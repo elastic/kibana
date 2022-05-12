@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
 
   // FAILING: https://github.com/elastic/kibana/issues/132049
-  describe.skip('Dashboard options list integration', () => {
+  describe('Dashboard options list integration', () => {
     before(async () => {
       await common.navigateToApp('dashboard');
       await dashboard.gotoDashboardLandingPage();
