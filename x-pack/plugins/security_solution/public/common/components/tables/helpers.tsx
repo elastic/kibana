@@ -47,8 +47,8 @@ export const getRowItemDraggable = ({
   rowItem,
   attrName,
   idPrefix,
-  fieldType = 'keyword',
-  isAggregatable = false,
+  fieldType,
+  isAggregatable,
   render,
   dragDisplayValue,
 }: GetRowItemDraggableParams): JSX.Element => {

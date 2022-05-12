@@ -77,8 +77,6 @@ exports[`Table Helpers #getRowItemDraggable it returns correctly against snapsho
       },
     }
   }
-  fieldType="keyword"
-  isAggregatable={false}
   key="idPrefix-attrName-item1"
   render={[Function]}
 />

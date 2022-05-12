@@ -249,7 +249,7 @@ const SUCCESS_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEdges> = {
           },
         }}
         isAggregatable={true}
-        fieldType={'keyword'}
+        fieldType="keyword"
         render={(dataProvider, _, snapshot) =>
           snapshot.isDragging ? (
             <DragEffects>

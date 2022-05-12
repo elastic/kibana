@@ -70,7 +70,7 @@ export const DraggableScoreComponent = ({
       dataProvider={dataProviderProp}
       render={render}
       isAggregatable={true}
-      fieldType={'keyword'}
+      fieldType="keyword"
     />
   );
 };
