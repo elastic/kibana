@@ -9,7 +9,7 @@
 import { MakeSchemaFrom } from '../types';
 import type { CollectorsStats } from './usage_collector_stats_collector';
 
-export const schema: MakeSchemaFrom<CollectorsStats> = {
+export const collectorsStatsSchema: MakeSchemaFrom<CollectorsStats> = {
   total_duration: {
     type: 'long',
     _meta: {

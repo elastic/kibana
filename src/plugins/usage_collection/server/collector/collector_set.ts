@@ -261,24 +261,27 @@ export class CollectorSet {
       return { duration, type, status };
     });
     
-    const usageCollectorStatsOptions = usageCollectorsStatsCollector({
-      // isReady stats
-      nonReadyCollectorTypes,
-      timedOutCollectorsTypes,
-      isReadyExecutionDurationByType,
+    const usageCollectorStats = usageCollectorsStatsCollector(
+      // pass `this` as `usageCollection` to the collector to mimic
+      // registering a collector via usageCollection.SetupContract
+      this,
+      {
+        // isReady stats
+        nonReadyCollectorTypes,
+        timedOutCollectorsTypes,
+        isReadyExecutionDurationByType,
 
-      // fetch stats
-      fetchExecutionDurationByType,
-    });
-
-    const usageCollectorStats = this.makeUsageCollector(usageCollectorStatsOptions);
+        // fetch stats
+        fetchExecutionDurationByType,
+      },
+    );
 
     return [
       ...fetchExecutions
         .map(({ type, fetchResult }) => ({ type, result: fetchResult }))
         .filter(
           (response): response is { type: string; result: unknown } =>
-            typeof response !== 'undefined'
+            typeof response?.result !== 'undefined' 
         ),
 
       // Treat collector stats as just another "collector"

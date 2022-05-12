@@ -7,8 +7,8 @@
  */
 
 import { sumBy } from 'lodash';
-import type { UsageCollectorOptions } from '../usage_collector';
-import { schema } from './schema';
+import { collectorsStatsSchema } from './schema';
+import type { CollectorSet } from '../collector_set';
 
 export interface CollectorsStats {
   not_ready: { count: number; names: string[] };
@@ -30,16 +30,19 @@ export interface CollectorsStatsCollectorParams {
   fetchExecutionDurationByType: {duration: number, type: string, status: 'failed' | 'success'}[];
 }
 
-export const usageCollectorsStatsCollector = ({
-  nonReadyCollectorTypes,
-  timedOutCollectorsTypes,
-  isReadyExecutionDurationByType,
-  fetchExecutionDurationByType
-}: CollectorsStatsCollectorParams): UsageCollectorOptions<CollectorsStats> => {
-  return {
+export const usageCollectorsStatsCollector = (
+    usageCollection: Pick<CollectorSet, 'makeUsageCollector'>,
+    {
+      nonReadyCollectorTypes,
+      timedOutCollectorsTypes,
+      isReadyExecutionDurationByType,
+      fetchExecutionDurationByType
+    }: CollectorsStatsCollectorParams,
+  ) => {
+  return usageCollection.makeUsageCollector<CollectorsStats>({
     type: 'usage_collector_stats',
     isReady: () => true,
-    schema,
+    schema: collectorsStatsSchema,
     fetch: () => {
       const totalIsReadyDuration = sumBy(isReadyExecutionDurationByType, 'duration');
       const totalFetchDuration = sumBy(fetchExecutionDurationByType, 'duration');
@@ -80,5 +83,5 @@ export const usageCollectorsStatsCollector = ({
 
       return collectorsStats;
     },
-  };
+  });
 };
