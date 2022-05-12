@@ -48,7 +48,7 @@ export function useFetchRules({
         setTagsState({ data: ruleTagsAggs.ruleTags, error: null });
       }
     } catch (e) {
-      setTagsState((oldState) => ({ ...oldState, error: RULE_TAGS_LOAD_ERROR }));
+      setTagsState((oldState: TagsState) => ({ ...oldState, error: RULE_TAGS_LOAD_ERROR }));
     }
   }, [http]);
 
