@@ -137,7 +137,7 @@ export const getAxiosInstance = ({
         if (!accessToken) {
           throw new Error(`Unable to retrieve access token for connectorId: ${connectorId}`);
         }
-        axiosConfig.headers.Authorization = accessToken;
+        axiosConfig.headers = { ...axiosConfig.headers, Authorization: accessToken };
         return axiosConfig;
       },
       (error) => {
