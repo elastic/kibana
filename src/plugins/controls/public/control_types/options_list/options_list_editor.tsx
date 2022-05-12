@@ -144,7 +144,7 @@ export const OptionsListEditor = ({
       <EuiFormRow label={OptionsListStrings.editor.getFieldTitle()}>
         <FieldPicker
           filterPredicate={(field) => Boolean(state.fieldsMap?.[field.name])}
-          selectedFieldName={fieldName}
+          selectedFieldName={selectedField}
           dataView={dataView}
           onSelectField={(field) => {
             setDefaultTitle(field.displayName ?? field.name);
