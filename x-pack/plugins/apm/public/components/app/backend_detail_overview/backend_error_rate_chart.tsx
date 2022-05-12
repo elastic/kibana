@@ -6,6 +6,7 @@
  */
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { ComparisonOptionEnum } from '../../shared/time_comparison/get_comparison_options';
 import { asPercent } from '../../../../common/utils/formatters';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -35,7 +36,7 @@ export function BackendFailedTransactionRateChart({
       rangeFrom,
       rangeTo,
       offset,
-      comparisonEnabled,
+      comparison,
     },
   } = useApmParams('/backends/overview');
 
@@ -55,14 +56,15 @@ export function BackendFailedTransactionRateChart({
             backendName,
             start,
             end,
-            offset: comparisonEnabled ? offset : undefined,
+            offset:
+              comparison === ComparisonOptionEnum.Time ? offset : undefined,
             kuery,
             environment,
           },
         },
       });
     },
-    [backendName, start, end, offset, kuery, environment, comparisonEnabled]
+    [backendName, start, end, offset, kuery, environment, comparison]
   );
 
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(

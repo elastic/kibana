@@ -95,7 +95,6 @@ const apmRoutes = {
             }),
             t.partial({
               serviceGroup: t.string,
-              comparison: t.string,
             }),
             t.partial({
               refreshPaused: t.union([t.literal('true'), t.literal('false')]),

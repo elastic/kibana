@@ -15,6 +15,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import uuid from 'uuid';
+import { ComparisonOptionEnum } from '../../shared/time_comparison/get_comparison_options';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -56,7 +57,7 @@ export function ErrorGroupOverview() {
       rangeFrom,
       rangeTo,
       offset,
-      comparisonEnabled,
+      comparison,
     },
   } = useApmParams('/services/{serviceName}/errors');
 
@@ -126,7 +127,8 @@ export function ErrorGroupOverview() {
                 groupIds: JSON.stringify(
                   errorGroupMainStatistics.map(({ groupId }) => groupId).sort()
                 ),
-                offset: comparisonEnabled ? offset : undefined,
+                offset:
+                  comparison === ComparisonOptionEnum.Time ? offset : undefined,
               },
             },
           }
@@ -187,7 +189,7 @@ export function ErrorGroupOverview() {
               errorGroupDetailedStatisticsStatus === FETCH_STATUS.NOT_INITIATED
             }
             detailedStatistics={errorGroupDetailedStatistics}
-            comparisonEnabled={comparisonEnabled}
+            comparison={comparison}
           />
         </EuiPanel>
       </EuiFlexItem>

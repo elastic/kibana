@@ -12,6 +12,7 @@ import { useApmServiceContext } from '../context/apm_service/use_apm_service_con
 import { getLatencyChartSelector } from '../selectors/latency_chart_selectors';
 import { useTimeRange } from './use_time_range';
 import { useApmParams } from './use_apm_params';
+import { ComparisonOptionEnum } from '../components/shared/time_comparison/get_comparison_options';
 
 export function useTransactionLatencyChartsFetcher({
   kuery,
@@ -26,7 +27,7 @@ export function useTransactionLatencyChartsFetcher({
   } = useLegacyUrlParams();
 
   const {
-    query: { rangeFrom, rangeTo, offset, comparisonEnabled },
+    query: { rangeFrom, rangeTo, offset, comparison },
   } = useApmParams('/services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -53,7 +54,8 @@ export function useTransactionLatencyChartsFetcher({
                 transactionType,
                 transactionName,
                 latencyAggregationType,
-                offset: comparisonEnabled ? offset : undefined,
+                offset:
+                  comparison === ComparisonOptionEnum.Time ? offset : undefined,
               },
             },
           }
@@ -70,7 +72,7 @@ export function useTransactionLatencyChartsFetcher({
       transactionType,
       latencyAggregationType,
       offset,
-      comparisonEnabled,
+      comparison,
     ]
   );
 

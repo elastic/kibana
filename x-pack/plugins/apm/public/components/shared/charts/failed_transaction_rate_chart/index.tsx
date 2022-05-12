@@ -9,6 +9,7 @@ import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { ComparisonOptionEnum } from '../../time_comparison/get_comparison_options';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { useFetcher } from '../../../../hooks/use_fetcher';
@@ -57,7 +58,7 @@ export function FailedTransactionRateChart({
   } = useLegacyUrlParams();
 
   const {
-    query: { rangeFrom, rangeTo, comparisonEnabled, offset },
+    query: { rangeFrom, rangeTo, comparison, offset },
   } = useApmParams('/services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -89,7 +90,8 @@ export function FailedTransactionRateChart({
                 end,
                 transactionType,
                 transactionName,
-                offset: comparisonEnabled ? offset : undefined,
+                offset:
+                  comparison === ComparisonOptionEnum.Time ? offset : undefined,
               },
             },
           }
@@ -105,7 +107,7 @@ export function FailedTransactionRateChart({
       transactionType,
       transactionName,
       offset,
-      comparisonEnabled,
+      comparison,
     ]
   );
 
@@ -122,7 +124,7 @@ export function FailedTransactionRateChart({
         defaultMessage: 'Failed transaction rate (avg.)',
       }),
     },
-    ...(comparisonEnabled
+    ...(comparison === ComparisonOptionEnum.Time
       ? [
           {
             data: data.previousPeriod.timeseries,

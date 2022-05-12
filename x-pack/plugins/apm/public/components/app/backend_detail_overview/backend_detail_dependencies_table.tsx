@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { ComparisonOptionEnum } from '../../shared/time_comparison/get_comparison_options';
 import { getNodeName, NodeType } from '../../../../common/connections';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
@@ -22,7 +23,7 @@ export function BackendDetailDependenciesTable() {
       rangeTo,
       kuery,
       environment,
-      comparisonEnabled,
+      comparison,
       offset,
     },
   } = useApmParams('/backends/overview');
@@ -43,13 +44,14 @@ export function BackendDetailDependenciesTable() {
             end,
             environment,
             numBuckets: 20,
-            offset: comparisonEnabled ? offset : undefined,
+            offset:
+              comparison === ComparisonOptionEnum.Time ? offset : undefined,
             kuery,
           },
         },
       });
     },
-    [start, end, environment, offset, backendName, kuery, comparisonEnabled]
+    [start, end, environment, offset, backendName, kuery, comparison]
   );
 
   const dependencies =
@@ -70,7 +72,7 @@ export function BackendDetailDependenciesTable() {
             serviceName={location.serviceName}
             agentName={location.agentName}
             query={{
-              comparisonEnabled,
+              comparison,
               offset,
               environment,
               kuery,

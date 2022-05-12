@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { ComparisonOptionEnum } from '../../../shared/time_comparison/get_comparison_options';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import type { ContentsProps } from '.';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
@@ -50,7 +51,7 @@ export function ServiceContents({
     throw new Error('Expected rangeFrom and rangeTo to be set');
   }
 
-  const { rangeFrom, rangeTo, comparisonEnabled, offset } = query;
+  const { rangeFrom, rangeTo, comparison, offset } = query;
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -69,14 +70,15 @@ export function ServiceContents({
                 environment,
                 start,
                 end,
-                offset: comparisonEnabled ? offset : undefined,
+                offset:
+                  comparison === ComparisonOptionEnum.Time ? offset : undefined,
               },
             },
           }
         );
       }
     },
-    [environment, serviceName, start, end, offset, comparisonEnabled]
+    [environment, serviceName, start, end, offset, comparison]
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;
@@ -88,7 +90,7 @@ export function ServiceContents({
       rangeTo,
       environment,
       kuery,
-      comparisonEnabled,
+      comparison,
       serviceGroup,
     },
   });
@@ -101,7 +103,7 @@ export function ServiceContents({
       environment,
       kuery,
       serviceGroup,
-      comparisonEnabled,
+      comparison,
     },
   });
 

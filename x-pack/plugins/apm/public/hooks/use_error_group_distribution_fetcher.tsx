@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { ComparisonOptionEnum } from '../components/shared/time_comparison/get_comparison_options';
 import { useApmParams } from './use_apm_params';
 import { useFetcher } from './use_fetcher';
 import { useTimeRange } from './use_time_range';
@@ -20,7 +21,7 @@ export function useErrorGroupDistributionFetcher({
   environment: string;
 }) {
   const {
-    query: { rangeFrom, rangeTo, offset, comparisonEnabled },
+    query: { rangeFrom, rangeTo, offset, comparison },
   } = useApmParams('/services/{serviceName}/errors');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -38,7 +39,8 @@ export function useErrorGroupDistributionFetcher({
                 kuery,
                 start,
                 end,
-                offset: comparisonEnabled ? offset : undefined,
+                offset:
+                  comparison === ComparisonOptionEnum.Time ? offset : undefined,
                 groupId,
               },
             },
@@ -46,16 +48,7 @@ export function useErrorGroupDistributionFetcher({
         );
       }
     },
-    [
-      environment,
-      kuery,
-      serviceName,
-      start,
-      end,
-      offset,
-      groupId,
-      comparisonEnabled,
-    ]
+    [environment, kuery, serviceName, start, end, offset, groupId, comparison]
   );
 
   return { errorDistributionData: data, status };

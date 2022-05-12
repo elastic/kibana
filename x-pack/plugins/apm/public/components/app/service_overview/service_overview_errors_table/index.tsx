@@ -149,7 +149,8 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
                 groupIds: JSON.stringify(
                   items.map(({ groupId: groupId }) => groupId).sort()
                 ),
-                offset: comparisonEnabled ? offset : undefined,
+                offset:
+                  comparison === ComparisonOptionEnum.Time ? offset : undefined,
               },
             },
           }

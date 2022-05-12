@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { ComparisonOptionEnum } from '../../time_comparison/get_comparison_options';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { useFetcher } from '../../../../hooks/use_fetcher';
@@ -34,7 +35,7 @@ interface Props {
   kuery: string;
   environment: string;
   transactionName?: string;
-  comparisonEnabled?: boolean;
+  comparison?: boolean;
   offset?: string;
 }
 
@@ -58,7 +59,7 @@ export function TransactionColdstartRateChart({
   environment,
   kuery,
   transactionName,
-  comparisonEnabled,
+  comparison,
   offset,
 }: Props) {
   const theme = useTheme();
@@ -90,7 +91,8 @@ export function TransactionColdstartRateChart({
               start,
               end,
               transactionType,
-              offset: comparisonEnabled ? offset : undefined,
+              offset:
+                comparison === ComparisonOptionEnum.Time ? offset : undefined,
               ...(transactionName ? { transactionName } : {}),
             },
           },
@@ -107,7 +109,7 @@ export function TransactionColdstartRateChart({
       transactionName,
       offset,
       endpoint,
-      comparisonEnabled,
+      comparison,
     ]
   );
 
@@ -120,7 +122,7 @@ export function TransactionColdstartRateChart({
         defaultMessage: 'Cold start rate (avg.)',
       }),
     },
-    ...(comparisonEnabled
+    ...(comparison === ComparisonOptionEnum.Time
       ? [
           {
             data: data.previousPeriod.transactionColdstartRate,

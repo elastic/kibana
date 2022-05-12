@@ -11,6 +11,7 @@ import { TypeOf } from '@kbn/typed-react-router-config';
 import { METRIC_TYPE } from '@kbn/analytics';
 import React from 'react';
 import { useUiTracker } from '@kbn/observability-plugin/public';
+import { ComparisonOptionEnum } from '../../../shared/time_comparison/get_comparison_options';
 import { ContentsProps } from '.';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
@@ -37,7 +38,7 @@ export function BackendContents({
     '/services/{serviceName}/service-map'
   );
 
-  const { offset, comparisonEnabled } = query;
+  const { offset, comparison } = query;
 
   const apmRouter = useApmRouter();
 
@@ -53,13 +54,14 @@ export function BackendContents({
               environment,
               start,
               end,
-              offset: comparisonEnabled ? offset : undefined,
+              offset:
+                comparison === ComparisonOptionEnum.Time ? offset : undefined,
             },
           },
         });
       }
     },
-    [environment, backendName, start, end, offset, comparisonEnabled]
+    [environment, backendName, start, end, offset, comparison]
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;

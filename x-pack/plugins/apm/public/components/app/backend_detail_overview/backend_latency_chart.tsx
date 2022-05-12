@@ -21,6 +21,7 @@ import {
   getTimeSeriesColor,
 } from '../../shared/charts/helper/get_timeseries_color';
 import { getComparisonChartTheme } from '../../shared/time_comparison/get_comparison_chart_theme';
+import { ComparisonOptionEnum } from '../../shared/time_comparison/get_comparison_options';
 
 export function BackendLatencyChart({ height }: { height: number }) {
   const {
@@ -31,7 +32,7 @@ export function BackendLatencyChart({ height }: { height: number }) {
       kuery,
       environment,
       offset,
-      comparisonEnabled,
+      comparison,
     },
   } = useApmParams('/backends/overview');
 
@@ -51,14 +52,15 @@ export function BackendLatencyChart({ height }: { height: number }) {
             backendName,
             start,
             end,
-            offset: comparisonEnabled ? offset : undefined,
+            offset:
+              comparison === ComparisonOptionEnum.Time ? offset : undefined,
             kuery,
             environment,
           },
         },
       });
     },
-    [backendName, start, end, offset, kuery, environment, comparisonEnabled]
+    [backendName, start, end, offset, kuery, environment, comparison]
   );
 
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(

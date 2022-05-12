@@ -9,6 +9,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useUiTracker } from '@kbn/observability-plugin/public';
+import { ComparisonOptionEnum } from '../../../shared/time_comparison/get_comparison_options';
 import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
@@ -18,14 +19,7 @@ import { DependenciesTable } from '../../../shared/dependencies_table';
 
 export function BackendInventoryDependenciesTable() {
   const {
-    query: {
-      rangeFrom,
-      rangeTo,
-      environment,
-      kuery,
-      comparisonEnabled,
-      offset,
-    },
+    query: { rangeFrom, rangeTo, environment, kuery, comparison, offset },
   } = useApmParams('/backends');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -45,13 +39,14 @@ export function BackendInventoryDependenciesTable() {
             end,
             environment,
             numBuckets: 20,
-            offset: comparisonEnabled ? offset : undefined,
+            offset:
+              comparison === ComparisonOptionEnum.Time ? offset : undefined,
             kuery,
           },
         },
       });
     },
-    [start, end, environment, offset, kuery, comparisonEnabled]
+    [start, end, environment, offset, kuery, comparison]
   );
 
   const dependencies =
@@ -68,7 +63,7 @@ export function BackendInventoryDependenciesTable() {
           subtype={location.spanSubtype}
           query={{
             backendName: location.backendName,
-            comparisonEnabled,
+            comparison,
             offset,
             environment,
             kuery,

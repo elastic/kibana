@@ -9,6 +9,7 @@ import { EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { orderBy } from 'lodash';
 import React, { useState } from 'react';
 import uuid from 'uuid';
+import { ComparisonOptionEnum } from '../../shared/time_comparison/get_comparison_options';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
@@ -77,7 +78,7 @@ export function ServiceOverviewInstancesChartAndTable({
       kuery,
       rangeFrom,
       rangeTo,
-      comparisonEnabled,
+      comparison,
       offset,
       latencyAggregationType,
     },
@@ -109,7 +110,8 @@ export function ServiceOverviewInstancesChartAndTable({
               start,
               end,
               transactionType,
-              offset: comparisonEnabled ? offset : undefined,
+              offset:
+                comparison === ComparisonOptionEnum.Time ? offset : undefined,
             },
           },
         }
@@ -138,7 +140,7 @@ export function ServiceOverviewInstancesChartAndTable({
       // not used, but needed to trigger an update when offset is changed either manually by user or when time range is changed
       offset,
       // not used, but needed to trigger an update when comparison feature is disabled/enabled by user
-      comparisonEnabled,
+      comparison,
     ]
   );
 
@@ -197,7 +199,8 @@ export function ServiceOverviewInstancesChartAndTable({
               serviceNodeIds: JSON.stringify(
                 currentPeriodOrderedItems.map((item) => item.serviceNodeName)
               ),
-              offset: comparisonEnabled ? offset : undefined,
+              offset:
+                comparison === ComparisonOptionEnum.Time ? offset : undefined,
             },
           },
         }

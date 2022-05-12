@@ -19,6 +19,7 @@ import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
+import { ComparisonOptionEnum } from '../time_comparison/get_comparison_options';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
@@ -89,7 +90,7 @@ export function TransactionsTable({
 
   const {
     query: {
-      comparisonEnabled,
+      comparison,
       offset,
       latencyAggregationType,
       page: urlPage = 0,
@@ -178,7 +179,7 @@ export function TransactionsTable({
       // not used, but needed to trigger an update when offset is changed either manually by user or when time range is changed
       offset,
       // not used, but needed to trigger an update when comparison feature is disabled/enabled by user
-      comparisonEnabled,
+      comparison,
     ]
   );
 
@@ -221,7 +222,8 @@ export function TransactionsTable({
                 transactionNames: JSON.stringify(
                   transactionGroups.map(({ name }) => name).sort()
                 ),
-                offset: comparisonEnabled ? offset : undefined,
+                offset:
+                  comparison === ComparisonOptionEnum.Time ? offset : undefined,
               },
             },
           }
@@ -241,7 +243,7 @@ export function TransactionsTable({
       transactionGroupDetailedStatisticsStatus === FETCH_STATUS.LOADING ||
       transactionGroupDetailedStatisticsStatus === FETCH_STATUS.NOT_INITIATED,
     transactionGroupDetailedStatistics,
-    comparisonEnabled,
+    comparisonEnabled: comparison === ComparisonOptionEnum.Time,
     shouldShowSparkPlots,
     offset,
   });
