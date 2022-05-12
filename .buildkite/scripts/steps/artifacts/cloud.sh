@@ -58,13 +58,13 @@ function shutdown {
 trap "shutdown" EXIT
 
 echo "--- FTR Setup"
-export TEST_KIBANA_PROTOCOL=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').protocol)")
+export TEST_KIBANA_PROTOCOL=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').protocol.replace(':', ''))")
 export TEST_KIBANA_HOSTNAME=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').hostname)")
 export TEST_KIBANA_PORT=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').port)")
 export TEST_KIBANA_USERNAME="$CLOUD_DEPLOYMENT_USERNAME"
 export TEST_KIBANA_PASS="$CLOUD_DEPLOYMENT_PASSWORD"
 
-export TEST_ES_PROTOCOL=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').protocol)")
+export TEST_ES_PROTOCOL=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').protocol.replace(':', ''))")
 export TEST_ES_HOSTNAME==$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').hostname)")
 export TEST_ES_PORT=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').port)")
 export TEST_ES_USER="$CLOUD_DEPLOYMENT_USERNAME"
