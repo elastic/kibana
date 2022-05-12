@@ -8,7 +8,7 @@
 
 import util from 'util';
 
-import { GroupSchema, FieldDetails, TOP_LEVEL_NAME } from '../src/common/types';
+import { GroupSchema, FieldDetails, TOP_LEVEL_NAME } from '../common/types';
 import { append, write } from './write_file';
 
 export function printSchema(schema: GroupSchema, outPath: string) {

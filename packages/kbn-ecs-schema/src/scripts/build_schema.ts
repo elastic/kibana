@@ -7,7 +7,7 @@
  */
 
 import { set } from 'lodash';
-import { EcsNestedSchema, GroupSchema, TOP_LEVEL_NAME, TOP_LEVEL_GROUPS } from '../src/common/types';
+import { EcsNestedSchema, GroupSchema, TOP_LEVEL_NAME, TOP_LEVEL_GROUPS } from '../common/types';
 
 export function buildSchema(spec: EcsNestedSchema) : GroupSchema {
   const schema: GroupSchema = {};
