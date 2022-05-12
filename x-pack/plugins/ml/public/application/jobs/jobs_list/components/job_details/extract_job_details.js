@@ -99,6 +99,14 @@ export function extractJobDetails(job, basePath, refreshJobList) {
       return ['', <EditAlertRule initialAlert={v} onSave={refreshJobList} />];
     }),
   };
+  if (job.alerting_rules) {
+    // remove the alerting_rules list from the general section
+    // so not to show it twice.
+    const i = general.items.findIndex((item) => item[0] === 'alerting_rules');
+    if (i >= 0) {
+      general.items.splice(i, 1);
+    }
+  }
 
   const detectors = {
     id: 'detectors',
