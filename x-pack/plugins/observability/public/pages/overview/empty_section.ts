@@ -84,20 +84,5 @@ export const getEmptySections = ({ http }: { http: HttpSetup }): ISection[] => {
       }),
       href: http.basePath.prepend('/app/home#/tutorial/apm'),
     },
-    {
-      id: 'alert',
-      title: i18n.translate('xpack.observability.emptySection.apps.alert.title', {
-        defaultMessage: 'No alerts found.',
-      }),
-      icon: 'watchesApp',
-      description: i18n.translate('xpack.observability.emptySection.apps.alert.description', {
-        defaultMessage:
-          'Detect complex conditions within Observability and trigger actions when those conditions are met.',
-      }),
-      linkTitle: i18n.translate('xpack.observability.emptySection.apps.alert.link', {
-        defaultMessage: 'Create rule',
-      }),
-      href: http.basePath.prepend('/app/management/insightsAndAlerting/triggersActions/alerts'),
-    },
   ];
 };
