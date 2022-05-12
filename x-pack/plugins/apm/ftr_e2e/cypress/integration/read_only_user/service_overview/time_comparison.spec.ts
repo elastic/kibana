@@ -96,7 +96,7 @@ describe('Service overview: Time Comparison', () => {
         cy.intercept('GET', endpoint).as(name);
       });
       cy.visit(serviceOverviewHref);
-      cy.contains('opbeans-java');
+      cy.contains('opbeans-java', { timeout: 10000 });
 
       cy.get('[data-test-subj="comparisonSelect"]').should('be.enabled');
       const offset = `offset=1d`;
