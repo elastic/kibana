@@ -106,11 +106,11 @@ export const CHANGE_STATUS = i18n.translate('xpack.cases.caseTable.changeStatus'
   defaultMessage: 'Change status',
 });
 
-export const MTTR_STAT = i18n.translate('xpack.cases.casesStats.mttr', {
-  defaultMessage: 'MTTR',
+export const ATTC_STAT = i18n.translate('xpack.cases.casesStats.mttr', {
+  defaultMessage: 'Average time to close',
 });
 
-export const MTTR_DESCRIPTION = i18n.translate('xpack.cases.casesStats.mttrDescription', {
+export const ATTC_DESCRIPTION = i18n.translate('xpack.cases.casesStats.mttrDescription', {
   defaultMessage:
-    'MTTR (mean time to respond) is the average time it takes to recover from a product or system failure from the time when you are first alerted to that failure. This does not include any lag time in your alert system. ',
+    'Average time to close is the average duration of cases from creation to closure.',
 });

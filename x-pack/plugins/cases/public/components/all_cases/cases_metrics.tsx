@@ -20,7 +20,7 @@ import { CaseStatuses } from '../../../common/api';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
 import { StatusStats } from '../status/status_stats';
 import { useGetCasesMetrics } from '../../containers/use_get_cases_metrics';
-import { MTTR_DESCRIPTION, MTTR_STAT } from './translations';
+import { ATTC_DESCRIPTION, ATTC_STAT } from './translations';
 
 interface CountProps {
   refresh?: number;
@@ -97,9 +97,9 @@ export const CasesMetrics: FunctionComponent<CountProps> = ({ refresh }) => {
             listItems={[
               {
                 title: (
-                  <EuiToolTip position="right" content={MTTR_DESCRIPTION}>
+                  <EuiToolTip position="right" content={ATTC_DESCRIPTION}>
                     <>
-                      {MTTR_STAT} <EuiIcon type="questionInCircle" />
+                      {ATTC_STAT} <EuiIcon type="questionInCircle" />
                     </>
                   </EuiToolTip>
                 ),
