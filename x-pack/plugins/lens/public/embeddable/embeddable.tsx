@@ -51,6 +51,7 @@ import type {
   ThemeServiceStart,
 } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { BrushTriggerEvent, ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
 import {
@@ -58,8 +59,6 @@ import {
   isLensFilterEvent,
   isLensEditEvent,
   isLensTableRowContextMenuClickEvent,
-  LensBrushEvent,
-  LensFilterEvent,
   LensTableRowContextMenuEvent,
   VisualizationMap,
   Visualization,
@@ -94,9 +93,9 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   renderMode?: RenderMode;
   style?: React.CSSProperties;
   className?: string;
-  onBrushEnd?: (data: LensBrushEvent['data']) => void;
+  onBrushEnd?: (data: BrushTriggerEvent['data']) => void;
   onLoad?: (isLoading: boolean) => void;
-  onFilter?: (data: LensFilterEvent['data']) => void;
+  onFilter?: (data: ClickTriggerEvent['data']) => void;
   onTableRowClick?: (data: LensTableRowContextMenuEvent['data']) => void;
 }
 
@@ -348,6 +347,7 @@ export class Embeddable
     if (!this.savedVis || !this.savedVis.visualizationType) {
       return [];
     }
+
     return this.deps.visualizationMap[this.savedVis.visualizationType]?.triggers || [];
   }
 
@@ -458,6 +458,7 @@ export class Embeddable
       this.embeddableTitle = this.getTitle();
       isDirty = true;
     }
+
     return isDirty;
   }
 

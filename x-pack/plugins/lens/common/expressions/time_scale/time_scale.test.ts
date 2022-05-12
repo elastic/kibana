@@ -6,10 +6,8 @@
  */
 
 import moment from 'moment';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { Datatable } from '@kbn/expressions-plugin/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { TimeRange } from '@kbn/data-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { TimeRange } from '@kbn/data-plugin/common';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 
 // mock the specific inner variable:
