@@ -51,7 +51,7 @@ import { useKibana } from '../../utils/kibana_react';
 // import { useFetchRuleSummary } from '../../hooks/use_fetch_rule_summary';
 import { useFetchLast24hAlerts } from '../../hooks/use_fetch_last24h_alerts';
 import { formatInterval } from './utils';
-import { hasExecuteActionsCapability, hasAllPrivilege } from './config';
+import { hasExecuteActionsCapability, hasAllPrivilege, RULES_PAGE_LINK } from './config';
 
 export function RuleDetailsPage() {
   const {
@@ -422,11 +422,11 @@ export function RuleDetailsPage() {
         <DeleteModalConfirmation
           onDeleted={async () => {
             setRuleToDelete([]);
-            navigateToUrl(http.basePath.prepend('/app/observability/alerts/rules'));
+            navigateToUrl(http.basePath.prepend(RULES_PAGE_LINK));
           }}
           onErrors={async () => {
             setRuleToDelete([]);
-            navigateToUrl(http.basePath.prepend('/app/observability/alerts/rules'));
+            navigateToUrl(http.basePath.prepend(RULES_PAGE_LINK));
           }}
           onCancel={() => {}}
           apiDeleteCall={deleteRules}

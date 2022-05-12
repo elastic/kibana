@@ -18,3 +18,5 @@ export function hasAllPrivilege(rule: InitialRule, ruleType?: RuleType): boolean
 
 export const hasExecuteActionsCapability = (capabilities: Capabilities) =>
   capabilities?.actions?.execute;
+
+export const RULES_PAGE_LINK = '/app/observability/alerts/rules';
