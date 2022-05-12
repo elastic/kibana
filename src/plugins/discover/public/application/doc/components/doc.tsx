@@ -45,7 +45,7 @@ export function Doc(props: DocProps) {
         {reqState === ElasticRequestState.NotFoundDataView && (
           <EuiCallOut
             color="danger"
-            data-test-subj={`doc-msg-notFoundIndexPattern`}
+            data-test-subj={`doc-msg-notFoundDataView`}
             iconType="alert"
             title={
               <FormattedMessage

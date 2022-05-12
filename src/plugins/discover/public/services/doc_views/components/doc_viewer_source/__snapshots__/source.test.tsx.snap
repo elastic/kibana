@@ -2,14 +2,14 @@
 
 exports[`Source Viewer component renders error state 1`] = `
 <DocViewerSource
-  hasLineNumbers={true}
-  id="1"
-  index="index1"
   dataView={
     Object {
       "getComputedFields": [Function],
     }
   }
+  hasLineNumbers={true}
+  id="1"
+  index="index1"
   width={123}
 >
   <EuiEmptyPrompt
@@ -178,14 +178,14 @@ exports[`Source Viewer component renders error state 1`] = `
 
 exports[`Source Viewer component renders json code editor 1`] = `
 <DocViewerSource
-  hasLineNumbers={true}
-  id="1"
-  index="index1"
   dataView={
     Object {
       "getComputedFields": [Function],
     }
   }
+  hasLineNumbers={true}
+  id="1"
+  index="index1"
   width={123}
 >
   <Memo()
@@ -435,14 +435,14 @@ exports[`Source Viewer component renders json code editor 1`] = `
 
 exports[`Source Viewer component renders loading state 1`] = `
 <DocViewerSource
-  hasLineNumbers={true}
-  id="1"
-  index="index1"
   dataView={
     Object {
       "getComputedFields": [Function],
     }
   }
+  hasLineNumbers={true}
+  id="1"
+  index="index1"
   width={123}
 >
   <div

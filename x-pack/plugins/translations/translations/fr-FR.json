@@ -2799,7 +2799,7 @@
     "discover.discoverTitle": "Discover",
     "discover.doc.couldNotFindDocumentsDescription": "Aucun document ne correspond à cet ID.",
     "discover.doc.failedToExecuteQueryDescription": "Impossible d'exécuter la recherche",
-    "discover.doc.failedToLocateDataView": "Aucune vue de données ne correspond à l'ID {indexPatternId}.",
+    "discover.doc.failedToLocateDataView": "Aucune vue de données ne correspond à l'ID {dataViewId}.",
     "discover.doc.failedToLocateDocumentDescription": "Document introuvable",
     "discover.doc.loadingDescription": "Chargement…",
     "discover.doc.somethingWentWrongDescription": "Index {indexName} manquant.",

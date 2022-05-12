@@ -194,7 +194,7 @@ describe('Discover grid columns', function () {
           ],
           "display": <React.Fragment>
             timestamp
-
+             
             <EuiIconTip
               aria-label="Primary time field."
               content="This field represents the time that events occurred."
