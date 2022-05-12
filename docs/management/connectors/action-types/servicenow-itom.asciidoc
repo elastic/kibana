@@ -12,7 +12,7 @@ The {sn} ITOM connector uses the https://docs.servicenow.com/bundle/rome-it-oper
 ==== Prerequisites
 * Create a {sn} integration user and assign it the appropriate roles.
 
-*If using OAuth*
+If you use open authorization (OAuth), you must also:
 
 * Create an RSA keypair and add an X.509 Certificate.
 * Create an OAuth JWT API endpoint for external clients with a JWT Verifiers Map.
