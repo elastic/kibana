@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { lensMultitable } from './lens_multitable';
-export type { LensMultitableExpressionTypeDefinition } from './lens_multitable';
+export { VectorTileAdapter } from './vector_tile_adapter';
+export { VectorTileInspectorView } from './vector_tile_inspector_view';
