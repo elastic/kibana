@@ -88,5 +88,28 @@ export default function ({
           expect(body.rows).to.eql(client.rows);
         });
     });
+
+    it('should support `kibana_context` query on input', async () => {
+      const expression = `
+        kibana_context {kql "geo.src: US"}
+        | essql query='select count(*) as count from "logstash-*"'
+      `;
+      const result = await expectExpression('essql_kibana_context_query', expression).getResponse();
+
+      expect(result?.rows?.[0]?.count).to.be(1194);
+    });
+
+    it('should support `kibana_context` filters on input', async () => {
+      const expression = `
+        kibana_context filters={phraseFilter field={field name="geo.src" type="string"} phrase="US"}
+        | essql query='select count(*) as count from "logstash-*"'
+      `;
+      const result = await expectExpression(
+        'essql_kibana_context_filters',
+        expression
+      ).getResponse();
+
+      expect(result?.rows?.[0]?.count).to.be(1194);
+    });
   });
 }

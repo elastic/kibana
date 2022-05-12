@@ -8,25 +8,29 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { KibanaRequest } from '@kbn/core/server';
+import { buildEsQuery } from '@kbn/es-query';
 import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import {
   Datatable,
   DatatableColumnType,
   ExpressionFunctionDefinition,
-  ExpressionValueFilter,
 } from '@kbn/expressions-plugin/common';
 
 import { map, zipObject } from 'lodash';
 import { lastValueFrom } from 'rxjs';
+import { getEsQueryConfig } from '../../es_query';
+import { UiSettingsCommon } from '../..';
 import {
   ISearchGeneric,
+  KibanaContext,
+  SqlRequestParams,
   SqlSearchStrategyRequest,
   SqlSearchStrategyResponse,
   SQL_SEARCH_STRATEGY,
 } from '..';
 
-type Input = ExpressionValueFilter;
+type Input = KibanaContext | null;
 type Output = Promise<Datatable>;
 
 interface Arguments {
@@ -49,6 +53,7 @@ interface EssqlFnArguments {
 
 interface EssqlStartDependencies {
   search: ISearchGeneric;
+  uiSettings: UiSettingsCommon;
 }
 
 function normalizeType(type: string): DatatableColumnType {
@@ -74,7 +79,7 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
   const essql: EssqlExpressionFunctionDefinition = {
     name: 'essql',
     type: 'datatable',
-    inputTypes: ['filter'],
+    inputTypes: ['kibana_context', 'null'],
     help: i18n.translate('data.search.essql.help', {
       defaultMessage: 'Queries Elasticsearch using Elasticsearch SQL.',
     }),
@@ -113,7 +118,7 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
       },
     },
     async fn(input, { parameter, timezone, count, query }, { getKibanaRequest }) {
-      const { search } = await getStartDependencies(() => {
+      const { search, uiSettings } = await getStartDependencies(() => {
         const request = getKibanaRequest?.();
         if (!request) {
           throw new Error(
@@ -125,18 +130,25 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
         return request;
       });
 
-      const params = {
+      const params: SqlRequestParams = {
         query,
         fetch_size: count,
         time_zone: timezone,
         params: parameter,
         field_multi_value_leniency: true,
-        filter: {
-          bool: {
-            must: [{ match_all: {} }],
-          },
-        },
       };
+
+      if (input) {
+        const esQueryConfigs = getEsQueryConfig(
+          uiSettings as Parameters<typeof getEsQueryConfig>[0]
+        );
+        params.filter = buildEsQuery(
+          undefined,
+          input.query || [],
+          input.filters || [],
+          esQueryConfigs
+        );
+      }
 
       try {
         const { rawResponse: body } = await lastValueFrom(

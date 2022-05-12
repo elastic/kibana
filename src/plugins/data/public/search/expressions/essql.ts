@@ -7,6 +7,7 @@
  */
 
 import { StartServicesAccessor } from '@kbn/core/public';
+import { UiSettingsCommon } from '../../../common';
 import { DataPublicPluginStart, DataStartDependencies } from '../../types';
 import { getEssqlFn } from '../../../common/search/expressions/essql';
 
@@ -31,14 +32,14 @@ export function getEssql({
   return getEssqlFn({
     async getStartDependencies() {
       const [
-        ,
+        { uiSettings },
         ,
         {
           search: { search },
         },
       ] = await getStartServices();
 
-      return { search };
+      return { search, uiSettings: uiSettings as unknown as UiSettingsCommon };
     },
   });
 }
