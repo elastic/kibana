@@ -86,7 +86,12 @@ const createTestConfig = (extraConfigs: Record<string, any>, updatedAt?: string)
 
 describe('monitor upgrade telemetry helpers', () => {
   it('formats telemetry events', () => {
-    const actual = formatTelemetryEvent({ monitor: testConfig, kibanaVersion, errors });
+    const actual = formatTelemetryEvent({
+      monitor: testConfig,
+      kibanaVersion,
+      isInlineScript: false,
+      errors,
+    });
     expect(actual).toEqual({
       stackVersion: kibanaVersion,
       configId: sha256.create().update(testConfig.id).hex(),
@@ -106,45 +111,50 @@ describe('monitor upgrade telemetry helpers', () => {
   });
 
   it.each([
-    [ConfigKey.SOURCE_INLINE, 'recorder', true],
-    [ConfigKey.SOURCE_INLINE, 'inline', false],
-    [ConfigKey.SOURCE_ZIP_URL, 'zip', false],
-  ])('handles formatting scriptType for browser monitors', (config, scriptType, isRecorder) => {
-    const actual = formatTelemetryEvent({
-      monitor: createTestConfig({
-        [config]: 'test',
-        [ConfigKey.METADATA]: {
-          script_source: {
-            is_generated_script: isRecorder,
+    [ConfigKey.SOURCE_INLINE, 'recorder', true, true],
+    [ConfigKey.SOURCE_INLINE, 'inline', false, true],
+    [ConfigKey.SOURCE_ZIP_URL, 'zip', false, false],
+  ])(
+    'handles formatting scriptType for browser monitors',
+    (config, scriptType, isRecorder, isInlineScript) => {
+      const actual = formatTelemetryEvent({
+        monitor: createTestConfig({
+          [config]: 'test',
+          [ConfigKey.METADATA]: {
+            script_source: {
+              is_generated_script: isRecorder,
+            },
           },
-        },
-      }),
-      kibanaVersion,
-      errors,
-    });
-    expect(actual).toEqual({
-      stackVersion: kibanaVersion,
-      configId: sha256.create().update(testConfig.id).hex(),
-      locations: ['us_central', 'other'],
-      locationsCount: 2,
-      monitorNameLength: testConfig.attributes[ConfigKey.NAME].length,
-      updatedAt: testConfig.updated_at,
-      type: testConfig.attributes[ConfigKey.MONITOR_TYPE],
-      scriptType,
-      monitorInterval: 180000,
-      lastUpdatedAt: undefined,
-      deletedAt: undefined,
-      errors,
-      durationSinceLastUpdated: undefined,
-      revision: 1,
-    });
-  });
+        }),
+        isInlineScript,
+        kibanaVersion,
+        errors,
+      });
+      expect(actual).toEqual({
+        stackVersion: kibanaVersion,
+        configId: sha256.create().update(testConfig.id).hex(),
+        locations: ['us_central', 'other'],
+        locationsCount: 2,
+        monitorNameLength: testConfig.attributes[ConfigKey.NAME].length,
+        updatedAt: testConfig.updated_at,
+        type: testConfig.attributes[ConfigKey.MONITOR_TYPE],
+        scriptType,
+        monitorInterval: 180000,
+        lastUpdatedAt: undefined,
+        deletedAt: undefined,
+        errors,
+        durationSinceLastUpdated: undefined,
+        revision: 1,
+      });
+    }
+  );
 
   it('handles formatting update events', () => {
     const actual = formatTelemetryUpdateEvent(
       createTestConfig({}, '2011-10-05T16:48:00.000Z'),
       testConfig,
       kibanaVersion,
+      false,
       errors
     );
     expect(actual).toEqual({
@@ -170,6 +180,7 @@ describe('monitor upgrade telemetry helpers', () => {
       testConfig,
       kibanaVersion,
       '2011-10-05T16:48:00.000Z',
+      false,
       errors
     );
     expect(actual).toEqual({
@@ -201,12 +212,13 @@ describe('sendTelemetryEvents', () => {
   });
 
   it('should queue telemetry events with generic error', () => {
-    const event = formatTelemetryEvent({ monitor: testConfig, kibanaVersion, errors });
-    sendTelemetryEvents(
-      loggerMock,
-      eventsTelemetryMock,
-      formatTelemetryEvent({ monitor: testConfig, kibanaVersion, errors })
-    );
+    const event = formatTelemetryEvent({
+      monitor: testConfig,
+      kibanaVersion,
+      isInlineScript: true,
+      errors,
+    });
+    sendTelemetryEvents(loggerMock, eventsTelemetryMock, event);
 
     expect(eventsTelemetryMock.queueTelemetryEvents).toHaveBeenCalledWith(MONITOR_UPDATE_CHANNEL, [
       event,
