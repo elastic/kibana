@@ -57,7 +57,6 @@ function shutdown {
 }
 trap "shutdown" EXIT
 
-echo "--- FTR Setup"
 export TEST_KIBANA_PROTOCOL=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').protocol.replace(':', ''))")
 export TEST_KIBANA_HOSTNAME=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').hostname)")
 export TEST_KIBANA_PORT=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').port)")
