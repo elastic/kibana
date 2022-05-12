@@ -9897,6 +9897,21 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-server.SavedObjectReferenceWithContext.originId",
+            "type": "string",
+            "tags": [],
+            "label": "originId",
+            "description": [
+              "The origin ID of the referenced object (if it has one)"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/server/saved_objects/service/lib/collect_multi_namespace_references.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-server.SavedObjectReferenceWithContext.spaces",
             "type": "Array",
             "tags": [],
@@ -9948,6 +9963,21 @@
             "label": "spacesWithMatchingAliases",
             "description": [
               "The space(s) that legacy URL aliases matching this type/id exist in"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/core/server/saved_objects/service/lib/collect_multi_namespace_references.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectReferenceWithContext.spacesWithMatchingOrigins",
+            "type": "Array",
+            "tags": [],
+            "label": "spacesWithMatchingOrigins",
+            "description": [
+              "The space(s) that objects matching this origin exist in (including this one)"
             ],
             "signature": [
               "string[] | undefined"

@@ -5,21 +5,43 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { ExecutionContextService, ExecutionContextSetup } from './execution_context_service';
+import type { AnalyticsServiceSetup } from '../analytics';
+import { analyticsServiceMock } from '../analytics/analytics_service.mock';
 
 describe('ExecutionContextService', () => {
   let execContext: ExecutionContextSetup;
   let curApp$: BehaviorSubject<string>;
   let execService: ExecutionContextService;
+  let analytics: jest.Mocked<AnalyticsServiceSetup>;
 
   beforeEach(() => {
+    analytics = analyticsServiceMock.createAnalyticsServiceSetup();
     execService = new ExecutionContextService();
-    execContext = execService.setup();
+    execContext = execService.setup({ analytics });
     curApp$ = new BehaviorSubject('app1');
     execContext = execService.start({
       curApp$,
     });
+  });
+
+  it('should extend the analytics context', async () => {
+    expect(analytics.registerContextProvider).toHaveBeenCalledTimes(1);
+    const context$ = analytics.registerContextProvider.mock.calls[0][0].context$;
+    execContext.set({
+      type: 'ghf',
+      description: 'first set',
+    });
+
+    await expect(firstValueFrom(context$)).resolves.toMatchInlineSnapshot(`
+      Object {
+        "applicationId": "app1",
+        "entityId": undefined,
+        "page": undefined,
+        "pageName": "ghf:app1",
+      }
+    `);
   });
 
   it('app name updates automatically and clears everything else', () => {

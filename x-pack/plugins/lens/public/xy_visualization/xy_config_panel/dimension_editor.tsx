@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { YAxisMode, YConfig } from '@kbn/expression-xy-plugin/common';
+import { YAxisMode, ExtendedYConfig } from '@kbn/expression-xy-plugin/common';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { State, XYState, XYDataLayerConfig } from '../types';
 import { FormatFactory } from '../../../common';
@@ -17,7 +17,7 @@ import { isHorizontalChart } from '../state_helpers';
 import { ColorPicker } from './color_picker';
 import { PalettePicker, useDebouncedValue } from '../../shared_components';
 import { isAnnotationsLayer, isReferenceLayer } from '../visualization_helpers';
-import { ReferenceLinePanel } from './reference_line_panel';
+import { ReferenceLinePanel } from './reference_line_config_panel';
 import { AnnotationsPanel } from './annotations_config_panel';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
@@ -57,7 +57,7 @@ export function DimensionEditor(
   const axisMode = localYConfig?.axisMode || 'auto';
 
   const setConfig = useCallback(
-    (yConfig: Partial<YConfig> | undefined) => {
+    (yConfig: Partial<ExtendedYConfig> | undefined) => {
       if (yConfig == null) {
         return;
       }

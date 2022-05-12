@@ -121,10 +121,12 @@ export enum SecurityPageName {
   usersExternalAlerts = 'users-external_alerts',
   threatHuntingLanding = 'threat-hunting',
   dashboardsLanding = 'dashboards',
+  manageLanding = 'manage',
 }
 
 export const THREAT_HUNTING_PATH = '/threat_hunting' as const;
 export const DASHBOARDS_PATH = '/dashboards' as const;
+export const MANAGE_PATH = '/manage' as const;
 export const TIMELINES_PATH = '/timelines' as const;
 export const CASES_PATH = '/cases' as const;
 export const OVERVIEW_PATH = '/overview' as const;
