@@ -24,7 +24,6 @@ import { RangeSliderStrings } from './range_slider_strings';
 interface RangeSliderEditorState {
   dataViewListItems: DataViewListItem[];
   dataView?: DataView;
-  fieldName?: string;
 }
 
 const FieldPicker = withSuspense(LazyFieldPicker, null);
@@ -37,19 +36,20 @@ export const RangeSliderEditor = ({
   setDefaultTitle,
   getRelevantDataViewId,
   setLastUsedDataViewId,
+  selectedField,
+  setSelectedField,
 }: ControlEditorProps<RangeSliderEmbeddableInput>) => {
   // Controls Services Context
   const { dataViews } = pluginServices.getHooks();
   const { getIdsWithTitle, getDefaultId, get } = dataViews.useService();
 
   const [state, setState] = useState<RangeSliderEditorState>({
-    fieldName: initialInput?.fieldName,
     dataViewListItems: [],
   });
 
   useMount(() => {
     let mounted = true;
-    if (state.fieldName) setDefaultTitle(state.fieldName);
+    if (selectedField) setDefaultTitle(selectedField);
     (async () => {
       const dataViewListItems = await getIdsWithTitle();
       const initialId =
@@ -68,11 +68,11 @@ export const RangeSliderEditor = ({
   });
 
   useEffect(
-    () => setValidState(Boolean(state.fieldName) && Boolean(state.dataView)),
-    [state.fieldName, setValidState, state.dataView]
+    () => setValidState(Boolean(selectedField) && Boolean(state.dataView)),
+    [selectedField, setValidState, state.dataView]
   );
 
-  const { dataView, fieldName } = state;
+  const { dataView } = state;
   return (
     <>
       <EuiFormRow label={RangeSliderStrings.editor.getDataViewTitle()}>
@@ -84,7 +84,7 @@ export const RangeSliderEditor = ({
             if (dataViewId === dataView?.id) return;
 
             onChange({ dataViewId });
-            setState((s) => ({ ...s, fieldName: undefined }));
+            setSelectedField(undefined);
             get(dataViewId).then((newDataView) => {
               setState((s) => ({ ...s, dataView: newDataView }));
             });
@@ -97,12 +97,12 @@ export const RangeSliderEditor = ({
       <EuiFormRow label={RangeSliderStrings.editor.getFieldTitle()}>
         <FieldPicker
           filterPredicate={(field) => field.aggregatable && field.type === 'number'}
-          selectedFieldName={fieldName}
+          selectedFieldName={selectedField}
           dataView={dataView}
           onSelectField={(field) => {
             setDefaultTitle(field.displayName ?? field.name);
             onChange({ fieldName: field.name });
-            setState((s) => ({ ...s, fieldName: field.name }));
+            setSelectedField(field.name);
           }}
         />
       </EuiFormRow>

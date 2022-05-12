@@ -52,6 +52,8 @@ export interface ControlEditorProps<T extends ControlInput = ControlInput> {
   onChange: (partial: Partial<T>) => void;
   setValidState: (valid: boolean) => void;
   setDefaultTitle: (defaultTitle: string) => void;
+  selectedField: string | undefined;
+  setSelectedField: (newField: string | undefined) => void;
 }
 
 /**

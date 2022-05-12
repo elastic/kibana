@@ -7,6 +7,7 @@
  */
 
 import expect from '@kbn/expect';
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -37,19 +38,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await timePicker.setDefaultDataRange();
 
       // populate an initial set of controls and get their ids.
-      await dashboardControls.createOptionsListControl({
+      await dashboardControls.createControl({
+        controlType: OPTIONS_LIST_CONTROL,
         dataViewTitle: 'animals-*',
         fieldName: 'animal.keyword',
         title: 'Animal',
       });
 
-      await dashboardControls.createOptionsListControl({
+      await dashboardControls.createControl({
+        controlType: OPTIONS_LIST_CONTROL,
         dataViewTitle: 'animals-*',
         fieldName: 'name.keyword',
         title: 'Animal Name',
       });
 
-      await dashboardControls.createOptionsListControl({
+      await dashboardControls.createControl({
+        controlType: OPTIONS_LIST_CONTROL,
         dataViewTitle: 'animals-*',
         fieldName: 'sound.keyword',
         title: 'Animal Sound',

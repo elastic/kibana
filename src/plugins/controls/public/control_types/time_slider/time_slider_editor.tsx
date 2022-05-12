@@ -23,7 +23,6 @@ import { TimeSliderStrings } from './time_slider_strings';
 interface TimeSliderEditorState {
   dataViewListItems: DataViewListItem[];
   dataView?: DataView;
-  fieldName?: string;
 }
 
 const FieldPicker = withSuspense(LazyFieldPicker, null);
@@ -36,19 +35,20 @@ export const TimeSliderEditor = ({
   setDefaultTitle,
   getRelevantDataViewId,
   setLastUsedDataViewId,
+  selectedField,
+  setSelectedField,
 }: ControlEditorProps<any>) => {
   // Controls Services Context
   const { dataViews } = pluginServices.getHooks();
   const { getIdsWithTitle, getDefaultId, get } = dataViews.useService();
 
   const [state, setState] = useState<TimeSliderEditorState>({
-    fieldName: initialInput?.fieldName,
     dataViewListItems: [],
   });
 
   useMount(() => {
     let mounted = true;
-    if (state.fieldName) setDefaultTitle(state.fieldName);
+    if (selectedField) setDefaultTitle(selectedField);
     (async () => {
       const dataViewListItems = await getIdsWithTitle();
       const initialId =
@@ -67,11 +67,11 @@ export const TimeSliderEditor = ({
   });
 
   useEffect(
-    () => setValidState(Boolean(state.fieldName) && Boolean(state.dataView)),
-    [state.fieldName, setValidState, state.dataView]
+    () => setValidState(Boolean(selectedField) && Boolean(state.dataView)),
+    [selectedField, setValidState, state.dataView]
   );
 
-  const { dataView, fieldName } = state;
+  const { dataView } = state;
   return (
     <>
       <EuiFormRow label={TimeSliderStrings.editor.getDataViewTitle()}>
@@ -83,7 +83,7 @@ export const TimeSliderEditor = ({
             if (dataViewId === dataView?.id) return;
 
             onChange({ dataViewId });
-            setState((s) => ({ ...s, fieldName: undefined }));
+            setSelectedField(undefined);
             get(dataViewId).then((newDataView) => {
               setState((s) => ({ ...s, dataView: newDataView }));
             });
@@ -96,12 +96,12 @@ export const TimeSliderEditor = ({
       <EuiFormRow label={TimeSliderStrings.editor.getFieldTitle()}>
         <FieldPicker
           filterPredicate={(field) => field.type === 'date'}
-          selectedFieldName={fieldName}
+          selectedFieldName={selectedField}
           dataView={dataView}
           onSelectField={(field) => {
             setDefaultTitle(field.displayName ?? field.name);
             onChange({ fieldName: field.name });
-            setState((s) => ({ ...s, fieldName: field.name }));
+            setSelectedField(field.name);
           }}
         />
       </EuiFormRow>

@@ -7,6 +7,7 @@
  */
 
 import expect from '@kbn/expect';
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -29,7 +30,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('adjust layout of controls', async () => {
       await dashboard.switchToEditMode();
-      await dashboardControls.createOptionsListControl({
+      await dashboardControls.createControl({
+        controlType: OPTIONS_LIST_CONTROL,
         dataViewTitle: 'animals-*',
         fieldName: 'sound.keyword',
       });
@@ -41,7 +43,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('apply new default size', async () => {
       it('to new controls only', async () => {
         await dashboardControls.updateControlsSize('medium');
-        await dashboardControls.createOptionsListControl({
+        await dashboardControls.createControl({
+          controlType: OPTIONS_LIST_CONTROL,
           dataViewTitle: 'animals-*',
           fieldName: 'name.keyword',
         });
@@ -54,7 +57,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('to all existing controls', async () => {
-        await dashboardControls.createOptionsListControl({
+        await dashboardControls.createControl({
+          controlType: OPTIONS_LIST_CONTROL,
           dataViewTitle: 'animals-*',
           fieldName: 'animal.keyword',
           width: 'large',
@@ -82,7 +86,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('when at least one control', async () => {
-        await dashboardControls.createOptionsListControl({
+        await dashboardControls.createControl({
+          controlType: OPTIONS_LIST_CONTROL,
           dataViewTitle: 'animals-*',
           fieldName: 'sound.keyword',
         });
