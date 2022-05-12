@@ -8,6 +8,7 @@
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { ComparisonOptionEnum } from '../../../shared/time_comparison/get_comparison_options';
 import { getNextEnvironmentUrlParam } from '../../../../../common/environment_filter_values';
 import { Transaction as ITransaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
@@ -48,7 +49,7 @@ export function MaybeViewTraceLink({
   environment: Environment;
 }) {
   const {
-    query: { latencyAggregationType, comparisonEnabled, offset },
+    query: { latencyAggregationType, comparison, offset },
   } = useApmParams('/services/{serviceName}/transactions/view');
 
   if (isLoading || !transaction) {
@@ -105,7 +106,7 @@ export function MaybeViewTraceLink({
         transactionType={rootTransaction.transaction.type}
         environment={nextEnvironment}
         latencyAggregationType={latencyAggregationType}
-        comparisonEnabled={comparisonEnabled}
+        comparisonEnabled={comparison === ComparisonOptionEnum.Time}
         offset={offset}
       >
         <FullTraceButton />

@@ -13,16 +13,18 @@ import { Breakpoints } from '../../../../hooks/use_breakpoints';
 import { getServiceColumns } from '.';
 import * as stories from './service_list.stories';
 import * as timeSeriesColor from '../../../shared/charts/helper/get_timeseries_color';
+import { TypeOf } from '@kbn/typed-react-router-config';
+import { ApmRoutes } from '../../../routing/apm_route_config';
 
 const { Example, EmptyState } = composeStories(stories);
 
-const query = {
+const query: TypeOf<ApmRoutes, '/services'>['query'] = {
   rangeFrom: 'now-15m',
   rangeTo: 'now',
   environment: ENVIRONMENT_ALL.value,
   kuery: '',
   serviceGroup: '',
-  comparisonEnabled: false,
+  comparison: 'false',
 };
 
 const service: any = {

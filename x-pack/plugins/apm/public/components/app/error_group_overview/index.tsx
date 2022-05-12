@@ -189,7 +189,7 @@ export function ErrorGroupOverview() {
               errorGroupDetailedStatisticsStatus === FETCH_STATUS.NOT_INITIATED
             }
             detailedStatistics={errorGroupDetailedStatistics}
-            comparison={comparison}
+            comparisonEnabled={comparison === ComparisonOptionEnum.Time}
           />
         </EuiPanel>
       </EuiFlexItem>

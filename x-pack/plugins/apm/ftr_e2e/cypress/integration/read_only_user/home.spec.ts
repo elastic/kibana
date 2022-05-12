@@ -15,7 +15,7 @@ const end = '2021-10-10T00:15:00.000Z';
 const serviceInventoryHref = url.format({
   pathname: '/app/apm/services',
   query: {
-    comparisonEnabled: 'true',
+    comparison: 'time',
     environment: 'ENVIRONMENT_ALL',
     rangeFrom: start,
     rangeTo: end,

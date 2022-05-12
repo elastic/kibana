@@ -13,6 +13,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode, useEffect, useState } from 'react';
+import { ComparisonOptionEnum } from '../../../shared/time_comparison/get_comparison_options';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
@@ -73,7 +74,7 @@ export function ServiceOverviewInstancesTable({
   const { agentName } = useApmServiceContext();
 
   const {
-    query: { kuery, latencyAggregationType, comparisonEnabled },
+    query: { kuery, latencyAggregationType, comparison },
   } = useApmParams('/services/{serviceName}');
 
   const [itemIdToOpenActionMenuRowMap, setItemIdToOpenActionMenuRowMap] =
@@ -128,7 +129,7 @@ export function ServiceOverviewInstancesTable({
     latencyAggregationType: latencyAggregationType as LatencyAggregationType,
     detailedStatsLoading,
     detailedStatsData,
-    comparisonEnabled,
+    comparisonEnabled: comparison === ComparisonOptionEnum.Time,
     toggleRowDetails,
     itemIdToExpandedRowMap,
     toggleRowActionMenu,

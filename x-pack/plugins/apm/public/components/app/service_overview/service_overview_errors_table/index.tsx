@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import React, { useState } from 'react';
 import uuid from 'uuid';
+import { ComparisonOptionEnum } from '../../../shared/time_comparison/get_comparison_options';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
@@ -69,8 +70,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
 
   const { query } = useApmParams('/services/{serviceName}/overview');
 
-  const { environment, kuery, rangeFrom, rangeTo, offset, comparisonEnabled } =
-    query;
+  const { environment, kuery, rangeFrom, rangeTo, offset, comparison } = query;
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -123,7 +123,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       // not used, but needed to trigger an update when offset is changed either manually by user or when time range is changed
       offset,
       // not used, but needed to trigger an update when comparison feature is disabled/enabled by user
-      comparisonEnabled,
+      comparison,
     ]
   );
 
@@ -170,7 +170,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     serviceName,
     errorGroupDetailedStatisticsLoading,
     errorGroupDetailedStatistics,
-    comparisonEnabled,
+    comparisonEnabled: comparison === ComparisonOptionEnum.Time,
     query,
   });
 

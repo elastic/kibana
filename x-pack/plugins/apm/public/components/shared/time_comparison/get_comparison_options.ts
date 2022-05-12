@@ -8,7 +8,6 @@
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
-
 export enum ComparisonOptionEnum {
   Time = 'time',
   False = 'false',

@@ -17,6 +17,7 @@ import {
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { ComparisonOptionEnum } from '../../../shared/time_comparison/get_comparison_options';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
@@ -39,7 +40,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
   const theme = useTheme();
 
   const { urlParams } = useLegacyUrlParams();
-  const { comparisonEnabled } = urlParams;
+  const { comparison } = urlParams;
 
   const timeseries = [
     {
@@ -49,7 +50,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
         defaultMessage: 'Occurrences',
       }),
     },
-    ...(comparisonEnabled
+    ...(comparison === ComparisonOptionEnum.Time
       ? [
           {
             data: distribution.previousPeriod,

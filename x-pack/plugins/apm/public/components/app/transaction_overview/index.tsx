@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { ComparisonOptionEnum } from '../../shared/time_comparison/get_comparison_options';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -25,7 +26,7 @@ export function TransactionOverview() {
       rangeFrom,
       rangeTo,
       transactionType: transactionTypeFromUrl,
-      comparisonEnabled,
+      comparison,
       offset,
     },
   } = useApmParams('/services/{serviceName}/transactions');
@@ -68,7 +69,7 @@ export function TransactionOverview() {
         start={start}
         end={end}
         isServerlessContext={isServerless}
-        comparisonEnabled={comparisonEnabled}
+        comparison={comparison as ComparisonOptionEnum}
         offset={offset}
       />
       <EuiSpacer size="s" />

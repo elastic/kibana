@@ -38,7 +38,7 @@ export function BackendDetailOverview() {
       refreshPaused,
       environment,
       kuery,
-      comparisonEnabled,
+      comparison,
     },
   } = useApmParams('/backends/overview');
 
@@ -55,7 +55,7 @@ export function BackendDetailOverview() {
           refreshPaused,
           environment,
           kuery,
-          comparisonEnabled,
+          comparison,
         },
       }),
     },
@@ -70,7 +70,7 @@ export function BackendDetailOverview() {
           refreshPaused,
           environment,
           kuery,
-          comparisonEnabled,
+          comparison,
         },
       }),
     },

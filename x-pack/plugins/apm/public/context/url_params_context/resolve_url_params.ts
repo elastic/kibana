@@ -6,6 +6,7 @@
  */
 
 import { Location } from 'history';
+import { ComparisonOptionEnum } from '../../components/shared/time_comparison/get_comparison_options';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { toQuery } from '../../components/shared/links/url_helpers';
@@ -47,7 +48,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     searchTerm,
     percentile,
     latencyAggregationType = LatencyAggregationType.avg,
-    comparisonEnabled,
+    comparison,
     offset,
   } = query;
 
@@ -79,9 +80,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     searchTerm: toString(searchTerm),
     percentile: toNumber(percentile),
     latencyAggregationType: latencyAggregationType as LatencyAggregationType,
-    comparisonEnabled: comparisonEnabled
-      ? toBoolean(comparisonEnabled)
-      : undefined,
+    comparison: comparison as ComparisonOptionEnum,
     offset,
   });
 }

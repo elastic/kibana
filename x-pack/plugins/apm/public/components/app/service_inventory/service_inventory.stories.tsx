@@ -10,6 +10,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { ComparisonOptionEnum } from '../../shared/time_comparison/get_comparison_options';
 import { AnomalyDetectionSetupState } from '../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
 import { AnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
@@ -59,7 +60,7 @@ const stories: Meta<{}> = {
           <KibanaReactContext.Provider>
             <MockUrlParamsContextProvider
               params={{
-                comparisonEnabled: true,
+                comparison: ComparisonOptionEnum.Time,
                 offset: '1d',
               }}
             >

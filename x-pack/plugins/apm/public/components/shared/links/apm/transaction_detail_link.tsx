@@ -9,6 +9,7 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { EuiLink } from '@elastic/eui';
 import { pickBy, identity } from 'lodash';
+import { ComparisonOptionEnum } from '../../time_comparison/get_comparison_options';
 import { getLegacyApmHref, APMLinkExtendProps } from './apm_link';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { pickKeys } from '../../../../../common/utils/pick_keys';
@@ -60,7 +61,9 @@ export function TransactionDetailLink({
       transactionId,
       transactionName,
       transactionType,
-      comparisonEnabled: defaultComparisonEnabled,
+      comparison: defaultComparisonEnabled
+        ? ComparisonOptionEnum.Time
+        : ComparisonOptionEnum.False,
       offset,
       ...pickKeys(urlParams as APMQueryParams, ...persistedFilters),
       ...pickBy({ latencyAggregationType, environment }, identity),

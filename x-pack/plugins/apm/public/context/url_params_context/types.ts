@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ComparisonOptionEnum } from '../../components/shared/time_comparison/get_comparison_options';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 
 export interface UrlParams {
@@ -32,7 +33,7 @@ export interface UrlParams {
   searchTerm?: string;
   percentile?: number;
   latencyAggregationType?: LatencyAggregationType;
-  comparisonEnabled?: boolean;
+  comparison?: ComparisonOptionEnum;
   offset?: string;
 }
 

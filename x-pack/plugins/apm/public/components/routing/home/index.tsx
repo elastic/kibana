@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React, { ComponentProps } from 'react';
-import { toBooleanRt } from '@kbn/io-ts-utils';
 import { comparisonRt } from '../../../../common/comparisons_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
@@ -134,14 +133,13 @@ export const home = {
           rangeFrom: t.string,
           rangeTo: t.string,
           kuery: t.string,
-          comparisonEnabled: toBooleanRt,
+          comparison: comparisonRt,
         }),
         t.partial({
           refreshPaused: t.union([t.literal('true'), t.literal('false')]),
           refreshInterval: t.string,
         }),
         offsetRt,
-        comparisonRt,
       ]),
     }),
     defaults: {
@@ -175,9 +173,8 @@ export const home = {
         params: t.partial({
           query: t.intersection([
             t.type({
-              comparisonEnabled: toBooleanRt,
+              comparison: comparisonRt,
             }),
-            comparisonRt,
             offsetRt,
           ]),
         }),

@@ -7,10 +7,8 @@
 
 import * as t from 'io-ts';
 
-export const comparisonRt = t.type({
-  comparison: t.union([
-    t.literal('mlBounds'),
-    t.literal('time'),
-    t.literal('false'),
-  ]),
-});
+export const comparisonRt = t.union([
+  t.literal('mlBounds'),
+  t.literal('time'),
+  t.literal('false'),
+]);

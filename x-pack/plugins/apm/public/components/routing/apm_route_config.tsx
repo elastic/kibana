@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
-import { toBooleanRt } from '@kbn/io-ts-utils';
 import { comparisonRt } from '../../../common/comparisons_rt';
 import { Breadcrumb } from '../app/breadcrumb';
 import { TraceLink } from '../app/trace_link';
@@ -91,7 +90,7 @@ const apmRoutes = {
             t.type({
               rangeFrom: t.string,
               rangeTo: t.string,
-              comparisonEnabled: toBooleanRt,
+              comparison: comparisonRt,
             }),
             t.partial({
               serviceGroup: t.string,
@@ -101,7 +100,6 @@ const apmRoutes = {
               refreshInterval: t.string,
             }),
             offsetRt,
-            comparisonRt,
           ]),
         }),
       },

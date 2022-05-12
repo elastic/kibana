@@ -19,6 +19,7 @@ import { first } from 'lodash';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { ComparisonOptionEnum } from '../../../shared/time_comparison/get_comparison_options';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import type { ApmUrlParams } from '../../../../context/url_params_context/types';
@@ -71,7 +72,7 @@ export function DetailView({ errorGroup, urlParams, kuery }: Props) {
   const history = useHistory();
   const { transaction, error, occurrencesCount } = errorGroup;
 
-  const { detailTab, offset, comparisonEnabled } = urlParams;
+  const { detailTab, offset, comparison } = urlParams;
 
   if (!error) {
     return null;
@@ -139,7 +140,7 @@ export function DetailView({ errorGroup, urlParams, kuery }: Props) {
                 transactionType={transaction.transaction.type}
                 serviceName={transaction.service.name}
                 offset={offset}
-                comparisonEnabled={comparisonEnabled}
+                comparisonEnabled={comparison === ComparisonOptionEnum.Time}
               >
                 <EuiIcon type="merge" />
                 <TransactionLinkName>

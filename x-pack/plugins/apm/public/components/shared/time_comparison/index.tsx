@@ -34,7 +34,7 @@ export function TimeComparison() {
   const history = useHistory();
   const { isSmall } = useBreakpoints();
   const {
-    query: { rangeFrom, rangeTo, comparisonEnabled, offset, comparison },
+    query: { rangeFrom, rangeTo, offset, comparison },
   } = useAnyOfApmParams('/services', '/backends/*', '/services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -58,11 +58,12 @@ export function TimeComparison() {
     return null;
   }
 
+  const comparisonEnabled = comparison !== ComparisonOptionEnum.False;
   return (
     <EuiSelect
       fullWidth={isSmall}
       data-test-subj="comparisonSelect"
-      disabled={comparison === ComparisonOptionEnum.False}
+      disabled={!comparisonEnabled}
       options={comparisonOptions}
       value={comparison === ComparisonOptionEnum.Time ? offset : comparison}
       prepend={

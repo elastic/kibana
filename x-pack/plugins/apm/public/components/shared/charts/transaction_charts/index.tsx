@@ -7,6 +7,7 @@
 
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { ComparisonOptionEnum } from '../../time_comparison/get_comparison_options';
 import { AnnotationsContextProvider } from '../../../../context/annotations/annotations_context';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { ServiceOverviewThroughputChart } from '../../../app/service_overview/service_overview_throughput_chart';
@@ -22,7 +23,7 @@ export function TransactionCharts({
   end,
   transactionName,
   isServerlessContext,
-  comparisonEnabled,
+  comparison,
   offset,
 }: {
   kuery: string;
@@ -31,7 +32,7 @@ export function TransactionCharts({
   end: string;
   transactionName?: string;
   isServerlessContext?: boolean;
-  comparisonEnabled?: boolean;
+  comparison?: ComparisonOptionEnum;
   offset?: string;
 }) {
   return (
@@ -69,7 +70,7 @@ export function TransactionCharts({
                   kuery={kuery}
                   transactionName={transactionName}
                   environment={environment}
-                  comparisonEnabled={comparisonEnabled}
+                  comparison={comparison}
                   offset={offset}
                 />
               </EuiFlexItem>

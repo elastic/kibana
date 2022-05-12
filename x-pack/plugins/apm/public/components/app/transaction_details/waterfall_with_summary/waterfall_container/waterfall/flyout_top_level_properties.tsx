@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { ComparisonOptionEnum } from '../../../../../shared/time_comparison/get_comparison_options';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
@@ -25,7 +26,7 @@ interface Props {
 export function FlyoutTopLevelProperties({ transaction }: Props) {
   const { query } = useApmParams('/services/{serviceName}/transactions/view');
 
-  const { latencyAggregationType, comparisonEnabled, offset } = query;
+  const { latencyAggregationType, comparison, offset } = query;
 
   if (!transaction) {
     return null;
@@ -65,7 +66,7 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
           transactionType={transaction.transaction.type}
           environment={nextEnvironment}
           latencyAggregationType={latencyAggregationType}
-          comparisonEnabled={comparisonEnabled}
+          comparisonEnabled={comparison === ComparisonOptionEnum.Time}
           offset={offset}
         >
           {transaction.transaction.name}

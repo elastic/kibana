@@ -8,6 +8,7 @@
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { ComparisonOptionEnum } from '../../shared/time_comparison/get_comparison_options';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
@@ -29,7 +30,7 @@ export function TransactionDetails() {
     rangeFrom,
     rangeTo,
     transactionType: transactionTypeFromUrl,
-    comparisonEnabled,
+    comparison,
     offset,
   } = query;
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -73,7 +74,7 @@ export function TransactionDetails() {
           end={end}
           transactionName={transactionName}
           isServerlessContext={isServerless}
-          comparisonEnabled={comparisonEnabled}
+          comparison={comparison as ComparisonOptionEnum}
           offset={offset}
         />
       </ChartPointerEventContextProvider>
