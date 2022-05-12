@@ -428,4 +428,35 @@ storiesOf('SearchBar', module)
       showQueryInput: true,
       showSubmitButton: false,
     } as SearchBarProps)
+  )
+  .add('with filter bar on but pinning option is hidden from menus', () =>
+    wrapSearchBarInContext({
+      showDatePicker: false,
+      showFilterBar: true,
+      showQueryInput: true,
+      hiddenFilterPanelOptions: ['pinFilter'],
+      filters: [
+        {
+          meta: {
+            index: '1234',
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'phrase',
+            key: 'category.keyword',
+            params: {
+              query: "Men's Accessories",
+            },
+          },
+          query: {
+            match_phrase: {
+              'category.keyword': "Men's Accessories",
+            },
+          },
+          $state: {
+            store: 'appState',
+          },
+        },
+      ],
+    } as unknown as SearchBarProps)
   );
