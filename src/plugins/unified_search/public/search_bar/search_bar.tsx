@@ -210,8 +210,8 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
     return dataViews !== undefined && dataViews.length > 0;
   }
 
-  private checkEveryDataViewsDoesNotHaveValueTimeFieldName(dataViews: DataView[]) {
-    return dataViews.every((dataView) => isEmpty(dataView.timeFieldName));
+  private checkSomeDataViewsHaveValueTimeFieldName(dataViews: DataView[]) {
+    return dataViews.some((dataView) => !isEmpty(dataView.timeFieldName));
   }
 
   /*
@@ -225,9 +225,10 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
       (!showDatePicker && dateRangeFrom !== undefined && dateRangeTo !== undefined);
 
     if (this.checkDataViewsExistsAndHasAnyElement(indexPatterns)) {
-      const isEveryDataViewsHasNotTimeFieldName =
-        this.checkEveryDataViewsDoesNotHaveValueTimeFieldName(indexPatterns!);
-      return !isEveryDataViewsHasNotTimeFieldName && defaultCheck;
+      const isSomeDataViewsHaveTimeFieldName = this.checkSomeDataViewsHaveValueTimeFieldName(
+        indexPatterns!
+      );
+      return isSomeDataViewsHaveTimeFieldName && defaultCheck;
     } else {
       return defaultCheck;
     }
