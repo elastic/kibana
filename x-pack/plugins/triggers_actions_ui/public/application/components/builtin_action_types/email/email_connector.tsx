@@ -14,7 +14,7 @@ import { AdditionalEmailServices } from '@kbn/actions-plugin/common';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import {
   UseField,
-  useForm,
+  useFormContext,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
@@ -33,6 +33,11 @@ import * as i18n from './translations';
 const { emptyField } = fieldValidators;
 
 const ExchangeFormFields = lazy(() => import('./exchange_form'));
+
+const shouldDisableEmailConfiguration = (service: string | null | undefined) =>
+  isEmpty(service) ||
+  (service !== AdditionalEmailServices.EXCHANGE && service !== AdditionalEmailServices.OTHER);
+
 export const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
 }) => {
@@ -43,14 +48,14 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
     notifications: { toasts },
   } = useKibana().services;
 
-  const { form } = useForm();
+  const form = useFormContext();
   const { updateFieldValues } = form;
   const [{ config }] = useFormData({
     watch: ['config.service', 'config.hasAuth'],
   });
 
   const { service, hasAuth } = config ?? { service: null, hasAuth: false };
-  const disableServiceConfig = isEmpty(service);
+  const disableServiceConfig = shouldDisableEmailConfiguration(service);
 
   const { isLoading, getEmailServiceConfig } = useEmailConfig({ http, toasts });
 
