@@ -22,6 +22,7 @@ import {
   EuiPopover,
   EuiHorizontalRule,
   EuiTabbedContent,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 
 import {
@@ -67,7 +68,7 @@ export function RuleDetailsPage() {
 
   const { ruleId } = useParams<RuleDetailsPathParams>();
   const { ObservabilityPageTemplate } = usePluginContext();
-  const { isLoadingRule, rule, ruleType, errorRule, reloadRule } = useFetchRule({ ruleId, http });
+  const { isRuleLoading, rule, ruleType, errorRule, reloadRule } = useFetchRule({ ruleId, http });
   const [features, setFeatures] = useState<string>('');
   const [ruleToDelete, setRuleToDelete] = useState<string[]>([]);
   const [isPageLoading, setIsPageLoading] = useState(false);
@@ -159,8 +160,30 @@ export function RuleDetailsPage() {
     },
   ];
 
-  if (isPageLoading || (isLoadingRule && !errorRule)) return <CenterJustifiedSpinner />;
-  if (!rule && !isLoadingRule && errorRule) return toasts.addDanger({ title: errorRule });
+  if (isPageLoading || isRuleLoading) return <CenterJustifiedSpinner />;
+  if (!rule || errorRule)
+    return (
+      <EuiPanel>
+        <EuiEmptyPrompt
+          iconType="alert"
+          color="danger"
+          title={
+            <h2>
+              {i18n.translate('xpack.observability.ruleDetails.errorPromptTitle', {
+                defaultMessage: 'Unable to load rule details',
+              })}
+            </h2>
+          }
+          body={
+            <p>
+              {i18n.translate('xpack.observability.ruleDetails.errorPromptBody', {
+                defaultMessage: 'There was an error loading the rule details.',
+              })}
+            </p>
+          }
+        />
+      </EuiPanel>
+    );
   return (
     <ObservabilityPageTemplate
       pageHeader={{

@@ -21,7 +21,7 @@ export interface FetchRuleProps {
 }
 
 export interface FetchRule {
-  isLoadingRule: boolean;
+  isRuleLoading: boolean;
   rule: Rule | undefined;
   ruleType: RuleType | undefined;
   errorRule: string | undefined;

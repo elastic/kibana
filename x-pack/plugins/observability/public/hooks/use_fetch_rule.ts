@@ -12,7 +12,7 @@ import { RULE_LOAD_ERROR } from '../pages/rule_details/translations';
 
 export function useFetchRule({ ruleId, http }: FetchRuleProps) {
   const [ruleSummary, setRuleSummary] = useState<FetchRule>({
-    isLoadingRule: true,
+    isRuleLoading: true,
     rule: undefined,
     ruleType: undefined,
     errorRule: undefined,
@@ -31,14 +31,14 @@ export function useFetchRule({ ruleId, http }: FetchRuleProps) {
       const ruleType = ruleTypes.find((type) => type.id === rule.ruleTypeId);
       setRuleSummary((oldState: FetchRule) => ({
         ...oldState,
-        isLoadingRule: false,
+        isRuleLoading: false,
         rule,
         ruleType,
       }));
     } catch (error) {
       setRuleSummary((oldState: FetchRule) => ({
         ...oldState,
-        isLoadingRule: false,
+        isRuleLoading: false,
         errorRule: RULE_LOAD_ERROR(
           error instanceof Error ? error.message : typeof error === 'string' ? error : ''
         ),
