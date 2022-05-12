@@ -266,7 +266,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('Selections made in control apply to dashboard', async () => {
         it('Shows available options in options list', async () => {
-          await ensureAvailableOptionsEql(allAvailableOptions);
+          await header.waitUntilLoadingHasFinished();
+          await retry.try(async () => {
+            await ensureAvailableOptionsEql(allAvailableOptions);
+          });
         });
 
         it('Can search options list for available options', async () => {
@@ -308,9 +311,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           const selectionString = await dashboardControls.optionsListGetSelectionsString(controlId);
           expect(selectionString).to.be('hiss, grr');
-        });
 
-        after(async () => {
           await dashboardControls.optionsListOpenPopover(controlId);
           await dashboardControls.optionsListPopoverClearSelections();
           await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
