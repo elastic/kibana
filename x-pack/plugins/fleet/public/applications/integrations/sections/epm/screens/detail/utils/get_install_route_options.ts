@@ -20,7 +20,7 @@ interface GetInstallPkgRouteOptionsParams {
 }
 
 const isPackageExemptFromStepsLayout = (pkgkey: string) =>
-  SPECIAL_PACKAGES.some((pkgname) => pkgkey.startsWith(pkgname + '-'));
+  SPECIAL_PACKAGES.some((pkgname) => pkgkey.startsWith(pkgname));
 /*
  * When the install package button is pressed, this fn decides which page to navigate to
  * by generating the options to be passed to `services.application.navigateToApp`.

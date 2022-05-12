@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { ReactEventHandler } from 'react';
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { useRouteMatch, useHistory, useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useRouteMatch } from 'react-router-dom';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -24,17 +23,15 @@ import {
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { safeLoad } from 'js-yaml';
 
+import { useCancelAddPackagePolicy, useOnSaveNavigate } from '../hooks';
 import { dataTypes, FLEET_SYSTEM_PACKAGE, splitPkgKey } from '../../../../../../../common';
 import type {
   AgentPolicy,
   NewAgentPolicy,
   NewPackagePolicy,
   PackagePolicy,
-  CreatePackagePolicyRouteState,
-  OnSaveQueryParamKeys,
 } from '../../../../types';
 import {
-  useLink,
   sendCreatePackagePolicy,
   useStartServices,
   useConfig,
@@ -42,22 +39,24 @@ import {
   useGetPackageInfoByKey,
   sendCreateAgentPolicy,
 } from '../../../../hooks';
-import { Loading, Error } from '../../../../components';
+import { Loading, Error, ExtensionWrapper } from '../../../../components';
 
 import { agentPolicyFormValidation, ConfirmDeployAgentPolicyModal } from '../../components';
-import { useIntraAppState, useUIExtension } from '../../../../hooks';
-import { ExtensionWrapper } from '../../../../components';
+import { useUIExtension } from '../../../../hooks';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../../types';
 import { pkgKeyFromPackageInfo } from '../../../../services';
 
-import type { EditPackagePolicyFrom, PackagePolicyFormState, AddToPolicyParams } from '../types';
+import type {
+  PackagePolicyFormState,
+  AddToPolicyParams,
+  CreatePackagePolicyParams,
+} from '../types';
 
 import { IntegrationBreadcrumb } from '../components';
 
 import { CreatePackagePolicySinglePageLayout, PostInstallAddAgentModal } from './components';
 import type { PackagePolicyValidationResults } from './services';
 import { validatePackagePolicy, validationHasErrors } from './services';
-import { appendOnSaveQueryParamsToPath } from './utils';
 import { StepConfigurePackagePolicy } from './step_configure_package';
 import { StepDefinePackagePolicy } from './step_define_package_policy';
 import { SelectedPolicyTab, StepSelectHosts } from './step_select_hosts';
@@ -78,40 +77,15 @@ const CustomEuiBottomBar = styled(EuiBottomBar)`
   z-index: 50;
 `;
 
-export const CreatePackagePolicySinglePage: React.FunctionComponent = () => {
-  const {
-    application: { navigateToApp },
-    notifications,
-  } = useStartServices();
+export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
+  from,
+  queryParamsPolicyId,
+}) => {
+  const { notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
   const { params } = useRouteMatch<AddToPolicyParams>();
-  const { getHref, getPath } = useLink();
-  const history = useHistory();
-  const routeState = useIntraAppState<CreatePackagePolicyRouteState>();
-
-  const { search } = useLocation();
-  const queryParams = useMemo(() => new URLSearchParams(search), [search]);
-  const queryParamsPolicyId = useMemo(
-    () => queryParams.get('policyId') ?? undefined,
-    [queryParams]
-  );
-  /**
-   * Please note: policyId can come from one of two sources. The URL param (in the URL path) or
-   * in the query params (?policyId=foo).
-   *
-   * Either way, we take this as an indication that a user is "coming from" the fleet policy UI
-   * since we link them out to packages (a.k.a. integrations) UI when choosing a new package. It is
-   * no longer possible to choose a package directly in the create package form.
-   *
-   * We may want to deprecate the ability to pass in policyId from URL params since there is no package
-   * creation possible if a user has not chosen one from the packages UI.
-   */
-  const from: EditPackagePolicyFrom =
-    'policyId' in params || queryParamsPolicyId ? 'policy' : 'package';
-
-  // Agent policy state
   const [agentPolicy, setAgentPolicy] = useState<AgentPolicy | undefined>();
 
   const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>({
@@ -129,6 +103,12 @@ export const CreatePackagePolicySinglePage: React.FunctionComponent = () => {
 
   // Retrieve agent count
   const agentPolicyId = agentPolicy?.id;
+
+  const { cancelClickHandler, cancelUrl } = useCancelAddPackagePolicy({
+    from,
+    pkgkey: params.pkgkey,
+    agentPolicyId,
+  });
   useEffect(() => {
     const getAgentCount = async () => {
       const { data } = await sendGetAgentStatus({ policyId: agentPolicyId });
@@ -158,6 +138,15 @@ export const CreatePackagePolicySinglePage: React.FunctionComponent = () => {
     inputs: [],
   });
 
+  const onSaveNavigate = useOnSaveNavigate({
+    packagePolicy,
+    queryParamsPolicyId,
+  });
+  const navigateAddAgent = (policy?: PackagePolicy) =>
+    onSaveNavigate(policy, ['openEnrollmentFlyout']);
+
+  const navigateAddAgentHelp = (policy?: PackagePolicy) =>
+    onSaveNavigate(policy, ['showAddAgentHelp']);
   // Validation state
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
@@ -301,28 +290,6 @@ export const CreatePackagePolicySinglePage: React.FunctionComponent = () => {
     [updatePackagePolicy]
   );
 
-  // Cancel path
-  const cancelUrl = useMemo(() => {
-    if (routeState && routeState.onCancelUrl) {
-      return routeState.onCancelUrl;
-    }
-    return from === 'policy' && agentPolicyId
-      ? getHref('policy_details', {
-          policyId: agentPolicyId,
-        })
-      : getHref('integration_details_overview', { pkgkey: params.pkgkey });
-  }, [routeState, from, agentPolicyId, getHref, params.pkgkey]);
-
-  const cancelClickHandler: ReactEventHandler = useCallback(
-    (ev) => {
-      if (routeState && routeState.onCancelNavigateTo) {
-        ev.preventDefault();
-        navigateToApp(...routeState.onCancelNavigateTo);
-      }
-    },
-    [routeState, navigateToApp]
-  );
-
   // Save package policy
   const savePackagePolicy = useCallback(
     async (pkgPolicy: NewPackagePolicy) => {
@@ -332,51 +299,6 @@ export const CreatePackagePolicySinglePage: React.FunctionComponent = () => {
       return result;
     },
     [agentCount]
-  );
-  const doOnSaveNavigation = useRef<boolean>(true);
-
-  // Detect if user left page
-  useEffect(() => {
-    return () => {
-      doOnSaveNavigation.current = false;
-    };
-  }, []);
-
-  const navigateAddAgent = (policy?: PackagePolicy) =>
-    onSaveNavigate(policy, ['openEnrollmentFlyout']);
-
-  const navigateAddAgentHelp = (policy?: PackagePolicy) =>
-    onSaveNavigate(policy, ['showAddAgentHelp']);
-
-  const onSaveNavigate = useCallback(
-    (policy?: PackagePolicy, paramsToApply: OnSaveQueryParamKeys[] = []) => {
-      if (!doOnSaveNavigation.current) {
-        return;
-      }
-
-      const packagePolicyPath = getPath('policy_details', { policyId: packagePolicy.policy_id });
-
-      if (routeState?.onSaveNavigateTo && policy) {
-        const [appId, options] = routeState.onSaveNavigateTo;
-
-        if (options?.path) {
-          const pathWithQueryString = appendOnSaveQueryParamsToPath({
-            // In cases where we want to navigate back to a new/existing policy, we need to override the initial `path`
-            // value and navigate to the actual agent policy instead
-            path: queryParamsPolicyId ? packagePolicyPath : options.path,
-            policy,
-            mappingOptions: routeState.onSaveQueryParams,
-            paramsToApply,
-          });
-          navigateToApp(appId, { ...options, path: pathWithQueryString });
-        } else {
-          navigateToApp(...routeState.onSaveNavigateTo);
-        }
-      } else {
-        history.push(packagePolicyPath);
-      }
-    },
-    [packagePolicy.policy_id, getPath, navigateToApp, history, routeState, queryParamsPolicyId]
   );
 
   const createAgentPolicy = useCallback(async (): Promise<string | undefined> => {

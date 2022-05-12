@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type React from 'react';
 export type EditPackagePolicyFrom =
   | 'package'
   | 'package-edit'
@@ -27,3 +28,8 @@ export interface AddToPolicyParams {
   integration?: string;
   policyId?: string;
 }
+
+export type CreatePackagePolicyParams = React.FunctionComponent<{
+  from: EditPackagePolicyFrom;
+  queryParamsPolicyId?: string;
+}>;

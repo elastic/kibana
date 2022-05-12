@@ -11,10 +11,11 @@ import { splitPkgKey } from '../../../../../../../common';
 
 import { useGetPackageInfoByKey } from '../../../../hooks';
 
-import type { AddToPolicyParams } from '../types';
+import type { AddToPolicyParams, CreatePackagePolicyParams } from '../types';
+import { useCancelAddPackagePolicy } from '../hooks';
 
 import { AddFirstIntegrationSplashScreen } from './components/add_first_integration_splash';
-export const CreatePackagePolicyMultiPage: React.FunctionComponent = () => {
+export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({ from }) => {
   const { params } = useRouteMatch<AddToPolicyParams>();
 
   const { pkgName, pkgVersion } = splitPkgKey(params.pkgkey);
@@ -34,12 +35,23 @@ export const CreatePackagePolicyMultiPage: React.FunctionComponent = () => {
     );
   }, [packageInfo?.policy_templates, params]);
 
+  const spashScreenNext = () => {}; // TODO: this will display the add package policy steps
+
+  const { cancelClickHandler, cancelUrl } = useCancelAddPackagePolicy({
+    from,
+    pkgkey: params.pkgkey,
+    // agentPolicyId, TODO: Provide agent policy
+  });
+
   return (
     <AddFirstIntegrationSplashScreen
       isLoading={isPackageInfoLoading}
       error={packageInfoError}
       integrationInfo={integrationInfo}
       packageInfo={packageInfo}
+      cancelUrl={cancelUrl}
+      cancelClickHandler={cancelClickHandler}
+      onNext={spashScreenNext}
     />
   );
 };
