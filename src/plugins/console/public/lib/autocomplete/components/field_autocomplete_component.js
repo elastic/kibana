@@ -11,12 +11,9 @@ import { getAutocompleteInfo } from '../../../services';
 import { ListComponent } from './list_component';
 
 function FieldGenerator(context) {
-  return _.map(
-    getAutocompleteInfo().mapping.get(context.indices, context.types),
-    function (field) {
-      return { name: field.name, meta: field.type };
-    }
-  );
+  return _.map(getAutocompleteInfo().mapping.get(context.indices, context.types), function (field) {
+    return { name: field.name, meta: field.type };
+  });
 }
 
 export class FieldAutocompleteComponent extends ListComponent {

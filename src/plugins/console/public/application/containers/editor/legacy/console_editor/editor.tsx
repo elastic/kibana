@@ -64,7 +64,14 @@ const inputId = 'ConAppInputTextarea';
 
 function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
   const {
-    services: { history, notifications, settings: settingsService, esHostService, http, autocompleteInfo },
+    services: {
+      history,
+      notifications,
+      settings: settingsService,
+      esHostService,
+      http,
+      autocompleteInfo,
+    },
     docLinkVersion,
   } = useServicesContext();
 
