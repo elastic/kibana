@@ -7,15 +7,14 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import {
-  IKibanaResponse,
   IScopedClusterClient,
-  KibanaResponseFactory,
   Logger,
   RequestHandler,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
+import { errorHandler } from '../error_handler';
 import {
   HostInfo,
   HostMetadata,
@@ -33,9 +32,6 @@ import { findAgentIdsByStatus } from './support/agent_status';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { fleetAgentStatusToEndpointHostStatus } from '../../utils';
 import { queryResponseToHostListResult } from './support/query_strategies';
-import { NotFoundError } from '../../errors';
-import { EndpointHostUnEnrolledError } from '../../services/metadata';
-import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/metadata';
 import {
   ENDPOINT_DEFAULT_PAGE,
@@ -54,32 +50,6 @@ export interface MetadataRequestContext {
 
 export const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
   return endpointAppContext.logFactory.get('metadata');
-};
-
-const errorHandler = <E extends Error>(
-  logger: Logger,
-  res: KibanaResponseFactory,
-  error: E
-): IKibanaResponse => {
-  logger.error(error);
-
-  if (error instanceof CustomHttpRequestError) {
-    return res.customError({
-      statusCode: error.statusCode,
-      body: error,
-    });
-  }
-
-  if (error instanceof NotFoundError) {
-    return res.notFound({ body: error });
-  }
-
-  if (error instanceof EndpointHostUnEnrolledError) {
-    return res.badRequest({ body: error });
-  }
-
-  // Kibana CORE will take care of `500` errors when the handler `throw`'s, including logging the error
-  throw error;
 };
 
 export function getMetadataListRequestHandler(
