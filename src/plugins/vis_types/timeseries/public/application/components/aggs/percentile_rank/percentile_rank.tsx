@@ -112,7 +112,7 @@ export const PercentileRankAgg = (props: PercentileRankAggProps) => {
             indexPattern={indexPattern}
             value={model.field ?? ''}
             onChange={(value) =>
-              props.onChange({
+              handleChange({
                 field: value?.[0],
               })
             }
