@@ -29,6 +29,8 @@ export interface ShowOptionsPopoverProps {
   onUseMarginsChange: (useMargins: boolean) => void;
   syncColors: boolean;
   onSyncColorsChange: (syncColors: boolean) => void;
+  syncTooltips: boolean;
+  onSyncTooltipsChange: (syncTooltips: boolean) => void;
   hidePanelTitles: boolean;
   onHidePanelTitlesChange: (hideTitles: boolean) => void;
   theme$: CoreStart['theme']['theme$'];
@@ -42,6 +44,8 @@ export function showOptionsPopover({
   onHidePanelTitlesChange,
   syncColors,
   onSyncColorsChange,
+  syncTooltips,
+  onSyncTooltipsChange,
   theme$,
 }: ShowOptionsPopoverProps) {
   if (isOpen) {
@@ -68,6 +72,8 @@ export function showOptionsPopover({
             onHidePanelTitlesChange={onHidePanelTitlesChange}
             syncColors={syncColors}
             onSyncColorsChange={onSyncColorsChange}
+            syncTooltips={syncTooltips}
+            onSyncTooltipsChange={onSyncTooltipsChange}
           />
         </EuiWrappingPopover>
       </KibanaThemeProvider>

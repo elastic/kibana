@@ -9,5 +9,5 @@ Exposes the public APIs of the AnalyticsClient during the setup phase.
 <b>Signature:</b>
 
 ```typescript
-export declare type AnalyticsServiceSetup = AnalyticsClient;
+export declare type AnalyticsServiceSetup = Omit<AnalyticsClient, 'shutdown'>;
 ```

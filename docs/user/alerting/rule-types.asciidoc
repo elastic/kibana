@@ -41,6 +41,12 @@ see {subscriptions}[the subscription page].
 
 Observability rules are categorized into APM and User Experience, Logs, Metrics, Stack Monitoring, and Uptime.
 
+[NOTE]
+==============================================
+If you create a rule in the {observability} app, its alerts are not visible in
+*{stack-manage-app} > {rules-ui}*. They are visible only in the {observability} app.
+==============================================
+
 [cols="2*<"]
 |===
 
@@ -72,7 +78,13 @@ beta:[] {ml-docs}/ml-configuring-alerts.html[{ml-cap} rules] run scheduled check
 [[security-rules]]
 === Security rules
 
-Security rules detect suspicious source events with pre-built or custom rules and create alerts when a rule’s conditions are met. For more information, refer to {security-guide}/prebuilt-rules.html[Security rules].
+Security rules detect suspicious source events with pre-built or custom rules and create alerts when a rule's conditions are met. For more information, refer to {security-guide}/prebuilt-rules.html[Security rules].
+
+[NOTE]
+==============================================
+Alerts associated with security rules are visible only in the {security-app};
+they are not visible in *{stack-manage-app} > {rules-ui}*.
+==============================================
 
 include::rule-types/index-threshold.asciidoc[]
 include::rule-types/es-query.asciidoc[]
