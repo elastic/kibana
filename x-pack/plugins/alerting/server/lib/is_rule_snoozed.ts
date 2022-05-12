@@ -26,11 +26,15 @@ export function getRuleSnoozeEndTime(rule: RuleSnoozeProps): Date | null {
 
     // Check to see if now is during a recurrence of the snooze
     if (rRule) {
-      const recurrenceRule = rrulestr(rRule);
-      const lastOccurrence = recurrenceRule.before(new Date(now), true);
-      if (!lastOccurrence) continue;
-      const lastOccurrenceEndTime = lastOccurrence.getTime() + duration;
-      if (now < lastOccurrenceEndTime) return new Date(lastOccurrenceEndTime);
+      try {
+        const recurrenceRule = rrulestr(rRule);
+        const lastOccurrence = recurrenceRule.before(new Date(now), true);
+        if (!lastOccurrence) continue;
+        const lastOccurrenceEndTime = lastOccurrence.getTime() + duration;
+        if (now < lastOccurrenceEndTime) return new Date(lastOccurrenceEndTime);
+      } catch (e) {
+        throw new Error(`Failed to process RRule ${rRule}: ${e}`);
+      }
     }
   }
 
