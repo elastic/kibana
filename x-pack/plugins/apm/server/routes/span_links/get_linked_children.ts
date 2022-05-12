@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { isEmpty } from 'lodash';
 import {
   PROCESSOR_EVENT,
   SPAN_ID,
@@ -61,8 +62,16 @@ async function fetchLinkedChildrenOfSpan({
       },
     }
   );
-
-  return response.hits.hits;
+  // Filter out documents that don't have any span.links that match the combination of traceId and spanId
+  return response.hits.hits.filter(({ _source: source }) => {
+    const spanLinks = source.span?.links?.filter((spanLink) => {
+      return (
+        spanLink.trace.id === traceId &&
+        (spanId ? spanLink.span.id === spanId : true)
+      );
+    });
+    return !isEmpty(spanLinks);
+  });
 }
 
 function getSpanId(source: TransactionRaw | SpanRaw) {
@@ -88,7 +97,6 @@ export async function getLinkedChildrenCountBySpanId({
     start,
     end,
   });
-
   return linkedChildren.reduce<Record<string, number>>(
     (acc, { _source: source }) => {
       source.span?.links?.forEach((link) => {

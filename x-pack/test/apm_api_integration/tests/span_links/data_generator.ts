@@ -6,6 +6,7 @@
  */
 import { apm, timerange } from '@elastic/apm-synthtrace';
 import { SpanLink } from '@kbn/apm-plugin/typings/es_schemas/raw/fields/span_links';
+import uuid from 'uuid';
 
 function getServiceAData() {
   const serviceAInstanceGo = apm.service('Service A', 'production', 'go').instance('instance a');
@@ -99,17 +100,33 @@ function getServiceBData() {
     span: { id: spanB?.['span.id']! },
   };
 
+  const serviceBTransactionBLink = {
+    trace: { id: transactionB?.['trace.id']! },
+    span: { id: transactionB?.['transaction.id']! },
+  };
+
   return {
     serviceBIds,
     serviceBSpanBLink,
     serviceBAsArray,
+    serviceBTransactionBLink,
   };
 }
 
-function getServiceCData({ serviceASpanALink }: { serviceASpanALink: SpanLink }) {
+function getServiceCData({
+  serviceASpanALink,
+  serviceBSpanBLink,
+  serviceBTransactionBLink,
+}: {
+  serviceASpanALink: SpanLink;
+  serviceBSpanBLink: SpanLink;
+  serviceBTransactionBLink: SpanLink;
+}) {
   const serviceCInstanceRuby = apm
     .service('Service C', 'production', 'ruby')
     .instance('instance c');
+
+  const externalTraceId = uuid.v4();
 
   const serviceCEvents = timerange(
     new Date('2022-01-01T00:04:00.000Z'),
@@ -120,7 +137,13 @@ function getServiceCData({ serviceASpanALink }: { serviceASpanALink: SpanLink })
     .generator((timestamp) => {
       return serviceCInstanceRuby
         .transaction(`Transaction C`)
-        .defaults({ 'span.links': [serviceASpanALink] })
+        .defaults({
+          'span.links': [
+            serviceASpanALink,
+            serviceBTransactionBLink,
+            { trace: { id: externalTraceId }, span: { id: serviceBSpanBLink.span.id } },
+          ],
+        })
         .timestamp(timestamp)
         .duration(1000)
         .success()
@@ -150,6 +173,7 @@ function getServiceCData({ serviceASpanALink }: { serviceASpanALink: SpanLink })
     traceId: transactionC?.['trace.id']!,
     transactionCId: transactionC?.['transaction.id']!,
     spanCId: spanC?.['span.id']!,
+    externalTraceId,
   };
   return {
     serviceCTransactionCLink,
@@ -228,6 +252,8 @@ function getServiceDData({
  * Service C (ruby)
  * --Transaction C
  * ------span.links=Service A / Span A
+ * ------span.links=Service B / Transaction B
+ * ------span.links=External ID / Span B
  * ----Span C
  *
  * Service D (nodejs)
@@ -238,16 +264,16 @@ function getServiceDData({
  */
 export function generateSpanLinksData() {
   const { serviceAAsArray, serviceAIds, serviceASpanALink } = getServiceAData();
-  const { serviceBAsArray, serviceBIds, serviceBSpanBLink } = getServiceBData();
+  const { serviceBAsArray, serviceBIds, serviceBSpanBLink, serviceBTransactionBLink } =
+    getServiceBData();
   const { serviceCAsArray, serviceCIds, serviceCSpanCLink, serviceCTransactionCLink } =
-    getServiceCData({ serviceASpanALink });
+    getServiceCData({ serviceASpanALink, serviceBSpanBLink, serviceBTransactionBLink });
   const { serviceDAsArray, serviceDIds } = getServiceDData({
     serviceASpanALink,
     serviceBSpanBLink,
     serviceCSpanCLink,
     serviceCTransactionCLink,
   });
-
   return {
     events: {
       serviceAAsArray,

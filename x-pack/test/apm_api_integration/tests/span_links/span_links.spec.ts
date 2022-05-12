@@ -22,29 +22,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'contains linked children',
     { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
     () => {
-      let serviceAIds: {
-        transactionAId: string;
-        traceId: string;
-        spanAId: string;
-      };
-
-      let serviceBIds: {
-        traceId: string;
-        transactionBId: string;
-        spanBId: string;
-      };
-
-      let serviceCIds: {
-        traceId: string;
-        transactionCId: string;
-        spanCId: string;
-      };
-
-      let serviceDIds: {
-        traceId: string;
-        transactionDId: string;
-        spanEId: string;
-      };
+      type GenerateSpanLinksDataIds = ReturnType<typeof generateSpanLinksData>['ids'];
+      let serviceAIds: GenerateSpanLinksDataIds['serviceAIds'];
+      let serviceBIds: GenerateSpanLinksDataIds['serviceBIds'];
+      let serviceCIds: GenerateSpanLinksDataIds['serviceCIds'];
+      let serviceDIds: GenerateSpanLinksDataIds['serviceDIds'];
 
       before(async () => {
         const { events, ids } = generateSpanLinksData();
@@ -63,7 +45,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
       });
 
-      // after(() => synthtraceEsClient.clean());
+      after(() => synthtraceEsClient.clean());
 
       describe('Span links count on traces', () => {
         async function fetchTraces({ traceId }: { traceId: string }) {
@@ -99,9 +81,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             traces = tracesResponse.body;
           });
 
-          it('contains one children link on Span B', () => {
-            expect(Object.values(traces.linkedChildrenOfSpanCountBySpanId).length).to.equal(1);
+          it('contains two children link on Span B', () => {
+            expect(Object.values(traces.linkedChildrenOfSpanCountBySpanId).length).to.equal(2);
             expect(traces.linkedChildrenOfSpanCountBySpanId[serviceBIds.spanBId]).to.equal(1);
+            expect(traces.linkedChildrenOfSpanCountBySpanId[serviceBIds.transactionBId]).to.equal(
+              1
+            );
           });
         });
 
@@ -277,8 +262,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             spanBLinksDetails = spanALinksDetailsResponse;
           });
 
-          it('returns no links for transaction B', () => {
-            expect(transactionBLinksDetails.childrenLinks.spanLinksDetails).to.eql([]);
+          it('returns Service C as children of transaction B', () => {
+            expect(transactionBLinksDetails.childrenLinks.spanLinksDetails.length).to.be(1);
+          });
+
+          it('returns no parent for transaction B', () => {
             expect(transactionBLinksDetails.parentsLinks.spanLinksDetails).to.eql([]);
           });
 
@@ -333,8 +321,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             spanCLinksDetails = spanALinksDetailsResponse;
           });
 
-          it('returns Service A Span A as parent of Transaction C', () => {
-            expect(transactionCLinksDetails.parentsLinks.spanLinksDetails.length).to.be(1);
+          it('returns Service A Span A, Service B Transaction B, and External link as parents of Transaction C', () => {
+            expect(transactionCLinksDetails.parentsLinks.spanLinksDetails.length).to.be(3);
             expect(transactionCLinksDetails.parentsLinks.spanLinksDetails).to.eql([
               {
                 traceId: serviceAIds.traceId,
@@ -348,6 +336,21 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   spanSubtype: 'http',
                   spanType: 'external',
                 },
+              },
+              {
+                traceId: serviceBIds.traceId,
+                spanId: serviceBIds.transactionBId,
+                details: {
+                  serviceName: 'Service B',
+                  agentName: 'java',
+                  transactionId: serviceBIds.transactionBId,
+                  duration: 1000000,
+                  spanName: 'Transaction B',
+                },
+              },
+              {
+                traceId: serviceCIds.externalTraceId,
+                spanId: serviceBIds.spanBId,
               },
             ]);
           });
