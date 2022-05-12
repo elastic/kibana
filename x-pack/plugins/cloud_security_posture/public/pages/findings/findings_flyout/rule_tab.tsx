@@ -13,14 +13,14 @@ import * as TEXT from '../translations';
 import { CspFinding } from '../types';
 import { Markdown } from './findings_flyout';
 
-const getRuleList = (data: CspFinding) => [
+const getRuleList = ({ rule }: CspFinding) => [
   {
     title: TEXT.NAME,
-    description: data.rule.name,
+    description: rule.name,
   },
   {
     title: TEXT.DESCRIPTION,
-    description: <Markdown>{data.rule.description}</Markdown>,
+    description: <Markdown>{rule.description}</Markdown>,
   },
   {
     title: TEXT.FRAMEWORK_SOURCES,
@@ -37,24 +37,24 @@ const getRuleList = (data: CspFinding) => [
   },
   {
     title: TEXT.CIS_SECTION,
-    description: data.rule.section,
+    description: rule.section,
   },
   {
     title: TEXT.PROFILE_APPLICABILITY,
-    description: <Markdown>{data.rule.profile_applicability}</Markdown>,
+    description: <Markdown>{rule.profile_applicability}</Markdown>,
   },
   {
     title: TEXT.BENCHMARK,
-    description: data.rule.benchmark.name,
+    description: rule.benchmark.name,
   },
 
   {
     title: TEXT.AUDIT,
-    description: <Markdown>{data.rule.audit}</Markdown>,
+    description: <Markdown>{rule.audit}</Markdown>,
   },
   {
     title: TEXT.REFERENCES,
-    description: <Markdown>{data.rule.references}</Markdown>,
+    description: <Markdown>{rule.references}</Markdown>,
   },
 ];
 
