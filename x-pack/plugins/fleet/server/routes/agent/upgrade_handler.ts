@@ -170,21 +170,33 @@ const checkFleetServerVersion = async (
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ) => {
-  const packagePolicyData = await packagePolicyService.list(soClient, {
-    perPage: SO_SEARCH_LIMIT,
-    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: fleet_server`,
-  });
+  let packagePolicyData;
+  try {
+    packagePolicyData = await packagePolicyService.list(soClient, {
+      perPage: SO_SEARCH_LIMIT,
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: fleet_server`,
+    });
+  } catch (error) {
+    throw new Error(error.message);
+  }
   const agentPoliciesIds = packagePolicyData?.items.map((item) => item.policy_id);
 
   if (agentPoliciesIds.length === 0) {
     return;
   }
 
-  const { agents: fleetServerAgents } = await getAgentsByKuery(esClient, {
-    showInactive: false,
-    perPage: SO_SEARCH_LIMIT,
-    kuery: `${AGENTS_PREFIX}.policy_id:${agentPoliciesIds.map((id) => `"${id}"`).join(' or ')}`,
-  });
+  let agentsResponse;
+  try {
+    agentsResponse = await getAgentsByKuery(esClient, {
+      showInactive: false,
+      perPage: SO_SEARCH_LIMIT,
+      kuery: `${AGENTS_PREFIX}.policy_id:${agentPoliciesIds.map((id) => `"${id}"`).join(' or ')}`,
+    });
+  } catch (error) {
+    throw new Error(error.message);
+  }
+
+  const { agents: fleetServerAgents } = agentsResponse;
 
   if (fleetServerAgents.length === 0) {
     return;
@@ -207,8 +219,9 @@ const checkFleetServerVersion = async (
 
   const maxFleetServerVersion = getMaxVersion(fleetServerVersions);
 
-  if (semverGt(versionToUpgradeNumber, maxFleetServerVersion))
+  if (semverGt(versionToUpgradeNumber, maxFleetServerVersion)) {
     throw new Error(
       `cannot upgrade agent to ${versionToUpgradeNumber} because it is higher than the latest fleet server version ${maxFleetServerVersion}`
     );
+  }
 };

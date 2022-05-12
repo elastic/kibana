@@ -584,7 +584,8 @@ export default function (providerContext: FtrProviderContext) {
           index: AGENTS_INDEX,
           body: {
             doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+              policy_id: `agent-policy-1`,
+              local_metadata: { elastic: { agent: { upgradeable: true, version: '6.0.0' } } },
             },
           },
         });
@@ -594,7 +595,8 @@ export default function (providerContext: FtrProviderContext) {
           index: AGENTS_INDEX,
           body: {
             doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+              policy_id: `agent-policy-2`,
+              local_metadata: { elastic: { agent: { upgradeable: true, version: '6.0.0' } } },
             },
           },
         });
