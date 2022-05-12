@@ -2065,6 +2065,7 @@ describe('Lens migrations', () => {
       expect(layer2Columns['4'].params).toHaveProperty('includeEmptyRows', true);
     });
   });
+
   describe('8.3.0 old metric visualization defaults', () => {
     const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
@@ -2115,6 +2116,74 @@ describe('Lens migrations', () => {
     });
   });
 
+  describe('8.3.0 - convert legend sizes to strings', () => {
+    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const migrate = migrations['8.3.0'];
+
+    const autoLegendSize = 'auto';
+    const largeLegendSize = 'large';
+    const largeLegendSizePx = 180;
+
+    it('works for XY visualization and heatmap', () => {
+      const getDoc = (type: string, legendSize: number | undefined) =>
+        ({
+          attributes: {
+            visualizationType: type,
+            state: {
+              visualization: {
+                legend: {
+                  legendSize,
+                },
+              },
+            },
+          },
+        } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>);
+
+      expect(
+        migrate(getDoc('lnsXY', undefined), context).attributes.state.visualization.legend
+          .legendSize
+      ).toBe(autoLegendSize);
+      expect(
+        migrate(getDoc('lnsXY', largeLegendSizePx), context).attributes.state.visualization.legend
+          .legendSize
+      ).toBe(largeLegendSize);
+
+      expect(
+        migrate(getDoc('lnsHeatmap', undefined), context).attributes.state.visualization.legend
+          .legendSize
+      ).toBe(autoLegendSize);
+      expect(
+        migrate(getDoc('lnsHeatmap', largeLegendSizePx), context).attributes.state.visualization
+          .legend.legendSize
+      ).toBe(largeLegendSize);
+    });
+
+    it('works for pie visualization', () => {
+      const pieVisDoc = {
+        attributes: {
+          visualizationType: 'lnsPie',
+          state: {
+            visualization: {
+              layers: [
+                {
+                  legendSize: undefined,
+                },
+                {
+                  legendSize: largeLegendSizePx,
+                },
+              ],
+            },
+          },
+        },
+      } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
+
+      expect(migrate(pieVisDoc, context).attributes.state.visualization.layers).toEqual([
+        { legendSize: autoLegendSize },
+        { legendSize: largeLegendSize },
+      ]);
+    });
+  });
+
   describe('8.3.0 valueLabels in XY', () => {
     const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
@@ -2128,6 +2197,7 @@ describe('Lens migrations', () => {
         state: {
           visualization: {
             valueLabels: 'inside',
+            legend: {},
           },
         },
       },

@@ -42,6 +42,9 @@ const mockSource = {
   isGeoGridPrecisionAware: () => {
     return false;
   },
+  isESSource: () => {
+    return false;
+  },
 } as unknown as IMvtVectorSource;
 
 describe('syncMvtSourceData', () => {
@@ -50,6 +53,7 @@ describe('syncMvtSourceData', () => {
 
     await syncMvtSourceData({
       layerId: 'layer1',
+      layerName: 'my layer',
       prevDataRequest: undefined,
       requestMeta: {
         ...syncContext.dataFilters,
@@ -96,6 +100,7 @@ describe('syncMvtSourceData', () => {
 
     await syncMvtSourceData({
       layerId: 'layer1',
+      layerName: 'my layer',
       prevDataRequest: {
         getMeta: () => {
           return prevRequestMeta;
@@ -138,6 +143,7 @@ describe('syncMvtSourceData', () => {
 
     await syncMvtSourceData({
       layerId: 'layer1',
+      layerName: 'my layer',
       prevDataRequest: {
         getMeta: () => {
           return prevRequestMeta;
@@ -177,6 +183,7 @@ describe('syncMvtSourceData', () => {
 
     await syncMvtSourceData({
       layerId: 'layer1',
+      layerName: 'my layer',
       prevDataRequest: {
         getMeta: () => {
           return prevRequestMeta;
@@ -224,6 +231,7 @@ describe('syncMvtSourceData', () => {
 
     await syncMvtSourceData({
       layerId: 'layer1',
+      layerName: 'my layer',
       prevDataRequest: {
         getMeta: () => {
           return prevRequestMeta;
@@ -263,6 +271,7 @@ describe('syncMvtSourceData', () => {
 
     await syncMvtSourceData({
       layerId: 'layer1',
+      layerName: 'my layer',
       prevDataRequest: {
         getMeta: () => {
           return prevRequestMeta;
@@ -302,6 +311,7 @@ describe('syncMvtSourceData', () => {
 
     await syncMvtSourceData({
       layerId: 'layer1',
+      layerName: 'my layer',
       prevDataRequest: {
         getMeta: () => {
           return prevRequestMeta;
@@ -324,5 +334,39 @@ describe('syncMvtSourceData', () => {
     sinon.assert.calledOnce(syncContext.startLoading);
     // @ts-expect-error
     sinon.assert.calledOnce(syncContext.stopLoading);
+  });
+
+  test('Should add layer to vector tile inspector when source is synced', async () => {
+    const syncContext = new MockSyncContext({ dataFilters: {} });
+    const mockVectorTileAdapter = {
+      addLayer: sinon.spy(),
+    };
+
+    await syncMvtSourceData({
+      layerId: 'layer1',
+      layerName: 'my layer',
+      prevDataRequest: undefined,
+      requestMeta: {
+        ...syncContext.dataFilters,
+        applyGlobalQuery: true,
+        applyGlobalTime: true,
+        applyForceRefresh: true,
+        fieldNames: [],
+        sourceMeta: {},
+        isForceRefresh: false,
+        isFeatureEditorOpenForLayer: false,
+      },
+      source: {
+        ...mockSource,
+        isESSource: () => {
+          return true;
+        },
+        getInspectorAdapters: () => {
+          return { vectorTiles: mockVectorTileAdapter };
+        },
+      },
+      syncContext,
+    });
+    sinon.assert.calledOnce(mockVectorTileAdapter.addLayer);
   });
 });
