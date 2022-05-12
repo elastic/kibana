@@ -10,7 +10,7 @@ import { compact } from 'lodash';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
-import { get, isEqual } from 'lodash';
+import { get, isEqual, isEmpty } from 'lodash';
 import { EuiIconProps } from '@elastic/eui';
 import memoizeOne from 'memoize-one';
 
@@ -209,8 +209,12 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     );
   }
 
-  private checkDataViewExistsAndHasAnyElement(dataViews: DataView[] | undefined): boolean {
+  private checkDataViewsExistsAndHasAnyElement(dataViews: DataView[] | undefined): boolean {
     return dataViews !== undefined && dataViews.length > 0;
+  }
+
+  private checkEveryDataViewsDoesNotHaveValueTimeFieldName(dataViews: DataView[]) {
+    return dataViews.every((dataView) => isEmpty(dataView.timeFieldName));
   }
 
   /*
@@ -223,10 +227,10 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       showDatePicker ||
       (!showDatePicker && dateRangeFrom !== undefined && dateRangeTo !== undefined);
 
-    if (this.checkDataViewExistsAndHasAnyElement(indexPatterns)) {
-      const currentDataView = indexPatterns![0];
-      const hasTimeFieldName = Boolean(currentDataView.timeFieldName);
-      return hasTimeFieldName && defaultCheck;
+    if (this.checkDataViewsExistsAndHasAnyElement(indexPatterns)) {
+      const isEveryDataViewsHasNotTimeFieldName =
+        this.checkEveryDataViewsDoesNotHaveValueTimeFieldName(indexPatterns!);
+      return !isEveryDataViewsHasNotTimeFieldName && defaultCheck;
     } else {
       return defaultCheck;
     }
