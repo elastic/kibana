@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { EventEmitter } from 'events';
 import {
   VisualizeServices,
   VisualizeAppState,
@@ -20,7 +21,7 @@ import {
   VisualizeEditorVisInstance,
 } from '../types';
 import { VISUALIZE_APP_NAME } from '../../../common/constants';
-import { getTopNavConfig } from '../utils';
+import { getTopNavConfig, updateDataView } from '../utils';
 import type { NavigateToLensContext } from '../..';
 
 const LOCAL_STORAGE_EDIT_IN_LENS_BADGE = 'EDIT_IN_LENS_BADGE_VISIBLE';
@@ -40,6 +41,7 @@ interface VisualizeTopNavProps {
   visualizationIdFromUrl?: string;
   embeddableId?: string;
   onAppLeave: AppMountParameters['onAppLeave'];
+  eventEmitter: EventEmitter;
 }
 
 const TopNav = ({
@@ -57,6 +59,7 @@ const TopNav = ({
   visualizationIdFromUrl,
   embeddableId,
   onAppLeave,
+  eventEmitter,
 }: VisualizeTopNavProps) => {
   const { services } = useKibana<VisualizeServices>();
   const { TopNavMenu } = services.navigation.ui;
@@ -247,6 +250,23 @@ const TopNav = ({
     };
   }, [services.data.query.timefilter.timefilter, doReload]);
 
+  const shouldShowDataViewPicker = Boolean(
+    vis.type.editorConfig?.enableDataViewChange && !vis.data.savedSearchId && vis.data.indexPattern
+  );
+
+  const onChangeDataView = useCallback(
+    async (selectedDataViewId: string) => {
+      const selectedDataView = await services.dataViews.get(selectedDataViewId);
+
+      if (selectedDataView) {
+        updateDataView(visInstance, selectedDataView);
+        setIndexPatterns([selectedDataView]);
+        eventEmitter.emit('updateEditor', true);
+      }
+    },
+    [eventEmitter, services.dataViews, visInstance]
+  );
+
   return isChromeVisible ? (
     /**
      * Most visualizations have all search bar components enabled.
@@ -255,6 +275,7 @@ const TopNav = ({
      * All visualizations also have the timepicker\autorefresh component,
      * it is enabled by default in the TopNavMenu component.
      */
+
     <TopNavMenu
       appName={VISUALIZE_APP_NAME}
       config={config}
@@ -269,6 +290,17 @@ const TopNav = ({
       showFilterBar={showFilterBar}
       showQueryInput={showQueryInput}
       showSaveQuery={Boolean(services.visualizeCapabilities.saveQuery)}
+      dataViewPickerComponentProps={
+        shouldShowDataViewPicker
+          ? {
+              currentDataViewId: vis.data.indexPattern!.id,
+              trigger: {
+                label: vis.data.indexPattern!.title,
+              },
+              onChangeDataView,
+            }
+          : undefined
+      }
       showSearchBar
       useDefaultBehaviors
     />

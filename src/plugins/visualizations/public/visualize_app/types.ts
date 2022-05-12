@@ -51,6 +51,7 @@ import type { createVisEmbeddableFromObject } from '../embeddable';
 import type { VisEditorsRegistry } from '../vis_editors_registry';
 
 export interface VisualizeAppState {
+  dataView?: string;
   filters: Filter[];
   uiState: SerializableRecord;
   vis: SavedVisState;

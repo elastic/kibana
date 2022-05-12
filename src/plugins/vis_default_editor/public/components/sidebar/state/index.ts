@@ -35,7 +35,7 @@ export function useEditorReducer(
       dispatch(action);
 
       eventEmitter.emit('dirtyStateChange', {
-        isDirty: action.type !== EditorStateActionTypes.DISCARD_CHANGES,
+        isDirty: action.type !== EditorStateActionTypes.DISCARD_CHANGES || action.payload.setDirty,
       });
     },
     [eventEmitter]

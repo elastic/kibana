@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { AppMountParameters } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { EventEmitter } from 'events';
 import { VisualizeTopNav } from './visualize_top_nav';
 import { ExperimentalVisInfo } from './experimental_vis_info';
 import { urlFor } from '../..';
@@ -48,6 +49,7 @@ interface VisualizeEditorCommonProps {
   originatingPath?: string;
   visualizationIdFromUrl?: string;
   embeddableId?: string;
+  eventEmitter: EventEmitter;
 }
 
 export const VisualizeEditorCommon = ({
@@ -66,6 +68,7 @@ export const VisualizeEditorCommon = ({
   visualizationIdFromUrl,
   embeddableId,
   visEditorRef,
+  eventEmitter,
 }: VisualizeEditorCommonProps) => {
   const { services } = useKibana<VisualizeServices>();
 
@@ -149,6 +152,7 @@ export const VisualizeEditorCommon = ({
           visualizationIdFromUrl={visualizationIdFromUrl}
           embeddableId={embeddableId}
           onAppLeave={onAppLeave}
+          eventEmitter={eventEmitter}
         />
       )}
       {visInstance?.vis?.type?.stage === 'experimental' && <ExperimentalVisInfo />}

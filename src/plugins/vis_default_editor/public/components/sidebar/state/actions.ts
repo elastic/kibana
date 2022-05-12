@@ -20,7 +20,10 @@ type AggId = IAggConfig['id'];
 type AggParams = IAggConfig['params'];
 
 type AddNewAgg = ActionType<EditorStateActionTypes.ADD_NEW_AGG, { schema: Schema }>;
-type DiscardChanges = ActionType<EditorStateActionTypes.DISCARD_CHANGES, Vis>;
+type DiscardChanges = ActionType<
+  EditorStateActionTypes.DISCARD_CHANGES,
+  { vis: Vis; setDirty: boolean }
+>;
 type ChangeAggType = ActionType<
   EditorStateActionTypes.CHANGE_AGG_TYPE,
   { aggId: AggId; value: IAggConfig['type'] }
@@ -64,7 +67,7 @@ export type EditorAction =
 
 export interface EditorActions {
   addNewAgg(schema: Schema): AddNewAgg;
-  discardChanges(vis: Vis): DiscardChanges;
+  discardChanges(vis: Vis, setDirty?: boolean): DiscardChanges;
   changeAggType(aggId: AggId, value: IAggConfig['type']): ChangeAggType;
   setAggParamValue<T extends keyof AggParams>(
     aggId: AggId,
@@ -88,9 +91,9 @@ const addNewAgg: EditorActions['addNewAgg'] = (schema) => ({
   },
 });
 
-const discardChanges: EditorActions['discardChanges'] = (vis) => ({
+const discardChanges: EditorActions['discardChanges'] = (vis, setDirty = false) => ({
   type: EditorStateActionTypes.DISCARD_CHANGES,
-  payload: vis,
+  payload: { vis, setDirty },
 });
 
 const changeAggType: EditorActions['changeAggType'] = (aggId, value) => ({

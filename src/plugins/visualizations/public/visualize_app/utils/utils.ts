@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import type { History } from 'history';
 import type { ChromeStart, DocLinksStart } from '@kbn/core/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { redirectWhenMissing } from '@kbn/kibana-utils-plugin/public';
 import { VisualizeConstants } from '../../../common/constants';
@@ -60,6 +61,11 @@ export const visStateToEditorState = (
     vis: { ...savedVisState.visState, title: vis.title },
     linked: savedVis && savedVis.id ? !!savedVis.savedSearchId : !!savedVisState.savedSearchId,
   };
+};
+
+export const updateDataView = (visInstance: VisualizeEditorVisInstance, dataView: DataView) => {
+  visInstance.vis.data.indexPattern = dataView;
+  visInstance.vis.data.searchSource?.setField('index', dataView);
 };
 
 export const redirectToSavedObjectPage = (

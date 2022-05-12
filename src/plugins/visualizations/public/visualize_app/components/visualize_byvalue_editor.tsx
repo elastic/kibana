@@ -94,6 +94,7 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
 
   return (
     <VisualizeEditorCommon
+      eventEmitter={eventEmitter}
       visInstance={byValueVisInstance}
       appState={appState}
       currentAppState={currentAppState}

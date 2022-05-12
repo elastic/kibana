@@ -93,6 +93,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
 
   return (
     <VisualizeEditorCommon
+      eventEmitter={eventEmitter}
       visInstance={savedVisInstance}
       appState={appState}
       currentAppState={currentAppState}
