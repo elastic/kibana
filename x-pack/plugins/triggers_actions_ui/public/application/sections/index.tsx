@@ -41,3 +41,6 @@ export const RuleStatusFilter = suspendedComponentWithProps(
 export const RuleTagBadge = suspendedComponentWithProps(
   lazy(() => import('./rules_list/components/rule_tag_badge'))
 );
+export const RuleEventLogList = suspendedComponentWithProps(
+  lazy(() => import('./rule_details/components/rule_event_log_list'))
+);

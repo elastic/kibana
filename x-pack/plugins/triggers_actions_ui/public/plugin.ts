@@ -34,6 +34,7 @@ import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
 import { getRuleTagFilterLazy } from './common/get_rule_tag_filter';
 import { getRuleStatusFilterLazy } from './common/get_rule_status_filter';
 import { getRuleTagBadgeLazy } from './common/get_rule_tag_badge';
+import { getRuleEventLogListLazy } from './common/get_rule_event_log_list';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
 import {
   ExperimentalFeatures,
@@ -52,6 +53,7 @@ import type {
   RuleTagFilterProps,
   RuleStatusFilterProps,
   RuleTagBadgeProps,
+  RuleEventLogListProps,
   AlertsTableConfigurationRegistry,
 } from './types';
 import { TriggersActionsUiConfigType } from '../common/types';
@@ -85,6 +87,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getRuleTagFilter: (props: RuleTagFilterProps) => ReactElement<RuleTagFilterProps>;
   getRuleStatusFilter: (props: RuleStatusFilterProps) => ReactElement<RuleStatusFilterProps>;
   getRuleTagBadge: (props: RuleTagBadgeProps) => ReactElement<RuleTagBadgeProps>;
+  getRuleEventLogList: (props: RuleEventLogListProps) => ReactElement<RuleEventLogListProps>;
 }
 
 interface PluginsSetup {
@@ -266,6 +269,9 @@ export class Plugin
       },
       getRuleTagBadge: (props: RuleTagBadgeProps) => {
         return getRuleTagBadgeLazy(props);
+      },
+      getRuleEventLogList: (props: RuleEventLogListProps) => {
+        return getRuleEventLogListLazy(props);
       },
     };
   }
