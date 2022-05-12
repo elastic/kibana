@@ -30,6 +30,7 @@ class DocLinks {
   public appSearchSynonyms: string;
   public appSearchWebCrawler: string;
   public appSearchWebCrawlerEventLogs: string;
+  public appSearchWebCrawlerReference: string;
   public clientsGoIndex: string;
   public clientsGuide: string;
   public clientsJavaBasicAuthentication: string;
@@ -111,6 +112,7 @@ class DocLinks {
     this.appSearchSynonyms = '';
     this.appSearchWebCrawler = '';
     this.appSearchWebCrawlerEventLogs = '';
+    this.appSearchWebCrawlerReference = '';
     this.clientsGoIndex = '';
     this.clientsGuide = '';
     this.clientsJavaBasicAuthentication = '';
@@ -194,6 +196,7 @@ class DocLinks {
     this.appSearchSynonyms = docLinks.links.appSearch.synonyms;
     this.appSearchWebCrawler = docLinks.links.appSearch.webCrawler;
     this.appSearchWebCrawlerEventLogs = docLinks.links.appSearch.webCrawlerEventLogs;
+    this.appSearchWebCrawlerReference = docLinks.links.appSearch.webCrawlerReference;
     this.clientsGoIndex = docLinks.links.clients.goIndex;
     this.clientsGuide = docLinks.links.clients.guide;
     this.clientsJavaBasicAuthentication = docLinks.links.clients.javaBasicAuthentication;
