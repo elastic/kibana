@@ -20,15 +20,15 @@ export class ElasticsearchBlobStorage implements BlobStorage {
   constructor(private readonly esClient: ElasticsearchClient, private readonly logger: Logger) {}
 
   private readonly indexName = BLOB_STORAGE_SYSTEM_INDEX_NAME;
-  private setupComplete = false;
+  private indexCreateCheckComplete = false;
 
   private async createIndexIfNotExists(): Promise<void> {
-    if (this.setupComplete) {
+    if (this.indexCreateCheckComplete) {
       return;
     }
     if (await this.esClient.indices.exists({ index: this.indexName })) {
       this.logger.debug(`${this.indexName} already exists.`);
-      this.setupComplete = true;
+      this.indexCreateCheckComplete = true;
       return;
     }
 
@@ -45,7 +45,7 @@ export class ElasticsearchBlobStorage implements BlobStorage {
           mappings,
         },
       });
-      this.setupComplete = true;
+      this.indexCreateCheckComplete = true;
     } catch (e) {
       if (e instanceof errors.ResponseError && e.statusCode === 400) {
         this.logger.warn('Unable to create blob storage index, it may have been created already.');
