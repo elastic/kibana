@@ -21,7 +21,7 @@ import {
   EuiProgress,
   EuiLoadingContent,
 } from '@elastic/eui';
-import { AlertsField, AlertsData } from '../../../../types';
+import { AlertsField } from '../../../../types';
 
 const SAMPLE_TITLE_LABEL = i18n.translate(
   'xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.sampleTitle',

@@ -6,7 +6,6 @@
  */
 
 import { isEmpty } from 'lodash';
-import { ValidFeatureId, AlertConsumers } from '@kbn/rule-data-utils';
 
 import { CommentType } from '../../../common/api';
 import type { Comment } from '../../containers/types';
