@@ -7,7 +7,7 @@
 
 import React, { useCallback, useContext, useMemo } from 'react';
 import { TriggerActionsContext } from '../../../utils/triggers_actions_context';
-import { LOG_DOCUMENT_COUNT_ALERT_TYPE_ID } from '../../../../common/alerting/logs/log_threshold/types';
+import { LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '../../../../common/alerting/logs/log_threshold/types';
 
 interface Props {
   visible?: boolean;
@@ -25,7 +25,7 @@ export const AlertFlyout = (props: Props) => {
         consumer: 'logs',
         onClose: onCloseFlyout,
         canChangeTrigger: false,
-        alertTypeId: LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
+        ruleTypeId: LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
         metadata: {
           isInternal: true,
         },

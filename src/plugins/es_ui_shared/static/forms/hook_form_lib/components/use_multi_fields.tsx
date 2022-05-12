@@ -18,6 +18,64 @@ interface Props<T> {
   children: (fields: { [K in keyof T]: FieldHook<T[K]> }) => JSX.Element;
 }
 
+/**
+ * Use this component to avoid nesting multiple <UseField />
+  @example
+```
+// before
+<UseField path="maxValue">
+  {maxValueField => {
+    return (
+      <UseField path="minValue">
+        {minValueField => {
+          return (
+            // The EuiDualRange handles 2 values (min and max) and thus
+            // updates 2 fields in our form
+            <EuiDualRange
+              min={0}
+              max={100}
+              value={[minValueField.value, maxValueField.value]}
+              onChange={([minValue, maxValue]) => {
+                minValueField.setValue(minValue);
+                maxValueField.setValue(maxValue);
+              }}
+            />
+          )
+        }}
+      </UseField>
+    )
+  }}
+</UseField>
+
+// after
+const fields = {
+  min: {
+    ... // any prop you would normally pass to <UseField />
+    path: 'minValue',
+    config: { ... } // FieldConfig
+  },
+  max: {
+    path: 'maxValue',
+  },
+};
+
+<UseMultiField fields={fields}>
+  {({ min, max }) => {
+    return (
+      <EuiDualRange
+        min={0}
+        max={100}
+        value={[min.value, max.value]}
+        onChange={([minValue, maxValue]) => {
+          min.setValue(minValue);
+          max.setValue(maxValue);
+        }}
+      />
+    );
+  }}
+</UseMultiField>
+```
+ */
 export function UseMultiFields<T = { [key: string]: unknown }>({ fields, children }: Props<T>) {
   const fieldsArray = Object.entries(fields).reduce(
     (acc, [fieldId, field]) => [...acc, { id: fieldId, ...(field as FieldHook) }],

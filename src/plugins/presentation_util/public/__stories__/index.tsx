@@ -8,3 +8,5 @@
 
 export * from './render';
 export * from './wait_for';
+export * from './fixtures/flights';
+export * from './fixtures/flights_data';

@@ -52,13 +52,17 @@ jest.mock('../../utils/route/use_route_spy', () => ({
   useRouteSpy: () => [mockRouteSpy],
 }));
 
+const mockSearch = jest.fn();
+
+const mockAddWarning = jest.fn();
 jest.mock('../../lib/kibana', () => ({
-  useToasts: jest.fn().mockReturnValue({
+  useToasts: () => ({
     addError: jest.fn(),
     addSuccess: jest.fn(),
-    addWarning: jest.fn(),
+    addWarning: mockAddWarning,
+    remove: jest.fn(),
   }),
-  useKibana: jest.fn().mockReturnValue({
+  useKibana: () => ({
     services: {
       application: {
         capabilities: {
@@ -72,7 +76,7 @@ jest.mock('../../lib/kibana', () => ({
           getTitles: jest.fn().mockImplementation(() => Promise.resolve(mockPatterns)),
         },
         search: {
-          search: jest.fn().mockImplementation(() => ({
+          search: mockSearch.mockImplementation(() => ({
             subscribe: jest.fn().mockImplementation(() => ({
               error: jest.fn(),
               next: jest.fn(),
@@ -114,17 +118,7 @@ describe('Sourcerer Hooks', () => {
         payload: {
           id: 'timeline',
           selectedDataViewId: 'security-solution',
-          selectedPatterns: [
-            '.siem-signals-spacename',
-            'apm-*-transaction*',
-            'auditbeat-*',
-            'endgame-*',
-            'filebeat-*',
-            'logs-*',
-            'packetbeat-*',
-            'traces-apm*',
-            'winlogbeat-*',
-          ],
+          selectedPatterns: ['.siem-signals-spacename', ...DEFAULT_INDEX_PATTERN],
         },
       });
     });
@@ -188,9 +182,43 @@ describe('Sourcerer Hooks', () => {
           type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
           payload: { loading: false },
         });
+        expect(mockDispatch).toHaveBeenCalledTimes(7);
+        expect(mockSearch).toHaveBeenCalledTimes(2);
       });
     });
   });
+
+  it('calls addWarning if defaultDataView has an error', async () => {
+    store = createStore(
+      {
+        ...mockGlobalState,
+        sourcerer: {
+          ...mockGlobalState.sourcerer,
+          signalIndexName: null,
+          defaultDataView: {
+            ...mockGlobalState.sourcerer.defaultDataView,
+            error: true,
+          },
+        },
+      },
+      SUB_PLUGINS_REDUCER,
+      kibanaObservable,
+      storage
+    );
+    await act(async () => {
+      renderHook<string, void>(() => useInitSourcerer(), {
+        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+      });
+
+      await waitFor(() => {
+        expect(mockAddWarning).toHaveBeenNthCalledWith(1, {
+          text: 'Users with write permission need to access the Elastic Security app to initialize the app source data.',
+          title: 'Write role required to generate data',
+        });
+      });
+    });
+  });
+
   it('handles detections page', async () => {
     await act(async () => {
       mockUseUserInfo.mockImplementation(() => ({
@@ -216,26 +244,51 @@ describe('Sourcerer Hooks', () => {
       });
     });
   });
+  it('index field search is not repeated when default and timeline have same dataViewId', async () => {
+    await act(async () => {
+      const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+      });
+      await waitForNextUpdate();
+      rerender();
+      await waitFor(() => {
+        expect(mockSearch).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+  it('index field search called twice when default and timeline have different dataViewId', async () => {
+    store = createStore(
+      {
+        ...mockGlobalState,
+        sourcerer: {
+          ...mockGlobalState.sourcerer,
+          sourcererScopes: {
+            ...mockGlobalState.sourcerer.sourcererScopes,
+            [SourcererScopeName.timeline]: {
+              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+              selectedDataViewId: 'different-id',
+            },
+          },
+        },
+      },
+      SUB_PLUGINS_REDUCER,
+      kibanaObservable,
+      storage
+    );
+    await act(async () => {
+      const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+      });
+      await waitForNextUpdate();
+      rerender();
+      await waitFor(() => {
+        expect(mockSearch).toHaveBeenCalledTimes(2);
+      });
+    });
+  });
 
   describe('useSourcererDataView', () => {
-    it('Should exclude elastic cloud alias when selected patterns include "logs-*" as an alias', async () => {
-      await act(async () => {
-        const { result, rerender, waitForNextUpdate } = renderHook<
-          SourcererScopeName,
-          SelectedDataView
-        >(() => useSourcererDataView(), {
-          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-        });
-        await waitForNextUpdate();
-        rerender();
-        expect(result.current.selectedPatterns).toEqual([
-          '-*elastic-cloud-logs-*',
-          ...mockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns,
-        ]);
-      });
-    });
-
-    it('Should NOT exclude elastic cloud alias when selected patterns does NOT include "logs-*" as an alias', async () => {
+    it('Should put any excludes in the index pattern at the end of the pattern list, and sort both the includes and excludes', async () => {
       await act(async () => {
         store = createStore(
           {
@@ -247,13 +300,15 @@ describe('Sourcerer Hooks', () => {
                 [SourcererScopeName.default]: {
                   ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
                   selectedPatterns: [
-                    'apm-*-transaction*',
-                    'auditbeat-*',
+                    '-packetbeat-*',
                     'endgame-*',
+                    'auditbeat-*',
                     'filebeat-*',
+                    'winlogbeat-*',
+                    '-filebeat-*',
                     'packetbeat-*',
                     'traces-apm*',
-                    'winlogbeat-*',
+                    'apm-*-transaction*',
                   ],
                 },
               },
@@ -279,56 +334,8 @@ describe('Sourcerer Hooks', () => {
           'packetbeat-*',
           'traces-apm*',
           'winlogbeat-*',
-        ]);
-      });
-    });
-
-    it('Should NOT exclude elastic cloud alias when selected patterns include "logs-endpoint.event-*" as an alias', async () => {
-      await act(async () => {
-        store = createStore(
-          {
-            ...mockGlobalState,
-            sourcerer: {
-              ...mockGlobalState.sourcerer,
-              sourcererScopes: {
-                ...mockGlobalState.sourcerer.sourcererScopes,
-                [SourcererScopeName.default]: {
-                  ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
-                  selectedPatterns: [
-                    'apm-*-transaction*',
-                    'auditbeat-*',
-                    'endgame-*',
-                    'filebeat-*',
-                    'packetbeat-*',
-                    'traces-apm*',
-                    'winlogbeat-*',
-                    'logs-endpoint.event-*',
-                  ],
-                },
-              },
-            },
-          },
-          SUB_PLUGINS_REDUCER,
-          kibanaObservable,
-          storage
-        );
-        const { result, rerender, waitForNextUpdate } = renderHook<
-          SourcererScopeName,
-          SelectedDataView
-        >(() => useSourcererDataView(), {
-          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-        });
-        await waitForNextUpdate();
-        rerender();
-        expect(result.current.selectedPatterns).toEqual([
-          'apm-*-transaction*',
-          'auditbeat-*',
-          'endgame-*',
-          'filebeat-*',
-          'logs-endpoint.event-*',
-          'packetbeat-*',
-          'traces-apm*',
-          'winlogbeat-*',
+          '-filebeat-*',
+          '-packetbeat-*',
         ]);
       });
     });

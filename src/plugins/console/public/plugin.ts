@@ -7,9 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/public';
+import { Plugin, CoreSetup, PluginInitializerContext } from '@kbn/core/public';
 
-import { FeatureCatalogueCategory } from '../../home/public';
 import {
   AppSetupUIPluginDependencies,
   ClientConfigType,
@@ -41,7 +40,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
           icon: 'consoleApp',
           path: '/app/dev_tools#/console',
           showOnHomePage: false,
-          category: FeatureCatalogueCategory.ADMIN,
+          category: 'admin',
         });
       }
 
@@ -57,7 +56,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
 
           const {
             i18n: { Context: I18nContext },
-            docLinks: { DOC_LINK_VERSION },
+            docLinks: { DOC_LINK_VERSION, links },
           } = core;
 
           const { renderApp } = await import('./application');
@@ -65,6 +64,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
           return renderApp({
             http,
             docLinkVersion: DOC_LINK_VERSION,
+            docLinks: links,
             I18nContext,
             notifications,
             usageCollection,

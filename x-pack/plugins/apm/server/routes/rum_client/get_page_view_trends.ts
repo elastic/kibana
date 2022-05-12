@@ -8,7 +8,13 @@
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import { SetupUX } from './route';
-import { BreakdownItem } from '../../../typings/ui_filters';
+
+export interface BreakdownItem {
+  name: string;
+  type: string;
+  fieldName: string;
+  selected?: boolean;
+}
 
 export async function getPageViewTrends({
   setup,

@@ -13,7 +13,7 @@ import { RoleTypes, AbilityTypes, Role } from './types';
  * Transforms the `role` data we receive from the Enterprise Search
  * server into a more convenient format for front-end use
  */
-export const getRoleAbilities = (role: Account['role'], hasPlatinumLicense = false): Role => {
+export const getRoleAbilities = (role: Account['role']): Role => {
   // Role ability function helpers
   const myRole = {
     can: (action: AbilityTypes, subject: string): boolean => {
@@ -49,7 +49,7 @@ export const getRoleAbilities = (role: Account['role'], hasPlatinumLicense = fal
     canViewSettings: myRole.can('view', 'account_settings'),
     canViewRoleMappings: myRole.can('view', 'role_mappings'),
     canManageEngines: myRole.can('manage', 'account_engines'),
-    canManageMetaEngines: hasPlatinumLicense && myRole.can('manage', 'account_engines'),
+    canManageMetaEngines: myRole.can('manage', 'account_engines'),
     canManageLogSettings: myRole.can('manage', 'account_log_settings'),
     canManageSettings: myRole.can('manage', 'account_settings'),
     canManageEngineCrawler: myRole.can('manage', 'engine_crawler'),

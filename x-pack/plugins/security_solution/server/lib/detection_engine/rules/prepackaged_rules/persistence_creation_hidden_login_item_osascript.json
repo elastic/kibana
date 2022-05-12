@@ -11,6 +11,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Creation of Hidden Login Item via Apple Script",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and process.name : \"osascript\" and\n process.command_line : \"osascript*login item*hidden:true*\"\n",
   "risk_score": 47,
   "rule_id": "f24bcae1-8980-4b30-b5dd-f851b055c9e7",
@@ -71,5 +72,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 2
 }

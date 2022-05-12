@@ -7,26 +7,21 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { UnwrapPromise } from '@kbn/utility-types';
 
-import {
-  MetricsServiceSetup,
-  ServiceStatus,
-  ServiceStatusLevels,
-} from '../../../../../core/server';
+import { MetricsServiceSetup, ServiceStatus, ServiceStatusLevels } from '@kbn/core/server';
 import {
   contextServiceMock,
   loggingSystemMock,
   metricsServiceMock,
   executionContextServiceMock,
-} from '../../../../../core/server/mocks';
-import { createHttpServer } from '../../../../../core/server/test_utils';
+} from '@kbn/core/server/mocks';
+import { createHttpServer } from '@kbn/core/server/test_utils';
 import { registerStatsRoute } from '../stats';
 import supertest from 'supertest';
 import { CollectorSet } from '../../collector';
 
 type HttpService = ReturnType<typeof createHttpServer>;
-type HttpSetup = UnwrapPromise<ReturnType<HttpService['setup']>>;
+type HttpSetup = Awaited<ReturnType<HttpService['setup']>>;
 
 describe('/api/stats', () => {
   let server: HttpService;
@@ -52,6 +47,7 @@ describe('/api/stats', () => {
       router,
       collectorSet: new CollectorSet({
         logger: loggingSystemMock.create().asLoggerFactory().get(),
+        executionContext: executionContextServiceMock.createSetupContract(),
       }),
       config: {
         allowAnonymous: true,

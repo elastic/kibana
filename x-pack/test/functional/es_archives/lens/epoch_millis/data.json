@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "AU_x4-TaGFA8no6QjiSJ",
-    "index": "epoch-millis",
+    "index": "epoch-millis1",
     "source": {
       "@message": "212.113.62.183 - - [2015-09-21T06:09:20.045Z] \"GET /uploads/dafydd-williams.jpg HTTP/1.1\" 200 3182 \"-\" \"Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1\"",
       "@tags": [
@@ -75,7 +75,7 @@
   "type": "doc",
   "value": {
     "id": "AU_x4-TaGFA8no6QjiSL",
-    "index": "epoch-millis",
+    "index": "epoch-millis2",
     "source": {
       "@message": "156.252.112.76 - - [2015-09-21T21:13:02.070Z] \"GET /uploads/aleksandr-samokutyayev.jpg HTTP/1.1\" 200 6176 \"-\" \"Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24\"",
       "@tags": [

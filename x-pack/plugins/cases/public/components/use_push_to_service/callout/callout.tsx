@@ -68,5 +68,6 @@ const CallOutComponent = ({
     </EuiCallOut>
   ) : null;
 };
+CallOutComponent.displayName = 'CallOut';
 
 export const CallOut = memo(CallOutComponent);

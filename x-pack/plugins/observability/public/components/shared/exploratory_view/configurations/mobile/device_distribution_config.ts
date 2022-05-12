@@ -18,7 +18,7 @@ import { SERVICE_NAME } from '../constants/elasticsearch_fieldnames';
 import { MOBILE_APP, NUMBER_OF_DEVICES } from '../constants/labels';
 import { MobileFields } from './mobile_fields';
 
-export function getMobileDeviceDistributionConfig({ indexPattern }: ConfigProps): SeriesConfig {
+export function getMobileDeviceDistributionConfig({ dataView }: ConfigProps): SeriesConfig {
   return {
     reportType: ReportTypes.DEVICE_DISTRIBUTION,
     defaultSeriesType: 'bar',
@@ -36,8 +36,8 @@ export function getMobileDeviceDistributionConfig({ indexPattern }: ConfigProps)
     filterFields: [...Object.keys(MobileFields), LABEL_FIELDS_FILTER],
     breakdownFields: Object.keys(MobileFields),
     baseFilters: [
-      ...buildPhraseFilter('agent.name', 'iOS/swift', indexPattern),
-      ...buildPhraseFilter('processor.event', 'transaction', indexPattern),
+      ...buildPhraseFilter('agent.name', 'iOS/swift', dataView),
+      ...buildPhraseFilter('processor.event', 'transaction', dataView),
     ],
     labels: {
       ...FieldLabels,

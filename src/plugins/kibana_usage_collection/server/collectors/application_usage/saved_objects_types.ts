@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectAttributes, SavedObjectsServiceSetup } from 'kibana/server';
+import type { SavedObjectAttributes, SavedObjectsServiceSetup } from '@kbn/core/server';
 
 /**
  * Used for accumulating the totals of all the stats older than 90d
@@ -27,7 +27,10 @@ export interface ApplicationUsageTransactional extends ApplicationUsageTotal {
   timestamp: string;
 }
 
-/** @deprecated transactional type is no longer used, and only preserved for backward compatibility */
+/**
+ * @deprecated transactional type is no longer used, and only preserved for backward compatibility
+ * @removeBy 8.0.0
+ */
 export const SAVED_OBJECTS_TRANSACTIONAL_TYPE = 'application_usage_transactional';
 
 /**

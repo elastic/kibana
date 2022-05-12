@@ -4,14 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import { AnnotationDomainType, LineAnnotation, RectAnnotation } from '@elastic/charts';
 import { first, last } from 'lodash';
-import { RectAnnotation, AnnotationDomainType, LineAnnotation } from '@elastic/charts';
-
-import {
-  Comparator,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../server/lib/alerting/metric_threshold/types';
+import React from 'react';
+import { Comparator } from '../../../../common/alerting/metrics';
 import { Color, colorTransformer } from '../../../../common/color_palette';
 
 interface ThresholdAnnotationsProps {

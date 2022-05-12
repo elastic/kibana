@@ -252,7 +252,7 @@ export const ESCaridnalityAggRT = rt.type({
 export const ESBucketScriptAggRT = rt.type({
   bucket_script: rt.intersection([
     rt.type({
-      buckets_path: rt.record(rt.string, rt.union([rt.undefined, rt.string])),
+      buckets_path: rt.record(rt.string, rt.string),
       script: rt.type({
         source: rt.string,
         lang: rt.keyof({ painless: null, expression: null }),
@@ -349,7 +349,7 @@ export type SnapshotMetricType = rt.TypeOf<typeof SnapshotMetricTypeRT>;
 
 export interface InventoryMetrics {
   tsvb: { [name: string]: TSVBMetricModelCreator };
-  snapshot: { [name: string]: MetricsUIAggregation };
+  snapshot: { [name: string]: MetricsUIAggregation | undefined };
   defaultSnapshot: SnapshotMetricType;
   /** This is used by the inventory view to calculate the appropriate amount of time for the metrics detail page. Some metris like awsS3 require multiple days where others like host only need an hour.*/
   defaultTimeRangeInSeconds: number;

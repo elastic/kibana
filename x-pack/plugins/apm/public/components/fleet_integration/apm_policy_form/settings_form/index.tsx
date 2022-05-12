@@ -14,6 +14,7 @@ import {
   EuiPanel,
   EuiText,
   EuiTitle,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
@@ -50,7 +51,7 @@ function FormRow({
     if (!configEntry) {
       return null;
     }
-    const { value } = configEntry;
+    const { value, frozen } = configEntry;
     const { isValid, message } = validateSettingValue(row, value);
     return (
       <React.Fragment key={key}>
@@ -69,7 +70,12 @@ function FormRow({
               </EuiText>
             }
           >
-            <FormRowSetting row={row} onChange={onChange} value={value} />
+            <FormRowSetting
+              row={row}
+              onChange={onChange}
+              value={value}
+              isDisabled={frozen}
+            />
           </EuiFormRow>
         </EuiDescribedFormGroup>
         {row.settings &&
@@ -86,6 +92,8 @@ export interface SettingsSection {
   title: string;
   subtitle?: string;
   settings: SettingsRow[];
+  isBeta?: boolean;
+  isPlatinumLicence?: boolean;
 }
 
 interface Props {
@@ -95,13 +103,38 @@ interface Props {
 }
 
 export function SettingsForm({ settingsSection, vars, onChange }: Props) {
-  const { title, subtitle, settings } = settingsSection;
+  const { title, subtitle, settings, isPlatinumLicence } = settingsSection;
   return (
     <EuiPanel>
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <EuiTitle size="s">
-            <h3>{title}</h3>
+            <h3>
+              {title} &nbsp;
+              {isPlatinumLicence && (
+                <EuiBetaBadge
+                  label={i18n.translate(
+                    'xpack.apm.fleet_integration.settings.platinumBadgeLabel',
+                    {
+                      defaultMessage: 'Platinum',
+                    }
+                  )}
+                  title={i18n.translate(
+                    'xpack.apm.fleet_integration.settings.platinumBadgeTooltipTitle',
+                    {
+                      defaultMessage: 'Platinum license required',
+                    }
+                  )}
+                  tooltipContent={i18n.translate(
+                    'xpack.apm.fleet_integration.settings.platinumBadgeTooltipDescription',
+                    {
+                      defaultMessage:
+                        'Configurations are saved but ignored if your Kibana licence is not Platinum.',
+                    }
+                  )}
+                />
+              )}
+            </h3>
           </EuiTitle>
         </EuiFlexItem>
         {subtitle && (

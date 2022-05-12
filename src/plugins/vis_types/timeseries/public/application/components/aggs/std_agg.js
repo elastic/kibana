@@ -52,7 +52,6 @@ export function StandardAgg(props) {
             panelType={props.panel.type}
             siblings={props.siblings}
             value={model.type}
-            uiRestrictions={uiRestrictions}
             onChange={handleSelectChange('type')}
             fullWidth
           />
@@ -69,7 +68,11 @@ export function StandardAgg(props) {
               restrict={restrictFields}
               indexPattern={indexPattern}
               value={model.field}
-              onChange={handleSelectChange('field')}
+              onChange={(value) =>
+                handleChange({
+                  field: value?.[0],
+                })
+              }
               uiRestrictions={uiRestrictions}
               fullWidth
             />

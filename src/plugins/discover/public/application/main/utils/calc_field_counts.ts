@@ -5,19 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { flattenHit, IndexPattern } from '../../../../../data/common';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { flattenHit } from '@kbn/data-plugin/public';
 import { ElasticSearchHit } from '../../../types';
 
 /**
- * This function is recording stats of the available fields, for usage in sidebar and sharing
+ * This function is calculating stats of the available fields, for usage in sidebar and sharing
  * Note that this values aren't displayed, but used for internal calculations
  */
-export function calcFieldCounts(
-  counts = {} as Record<string, number>,
-  rows?: ElasticSearchHit[],
-  indexPattern?: IndexPattern
-) {
+export function calcFieldCounts(rows?: ElasticSearchHit[], indexPattern?: DataView) {
+  const counts: Record<string, number> = {};
   if (!rows || !indexPattern) {
     return {};
   }

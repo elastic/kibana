@@ -11,6 +11,9 @@ export class ErrorWithStatusCode extends Error {
   constructor(message: string, statusCode: number) {
     super(message);
     this.statusCode = statusCode;
+
+    // For debugging - capture name of subclasses
+    this.name = this.constructor.name;
   }
 
   public getStatusCode = (): number => this.statusCode;

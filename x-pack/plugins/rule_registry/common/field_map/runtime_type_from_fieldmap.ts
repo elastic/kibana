@@ -57,7 +57,7 @@ const esFieldTypeMap = {
   float: t.union([t.number, NumberFromString]),
   scaled_float: t.union([t.number, NumberFromString]),
   unsigned_long: t.union([t.number, NumberFromString]),
-  flattened: t.record(t.string, t.array(t.string)),
+  flattened: t.UnknownRecord,
 };
 
 type EsFieldTypeMap = typeof esFieldTypeMap;
@@ -132,7 +132,6 @@ export function runtimeTypeFromFieldMap<TFieldMap extends FieldMap>(
   }
 
   const required = pickBy(fieldMap, (field) => field.required);
-
   return t.intersection([
     t.exact(t.partial(mapToType(fieldMap))),
     t.type(mapToType(required)),

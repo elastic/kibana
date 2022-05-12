@@ -6,18 +6,17 @@
  */
 
 import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
+import {
   EVENT_OUTCOME,
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
-import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
-import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-} from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { Coordinate } from '../../../typings/timeseries';
 import {
@@ -31,34 +30,43 @@ import {
   getOutcomeAggregation,
   getFailedTransactionRateTimeSeries,
 } from '../helpers/transaction_error_rate';
+import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 
 export async function getFailedTransactionRate({
   environment,
   kuery,
   serviceName,
-  transactionType,
+  transactionTypes,
   transactionName,
   setup,
   searchAggregatedTransactions,
   start,
   end,
   numBuckets,
+  offset,
 }: {
   environment: string;
   kuery: string;
   serviceName: string;
-  transactionType?: string;
+  transactionTypes: string[];
   transactionName?: string;
   setup: Setup;
   searchAggregatedTransactions: boolean;
   start: number;
   end: number;
   numBuckets?: number;
+  offset?: string;
 }): Promise<{
   timeseries: Coordinate[];
   average: number | null;
 }> {
   const { apmEventClient } = setup;
+
+  const { startWithOffset, endWithOffset } = getOffsetInMs({
+    start,
+    end,
+    offset,
+  });
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
@@ -67,10 +75,10 @@ export async function getFailedTransactionRate({
         [EVENT_OUTCOME]: [EventOutcome.failure, EventOutcome.success],
       },
     },
+    { terms: { [TRANSACTION_TYPE]: transactionTypes } },
     ...termQuery(TRANSACTION_NAME, transactionName),
-    ...termQuery(TRANSACTION_TYPE, transactionType),
     ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
-    ...rangeQuery(start, end),
+    ...rangeQuery(startWithOffset, endWithOffset),
     ...environmentQuery(environment),
     ...kqlQuery(kuery),
   ];
@@ -90,13 +98,13 @@ export async function getFailedTransactionRate({
           date_histogram: {
             field: '@timestamp',
             fixed_interval: getBucketSizeForAggregatedTransactions({
-              start,
-              end,
+              start: startWithOffset,
+              end: endWithOffset,
               searchAggregatedTransactions,
               numBuckets,
             }).intervalString,
             min_doc_count: 0,
-            extended_bounds: { min: start, max: end },
+            extended_bounds: { min: startWithOffset, max: endWithOffset },
           },
           aggs: {
             outcomes,
@@ -120,73 +128,4 @@ export async function getFailedTransactionRate({
   const average = calculateFailedTransactionRate(resp.aggregations.outcomes);
 
   return { timeseries, average };
-}
-
-export async function getFailedTransactionRatePeriods({
-  environment,
-  kuery,
-  serviceName,
-  transactionType,
-  transactionName,
-  setup,
-  searchAggregatedTransactions,
-  comparisonStart,
-  comparisonEnd,
-  start,
-  end,
-}: {
-  environment: string;
-  kuery: string;
-  serviceName: string;
-  transactionType?: string;
-  transactionName?: string;
-  setup: Setup;
-  searchAggregatedTransactions: boolean;
-  comparisonStart?: number;
-  comparisonEnd?: number;
-  start: number;
-  end: number;
-}) {
-  const commonProps = {
-    environment,
-    kuery,
-    serviceName,
-    transactionType,
-    transactionName,
-    setup,
-    searchAggregatedTransactions,
-  };
-
-  const currentPeriodPromise = getFailedTransactionRate({
-    ...commonProps,
-    start,
-    end,
-  });
-
-  const previousPeriodPromise =
-    comparisonStart && comparisonEnd
-      ? getFailedTransactionRate({
-          ...commonProps,
-          start: comparisonStart,
-          end: comparisonEnd,
-        })
-      : { timeseries: [], average: null };
-
-  const [currentPeriod, previousPeriod] = await Promise.all([
-    currentPeriodPromise,
-    previousPeriodPromise,
-  ]);
-
-  const currentPeriodTimeseries = currentPeriod.timeseries;
-
-  return {
-    currentPeriod,
-    previousPeriod: {
-      ...previousPeriod,
-      timeseries: offsetPreviousPeriodCoordinates({
-        currentPeriodTimeseries,
-        previousPeriodTimeseries: previousPeriod.timeseries,
-      }),
-    },
-  };
 }

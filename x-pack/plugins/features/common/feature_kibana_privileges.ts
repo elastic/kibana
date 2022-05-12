@@ -15,6 +15,19 @@ export interface FeatureKibanaPrivileges {
   excludeFromBasePrivileges?: boolean;
 
   /**
+   * Whether or not this privilege should only be granted to `All Spaces *`. Should be used for features that do not
+   * support Spaces. Defaults to `false`.
+   */
+  requireAllSpaces?: boolean;
+
+  /**
+   * Whether or not this privilege should be hidden in the roles UI and disallowed on the API. Defaults to `false`.
+   * @deprecated
+   * @removeBy 8.8.0
+   */
+  disabled?: boolean;
+
+  /**
    * If this feature includes management sections, you can specify them here to control visibility of those
    * pages based on user privileges.
    *

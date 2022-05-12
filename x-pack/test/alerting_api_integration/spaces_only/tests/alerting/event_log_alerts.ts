@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { Spaces } from '../../scenarios';
-import { getUrlPrefix, getTestAlertData, ObjectRemover, getEventLog } from '../../../common/lib';
+import { getUrlPrefix, getTestRuleData, ObjectRemover, getEventLog } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { IValidatedEvent } from '../../../../../plugins/event_log/server';
 
 // eslint-disable-next-line import/no-default-export
 export default function eventLogAlertTests({ getService }: FtrProviderContext) {
@@ -31,7 +31,7 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             rule_type_id: 'test.patternFiring',
             schedule: { interval: '1s' },
             throttle: null,
@@ -69,10 +69,29 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
         (event: IValidatedEvent) => event?.event?.action !== 'execute'
       );
 
+      // Verify unique executionId generated per `action:execute` grouping
+      const eventExecutionIdSet = new Set();
+      const totalUniqueExecutionIds = new Set();
+      let totalExecutionEventCount = 0;
+      events.forEach((event) => {
+        totalUniqueExecutionIds.add(event?.kibana?.alert?.rule?.execution?.uuid);
+        if (event?.event?.action === 'execute') {
+          totalExecutionEventCount += 1;
+          eventExecutionIdSet.add(event?.kibana?.alert?.rule?.execution?.uuid);
+          expect(eventExecutionIdSet.size).to.equal(1);
+          eventExecutionIdSet.clear();
+        } else {
+          eventExecutionIdSet.add(event?.kibana?.alert?.rule?.execution?.uuid);
+        }
+      });
+
+      // Ensure every execution actually had a unique id from the others
+      expect(totalUniqueExecutionIds.size).to.equal(totalExecutionEventCount);
+
       const currentAlertSpan: {
         alertId?: string;
         start?: string;
-        durationToDate?: number;
+        durationToDate?: string;
       } = {};
       for (let i = 0; i < instanceEvents.length; ++i) {
         switch (instanceEvents[i]?.event?.action) {
@@ -83,7 +102,7 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
 
             currentAlertSpan.alertId = instanceEvents[i]?.kibana?.alerting?.instance_id;
             currentAlertSpan.start = instanceEvents[i]?.event?.start;
-            currentAlertSpan.durationToDate = instanceEvents[i]?.event?.duration;
+            currentAlertSpan.durationToDate = `${instanceEvents[i]?.event?.duration}`;
             break;
 
           case 'active-instance':
@@ -91,12 +110,13 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
             expect(instanceEvents[i]?.event?.start).to.equal(currentAlertSpan.start);
             expect(instanceEvents[i]?.event?.end).to.be(undefined);
 
-            if (instanceEvents[i]?.event?.duration! !== 0) {
-              expect(instanceEvents[i]?.event?.duration! > currentAlertSpan.durationToDate!).to.be(
-                true
-              );
+            if (instanceEvents[i]?.event?.duration! !== '0') {
+              expect(
+                BigInt(instanceEvents[i]?.event?.duration!) >
+                  BigInt(currentAlertSpan.durationToDate!)
+              ).to.be(true);
             }
-            currentAlertSpan.durationToDate = instanceEvents[i]?.event?.duration;
+            currentAlertSpan.durationToDate = `${instanceEvents[i]?.event?.duration}`;
             break;
 
           case 'recovered-instance':
@@ -106,7 +126,7 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
             expect(
               new Date(instanceEvents[i]?.event?.end!).valueOf() -
                 new Date(instanceEvents[i]?.event?.start!).valueOf()
-            ).to.equal(instanceEvents[i]?.event?.duration! / 1000 / 1000);
+            ).to.equal(nanosToMillis(instanceEvents[i]?.event?.duration!));
             break;
         }
       }

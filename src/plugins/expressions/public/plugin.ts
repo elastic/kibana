@@ -7,7 +7,7 @@
  */
 
 import { pick } from 'lodash';
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { SerializableRecord } from '@kbn/utility-types';
 import type { ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
 import {
@@ -39,17 +39,7 @@ export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, Express
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  private configureExecutor(core: CoreSetup) {
-    const { executor } = this.expressions;
-
-    executor.extendContext({
-      environment: 'client',
-    });
-  }
-
   public setup(core: CoreSetup): ExpressionsSetup {
-    this.configureExecutor(core);
-
     const { expressions } = this;
     const { renderers } = expressions;
 

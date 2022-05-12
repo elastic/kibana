@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExpressionFunctionAST } from '@kbn/interpreter/common';
+import type { AstFunction } from '@kbn/interpreter';
 import { identity } from 'lodash';
 import { ExpressionAstArgument, Filter, FilterType } from '../../types';
 
@@ -23,7 +23,7 @@ const argToValue = (
 
 const convertFunctionToFilterType = (func: string) => functionToFilter[func] ?? FilterType.exactly;
 
-const collectArgs = (args: ExpressionFunctionAST['arguments']) => {
+const collectArgs = (args: AstFunction['arguments']) => {
   const argsKeys = Object.keys(args);
 
   if (!argsKeys.length) {
@@ -36,7 +36,7 @@ const collectArgs = (args: ExpressionFunctionAST['arguments']) => {
   );
 };
 
-export function adaptCanvasFilter(filter: ExpressionFunctionAST): Filter {
+export function adaptCanvasFilter(filter: AstFunction): Filter {
   const { function: type, arguments: args } = filter;
   const { column, filterGroup, value: valueArg, type: typeArg, ...rest } = args ?? {};
   return {

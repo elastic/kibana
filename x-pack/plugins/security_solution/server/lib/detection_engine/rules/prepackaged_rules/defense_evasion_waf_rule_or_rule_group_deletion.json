@@ -4,7 +4,7 @@
   ],
   "description": "Identifies the deletion of a specified AWS Web Application Firewall (WAF) rule or rule group.",
   "false_positives": [
-    "WAF rules or rule groups may be deleted by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Rule deletions from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+    "WAF rules or rule groups may be deleted by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Rule deletions by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
   ],
   "from": "now-60m",
   "index": [
@@ -16,7 +16,7 @@
   "license": "Elastic License v2",
   "name": "AWS WAF Rule or Rule Group Deletion",
   "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:aws.cloudtrail and event.action:(DeleteRule or DeleteRuleGroup) and event.outcome:success\n",
+  "query": "event.dataset:aws.cloudtrail and event.provider:(waf.amazonaws.com or waf-regional.amazonaws.com or wafv2.amazonaws.com) and event.action:(DeleteRule or DeleteRuleGroup) and event.outcome:success\n",
   "references": [
     "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/waf/delete-rule-group.html",
     "https://docs.aws.amazon.com/waf/latest/APIReference/API_waf_DeleteRuleGroup.html"
@@ -58,5 +58,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 6
+  "version": 8
 }

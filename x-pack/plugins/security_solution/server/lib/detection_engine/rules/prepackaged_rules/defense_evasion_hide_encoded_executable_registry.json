@@ -5,9 +5,7 @@
   "description": "Identifies registry write modifications to hide an encoded portable executable. This could be indicative of adversary defense evasion by avoiding the storing of malicious content directly on disk.",
   "from": "now-9m",
   "index": [
-    "logs-endpoint.events.*",
-    "winlogbeat-*",
-    "logs-windows.*"
+    "logs-endpoint.events.*"
   ],
   "language": "eql",
   "license": "Elastic License v2",
@@ -47,5 +45,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 5
 }

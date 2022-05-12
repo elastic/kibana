@@ -1,9 +1,0 @@
-==== Run {kib} with `brew services`
-
-With Homebrew, Kibana can be started and stopped as follows:
-
-[source,sh]
---------------------------------------------------
-brew services start elastic/tap/kibana-full
-brew services stop elastic/tap/kibana-full
---------------------------------------------------

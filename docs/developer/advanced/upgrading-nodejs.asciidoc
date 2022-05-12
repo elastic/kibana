@@ -17,33 +17,26 @@ These files must be updated when upgrading Node.js:
   - {kib-repo}blob/{branch}/WORKSPACE.bazel[`WORKSPACE.bazel`] - The version is specified in the `node_version` property.
     Besides this property, the list of files under `node_repositories` must be updated along with their respective SHA256 hashes.
     These can be found on the https://nodejs.org[nodejs.org] website.
-    Example for Node.js v14.16.1: https://nodejs.org/dist/v14.16.1/SHASUMS256.txt.asc
+    Example for Node.js v16.14.2: https://nodejs.org/dist/v16.14.2/SHASUMS256.txt.asc
 
-See PR {kib-repo}pull/96382[#96382] for an example of how the Node.js version has been upgraded previously.
-
-In the 6.8 branch, neither the `.ci/Dockerfile` file nor the `WORKSPACE.bazel` file exists, so when upgrading Node.js in that branch, just skip those files.
+See PR {kib-repo}pull/128123[#128123] for an example of how the Node.js version has been upgraded previously.
 
 === Backporting
 
 The following rules are not set in stone.
 Use best judgement when backporting.
 
-Currently version 7.11 and newer run Node.js 14, while 7.10 and older run Node.js 10.
-Hence, upgrades to either Node.js 14 or Node.js 10 should be done as separate PRs.
-
 ==== Node.js patch upgrades
 
-Typically, you want to backport Node.js *patch* upgrades to all supported release branches that run the same *major* Node.js version:
+Typically, you want to backport Node.js *patch* upgrades to all supported release branches that run the same *major* Node.js version (which currently is all of them, but this might change in the future once Node.js v18 is released and becomes LTS):
 
-  - If upgrading Node.js 14, and the current release is 7.11.1, the main PR should target `master` and be backported to `7.x` and `7.11`.
-  - If upgrading Node.js 10, the main PR should target `6.8` only.
+  - If upgrading Node.js 16, and the current release is 8.1.x, the main PR should target `main` and be backported to `7.17` and `8.1`.
 
 ==== Node.js minor upgrades
 
 Typically, you want to backport Node.js *minor* upgrades to the next minor {kib} release branch that runs the same *major* Node.js version:
 
-  - If upgrading Node.js 14, and the current release is 7.11.1, the main PR should target `master` and be backported to `7.x`, while leaving the `7.11` branch as-is.
-  - If upgrading Node.js 10, the main PR should target `6.8` only.
+  - If upgrading Node.js 16, and the current release is 8.1.x, the main PR should target `main` and be backported to `7.17`, while leaving the `8.1` branch as-is.
 
 === Upgrading installed Node.js version
 
@@ -56,11 +49,11 @@ Run the following to install the new Node.js version. Replace `<version>` with t
 nvm install <version>
 ----
 
-To get the same global npm modules installed with the new version of Node.js as is currently installed, use the `--reinstall-packages-from` command-line argument (optionally replace `14` with the desired source version):
+To get the same global npm modules installed with the new version of Node.js as is currently installed, use the `--reinstall-packages-from` command-line argument (optionally replace `16` with the desired source version):
 
 [source,bash]
 ----
-nvm install <version> --reinstall-packages-from=14
+nvm install <version> --reinstall-packages-from=16
 ----
 
 If needed, uninstall the old version of Node.js by running the following. Replace `<old-version>` with the full version number of the version that should be uninstalled:
@@ -70,11 +63,11 @@ If needed, uninstall the old version of Node.js by running the following. Replac
 nvm uninstall <old-version>
 ----
 
-Optionally, tell nvm to always use the "highest" installed Node.js 14 version. Replace `14` if a different major version is desired:
+Optionally, tell nvm to always use the "highest" installed Node.js 16 version. Replace `16` if a different major version is desired:
 
 [source,bash]
 ----
-nvm alias default 14
+nvm alias default 16
 ----
 
 Alternatively, include the full version number at the end to specify a specific default version.

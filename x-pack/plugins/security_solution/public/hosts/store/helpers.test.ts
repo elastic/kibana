@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { DEFAULT_TABLE_LIMIT } from '../../common/store/constants';
+import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../common/store/constants';
 import { HostsModel, HostsTableType, HostsType } from './model';
 import { setHostsQueriesActivePageToZero } from './helpers';
-import { Direction, HostsFields } from '../../../common/search_strategy';
+import { Direction, HostsFields, RiskScoreFields } from '../../../common/search_strategy';
 
 export const mockHostsState: HostsModel = {
   page: {
@@ -36,6 +36,19 @@ export const mockHostsState: HostsModel = {
         activePage: 4,
         limit: DEFAULT_TABLE_LIMIT,
       },
+      [HostsTableType.risk]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        sort: {
+          field: RiskScoreFields.riskScore,
+          direction: Direction.desc,
+        },
+        severitySelection: [],
+      },
+      [HostsTableType.sessions]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
     },
   },
   details: {
@@ -61,6 +74,19 @@ export const mockHostsState: HostsModel = {
       [HostsTableType.anomalies]: null,
       [HostsTableType.alerts]: {
         activePage: 4,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
+      [HostsTableType.risk]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        sort: {
+          field: RiskScoreFields.riskScore,
+          direction: Direction.desc,
+        },
+        severitySelection: [],
+      },
+      [HostsTableType.sessions]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
       },
     },
@@ -94,6 +120,19 @@ describe('Hosts redux store', () => {
           activePage: 0,
           limit: 10,
         },
+        [HostsTableType.risk]: {
+          activePage: 0,
+          limit: 10,
+          severitySelection: [],
+          sort: {
+            direction: 'desc',
+            field: 'risk_stats.risk_score',
+          },
+        },
+        [HostsTableType.sessions]: {
+          activePage: 0,
+          limit: 10,
+        },
       });
     });
 
@@ -119,6 +158,19 @@ describe('Hosts redux store', () => {
           limit: 10,
         },
         [HostsTableType.alerts]: {
+          activePage: 0,
+          limit: 10,
+        },
+        [HostsTableType.risk]: {
+          activePage: 0,
+          limit: 10,
+          severitySelection: [],
+          sort: {
+            direction: 'desc',
+            field: 'risk_stats.risk_score',
+          },
+        },
+        [HostsTableType.sessions]: {
           activePage: 0,
           limit: 10,
         },

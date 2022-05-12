@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test/jest';
+import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { EuiRange } from '@elastic/eui';
 import { FillOpacityOption } from './fill_opacity_option';
 

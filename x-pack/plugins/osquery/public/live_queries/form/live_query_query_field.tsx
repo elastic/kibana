@@ -10,7 +10,7 @@ import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import { OsquerySchemaLink } from '../../components/osquery_schema_link';
-import { FieldHook } from '../../shared_imports';
+import { EuiCodeEditorProps, FieldHook } from '../../shared_imports';
 import { OsqueryEditor } from '../../editor';
 import { useKibana } from '../../common/lib/kibana';
 
@@ -21,9 +21,14 @@ const StyledEuiCodeBlock = styled(EuiCodeBlock)`
 interface LiveQueryQueryFieldProps {
   disabled?: boolean;
   field: FieldHook<string>;
+  commands?: EuiCodeEditorProps['commands'];
 }
 
-const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({ disabled, field }) => {
+const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
+  disabled,
+  field,
+  commands,
+}) => {
   const permissions = useKibana().services.application.capabilities.osquery;
   const { value, setValue, errors } = field;
   const error = errors[0]?.message;
@@ -53,7 +58,7 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({ disa
           {value}
         </StyledEuiCodeBlock>
       ) : (
-        <OsqueryEditor defaultValue={value} onChange={handleEditorChange} />
+        <OsqueryEditor defaultValue={value} onChange={handleEditorChange} commands={commands} />
       )}
     </EuiFormRow>
   );

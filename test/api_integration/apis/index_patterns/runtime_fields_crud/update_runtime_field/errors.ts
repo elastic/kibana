@@ -8,44 +8,47 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { configArray } from '../../constants';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('errors', () => {
-    it('returns 404 error on non-existing index_pattern', async () => {
-      const id = `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx-${Date.now()}`;
-      const response = await supertest
-        .post(`/api/index_patterns/index_pattern/${id}/runtime_field/foo`)
-        .send({
-          runtimeField: {
-            script: {
-              source: "doc['something_new'].value",
+    configArray.forEach((config) => {
+      describe(config.name, () => {
+        it('returns 404 error on non-existing index_pattern', async () => {
+          const id = `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx-${Date.now()}`;
+          const response = await supertest.post(`${config.path}/${id}/runtime_field/foo`).send({
+            runtimeField: {
+              type: 'keyword',
+              script: {
+                source: "doc['something_new'].value",
+              },
             },
-          },
+          });
+
+          expect(response.status).to.be(404);
         });
 
-      expect(response.status).to.be(404);
-    });
-
-    it('returns error when field name is specified', async () => {
-      const id = `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx-${Date.now()}`;
-      const response = await supertest
-        .post(`/api/index_patterns/index_pattern/${id}/runtime_field/foo`)
-        .send({
-          name: 'foo',
-          runtimeField: {
-            script: {
-              source: "doc['something_new'].value",
+        it('returns error when field name is specified', async () => {
+          const id = `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx-${Date.now()}`;
+          const response = await supertest.post(`${config.path}/${id}/runtime_field/foo`).send({
+            name: 'foo',
+            runtimeField: {
+              type: 'keyword',
+              script: {
+                source: "doc['something_new'].value",
+              },
             },
-          },
-        });
+          });
 
-      expect(response.status).to.be(400);
-      expect(response.body.statusCode).to.be(400);
-      expect(response.body.message).to.be(
-        "[request body.name]: a value wasn't expected to be present"
-      );
+          expect(response.status).to.be(400);
+          expect(response.body.statusCode).to.be(400);
+          expect(response.body.message).to.be(
+            "[request body.name]: a value wasn't expected to be present"
+          );
+        });
+      });
     });
   });
 }

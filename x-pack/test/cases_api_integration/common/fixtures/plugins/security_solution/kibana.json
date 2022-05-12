@@ -1,8 +1,8 @@
 {
   "id": "securitySolutionFixtures",
   "owner": {
-    "githubTeam": "security-threat-hunting",
-    "name": "Security Solution Threat Hunting"
+    "githubTeam": "response-ops",
+    "name": "ResponseOps"
   },
   "version": "1.0.0",
   "kibanaVersion": "kibana",

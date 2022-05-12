@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import SwimlaneParamsFields from './swimlane_params';
 import { SwimlaneConnectorType } from './types';
 import { mappings } from './mocks';
@@ -36,6 +36,7 @@ describe('SwimlaneParamsFields renders', () => {
     actionTypeId: '.test',
     name: 'Test',
     isPreconfigured: false,
+    isDeprecated: false,
   };
 
   const defaultProps = {

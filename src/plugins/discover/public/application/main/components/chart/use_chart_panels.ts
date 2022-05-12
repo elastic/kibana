@@ -10,18 +10,15 @@ import type {
   EuiContextMenuPanelItemDescriptor,
   EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
-import { search } from '../../../../../../data/public';
-import { AppState } from '../../services/discover_state';
-import { DataCharts$ } from '../../utils/use_saved_search';
+import { search } from '@kbn/data-plugin/public';
 
 export function useChartPanels(
-  state: AppState,
-  savedSearchDataChart$: DataCharts$,
   toggleHideChart: () => void,
   onChangeInterval: (value: string) => void,
-  closePopover: () => void
+  closePopover: () => void,
+  hideChart?: boolean,
+  interval?: string
 ) {
-  const { interval, hideChart } = state;
   const selectedOptionIdx = search.aggs.intervalOptions.findIndex((opt) => opt.val === interval);
   const intervalDisplay =
     selectedOptionIdx > -1

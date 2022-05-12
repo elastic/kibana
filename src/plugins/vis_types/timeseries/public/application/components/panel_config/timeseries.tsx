@@ -166,6 +166,7 @@ export class TimeseriesPanelConfig extends Component<
           fields={this.props.fields}
           model={this.props.model}
           onChange={this.props.onChange}
+          defaultIndexPattern={this.props.defaultIndexPattern}
         />
       );
     } else {

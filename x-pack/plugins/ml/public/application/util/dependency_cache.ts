@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataPublicPluginSetup } from 'src/plugins/data/public';
+import type { DataPublicPluginSetup } from '@kbn/data-plugin/public';
 import type {
   IUiSettingsClient,
   ChromeStart,
@@ -16,47 +16,51 @@ import type {
   DocLinksStart,
   ToastsStart,
   OverlayStart,
+  ThemeServiceStart,
   ChromeRecentlyAccessed,
   IBasePath,
-} from 'kibana/public';
-import type { DataPublicPluginStart } from 'src/plugins/data/public';
-import type { SharePluginStart } from 'src/plugins/share/public';
-import type { DataViewsContract } from '../../../../../../src/plugins/data_views/public';
-import type { SecurityPluginSetup } from '../../../../security/public';
-import type { MapsStartApi } from '../../../../maps/public';
-import type { DataVisualizerPluginStart } from '../../../../data_visualizer/public';
+} from '@kbn/core/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
+import type { MapsStartApi } from '@kbn/maps-plugin/public';
+import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
+import type { AiopsPluginStart } from '@kbn/aiops-plugin/public';
 
 export interface DependencyCache {
   timefilter: DataPublicPluginSetup['query']['timefilter'] | null;
   config: IUiSettingsClient | null;
-  indexPatterns: DataViewsContract | null;
   chrome: ChromeStart | null;
   docLinks: DocLinksStart | null;
   toastNotifications: ToastsStart | null;
   overlays: OverlayStart | null;
+  theme: ThemeServiceStart | null;
   recentlyAccessed: ChromeRecentlyAccessed | null;
-  fieldFormats: DataPublicPluginStart['fieldFormats'] | null;
-  autocomplete: DataPublicPluginStart['autocomplete'] | null;
+  fieldFormats: FieldFormatsStart | null;
+  autocomplete: UnifiedSearchPublicPluginStart['autocomplete'] | null;
   basePath: IBasePath | null;
   savedObjectsClient: SavedObjectsClientContract | null;
   application: ApplicationStart | null;
   http: HttpStart | null;
   security: SecurityPluginSetup | undefined | null;
   i18n: I18nStart | null;
-  urlGenerators: SharePluginStart['urlGenerators'] | null;
+  dashboard: DashboardStart | null;
   maps: MapsStartApi | null;
   dataVisualizer: DataVisualizerPluginStart | null;
+  aiops: AiopsPluginStart | null;
   dataViews: DataViewsContract | null;
 }
 
 const cache: DependencyCache = {
   timefilter: null,
   config: null,
-  indexPatterns: null,
   chrome: null,
   docLinks: null,
   toastNotifications: null,
   overlays: null,
+  theme: null,
   recentlyAccessed: null,
   fieldFormats: null,
   autocomplete: null,
@@ -66,9 +70,10 @@ const cache: DependencyCache = {
   http: null,
   security: null,
   i18n: null,
-  urlGenerators: null,
+  dashboard: null,
   maps: null,
   dataVisualizer: null,
+  aiops: null,
   dataViews: null,
 };
 
@@ -76,10 +81,10 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.timefilter = deps.timefilter || null;
   cache.config = deps.config || null;
   cache.chrome = deps.chrome || null;
-  cache.indexPatterns = deps.indexPatterns || null;
   cache.docLinks = deps.docLinks || null;
   cache.toastNotifications = deps.toastNotifications || null;
   cache.overlays = deps.overlays || null;
+  cache.theme = deps.theme || null;
   cache.recentlyAccessed = deps.recentlyAccessed || null;
   cache.fieldFormats = deps.fieldFormats || null;
   cache.autocomplete = deps.autocomplete || null;
@@ -89,8 +94,9 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.http = deps.http || null;
   cache.security = deps.security || null;
   cache.i18n = deps.i18n || null;
-  cache.urlGenerators = deps.urlGenerators || null;
+  cache.dashboard = deps.dashboard || null;
   cache.dataVisualizer = deps.dataVisualizer || null;
+  cache.aiops = deps.aiops || null;
   cache.dataViews = deps.dataViews || null;
 }
 
@@ -126,6 +132,13 @@ export function getOverlays() {
     throw new Error("overlays haven't been initialized");
   }
   return cache.overlays;
+}
+
+export function getTheme() {
+  if (cache.theme === null) {
+    throw new Error("theme hasn't been initialized");
+  }
+  return cache.theme;
 }
 
 export function getUiSettings() {
@@ -205,11 +218,11 @@ export function getI18n() {
   return cache.i18n;
 }
 
-export function getGetUrlGenerator() {
-  if (cache.urlGenerators === null) {
-    throw new Error("urlGenerators hasn't been initialized");
+export function getDashboard() {
+  if (cache.dashboard === null) {
+    throw new Error("dashboard hasn't been initialized");
   }
-  return cache.urlGenerators.getUrlGenerator;
+  return cache.dashboard;
 }
 
 export function getDataViews() {

@@ -5,7 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Capabilities, IUiSettingsClient } from 'kibana/public';
+import { Capabilities, IUiSettingsClient } from '@kbn/core/public';
+import { DataViewsContract } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
 import {
   AppState as DiscoverState,
@@ -15,7 +17,6 @@ import {
   AppState as ContextState,
   GetStateReturn as ContextGetStateReturn,
 } from '../../../application/context/services/context_state';
-import { IndexPattern, IndexPatternsContract } from '../../../../../data/public';
 import { popularizeField } from '../../../utils/popularize_field';
 
 /**
@@ -71,8 +72,8 @@ export function getStateColumnActions({
 }: {
   capabilities: Capabilities;
   config: IUiSettingsClient;
-  indexPattern: IndexPattern;
-  indexPatterns: IndexPatternsContract;
+  indexPattern: DataView;
+  indexPatterns: DataViewsContract;
   useNewFieldsApi: boolean;
   setAppState: DiscoverGetStateReturn['setAppState'] | ContextGetStateReturn['setAppState'];
   state: DiscoverState | ContextState;

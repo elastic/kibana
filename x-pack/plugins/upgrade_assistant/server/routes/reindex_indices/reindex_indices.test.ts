@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { kibanaResponseFactory } from 'src/core/server';
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { licensingMock } from '../../../../licensing/server/mocks';
-import { securityMock } from '../../../../security/server/mocks';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from '../__mocks__/routes.mock';
 import { createRequestMock } from '../__mocks__/request.mock';
 import { handleEsError } from '../../shared_imports';
@@ -23,6 +23,7 @@ const mockReindexService = {
   processNextStep: jest.fn(),
   resumeReindexOperation: jest.fn(),
   cancelReindexing: jest.fn(),
+  getIndexAliases: jest.fn().mockResolvedValue({}),
 };
 jest.mock('../../lib/es_version_precheck', () => ({
   versionCheckHandlerWrapper: (a: any) => a,
@@ -31,6 +32,7 @@ jest.mock('../../lib/es_version_precheck', () => ({
 jest.mock('../../lib/reindexing', () => {
   return {
     reindexServiceFactory: () => mockReindexService,
+    generateNewIndexName: () => 'reindexed-foo',
   };
 });
 
@@ -159,7 +161,7 @@ describe('reindex API', () => {
 
       expect(resp.status).toEqual(200);
       const data = resp.payload;
-      expect(data.reindexOp).toBeNull();
+      expect(data.reindexOp).toBeUndefined();
       expect(data.warnings).toBeNull();
     });
   });

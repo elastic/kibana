@@ -7,19 +7,21 @@
 
 import http from 'http';
 import https from 'https';
-import { Plugin, CoreSetup, IRouter } from 'kibana/server';
-import { EncryptedSavedObjectsPluginStart } from '../../../../../../../plugins/encrypted_saved_objects/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
-import { PluginSetupContract as ActionsPluginSetupContract } from '../../../../../../../plugins/actions/server/plugin';
-import { ActionType } from '../../../../../../../plugins/actions/server';
+import { Plugin, CoreSetup, IRouter } from '@kbn/core/server';
+import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server/plugin';
+import { ActionType } from '@kbn/actions-plugin/server';
 import { initPlugin as initPagerduty } from './pagerduty_simulation';
 import { initPlugin as initSwimlane } from './swimlane_simulation';
 import { initPlugin as initServiceNow } from './servicenow_simulation';
+import { initPlugin as initServiceNowOAuth } from './servicenow_oauth_simulation';
 import { initPlugin as initJira } from './jira_simulation';
 import { initPlugin as initResilient } from './resilient_simulation';
 import { initPlugin as initSlack } from './slack_simulation';
 import { initPlugin as initWebhook } from './webhook_simulation';
 import { initPlugin as initMSExchange } from './ms_exchage_server_simulation';
+import { initPlugin as initXmatters } from './xmatters_simulation';
 
 export const NAME = 'actions-FTS-external-service-simulators';
 
@@ -32,6 +34,7 @@ export enum ExternalServiceSimulator {
   RESILIENT = 'resilient',
   WEBHOOK = 'webhook',
   MS_EXCHANGE = 'exchange',
+  XMATTERS = 'xmatters',
 }
 
 export function getExternalServiceSimulatorPath(service: ExternalServiceSimulator): string {
@@ -47,6 +50,7 @@ export function getAllExternalServiceSimulatorPaths(): string[] {
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.RESILIENT}/rest/orgs/201/incidents`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.MS_EXCHANGE}/users/test@/sendMail`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.MS_EXCHANGE}/1234567/oauth2/v2.0/token`);
+  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SERVICENOW}/oauth_token.do`);
   return allPaths;
 }
 
@@ -122,10 +126,15 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
 
     const router: IRouter = core.http.createRouter();
 
+    initXmatters(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.XMATTERS));
     initPagerduty(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY));
     initJira(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.JIRA));
     initResilient(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.RESILIENT));
     initMSExchange(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.MS_EXCHANGE));
+    initServiceNowOAuth(
+      router,
+      getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
+    );
   }
 
   public start() {}

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import path from 'path';
-
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 import { USER } from '../../../services/ml/security_common';
@@ -21,7 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
   ];
 
   describe('for user with read ML access', function () {
-    this.tags(['skipFirefox', 'mlqa']);
+    this.tags(['skipFirefox', 'ml']);
 
     describe('with no data loaded', function () {
       for (const testUser of testUsers) {
@@ -52,20 +50,30 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.navigation.assertOverviewTabEnabled(true);
 
             await ml.testExecution.logTestStep(
-              'should display the enabled "Anomaly Detection" tab'
+              'should display the enabled "Anomaly Detection" section correctly'
             );
             await ml.navigation.assertAnomalyDetectionTabEnabled(true);
+            await ml.navigation.assertAnomalyExplorerNavItemEnabled(true);
+            await ml.navigation.assertSingleMetricViewerNavItemEnabled(true);
+            await ml.navigation.assertSettingsTabEnabled(true);
 
             await ml.testExecution.logTestStep(
-              'should display the enabled "Data Frame Analytics" tab'
+              'should display the enabled "Data Frame Analytics" section'
             );
             await ml.navigation.assertDataFrameAnalyticsTabEnabled(true);
 
-            await ml.testExecution.logTestStep('should display the enabled "Data Visualizer" tab');
-            await ml.navigation.assertDataVisualizerTabEnabled(true);
+            await ml.testExecution.logTestStep(
+              'should display the enabled "Model Management" section'
+            );
+            await ml.navigation.assertTrainedModelsNavItemEnabled(true);
+            await ml.navigation.assertNodesNavItemEnabled(false);
 
-            await ml.testExecution.logTestStep('should display the enabled "Settings" tab');
-            await ml.navigation.assertSettingsTabEnabled(true);
+            await ml.testExecution.logTestStep(
+              'should display the enabled "Data Visualizer" section'
+            );
+            await ml.navigation.assertDataVisualizerTabEnabled(true);
+            await ml.navigation.assertFileDataVisualizerNavItemEnabled(true);
+            await ml.navigation.assertIndexDataVisualizerNavItemEnabled(true);
           });
 
           it('should display elements on ML Overview page correctly', async () => {
@@ -73,11 +81,22 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.navigation.navigateToMl();
             await ml.navigation.navigateToOverview();
 
+            await ml.commonUI.waitForDatePickerIndicatorLoaded();
+
+            await ml.testExecution.logTestStep('should display a welcome callout');
+            await ml.overviewPage.assertGettingStartedCalloutVisible(true);
+            await ml.overviewPage.dismissGettingStartedCallout();
+
+            await ml.testExecution.logTestStep('should not display ML Nodes panel');
+            await ml.mlNodesPanel.assertNodesOverviewPanelExists(false);
+
             await ml.testExecution.logTestStep('should display disabled AD create job button');
+            await ml.overviewPage.assertADEmptyStateExists();
             await ml.overviewPage.assertADCreateJobButtonExists();
             await ml.overviewPage.assertADCreateJobButtonEnabled(false);
 
             await ml.testExecution.logTestStep('should display disabled DFA create job button');
+            await ml.overviewPage.assertDFAEmptyStateExists();
             await ml.overviewPage.assertDFACreateJobButtonExists();
             await ml.overviewPage.assertDFACreateJobButtonEnabled(false);
           });
@@ -96,12 +115,8 @@ export default function ({ getService }: FtrProviderContext) {
       const ecIndexPattern = 'ft_module_sample_ecommerce';
       const ecExpectedTotalCount = '287';
 
-      const uploadFilePath = path.join(
-        __dirname,
-        '..',
-        'data_visualizer',
-        'files_to_import',
-        'artificial_server_log'
+      const uploadFilePath = require.resolve(
+        '../data_visualizer/files_to_import/artificial_server_log'
       );
       const expectedUploadFileTitle = 'artificial_server_log';
 
@@ -145,10 +160,13 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await ml.api.cleanMlIndices();
         await ml.api.deleteIndices(`user-${dfaJobId}`);
         await ml.api.deleteCalendar(calendarId);
         await ml.api.deleteFilter(filterId);
+        await ml.api.cleanMlIndices();
+        await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+        await ml.testResources.deleteIndexPatternByTitle('ft_ihp_outlier');
+        await ml.testResources.deleteIndexPatternByTitle(ecIndexPattern);
       });
 
       for (const testUser of testUsers) {

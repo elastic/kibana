@@ -6,7 +6,7 @@
  */
 
 import { UrlStateType } from '../url_state/constants';
-import type { SecurityPageName } from '../../../app/types';
+import { SecurityPageName } from '../../../app/types';
 import { UrlState } from '../url_state/types';
 import { SiemRouteType } from '../../utils/route/types';
 
@@ -38,23 +38,29 @@ export interface NavTab {
   disabled: boolean;
   urlKey?: UrlStateType;
   pageId?: SecurityPageName;
+  isBeta?: boolean;
 }
-
-export type SecurityNavKey =
-  | SecurityPageName.administration
-  | SecurityPageName.alerts
-  | SecurityPageName.case
-  | SecurityPageName.endpoints
-  | SecurityPageName.eventFilters
-  | SecurityPageName.exceptions
-  | SecurityPageName.hostIsolationExceptions
-  | SecurityPageName.hosts
-  | SecurityPageName.network
-  | SecurityPageName.overview
-  | SecurityPageName.rules
-  | SecurityPageName.timelines
-  | SecurityPageName.trustedApps
-  | SecurityPageName.ueba;
+export const securityNavKeys = [
+  SecurityPageName.administration,
+  SecurityPageName.alerts,
+  SecurityPageName.blocklist,
+  SecurityPageName.detectionAndResponse,
+  SecurityPageName.case,
+  SecurityPageName.endpoints,
+  SecurityPageName.landing,
+  SecurityPageName.policies,
+  SecurityPageName.eventFilters,
+  SecurityPageName.exceptions,
+  SecurityPageName.hostIsolationExceptions,
+  SecurityPageName.hosts,
+  SecurityPageName.network,
+  SecurityPageName.overview,
+  SecurityPageName.rules,
+  SecurityPageName.timelines,
+  SecurityPageName.trustedApps,
+  SecurityPageName.users,
+] as const;
+export type SecurityNavKey = typeof securityNavKeys[number];
 
 export type SecurityNav = Record<SecurityNavKey, NavTab>;
 

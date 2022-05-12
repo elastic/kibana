@@ -7,11 +7,13 @@
 
 import _ from 'lodash';
 import React, { ReactElement } from 'react';
-import rison from 'rison-node';
 import { i18n } from '@kbn/i18n';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
-import type { Filter, IndexPatternField, IndexPattern } from 'src/plugins/data/public';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { type Filter, buildPhraseFilter } from '@kbn/es-query';
+import type { DataViewField, DataView } from '@kbn/data-plugin/common';
+import { lastValueFrom } from 'rxjs';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { SortDirection, SortDirectionNumeric, TimeRange } from '@kbn/data-plugin/common';
 import { AbstractESSource } from '../es_source';
 import {
   getHttp,
@@ -27,6 +29,7 @@ import {
   PreIndexedShape,
   TotalHits,
 } from '../../../../common/elasticsearch_util';
+import { encodeMvtResponseBody } from '../../../../common/mvt_request_body';
 // @ts-expect-error
 import { UpdateSourceEditor } from './update_source_editor';
 import {
@@ -51,12 +54,6 @@ import {
   Timeslice,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
-import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
-import {
-  SortDirection,
-  SortDirectionNumeric,
-  TimeRange,
-} from '../../../../../../../src/plugins/data/common';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { IField } from '../../fields/field';
 import { GeoJsonWithMeta, IMvtVectorSource, SourceStatus } from '../vector_source';
@@ -71,6 +68,7 @@ import {
   getIsDrawLayer,
   getMatchingIndexes,
 } from './util/feature_edit';
+import { makePublicExecutionContext } from '../../../util';
 
 type ESSearchSourceSyncMeta = Pick<
   ESSearchSourceDescriptor,
@@ -122,7 +120,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
         : SortDirection.desc,
       scalingType: isValidStringConfig(descriptor.scalingType)
         ? descriptor.scalingType!
-        : SCALING_TYPES.LIMIT,
+        : SCALING_TYPES.MVT,
       topHitsSplitField: isValidStringConfig(descriptor.topHitsSplitField)
         ? descriptor.topHitsSplitField!
         : '',
@@ -183,8 +181,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
         sortOrder={this._descriptor.sortOrder}
         scalingType={this._descriptor.scalingType}
         filterByMapBounds={this.isFilterByMapBounds()}
-        hasJoins={sourceEditorArgs.hasJoins}
-        clearJoins={sourceEditorArgs.clearJoins}
+        numberOfJoins={sourceEditorArgs.numberOfJoins}
       />
     );
   }
@@ -192,7 +189,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   async getFields(): Promise<IField[]> {
     try {
       const indexPattern = await this.getIndexPattern();
-      const fields: IndexPatternField[] = indexPattern.fields.filter((field) => {
+      const fields: DataViewField[] = indexPattern.fields.filter((field) => {
         // Ensure fielddata is enabled for field.
         // Search does not request _source
         return field.aggregatable;
@@ -278,23 +275,28 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       throw new Error('Cannot _getTopHits without topHitsSplitField');
     }
 
-    const indexPattern: IndexPattern = await this.getIndexPattern();
+    const indexPattern: DataView = await this.getIndexPattern();
 
+    const fieldNames = searchFilters.fieldNames.filter(
+      (fieldName) => fieldName !== this._descriptor.geoField
+    );
     const { docValueFields, sourceOnlyFields, scriptFields } = getDocValueAndSourceFields(
       indexPattern,
-      searchFilters.fieldNames,
+      fieldNames,
       'epoch_millis'
     );
     const topHits: {
       size: number;
       script_fields: Record<string, { script: ScriptField }>;
       docvalue_fields: Array<string | { format: string; field: string }>;
+      fields: string[];
       _source?: boolean | { includes: string[] };
       sort?: Array<Record<string, SortDirectionNumeric>>;
     } = {
       size: topHitsSize,
       script_fields: scriptFields,
       docvalue_fields: docValueFields,
+      fields: [this._descriptor.geoField],
     };
 
     if (this._hasSort()) {
@@ -309,7 +311,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       };
     }
 
-    const topHitsSplitField: IndexPatternField = getField(indexPattern, topHitsSplitFieldName);
+    const topHitsSplitField: DataViewField = getField(indexPattern, topHitsSplitFieldName);
     const cardinalityAgg = { precision_threshold: 1 };
     const termsAgg = {
       size: DEFAULT_MAX_BUCKETS_LIMIT,
@@ -332,11 +334,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       },
     });
     if (topHitsSplitField.type === 'string') {
-      const entityIsNotEmptyFilter = esFilters.buildPhraseFilter(
-        topHitsSplitField,
-        '',
-        indexPattern
-      );
+      const entityIsNotEmptyFilter = buildPhraseFilter(topHitsSplitField, '', indexPattern);
       entityIsNotEmptyFilter.meta.negate = true;
       searchSource.setField('filter', [
         ...(searchSource.getField('filter') as Filter[]),
@@ -351,6 +349,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       registerCancelCallback,
       requestDescription: 'Elasticsearch document top hits request',
       searchSessionId: searchFilters.searchSessionId,
+      executionContext: makePublicExecutionContext('es_search_source:top_hits'),
     });
 
     const allHits: any[] = [];
@@ -388,9 +387,12 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   ) {
     const indexPattern = await this.getIndexPattern();
 
+    const fieldNames = searchFilters.fieldNames.filter(
+      (fieldName) => fieldName !== this._descriptor.geoField
+    );
     const { docValueFields, sourceOnlyFields } = getDocValueAndSourceFields(
       indexPattern,
-      searchFilters.fieldNames,
+      fieldNames,
       'epoch_millis'
     );
 
@@ -417,6 +419,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     } else {
       searchSource.setField('source', sourceOnlyFields);
     }
+    searchSource.setField('fields', [this._descriptor.geoField]);
     if (this._hasSort()) {
       searchSource.setField('sort', this._buildEsSort());
     }
@@ -428,6 +431,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       registerCancelCallback,
       requestDescription: 'Elasticsearch document request',
       searchSessionId: searchFilters.searchSessionId,
+      executionContext: makePublicExecutionContext('es_search_source:doc_search'),
     });
 
     const isTimeExtentForTimeslice =
@@ -562,7 +566,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     return this._tooltipFields.length > 0;
   }
 
-  async _loadTooltipProperties(docId: string | number, index: string, indexPattern: IndexPattern) {
+  async _loadTooltipProperties(docId: string | number, index: string, indexPattern: DataView) {
     if (this._tooltipFields.length === 0) {
       return {};
     }
@@ -589,7 +593,12 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     searchSource.setField('query', query);
     searchSource.setField('fieldsFromSource', this._getTooltipPropertyNames());
 
-    const resp = await searchSource.fetch({ legacyHitsTotal: false });
+    const { rawResponse: resp } = await lastValueFrom(
+      searchSource.fetch$({
+        legacyHitsTotal: false,
+        executionContext: makePublicExecutionContext('es_search_source:load_tooltip_properties'),
+      })
+    );
 
     const hit = _.get(resp, 'hits.hits[0]');
     if (!hit) {
@@ -749,10 +758,6 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       reason = i18n.translate('xpack.maps.source.esSearch.joinsDisabledReason', {
         defaultMessage: 'Joins are not supported when scaling by clusters',
       });
-    } else if (this._descriptor.scalingType === SCALING_TYPES.MVT) {
-      reason = i18n.translate('xpack.maps.source.esSearch.joinsDisabledReasonMvt', {
-        defaultMessage: 'Joins are not supported when scaling by vector tiles',
-      });
     } else {
       reason = null;
     }
@@ -799,9 +804,12 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     const indexPattern = await this.getIndexPattern();
     const indexSettings = await loadIndexSettings(indexPattern.title);
 
+    const fieldNames = searchFilters.fieldNames.filter(
+      (fieldName) => fieldName !== this._descriptor.geoField
+    );
     const { docValueFields, sourceOnlyFields } = getDocValueAndSourceFields(
       indexPattern,
-      searchFilters.fieldNames,
+      fieldNames,
       'epoch_millis'
     );
 
@@ -822,9 +830,6 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       searchSource.setField('sort', this._buildEsSort());
     }
 
-    const dsl = searchSource.getSearchRequestBody();
-    const risonDsl = rison.encode(dsl);
-
     const mvtUrlServicePath = getHttp().basePath.prepend(
       `/${GIS_API_PATH}/${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`
     );
@@ -832,7 +837,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     return `${mvtUrlServicePath}\
 ?geometryFieldName=${this._descriptor.geoField}\
 &index=${indexPattern.title}\
-&requestBody=${risonDsl}\
+&requestBody=${encodeMvtResponseBody(searchSource.getSearchRequestBody())}\
 &token=${refreshToken}`;
   }
 
@@ -840,9 +845,13 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     if (this._isTopHits() || this._descriptor.scalingType === SCALING_TYPES.MVT) {
       return null;
     }
-
-    const indexPattern = await this.getIndexPattern();
-    return indexPattern.timeFieldName ? indexPattern.timeFieldName : null;
+    try {
+      const indexPattern = await this.getIndexPattern();
+      return indexPattern.timeFieldName ? indexPattern.timeFieldName : null;
+    } catch (e) {
+      // do not throw when index pattern does not exist, error will be surfaced by getGeoJsonWithMeta
+      return null;
+    }
   }
 
   getUpdateDueToTimeslice(prevMeta: DataRequestMeta, timeslice?: Timeslice): boolean {
@@ -884,11 +893,14 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     const maxResultWindow = await this.getMaxResultWindow();
     const searchSource = await this.makeSearchSource(searchFilters, 0);
     searchSource.setField('trackTotalHits', maxResultWindow + 1);
-    const resp = await searchSource.fetch({
-      abortSignal: abortController.signal,
-      sessionId: searchFilters.searchSessionId,
-      legacyHitsTotal: false,
-    });
+    const { rawResponse: resp } = await lastValueFrom(
+      searchSource.fetch$({
+        abortSignal: abortController.signal,
+        sessionId: searchFilters.searchSessionId,
+        legacyHitsTotal: false,
+        executionContext: makePublicExecutionContext('es_search_source:all_doc_counts'),
+      })
+    );
     return !isTotalHitsGreaterThan(resp.hits.total as unknown as TotalHits, maxResultWindow);
   }
 }

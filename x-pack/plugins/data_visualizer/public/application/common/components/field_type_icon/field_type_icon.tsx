@@ -8,9 +8,9 @@
 import React, { FC } from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FieldIcon } from '@kbn/react-field/field_icon';
+import { FieldIcon } from '@kbn/react-field';
 import { getJobTypeLabel } from '../../util/field_types_utils';
-import type { JobFieldType } from '../../../../../common';
+import type { JobFieldType } from '../../../../../common/types';
 import './_index.scss';
 
 interface FieldTypeIconProps {

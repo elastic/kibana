@@ -1,0 +1,6 @@
+steps:
+  - command: .buildkite/scripts/steps/cloud/purge.sh
+    label: Purge old cloud deployments
+    timeout_in_minutes: 10
+    agents:
+      queue: kibana-default

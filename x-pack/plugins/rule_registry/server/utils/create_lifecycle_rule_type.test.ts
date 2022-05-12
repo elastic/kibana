@@ -13,11 +13,12 @@ import {
   ALERT_STATUS_RECOVERED,
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
-import { loggerMock } from '@kbn/logging/mocks';
-import { castArray, omit, mapValues } from 'lodash';
+import { loggerMock } from '@kbn/logging-mocks';
+import { castArray, omit } from 'lodash';
 import { RuleDataClient } from '../rule_data_client';
 import { createRuleDataClientMock } from '../rule_data_client/rule_data_client.mock';
 import { createLifecycleRuleTypeFactory } from './create_lifecycle_rule_type_factory';
+import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 
 type RuleTestHelpers = ReturnType<typeof createRule>;
 
@@ -66,10 +67,13 @@ function createRule(shouldWriteAlerts: boolean = true) {
 
   const scheduleActions = jest.fn();
 
-  const alertInstanceFactory = () => {
-    return {
-      scheduleActions,
-    } as any;
+  const alertFactory = {
+    create: () => {
+      return {
+        scheduleActions,
+      } as any;
+    },
+    done: () => ({ getRecoveredAlerts: () => [] }),
   };
 
   return {
@@ -107,16 +111,21 @@ function createRule(shouldWriteAlerts: boolean = true) {
           updatedBy: 'updatedBy',
         },
         services: {
-          alertInstanceFactory,
+          alertFactory,
           savedObjectsClient: {} as any,
+          uiSettingsClient: {} as any,
           scopedClusterClient: {} as any,
           shouldWriteAlerts: () => shouldWriteAlerts,
+          shouldStopExecution: () => false,
+          search: {} as any,
+          searchSourceClient: Promise.resolve({} as ISearchStartSearchSource),
         },
         spaceId: 'spaceId',
         state,
         tags: ['tags'],
         updatedBy: 'updatedBy',
         namespace: 'namespace',
+        executionId: 'b33f65d7-6e8b-4aae-8d20-c93613dec9f9',
       })) ?? {}) as Record<string, any>;
 
       previousStartedAt = startedAt;
@@ -222,9 +231,13 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.alert.instance.id": "opbeans-java",
               "kibana.alert.rule.category": "ruleTypeName",
               "kibana.alert.rule.consumer": "consumer",
+              "kibana.alert.rule.execution.uuid": "b33f65d7-6e8b-4aae-8d20-c93613dec9f9",
               "kibana.alert.rule.name": "name",
               "kibana.alert.rule.producer": "producer",
               "kibana.alert.rule.rule_type_id": "ruleTypeId",
+              "kibana.alert.rule.tags": Array [
+                "tags",
+              ],
               "kibana.alert.rule.uuid": "alertId",
               "kibana.alert.start": "2021-06-16T09:01:00.000Z",
               "kibana.alert.status": "active",
@@ -246,9 +259,13 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.alert.instance.id": "opbeans-node",
               "kibana.alert.rule.category": "ruleTypeName",
               "kibana.alert.rule.consumer": "consumer",
+              "kibana.alert.rule.execution.uuid": "b33f65d7-6e8b-4aae-8d20-c93613dec9f9",
               "kibana.alert.rule.name": "name",
               "kibana.alert.rule.producer": "producer",
               "kibana.alert.rule.rule_type_id": "ruleTypeId",
+              "kibana.alert.rule.tags": Array [
+                "tags",
+              ],
               "kibana.alert.rule.uuid": "alertId",
               "kibana.alert.start": "2021-06-16T09:01:00.000Z",
               "kibana.alert.status": "active",
@@ -293,14 +310,10 @@ describe('createLifecycleRuleTypeFactory', () => {
             (doc: any) => !('index' in doc) && doc['service.name'] === 'opbeans-node'
           ) as Record<string, any>;
 
-        const stored = mapValues(lastOpbeansNodeDoc, (val) => {
-          return castArray(val);
-        });
-
         // @ts-ignore 4.3.5 upgrade
         helpers.ruleDataClientMock.getReader().search.mockResolvedValueOnce({
           hits: {
-            hits: [{ fields: stored } as any],
+            hits: [{ _source: lastOpbeansNodeDoc } as any],
             total: {
               value: 1,
               relation: 'eq',
@@ -378,13 +391,9 @@ describe('createLifecycleRuleTypeFactory', () => {
             (doc: any) => !('index' in doc) && doc['service.name'] === 'opbeans-node'
           ) as Record<string, any>;
 
-        const stored = mapValues(lastOpbeansNodeDoc, (val) => {
-          return castArray(val);
-        });
-
         helpers.ruleDataClientMock.getReader().search.mockResolvedValueOnce({
           hits: {
-            hits: [{ fields: stored } as any],
+            hits: [{ _source: lastOpbeansNodeDoc } as any],
             total: {
               value: 1,
               relation: 'eq',

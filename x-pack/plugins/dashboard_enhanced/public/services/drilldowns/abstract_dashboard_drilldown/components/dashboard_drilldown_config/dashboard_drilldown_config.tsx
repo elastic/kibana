@@ -11,6 +11,7 @@ import {
   txtChooseDestinationDashboard,
   txtUseCurrentFilters,
   txtUseCurrentDateRange,
+  txtOpenInNewTab,
 } from './i18n';
 
 export interface DashboardDrilldownConfigProps {
@@ -18,9 +19,11 @@ export interface DashboardDrilldownConfigProps {
   dashboards: Array<EuiComboBoxOptionOption<string>>;
   currentFilters?: boolean;
   keepRange?: boolean;
+  openInNewTab?: boolean;
   onDashboardSelect: (dashboardId: string) => void;
   onCurrentFiltersToggle?: () => void;
   onKeepRangeToggle?: () => void;
+  onOpenInNewTab?: () => void;
   onSearchChange: (searchString: string) => void;
   isLoading: boolean;
   error?: string;
@@ -31,13 +34,15 @@ export const DashboardDrilldownConfig: React.FC<DashboardDrilldownConfigProps> =
   dashboards,
   currentFilters,
   keepRange,
+  openInNewTab,
   onDashboardSelect,
   onCurrentFiltersToggle,
   onKeepRangeToggle,
+  onOpenInNewTab,
   onSearchChange,
   isLoading,
   error,
-}) => {
+}: DashboardDrilldownConfigProps) => {
   const selectedTitle = dashboards.find((item) => item.value === activeDashboardId)?.label || '';
 
   return (
@@ -75,6 +80,16 @@ export const DashboardDrilldownConfig: React.FC<DashboardDrilldownConfigProps> =
             label={txtUseCurrentDateRange}
             checked={!!keepRange}
             onChange={onKeepRangeToggle}
+          />
+        </EuiFormRow>
+      )}
+      {!!onOpenInNewTab && (
+        <EuiFormRow hasChildLabel={false}>
+          <EuiSwitch
+            name="openInNewTab"
+            label={txtOpenInNewTab}
+            checked={!!openInNewTab}
+            onChange={onOpenInNewTab}
           />
         </EuiFormRow>
       )}

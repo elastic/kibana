@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternFieldBase } from '@kbn/es-query';
+import { DataViewFieldBase } from '@kbn/es-query';
 import * as i18n from '../translations';
 
 /**
@@ -14,7 +14,7 @@ import * as i18n from '../translations';
  */
 export const checkEmptyValue = (
   param: string | undefined,
-  field: IndexPatternFieldBase | undefined,
+  field: DataViewFieldBase | undefined,
   isRequired: boolean,
   touched: boolean
 ): string | undefined | null => {

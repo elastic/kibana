@@ -9,19 +9,27 @@ import {
   getEmptyFindResult,
   addPrepackagedRulesRequest,
   getFindResultWithSingleHit,
-  getAlertMock,
+  getRuleMock,
   getBasicEmptySearchResponse,
-  getBasicNoShardsSearchResponse,
 } from '../__mocks__/request_responses';
-import { configMock, requestContextMock, serverMock } from '../__mocks__';
+import { requestContextMock, serverMock } from '../__mocks__';
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 import { addPrepackedRulesRoute, createPrepackagedRules } from './add_prepackaged_rules_route';
-import { listMock } from '../../../../../../lists/server/mocks';
-import { ExceptionListClient } from '../../../../../../lists/server';
+import { listMock } from '@kbn/lists-plugin/server/mocks';
+import { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { installPrepackagedTimelines } from '../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+import { legacyMigrate } from '../../rules/utils';
+
+jest.mock('../../rules/utils', () => {
+  const actual = jest.requireActual('../../rules/utils');
+  return {
+    ...actual,
+    legacyMigrate: jest.fn(),
+  };
+});
 
 jest.mock('../../rules/get_prepackaged_rules', () => {
   return {
@@ -71,30 +79,18 @@ jest.mock('../../../timeline/routes/prepackaged_timelines/install_prepackaged_ti
   };
 });
 
-// Failing with rule registry enabled
-describe.skip.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('add_prepackaged_rules_route - %s', (_, isRuleRegistryEnabled) => {
+describe('add_prepackaged_rules_route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let mockExceptionsClient: ExceptionListClient;
-  const testif = isRuleRegistryEnabled ? test.skip : test;
-  const defaultConfig = context.securitySolution.getConfig();
 
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
     mockExceptionsClient = listMock.getExceptionListClient();
 
-    context.securitySolution.getConfig.mockImplementation(() =>
-      configMock.withRuleRegistryEnabled(defaultConfig, isRuleRegistryEnabled)
-    );
-
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
-    clients.rulesClient.update.mockResolvedValue(
-      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
-    );
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
     (installPrepackagedTimelines as jest.Mock).mockReset();
     (installPrepackagedTimelines as jest.Mock).mockResolvedValue({
@@ -105,6 +101,8 @@ describe.skip.each([
       errors: [],
     });
 
+    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
+
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     );
@@ -112,54 +110,11 @@ describe.skip.each([
   });
 
   describe('status codes', () => {
-    test('returns 200 when creating with a valid actionClient and rulesClient', async () => {
+    test('returns 200', async () => {
       const request = addPrepackagedRulesRequest();
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(200);
-    });
-
-    test('returns 404 if rulesClient is not available on the route', async () => {
-      context.alerting.getRulesClient = jest.fn();
-      const request = addPrepackagedRulesRequest();
-      const response = await server.inject(request, context);
-
-      expect(response.status).toEqual(404);
-      expect(response.body).toEqual({
-        message: 'Not Found',
-        status_code: 404,
-      });
-    });
-
-    test('it returns a 400 if the index does not exist when rule registry not enabled', async () => {
-      const request = addPrepackagedRulesRequest();
-      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(
-          getBasicNoShardsSearchResponse()
-        )
-      );
-      const response = await server.inject(request, context);
-
-      expect(response.status).toEqual(isRuleRegistryEnabled ? 200 : 400);
-      if (!isRuleRegistryEnabled) {
-        expect(response.body).toEqual({
-          status_code: 400,
-          message: expect.stringContaining(
-            'Pre-packaged rules cannot be installed until the signals index is created'
-          ),
-        });
-      }
-    });
-
-    test('returns 404 if siem client is unavailable', async () => {
-      const { securitySolution, ...contextWithoutSecuritySolution } = context;
-      const response = await server.inject(
-        addPrepackagedRulesRequest(),
-        // @ts-expect-error
-        contextWithoutSecuritySolution
-      );
-      expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
   });
 
@@ -167,7 +122,7 @@ describe.skip.each([
     test('1 rule is installed and 0 are updated when find results are empty', async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
       const request = addPrepackagedRulesRequest();
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
@@ -180,7 +135,7 @@ describe.skip.each([
 
     test('1 rule is updated and 0 are installed when we return a single find and the versions are different', async () => {
       const request = addPrepackagedRulesRequest();
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
@@ -190,20 +145,6 @@ describe.skip.each([
         timelines_updated: 0,
       });
     });
-
-    testif(
-      'catches errors if signals index does not exist when rule registry not enabled',
-      async () => {
-        context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
-          elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Test error'))
-        );
-        const request = addPrepackagedRulesRequest();
-        const response = await server.inject(request, context);
-
-        expect(response.status).toEqual(500);
-        expect(response.body).toEqual({ message: 'Test error', status_code: 500 });
-      }
-    );
   });
 
   test('should install prepackaged timelines', async () => {
@@ -224,7 +165,7 @@ describe.skip.each([
       ],
     });
     const request = addPrepackagedRulesRequest();
-    const response = await server.inject(request, context);
+    const response = await server.inject(request, requestContextMock.convertContext(context));
     expect(response.body).toEqual({
       rules_installed: 0,
       rules_updated: 1,
@@ -243,7 +184,7 @@ describe.skip.each([
       errors: [],
     });
     const request = addPrepackagedRulesRequest();
-    const response = await server.inject(request, context);
+    const response = await server.inject(request, requestContextMock.convertContext(context));
     expect(response.body).toEqual({
       rules_installed: 0,
       rules_updated: 1,
@@ -262,7 +203,7 @@ describe.skip.each([
       errors: [],
     });
     const request = addPrepackagedRulesRequest();
-    const response = await server.inject(request, context);
+    const response = await server.inject(request, requestContextMock.convertContext(context));
     expect(response.body).toEqual({
       rules_installed: 0,
       rules_updated: 1,
@@ -289,7 +230,7 @@ describe.skip.each([
       ],
     });
     const request = addPrepackagedRulesRequest();
-    const response = await server.inject(request, context);
+    const response = await server.inject(request, requestContextMock.convertContext(context));
     expect(response.body).toEqual({
       rules_installed: 0,
       rules_updated: 1,

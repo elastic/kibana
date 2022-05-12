@@ -11,6 +11,11 @@ jest.doMock('./client_config', () => ({
   parseClientOptions: parseClientOptionsMock,
 }));
 
+export const createTransportMock = jest.fn();
+jest.doMock('./create_transport', () => ({
+  createTransport: createTransportMock,
+}));
+
 export const ClientMock = jest.fn();
 jest.doMock('@elastic/elasticsearch', () => {
   const actual = jest.requireActual('@elastic/elasticsearch');

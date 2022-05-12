@@ -126,7 +126,7 @@ export const SnapshotSearchBar: React.FunctionComponent<Props> = ({
     </EuiButton>
   );
 
-  const [query, setQuery] = useState<Query>(getQueryFromListParams(listParams));
+  const [query, setQuery] = useState<Query>(getQueryFromListParams(listParams, searchSchema));
   const [error, setError] = useState<Error | null>(null);
 
   const onSearchBarChange = (args: EuiSearchBarOnChangeArgs) => {
@@ -152,12 +152,13 @@ export const SnapshotSearchBar: React.FunctionComponent<Props> = ({
         onChange={onSearchBarChange}
         toolsLeft={deleteButton}
         toolsRight={reloadButton}
-        box={{ schema: searchSchema, incremental: true }}
+        box={{ schema: searchSchema, incremental: true, 'data-test-subj': 'snapshotListSearch' }}
       />
       <EuiSpacer />
       {error ? (
         <>
           <EuiCallOut
+            data-test-subj="snapshotListSearchError"
             iconType="alert"
             color="danger"
             title={

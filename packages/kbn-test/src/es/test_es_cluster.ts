@@ -12,13 +12,11 @@ import del from 'del';
 // @ts-expect-error in js
 import { Cluster } from '@kbn/es';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
-import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
-import type { ToolingLog } from '@kbn/dev-utils';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
 import { esTestConfig } from './es_test_config';
-import { convertToKibanaClient } from './client_to_kibana_client';
 
-import { KIBANA_ROOT } from '../';
+import { KIBANA_ROOT } from '..';
 
 interface TestEsClusterNodesOptions {
   name: string;
@@ -43,6 +41,7 @@ interface Node {
   ) => Promise<{ insallPath: string }>;
   start: (installPath: string, opts: Record<string, unknown>) => Promise<void>;
   stop: () => Promise<void>;
+  kill: () => Promise<void>;
 }
 
 export interface ICluster {
@@ -53,7 +52,6 @@ export interface ICluster {
   stop: () => Promise<void>;
   cleanup: () => Promise<void>;
   getClient: () => Client;
-  getKibanaEsClient: () => KibanaClient;
   getHostUrls: () => string[];
 }
 
@@ -139,7 +137,20 @@ export interface CreateTestEsClusterOptions {
    * }
    */
   port?: number;
+  /**
+   * Should this ES cluster use SSL?
+   */
   ssl?: boolean;
+  /**
+   * Explicit transport port for a single node to run on, or a string port range to use eg. '9300-9400'
+   * defaults to the transport port from `packages/kbn-test/src/es/es_test_config.ts`
+   */
+  transportPort?: number | string;
+  /**
+   * Report to the creator of the es-test-cluster that the es node has exitted before stop() was called, allowing
+   * this caller to react appropriately. If this is not passed then an uncatchable exception will be thrown
+   */
+  onEarlyExit?: (msg: string) => void;
 }
 
 export function createTestEsCluster<
@@ -158,13 +169,15 @@ export function createTestEsCluster<
     esJavaOpts,
     clusterName: customClusterName = 'es-test-cluster',
     ssl,
+    transportPort,
+    onEarlyExit,
   } = options;
 
   const clusterName = `${CI_PARALLEL_PROCESS_PREFIX}${customClusterName}`;
 
   const defaultEsArgs = [
     `cluster.name=${clusterName}`,
-    `transport.port=${esTestConfig.getTransportPort()}`,
+    `transport.port=${transportPort ?? esTestConfig.getTransportPort()}`,
     // For multi-node clusters, we make all nodes master-eligible by default.
     ...(nodes.length > 1
       ? ['discovery.type=zen', `cluster.initial_master_nodes=${nodes.map((n) => n.name).join(',')}`]
@@ -247,9 +260,11 @@ export function createTestEsCluster<
             esArgs: assignArgs(esArgs, overriddenArgs),
             esJavaOpts,
             // If we have multiple nodes, we shouldn't try setting up the native realm
-            // right away, or ES will complain as the cluster isn't ready. So we only
+            // right away or wait for ES to be green, the cluster isn't ready. So we only
             // set it up after the last node is started.
             skipNativeRealmSetup: this.nodes.length > 1 && i < this.nodes.length - 1,
+            skipReadyCheck: this.nodes.length > 1 && i < this.nodes.length - 1,
+            onEarlyExit,
           });
         });
       }
@@ -261,20 +276,26 @@ export function createTestEsCluster<
     }
 
     async stop() {
-      const nodeStopPromises = [];
-      for (let i = 0; i < this.nodes.length; i++) {
-        nodeStopPromises.push(async () => {
+      await Promise.all(
+        this.nodes.map(async (node, i) => {
           log.info(`[es] stopping node ${nodes[i].name}`);
-          return await this.nodes[i].stop();
-        });
-      }
-      await Promise.all(nodeStopPromises.map(async (stop) => await stop()));
+          await node.stop();
+        })
+      );
 
       log.info('[es] stopped');
     }
 
     async cleanup() {
-      await this.stop();
+      log.info('[es] killing', this.nodes.length === 1 ? 'node' : `${this.nodes.length} nodes`);
+      await Promise.all(
+        this.nodes.map(async (node, i) => {
+          log.info(`[es] stopping node ${nodes[i].name}`);
+          // we are deleting this install, stop ES more aggressively
+          await node.kill();
+        })
+      );
+
       await del(config.installPath, { force: true });
       log.info('[es] cleanup complete');
     }
@@ -287,13 +308,6 @@ export function createTestEsCluster<
         node: this.getHostUrls()[0],
         Connection: HttpConnection,
       });
-    }
-
-    /**
-     * Returns an ES Client to the configured cluster
-     */
-    getKibanaEsClient(): KibanaClient {
-      return convertToKibanaClient(this.getClient());
     }
 
     getUrl() {

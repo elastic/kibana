@@ -29,7 +29,7 @@ import { euiPaletteColorBlind } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { useChartTheme } from '../../../../../../observability/public';
+import { useChartTheme } from '@kbn/observability-plugin/public';
 
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import type { HistogramItem } from '../../../../../common/correlations/types';
@@ -156,28 +156,31 @@ export function TransactionDistributionChart({
         <Chart>
           <Settings
             rotation={0}
-            theme={{
+            theme={[
+              {
+                legend: {
+                  spacingBuffer: 100,
+                },
+                areaSeriesStyle: {
+                  line: {
+                    visible: true,
+                  },
+                },
+                axes: {
+                  tickLine: {
+                    visible: true,
+                    size: 5,
+                    padding: 10,
+                  },
+                  tickLabel: {
+                    fontSize: 10,
+                    fill: euiTheme.eui.euiColorMediumShade,
+                    padding: 0,
+                  },
+                },
+              },
               ...chartTheme,
-              legend: {
-                spacingBuffer: 100,
-              },
-              areaSeriesStyle: {
-                line: {
-                  visible: true,
-                },
-              },
-              axes: {
-                ...chartTheme.axes,
-                tickLine: {
-                  size: 5,
-                },
-                tickLabel: {
-                  fontSize: 10,
-                  fill: euiTheme.eui.euiColorMediumShade,
-                  padding: 0,
-                },
-              },
-            }}
+            ]}
             showLegend={true}
             legendPosition={Position.Bottom}
             onBrushEnd={onChartSelection}

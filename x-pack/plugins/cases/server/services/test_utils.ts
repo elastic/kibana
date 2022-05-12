@@ -5,20 +5,23 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectReference, SavedObjectsFindResult } from 'kibana/server';
+import { SavedObject, SavedObjectReference, SavedObjectsFindResult } from '@kbn/core/server';
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import { ESConnectorFields } from '.';
 import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '../common/constants';
 import {
+  CaseAttributes,
   CaseConnector,
+  CaseExternalServiceBasic,
   CaseFullExternalService,
+  CaseSeverity,
   CaseStatuses,
-  CaseType,
   ConnectorTypes,
-  noneConnectorId,
+  NONE_CONNECTOR_ID,
 } from '../../common/api';
 import { CASE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { ESCaseAttributes, ExternalServicesWithoutConnectorId } from './cases/types';
-import { ACTION_SAVED_OBJECT_TYPE } from '../../../actions/server';
+import { getNoneCaseConnector } from '../common/utils';
 
 /**
  * This is only a utility interface to help with constructing test cases. After the migration, the ES format will no longer
@@ -80,8 +83,8 @@ export const createJiraConnector = ({
 };
 
 export const createExternalService = (
-  overrides?: Partial<CaseFullExternalService>
-): CaseFullExternalService => ({
+  overrides?: Partial<CaseExternalServiceBasic>
+): CaseExternalServiceBasic => ({
   connector_id: '100',
   connector_name: '.jira',
   external_id: '100',
@@ -96,7 +99,7 @@ export const createExternalService = (
   ...overrides,
 });
 
-export const basicCaseFields = {
+export const basicCaseFields: CaseAttributes = {
   closed_at: null,
   closed_by: null,
   created_at: '2019-11-25T21:54:48.952Z',
@@ -105,17 +108,20 @@ export const basicCaseFields = {
     email: 'testemail@elastic.co',
     username: 'elastic',
   },
+  severity: CaseSeverity.LOW,
+  duration: null,
   description: 'This is a brand new case of a bad meanie defacing data',
   title: 'Super Bad Security Issue',
   status: CaseStatuses.open,
   tags: ['defacement'],
-  type: CaseType.individual,
   updated_at: '2019-11-25T21:54:48.952Z',
   updated_by: {
     full_name: 'elastic',
     email: 'testemail@elastic.co',
     username: 'elastic',
   },
+  connector: getNoneCaseConnector(),
+  external_service: null,
   settings: {
     syncAlerts: true,
   },
@@ -178,7 +184,7 @@ export const createSavedObjectReferences = ({
   connector?: ESCaseConnectorWithId;
   externalService?: CaseFullExternalService;
 } = {}): SavedObjectReference[] => [
-  ...(connector && connector.id !== noneConnectorId
+  ...(connector && connector.id !== NONE_CONNECTOR_ID
     ? [
         {
           id: connector.id,

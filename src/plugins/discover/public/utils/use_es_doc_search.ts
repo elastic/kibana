@@ -8,12 +8,13 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IndexPattern } from '../../../data/common';
+import { firstValueFrom } from 'rxjs';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { DocProps } from '../application/doc/components/doc';
 import { ElasticRequestState } from '../application/doc/types';
-import { getServices } from '../kibana_services';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../common';
 import { ElasticSearchHit } from '../types';
+import { useDiscoverServices } from './use_discover_services';
 
 type RequestBody = Pick<estypes.SearchRequest, 'body'>;
 
@@ -23,7 +24,7 @@ type RequestBody = Pick<estypes.SearchRequest, 'body'>;
  */
 export function buildSearchBody(
   id: string,
-  indexPattern: IndexPattern,
+  indexPattern: DataView,
   useNewFieldsApi: boolean,
   requestAllFields?: boolean
 ): RequestBody | undefined {
@@ -69,19 +70,19 @@ export function useEsDocSearch({
 }: DocProps): [ElasticRequestState, ElasticSearchHit | null, () => void] {
   const [status, setStatus] = useState(ElasticRequestState.Loading);
   const [hit, setHit] = useState<ElasticSearchHit | null>(null);
-  const { data, uiSettings } = useMemo(() => getServices(), []);
+  const { data, uiSettings } = useDiscoverServices();
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
   const requestData = useCallback(async () => {
     try {
-      const { rawResponse } = await data.search
-        .search({
+      const { rawResponse } = await firstValueFrom(
+        data.search.search({
           params: {
             index,
             body: buildSearchBody(id, indexPattern, useNewFieldsApi, requestSource)?.body,
           },
         })
-        .toPromise();
+      );
 
       const hits = rawResponse.hits;
 

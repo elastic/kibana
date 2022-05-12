@@ -10,10 +10,10 @@ import {
   Collector,
   createUsageCollectionSetupMock,
   createCollectorFetchContextMock,
-} from '../../../../usage_collection/server/mocks';
+} from '@kbn/usage-collection-plugin/server/mocks';
 import { registerEventLoopDelaysCollector } from './event_loop_delays_usage_collector';
-import { loggingSystemMock, savedObjectsRepositoryMock } from '../../../../../core/server/mocks';
-import type { SavedObjectsFindResponse } from '../../../../../core/server';
+import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
 
 const logger = loggingSystemMock.createLogger();
 

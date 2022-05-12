@@ -18,6 +18,7 @@ export const GetPackagesRequestSchema = {
   query: schema.object({
     category: schema.maybe(schema.string()),
     experimental: schema.maybe(schema.boolean()),
+    excludeInstallStatus: schema.maybe(schema.boolean({ defaultValue: false })),
   }),
 };
 
@@ -74,7 +75,8 @@ export const InstallPackageFromRegistryRequestSchema = {
   }),
   body: schema.nullable(
     schema.object({
-      force: schema.boolean(),
+      force: schema.boolean({ defaultValue: false }),
+      ignore_constraints: schema.boolean({ defaultValue: false }),
     })
   ),
 };

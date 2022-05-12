@@ -7,7 +7,7 @@
  */
 
 import { pick } from 'lodash';
-import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/server';
+import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { ExpressionsService, ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
 
 export type ExpressionsServerSetup = ExpressionsServiceSetup;
@@ -22,10 +22,6 @@ export class ExpressionsServerPlugin
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup): ExpressionsServerSetup {
-    this.expressions.executor.extendContext({
-      environment: 'server',
-    });
-
     const setup = this.expressions.setup(pick(core, 'getStartServices'));
 
     return Object.freeze(setup);

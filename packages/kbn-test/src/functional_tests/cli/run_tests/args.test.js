@@ -6,8 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
+
 import { displayHelp, processOptions } from './args';
-import { createAbsolutePathSerializer } from '@kbn/dev-utils';
+
+jest.mock('../../../functional_test_runner/lib/es_version', () => {
+  return {
+    EsVersion: class {
+      static getDefault() {
+        return '999.999.999';
+      }
+    },
+  };
+});
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer(process.cwd()));
 

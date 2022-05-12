@@ -14,15 +14,15 @@ import type {
   ApiCallByListIdProps,
   UpdateExceptionListItemProps,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { coreMock } from '@kbn/core/public/mocks';
+import { HttpStart } from '@kbn/core/public';
 
 import { ENTRIES_WITH_IDS } from '../../../common/constants.mock';
 import { getUpdateExceptionListItemSchemaMock } from '../../../common/schemas/request/update_exception_list_item_schema.mock';
-import { coreMock } from '../../../../../../src/core/public/mocks';
 import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';
 import { getFoundExceptionListItemSchemaMock } from '../../../common/schemas/response/found_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
 import { getCreateExceptionListItemSchemaMock } from '../../../common/schemas/request/create_exception_list_item_schema.mock';
-import { HttpStart } from '../../../../../../src/core/public';
 
 jest.mock('@kbn/securitysolution-list-api');
 

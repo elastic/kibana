@@ -37,19 +37,53 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
   /** Access the fields on the form. */
   getFields: () => FieldsMap;
   /** Access the defaultValue for a specific field */
-  getFieldDefaultValue: (path: string) => unknown;
-  /**
-   * Return the form data. It accepts an optional options object with an `unflatten` parameter (defaults to `true`).
-   * If you are only interested in the raw form data, pass `unflatten: false` to the handler
-   */
+  getFieldDefaultValue: <FieldType = unknown>(path: string) => FieldType | undefined;
+  /** Return the form data. */
   getFormData: () => T;
   /* Returns an array with of all errors in the form. */
   getErrors: () => string[];
   /**
+   * Update multiple field values at once. You don't need to provide all the form
+   * fields, **partial** update is supported. This method is mainly useful to update an array
+   * of object fields.
+   *
+   * @example
+   * ```js
+   * // Update an array of fields
+   * form.updateFieldValues({ myArray: [{ foo: 'bar', baz: true }, { foo2: 'bar2', baz: false }] })
+   *
+   * // or simply multiple fields at once
+   * form.updateFieldValues({ foo: 'bar', baz: false })
+   * ```
+   */
+  updateFieldValues: (
+    updatedFormData: Partial<T> & FormData,
+    options?: {
+      /**
+       * Flag to indicate if the deserializer(s) are run against the provided form data.
+       * @default true
+       */
+      runDeserializer?: boolean;
+    }
+  ) => void;
+  /**
    * Reset the form states to their initial value and optionally
    * all the fields to their initial values.
    */
-  reset: (options?: { resetValues?: boolean; defaultValue?: Partial<T> }) => void;
+  reset: (options?: {
+    /**
+     * Flag to indicate if the fields values are reset or only the states
+     * (isSubmitted, isPristine, isValidated...).
+     * @default true
+     */
+    resetValues?: boolean;
+    /**
+     * The defaultValue object of the form to reset to (if resetValues is "true").
+     * If not specified, the initial "defaultValue" passed when initiating the form will be used.
+     * Pass an empty object (`{}`) to reset to a blank form.
+     */
+    defaultValue?: Partial<T>;
+  }) => void;
   validateFields: (
     fieldNames: string[],
     /** Run only blocking validations */
@@ -57,12 +91,18 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
   ) => Promise<{ areFieldsValid: boolean; isFormValid: boolean | undefined }>;
   readonly __options: Required<FormOptions>;
   __getFormData$: () => Subject<FormData>;
-  __addField: (field: FieldHook) => void;
+  __addField: (field: FieldHook<any>) => void;
   __removeField: (fieldNames: string | string[]) => void;
   __updateFormDataAt: (field: string, value: unknown) => void;
   __updateDefaultValueAt: (field: string, value: unknown) => void;
-  __readFieldConfigFromSchema: (field: string) => FieldConfig;
-  __getFormDefaultValue: () => FormData;
+  __readFieldConfigFromSchema: <
+    FieldType = unknown,
+    FormType = FormData,
+    InternalFieldType = FieldType
+  >(
+    fieldPath: string
+  ) => FieldConfig<FieldType, FormType, InternalFieldType> | undefined;
+  __getFormDefaultValue: () => I | undefined;
   __getFieldsRemoved: () => FieldsMap;
 }
 
@@ -116,9 +156,17 @@ export interface FieldHook<T = unknown, I = T> {
   readonly isValidating: boolean;
   readonly isValidated: boolean;
   readonly isChangingValue: boolean;
+  /**
+   * Validations declared on the field can have a specific "type" added (if not specified
+   * the `field` type is set by default). When we validate a field, all errors are added into
+   * a common "errors" array.
+   * Use this handler to retrieve error messages for a specific error code or validation type.
+   */
   getErrorsMessages: (args?: {
-    validationType?: 'field' | string;
+    /** The errorCode to return error messages from. It takes precedence over "validationType" */
     errorCode?: string;
+    /** The validation type to return error messages from */
+    validationType?: 'field' | string;
   }) => string | null;
   /**
    * Form <input /> "onChange" event handler
@@ -129,11 +177,15 @@ export interface FieldHook<T = unknown, I = T> {
   /**
    * Handler to change the field value
    *
-   * @param value The new value to assign to the field. If you provide a callback, you wil receive
-   * the previous value and you need to return the next value.
+   * @param value The new value to assign to the field. If a callback is provided, the new value
+   * must be returned synchronously.
    */
   setValue: (value: I | ((prevValue: I) => I)) => void;
   setErrors: (errors: ValidationError[]) => void;
+  /**
+   * Clear field errors. One of multiple validation types can be specified.
+   * If no type is specified the default `field` type will be cleared.
+   */
   clearErrors: (type?: string | string[]) => void;
   /**
    * Validate a form field, running all its validations.
@@ -147,8 +199,10 @@ export interface FieldHook<T = unknown, I = T> {
     onlyBlocking?: boolean;
   }) => FieldValidateResponse | Promise<FieldValidateResponse>;
   reset: (options?: { resetValue?: boolean; defaultValue?: T }) => unknown | undefined;
-  // Flag to indicate if the field value will be included in the form data outputted
-  // when calling form.getFormData();
+  /**
+   * (Used internally). Flag to indicate if the field value will be included in the form data outputted
+   * when submitting the form or calling `form.getFormData()`.
+   */
   __isIncludedInOutput: boolean;
   __serializeValue: (internalValue?: I) => T;
 }
@@ -160,11 +214,16 @@ export interface FieldConfig<T = unknown, FormType extends FormData = FormData, 
   readonly type?: string;
   readonly defaultValue?: T;
   readonly validations?: Array<ValidationConfig<FormType, string, I>>;
-  readonly formatters?: FormatterFunc[];
+  readonly formatters?: Array<FormatterFunc<I>>;
   readonly deserializer?: SerializerFunc<I, T>;
   readonly serializer?: SerializerFunc<T, I>;
   readonly fieldsToValidateOnChange?: string[];
   readonly valueChangeDebounceTime?: number;
+}
+
+export interface FieldValidationData {
+  validationData?: unknown;
+  validationDataProvider?: () => Promise<unknown>;
 }
 
 export interface FieldsMap {
@@ -206,7 +265,7 @@ export type ValidationFunc<
   V = unknown
 > = (
   data: ValidationFuncArg<I, V>
-) => ValidationError<E> | void | undefined | ValidationCancelablePromise;
+) => ValidationError<E> | void | undefined | ValidationCancelablePromise<E>;
 
 export type ValidationResponsePromise<E extends string = string> = Promise<
   ValidationError<E> | void | undefined
@@ -226,7 +285,7 @@ export interface FormData {
   [key: string]: any;
 }
 
-type FormatterFunc = (value: any, formData: FormData) => unknown;
+type FormatterFunc<I = unknown> = (value: any, formData: FormData) => I;
 
 // We set it as unknown as a form field can be any of any type
 // string | number | boolean | string[] ...

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
+import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getLatestTransformConfig, getPivotTransformConfig } from './index';
+import { getLatestTransformConfig, getPivotTransformConfig } from '.';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -81,6 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
         await transform.api.deleteIndices(testData.originalConfig.dest.index);
       }
       await transform.api.cleanTransformIndices();
+      await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
     });
 
     for (const testData of testDataList) {

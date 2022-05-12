@@ -13,17 +13,11 @@ export { SavedObjectSaveModal, SavedObjectSaveModalOrigin, showSaveModal } from 
 export type { SavedObjectFinderUiProps, SavedObjectMetaData } from './finder';
 export { getSavedObjectFinder, SavedObjectFinderUi } from './finder';
 export type {
-  SavedObjectLoaderFindOptions,
   SavedObjectDecorator,
   SavedObjectDecoratorFactory,
   SavedObjectDecoratorConfig,
 } from './saved_object';
-export {
-  SavedObjectLoader,
-  checkForDuplicateTitle,
-  saveWithConfirmation,
-  isErrorNonFatal,
-} from './saved_object';
+export { checkForDuplicateTitle, saveWithConfirmation, isErrorNonFatal } from './saved_object';
 export type { SavedObjectSaveOpts, SavedObject, SavedObjectConfig } from './types';
 export { PER_PAGE_SETTING, LISTING_LIMIT_SETTING } from '../common';
 export type { SavedObjectsStart, SavedObjectSetup } from './plugin';

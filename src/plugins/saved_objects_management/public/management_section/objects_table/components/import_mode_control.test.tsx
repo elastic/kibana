@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
-import { shallowWithI18nProvider, mountWithIntl } from '@kbn/test/jest';
+import { shallowWithI18nProvider, mountWithIntl } from '@kbn/test-jest-helpers';
 import { ImportModeControl, ImportModeControlProps } from './import_mode_control';
 
 describe('ImportModeControl', () => {

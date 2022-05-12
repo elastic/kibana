@@ -9,9 +9,14 @@ import React from 'react';
 import type { Store } from 'redux';
 import { Provider } from 'react-redux';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { FieldBrowserProps } from '../t_grid/toolbar/fields_browser/types';
 import { StatefulFieldsBrowser } from '../t_grid/toolbar/fields_browser';
-export type { FieldBrowserProps } from '../t_grid/toolbar/fields_browser/types';
+import { FieldBrowserProps } from '../../../common/types/fields_browser';
+export type {
+  CreateFieldComponent,
+  FieldBrowserOptions,
+  FieldBrowserProps,
+  GetFieldTableColumns,
+} from '../../../common/types/fields_browser';
 
 const EMPTY_BROWSER_FIELDS = {};
 
@@ -28,10 +33,7 @@ export const FieldBrowserWrappedComponent = (props: FieldBrowserWrappedComponent
   return (
     <Provider store={store}>
       <I18nProvider>
-        <StatefulFieldsBrowser
-          data-test-ref="steph-loves-this-fields-browser"
-          {...fieldsBrowseProps}
-        />
+        <StatefulFieldsBrowser {...fieldsBrowseProps} />
       </I18nProvider>
     </Provider>
   );

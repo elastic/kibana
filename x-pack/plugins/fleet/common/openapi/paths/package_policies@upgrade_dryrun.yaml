@@ -21,12 +21,15 @@ post:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              hasErrors:
-                type: boolean
-              diff:
-                schema:
-                $ref: ../components/schemas/upgrade_diff.yaml
+            type: array
+            items:
+              type: object
+              properties:
+                hasErrors:
+                  type: boolean
+                diff:
+                  $ref: ../components/schemas/upgrade_diff.yaml
+                agent_diff:
+                  $ref: ../components/schemas/upgrade_agent_diff.yaml
               required:
                 - hasErrors

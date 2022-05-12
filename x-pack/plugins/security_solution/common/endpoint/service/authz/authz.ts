@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { FleetAuthz } from '@kbn/fleet-plugin/common';
 import { LicenseService } from '../../../license';
-import { FleetAuthz } from '../../../../../fleet/common';
 import { EndpointAuthz } from '../../types/authz';
+import { MaybeImmutable } from '../../types';
 
 /**
  * Used by both the server and the UI to generate the Authorization for access to Endpoint related
@@ -15,20 +16,22 @@ import { EndpointAuthz } from '../../types/authz';
  *
  * @param licenseService
  * @param fleetAuthz
+ * @param userRoles
  */
 export const calculateEndpointAuthz = (
   licenseService: LicenseService,
-  fleetAuthz: FleetAuthz
+  fleetAuthz: FleetAuthz,
+  userRoles: MaybeImmutable<string[]>
 ): EndpointAuthz => {
   const isPlatinumPlusLicense = licenseService.isPlatinumPlus();
-  const hasAllAccessToFleet = fleetAuthz.fleet.all;
+  const hasAllAccessToFleet = userRoles.includes('superuser');
 
   return {
     canAccessFleet: hasAllAccessToFleet,
     canAccessEndpointManagement: hasAllAccessToFleet,
-    canCreateArtifactsByPolicy: isPlatinumPlusLicense,
+    canCreateArtifactsByPolicy: hasAllAccessToFleet && isPlatinumPlusLicense,
     canIsolateHost: isPlatinumPlusLicense && hasAllAccessToFleet,
-    canUnIsolateHost: true,
+    canUnIsolateHost: hasAllAccessToFleet,
   };
 };
 

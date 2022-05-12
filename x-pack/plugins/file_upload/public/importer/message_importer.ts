@@ -6,7 +6,7 @@
  */
 
 import { Importer } from './importer';
-import { Doc } from '../../common';
+import { ImportDocMessage } from '../../common/types';
 import { CreateDocsResponse, ImportFactoryOptions } from './types';
 
 export class MessageImporter extends Importer {
@@ -33,7 +33,7 @@ export class MessageImporter extends Importer {
   protected _createDocs(text: string, isLastPart: boolean): CreateDocsResponse {
     let remainder = 0;
     try {
-      const docs: Doc[] = [];
+      const docs: ImportDocMessage[] = [];
 
       let message = '';
       let line = '';
@@ -82,7 +82,7 @@ export class MessageImporter extends Importer {
     }
   }
 
-  private _processLine(data: Doc[], message: string, line: string) {
+  private _processLine(data: ImportDocMessage[], message: string, line: string) {
     if (this._excludeLinesRegex === null || line.match(this._excludeLinesRegex) === null) {
       if (this._multilineStartRegex === null || line.match(this._multilineStartRegex) !== null) {
         this._addMessage(data, message);
@@ -100,7 +100,7 @@ export class MessageImporter extends Importer {
     return message;
   }
 
-  private _addMessage(data: Doc[], message: string) {
+  private _addMessage(data: ImportDocMessage[], message: string) {
     // if the message ended \r\n (Windows line endings)
     // then omit the \r as well as the \n for consistency
     message = message.replace(/\r$/, '');

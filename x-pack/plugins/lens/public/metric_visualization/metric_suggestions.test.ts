@@ -111,6 +111,28 @@ describe('metric_suggestions', () => {
 
     expect(suggestion).toHaveLength(0);
   });
+
+  test('does not suggest for a bucketed value', () => {
+    const col = {
+      columnId: 'id',
+      operation: {
+        dataType: 'number',
+        label: `Top values`,
+        isBucketed: true,
+      },
+    } as const;
+    const suggestion = getSuggestions({
+      table: {
+        columns: [col],
+        isMultiRow: false,
+        layerId: 'l1',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: [],
+    });
+
+    expect(suggestion).toHaveLength(0);
+  });
   test('suggests a basic metric chart', () => {
     const [suggestion, ...rest] = getSuggestions({
       table: {
@@ -133,6 +155,41 @@ describe('metric_suggestions', () => {
           "layerType": "data",
         },
         "title": "Avg bytes",
+      }
+    `);
+  });
+
+  test('suggests a basic metric chart for non bucketed date value', () => {
+    const [suggestion, ...rest] = getSuggestions({
+      table: {
+        columns: [
+          {
+            columnId: 'id',
+            operation: {
+              dataType: 'date',
+              label: 'Last value of x',
+              isBucketed: false,
+            },
+          },
+        ],
+        isMultiRow: false,
+        layerId: 'l1',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: [],
+    });
+
+    expect(rest).toHaveLength(0);
+    expect(suggestion).toMatchInlineSnapshot(`
+      Object {
+        "previewIcon": [Function],
+        "score": 0.1,
+        "state": Object {
+          "accessor": "id",
+          "layerId": "l1",
+          "layerType": "data",
+        },
+        "title": "Last value of x",
       }
     `);
   });

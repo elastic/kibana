@@ -7,7 +7,7 @@
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FETCH_STATUS } from '../../public/hooks/use_fetcher';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { APIReturnType } from '../../public/services/rest/createCallApmApi';
+import type { APIReturnType } from '../../public/services/rest/create_call_apm_api';
 import { ENVIRONMENT_ALL } from '../environment_filter_values';
 
 export enum AnomalyDetectionSetupState {

@@ -22,7 +22,7 @@ export const validateConvertFilterToKueryNode = (
   indexMapping: IndexMapping
 ): KueryNode | undefined => {
   if (filter && indexMapping) {
-    const filterKueryNode =
+    let filterKueryNode =
       typeof filter === 'string' ? esKuery.fromKueryExpression(filter) : cloneDeep(filter);
 
     const validationFilterKuery = validateFilterKueryNode({
@@ -54,17 +54,20 @@ export const validateConvertFilterToKueryNode = (
       const existingKueryNode: KueryNode =
         path.length === 0 ? filterKueryNode : get(filterKueryNode, path);
       if (item.isSavedObjectAttr) {
-        existingKueryNode.arguments[0].value = existingKueryNode.arguments[0].value.split('.')[1];
+        const keySavedObjectAttr = existingKueryNode.arguments[0].value.split('.')[1];
+        existingKueryNode.arguments[0].value =
+          keySavedObjectAttr === 'id' ? '_id' : keySavedObjectAttr;
         const itemType = allowedTypes.filter((t) => t === item.type);
         if (itemType.length === 1) {
-          set(
-            filterKueryNode,
-            path,
-            esKuery.nodeTypes.function.buildNode('and', [
-              esKuery.nodeTypes.function.buildNode('is', 'type', itemType[0]),
-              existingKueryNode,
-            ])
-          );
+          const kueryToAdd = esKuery.nodeTypes.function.buildNode('and', [
+            esKuery.nodeTypes.function.buildNode('is', 'type', itemType[0]),
+            existingKueryNode,
+          ]);
+          if (path.length > 0) {
+            set(filterKueryNode, path, kueryToAdd);
+          } else {
+            filterKueryNode = kueryToAdd;
+          }
         }
       } else {
         existingKueryNode.arguments[0].value = existingKueryNode.arguments[0].value.replace(
@@ -171,6 +174,8 @@ export const isSavedObjectAttr = (key: string | null | undefined, indexMapping: 
   const keySplit = key != null ? key.split('.') : [];
   if (keySplit.length === 1 && fieldDefined(indexMapping, keySplit[0])) {
     return true;
+  } else if (keySplit.length === 2 && keySplit[1] === 'id') {
+    return true;
   } else if (keySplit.length === 2 && fieldDefined(indexMapping, keySplit[1])) {
     return true;
   } else {
@@ -216,6 +221,10 @@ export const hasFilterKeyError = (
 export const fieldDefined = (indexMappings: IndexMapping, key: string): boolean => {
   const mappingKey = 'properties.' + key.split('.').join('.properties.');
   if (get(indexMappings, mappingKey) != null) {
+    return true;
+  }
+
+  if (mappingKey === 'properties.id') {
     return true;
   }
 

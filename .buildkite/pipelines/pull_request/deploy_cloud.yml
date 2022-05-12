@@ -1,0 +1,7 @@
+steps:
+  - command: .buildkite/scripts/steps/cloud/build_and_deploy.sh
+    label: 'Build and Deploy to Cloud'
+    agents:
+      queue: n2-2
+    depends_on: build
+    timeout_in_minutes: 30

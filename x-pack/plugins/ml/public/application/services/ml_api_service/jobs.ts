@@ -45,6 +45,13 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
+  jobIdsWithGeo() {
+    return httpService.http<string[]>({
+      path: `${ML_BASE_PATH}/jobs/jobs_with_geo`,
+      method: 'GET',
+    });
+  },
+
   jobsWithTimerange(dateFormatTz: string) {
     const body = JSON.stringify({ dateFormatTz });
     return httpService.http<{

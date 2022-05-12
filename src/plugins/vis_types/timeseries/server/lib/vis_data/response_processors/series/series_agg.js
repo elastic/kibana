@@ -9,6 +9,7 @@ import { last, first } from 'lodash';
 import { SeriesAgg } from './_series_agg';
 import { getDefaultDecoration } from '../../helpers/get_default_decoration';
 import { calculateLabel } from '../../../../../common/calculate_label';
+import { SERIES_SEPARATOR } from '../../../../../common/constants';
 
 export function seriesAgg(resp, panel, series, meta, extractFields) {
   return (next) => async (results) => {
@@ -19,7 +20,7 @@ export function seriesAgg(resp, panel, series, meta, extractFields) {
       // Filter out the seires with the matching metric and store them
       // in targetSeries
       results = results.filter((s) => {
-        if (s.id.split(/:/)[0] === series.id) {
+        if (s.id.split(SERIES_SEPARATOR)[0] === series.id) {
           targetSeries.push(s.data);
           return false;
         }
@@ -32,7 +33,7 @@ export function seriesAgg(resp, panel, series, meta, extractFields) {
           return (fn && fn(acc)) || acc;
         }, targetSeries);
 
-      const fieldsForSeries = meta.index ? await extractFields({ id: meta.index }) : [];
+      const fieldsForSeries = meta.dataViewId ? await extractFields({ id: meta.dataViewId }) : [];
 
       results.push({
         id: `${series.id}`,

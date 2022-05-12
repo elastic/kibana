@@ -6,11 +6,9 @@
  */
 
 import { map } from 'rxjs/operators';
-import { connectToQueryState, esFilters } from '../../../../../../../src/plugins/data/public';
-import {
-  syncState,
-  BaseStateContainer,
-} from '../../../../../../../src/plugins/kibana_utils/public';
+import { FilterStateStore } from '@kbn/es-query';
+import { connectToQueryState } from '@kbn/data-plugin/public';
+import { syncState, BaseStateContainer } from '@kbn/kibana-utils-plugin/public';
 import { getData } from '../../../kibana_services';
 import { kbnUrlStateStorage } from '../../../render_app';
 import { AppStateManager } from './app_state_manager';
@@ -39,7 +37,7 @@ export function startAppStateSyncing(appStateManager: AppStateManager) {
     ),
   };
   const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(query, stateContainer, {
-    filters: esFilters.FilterStateStore.APP_STATE,
+    filters: FilterStateStore.APP_STATE,
     query: true,
   });
 

@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import './test_script.scss';
-
 import React, { Component, Fragment } from 'react';
 
 import {
@@ -24,13 +22,15 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { esQuery, IndexPattern, Query } from '../../../../../../../plugins/data/public';
-import { context as contextType } from '../../../../../../kibana_react/public';
+import { Query, buildEsQuery } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { context as contextType } from '@kbn/kibana-react-plugin/public';
 import { IndexPatternManagmentContextValue } from '../../../../types';
 import { ExecuteScript } from '../../types';
 
 interface TestScriptProps {
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   lang: string;
   name?: string;
   script?: string;
@@ -82,13 +82,8 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
 
     let query;
     if (searchContext) {
-      const esQueryConfigs = esQuery.getEsQueryConfig(this.context.services.uiSettings);
-      query = esQuery.buildEsQuery(
-        this.props.indexPattern,
-        searchContext.query || [],
-        [],
-        esQueryConfigs
-      );
+      const esQueryConfigs = getEsQueryConfig(this.context.services.uiSettings);
+      query = buildEsQuery(this.props.indexPattern, searchContext.query || [], [], esQueryConfigs);
     }
 
     const scriptResponse = await executeScript({
@@ -226,8 +221,11 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
           />
         </EuiFormRow>
 
+        <EuiSpacer size="s" />
+
         <div className="testScript__searchBar">
-          <this.context.services.data.ui.SearchBar
+          <this.context.services.unifiedSearch.ui.SearchBar
+            displayStyle="inPage"
             appName={'indexPatternManagement'}
             showFilterBar={false}
             showDatePicker={false}

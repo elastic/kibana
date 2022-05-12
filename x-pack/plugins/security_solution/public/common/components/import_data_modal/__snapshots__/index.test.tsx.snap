@@ -51,6 +51,7 @@ exports[`ImportDataModal renders correctly against snapshot 1`] = `
         Cancel
       </EuiButtonEmpty>
       <EuiButton
+        data-test-subj="import-data-modal-button"
         disabled={true}
         fill={true}
         onClick={[Function]}

@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import { jsonRt } from '@kbn/io-ts-utils/json_rt';
-import { createServerRouteRepository } from '@kbn/server-route-repository';
-import { ServerRoute } from '@kbn/server-route-repository';
+import { jsonRt } from '@kbn/io-ts-utils';
+import {
+  ServerRoute,
+  ServerRouteRepository,
+} from '@kbn/server-route-repository';
 import * as t from 'io-ts';
-import { CoreSetup, Logger } from 'src/core/server';
+import { CoreSetup, Logger } from '@kbn/core/server';
 import { APMConfig } from '../..';
 import { APMRouteCreateOptions, APMRouteHandlerResources } from '../typings';
 import { registerRoutes } from './register_apm_server_routes';
+import { NEVER } from 'rxjs';
 
 type RegisterRouteDependencies = Parameters<typeof registerRoutes>[0];
 
@@ -56,12 +59,6 @@ const getRegisterRouteDependencies = () => {
   };
 };
 
-const getRepository = () =>
-  createServerRouteRepository<
-    APMRouteHandlerResources,
-    APMRouteCreateOptions
-  >();
-
 const initApi = (
   routes: Array<
     ServerRoute<
@@ -75,11 +72,10 @@ const initApi = (
 ) => {
   const { mocks, dependencies } = getRegisterRouteDependencies();
 
-  let repository = getRepository();
-
-  routes.forEach((route) => {
-    repository = repository.add(route);
-  });
+  const repository: ServerRouteRepository = {};
+  for (const route of routes) {
+    repository[route.endpoint] = route;
+  }
 
   registerRoutes({
     ...dependencies,
@@ -110,9 +106,7 @@ const initApi = (
         query: {},
         body: null,
         events: {
-          aborted$: {
-            toPromise: () => new Promise(() => {}),
-          },
+          aborted$: NEVER,
         },
         ...request,
       },

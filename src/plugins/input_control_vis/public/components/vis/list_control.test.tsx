@@ -8,7 +8,7 @@
 
 import React from 'react';
 import sinon from 'sinon';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { ListControl } from './list_control';
 

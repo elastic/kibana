@@ -5,18 +5,19 @@
  * 2.0.
  */
 
+import axios, { AxiosResponse } from 'axios';
 // info on nodemailer: https://nodemailer.com/about/
 import nodemailer from 'nodemailer';
 import { default as MarkdownIt } from 'markdown-it';
 
-import { Logger } from '../../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { CustomHostSettings } from '../../config';
 import { getNodeSSLOptions, getSSLSettingsFromConfig } from './get_node_ssl_options';
 import { sendEmailGraphApi } from './send_email_graph_api';
-import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
-import { ProxySettings } from '../../types';
+import { ConnectorTokenClientContract, ProxySettings } from '../../types';
 import { AdditionalEmailServices } from '../../../common';
+import { getOAuthClientCredentialsAccessToken } from './get_oauth_client_credentials_access_token';
 
 // an email "service" which doesn't actually send, just returns what it would send
 export const JSON_TRANSPORT_SERVICE = '__json';
@@ -25,6 +26,7 @@ export const GRAPH_API_OAUTH_SCOPE = 'https://graph.microsoft.com/.default';
 export const EXCHANGE_ONLINE_SERVER_HOST = 'https://login.microsoftonline.com';
 
 export interface SendEmailOptions {
+  connectorId: string;
   transport: Transport;
   routing: Routing;
   content: Content;
@@ -59,42 +61,82 @@ export interface Content {
   message: string;
 }
 
-export async function sendEmail(logger: Logger, options: SendEmailOptions): Promise<unknown> {
+export async function sendEmail(
+  logger: Logger,
+  options: SendEmailOptions,
+  connectorTokenClient: ConnectorTokenClientContract
+): Promise<unknown> {
   const { transport, content } = options;
   const { message } = content;
   const messageHTML = htmlFromMarkdown(logger, message);
 
   if (transport.service === AdditionalEmailServices.EXCHANGE) {
-    return await sendEmailWithExchange(logger, options, messageHTML);
+    return await sendEmailWithExchange(logger, options, messageHTML, connectorTokenClient);
   } else {
     return await sendEmailWithNodemailer(logger, options, messageHTML);
   }
 }
 
 // send an email using MS Exchange Graph API
-async function sendEmailWithExchange(
+export async function sendEmailWithExchange(
   logger: Logger,
   options: SendEmailOptions,
-  messageHTML: string
+  messageHTML: string,
+  connectorTokenClient: ConnectorTokenClientContract
 ): Promise<unknown> {
-  const { transport, configurationUtilities } = options;
+  const { transport, configurationUtilities, connectorId } = options;
   const { clientId, clientSecret, tenantId, oauthTokenUrl } = transport;
-  // request access token for microsoft exchange online server with Graph API scope
 
-  const tokenResult = await requestOAuthClientCredentialsToken(
-    oauthTokenUrl ?? `${EXCHANGE_ONLINE_SERVER_HOST}/${tenantId}/oauth2/v2.0/token`,
+  const accessToken = await getOAuthClientCredentialsAccessToken({
+    connectorId,
     logger,
-    {
-      scope: GRAPH_API_OAUTH_SCOPE,
-      clientId,
-      clientSecret,
+    configurationUtilities,
+    credentials: {
+      config: {
+        clientId: clientId as string,
+        tenantId: tenantId as string,
+      },
+      secrets: {
+        clientSecret: clientSecret as string,
+      },
     },
-    configurationUtilities
-  );
+    oAuthScope: GRAPH_API_OAUTH_SCOPE,
+    tokenUrl: oauthTokenUrl ?? `${EXCHANGE_ONLINE_SERVER_HOST}/${tenantId}/oauth2/v2.0/token`,
+    connectorTokenClient,
+  });
+
+  if (!accessToken) {
+    throw new Error(`Unable to retrieve access token for connectorId: ${connectorId}`);
+  }
+
   const headers = {
     'Content-Type': 'application/json',
-    Authorization: `${tokenResult.tokenType} ${tokenResult.accessToken}`,
+    Authorization: accessToken,
   };
+
+  const axiosInstance = axios.create();
+  axiosInstance.interceptors.response.use(
+    async (response: AxiosResponse) => {
+      // Look for 4xx errors that indicate something is wrong with the request
+      // We don't know for sure that it is an access token issue but remove saved
+      // token just to be sure
+      if (response.status >= 400 && response.status < 500) {
+        await connectorTokenClient.deleteConnectorTokens({ connectorId });
+      }
+      return response;
+    },
+    async (error) => {
+      const statusCode = error?.response?.status;
+
+      // Look for 4xx errors that indicate something is wrong with the request
+      // We don't know for sure that it is an access token issue but remove saved
+      // token just to be sure
+      if (statusCode >= 400 && statusCode < 500) {
+        await connectorTokenClient.deleteConnectorTokens({ connectorId });
+      }
+      return Promise.reject(error);
+    }
+  );
 
   return await sendEmailGraphApi(
     {
@@ -104,7 +146,8 @@ async function sendEmailWithExchange(
       graphApiUrl: configurationUtilities.getMicrosoftGraphApiUrl(),
     },
     logger,
-    configurationUtilities
+    configurationUtilities,
+    axiosInstance
   );
 }
 

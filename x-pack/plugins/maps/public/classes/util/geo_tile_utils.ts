@@ -60,6 +60,39 @@ export function parseTileKey(tileKey: string): {
   return { x, y, zoom, tileCount };
 }
 
+export function getTilesForExtent(
+  zoom: number,
+  extent: MapExtent
+): Array<{ x: number; y: number; z: number }> {
+  const tileCount = getTileCount(Math.floor(zoom));
+  const minX = longitudeToTile(extent.minLon, tileCount);
+  const maxX = longitudeToTile(extent.maxLon, tileCount);
+  const minY = latitudeToTile(extent.maxLat, tileCount);
+  const maxY = latitudeToTile(extent.minLat, tileCount);
+
+  const tiles: Array<{ x: number; y: number; z: number }> = [];
+  for (let x = 0; x < tileCount && minX + x <= maxX; x++) {
+    const tileX = minX + x;
+    for (let y = 0; y < tileCount && minY + y <= maxY; y++) {
+      const tileY = minY + y;
+      tiles.push({
+        x: tileX < 0 ? tileCount - Math.abs(tileX) : tileX,
+        y: tileY < 0 ? tileCount - Math.abs(tileY) : tileY,
+        z: Math.floor(zoom),
+      });
+    }
+  }
+  return tiles;
+}
+
+export function getTileKey(lat: number, lon: number, zoom: number): string {
+  const tileCount = getTileCount(zoom);
+
+  const x = longitudeToTile(lon, tileCount);
+  const y = latitudeToTile(lat, tileCount);
+  return `${zoom}/${x}/${y}`;
+}
+
 function sinh(x: number): number {
   return (Math.exp(x) - Math.exp(-x)) / 2;
 }

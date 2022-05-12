@@ -6,7 +6,9 @@
 
 > Warning: This API is now obsolete.
 > 
-> Provided for legacy compatibility. Prefer the `response` property instead.
+> Provided for legacy compatibility. Prefer the `response` property instead.  8.8.0
+> 
+> Note to maintainers: when looking at usages, mind that typical use could be inside a `catch` block, so TS and code-reference navigation might not highlight them.
 > 
 
 <b>Signature:</b>

@@ -104,6 +104,20 @@ export interface IEmbeddable<
   getInput(): Readonly<I>;
 
   /**
+   * Because embeddables can inherit input from their parents, they also need a way to separate their own
+   * input from input which is inherited. If the embeddable does not have a parent, getExplicitInput
+   * and getInput should return the same.
+   **/
+  getExplicitInput(): Readonly<Partial<I>>;
+
+  /**
+   * Some embeddables contain input that should not be persisted anywhere beyond their own state. This method
+   * is a way for containers to separate input to store from input which can be ephemeral. In most cases, this
+   * will be the same as getExplicitInput
+   **/
+  getPersistableInput(): Readonly<Partial<I>>;
+
+  /**
    * Output state is:
    *
    * - State that should not change once the embeddable is instantiated, or
@@ -170,4 +184,11 @@ export interface IEmbeddable<
    * List of triggers that this embeddable will execute.
    */
   supportedTriggers(): string[];
+
+  /**
+   * Used to diff explicit embeddable input
+   */
+  getExplicitInputIsEqual(lastInput: Partial<I>): Promise<boolean>;
+
+  refreshInputFromParent(): void;
 }

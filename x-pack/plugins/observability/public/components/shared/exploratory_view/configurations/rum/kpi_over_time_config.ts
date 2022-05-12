@@ -48,7 +48,7 @@ import {
   WEB_APPLICATION_LABEL,
 } from '../constants/labels';
 
-export function getKPITrendsLensConfig({ indexPattern }: ConfigProps): SeriesConfig {
+export function getKPITrendsLensConfig({ dataView }: ConfigProps): SeriesConfig {
   return {
     defaultSeriesType: 'bar_stacked',
     seriesTypes: [],
@@ -83,8 +83,8 @@ export function getKPITrendsLensConfig({ indexPattern }: ConfigProps): SeriesCon
       LABEL_FIELDS_BREAKDOWN,
     ],
     baseFilters: [
-      ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
-      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
+      ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', dataView),
+      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', dataView),
     ],
     labels: { ...FieldLabels, [SERVICE_NAME]: WEB_APPLICATION_LABEL },
     definitionFields: [SERVICE_NAME, SERVICE_ENVIRONMENT],

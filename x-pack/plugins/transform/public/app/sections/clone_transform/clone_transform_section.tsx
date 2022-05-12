@@ -19,7 +19,6 @@ import {
   EuiPageHeader,
   EuiSpacer,
 } from '@elastic/eui';
-
 import { APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
 import { TransformConfigUnion } from '../../../../common/types/transform';
 
@@ -32,10 +31,12 @@ import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../se
 import { PrivilegesWrapper } from '../../lib/authorization';
 
 import { Wizard } from '../create_transform/components/wizard';
+import { overrideTransformForCloning } from '../../common/transform';
 
 type Props = RouteComponentProps<{ transformId: string }>;
+
 export const CloneTransformSection: FC<Props> = ({ match, location }) => {
-  const { indexPatternId }: Record<string, any> = parse(location.search, {
+  const { dataViewId }: Record<string, any> = parse(location.search, {
     sort: false,
   });
   // Set breadcrumb and page title
@@ -72,7 +73,7 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
     }
 
     try {
-      if (indexPatternId === undefined) {
+      if (dataViewId === undefined) {
         throw new Error(
           i18n.translate('xpack.transform.clone.fetchErrorPromptText', {
             defaultMessage: 'Could not fetch the Kibana data view ID.',
@@ -80,9 +81,9 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
         );
       }
 
-      setSavedObjectId(indexPatternId);
+      setSavedObjectId(dataViewId);
 
-      setTransformConfig(transformConfigs.transforms[0]);
+      setTransformConfig(overrideTransformForCloning(transformConfigs.transforms[0]));
       setErrorMessage(undefined);
       setIsInitialized(true);
     } catch (e) {

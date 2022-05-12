@@ -15,7 +15,7 @@ import { SplitByFilter } from './splits/filter';
 import { SplitByFilters } from './splits/filters';
 import { SplitByEverything } from './splits/everything';
 import { SplitUnsupported } from './splits/unsupported_split';
-import { isGroupByFieldsEnabled } from '../lib/check_ui_restrictions';
+import { isGroupByFieldsEnabled } from '../../../common/check_ui_restrictions';
 import { getDefaultQueryLanguage } from './lib/get_default_query_language';
 
 const SPLIT_MODES = {

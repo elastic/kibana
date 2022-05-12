@@ -15,6 +15,7 @@ import { HostsTableType } from '../../store/model';
 import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { AnomaliesHostTable } from '../../../common/components/ml/tables/anomalies_host_table';
+import { EventsQueryTabBody } from '../../../common/components/events_tab/events_query_tab_body';
 
 import { HostDetailsTabsProps } from './types';
 import { type } from './utils';
@@ -23,9 +24,11 @@ import {
   HostsQueryTabBody,
   AuthenticationsQueryTabBody,
   UncommonProcessQueryTabBody,
-  EventsQueryTabBody,
   HostAlertsQueryTabBody,
+  HostRiskTabBody,
+  SessionsTabBody,
 } from '../navigation';
+import { TimelineId } from '../../../../common/types';
 
 export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
   ({
@@ -97,10 +100,20 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
         </Route>
 
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.events})`}>
-          <EventsQueryTabBody {...tabProps} pageFilters={pageFilters} />
+          <EventsQueryTabBody
+            {...tabProps}
+            pageFilters={pageFilters}
+            timelineId={TimelineId.hostsPageEvents}
+          />
         </Route>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.alerts})`}>
           <HostAlertsQueryTabBody {...tabProps} pageFilters={pageFilters} />
+        </Route>
+        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.risk})`}>
+          <HostRiskTabBody {...tabProps} />
+        </Route>
+        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.sessions})`}>
+          <SessionsTabBody {...tabProps} />
         </Route>
       </Switch>
     );

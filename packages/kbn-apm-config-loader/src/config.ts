@@ -24,7 +24,7 @@ const DEFAULT_CONFIG: AgentConfigOptions = {
   globalLabels: {},
 };
 
-const CENTRALIZED_SERVICE_BASE_CONFIG: AgentConfigOptions | RUMAgentConfigOptions = {
+export const CENTRALIZED_SERVICE_BASE_CONFIG: AgentConfigOptions | RUMAgentConfigOptions = {
   serverUrl: 'https://kibana-cloud-apm.apm.us-east-1.aws.found.io',
 
   // The secretToken below is intended to be hardcoded in this file even though
@@ -136,6 +136,10 @@ export class ApmConfiguration {
       config.serverUrl = process.env.ELASTIC_APM_SERVER_URL;
     }
 
+    if (process.env.ELASTIC_APM_SECRET_TOKEN) {
+      config.secretToken = process.env.ELASTIC_APM_SECRET_TOKEN;
+    }
+
     if (process.env.ELASTIC_APM_GLOBAL_LABELS) {
       config.globalLabels = Object.fromEntries(
         process.env.ELASTIC_APM_GLOBAL_LABELS.split(',').map((p) => {
@@ -154,23 +158,6 @@ export class ApmConfiguration {
    */
   private getConfigFromKibanaConfig(): AgentConfigOptions {
     return this.rawKibanaConfig?.elastic?.apm ?? {};
-  }
-
-  /**
-   * Get the configuration from the apm.dev.js file, supersedes config
-   * from the --config file, disabled when running the distributable
-   */
-  private getDevConfig(): AgentConfigOptions {
-    if (this.isDistributable) {
-      return {};
-    }
-
-    try {
-      const apmDevConfigPath = join(this.rootDir, 'config', 'apm.dev.js');
-      return require(apmDevConfigPath);
-    } catch (e) {
-      return {};
-    }
   }
 
   /**
@@ -266,12 +253,7 @@ export class ApmConfiguration {
    * Reads APM configuration from different sources and merges them together.
    */
   private getConfigFromAllSources(): AgentConfigOptions {
-    const config = merge(
-      {},
-      this.getConfigFromKibanaConfig(),
-      this.getDevConfig(),
-      this.getConfigFromEnv()
-    );
+    const config = merge({}, this.getConfigFromKibanaConfig(), this.getConfigFromEnv());
 
     if (config.active === false && config.contextPropagationOnly !== false) {
       throw new Error(

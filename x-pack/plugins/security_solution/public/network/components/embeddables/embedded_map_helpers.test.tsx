@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { embeddablePluginMock } from '../../../../../../../src/plugins/embeddable/public/mocks';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { createEmbeddable, findMatchingIndexPatterns } from './embedded_map_helpers';
 import { createPortalNode } from 'react-reverse-portal';
 import {

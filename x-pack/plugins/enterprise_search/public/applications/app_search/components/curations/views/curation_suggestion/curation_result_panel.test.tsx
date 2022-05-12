@@ -51,6 +51,7 @@ describe('CurationResultPanel', () => {
       resultPosition: 1,
       isMetaEngine: true,
       schemaForTypeHighlights: values.engine.schema,
+      showClick: true,
     });
   });
 

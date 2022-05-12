@@ -36,6 +36,7 @@ const createServiceMock = ({
     isAnonymous: jest.fn(),
   },
   externalUrl: {
+    isInternalUrl: jest.fn(),
     validateUrl: jest.fn(),
   },
   addLoadingCountSource: jest.fn(),

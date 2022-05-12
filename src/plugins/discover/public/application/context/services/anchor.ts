@@ -5,23 +5,22 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-
-import { ISearchSource, EsQuerySortValue, IndexPattern } from '../../../../../data/public';
+import { ISearchSource, EsQuerySortValue } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { EsHitRecord } from '../../types';
 
 export async function fetchAnchor(
   anchorId: string,
-  indexPattern: IndexPattern,
+  indexPattern: DataView,
   searchSource: ISearchSource,
   sort: EsQuerySortValue[],
   useNewFieldsApi: boolean = false
 ): Promise<EsHitRecord> {
   updateSearchSource(searchSource, anchorId, sort, useNewFieldsApi, indexPattern);
-
-  const response = await searchSource.fetch();
-  const doc = response.hits?.hits?.[0];
+  const { rawResponse } = await lastValueFrom(await searchSource.fetch$());
+  const doc = rawResponse.hits?.hits?.[0];
 
   if (!doc) {
     throw new Error(
@@ -42,7 +41,7 @@ export function updateSearchSource(
   anchorId: string,
   sort: EsQuerySortValue[],
   useNewFieldsApi: boolean,
-  indexPattern: IndexPattern
+  indexPattern: DataView
 ) {
   searchSource
     .setParent(undefined)

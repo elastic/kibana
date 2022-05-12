@@ -20,9 +20,9 @@ import {
   XYBrushEvent,
 } from '@elastic/charts';
 import moment from 'moment';
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import { useDataVisualizerKibana } from '../../../../kibana_context';
-import { MULTILAYER_TIME_AXIS_STYLE } from '../../../../../../../../../src/plugins/charts/common';
 
 export interface DocumentCountChartPoint {
   time: number | string;
@@ -57,8 +57,11 @@ export const DocumentCountChart: FC<Props> = ({
   interval,
 }) => {
   const {
-    services: { data, uiSettings, fieldFormats },
+    services: { data, uiSettings, fieldFormats, charts },
   } = useDataVisualizerKibana();
+
+  const chartTheme = charts.theme.useChartsTheme();
+  const chartBaseTheme = charts.theme.useChartsBaseTheme();
 
   const xAxisFormatter = fieldFormats.deserialize({ id: 'date' });
   const useLegacyTimeAxis = uiSettings.get('visualization:useLegacyTimeAxis', false);
@@ -134,6 +137,8 @@ export const DocumentCountChart: FC<Props> = ({
           xDomain={xDomain}
           onBrushEnd={onBrushEnd as BrushEndListener}
           onElementClick={onElementClick}
+          theme={chartTheme}
+          baseTheme={chartBaseTheme}
         />
         <Axis
           id="bottom"

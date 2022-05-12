@@ -14,6 +14,7 @@ import {
   SavedObjectError,
   SavedObjectsImportRetry,
 } from '../../types';
+import type { ImportStateMap } from './types';
 
 interface CheckConflictsParams {
   objects: Array<SavedObject<{ title?: string }>>;
@@ -37,12 +38,12 @@ export async function checkConflicts({
 }: CheckConflictsParams) {
   const filteredObjects: Array<SavedObject<{ title?: string }>> = [];
   const errors: SavedObjectsImportFailure[] = [];
-  const importIdMap = new Map<string, { id?: string; omitOriginId?: boolean }>();
+  const importStateMap: ImportStateMap = new Map();
   const pendingOverwrites = new Set<string>();
 
   // exit early if there are no objects to check
   if (objects.length === 0) {
-    return { filteredObjects, errors, importIdMap, pendingOverwrites };
+    return { filteredObjects, errors, importStateMap, pendingOverwrites };
   }
 
   const retryMap = retries.reduce(
@@ -76,13 +77,13 @@ export async function checkConflicts({
       // This code path should not be triggered for a retry, but in case the consumer is using the import APIs incorrectly and attempting to
       // retry an object with a destinationId that would result in an unresolvable conflict, we regenerate the ID here as a fail-safe.
       const omitOriginId = createNewCopies || createNewCopy;
-      importIdMap.set(`${type}:${id}`, { id: uuidv4(), omitOriginId });
+      importStateMap.set(`${type}:${id}`, { destinationId: uuidv4(), omitOriginId });
       filteredObjects.push(object);
     } else if (errorObj && errorObj.statusCode !== 409) {
-      errors.push({ type, id, title, meta: { title }, error: { ...errorObj, type: 'unknown' } });
+      errors.push({ type, id, meta: { title }, error: { ...errorObj, type: 'unknown' } });
     } else if (errorObj?.statusCode === 409 && !ignoreRegularConflicts && !overwrite) {
       const error = { type: 'conflict' as 'conflict', ...(destinationId && { destinationId }) };
-      errors.push({ type, id, title, meta: { title }, error });
+      errors.push({ type, id, meta: { title }, error });
     } else {
       filteredObjects.push(object);
       if (errorObj?.statusCode === 409) {
@@ -90,5 +91,5 @@ export async function checkConflicts({
       }
     }
   });
-  return { filteredObjects, errors, importIdMap, pendingOverwrites };
+  return { filteredObjects, errors, importStateMap, pendingOverwrites };
 }

@@ -28,3 +28,5 @@ export function loadInitialState() {
 const originalLoader = jest.requireActual('../loader');
 
 export const extractReferences = originalLoader.extractReferences;
+
+export const injectReferences = originalLoader.injectReferences;

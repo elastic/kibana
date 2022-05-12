@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { ShallowWrapper } from 'enzyme';
-import { shallowWithI18nProvider } from '@kbn/test/jest';
+import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 import { Inspect, InspectProps } from './inspect';
 import { SavedObjectWithMetadata } from '../../../../common';
 

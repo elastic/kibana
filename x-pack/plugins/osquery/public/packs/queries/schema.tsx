@@ -29,7 +29,7 @@ export const createFormSchema = (ids: Set<string>) => ({
   description: {
     type: FIELD_TYPES.TEXT,
     label: i18n.translate('xpack.osquery.pack.queryFlyoutForm.descriptionFieldLabel', {
-      defaultMessage: 'Description',
+      defaultMessage: 'Description (optional)',
     }),
     validations: [],
   },
@@ -71,7 +71,7 @@ export const createFormSchema = (ids: Set<string>) => ({
     validations: [],
   },
   ecs_mapping: {
-    defaultValue: {},
+    defaultValue: [],
     type: FIELD_TYPES.JSON,
     validations: [],
   },

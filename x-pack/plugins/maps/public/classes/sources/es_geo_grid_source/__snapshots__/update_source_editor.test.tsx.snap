@@ -41,9 +41,9 @@ exports[`source editor geo_grid_source should not allow editing multiple metrics
       size="m"
     />
     <ResolutionEditor
-      isHeatmap={true}
       metrics={Array []}
       onChange={[Function]}
+      renderAs="point"
       resolution="COARSE"
     />
     <RenderAsSelect
@@ -80,6 +80,7 @@ exports[`source editor geo_grid_source should render editor 1`] = `
       fields={Array []}
       key="12345"
       metrics={Array []}
+      metricsFilter={[Function]}
       onChange={[Function]}
     />
   </EuiPanel>
@@ -91,16 +92,16 @@ exports[`source editor geo_grid_source should render editor 1`] = `
       size="xs"
     >
       <h6>
-        Clusters and grids
+        Clusters
       </h6>
     </EuiTitle>
     <EuiSpacer
       size="m"
     />
     <ResolutionEditor
-      isHeatmap={false}
       metrics={Array []}
       onChange={[Function]}
+      renderAs="point"
       resolution="COARSE"
     />
     <RenderAsSelect

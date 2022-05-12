@@ -12,7 +12,8 @@ import {
   visualizeGeoFieldTrigger,
   VISUALIZE_GEO_FIELD_TRIGGER,
   UiActionsStart,
-} from '../../../../../src/plugins/ui_actions/public';
+} from '@kbn/ui-actions-plugin/public';
+import { APP_ID } from '../../common/constants';
 
 interface Props {
   indexPatternId: string;
@@ -50,6 +51,7 @@ export function VisualizeGeoFieldButton(props: Props) {
     props.uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER).exec({
       indexPatternId: props.indexPatternId,
       fieldName: props.fieldName,
+      originatingApp: APP_ID,
     });
   }
 

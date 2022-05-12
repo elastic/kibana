@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { IBasePath, IRouter, Logger, PrebootServicePreboot } from '@kbn/core/server';
 import type { PublicContract, PublicMethodsOf } from '@kbn/utility-types';
-import type { IBasePath, IRouter, Logger, PrebootServicePreboot } from 'src/core/server';
 
 import type { ConfigType } from '../config';
 import type { ElasticsearchServiceSetup } from '../elasticsearch_service';

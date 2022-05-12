@@ -19,6 +19,7 @@ import { SavedObjectsImportFailure } from '../types';
 import { SavedObjectsImportError } from '../errors';
 import { getNonUniqueEntries } from './get_non_unique_entries';
 import { createLimitStream } from './create_limit_stream';
+import type { ImportStateMap } from './types';
 
 interface CollectSavedObjectsOptions {
   readStream: Readable;
@@ -35,7 +36,7 @@ export async function collectSavedObjects({
 }: CollectSavedObjectsOptions) {
   const errors: SavedObjectsImportFailure[] = [];
   const entries: Array<{ type: string; id: string }> = [];
-  const importIdMap = new Map<string, { id?: string; omitOriginId?: boolean }>();
+  const importStateMap: ImportStateMap = new Map();
   const collectedObjects: Array<SavedObject<{ title?: string }>> = await createPromiseFromStreams([
     readStream,
     createLimitStream(objectLimit),
@@ -48,7 +49,6 @@ export async function collectSavedObjects({
       errors.push({
         id: obj.id,
         type: obj.type,
-        title,
         meta: { title },
         error: {
           type: 'unsupported_type',
@@ -58,7 +58,13 @@ export async function collectSavedObjects({
     }),
     createFilterStream<SavedObject>((obj) => (filter ? filter(obj) : true)),
     createMapStream((obj: SavedObject) => {
-      importIdMap.set(`${obj.type}:${obj.id}`, {});
+      importStateMap.set(`${obj.type}:${obj.id}`, {});
+      for (const ref of obj.references ?? []) {
+        const key = `${ref.type}:${ref.id}`;
+        if (!importStateMap.has(key)) {
+          importStateMap.set(key, { isOnlyReference: true });
+        }
+      }
       // Ensure migrations execute on every saved object
       return Object.assign({ migrationVersion: {} }, obj);
     }),
@@ -74,6 +80,6 @@ export async function collectSavedObjects({
   return {
     errors,
     collectedObjects,
-    importIdMap,
+    importStateMap,
   };
 }

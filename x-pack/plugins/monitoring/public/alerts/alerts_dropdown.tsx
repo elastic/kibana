@@ -14,14 +14,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { MonitoringStartPluginDependencies } from '../types';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { MonitoringStartServices } from '../types';
 import { useAlertsModal } from '../application/hooks/use_alerts_modal';
 
 export const AlertsDropdown: React.FC<{}> = () => {
   const alertsEnableModalProvider = useAlertsModal();
-  const { navigateToApp } =
-    useKibana<MonitoringStartPluginDependencies['core']>().services.application;
+  const { navigateToApp } = useKibana<MonitoringStartServices>().services.application;
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 

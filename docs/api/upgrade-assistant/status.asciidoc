@@ -31,22 +31,8 @@ The API returns the following:
   "cluster": [
     {
       "message": "Cluster deprecated issue",
-      "details": "...",
-      "level": "warning",
-      "url": "https://docs.elastic.co/..."
-    }
-  ],
-  "indices": [
-    {
-      "message": "Index was created before 6.0",
-      "details": "...",
-      "index": "myIndex",
-      "level": "critical",
-      "reindex": true, <1>
-      "url": "https://docs.elastic.co/..."
+      "details":"You have 2 system indices that must be migrated and 5 Elasticsearch deprecation issues and 0 Kibana deprecation issues that must be resolved before upgrading."
     }
   ]
 }
 --------------------------------------------------
-
-<1> To fix indices with the `reindex` attribute, set to `true` using the <<start-resume-reindex, Start or resume reindex API>>.

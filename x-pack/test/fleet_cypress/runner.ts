@@ -12,36 +12,43 @@ import { withProcRunner } from '@kbn/dev-utils';
 
 import { FtrProviderContext } from './ftr_provider_context';
 
-import { AgentManager } from './agent';
+import { AgentManager, AgentManagerParams } from './agent';
 import { FleetManager } from './fleet_server';
 
 async function withFleetAgent(
   { getService }: FtrProviderContext,
   runner: (runnerEnv: Record<string, string>) => Promise<void>
 ) {
+  // skipping fleet server enroll for now, as it is not a functionality of Fleet UI itself. are there any existing e2e tests for enroll?
+  return await runner({});
+
   const log = getService('log');
   const config = getService('config');
 
   const esHost = Url.format(config.get('servers.elasticsearch'));
-  const esConfig = {
+  const params: AgentManagerParams = {
     user: config.get('servers.elasticsearch.username'),
     password: config.get('servers.elasticsearch.password'),
     esHost,
-    port: config.get('servers.elasticsearch.port'),
+    esPort: config.get('servers.elasticsearch.port'),
+    kibanaUrl: Url.format({
+      protocol: config.get('servers.kibana.protocol'),
+      hostname: config.get('servers.kibana.hostname'),
+      port: config.get('servers.kibana.port'),
+    }),
   };
-  const fleetManager = new FleetManager(esConfig, log);
-
-  const agentManager = new AgentManager(
-    {
-      ...esConfig,
-      kibanaUrl: Url.format({
-        protocol: config.get('servers.kibana.protocol'),
-        hostname: config.get('servers.kibana.hostname'),
-        port: config.get('servers.kibana.port'),
-      }),
+  const requestOptions = {
+    headers: {
+      'kbn-xsrf': 'kibana',
     },
-    log
-  );
+    auth: {
+      username: params.user,
+      password: params.password,
+    },
+  };
+  const fleetManager = new FleetManager(params, log, requestOptions);
+
+  const agentManager = new AgentManager(params, log, requestOptions);
 
   // Since the managers will create uncaughtException event handlers we need to exit manually
   process.on('uncaughtException', (err) => {

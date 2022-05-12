@@ -41,7 +41,7 @@ export function indicesRoutes({ router, routeGuard }: RouteInitialization) {
           requestFields !== undefined && Array.isArray(requestFields)
             ? requestFields.join(',')
             : '*';
-        const { body } = await client.asCurrentUser.fieldCaps({ index, fields });
+        const body = await client.asCurrentUser.fieldCaps({ index, fields });
         return response.ok({ body });
       } catch (e) {
         return response.customError(wrapError(e));

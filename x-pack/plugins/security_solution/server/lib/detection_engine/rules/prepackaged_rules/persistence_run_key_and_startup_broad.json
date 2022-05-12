@@ -5,9 +5,7 @@
   "description": "Identifies run key or startup key registry modifications. In order to survive reboots and other system interrupts, attackers will modify run keys within the registry or leverage startup folder items as a form of persistence.",
   "from": "now-9m",
   "index": [
-    "winlogbeat-*",
-    "logs-endpoint.events.*",
-    "logs-windows.*"
+    "logs-endpoint.events.*"
   ],
   "language": "eql",
   "license": "Elastic License v2",
@@ -47,7 +45,9 @@
       ]
     }
   ],
+  "timeline_id": "3e47ef71-ebfc-4520-975c-cb27fc090799",
+  "timeline_title": "Comprehensive Registry Timeline",
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 6
 }

@@ -12,7 +12,7 @@ import {
   AlertUtils,
   checkAAD,
   getUrlPrefix,
-  getTestAlertData,
+  getTestRuleData,
   ObjectRemover,
 } from '../../../common/lib';
 
@@ -34,7 +34,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
       const { body: createdAlert } = await supertestWithoutAuth
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
+        .send(getTestRuleData())
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
@@ -59,7 +59,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
       const { body: createdAlert } = await supertestWithoutAuth
         .post(`${getUrlPrefix(Spaces.other.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
+        .send(getTestRuleData())
         .expect(200);
       objectRemover.add(Spaces.other.id, createdAlert.id, 'rule', 'alerting');
 
@@ -75,7 +75,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
         const { body: createdAlert } = await supertestWithoutAuth
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
-          .send(getTestAlertData())
+          .send(getTestRuleData())
           .expect(200);
         objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 

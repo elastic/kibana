@@ -11,16 +11,20 @@ import type {
   CoreSetup,
   CoreStart,
   Logger,
+  PackageInfo,
   Plugin,
   PluginInitializerContext,
-} from 'src/core/server';
-import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
+} from '@kbn/core/server';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { ChromiumArchivePaths, HeadlessChromiumDriverFactory, install } from './browsers';
-import { createConfig, ConfigType } from './config';
-import { getScreenshots, ScreenshotOptions } from './screenshots';
+import { ConfigType, createConfig } from './config';
+import { Screenshots } from './screenshots';
+import { getChromiumPackage } from './utils';
 
 interface SetupDeps {
   screenshotMode: ScreenshotModePluginSetup;
+  cloud?: CloudSetup;
 }
 
 /**
@@ -38,37 +42,60 @@ export interface ScreenshottingStart {
    * @param options Screenshots session options.
    * @returns Observable with screenshotting results.
    */
-  getScreenshots(options: ScreenshotOptions): ReturnType<typeof getScreenshots>;
+  getScreenshots: Screenshots['getScreenshots'];
 }
 
 export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, SetupDeps> {
   private config: ConfigType;
   private logger: Logger;
+  private packageInfo: PackageInfo;
   private screenshotMode!: ScreenshotModePluginSetup;
   private browserDriverFactory!: Promise<HeadlessChromiumDriverFactory>;
+  private screenshots!: Promise<Screenshots>;
 
   constructor(context: PluginInitializerContext<ConfigType>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
+    this.packageInfo = context.env.packageInfo;
   }
 
-  setup({}: CoreSetup, { screenshotMode }: SetupDeps) {
+  setup({ http }: CoreSetup, { screenshotMode, cloud }: SetupDeps) {
     this.screenshotMode = screenshotMode;
     this.browserDriverFactory = (async () => {
       const paths = new ChromiumArchivePaths();
       const logger = this.logger.get('chromium');
       const [config, binaryPath] = await Promise.all([
         createConfig(this.logger, this.config),
-        install(paths, logger),
+        install(paths, logger, getChromiumPackage()),
       ]);
+      const basePath = http.basePath.serverBasePath;
 
-      return new HeadlessChromiumDriverFactory(this.screenshotMode, config, logger, binaryPath);
+      return new HeadlessChromiumDriverFactory(
+        this.screenshotMode,
+        config,
+        logger,
+        binaryPath,
+        basePath
+      );
     })();
-
     this.browserDriverFactory.catch((error) => {
       this.logger.error('Error in screenshotting setup, it may not function properly.');
       this.logger.error(error);
     });
+
+    this.screenshots = (async () => {
+      const browserDriverFactory = await this.browserDriverFactory;
+      return new Screenshots(
+        browserDriverFactory,
+        this.logger,
+        this.packageInfo,
+        http,
+        this.config,
+        cloud
+      );
+    })();
+    // Already handled in `browserDriverFactory`
+    this.screenshots.catch(() => {});
 
     return {};
   }
@@ -77,10 +104,10 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
     return {
       diagnose: () =>
         from(this.browserDriverFactory).pipe(switchMap((factory) => factory.diagnose())),
-      getScreenshots: (options) =>
-        from(this.browserDriverFactory).pipe(
-          switchMap((factory) => getScreenshots(factory, this.logger.get('screenshot'), options))
-        ),
+      getScreenshots: ((options) =>
+        from(this.screenshots).pipe(
+          switchMap((screenshots) => screenshots.getScreenshots(options))
+        )) as ScreenshottingStart['getScreenshots'],
     };
   }
 

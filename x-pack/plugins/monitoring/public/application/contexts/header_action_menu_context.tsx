@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import { AppMountParameters } from 'kibana/public';
+import { AppMountParameters } from '@kbn/core/public';
 
 interface ContextProps {
   setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
+  theme$?: AppMountParameters['theme$'];
 }
 
 export const HeaderActionMenuContext = React.createContext<ContextProps>({});

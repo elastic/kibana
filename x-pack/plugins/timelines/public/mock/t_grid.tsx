@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ALERT_START, ALERT_STATUS } from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_START, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { TGridIntegratedProps } from '../components/t_grid/integrated';
 import { mockBrowserFields, mockDocValueFields, mockRuntimeMappings } from './browser_fields';
 import { mockDataProviders } from './mock_data_providers';
@@ -88,9 +88,11 @@ const columnHeaders: ColumnHeaderOptions[] = [
 
 export const tGridIntegratedProps: TGridIntegratedProps = {
   additionalFilters: null,
+  appId: '',
   browserFields: mockBrowserFields,
   columns: columnHeaders,
   dataProviders: mockDataProviders,
+  dataViewId: 'data-view-id',
   deletedEventIds: [],
   disabledCellActions: [],
   docValueFields: mockDocValueFields,
@@ -131,7 +133,7 @@ export const tGridIntegratedProps: TGridIntegratedProps = {
 
 export const eventRenderedProps: EventRenderedViewProps = {
   alertToolbar: <></>,
-  browserFields: mockBrowserFields,
+  appId: '',
   events: mockTimelineData,
   leadingControlColumns: [],
   onChangePage: () => null,

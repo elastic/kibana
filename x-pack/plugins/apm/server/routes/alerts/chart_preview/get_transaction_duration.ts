@@ -6,7 +6,7 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { rangeQuery, termQuery } from '../../../../../observability/server';
+import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,

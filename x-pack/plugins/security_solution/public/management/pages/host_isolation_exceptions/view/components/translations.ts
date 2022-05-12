@@ -60,7 +60,7 @@ export const IP_LABEL = i18n.translate(
 export const IP_ERROR = i18n.translate(
   'xpack.securitySolution.hostIsolationExceptions.form.ip.error',
   {
-    defaultMessage: 'The ip is invalid. Only IPv4 with optional CIDR is supported',
+    defaultMessage: 'The IP is invalid. Only IPv4 with optional CIDR is supported',
   }
 );
 
@@ -126,11 +126,4 @@ export const getCreationSuccessMessage = (name: string) => {
       values: { name },
     }
   );
-};
-
-export const getLoadPoliciesError = (error: ServerApiError) => {
-  return i18n.translate('xpack.securitySolution.hostIsolationExceptions.failedLoadPolicies', {
-    defaultMessage: 'There was an error loading policies: "{error}"',
-    values: { error: error.message },
-  });
 };

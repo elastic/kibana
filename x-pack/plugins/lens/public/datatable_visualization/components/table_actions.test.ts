@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { EuiDataGridSorting } from '@elastic/eui';
-import { Datatable } from 'src/plugins/expressions';
+import { Datatable } from '@kbn/expressions-plugin';
 
 import {
   createGridFilterHandler,
@@ -17,7 +17,6 @@ import {
   createGridHideHandler,
   createTransposeColumnFilterHandler,
 } from './table_actions';
-import { LensMultiTable } from '../../../common';
 import { LensGridDirection, ColumnConfig } from '../../../common/expressions';
 
 function getDefaultConfig(): ColumnConfig {
@@ -49,17 +48,8 @@ function createTableRef(
   };
 }
 
-function createUntransposedRef(options?: {
-  withDate: boolean;
-}): React.MutableRefObject<LensMultiTable> {
-  return {
-    current: {
-      type: 'lens_multitable',
-      tables: {
-        first: createTableRef(options).current,
-      },
-    },
-  };
+function createUntransposedRef(options?: { withDate: boolean }): React.MutableRefObject<Datatable> {
+  return { current: createTableRef(options).current };
 }
 
 describe('Table actions', () => {
@@ -82,7 +72,6 @@ describe('Table actions', () => {
           },
         ],
         negate: false,
-        timeFieldName: 'a',
       });
     });
 
@@ -102,7 +91,6 @@ describe('Table actions', () => {
           },
         ],
         negate: true,
-        timeFieldName: 'a',
       });
     });
 
@@ -122,7 +110,6 @@ describe('Table actions', () => {
           },
         ],
         negate: false,
-        timeFieldName: 'a',
       });
     });
 
@@ -142,7 +129,6 @@ describe('Table actions', () => {
           },
         ],
         negate: true,
-        timeFieldName: undefined,
       });
     });
   });
@@ -151,13 +137,13 @@ describe('Table actions', () => {
     it('should set a filter on click with the correct configuration', () => {
       const onClickValue = jest.fn();
       const tableRef = createUntransposedRef({ withDate: true });
-      tableRef.current.tables.first.rows = [{ a: 123456 }];
+      tableRef.current.rows = [{ a: 123456 }];
       const filterHandle = createTransposeColumnFilterHandler(onClickValue, tableRef);
 
       filterHandle(
         [
           {
-            originalBucketColumn: tableRef.current.tables.first.columns[0],
+            originalBucketColumn: tableRef.current.columns[0],
             value: 123456,
           },
         ],
@@ -168,25 +154,24 @@ describe('Table actions', () => {
           {
             column: 0,
             row: 0,
-            table: tableRef.current.tables.first,
+            table: tableRef.current,
             value: 123456,
           },
         ],
         negate: false,
-        timeFieldName: 'a',
       });
     });
 
     it('should set a negate filter on click with the correct configuration', () => {
       const onClickValue = jest.fn();
       const tableRef = createUntransposedRef({ withDate: true });
-      tableRef.current.tables.first.rows = [{ a: 123456 }];
+      tableRef.current.rows = [{ a: 123456 }];
       const filterHandle = createTransposeColumnFilterHandler(onClickValue, tableRef);
 
       filterHandle(
         [
           {
-            originalBucketColumn: tableRef.current.tables.first.columns[0],
+            originalBucketColumn: tableRef.current.columns[0],
             value: 123456,
           },
         ],
@@ -197,12 +182,11 @@ describe('Table actions', () => {
           {
             column: 0,
             row: 0,
-            table: tableRef.current.tables.first,
+            table: tableRef.current,
             value: 123456,
           },
         ],
         negate: true,
-        timeFieldName: undefined,
       });
     });
 
@@ -210,7 +194,7 @@ describe('Table actions', () => {
       const onClickValue = jest.fn();
       const tableRef = createUntransposedRef({ withDate: false });
       const filterHandle = createTransposeColumnFilterHandler(onClickValue, tableRef);
-      tableRef.current.tables.first.columns = [
+      tableRef.current.columns = [
         {
           id: 'a',
           name: 'a',
@@ -226,7 +210,7 @@ describe('Table actions', () => {
           },
         },
       ];
-      tableRef.current.tables.first.rows = [
+      tableRef.current.rows = [
         {
           a: 'a1',
           b: 'b1',
@@ -248,11 +232,11 @@ describe('Table actions', () => {
       filterHandle(
         [
           {
-            originalBucketColumn: tableRef.current.tables.first.columns[0],
+            originalBucketColumn: tableRef.current.columns[0],
             value: 'a2',
           },
           {
-            originalBucketColumn: tableRef.current.tables.first.columns[1],
+            originalBucketColumn: tableRef.current.columns[1],
             value: 'b3',
           },
         ],
@@ -263,18 +247,17 @@ describe('Table actions', () => {
           {
             column: 0,
             row: 1,
-            table: tableRef.current.tables.first,
+            table: tableRef.current,
             value: 'a2',
           },
           {
             column: 1,
             row: 2,
-            table: tableRef.current.tables.first,
+            table: tableRef.current,
             value: 'b3',
           },
         ],
         negate: false,
-        timeFieldName: undefined,
       });
     });
   });

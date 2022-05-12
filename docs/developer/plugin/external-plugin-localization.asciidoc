@@ -83,18 +83,12 @@ node scripts/i18n_check --fix --include-config ../kibana-extra/myPlugin/.i18nrc.
 [discrete]
 === Implementing i18n in the UI
 
-{kib} relies on several UI frameworks (ReactJS and AngularJS) and
-requires localization in different environments (browser and NodeJS).
+{kib} relies on ReactJS and requires localization in different environments (browser and NodeJS).
 The internationalization engine is framework agnostic and consumable in
-all parts of {kib} (ReactJS, AngularJS and NodeJS).
+all parts of {kib} (ReactJS, and NodeJS).
 
-To simplify
-internationalization in UI frameworks, additional abstractions are
-built around the I18n engine: `react-intl` for React and custom
-components for AngularJS. https://github.com/yahoo/react-intl[React-intl]
-is built around https://github.com/yahoo/intl-messageformat[intl-messageformat],
-so both React and AngularJS frameworks use the same engine and the same
-message syntax.
+To simplify internationalization in React, an additional abstraction is
+built around the I18n engine using https://github.com/yahoo/react-intl[React-intl] for React.
 
 
 [discrete]
@@ -109,7 +103,7 @@ export const HELLO_WORLD = i18n.translate('hello.wonderful.world', {
 });
 -----------
 
-Full details are {kib-repo}tree/master/packages/kbn-i18n#vanilla-js[here].
+Full details are {kib-repo}tree/main/packages/kbn-i18n#vanilla-js[here].
 
 [discrete]
 ==== i18n for React
@@ -133,14 +127,14 @@ export const Component = () => {
 };
 -----------
 
-Full details are {kib-repo}tree/master/packages/kbn-i18n#react[here].
+Full details are {kib-repo}tree/main/packages/kbn-i18n#react[here].
 
 [discrete]
 === Resources
 
-To learn more about i18n tooling, see {blob}src/dev/i18n/README.md[i18n dev tooling].
+To learn more about i18n tooling, see {kib-repo}blob/{branch}src/dev/i18n/README.md[i18n dev tooling].
 
 To learn more about implementing i18n in the UI, use the following links:
 
-* {blob}packages/kbn-i18n/README.md[i18n plugin]
-* {blob}packages/kbn-i18n/GUIDELINE.md[i18n guidelines]
+* {kib-repo}blob/{branch}packages/kbn-i18n/README.md[i18n plugin]
+* {kib-repo}blob/{branch}packages/kbn-i18n/GUIDELINE.md[i18n guidelines]

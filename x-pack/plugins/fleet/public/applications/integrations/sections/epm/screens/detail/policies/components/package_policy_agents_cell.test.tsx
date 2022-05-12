@@ -10,12 +10,13 @@ import React from 'react';
 import { act } from '@testing-library/react';
 
 import { createIntegrationsTestRendererMock } from '../../../../../../../../mock';
+import type { AgentPolicy } from '../../../../../../types';
 
 import { PackagePolicyAgentsCell } from './package_policy_agents_cell';
 
 function renderCell({
   agentCount = 0,
-  agentPolicyId = '123',
+  agentPolicy = {} as AgentPolicy,
   onAddAgent = () => {},
   hasHelpPopover = false,
 }) {
@@ -24,7 +25,7 @@ function renderCell({
   return renderer.render(
     <PackagePolicyAgentsCell
       agentCount={agentCount}
-      agentPolicyId={agentPolicyId}
+      agentPolicy={agentPolicy}
       onAddAgent={onAddAgent}
       hasHelpPopover={hasHelpPopover}
     />
@@ -36,6 +37,18 @@ describe('PackagePolicyAgentsCell', () => {
     const utils = renderCell({ agentCount: 0 });
     await act(async () => {
       expect(utils.queryByText('Add agent')).toBeInTheDocument();
+    });
+  });
+
+  test('it should not display add agent if policy is managed', async () => {
+    const utils = renderCell({
+      agentCount: 0,
+      agentPolicy: {
+        is_managed: true,
+      } as AgentPolicy,
+    });
+    await act(async () => {
+      expect(utils.queryByText('Add agent')).not.toBeInTheDocument();
     });
   });
 

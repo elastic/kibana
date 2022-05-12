@@ -46,7 +46,7 @@ HTTP method. All these APIs share the same signature, and receive two parameters
 
 When invoked, the `handler` receive three parameters: `context`, `request`, and `response`, and must return a response that will be sent to serve
 the request.
-- `context` is a request-bound context exposed for the request. It allows for example to use an elasticsearch client bound to the request's credentials.
+- `context` is a request-bound context exposed for the request. For example, it allows to use an elasticsearch client bound to the request's credentials.
 - `request` contains information related to the request, such as the path and query parameter
 - `response` contains factory helpers to create the response to return from the endpoint
 

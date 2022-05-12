@@ -8,9 +8,9 @@
 
 import { i18n } from '@kbn/i18n';
 import * as React from 'react';
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { toMountPoint } from '../../kibana_react/public';
-import { SharePluginStart } from '../../share/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import { InspectorViewRegistry } from './view_registry';
 import { InspectorOptions, InspectorSession } from './types';
 import { InspectorPanel } from './ui/inspector_panel';
@@ -106,7 +106,8 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
               uiSettings: core.uiSettings,
               share: startDeps.share,
             }}
-          />
+          />,
+          { theme$: core.theme.theme$ }
         ),
         {
           'data-test-subj': 'inspectorPanel',

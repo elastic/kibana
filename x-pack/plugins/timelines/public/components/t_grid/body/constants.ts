@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 /**
  * This is the effective width in pixels of an action button used with
@@ -24,14 +24,8 @@ import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
 export const DEFAULT_ACTION_BUTTON_WIDTH =
   parseInt(euiThemeVars.euiSizeXL, 10) - parseInt(euiThemeVars.euiSizeXS, 10); // px
 
-/** Additional column width to include when checkboxes are shown **/
-export const SHOW_CHECK_BOXES_COLUMN_WIDTH = 24; // px;
-
 /** The default minimum width of a column (when a width for the column type is not specified) */
 export const DEFAULT_COLUMN_MIN_WIDTH = 180; // px
-
-/** The minimum width of a resized column */
-export const RESIZED_COLUMN_MIN_WITH = 70; // px
 
 /** The default minimum width of a column of type `date` */
 export const DEFAULT_DATE_COLUMN_MIN_WIDTH = 190; // px

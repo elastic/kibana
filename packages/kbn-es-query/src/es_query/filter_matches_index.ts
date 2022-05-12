@@ -7,7 +7,7 @@
  */
 
 import { Filter } from '../filters';
-import { IndexPatternBase } from '..';
+import { DataViewBase } from '..';
 
 /*
  * TODO: We should base this on something better than `filter.meta.key`. We should probably modify
@@ -16,7 +16,7 @@ import { IndexPatternBase } from '..';
  *
  * @internal
  */
-export function filterMatchesIndex(filter: Filter, indexPattern?: IndexPatternBase | null) {
+export function filterMatchesIndex(filter: Filter, indexPattern?: DataViewBase | null) {
   if (!filter.meta?.key || !indexPattern) {
     return true;
   }

@@ -11,23 +11,33 @@ export type {
   EmbeddableComponentProps,
   TypedLensByValueInput,
 } from './embeddable/embeddable_component';
-export type { XYState } from './xy_visualization/types';
-export type { DataType, OperationMetadata } from './types';
 export type {
+  XYState,
+  XYReferenceLineLayerConfig,
+  XYLayerConfig,
+  ValidLayer,
+  XYDataLayerConfig,
+  XYAnnotationLayerConfig,
+} from './xy_visualization/types';
+export type {
+  DatasourcePublicAPI,
+  DataType,
+  OperationMetadata,
+  SuggestionRequest,
+  TableSuggestion,
+  Visualization,
+  VisualizationSuggestion,
+} from './types';
+export type {
+  ValueLabelConfig,
   PieVisualizationState,
   PieLayerState,
   SharedPieLayerState,
-  MetricState,
-  AxesSettingsConfig,
-  XYLayerConfig,
-  LegendConfig,
-  SeriesType,
-  YAxisMode,
-  XYCurveType,
-  YConfig,
-} from '../common/expressions';
-export type { ValueLabelConfig } from '../common/types';
+} from '../common/types';
+
 export type { DatatableVisualizationState } from './datatable_visualization/visualization';
+export type { HeatmapVisualizationState } from './heatmap_visualization/types';
+export type { GaugeVisualizationState } from './visualizations/gauge/constants';
 export type {
   IndexPatternPersistedState,
   PersistedIndexPatternLayer,
@@ -55,9 +65,47 @@ export type {
   FormulaIndexPatternColumn,
   MathIndexPatternColumn,
   OverallSumIndexPatternColumn,
+  FormulaPublicApi,
+  StaticValueIndexPatternColumn,
+  TimeScaleIndexPatternColumn,
 } from './indexpattern_datasource/types';
+export type {
+  XYArgs,
+  ExtendedYConfig,
+  XYRender,
+  LayerType,
+  YAxisMode,
+  LineStyle,
+  FillStyle,
+  SeriesType,
+  YScaleType,
+  XScaleType,
+  AxisConfig,
+  XYCurveType,
+  XYChartProps,
+  LegendConfig,
+  IconPosition,
+  ExtendedYConfigResult,
+  DataLayerArgs,
+  ValueLabelMode,
+  AxisExtentMode,
+  DataLayerConfig,
+  FittingFunction,
+  AxisExtentConfig,
+  LegendConfigResult,
+  AxesSettingsConfig,
+  GridlinesConfigResult,
+  TickLabelsConfigResult,
+  AxisExtentConfigResult,
+  ReferenceLineLayerArgs,
+  LabelsOrientationConfig,
+  ReferenceLineLayerConfig,
+  LabelsOrientationConfigResult,
+  AxisTitlesVisibilityConfigResult,
+} from '@kbn/expression-xy-plugin/common';
 export type { LensEmbeddableInput } from './embeddable';
+export { layerTypes } from '../common';
 
-export type { LensPublicStart } from './plugin';
+export type { LensPublicStart, LensPublicSetup } from './plugin';
 
 export const plugin = () => new LensPlugin();

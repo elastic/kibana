@@ -7,31 +7,44 @@
 
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import { useStore } from 'react-redux';
+import { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import { downloadMultipleAs } from '@kbn/share-plugin/public';
+import { tableHasFormulas } from '@kbn/data-plugin/common';
+import { exporters } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { trackUiEvent } from '../lens_ui_telemetry';
+import type { StateSetter } from '../types';
 import {
   LensAppServices,
   LensTopNavActions,
   LensTopNavMenuProps,
   LensTopNavTooltips,
 } from './types';
-import { downloadMultipleAs } from '../../../../../src/plugins/share/public';
-import { trackUiEvent } from '../lens_ui_telemetry';
-import { tableHasFormulas } from '../../../../../src/plugins/data/common';
-import { exporters, IndexPattern } from '../../../../../src/plugins/data/public';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { toggleSettingsMenuOpen } from './settings_menu';
 import {
   setState,
   useLensSelector,
   useLensDispatch,
   LensAppState,
   DispatchSetState,
+  updateDatasourceState,
 } from '../state_management';
-import { getIndexPatternsObjects, getIndexPatternsIds, getResolvedDateRange } from '../utils';
+import {
+  getIndexPatternsObjects,
+  getIndexPatternsIds,
+  getResolvedDateRange,
+  handleIndexPatternChange,
+  refreshIndexPatternsList,
+} from '../utils';
+import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
 
 function getLensTopNavConfig(options: {
   showSaveAndReturn: boolean;
   enableExportToCSV: boolean;
+  showOpenInDiscover?: boolean;
   showCancel: boolean;
   isByValueMode: boolean;
   allowByValue: boolean;
@@ -39,16 +52,21 @@ function getLensTopNavConfig(options: {
   tooltips: LensTopNavTooltips;
   savingToLibraryPermitted: boolean;
   savingToDashboardPermitted: boolean;
+  contextOriginatingApp?: string;
+  isSaveable: boolean;
 }): TopNavMenuData[] {
   const {
     actions,
     showCancel,
     allowByValue,
     enableExportToCSV,
+    showOpenInDiscover,
     showSaveAndReturn,
     savingToLibraryPermitted,
     savingToDashboardPermitted,
     tooltips,
+    contextOriginatingApp,
+    isSaveable,
   } = options;
   const topNavMenu: TopNavMenuData[] = [];
 
@@ -70,6 +88,40 @@ function getLensTopNavConfig(options: {
     : i18n.translate('xpack.lens.app.save', {
         defaultMessage: 'Save',
       });
+
+  if (contextOriginatingApp) {
+    topNavMenu.push({
+      label: i18n.translate('xpack.lens.app.goBackLabel', {
+        defaultMessage: `Go back to {contextOriginatingApp}`,
+        values: { contextOriginatingApp },
+      }),
+      run: actions.goBack,
+      className: 'lnsNavItem__goBack',
+      testId: 'lnsApp_goBackToAppButton',
+      description: i18n.translate('xpack.lens.app.goBackLabel', {
+        defaultMessage: `Go back to {contextOriginatingApp}`,
+        values: { contextOriginatingApp },
+      }),
+      disableButton: false,
+    });
+  }
+
+  if (showOpenInDiscover) {
+    const exploreDataInDiscoverLabel = i18n.translate('xpack.lens.app.exploreDataInDiscover', {
+      defaultMessage: 'Explore data in Discover',
+    });
+
+    topNavMenu.push({
+      label: exploreDataInDiscoverLabel,
+      run: () => {},
+      testId: 'lnsApp_openInDiscover',
+      description: exploreDataInDiscoverLabel,
+      disableButton: Boolean(tooltips.showUnderlyingDataWarning()),
+      tooltip: tooltips.showUnderlyingDataWarning,
+      target: '_blank',
+      href: actions.getUnderlyingDataUrl(),
+    });
+  }
 
   topNavMenu.push({
     label: i18n.translate('xpack.lens.app.inspect', {
@@ -94,6 +146,17 @@ function getLensTopNavConfig(options: {
     }),
     disableButton: !enableExportToCSV,
     tooltip: tooltips.showExportWarning,
+  });
+
+  topNavMenu.push({
+    label: i18n.translate('xpack.lens.app.settings', {
+      defaultMessage: 'Settings',
+    }),
+    run: actions.openSettings,
+    testId: 'lnsApp_settingsButton',
+    description: i18n.translate('xpack.lens.app.settingsAriaLabel', {
+      defaultMessage: 'Open the Lens settings menu',
+    }),
   });
 
   if (showCancel) {
@@ -130,7 +193,7 @@ function getLensTopNavConfig(options: {
       iconType: 'checkInCircleFilled',
       run: actions.saveAndReturn,
       testId: 'lnsApp_saveAndReturnButton',
-      disableButton: !savingToDashboardPermitted,
+      disableButton: !isSaveable,
       description: i18n.translate('xpack.lens.app.saveAndReturnButtonAriaLabel', {
         defaultMessage: 'Save the current lens visualization and return to the last app',
       }),
@@ -151,6 +214,12 @@ export const LensTopNavMenu = ({
   redirectToOrigin,
   datasourceMap,
   title,
+  goBackToOriginatingApp,
+  contextOriginatingApp,
+  initialContextIsEmbedded,
+  topNavMenuEntryGenerators,
+  initialContext,
+  theme$,
 }: LensTopNavMenuProps) => {
   const {
     data,
@@ -159,7 +228,11 @@ export const LensTopNavMenu = ({
     uiSettings,
     application,
     attributeService,
+    discover,
     dashboardFeatureFlag,
+    dataViewFieldEditor,
+    dataViewEditor,
+    dataViews,
   } = useKibana<LensAppServices>().services;
 
   const dispatch = useLensDispatch();
@@ -168,8 +241,12 @@ export const LensTopNavMenu = ({
     [dispatch]
   );
 
-  const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>([]);
+  const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
+  const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView>();
   const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
+  const editPermission = dataViewFieldEditor.userPermissions.editIndexPattern();
+  const closeFieldEditor = useRef<() => void | undefined>();
+  const closeDataViewEditor = useRef<() => void | undefined>();
 
   const {
     isSaveable,
@@ -179,7 +256,10 @@ export const LensTopNavMenu = ({
     savedQuery,
     activeDatasourceId,
     datasourceStates,
+    visualization,
+    filters,
   } = useLensSelector((state) => state.lens);
+
   const allLoaded = Object.values(datasourceStates).every(({ isLoading }) => isLoading === false);
 
   useEffect(() => {
@@ -211,7 +291,7 @@ export const LensTopNavMenu = ({
 
     // Update the cached index patterns if the user made a change to any of them
     if (hasIndexPatternsChanged) {
-      getIndexPatternsObjects(indexPatternIds, data.indexPatterns).then(
+      getIndexPatternsObjects(indexPatternIds, dataViews).then(
         ({ indexPatterns: indexPatternObjects, rejectedIds }) => {
           setIndexPatterns(indexPatternObjects);
           setRejectedIndexPatterns(rejectedIds);
@@ -224,8 +304,22 @@ export const LensTopNavMenu = ({
     rejectedIndexPatterns,
     datasourceMap,
     indexPatterns,
-    data.indexPatterns,
+    dataViews,
   ]);
+
+  useEffect(() => {
+    if (indexPatterns.length > 0) {
+      setCurrentIndexPattern(indexPatterns[0]);
+    }
+  }, [indexPatterns]);
+
+  useEffect(() => {
+    return () => {
+      // Make sure to close the editors when unmounting
+      closeFieldEditor.current?.();
+      closeDataViewEditor.current?.();
+    };
+  }, []);
 
   const { TopNavMenu } = navigation.ui;
   const { from, to } = data.query.timefilter.timefilter.getTime();
@@ -238,121 +332,223 @@ export const LensTopNavMenu = ({
   const unsavedTitle = i18n.translate('xpack.lens.app.unsavedFilename', {
     defaultMessage: 'unsaved',
   });
-  const topNavConfig = useMemo(
-    () =>
-      getLensTopNavConfig({
-        showSaveAndReturn: Boolean(
+  const additionalMenuEntries = useMemo(() => {
+    if (!visualization.activeId) return undefined;
+    const visualizationId = visualization.activeId;
+    const entries = topNavMenuEntryGenerators.flatMap((menuEntryGenerator) => {
+      const menuEntry = menuEntryGenerator({
+        datasourceStates,
+        visualizationId,
+        visualizationState: visualization.state,
+        query,
+        filters,
+        initialContext,
+      });
+      return menuEntry ? [menuEntry] : [];
+    });
+    if (entries.length > 0) {
+      return entries;
+    }
+  }, [
+    datasourceStates,
+    topNavMenuEntryGenerators,
+    visualization.activeId,
+    visualization.state,
+    query,
+    filters,
+    initialContext,
+  ]);
+
+  const layerMetaInfo = useMemo(() => {
+    if (!activeDatasourceId || !discover) {
+      return;
+    }
+    return getLayerMetaInfo(
+      datasourceMap[activeDatasourceId],
+      datasourceStates[activeDatasourceId].state,
+      activeData,
+      application.capabilities
+    );
+  }, [
+    activeData,
+    activeDatasourceId,
+    datasourceMap,
+    datasourceStates,
+    discover,
+    application.capabilities,
+  ]);
+
+  const lensStore = useStore();
+
+  const topNavConfig = useMemo(() => {
+    const baseMenuEntries = getLensTopNavConfig({
+      showSaveAndReturn:
+        Boolean(
           isLinkedToOriginatingApp &&
             // Temporarily required until the 'by value' paradigm is default.
             (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
-        ),
-        enableExportToCSV: Boolean(isSaveable && activeData && Object.keys(activeData).length),
-        isByValueMode: getIsByValueMode(),
-        allowByValue: dashboardFeatureFlag.allowByValueEmbeddables,
-        showCancel: Boolean(isLinkedToOriginatingApp),
-        savingToLibraryPermitted,
-        savingToDashboardPermitted,
-        tooltips: {
-          showExportWarning: () => {
-            if (activeData) {
-              const datatables = Object.values(activeData);
-              const formulaDetected = datatables.some((datatable) => {
-                return tableHasFormulas(datatable.columns, datatable.rows);
-              });
-              if (formulaDetected) {
-                return i18n.translate('xpack.lens.app.downloadButtonFormulasWarning', {
-                  defaultMessage:
-                    'Your CSV contains characters that spreadsheet applications might interpret as formulas.',
-                });
-              }
-            }
-            return undefined;
-          },
-        },
-        actions: {
-          inspect: () => lensInspector.inspect({ title }),
-          exportToCSV: () => {
-            if (!activeData) {
-              return;
-            }
-            const datatables = Object.values(activeData);
-            const content = datatables.reduce<Record<string, { content: string; type: string }>>(
-              (memo, datatable, i) => {
-                // skip empty datatables
-                if (datatable) {
-                  const postFix = datatables.length > 1 ? `-${i + 1}` : '';
-
-                  memo[`${title || unsavedTitle}${postFix}.csv`] = {
-                    content: exporters.datatableToCSV(datatable, {
-                      csvSeparator: uiSettings.get('csv:separator', ','),
-                      quoteValues: uiSettings.get('csv:quoteValues', true),
-                      formatFactory: fieldFormats.deserialize,
-                      escapeFormulaValues: false,
-                    }),
-                    type: exporters.CSV_MIME_TYPE,
-                  };
-                }
-                return memo;
-              },
-              {}
-            );
-            if (content) {
-              downloadMultipleAs(content);
-            }
-          },
-          saveAndReturn: () => {
-            if (savingToDashboardPermitted) {
-              // disabling the validation on app leave because the document has been saved.
-              onAppLeave((actions) => {
-                return actions.default();
-              });
-              runSave(
-                {
-                  newTitle: title || '',
-                  newCopyOnSave: false,
-                  isTitleDuplicateConfirmed: false,
-                  returnToOrigin: true,
-                },
-                {
-                  saveToLibrary:
-                    (initialInput && attributeService.inputIsRefType(initialInput)) ?? false,
-                }
-              );
-            }
-          },
-          showSaveModal: () => {
-            if (savingToDashboardPermitted || savingToLibraryPermitted) {
-              setIsSaveModalVisible(true);
-            }
-          },
-          cancel: () => {
-            if (redirectToOrigin) {
-              redirectToOrigin();
-            }
-          },
-        },
-      }),
-    [
-      activeData,
-      attributeService,
-      dashboardFeatureFlag.allowByValueEmbeddables,
-      fieldFormats.deserialize,
-      getIsByValueMode,
-      initialInput,
-      isLinkedToOriginatingApp,
-      isSaveable,
-      title,
-      onAppLeave,
-      redirectToOrigin,
-      runSave,
-      savingToDashboardPermitted,
+        ) || Boolean(initialContextIsEmbedded),
+      enableExportToCSV: Boolean(isSaveable && activeData && Object.keys(activeData).length),
+      showOpenInDiscover: Boolean(layerMetaInfo?.isVisible),
+      isByValueMode: getIsByValueMode(),
+      allowByValue: dashboardFeatureFlag.allowByValueEmbeddables,
+      showCancel: Boolean(isLinkedToOriginatingApp),
       savingToLibraryPermitted,
-      setIsSaveModalVisible,
-      uiSettings,
-      unsavedTitle,
-      lensInspector,
-    ]
-  );
+      savingToDashboardPermitted,
+      isSaveable,
+      contextOriginatingApp,
+      tooltips: {
+        showExportWarning: () => {
+          if (activeData) {
+            const datatables = Object.values(activeData);
+            const formulaDetected = datatables.some((datatable) => {
+              return tableHasFormulas(datatable.columns, datatable.rows);
+            });
+            if (formulaDetected) {
+              return i18n.translate('xpack.lens.app.downloadButtonFormulasWarning', {
+                defaultMessage:
+                  'Your CSV contains characters that spreadsheet applications might interpret as formulas.',
+              });
+            }
+          }
+          return undefined;
+        },
+        showUnderlyingDataWarning: () => {
+          return layerMetaInfo?.error;
+        },
+      },
+      actions: {
+        inspect: () => lensInspector.inspect({ title }),
+        exportToCSV: () => {
+          if (!activeData) {
+            return;
+          }
+          const datatables = Object.values(activeData);
+          const content = datatables.reduce<Record<string, { content: string; type: string }>>(
+            (memo, datatable, i) => {
+              // skip empty datatables
+              if (datatable) {
+                const postFix = datatables.length > 1 ? `-${i + 1}` : '';
+
+                memo[`${title || unsavedTitle}${postFix}.csv`] = {
+                  content: exporters.datatableToCSV(datatable, {
+                    csvSeparator: uiSettings.get('csv:separator', ','),
+                    quoteValues: uiSettings.get('csv:quoteValues', true),
+                    formatFactory: fieldFormats.deserialize,
+                    escapeFormulaValues: false,
+                  }),
+                  type: exporters.CSV_MIME_TYPE,
+                };
+              }
+              return memo;
+            },
+            {}
+          );
+          if (content) {
+            downloadMultipleAs(content);
+          }
+        },
+        saveAndReturn: () => {
+          if (isSaveable) {
+            // disabling the validation on app leave because the document has been saved.
+            onAppLeave((actions) => {
+              return actions.default();
+            });
+            runSave(
+              {
+                newTitle: title || '',
+                newCopyOnSave: false,
+                isTitleDuplicateConfirmed: false,
+                returnToOrigin: true,
+              },
+              {
+                saveToLibrary:
+                  (initialInput && attributeService.inputIsRefType(initialInput)) ?? false,
+              }
+            );
+          }
+        },
+        showSaveModal: () => {
+          if (savingToDashboardPermitted || savingToLibraryPermitted) {
+            setIsSaveModalVisible(true);
+          }
+        },
+        goBack: () => {
+          if (contextOriginatingApp) {
+            goBackToOriginatingApp?.();
+          }
+        },
+        cancel: () => {
+          if (redirectToOrigin) {
+            redirectToOrigin();
+          }
+        },
+        getUnderlyingDataUrl: () => {
+          if (!layerMetaInfo) {
+            return;
+          }
+          const { error, meta } = layerMetaInfo;
+          // If Discover is not available, return
+          // If there's no data, return
+          if (error || !discover || !meta) {
+            return;
+          }
+          const { filters: newFilters, query: newQuery } = combineQueryAndFilters(
+            query,
+            filters,
+            meta,
+            indexPatterns
+          );
+
+          return discover.locator!.getRedirectUrl({
+            indexPatternId: meta.id,
+            timeRange: data.query.timefilter.timefilter.getTime(),
+            filters: newFilters,
+            query: newQuery,
+            columns: meta.columns,
+          });
+        },
+        openSettings: (anchorElement: HTMLElement) =>
+          toggleSettingsMenuOpen({
+            lensStore,
+            anchorElement,
+            theme$,
+          }),
+      },
+    });
+    return [...(additionalMenuEntries || []), ...baseMenuEntries];
+  }, [
+    isLinkedToOriginatingApp,
+    dashboardFeatureFlag.allowByValueEmbeddables,
+    initialInput,
+    initialContextIsEmbedded,
+    isSaveable,
+    activeData,
+    layerMetaInfo,
+    getIsByValueMode,
+    savingToLibraryPermitted,
+    savingToDashboardPermitted,
+    contextOriginatingApp,
+    additionalMenuEntries,
+    lensInspector,
+    title,
+    unsavedTitle,
+    uiSettings,
+    fieldFormats.deserialize,
+    onAppLeave,
+    runSave,
+    attributeService,
+    setIsSaveModalVisible,
+    goBackToOriginatingApp,
+    redirectToOrigin,
+    discover,
+    query,
+    filters,
+    indexPatterns,
+    data.query.timefilter.timefilter,
+    lensStore,
+    theme$,
+  ]);
 
   const onQuerySubmitWrapped = useCallback(
     (payload) => {
@@ -408,6 +604,123 @@ export const LensTopNavMenu = ({
     });
   }, [data.query.filterManager, data.query.queryString, dispatchSetState]);
 
+  const setDatasourceState: StateSetter<unknown> = useMemo(() => {
+    return (updater) => {
+      dispatch(
+        updateDatasourceState({
+          updater,
+          datasourceId: activeDatasourceId!,
+          clearStagedPreview: true,
+        })
+      );
+    };
+  }, [activeDatasourceId, dispatch]);
+
+  const refreshFieldList = useCallback(async () => {
+    if (currentIndexPattern && currentIndexPattern.id) {
+      refreshIndexPatternsList({
+        activeDatasources: Object.keys(datasourceStates).reduce(
+          (acc, datasourceId) => ({
+            ...acc,
+            [datasourceId]: datasourceMap[datasourceId],
+          }),
+          {}
+        ),
+        indexPatternId: currentIndexPattern.id,
+        setDatasourceState,
+      });
+    }
+    // start a new session so all charts are refreshed
+    data.search.session.start();
+  }, [
+    currentIndexPattern,
+    data.search.session,
+    datasourceMap,
+    datasourceStates,
+    setDatasourceState,
+  ]);
+
+  const editField = useMemo(
+    () =>
+      editPermission
+        ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
+            if (currentIndexPattern?.id) {
+              const indexPatternInstance = await data.dataViews.get(currentIndexPattern?.id);
+              closeFieldEditor.current = dataViewFieldEditor.openEditor({
+                ctx: {
+                  dataView: indexPatternInstance,
+                },
+                fieldName,
+                onSave: async () => {
+                  refreshFieldList();
+                },
+              });
+            }
+          }
+        : undefined,
+    [editPermission, currentIndexPattern?.id, data.dataViews, dataViewFieldEditor, refreshFieldList]
+  );
+
+  const addField = useMemo(
+    () => (editPermission && editField ? () => editField(undefined, 'add') : undefined),
+    [editField, editPermission]
+  );
+
+  const createNewDataView = useCallback(() => {
+    const dataViewEditPermission = dataViewEditor.userPermissions.editDataView;
+    if (!dataViewEditPermission) {
+      return;
+    }
+    closeDataViewEditor.current = dataViewEditor.openEditor({
+      onSave: async (dataView) => {
+        if (dataView.id) {
+          handleIndexPatternChange({
+            activeDatasources: Object.keys(datasourceStates).reduce(
+              (acc, datasourceId) => ({
+                ...acc,
+                [datasourceId]: datasourceMap[datasourceId],
+              }),
+              {}
+            ),
+            datasourceStates,
+            indexPatternId: dataView.id,
+            setDatasourceState,
+          });
+          refreshFieldList();
+        }
+      },
+    });
+  }, [dataViewEditor, datasourceMap, datasourceStates, refreshFieldList, setDatasourceState]);
+
+  const dataViewPickerProps = {
+    trigger: {
+      label: currentIndexPattern?.title || '',
+      'data-test-subj': 'lns-dataView-switch-link',
+      title: currentIndexPattern?.title || '',
+    },
+    currentDataViewId: currentIndexPattern?.id,
+    onAddField: addField,
+    onDataViewCreated: createNewDataView,
+    onChangeDataView: (newIndexPatternId: string) => {
+      const currentDataView = indexPatterns.find(
+        (indexPattern) => indexPattern.id === newIndexPatternId
+      );
+      setCurrentIndexPattern(currentDataView);
+      handleIndexPatternChange({
+        activeDatasources: Object.keys(datasourceStates).reduce(
+          (acc, datasourceId) => ({
+            ...acc,
+            [datasourceId]: datasourceMap[datasourceId],
+          }),
+          {}
+        ),
+        datasourceStates,
+        indexPatternId: newIndexPatternId,
+        setDatasourceState,
+      });
+    },
+  };
+
   return (
     <TopNavMenu
       setMenuMountPoint={setHeaderActionMenu}
@@ -424,6 +737,7 @@ export const LensTopNavMenu = ({
       dateRangeTo={to}
       indicateNoData={indicateNoData}
       showSearchBar={true}
+      dataViewPickerComponentProps={dataViewPickerProps}
       showDatePicker={
         indexPatterns.some((ip) => ip.isTimeBased()) ||
         Boolean(
@@ -439,6 +753,7 @@ export const LensTopNavMenu = ({
       data-test-subj="lnsApp_topNav"
       screenTitle={'lens'}
       appName={'lens'}
+      displayStyle="detached"
     />
   );
 };

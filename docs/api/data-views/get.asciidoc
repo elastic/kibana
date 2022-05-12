@@ -6,12 +6,14 @@
 
 experimental[] Retrieve a single data view by ID.
 
+
 [[data-views-api-get-request]]
 ==== Request
 
-`GET <kibana host>:<port>/api/index_patterns/index_pattern/<id>`
+`GET <kibana host>:<port>/api/data_views/data_view/<id>`
 
-`GET <kibana host>:<port>/s/<space_id>/api/index_patterns/index_pattern/<id>`
+`GET <kibana host>:<port>/s/<space_id>/api/data_views/data_view/<id>`
+
 
 [[data-views-api-get-params]]
 ==== Path parameters
@@ -22,6 +24,7 @@ experimental[] Retrieve a single data view by ID.
 `id`::
 (Required, string) The ID of the data view you want to retrieve.
 
+
 [[data-views-api-get-codes]]
 ==== Response code
 
@@ -31,14 +34,15 @@ Indicates a successful call.
 `404`::
 The specified data view and ID doesn't exist.
 
+
 [[data-views-api-get-example]]
 ==== Example
 
-Retrieve the data view object with the `my-pattern` ID:
+Retrieve the data view object with the `my-view` ID:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X GET api/index_patterns/index_pattern/my-pattern
+$ curl -X GET api/data_views/data_view/my-view
 --------------------------------------------------
 // KIBANA
 
@@ -47,8 +51,8 @@ The API returns a data view object:
 [source,sh]
 --------------------------------------------------
 {
-    "index_pattern": {
-        "id": "my-pattern",
+    "data_view": {
+        "id": "my-view",
         "version": "...",
         "title": "...",
         "type": "...",

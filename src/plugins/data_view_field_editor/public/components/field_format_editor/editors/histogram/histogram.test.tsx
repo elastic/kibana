@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import type { FieldFormat } from 'src/plugins/field_formats/common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 import { HistogramFormatEditor } from './histogram';
 

@@ -6,11 +6,11 @@
  */
 
 import type { Type } from '@kbn/config-schema';
-import { kibanaResponseFactory } from 'src/core/server';
-import { coreMock, httpServerMock } from 'src/core/server/mocks';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { KibanaFeature } from '@kbn/features-plugin/server';
+import type { LicenseCheck } from '@kbn/licensing-plugin/server';
 
-import { KibanaFeature } from '../../../../../features/server';
-import type { LicenseCheck } from '../../../../../licensing/server';
 import { GLOBAL_RESOURCE } from '../../../../common/constants';
 import { securityFeatureUsageServiceMock } from '../../../feature_usage/index.mock';
 import { routeDefinitionParamsMock } from '../../index.mock';
@@ -46,8 +46,8 @@ interface TestOptions {
   name: string;
   licenseCheckResult?: LicenseCheck;
   apiResponses?: {
-    get: () => Promise<unknown>;
-    put: () => Promise<unknown>;
+    get: () => unknown;
+    put: () => unknown;
   };
   payload?: Record<string, any>;
   asserts: {
@@ -56,31 +56,43 @@ interface TestOptions {
     apiArguments?: { get: unknown[]; put: unknown[] };
     recordSubFeaturePrivilegeUsage?: boolean;
   };
+  features?: KibanaFeature[];
 }
 
 const putRoleTest = (
   description: string,
-  { name, payload, licenseCheckResult = { state: 'valid' }, apiResponses, asserts }: TestOptions
+  {
+    name,
+    payload,
+    licenseCheckResult = { state: 'valid' },
+    apiResponses,
+    asserts,
+    features,
+  }: TestOptions
 ) => {
   test(description, async () => {
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
     mockRouteDefinitionParams.authz.applicationName = application;
     mockRouteDefinitionParams.authz.privileges.get.mockReturnValue(privilegeMap);
 
-    const mockContext = {
-      core: coreMock.createRequestHandlerContext(),
-      licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } } as any,
-    };
+    const mockCoreContext = coreMock.createRequestHandlerContext();
+    const mockLicensingContext = {
+      license: { check: jest.fn().mockReturnValue(licenseCheckResult) },
+    } as any;
+    const mockContext = coreMock.createCustomRequestHandlerContext({
+      core: mockCoreContext,
+      licensing: mockLicensingContext,
+    });
 
     if (apiResponses?.get) {
-      mockContext.core.elasticsearch.client.asCurrentUser.security.getRole.mockImplementationOnce(
-        (async () => ({ body: await apiResponses?.get() })) as any
+      mockCoreContext.elasticsearch.client.asCurrentUser.security.getRole.mockResponseImplementationOnce(
+        (() => ({ body: apiResponses?.get() })) as any
       );
     }
 
     if (apiResponses?.put) {
-      mockContext.core.elasticsearch.client.asCurrentUser.security.putRole.mockImplementationOnce(
-        (async () => ({ body: await apiResponses?.put() })) as any
+      mockCoreContext.elasticsearch.client.asCurrentUser.security.putRole.mockResponseImplementationOnce(
+        (() => ({ body: apiResponses?.put() })) as any
       );
     }
 
@@ -88,43 +100,45 @@ const putRoleTest = (
       securityFeatureUsageServiceMock.createStartContract()
     );
 
-    mockRouteDefinitionParams.getFeatures.mockResolvedValue([
-      new KibanaFeature({
-        id: 'feature_1',
-        name: 'feature 1',
-        app: [],
-        category: { id: 'foo', label: 'foo' },
-        privileges: {
-          all: {
-            ui: [],
-            savedObject: { all: [], read: [] },
+    mockRouteDefinitionParams.getFeatures.mockResolvedValue(
+      features ?? [
+        new KibanaFeature({
+          id: 'feature_1',
+          name: 'feature 1',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          privileges: {
+            all: {
+              ui: [],
+              savedObject: { all: [], read: [] },
+            },
+            read: {
+              ui: [],
+              savedObject: { all: [], read: [] },
+            },
           },
-          read: {
-            ui: [],
-            savedObject: { all: [], read: [] },
-          },
-        },
-        subFeatures: [
-          {
-            name: 'sub feature 1',
-            privilegeGroups: [
-              {
-                groupType: 'independent',
-                privileges: [
-                  {
-                    id: 'sub_feature_privilege_1',
-                    name: 'first sub-feature privilege',
-                    includeIn: 'none',
-                    ui: [],
-                    savedObject: { all: [], read: [] },
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      }),
-    ]);
+          subFeatures: [
+            {
+              name: 'sub feature 1',
+              privilegeGroups: [
+                {
+                  groupType: 'independent',
+                  privileges: [
+                    {
+                      id: 'sub_feature_privilege_1',
+                      name: 'first sub-feature privilege',
+                      includeIn: 'none',
+                      ui: [],
+                      savedObject: { all: [], read: [] },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        }),
+      ]
+    );
 
     definePutRolesRoutes(mockRouteDefinitionParams);
     const [[{ validate }, handler]] = mockRouteDefinitionParams.router.put.mock.calls;
@@ -144,15 +158,15 @@ const putRoleTest = (
 
     if (asserts.apiArguments?.get) {
       expect(
-        mockContext.core.elasticsearch.client.asCurrentUser.security.getRole
+        mockCoreContext.elasticsearch.client.asCurrentUser.security.getRole
       ).toHaveBeenCalledWith(...asserts.apiArguments?.get);
     }
     if (asserts.apiArguments?.put) {
       expect(
-        mockContext.core.elasticsearch.client.asCurrentUser.security.putRole
+        mockCoreContext.elasticsearch.client.asCurrentUser.security.putRole
       ).toHaveBeenCalledWith(...asserts.apiArguments?.put);
     }
-    expect(mockContext.licensing.license.check).toHaveBeenCalledWith('security', 'basic');
+    expect(mockLicensingContext.license.check).toHaveBeenCalledWith('security', 'basic');
 
     if (asserts.recordSubFeaturePrivilegeUsage) {
       expect(
@@ -207,13 +221,66 @@ describe('PUT role', () => {
       licenseCheckResult: { state: 'invalid', message: 'test forbidden message' },
       asserts: { statusCode: 403, result: { message: 'test forbidden message' } },
     });
+
+    describe('feature validation', () => {
+      const fooFeature = new KibanaFeature({
+        id: 'bar',
+        name: 'bar',
+        privileges: {
+          all: {
+            requireAllSpaces: true,
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+          read: {
+            disabled: true,
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+        app: [],
+        category: { id: 'bar', label: 'bar' },
+      });
+
+      putRoleTest('returns validation errors', {
+        name: 'bar-role',
+        payload: {
+          kibana: [
+            {
+              spaces: ['bar-space'],
+              base: [],
+              feature: {
+                bar: ['all', 'read'],
+              },
+            },
+          ],
+        },
+        features: [fooFeature],
+        asserts: {
+          statusCode: 400,
+          result: {
+            message:
+              'Role cannot be updated due to validation errors: ["Feature privilege [bar.all] requires all spaces to be selected but received [bar-space]","Feature [bar] does not support privilege [read]."]',
+          },
+        },
+      });
+    });
   });
 
   describe('success', () => {
     putRoleTest(`creates empty role`, {
       name: 'foo-role',
       payload: {},
-      apiResponses: { get: async () => ({}), put: async () => {} },
+      apiResponses: {
+        get: () => ({}),
+        put: () => {},
+      },
       asserts: {
         apiArguments: {
           get: [{ name: 'foo-role' }, { ignore: [404] }],
@@ -243,7 +310,10 @@ describe('PUT role', () => {
           },
         ],
       },
-      apiResponses: { get: async () => ({}), put: async () => {} },
+      apiResponses: {
+        get: () => ({}),
+        put: () => {},
+      },
       asserts: {
         apiArguments: {
           get: [{ name: 'foo-role' }, { ignore: [404] }],
@@ -282,7 +352,10 @@ describe('PUT role', () => {
           },
         ],
       },
-      apiResponses: { get: async () => ({}), put: async () => {} },
+      apiResponses: {
+        get: () => ({}),
+        put: () => {},
+      },
       asserts: {
         apiArguments: {
           get: [{ name: 'foo-role' }, { ignore: [404] }],
@@ -319,7 +392,10 @@ describe('PUT role', () => {
           },
         ],
       },
-      apiResponses: { get: async () => ({}), put: async () => {} },
+      apiResponses: {
+        get: () => ({}),
+        put: () => {},
+      },
       asserts: {
         apiArguments: {
           get: [{ name: 'foo-role' }, { ignore: [404] }],
@@ -384,7 +460,10 @@ describe('PUT role', () => {
           },
         ],
       },
-      apiResponses: { get: async () => ({}), put: async () => {} },
+      apiResponses: {
+        get: () => ({}),
+        put: () => {},
+      },
       asserts: {
         apiArguments: {
           get: [{ name: 'foo-role' }, { ignore: [404] }],
@@ -474,7 +553,7 @@ describe('PUT role', () => {
         ],
       },
       apiResponses: {
-        get: async () => ({
+        get: () => ({
           'foo-role': {
             metadata: {
               bar: 'old-metadata',
@@ -504,7 +583,7 @@ describe('PUT role', () => {
             ],
           },
         }),
-        put: async () => {},
+        put: () => {},
       },
       asserts: {
         apiArguments: {
@@ -577,7 +656,7 @@ describe('PUT role', () => {
         ],
       },
       apiResponses: {
-        get: async () => ({
+        get: () => ({
           'foo-role': {
             metadata: {
               bar: 'old-metadata',
@@ -612,7 +691,7 @@ describe('PUT role', () => {
             ],
           },
         }),
-        put: async () => {},
+        put: () => {},
       },
       asserts: {
         apiArguments: {
@@ -668,7 +747,10 @@ describe('PUT role', () => {
           },
         ],
       },
-      apiResponses: { get: async () => ({}), put: async () => {} },
+      apiResponses: {
+        get: () => ({}),
+        put: () => {},
+      },
       asserts: {
         recordSubFeaturePrivilegeUsage: true,
         apiArguments: {
@@ -709,7 +791,10 @@ describe('PUT role', () => {
           },
         ],
       },
-      apiResponses: { get: async () => ({}), put: async () => {} },
+      apiResponses: {
+        get: () => ({}),
+        put: () => {},
+      },
       asserts: {
         recordSubFeaturePrivilegeUsage: false,
         apiArguments: {
@@ -750,7 +835,10 @@ describe('PUT role', () => {
           },
         ],
       },
-      apiResponses: { get: async () => ({}), put: async () => {} },
+      apiResponses: {
+        get: () => ({}),
+        put: () => {},
+      },
       asserts: {
         recordSubFeaturePrivilegeUsage: false,
         apiArguments: {

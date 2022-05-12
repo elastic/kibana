@@ -53,4 +53,10 @@ properties:
     type: string
   description:
     type: string
+  force:
+    type: boolean
 required:
+  - name
+  - namespace
+  - policy_id
+  - enabled

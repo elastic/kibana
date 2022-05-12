@@ -10,10 +10,11 @@ import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../
 
 import { sendRequest, useRequest } from './use_request';
 
-export const sendGetPermissionsCheck = () => {
+export const sendGetPermissionsCheck = (fleetServerSetup?: boolean) => {
   return sendRequest<CheckPermissionsResponse>({
     path: appRoutesService.getCheckPermissionsPath(),
     method: 'get',
+    query: { fleetServerSetup },
   });
 };
 

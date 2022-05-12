@@ -1,0 +1,45 @@
+{
+  "author": [
+    "Austin Songer"
+  ],
+  "description": "Identifies the creation of role binding or cluster role bindings. You can assign these roles to Kubernetes subjects (users, groups, or service accounts) with role bindings and cluster role bindings. An adversary who has permissions to create bindings and cluster-bindings in the cluster can create a binding to the cluster-admin ClusterRole or to other high privileges roles.",
+  "from": "now-20m",
+  "index": [
+    "filebeat-*",
+    "logs-azure*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Azure Kubernetes Rolebindings Created",
+  "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:azure.activitylogs and azure.activitylogs.operation_name:\n\t(\"MICROSOFT.KUBERNETES/CONNECTEDCLUSTERS/RBAC.AUTHORIZATION.K8S.IO/ROLEBINDINGS/WRITE\" or\n\t \"MICROSOFT.KUBERNETES/CONNECTEDCLUSTERS/RBAC.AUTHORIZATION.K8S.IO/CLUSTERROLEBINDINGS/WRITE\") and \nevent.outcome:(Success or success)\n",
+  "references": [
+    "https://docs.microsoft.com/en-us/azure/role-based-access-control/resource-provider-operations#microsoftkubernetes",
+    "https://www.microsoft.com/security/blog/2020/04/02/attack-matrix-kubernetes/"
+  ],
+  "risk_score": 21,
+  "rule_id": "1c966416-60c1-436b-bfd0-e002fddbfd89",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "Azure",
+    "Continuous Monitoring",
+    "SecOps",
+    "Identity and Access"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": []
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 1
+}

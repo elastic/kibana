@@ -9,7 +9,7 @@
 import moment from 'moment';
 import React from 'react';
 import { NewsFeed } from './news_feed';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
 const mockNewsFetchResult = {
   error: null,

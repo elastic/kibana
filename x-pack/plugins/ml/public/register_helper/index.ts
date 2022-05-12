@@ -10,3 +10,4 @@ export { registerManagementSection } from '../application/management';
 export { registerMlUiActions } from '../ui_actions';
 export { registerSearchLinks } from './register_search_links';
 export { registerMlAlerts } from '../alerting';
+export { registerMapExtension } from '../maps/register_map_extension';

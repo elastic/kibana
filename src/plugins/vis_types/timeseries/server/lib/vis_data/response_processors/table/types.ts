@@ -12,7 +12,9 @@ import type { TableSearchRequestMeta } from '../../request_processors/table/type
 import type { Panel, Series, PanelData } from '../../../../../common/types';
 
 export interface TableResponseProcessorsParams {
-  bucket: Record<string, unknown>;
+  response: {
+    aggregations: Record<string, any>;
+  };
   panel: Panel;
   series: Series;
   meta: TableSearchRequestMeta;

@@ -17,7 +17,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { euiLightVars as theme } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars as theme } from '@kbn/ui-theme';
 
 import { JobMessage } from '../../../../common/types/audit_message';
 import { JobIcon } from '../job_message_icon';

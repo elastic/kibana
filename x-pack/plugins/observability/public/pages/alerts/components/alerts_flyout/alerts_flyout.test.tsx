@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import * as useUiSettingHook from '../../../../../../../../src/plugins/kibana_react/public/ui_settings/use_ui_setting';
+import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import { createObservabilityRuleTypeRegistryMock } from '../../../../rules/observability_rule_type_registry_mock';
 import { render } from '../../../../utils/test_helper';
 import type { TopAlert } from '../../containers/alerts_page';

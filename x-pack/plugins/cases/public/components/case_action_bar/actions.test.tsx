@@ -81,7 +81,7 @@ describe('CaseView actions', () => {
     expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeTruthy();
     wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
     expect(handleOnDeleteConfirm.mock.calls[0][0]).toEqual([
-      { id: basicCase.id, title: basicCase.title, type: 'individual' },
+      { id: basicCase.id, title: basicCase.title },
     ]);
   });
 

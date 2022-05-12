@@ -1,18 +1,15 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
 const execSync = require('child_process').execSync;
 const fs = require('fs');
 const { areChangesSkippable, doAnyChangesMatch } = require('kibana-buildkite-library');
-
-const SKIPPABLE_PATHS = [
-  /^docs\//,
-  /^rfcs\//,
-  /^.ci\/.+\.yml$/,
-  /^.ci\/es-snapshots\//,
-  /^.ci\/pipeline-library\//,
-  /^.ci\/Jenkinsfile_[^\/]+$/,
-  /^\.github\//,
-  /\.md$/,
-  /^\.backportrc\.json$/,
-];
+const { SKIPPABLE_PR_MATCHERS } = require('./skippable_pr_matchers');
 
 const REQUIRED_PATHS = [
   // this file is auto-generated and changes to it need to be validated with CI
@@ -38,7 +35,7 @@ const uploadPipeline = (pipelineContent) => {
 
 (async () => {
   try {
-    const skippable = await areChangesSkippable(SKIPPABLE_PATHS, REQUIRED_PATHS);
+    const skippable = await areChangesSkippable(SKIPPABLE_PR_MATCHERS, REQUIRED_PATHS);
 
     if (skippable) {
       console.log('All changes in PR are skippable. Skipping CI.');
@@ -56,17 +53,37 @@ const uploadPipeline = (pipelineContent) => {
 
     if (
       (await doAnyChangesMatch([
-        /^x-pack\/plugins\/security_solution/,
-        /^x-pack\/plugins\/cases/,
         /^x-pack\/plugins\/lists/,
+        /^x-pack\/plugins\/security_solution/,
         /^x-pack\/plugins\/timelines/,
-        /^x-pack\/test\/security_solution_cypress/,
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/sections\/action_connector_form/,
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/context\/actions_connectors_context\.tsx/,
+        /^x-pack\/test\/security_solution_cypress/,
       ])) ||
       process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution.yml'));
+    }
+
+    if (
+      (await doAnyChangesMatch([
+        /^src\/plugins\/data/,
+        /^x-pack\/plugins\/actions/,
+        /^x-pack\/plugins\/alerting/,
+        /^x-pack\/plugins\/event_log/,
+        /^x-pack\/plugins\/rule_registry/,
+        /^x-pack\/plugins\/task_manager/,
+      ])) ||
+      process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/response_ops.yml'));
+    }
+
+    if (
+      (await doAnyChangesMatch([/^x-pack\/plugins\/cases/])) ||
+      process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/response_ops_cases.yml'));
     }
 
     if (
@@ -77,20 +94,14 @@ const uploadPipeline = (pipelineContent) => {
     }
 
     if (
-      (await doAnyChangesMatch([
-        /^x-pack\/plugins\/fleet/,
-        /^x-pack\/test\/fleet_cypress/,
-      ])) ||
+      (await doAnyChangesMatch([/^x-pack\/plugins\/fleet/, /^x-pack\/test\/fleet_cypress/])) ||
       process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fleet_cypress.yml'));
     }
 
     if (
-      (await doAnyChangesMatch([
-        /^x-pack\/plugins\/osquery/,
-        /^x-pack\/test\/osquery_cypress/,
-      ])) ||
+      (await doAnyChangesMatch([/^x-pack\/plugins\/osquery/, /^x-pack\/test\/osquery_cypress/])) ||
       process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/osquery_cypress.yml'));
@@ -98,6 +109,10 @@ const uploadPipeline = (pipelineContent) => {
 
     if (await doAnyChangesMatch([/^x-pack\/plugins\/uptime/])) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/uptime.yml'));
+    }
+
+    if (process.env.GITHUB_PR_LABELS.includes('ci:deploy-cloud')) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_cloud.yml'));
     }
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));

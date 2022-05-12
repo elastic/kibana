@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { registerLayerWizard } from './layer_wizard_registry';
+import { registerLayerWizardInternal } from './layer_wizard_registry';
 import { uploadLayerWizardConfig } from './file_upload_wizard';
 import {
   esDocumentsLayerWizardConfig,
@@ -16,17 +16,12 @@ import {
   heatmapLayerWizardConfig,
 } from '../../sources/es_geo_grid_source';
 import { geoLineLayerWizardConfig } from '../../sources/es_geo_line_source';
-// @ts-ignore
-import { point2PointLayerWizardConfig } from '../../sources/es_pew_pew_source';
-// @ts-ignore
+import { point2PointLayerWizardConfig } from '../../sources/es_pew_pew_source/point_2_point_layer_wizard';
 import { emsBoundariesLayerWizardConfig } from '../../sources/ems_file_source';
-// @ts-ignore
 import { emsBaseMapLayerWizardConfig } from '../../sources/ems_tms_source';
-// @ts-ignore
-import { kibanaBasemapLayerWizardConfig } from '../../sources/kibana_tilemap_source';
+import { kibanaBasemapLayerWizardConfig } from '../../sources/kibana_tilemap_source/kibana_base_map_layer_wizard';
 import { tmsLayerWizardConfig } from '../../sources/xyz_tms_source';
-// @ts-ignore
-import { wmsLayerWizardConfig } from '../../sources/wms_source';
+import { wmsLayerWizardConfig } from '../../sources/wms_source/wms_layer_wizard';
 import { mvtVectorSourceWizardConfig } from '../../sources/mvt_single_layer_vector_source';
 import { ObservabilityLayerWizardConfig } from './solution_layers/observability';
 import { SecurityLayerWizardConfig } from './solution_layers/security';
@@ -34,36 +29,29 @@ import { choroplethLayerWizardConfig } from './choropleth_layer_wizard';
 import { newVectorLayerWizardConfig } from './new_vector_layer_wizard';
 
 let registered = false;
+
 export function registerLayerWizards() {
   if (registered) {
     return;
   }
 
-  // Registration order determines display order
-  registerLayerWizard(uploadLayerWizardConfig);
-  registerLayerWizard(esDocumentsLayerWizardConfig);
-  // @ts-ignore
-  registerLayerWizard(choroplethLayerWizardConfig);
-  registerLayerWizard(clustersLayerWizardConfig);
-  // @ts-ignore
-  registerLayerWizard(heatmapLayerWizardConfig);
-  registerLayerWizard(esTopHitsLayerWizardConfig);
-  registerLayerWizard(geoLineLayerWizardConfig);
-  // @ts-ignore
-  registerLayerWizard(point2PointLayerWizardConfig);
-  // @ts-ignore
-  registerLayerWizard(emsBoundariesLayerWizardConfig);
-  registerLayerWizard(newVectorLayerWizardConfig);
-  // @ts-ignore
-  registerLayerWizard(emsBaseMapLayerWizardConfig);
-  // @ts-ignore
-  registerLayerWizard(kibanaBasemapLayerWizardConfig);
-  registerLayerWizard(tmsLayerWizardConfig);
-  // @ts-ignore
-  registerLayerWizard(wmsLayerWizardConfig);
+  registerLayerWizardInternal(uploadLayerWizardConfig);
+  registerLayerWizardInternal(esDocumentsLayerWizardConfig);
+  registerLayerWizardInternal(choroplethLayerWizardConfig);
+  registerLayerWizardInternal(clustersLayerWizardConfig);
+  registerLayerWizardInternal(heatmapLayerWizardConfig);
+  registerLayerWizardInternal(esTopHitsLayerWizardConfig);
+  registerLayerWizardInternal(geoLineLayerWizardConfig);
+  registerLayerWizardInternal(point2PointLayerWizardConfig);
+  registerLayerWizardInternal(emsBoundariesLayerWizardConfig);
+  registerLayerWizardInternal(newVectorLayerWizardConfig);
+  registerLayerWizardInternal(emsBaseMapLayerWizardConfig);
+  registerLayerWizardInternal(kibanaBasemapLayerWizardConfig);
+  registerLayerWizardInternal(tmsLayerWizardConfig);
+  registerLayerWizardInternal(wmsLayerWizardConfig);
 
-  registerLayerWizard(mvtVectorSourceWizardConfig);
-  registerLayerWizard(ObservabilityLayerWizardConfig);
-  registerLayerWizard(SecurityLayerWizardConfig);
+  registerLayerWizardInternal(mvtVectorSourceWizardConfig);
+  registerLayerWizardInternal(ObservabilityLayerWizardConfig);
+  registerLayerWizardInternal(SecurityLayerWizardConfig);
   registered = true;
 }

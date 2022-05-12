@@ -5,17 +5,15 @@
   // Use the EuiFlyout style
   @include euiFlyout;
   // But with custom positioning to keep it within the sidebar contents
-  position: absolute;
-  left: 0;
   animation: euiFlyout $euiAnimSpeedNormal $euiAnimSlightResistance;
+  left: 0;
+  max-width: none !important;
+  z-index: $euiZContentMenu;
 
   @include euiBreakpoint('l', 'xl') {
-    top: 0 !important;
     height: 100% !important;
-  }
-
-  @include euiBreakpoint('xs', 's', 'm') {
-    @include euiFlyout;
+    position: absolute;
+    top: 0 !important;
   }
 
   .lnsFrameLayout__sidebar-isFullscreen & {
@@ -47,4 +45,17 @@
 
 .lnsBody--overflowHidden {
   overflow: hidden;
+}
+
+.lnsLayerAddButton:hover {
+  text-decoration: none;
+
+  .lnsLayerAddButton__label {
+    text-decoration: underline;
+  }
+
+  .lnsLayerAddButton__techBadge,
+  .lnsLayerAddButton__techBadge * {
+    cursor: pointer;
+  }
 }

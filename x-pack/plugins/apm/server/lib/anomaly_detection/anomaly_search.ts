@@ -8,7 +8,7 @@
 import {
   ESSearchRequest,
   ESSearchResponse,
-} from '../../../../../../src/core/types/elasticsearch';
+} from '@kbn/core/types/elasticsearch';
 import { Setup } from '../helpers/setup_request';
 
 interface SharedFields {

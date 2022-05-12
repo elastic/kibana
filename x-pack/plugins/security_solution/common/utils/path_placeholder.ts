@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ConditionEntryField, OperatingSystem, TrustedAppEntryTypes } from '../endpoint/types';
+import { ConditionEntryField, OperatingSystem, EntryTypes } from '@kbn/securitysolution-utils';
 
 export const getPlaceholderText = () => ({
   windows: {
-    wildcard: 'C:\\sample\\**\\*',
+    wildcard: 'C:\\sample\\*\\path.exe',
     exact: 'C:\\sample\\path.exe',
   },
   others: {
-    wildcard: '/opt/**/*',
+    wildcard: '/opt/*/app',
     exact: '/opt/bin',
   },
 });
@@ -25,7 +24,7 @@ export const getPlaceholderTextByOSType = ({
 }: {
   os: OperatingSystem;
   field: ConditionEntryField;
-  type: TrustedAppEntryTypes;
+  type: EntryTypes;
 }): string | undefined => {
   if (field === ConditionEntryField.PATH) {
     if (os === OperatingSystem.WINDOWS) {

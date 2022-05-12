@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { AddRoleAlert } from './add_role_alert';
 
 describe('AddRoleAlert component', () => {

@@ -11,5 +11,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./params'));
     loadTestFile(require.resolve('./conflicts'));
     loadTestFile(require.resolve('./response'));
+    loadTestFile(require.resolve('./filter'));
   });
 }

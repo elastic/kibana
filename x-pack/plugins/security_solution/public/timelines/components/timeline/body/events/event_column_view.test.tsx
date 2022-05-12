@@ -19,7 +19,8 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use
 import { getDefaultControlColumn } from '../control_columns';
 import { testLeadingControlColumn } from '../../../../../common/mock/mock_timeline_control_columns';
 import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
-import { getActionsColumnWidth } from '../../../../../../../timelines/public';
+import { getActionsColumnWidth } from '@kbn/timelines-plugin/public';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -40,6 +41,7 @@ jest.mock('../../../../../common/lib/kibana', () => ({
           siem: { crud_alerts: true, read_alerts: true },
         },
       },
+      cases: mockCasesContract(),
     },
   }),
   useToasts: jest.fn().mockReturnValue({
@@ -49,17 +51,6 @@ jest.mock('../../../../../common/lib/kibana', () => ({
   }),
   useGetUserCasesPermissions: jest.fn(),
 }));
-
-jest.mock(
-  '../../../../../../../timelines/public/components/actions/timeline/cases/add_to_case_action',
-  () => {
-    return {
-      AddToCasePopover: () => {
-        return <div data-test-subj="add-to-case-action">{'Add to case'}</div>;
-      },
-    };
-  }
-);
 
 describe('EventColumnView', () => {
   useIsExperimentalFeatureEnabledMock.mockReturnValue(false);

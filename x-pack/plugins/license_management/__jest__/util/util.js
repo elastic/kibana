@@ -10,8 +10,8 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 
-import { mountWithIntl } from '@kbn/test/jest';
-import { httpServiceMock, scopedHistoryMock } from '../../../../../src/core/public/mocks';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { httpServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { licenseManagementStore } from '../../public/application/store/store';
 import { AppContextProvider } from '../../public/application/app_context';
 

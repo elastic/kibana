@@ -11,6 +11,15 @@ import {
   MatrixHistogramType,
 } from '../../../../../../../common/search_strategy';
 
+const runtimeMappings: MatrixHistogramRequestOptions['runtimeMappings'] = {
+  '@a.runtime.field': {
+    script: {
+      source: 'emit("Radically mocked dude: " + doc[\'host.name\'].value)',
+    },
+    type: 'keyword',
+  },
+};
+
 export const mockOptions: MatrixHistogramRequestOptions = {
   defaultIndex: [
     'apm-*-transaction*',
@@ -27,6 +36,7 @@ export const mockOptions: MatrixHistogramRequestOptions = {
   histogramType: MatrixHistogramType.events,
   timerange: { interval: '12h', from: '2020-09-08T16:11:26.215Z', to: '2020-09-09T16:11:26.215Z' },
   stackByField: 'event.action',
+  runtimeMappings,
 };
 
 export const expectedDsl = {
@@ -80,6 +90,7 @@ export const expectedDsl = {
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
     size: 0,
   },
 };
@@ -137,6 +148,7 @@ export const expectedThresholdDsl = {
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
     size: 0,
   },
 };
@@ -192,6 +204,7 @@ export const expectedThresholdMissingFieldDsl = {
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
     size: 0,
   },
 };
@@ -242,6 +255,7 @@ export const expectedThresholdWithCardinalityDsl = {
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
     size: 0,
   },
   ignore_unavailable: true,
@@ -311,6 +325,7 @@ export const expectedThresholdWithGroupFieldsAndCardinalityDsl = {
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
     size: 0,
   },
 };
@@ -363,6 +378,7 @@ export const expectedThresholdGroupWithCardinalityDsl = {
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
     size: 0,
   },
   ignore_unavailable: true,
@@ -438,6 +454,7 @@ export const expectedIpIncludingMissingDataDsl = {
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
     size: 0,
   },
 };
@@ -496,6 +513,7 @@ export const expectedIpNotIncludingMissingDataDsl = {
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
     size: 0,
   },
 };

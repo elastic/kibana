@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderWithIntl } from '@kbn/test/jest';
+import { renderWithIntl } from '@kbn/test-jest-helpers';
 import { WeTried } from '.';
 
 describe('WeTried', () => {

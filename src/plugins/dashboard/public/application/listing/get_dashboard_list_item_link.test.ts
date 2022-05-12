@@ -7,11 +7,11 @@
  */
 
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
-import { ApplicationStart } from 'kibana/public';
-import { esFilters } from '../../../../data/public';
+import { ApplicationStart } from '@kbn/core/public';
 import { createHashHistory } from 'history';
-import { createKbnUrlStateStorage } from '../../../../kibana_utils/public';
-import { GLOBAL_STATE_STORAGE_KEY } from '../../url_generator';
+import { FilterStateStore } from '@kbn/es-query';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { GLOBAL_STATE_STORAGE_KEY } from '../../dashboard_constants';
 
 const DASHBOARD_ID = '13823000-99b9-11ea-9eb6-d9e8adceb647';
 
@@ -118,7 +118,7 @@ describe('when global filters change', () => {
         },
         query: { query: 'q1' },
         $state: {
-          store: esFilters.FilterStateStore.GLOBAL_STATE,
+          store: FilterStateStore.GLOBAL_STATE,
         },
       },
     ];

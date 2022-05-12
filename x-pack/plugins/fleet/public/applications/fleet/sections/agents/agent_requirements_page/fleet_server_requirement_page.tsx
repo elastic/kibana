@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { useStartServices } from '../../../hooks';
+import { useStartServices, sendGetPermissionsCheck } from '../../../hooks';
 
-import { CloudInstructions, OnPremInstructions } from './components';
+import { FleetServerMissingPrivileges } from '../components/fleet_server_callouts';
+
+import { Loading } from '../components';
+
+import { FleetServerInstructions } from '../../../components';
+
+import { CloudInstructions, EnrollmentRecommendation } from './components';
 
 const FlexItemWithMinWidth = styled(EuiFlexItem)`
   min-width: 0px;
@@ -23,23 +29,56 @@ const ContentWrapper = styled(EuiFlexGroup)`
   margin: 0 auto;
 `;
 
-export const FleetServerRequirementPage = () => {
+export const FleetServerRequirementPage: React.FunctionComponent<
+  | {
+      showEnrollmentRecommendation?: false;
+      showStandaloneTab?: never;
+    }
+  | {
+      showEnrollmentRecommendation?: true;
+      showStandaloneTab: () => void;
+    }
+> = ({ showStandaloneTab = () => {}, showEnrollmentRecommendation = true }) => {
   const startService = useStartServices();
   const deploymentUrl = startService.cloud?.deploymentUrl;
 
+  const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);
+  const [permissionsError, setPermissionsError] = useState<string>();
+
+  useEffect(() => {
+    async function checkPermissions() {
+      setIsPermissionsLoading(false);
+      setPermissionsError(undefined);
+
+      try {
+        setIsPermissionsLoading(true);
+        const permissionsResponse = await sendGetPermissionsCheck(true);
+
+        setIsPermissionsLoading(false);
+        if (!permissionsResponse.data?.success) {
+          setPermissionsError(permissionsResponse.data?.error || 'REQUEST_ERROR');
+        }
+      } catch (err) {
+        setPermissionsError('REQUEST_ERROR');
+      }
+    }
+    checkPermissions();
+  }, []);
+
   return (
     <>
-      <ContentWrapper
-        gutterSize="none"
-        justifyContent="center"
-        alignItems="center"
-        direction="column"
-      >
+      <ContentWrapper gutterSize="none" justifyContent="center" direction="column">
         <FlexItemWithMinWidth grow={false}>
           {deploymentUrl ? (
             <CloudInstructions deploymentUrl={deploymentUrl} />
+          ) : isPermissionsLoading ? (
+            <Loading />
+          ) : permissionsError ? (
+            <FleetServerMissingPrivileges />
+          ) : showEnrollmentRecommendation ? (
+            <EnrollmentRecommendation showStandaloneTab={showStandaloneTab} />
           ) : (
-            <OnPremInstructions />
+            <FleetServerInstructions />
           )}
         </FlexItemWithMinWidth>
       </ContentWrapper>

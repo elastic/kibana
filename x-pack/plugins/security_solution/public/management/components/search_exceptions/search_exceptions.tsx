@@ -17,10 +17,16 @@ export interface SearchExceptionsProps {
   placeholder: string;
   hasPolicyFilter?: boolean;
   policyList?: ImmutableArray<PolicyData>;
-  defaultExcludedPolicies?: string;
   defaultIncludedPolicies?: string;
   hideRefreshButton?: boolean;
-  onSearch(query: string, includedPolicies?: string, excludedPolicies?: string): void;
+  onSearch(
+    /** The query string the user entered into the text field */
+    query: string,
+    /** A list of policy id's comma delimited */
+    includedPolicies: string | undefined,
+    /** Will be `true` if the user clicked the `refresh` button */
+    refresh: boolean
+  ): void;
 }
 
 export const SearchExceptions = memo<SearchExceptionsProps>(
@@ -31,13 +37,11 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
     hasPolicyFilter,
     policyList,
     defaultIncludedPolicies,
-    defaultExcludedPolicies,
     hideRefreshButton = false,
   }) => {
     const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
     const [query, setQuery] = useState<string>(defaultValue);
     const [includedPolicies, setIncludedPolicies] = useState<string>(defaultIncludedPolicies || '');
-    const [excludedPolicies, setExcludedPolicies] = useState<string>(defaultExcludedPolicies || '');
 
     const onChangeSelection = useCallback(
       (items: PolicySelectionItem[]) => {
@@ -45,15 +49,10 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
           .filter((item) => item.checked === 'on')
           .map((item) => item.id)
           .join(',');
-        const excludePoliciesNew = items
-          .filter((item) => item.checked === 'off')
-          .map((item) => item.id)
-          .join(',');
 
         setIncludedPolicies(includePoliciesNew);
-        setExcludedPolicies(excludePoliciesNew);
 
-        onSearch(query, includePoliciesNew, excludePoliciesNew);
+        onSearch(query, includePoliciesNew, false);
       },
       [onSearch, query]
     );
@@ -63,15 +62,15 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
       [setQuery]
     );
     const handleOnSearch = useCallback(
-      () => onSearch(query, includedPolicies, excludedPolicies),
-      [onSearch, query, includedPolicies, excludedPolicies]
+      () => onSearch(query, includedPolicies, true),
+      [onSearch, query, includedPolicies]
     );
 
     const handleOnSearchQuery = useCallback(
       (value) => {
-        onSearch(value, includedPolicies, excludedPolicies);
+        onSearch(value, includedPolicies, false);
       },
-      [onSearch, includedPolicies, excludedPolicies]
+      [onSearch, includedPolicies]
     );
 
     return (
@@ -96,7 +95,6 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
           <EuiFlexItem grow={false}>
             <PoliciesSelector
               policies={policyList}
-              defaultExcludedPolicies={defaultExcludedPolicies}
               defaultIncludedPolicies={defaultIncludedPolicies}
               onChangeSelection={onChangeSelection}
             />
@@ -104,8 +102,8 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
         ) : null}
 
         {!hideRefreshButton ? (
-          <EuiFlexItem grow={false} onClick={handleOnSearch} data-test-subj="searchButton">
-            <EuiButton iconType="refresh">
+          <EuiFlexItem grow={false}>
+            <EuiButton iconType="refresh" onClick={handleOnSearch} data-test-subj="searchButton">
               {i18n.translate('xpack.securitySolution.management.search.button', {
                 defaultMessage: 'Refresh',
               })}

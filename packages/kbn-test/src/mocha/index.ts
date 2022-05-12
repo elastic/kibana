@@ -11,7 +11,7 @@
 export { setupJUnitReportGeneration } from './junit_report_generation';
 // @ts-ignore not typed yet
 // @internal
-export { recordLog, snapshotLogsForRunnable } from './log_cache';
+export { recordLog, snapshotLogsForRunnable, getSnapshotOfRunnableLogs } from './log_cache';
 // @ts-ignore not typed yet
 // @internal
 export { escapeCdata } from './xml';

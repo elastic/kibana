@@ -1,0 +1,87 @@
+{
+  "id": "stackAlerts",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "stackAlerts",
+        "id": "def-server.ID",
+        "type": "string",
+        "tags": [],
+        "label": "ID",
+        "description": [],
+        "signature": [
+          "\".index-threshold\""
+        ],
+        "path": "x-pack/plugins/stack_alerts/server/alert_types/index_threshold/alert_type.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "stackAlerts",
+        "id": "def-common.Config",
+        "type": "Type",
+        "tags": [],
+        "label": "Config",
+        "description": [],
+        "signature": [
+          "{}"
+        ],
+        "path": "x-pack/plugins/stack_alerts/common/config.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "stackAlerts",
+        "id": "def-common.STACK_ALERTS_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "STACK_ALERTS_FEATURE_ID",
+        "description": [],
+        "signature": [
+          "\"stackAlerts\""
+        ],
+        "path": "x-pack/plugins/stack_alerts/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "stackAlerts",
+        "id": "def-common.configSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "configSchema",
+        "description": [],
+        "signature": [
+          "ObjectType",
+          "<{}>"
+        ],
+        "path": "x-pack/plugins/stack_alerts/common/config.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

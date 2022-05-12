@@ -4,18 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import moment from 'moment';
 import { takeUntil } from 'rxjs/operators';
 import { from } from 'rxjs';
 import React from 'react';
-import { getInitialGroupsMap } from '../../application/components/job_selector/job_selector';
 import {
   KibanaContextProvider,
   toMountPoint,
-} from '../../../../../../src/plugins/kibana_react/public';
+  wrapWithTheme,
+} from '@kbn/kibana-react-plugin/public';
+import { DashboardConstants } from '@kbn/dashboard-plugin/public';
+import { getInitialGroupsMap } from '../../application/components/job_selector/job_selector';
 import { getMlGlobalServices } from '../../application/app';
-import { DashboardConstants } from '../../../../../../src/plugins/dashboard/public';
 import { JobId } from '../../../common/types/anomaly_detection_jobs';
 import { JobSelectorFlyout } from './components/job_selector_flyout';
 
@@ -34,6 +35,7 @@ export async function resolveJobSelection(
   const {
     http,
     uiSettings,
+    theme,
     application: { currentAppId$ },
   } = coreStart;
 
@@ -70,18 +72,23 @@ export async function resolveJobSelection(
 
       const flyoutSession = coreStart.overlays.openFlyout(
         toMountPoint(
-          <KibanaContextProvider services={{ ...coreStart, mlServices: getMlGlobalServices(http) }}>
-            <JobSelectorFlyout
-              selectedIds={selectedJobIds}
-              withTimeRangeSelector={false}
-              dateFormatTz={dateFormatTz}
-              singleSelection={false}
-              timeseriesOnly={true}
-              onFlyoutClose={onFlyoutClose}
-              onSelectionConfirmed={onSelectionConfirmed}
-              maps={maps}
-            />
-          </KibanaContextProvider>
+          wrapWithTheme(
+            <KibanaContextProvider
+              services={{ ...coreStart, mlServices: getMlGlobalServices(http) }}
+            >
+              <JobSelectorFlyout
+                selectedIds={selectedJobIds}
+                withTimeRangeSelector={false}
+                dateFormatTz={dateFormatTz}
+                singleSelection={false}
+                timeseriesOnly={true}
+                onFlyoutClose={onFlyoutClose}
+                onSelectionConfirmed={onSelectionConfirmed}
+                maps={maps}
+              />
+            </KibanaContextProvider>,
+            theme.theme$
+          )
         ),
         {
           'data-test-subj': 'mlFlyoutJobSelector',

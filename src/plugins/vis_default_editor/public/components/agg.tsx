@@ -13,11 +13,10 @@ import {
   EuiButtonIcon,
   EuiButtonIconProps,
   EuiSpacer,
-  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { IAggConfig, TimeRange } from 'src/plugins/data/public';
+import { IAggConfig, TimeRange } from '@kbn/data-plugin/public';
 import { DefaultEditorAggParams } from './agg_params';
 import { DefaultEditorAggCommonProps } from './agg_common_props';
 import { AGGS_ACTION_KEYS, AggsAction } from './agg_group_state';
@@ -198,6 +197,7 @@ function DefaultEditorAgg({
     if (isDraggable) {
       actionIcons.push({
         id: 'dragHandle',
+        color: 'text',
         type: 'grab',
         tooltip: i18n.translate('visDefaultEditor.agg.modifyPriorityButtonTooltip', {
           defaultMessage: 'Modify priority of {schemaTitle} {aggTitle} by dragging',
@@ -219,39 +219,23 @@ function DefaultEditorAgg({
         dataTestSubj: 'removeDimensionBtn',
       });
     }
-    return (
-      <div {...dragHandleProps}>
-        {actionIcons.map((icon) => {
-          if (icon.id === 'dragHandle') {
-            return (
-              <EuiIconTip
-                key={icon.id}
-                type={icon.type}
-                content={icon.tooltip}
-                iconProps={{
-                  ['aria-label']: icon.tooltip,
-                  ['data-test-subj']: icon.dataTestSubj,
-                }}
-                position="bottom"
-              />
-            );
-          }
-
-          return (
-            <EuiToolTip key={icon.id} position="bottom" content={icon.tooltip}>
-              <EuiButtonIcon
-                disabled={icon.disabled}
-                iconType={icon.type}
-                color={icon.color as EuiButtonIconProps['color']}
-                onClick={icon.onClick}
-                aria-label={icon.tooltip}
-                data-test-subj={icon.dataTestSubj}
-              />
-            </EuiToolTip>
-          );
-        })}
-      </div>
-    );
+    return actionIcons.length ? (
+      <>
+        {actionIcons.map((icon) => (
+          <EuiToolTip key={icon.id} position="bottom" content={icon.tooltip}>
+            <EuiButtonIcon
+              disabled={icon.disabled}
+              iconType={icon.type}
+              color={icon.color as EuiButtonIconProps['color']}
+              onClick={icon.onClick}
+              aria-label={icon.tooltip}
+              data-test-subj={icon.dataTestSubj}
+              {...(icon.id === 'dragHandle' ? dragHandleProps : {})}
+            />
+          </EuiToolTip>
+        ))}
+      </>
+    ) : null;
   };
 
   const buttonContent = (

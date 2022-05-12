@@ -5,7 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { nonEmptyStringRt } from '@kbn/io-ts-utils/non_empty_string_rt';
+import { nonEmptyStringRt } from '@kbn/io-ts-utils';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,

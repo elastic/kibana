@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { ApplicationStart } from 'kibana/public';
-import { QueryState } from '../../../../data/public';
-import { setStateToKbnUrl } from '../../../../kibana_utils/public';
-import { createDashboardEditUrl, DashboardConstants } from '../../dashboard_constants';
-import { GLOBAL_STATE_STORAGE_KEY } from '../../url_generator';
+import { ApplicationStart } from '@kbn/core/public';
+import { QueryState } from '@kbn/data-plugin/public';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import {
+  DashboardConstants,
+  createDashboardEditUrl,
+  GLOBAL_STATE_STORAGE_KEY,
+} from '../../dashboard_constants';
 import { IKbnUrlStateStorage } from '../../services/kibana_utils';
 
 export const getDashboardListItemLink = (

@@ -33,6 +33,7 @@ interface Props {
   schemaForTypeHighlights?: Schema;
   actions?: ResultAction[];
   dragHandleProps?: DraggableProvidedDragHandleProps;
+  showClick?: boolean;
 }
 
 const RESULT_CUTOFF = 5;
@@ -46,6 +47,7 @@ export const Result: React.FC<Props> = ({
   actions = [],
   dragHandleProps,
   resultPosition,
+  showClick = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -57,7 +59,6 @@ export const Result: React.FC<Props> = ({
     [result]
   );
   const numResults = resultFields.length;
-
   const typeForField = (fieldName: string) => {
     if (schemaForTypeHighlights) return schemaForTypeHighlights[fieldName];
   };
@@ -103,6 +104,7 @@ export const Result: React.FC<Props> = ({
           documentLink={documentLink}
           actions={actions}
           resultPosition={resultPosition}
+          showClick={showClick}
         />
         {resultFields
           .slice(0, isOpen ? resultFields.length : RESULT_CUTOFF)

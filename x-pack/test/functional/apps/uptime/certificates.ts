@@ -18,9 +18,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
-  // FLAKY https://github.com/elastic/kibana/issues/114261
-  describe.skip('certificates', function () {
-    describe('empty certificates', function () {
+  describe('certificates', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/114261
+    describe.skip('empty certificates', function () {
       before(async () => {
         await esArchiver.load(BLANK_INDEX_PATH);
         await makeCheck({ es });
@@ -62,7 +62,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await uptimeService.navigation.goToCertificates();
       });
 
-      describe('page', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/114215
+      describe.skip('page', () => {
         beforeEach(async () => {
           await uptimeService.navigation.goToCertificates();
           await uptimeService.navigation.refreshApp();

@@ -1,6 +1,7 @@
 [role="xpack"]
 [[reporting-troubleshooting]]
 == Reporting troubleshooting
+
 ++++
 <titleabbrev>Troubleshooting</titleabbrev>
 ++++
@@ -14,8 +15,8 @@ Having trouble? Here are solutions to common problems you might encounter while 
 * <<reporting-troubleshooting-error-messages>>
 * <<reporting-troubleshooting-puppeteer-debug-logs>>
 * <<reporting-troubleshooting-system-requirements>>
-* <<reporting-troubleshooting-arm-systems>>
 * <<reporting-troubleshooting-maps-ems>>
+* <<reporting-manual-chromium-install>>
 
 [float]
 [[reporting-diagnostics]]
@@ -151,12 +152,6 @@ If the {kib} instance doesn't have enough memory to run the report, the report f
 In this case, try increasing the memory for the {kib} instance to 2GB.
 
 [float]
-[[reporting-troubleshooting-arm-systems]]
-=== ARM systems
-
-Chromium is not compatible with ARM RHEL/CentOS.
-
-[float]
 [[reporting-troubleshooting-maps-ems]]
 === Unable to connect to Elastic Maps Service
 
@@ -164,3 +159,24 @@ https://www.elastic.co/elastic-maps-service[{ems} ({ems-init})] is a service tha
 tile layers and vector shapes of administrative boundaries.
 If a report contains a map with a missing basemap layer or administrative boundary, the {kib} server does not have access to {ems-init}.
 See <<maps-connect-to-ems>> for information on how to connect your {kib} server to {ems-init}.
+
+[float]
+[[reporting-manual-chromium-install]]
+=== Manually install the Chromium browser for Darwin
+Chromium is not embedded into {kib} for the Darwin (Mac OS) architecture. When
+running {kib} on Darwin, Reporting will download Chromium into the proper area of
+the {kib} installation path the first time the server starts. If the server
+does not have access to the Internet, you must download the
+Chromium browser and install it into the {kib} installation path.
+
+1. Download the Chromium zip file:
+
+** For https://commondatastorage.googleapis.com/chromium-browser-snapshots/Mac/901912/chrome-mac.zip[x64] systems
+** For https://commondatastorage.googleapis.com/chromium-browser-snapshots/Mac_Arm/901913/chrome-mac.zip[ARM] systems
+
+2. Copy the zip file into the holding area. Relative to the root directory of {kib}, the path is:
+
+** `.chromium/x64` for x64 systems
+** `.chromium/arm64` for ARM systems
+
+When {kib} starts, it will automatically extract the browser from the zip file, and is then ready for PNG and PDF reports.

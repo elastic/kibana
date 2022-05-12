@@ -12,8 +12,13 @@ import type {
   ExpressionFunctionDefinition,
   Datatable,
   Render,
-} from '../../../../expressions/common';
-import { prepareLogTable, Dimension } from '../../../../visualizations/public';
+} from '@kbn/expressions-plugin/common';
+import {
+  prepareLogTable,
+  Dimension,
+  DEFAULT_LEGEND_SIZE,
+  LegendSize,
+} from '@kbn/visualizations-plugin/public';
 import type { ChartType } from '../../common';
 import type { VisParams, XYVisConfig } from '../types';
 
@@ -23,6 +28,7 @@ export interface RenderValue {
   visType: ChartType;
   visConfig: VisParams;
   syncColors: boolean;
+  syncTooltips: boolean;
 }
 
 export type VisTypeXyExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -70,6 +76,21 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
       help: i18n.translate('visTypeXy.function.args.args.maxLegendLines.help', {
         defaultMessage: 'Defines the maximum lines per legend item',
       }),
+    },
+    legendSize: {
+      types: ['string'],
+      default: DEFAULT_LEGEND_SIZE,
+      help: i18n.translate('visTypeXy.function.args.args.legendSize.help', {
+        defaultMessage: 'Specifies the legend size.',
+      }),
+      options: [
+        LegendSize.AUTO,
+        LegendSize.SMALL,
+        LegendSize.MEDIUM,
+        LegendSize.LARGE,
+        LegendSize.EXTRA_LARGE,
+      ],
+      strict: true,
     },
     addLegend: {
       types: ['boolean'],
@@ -232,10 +253,21 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
       }),
       multi: true,
     },
+    ariaLabel: {
+      types: ['string'],
+      help: i18n.translate('visTypeXy.function.args.ariaLabel.help', {
+        defaultMessage: 'Specifies the aria label of the xy chart',
+      }),
+      required: false,
+    },
   },
   fn(context, args, handlers) {
     const visType = args.chartType;
     const visConfig = {
+      ariaLabel:
+        args.ariaLabel ??
+        (handlers.variables?.embeddableTitle as string) ??
+        handlers.getExecutionContext?.()?.description,
       type: args.chartType,
       addLegend: args.addLegend,
       addTooltip: args.addTooltip,
@@ -243,6 +275,7 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
       addTimeMarker: args.addTimeMarker,
       maxLegendLines: args.maxLegendLines,
       truncateLegend: args.truncateLegend,
+      legendSize: args.legendSize,
       categoryAxes: args.categoryAxes.map((categoryAxis) => ({
         ...categoryAxis,
         type: categoryAxis.axisType,
@@ -330,6 +363,7 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
         visConfig,
         visData: context,
         syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
+        syncTooltips: handlers?.isSyncTooltipsEnabled?.() ?? false,
       },
     };
   },

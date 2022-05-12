@@ -18,8 +18,10 @@ export async function getMetadataForEndpoints(
   requestHandlerContext: SecuritySolutionRequestHandlerContext
 ): Promise<HostMetadata[]> {
   const query = getESQueryHostMetadataByIDs(endpointIDs);
-  const esClient = requestHandlerContext.core.elasticsearch.client.asCurrentUser;
-  const { body } = await esClient.search<HostMetadata>(query as estypes.SearchRequest);
+  const esClient = (await requestHandlerContext.core).elasticsearch.client.asCurrentUser;
+  const { body } = await esClient.search<HostMetadata>(query as estypes.SearchRequest, {
+    meta: true,
+  });
   const hosts = queryResponseToHostListResult(body as estypes.SearchResponse<HostMetadata>);
   return hosts.resultList;
 }

@@ -1,0 +1,22 @@
+{
+  "attributes": {
+    "description": "Sample dashboard",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"
+    },
+    "optionsJSON": "{\"darkTheme\":false}",
+    "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":12,\"i\":\"1\",\"w\":24,\"x\":0,\"y\":0},\"panelIndex\":\"1\",\"panelRefName\":\"panel_0\",\"version\":\"7.3.0\"},{\"embeddableConfig\":{\"columns\":[\"kafka.log.class\",\"kafka.log.trace.class\",\"kafka.log.trace.full\"],\"sort\":[\"@timestamp\",\"desc\"]},\"gridData\":{\"h\":12,\"i\":\"2\",\"w\":24,\"x\":24,\"y\":0},\"panelIndex\":\"2\",\"panelRefName\":\"panel_1\",\"version\":\"7.3.0\"},{\"embeddableConfig\":{\"columns\":[\"log.level\",\"kafka.log.component\",\"message\"],\"sort\":[\"@timestamp\",\"desc\"]},\"gridData\":{\"h\":20,\"i\":\"3\",\"w\":48,\"x\":0,\"y\":20},\"panelIndex\":\"3\",\"panelRefName\":\"panel_2\",\"version\":\"7.3.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"4\",\"w\":48,\"x\":0,\"y\":12},\"panelIndex\":\"4\",\"panelRefName\":\"panel_3\",\"version\":\"7.3.0\"}]",
+    "timeRestore": false,
+    "title": "[Logs Sample] Overview ECS",
+    "version": 1
+  },
+  "references": [
+    { "id": "test_visualization", "name": "panel_0", "type": "visualization" },
+    { "id": "test_search", "name": "panel_1", "type": "search" },
+    { "id": "test_search", "name": "panel_2", "type": "search" },
+    { "id": "test_visualization", "name": "panel_3", "type": "visualization" }
+  ],
+  "id": "test_dashboard",
+  "type": "dashboard"
+}

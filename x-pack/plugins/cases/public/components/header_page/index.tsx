@@ -6,15 +6,15 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import styled, { css } from 'styled-components';
-import { useAllCasesNavigation } from '../../common/navigation';
 
+import { useAllCasesNavigation } from '../../common/navigation';
 import { LinkIcon } from '../link_icon';
 import { Subtitle, SubtitleProps } from '../subtitle';
 import { Title } from './title';
-import { BadgeOptions, TitleProp } from './types';
 import * as i18n from './translations';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface HeaderProps {
   border?: boolean;
@@ -55,24 +55,18 @@ const LinkBack = styled.div.attrs({
 `;
 LinkBack.displayName = 'LinkBack';
 
-const Badge = styled(EuiBadge)`
-  letter-spacing: 0;
-` as unknown as typeof EuiBadge;
-Badge.displayName = 'Badge';
-
 export interface HeaderPageProps extends HeaderProps {
   showBackButton?: boolean;
-  badgeOptions?: BadgeOptions;
   children?: React.ReactNode;
   subtitle?: SubtitleProps['items'];
   subtitle2?: SubtitleProps['items'];
-  title: TitleProp;
+  title: string | React.ReactNode;
   titleNode?: React.ReactElement;
+  'data-test-subj'?: string;
 }
 
 const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   showBackButton = false,
-  badgeOptions,
   border,
   children,
   isLoading,
@@ -80,8 +74,9 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   subtitle2,
   title,
   titleNode,
-  ...rest
+  'data-test-subj': dataTestSubj,
 }) => {
+  const { releasePhase } = useCasesContext();
   const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
 
   const navigateToAllCasesClick = useCallback(
@@ -95,7 +90,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   );
 
   return (
-    <Header border={border} {...rest}>
+    <Header border={border} data-test-subj={dataTestSubj}>
       <EuiFlexGroup alignItems="center">
         <FlexItem>
           {showBackButton && (
@@ -111,7 +106,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
             </LinkBack>
           )}
 
-          {titleNode || <Title title={title} badgeOptions={badgeOptions} />}
+          {titleNode || <Title title={title} releasePhase={releasePhase} />}
 
           {subtitle && <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />}
           {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />}
@@ -127,5 +122,6 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
     </Header>
   );
 };
+HeaderPageComponent.displayName = 'HeaderPage';
 
 export const HeaderPage = React.memo(HeaderPageComponent);

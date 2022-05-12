@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 import React, { ReactNode } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Observable } from 'rxjs';
 
-import { NotificationsSetup, IUiSettingsClient, CoreTheme } from 'kibana/public';
-import { ManagementAppMountParams } from 'src/plugins/management/public';
-import { SharePluginStart } from 'src/plugins/share/public';
-import type { FileUploadPluginStart } from '../../../file_upload/public';
+import { ApplicationStart } from '@kbn/core/public';
+import { NotificationsSetup, IUiSettingsClient, CoreTheme } from '@kbn/core/public';
+import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '../shared_imports';
 
 import { API_BASE_PATH } from '../../common/constants';
@@ -38,8 +39,9 @@ export interface AppServices {
   notifications: NotificationsSetup;
   history: ManagementAppMountParams['history'];
   uiSettings: IUiSettingsClient;
-  urlGenerators: SharePluginStart['urlGenerators'];
+  share: SharePluginStart;
   fileUpload: FileUploadPluginStart;
+  application: ApplicationStart;
 }
 
 export interface CoreServices {

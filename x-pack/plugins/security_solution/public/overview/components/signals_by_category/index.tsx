@@ -8,6 +8,7 @@
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { Filter, Query } from '@kbn/es-query';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { AlertsHistogramPanel } from '../../../detections/components/alerts_kpis/alerts_histogram_panel';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
@@ -33,6 +34,7 @@ interface Props {
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
   showLegend?: boolean;
   timelineId?: string;
+  runtimeMappings?: MappingRuntimeFields;
 }
 
 const SignalsByCategoryComponent: React.FC<Props> = ({
@@ -45,6 +47,7 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
   showLegend,
   setAbsoluteRangeDatePickerTarget = 'global',
   timelineId,
+  runtimeMappings,
 }) => {
   const dispatch = useDispatch();
   const { signalIndexName } = useSignalIndex();
@@ -81,6 +84,7 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
       showStackBy={onlyField == null}
       showTotalAlertsCount={true}
       signalIndexName={signalIndexName}
+      runtimeMappings={runtimeMappings}
       timelineId={timelineId}
       title={i18n.ALERT_COUNT}
       titleSize={onlyField == null ? 'm' : 's'}

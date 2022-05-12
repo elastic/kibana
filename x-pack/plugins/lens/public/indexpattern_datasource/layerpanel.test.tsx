@@ -8,9 +8,10 @@
 import React from 'react';
 import { IndexPatternPrivateState } from './types';
 import { IndexPatternLayerPanelProps, LayerPanel } from './layerpanel';
-import { shallowWithIntl as shallow } from '@kbn/test/jest';
+import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { ShallowWrapper } from 'enzyme';
 import { EuiSelectable } from '@elastic/eui';
+import { DataViewsList } from '@kbn/unified-search-plugin/public';
 import { ChangeIndexPattern } from './change_indexpattern';
 import { getFieldByNameFactory } from './pure_helpers';
 import { TermsIndexPatternColumn } from './operations';
@@ -212,7 +213,14 @@ describe('Layer Data Panel', () => {
   });
 
   function getIndexPatternPickerList(instance: ShallowWrapper) {
-    return instance.find(ChangeIndexPattern).first().dive().find(EuiSelectable);
+    return instance
+      .find(ChangeIndexPattern)
+      .first()
+      .dive()
+      .find(DataViewsList)
+      .first()
+      .dive()
+      .find(EuiSelectable);
   }
 
   function selectIndexPatternPickerOption(instance: ShallowWrapper, selectedLabel: string) {

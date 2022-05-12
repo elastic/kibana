@@ -68,7 +68,7 @@ Execute the <<spaces-api-copy-saved-objects,copy saved objects to space API>>, w
     `id`::::
     (Required, string) The saved object ID.
     `overwrite`::::
-    (Required, boolean) When set to `true`, the saved object from the source space (desigated by the <<spaces-api-resolve-copy-saved-objects-conflicts-path-params, `space_id` path parameter>>) overwrites the conflicting object in the destination space. When set to `false`, this does nothing.
+    (Required, boolean) When set to `true`, the saved object from the source space (designated by the <<spaces-api-resolve-copy-saved-objects-conflicts-path-params, `space_id` path parameter>>) overwrites the conflicting object in the destination space. When set to `false`, this does nothing.
     `destinationId`::::
     (Optional, string) Specifies the destination ID that the copied object should have, if different from the current ID.
     `ignoreMissingReferences`:::
@@ -141,7 +141,7 @@ refer to the <<spaces-api-resolve-copy-saved-objects-conflicts-example,examples>
 
 This example builds upon the <<spaces-api-copy-saved-objects-example-3,Copy objects API example with conflict errors>>.
 
-Resolve conflict errors for an index pattern, visualization, and *Canvas* workpad by overwriting the existing saved objects:
+Resolve conflict errors for {a-data-source}, visualization, and *Canvas* workpad by overwriting the existing saved objects:
 
 [source,sh]
 ----

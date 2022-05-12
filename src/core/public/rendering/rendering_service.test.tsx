@@ -104,4 +104,9 @@ describe('RenderingService#start', () => {
               </div>
           `);
   });
+
+  it('adds global styles via `CoreContextProvider` `globalStyles` configuration', () => {
+    startService();
+    expect(document.querySelector(`style[data-emotion="eui-styles-global"]`)).toBeDefined();
+  });
 });

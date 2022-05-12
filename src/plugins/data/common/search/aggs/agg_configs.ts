@@ -18,13 +18,14 @@ import {
   ISearchOptions,
   ISearchSource,
   RangeFilter,
-} from 'src/plugins/data/public';
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../public';
 import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';
 import { IAggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { AggGroupNames } from './agg_groups';
 import { IndexPattern } from '../..';
-import { TimeRange, getTime, calculateBounds } from '../../../common';
+import { TimeRange, getTime, calculateBounds } from '../..';
 import { IBucketAggConfig } from './buckets';
 import { insertTimeShiftSplit, mergeTimeShifts } from './utils/time_splits';
 
@@ -58,7 +59,7 @@ export interface AggConfigsOptions {
 
 export type CreateAggConfigParams = Assign<AggConfigSerialized, { type: string | IAggType }>;
 
-export type GenericBucket = estypes.AggregationsBucket & {
+export type GenericBucket = estypes.AggregationsBuckets<any> & {
   [property: string]: estypes.AggregationsAggregate;
 };
 
@@ -473,7 +474,14 @@ export class AggConfigs {
   getResponseAggById(id: string): AggConfig | undefined {
     id = String(id);
     const reqAgg = _.find(this.getRequestAggs(), function (agg: AggConfig) {
-      return id.substr(0, String(agg.id).length) === agg.id;
+      const aggId = String(agg.id);
+      // only multi-value aggs like percentiles are allowed to contain dots and [
+      const isMultiValueId = id.includes('[') || id.includes('.');
+      if (!isMultiValueId) {
+        return id === aggId;
+      }
+      const baseId = id.substring(0, id.indexOf('[') !== -1 ? id.indexOf('[') : id.indexOf('.'));
+      return baseId === aggId;
     });
     if (!reqAgg) return;
     return _.find(reqAgg.getResponseAggs(), { id });

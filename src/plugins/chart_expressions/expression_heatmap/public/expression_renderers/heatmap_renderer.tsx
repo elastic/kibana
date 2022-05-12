@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import React, { memo } from 'react';
+import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import type { PersistedState } from '../../../../visualizations/public';
-import { ThemeServiceStart } from '../../../../../core/public';
-import { KibanaThemeProvider } from '../../../../kibana_react/public';
-import { ExpressionRenderDefinition } from '../../../../expressions/common/expression_renderers';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import { ThemeServiceStart } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import {
   EXPRESSION_HEATMAP_NAME,
   HeatmapExpressionProps,
@@ -20,10 +20,6 @@ import {
 } from '../../common';
 import { getFormatService, getPaletteService, getUISettings, getThemeService } from '../services';
 import { getTimeZone } from '../utils/get_timezone';
-
-import HeatmapComponent from '../components/heatmap_component';
-import './index.scss';
-const MemoizedChart = memo(HeatmapComponent);
 
 interface ExpressioHeatmapRendererDependencies {
   theme: ThemeServiceStart;
@@ -49,10 +45,12 @@ export const heatmapRenderer: (
     };
 
     const timeZone = getTimeZone(getUISettings());
+    const { HeatmapComponent } = await import('../components/heatmap_component');
+    const { isInteractive } = handlers;
     render(
       <KibanaThemeProvider theme$={theme.theme$}>
         <div className="heatmap-container" data-test-subj="heatmapChart">
-          <MemoizedChart
+          <HeatmapComponent
             {...config}
             onClickValue={onClickValue}
             onSelectRange={onSelectRange}
@@ -61,6 +59,7 @@ export const heatmapRenderer: (
             chartsThemeService={getThemeService()}
             paletteService={getPaletteService()}
             uiState={handlers.uiState as PersistedState}
+            interactive={isInteractive()}
           />
         </div>
       </KibanaThemeProvider>,

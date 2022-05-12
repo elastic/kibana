@@ -8,14 +8,17 @@
 /* eslint-disable max-classes-per-file */
 
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import { ClusterMetric, Metric } from '../classes';
+
+import { ClusterMetric, Metric, MetricOptions } from '../classes';
 import { SMALL_FLOAT, LARGE_FLOAT } from '../../../../common/formatting';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
 
+type ApmClusterMetricOptions = Pick<
+  MetricOptions,
+  'field' | 'title' | 'label' | 'description' | 'derivative' | 'format' | 'metricAgg' | 'units'
+>;
 export class ApmClusterMetric extends ClusterMetric {
-  // @ts-ignore
-  constructor(opts) {
+  constructor(opts: ApmClusterMetricOptions) {
     super({
       ...opts,
       app: 'apm',
@@ -31,9 +34,12 @@ export class ApmClusterMetric extends ClusterMetric {
   }
 }
 
+type ApmMetricOptions = Pick<
+  MetricOptions,
+  'title' | 'label' | 'description' | 'field' | 'format' | 'metricAgg' | 'units' | 'derivative'
+>;
 export class ApmMetric extends Metric {
-  // @ts-ignore
-  constructor(opts) {
+  constructor(opts: ApmMetricOptions) {
     super({
       ...opts,
       app: 'apm',
@@ -51,9 +57,12 @@ export class ApmMetric extends Metric {
 
 export type ApmMetricFields = ReturnType<typeof ApmMetric.getMetricFields>;
 
+type ApmCpuUtilizationMetricOptions = Pick<
+  MetricOptions,
+  'title' | 'label' | 'description' | 'field'
+>;
 export class ApmCpuUtilizationMetric extends ApmMetric {
-  // @ts-ignore
-  constructor(opts) {
+  constructor(opts: ApmCpuUtilizationMetricOptions) {
     super({
       ...opts,
       format: SMALL_FLOAT,
@@ -62,12 +71,13 @@ export class ApmCpuUtilizationMetric extends ApmMetric {
       derivative: true,
     });
 
-    /*
-     * Convert a counter of milliseconds of utilization time into a percentage of the bucket size
-     */
-    // @ts-ignore
-    this.calculation = ({ metric_deriv: metricDeriv } = {}, _key, _metric, bucketSizeInSeconds) => {
-      if (metricDeriv) {
+    this.calculation = (
+      { metric_deriv: metricDeriv } = { metric_deriv: undefined },
+      _key,
+      _metric,
+      bucketSizeInSeconds
+    ) => {
+      if (metricDeriv && bucketSizeInSeconds) {
         const { value: metricDerivValue } = metricDeriv;
         const bucketSizeInMillis = bucketSizeInSeconds * 1000;
 
@@ -80,9 +90,13 @@ export class ApmCpuUtilizationMetric extends ApmMetric {
   }
 }
 
+type ApmEventsRateClusterMetricOptions = Pick<
+  ApmClusterMetricOptions,
+  'field' | 'title' | 'label' | 'description'
+>;
+
 export class ApmEventsRateClusterMetric extends ApmClusterMetric {
-  // @ts-ignore
-  constructor(opts) {
+  constructor(opts: ApmEventsRateClusterMetricOptions) {
     super({
       ...opts,
       derivative: true,
@@ -93,7 +107,6 @@ export class ApmEventsRateClusterMetric extends ApmClusterMetric {
       }),
     });
 
-    // @ts-ignore
     this.aggs = {
       beats_uuids: {
         terms: {
@@ -103,7 +116,6 @@ export class ApmEventsRateClusterMetric extends ApmClusterMetric {
         aggs: {
           event_rate_per_beat: {
             max: {
-              // @ts-ignore
               field: this.field,
             },
           },

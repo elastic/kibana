@@ -14,7 +14,7 @@ import { buildPhrasesFilter } from './phrases_filter';
 import { buildRangeFilter, RangeFilterParams } from './range_filter';
 import { buildExistsFilter } from './exists_filter';
 
-import type { IndexPatternFieldBase, IndexPatternBase } from '../../es_query';
+import type { DataViewFieldBase, DataViewBase } from '../../es_query';
 import { FilterStateStore } from './types';
 
 /**
@@ -32,8 +32,8 @@ import { FilterStateStore } from './types';
  * @public
  */
 export function buildFilter(
-  indexPattern: IndexPatternBase,
-  field: IndexPatternFieldBase,
+  indexPattern: DataViewBase,
+  field: DataViewFieldBase,
   type: FILTERS,
   negate: boolean,
   disabled: boolean,
@@ -52,8 +52,8 @@ export function buildFilter(
 }
 
 function buildBaseFilter(
-  indexPattern: IndexPatternBase,
-  field: IndexPatternFieldBase,
+  indexPattern: DataViewBase,
+  field: DataViewFieldBase,
   type: FILTERS,
   params: Serializable
 ): Filter {

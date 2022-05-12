@@ -8,7 +8,7 @@
 import { useEffect, useState } from 'react';
 import { XJsonMode } from '@kbn/ace';
 
-import { XJson } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
 import { PostTransformsPreviewRequestSchema } from '../../../../../../../common/api_schemas/transforms';
 

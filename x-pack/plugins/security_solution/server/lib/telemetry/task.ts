@@ -6,14 +6,14 @@
  */
 
 import moment from 'moment';
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../task_manager/server';
-import { TelemetryReceiver } from './receiver';
-import { TelemetryEventsSender } from './sender';
+} from '@kbn/task-manager-plugin/server';
+import { ITelemetryReceiver } from './receiver';
+import { ITelemetryEventsSender } from './sender';
 
 export interface SecurityTelemetryTaskConfig {
   type: string;
@@ -28,8 +28,8 @@ export interface SecurityTelemetryTaskConfig {
 export type SecurityTelemetryTaskRunner = (
   taskId: string,
   logger: Logger,
-  receiver: TelemetryReceiver,
-  sender: TelemetryEventsSender,
+  receiver: ITelemetryReceiver,
+  sender: ITelemetryEventsSender,
   taskExecutionPeriod: TaskExecutionPeriod
 ) => Promise<number>;
 
@@ -46,14 +46,14 @@ export type LastExecutionTimestampCalculator = (
 export class SecurityTelemetryTask {
   private readonly config: SecurityTelemetryTaskConfig;
   private readonly logger: Logger;
-  private readonly sender: TelemetryEventsSender;
-  private readonly receiver: TelemetryReceiver;
+  private readonly sender: ITelemetryEventsSender;
+  private readonly receiver: ITelemetryReceiver;
 
   constructor(
     config: SecurityTelemetryTaskConfig,
     logger: Logger,
-    sender: TelemetryEventsSender,
-    receiver: TelemetryReceiver
+    sender: ITelemetryEventsSender,
+    receiver: ITelemetryReceiver
   ) {
     this.config = config;
     this.logger = logger;

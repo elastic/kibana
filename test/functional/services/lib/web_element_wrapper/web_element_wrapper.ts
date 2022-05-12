@@ -11,7 +11,7 @@ import { WebElement, WebDriver, By, Key } from 'selenium-webdriver';
 import { PNG } from 'pngjs';
 import cheerio from 'cheerio';
 import testSubjSelector from '@kbn/test-subj-selector';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { CustomCheerio, CustomCheerioStatic } from './custom_cheerio_api';
 // @ts-ignore not supported yet
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
@@ -200,6 +200,18 @@ export class WebElementWrapper {
       await wrapper.scrollIntoViewIfNecessary();
       await wrapper.driver.executeScript(`arguments[0].focus()`, wrapper._webElement);
     });
+  }
+
+  /**
+   * If possible, opens 'href' of this element directly through the URL
+   *
+   * @return {Promise<void>}
+   */
+  public async openHref() {
+    const href = await this.getAttribute('href');
+    if (href) {
+      await this.driver.get(href);
+    }
   }
 
   /**
@@ -490,8 +502,7 @@ export class WebElementWrapper {
   public async findByTestSubject(selector: string) {
     return await this.retryCall(async function find(wrapper) {
       return wrapper._wrap(
-        await wrapper._webElement.findElement(wrapper.By.css(testSubjSelector(selector))),
-        wrapper.By.css(selector)
+        await wrapper._webElement.findElement(wrapper.By.css(testSubjSelector(selector)))
       );
     });
   }
@@ -675,17 +686,23 @@ export class WebElementWrapper {
    * @param {string} className
    * @return {Promise<void>}
    */
-  public async waitForDeletedByCssSelector(selector: string): Promise<void> {
-    await this.driver.manage().setTimeouts({ implicit: 1000 });
-    await this.driver.wait(
-      async () => {
-        const found = await this._webElement.findElements(this.By.css(selector));
-        return found.length === 0;
-      },
-      this.timeout,
-      `The element with ${selector} selector was still present after ${this.timeout} sec.`
-    );
-    await this.driver.manage().setTimeouts({ implicit: this.timeout });
+  public async waitForDeletedByCssSelector(
+    selector: string,
+    implicitTimeout = 1000
+  ): Promise<void> {
+    try {
+      await this.driver.manage().setTimeouts({ implicit: implicitTimeout });
+      await this.driver.wait(
+        async () => {
+          const found = await this._webElement.findElements(this.By.css(selector));
+          return found.length === 0;
+        },
+        this.timeout,
+        `The element with ${selector} selector was still present after ${this.timeout} sec.`
+      );
+    } finally {
+      await this.driver.manage().setTimeouts({ implicit: this.timeout });
+    }
   }
 
   /**

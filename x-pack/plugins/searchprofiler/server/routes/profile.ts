@@ -43,13 +43,13 @@ export const register = ({ router, getLicenseStatus, log }: RouteDependencies) =
       };
 
       try {
-        const client = ctx.core.elasticsearch.client.asCurrentUser;
+        const client = (await ctx.core).elasticsearch.client.asCurrentUser;
         const resp = await client.search(body);
 
         return response.ok({
           body: {
             ok: true,
-            resp: resp.body,
+            resp,
           },
         });
       } catch (err) {

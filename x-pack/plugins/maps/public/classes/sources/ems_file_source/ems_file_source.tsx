@@ -8,7 +8,7 @@
 import React, { ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Feature } from 'geojson';
-import { Adapters } from 'src/plugins/inspector/public';
+import { Adapters } from '@kbn/inspector-plugin/public';
 import { FileLayer } from '@elastic/ems-client';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { AbstractVectorSource, GeoJsonWithMeta, IVectorSource } from '../vector_source';
@@ -135,7 +135,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
         meta: {},
       };
     } catch (error) {
-      throw new Error(`${getErrorInfo(this._descriptor.id)} - ${error.message}`);
+      throw new Error(getErrorInfo(this._descriptor.id));
     }
   }
 

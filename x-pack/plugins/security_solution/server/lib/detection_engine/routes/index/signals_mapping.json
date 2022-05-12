@@ -286,6 +286,13 @@
               "enabled": {
                 "type": "keyword"
               },
+              "execution": {
+                "properties": {
+                  "uuid": {
+                    "type": "keyword"
+                  }
+                }
+              },
               "filters": {
                 "type": "object"
               },

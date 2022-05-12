@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { checkParam } from '../error_missing_required';
 import { BeatsClusterMetric } from '../metrics';
 import { createBeatsQuery } from './create_beats_query';
 import { beatsAggFilterPath, beatsUuidsAgg, beatsAggResponseHandler } from './_beats_stats';
 import type { ElasticsearchResponse } from '../../../common/types/es';
 import { LegacyRequest, Cluster } from '../../types';
+import { getLegacyIndexPattern } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
 
 export function handleResponse(clusterUuid: string, response: ElasticsearchResponse) {
   const { beatTotal, beatTypes, totalEvents, bytesSent } = beatsAggResponseHandler(response);
@@ -31,23 +32,21 @@ export function handleResponse(clusterUuid: string, response: ElasticsearchRespo
   };
 }
 
-export function getBeatsForClusters(
-  req: LegacyRequest,
-  beatsIndexPattern: string,
-  clusters: Cluster[]
-) {
-  checkParam(beatsIndexPattern, 'beatsIndexPattern in beats/getBeatsForClusters');
-
+export function getBeatsForClusters(req: LegacyRequest, clusters: Cluster[], ccs: string) {
   const start = req.payload.timeRange.min;
   const end = req.payload.timeRange.max;
-  const config = req.server.config();
-  const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
-
+  const config = req.server.config;
+  const maxBucketSize = config.ui.max_bucket_size;
+  const indexPatterns = getLegacyIndexPattern({
+    moduleType: 'beats',
+    ccs,
+    config: Globals.app.config,
+  });
   return Promise.all(
     clusters.map(async (cluster) => {
       const clusterUuid = cluster.elasticsearch?.cluster?.id ?? cluster.cluster_uuid;
       const params = {
-        index: beatsIndexPattern,
+        index: indexPatterns,
         size: 0,
         ignore_unavailable: true,
         filter_path: beatsAggFilterPath,
@@ -58,7 +57,7 @@ export function getBeatsForClusters(
             clusterUuid,
             metric: BeatsClusterMetric.getMetricFields(), // override default of BeatMetric.getMetricFields
           }),
-          aggs: beatsUuidsAgg(maxBucketSize!),
+          aggs: beatsUuidsAgg(maxBucketSize),
         },
       };
 

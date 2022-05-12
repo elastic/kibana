@@ -10,14 +10,12 @@ import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 import rison from 'rison-node';
 import url from 'url';
 
-import { DASHBOARD_APP_URL_GENERATOR } from '../../../../../../../../src/plugins/dashboard/public';
-
 import { getPartitioningFieldNames } from '../../../../../common/util/job_utils';
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { replaceTokensInUrlValue, isValidLabel } from '../../../util/custom_url_utils';
 import { ml } from '../../../services/ml_api_service';
 import { escapeForElasticsearchQuery } from '../../../util/string_utils';
-import { getSavedObjectsClient, getGetUrlGenerator } from '../../../util/dependency_cache';
+import { getSavedObjectsClient, getDashboard } from '../../../util/dependency_cache';
 
 export function getNewCustomUrlDefaults(job, dashboards, dataViews) {
   // Returns the settings object in the format used by the custom URL editor
@@ -152,10 +150,10 @@ function buildDashboardUrlFromSettings(settings) {
           query = queryFromEntityFieldNames;
         }
 
-        const getUrlGenerator = getGetUrlGenerator();
-        const generator = getUrlGenerator(DASHBOARD_APP_URL_GENERATOR);
-        return generator
-          .createUrl({
+        const dashboard = getDashboard();
+
+        dashboard.locator
+          .getUrl({
             dashboardId,
             timeRange: {
               from: '$earliest$',

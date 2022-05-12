@@ -1,0 +1,17 @@
+{
+  "attributes": {
+    "benchmark": { "name": "CIS Kubernetes", "version": "1.4.1" },
+    "benchmark_rule_id": "1.1.2",
+    "default_value": "By default, anonymous access is enabled.",
+    "description": "'Disable anonymous requests to the API server",
+    "impact": "Anonymous requests will be rejected.",
+    "name": "Ensure that the API server pod specification file permissions are set to 644 or more restrictive (Automated)",
+    "rationale": "When enabled, requests that are not rejected by other configured authentication methods\nare treated as anonymous requests. These requests are then served by the API server. You\nshould rely on authentication to authorize access and disallow anonymous requests.\nIf you are using RBAC authorization, it is generally considered reasonable to allow\nanonymous access to the API Server for health checks and discovery purposes, and hence\nthis recommendation is not scored. However, you should consider whether anonymous\ndiscovery is an acceptable risk for your purposes.",
+    "rego_rule_id": "cis_k8s.cis_1_1_1",
+    "remediation": "Edit the API server pod specification file /etc/kubernetes/manifests/kubeapiserver.yaml on the master node and set the below parameter.\n--anonymous-auth=false",
+    "severity": "low",
+    "tags": ["Kubernetes", "Containers"]
+  },
+  "id": "sample_csp_rule_template2",
+  "type": "csp-rule-template"
+}

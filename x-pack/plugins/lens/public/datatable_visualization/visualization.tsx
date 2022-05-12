@@ -7,32 +7,35 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { Ast } from '@kbn/interpreter/common';
+import { Ast } from '@kbn/interpreter';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { PaletteRegistry } from 'src/plugins/charts/public';
-import { ThemeServiceStart } from 'kibana/public';
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
+import { PaletteRegistry, CUSTOM_PALETTE } from '@kbn/coloring';
+import { ThemeServiceStart } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type {
   SuggestionRequest,
   Visualization,
   VisualizationSuggestion,
-  DatasourcePublicAPI,
+  DatasourceLayers,
 } from '../types';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
 import { TableDimensionEditor } from './components/dimension_editor';
-import { CUSTOM_PALETTE } from '../shared_components/coloring/constants';
-import { getStopsForFixedMode } from '../shared_components';
 import { LayerType, layerTypes } from '../../common';
 import { getDefaultSummaryLabel, PagingState } from '../../common/expressions';
 import type { ColumnState, SortingState } from '../../common/expressions';
 import { DataTableToolbar } from './components/toolbar';
+
 export interface DatatableVisualizationState {
   columns: ColumnState[];
   layerId: string;
   layerType: LayerType;
   sorting?: SortingState;
-  fitRowToContent?: boolean;
+  rowHeight?: 'auto' | 'single' | 'custom';
+  headerRowHeight?: 'auto' | 'single' | 'custom';
+  rowHeightLines?: number;
+  headerRowHeightLines?: number;
   paging?: PagingState;
 }
 
@@ -84,6 +87,8 @@ export const getDatatableVisualization = ({
   },
 
   switchVisualizationType: (_, state) => state,
+
+  triggers: [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.tableRowContextMenuClick],
 
   initialize(addNewLayer, state) {
     return (
@@ -241,9 +246,9 @@ export const getDatatableVisualization = ({
             .filter((c) => !datasource!.getOperationForColumnId(c)?.isBucketed)
             .map((accessor) => {
               const columnConfig = columnMap[accessor];
-              const hasColoring = Boolean(
-                columnConfig.colorMode !== 'none' && columnConfig.palette?.params?.stops
-              );
+              const stops = columnConfig.palette?.params?.stops;
+              const hasColoring = Boolean(columnConfig.colorMode !== 'none' && stops);
+
               return {
                 columnId: accessor,
                 triggerIcon: columnConfig.hidden
@@ -251,12 +256,7 @@ export const getDatatableVisualization = ({
                   : hasColoring
                   ? 'colorBy'
                   : undefined,
-                palette: hasColoring
-                  ? getStopsForFixedMode(
-                      columnConfig.palette?.params?.stops || [],
-                      columnConfig.palette?.params?.colorStops
-                    )
-                  : undefined,
+                palette: hasColoring && stops ? stops.map(({ color }) => color) : undefined,
               };
             }),
           supportsMoreColumns: true,
@@ -314,7 +314,7 @@ export const getDatatableVisualization = ({
       {
         type: layerTypes.DATA,
         label: i18n.translate('xpack.lens.datatable.addLayer', {
-          defaultMessage: 'Add visualization layer',
+          defaultMessage: 'Visualization',
         }),
       },
     ];
@@ -326,7 +326,12 @@ export const getDatatableVisualization = ({
     }
   },
 
-  toExpression(state, datasourceLayers, { title, description } = {}): Ast | null {
+  toExpression(
+    state,
+    datasourceLayers,
+    { title, description } = {},
+    datasourceExpressionsByLayers = {}
+  ): Ast | null {
     const { sortedColumns, datasource } =
       getDataSourceAndSortedColumns(state, datasourceLayers, state.layerId) || {};
 
@@ -346,9 +351,12 @@ export const getDatatableVisualization = ({
       .filter((columnId) => datasource!.getOperationForColumnId(columnId))
       .map((columnId) => columnMap[columnId]);
 
+    const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
+
     return {
       type: 'expression',
       chain: [
+        ...(datasourceExpression?.chain ?? []),
         {
           type: 'function',
           function: 'lens_datatable',
@@ -366,8 +374,12 @@ export const getDatatableVisualization = ({
                     : [],
                 reverse: false, // managed at UI level
               };
+              const sortingHint = datasource!.getOperationForColumnId(column.columnId)!.sortingHint;
 
               const hasNoSummaryRow = column.summaryRow == null || column.summaryRow === 'none';
+
+              const canColor =
+                datasource!.getOperationForColumnId(column.columnId)?.dataType === 'number';
 
               return {
                 type: 'expression',
@@ -385,12 +397,13 @@ export const getDatatableVisualization = ({
                         !datasource!.getOperationForColumnId(column.columnId)?.isBucketed,
                       ],
                       alignment: typeof column.alignment === 'undefined' ? [] : [column.alignment],
-                      colorMode: [column.colorMode ?? 'none'],
+                      colorMode: [canColor && column.colorMode ? column.colorMode : 'none'],
                       palette: [paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams)],
                       summaryRow: hasNoSummaryRow ? [] : [column.summaryRow!],
                       summaryLabel: hasNoSummaryRow
                         ? []
                         : [column.summaryLabel ?? getDefaultSummaryLabel(column.summaryRow!)],
+                      sortingHint: sortingHint ? [sortingHint] : [],
                     },
                   },
                 ],
@@ -398,7 +411,16 @@ export const getDatatableVisualization = ({
             }),
             sortingColumnId: [state.sorting?.columnId || ''],
             sortingDirection: [state.sorting?.direction || 'none'],
-            fitRowToContent: [state.fitRowToContent ?? false],
+            fitRowToContent: [state.rowHeight === 'auto'],
+            headerRowHeight: [state.headerRowHeight ?? 'single'],
+            rowHeightLines: [
+              !state.rowHeight || state.rowHeight === 'single' ? 1 : state.rowHeightLines ?? 2,
+            ],
+            headerRowHeightLines: [
+              !state.headerRowHeight || state.headerRowHeight === 'single'
+                ? 1
+                : state.headerRowHeightLines ?? 2,
+            ],
             pageSize: state.paging?.enabled ? [state.paging.size] : [],
           },
         },
@@ -478,7 +500,7 @@ export const getDatatableVisualization = ({
 
 function getDataSourceAndSortedColumns(
   state: DatatableVisualizationState,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   layerId: string
 ) {
   const datasource = datasourceLayers[state.layerId];

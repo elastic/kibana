@@ -61,7 +61,7 @@ export const parseAppUrl = (
   for (const app of apps.values()) {
     const appPath = app.appRoute || `/app/${app.id}`;
 
-    if (url.startsWith(appPath)) {
+    if (urlInApp(url, appPath)) {
       const path = url.substr(appPath.length);
       return {
         app: app.id,
@@ -69,4 +69,17 @@ export const parseAppUrl = (
       };
     }
   }
+};
+
+const separators = ['/', '?', '#'];
+
+const urlInApp = (url: string, appPath: string) => {
+  if (url === appPath) {
+    return true;
+  }
+  if (url.startsWith(appPath)) {
+    const nextChar = url.substring(appPath.length, appPath.length + 1);
+    return separators.includes(nextChar);
+  }
+  return false;
 };

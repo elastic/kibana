@@ -12,7 +12,7 @@ import { getMiscUiSettings } from './misc';
 import { getNavigationSettings } from './navigation';
 import { getNotificationsSettings } from './notifications';
 import { getThemeSettings } from './theme';
-import { getCoreSettings } from './index';
+import { getCoreSettings } from '.';
 import { getStateSettings } from './state';
 
 describe('getCoreSettings', () => {

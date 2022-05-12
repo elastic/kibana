@@ -4,7 +4,7 @@
   ],
   "description": "Identifies the deletion of an AWS log trail. An adversary may delete trails in an attempt to evade defenses.",
   "false_positives": [
-    "Trail deletions may be made by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Trail deletions from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+    "Trail deletions may be made by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Trail deletions by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
   ],
   "from": "now-60m",
   "index": [
@@ -58,5 +58,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 6
+  "version": 7
 }

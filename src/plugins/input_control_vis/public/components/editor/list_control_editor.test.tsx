@@ -12,7 +12,7 @@ import { shallow } from 'enzyme';
 
 import { findTestSubject } from '@elastic/eui/lib/test';
 
-import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { getIndexPatternMock } from '../../test_utils/get_index_pattern_mock';
 import { ListControlEditor } from './list_control_editor';
 import { ControlParams } from '../../editor_utils';

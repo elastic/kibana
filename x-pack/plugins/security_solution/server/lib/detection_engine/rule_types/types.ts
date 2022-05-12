@@ -7,22 +7,23 @@
 
 import { Moment } from 'moment';
 
-import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/logging';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { AlertExecutorOptions, AlertType } from '../../../../../alerting/server';
+import { RuleExecutorOptions, RuleType } from '@kbn/alerting-plugin/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeState,
+  RuleTypeState,
   WithoutReservedActionGroups,
-} from '../../../../../alerting/common';
-import { ListClient } from '../../../../../lists/server';
-import { TechnicalRuleFieldMap } from '../../../../../rule_registry/common/assets/field_maps/technical_rule_field_map';
-import { TypeOfFieldMap } from '../../../../../rule_registry/common/field_map';
-import { PersistenceServices, IRuleDataClient } from '../../../../../rule_registry/server';
-import { BaseHit } from '../../../../common/detection_engine/types';
+} from '@kbn/alerting-plugin/common';
+import { ListClient } from '@kbn/lists-plugin/server';
+import {
+  PersistenceServices,
+  IRuleDataClient,
+  IRuleDataReader,
+} from '@kbn/rule-registry-plugin/server';
+import { IEventLogService } from '@kbn/event-log-plugin/server';
 import { ConfigType } from '../../../config';
 import { SetupPlugins } from '../../../plugin';
 import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
@@ -34,11 +35,10 @@ import {
   WrapSequences,
 } from '../signals/types';
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
-import { IEventLogService } from '../../../../../event_log/server';
-import { AlertsFieldMap, RulesFieldMap } from '../../../../common/field_maps';
-import { IRuleExecutionLogClient } from '../rule_execution_log';
+import { ITelemetryEventsSender } from '../../telemetry/sender';
+import { RuleExecutionLogForExecutorsFactory } from '../rule_execution_log';
 
-export interface SecurityAlertTypeReturnValue<TState extends AlertTypeState> {
+export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   bulkCreateTimes: string[];
   createdSignalsCount: number;
   createdSignals: unknown[];
@@ -65,19 +65,20 @@ export interface RunOpts<TParams extends RuleParams> {
   };
   wrapHits: WrapHits;
   wrapSequences: WrapSequences;
+  ruleDataReader: IRuleDataReader;
 }
 
 export type SecurityAlertType<
   TParams extends RuleParams,
-  TState extends AlertTypeState,
+  TState extends RuleTypeState,
   TInstanceContext extends AlertInstanceContext = {},
   TActionGroupIds extends string = never
 > = Omit<
-  AlertType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>,
+  RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>,
   'executor'
 > & {
   executor: (
-    options: AlertExecutorOptions<
+    options: RuleExecutorOptions<
       TParams,
       TState,
       AlertInstanceState,
@@ -96,33 +97,23 @@ export interface CreateSecurityRuleTypeWrapperProps {
   config: ConfigType;
   ruleDataClient: IRuleDataClient;
   eventLogService: IEventLogService;
-  ruleExecutionLogClientOverride?: IRuleExecutionLogClient;
+  ruleExecutionLoggerFactory: RuleExecutionLogForExecutorsFactory;
 }
 
 export type CreateSecurityRuleTypeWrapper = (
   options: CreateSecurityRuleTypeWrapperProps
 ) => <
   TParams extends RuleParams,
-  TState extends AlertTypeState,
+  TState extends RuleTypeState,
   TInstanceContext extends AlertInstanceContext = {}
 >(
   type: SecurityAlertType<TParams, TState, TInstanceContext, 'default'>
-) => AlertType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, 'default'>;
-
-export type RACAlertSignal = TypeOfFieldMap<AlertsFieldMap> & TypeOfFieldMap<RulesFieldMap>;
-export type RACAlert = Exclude<
-  TypeOfFieldMap<TechnicalRuleFieldMap> & RACAlertSignal,
-  '@timestamp'
-> & {
-  '@timestamp': string;
-};
-
-export type RACSourceHit = SearchHit<RACAlert>;
-export type WrappedRACAlert = BaseHit<RACAlert>;
+) => RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, 'default'>;
 
 export interface CreateRuleOptions {
   experimentalFeatures: ExperimentalFeatures;
   logger: Logger;
   ml?: SetupPlugins['ml'];
+  eventsTelemetry?: ITelemetryEventsSender | undefined;
   version: string;
 }

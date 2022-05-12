@@ -18,6 +18,7 @@ import {
   LAYER_WIZARD_CATEGORY,
   VECTOR_STYLES,
   STYLE_TYPE,
+  WIZARD_ID,
 } from '../../../../common/constants';
 import { NUMERICAL_COLOR_PALETTES } from '../../styles/color_palettes';
 // @ts-ignore
@@ -27,6 +28,8 @@ import { ColorDynamicOptions, SizeDynamicOptions } from '../../../../common/desc
 import { Point2PointLayerIcon } from '../../layers/wizards/icons/point_2_point_layer_icon';
 
 export const point2PointLayerWizardConfig: LayerWizard = {
+  id: WIZARD_ID.POINT_2_POINT,
+  order: 10,
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.source.pewPewDescription', {
     defaultMessage: 'Aggregated data paths between the source and destination',

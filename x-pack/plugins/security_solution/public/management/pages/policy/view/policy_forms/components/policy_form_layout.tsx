@@ -19,7 +19,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
-import { ApplicationStart } from 'kibana/public';
+import { ApplicationStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import {
   policyDetails,
@@ -28,7 +29,6 @@ import {
   isLoading,
 } from '../../../store/policy_details/selectors';
 
-import { toMountPoint } from '../../../../../../../../../../src/plugins/kibana_react/public';
 import { useToasts, useKibana } from '../../../../../../common/lib/kibana';
 import { AppAction } from '../../../../../../common/store/actions';
 import { SpyRoute } from '../../../../../../common/utils/route/spy_routes';
@@ -45,6 +45,7 @@ export const PolicyFormLayout = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
   const {
     services: {
+      theme,
       application: { navigateToApp },
     },
   } = useKibana();
@@ -86,7 +87,8 @@ export const PolicyFormLayout = React.memo(() => {
                 defaultMessage="Integration {name} has been updated."
                 values={{ name: policyName }}
               />
-            </span>
+            </span>,
+            { theme$: theme.theme$ }
           ),
         });
 
@@ -103,7 +105,7 @@ export const PolicyFormLayout = React.memo(() => {
         });
       }
     }
-  }, [navigateToApp, toasts, policyName, policyUpdateStatus, routeState]);
+  }, [navigateToApp, toasts, policyName, policyUpdateStatus, routeState, theme.theme$]);
 
   const handleCancelOnClick = useNavigateToAppEventHandler(...navigateToAppArguments);
 
@@ -144,7 +146,7 @@ export const PolicyFormLayout = React.memo(() => {
     <>
       {showConfirm && (
         <ConfirmUpdate
-          hostCount={policyAgentStatusSummary?.total ?? 0}
+          endpointCount={policyAgentStatusSummary?.total ?? 0}
           onCancel={handleSaveCancel}
           onConfirm={handleSaveConfirmation}
         />

@@ -15,6 +15,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
   const jwksPath = resolve(__dirname, './fixtures/oidc/jwks.json');
 
+  const testEndpointsPlugin = resolve(
+    __dirname,
+    '../security_functional/fixtures/common/test_endpoints'
+  );
+
   return {
     testFiles: [require.resolve('./tests/oidc/authorization_code_flow')],
     servers: xPackAPITestsConfig.get('servers'),
@@ -50,6 +55,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         `--plugin-path=${plugin}`,
+        `--plugin-path=${testEndpointsPlugin}`,
         `--xpack.security.authProviders=${JSON.stringify(['oidc', 'basic'])}`,
         '--xpack.security.authc.oidc.realm="oidc1"',
       ],

@@ -9,7 +9,7 @@ Update multiple documents at once
 <b>Signature:</b>
 
 ```typescript
-bulkUpdate<T = unknown>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<unknown>>;
+bulkUpdate<T = unknown>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<T>>;
 ```
 
 ## Parameters
@@ -20,7 +20,7 @@ bulkUpdate<T = unknown>(objects?: SavedObjectsBulkUpdateObject[]): Promise<Saved
 
 <b>Returns:</b>
 
-Promise&lt;SavedObjectsBatchResponse&lt;unknown&gt;&gt;
+Promise&lt;SavedObjectsBatchResponse&lt;T&gt;&gt;
 
 The result of the update operation containing both failed and updated saved objects.
 

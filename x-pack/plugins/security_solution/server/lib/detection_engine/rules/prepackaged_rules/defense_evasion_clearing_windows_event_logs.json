@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Clearing Windows Event Logs",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"process_started\", \"start\") and\n  (process.name : \"wevtutil.exe\" or process.pe.original_file_name == \"wevtutil.exe\") and\n    process.args : (\"/e:false\", \"cl\", \"clear-log\") or\n  process.name : (\"powershell.exe\", \"pwsh.exe\", \"powershell_ise.exe\") and process.args : \"Clear-EventLog\"\n",
   "risk_score": 21,
   "rule_id": "d331bbe2-6db4-4941-80a5-8270db72eb61",
@@ -49,5 +50,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 11
+  "version": 12
 }

@@ -7,12 +7,18 @@
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getAgentAuthorizationSettings } from './settings_definition/agent_authorization_settings';
 import { getApmSettings } from './settings_definition/apm_settings';
 import {
   getRUMSettings,
   isRUMFormValid,
 } from './settings_definition/rum_settings';
+import {
+  TAIL_SAMPLING_ENABLED_KEY,
+  getTailSamplingSettings,
+  isTailBasedSamplingValid,
+} from './settings_definition/tail_sampling_settings';
 import {
   getTLSSettings,
   isTLSFormValid,
@@ -24,25 +30,28 @@ import { PackagePolicyVars } from './typings';
 interface Props {
   updateAPMPolicy: (newVars: PackagePolicyVars, isValid: boolean) => void;
   vars?: PackagePolicyVars;
-  isCloudPolicy: boolean;
 }
 
-export function APMPolicyForm({
-  vars = {},
-  isCloudPolicy,
-  updateAPMPolicy,
-}: Props) {
-  const { apmSettings, rumSettings, tlsSettings, agentAuthorizationSettings } =
-    useMemo(() => {
-      return {
-        apmSettings: getApmSettings({ isCloudPolicy }),
-        rumSettings: getRUMSettings(),
-        tlsSettings: getTLSSettings(),
-        agentAuthorizationSettings: getAgentAuthorizationSettings({
-          isCloudPolicy,
-        }),
-      };
-    }, [isCloudPolicy]);
+export function APMPolicyForm({ vars = {}, updateAPMPolicy }: Props) {
+  const tailSamplingPoliciesDocsLink =
+    useKibana().services.docLinks?.links.apm.tailSamplingPolicies;
+  const {
+    apmSettings,
+    rumSettings,
+    tlsSettings,
+    agentAuthorizationSettings,
+    tailSamplingSettings,
+  } = useMemo(() => {
+    return {
+      apmSettings: getApmSettings(),
+      rumSettings: getRUMSettings(),
+      tlsSettings: getTLSSettings(),
+      agentAuthorizationSettings: getAgentAuthorizationSettings(),
+      tailSamplingSettings: getTailSamplingSettings(
+        tailSamplingPoliciesDocsLink
+      ),
+    };
+  }, [tailSamplingPoliciesDocsLink]);
 
   function handleFormChange(key: string, value: any) {
     // Merge new key/value with the rest of fields
@@ -53,7 +62,8 @@ export function APMPolicyForm({
       isSettingsFormValid(apmSettings, newVars) &&
       isRUMFormValid(newVars, rumSettings) &&
       isTLSFormValid(newVars, tlsSettings) &&
-      isSettingsFormValid(agentAuthorizationSettings, newVars);
+      isSettingsFormValid(agentAuthorizationSettings, newVars) &&
+      isTailBasedSamplingValid(newVars, tailSamplingSettings);
 
     updateAPMPolicy(newVars, isFormValid);
   }
@@ -103,6 +113,27 @@ export function APMPolicyForm({
       ),
       settings: agentAuthorizationSettings,
     },
+    ...(vars[TAIL_SAMPLING_ENABLED_KEY]
+      ? [
+          {
+            id: 'tailSampling',
+            title: i18n.translate(
+              'xpack.apm.fleet_integration.settings.tailSampling.settings.title',
+              { defaultMessage: 'Tail-based sampling' }
+            ),
+            subtitle: i18n.translate(
+              'xpack.apm.fleet_integration.settings.tailSampling.settings.subtitle',
+              {
+                defaultMessage:
+                  'Manage tail-based sampling for services and traces.',
+              }
+            ),
+            settings: tailSamplingSettings,
+            isBeta: false,
+            isPlatinumLicence: true,
+          },
+        ]
+      : []),
   ];
 
   return (

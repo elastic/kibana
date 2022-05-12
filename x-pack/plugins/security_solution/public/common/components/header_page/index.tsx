@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiProgress,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiProgress, EuiPageHeader, EuiPageHeaderSection, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import styled, { css } from 'styled-components';
 
@@ -46,11 +40,6 @@ const LinkBack = styled.div.attrs({
   `}
 `;
 LinkBack.displayName = 'LinkBack';
-
-const Badge = styled(EuiBadge)`
-  letter-spacing: 0;
-` as unknown as typeof EuiBadge;
-Badge.displayName = 'Badge';
 
 const HeaderSection = styled(EuiPageHeaderSection)`
   // Without  min-width: 0, as a flex child, it wouldn't shrink properly
@@ -117,7 +106,6 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   subtitle2,
   title,
   titleNode,
-  ...rest
 }) => (
   <>
     <EuiPageHeader alignItems="center" bottomBorder={border}>

@@ -14,8 +14,9 @@ Run all tests from the `x-pack` root directory
 - Unit tests: `yarn test:jest x-pack/plugins/lens`
 - Functional tests:
   - Run `node scripts/functional_tests_server`
-  - Run `node ../scripts/functional_test_runner.js --config ./test/functional/config.js --grep="lens app"`
-  - You may want to comment out all imports except for Lens in the config file.
+  - Run `node ../scripts/functional_test_runner.js --config ./test/functional/apps/lens/group1/config.ts`
+  - Run `node ../scripts/functional_test_runner.js --config ./test/functional/apps/lens/group2/config.ts`
+  - Run `node ../scripts/functional_test_runner.js --config ./test/functional/apps/lens/group3/config.ts`
 - API Functional tests:
   - Run `node scripts/functional_tests_server`
   - Run `node ../scripts/functional_test_runner.js --config ./test/api_integration/config.ts --grep=Lens`
@@ -23,6 +24,8 @@ Run all tests from the `x-pack` root directory
 ## Developing tips
 
 Lens state is kept in the Redux Store. To enable redux logger, open Chrome Developer Tools and type in the console: `window.ELASTIC_LENS_LOGGER=true`.
+
+To simulate long running searches, set `data.search.aggs.shardDelay.enabled` in your `kibana.dev.yml` to true and set the dealy via console in the browser (e.g. for a 20 seconds delay): `window.ELASTIC_LENS_DELAY_SECONDS=20`.
 
 ## UI Terminology
 

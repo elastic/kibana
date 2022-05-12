@@ -1,0 +1,411 @@
+{
+  "id": "@kbn/securitysolution-list-constants",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.ENDPOINT_BLOCKLISTS_LIST_DESCRIPTION",
+        "type": "string",
+        "tags": [],
+        "label": "ENDPOINT_BLOCKLISTS_LIST_DESCRIPTION",
+        "description": [],
+        "signature": [
+          "\"Endpoint Security Blocklists List\""
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.ENDPOINT_BLOCKLISTS_LIST_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ENDPOINT_BLOCKLISTS_LIST_ID",
+        "description": [],
+        "signature": [
+          "\"endpoint_blocklists\""
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.ENDPOINT_BLOCKLISTS_LIST_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "ENDPOINT_BLOCKLISTS_LIST_NAME",
+        "description": [],
+        "signature": [
+          "\"Endpoint Security Blocklists List\""
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION",
+        "type": "string",
+        "tags": [],
+        "label": "ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION",
+        "description": [
+          "Description of event filters agnostic list"
+        ],
+        "signature": [
+          "\"Endpoint Security Event Filters List\""
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.ENDPOINT_EVENT_FILTERS_LIST_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ENDPOINT_EVENT_FILTERS_LIST_ID",
+        "description": [
+          "ID of event filters agnostic list"
+        ],
+        "signature": [
+          "\"endpoint_event_filters\""
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.ENDPOINT_EVENT_FILTERS_LIST_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "ENDPOINT_EVENT_FILTERS_LIST_NAME",
+        "description": [
+          "Name of event filters agnostic list"
+        ],
+        "signature": [
+          "\"Endpoint Security Event Filters List\""
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_DESCRIPTION",
+        "type": "string",
+        "tags": [],
+        "label": "ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_DESCRIPTION",
+        "description": [],
+        "signature": [
+          "\"Endpoint Security Host isolation exceptions List\""
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID",
+        "description": [],
+        "signature": [
+          "\"endpoint_host_isolation_exceptions\""
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_NAME",
+        "description": [],
+        "signature": [
+          "\"Endpoint Security Host isolation exceptions List\""
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.ENDPOINT_LIST_DESCRIPTION",
+        "type": "string",
+        "tags": [],
+        "label": "ENDPOINT_LIST_DESCRIPTION",
+        "description": [
+          "The description of the single global space agnostic endpoint list"
+        ],
+        "signature": [
+          "\"Endpoint Security Exception List\""
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.ENDPOINT_LIST_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ENDPOINT_LIST_ID",
+        "description": [
+          "\nThis ID is used for _both_ the Saved Object ID and for the list_id\nfor the single global space agnostic endpoint list"
+        ],
+        "signature": [
+          "\"endpoint_list\""
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.ENDPOINT_LIST_ITEM_URL",
+        "type": "string",
+        "tags": [],
+        "label": "ENDPOINT_LIST_ITEM_URL",
+        "description": [
+          "\nSpecific routes for the single global space agnostic endpoint list. These are convenience\nroutes where they are going to try and create the global space agnostic endpoint list if it\ndoes not exist yet or if it was deleted at some point and re-create it before adding items to\nthe list"
+        ],
+        "signature": [
+          "\"/api/endpoint_list/items\""
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.ENDPOINT_LIST_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "ENDPOINT_LIST_NAME",
+        "description": [
+          "The name of the single global space agnostic endpoint list"
+        ],
+        "signature": [
+          "\"Endpoint Security Exception List\""
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.ENDPOINT_LIST_URL",
+        "type": "string",
+        "tags": [],
+        "label": "ENDPOINT_LIST_URL",
+        "description": [
+          "\nSpecific routes for the single global space agnostic endpoint list"
+        ],
+        "signature": [
+          "\"/api/endpoint_list\""
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION",
+        "type": "string",
+        "tags": [],
+        "label": "ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION",
+        "description": [
+          "Description of trusted apps agnostic list"
+        ],
+        "signature": [
+          "\"Endpoint Security Trusted Apps List\""
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.ENDPOINT_TRUSTED_APPS_LIST_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ENDPOINT_TRUSTED_APPS_LIST_ID",
+        "description": [
+          "ID of trusted apps agnostic list"
+        ],
+        "signature": [
+          "\"endpoint_trusted_apps\""
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.ENDPOINT_TRUSTED_APPS_LIST_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "ENDPOINT_TRUSTED_APPS_LIST_NAME",
+        "description": [
+          "Name of trusted apps agnostic list"
+        ],
+        "signature": [
+          "\"Endpoint Security Trusted Apps List\""
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.EXCEPTION_LIST_ITEM_URL",
+        "type": "string",
+        "tags": [],
+        "label": "EXCEPTION_LIST_ITEM_URL",
+        "description": [],
+        "signature": [
+          "\"/api/exception_lists/items\""
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.EXCEPTION_LIST_NAMESPACE",
+        "type": "string",
+        "tags": [],
+        "label": "EXCEPTION_LIST_NAMESPACE",
+        "description": [],
+        "signature": [
+          "\"exception-list\""
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.EXCEPTION_LIST_NAMESPACE_AGNOSTIC",
+        "type": "string",
+        "tags": [],
+        "label": "EXCEPTION_LIST_NAMESPACE_AGNOSTIC",
+        "description": [
+          "\nException list spaces"
+        ],
+        "signature": [
+          "\"exception-list-agnostic\""
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.EXCEPTION_LIST_URL",
+        "type": "string",
+        "tags": [],
+        "label": "EXCEPTION_LIST_URL",
+        "description": [
+          "\nException list routes"
+        ],
+        "signature": [
+          "\"/api/exception_lists\""
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.LIST_INDEX",
+        "type": "string",
+        "tags": [],
+        "label": "LIST_INDEX",
+        "description": [],
+        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.LIST_ITEM_URL",
+        "type": "string",
+        "tags": [],
+        "label": "LIST_ITEM_URL",
+        "description": [],
+        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.LIST_PRIVILEGES_URL",
+        "type": "string",
+        "tags": [],
+        "label": "LIST_PRIVILEGES_URL",
+        "description": [],
+        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.LIST_URL",
+        "type": "string",
+        "tags": [],
+        "label": "LIST_URL",
+        "description": [
+          "\nValue list routes"
+        ],
+        "signature": [
+          "\"/api/lists\""
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.MAX_EXCEPTION_LIST_SIZE",
+        "type": "number",
+        "tags": [],
+        "label": "MAX_EXCEPTION_LIST_SIZE",
+        "description": [],
+        "signature": [
+          "10000"
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

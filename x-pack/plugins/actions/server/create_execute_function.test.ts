@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'src/core/server';
+import { KibanaRequest } from '@kbn/core/server';
 import uuid from 'uuid';
-import { taskManagerMock } from '../../task_manager/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { createExecutionEnqueuerFunction } from './create_execute_function';
-import { savedObjectsClientMock } from '../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { actionTypeRegistryMock } from './action_type_registry.mock';
 import {
   asHttpRequestExecutionSource,
@@ -49,6 +49,7 @@ describe('execute()', () => {
       id: '123',
       params: { baz: false },
       spaceId: 'default',
+      executionId: '123abc',
       apiKey: Buffer.from('123:abc').toString('base64'),
       source: asHttpRequestExecutionSource(request),
     });
@@ -74,6 +75,79 @@ describe('execute()', () => {
       {
         actionId: '123',
         params: { baz: false },
+        executionId: '123abc',
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      {
+        references: [
+          {
+            id: '123',
+            name: 'actionRef',
+            type: 'action',
+          },
+        ],
+      }
+    );
+    expect(actionTypeRegistry.isActionExecutable).toHaveBeenCalledWith('123', 'mock-action', {
+      notifyUsage: true,
+    });
+  });
+
+  test('schedules the action with all given parameters and consumer', async () => {
+    const actionTypeRegistry = actionTypeRegistryMock.create();
+    const executeFn = createExecutionEnqueuerFunction({
+      taskManager: mockTaskManager,
+      actionTypeRegistry,
+      isESOCanEncrypt: true,
+      preconfiguredActions: [],
+    });
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '123',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'mock-action',
+      },
+      references: [],
+    });
+    savedObjectsClient.create.mockResolvedValueOnce({
+      id: '234',
+      type: 'action_task_params',
+      attributes: {},
+      references: [],
+    });
+    await executeFn(savedObjectsClient, {
+      id: '123',
+      params: { baz: false },
+      spaceId: 'default',
+      executionId: '123abc',
+      consumer: 'test-consumer',
+      apiKey: Buffer.from('123:abc').toString('base64'),
+      source: asHttpRequestExecutionSource(request),
+    });
+    expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
+    expect(mockTaskManager.schedule.mock.calls[0]).toMatchInlineSnapshot(`
+            Array [
+              Object {
+                "params": Object {
+                  "actionTaskParamsId": "234",
+                  "spaceId": "default",
+                },
+                "scope": Array [
+                  "actions",
+                ],
+                "state": Object {},
+                "taskType": "actions:mock-action",
+              },
+            ]
+        `);
+    expect(savedObjectsClient.get).toHaveBeenCalledWith('action', '123');
+    expect(savedObjectsClient.create).toHaveBeenCalledWith(
+      'action_task_params',
+      {
+        actionId: '123',
+        params: { baz: false },
+        executionId: '123abc',
+        consumer: 'test-consumer',
         apiKey: Buffer.from('123:abc').toString('base64'),
       },
       {
@@ -119,6 +193,7 @@ describe('execute()', () => {
       spaceId: 'default',
       apiKey: Buffer.from('123:abc').toString('base64'),
       source: asHttpRequestExecutionSource(request),
+      executionId: '123abc',
       relatedSavedObjects: [
         {
           id: 'some-id',
@@ -134,6 +209,7 @@ describe('execute()', () => {
         actionId: '123',
         params: { baz: false },
         apiKey: Buffer.from('123:abc').toString('base64'),
+        executionId: '123abc',
         relatedSavedObjects: [
           {
             id: 'related_some-type_0',
@@ -171,6 +247,7 @@ describe('execute()', () => {
           actionTypeId: 'mock-action-preconfigured',
           config: {},
           isPreconfigured: true,
+          isDeprecated: false,
           name: 'x',
           secrets: {},
         },
@@ -196,6 +273,7 @@ describe('execute()', () => {
       id: '123',
       params: { baz: false },
       spaceId: 'default',
+      executionId: '123abc',
       apiKey: Buffer.from('123:abc').toString('base64'),
       source: asSavedObjectExecutionSource(source),
     });
@@ -221,6 +299,7 @@ describe('execute()', () => {
       {
         actionId: '123',
         params: { baz: false },
+        executionId: '123abc',
         apiKey: Buffer.from('123:abc').toString('base64'),
       },
       {
@@ -246,6 +325,7 @@ describe('execute()', () => {
           actionTypeId: 'mock-action-preconfigured',
           config: {},
           isPreconfigured: true,
+          isDeprecated: false,
           name: 'x',
           secrets: {},
         },
@@ -273,6 +353,7 @@ describe('execute()', () => {
       spaceId: 'default',
       apiKey: Buffer.from('123:abc').toString('base64'),
       source: asSavedObjectExecutionSource(source),
+      executionId: '123abc',
       relatedSavedObjects: [
         {
           id: 'some-id',
@@ -305,6 +386,7 @@ describe('execute()', () => {
         actionId: '123',
         params: { baz: false },
         apiKey: Buffer.from('123:abc').toString('base64'),
+        executionId: '123abc',
         relatedSavedObjects: [
           {
             id: 'related_some-type_0',
@@ -343,6 +425,7 @@ describe('execute()', () => {
         id: '123',
         params: { baz: false },
         spaceId: 'default',
+        executionId: '123abc',
         apiKey: null,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -372,6 +455,7 @@ describe('execute()', () => {
         id: '123',
         params: { baz: false },
         spaceId: 'default',
+        executionId: '123abc',
         apiKey: null,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -404,6 +488,7 @@ describe('execute()', () => {
         id: '123',
         params: { baz: false },
         spaceId: 'default',
+        executionId: '123abc',
         apiKey: null,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
@@ -423,6 +508,7 @@ describe('execute()', () => {
           name: 'Slack #xyz',
           secrets: {},
           isPreconfigured: true,
+          isDeprecated: false,
         },
       ],
     });
@@ -446,6 +532,7 @@ describe('execute()', () => {
       id: '123',
       params: { baz: false },
       spaceId: 'default',
+      executionId: '123abc',
       apiKey: null,
     });
 

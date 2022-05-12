@@ -8,8 +8,9 @@
 import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
-import { CoreSetup, ApplicationStart } from 'src/core/public';
-import { ManagementAppMountParams } from '../../../../../src/plugins/management/public';
+import { CoreSetup, ApplicationStart } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { getTagsCapabilities } from '../../common';
 import { SavedObjectTaggingPluginStart } from '../types';
 import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../services';
@@ -44,24 +45,26 @@ export const mountSection = async ({
   title,
 }: MountSectionParams) => {
   const [coreStart] = await core.getStartServices();
-  const { element, setBreadcrumbs } = mountParams;
+  const { element, setBreadcrumbs, theme$ } = mountParams;
   const capabilities = getTagsCapabilities(coreStart.application.capabilities);
   const assignableTypes = await assignmentService.getAssignableTypes();
   coreStart.chrome.docTitle.change(title);
 
   ReactDOM.render(
     <I18nProvider>
-      <RedirectToHomeIfUnauthorized applications={coreStart.application}>
-        <TagManagementPage
-          setBreadcrumbs={setBreadcrumbs}
-          core={coreStart}
-          tagClient={tagClient}
-          tagCache={tagCache}
-          assignmentService={assignmentService}
-          capabilities={capabilities}
-          assignableTypes={assignableTypes}
-        />
-      </RedirectToHomeIfUnauthorized>
+      <KibanaThemeProvider theme$={theme$}>
+        <RedirectToHomeIfUnauthorized applications={coreStart.application}>
+          <TagManagementPage
+            setBreadcrumbs={setBreadcrumbs}
+            core={coreStart}
+            tagClient={tagClient}
+            tagCache={tagCache}
+            assignmentService={assignmentService}
+            capabilities={capabilities}
+            assignableTypes={assignableTypes}
+          />
+        </RedirectToHomeIfUnauthorized>
+      </KibanaThemeProvider>
     </I18nProvider>,
     element
   );

@@ -6,11 +6,10 @@
  */
 
 import * as t from 'io-ts';
-import { toNumberRt } from '@kbn/io-ts-utils/to_number_rt';
+import { toNumberRt } from '@kbn/io-ts-utils';
 import { getOverallLatencyDistribution } from './get_overall_latency_distribution';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 
 const latencyOverallDistributionRoute = createApmServerRoute({
@@ -37,7 +36,9 @@ const latencyOverallDistributionRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<import('./types').OverallLatencyDistributionResponse> => {
     const setup = await setupRequest(resources);
 
     const {
@@ -68,4 +69,4 @@ const latencyOverallDistributionRoute = createApmServerRoute({
 });
 
 export const latencyDistributionRouteRepository =
-  createApmServerRouteRepository().add(latencyOverallDistributionRoute);
+  latencyOverallDistributionRoute;

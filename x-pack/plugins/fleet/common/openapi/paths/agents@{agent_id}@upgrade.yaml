@@ -29,4 +29,3 @@ post:
       application/json:
         schema:
           $ref: ../components/schemas/upgrade_agent.yaml
-

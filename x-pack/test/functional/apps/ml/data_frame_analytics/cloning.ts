@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { DeepPartial } from '../../../../../plugins/ml/common/types/common';
-import { DataFrameAnalyticsConfig } from '../../../../../plugins/ml/public/application/data_frame_analytics/common';
+import { DeepPartial } from '@kbn/ml-plugin/common/types/common';
+import { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -159,6 +159,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.api.deleteIndices(testData.job.dest!.index as string);
           await ml.testResources.deleteIndexPatternByTitle(testData.job.dest!.index as string);
           await ml.testResources.deleteIndexPatternByTitle(cloneDestIndex);
+          await ml.testResources.deleteIndexPatternByTitle(testData.indexPattern.name);
         });
 
         it('opens the existing job in the data frame analytics job wizard', async () => {

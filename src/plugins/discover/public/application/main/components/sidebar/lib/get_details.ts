@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 // @ts-expect-error
 import { fieldCalculator } from './field_calculator';
-import { IndexPattern, IndexPatternField } from '../../../../../../../data/public';
 import { ElasticSearchHit } from '../../../../../types';
 
 export function getDetails(
-  field: IndexPatternField,
+  field: DataViewField,
   hits: ElasticSearchHit[] | undefined,
   columns: string[],
-  indexPattern?: IndexPattern
+  indexPattern?: DataView
 ) {
   if (!indexPattern || !hits) {
     return {};

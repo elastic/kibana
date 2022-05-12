@@ -12,7 +12,7 @@ describe('Index data visualizer locator', () => {
 
   it('should generate valid URL for the Index Data Visualizer Viewer page with global settings', async () => {
     const location = await definition.getLocation({
-      indexPatternId: '3da93760-e0af-11ea-9ad3-3bcfc330e42a',
+      dataViewId: '3da93760-e0af-11ea-9ad3-3bcfc330e42a',
       timeRange: {
         from: 'now-30m',
         to: 'now',
@@ -29,7 +29,7 @@ describe('Index data visualizer locator', () => {
 
   it('should prioritize savedSearchId even when data view id is available', async () => {
     const location = await definition.getLocation({
-      indexPatternId: '3da93760-e0af-11ea-9ad3-3bcfc330e42a',
+      dataViewId: '3da93760-e0af-11ea-9ad3-3bcfc330e42a',
       savedSearchId: '45014020-dffa-11eb-b120-a105fbbe93b3',
     });
 
@@ -42,7 +42,7 @@ describe('Index data visualizer locator', () => {
 
   it('should generate valid URL with field names and field types', async () => {
     const location = await definition.getLocation({
-      indexPatternId: '3da93760-e0af-11ea-9ad3-3bcfc330e42a',
+      dataViewId: '3da93760-e0af-11ea-9ad3-3bcfc330e42a',
       visibleFieldNames: ['@timestamp', 'responsetime'],
       visibleFieldTypes: ['number'],
     });
@@ -55,7 +55,7 @@ describe('Index data visualizer locator', () => {
 
   it('should generate valid URL with KQL query', async () => {
     const location = await definition.getLocation({
-      indexPatternId: '3da93760-e0af-11ea-9ad3-3bcfc330e42a',
+      dataViewId: '3da93760-e0af-11ea-9ad3-3bcfc330e42a',
       query: {
         searchQuery: {
           bool: {
@@ -83,7 +83,7 @@ describe('Index data visualizer locator', () => {
 
   it('should generate valid URL with Lucene query', async () => {
     const location = await definition.getLocation({
-      indexPatternId: '3da93760-e0af-11ea-9ad3-3bcfc330e42a',
+      dataViewId: '3da93760-e0af-11ea-9ad3-3bcfc330e42a',
       query: {
         searchQuery: {
           query_string: {

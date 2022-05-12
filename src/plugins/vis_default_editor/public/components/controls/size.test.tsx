@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { EuiIconTip } from '@elastic/eui';
 import { SizeParamEditor, SizeParamEditorProps } from './size';
 import { aggParamCommonPropsMock } from './test_utils';

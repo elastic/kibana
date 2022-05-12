@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RequestHandler, RouteMethod } from 'src/core/server';
-import { AuthenticatedUser } from '../../../../security/server';
+import { RequestHandler, RouteMethod } from '@kbn/core/server';
+import { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { ReportingCore } from '../../core';
 import { getUser } from './get_user';
 import type { ReportingRequestHandlerContext } from '../../types';
@@ -30,12 +30,13 @@ export const authorizedUserPreRouting = <P, Q, B>(
 ): RequestHandler<P, Q, B, ReportingRequestHandlerContext, RouteMethod> => {
   const { logger, security } = reporting.getPluginSetupDeps();
 
-  return (context, req, res) => {
+  return async (context, req, res) => {
+    const { security: securityStart } = await reporting.getPluginStartDeps();
     try {
       let user: ReportingRequestUser = false;
       if (security && security.license.isEnabled()) {
         // find the authenticated user, or null if security is not enabled
-        user = getUser(req, security);
+        user = getUser(req, securityStart);
         if (!user) {
           // security is enabled but the user is null
           return res.unauthorized({ body: `Sorry, you aren't authenticated` });

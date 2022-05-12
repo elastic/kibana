@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { Capabilities } from 'kibana/public';
-import { IndexPattern, IndexPatternsContract } from '../../../data/public';
+import type { Capabilities } from '@kbn/core/public';
+import { DataViewsContract } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 
 async function popularizeField(
-  indexPattern: IndexPattern,
+  indexPattern: DataView,
   fieldName: string,
-  indexPatternsService: IndexPatternsContract,
+  DataViewsService: DataViewsContract,
   capabilities: Capabilities
 ) {
   if (!indexPattern.id || !capabilities?.indexPatterns?.save) return;
@@ -25,7 +26,7 @@ async function popularizeField(
 
   // Catch 409 errors caused by user adding columns in a higher frequency that the changes can be persisted to Elasticsearch
   try {
-    await indexPatternsService.updateSavedObject(indexPattern, 0, true);
+    await DataViewsService.updateSavedObject(indexPattern, 0, true);
     // eslint-disable-next-line no-empty
   } catch {}
 }

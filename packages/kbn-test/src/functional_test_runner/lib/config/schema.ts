@@ -14,22 +14,37 @@ import type { CustomHelpers } from 'joi';
 // valid pattern for ID
 // enforced camel-case identifiers for consistency
 const ID_PATTERN = /^[a-zA-Z0-9_]+$/;
+const SCALABILITY_DURATION_PATTERN = /^[1-9]\d{0,}[m|s]$/;
 // it will search both --inspect and --inspect-brk
 const INSPECTING = !!process.execArgv.find((arg) => arg.includes('--inspect'));
 
-const urlPartsSchema = () =>
+const maybeRequireKeys = (keys: string[], schemas: Record<string, Joi.Schema>) => {
+  if (!keys.length) {
+    return schemas;
+  }
+
+  const withRequires: Record<string, Joi.Schema> = {};
+  for (const [key, schema] of Object.entries(schemas)) {
+    withRequires[key] = keys.includes(key) ? schema.required() : schema;
+  }
+  return withRequires;
+};
+
+const urlPartsSchema = ({ requiredKeys }: { requiredKeys?: string[] } = {}) =>
   Joi.object()
-    .keys({
-      protocol: Joi.string().valid('http', 'https').default('http'),
-      hostname: Joi.string().hostname().default('localhost'),
-      port: Joi.number(),
-      auth: Joi.string().regex(/^[^:]+:.+$/, 'username and password separated by a colon'),
-      username: Joi.string(),
-      password: Joi.string(),
-      pathname: Joi.string().regex(/^\//, 'start with a /'),
-      hash: Joi.string().regex(/^\//, 'start with a /'),
-      certificateAuthorities: Joi.array().items(Joi.binary()).optional(),
-    })
+    .keys(
+      maybeRequireKeys(requiredKeys ?? [], {
+        protocol: Joi.string().valid('http', 'https').default('http'),
+        hostname: Joi.string().hostname().default('localhost'),
+        port: Joi.number(),
+        auth: Joi.string().regex(/^[^:]+:.+$/, 'username and password separated by a colon'),
+        username: Joi.string(),
+        password: Joi.string(),
+        pathname: Joi.string().regex(/^\//, 'start with a /'),
+        hash: Joi.string().regex(/^\//, 'start with a /'),
+        certificateAuthorities: Joi.array().items(Joi.binary()).optional(),
+      })
+    )
     .default();
 
 const appUrlPartsSchema = () =>
@@ -100,6 +115,7 @@ export const schema = Joi.object()
         try: Joi.number().default(120000),
         waitFor: Joi.number().default(20000),
         esRequestTimeout: Joi.number().default(30000),
+        kibanaReportCompletion: Joi.number().default(60_000),
         kibanaStabilize: Joi.number().default(15000),
         navigateStatusPageCheck: Joi.number().default(250),
 
@@ -123,6 +139,7 @@ export const schema = Joi.object()
     mochaOpts: Joi.object()
       .keys({
         bail: Joi.boolean().default(false),
+        dryRun: Joi.boolean().default(false),
         grep: Joi.string(),
         invert: Joi.boolean().default(false),
         slow: Joi.number().default(30000),
@@ -151,7 +168,10 @@ export const schema = Joi.object()
 
     mochaReporter: Joi.object()
       .keys({
-        captureLogOutput: Joi.boolean().default(!!process.env.CI),
+        captureLogOutput: Joi.boolean().default(
+          !!process.env.CI && !process.env.DISABLE_CI_LOG_OUTPUT_CAPTURE
+        ),
+        sendToCiStats: Joi.boolean().default(!!process.env.CI),
       })
       .default(),
 
@@ -168,18 +188,25 @@ export const schema = Joi.object()
     servers: Joi.object()
       .keys({
         kibana: urlPartsSchema(),
-        elasticsearch: urlPartsSchema(),
+        elasticsearch: urlPartsSchema({
+          requiredKeys: ['port'],
+        }),
       })
       .default(),
 
     esTestCluster: Joi.object()
       .keys({
-        license: Joi.string().default('basic'),
+        license: Joi.valid('basic', 'trial', 'gold').default('basic'),
         from: Joi.string().default('snapshot'),
-        serverArgs: Joi.array(),
+        serverArgs: Joi.array().items(Joi.string()),
         esJavaOpts: Joi.string(),
         dataArchive: Joi.string(),
         ssl: Joi.boolean().default(false),
+        ccs: Joi.object().keys({
+          remoteClusterUrl: Joi.string().uri({
+            scheme: /https?/,
+          }),
+        }),
       })
       .default(),
 
@@ -200,6 +227,11 @@ export const schema = Joi.object()
             wait: Joi.object()
               .regex()
               .default(/Kibana is now available/),
+
+            /**
+             * Does this test config only work when run against source?
+             */
+            alwaysUseSource: Joi.boolean().default(false),
           })
           .default(),
         env: Joi.object().unknown().default(),
@@ -232,6 +264,67 @@ export const schema = Joi.object()
         directory: Joi.string().default(defaultRelativeToConfigPath('fixtures/kbn_archiver')),
       })
       .default(),
+
+    /**
+     * Optional settings to list test data archives, that will be loaded during the 'beforeTests'
+     * lifecycle phase and unloaded during the 'cleanup' lifecycle phase.
+     */
+    testData: Joi.object()
+      .keys({
+        kbnArchives: Joi.array().items(Joi.string()).default([]),
+        esArchives: Joi.array().items(Joi.string()).default([]),
+      })
+      .default(),
+
+    /**
+     * Optional settings to enable scalability testing for single user performance journey.
+     * If defined, 'scalabilitySetup' must include 'warmup' and 'test' stages,
+     * 'maxDuration', e.g. '10m' to limit execution time to 10 minutes.
+     * Each stage must include 'action', 'duration' and 'maxUsersCount'.
+     * In addition, 'rampConcurrentUsers' requires 'minUsersCount' to ramp users from
+     * min to max within provided time duration.
+     */
+    scalabilitySetup: Joi.object()
+      .keys({
+        warmup: Joi.object()
+          .keys({
+            stages: Joi.array().items(
+              Joi.object().keys({
+                action: Joi.string()
+                  .valid('constantConcurrentUsers', 'rampConcurrentUsers')
+                  .required(),
+                duration: Joi.string().pattern(SCALABILITY_DURATION_PATTERN).required(),
+                minUsersCount: Joi.number().when('action', {
+                  is: 'rampConcurrentUsers',
+                  then: Joi.number().required().less(Joi.ref('maxUsersCount')),
+                  otherwise: Joi.forbidden(),
+                }),
+                maxUsersCount: Joi.number().required().greater(0),
+              })
+            ),
+          })
+          .required(),
+        test: Joi.object()
+          .keys({
+            stages: Joi.array().items(
+              Joi.object().keys({
+                action: Joi.string()
+                  .valid('constantConcurrentUsers', 'rampConcurrentUsers')
+                  .required(),
+                duration: Joi.string().pattern(SCALABILITY_DURATION_PATTERN).required(),
+                minUsersCount: Joi.number().when('action', {
+                  is: 'rampConcurrentUsers',
+                  then: Joi.number().required().less(Joi.ref('maxUsersCount')),
+                  otherwise: Joi.forbidden(),
+                }),
+                maxUsersCount: Joi.number().required().greater(0),
+              })
+            ),
+          })
+          .required(),
+        maxDuration: Joi.string().pattern(SCALABILITY_DURATION_PATTERN).required(),
+      })
+      .optional(),
 
     // settings for the kibanaServer.uiSettings module
     uiSettings: Joi.object()
@@ -272,6 +365,7 @@ export const schema = Joi.object()
     security: Joi.object()
       .keys({
         roles: Joi.object().default(),
+        remoteEsRoles: Joi.object(),
         defaultRoles: Joi.array()
           .items(Joi.string())
           .when('$primary', {

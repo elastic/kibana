@@ -8,12 +8,13 @@
 import React, { memo } from 'react';
 import { Switch, Route } from 'react-router-dom';
 
+import type { IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
+
+import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
+
 import type { DynamicPage, DynamicPagePathValues, StaticPage } from '../../../../constants';
 import { INTEGRATIONS_ROUTING_PATHS, INTEGRATIONS_SEARCH_QUERYPARAM } from '../../../../constants';
 import { DefaultLayout } from '../../../../layouts';
-
-import type { IntegrationCategory } from '../../../../../../../../../../src/plugins/custom_integrations/common';
-import type { CustomIntegration } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 
 import type { PackageListItem } from '../../../../types';
 
@@ -50,7 +51,7 @@ export const mapToCard = (
   let uiInternalPathUrl;
 
   if (item.type === 'ui_link') {
-    uiInternalPathUrl = getAbsolutePath(item.uiInternalPath);
+    uiInternalPathUrl = item.uiExternalLink || getAbsolutePath(item.uiInternalPath);
   } else {
     let urlVersion = item.version;
 

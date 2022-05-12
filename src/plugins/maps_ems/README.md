@@ -1,3 +1,6 @@
 # Maps EMS
 
-Configuration of kibana-wide EMS settings and some higher level utilities.
+Utility plugin:
+- Typing for the `map.*` yml configuration. (`MapConfig`).
+- These settings includes EMS-related configuration (e.g. for on-prem EMS deployments)
+- Higher level utilities to construct an EMS-client based on these configuration parameters

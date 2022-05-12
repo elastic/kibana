@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { registerTestBed } from '@kbn/test/jest';
+import { registerTestBed } from '@kbn/test-jest-helpers';
 import { createRollupJobsStore } from '../../../crud_app/store';
 import { JobCreate } from '../../../crud_app/sections';
 import { JOB_TO_CLONE } from './constants';

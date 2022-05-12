@@ -111,8 +111,13 @@ const rules = {
       filters: {},
     },
     diversified_sampler: {
-      shard_size: '',
-      field: '',
+      shard_size: 100,
+      field: '{field}',
+      max_docs_per_value: 1,
+      execution_hint: {
+        __template: 'global_ordinals',
+        __one_of: ['global_ordinals', 'map', 'bytes_hash'],
+      },
     },
     min: simple_metric,
     max: simple_metric,
@@ -446,13 +451,7 @@ const rules = {
     },
     sampler: {
       __template: {},
-      field: '{field}',
-      script: {
-        // populated by a global rule
-      },
       shard_size: 100,
-      max_docs_per_value: 3,
-      execution_hint: { __one_of: ['map', 'global_ordinals', 'bytes_hash'] },
     },
     children: {
       __template: {

@@ -7,11 +7,7 @@
 
 import { set } from '@elastic/safer-lodash-set/fp';
 import { get, has, head } from 'lodash/fp';
-import {
-  IScopedClusterClient,
-  KibanaRequest,
-  SavedObjectsClientContract,
-} from '../../../../../../../../../src/core/server';
+import { IScopedClusterClient, KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
 import { Direction } from '../../../../../../common/search_strategy/common';
 import {
@@ -188,11 +184,11 @@ export const getHostEndpoint = async (
     return null;
   }
 
-  const { esClient, endpointContext, request } = deps;
+  const { esClient, endpointContext } = deps;
   const logger = endpointContext.logFactory.get('metadata');
 
   try {
-    const fleetServices = endpointContext.service.getScopedFleetServices(request);
+    const fleetServices = endpointContext.service.getInternalFleetServices();
     const endpointMetadataService = endpointContext.service.getEndpointMetadataService();
 
     const endpointData = await endpointMetadataService

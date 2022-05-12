@@ -15,6 +15,7 @@ export class Service extends Entity<ApmFields> {
     return new Instance({
       ...this.fields,
       ['service.node.name']: instanceName,
+      'host.name': instanceName,
       'container.id': instanceName,
     });
   }

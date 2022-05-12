@@ -50,5 +50,6 @@ const StatusFilterComponent: React.FC<Props> = ({
     />
   );
 };
+StatusFilterComponent.displayName = 'StatusFilter';
 
 export const StatusFilter = memo(StatusFilterComponent);

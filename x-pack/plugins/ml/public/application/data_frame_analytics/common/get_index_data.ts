@@ -11,7 +11,7 @@ import { extractErrorMessage } from '../../../../common/util/errors';
 import { EsSorting, UseDataGridReturnType, getProcessedFields } from '../../components/data_grid';
 import { ml } from '../../services/ml_api_service';
 
-import { isKeywordAndTextType } from '../common/fields';
+import { isKeywordAndTextType } from './fields';
 import { SavedSearchQuery } from '../../contexts/ml';
 
 import { INDEX_STATUS } from './analytics';
@@ -64,16 +64,19 @@ export const getIndexData = async (
       });
 
       if (!options.didCancel) {
-        setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total.value);
+        setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total!.value);
         setRowCountRelation(
           typeof resp.hits.total === 'number'
             ? ('eq' as estypes.SearchTotalHitsRelation)
-            : resp.hits.total.relation
+            : resp.hits.total!.relation
         );
         setTableItems(
           resp.hits.hits.map((d) =>
-            getProcessedFields(d.fields ?? {}, (key: string) =>
-              key.startsWith(`${jobConfig.dest.results_field}.feature_importance`)
+            getProcessedFields(
+              d.fields ?? {},
+              (key: string) =>
+                key.startsWith(`${jobConfig.dest.results_field}.feature_importance`) ||
+                key.startsWith(`${jobConfig.dest.results_field}.feature_influence`)
             )
           )
         );

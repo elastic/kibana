@@ -22,6 +22,7 @@ export interface EventFiltersPageLocation {
   /** Used for editing. The ID of the selected event filter */
   id?: string;
   filter: string;
+  included_policies: string;
 }
 
 export interface EventFiltersForm {
@@ -50,7 +51,7 @@ export interface EventFiltersService {
   getOne(id: string): Promise<ExceptionListItemSchema>;
   updateOne(exception: Immutable<UpdateExceptionListItemSchema>): Promise<ExceptionListItemSchema>;
   deleteOne(id: string): Promise<ExceptionListItemSchema>;
-  getSummary(): Promise<ExceptionListSummarySchema>;
+  getSummary(filter?: string): Promise<ExceptionListSummarySchema>;
 }
 
 export interface EventFiltersListPageData {

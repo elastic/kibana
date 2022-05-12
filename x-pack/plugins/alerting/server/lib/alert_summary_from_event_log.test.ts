@@ -6,8 +6,8 @@
  */
 
 import { random, mean } from 'lodash';
-import { SanitizedAlert, AlertSummary } from '../types';
-import { IValidatedEvent } from '../../../event_log/server';
+import { SanitizedRule, AlertSummary } from '../types';
+import { IValidatedEvent, millisToNanos, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER, LEGACY_EVENT_LOG_ACTIONS } from '../plugin';
 import { alertSummaryFromEventLog } from './alert_summary_from_event_log';
 
@@ -19,9 +19,11 @@ describe('alertSummaryFromEventLog', () => {
   test('no events and muted ids', async () => {
     const rule = createRule({});
     const events: IValidatedEvent[] = [];
+    const executionEvents: IValidatedEvent[] = [];
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
       events,
+      executionEvents,
       dateStart,
       dateEnd,
     });
@@ -63,9 +65,11 @@ describe('alertSummaryFromEventLog', () => {
       muteAll: true,
     });
     const events: IValidatedEvent[] = [];
+    const executionEvents: IValidatedEvent[] = [];
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
       events,
+      executionEvents,
       dateStart: dateString(dateEnd, ONE_HOUR_IN_MILLIS),
       dateEnd: dateString(dateEnd, ONE_HOUR_IN_MILLIS * 2),
     });
@@ -102,9 +106,11 @@ describe('alertSummaryFromEventLog', () => {
       mutedInstanceIds: ['alert-1', 'alert-2'],
     });
     const events: IValidatedEvent[] = [];
+    const executionEvents: IValidatedEvent[] = [];
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
       events,
+      executionEvents,
       dateStart,
       dateEnd,
     });
@@ -138,10 +144,12 @@ describe('alertSummaryFromEventLog', () => {
     const rule = createRule({});
     const eventsFactory = new EventsFactory();
     const events = eventsFactory.addExecute().advanceTime(10000).addExecute().getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
       events,
+      executionEvents,
       dateStart,
       dateEnd,
     });
@@ -166,10 +174,12 @@ describe('alertSummaryFromEventLog', () => {
       .advanceTime(10000)
       .addExecute('rut roh!')
       .getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
       events,
+      executionEvents,
       dateStart,
       dateEnd,
     });
@@ -207,10 +217,12 @@ describe('alertSummaryFromEventLog', () => {
       .addExecute()
       .addRecoveredAlert('alert-1')
       .getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
       events,
+      executionEvents,
       dateStart,
       dateEnd,
     });
@@ -246,10 +258,12 @@ describe('alertSummaryFromEventLog', () => {
       .addExecute()
       .addLegacyResolvedAlert('alert-1')
       .getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
       events,
+      executionEvents,
       dateStart,
       dateEnd,
     });
@@ -284,10 +298,12 @@ describe('alertSummaryFromEventLog', () => {
       .addExecute()
       .addRecoveredAlert('alert-1')
       .getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
       events,
+      executionEvents,
       dateStart,
       dateEnd,
     });
@@ -323,10 +339,12 @@ describe('alertSummaryFromEventLog', () => {
       .addExecute()
       .addActiveAlert('alert-1', 'action group A')
       .getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
       events,
+      executionEvents,
       dateStart,
       dateEnd,
     });
@@ -362,10 +380,12 @@ describe('alertSummaryFromEventLog', () => {
       .addExecute()
       .addActiveAlert('alert-1', undefined)
       .getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
       events,
+      executionEvents,
       dateStart,
       dateEnd,
     });
@@ -401,10 +421,12 @@ describe('alertSummaryFromEventLog', () => {
       .addExecute()
       .addActiveAlert('alert-1', 'action group B')
       .getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
       events,
+      executionEvents,
       dateStart,
       dateEnd,
     });
@@ -439,14 +461,15 @@ describe('alertSummaryFromEventLog', () => {
       .addExecute()
       .addActiveAlert('alert-1', 'action group A')
       .getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
       events,
+      executionEvents,
       dateStart,
       dateEnd,
     });
-
     const { lastRun, status, alerts, executionDuration } = summary;
     expect({ lastRun, status, alerts }).toMatchInlineSnapshot(`
       Object {
@@ -481,14 +504,15 @@ describe('alertSummaryFromEventLog', () => {
       .addActiveAlert('alert-1', 'action group A')
       .addRecoveredAlert('alert-2')
       .getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
       events,
+      executionEvents,
       dateStart,
       dateEnd,
     });
-
     const { lastRun, status, alerts, executionDuration } = summary;
     expect({ lastRun, status, alerts }).toMatchInlineSnapshot(`
       Object {
@@ -536,10 +560,12 @@ describe('alertSummaryFromEventLog', () => {
       .addExecute()
       .addActiveAlert('alert-1', 'action group B')
       .getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
       events,
+      executionEvents,
       dateStart,
       dateEnd,
     });
@@ -617,7 +643,7 @@ export class EventsFactory {
       event: {
         provider: EVENT_LOG_PROVIDER,
         action: EVENT_LOG_ACTIONS.execute,
-        duration: random(2000, 180000) * 1000 * 1000,
+        duration: millisToNanos(random(2000, 180000)),
       },
     };
 
@@ -684,17 +710,17 @@ export class EventsFactory {
     return this.events
       .filter((ev) => ev?.event?.action === 'execute' && ev?.event?.duration !== undefined)
       .reduce((res: Record<string, number>, ev) => {
-        res[ev?.['@timestamp']!] = ev?.event?.duration! / (1000 * 1000);
+        res[ev?.['@timestamp']!] = nanosToMillis(ev?.event?.duration!);
         return res;
       }, {});
   }
 }
 
-function createRule(overrides: Partial<SanitizedAlert>): SanitizedAlert<{ bar: boolean }> {
+function createRule(overrides: Partial<SanitizedRule>): SanitizedRule<{ bar: boolean }> {
   return { ...BaseRule, ...overrides };
 }
 
-const BaseRule: SanitizedAlert<{ bar: boolean }> = {
+const BaseRule: SanitizedRule<{ bar: boolean }> = {
   id: 'rule-123',
   alertTypeId: '123',
   schedule: { interval: '10s' },

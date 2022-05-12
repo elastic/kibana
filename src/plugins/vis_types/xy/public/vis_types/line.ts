@@ -11,9 +11,9 @@ import { i18n } from '@kbn/i18n';
 import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
 import { Position, Fit } from '@elastic/charts';
 
-import { AggGroupNames } from '../../../../data/public';
-import { VIS_EVENT_TO_TRIGGER } from '../../../../visualizations/public';
-import { defaultCountLabel, LabelRotation } from '../../../../charts/public';
+import { AggGroupNames } from '@kbn/data-plugin/public';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import { defaultCountLabel, LabelRotation } from '@kbn/charts-plugin/public';
 
 import {
   ChartMode,
@@ -157,7 +157,9 @@ export const lineVisTypeDefinition = {
           '!filter',
           '!sampler',
           '!diversified_sampler',
+          '!rare_terms',
           '!multi_terms',
+          '!significant_text',
         ],
       },
       {
@@ -174,7 +176,9 @@ export const lineVisTypeDefinition = {
           '!filter',
           '!sampler',
           '!diversified_sampler',
+          '!rare_terms',
           '!multi_terms',
+          '!significant_text',
         ],
       },
       {
@@ -191,7 +195,9 @@ export const lineVisTypeDefinition = {
           '!filter',
           '!sampler',
           '!diversified_sampler',
+          '!rare_terms',
           '!multi_terms',
+          '!significant_text',
         ],
       },
     ],

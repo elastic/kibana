@@ -13,6 +13,7 @@ import { CreateRulesSchema } from '../../../../../common/detection_engine/schema
 import { createRule } from './api';
 import * as i18n from './translations';
 import { transformOutput } from './transforms';
+import { useInvalidateRules } from './use_find_rules_query';
 
 interface CreateRuleReturn {
   isLoading: boolean;
@@ -26,6 +27,7 @@ export const useCreateRule = (): ReturnCreateRule => {
   const [ruleId, setRuleId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { addError } = useAppToasts();
+  const invalidateRules = useInvalidateRules();
 
   useEffect(() => {
     let isSubscribed = true;
@@ -39,6 +41,7 @@ export const useCreateRule = (): ReturnCreateRule => {
             rule: transformOutput(rule),
             signal: abortCtrl.signal,
           });
+          invalidateRules();
           if (isSubscribed) {
             setRuleId(createRuleResponse.id);
           }
@@ -58,7 +61,7 @@ export const useCreateRule = (): ReturnCreateRule => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [rule, addError]);
+  }, [rule, addError, invalidateRules]);
 
   return [{ isLoading, ruleId }, setRule];
 };

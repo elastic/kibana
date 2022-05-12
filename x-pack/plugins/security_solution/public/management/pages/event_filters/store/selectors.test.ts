@@ -29,7 +29,7 @@ import { ecsEventMock } from '../test_utils';
 import { getInitialExceptionFromEvent } from './utils';
 import { EventFiltersListPageState, EventFiltersPageLocation } from '../types';
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../../common/constants';
-import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
+import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
 import {
   asStaleResourceState,
   createFailedResourceState,
@@ -233,6 +233,7 @@ describe('event filters selectors', () => {
         filter: '',
         id: '',
         show: undefined,
+        included_policies: '',
       };
     });
 
@@ -359,6 +360,7 @@ describe('event filters selectors', () => {
         page_index: MANAGEMENT_DEFAULT_PAGE,
         page_size: MANAGEMENT_DEFAULT_PAGE_SIZE,
         filter: 'filter',
+        included_policies: '1',
       };
       const state = {
         ...initialState,

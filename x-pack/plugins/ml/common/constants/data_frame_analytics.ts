@@ -29,6 +29,11 @@ export const JOB_MAP_NODE_TYPES = {
   TRAINED_MODEL: 'trainedModel',
 } as const;
 
+export const INDEX_CREATED_BY = {
+  FILE_DATA_VISUALIZER: 'file-data-visualizer',
+  DATA_FRAME_ANALYTICS: 'data-frame-analytics',
+} as const;
+
 export const BUILT_IN_MODEL_TAG = 'prepackaged';
 
 export type JobMapNodeTypes = typeof JOB_MAP_NODE_TYPES[keyof typeof JOB_MAP_NODE_TYPES];

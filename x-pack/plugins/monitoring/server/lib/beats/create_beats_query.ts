@@ -26,9 +26,12 @@ export function createBeatsQuery(options: {
   end?: number;
 }) {
   const opts = {
+    moduleType: 'beats',
     filters: [] as any[],
     metric: BeatsMetric.getMetricFields(),
-    types: ['stats', 'beats_stats'],
+    type: 'beats_stats',
+    metricset: 'stats',
+    dsDataset: 'beats.stats',
     ...(options ?? {}),
   };
 

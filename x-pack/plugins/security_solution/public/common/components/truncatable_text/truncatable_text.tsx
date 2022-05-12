@@ -16,7 +16,7 @@ import { EuiToolTip } from '@elastic/eui';
  * Note: Requires a parent container with a defined width or max-width.
  */
 
-const EllipsisText = styled.span`
+export const EllipsisText = styled.span`
   &,
   & * {
     display: inline-block;

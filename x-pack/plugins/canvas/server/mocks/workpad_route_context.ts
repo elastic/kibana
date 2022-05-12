@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { AwaitedProperties } from '@kbn/utility-types';
 import { CanvasRouteHandlerContext } from '../workpad_route_context';
 
-export interface MockWorkpadRouteContext extends CanvasRouteHandlerContext {
+export interface MockWorkpadRouteContext extends AwaitedProperties<CanvasRouteHandlerContext> {
   canvas: {
     workpad: {
       create: jest.Mock;
       get: jest.Mock;
+      import: jest.Mock;
       update: jest.Mock;
       resolve: jest.Mock;
     };
@@ -23,6 +25,7 @@ export const workpadRouteContextMock = {
     workpad: {
       create: jest.fn(),
       get: jest.fn(),
+      import: jest.fn(),
       update: jest.fn(),
       resolve: jest.fn(),
     },

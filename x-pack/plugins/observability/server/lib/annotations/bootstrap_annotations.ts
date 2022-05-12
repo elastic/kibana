@@ -10,9 +10,8 @@ import {
   PluginInitializerContext,
   KibanaRequest,
   RequestHandlerContext,
-} from 'kibana/server';
-import { LicensingApiRequestHandlerContext } from '../../../../licensing/server';
-import { PromiseReturnType } from '../../../typings/common';
+} from '@kbn/core/server';
+import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import { createAnnotationsClient } from './create_annotations_client';
 import { registerAnnotationAPIs } from './register_annotation_apis';
 
@@ -22,12 +21,12 @@ interface Params {
   context: PluginInitializerContext;
 }
 
-export type ScopedAnnotationsClientFactory = PromiseReturnType<
-  typeof bootstrapAnnotations
+export type ScopedAnnotationsClientFactory = Awaited<
+  ReturnType<typeof bootstrapAnnotations>
 >['getScopedAnnotationsClient'];
 
-export type ScopedAnnotationsClient = ReturnType<ScopedAnnotationsClientFactory>;
-export type AnnotationsAPI = PromiseReturnType<typeof bootstrapAnnotations>;
+export type ScopedAnnotationsClient = Awaited<ReturnType<ScopedAnnotationsClientFactory>>;
+export type AnnotationsAPI = Awaited<ReturnType<typeof bootstrapAnnotations>>;
 
 export async function bootstrapAnnotations({ index, core, context }: Params) {
   const logger = context.logger.get('annotations');
@@ -39,15 +38,19 @@ export async function bootstrapAnnotations({ index, core, context }: Params) {
   });
 
   return {
-    getScopedAnnotationsClient: (
-      requestContext: RequestHandlerContext & { licensing: LicensingApiRequestHandlerContext },
+    getScopedAnnotationsClient: async (
+      requestContext: RequestHandlerContext & {
+        licensing: Promise<LicensingApiRequestHandlerContext>;
+      },
       request: KibanaRequest
     ) => {
+      const esClient = (await requestContext.core).elasticsearch.client;
+      const { license } = await requestContext.licensing;
       return createAnnotationsClient({
         index,
-        esClient: requestContext.core.elasticsearch.client.asCurrentUser,
+        esClient: esClient.asCurrentUser,
         logger,
-        license: requestContext.licensing?.license,
+        license,
       });
     },
   };

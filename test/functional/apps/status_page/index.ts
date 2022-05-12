@@ -14,8 +14,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common']);
 
   describe('status page', function () {
-    this.tags('ciGroup1');
-
     beforeEach(async () => {
       await PageObjects.common.navigateToApp('status_page');
     });
@@ -38,6 +36,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should display the server metrics', async () => {
       const metrics = await testSubjects.findAll('serverMetric');
       expect(metrics).to.have.length(6);
+    });
+
+    it('should display the server metrics meta', async () => {
+      const metricsMetas = await testSubjects.findAll('serverMetricMeta');
+      expect(metricsMetas).to.have.length(3);
     });
 
     it('should display the server status', async () => {

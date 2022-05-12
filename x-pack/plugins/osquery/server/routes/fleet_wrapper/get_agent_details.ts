@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { IRouter } from '@kbn/core/server';
 import { PLUGIN_ID } from '../../../common';
-import { IRouter } from '../../../../../../src/core/server';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 export const getAgentDetailsRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
@@ -20,15 +20,13 @@ export const getAgentDetailsRoute = (router: IRouter, osqueryContext: OsqueryApp
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     async (context, request, response) => {
-      const esClient = context.core.elasticsearch.client.asInternalUser;
-
       let agent;
 
       try {
         agent = await osqueryContext.service
           .getAgentService()
-          // @ts-expect-error update types
-          ?.getAgent(esClient, request.params.id);
+          ?.asInternalUser // @ts-expect-error update types
+          ?.getAgent(request.params.id);
       } catch (err) {
         return response.notFound();
       }

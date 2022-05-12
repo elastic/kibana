@@ -44,7 +44,8 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const { username, password } = getService('config').get('servers.kibana');
 
-  describe('Audit Log', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/119267
+  describe.skip('Audit Log', function () {
     const logFilePath = Path.resolve(__dirname, '../../fixtures/audit/audit.log');
     const logFile = new FileWrapper(logFilePath);
 

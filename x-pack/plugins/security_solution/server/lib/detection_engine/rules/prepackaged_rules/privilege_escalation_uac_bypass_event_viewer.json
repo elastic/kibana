@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Bypass UAC via Event Viewer",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  process.parent.name : \"eventvwr.exe\" and\n  not process.executable : \n            (\"?:\\\\Windows\\\\SysWOW64\\\\mmc.exe\", \n             \"?:\\\\Windows\\\\System32\\\\mmc.exe\",\n             \"?:\\\\Windows\\\\SysWOW64\\\\WerFault.exe\",\n             \"?:\\\\Windows\\\\System32\\\\WerFault.exe\")\n",
   "risk_score": 73,
   "rule_id": "31b4c719-f2b4-41f6-a9bd-fce93c2eaf62",
@@ -49,5 +50,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 9
+  "version": 10
 }

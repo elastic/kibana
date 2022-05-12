@@ -11,7 +11,7 @@ import type {
   PluginConfigDescriptor,
   PluginInitializer,
   PluginInitializerContext,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
 import { ConfigSchema } from './config';
 import { InteractiveSetupPlugin } from './plugin';

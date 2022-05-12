@@ -11,8 +11,8 @@ import { FilterManager } from '../filter_manager';
 
 import {
   Filter,
-  IndexPatternFieldBase,
-  IndexPatternBase,
+  DataViewFieldBase,
+  DataViewBase,
   isExistsFilter,
   buildExistsFilter,
   isPhraseFilter,
@@ -25,7 +25,7 @@ const INDEX_NAME = 'my-index';
 const EXISTS_FIELD_NAME = '_exists_';
 const FIELD = {
   name: 'my-field',
-} as IndexPatternFieldBase;
+} as DataViewFieldBase;
 const PHRASE_VALUE = 'my-value';
 
 describe('Generate filters', () => {
@@ -70,7 +70,7 @@ describe('Generate filters', () => {
   });
 
   it('should update and re-enable EXISTING exists filter', () => {
-    const filter = buildExistsFilter(FIELD, { id: INDEX_NAME } as IndexPatternBase);
+    const filter = buildExistsFilter(FIELD, { id: INDEX_NAME } as DataViewBase);
     filter.meta.disabled = true;
     filtersArray.push(filter);
 
@@ -113,7 +113,7 @@ describe('Generate filters', () => {
       {
         name: 'my-field',
         type: 'ip_range',
-      } as IndexPatternFieldBase,
+      } as DataViewFieldBase,
       {
         gt: '192.168.0.0',
         lte: '192.168.255.255',
@@ -140,7 +140,7 @@ describe('Generate filters', () => {
       {
         name: 'my-field',
         type: 'number_range',
-      } as IndexPatternFieldBase,
+      } as DataViewFieldBase,
       10000,
       '+',
       INDEX_NAME

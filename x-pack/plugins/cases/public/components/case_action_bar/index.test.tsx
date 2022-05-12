@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 import { render } from '@testing-library/react';
 
 import { basicCase } from '../../containers/mock';
-import { CaseActionBar } from '.';
+import { CaseActionBar, CaseActionBarProps } from '.';
 import { TestProviders } from '../../common/mock';
 
 describe('CaseActionBar', () => {
@@ -28,6 +28,7 @@ describe('CaseActionBar', () => {
     onUpdateField,
     currentExternalIncident: null,
     userCanCrud: true,
+    metricsFeatures: [],
   };
 
   beforeEach(() => {
@@ -118,7 +119,7 @@ describe('CaseActionBar', () => {
 
   it('should not show the sync alerts toggle when alerting is disabled', () => {
     const { queryByText } = render(
-      <TestProviders features={{ alerts: { sync: false } }}>
+      <TestProviders features={{ alerts: { sync: false, enabled: true }, metrics: [] }}>
         <CaseActionBar {...defaultProps} />
       </TestProviders>
     );
@@ -134,5 +135,26 @@ describe('CaseActionBar', () => {
     );
 
     expect(queryByText('Sync alerts')).toBeInTheDocument();
+  });
+
+  it('should not show the Case open text when the lifespan feature is enabled', () => {
+    const props: CaseActionBarProps = { ...defaultProps };
+    const { queryByText } = render(
+      <TestProviders features={{ metrics: ['lifespan'] }}>
+        <CaseActionBar {...props} />
+      </TestProviders>
+    );
+
+    expect(queryByText('Case opened')).not.toBeInTheDocument();
+  });
+
+  it('should show the Case open text when the lifespan feature is disabled', () => {
+    const { getByText } = render(
+      <TestProviders>
+        <CaseActionBar {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(getByText('Case opened')).toBeInTheDocument();
   });
 });

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { LicenseType } from '@kbn/licensing-plugin/public';
+import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
 import {
   ActionFactoryDefinition,
   BaseActionConfig,
   BaseActionFactoryContext,
   SerializedEvent,
 } from '../dynamic_actions';
-import { LicenseType } from '../../../licensing/public';
-import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
-import { PersistableStateDefinition } from '../../../../../src/plugins/kibana_utils/common';
 
 /**
  * This is a convenience interface to register a drilldown. Drilldown has
@@ -70,7 +70,7 @@ export interface DrilldownDefinition<
   createConfig: ActionFactoryDefinition<Config, ExecutionContext, FactoryContext>['createConfig'];
 
   /**
-   * `UiComponent` that collections config for this drilldown. You can create
+   * `UiComponent` that collects config for this drilldown. You can create
    * a React component and transform it `UiComponent` using `uiToReactComponent`
    * helper from `kibana_utils` plugin.
    *
@@ -94,6 +94,12 @@ export interface DrilldownDefinition<
    * A validator function for the config object. Should always return a boolean.
    */
   isConfigValid: ActionFactoryDefinition<Config, ExecutionContext, FactoryContext>['isConfigValid'];
+
+  /**
+   * Compatibility check during drilldown creation.
+   * Could be used to filter out a drilldown if it's not compatible with the current context.
+   */
+  isConfigurable?(context: FactoryContext): boolean;
 
   /**
    * Name of EUI icon to display when showing this drilldown to user.

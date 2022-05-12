@@ -15,11 +15,13 @@ export interface LicensingPluginSetup {
   /**
    * Steam of licensing information {@link ILicense}.
    * @deprecated in favour of the counterpart provided from start contract
+   * @removeBy 8.8.0
    */
   license$: Observable<ILicense>;
   /**
    * Triggers licensing information re-fetch.
    * @deprecated in favour of the counterpart provided from start contract
+   * @removeBy 8.8.0
    */
   refresh(): Promise<ILicense>;
   /**

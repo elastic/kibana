@@ -8,8 +8,7 @@
 import expect from '@kbn/expect';
 import url from 'url';
 import moment from 'moment';
-import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
-import { PromiseReturnType } from '../../../../plugins/observability/typings/common';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 
@@ -90,7 +89,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'Latency with a basic license when data is loaded',
     { config: 'basic', archives: [archiveName] },
     () => {
-      let response: PromiseReturnType<typeof supertest.get>;
+      let response: Awaited<ReturnType<typeof supertest.get>>;
 
       describe('average latency type', () => {
         before(async () => {
@@ -182,8 +181,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 transactionType: 'request',
                 start: moment(end).subtract(15, 'minutes').toISOString(),
                 end,
-                comparisonStart: start,
-                comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+                offset: '15m',
                 environment: 'ENVIRONMENT_ALL',
                 kuery: '',
               },
@@ -249,7 +247,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'Transaction latency with a trial license when data is loaded',
     { config: 'trial', archives: [archiveName] },
     () => {
-      let response: PromiseReturnType<typeof supertest.get>;
+      let response: Awaited<ReturnType<typeof supertest.get>>;
 
       const transactionType = 'request';
 

@@ -12,7 +12,6 @@
   const buildFunctionNode = nodeTypes.function.buildNodeWithArgumentNodes;
   const buildLiteralNode = nodeTypes.literal.buildNode;
   const buildWildcardNode = nodeTypes.wildcard.buildNode;
-  const buildNamedArgNode = nodeTypes.namedArg.buildNode;
   const { wildcardSymbol } = nodeTypes.wildcard;
 }
 
@@ -100,8 +99,7 @@ FieldRangeExpression
         suggestionTypes: ['conjunction']
       };
     }
-    const range = buildNamedArgNode(operator, value);
-    return buildFunctionNode('range', [field, range]);
+    return buildFunctionNode('range', [field, operator, value]);
   }
 
 FieldValueExpression

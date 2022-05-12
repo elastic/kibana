@@ -6,9 +6,8 @@
  */
 
 import type { EuiDataGridSorting } from '@elastic/eui';
-import type { Datatable, DatatableColumn } from 'src/plugins/expressions';
-import type { LensFilterEvent } from '../../types';
-import type { LensMultiTable } from '../../../common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin';
+import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import type { LensResizeAction, LensSortAction, LensToggleAction } from './types';
 import type { ColumnConfig, LensGridDirection } from '../../../common/expressions';
 import { getOriginalId } from '../../../common/expressions';
@@ -72,14 +71,10 @@ export const createGridHideHandler =
 export const createGridFilterHandler =
   (
     tableRef: React.MutableRefObject<Datatable>,
-    onClickValue: (data: LensFilterEvent['data']) => void
+    onClickValue: (data: ClickTriggerEvent['data']) => void
   ) =>
   (field: string, value: unknown, colIndex: number, rowIndex: number, negate: boolean = false) => {
-    const col = tableRef.current.columns[colIndex];
-    const isDate = col.meta?.type === 'date';
-    const timeFieldName = negate && isDate ? undefined : col?.meta?.field;
-
-    const data: LensFilterEvent['data'] = {
+    const data: ClickTriggerEvent['data'] = {
       negate,
       data: [
         {
@@ -89,7 +84,6 @@ export const createGridFilterHandler =
           table: tableRef.current,
         },
       ],
-      timeFieldName,
     };
 
     onClickValue(data);
@@ -97,22 +91,17 @@ export const createGridFilterHandler =
 
 export const createTransposeColumnFilterHandler =
   (
-    onClickValue: (data: LensFilterEvent['data']) => void,
-    untransposedDataRef: React.MutableRefObject<LensMultiTable | undefined>
+    onClickValue: (data: ClickTriggerEvent['data']) => void,
+    untransposedDataRef: React.MutableRefObject<Datatable | undefined>
   ) =>
   (
     bucketValues: Array<{ originalBucketColumn: DatatableColumn; value: unknown }>,
     negate: boolean = false
   ) => {
     if (!untransposedDataRef.current) return;
-    const originalTable = Object.values(untransposedDataRef.current.tables)[0];
-    const timeField = bucketValues.find(
-      ({ originalBucketColumn }) => originalBucketColumn.meta.type === 'date'
-    )?.originalBucketColumn;
-    const isDate = Boolean(timeField);
-    const timeFieldName = negate && isDate ? undefined : timeField?.meta?.field;
+    const originalTable = untransposedDataRef.current;
 
-    const data: LensFilterEvent['data'] = {
+    const data: ClickTriggerEvent['data'] = {
       negate,
       data: bucketValues.map(({ originalBucketColumn, value }) => {
         const columnIndex = originalTable.columns.findIndex(
@@ -126,7 +115,6 @@ export const createTransposeColumnFilterHandler =
           table: originalTable,
         };
       }),
-      timeFieldName,
     };
 
     onClickValue(data);

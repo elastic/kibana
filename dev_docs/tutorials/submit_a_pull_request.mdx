@@ -23,7 +23,7 @@ After cloning your fork and navigating to the directory containing your fork:
 
 ```bash
 # Make sure you currently have the branch checked out off of which you'd like to work
-git checkout master
+git checkout main
 
 # Create a new branch
 git checkout -b fix-typos-in-readme
@@ -76,7 +76,7 @@ See [Pull request review guidelines](https://www.elastic.co/guide/en/kibana/mast
 
 ## Updating your PR with upstream
 
-If your pull request hasn't been updated with the latest code from the upstream/target branch, e.g. `master`, in the last 48 hours, it won't be able to merge until it is updated. This is to help prevent problems that could occur by merging stale code into upstream, e.g. something new was recently merged that is incompatible with something in your pull request.
+If your pull request hasn't been updated with the latest code from the upstream/target branch, e.g. `main`, in the last 48 hours, it won't be able to merge until it is updated. This is to help prevent problems that could occur by merging stale code into upstream, e.g. something new was recently merged that is incompatible with something in your pull request.
 
 As an alternative to using `git` to manually update your branch, you can leave a comment on your pull request with the text `@elasticmachine merge upstream`. This will automatically update your branch and kick off CI for it.
 

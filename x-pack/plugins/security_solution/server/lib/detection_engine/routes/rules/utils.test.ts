@@ -7,99 +7,112 @@
 
 import { Readable } from 'stream';
 import { createPromiseFromStreams } from '@kbn/utils';
+import { Action, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import {
-  transformAlertToRule,
   getIdError,
   transformFindAlerts,
   transform,
-  transformTags,
   getIdBulkError,
   transformAlertsToRules,
   getDuplicates,
   getTupleDuplicateErrorsAndUniqueRules,
   getInvalidConnectors,
+  swapActionIds,
+  migrateLegacyActionsIds,
 } from './utils';
-import { getAlertMock } from '../__mocks__/request_responses';
-import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
+import { getRuleMock } from '../__mocks__/request_responses';
 import { PartialFilter } from '../../types';
-import { BulkError } from '../utils';
+import { BulkError, createBulkErrorObject } from '../utils';
 import { getOutputRuleAlertForRest } from '../__mocks__/utils';
-import { PartialAlert } from '../../../../../../alerting/server';
-import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
+import { PartialRule } from '@kbn/alerting-plugin/server';
+import { createRulesAndExceptionsStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { RuleAlertType } from '../../rules/types';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
-import { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request';
 import {
   getMlRuleParams,
   getQueryRuleParams,
   getThreatRuleParams,
 } from '../../schemas/rule_schemas.mock';
+import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 import { requestContextMock } from '../__mocks__';
 
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRuleAlertAction } from '../../rule_actions/legacy_types';
+import { RuleExceptionsPromiseFromStreams } from './utils/import_rules_utils';
+import { partition } from 'lodash/fp';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('utils - %s', (_, isRuleRegistryEnabled) => {
+const createMockImportRule = async (rule: ReturnType<typeof getCreateRulesSchemaMock>) => {
+  const ndJsonStream = new Readable({
+    read() {
+      this.push(`${JSON.stringify(rule)}\n`);
+      this.push(null);
+    },
+  });
+  const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
+    ndJsonStream,
+    ...createRulesAndExceptionsStreamFromNdJson(1000),
+  ]);
+  return rules;
+};
+
+describe('utils', () => {
   const { clients } = requestContextMock.createTools();
 
-  describe('transformAlertToRule', () => {
+  describe('internalRuleToAPIResponse', () => {
     test('should work with a full data set', () => {
-      const fullRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
-      const rule = transformAlertToRule(fullRule);
+      const fullRule = getRuleMock(getQueryRuleParams());
+      const rule = internalRuleToAPIResponse(fullRule);
       expect(rule).toEqual(getOutputRuleAlertForRest());
     });
 
     test('should omit note if note is undefined', () => {
-      const fullRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+      const fullRule = getRuleMock(getQueryRuleParams());
       fullRule.params.note = undefined;
-      const rule = transformAlertToRule(fullRule);
+      const rule = internalRuleToAPIResponse(fullRule);
       const { note, ...expectedWithoutNote } = getOutputRuleAlertForRest();
       expect(rule).toEqual(expectedWithoutNote);
     });
 
     test('should return enabled is equal to false', () => {
-      const fullRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+      const fullRule = getRuleMock(getQueryRuleParams());
       fullRule.enabled = false;
-      const ruleWithEnabledFalse = transformAlertToRule(fullRule);
+      const ruleWithEnabledFalse = internalRuleToAPIResponse(fullRule);
       const expected = getOutputRuleAlertForRest();
       expected.enabled = false;
       expect(ruleWithEnabledFalse).toEqual(expected);
     });
 
     test('should return immutable is equal to false', () => {
-      const fullRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+      const fullRule = getRuleMock(getQueryRuleParams());
       fullRule.params.immutable = false;
-      const ruleWithEnabledFalse = transformAlertToRule(fullRule);
+      const ruleWithEnabledFalse = internalRuleToAPIResponse(fullRule);
       const expected = getOutputRuleAlertForRest();
       expect(ruleWithEnabledFalse).toEqual(expected);
     });
 
-    test('should work with tags but filter out any internal tags', () => {
-      const fullRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
-      fullRule.tags = ['tag 1', 'tag 2', `${INTERNAL_IDENTIFIER}_some_other_value`];
-      const rule = transformAlertToRule(fullRule);
+    test('should work with tags', () => {
+      const fullRule = getRuleMock(getQueryRuleParams());
+      fullRule.tags = ['tag 1', 'tag 2'];
+      const rule = internalRuleToAPIResponse(fullRule);
       const expected = getOutputRuleAlertForRest();
       expected.tags = ['tag 1', 'tag 2'];
       expect(rule).toEqual(expected);
     });
 
     test('transforms ML Rule fields', () => {
-      const mlRule = getAlertMock(isRuleRegistryEnabled, getMlRuleParams());
+      const mlRule = getRuleMock(getMlRuleParams());
       mlRule.params.anomalyThreshold = 55;
       mlRule.params.machineLearningJobId = ['some_job_id'];
       mlRule.params.type = 'machine_learning';
 
-      const rule = transformAlertToRule(mlRule);
+      const rule = internalRuleToAPIResponse(mlRule);
       expect(rule).toEqual(
         expect.objectContaining({
           anomaly_threshold: 55,
@@ -110,7 +123,7 @@ describe.each([
     });
 
     test('transforms threat_matching fields', () => {
-      const threatRule = getAlertMock(isRuleRegistryEnabled, getThreatRuleParams());
+      const threatRule = getRuleMock(getThreatRuleParams());
       const threatFilters: PartialFilter[] = [
         {
           query: {
@@ -147,7 +160,7 @@ describe.each([
       threatRule.params.threatMapping = threatMapping;
       threatRule.params.threatQuery = '*:*';
 
-      const rule = transformAlertToRule(threatRule);
+      const rule = internalRuleToAPIResponse(threatRule);
       expect(rule).toEqual(
         expect.objectContaining({
           threat_index: ['index-123'],
@@ -163,9 +176,9 @@ describe.each([
     test('does not leak a lists structure in the transform which would cause validation issues', () => {
       const result: RuleAlertType & { lists: [] } = {
         lists: [],
-        ...getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()),
+        ...getRuleMock(getQueryRuleParams()),
       };
-      const rule = transformAlertToRule(result);
+      const rule = internalRuleToAPIResponse(result);
       expect(rule).toEqual(
         expect.not.objectContaining({
           lists: [],
@@ -178,9 +191,9 @@ describe.each([
     test('does not leak an exceptions_list structure in the transform which would cause validation issues', () => {
       const result: RuleAlertType & { exceptions_list: [] } = {
         exceptions_list: [],
-        ...getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()),
+        ...getRuleMock(getQueryRuleParams()),
       };
-      const rule = transformAlertToRule(result);
+      const rule = internalRuleToAPIResponse(result);
       expect(rule).toEqual(
         expect.not.objectContaining({
           exceptions_list: [],
@@ -275,7 +288,7 @@ describe.each([
           page: 1,
           perPage: 0,
           total: 0,
-          data: [getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())],
+          data: [getRuleMock(getQueryRuleParams())],
         },
         {},
         {}
@@ -295,7 +308,7 @@ describe.each([
           page: 1,
           perPage: 0,
           total: 0,
-          data: [getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())],
+          data: [getRuleMock(getQueryRuleParams())],
         },
         {},
         {
@@ -322,7 +335,7 @@ describe.each([
       ];
 
       const legacyRuleActions: Record<string, LegacyRulesActionsSavedObject | undefined> = {
-        [getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()).id]: {
+        [getRuleMock(getQueryRuleParams()).id]: {
           id: '123',
           actions,
           alertThrottle: '1h',
@@ -334,7 +347,7 @@ describe.each([
           page: 1,
           perPage: 0,
           total: 0,
-          data: [getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())],
+          data: [getRuleMock(getQueryRuleParams())],
         },
         {},
         legacyRuleActions
@@ -355,36 +368,15 @@ describe.each([
 
   describe('transform', () => {
     test('outputs 200 if the data is of type siem alert', () => {
-      const output = transform(
-        getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()),
-        undefined,
-        isRuleRegistryEnabled
-      );
+      const output = transform(getRuleMock(getQueryRuleParams()), undefined);
       const expected = getOutputRuleAlertForRest();
       expect(output).toEqual(expected);
     });
 
     test('returns 500 if the data is not of type siem alert', () => {
-      const unsafeCast = { data: [{ random: 1 }] } as unknown as PartialAlert;
-      const output = transform(unsafeCast, undefined, isRuleRegistryEnabled);
+      const unsafeCast = { data: [{ random: 1 }] } as unknown as PartialRule;
+      const output = transform(unsafeCast, undefined);
       expect(output).toBeNull();
-    });
-  });
-
-  describe('transformTags', () => {
-    test('it returns tags that have no internal structures', () => {
-      expect(transformTags(['tag 1', 'tag 2'])).toEqual(['tag 1', 'tag 2']);
-    });
-
-    test('it returns empty tags given empty tags', () => {
-      expect(transformTags([])).toEqual([]);
-    });
-
-    test('it returns tags with internal tags stripped out', () => {
-      expect(transformTags(['tag 1', `${INTERNAL_IDENTIFIER}_some_value`, 'tag 2'])).toEqual([
-        'tag 1',
-        'tag 2',
-      ]);
     });
   });
 
@@ -478,15 +470,15 @@ describe.each([
     });
 
     test('given single alert will return the alert transformed', () => {
-      const result1 = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+      const result1 = getRuleMock(getQueryRuleParams());
       const transformed = transformAlertsToRules([result1], {});
       const expected = getOutputRuleAlertForRest();
       expect(transformed).toEqual([expected]);
     });
 
     test('given two alerts will return the two alerts transformed', () => {
-      const result1 = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
-      const result2 = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+      const result1 = getRuleMock(getQueryRuleParams());
+      const result2 = getRuleMock(getQueryRuleParams());
       result2.id = 'some other id';
       result2.params.ruleId = 'some other id';
 
@@ -543,12 +535,11 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...createRulesAndExceptionsStreamFromNdJson(1000),
       ]);
-      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, false);
+      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(rules, false);
       const isInstanceOfError = output[0] instanceof Error;
 
       expect(isInstanceOfError).toEqual(true);
@@ -565,12 +556,12 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...createRulesAndExceptionsStreamFromNdJson(1000),
       ]);
-      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, false);
+
+      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(rules, false);
 
       expect(output.length).toEqual(1);
       expect(errors).toEqual([
@@ -596,12 +587,12 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...createRulesAndExceptionsStreamFromNdJson(1000),
       ]);
-      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, false);
+
+      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(rules, false);
       const isInstanceOfError = output[0] instanceof Error;
 
       expect(isInstanceOfError).toEqual(true);
@@ -618,12 +609,12 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...createRulesAndExceptionsStreamFromNdJson(1000),
       ]);
-      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, true);
+
+      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(rules, true);
 
       expect(output.length).toEqual(1);
       expect(errors.length).toEqual(0);
@@ -639,12 +630,12 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...createRulesAndExceptionsStreamFromNdJson(1000),
       ]);
-      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, false);
+
+      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(rules, false);
       const isInstanceOfError = output[0] instanceof Error;
 
       expect(isInstanceOfError).toEqual(true);
@@ -652,6 +643,250 @@ describe.each([
     });
   });
 
+  describe('swapActionIds', () => {
+    const mockAction: Action = {
+      group: 'group string',
+      id: 'some-7.x-id',
+      action_type_id: '.slack',
+      params: {},
+    };
+    const soClient = clients.core.savedObjects.getClient();
+    beforeEach(() => {
+      soClient.find.mockReset();
+      soClient.find.mockClear();
+    });
+
+    test('returns error if Elasticsearch query fails', async () => {
+      soClient.find.mockRejectedValue(new Error('failed to query'));
+      const result = await swapActionIds(mockAction, soClient);
+      expect((result as Error).message).toEqual('failed to query');
+    });
+
+    test('returns original action if Elasticsearch query returns no hits', async () => {
+      soClient.find.mockImplementationOnce(async () => ({
+        total: 0,
+        per_page: 0,
+        page: 1,
+        saved_objects: [],
+      }));
+      const result = await swapActionIds(mockAction, soClient);
+      expect(result).toEqual(mockAction);
+    });
+
+    test('returns error if conflicting action connectors are found -> two hits found with same originId', async () => {
+      soClient.find.mockImplementationOnce(async () => ({
+        total: 0,
+        per_page: 0,
+        page: 1,
+        saved_objects: [
+          { score: 0, id: 'fake id 1', type: 'action', attributes: {}, references: [] },
+          { score: 0, id: 'fake id 2', type: 'action', attributes: {}, references: [] },
+        ],
+      }));
+      const result = await swapActionIds(mockAction, soClient);
+      expect(result instanceof Error).toBeTruthy();
+      expect((result as unknown as Error).message).toEqual(
+        'Found two action connectors with originId or _id: some-7.x-id The upload cannot be completed unless the _id or the originId of the action connector is changed. See https://www.elastic.co/guide/en/kibana/current/sharing-saved-objects.html for more details'
+      );
+    });
+
+    test('returns action with new migrated _id if a single hit is found when querying by action connector originId', async () => {
+      soClient.find.mockImplementationOnce(async () => ({
+        total: 0,
+        per_page: 0,
+        page: 1,
+        saved_objects: [
+          { score: 0, id: 'new-post-8.0-id', type: 'action', attributes: {}, references: [] },
+        ],
+      }));
+      const result = await swapActionIds(mockAction, soClient);
+      expect(result).toEqual({ ...mockAction, id: 'new-post-8.0-id' });
+    });
+  });
+
+  describe('migrateLegacyActionsIds', () => {
+    const mockAction: Action = {
+      group: 'group string',
+      id: 'some-7.x-id',
+      action_type_id: '.slack',
+      params: {},
+    };
+    const soClient = clients.core.savedObjects.getClient();
+    beforeEach(() => {
+      soClient.find.mockReset();
+      soClient.find.mockClear();
+    });
+    test('returns import rules schemas + migrated action', async () => {
+      const rule: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        actions: [mockAction],
+      };
+      soClient.find.mockImplementationOnce(async () => ({
+        total: 0,
+        per_page: 0,
+        page: 1,
+        saved_objects: [
+          { score: 0, id: 'new-post-8.0-id', type: 'action', attributes: {}, references: [] },
+        ],
+      }));
+
+      const res = await migrateLegacyActionsIds(
+        // @ts-expect-error
+        [rule],
+        soClient
+      );
+      expect(res).toEqual([{ ...rule, actions: [{ ...mockAction, id: 'new-post-8.0-id' }] }]);
+    });
+
+    test('returns import rules schemas + multiple migrated action', async () => {
+      const rule: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        actions: [mockAction, { ...mockAction, id: 'different-id' }],
+      };
+      soClient.find.mockImplementation(async () => ({
+        total: 0,
+        per_page: 0,
+        page: 1,
+        saved_objects: [
+          { score: 0, id: 'new-post-8.0-id', type: 'action', attributes: {}, references: [] },
+        ],
+      }));
+
+      const res = await migrateLegacyActionsIds(
+        // @ts-expect-error
+        [rule],
+        soClient
+      );
+      expect(res).toEqual([
+        {
+          ...rule,
+          actions: [
+            { ...mockAction, id: 'new-post-8.0-id' },
+            { ...mockAction, id: 'new-post-8.0-id' },
+          ],
+        },
+      ]);
+    });
+
+    test('returns import rules schemas + one migrated action + one error', async () => {
+      const rule: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        actions: [mockAction, { ...mockAction, id: 'different-id' }],
+      };
+      const rules = await createMockImportRule(rule);
+      soClient.find.mockImplementationOnce(async () => ({
+        total: 0,
+        per_page: 0,
+        page: 1,
+        saved_objects: [
+          { score: 0, id: 'new-post-8.0-id', type: 'action', attributes: {}, references: [] },
+        ],
+      }));
+
+      soClient.find.mockRejectedValueOnce(new Error('failed to query'));
+
+      const res = await migrateLegacyActionsIds(rules, soClient);
+      expect(soClient.find.mock.calls).toHaveLength(2);
+      const [error, ruleRes] = partition<PromiseFromStreams, Error>(
+        (item): item is Error => item instanceof Error
+      )(res);
+
+      expect(ruleRes[0]).toEqual({
+        ...rules[0],
+        actions: [{ ...mockAction, id: 'new-post-8.0-id' }],
+      });
+      expect(error[0]).toEqual(
+        new Error(
+          JSON.stringify(
+            createBulkErrorObject({
+              ruleId: rule.rule_id,
+              statusCode: 409,
+              message: `${[new Error('failed to query')].map((e: Error) => e.message).join(',')}`,
+            })
+          )
+        )
+      );
+    });
+
+    test('returns import rules schemas + migrated action resulting in error', async () => {
+      const rule: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        // only passing in one action here
+        actions: [mockAction],
+      };
+      soClient.find.mockImplementationOnce(async () => ({
+        total: 0,
+        per_page: 0,
+        page: 1,
+        saved_objects: [
+          // two actions are being returned, thus resulting in a conflict
+          { score: 0, id: 'new-post-8.0-id', type: 'action', attributes: {}, references: [] },
+          { score: 0, id: 'new-post-8.0-id-2', type: 'action', attributes: {}, references: [] },
+        ],
+      }));
+
+      const res = await migrateLegacyActionsIds(
+        // @ts-expect-error
+        [rule],
+        soClient
+      );
+      expect(res[1] instanceof Error).toBeTruthy();
+      expect((res[1] as unknown as Error).message).toEqual(
+        JSON.stringify({
+          rule_id: 'rule-1',
+          error: {
+            status_code: 409,
+            message:
+              // error message for when two or more action connectors are found for a single id
+              'Found two action connectors with originId or _id: some-7.x-id The upload cannot be completed unless the _id or the originId of the action connector is changed. See https://www.elastic.co/guide/en/kibana/current/sharing-saved-objects.html for more details',
+          },
+        })
+      );
+    });
+    test('returns import multiple rules schemas + migrated action, one success and one error', async () => {
+      const rule: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        actions: [mockAction],
+      };
+
+      soClient.find.mockImplementationOnce(async () => ({
+        total: 0,
+        per_page: 0,
+        page: 1,
+        saved_objects: [
+          { score: 0, id: 'new-post-8.0-id', type: 'action', attributes: {}, references: [] },
+        ],
+      }));
+      soClient.find.mockImplementationOnce(async () => ({
+        total: 0,
+        per_page: 0,
+        page: 1,
+        saved_objects: [
+          { score: 0, id: 'new-post-8.0-id', type: 'action', attributes: {}, references: [] },
+          { score: 0, id: 'new-post-8.0-id-2', type: 'action', attributes: {}, references: [] },
+        ],
+      }));
+
+      const res = await migrateLegacyActionsIds(
+        // @ts-expect-error
+        [rule, rule],
+        soClient
+      );
+      expect(res[0]).toEqual({ ...rule, actions: [{ ...mockAction, id: 'new-post-8.0-id' }] });
+      expect(res[1]).toEqual({ ...rule, actions: [] });
+      expect(res[2] instanceof Error).toBeTruthy();
+      expect((res[2] as unknown as Error).message).toEqual(
+        JSON.stringify({
+          rule_id: 'rule-1',
+          error: {
+            status_code: 409,
+            message:
+              'Found two action connectors with originId or _id: some-7.x-id The upload cannot be completed unless the _id or the originId of the action connector is changed. See https://www.elastic.co/guide/en/kibana/current/sharing-saved-objects.html for more details',
+          },
+        })
+      );
+    });
+  });
   describe('getInvalidConnectors', () => {
     beforeEach(() => {
       clients.actionsClient.getAll.mockReset();
@@ -667,13 +902,13 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...createRulesAndExceptionsStreamFromNdJson(1000),
       ]);
+
       clients.actionsClient.getAll.mockResolvedValue([]);
-      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
       const isInstanceOfError = output[0] instanceof Error;
 
       expect(isInstanceOfError).toEqual(true);
@@ -698,13 +933,12 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...createRulesAndExceptionsStreamFromNdJson(1000),
       ]);
       clients.actionsClient.getAll.mockResolvedValue([]);
-      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
       expect(output.length).toEqual(0);
       expect(errors).toEqual<BulkError[]>([
         {
@@ -735,10 +969,9 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...createRulesAndExceptionsStreamFromNdJson(1000),
       ]);
       clients.actionsClient.getAll.mockResolvedValue([
         {
@@ -747,9 +980,10 @@ describe.each([
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
       ]);
-      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
       expect(errors.length).toEqual(0);
       expect(output.length).toEqual(1);
       expect(output[0]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule));
@@ -779,10 +1013,9 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...createRulesAndExceptionsStreamFromNdJson(1000),
       ]);
       clients.actionsClient.getAll.mockResolvedValue([
         {
@@ -791,6 +1024,7 @@ describe.each([
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
         {
           id: '789',
@@ -798,9 +1032,10 @@ describe.each([
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
       ]);
-      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
       expect(errors.length).toEqual(0);
       expect(output.length).toEqual(1);
       expect(output[0]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule));
@@ -836,10 +1071,9 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...createRulesAndExceptionsStreamFromNdJson(1000),
       ]);
       clients.actionsClient.getAll.mockResolvedValue([
         {
@@ -848,6 +1082,7 @@ describe.each([
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
         {
           id: '789',
@@ -855,9 +1090,10 @@ describe.each([
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
       ]);
-      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
       expect(errors.length).toEqual(0);
       expect(output.length).toEqual(2);
       expect(output[0]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule1));
@@ -900,10 +1136,9 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...createRulesAndExceptionsStreamFromNdJson(1000),
       ]);
       clients.actionsClient.getAll.mockResolvedValue([
         {
@@ -912,6 +1147,7 @@ describe.each([
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
         {
           id: '789',
@@ -919,9 +1155,10 @@ describe.each([
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
       ]);
-      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
       expect(errors.length).toEqual(1);
       expect(output.length).toEqual(1);
       expect(output[0]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule1));
@@ -966,10 +1203,9 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...createRulesAndExceptionsStreamFromNdJson(1000),
       ]);
       clients.actionsClient.getAll.mockResolvedValue([
         {
@@ -978,6 +1214,7 @@ describe.each([
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
         {
           id: '789',
@@ -985,9 +1222,10 @@ describe.each([
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
       ]);
-      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
       expect(errors.length).toEqual(1);
       expect(output.length).toEqual(0);
       expect(errors).toEqual<BulkError[]>([
@@ -1073,10 +1311,9 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...createRulesAndExceptionsStreamFromNdJson(1000),
       ]);
       clients.actionsClient.getAll.mockResolvedValue([
         {
@@ -1085,6 +1322,7 @@ describe.each([
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
         {
           id: '789',
@@ -1092,9 +1330,10 @@ describe.each([
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
       ]);
-      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
       expect(errors.length).toEqual(2);
       expect(output.length).toEqual(1);
       expect(output[0]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule2));

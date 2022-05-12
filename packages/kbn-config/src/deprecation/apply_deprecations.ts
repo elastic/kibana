@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep, unset } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
 import type {
   AddConfigDeprecation,
   ChangedDeprecatedPaths,
   ConfigDeprecationWithContext,
 } from './types';
+import { unsetAndCleanEmptyParent } from './unset_and_clean_empty_parent';
 
 const noopAddDeprecationFactory: () => AddConfigDeprecation = () => () => undefined;
 
@@ -45,7 +46,7 @@ export const applyDeprecations = (
       if (commands.unset) {
         changedPaths.unset.push(...commands.unset.map((c) => c.path));
         commands.unset.forEach(function ({ path: commandPath }) {
-          unset(result, commandPath);
+          unsetAndCleanEmptyParent(result, commandPath);
         });
       }
     }

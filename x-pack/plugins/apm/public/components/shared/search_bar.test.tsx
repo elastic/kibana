@@ -9,16 +9,16 @@ import { getByTestId, fireEvent, getByText } from '@testing-library/react';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import React from 'react';
 import { Router } from 'react-router-dom';
-import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { MockApmPluginContextWrapper } from '../../context/apm_plugin/mock_apm_plugin_context';
 import { ApmServiceContextProvider } from '../../context/apm_service/apm_service_context';
 import { UrlParamsProvider } from '../../context/url_params_context/url_params_context';
 import type { ApmUrlParams } from '../../context/url_params_context/types';
 import * as useFetcherHook from '../../hooks/use_fetcher';
 import * as useServiceTransactionTypesHook from '../../context/apm_service/use_service_transaction_types_fetcher';
-import { renderWithTheme } from '../../utils/testHelpers';
-import { fromQuery } from './Links/url_helpers';
-import { CoreStart } from 'kibana/public';
+import { renderWithTheme } from '../../utils/test_helpers';
+import { fromQuery } from './links/url_helpers';
+import { CoreStart } from '@kbn/core/public';
 import { SearchBar } from './search_bar';
 
 function setup({

@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
@@ -29,6 +29,7 @@ describe('OpenTimelineModal', () => {
       euiBreakpoints: {
         s: '500px',
       },
+      paddingSizes: { m: '16px' },
     },
   });
   const title = 'All Timelines / Open Timelines';

@@ -48,12 +48,12 @@ interface Props {
   duration: string;
   label: string;
   errors: string[];
-  setAlertParams: (property: string, value: any) => void;
+  setRuleParams: (property: string, value: any) => void;
 }
 
 const parseRegex = /(\d+)([smhd]{1})/;
 export const AlertParamDuration: React.FC<Props> = (props: Props) => {
-  const { name, label, setAlertParams, errors } = props;
+  const { name, label, setRuleParams, errors } = props;
   const parsed = parseRegex.exec(props.duration);
   const defaultValue = parsed && parsed[1] ? parseInt(parsed[1], 10) : 1;
   const defaultUnit = parsed && parsed[2] ? parsed[2] : TIME_UNITS.MINUTE;
@@ -66,7 +66,7 @@ export const AlertParamDuration: React.FC<Props> = (props: Props) => {
   }));
 
   React.useEffect(() => {
-    setAlertParams(name, `${value}${unit}`);
+    setRuleParams(name, `${value}${unit}`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unit, value]);
 

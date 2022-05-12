@@ -9,6 +9,7 @@
 import { SavedObject, SavedObjectsClientContract } from '../../types';
 import { SavedObjectsImportFailure, SavedObjectsImportRetry } from '../types';
 import { SavedObjectsImportError } from '../errors';
+import type { ImportStateMap } from './types';
 
 const REF_TYPES_TO_VALIDATE = ['index-pattern', 'search'];
 
@@ -22,29 +23,44 @@ const getObjectsToSkip = (retries: SavedObjectsImportRetry[] = []) =>
     new Set<string>()
   );
 
-export async function getNonExistingReferenceAsKeys(
-  savedObjects: SavedObject[],
-  savedObjectsClient: SavedObjectsClientContract,
-  namespace?: string,
-  retries?: SavedObjectsImportRetry[]
-) {
+export interface ValidateReferencesParams {
+  objects: Array<SavedObject<{ title?: string }>>;
+  savedObjectsClient: SavedObjectsClientContract;
+  namespace: string | undefined;
+  importStateMap: ImportStateMap;
+  retries?: SavedObjectsImportRetry[];
+}
+
+async function getNonExistingReferenceAsKeys({
+  objects,
+  savedObjectsClient,
+  namespace,
+  importStateMap,
+  retries,
+}: ValidateReferencesParams) {
   const objectsToSkip = getObjectsToSkip(retries);
   const collector = new Map();
   // Collect all references within objects
-  for (const savedObject of savedObjects) {
-    if (objectsToSkip.has(`${savedObject.type}:${savedObject.id}`)) {
-      // skip objects with retries that have specified `ignoreMissingReferences`
+  for (const object of objects) {
+    if (objectsToSkip.has(`${object.type}:${object.id}`)) {
+      // skip objects with retries that have specified `ignoreMissingReferences`, or that share an origin with an existing object that has a different ID
       continue;
     }
-    const filteredReferences = (savedObject.references || []).filter(filterReferencesToValidate);
+    const filteredReferences = (object.references || []).filter(filterReferencesToValidate);
     for (const { type, id } of filteredReferences) {
+      const key = `${type}:${id}`;
+      const { isOnlyReference, destinationId } = importStateMap.get(key) ?? {};
+      if (isOnlyReference && destinationId) {
+        // We previously searched for this reference and found one with a matching origin, skip validating this
+        continue;
+      }
       collector.set(`${type}:${id}`, { type, id });
     }
   }
 
   // Remove objects that could be references
-  for (const savedObject of savedObjects) {
-    collector.delete(`${savedObject.type}:${savedObject.id}`);
+  for (const object of objects) {
+    collector.delete(`${object.type}:${object.id}`);
   }
   if (collector.size === 0) {
     return [];
@@ -73,23 +89,14 @@ export async function getNonExistingReferenceAsKeys(
   return [...collector.keys()];
 }
 
-export async function validateReferences(
-  savedObjects: Array<SavedObject<{ title?: string }>>,
-  savedObjectsClient: SavedObjectsClientContract,
-  namespace?: string,
-  retries?: SavedObjectsImportRetry[]
-) {
+export async function validateReferences(params: ValidateReferencesParams) {
+  const { objects, retries } = params;
   const objectsToSkip = getObjectsToSkip(retries);
   const errorMap: { [key: string]: SavedObjectsImportFailure } = {};
-  const nonExistingReferenceKeys = await getNonExistingReferenceAsKeys(
-    savedObjects,
-    savedObjectsClient,
-    namespace,
-    retries
-  );
+  const nonExistingReferenceKeys = await getNonExistingReferenceAsKeys(params);
 
   // Filter out objects with missing references, add to error object
-  savedObjects.forEach(({ type, id, references, attributes }) => {
+  objects.forEach(({ type, id, references, attributes }) => {
     if (objectsToSkip.has(`${type}:${id}`)) {
       // skip objects with retries that have specified `ignoreMissingReferences`
       return;
@@ -109,7 +116,6 @@ export async function validateReferences(
     errorMap[`${type}:${id}`] = {
       id,
       type,
-      title,
       meta: { title },
       error: { type: 'missing_references', references: missingReferences },
     };

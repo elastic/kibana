@@ -109,8 +109,9 @@ export default function (providerContext: FtrProviderContext) {
       expect(pipelineRes).to.have.property(FINAL_PIPELINE_ID);
       const res = await es.indices.getIndexTemplate({ name: 'logs-log.log' });
       expect(res.index_templates.length).to.be(FINAL_PIPELINE_VERSION);
+      expect(res.index_templates[0]?.index_template?.composed_of).to.contain('.fleet_globals-1');
       expect(res.index_templates[0]?.index_template?.composed_of).to.contain(
-        '.fleet_component_template-1'
+        '.fleet_agent_id_verification-1'
       );
     });
 
@@ -197,12 +198,17 @@ export default function (providerContext: FtrProviderContext) {
     for (const scenario of scenarios) {
       it(`Should write the correct event.agent_id_status for ${scenario.name}`, async () => {
         // Create an API key
-        const apiKeyRes = await es.security.createApiKey({
-          body: {
-            name: `test api key`,
-            ...(scenario.apiKey || {}),
+        const apiKeyRes = await es.security.createApiKey(
+          {
+            body: {
+              name: `test api key`,
+              ...(scenario.apiKey || {}),
+            },
           },
-        });
+          {
+            headers: { 'es-security-runas-user': 'elastic' }, // run as elastic suer
+          }
+        );
 
         const res = await indexUsingApiKey(
           {

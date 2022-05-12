@@ -464,6 +464,7 @@ export const EditMenu: FunctionComponent<Props> = ({
           deleteNodes();
           closePopover();
         },
+        'data-test-subj': 'canvasEditMenuDeleteButton',
       },
       {
         name: shortcutHelp.CLONE,

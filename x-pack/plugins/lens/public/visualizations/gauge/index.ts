@@ -5,36 +5,21 @@
  * 2.0.
  */
 
-import type { CoreSetup } from 'kibana/public';
-import type { ExpressionsSetup } from '../../../../../../src/plugins/expressions/public';
+import type { CoreSetup } from '@kbn/core/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { EditorFrameSetup } from '../../types';
-import type { ChartsPluginSetup } from '../../../../../../src/plugins/charts/public';
-import type { FormatFactory } from '../../../common';
-import { transparentizePalettes } from './utils';
+import { transparentizePalettes } from './palette_config';
 
 export interface GaugeVisualizationPluginSetupPlugins {
-  expressions: ExpressionsSetup;
-  formatFactory: FormatFactory;
   editorFrame: EditorFrameSetup;
   charts: ChartsPluginSetup;
 }
 
 export class GaugeVisualization {
-  setup(
-    core: CoreSetup,
-    { expressions, formatFactory, editorFrame, charts }: GaugeVisualizationPluginSetupPlugins
-  ) {
+  setup(core: CoreSetup, { editorFrame, charts }: GaugeVisualizationPluginSetupPlugins) {
     editorFrame.registerVisualization(async () => {
-      const { getGaugeVisualization, getGaugeRenderer } = await import('../../async_services');
+      const { getGaugeVisualization } = await import('../../async_services');
       const palettes = transparentizePalettes(await charts.palettes.getPalettes());
-
-      expressions.registerRenderer(
-        getGaugeRenderer({
-          formatFactory,
-          chartsThemeService: charts.theme,
-          paletteService: palettes,
-        })
-      );
       return getGaugeVisualization({ paletteService: palettes });
     });
   }

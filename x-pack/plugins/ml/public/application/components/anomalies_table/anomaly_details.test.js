@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl, mountWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import { AnomalyDetails } from './anomaly_details';
 
 const props = {

@@ -15,7 +15,7 @@ jest.mock('../../../../../../../shared_imports');
 describe('Data Frame Analytics: <CreateAnalyticsButton />', () => {
   test('Minimal initialization', () => {
     const wrapper = mount(
-      <CreateAnalyticsButton isDisabled={false} setIsSourceIndexModalVisible={jest.fn()} />
+      <CreateAnalyticsButton isDisabled={false} navigateToSourceSelection={jest.fn()} />
     );
 
     expect(wrapper.find('EuiButton').text()).toBe('Create job');

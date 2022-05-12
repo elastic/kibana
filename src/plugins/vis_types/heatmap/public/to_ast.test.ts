@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { Vis } from 'src/plugins/visualizations/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
 import { sampleAreaVis } from './sample_vis.test.mocks';
-import { buildExpression } from '../../../expressions/public';
+import { buildExpression } from '@kbn/expressions-plugin/public';
 
 import { toExpressionAst } from './to_ast';
 import { HeatmapVisParams } from './types';
 
-jest.mock('../../../expressions/public', () => ({
-  ...(jest.requireActual('../../../expressions/public') as any),
+jest.mock('@kbn/expressions-plugin/public', () => ({
+  ...(jest.requireActual('@kbn/expressions-plugin/public') as any),
   buildExpression: jest.fn().mockImplementation(() => ({
     toAst: () => ({
       type: 'expression',

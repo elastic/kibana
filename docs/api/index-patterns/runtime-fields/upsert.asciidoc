@@ -1,0 +1,63 @@
+[[index-patterns-runtime-field-api-upsert]]
+=== Upsert runtime field API
+++++
+<titleabbrev>Upsert runtime field</titleabbrev>
+++++
+
+deprecated::[8.0.0,Use <<data-views-runtime-field-api-upsert>> instead.]
+
+experimental[] Create or update an existing runtime field
+
+[[index-patterns-runtime-field-upsert-request]]
+==== Request
+
+`PUT <kibana host>:<port>/api/index_patterns/index_pattern/<index_pattern_id>/runtime_field`
+
+`PUT <kibana host>:<port>/s/<space_id>/api/index_patterns/index_pattern/<index_pattern_id>/runtime_field`
+
+[[index-patterns-runtime-field-upsert-params]]
+==== Path parameters
+
+`space_id`::
+(Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+`index_pattern_id`::
+(Required, string) The ID of the index pattern.
+
+[[index-patterns-runtime-field-upsert-body]]
+==== Request body
+
+`name`:: (Required, string) The name for a new runtime field or a name of an existing runtime field.
+
+`runtimeField`:: (Required, object) The runtime field definition object.
+
+
+[[index-patterns-runtime-field-upsert-example]]
+==== Examples
+
+Create or update an existing runtime field on an index pattern:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X PUT api/index_patterns/index_pattern/<index_pattern_id>/runtime_field
+{
+  "name": "runtimeFoo",
+  "runtimeField": {
+     "type": "long",
+     "script": {
+        "source": "emit(doc["foo"].value)"
+      }
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+The API returns created or updated runtime field object and updated index pattern object:
+
+[source,sh]
+--------------------------------------------------
+{
+    "index_pattern": {...},
+    "field": {...}
+}
+--------------------------------------------------

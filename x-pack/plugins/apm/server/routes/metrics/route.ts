@@ -9,7 +9,6 @@ import * as t from 'io-ts';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getMetricsChartDataByAgent } from './get_metrics_chart_data_by_agent';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 
 const metricsChartsRoute = createApmServerRoute({
@@ -31,7 +30,23 @@ const metricsChartsRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    charts: Array<{
+      title: string;
+      key: string;
+      yUnit: import('./../../../typings/timeseries').YUnit;
+      series: Array<{
+        title: string;
+        key: string;
+        type: import('./../../../typings/timeseries').ChartType;
+        color: string;
+        overallValue: number;
+        data: Array<{ x: number; y: number | null }>;
+      }>;
+    }>;
+  }> => {
     const { params } = resources;
     const setup = await setupRequest(resources);
     const { serviceName } = params.path;
@@ -53,5 +68,4 @@ const metricsChartsRoute = createApmServerRoute({
   },
 });
 
-export const metricsRouteRepository =
-  createApmServerRouteRepository().add(metricsChartsRoute);
+export const metricsRouteRepository = metricsChartsRoute;

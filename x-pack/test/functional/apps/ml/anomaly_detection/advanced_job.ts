@@ -220,7 +220,7 @@ export default function ({ getService }: FtrProviderContext) {
   const calendarId = `wizard-test-calendar_${Date.now()}`;
 
   describe('advanced job', function () {
-    this.tags(['mlqa']);
+    this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
@@ -232,6 +232,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.testResources.deleteIndexPatternByTitle('ft_ecommerce');
     });
 
     for (const testData of testDataList) {
@@ -432,7 +433,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep(
             'job creation displays the created job in the job list'
           );
-          await ml.jobTable.refreshJobList();
           await ml.jobTable.filterWithSearchString(testData.jobId, 1);
 
           await ml.testExecution.logTestStep(
@@ -648,7 +648,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep(
             'job cloning displays the created job in the job list'
           );
-          await ml.jobTable.refreshJobList();
           await ml.jobTable.filterWithSearchString(testData.jobIdClone, 1);
 
           await ml.testExecution.logTestStep(

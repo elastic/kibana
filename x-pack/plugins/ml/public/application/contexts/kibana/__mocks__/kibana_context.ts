@@ -5,8 +5,31 @@
  * 2.0.
  */
 
-import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { BehaviorSubject } from 'rxjs';
 
+export const chartsServiceMock = {
+  theme: {
+    useChartsTheme: jest.fn(() => {
+      return {
+        crosshair: {
+          line: {
+            stroke: 'black',
+            strokeWidth: 1,
+            dash: [4, 4],
+          },
+        },
+      };
+    }),
+  },
+  activeCursor: {
+    activeCursor$: new BehaviorSubject({
+      cursor: {
+        x: 10432423,
+      },
+    }),
+  },
+};
 export const kibanaContextMock = {
   services: {
     uiSettings: { get: jest.fn() },
@@ -21,6 +44,7 @@ export const kibanaContextMock = {
       urlGenerators: { getUrlGenerator: jest.fn() },
     },
     data: dataPluginMock.createStartContract(),
+    charts: chartsServiceMock,
   },
 };
 

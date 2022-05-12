@@ -8,81 +8,86 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { configArray } from '../../constants';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('validation', () => {
-    it('returns error when index_pattern object is not provided', async () => {
-      const response = await supertest.post('/api/index_patterns/index_pattern');
+    configArray.forEach((config) => {
+      describe(config.name, () => {
+        it('returns error when index_pattern object is not provided', async () => {
+          const response = await supertest.post(config.path);
 
-      expect(response.status).to.be(400);
-      expect(response.body.statusCode).to.be(400);
-      expect(response.body.message).to.be(
-        '[request body]: expected a plain object value, but found [null] instead.'
-      );
-    });
+          expect(response.status).to.be(400);
+          expect(response.body.statusCode).to.be(400);
+          expect(response.body.message).to.be(
+            '[request body]: expected a plain object value, but found [null] instead.'
+          );
+        });
 
-    it('returns error on empty index_pattern object', async () => {
-      const response = await supertest.post('/api/index_patterns/index_pattern').send({
-        index_pattern: {},
-      });
+        it('returns error on empty index_pattern object', async () => {
+          const response = await supertest.post(config.path).send({
+            [config.serviceKey]: {},
+          });
 
-      expect(response.status).to.be(400);
-      expect(response.body.statusCode).to.be(400);
-      expect(response.body.message).to.be(
-        '[request body.index_pattern.title]: expected value of type [string] but got [undefined]'
-      );
-    });
+          expect(response.status).to.be(400);
+          expect(response.body.statusCode).to.be(400);
+          expect(response.body.message).to.be(
+            `[request body.${config.serviceKey}.title]: expected value of type [string] but got [undefined]`
+          );
+        });
 
-    it('returns error when "override" parameter is not a boolean', async () => {
-      const response = await supertest.post('/api/index_patterns/index_pattern').send({
-        override: 123,
-        index_pattern: {
-          title: 'foo',
-        },
-      });
+        it('returns error when "override" parameter is not a boolean', async () => {
+          const response = await supertest.post(config.path).send({
+            override: 123,
+            [config.serviceKey]: {
+              title: 'foo',
+            },
+          });
 
-      expect(response.status).to.be(400);
-      expect(response.body.statusCode).to.be(400);
-      expect(response.body.message).to.be(
-        '[request body.override]: expected value of type [boolean] but got [number]'
-      );
-    });
+          expect(response.status).to.be(400);
+          expect(response.body.statusCode).to.be(400);
+          expect(response.body.message).to.be(
+            '[request body.override]: expected value of type [boolean] but got [number]'
+          );
+        });
 
-    it('returns error when "refresh_fields" parameter is not a boolean', async () => {
-      const response = await supertest.post('/api/index_patterns/index_pattern').send({
-        refresh_fields: 123,
-        index_pattern: {
-          title: 'foo',
-        },
-      });
+        it('returns error when "refresh_fields" parameter is not a boolean', async () => {
+          const response = await supertest.post(config.path).send({
+            refresh_fields: 123,
+            [config.serviceKey]: {
+              title: 'foo',
+            },
+          });
 
-      expect(response.status).to.be(400);
-      expect(response.body.statusCode).to.be(400);
-      expect(response.body.message).to.be(
-        '[request body.refresh_fields]: expected value of type [boolean] but got [number]'
-      );
-    });
+          expect(response.status).to.be(400);
+          expect(response.body.statusCode).to.be(400);
+          expect(response.body.message).to.be(
+            '[request body.refresh_fields]: expected value of type [boolean] but got [number]'
+          );
+        });
 
-    it('returns an error when unknown runtime field type', async () => {
-      const title = `basic_index*`;
-      const response = await supertest.post('/api/index_patterns/index_pattern').send({
-        override: true,
-        index_pattern: {
-          title,
-          runtimeFieldMap: {
-            runtimeFoo: {
-              type: 'wrong-type',
-              script: {
-                source: 'emit(doc["foo"].value)',
+        it('returns an error when unknown runtime field type', async () => {
+          const title = `basic_index*`;
+          const response = await supertest.post(config.path).send({
+            override: true,
+            [config.serviceKey]: {
+              title,
+              runtimeFieldMap: {
+                runtimeFoo: {
+                  type: 'wrong-type',
+                  script: {
+                    source: 'emit(doc["foo"].value)',
+                  },
+                },
               },
             },
-          },
-        },
-      });
+          });
 
-      expect(response.status).to.be(400);
+          expect(response.status).to.be(400);
+        });
+      });
     });
   });
 }

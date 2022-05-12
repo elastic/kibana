@@ -15,11 +15,44 @@ import { waitFor } from '@testing-library/react';
 import { mockIndexPattern, TestProviders } from '../../../common/mock';
 
 import { AlertsByCategory } from '.';
+import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
+import { useRouteSpy } from '../../../common/utils/route/use_route_spy';
 
 jest.mock('../../../common/components/link_to');
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/components/visualization_actions', () => ({
+  VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
+}));
+
 jest.mock('../../../common/containers/matrix_histogram', () => ({
   useMatrixHistogramCombined: jest.fn(),
+}));
+
+jest.mock('../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../common/lib/kibana');
+
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        ...original.useKibana().services,
+        cases: {
+          ui: {
+            getCasesContext: jest.fn().mockReturnValue(mockCasesContext),
+          },
+        },
+      },
+    }),
+  };
+});
+
+jest.mock('../../../common/utils/route/use_route_spy', () => ({
+  useRouteSpy: jest.fn().mockReturnValue([
+    {
+      detailName: 'mockHost',
+      pageName: 'hosts',
+      tabName: 'externalAlerts',
+    },
+  ]),
 }));
 
 const from = '2020-03-31T06:00:00.000Z';
@@ -137,6 +170,182 @@ describe('Alerts by category', () => {
     test('it renders the bar chart when data is available', async () => {
       await waitFor(() => {
         expect(wrapper.find(`.echChart`).exists()).toBe(true);
+      });
+    });
+
+    test('it shows visualization actions on host page', async () => {
+      await waitFor(() => {
+        expect(wrapper.find('[data-test-subj="mock-viz-actions"]').exists()).toBe(true);
+      });
+    });
+
+    test('it shows visualization actions on network page', async () => {
+      (useRouteSpy as jest.Mock).mockReturnValue([
+        {
+          detailName: undefined,
+          pageName: 'network',
+          tabName: 'external-alerts',
+        },
+      ]);
+
+      const testWrapper = mount(
+        <TestProviders>
+          <AlertsByCategory {...testProps} />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        testWrapper.update();
+      });
+      await waitFor(() => {
+        expect(testWrapper.find('[data-test-subj="mock-viz-actions"]').exists()).toBe(true);
+      });
+    });
+
+    test('it does not shows visualization actions on other pages', async () => {
+      (useRouteSpy as jest.Mock).mockReturnValue([
+        {
+          detailName: undefined,
+          pageName: 'overview',
+          tabName: undefined,
+        },
+      ]);
+      const testWrapper = mount(
+        <TestProviders>
+          <AlertsByCategory {...testProps} />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        testWrapper.update();
+      });
+
+      await waitFor(() => {
+        expect(testWrapper.find('[data-test-subj="mock-viz-actions"]').exists()).toBe(false);
+      });
+    });
+  });
+
+  describe('Host page', () => {
+    beforeAll(async () => {
+      (useRouteSpy as jest.Mock).mockReturnValue([
+        {
+          detailName: 'mockHost',
+          pageName: 'hosts',
+          tabName: 'externalAlerts',
+        },
+      ]);
+
+      (useMatrixHistogramCombined as jest.Mock).mockReturnValue([
+        false,
+        {
+          data: [
+            { x: 1, y: 2, g: 'g1' },
+            { x: 2, y: 4, g: 'g1' },
+            { x: 3, y: 6, g: 'g1' },
+            { x: 1, y: 1, g: 'g2' },
+            { x: 2, y: 3, g: 'g2' },
+            { x: 3, y: 5, g: 'g2' },
+          ],
+          inspect: false,
+          totalCount: 6,
+        },
+      ]);
+
+      wrapper = mount(
+        <TestProviders>
+          <AlertsByCategory {...testProps} />
+        </TestProviders>
+      );
+
+      wrapper.update();
+    });
+
+    test('it shows visualization actions', async () => {
+      await waitFor(() => {
+        expect(wrapper.find('[data-test-subj="mock-viz-actions"]').exists()).toBe(true);
+      });
+    });
+  });
+
+  describe('Network page', () => {
+    beforeAll(async () => {
+      (useRouteSpy as jest.Mock).mockReturnValue([
+        {
+          detailName: undefined,
+          pageName: 'network',
+          tabName: 'external-alerts',
+        },
+      ]);
+      (useMatrixHistogramCombined as jest.Mock).mockReturnValue([
+        false,
+        {
+          data: [
+            { x: 1, y: 2, g: 'g1' },
+            { x: 2, y: 4, g: 'g1' },
+            { x: 3, y: 6, g: 'g1' },
+            { x: 1, y: 1, g: 'g2' },
+            { x: 2, y: 3, g: 'g2' },
+            { x: 3, y: 5, g: 'g2' },
+          ],
+          inspect: false,
+          totalCount: 6,
+        },
+      ]);
+
+      wrapper = mount(
+        <TestProviders>
+          <AlertsByCategory {...testProps} />
+        </TestProviders>
+      );
+
+      wrapper.update();
+    });
+
+    test('it shows visualization actions', async () => {
+      await waitFor(() => {
+        expect(wrapper.find('[data-test-subj="mock-viz-actions"]').exists()).toBe(true);
+      });
+    });
+  });
+
+  describe('Othen than Host or Network page', () => {
+    beforeAll(async () => {
+      (useRouteSpy as jest.Mock).mockReturnValue([
+        {
+          detailName: undefined,
+          pageName: 'overview',
+          tabName: undefined,
+        },
+      ]);
+      (useMatrixHistogramCombined as jest.Mock).mockReturnValue([
+        false,
+        {
+          data: [
+            { x: 1, y: 2, g: 'g1' },
+            { x: 2, y: 4, g: 'g1' },
+            { x: 3, y: 6, g: 'g1' },
+            { x: 1, y: 1, g: 'g2' },
+            { x: 2, y: 3, g: 'g2' },
+            { x: 3, y: 5, g: 'g2' },
+          ],
+          inspect: false,
+          totalCount: 6,
+        },
+      ]);
+
+      wrapper = mount(
+        <TestProviders>
+          <AlertsByCategory {...testProps} />
+        </TestProviders>
+      );
+
+      wrapper.update();
+    });
+
+    test('it does not shows visualization actions', async () => {
+      await waitFor(() => {
+        expect(wrapper.find('[data-test-subj="mock-viz-actions"]').exists()).toBe(false);
       });
     });
   });

@@ -61,6 +61,7 @@ export enum FIELD_FORMAT_IDS {
   DATE = 'date',
   DATE_NANOS = 'date_nanos',
   DURATION = 'duration',
+  GEO_POINT = 'geo_point',
   IP = 'ip',
   NUMBER = 'number',
   PERCENT = 'percent',

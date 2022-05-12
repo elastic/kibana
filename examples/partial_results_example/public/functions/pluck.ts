@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Datatable, ExpressionFunctionDefinition } from 'src/plugins/expressions';
+import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin';
 
 export interface PluckArguments {
   key: string;

@@ -8,23 +8,23 @@
 
 import React, { useEffect, useState } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
-import { IndexPattern } from '../../../../../plugins/data/public';
-import { useKibana } from '../../../../../plugins/kibana_react/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { IndexPatternManagmentContext } from '../../types';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
-import { EditIndexPattern } from '../edit_index_pattern';
+import { EditIndexPattern } from '.';
 
 const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ ...props }) => {
-  const { data, setBreadcrumbs } = useKibana<IndexPatternManagmentContext>().services;
-  const [indexPattern, setIndexPattern] = useState<IndexPattern>();
+  const { dataViews, setBreadcrumbs } = useKibana<IndexPatternManagmentContext>().services;
+  const [indexPattern, setIndexPattern] = useState<DataView>();
 
   useEffect(() => {
-    data.indexPatterns.get(props.match.params.id).then((ip: IndexPattern) => {
+    dataViews.get(props.match.params.id).then((ip: DataView) => {
       setIndexPattern(ip);
       setBreadcrumbs(getEditBreadcrumbs(ip));
     });
-  }, [data.indexPatterns, props.match.params.id, setBreadcrumbs]);
+  }, [dataViews, props.match.params.id, setBreadcrumbs]);
 
   if (indexPattern) {
     return <EditIndexPattern indexPattern={indexPattern} />;

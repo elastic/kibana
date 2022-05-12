@@ -5,25 +5,21 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import apm from 'elastic-apm-node';
-import type { Logger } from 'src/core/server';
 import type { HeadlessChromiumDriver } from '../browsers';
 import { Layout } from '../layouts';
 import { CONTEXT_WAITFORRENDER } from './constants';
+import { Actions, EventLogger } from './event_logger';
 
 export const waitForRenderComplete = async (
   browser: HeadlessChromiumDriver,
-  logger: Logger,
+  eventLogger: EventLogger,
   loadDelay: number,
   layout: Layout
 ) => {
-  const span = apm.startSpan('wait_for_render', 'wait');
-
-  logger.debug(
-    i18n.translate('xpack.screenshotting.screencapture.waitingForRenderComplete', {
-      defaultMessage: 'waiting for rendering to complete',
-    })
+  const spanEnd = eventLogger.logScreenshottingEvent(
+    'wait for render complete',
+    Actions.WAIT_RENDER,
+    'wait'
   );
 
   return await browser
@@ -71,15 +67,9 @@ export const waitForRenderComplete = async (
         args: [layout.selectors.renderComplete, loadDelay],
       },
       { context: CONTEXT_WAITFORRENDER },
-      logger
+      eventLogger.kbnLogger
     )
     .then(() => {
-      logger.debug(
-        i18n.translate('xpack.screenshotting.screencapture.renderIsComplete', {
-          defaultMessage: 'rendering is complete',
-        })
-      );
-
-      span?.end();
+      spanEnd();
     });
 };

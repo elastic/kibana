@@ -8,7 +8,7 @@
 
 jest.mock('getos', () => (cb: Function) => cb(null, { dist: 'distrib', release: 'release' }));
 
-import { loggerMock } from '@kbn/logging/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import os from 'os';
 import { cgroupCollectorMock } from './os.test.mocks';
 import { OsMetricsCollector } from './os';

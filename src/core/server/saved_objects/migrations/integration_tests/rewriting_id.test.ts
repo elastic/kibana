@@ -13,7 +13,7 @@ import { kibanaPackageJson as pkg } from '@kbn/utils';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import type { ElasticsearchClient } from '../../../elasticsearch';
 import { Root } from '../../../root';
-import { deterministicallyRegenerateObjectId } from '../../migrations/core/document_migrator';
+import { deterministicallyRegenerateObjectId } from '../core/document_migrator';
 
 const logFilePath = Path.join(__dirname, 'rewriting_id.log');
 
@@ -28,7 +28,7 @@ function sortByTypeAndId(a: { type: string; id: string }, b: { type: string; id:
 }
 
 async function fetchDocs(esClient: ElasticsearchClient, index: string) {
-  const { body } = await esClient.search<any>({
+  const body = await esClient.search<any>({
     index,
     body: {
       query: {
@@ -76,6 +76,7 @@ function createRoot() {
         loggers: [
           {
             name: 'root',
+            level: 'info',
             appenders: ['file'],
           },
         ],
@@ -199,8 +200,9 @@ describe('migration v2', () => {
             targetId: newFooId,
             targetNamespace: 'spacex',
             targetType: 'foo',
+            purpose: 'savedObjectConversion',
           },
-          migrationVersion: {},
+          migrationVersion: { 'legacy-url-alias': '8.2.0' },
           references: [],
           coreMigrationVersion: pkg.version,
         },
@@ -232,8 +234,9 @@ describe('migration v2', () => {
             targetId: newBarId,
             targetNamespace: 'spacex',
             targetType: 'bar',
+            purpose: 'savedObjectConversion',
           },
-          migrationVersion: {},
+          migrationVersion: { 'legacy-url-alias': '8.2.0' },
           references: [],
           coreMigrationVersion: pkg.version,
         },

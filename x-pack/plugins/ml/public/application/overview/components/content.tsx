@@ -6,42 +6,27 @@
  */
 
 import React, { FC } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { AnomalyDetectionPanel } from './anomaly_detection_panel';
 import { AnalyticsPanel } from './analytics_panel';
 
 interface Props {
   createAnomalyDetectionJobDisabled: boolean;
-  createAnalyticsJobDisabled: boolean;
   setAdLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
   setDfaLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
-  refreshCount: number;
 }
 
-// Fetch jobs and determine what to show
 export const OverviewContent: FC<Props> = ({
   createAnomalyDetectionJobDisabled,
-  createAnalyticsJobDisabled,
   setAdLazyJobCount,
   setDfaLazyJobCount,
-  refreshCount,
 }) => (
-  <EuiFlexItem grow={3}>
-    <EuiFlexGroup direction="column">
-      <EuiFlexItem grow={false}>
-        <AnomalyDetectionPanel
-          jobCreationDisabled={createAnomalyDetectionJobDisabled}
-          setLazyJobCount={setAdLazyJobCount}
-          refreshCount={refreshCount}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <AnalyticsPanel
-          jobCreationDisabled={createAnalyticsJobDisabled}
-          setLazyJobCount={setDfaLazyJobCount}
-          refreshCount={refreshCount}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiFlexItem>
+  <>
+    <AnomalyDetectionPanel
+      jobCreationDisabled={createAnomalyDetectionJobDisabled}
+      setLazyJobCount={setAdLazyJobCount}
+    />
+    <EuiSpacer size="m" />
+    <AnalyticsPanel setLazyJobCount={setDfaLazyJobCount} />
+  </>
 );

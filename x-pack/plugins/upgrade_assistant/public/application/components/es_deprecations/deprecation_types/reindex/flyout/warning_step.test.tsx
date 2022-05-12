@@ -19,7 +19,7 @@ const kibanaVersion = new SemVer(MAJOR_VERSION);
 
 jest.mock('../../../../../app_context', () => {
   const { docLinksServiceMock } = jest.requireActual(
-    '../../../../../../../../../../src/core/public/doc_links/doc_links_service.mock'
+    '@kbn/core/public/doc_links/doc_links_service.mock'
   );
 
   return {
@@ -40,6 +40,11 @@ describe('WarningsFlyoutStep', () => {
     warnings: [] as ReindexWarning[],
     hideWarningsStep: jest.fn(),
     continueReindex: jest.fn(),
+    meta: {
+      indexName: 'foo',
+      reindexName: 'reindexed-foo',
+      aliases: [],
+    },
   };
 
   it('renders', () => {

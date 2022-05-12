@@ -24,12 +24,14 @@ export interface MvtSourceData {
 
 export async function syncMvtSourceData({
   layerId,
+  layerName,
   prevDataRequest,
   requestMeta,
   source,
   syncContext,
 }: {
   layerId: string;
+  layerName: string;
   prevDataRequest: DataRequest | undefined;
   requestMeta: VectorSourceRequestMeta;
   source: IMvtVectorSource;
@@ -53,7 +55,8 @@ export async function syncMvtSourceData({
         return true;
       },
     });
-    const canSkip = noChangesInSourceState && noChangesInSearchState;
+    const canSkip =
+      !syncContext.forceRefreshDueToDrawing && noChangesInSourceState && noChangesInSearchState;
 
     if (canSkip) {
       return;
@@ -63,11 +66,16 @@ export async function syncMvtSourceData({
   syncContext.startLoading(SOURCE_DATA_REQUEST_ID, requestToken, requestMeta);
   try {
     const refreshToken =
-      !prevData || (requestMeta.isForceRefresh && requestMeta.applyForceRefresh)
+      !prevData ||
+      syncContext.forceRefreshDueToDrawing ||
+      (requestMeta.isForceRefresh && requestMeta.applyForceRefresh)
         ? uuid()
         : prevData.refreshToken;
 
     const tileUrl = await source.getTileUrl(requestMeta, refreshToken);
+    if (source.isESSource()) {
+      source.getInspectorAdapters()?.vectorTiles.addLayer(layerId, layerName, tileUrl);
+    }
     const sourceData = {
       tileUrl,
       tileSourceLayer: source.getTileSourceLayer(),

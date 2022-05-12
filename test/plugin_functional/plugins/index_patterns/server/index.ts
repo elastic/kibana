@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializer } from 'kibana/server';
+import { PluginInitializer } from '@kbn/core/server';
 import {
   IndexPatternsTestPlugin,
   IndexPatternsTestPluginSetup,
   IndexPatternsTestPluginStart,
 } from './plugin';
 
-export const plugin: PluginInitializer<IndexPatternsTestPluginSetup, IndexPatternsTestPluginStart> =
-  () => new IndexPatternsTestPlugin();
+export const plugin: PluginInitializer<
+  IndexPatternsTestPluginSetup,
+  IndexPatternsTestPluginStart
+> = () => new IndexPatternsTestPlugin();

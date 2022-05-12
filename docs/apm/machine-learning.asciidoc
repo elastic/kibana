@@ -52,9 +52,6 @@ That's it! After a few minutes, the job will begin calculating results;
 it might take additional time for results to appear on your service maps.
 Existing jobs can be managed in *Machine Learning jobs management*.
 
-APM specific anomaly detection wizards are also available for certain Agents.
-See the machine learning {ml-docs}/ootb-ml-jobs-apm.html[APM anomaly detection configurations] for more information.
-
 [float]
 [[warning-ml-integration]]
 === Anomaly detection warning

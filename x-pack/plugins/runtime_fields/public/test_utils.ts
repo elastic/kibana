@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type { TestBed } from '@kbn/test/jest';
-export { registerTestBed } from '@kbn/test/jest';
+export type { TestBed } from '@kbn/test-jest-helpers';
+export { registerTestBed } from '@kbn/test-jest-helpers';

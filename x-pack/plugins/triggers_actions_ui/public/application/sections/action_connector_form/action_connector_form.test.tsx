@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import {
   UserConfiguredActionConnector,
@@ -41,6 +41,7 @@ describe('action_connector_form', () => {
       config: {},
       secrets: {},
       isPreconfigured: false,
+      isDeprecated: false,
     };
     const wrapper = mountWithIntl(
       <ActionConnectorForm

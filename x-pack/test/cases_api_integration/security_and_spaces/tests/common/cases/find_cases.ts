@@ -6,12 +6,15 @@
  */
 
 import expect from '@kbn/expect';
+import { CASES_URL } from '@kbn/cases-plugin/common/constants';
+import {
+  CaseResponse,
+  CaseSeverity,
+  CaseStatuses,
+  CommentType,
+} from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import {
-  CASES_URL,
-  SUB_CASES_PATCH_DEL_URL,
-} from '../../../../../../plugins/cases/common/constants';
 import {
   postCaseReq,
   postCommentUserReq,
@@ -20,18 +23,12 @@ import {
 } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
-  createSubCase,
-  setStatus,
-  CreateSubCaseResp,
-  createCaseAction,
-  deleteCaseAction,
   ensureSavedObjectIsAuthorized,
   findCases,
   createCase,
   updateCase,
   createComment,
 } from '../../../../common/lib/utils';
-import { CaseResponse, CaseStatuses, CaseType } from '../../../../../../plugins/cases/common/api';
 import {
   obsOnly,
   secOnly,
@@ -55,6 +52,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('find_cases', () => {
     describe('basic tests', () => {
@@ -120,6 +119,45 @@ export default ({ getService }: FtrProviderContext): void => {
           count_open_cases: 1,
           count_closed_cases: 1,
           count_in_progress_cases: 0,
+        });
+      });
+
+      it('filters by severity', async () => {
+        await createCase(supertest, postCaseReq);
+        const theCase = await createCase(supertest, postCaseReq);
+        const patchedCase = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: theCase.id,
+                version: theCase.version,
+                severity: CaseSeverity.HIGH,
+              },
+            ],
+          },
+        });
+
+        const cases = await findCases({ supertest, query: { severity: CaseSeverity.HIGH } });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 1,
+          cases: [patchedCase[0]],
+          count_open_cases: 1,
+        });
+      });
+
+      it('filters by severity (none found)', async () => {
+        await createCase(supertest, postCaseReq);
+        await createCase(supertest, postCaseReq);
+
+        const cases = await findCases({ supertest, query: { severity: CaseSeverity.CRITICAL } });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 0,
+          cases: [],
         });
       });
 
@@ -198,194 +236,105 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(cases.count_in_progress_cases).to.eql(1);
       });
 
+      it('returns the correct fields', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const queryFields: Array<keyof CaseResponse | Array<keyof CaseResponse>> = [
+          'title',
+          ['title', 'description'],
+        ];
+
+        for (const fields of queryFields) {
+          const cases = await findCases({ supertest, query: { fields } });
+          const fieldsAsArray = Array.isArray(fields) ? fields : [fields];
+
+          const expectedValues = fieldsAsArray.reduce(
+            (theCase, field) => ({
+              ...theCase,
+              [field]: postedCase[field],
+            }),
+            {}
+          );
+
+          expect(cases).to.eql({
+            ...findCasesResp,
+            total: 1,
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                external_service: postedCase.external_service,
+                owner: postedCase.owner,
+                connector: postedCase.connector,
+                comments: [],
+                totalAlerts: 0,
+                totalComment: 0,
+                ...expectedValues,
+              },
+            ],
+            count_open_cases: 1,
+          });
+        }
+      });
+
       it('unhappy path - 400s when bad query supplied', async () => {
         await findCases({ supertest, query: { perPage: true }, expectedHttpCode: 400 });
       });
+    });
 
-      // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
-      describe.skip('stats with sub cases', () => {
-        let collection: CreateSubCaseResp;
-        let actionID: string;
-        before(async () => {
-          actionID = await createCaseAction(supertest);
-        });
-        after(async () => {
-          await deleteCaseAction(supertest, actionID);
-        });
-        beforeEach(async () => {
-          // create a collection with a sub case that is marked as open
-          collection = await createSubCase({ supertest, actionID });
+    describe('alerts', () => {
+      const defaultSignalsIndex = '.siem-signals-default-000001';
+      const signalID = '4679431ee0ba3209b6fcd60a255a696886fe0a7d18f5375de510ff5b68fa6b78';
+      const signalID2 = '1023bcfea939643c5e51fd8df53797e0ea693cee547db579ab56d96402365c1e';
 
-          const [, , { body: toCloseCase }] = await Promise.all([
-            // set the sub case to in-progress
-            setStatus({
-              supertest,
-              cases: [
-                {
-                  id: collection.newSubCaseInfo.subCases![0].id,
-                  version: collection.newSubCaseInfo.subCases![0].version,
-                  status: CaseStatuses['in-progress'],
-                },
-              ],
-              type: 'sub_case',
-            }),
-            // create two cases that are both open
-            supertest.post(CASES_URL).set('kbn-xsrf', 'true').send(postCaseReq),
-            supertest.post(CASES_URL).set('kbn-xsrf', 'true').send(postCaseReq),
-          ]);
+      beforeEach(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/cases/signals/default');
+      });
 
-          // set the third case to closed
-          await setStatus({
+      afterEach(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/cases/signals/default');
+        await deleteAllCaseItems(es);
+      });
+
+      it('correctly counts alerts ignoring duplicates', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        /**
+         * Adds three comments of type alerts.
+         * The first two have the same alertId.
+         * The third has different alertId.
+         */
+        for (const alertId of [signalID, signalID, signalID2]) {
+          await createComment({
             supertest,
-            cases: [
-              {
-                id: toCloseCase.id,
-                version: toCloseCase.version,
-                status: CaseStatuses.closed,
-              },
-            ],
-            type: 'case',
-          });
-        });
-        it('correctly counts stats without using a filter', async () => {
-          const cases = await findCases({ supertest });
-
-          expect(cases.total).to.eql(3);
-          expect(cases.count_closed_cases).to.eql(1);
-          expect(cases.count_open_cases).to.eql(1);
-          expect(cases.count_in_progress_cases).to.eql(1);
-        });
-
-        it('correctly counts stats with a filter for open cases', async () => {
-          const cases = await findCases({ supertest, query: { status: CaseStatuses.open } });
-
-          expect(cases.cases.length).to.eql(1);
-
-          // since we're filtering on status and the collection only has an in-progress case, it should only return the
-          // individual case that has the open status and no collections
-          // ENABLE_CASE_CONNECTOR: this value is not correct because it includes a collection
-          // that does not have an open case. This is a known issue and will need to be resolved
-          // when this issue is addressed: https://github.com/elastic/kibana/issues/94115
-          expect(cases.total).to.eql(2);
-          expect(cases.count_closed_cases).to.eql(1);
-          expect(cases.count_open_cases).to.eql(1);
-          expect(cases.count_in_progress_cases).to.eql(1);
-        });
-
-        it('correctly counts stats with a filter for individual cases', async () => {
-          const cases = await findCases({ supertest, query: { type: CaseType.individual } });
-
-          expect(cases.total).to.eql(2);
-          expect(cases.count_closed_cases).to.eql(1);
-          expect(cases.count_open_cases).to.eql(1);
-          expect(cases.count_in_progress_cases).to.eql(0);
-        });
-
-        it('correctly counts stats with a filter for collection cases with multiple sub cases', async () => {
-          // this will force the first sub case attached to the collection to be closed
-          // so we'll have one closed sub case and one open sub case
-          await createSubCase({ supertest, caseID: collection.newSubCaseInfo.id, actionID });
-          const cases = await findCases({ supertest, query: { type: CaseType.collection } });
-
-          expect(cases.total).to.eql(1);
-          expect(cases.cases[0].subCases?.length).to.eql(2);
-          expect(cases.count_closed_cases).to.eql(1);
-          expect(cases.count_open_cases).to.eql(1);
-          expect(cases.count_in_progress_cases).to.eql(0);
-        });
-
-        it('correctly counts stats with a filter for collection and open cases with multiple sub cases', async () => {
-          // this will force the first sub case attached to the collection to be closed
-          // so we'll have one closed sub case and one open sub case
-          await createSubCase({ supertest, caseID: collection.newSubCaseInfo.id, actionID });
-          const cases = await findCases({
-            supertest,
-            query: {
-              type: CaseType.collection,
-              status: CaseStatuses.open,
+            caseId: postedCase.id,
+            params: {
+              alertId,
+              index: defaultSignalsIndex,
+              rule: { id: 'test-rule-id', name: 'test-index-id' },
+              type: CommentType.alert,
+              owner: 'securitySolutionFixture',
             },
           });
+        }
 
-          expect(cases.total).to.eql(1);
-          expect(cases.cases[0].subCases?.length).to.eql(1);
-          expect(cases.count_closed_cases).to.eql(1);
-          expect(cases.count_open_cases).to.eql(1);
-          expect(cases.count_in_progress_cases).to.eql(0);
+        const patchedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
         });
 
-        it('correctly counts stats including a collection without sub cases when not filtering on status', async () => {
-          // delete the sub case on the collection so that it doesn't have any sub cases
-          await supertest
-            .delete(
-              `${SUB_CASES_PATCH_DEL_URL}?ids=["${collection.newSubCaseInfo.subCases![0].id}"]`
-            )
-            .set('kbn-xsrf', 'true')
-            .send()
-            .expect(204);
-
-          const cases = await findCases({ supertest, query: { type: CaseType.collection } });
-
-          // it should include the collection without sub cases because we did not pass in a filter on status
-          expect(cases.total).to.eql(3);
-          expect(cases.count_closed_cases).to.eql(1);
-          expect(cases.count_open_cases).to.eql(1);
-          expect(cases.count_in_progress_cases).to.eql(0);
-        });
-
-        it('correctly counts stats including a collection without sub cases when filtering on tags', async () => {
-          // delete the sub case on the collection so that it doesn't have any sub cases
-          await supertest
-            .delete(
-              `${SUB_CASES_PATCH_DEL_URL}?ids=["${collection.newSubCaseInfo.subCases![0].id}"]`
-            )
-            .set('kbn-xsrf', 'true')
-            .send()
-            .expect(204);
-
-          const cases = await findCases({ supertest, query: { tags: ['defacement'] } });
-
-          // it should include the collection without sub cases because we did not pass in a filter on status
-          expect(cases.total).to.eql(3);
-          expect(cases.count_closed_cases).to.eql(1);
-          expect(cases.count_open_cases).to.eql(1);
-          expect(cases.count_in_progress_cases).to.eql(0);
-        });
-
-        it('does not return collections without sub cases matching the requested status', async () => {
-          const cases = await findCases({ supertest, query: { status: CaseStatuses.closed } });
-
-          expect(cases.cases.length).to.eql(1);
-          // it should not include the collection that has a sub case as in-progress
-          // ENABLE_CASE_CONNECTOR: this value is not correct because it includes collections. This short term
-          // fix for when sub cases are not enabled. When the feature is completed the _find API
-          // will need to be fixed as explained in this ticket: https://github.com/elastic/kibana/issues/94115
-          expect(cases.total).to.eql(2);
-          expect(cases.count_closed_cases).to.eql(1);
-          expect(cases.count_open_cases).to.eql(1);
-          expect(cases.count_in_progress_cases).to.eql(1);
-        });
-
-        it('does not return empty collections when filtering on status', async () => {
-          // delete the sub case on the collection so that it doesn't have any sub cases
-          await supertest
-            .delete(
-              `${SUB_CASES_PATCH_DEL_URL}?ids=["${collection.newSubCaseInfo.subCases![0].id}"]`
-            )
-            .set('kbn-xsrf', 'true')
-            .send()
-            .expect(204);
-
-          const cases = await findCases({ supertest, query: { status: CaseStatuses.closed } });
-
-          expect(cases.cases.length).to.eql(1);
-
-          // ENABLE_CASE_CONNECTOR: this value is not correct because it includes collections. This short term
-          // fix for when sub cases are not enabled. When the feature is completed the _find API
-          // will need to be fixed as explained in this ticket: https://github.com/elastic/kibana/issues/94115
-          expect(cases.total).to.eql(2);
-          expect(cases.count_closed_cases).to.eql(1);
-          expect(cases.count_open_cases).to.eql(1);
-          expect(cases.count_in_progress_cases).to.eql(0);
+        const cases = await findCases({ supertest });
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 1,
+          cases: [
+            {
+              ...patchedCase,
+              comments: [],
+              totalAlerts: 2,
+              totalComment: 1,
+            },
+          ],
+          count_open_cases: 1,
         });
       });
     });
@@ -567,6 +516,60 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(cases.count_open_cases).to.eql(10);
         expect(cases.count_closed_cases).to.eql(0);
         expect(cases.count_in_progress_cases).to.eql(0);
+      });
+    });
+
+    describe('range queries', () => {
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_various_dates.json'
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_various_dates.json'
+        );
+        await deleteAllCaseItems(es);
+      });
+
+      it('returns all cases without a range filter', async () => {
+        const EXPECTED_CASES = 3;
+        const cases = await findCases({ supertest });
+
+        expect(cases.total).to.be(EXPECTED_CASES);
+        expect(cases.count_open_cases).to.be(EXPECTED_CASES);
+        expect(cases.cases.length).to.be(EXPECTED_CASES);
+      });
+
+      it('respects the range parameters', async () => {
+        const queries = [
+          { expectedCases: 2, query: { from: '2022-03-16' } },
+          { expectedCases: 2, query: { to: '2022-03-21' } },
+          { expectedCases: 2, query: { from: '2022-03-15', to: '2022-03-21' } },
+        ];
+
+        for (const query of queries) {
+          const cases = await findCases({
+            supertest,
+            query: query.query,
+          });
+
+          expect(cases.total).to.be(query.expectedCases);
+          expect(cases.count_open_cases).to.be(query.expectedCases);
+          expect(cases.cases.length).to.be(query.expectedCases);
+        }
+      });
+
+      it('escapes correctly', async () => {
+        const cases = await findCases({
+          supertest,
+          query: { from: '2022-03-15T10:16:56.252Z', to: '2022-03-20T10:16:56.252' },
+        });
+
+        expect(cases.total).to.be(2);
+        expect(cases.count_open_cases).to.be(2);
+        expect(cases.cases.length).to.be(2);
       });
     });
 
@@ -808,6 +811,89 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // Only security solution cases are being returned
         ensureSavedObjectIsAuthorized(res.cases, 1, ['securitySolutionFixture']);
+      });
+
+      describe('range queries', () => {
+        before(async () => {
+          await kibanaServer.importExport.load(
+            'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_various_dates.json',
+            { space: 'space1' }
+          );
+        });
+
+        after(async () => {
+          await kibanaServer.importExport.unload(
+            'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_various_dates.json',
+            { space: 'space1' }
+          );
+          await deleteAllCaseItems(es);
+        });
+
+        it('should respect the owner filter when using range queries', async () => {
+          const res = await findCases({
+            supertest: supertestWithoutAuth,
+            query: {
+              from: '2022-03-15',
+              to: '2022-03-21',
+            },
+            auth: {
+              user: secOnly,
+              space: 'space1',
+            },
+          });
+
+          // Only security solution cases are being returned
+          ensureSavedObjectIsAuthorized(res.cases, 1, ['securitySolutionFixture']);
+        });
+      });
+
+      describe('RBAC query filter', () => {
+        it('should return the correct cases when trying to query filter by severity', async () => {
+          await Promise.all([
+            createCase(
+              supertestWithoutAuth,
+              getPostCaseRequest({ owner: 'securitySolutionFixture', severity: CaseSeverity.HIGH }),
+              200,
+              {
+                user: obsSec,
+                space: 'space1',
+              }
+            ),
+            createCase(
+              supertestWithoutAuth,
+              getPostCaseRequest({ owner: 'securitySolutionFixture', severity: CaseSeverity.HIGH }),
+              200,
+              {
+                user: obsSec,
+                space: 'space1',
+              }
+            ),
+            createCase(
+              supertestWithoutAuth,
+              getPostCaseRequest({ owner: 'observabilityFixture', severity: CaseSeverity.HIGH }),
+              200,
+              {
+                user: obsOnly,
+                space: 'space1',
+              }
+            ),
+          ]);
+
+          // User with permissions only to security solution should get only the security solution cases
+          const res = await findCases({
+            supertest: supertestWithoutAuth,
+            query: {
+              severity: CaseSeverity.HIGH,
+            },
+            auth: {
+              user: secOnly,
+              space: 'space1',
+            },
+          });
+
+          // Only security solution cases are being returned
+          ensureSavedObjectIsAuthorized(res.cases, 2, ['securitySolutionFixture']);
+        });
       });
     });
   });

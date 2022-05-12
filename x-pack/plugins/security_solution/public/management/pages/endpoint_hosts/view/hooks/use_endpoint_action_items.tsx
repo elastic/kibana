@@ -7,8 +7,8 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { APP_UI_ID } from '../../../../../../common/constants';
-import { pagePathGetters } from '../../../../../../../fleet/public';
 import { getEndpointDetailsPath } from '../../../../common/routing';
 import { HostMetadata, MaybeImmutable } from '../../../../../../common/endpoint/types';
 import { useEndpointSelector } from './hooks';
@@ -65,7 +65,7 @@ export const useEndpointActionItems = (
         // Un-isolate is always available to users regardless of license level
         isolationActions.push({
           'data-test-subj': 'unIsolateLink',
-          icon: 'logoSecurity',
+          icon: 'lockOpen',
           key: 'unIsolateHost',
           navigateAppId: APP_UI_ID,
           navigateOptions: {
@@ -83,7 +83,7 @@ export const useEndpointActionItems = (
         // For Platinum++ licenses, users also have ability to isolate
         isolationActions.push({
           'data-test-subj': 'isolateLink',
-          icon: 'logoSecurity',
+          icon: 'lock',
           key: 'isolateHost',
           navigateAppId: APP_UI_ID,
           navigateOptions: {

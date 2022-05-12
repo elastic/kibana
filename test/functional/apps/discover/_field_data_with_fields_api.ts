@@ -91,12 +91,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           hash.replace('columns:!()', 'columns:!(relatedContent)'),
           { useActualUrl: true }
         );
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function tryingForTime() {
           expect(await PageObjects.discover.getDocHeader()).to.contain('relatedContent');
-        });
 
-        const field = await PageObjects.discover.getDocTableIndex(1);
-        expect(field).to.contain('relatedContent.url');
+          const field = await PageObjects.discover.getDocTableIndex(1);
+          expect(field).to.contain('relatedContent.url');
+        });
 
         const marks = await PageObjects.discover.getMarks();
         expect(marks.length).to.be.above(0);

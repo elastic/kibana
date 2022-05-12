@@ -20,6 +20,9 @@ exports.EcsCustomPropertyMappings = {
       // task specific fields
       task: {
         properties: {
+          id: {
+            type: 'keyword',
+          },
           scheduled: {
             type: 'date',
           },
@@ -53,6 +56,10 @@ exports.EcsCustomPropertyMappings = {
         properties: {
           rule: {
             properties: {
+              consumer: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
               execution: {
                 properties: {
                   uuid: {
@@ -68,7 +75,31 @@ exports.EcsCustomPropertyMappings = {
                   },
                   metrics: {
                     properties: {
+                      number_of_triggered_actions: {
+                        type: 'long',
+                      },
+                      number_of_generated_actions: {
+                        type: 'long',
+                      },
+                      number_of_new_alerts: {
+                        type: 'long',
+                      },
+                      number_of_active_alerts: {
+                        type: 'long',
+                      },
+                      number_of_recovered_alerts: {
+                        type: 'long',
+                      },
+                      total_number_of_alerts: {
+                        type: 'long',
+                      },
+                      number_of_searches: {
+                        type: 'long',
+                      },
                       total_indexing_duration_ms: {
+                        type: 'long',
+                      },
+                      es_search_duration_ms: {
                         type: 'long',
                       },
                       total_search_duration_ms: {
@@ -80,6 +111,10 @@ exports.EcsCustomPropertyMappings = {
                     },
                   },
                 },
+              },
+              rule_type_id: {
+                type: 'keyword',
+                ignore_above: 1024,
               },
             },
           },

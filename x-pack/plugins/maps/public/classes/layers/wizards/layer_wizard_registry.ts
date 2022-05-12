@@ -11,6 +11,27 @@ import { ReactElement, FunctionComponent } from 'react';
 import type { LayerDescriptor } from '../../../../common/descriptor_types';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 
+export type LayerWizard = {
+  id: string;
+  title: string;
+  categories: LAYER_WIZARD_CATEGORY[];
+  /*
+   * Sets display order.
+   * Lower numbers are displayed before higher numbers.
+   * 0-99 reserved for Maps-plugin wizards.
+   */
+  order: number;
+  description: string;
+  icon: string | FunctionComponent<any>;
+  renderWizard(renderWizardArguments: RenderWizardArguments): ReactElement<any>;
+  prerequisiteSteps?: Array<{ id: string; label: string }>;
+  disabledReason?: string;
+  getIsDisabled?: () => Promise<boolean> | boolean;
+  isBeta?: boolean;
+  checkVisibility?: () => Promise<boolean>;
+  showFeatureEditTools?: boolean;
+};
+
 export type RenderWizardArguments = {
   previewLayers: (layerDescriptors: LayerDescriptor[]) => void;
   mapColors: string[];
@@ -27,20 +48,6 @@ export type RenderWizardArguments = {
   advanceToNextStep: () => void;
 };
 
-export type LayerWizard = {
-  categories: LAYER_WIZARD_CATEGORY[];
-  checkVisibility?: () => Promise<boolean>;
-  description: string;
-  disabledReason?: string;
-  getIsDisabled?: () => Promise<boolean> | boolean;
-  isBeta?: boolean;
-  icon: string | FunctionComponent<any>;
-  prerequisiteSteps?: Array<{ id: string; label: string }>;
-  renderWizard(renderWizardArguments: RenderWizardArguments): ReactElement<any>;
-  title: string;
-  showFeatureEditTools?: boolean;
-};
-
 export type LayerWizardWithMeta = LayerWizard & {
   isVisible: boolean;
   isDisabled: boolean;
@@ -48,7 +55,7 @@ export type LayerWizardWithMeta = LayerWizard & {
 
 const registry: LayerWizard[] = [];
 
-export function registerLayerWizard(layerWizard: LayerWizard) {
+export function registerLayerWizardInternal(layerWizard: LayerWizard) {
   registry.push({
     checkVisibility: async () => {
       return true;
@@ -61,6 +68,13 @@ export function registerLayerWizard(layerWizard: LayerWizard) {
   });
 }
 
+export function registerLayerWizardExternal(layerWizard: LayerWizard) {
+  if (layerWizard.order < 100) {
+    throw new Error(`layerWizard.order should be greater than or equal to '100'`);
+  }
+  registerLayerWizardInternal(layerWizard);
+}
+
 export async function getLayerWizards(): Promise<LayerWizardWithMeta[]> {
   const promises = registry.map(async (layerWizard: LayerWizard) => {
     return {
@@ -69,7 +83,15 @@ export async function getLayerWizards(): Promise<LayerWizardWithMeta[]> {
       isDisabled: await layerWizard.getIsDisabled!(),
     };
   });
-  return (await Promise.all(promises)).filter(({ isVisible }) => {
-    return isVisible;
-  });
+  return (await Promise.all(promises))
+    .filter(({ isVisible }) => {
+      return isVisible;
+    })
+    .sort((wizard1: LayerWizardWithMeta, wizard2: LayerWizardWithMeta) => {
+      return wizard1.order - wizard2.order;
+    });
+}
+
+export function getWizardById(wizardId: string) {
+  return registry.find((wizard) => wizard.id === wizardId);
 }

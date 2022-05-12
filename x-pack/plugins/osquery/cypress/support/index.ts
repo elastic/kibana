@@ -22,25 +22,25 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 
-// Import commands.js using ES2015 syntax:
-import './commands';
+// force ESM in this module
+export {};
+
+// eslint-disable-next-line import/no-extraneous-dependencies
+import 'cypress-react-selector';
 // import './coverage';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Chainable {
-      getBySel: typeof cy.get;
+      getBySel(...args: Parameters<Cypress.Chainable['get']>): Chainable<JQuery<HTMLElement>>;
     }
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getBySel(selector: string, ...args: any[]) {
-  return cy.get(`[data-test-subj=${selector}]`, ...args);
-}
-
-Cypress.Commands.add('getBySel', getBySel);
+Cypress.Commands.add('getBySel', (selector, ...args) =>
+  cy.get(`[data-test-subj="${selector}"]`, ...args)
+);
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

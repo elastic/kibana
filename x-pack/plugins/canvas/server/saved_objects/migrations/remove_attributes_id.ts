@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectMigrationFn } from 'src/core/server';
+import { SavedObjectMigrationFn } from '@kbn/core/server';
 
-export const removeAttributesId: SavedObjectMigrationFn = (doc) => {
+export const removeAttributesId: SavedObjectMigrationFn<any, any> = (doc) => {
   if (typeof doc.attributes === 'object' && doc.attributes !== null) {
     delete (doc.attributes as any).id;
   }

@@ -13,13 +13,13 @@ import {
 import { mockApiLog } from './__mocks__/api_log.mock';
 import '../../__mocks__/engine_logic.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { DEFAULT_META } from '../../../shared/constants';
 
 import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
-import { ApiLogsLogic } from './';
+import { ApiLogsLogic } from '.';
 
 describe('ApiLogsLogic', () => {
   const { mount, unmount } = new LogicMounter(ApiLogsLogic);

@@ -15,7 +15,7 @@ import {
   getLocale,
   getNewsFeedUrl,
   getNewsItemsFromApiResponse,
-  removeSnapshotFromVersion,
+  removeSuffixFromVersion,
   showNewsItem,
 } from './helpers';
 import { NewsItem, RawNewsApiResponse } from './types';
@@ -23,53 +23,46 @@ import { NewsItem, RawNewsApiResponse } from './types';
 jest.mock('../../lib/kibana');
 
 describe('helpers', () => {
-  describe('removeSnapshotFromVersion', () => {
+  describe('removeSuffixFromVersion', () => {
+    test('removes entire suffix after version number', () => {
+      const version = '8.0.0-SNAPSHOT-rc1';
+
+      expect(removeSuffixFromVersion(version)).toEqual('8.0.0');
+    });
     test('it should remove an all-caps `-SNAPSHOT`', () => {
       const version = '8.0.0-SNAPSHOT';
 
-      expect(removeSnapshotFromVersion(version)).toEqual('8.0.0');
+      expect(removeSuffixFromVersion(version)).toEqual('8.0.0');
     });
 
     test('it should remove a mixed-case `-SnApShoT`', () => {
       const version = '8.0.0-SnApShoT';
 
-      expect(removeSnapshotFromVersion(version)).toEqual('8.0.0');
-    });
-
-    test('it should remove all occurrences of `-SNAPSHOT`, regardless of where they appear in the version', () => {
-      const version = '-SNAPSHOT8.0.0-SNAPSHOT';
-
-      expect(removeSnapshotFromVersion(version)).toEqual('8.0.0');
+      expect(removeSuffixFromVersion(version)).toEqual('8.0.0');
     });
 
     test('it should NOT transform a version when it does not contain a `-SNAPSHOT`', () => {
       const version = '8.0.0';
 
-      expect(removeSnapshotFromVersion(version)).toEqual('8.0.0');
+      expect(removeSuffixFromVersion(version)).toEqual('8.0.0');
     });
 
-    test('it should NOT transform a version if it omits the dash in `SNAPSHOT`', () => {
+    test('it should transform a version if it omits the dash in `SNAPSHOT`', () => {
       const version = '8.0.0SNAPSHOT';
 
-      expect(removeSnapshotFromVersion(version)).toEqual('8.0.0SNAPSHOT');
-    });
-
-    test('it should NOT transform a version if has only a partial `-SNAPSHOT`', () => {
-      const version = '8.0.0-SNAP';
-
-      expect(removeSnapshotFromVersion(version)).toEqual('8.0.0-SNAP');
+      expect(removeSuffixFromVersion(version)).toEqual('8.0.0');
     });
 
     test('it should NOT transform an undefined version', () => {
       const version = undefined;
 
-      expect(removeSnapshotFromVersion(version)).toBeUndefined();
+      expect(removeSuffixFromVersion(version)).toBeUndefined();
     });
 
     test('it should NOT transform an empty version', () => {
       const version = '';
 
-      expect(removeSnapshotFromVersion(version)).toEqual('');
+      expect(removeSuffixFromVersion(version)).toEqual('');
     });
   });
 

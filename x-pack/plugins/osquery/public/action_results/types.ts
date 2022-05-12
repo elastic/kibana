@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export type ActionAgentStatus = 'success' | 'pending' | 'failed';
+export enum ActionAgentStatus {
+  SUCCESS = 'success',
+  PENDING = 'pending',
+  FAILED = 'failed',
+}

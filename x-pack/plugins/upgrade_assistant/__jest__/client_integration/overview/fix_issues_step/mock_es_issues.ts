@@ -23,11 +23,15 @@ export const esCriticalAndWarningDeprecations: ESUpgradeStatus = {
       isCritical: false,
       type: 'index_settings',
       resolveDuringUpgrade: false,
-      message: 'translog retention settings are ignored',
-      url: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-translog.html',
+      message: 'Setting [index.routing.allocation.include._tier] is deprecated',
+      url: 'https://www.elastic.co/guide/en/elasticsearch/reference/7.16/migrating-7.13.html#deprecate-tier-filter-setting',
       details:
-        'translog retention settings [index.translog.retention.size] and [index.translog.retention.age] are ignored because translog is no longer used in peer recoveries with soft-deletes enabled (default in 7.0 or later)',
+        'Remove the [index.routing.allocation.include._tier] setting. Use [index.routing.allocation.include._tier_preference] to control allocation to data tiers.',
       index: 'settings',
+      correctiveAction: {
+        type: 'indexSetting',
+        deprecatedSettings: ['index.routing.allocation.include._tier'],
+      },
     },
   ],
 };

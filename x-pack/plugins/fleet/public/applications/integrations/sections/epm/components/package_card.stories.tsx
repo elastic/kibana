@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import type { SavedObject } from 'src/core/public';
+import type { SavedObject } from '@kbn/core/public';
 
 import type { Installation } from '../../../../../../common';
 
@@ -63,6 +63,7 @@ export const Installed = ({ width, ...props }: Args) => {
       install_version: props.version,
       es_index_patterns: {},
       installed_kibana: [],
+      installed_kibana_space_id: 'default',
       installed_es: [],
       install_status: 'installed',
       install_source: 'registry',

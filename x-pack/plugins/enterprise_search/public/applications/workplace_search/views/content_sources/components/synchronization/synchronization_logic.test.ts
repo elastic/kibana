@@ -13,8 +13,13 @@ import {
 } from '../../../../../__mocks__/kea_logic';
 import { fullContentSources } from '../../../../__mocks__/content_sources.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
+import {
+  InlineEditableTableLogic,
+  InlineEditableTableProps,
+} from '../../../../../shared/tables/inline_editable_table/inline_editable_table_logic';
+import { ItemWithAnID } from '../../../../../shared/tables/types';
 import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
 
 jest.mock('../../source_logic', () => ({
@@ -30,11 +35,12 @@ import {
   SynchronizationLogic,
   emptyBlockedWindow,
   stripScheduleSeconds,
+  EditableIndexingRule,
 } from './synchronization_logic';
 
 describe('SynchronizationLogic', () => {
   const { http } = mockHttpValues;
-  const { flashSuccessToast } = mockFlashMessageHelpers;
+  const { flashSuccessToast, flashAPIErrors } = mockFlashMessageHelpers;
   const { navigateToUrl } = mockKibanaValues;
   const { mount } = new LogicMounter(SynchronizationLogic);
   const contentSource = fullContentSources[0];
@@ -49,12 +55,49 @@ describe('SynchronizationLogic', () => {
     },
   };
 
+  const defaultIndexingRules: EditableIndexingRule[] = [
+    {
+      filterType: 'object_type',
+      id: 0,
+      value: 'value',
+      valueType: 'include',
+    },
+    {
+      filterType: 'path_template',
+      id: 1,
+      value: 'value',
+      valueType: 'exclude',
+    },
+    {
+      filterType: 'file_extension',
+      id: 2,
+      value: 'value',
+      valueType: 'include',
+    },
+  ];
+
   const defaultValues = {
     navigatingBetweenTabs: false,
-    hasUnsavedObjectsAndAssetsChanges: false,
+    hasUnsavedAssetsAndObjectsChanges: false,
+    hasUnsavedIndexingRulesChanges: false,
     hasUnsavedFrequencyChanges: false,
     contentExtractionChecked: true,
     thumbnailsChecked: true,
+    indexingRules: defaultIndexingRules,
+    indexingRulesForAPI: [
+      {
+        filter_type: 'object_type',
+        include: 'value',
+      },
+      {
+        filter_type: 'path_template',
+        exclude: 'value',
+      },
+      {
+        filter_type: 'file_extension',
+        include: 'value',
+      },
+    ],
     schedule: contentSource.indexing.schedule,
     cachedSchedule: contentSource.indexing.schedule,
   };
@@ -109,10 +152,17 @@ describe('SynchronizationLogic', () => {
     it('resetSyncSettings', () => {
       SynchronizationLogic.actions.setContentExtractionChecked(false);
       SynchronizationLogic.actions.setThumbnailsChecked(false);
+      SynchronizationLogic.actions.addIndexingRule({
+        filterType: 'file_extension',
+        valueType: 'exclude',
+        value: 'value',
+      });
       SynchronizationLogic.actions.resetSyncSettings();
 
       expect(SynchronizationLogic.values.thumbnailsChecked).toEqual(true);
       expect(SynchronizationLogic.values.contentExtractionChecked).toEqual(true);
+      expect(SynchronizationLogic.values.indexingRules).toEqual(defaultIndexingRules);
+      expect(SynchronizationLogic.values.hasUnsavedIndexingRulesChanges).toEqual(false);
     });
 
     describe('setSyncFrequency', () => {
@@ -151,37 +201,133 @@ describe('SynchronizationLogic', () => {
         expect(SynchronizationLogic.values.schedule.blockedWindows).toBeUndefined();
       });
     });
-  });
 
-  describe('setBlockedTimeWindow', () => {
-    it('sets "jobType"', () => {
-      SynchronizationLogic.actions.addBlockedWindow();
-      SynchronizationLogic.actions.setBlockedTimeWindow(0, 'jobType', 'incremental');
+    describe('setBlockedTimeWindow', () => {
+      it('sets "jobType"', () => {
+        SynchronizationLogic.actions.addBlockedWindow();
+        SynchronizationLogic.actions.setBlockedTimeWindow(0, 'jobType', 'incremental');
 
-      expect(SynchronizationLogic.values.schedule.blockedWindows![0].jobType).toEqual(
-        'incremental'
-      );
+        expect(SynchronizationLogic.values.schedule.blockedWindows![0].jobType).toEqual(
+          'incremental'
+        );
+      });
+
+      it('sets "day"', () => {
+        SynchronizationLogic.actions.addBlockedWindow();
+        SynchronizationLogic.actions.setBlockedTimeWindow(0, 'day', 'tuesday');
+
+        expect(SynchronizationLogic.values.schedule.blockedWindows![0].day).toEqual('tuesday');
+      });
+
+      it('sets "start"', () => {
+        SynchronizationLogic.actions.addBlockedWindow();
+        SynchronizationLogic.actions.setBlockedTimeWindow(0, 'start', '9:00:00Z');
+
+        expect(SynchronizationLogic.values.schedule.blockedWindows![0].start).toEqual('9:00:00Z');
+      });
+
+      it('sets "end"', () => {
+        SynchronizationLogic.actions.addBlockedWindow();
+        SynchronizationLogic.actions.setBlockedTimeWindow(0, 'end', '11:00:00Z');
+
+        expect(SynchronizationLogic.values.schedule.blockedWindows![0].end).toEqual('11:00:00Z');
+      });
     });
 
-    it('sets "day"', () => {
-      SynchronizationLogic.actions.addBlockedWindow();
-      SynchronizationLogic.actions.setBlockedTimeWindow(0, 'day', 'tuesday');
+    describe('addIndexingRule', () => {
+      const indexingRule: EditableIndexingRule = {
+        filterType: 'file_extension',
+        valueType: 'exclude',
+        value: 'value',
+        id: 10,
+      };
 
-      expect(SynchronizationLogic.values.schedule.blockedWindows![0].day).toEqual('tuesday');
+      it('adds indexing rule with id 0', () => {
+        SynchronizationLogic.actions.setIndexingRules([]);
+        SynchronizationLogic.actions.addIndexingRule(indexingRule);
+
+        expect(SynchronizationLogic.values.indexingRules).toEqual([{ ...indexingRule, id: 0 }]);
+        expect(SynchronizationLogic.values.hasUnsavedIndexingRulesChanges).toEqual(true);
+      });
+
+      it('adds indexing rule with id existing length + 1', () => {
+        SynchronizationLogic.actions.addIndexingRule(indexingRule);
+
+        expect(SynchronizationLogic.values.indexingRules).toEqual([
+          ...defaultValues.indexingRules,
+          { ...indexingRule, id: 3 },
+        ]);
+        expect(SynchronizationLogic.values.hasUnsavedIndexingRulesChanges).toEqual(true);
+      });
+      it('adds indexing rule with unique id in case of previous deletions', () => {
+        SynchronizationLogic.actions.deleteIndexingRule({ ...indexingRule, id: 1 });
+        SynchronizationLogic.actions.addIndexingRule(indexingRule);
+
+        expect(SynchronizationLogic.values.indexingRules).toEqual([
+          defaultValues.indexingRules[0],
+          defaultValues.indexingRules[2],
+          { ...indexingRule, id: 3 },
+        ]);
+        expect(SynchronizationLogic.values.hasUnsavedIndexingRulesChanges).toEqual(true);
+      });
     });
 
-    it('sets "start"', () => {
-      SynchronizationLogic.actions.addBlockedWindow();
-      SynchronizationLogic.actions.setBlockedTimeWindow(0, 'start', '9:00:00Z');
+    describe('setIndexingRule', () => {
+      const indexingRule: EditableIndexingRule = {
+        filterType: 'file_extension',
+        valueType: 'exclude',
+        value: 'value',
+        id: 1,
+      };
 
-      expect(SynchronizationLogic.values.schedule.blockedWindows![0].start).toEqual('9:00:00Z');
+      it('updates indexing rule', () => {
+        SynchronizationLogic.actions.setIndexingRule(indexingRule);
+
+        expect(SynchronizationLogic.values.indexingRules).toEqual([
+          defaultValues.indexingRules[0],
+          indexingRule,
+          defaultValues.indexingRules[2],
+        ]);
+        expect(SynchronizationLogic.values.hasUnsavedIndexingRulesChanges).toEqual(true);
+      });
     });
 
-    it('sets "end"', () => {
-      SynchronizationLogic.actions.addBlockedWindow();
-      SynchronizationLogic.actions.setBlockedTimeWindow(0, 'end', '11:00:00Z');
+    describe('setIndexingRules', () => {
+      const indexingRule: EditableIndexingRule = {
+        filterType: 'file_extension',
+        valueType: 'exclude',
+        value: 'value',
+        id: 1,
+      };
 
-      expect(SynchronizationLogic.values.schedule.blockedWindows![0].end).toEqual('11:00:00Z');
+      it('updates indexing rules', () => {
+        SynchronizationLogic.actions.setIndexingRules([indexingRule, indexingRule]);
+
+        expect(SynchronizationLogic.values.indexingRules).toEqual([
+          { ...indexingRule, id: 0 },
+          { ...indexingRule, id: 1 },
+        ]);
+        expect(SynchronizationLogic.values.hasUnsavedIndexingRulesChanges).toEqual(true);
+      });
+    });
+
+    describe('deleteIndexingRule', () => {
+      const indexingRule: EditableIndexingRule = {
+        filterType: 'file_extension',
+        valueType: 'exclude',
+        value: 'value',
+        id: 1,
+      };
+
+      it('updates indexing rules', () => {
+        const newIndexingRules = defaultValues.indexingRules.filter(
+          (val) => val.id !== indexingRule.id
+        );
+        SynchronizationLogic.actions.deleteIndexingRule(indexingRule);
+        expect(SynchronizationLogic.values.indexingRules).toEqual(newIndexingRules);
+
+        expect(SynchronizationLogic.values.hasUnsavedIndexingRulesChanges).toEqual(true);
+      });
     });
   });
 
@@ -209,6 +355,204 @@ describe('SynchronizationLogic', () => {
       });
     });
 
+    describe('initAddIndexingRule', () => {
+      const indexingRule: EditableIndexingRule = {
+        filterType: 'file_extension',
+        valueType: 'exclude',
+        value: 'value',
+        id: 1,
+      };
+      it('calls validate endpoint and continues if no errors happen', async () => {
+        const addIndexingRuleSpy = jest.spyOn(SynchronizationLogic.actions, 'addIndexingRule');
+        const promise = Promise.resolve({ rules: [] });
+        const doneSpy = jest.spyOn(
+          InlineEditableTableLogic({
+            instanceId: 'IndexingRulesTable',
+          } as InlineEditableTableProps<ItemWithAnID>).actions,
+          'doneEditing'
+        );
+        http.post.mockReturnValue(promise);
+        SynchronizationLogic.actions.initAddIndexingRule(indexingRule);
+
+        expect(http.post).toHaveBeenCalledWith(
+          '/internal/workplace_search/org/sources/123/indexing_rules/validate',
+          {
+            body: JSON.stringify({
+              rules: [
+                {
+                  filter_type: 'file_extension',
+                  exclude: 'value',
+                },
+              ],
+            }),
+          }
+        );
+        await promise;
+        expect(addIndexingRuleSpy).toHaveBeenCalledWith(indexingRule);
+        expect(doneSpy).toHaveBeenCalled();
+      });
+
+      it('calls validate endpoint and sets errors if there is an error', async () => {
+        const addIndexingRuleSpy = jest.spyOn(SynchronizationLogic.actions, 'addIndexingRule');
+        const promise = Promise.resolve({ rules: [{ valid: false, error: 'error' }] });
+        http.post.mockReturnValue(promise);
+        SynchronizationLogic.actions.initAddIndexingRule({ ...indexingRule, valueType: 'include' });
+        const doneSpy = jest.spyOn(
+          InlineEditableTableLogic({
+            instanceId: 'IndexingRulesTable',
+          } as InlineEditableTableProps<ItemWithAnID>).actions,
+          'doneEditing'
+        );
+
+        expect(http.post).toHaveBeenCalledWith(
+          '/internal/workplace_search/org/sources/123/indexing_rules/validate',
+          {
+            body: JSON.stringify({
+              rules: [
+                {
+                  filter_type: 'file_extension',
+                  include: 'value',
+                },
+              ],
+            }),
+          }
+        );
+        await promise;
+        expect(addIndexingRuleSpy).not.toHaveBeenCalled();
+        expect(doneSpy).toHaveBeenCalled();
+      });
+
+      it('flashes an error if the API call fails', async () => {
+        const addIndexingRuleSpy = jest.spyOn(SynchronizationLogic.actions, 'addIndexingRule');
+        const promise = Promise.reject('error');
+        http.post.mockReturnValue(promise);
+        const doneSpy = jest.spyOn(
+          InlineEditableTableLogic({
+            instanceId: 'IndexingRulesTable',
+          } as InlineEditableTableProps<ItemWithAnID>).actions,
+          'doneEditing'
+        );
+        SynchronizationLogic.actions.initAddIndexingRule(indexingRule);
+
+        expect(http.post).toHaveBeenCalledWith(
+          '/internal/workplace_search/org/sources/123/indexing_rules/validate',
+          {
+            body: JSON.stringify({
+              rules: [
+                {
+                  filter_type: 'file_extension',
+                  exclude: 'value',
+                },
+              ],
+            }),
+          }
+        );
+        await nextTick();
+        expect(addIndexingRuleSpy).not.toHaveBeenCalled();
+        expect(doneSpy).not.toHaveBeenCalled();
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
+      });
+    });
+
+    describe('initSetIndexingRule', () => {
+      const indexingRule: EditableIndexingRule = {
+        filterType: 'file_extension',
+        valueType: 'exclude',
+        value: 'value',
+        id: 1,
+      };
+
+      it('calls validate endpoint and continues if no errors happen', async () => {
+        const setIndexingRuleSpy = jest.spyOn(SynchronizationLogic.actions, 'setIndexingRule');
+        const promise = Promise.resolve({ rules: [] });
+        http.post.mockReturnValue(promise);
+        const doneSpy = jest.spyOn(
+          InlineEditableTableLogic({
+            instanceId: 'IndexingRulesTable',
+          } as InlineEditableTableProps<ItemWithAnID>).actions,
+          'doneEditing'
+        );
+        SynchronizationLogic.actions.initSetIndexingRule(indexingRule);
+
+        expect(http.post).toHaveBeenCalledWith(
+          '/internal/workplace_search/org/sources/123/indexing_rules/validate',
+          {
+            body: JSON.stringify({
+              rules: [
+                {
+                  filter_type: 'file_extension',
+                  exclude: 'value',
+                },
+              ],
+            }),
+          }
+        );
+        await promise;
+        expect(setIndexingRuleSpy).toHaveBeenCalledWith(indexingRule);
+        expect(doneSpy).toHaveBeenCalled();
+      });
+
+      it('calls validate endpoint and sets errors if there is an error', async () => {
+        const setIndexingRuleSpy = jest.spyOn(SynchronizationLogic.actions, 'setIndexingRule');
+        const promise = Promise.resolve({ rules: [{ valid: false, error: 'error' }] });
+        http.post.mockReturnValue(promise);
+        const doneSpy = jest.spyOn(
+          InlineEditableTableLogic({
+            instanceId: 'IndexingRulesTable',
+          } as InlineEditableTableProps<ItemWithAnID>).actions,
+          'doneEditing'
+        );
+        SynchronizationLogic.actions.initSetIndexingRule({ ...indexingRule, valueType: 'include' });
+
+        expect(http.post).toHaveBeenCalledWith(
+          '/internal/workplace_search/org/sources/123/indexing_rules/validate',
+          {
+            body: JSON.stringify({
+              rules: [
+                {
+                  filter_type: 'file_extension',
+                  include: 'value',
+                },
+              ],
+            }),
+          }
+        );
+        await promise;
+        expect(setIndexingRuleSpy).not.toHaveBeenCalled();
+        expect(doneSpy).toHaveBeenCalled();
+      });
+      it('flashes an error if the API call fails', async () => {
+        const setIndexingRuleSpy = jest.spyOn(SynchronizationLogic.actions, 'setIndexingRule');
+        const promise = Promise.reject('error');
+        http.post.mockReturnValue(promise);
+        const doneSpy = jest.spyOn(
+          InlineEditableTableLogic({
+            instanceId: 'IndexingRulesTable',
+          } as InlineEditableTableProps<ItemWithAnID>).actions,
+          'doneEditing'
+        );
+        SynchronizationLogic.actions.initSetIndexingRule(indexingRule);
+
+        expect(http.post).toHaveBeenCalledWith(
+          '/internal/workplace_search/org/sources/123/indexing_rules/validate',
+          {
+            body: JSON.stringify({
+              rules: [
+                {
+                  filter_type: 'file_extension',
+                  exclude: 'value',
+                },
+              ],
+            }),
+          }
+        );
+        await nextTick();
+        expect(setIndexingRuleSpy).not.toHaveBeenCalled();
+        expect(doneSpy).not.toHaveBeenCalled();
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
+      });
+    });
+
     describe('updateSyncEnabled', () => {
       it('calls updateServerSettings method', async () => {
         const updateServerSettingsSpy = jest.spyOn(
@@ -225,13 +569,13 @@ describe('SynchronizationLogic', () => {
       });
     });
 
-    describe('updateObjectsAndAssetsSettings', () => {
+    describe('updateAssetsAndObjectsSettings', () => {
       it('calls updateServerSettings method', async () => {
         const updateServerSettingsSpy = jest.spyOn(
           SynchronizationLogic.actions,
           'updateServerSettings'
         );
-        SynchronizationLogic.actions.updateObjectsAndAssetsSettings();
+        SynchronizationLogic.actions.updateAssetsAndObjectsSettings();
 
         expect(updateServerSettingsSpy).toHaveBeenCalledWith({
           content_source: {
@@ -240,6 +584,20 @@ describe('SynchronizationLogic', () => {
                 content_extraction: { enabled: true },
                 thumbnails: { enabled: true },
               },
+              rules: [
+                {
+                  filter_type: 'object_type',
+                  include: 'value',
+                },
+                {
+                  filter_type: 'path_template',
+                  exclude: 'value',
+                },
+                {
+                  filter_type: 'file_extension',
+                  include: 'value',
+                },
+              ],
             },
           },
         });

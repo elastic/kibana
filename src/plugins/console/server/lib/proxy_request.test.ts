@@ -101,4 +101,53 @@ describe(`Console's send request`, () => {
       'transfer-encoding': 'chunked',
     });
   });
+
+  describe('with percent-encoded uri pathname', () => {
+    beforeEach(() => {
+      fakeRequest = {
+        abort: sinon.stub(),
+        on() {},
+        once(event: string, fn: (v: string) => void) {
+          if (event === 'response') {
+            return fn('done');
+          }
+        },
+      } as any;
+    });
+
+    it('should decode percent-encoded uri pathname and encode it correctly', async () => {
+      const uri = new URL(
+        `http://noone.nowhere.none/%{[@metadata][beat]}-%{[@metadata][version]}-2020.08.23`
+      );
+      const result = await proxyRequest({
+        agent: null as any,
+        headers: {},
+        method: 'get',
+        payload: null as any,
+        timeout: 30000,
+        uri,
+      });
+
+      expect(result).toEqual('done');
+      const [httpRequestOptions] = stub.firstCall.args;
+      expect((httpRequestOptions as any).path).toEqual(
+        '/%25%7B%5B%40metadata%5D%5Bbeat%5D%7D-%25%7B%5B%40metadata%5D%5Bversion%5D%7D-2020.08.23'
+      );
+    });
+
+    it('should issue request with date-math format', async () => {
+      const result = await proxyRequest({
+        agent: null as any,
+        headers: {},
+        method: 'get',
+        payload: null as any,
+        timeout: 30000,
+        uri: new URL(`http://noone.nowhere.none/%3Cmy-index-%7Bnow%2Fd%7D%3E`),
+      });
+
+      expect(result).toEqual('done');
+      const [httpRequestOptions] = stub.firstCall.args;
+      expect((httpRequestOptions as any).path).toEqual('/%3Cmy-index-%7Bnow%2Fd%7D%3E');
+    });
+  });
 });

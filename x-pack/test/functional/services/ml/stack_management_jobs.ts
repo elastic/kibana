@@ -10,12 +10,12 @@ import { REPO_ROOT } from '@kbn/utils';
 import fs from 'fs';
 import path from 'path';
 
+import type { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
+import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { MlADJobTable } from './job_table';
 import type { MlDFAJobTable } from './data_frame_analytics_table';
-import type { JobType } from '../../../../plugins/ml/common/types/saved_objects';
-import type { Job, Datafeed } from '../../../../plugins/ml/common/types/anomaly_detection_jobs';
-import type { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
 
 type SyncFlyoutObjectType =
   | 'MissingObjects'
@@ -92,14 +92,14 @@ export function MachineLearningStackManagementJobsProvider(
       const resultToast = await toasts.getToastElement(1);
       const titleElement = await testSubjects.findDescendant('euiToastHeader', resultToast);
       const title: string = await titleElement.getVisibleText();
-      expect(title).to.match(/^\d+ job[s]? synchronized$/);
+      expect(title).to.match(/^\d+ item[s]? synchronized$/);
 
       const dismissButton = await testSubjects.findDescendant('toastCloseButton', resultToast);
       await dismissButton.click();
     },
 
     async assertADJobRowSpaces(adJobId: string, expectedSpaces: string[]) {
-      await mlADJobTable.refreshJobList();
+      await mlADJobTable.refreshJobList('stackMgmtJobList');
       const rows = await mlADJobTable.parseJobTable('stackMgmtJobList');
       const jobRow = rows.filter((row) => row.id === adJobId)[0];
       expect(jobRow).to.have.property('spaces');
@@ -112,7 +112,7 @@ export function MachineLearningStackManagementJobsProvider(
     },
 
     async assertDFAJobRowSpaces(dfaJobId: string, expectedSpaces: string[]) {
-      await mlDFAJobTable.refreshAnalyticsTable();
+      await mlDFAJobTable.refreshAnalyticsTable('stackMgmtJobList');
       const rows = await mlDFAJobTable.parseAnalyticsTable('stackMgmtJobList');
       const jobRow = rows.filter((row) => row.id === dfaJobId)[0];
       expect(jobRow).to.have.property('spaces');
@@ -182,7 +182,7 @@ export function MachineLearningStackManagementJobsProvider(
     async isSpaceSelectionRowSelected(spaceId: string): Promise<boolean> {
       const state = await testSubjects.getAttribute(
         `sts-space-selector-row-${spaceId}`,
-        'aria-selected',
+        'data-test-selected',
         1000
       );
       return state === 'true';

@@ -10,20 +10,20 @@ import React from 'react';
 
 export const hasUserDataViewMock = jest.fn();
 
-jest.doMock('../../../../../../src/plugins/kibana_react/public', () => ({
+jest.doMock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn().mockReturnValue({
     services: {
       http: { basePath: { prepend: jest.fn((path: string) => (path ? path : 'path')) } },
-      data: {
-        indexPatterns: {
-          hasUserDataView: hasUserDataViewMock,
-        },
+      dataViews: {
+        hasUserDataView: hasUserDataViewMock,
       },
       share: { url: { locators: { get: () => ({ useUrl: () => '' }) } } },
       uiSettings: { get: jest.fn() },
       docLinks: {
         links: {
-          kibana: 'kibana_docs_url',
+          kibana: {
+            guide: 'kibana_docs_url',
+          },
         },
       },
     },

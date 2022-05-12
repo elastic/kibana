@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { UpdateConnector, Props } from './update_connector';
 import { ServiceNowActionConnector } from './types';
 jest.mock('../../../../common/lib/kibana');
@@ -19,6 +19,7 @@ const actionConnector: ServiceNowActionConnector = {
   id: 'test',
   actionTypeId: '.servicenow',
   isPreconfigured: false,
+  isDeprecated: false,
   name: 'servicenow',
   config: {
     apiUrl: 'https://test/',

@@ -9,8 +9,8 @@ import { URL } from 'url';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 
-import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
-import type { SearchHit, ESSearchResponse } from '../../../../../../src/core/types/elasticsearch';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { SearchHit, ESSearchResponse } from '@kbn/core/types/elasticsearch';
 
 import type {
   Artifact,
@@ -95,7 +95,6 @@ export const generateArtifactEsGetSingleHitMock = (
     _index: '.fleet-artifacts_1',
     _id: id,
     _version: 1,
-    _type: '',
     _score: 1,
     _source,
   };
@@ -103,7 +102,8 @@ export const generateArtifactEsGetSingleHitMock = (
 
 export const generateArtifactEsSearchResultHitsMock = (): ESSearchResponse<
   ArtifactElasticsearchProperties,
-  {}
+  {},
+  { restTotalHitsAsInt: true }
 > => {
   return {
     took: 0,
@@ -115,10 +115,7 @@ export const generateArtifactEsSearchResultHitsMock = (): ESSearchResponse<
       failed: 0,
     },
     hits: {
-      total: {
-        value: 1,
-        relation: 'eq',
-      },
+      total: 1,
       max_score: 2,
       hits: [generateArtifactEsGetSingleHitMock()],
     },

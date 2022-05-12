@@ -5,60 +5,45 @@
  * 2.0.
  */
 
-import { cleanKibana } from '../../tasks/common';
-
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import { openTimelineFieldsBrowser, populateTimeline } from '../../tasks/timeline';
 
 import { HOSTS_URL, ALERTS_URL } from '../../urls/navigation';
 
-import { waitForAlertsIndexToBeCreated, waitForAlertsPanelToBeLoaded } from '../../tasks/alerts';
-import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
+import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 
 import { getNewRule } from '../../objects/rule';
 import { refreshPage } from '../../tasks/security_header';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { openEventsViewerFieldsBrowser } from '../../tasks/hosts/events';
+import { assertFieldDisplayed, createField } from '../../tasks/create_runtime_field';
 
 describe('Create DataView runtime field', () => {
   before(() => {
-    cleanKibana();
+    login();
   });
 
   it('adds field to alert table', () => {
     const fieldName = 'field.name.alert.page';
-    loginAndWaitForPage(ALERTS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
-    createCustomRuleActivated(getNewRule());
+    visit(ALERTS_URL);
+    createCustomRuleEnabled(getNewRule());
     refreshPage();
-    waitForAlertsToPopulate(500);
+    waitForAlertsToPopulate();
     openEventsViewerFieldsBrowser();
 
-    cy.get('[data-test-subj="create-field"]').click();
-    cy.get('.indexPatternFieldEditorMaskOverlay').find('[data-test-subj="input"]').type(fieldName);
-    cy.get('[data-test-subj="fieldSaveButton"]').click();
-
-    cy.get(
-      `[data-test-subj="events-viewer-panel"] [data-test-subj="dataGridHeaderCell-${fieldName}"]`
-    ).should('exist');
+    createField(fieldName);
+    assertFieldDisplayed(fieldName, 'alerts');
   });
 
   it('adds field to timeline', () => {
     const fieldName = 'field.name.timeline';
-
-    loginAndWaitForPage(HOSTS_URL);
+    visit(HOSTS_URL);
     openTimelineUsingToggle();
     populateTimeline();
     openTimelineFieldsBrowser();
 
-    cy.get('[data-test-subj="create-field"]').click();
-    cy.get('.indexPatternFieldEditorMaskOverlay').find('[data-test-subj="input"]').type(fieldName);
-    cy.get('[data-test-subj="fieldSaveButton"]').click();
-
-    cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${fieldName}"]`).should(
-      'exist'
-    );
+    createField(fieldName);
+    assertFieldDisplayed(fieldName);
   });
 });

@@ -32,8 +32,7 @@ import {
 export const getPrepackagedRulesStatusRoute = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
-  security: SetupPlugins['security'],
-  isRuleRegistryEnabled: boolean
+  security: SetupPlugins['security']
 ) => {
   router.get(
     {
@@ -44,14 +43,11 @@ export const getPrepackagedRulesStatusRoute = (
       },
     },
     async (context, request, response) => {
-      const savedObjectsClient = context.core.savedObjects.client;
       const siemResponse = buildSiemResponse(response);
-      const rulesClient = context.alerting?.getRulesClient();
+      const ctx = await context.resolve(['core', 'alerting']);
+      const savedObjectsClient = ctx.core.savedObjects.client;
+      const rulesClient = ctx.alerting.getRulesClient();
       const ruleAssetsClient = ruleAssetSavedObjectsClientFactory(savedObjectsClient);
-
-      if (!rulesClient) {
-        return siemResponse.error({ statusCode: 404 });
-      }
 
       try {
         const latestPrepackagedRules = await getLatestPrepackagedRules(
@@ -60,19 +56,17 @@ export const getPrepackagedRulesStatusRoute = (
           config.prebuiltRulesFromSavedObjects
         );
         const customRules = await findRules({
-          isRuleRegistryEnabled,
           rulesClient,
           perPage: 1,
           page: 1,
           sortField: 'enabled',
           sortOrder: 'desc',
-          filter: 'alert.attributes.tags:"__internal_immutable:false"',
+          filter: 'alert.attributes.params.immutable: false',
           fields: undefined,
         });
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
         const prepackagedRules = await getExistingPrepackagedRules({
           rulesClient,
-          isRuleRegistryEnabled,
         });
 
         const rulesToInstall = getRulesToInstall(latestPrepackagedRules, prepackagedRules);

@@ -8,7 +8,7 @@
 import { PassThrough } from 'stream';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 import { ErrorWithStatusCode } from '../../error_with_status_code';
 import { findSourceValue } from '../utils/find_source_value';
@@ -117,22 +117,20 @@ export const getResponse = async ({
   listItemIndex,
   size = SIZE,
 }: GetResponseOptions): Promise<estypes.SearchResponse<SearchEsListItemSchema>> => {
-  return (
-    await esClient.search<SearchEsListItemSchema>({
-      body: {
-        query: {
-          term: {
-            list_id: listId,
-          },
+  return (await esClient.search<SearchEsListItemSchema>({
+    body: {
+      query: {
+        term: {
+          list_id: listId,
         },
-        search_after: searchAfter,
-        sort: [{ tie_breaker_id: 'asc' }],
       },
-      ignore_unavailable: true,
-      index: listItemIndex,
-      size,
-    })
-  ).body as unknown as estypes.SearchResponse<SearchEsListItemSchema>;
+      search_after: searchAfter,
+      sort: [{ tie_breaker_id: 'asc' }],
+    },
+    ignore_unavailable: true,
+    index: listItemIndex,
+    size,
+  })) as unknown as estypes.SearchResponse<SearchEsListItemSchema>;
 };
 
 export interface WriteResponseHitsToStreamOptions {

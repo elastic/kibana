@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
+import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { RoleTemplateEditor } from './role_template_editor';
 

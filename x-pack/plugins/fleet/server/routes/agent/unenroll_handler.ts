@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RequestHandler } from 'src/core/server';
+import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import type {
@@ -25,8 +25,9 @@ export const postAgentUnenrollHandler: RequestHandler<
   undefined,
   TypeOf<typeof PostAgentUnenrollRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
   try {
     await AgentService.unenrollAgent(soClient, esClient, request.params.agentId, {
       force: request.body?.force,
@@ -52,8 +53,9 @@ export const postBulkAgentsUnenrollHandler: RequestHandler<
     });
   }
 
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
   const agentOptions = Array.isArray(request.body.agents)
     ? { agentIds: request.body.agents }
     : { kuery: request.body.agents };

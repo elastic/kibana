@@ -9,7 +9,6 @@ export default function ({ loadTestFile }) {
   describe('MetricsUI Endpoints', () => {
     loadTestFile(require.resolve('./metadata'));
     loadTestFile(require.resolve('./log_entry_highlights'));
-    loadTestFile(require.resolve('./log_sources'));
     loadTestFile(require.resolve('./log_summary'));
     loadTestFile(require.resolve('./metrics'));
     loadTestFile(require.resolve('./sources'));
@@ -23,5 +22,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./metrics_process_list'));
     loadTestFile(require.resolve('./metrics_process_list_chart'));
     loadTestFile(require.resolve('./infra_log_analysis_validation_log_entry_datasets'));
+    loadTestFile(require.resolve('./inventory_threshold_alert'));
   });
 }

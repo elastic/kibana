@@ -14,8 +14,8 @@ import { LinkPanelViewProps } from '../link_panel/types';
 import { Link } from '../link_panel/link';
 import * as i18n from './translations';
 import { VIEW_DASHBOARD } from '../overview_cti_links/translations';
-import { QUERY_ID as RiskyHostsQueryId } from '../../../common/containers/hosts_risk/use_hosts_risk_score';
 import { NavigateToHost } from './navigate_to_host';
+import { HostRiskScoreQueryId } from '../../../risk_score/containers';
 
 const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
   {
@@ -94,7 +94,7 @@ export const RiskyHostsPanelView: React.FC<LinkPanelViewProps> = ({
         dataTestSubj: 'risky-hosts-dashboard-links',
         defaultSortField: 'count',
         defaultSortOrder: 'desc',
-        inspectQueryId: isInspectEnabled ? RiskyHostsQueryId : undefined,
+        inspectQueryId: isInspectEnabled ? HostRiskScoreQueryId.OVERVIEW_RISKY_HOSTS : undefined,
         listItems,
         panelTitle: i18n.PANEL_TITLE,
         splitPanel: splitPanelElement,

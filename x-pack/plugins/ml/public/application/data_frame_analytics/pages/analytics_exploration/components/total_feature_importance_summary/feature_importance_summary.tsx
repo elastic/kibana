@@ -18,10 +18,10 @@ import {
   RecursivePartial,
   AxisStyle,
   PartialTheme,
-  BarSeriesSpec,
+  BarSeriesProps,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { euiLightVars as euiVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars as euiVars } from '@kbn/ui-theme';
 import {
   TotalFeatureImportance,
   isClassificationTotalFeatureImportance,
@@ -100,13 +100,18 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
     services: { docLinks },
   } = useMlKibana();
 
-  const [plotData, barSeriesSpec, showLegend, chartHeight] = useMemo(() => {
-    let sortedData: Array<{
-      featureName: string;
-      meanImportance: number;
-      className?: FeatureImportanceClassName;
-    }> = [];
-    let _barSeriesSpec: Partial<BarSeriesSpec> = {
+  interface Datum {
+    featureName: string;
+    meanImportance: number;
+    className?: FeatureImportanceClassName;
+  }
+  type PlotData = Datum[];
+  type SeriesProps = Omit<BarSeriesProps, 'id' | 'xScaleType' | 'yScaleType' | 'data'>;
+  const [plotData, barSeriesSpec, showLegend, chartHeight] = useMemo<
+    [plotData: PlotData, barSeriesSpec: SeriesProps, showLegend?: boolean, chartHeight?: number]
+  >(() => {
+    let sortedData: PlotData = [];
+    let _barSeriesSpec: SeriesProps = {
       xAccessor: 'featureName',
       yAccessors: ['meanImportance'],
       name: i18n.translate(
@@ -122,7 +127,7 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
       | 'regression'
       | '' = '';
     if (totalFeatureImportance.length < 1) {
-      return [sortedData, _barSeriesSpec];
+      return [sortedData, _barSeriesSpec, undefined, undefined];
     }
 
     if (isClassificationTotalFeatureImportance(totalFeatureImportance[0])) {
@@ -282,7 +287,12 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
                   height: chartHeight,
                 }}
               >
-                <Settings rotation={90} theme={theme} showLegend={showLegend} />
+                <Settings
+                  rotation={90}
+                  // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
+                  theme={theme}
+                  showLegend={showLegend}
+                />
 
                 <Axis
                   id="x-axis"

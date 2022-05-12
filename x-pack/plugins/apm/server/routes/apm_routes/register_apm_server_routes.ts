@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
-import { KibanaRequest, RouteRegistrar } from 'src/core/server';
+import { KibanaRequest, RouteRegistrar } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 import agent from 'elastic-apm-node';
 import { ServerRouteRepository } from '@kbn/server-route-repository';
@@ -17,12 +17,11 @@ import {
   parseEndpoint,
   routeValidationObject,
 } from '@kbn/server-route-repository';
-import { mergeRt } from '@kbn/io-ts-utils/merge_rt';
-import { jsonRt } from '@kbn/io-ts-utils/json_rt';
+import { jsonRt, mergeRt } from '@kbn/io-ts-utils';
+import { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import { pickKeys } from '../../../common/utils/pick_keys';
 import { APMRouteHandlerResources, TelemetryUsageCounter } from '../typings';
 import type { ApmPluginRequestHandlerContext } from '../typings';
-import { InspectResponse } from '../../../../observability/typings/common';
 
 const inspectRt = t.exact(
   t.partial({
@@ -55,13 +54,13 @@ export function registerRoutes({
   core: APMRouteHandlerResources['core'];
   plugins: APMRouteHandlerResources['plugins'];
   logger: APMRouteHandlerResources['logger'];
-  repository: ServerRouteRepository<APMRouteHandlerResources>;
+  repository: ServerRouteRepository;
   config: APMRouteHandlerResources['config'];
   ruleDataClient: APMRouteHandlerResources['ruleDataClient'];
   telemetryUsageCounter?: TelemetryUsageCounter;
   kibanaVersion: string;
 }) {
-  const routes = repository.getRoutes();
+  const routes = Object.values(repository);
 
   const router = core.setup.http.createRouter();
 
@@ -118,10 +117,10 @@ export function registerRoutes({
               ),
               ruleDataClient,
               kibanaVersion,
-            }).then((value) => {
+            }).then((value: Record<string, any> | undefined | null) => {
               return {
                 aborted: false,
-                data: value as Record<string, any> | undefined | null,
+                data: value,
               };
             }),
             request.events.aborted$.toPromise().then(() => {

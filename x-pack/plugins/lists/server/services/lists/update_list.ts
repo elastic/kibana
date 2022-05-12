@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type {
   DescriptionOrUndefined,
   Id,
@@ -59,7 +59,7 @@ export const updateList = async ({
       updated_at: updatedAt,
       updated_by: user,
     };
-    const { body: response } = await esClient.update({
+    const response = await esClient.update({
       ...decodeVersion(_version),
       body: { doc },
       id,

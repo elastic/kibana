@@ -5,6 +5,12 @@
  * 2.0.
  */
 
-export * from './rule_execution_log_client';
-export * from './types';
+export * from './client_for_executors/client_interface';
+export * from './client_for_routes/client_interface';
+export * from './client_factories';
+
+export { ruleExecutionType } from './execution_saved_object/saved_objects_type';
+
+export { registerEventLogProvider } from './event_log/register_event_log_provider';
+export { mergeRuleExecutionSummary } from './merge_rule_execution_summary';
 export * from './utils/normalization';

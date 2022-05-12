@@ -56,7 +56,9 @@ export function createTimeFilter(options: {
  * document UUIDs, start time and end time, and injecting additional filters.
  *
  * Options object:
- * @param {String} options.type - `type` field value of the documents
+ * @param {string} options.type - `type` field value of the documents in legay .monitoring indices
+ * @param {string} options.dsDataset - `data_stream.dataset` field values of the documents
+ * @param {string} options.metricset - `metricset.name` field values of the documents
  * @param {Array} options.filters - additional filters to add to the `bool` section of the query. Default: []
  * @param {string} options.clusterUuid - a UUID of the cluster. Required.
  * @param {string} options.uuid - a UUID of the metric to filter for, or `null` if UUID should not be part of the query
@@ -64,30 +66,44 @@ export function createTimeFilter(options: {
  * @param {Date} options.end - numeric timestamp (optional)
  * @param {Metric} options.metric - Metric instance or metric fields object @see ElasticsearchMetric.getMetricFields
  */
-export function createQuery(options: {
+
+interface CreateQueryOptions {
   type?: string;
-  types?: string[];
+  dsDataset?: string;
+  metricset?: string;
   filters?: any[];
-  clusterUuid: string;
+  clusterUuid?: string;
   uuid?: string;
   start?: number;
   end?: number;
   metric?: { uuidField?: string; timestampField: string };
-}) {
-  const { type, types, clusterUuid, uuid, filters } = defaults(options, { filters: [] });
+}
+export function createQuery(options: CreateQueryOptions) {
+  const { type, metricset, dsDataset, clusterUuid, uuid, filters } = defaults(options, {
+    filters: [],
+  });
 
   const isFromStandaloneCluster = clusterUuid === STANDALONE_CLUSTER_CLUSTER_UUID;
 
+  const terms = [];
   let typeFilter: any;
+
+  // data_stream.dataset matches agent integration data streams
+  if (dsDataset) {
+    terms.push({ term: { 'data_stream.dataset': dsDataset } });
+  }
+  // metricset.name matches standalone beats
+  if (metricset) {
+    terms.push({ term: { 'metricset.name': metricset } });
+  }
+  // type matches legacy data
   if (type) {
-    typeFilter = { bool: { should: [{ term: { type } }, { term: { 'metricset.name': type } }] } };
-  } else if (types) {
+    terms.push({ term: { type } });
+  }
+  if (terms.length) {
     typeFilter = {
       bool: {
-        should: [
-          ...types.map((t) => ({ term: { type: t } })),
-          ...types.map((t) => ({ term: { 'metricset.name': t } })),
-        ],
+        should: [...terms],
       },
     };
   }

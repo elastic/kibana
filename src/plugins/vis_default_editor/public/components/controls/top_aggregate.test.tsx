@@ -7,14 +7,14 @@
  */
 
 import React from 'react';
-import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import {
   AggregateValueProp,
   TopAggregateParamEditor,
   TopAggregateParamEditorProps,
 } from './top_aggregate';
 import { aggParamCommonPropsMock } from './test_utils';
-import { IAggConfig } from 'src/plugins/data/public';
+import { IAggConfig } from '@kbn/data-plugin/public';
 
 describe('TopAggregateParamEditor', () => {
   let agg: IAggConfig;

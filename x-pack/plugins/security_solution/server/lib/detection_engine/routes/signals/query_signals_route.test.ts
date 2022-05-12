@@ -16,7 +16,7 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { querySignalsRoute } from './query_signals_route';
-import { ruleRegistryMocks } from '../../../../../../rule_registry/server/mocks';
+import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 
 describe('query for signal', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -27,7 +27,6 @@ describe('query for signal', () => {
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
 
-    // @ts-expect-error 4.3.5 upgrade
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ruleDataClient.getReader().search.mockResolvedValue(getEmptySignalsResponse() as any);
 
@@ -36,7 +35,10 @@ describe('query for signal', () => {
 
   describe('query and agg on signals index', () => {
     test('returns 200 when using single query', async () => {
-      const response = await server.inject(getSignalsQueryRequest(), context);
+      const response = await server.inject(
+        getSignalsQueryRequest(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(200);
       expect(ruleDataClient.getReader().search).toHaveBeenCalledWith(
@@ -47,7 +49,10 @@ describe('query for signal', () => {
     });
 
     test('returns 200 when using single agg', async () => {
-      const response = await server.inject(getSignalsAggsQueryRequest(), context);
+      const response = await server.inject(
+        getSignalsAggsQueryRequest(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(200);
       expect(ruleDataClient.getReader().search).toHaveBeenCalledWith(
@@ -56,7 +61,10 @@ describe('query for signal', () => {
     });
 
     test('returns 200 when using aggs and query together', async () => {
-      const response = await server.inject(getSignalsAggsAndQueryRequest(), context);
+      const response = await server.inject(
+        getSignalsAggsAndQueryRequest(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(200);
       expect(ruleDataClient.getReader().search).toHaveBeenCalledWith(
@@ -71,7 +79,10 @@ describe('query for signal', () => {
 
     test('catches error if query throws error', async () => {
       ruleDataClient.getReader().search.mockRejectedValue(new Error('Test error'));
-      const response = await server.inject(getSignalsAggsQueryRequest(), context);
+      const response = await server.inject(
+        getSignalsAggsQueryRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message: 'Test error',
@@ -121,7 +132,7 @@ describe('query for signal', () => {
         path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
         body: {},
       });
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
       expect(response.status).toEqual(400);
       expect(response.body).toEqual({
         message: '"value" must have at least 1 children',

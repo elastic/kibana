@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './create_start_service_getter';
+export type { StartServicesGetter } from './create_start_service_getter';
+export { createStartServicesGetter } from './create_start_service_getter';

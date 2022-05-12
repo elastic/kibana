@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RequestHandler } from 'src/core/server';
+import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import semverCoerce from 'semver/functions/coerce';
 
@@ -22,12 +22,14 @@ export const postAgentUpgradeHandler: RequestHandler<
   undefined,
   TypeOf<typeof PostAgentUpgradeRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
   const { version, source_uri: sourceUri, force } = request.body;
   const kibanaVersion = appContextService.getKibanaVersion();
   try {
     checkVersionIsSame(version, kibanaVersion);
+    checkSourceUriAllowed(sourceUri);
   } catch (err) {
     return response.customError({
       statusCode: 400,
@@ -76,12 +78,20 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
   undefined,
   TypeOf<typeof PostBulkAgentUpgradeRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asInternalUser;
-  const { version, source_uri: sourceUri, agents, force } = request.body;
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const {
+    version,
+    source_uri: sourceUri,
+    agents,
+    force,
+    rollout_duration_seconds: upgradeDurationSeconds,
+  } = request.body;
   const kibanaVersion = appContextService.getKibanaVersion();
   try {
     checkVersionIsSame(version, kibanaVersion);
+    checkSourceUriAllowed(sourceUri);
   } catch (err) {
     return response.customError({
       statusCode: 400,
@@ -98,6 +108,7 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
       sourceUri,
       version,
       force,
+      upgradeDurationSeconds,
     };
     const results = await AgentService.sendUpgradeAgentsActions(soClient, esClient, upgradeOptions);
     const body = results.items.reduce<PostBulkAgentUpgradeResponse>((acc, so) => {
@@ -126,4 +137,12 @@ export const checkVersionIsSame = (version: string, kibanaVersion: string) => {
     throw new Error(
       `cannot upgrade agent to ${versionToUpgradeNumber} because it is different than the installed kibana version ${kibanaVersionNumber}`
     );
+};
+
+const checkSourceUriAllowed = (sourceUri?: string) => {
+  if (sourceUri && !appContextService.getConfig()?.developer?.allowAgentUpgradeSourceUri) {
+    throw new Error(
+      `source_uri is not allowed or recommended in production. Set xpack.fleet.developer.allowAgentUpgradeSourceUri in kibana.yml to true.`
+    );
+  }
 };

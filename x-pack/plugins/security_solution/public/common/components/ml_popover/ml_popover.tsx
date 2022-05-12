@@ -17,6 +17,7 @@ import moment from 'moment';
 import React, { Dispatch, useCallback, useReducer, useState, useMemo } from 'react';
 import styled from 'styled-components';
 
+import { MLJobsAwaitingNodeWarning } from '@kbn/ml-plugin/public';
 import { useKibana } from '../../lib/kibana';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../lib/telemetry';
 import { errorToToaster, useStateToaster, ActionToaster } from '../toasters';
@@ -30,7 +31,6 @@ import * as i18n from './translations';
 import { JobsFilters, SecurityJob } from './types';
 import { UpgradeContents } from './upgrade_contents';
 import { useSecurityJobs } from './hooks/use_security_jobs';
-import { MLJobsAwaitingNodeWarning } from '../../../../../ml/public';
 
 const PopoverContentsDiv = styled.div`
   max-width: 684px;

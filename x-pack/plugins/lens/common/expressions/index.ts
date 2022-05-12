@@ -8,12 +8,5 @@
 export * from './counter_rate';
 export * from './format_column';
 export * from './rename_columns';
-export * from './merge_tables';
 export * from './time_scale';
 export * from './datatable';
-export * from './gauge_chart';
-export * from './metric_chart';
-export * from './pie_chart';
-export * from './xy_chart';
-
-export * from './expression_types';

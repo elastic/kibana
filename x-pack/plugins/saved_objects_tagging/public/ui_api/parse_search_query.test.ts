@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsTaggingApiUi } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
+import { SavedObjectsTaggingApiUi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { tagsCacheMock } from '../services/tags/tags_cache.mock';
 import { createTag } from '../../common/test_utils';
 import { buildParseSearchQuery } from './parse_search_query';

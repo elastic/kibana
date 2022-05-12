@@ -9,10 +9,20 @@ import { Transform } from 'stream';
 import * as t from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
-import { createSplitStream, createMapStream, createConcatStream } from '@kbn/utils';
+import {
+  createSplitStream,
+  createMapStream,
+  createConcatStream,
+  createReduceStream,
+} from '@kbn/utils';
 
 import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
+import {
+  ImportExceptionListItemSchema,
+  ImportExceptionsListSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { has } from 'lodash/fp';
 import { importRuleValidateTypeDependents } from '../../../../common/detection_engine/schemas/request/import_rules_type_dependents';
 import {
   importRulesSchema,
@@ -21,13 +31,27 @@ import {
 } from '../../../../common/detection_engine/schemas/request/import_rules_schema';
 import {
   parseNdjsonStrings,
-  filterExceptions,
-  createLimitStream,
+  createRulesLimitStream,
   filterExportedCounts,
 } from '../../../utils/read_stream/create_stream_from_ndjson';
 
-export const validateRules = (): Transform => {
-  return createMapStream((obj: ImportRulesSchema) => {
+/**
+ * Validates exception lists and items schemas
+ */
+export const validateRulesStream = (): Transform => {
+  return createMapStream<{
+    exceptions: Array<ImportExceptionsListSchema | ImportExceptionListItemSchema | Error>;
+    rules: Array<ImportRulesSchemaDecoded | Error>;
+  }>((items) => ({
+    exceptions: items.exceptions,
+    rules: validateRules(items.rules),
+  }));
+};
+
+export const validateRules = (
+  rules: Array<ImportRulesSchema | Error>
+): Array<ImportRulesSchemaDecoded | Error> => {
+  return rules.map((obj: ImportRulesSchema | Error) => {
     if (!(obj instanceof Error)) {
       const decoded = importRulesSchema.decode(obj);
       const checked = exactCheck(obj, decoded);
@@ -49,21 +73,42 @@ export const validateRules = (): Transform => {
   });
 };
 
+/**
+ * Sorts the exceptions into the lists and items.
+ * We do this because we don't want the order of the exceptions
+ * in the import to matter. If we didn't sort, then some items
+ * might error if the list has not yet been created
+ */
+export const sortImports = (): Transform => {
+  return createReduceStream<{
+    exceptions: Array<ImportExceptionsListSchema | ImportExceptionListItemSchema | Error>;
+    rules: Array<ImportRulesSchemaDecoded | Error>;
+  }>(
+    (acc, importItem) => {
+      if (has('list_id', importItem) || has('item_id', importItem) || has('entries', importItem)) {
+        return { ...acc, exceptions: [...acc.exceptions, importItem] };
+      } else {
+        return { ...acc, rules: [...acc.rules, importItem] };
+      }
+    },
+    {
+      exceptions: [],
+      rules: [],
+    }
+  );
+};
+
 // TODO: Capture both the line number and the rule_id if you have that information for the error message
 // eventually and then pass it down so we can give error messages on the line number
 
-/**
- * Inspiration and the pattern of code followed is from:
- * saved_objects/lib/create_saved_objects_stream_from_ndjson.ts
- */
-export const createRulesStreamFromNdJson = (ruleLimit: number) => {
+export const createRulesAndExceptionsStreamFromNdJson = (ruleLimit: number) => {
   return [
     createSplitStream('\n'),
     parseNdjsonStrings(),
     filterExportedCounts(),
-    filterExceptions(),
-    validateRules(),
-    createLimitStream(ruleLimit),
+    sortImports(),
+    validateRulesStream(),
+    createRulesLimitStream(ruleLimit),
     createConcatStream([]),
   ];
 };

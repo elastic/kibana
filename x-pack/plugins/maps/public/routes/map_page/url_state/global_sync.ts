@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { TimeRange, RefreshInterval, Filter } from 'src/plugins/data/public';
-import { syncQueryStateWithUrl } from '../../../../../../../src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
+import { TimeRange, RefreshInterval } from '@kbn/data-plugin/public';
+import { syncQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { getData } from '../../../kibana_services';
 import { kbnUrlStateStorage } from '../../../render_app';
 

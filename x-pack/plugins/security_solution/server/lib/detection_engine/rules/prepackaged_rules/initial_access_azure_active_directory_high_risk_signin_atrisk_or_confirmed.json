@@ -1,0 +1,52 @@
+{
+  "author": [
+    "Austin Songer"
+  ],
+  "description": "Identifies high risk Azure Active Directory (AD) sign-ins by leveraging Microsoft Identity Protection machine learning and heuristics.",
+  "from": "now-25m",
+  "index": [
+    "filebeat-*",
+    "logs-azure*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Azure Active Directory High Risk User Sign-in Heuristic",
+  "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:azure.signinlogs and\n  azure.signinlogs.properties.risk_state:(\"confirmedCompromised\" or \"atRisk\") and event.outcome:(success or Success)\n",
+  "references": [
+    "https://docs.microsoft.com/en-us/azure/active-directory/reports-monitoring/reference-azure-monitor-sign-ins-log-schema",
+    "https://docs.microsoft.com/en-us/azure/active-directory/identity-protection/overview-identity-protection",
+    "https://docs.microsoft.com/en-us/azure/active-directory/identity-protection/howto-identity-protection-investigate-risk"
+  ],
+  "risk_score": 47,
+  "rule_id": "26edba02-6979-4bce-920a-70b080a7be81",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "Azure",
+    "Continuous Monitoring",
+    "SecOps",
+    "Identity and Access"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0001",
+        "name": "Initial Access",
+        "reference": "https://attack.mitre.org/tactics/TA0001/"
+      },
+      "technique": [
+        {
+          "id": "T1078",
+          "name": "Valid Accounts",
+          "reference": "https://attack.mitre.org/techniques/T1078/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 1
+}

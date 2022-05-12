@@ -13,8 +13,11 @@ import { render as reactRender, act } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import type { RenderHookResult } from '@testing-library/react-hooks';
 
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { ScopedHistory } from '../../../../../src/core/public';
+import { themeServiceMock } from '@kbn/core/public/mocks';
+
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { ScopedHistory } from '@kbn/core/public';
+
 import { FleetAppContext } from '../applications/fleet/app';
 import { IntegrationsAppContext } from '../applications/integrations/app';
 import type { FleetConfigType } from '../plugin';
@@ -24,7 +27,6 @@ import { createConfigurationMock } from './plugin_configuration';
 import { createStartMock } from './plugin_interfaces';
 import { createStartServices } from './fleet_start_services';
 import type { MockedFleetStart, MockedFleetStartServices } from './types';
-
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
 /**
@@ -76,13 +78,13 @@ export const createFleetTestRendererMock = (): TestRenderer => {
     AppWrapper: memo(({ children }) => {
       return (
         <FleetAppContext
-          basepath={basePath}
           startServices={testRendererMocks.startServices}
           config={testRendererMocks.config}
           history={testRendererMocks.mountHistory}
           kibanaVersion={testRendererMocks.kibanaVersion}
           extensions={extensions}
           routerHistory={testRendererMocks.history}
+          theme$={themeServiceMock.createTheme$()}
         >
           {children}
         </FleetAppContext>
@@ -138,6 +140,7 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
           kibanaVersion={testRendererMocks.kibanaVersion}
           extensions={extensions}
           routerHistory={testRendererMocks.history}
+          theme$={themeServiceMock.createTheme$()}
           setHeaderActionMenu={() => {}}
         >
           {children}

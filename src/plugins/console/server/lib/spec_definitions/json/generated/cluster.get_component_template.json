@@ -10,7 +10,7 @@
     ],
     "patterns": [
       "_component_template",
-      "_component_template/{name}"
+      "_component_template/{component_template}"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/getting-component-templates.html"
   }

@@ -14,9 +14,8 @@ import { usePushToService, ReturnUsePushToService, UsePushToService } from '.';
 import { TestProviders } from '../../common/mock';
 import { CaseStatuses, ConnectorTypes } from '../../../common/api';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
-import { basicPush, actionLicenses } from '../../containers/mock';
+import { basicPush, actionLicenses, connectorsMock } from '../../containers/mock';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
-import { connectorsMock } from '../../containers/configure/mock';
 import { CLOSED_CASE_PUSH_ERROR_ID } from './callout/types';
 import * as i18n from './translations';
 

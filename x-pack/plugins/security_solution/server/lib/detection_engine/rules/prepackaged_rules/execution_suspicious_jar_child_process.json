@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Identifies suspicious child processes of a Java Archive (JAR) file. JAR files may be used to deliver malware in order to evade detection.",
+  "description": "Identifies suspicious child processes of the Java interpreter process. This may indicate an attempt to execute a malicious JAR file or an exploitation attempt via a JAVA specific vulnerability.",
   "from": "now-9m",
   "index": [
     "auditbeat-*",
@@ -10,8 +10,14 @@
   ],
   "language": "eql",
   "license": "Elastic License v2",
-  "name": "Suspicious JAR Child Process",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.parent.name : \"java\" and\n  process.name : (\"sh\", \"bash\", \"dash\", \"ksh\", \"tcsh\", \"zsh\", \"curl\", \"wget\") and\n  process.args : \"-jar\" and process.args : \"*.jar\" and\n  /* Add any FP's here */\n  not process.executable : (\"/Users/*/.sdkman/*\", \"/Library/Java/JavaVirtualMachines/*\") and\n  not process.args : (\"/usr/local/*\", \"/Users/*/github.com/*\", \"/Users/*/src/*\")\n",
+  "name": "Suspicious JAVA Child Process",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.parent.name : \"java\" and\n  process.name : (\"sh\", \"bash\", \"dash\", \"ksh\", \"tcsh\", \"zsh\", \"curl\", \"wget\")\n",
+  "references": [
+    "https://www.lunasec.io/docs/blog/log4j-zero-day/",
+    "https://github.com/christophetd/log4shell-vulnerable-app",
+    "https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE.pdf"
+  ],
   "risk_score": 47,
   "rule_id": "8acb7614-1d92-4359-bfcf-478b6d9de150",
   "severity": "medium",
@@ -49,5 +55,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 4
 }

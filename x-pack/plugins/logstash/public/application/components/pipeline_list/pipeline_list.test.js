@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { PipelineList } from './pipeline_list';
 
 describe('PipelineList component', () => {

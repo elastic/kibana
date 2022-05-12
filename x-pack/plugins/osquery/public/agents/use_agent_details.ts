@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { useQuery } from 'react-query';
 
-import { GetOneAgentResponse } from '../../../fleet/common';
+import { GetOneAgentResponse } from '@kbn/fleet-plugin/common';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
 
@@ -21,6 +21,7 @@ interface UseAgentDetails {
 export const useAgentDetails = ({ agentId, silent, skip }: UseAgentDetails) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
+
   return useQuery<GetOneAgentResponse, unknown, GetOneAgentResponse['item']>(
     ['agentDetails', agentId],
     () => http.get(`/internal/osquery/fleet_wrapper/agents/${agentId}`),

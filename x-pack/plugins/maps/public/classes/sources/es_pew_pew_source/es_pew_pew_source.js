@@ -18,6 +18,7 @@ import { AbstractESAggSource } from '../es_agg_source';
 import { registerSource } from '../source_registry';
 import { turfBboxToBounds } from '../../../../common/elasticsearch_util';
 import { DataRequestAbortError } from '../../util/data_request';
+import { makePublicExecutionContext } from '../../../util';
 
 const MAX_GEOTILE_LEVEL = 29;
 
@@ -163,6 +164,7 @@ export class ESPewPewSource extends AbstractESAggSource {
         defaultMessage: 'Source-destination connections request',
       }),
       searchSessionId: searchFilters.searchSessionId,
+      executionContext: makePublicExecutionContext('es_pew_pew_source:connections'),
     });
 
     const { featureCollection } = convertToLines(esResponse);
@@ -199,10 +201,13 @@ export class ESPewPewSource extends AbstractESAggSource {
     try {
       const abortController = new AbortController();
       registerCancelCallback(() => abortController.abort());
-      const esResp = await searchSource.fetch({
-        abortSignal: abortController.signal,
-        legacyHitsTotal: false,
-      });
+      const { rawResponse: esResp } = await searchSource
+        .fetch$({
+          abortSignal: abortController.signal,
+          legacyHitsTotal: false,
+          executionContext: makePublicExecutionContext('es_pew_pew_source:bounds'),
+        })
+        .toPromise();
       if (esResp.aggregations.destFitToBounds.bounds) {
         corners.push([
           esResp.aggregations.destFitToBounds.bounds.top_left.lon,

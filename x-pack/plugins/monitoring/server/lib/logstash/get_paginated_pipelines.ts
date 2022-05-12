@@ -42,7 +42,6 @@ import {
 
 interface GetPaginatedPipelinesParams {
   req: LegacyRequest;
-  lsIndexPattern: string;
   clusterUuid: string;
   logstashUuid?: string;
   metrics: {
@@ -55,7 +54,6 @@ interface GetPaginatedPipelinesParams {
 }
 export async function getPaginatedPipelines({
   req,
-  lsIndexPattern,
   clusterUuid,
   logstashUuid,
   metrics,
@@ -65,21 +63,19 @@ export async function getPaginatedPipelines({
 }: GetPaginatedPipelinesParams) {
   const { throughputMetric, nodesCountMetric } = metrics;
   const sortField = sort.field;
-  const config = req.server.config();
-  // TODO type config
-  const size = config.get('monitoring.ui.max_bucket_size') as unknown as number;
+  const config = req.server.config;
+  const size = config.ui.max_bucket_size;
   let pipelines = await getLogstashPipelineIds({
     req,
-    lsIndexPattern,
     clusterUuid,
     logstashUuid,
     size,
   });
   // this is needed for sorting
   if (sortField === throughputMetric) {
-    pipelines = await getPaginatedThroughputData(pipelines, req, lsIndexPattern, throughputMetric);
+    pipelines = await getPaginatedThroughputData(pipelines, req, throughputMetric);
   } else if (sortField === nodesCountMetric) {
-    pipelines = await getPaginatedNodesData(pipelines, req, lsIndexPattern, nodesCountMetric);
+    pipelines = await getPaginatedNodesData(pipelines, req, nodesCountMetric);
   }
 
   const filteredPipelines = filter(pipelines, queryText, ['id']); // We only support filtering by id right now
@@ -91,7 +87,6 @@ export async function getPaginatedPipelines({
   const response = {
     pipelines: await getPipelines({
       req,
-      lsIndexPattern,
       pipelines: pageOfPipelines,
       throughputMetric,
       nodesCountMetric,
@@ -131,9 +126,10 @@ function processPipelinesAPIResponse(
 async function getPaginatedThroughputData(
   pipelines: Pipeline[],
   req: LegacyRequest,
-  lsIndexPattern: string,
   throughputMetric: PipelineThroughputMetricKey
 ): Promise<Pipeline[]> {
+  const dataset = 'node_stats';
+  const moduleType = 'logstash';
   const metricSeriesData: any = Object.values(
     await Promise.all(
       pipelines.map((pipeline) => {
@@ -141,20 +137,17 @@ async function getPaginatedThroughputData(
           try {
             const data = await getMetrics(
               req,
-              lsIndexPattern,
+              moduleType,
               [throughputMetric],
               [
                 {
                   bool: {
                     should: [
+                      { term: { 'data_stream.dataset': `${moduleType}.${dataset}` } },
+                      { term: { 'metricset.name': dataset } },
                       {
                         term: {
                           type: 'logstash_stats',
-                        },
-                      },
-                      {
-                        term: {
-                          'metricset.name': 'stats',
                         },
                       },
                     ],
@@ -197,18 +190,23 @@ async function getPaginatedThroughputData(
 async function getPaginatedNodesData(
   pipelines: Pipeline[],
   req: LegacyRequest,
-  lsIndexPattern: string,
   nodesCountMetric: PipelineNodeCountMetricKey
 ): Promise<Pipeline[]> {
+  const dataset = 'node_stats';
+  const moduleType = 'logstash';
   const pipelineWithMetrics = cloneDeep(pipelines);
   const metricSeriesData = await getMetrics(
     req,
-    lsIndexPattern,
+    moduleType,
     [nodesCountMetric],
     [
       {
         bool: {
-          should: [{ term: { type: 'logstash_stats' } }, { term: { 'metricset.name': 'stats' } }],
+          should: [
+            { term: { 'data_stream.dataset': `${moduleType}.${dataset}` } },
+            { term: { 'metricset.name': dataset } },
+            { term: { type: 'logstash_stats' } },
+          ],
         },
       },
     ],
@@ -228,29 +226,17 @@ async function getPaginatedNodesData(
 
 async function getPipelines({
   req,
-  lsIndexPattern,
   pipelines,
   throughputMetric,
   nodesCountMetric,
 }: {
   req: LegacyRequest;
-  lsIndexPattern: string;
   pipelines: Pipeline[];
   throughputMetric: PipelineThroughputMetricKey;
   nodesCountMetric: PipelineNodeCountMetricKey;
 }): Promise<PipelineWithMetrics[]> {
-  const throughputPipelines = await getThroughputPipelines(
-    req,
-    lsIndexPattern,
-    pipelines,
-    throughputMetric
-  );
-  const nodeCountPipelines = await getNodePipelines(
-    req,
-    lsIndexPattern,
-    pipelines,
-    nodesCountMetric
-  );
+  const throughputPipelines = await getThroughputPipelines(req, pipelines, throughputMetric);
+  const nodeCountPipelines = await getNodePipelines(req, pipelines, nodesCountMetric);
   const finalPipelines = pipelines.map(({ id }) => {
     const matchThroughputPipeline = throughputPipelines.find((p) => p.id === id);
     const matchNodesCountPipeline = nodeCountPipelines.find((p) => p.id === id);
@@ -273,30 +259,28 @@ async function getPipelines({
 
 async function getThroughputPipelines(
   req: LegacyRequest,
-  lsIndexPattern: string,
   pipelines: Pipeline[],
   throughputMetric: string
 ): Promise<PipelineWithMetrics[]> {
+  const dataset = 'node_stats';
+  const moduleType = 'logstash';
   const metricsResponse = await Promise.all(
     pipelines.map((pipeline) => {
       return new Promise(async (resolve, reject) => {
         try {
           const data = await getMetrics(
             req,
-            lsIndexPattern,
+            moduleType,
             [throughputMetric],
             [
               {
                 bool: {
                   should: [
+                    { term: { 'data_stream.dataset': `${moduleType}.${dataset}` } },
+                    { term: { 'metricset.name': dataset } },
                     {
                       term: {
                         type: 'logstash_stats',
-                      },
-                    },
-                    {
-                      term: {
-                        'metricset.name': 'stats',
                       },
                     },
                   ],
@@ -319,18 +303,23 @@ async function getThroughputPipelines(
 
 async function getNodePipelines(
   req: LegacyRequest,
-  lsIndexPattern: string,
   pipelines: Pipeline[],
   nodesCountMetric: string
 ): Promise<PipelineWithMetrics[]> {
+  const moduleType = 'logstash';
+  const dataset = 'node_stats';
   const metricData = await getMetrics(
     req,
-    lsIndexPattern,
+    moduleType,
     [nodesCountMetric],
     [
       {
         bool: {
-          should: [{ term: { type: 'logstash_stats' } }, { term: { 'metricset.name': 'stats' } }],
+          should: [
+            { term: { 'data_stream.dataset': `${moduleType}.${dataset}` } },
+            { term: { 'metricset.name': dataset } },
+            { term: { type: 'logstash_stats' } },
+          ],
         },
       },
     ],

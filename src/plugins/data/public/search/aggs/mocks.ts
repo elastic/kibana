@@ -56,11 +56,6 @@ export const searchAggsSetupMock = (): AggsSetup => ({
 
 export const searchAggsStartMock = (): AggsStart => ({
   calculateAutoTimeExpression: getCalculateAutoTimeExpression(getConfig),
-  datatableUtilities: {
-    isFilterable: jest.fn(),
-    getAggConfig: jest.fn(),
-    getIndexPattern: jest.fn(),
-  },
   createAggConfigs: jest.fn().mockImplementation((indexPattern, configStates = [], schemas) => {
     return new AggConfigs(indexPattern, configStates, {
       typesRegistry: mockAggTypesRegistry(),

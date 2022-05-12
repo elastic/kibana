@@ -16,6 +16,7 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
+import { UrlTemplateEditor, UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import { UrlDrilldownConfig } from '../../types';
 import './index.scss';
 import {
@@ -27,14 +28,11 @@ import {
   txtUrlTemplateEncodeDescription,
 } from './i18n';
 import { VariablePopover } from '../variable_popover';
-import {
-  UrlTemplateEditor,
-  UrlTemplateEditorVariable,
-} from '../../../../../../../../src/plugins/kibana_react/public';
 
 export interface UrlDrilldownCollectConfigProps {
   config: UrlDrilldownConfig;
   variables: UrlTemplateEditorVariable[];
+  exampleUrl: string;
   onConfig: (newConfig: UrlDrilldownConfig) => void;
   syntaxHelpDocsLink?: string;
   variablesHelpDocsLink?: string;
@@ -43,17 +41,18 @@ export interface UrlDrilldownCollectConfigProps {
 export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfigProps> = ({
   config,
   variables,
+  exampleUrl,
   onConfig,
   syntaxHelpDocsLink,
   variablesHelpDocsLink,
 }) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
-  const [showUrlError, setShowUrlError] = React.useState(false);
+  const [isPristine, setIsPristine] = React.useState(true);
   const urlTemplate = config.url.template ?? '';
 
   function updateUrlTemplate(newUrlTemplate: string) {
     if (config.url.template !== newUrlTemplate) {
-      setShowUrlError(true);
+      setIsPristine(false);
       onConfig({
         ...config,
         url: {
@@ -64,7 +63,7 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfigProps>
     }
   }
   const isEmpty = !urlTemplate;
-  const isInvalid = showUrlError && isEmpty;
+  const isInvalid = !isPristine && isEmpty;
   const variablesDropdown = (
     <VariablePopover
       variables={variables}
@@ -99,6 +98,7 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfigProps>
         <UrlTemplateEditor
           variables={variables}
           value={urlTemplate}
+          placeholder={exampleUrl}
           onChange={(newUrlTemplate) => updateUrlTemplate(newUrlTemplate)}
           onEditor={(editor) => {
             editorRef.current = editor;

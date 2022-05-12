@@ -90,3 +90,7 @@ export function isIosAgentName(agentName?: string) {
 export function isJRubyAgent(agentName?: string, runtimeName?: string) {
   return agentName === 'ruby' && runtimeName?.toLowerCase() === 'jruby';
 }
+
+export function isServerlessAgent(runtimeName?: string) {
+  return runtimeName?.toLowerCase().startsWith('aws_lambda');
+}

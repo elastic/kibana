@@ -80,7 +80,7 @@ export function TimeScaling({
 
   return (
     <EuiFormRow
-      display="columnCompressed"
+      display="rowCompressed"
       fullWidth
       label={
         <EuiToolTip

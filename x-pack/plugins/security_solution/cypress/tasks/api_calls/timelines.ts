@@ -40,12 +40,15 @@ export const createTimeline = (timeline: CompleteTimeline) =>
           },
         },
         dateRange: {
-          end: '1577881376000',
-          start: '1514809376000',
+          end: '2022-04-01T12:22:56.000Z',
+          start: '2018-01-01T12:22:56.000Z',
         },
         description: timeline.description,
         title: timeline.title,
         savedQueryId: null,
+        ...(timeline.dataViewId != null && timeline.indexNames != null
+          ? { dataViewId: timeline.dataViewId, indexNames: timeline.indexNames }
+          : {}),
       },
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },

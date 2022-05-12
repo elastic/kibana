@@ -1,4 +1,0 @@
-{
-  "main": "../target_node/iso_to_epoch_rt",
-  "types": "../target_types/iso_to_epoch_rt"
-}

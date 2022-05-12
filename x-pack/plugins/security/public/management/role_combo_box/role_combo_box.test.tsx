@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { RoleComboBox } from './role_combo_box';
 

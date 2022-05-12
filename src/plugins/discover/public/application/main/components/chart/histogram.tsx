@@ -11,17 +11,17 @@ import React, { useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiIconTip,
   EuiLoadingChart,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import {
   Axis,
   BrushEndListener,
-  XYBrushEvent,
   Chart,
   ElementClickListener,
   HistogramBarSeries,
@@ -29,26 +29,28 @@ import {
   ScaleType,
   Settings,
   TooltipType,
+  XYBrushEvent,
   XYChartElementEvent,
 } from '@elastic/charts';
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import {
   CurrentTime,
   Endzones,
   getAdjustedInterval,
   renderEndzoneTooltip,
-} from '../../../../../../charts/public';
+} from '@kbn/charts-plugin/public';
+import { LEGACY_TIME_AXIS, MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DataCharts$, DataChartsMessage } from '../../utils/use_saved_search';
 import { FetchStatus } from '../../../types';
-import { DiscoverServices } from '../../../../build_services';
 import { useDataState } from '../../utils/use_data_state';
-import { LEGACY_TIME_AXIS, MULTILAYER_TIME_AXIS_STYLE } from '../../../../../../charts/common';
+import { GetStateReturn } from '../../services/discover_state';
 
 export interface DiscoverHistogramProps {
   savedSearchData$: DataCharts$;
   timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
-  services: DiscoverServices;
+  stateContainer: GetStateReturn;
 }
 
 function getTimezone(uiSettings: IUiSettingsClient) {
@@ -64,16 +66,16 @@ function getTimezone(uiSettings: IUiSettingsClient) {
 export function DiscoverHistogram({
   savedSearchData$,
   timefilterUpdateHandler,
-  services,
+  stateContainer,
 }: DiscoverHistogramProps) {
-  const chartTheme = services.theme.useChartsTheme();
-  const chartBaseTheme = services.theme.useChartsBaseTheme();
+  const { data, theme, uiSettings, fieldFormats } = useDiscoverServices();
+  const chartTheme = theme.useChartsTheme();
+  const chartBaseTheme = theme.useChartsBaseTheme();
 
   const dataState: DataChartsMessage = useDataState(savedSearchData$);
 
-  const uiSettings = services.uiSettings;
   const timeZone = getTimezone(uiSettings);
-  const { chartData, fetchStatus, bucketInterval } = dataState;
+  const { chartData, bucketInterval, fetchStatus, error } = dataState;
 
   const onBrushEnd = useCallback(
     ({ x }: XYBrushEvent) => {
@@ -101,7 +103,7 @@ export function DiscoverHistogram({
     [timefilterUpdateHandler]
   );
 
-  const { timefilter } = services.data.query.timefilter;
+  const { timefilter } = data.query.timefilter;
 
   const { from, to } = timefilter.getAbsoluteTime();
   const dateFormat = useMemo(() => uiSettings.get('dateFormat'), [uiSettings]);
@@ -124,8 +126,20 @@ export function DiscoverHistogram({
       from: dateMath.parse(from),
       to: dateMath.parse(to, { roundUp: true }),
     };
-    return `${toMoment(timeRange.from)} - ${toMoment(timeRange.to)}`;
-  }, [from, to, toMoment]);
+    const intervalText = i18n.translate('discover.histogramTimeRangeIntervalDescription', {
+      defaultMessage: '(interval: {value})',
+      values: {
+        value: `${
+          stateContainer.appStateContainer.getState().interval === 'auto'
+            ? `${i18n.translate('discover.histogramTimeRangeIntervalAuto', {
+                defaultMessage: 'Auto',
+              })} - `
+            : ''
+        }${bucketInterval?.description}`,
+      },
+    });
+    return `${toMoment(timeRange.from)} - ${toMoment(timeRange.to)} ${intervalText}`;
+  }, [from, to, toMoment, bucketInterval, stateContainer]);
 
   if (!chartData && fetchStatus === FetchStatus.LOADING) {
     return (
@@ -141,6 +155,29 @@ export function DiscoverHistogram({
     );
   }
 
+  if (fetchStatus === FetchStatus.ERROR && error) {
+    return (
+      <div className="dscHistogram__errorChartContainer">
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false} className="dscHistogram__errorChart__icon">
+            <EuiIcon type="visBarVertical" color="danger" size="m" />
+          </EuiFlexItem>
+          <EuiFlexItem className="dscHistogram__errorChart">
+            <EuiText size="s" color="danger">
+              <FormattedMessage
+                id="discover.errorLoadingChart"
+                defaultMessage="Error loading chart"
+              />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiText className="dscHistogram__errorChart__text" size="s">
+          {error.message}
+        </EuiText>
+      </div>
+    );
+  }
+
   if (!chartData) {
     return null;
   }
@@ -150,7 +187,6 @@ export function DiscoverHistogram({
     return moment(val).format(xAxisFormat);
   };
 
-  const data = chartData.values;
   const isDarkMode = uiSettings.get('theme:darkMode');
 
   /*
@@ -168,7 +204,7 @@ export function DiscoverHistogram({
   const domainStart = domain.min.valueOf();
   const domainEnd = domain.max.valueOf();
 
-  const domainMin = Math.min(data[0]?.x, domainStart);
+  const domainMin = Math.min(chartData.values[0]?.x, domainStart);
   const domainMax = Math.max(domainEnd - xInterval, lastXValue);
 
   const xDomain = {
@@ -186,7 +222,7 @@ export function DiscoverHistogram({
     type: TooltipType.VerticalCursor,
   };
 
-  const xAxisFormatter = services.data.fieldFormats.deserialize(chartData.yAxisFormat);
+  const xAxisFormatter = fieldFormats.deserialize(chartData.yAxisFormat);
 
   const useLegacyTimeAxis = uiSettings.get(LEGACY_TIME_AXIS, false);
 
@@ -274,7 +310,7 @@ export function DiscoverHistogram({
             yScaleType={ScaleType.Linear}
             xAccessor="x"
             yAccessors={['y']}
-            data={data}
+            data={chartData.values}
             yNice
             timeZone={timeZone}
             name={chartData.yAxisLabel}

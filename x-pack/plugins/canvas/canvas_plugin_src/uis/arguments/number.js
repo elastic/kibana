@@ -9,6 +9,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFieldNumber, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
+import { withDebounceArg } from '../../../public/components/with_debounce_arg';
 import { ArgumentStrings } from '../../../i18n';
 
 const { Number: strings } = ArgumentStrings;
@@ -28,8 +29,11 @@ const NumberArgInput = ({ argId, argValue, typeInstance, onValueChange }) => {
 
   const onChange = useCallback(
     (ev) => {
-      const onChangeFn = confirm ? setValue : onValueChange;
-      onChangeFn(ev.target.value);
+      const { value } = ev.target;
+      setValue(value);
+      if (!confirm) {
+        onValueChange(value);
+      }
     },
     [confirm, onValueChange]
   );
@@ -62,6 +66,6 @@ export const number = () => ({
   name: 'number',
   displayName: strings.getDisplayName(),
   help: strings.getHelp(),
-  simpleTemplate: templateFromReactComponent(NumberArgInput),
+  simpleTemplate: templateFromReactComponent(withDebounceArg(NumberArgInput)),
   default: '0',
 });

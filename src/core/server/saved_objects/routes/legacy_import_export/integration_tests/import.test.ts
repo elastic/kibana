@@ -32,15 +32,14 @@ jest.mock('../lib/import_dashboards', () => ({
 }));
 
 import supertest from 'supertest';
-import type { UnwrapPromise } from '@kbn/utility-types';
 import { CoreUsageStatsClient } from '../../../../core_usage_data';
 import { coreUsageStatsClientMock } from '../../../../core_usage_data/core_usage_stats_client.mock';
 import { coreUsageDataServiceMock } from '../../../../core_usage_data/core_usage_data_service.mock';
 import { registerLegacyImportRoute } from '../import';
 import { setupServer } from '../../test_utils';
-import { loggerMock } from 'src/core/server/logging/logger.mock';
+import { loggerMock } from '../../../../logging/logger.mock';
 
-type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
+type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 let coreUsageStatsClient: jest.Mocked<CoreUsageStatsClient>;
 
 describe('POST /api/dashboards/import', () => {

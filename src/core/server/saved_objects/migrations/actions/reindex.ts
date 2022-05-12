@@ -21,6 +21,7 @@ import { BATCH_SIZE } from './constants';
 export interface ReindexResponse {
   taskId: string;
 }
+
 /** @internal */
 export interface ReindexParams {
   client: ElasticsearchClient;
@@ -34,6 +35,7 @@ export interface ReindexParams {
    */
   unusedTypesQuery: estypes.QueryDslQueryContainer;
 }
+
 /**
  * Reindex documents from the `sourceIndex` into the `targetIndex`. Returns a
  * task ID which can be tracked for progress.
@@ -85,7 +87,7 @@ export const reindex =
         // Create a task and return task id instead of blocking until complete
         wait_for_completion: false,
       })
-      .then(({ body: { task: taskId } }) => {
+      .then(({ task: taskId }) => {
         return Either.right({ taskId: String(taskId) });
       })
       .catch(catchRetryableEsClientErrors);

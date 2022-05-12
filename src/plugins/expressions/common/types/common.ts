@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ObservableLike, UnwrapObservable, UnwrapPromiseOrReturn } from '@kbn/utility-types';
+import { ObservableLike, UnwrapObservable } from '@kbn/utility-types';
 
 /**
  * This can convert a type into a known Expression string representation of
@@ -37,7 +37,7 @@ export type KnownTypeToString<T> =
  * `someArgument: Promise<boolean | string>` results in `types: ['boolean', 'string']`
  */
 export type TypeString<T> = KnownTypeToString<
-  T extends ObservableLike<unknown> ? UnwrapObservable<T> : UnwrapPromiseOrReturn<T>
+  T extends ObservableLike<unknown> ? UnwrapObservable<T> : Awaited<T>
 >;
 
 /**

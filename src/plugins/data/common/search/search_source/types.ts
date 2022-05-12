@@ -7,12 +7,14 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { AggConfigSerialized, IAggConfigs } from 'src/plugins/data/public';
 import { SerializableRecord } from '@kbn/utility-types';
+import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { AggConfigSerialized, IAggConfigs } from '../../../public';
 import { Query } from '../..';
 import { Filter } from '../../es_query';
 import { IndexPattern } from '../..';
-import { SearchSource } from './search_source';
+import type { SearchSource } from './search_source';
 
 /**
  * search source interface
@@ -24,7 +26,8 @@ export type ISearchSource = Pick<SearchSource, keyof SearchSource>;
  * high level search service
  * @public
  */
-export interface ISearchStartSearchSource {
+export interface ISearchStartSearchSource
+  extends PersistableStateService<SerializedSearchSourceFields> {
   /**
    * creates {@link SearchSource} based on provided serialized {@link SearchSourceFields}
    * @param fields
@@ -43,15 +46,17 @@ export enum SortDirection {
   desc = 'desc',
 }
 
-export interface SortDirectionFormat {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type SortDirectionFormat = {
   order: SortDirection;
   format?: string;
-}
+};
 
-export interface SortDirectionNumeric {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type SortDirectionNumeric = {
   order: SortDirection;
   numeric_type?: 'double' | 'long' | 'date' | 'date_nanos';
-}
+};
 
 export type EsQuerySortValue = Record<
   string,
@@ -114,7 +119,8 @@ export interface SearchSourceFields {
   parent?: SearchSourceFields;
 }
 
-export interface SerializedSearchSourceFields {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type SerializedSearchSourceFields = {
   type?: string;
   /**
    * {@link Query}
@@ -159,7 +165,7 @@ export interface SerializedSearchSourceFields {
   terminate_after?: number;
 
   parent?: SerializedSearchSourceFields;
-}
+};
 
 export interface SearchSourceOptions {
   callParentStartHandlers?: boolean;
@@ -210,4 +216,14 @@ export interface ShardFailure {
     type: string;
   };
   shard: number;
+}
+
+export function isSerializedSearchSource(
+  maybeSerializedSearchSource: unknown
+): maybeSerializedSearchSource is SerializedSearchSourceFields {
+  return (
+    typeof maybeSerializedSearchSource === 'object' &&
+    maybeSerializedSearchSource !== null &&
+    !Array.isArray(maybeSerializedSearchSource)
+  );
 }

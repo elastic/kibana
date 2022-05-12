@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { AlertTypeParams } from '../../../../alerting/common';
-import type { AlertTypeModel, ValidationResult } from '../../../../triggers_actions_ui/public';
+import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import type { RuleTypeModel, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   RULE_CCR_READ_EXCEPTIONS,
   RULE_DETAILS,
@@ -20,7 +20,7 @@ import {
   LazyExpressionProps,
 } from '../components/param_details_form/lazy_expression';
 
-interface ValidateOptions extends AlertTypeParams {
+interface ValidateOptions extends RuleTypeParams {
   duration: string;
 }
 
@@ -42,7 +42,7 @@ const validate = (inputValues: ValidateOptions): ValidationResult => {
 
 export function createCCRReadExceptionsAlertType(
   config: MonitoringConfig
-): AlertTypeModel<ValidateOptions> {
+): RuleTypeModel<ValidateOptions> {
   return {
     id: RULE_CCR_READ_EXCEPTIONS,
     description: RULE_DETAILS[RULE_CCR_READ_EXCEPTIONS].description,
@@ -50,7 +50,7 @@ export function createCCRReadExceptionsAlertType(
     documentationUrl(docLinks) {
       return `${docLinks.links.monitoring.alertsKibanaCCRReadExceptions}`;
     },
-    alertParamsExpression: (props: LazyExpressionProps) => (
+    ruleParamsExpression: (props: LazyExpressionProps) => (
       <LazyExpression
         {...props}
         config={config}

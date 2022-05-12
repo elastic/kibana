@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { TelemetryCollectionManagerPlugin } from '@kbn/telemetry-collection-manager-plugin/server/plugin';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { TelemetryCollectionManagerPlugin } from '../../../../src/plugins/telemetry_collection_manager/server/plugin';
 
 export function UsageAPIProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -40,11 +40,12 @@ export function UsageAPIProvider({ getService }: FtrProviderContext) {
      */
     async getTelemetryStats(payload: {
       unencrypted?: boolean;
+      refreshCache?: boolean;
     }): Promise<ReturnType<TelemetryCollectionManagerPlugin['getStats']>> {
       const { body } = await supertest
         .post('/api/telemetry/v2/clusters/_stats')
         .set('kbn-xsrf', 'xxx')
-        .send(payload)
+        .send({ refreshCache: true, ...payload })
         .expect(200);
       return body;
     },

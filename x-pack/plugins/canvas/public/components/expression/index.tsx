@@ -7,7 +7,7 @@
 
 import React, { FC, useState, useCallback, useMemo, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fromExpression } from '@kbn/interpreter/common';
+import { fromExpression } from '@kbn/interpreter';
 import { useExpressionsService } from '../../services';
 import { getSelectedPage, getSelectedElement } from '../../state/selectors/workpad';
 // @ts-expect-error

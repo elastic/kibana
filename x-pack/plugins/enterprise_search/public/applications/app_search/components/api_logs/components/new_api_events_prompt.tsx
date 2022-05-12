@@ -12,7 +12,7 @@ import { useValues, useActions } from 'kea';
 import { EuiPanel, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { ApiLogsLogic } from '../';
+import { ApiLogsLogic } from '..';
 
 import './new_api_events_prompt.scss';
 

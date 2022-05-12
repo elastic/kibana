@@ -13,29 +13,25 @@ import {
   EuiFlexItem,
   EuiSwitchEvent,
   EuiSwitch,
+  EuiIcon,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { PaletteRegistry } from 'src/plugins/charts/public';
 import {
-  isNumericFieldForDatatable,
-  GaugeVisualizationState,
-  GaugeTicksPositions,
-  GaugeColorModes,
-} from '../../../common/expressions';
-import {
-  applyPaletteParams,
+  PaletteRegistry,
   CustomizablePalette,
   CUSTOM_PALETTE,
   FIXED_PROGRESSION,
-  getStopsForFixedMode,
-  PalettePanelContainer,
-} from '../../shared_components/';
+} from '@kbn/coloring';
+import { GaugeTicksPositions, GaugeColorModes } from '@kbn/expression-gauge-plugin/common';
+import { getMaxValue, getMinValue } from '@kbn/expression-gauge-plugin/public';
+import { isNumericFieldForDatatable } from '../../../common/expressions';
+import { applyPaletteParams, PalettePanelContainer, TooltipWrapper } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
-import { defaultPaletteParams } from './palette_config';
-
 import './dimension_editor.scss';
-import { getMaxValue, getMinValue } from './utils';
+import { GaugeVisualizationState } from './constants';
+import { defaultPaletteParams } from './palette_config';
+import { getAccessorsFromState } from './utils';
 
 export function GaugeDimensionEditor(
   props: VisualizationDimensionEditorProps<GaugeVisualizationState> & {
@@ -54,11 +50,13 @@ export function GaugeDimensionEditor(
     return null;
   }
 
+  const accessors = getAccessorsFromState(state);
+
   const hasDynamicColoring = state?.colorMode === 'palette';
 
   const currentMinMax = {
-    min: getMinValue(firstRow, state),
-    max: getMaxValue(firstRow, state),
+    min: getMinValue(firstRow, accessors),
+    max: getMaxValue(firstRow, accessors),
   };
 
   const activePalette = state?.palette || {
@@ -66,6 +64,7 @@ export function GaugeDimensionEditor(
     name: defaultPaletteParams.name,
     params: {
       ...defaultPaletteParams,
+      continuity: 'all',
       colorStops: undefined,
       stops: undefined,
       rangeMin: currentMinMax.min,
@@ -103,12 +102,12 @@ export function GaugeDimensionEditor(
                       stops: displayStops,
                     },
                   },
-                  ticksPosition: GaugeTicksPositions.bands,
-                  colorMode: GaugeColorModes.palette,
+                  ticksPosition: GaugeTicksPositions.BANDS,
+                  colorMode: GaugeColorModes.PALETTE,
                 }
               : {
-                  ticksPosition: GaugeTicksPositions.auto,
-                  colorMode: GaugeColorModes.none,
+                  ticksPosition: GaugeTicksPositions.AUTO,
+                  colorMode: GaugeColorModes.NONE,
                 };
 
             setState({
@@ -137,14 +136,7 @@ export function GaugeDimensionEditor(
               <EuiFlexItem>
                 <EuiColorPaletteDisplay
                   data-test-subj="lnsGauge_dynamicColoring_palette"
-                  palette={
-                    activePalette.params?.name === CUSTOM_PALETTE
-                      ? getStopsForFixedMode(
-                          activePalette.params.stops!,
-                          activePalette.params.colorStops
-                        )
-                      : displayStops.map(({ color }) => color)
-                  }
+                  palette={displayStops.map(({ color }) => color)}
                   type={FIXED_PROGRESSION}
                   onClick={togglePalette}
                 />
@@ -170,7 +162,6 @@ export function GaugeDimensionEditor(
                     palettes={props.paletteService}
                     activePalette={activePalette}
                     dataBounds={currentMinMax}
-                    showContinuity={false}
                     setPalette={(newPalette) => {
                       // if the new palette is not custom, replace the rangeMin with the artificial one
                       if (
@@ -191,11 +182,32 @@ export function GaugeDimensionEditor(
             </EuiFlexGroup>
           </EuiFormRow>
           <EuiFormRow
-            fullWidth
             display="columnCompressedSwitch"
-            label={i18n.translate('xpack.lens.shared.ticksPositionOptions', {
-              defaultMessage: 'Ticks on bands',
-            })}
+            fullWidth
+            label={
+              <TooltipWrapper
+                position="top"
+                tooltipContent={i18n.translate('xpack.lens.shared.ticksPositionOptionsTooltip', {
+                  defaultMessage:
+                    'Places ticks on each band border instead of distributing them evenly',
+                })}
+                condition={true}
+                delay="regular"
+              >
+                <span>
+                  {i18n.translate('xpack.lens.shared.ticksPositionOptions', {
+                    defaultMessage: 'Ticks on bands',
+                  })}
+
+                  <EuiIcon
+                    type="questionInCircle"
+                    color="subdued"
+                    size="s"
+                    className="eui-alignTop"
+                  />
+                </span>
+              </TooltipWrapper>
+            }
           >
             <EuiSwitch
               compressed
@@ -204,14 +216,14 @@ export function GaugeDimensionEditor(
               })}
               data-test-subj="lens-toolbar-gauge-ticks-position-switch"
               showLabel={false}
-              checked={state.ticksPosition === GaugeTicksPositions.bands}
+              checked={state.ticksPosition === GaugeTicksPositions.BANDS}
               onChange={() => {
                 setState({
                   ...state,
                   ticksPosition:
-                    state.ticksPosition === GaugeTicksPositions.bands
-                      ? GaugeTicksPositions.auto
-                      : GaugeTicksPositions.bands,
+                    state.ticksPosition === GaugeTicksPositions.BANDS
+                      ? GaugeTicksPositions.AUTO
+                      : GaugeTicksPositions.BANDS,
                 });
               }}
             />

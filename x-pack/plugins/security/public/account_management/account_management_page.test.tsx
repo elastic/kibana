@@ -8,8 +8,8 @@
 import { act } from '@testing-library/react';
 import React from 'react';
 
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
 import type { AuthenticatedUser } from '../../common/model';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';

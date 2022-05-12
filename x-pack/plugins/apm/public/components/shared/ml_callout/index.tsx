@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { AnomalyDetectionSetupState } from '../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
 import { useMlManageJobsHref } from '../../../hooks/use_ml_manage_jobs_href';
-import { APMLink } from '../Links/apm/APMLink';
+import { APMLink } from '../links/apm/apm_link';
 
 export function shouldDisplayMlCallout(
   anomalyDetectionSetupState: AnomalyDetectionSetupState
@@ -107,7 +107,7 @@ export function MLCallout({
         ),
         text: i18n.translate('xpack.apm.mlCallout.updateAvailableCalloutText', {
           defaultMessage:
-            'We have updated the anomaly detection jobs that provide insights into degraded performance and added detectors for throughput and failed transaction rate. If you choose to upgrade, we will create the new jobs and close the existing legacy jobs. The data shown in the APM app will automatically switch to the new.',
+            'We have updated the anomaly detection jobs that provide insights into degraded performance and added detectors for throughput and failed transaction rate. If you choose to upgrade, we will create the new jobs and close the existing legacy jobs. The data shown in the APM app will automatically switch to the new. Please note that the option to migrate all existing jobs will not be available if you choose to create a new job.',
         }),
         color: 'success',
         icon: 'wrench',

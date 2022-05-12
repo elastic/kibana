@@ -27,5 +27,6 @@ const SubmitCaseButtonComponent: React.FC = () => {
     </EuiButton>
   );
 };
+SubmitCaseButtonComponent.displayName = 'SubmitCaseButton';
 
 export const SubmitCaseButton = memo(SubmitCaseButtonComponent);

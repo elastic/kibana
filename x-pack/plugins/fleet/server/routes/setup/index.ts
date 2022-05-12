@@ -5,48 +5,54 @@
  * 2.0.
  */
 
-import { PLUGIN_ID, AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../constants';
+import { AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../constants';
 import type { FleetConfigType } from '../../../common';
 
-import type { FleetRouter } from '../../types/request_context';
+import type { FleetAuthzRouter } from '../security';
 
 import { getFleetStatusHandler, fleetSetupHandler } from './handlers';
 
-export const registerFleetSetupRoute = (router: FleetRouter) => {
+export const registerFleetSetupRoute = (router: FleetAuthzRouter) => {
   router.post(
     {
       path: SETUP_API_ROUTE,
       validate: false,
+      fleetAuthz: {
+        fleet: { setup: true },
+      },
     },
     fleetSetupHandler
   );
 };
 
 // That route is used by agent to setup Fleet
-export const registerCreateFleetSetupRoute = (router: FleetRouter) => {
+export const registerCreateFleetSetupRoute = (router: FleetAuthzRouter) => {
   router.post(
     {
       path: AGENTS_SETUP_API_ROUTES.CREATE_PATTERN,
       validate: false,
+      fleetAuthz: {
+        fleet: { setup: true },
+      },
     },
     fleetSetupHandler
   );
 };
 
-export const registerGetFleetStatusRoute = (router: FleetRouter) => {
+export const registerGetFleetStatusRoute = (router: FleetAuthzRouter) => {
   router.get(
     {
       path: AGENTS_SETUP_API_ROUTES.INFO_PATTERN,
       validate: false,
-      // Disable this tag and the automatic RBAC support until elastic/fleet-server access is removed in 8.0
-      // Required to allow elastic/fleet-server to access this API.
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        fleet: { setup: true },
+      },
     },
     getFleetStatusHandler
   );
 };
 
-export const registerRoutes = (router: FleetRouter, config: FleetConfigType) => {
+export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
   // Ingest manager setup
   registerFleetSetupRoute(router);
 

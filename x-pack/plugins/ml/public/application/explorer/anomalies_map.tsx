@@ -23,11 +23,11 @@ import {
   STYLE_TYPE,
   COLOR_MAP_TYPE,
   VectorLayerDescriptor,
-} from '../../../../maps/common';
+} from '@kbn/maps-plugin/common';
+import { EMSTermJoinConfig } from '@kbn/maps-plugin/public';
 import { useMlKibana } from '../contexts/kibana';
 import { isDefined } from '../../../common/types/guards';
 import { MlEmbeddedMapComponent } from '../components/ml_embedded_map';
-import { EMSTermJoinConfig } from '../../../../maps/public';
 import { AnomaliesTableRecord } from '../../../common/types/anomalies';
 
 const MAX_ENTITY_VALUES = 3;
@@ -222,7 +222,7 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
 
   return (
     <>
-      <EuiPanel>
+      <EuiPanel data-test-subj="mlAnomaliesMapContainer" hasShadow={false} hasBorder>
         <EuiAccordion
           id="mlAnomalyExplorerAnomaliesMapAccordionId"
           initialIsOpen={true}

@@ -50,6 +50,7 @@ export type TGridCellAction = ({
   header,
   pageSize,
   timelineId,
+  closeCellPopover,
 }: {
   browserFields: BrowserFields;
   /** each row of data is represented as one TimelineNonEcsData[] */
@@ -58,6 +59,7 @@ export type TGridCellAction = ({
   header?: ColumnHeaderOptions;
   pageSize: number;
   timelineId: string;
+  closeCellPopover?: () => void;
 }) => (props: EuiDataGridColumnCellActionProps) => ReactNode;
 
 /** The specification of a column header */
@@ -76,8 +78,8 @@ export type ColumnHeaderOptions = Pick<
   tGridCellActions?: TGridCellAction[];
   category?: string;
   columnHeaderType: ColumnHeaderType;
-  description?: string;
-  example?: string;
+  description?: string | null;
+  example?: string | number | null;
   format?: string;
   linkField?: string;
   placeholder?: string;

@@ -20,25 +20,24 @@ import {
   EuiNotificationBadge,
   EuiPageSideBar,
   useResizeObserver,
+  EuiButton,
 } from '@elastic/eui';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 
-import { isEqual, sortBy } from 'lodash';
+import { isEqual } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { indexPatterns as indexPatternUtils } from '@kbn/data-plugin/public';
+import { DataViewPicker } from '@kbn/unified-search-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DiscoverField } from './discover_field';
-import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DiscoverFieldSearch } from './discover_field_search';
 import { FIELDS_LIMIT_SETTING } from '../../../../../common';
 import { groupFields } from './lib/group_fields';
-import {
-  IndexPatternField,
-  indexPatterns as indexPatternUtils,
-} from '../../../../../../data/public';
 import { getDetails } from './lib/get_details';
 import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
-import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { ElasticSearchHit } from '../../../../types';
 
@@ -70,6 +69,8 @@ export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProp
 
   editField: (fieldName?: string) => void;
 
+  createNewDataView: () => void;
+
   /**
    * a statistics of the distribution of fields in the given hits
    */
@@ -82,6 +83,8 @@ export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProp
    * Discover view mode
    */
   viewMode: VIEW_MODE;
+
+  showDataViewPicker?: boolean;
 }
 
 export function DiscoverSidebarComponent({
@@ -95,24 +98,23 @@ export function DiscoverSidebarComponent({
   onAddFilter,
   onRemoveField,
   selectedIndexPattern,
-  services,
   setFieldFilter,
   trackUiMetric,
   useNewFieldsApi = false,
-  useFlyout = false,
   onEditRuntimeField,
   onChangeIndexPattern,
   setFieldEditorRef,
   closeFlyout,
   editField,
   viewMode,
+  createNewDataView,
+  showDataViewPicker,
 }: DiscoverSidebarProps) {
-  const [fields, setFields] = useState<IndexPatternField[] | null>(null);
+  const { uiSettings, dataViewFieldEditor } = useDiscoverServices();
+  const [fields, setFields] = useState<DataViewField[] | null>(null);
 
-  const { indexPatternFieldEditor } = services;
-  const indexPatternFieldEditPermission =
-    indexPatternFieldEditor?.userPermissions.editIndexPattern();
-  const canEditIndexPatternField = !!indexPatternFieldEditPermission && useNewFieldsApi;
+  const dataViewFieldEditPermission = dataViewFieldEditor?.userPermissions.editIndexPattern();
+  const canEditDataViewField = !!dataViewFieldEditPermission && useNewFieldsApi;
   const [scrollContainer, setScrollContainer] = useState<Element | null>(null);
   const [fieldsToRender, setFieldsToRender] = useState(FIELDS_PER_PAGE);
   const [fieldsPerPage, setFieldsPerPage] = useState(FIELDS_PER_PAGE);
@@ -137,14 +139,11 @@ export function DiscoverSidebarComponent({
   );
 
   const getDetailsByField = useCallback(
-    (ipField: IndexPatternField) => getDetails(ipField, documents, columns, selectedIndexPattern),
+    (ipField: DataViewField) => getDetails(ipField, documents, columns, selectedIndexPattern),
     [documents, columns, selectedIndexPattern]
   );
 
-  const popularLimit = useMemo(
-    () => services.uiSettings.get(FIELDS_LIMIT_SETTING),
-    [services.uiSettings]
-  );
+  const popularLimit = useMemo(() => uiSettings.get(FIELDS_LIMIT_SETTING), [uiSettings]);
 
   const {
     selected: selectedFields,
@@ -199,16 +198,31 @@ export function DiscoverSidebarComponent({
     }
   }, [paginate, scrollContainer, unpopularFields]);
 
-  const fieldTypes = useMemo(() => {
+  const { fieldTypes, presentFieldTypes } = useMemo(() => {
     const result = ['any'];
+    const dataViewFieldTypes = new Set<string>();
     if (Array.isArray(fields)) {
       for (const field of fields) {
-        if (result.indexOf(field.type) === -1) {
-          result.push(field.type);
+        if (field.type !== '_source') {
+          // If it's a string type, we want to distinguish between keyword and text
+          // For this purpose we need the ES type
+          const type =
+            field.type === 'string' &&
+            field.esTypes &&
+            ['keyword', 'text'].includes(field.esTypes[0])
+              ? field.esTypes?.[0]
+              : field.type;
+          // _id and _index would map to string, that's why we don't add the string type here
+          if (type && type !== 'string') {
+            dataViewFieldTypes.add(type);
+          }
+          if (result.indexOf(field.type) === -1) {
+            result.push(field.type);
+          }
         }
       }
     }
-    return result;
+    return { fieldTypes: result, presentFieldTypes: Array.from(dataViewFieldTypes) };
   }, [fields]);
 
   const showFieldStats = useMemo(() => viewMode === VIEW_MODE.DOCUMENT_LEVEL, [viewMode]);
@@ -217,7 +231,7 @@ export function DiscoverSidebarComponent({
     if (!useNewFieldsApi || !fields) {
       return undefined;
     }
-    const map = new Map<string, Array<{ field: IndexPatternField; isSelected: boolean }>>();
+    const map = new Map<string, Array<{ field: DataViewField; isSelected: boolean }>>();
     fields.forEach((field) => {
       const subTypeMulti = indexPatternUtils.getFieldSubtypeMulti(field);
       const parent = subTypeMulti?.multi.parent;
@@ -243,9 +257,9 @@ export function DiscoverSidebarComponent({
 
   const deleteField = useMemo(
     () =>
-      canEditIndexPatternField && selectedIndexPattern
+      canEditDataViewField && selectedIndexPattern
         ? async (fieldName: string) => {
-            const ref = indexPatternFieldEditor.openDeleteModal({
+            const ref = dataViewFieldEditor.openDeleteModal({
               ctx: {
                 dataView: selectedIndexPattern,
               },
@@ -264,11 +278,11 @@ export function DiscoverSidebarComponent({
         : undefined,
     [
       selectedIndexPattern,
-      canEditIndexPatternField,
+      canEditDataViewField,
       setFieldEditorRef,
       closeFlyout,
       onEditRuntimeField,
-      indexPatternFieldEditor,
+      dataViewFieldEditor,
     ]
   );
 
@@ -283,34 +297,6 @@ export function DiscoverSidebarComponent({
 
   if (!selectedIndexPattern) {
     return null;
-  }
-
-  if (useFlyout) {
-    return (
-      <section
-        aria-label={i18n.translate('discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel', {
-          defaultMessage: 'Index and fields',
-        })}
-      >
-        <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={true}>
-            <DiscoverIndexPattern
-              selectedIndexPattern={selectedIndexPattern}
-              indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
-              onChangeIndexPattern={onChangeIndexPattern}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <DiscoverIndexPatternManagement
-              services={services}
-              selectedIndexPattern={selectedIndexPattern}
-              editField={editField}
-              useNewFieldsApi={useNewFieldsApi}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </section>
-    );
   }
 
   return (
@@ -329,31 +315,27 @@ export function DiscoverSidebarComponent({
         gutterSize="s"
         responsive={false}
       >
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={true} className="dscSidebar__indexPatternSwitcher">
-              <DiscoverIndexPattern
-                selectedIndexPattern={selectedIndexPattern}
-                indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
-                onChangeIndexPattern={onChangeIndexPattern}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <DiscoverIndexPatternManagement
-                services={services}
-                selectedIndexPattern={selectedIndexPattern}
-                useNewFieldsApi={useNewFieldsApi}
-                editField={editField}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+        {Boolean(showDataViewPicker) && (
+          <DataViewPicker
+            currentDataViewId={selectedIndexPattern.id}
+            onChangeDataView={onChangeIndexPattern}
+            onAddField={editField}
+            onDataViewCreated={createNewDataView}
+            trigger={{
+              label: selectedIndexPattern?.title || '',
+              'data-test-subj': 'indexPattern-switch-link',
+              title: selectedIndexPattern?.title || '',
+              fullWidth: true,
+            }}
+          />
+        )}
         <EuiFlexItem grow={false}>
           <form>
             <DiscoverFieldSearch
               onChange={onChangeFieldSearch}
               value={fieldFilter.name}
               types={fieldTypes}
+              presentFieldTypes={presentFieldTypes}
             />
           </form>
         </EuiFlexItem>
@@ -399,7 +381,7 @@ export function DiscoverSidebarComponent({
                         aria-labelledby="selected_fields"
                         data-test-subj={`fieldList-selected`}
                       >
-                        {selectedFields.map((field: IndexPatternField) => {
+                        {selectedFields.map((field: DataViewField) => {
                           return (
                             <li key={`field${field.name}`} data-attr-field={field.name}>
                               <DiscoverField
@@ -413,8 +395,8 @@ export function DiscoverSidebarComponent({
                                 selected={true}
                                 trackUiMetric={trackUiMetric}
                                 multiFields={multiFields?.get(field.name)}
-                                onEditField={canEditIndexPatternField ? editField : undefined}
-                                onDeleteField={canEditIndexPatternField ? deleteField : undefined}
+                                onEditField={canEditDataViewField ? editField : undefined}
+                                onDeleteField={canEditDataViewField ? deleteField : undefined}
                                 showFieldStats={showFieldStats}
                               />
                             </li>
@@ -460,7 +442,7 @@ export function DiscoverSidebarComponent({
                         aria-labelledby="available_fields available_fields_popular"
                         data-test-subj={`fieldList-popular`}
                       >
-                        {popularFields.map((field: IndexPatternField) => {
+                        {popularFields.map((field: DataViewField) => {
                           return (
                             <li key={`field${field.name}`} data-attr-field={field.name}>
                               <DiscoverField
@@ -473,8 +455,8 @@ export function DiscoverSidebarComponent({
                                 getDetails={getDetailsByField}
                                 trackUiMetric={trackUiMetric}
                                 multiFields={multiFields?.get(field.name)}
-                                onEditField={canEditIndexPatternField ? editField : undefined}
-                                onDeleteField={canEditIndexPatternField ? deleteField : undefined}
+                                onEditField={canEditDataViewField ? editField : undefined}
+                                onDeleteField={canEditDataViewField ? deleteField : undefined}
                                 showFieldStats={showFieldStats}
                               />
                             </li>
@@ -489,7 +471,7 @@ export function DiscoverSidebarComponent({
                     data-test-subj={`fieldList-unpopular`}
                     ref={availableFieldsContainer}
                   >
-                    {getPaginated(unpopularFields).map((field: IndexPatternField) => {
+                    {getPaginated(unpopularFields).map((field: DataViewField) => {
                       return (
                         <li key={`field${field.name}`} data-attr-field={field.name}>
                           <DiscoverField
@@ -502,8 +484,8 @@ export function DiscoverSidebarComponent({
                             getDetails={getDetailsByField}
                             trackUiMetric={trackUiMetric}
                             multiFields={multiFields?.get(field.name)}
-                            onEditField={canEditIndexPatternField ? editField : undefined}
-                            onDeleteField={canEditIndexPatternField ? deleteField : undefined}
+                            onEditField={canEditDataViewField ? editField : undefined}
+                            onDeleteField={canEditDataViewField ? deleteField : undefined}
                             showFieldStats={showFieldStats}
                           />
                         </li>
@@ -514,6 +496,18 @@ export function DiscoverSidebarComponent({
               </div>
             )}
           </div>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            iconType="indexOpen"
+            data-test-subj="indexPattern-add-field_btn"
+            onClick={() => editField()}
+            size="s"
+          >
+            {i18n.translate('discover.fieldChooser.addField.label', {
+              defaultMessage: 'Add a field',
+            })}
+          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPageSideBar>

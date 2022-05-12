@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { Aggregators } from '../types';
+import { Aggregators } from '../../../../../common/alerting/metrics';
 
 export const createTimerange = (
   interval: number,

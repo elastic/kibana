@@ -49,7 +49,7 @@ describe('CtiEnabledModule', () => {
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
-            <CtiEnabledModule {...mockProps} allIntegrationsInstalled={true} />
+            <CtiEnabledModule {...mockProps} />
           </ThemeProvider>
         </I18nProvider>
       </Provider>

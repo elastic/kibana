@@ -206,7 +206,7 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
     pageIndex,
     pageSize,
     totalItemCount: lists.result?.total ?? 0,
-    hidePerPageOptions: true,
+    showPerPageOptions: false,
   };
   const columns = buildColumns(handleExport, handleDelete);
 

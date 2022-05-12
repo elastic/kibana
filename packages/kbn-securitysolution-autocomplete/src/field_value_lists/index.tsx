@@ -10,7 +10,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useFindLists } from '@kbn/securitysolution-list-hooks';
-import { IndexPatternFieldBase } from '@kbn/es-query';
+import { DataViewFieldBase } from '@kbn/es-query';
 
 import { filterFieldToList } from '../filter_field_to_list';
 import { getGenericComboBoxProps } from '../get_generic_combo_box_props';
@@ -31,7 +31,7 @@ interface AutocompleteFieldListsProps {
   onChange: (arg: ListSchema) => void;
   placeholder: string;
   rowLabel?: string;
-  selectedField: IndexPatternFieldBase | undefined;
+  selectedField: DataViewFieldBase | undefined;
   selectedValue: string | undefined;
 }
 

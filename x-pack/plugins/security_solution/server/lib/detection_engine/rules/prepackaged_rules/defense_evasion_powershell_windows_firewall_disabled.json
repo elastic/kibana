@@ -1,0 +1,63 @@
+{
+  "author": [
+    "Austin Songer"
+  ],
+  "description": "Identifies when the Windows Firewall is disabled using PowerShell cmdlets, which can help attackers evade network constraints, like internet and network lateral communication restrictions.",
+  "false_positives": [
+    "Windows Firewall can be disabled by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Windows Profile being disabled by unfamiliar users should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*",
+    "winlogbeat-*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Windows Firewall Disabled via PowerShell",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
+  "query": "process where event.action == \"start\" and\n  (process.name : (\"powershell.exe\", \"pwsh.exe\", \"powershell_ise.exe\") or process.pe.original_file_name == \"PowerShell.EXE\") and\n   process.args : \"*Set-NetFirewallProfile*\" and\n  (process.args : \"*-Enabled*\" and process.args : \"*False*\") and\n  (process.args : \"*-All*\" or process.args : (\"*Public*\", \"*Domain*\", \"*Private*\"))\n",
+  "references": [
+    "https://docs.microsoft.com/en-us/powershell/module/netsecurity/set-netfirewallprofile?view=windowsserver2019-ps",
+    "https://www.tutorialspoint.com/how-to-get-windows-firewall-profile-settings-using-powershell",
+    "http://powershellhelp.space/commands/set-netfirewallrule-psv5.php",
+    "http://woshub.com/manage-windows-firewall-powershell/"
+  ],
+  "risk_score": 47,
+  "rule_id": "f63c8e3c-d396-404f-b2ea-0379d3942d73",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1562",
+          "name": "Impair Defenses",
+          "reference": "https://attack.mitre.org/techniques/T1562/",
+          "subtechnique": [
+            {
+              "id": "T1562.004",
+              "name": "Disable or Modify System Firewall",
+              "reference": "https://attack.mitre.org/techniques/T1562/004/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 4
+}

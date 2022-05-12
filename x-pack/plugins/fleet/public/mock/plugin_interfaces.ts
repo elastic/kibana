@@ -14,23 +14,25 @@ export const createStartMock = (extensionsStorage: UIExtensionsStorage = {}): Mo
   return {
     isInitialized: jest.fn().mockResolvedValue(true),
     registerExtension: createExtensionRegistrationCallback(extensionsStorage),
-    authz: Promise.resolve({
+    authz: {
       fleet: {
         all: true,
         setup: true,
         readEnrollmentTokens: true,
+        readAgentPolicies: true,
       },
       integrations: {
         readPackageInfo: true,
         readInstalledPackages: true,
         installPackages: true,
         upgradePackages: true,
+        uploadPackages: true,
         removePackages: true,
         readPackageSettings: true,
         writePackageSettings: true,
         readIntegrationPolicies: true,
         writeIntegrationPolicies: true,
       },
-    }),
+    },
   };
 };

@@ -8,7 +8,7 @@
 
 import { tabifyAggResponse } from './tabify';
 import { IndexPattern } from '../..';
-import { AggConfigs, IAggConfig, IAggConfigs } from '../aggs';
+import { AggConfigs, BucketAggParam, IAggConfig, IAggConfigs } from '../aggs';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import { metricOnly, threeTermBuckets } from './fixtures/fake_hierarchical_data';
 
@@ -52,6 +52,46 @@ describe('tabifyAggResponse Integration', () => {
 
     expect(resp.rows[0]).toEqual({ 'col-0-1': 1000 });
     expect(resp.columns[0]).toHaveProperty('name', aggConfigs.aggs[0].makeLabel());
+
+    expect(resp).toHaveProperty('meta.type', 'esaggs');
+    expect(resp).toHaveProperty('meta.source', '1234');
+    expect(resp).toHaveProperty('meta.statistics.totalCount', 1000);
+  });
+
+  describe('scaleMetricValues performance check', () => {
+    beforeAll(() => {
+      typesRegistry.get('count').params.push({
+        name: 'scaleMetricValues',
+        default: false,
+        write: () => {},
+        advanced: true,
+      } as any as BucketAggParam<any>);
+    });
+    test('does not call write if scaleMetricValues is not set', () => {
+      const aggConfigs = createAggConfigs([{ type: 'count' } as any]);
+
+      const writeMock = jest.fn();
+      aggConfigs.getRequestAggs()[0].write = writeMock;
+
+      tabifyAggResponse(aggConfigs, metricOnly, {
+        metricsAtAllLevels: true,
+      });
+      expect(writeMock).not.toHaveBeenCalled();
+    });
+
+    test('does call write if scaleMetricValues is set', () => {
+      const aggConfigs = createAggConfigs([
+        { type: 'count', params: { scaleMetricValues: true } } as any,
+      ]);
+
+      const writeMock = jest.fn(() => ({}));
+      aggConfigs.getRequestAggs()[0].write = writeMock;
+
+      tabifyAggResponse(aggConfigs, metricOnly, {
+        metricsAtAllLevels: true,
+      });
+      expect(writeMock).toHaveBeenCalled();
+    });
   });
 
   describe('transforms a complex response', () => {

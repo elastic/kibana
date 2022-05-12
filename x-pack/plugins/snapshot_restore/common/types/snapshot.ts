@@ -68,6 +68,10 @@ export interface SnapshotDetailsEs {
   duration_in_millis: number;
   failures: any[];
   shards: SnapshotDetailsShardsStatusEs;
+  feature_states: Array<{
+    feature_name: string;
+    indices: string[];
+  }>;
   metadata?: {
     policy: string;
     [key: string]: any;

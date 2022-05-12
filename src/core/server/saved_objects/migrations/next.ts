@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { UnwrapPromise } from '@kbn/utility-types';
 import type {
   AllActionStates,
   ReindexSourceToTempOpenPit,
@@ -53,14 +52,14 @@ type ActionMap = ReturnType<typeof nextActionMap>;
  * E.g. given 'INIT', provides the response type of the action triggered by
  * `next` in the 'INIT' control state.
  */
-export type ResponseType<ControlState extends AllActionStates> = UnwrapPromise<
+export type ResponseType<ControlState extends AllActionStates> = Awaited<
   ReturnType<ReturnType<ActionMap[ControlState]>>
 >;
 
 export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: TransformRawDocs) => {
   return {
     INIT: (state: InitState) =>
-      Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
+      Actions.initAction({ client, indices: [state.currentAlias, state.versionAlias] }),
     WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>
       Actions.waitForIndexStatusYellow({ client, index: state.sourceIndex.value }),
     CHECK_UNKNOWN_DOCUMENTS: (state: CheckUnknownDocumentsState) =>

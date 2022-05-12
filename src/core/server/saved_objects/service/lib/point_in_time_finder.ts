@@ -8,7 +8,7 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Logger } from '../../../logging';
 import type { SavedObjectsFindOptions, SavedObjectsClientContract } from '../../types';
-import type { SavedObjectsFindResponse } from '../';
+import type { SavedObjectsFindResponse } from '..';
 
 type PointInTimeFinderClient = Pick<
   SavedObjectsClientContract,

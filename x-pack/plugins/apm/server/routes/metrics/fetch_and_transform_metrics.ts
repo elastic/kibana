@@ -6,10 +6,11 @@
  */
 
 import { Unionize } from 'utility-types';
-import { euiLightVars as theme } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars as theme } from '@kbn/ui-theme';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { AggregationOptionsByType } from '@kbn/core/types/elasticsearch';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { getVizColorForIndex } from '../../../common/viz_colors';
-import { AggregationOptionsByType } from '../../../../../../src/core/types/elasticsearch';
 import { APMEventESSearchRequest } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getMetricsDateHistogramParams } from '../../lib/helpers/metrics';
 import { Setup } from '../../lib/helpers/setup_request';
@@ -18,10 +19,8 @@ import {
   environmentQuery,
   serviceNodeNameQuery,
 } from '../../../common/utils/environment_query';
-import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../../observability/typings/common';
 
 type MetricsAggregationMap = Unionize<{
   min: AggregationOptionsByType['min'];
@@ -43,8 +42,8 @@ export type GenericMetricsRequest = APMEventESSearchRequest & {
   };
 };
 
-export type GenericMetricsChart = PromiseReturnType<
-  typeof fetchAndTransformMetrics
+export type GenericMetricsChart = Awaited<
+  ReturnType<typeof fetchAndTransformMetrics>
 >;
 
 export async function fetchAndTransformMetrics<T extends MetricAggs>({

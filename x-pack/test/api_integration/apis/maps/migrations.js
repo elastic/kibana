@@ -7,9 +7,10 @@
 
 import expect from '@kbn/expect';
 
+import semver from 'semver';
+
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const kibanaServer = getService('kibanaServer');
 
   describe('map migrations', () => {
     describe('saved object migrations', () => {
@@ -64,18 +65,6 @@ export default function ({ getService }) {
     });
 
     describe('embeddable migrations', () => {
-      before(async () => {
-        await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
-        );
-      });
-
-      after(async () => {
-        await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
-        );
-      });
-
       it('should apply embeddable migrations', async () => {
         const resp = await supertest
           .get(`/api/saved_objects/dashboard/4beb0d80-c2ef-11eb-b0cb-bd162d969e6b`)
@@ -90,7 +79,7 @@ export default function ({ getService }) {
         }
         expect(panels.length).to.be(1);
         expect(panels[0].type).to.be('map');
-        expect(panels[0].version).to.be('8.1.0');
+        expect(semver.gte(panels[0].version, '8.1.0')).to.be(true);
       });
     });
   });

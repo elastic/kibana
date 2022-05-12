@@ -8,7 +8,7 @@
 import { get } from 'lodash';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import { setSignalStatusValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/set_signal_status_type_dependents';
 import {
   SetSignalsStatusSchemaDecoded,
@@ -20,7 +20,7 @@ import {
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
 } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
-import { TelemetryEventsSender } from '../../../telemetry/sender';
+import { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { INSIGHTS_CHANNEL } from '../../../telemetry/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
@@ -33,7 +33,7 @@ export const setSignalsStatusRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger,
   security: SetupPlugins['security'],
-  sender: TelemetryEventsSender
+  sender: ITelemetryEventsSender
 ) => {
   router.post(
     {
@@ -49,11 +49,13 @@ export const setSignalsStatusRoute = (
     },
     async (context, request, response) => {
       const { conflicts, signal_ids: signalIds, query, status } = request.body;
-      const esClient = context.core.elasticsearch.client.asCurrentUser;
-      const siemClient = context.securitySolution?.getAppClient();
+      const core = await context.core;
+      const securitySolution = await context.securitySolution;
+      const esClient = core.elasticsearch.client.asCurrentUser;
+      const siemClient = securitySolution?.getAppClient();
       const siemResponse = buildSiemResponse(response);
       const validationErrors = setSignalStatusValidateTypeDependents(request.body);
-      const spaceId = context.securitySolution?.getSpaceId() ?? 'default';
+      const spaceId = securitySolution?.getSpaceId() ?? 'default';
 
       if (validationErrors.length) {
         return siemResponse.error({ statusCode: 400, body: validationErrors });
@@ -99,7 +101,7 @@ export const setSignalsStatusRoute = (
         };
       }
       try {
-        const { body } = await esClient.updateByQuery({
+        const body = await esClient.updateByQuery({
           index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
           conflicts: conflicts ?? 'abort',
           // https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update-by-query.html#_refreshing_shards_2

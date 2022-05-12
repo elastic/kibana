@@ -27,12 +27,9 @@ export function createServerRouteFactory<
     TReturnType,
     TRouteCreateOptions
   >
-) => ServerRoute<
+) => Record<
   TEndpoint,
-  TRouteParamsRT,
-  TRouteHandlerResources,
-  TReturnType,
-  TRouteCreateOptions
+  ServerRoute<TEndpoint, TRouteParamsRT, TRouteHandlerResources, TReturnType, TRouteCreateOptions>
 > {
-  return (route) => route;
+  return (route) => ({ [route.endpoint]: route } as any);
 }

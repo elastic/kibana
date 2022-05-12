@@ -7,11 +7,9 @@
 
 import {
   getCreateCasePath,
-  getSubCaseViewPath,
   getCaseViewPath,
   getCasesConfigurePath,
   getCaseViewWithCommentPath,
-  getSubCaseViewWithCommentPath,
   generateCaseViewPath,
 } from './paths';
 
@@ -20,11 +18,19 @@ describe('Paths', () => {
     it('returns the correct path', () => {
       expect(getCreateCasePath('test')).toBe('test/create');
     });
+
+    it('normalize the path correctly', () => {
+      expect(getCreateCasePath('//test//page')).toBe('/test/page/create');
+    });
   });
 
   describe('getCasesConfigurePath', () => {
     it('returns the correct path', () => {
       expect(getCasesConfigurePath('test')).toBe('test/configure');
+    });
+
+    it('normalize the path correctly', () => {
+      expect(getCasesConfigurePath('//test//page')).toBe('/test/page/configure');
     });
   });
 
@@ -32,11 +38,9 @@ describe('Paths', () => {
     it('returns the correct path', () => {
       expect(getCaseViewPath('test')).toBe('test/:detailName');
     });
-  });
 
-  describe('getSubCaseViewPath', () => {
-    it('returns the correct path', () => {
-      expect(getSubCaseViewPath('test')).toBe('test/:detailName/sub-cases/:subCaseId');
+    it('normalize the path correctly', () => {
+      expect(getCaseViewPath('//test//page')).toBe('/test/page/:detailName');
     });
   });
 
@@ -44,13 +48,9 @@ describe('Paths', () => {
     it('returns the correct path', () => {
       expect(getCaseViewWithCommentPath('test')).toBe('test/:detailName/:commentId');
     });
-  });
 
-  describe('getSubCaseViewWithCommentPath', () => {
-    it('returns the correct path', () => {
-      expect(getSubCaseViewWithCommentPath('test')).toBe(
-        'test/:detailName/sub-cases/:subCaseId/:commentId'
-      );
+    it('normalize the path correctly', () => {
+      expect(getCaseViewWithCommentPath('//test//page')).toBe('/test/page/:detailName/:commentId');
     });
   });
 
@@ -59,26 +59,10 @@ describe('Paths', () => {
       expect(generateCaseViewPath({ detailName: 'my-case' })).toBe('/my-case');
     });
 
-    it('returns the correct path when subCaseId is provided', () => {
-      expect(generateCaseViewPath({ detailName: 'my-case', subCaseId: 'my-sub-case' })).toBe(
-        '/my-case/sub-cases/my-sub-case'
-      );
-    });
-
     it('returns the correct path when commentId is provided', () => {
       expect(generateCaseViewPath({ detailName: 'my-case', commentId: 'my-comment' })).toBe(
         '/my-case/my-comment'
       );
-    });
-
-    it('returns the correct path when subCaseId and commentId is provided', () => {
-      expect(
-        generateCaseViewPath({
-          detailName: 'my-case',
-          subCaseId: 'my-sub-case',
-          commentId: 'my-comment',
-        })
-      ).toBe('/my-case/sub-cases/my-sub-case/my-comment');
     });
   });
 });

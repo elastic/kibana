@@ -6,11 +6,11 @@
  */
 
 import { createAlertEventLogRecordObject } from './create_alert_event_log_record_object';
-import { UntypedNormalizedAlertType } from '../rule_type_registry';
+import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { RecoveredActionGroup } from '../types';
 
 describe('createAlertEventLogRecordObject', () => {
-  const ruleType: jest.Mocked<UntypedNormalizedAlertType> = {
+  const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
     id: 'test',
     name: 'My test alert',
     actionGroups: [{ id: 'default', name: 'Default' }, RecoveredActionGroup],
@@ -25,8 +25,10 @@ describe('createAlertEventLogRecordObject', () => {
   test('created alert event "execute-start"', async () => {
     expect(
       createAlertEventLogRecordObject({
+        executionId: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
         ruleId: '1',
         ruleType,
+        consumer: 'rule-consumer',
         action: 'execute-start',
         timestamp: '1970-01-01T00:00:00.000Z',
         task: {
@@ -41,6 +43,7 @@ describe('createAlertEventLogRecordObject', () => {
             relation: 'primary',
           },
         ],
+        spaceId: 'default',
       })
     ).toStrictEqual({
       '@timestamp': '1970-01-01T00:00:00.000Z',
@@ -50,6 +53,15 @@ describe('createAlertEventLogRecordObject', () => {
         kind: 'alert',
       },
       kibana: {
+        alert: {
+          rule: {
+            consumer: 'rule-consumer',
+            execution: {
+              uuid: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
+            },
+            rule_type_id: 'test',
+          },
+        },
         saved_objects: [
           {
             id: '1',
@@ -59,6 +71,7 @@ describe('createAlertEventLogRecordObject', () => {
             type_id: 'test',
           },
         ],
+        space_ids: ['default'],
         task: {
           schedule_delay: 0,
           scheduled: '1970-01-01T00:00:00.000Z',
@@ -76,9 +89,11 @@ describe('createAlertEventLogRecordObject', () => {
   test('created alert event "recovered-instance"', async () => {
     expect(
       createAlertEventLogRecordObject({
+        executionId: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
         ruleId: '1',
         ruleName: 'test name',
         ruleType,
+        consumer: 'rule-consumer',
         action: 'recovered-instance',
         instanceId: 'test1',
         group: 'group 1',
@@ -98,6 +113,7 @@ describe('createAlertEventLogRecordObject', () => {
             relation: 'primary',
           },
         ],
+        spaceId: 'default',
       })
     ).toStrictEqual({
       event: {
@@ -109,6 +125,15 @@ describe('createAlertEventLogRecordObject', () => {
         start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
+        alert: {
+          rule: {
+            consumer: 'rule-consumer',
+            execution: {
+              uuid: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
+            },
+            rule_type_id: 'test',
+          },
+        },
         alerting: {
           action_group_id: 'group 1',
           action_subgroup: 'subgroup value',
@@ -123,6 +148,7 @@ describe('createAlertEventLogRecordObject', () => {
             type_id: 'test',
           },
         ],
+        space_ids: ['default'],
       },
       message: 'message text here',
       rule: {
@@ -138,9 +164,11 @@ describe('createAlertEventLogRecordObject', () => {
   test('created alert event "execute-action"', async () => {
     expect(
       createAlertEventLogRecordObject({
+        executionId: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
         ruleId: '1',
         ruleName: 'test name',
         ruleType,
+        consumer: 'rule-consumer',
         action: 'execute-action',
         instanceId: 'test1',
         group: 'group 1',
@@ -165,6 +193,7 @@ describe('createAlertEventLogRecordObject', () => {
             typeId: '.email',
           },
         ],
+        spaceId: 'default',
       })
     ).toStrictEqual({
       event: {
@@ -176,6 +205,15 @@ describe('createAlertEventLogRecordObject', () => {
         start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
+        alert: {
+          rule: {
+            consumer: 'rule-consumer',
+            execution: {
+              uuid: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
+            },
+            rule_type_id: 'test',
+          },
+        },
         alerting: {
           action_group_id: 'group 1',
           action_subgroup: 'subgroup value',
@@ -196,6 +234,7 @@ describe('createAlertEventLogRecordObject', () => {
             type_id: '.email',
           },
         ],
+        space_ids: ['default'],
       },
       message: 'action execution start',
       rule: {

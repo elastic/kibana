@@ -14,6 +14,7 @@
     { "path": "../../../../src/plugins/expressions/tsconfig.json" },
     { "path": "../../../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../../../src/plugins/kibana_utils/tsconfig.json" },
-    { "path": "../../../../src/plugins/ui_actions/tsconfig.json" }
+    { "path": "../../../../src/plugins/ui_actions/tsconfig.json" },
+    { "path": "../../../../src/plugins/data/tsconfig.json" }
   ]
 }

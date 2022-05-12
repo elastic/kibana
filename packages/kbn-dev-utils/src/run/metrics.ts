@@ -9,8 +9,8 @@
 import path from 'path';
 import { REPO_ROOT } from '@kbn/utils';
 import normalizePath from 'normalize-path';
-import { CiStatsReporter } from '../ci_stats_reporter';
-import { ToolingLog } from '../tooling_log';
+import { CiStatsReporter } from '@kbn/ci-stats-reporter';
+import { ToolingLog } from '@kbn/tooling-log';
 
 export type MetricsMeta = Map<string, string | boolean | number>;
 

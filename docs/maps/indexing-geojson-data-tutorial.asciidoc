@@ -47,7 +47,7 @@ image::maps/images/fu_gs_new_england_map.png[]
 For each GeoJSON file you downloaded, complete the following steps:
 
 . Click *Add layer*.
-. From the list of layer types, click *Upload GeoJSON*.
+. From the list of layer types, click *Upload file*.
 . Using the File Picker, upload the GeoJSON file.
 +
 Depending on the geometry type of your features, this will

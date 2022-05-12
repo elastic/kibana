@@ -23,8 +23,13 @@ export class TopTermPercentageField implements IESAggField {
   }
 
   supportsFieldMetaFromLocalData(): boolean {
-    // Elasticsearch vector tile search API does not support top term metric
-    return false;
+    if (this.getSource().isMvt()) {
+      // Elasticsearch vector tile search API does not support top term metric so meta tile does not contain any values
+      return false;
+    } else {
+      // field meta can be extracted from local data when field is geojson source
+      return true;
+    }
   }
 
   getSource(): IVectorSource {

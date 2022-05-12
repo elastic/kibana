@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from 'src/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import type { RouteDefinitionParams } from '../';
+import type { RouteDefinitionParams } from '..';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 interface NodeSettingsResponse {
@@ -43,11 +43,11 @@ export function defineRoleMappingFeatureCheckRoute({ router, logger }: RouteDefi
       validate: false,
     },
     createLicensedRouteHandler(async (context, request, response) => {
-      const {
-        body: { has_all_requested: canManageRoleMappings },
-      } = await context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges<{
-        has_all_requested: boolean;
-      }>({ body: { cluster: ['manage_security'] } });
+      const esClient = (await context.core).elasticsearch.client;
+      const { has_all_requested: canManageRoleMappings } =
+        await esClient.asCurrentUser.security.hasPrivileges({
+          body: { cluster: ['manage_security'] },
+        });
 
       if (!canManageRoleMappings) {
         return response.ok({
@@ -57,10 +57,7 @@ export function defineRoleMappingFeatureCheckRoute({ router, logger }: RouteDefi
         });
       }
 
-      const enabledFeatures = await getEnabledRoleMappingsFeatures(
-        context.core.elasticsearch.client.asInternalUser,
-        logger
-      );
+      const enabledFeatures = await getEnabledRoleMappingsFeatures(esClient.asInternalUser, logger);
 
       return response.ok({
         body: {
@@ -76,8 +73,7 @@ async function getEnabledRoleMappingsFeatures(esClient: ElasticsearchClient, log
   logger.debug(`Retrieving role mappings features`);
 
   const nodeScriptSettingsPromise = esClient.nodes
-    .info<NodeSettingsResponse>({ filter_path: 'nodes.*.settings.script' })
-    .then(({ body }) => body)
+    .info({ filter_path: 'nodes.*.settings.script' })
     .catch((error) => {
       // fall back to assuming that node settings are unset/at their default values.
       // this will allow the role mappings UI to permit both role template script types,
@@ -90,7 +86,7 @@ async function getEnabledRoleMappingsFeatures(esClient: ElasticsearchClient, log
   // Do not augment with such input.
   const xpackUsagePromise = esClient.transport
     .request({ method: 'GET', path: '/_xpack/usage' })
-    .then(({ body }) => body as XPackUsageResponse)
+    .then((body) => body as XPackUsageResponse)
     .catch((error) => {
       // fall back to no external realms configured.
       // this will cause a warning in the UI about no compatible realms being enabled, but will otherwise allow

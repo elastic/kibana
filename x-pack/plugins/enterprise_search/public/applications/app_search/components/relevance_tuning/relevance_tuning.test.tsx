@@ -96,4 +96,13 @@ describe('RelevanceTuning', () => {
       expect(buttons.children().length).toBe(0);
     });
   });
+
+  it('will not render the PrecisionSlider for elasticsearch engines', () => {
+    setMockValues({
+      ...values,
+      isElasticsearchEngine: true,
+    });
+
+    expect(subject().find(PrecisionSlider).exists()).toBe(false);
+  });
 });

@@ -9,13 +9,16 @@ import React, { memo } from 'react';
 import { EuiFlyoutHeader, EuiLoadingContent, EuiToolTip, EuiTitle } from '@elastic/eui';
 import { useEndpointSelector } from '../../hooks';
 import { detailsLoading } from '../../../store/selectors';
+import { BackToEndpointDetailsFlyoutSubHeader } from './back_to_endpoint_details_flyout_subheader';
 
 export const EndpointDetailsFlyoutHeader = memo(
   ({
+    endpointId,
     hasBorder = false,
     hostname,
     children,
   }: {
+    endpointId?: string;
     hasBorder?: boolean;
     hostname?: string;
     children?: React.ReactNode | React.ReactNodeArray;
@@ -24,6 +27,8 @@ export const EndpointDetailsFlyoutHeader = memo(
 
     return (
       <EuiFlyoutHeader hasBorder={hasBorder}>
+        {endpointId && <BackToEndpointDetailsFlyoutSubHeader endpointId={endpointId} />}
+
         {hostDetailsLoading ? (
           <EuiLoadingContent lines={1} />
         ) : (

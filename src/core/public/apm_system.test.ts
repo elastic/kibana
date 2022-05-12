@@ -9,9 +9,11 @@
 jest.mock('@elastic/apm-rum');
 import type { DeeplyMockedKeys, MockedKeys } from '@kbn/utility-types/jest';
 import { init, apm } from '@elastic/apm-rum';
+import type { Transaction } from '@elastic/apm-rum';
 import { ApmSystem } from './apm_system';
 import { Subject } from 'rxjs';
 import { InternalApplicationStart } from './application/types';
+import { executionContextServiceMock } from './execution_context/execution_context_service.mock';
 
 const initMock = init as jest.Mocked<typeof init>;
 const apmMock = apm as DeeplyMockedKeys<typeof apm>;
@@ -95,6 +97,7 @@ describe('ApmSystem', () => {
           application: {
             currentAppId$,
           } as any as InternalApplicationStart,
+          executionContext: executionContextServiceMock.createInternalStartContract(),
         });
 
         expect(mark).toHaveBeenCalledWith('apm-start');
@@ -117,6 +120,7 @@ describe('ApmSystem', () => {
           application: {
             currentAppId$,
           } as any as InternalApplicationStart,
+          executionContext: executionContextServiceMock.createInternalStartContract(),
         });
         currentAppId$.next('myapp');
 
@@ -144,6 +148,7 @@ describe('ApmSystem', () => {
           application: {
             currentAppId$,
           } as any as InternalApplicationStart,
+          executionContext: executionContextServiceMock.createInternalStartContract(),
         });
         currentAppId$.next('myapp');
 

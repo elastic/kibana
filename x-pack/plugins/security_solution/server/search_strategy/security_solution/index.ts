@@ -6,12 +6,9 @@
  */
 
 import { map, mergeMap } from 'rxjs/operators';
-import {
-  ISearchStrategy,
-  PluginStart,
-  shimHitsTotal,
-} from '../../../../../../src/plugins/data/server';
-import { ENHANCED_ES_SEARCH_STRATEGY } from '../../../../../../src/plugins/data/common';
+import { ISearchStrategy, PluginStart, shimHitsTotal } from '@kbn/data-plugin/server';
+import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import { KibanaRequest } from '@kbn/core/server';
 import {
   FactoryQueryTypes,
   StrategyResponseType,
@@ -34,7 +31,8 @@ function assertValidRequestType<T extends FactoryQueryTypes>(
 
 export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTypes>(
   data: PluginStart,
-  endpointContext: EndpointAppContext
+  endpointContext: EndpointAppContext,
+  getSpaceId?: (request: KibanaRequest) => string
 ): ISearchStrategy<StrategyRequestType<T>, StrategyResponseType<T>> => {
   const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
 
@@ -60,6 +58,7 @@ export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTyp
             savedObjectsClient: deps.savedObjectsClient,
             endpointContext,
             request: deps.request,
+            spaceId: getSpaceId && getSpaceId(deps.request),
           })
         )
       );

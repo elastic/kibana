@@ -1,0 +1,41 @@
+format_version: 1.0.0
+name: with_required_variables
+title: Package with variables
+description: This is a package.
+version: 0.1.0
+categories: []
+# Options are experimental, beta, ga
+release: beta
+# The package type. The options for now are [integration, solution], more type might be added in the future.
+# The default type is integration and will be set if empty.
+type: integration
+license: basic
+# This package can be removed
+removable: true
+
+requirement:
+  elasticsearch:
+    versions: ">7.7.0"
+  kibana:
+    versions: ">7.7.0"
+
+screenshots:
+- src: "/img/screenshots/metricbeat_dashboard.png"
+  title: "metricbeat dashboard"
+  size: "1855x949"
+  type: "image/png"
+icons:
+  - src: "/img/logo.svg"
+    size: "16x16"
+    type: "image/svg+xml"
+
+
+policy_templates:
+  - name: with_required_variables
+    title: Package Policy Upgrade
+    description: Test Package for Upgrading Package Policies
+    inputs:
+      - type: test_input
+        title: Test Input
+        description: Test Input
+        enabled: true

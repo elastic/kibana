@@ -223,13 +223,6 @@ export const CONFIGURED_SOURCES_LIST_ACCOUNT_ONLY_TOOLTIP = i18n.translate(
   }
 );
 
-export const CONFIGURED_SOURCES_CONNECT_BUTTON = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSources.connectButton',
-  {
-    defaultMessage: 'Connect',
-  }
-);
-
 export const CONFIGURED_SOURCES_EMPTY_STATE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSources.emptyState',
   {
@@ -276,62 +269,6 @@ export const SAVE_CUSTOM_BODY1 = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.body1',
   {
     defaultMessage: 'Your endpoints are ready to accept requests.',
-  }
-);
-
-export const SAVE_CUSTOM_BODY2 = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.body2',
-  {
-    defaultMessage: 'Be sure to copy your Source Identifier below.',
-  }
-);
-
-export const SAVE_CUSTOM_RETURN_BUTTON = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.return.button',
-  {
-    defaultMessage: 'Return to Sources',
-  }
-);
-
-export const SAVE_CUSTOM_VISUAL_WALKTHROUGH_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.visualWalkthrough.title',
-  {
-    defaultMessage: 'Visual Walkthrough',
-  }
-);
-
-export const SAVE_CUSTOM_VISUAL_WALKTHROUGH_LINK = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.visualWalkthrough.link',
-  {
-    defaultMessage: 'Check out the documentation',
-  }
-);
-
-export const SAVE_CUSTOM_STYLING_RESULTS_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.stylingResults.title',
-  {
-    defaultMessage: 'Styling Results',
-  }
-);
-
-export const SAVE_CUSTOM_STYLING_RESULTS_LINK = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.stylingResults.link',
-  {
-    defaultMessage: 'Display Settings',
-  }
-);
-
-export const SAVE_CUSTOM_DOC_PERMISSIONS_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.docPermissions.title',
-  {
-    defaultMessage: 'Set document-level permissions',
-  }
-);
-
-export const SAVE_CUSTOM_DOC_PERMISSIONS_LINK = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.docPermissions.link',
-  {
-    defaultMessage: 'Document-level permissions',
   }
 );
 

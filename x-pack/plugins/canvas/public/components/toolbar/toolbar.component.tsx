@@ -109,7 +109,11 @@ export const Toolbar: FC<Props> = ({
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty color="text" onClick={() => toggleTray('pageManager')}>
+                <EuiButtonEmpty
+                  color="text"
+                  onClick={() => toggleTray('pageManager')}
+                  data-test-subj="canvasPageManagerButton"
+                >
                   {strings.getPageButtonLabel(selectedPageNumber, totalPages)}
                 </EuiButtonEmpty>
               </EuiFlexItem>

@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchOutput } from '../lib/utils/to_elasticsearch_output';
 import { RunOptions } from './utils/parse_run_cli_flags';
+import { EntityIterable } from '../lib/entity_iterable';
 
-type Generate = (range: { from: number; to: number }) => ElasticsearchOutput[];
-export type Scenario = (options: RunOptions) => Promise<{ generate: Generate }>;
+type Generate<TFields> = (range: { from: Date; to: Date }) => EntityIterable<TFields>;
+export type Scenario<TFields> = (options: RunOptions) => Promise<{
+  generate: Generate<TFields>;
+  mapToIndex?: (data: Record<string, any>) => string;
+}>;

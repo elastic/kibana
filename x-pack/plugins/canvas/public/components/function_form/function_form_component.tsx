@@ -13,13 +13,15 @@ type FunctionFormComponentProps = RenderArgData;
 export const FunctionFormComponent: FunctionComponent<FunctionFormComponentProps> = (props) => {
   const passedProps = {
     name: props.name,
+    removable: props.removable,
     argResolver: props.argResolver,
     args: props.args,
+    id: props.id,
+    nestedFunctionsArgs: props.nestedFunctionsArgs,
     argType: props.argType,
     argTypeDef: props.argTypeDef,
     filterGroups: props.filterGroups,
     context: props.context,
-    expressionIndex: props.expressionIndex,
     expressionType: props.expressionType,
     nextArgType: props.nextArgType,
     nextExpressionType: props.nextExpressionType,
@@ -27,6 +29,7 @@ export const FunctionFormComponent: FunctionComponent<FunctionFormComponentProps
     onValueAdd: props.onValueAdd,
     onValueChange: props.onValueChange,
     onValueRemove: props.onValueRemove,
+    onContainerRemove: props.onContainerRemove,
     updateContext: props.updateContext,
   };
 

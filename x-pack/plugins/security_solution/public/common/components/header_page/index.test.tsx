@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiDarkVars } from '@kbn/ui-theme';
 import { shallow } from 'enzyme';
 import React from 'react';
 
 import '../../mock/match_media';
 import { TestProviders } from '../../mock';
-import { HeaderPage } from './index';
+import { HeaderPage } from '.';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { SecurityPageName } from '../../../app/types';
 

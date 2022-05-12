@@ -122,13 +122,17 @@ function reduceLayers(path, layers) {
     const updatedStyles = [...accumulatedCapabilities.styles];
     if (_.has(layer, 'Style[0]')) {
       updatedStyles.push(
-        createOption(path, _.get(layer, 'Style[0].Title[0]'), _.get(layer, 'Style[0].Name[0]'))
+        createOption(
+          path,
+          _.get(layer, 'Style[0].Title[0]', ''),
+          _.get(layer, 'Style[0].Name[0]', '')
+        )
       );
     }
     return {
       layers: [
         ...accumulatedCapabilities.layers,
-        createOption(path, layer.Title[0], layer.Name[0]),
+        createOption(path, _.get(layer, 'Title[0]', ''), _.get(layer, 'Name[0]', '')),
       ],
       styles: updatedStyles,
     };

@@ -23,10 +23,10 @@ import {
   Vis,
   PersistedState,
   VisualizeEmbeddableContract,
-} from 'src/plugins/visualizations/public';
-import type { Schema } from 'src/plugins/visualizations/public';
-import { TimeRange } from 'src/plugins/data/public';
-import { SavedSearch } from 'src/plugins/discover/public';
+} from '@kbn/visualizations-plugin/public';
+import type { Schema } from '@kbn/visualizations-plugin/public';
+import { TimeRange } from '@kbn/data-plugin/public';
+import { SavedSearch } from '@kbn/discover-plugin/public';
 import { DefaultEditorNavBar } from './navbar';
 import { DefaultEditorControls } from './controls';
 import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';
@@ -104,7 +104,7 @@ function DefaultEditorSideBarComponent({
       ...vis.serialize(),
       params: state.params,
       data: {
-        aggs: state.data.aggs ? (state.data.aggs.aggs.map((agg) => agg.toJSON()) as any) : [],
+        aggs: state.data.aggs ? (state.data.aggs.aggs.map((agg) => agg.serialize()) as any) : [],
       },
     });
     embeddableHandler.reload();

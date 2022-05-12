@@ -11,7 +11,7 @@ import {
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectsExportTransformContext,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import { CaseUserActionAttributes, CommentAttributes } from '../../../common/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
@@ -75,7 +75,7 @@ async function getAttachmentsAndUserActionsForCases(
     getAssociatedObjects<CaseUserActionAttributes>({
       savedObjectsClient,
       caseIds,
-      sortField: 'action_at',
+      sortField: defaultSortField,
       type: CASE_USER_ACTION_SAVED_OBJECT,
     }),
   ]);

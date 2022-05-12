@@ -9,7 +9,7 @@
 import React from 'react';
 import { TopNavMenuItem } from './top_nav_menu_item';
 import { TopNavMenuData } from './top_nav_menu_data';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
 describe('TopNavMenu', () => {
   const ensureMenuItemDisabled = (data: TopNavMenuData) => {

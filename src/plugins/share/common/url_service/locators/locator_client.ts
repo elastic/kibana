@@ -7,8 +7,9 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { MigrateFunctionsObject } from 'src/plugins/kibana_utils/common';
-import { SavedObjectReference } from 'kibana/server';
+import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { SavedObjectReference } from '@kbn/core/server';
 import type { LocatorDependencies } from './locator';
 import type { LocatorDefinition, LocatorPublic, ILocatorClient, LocatorData } from './types';
 import { Locator } from './locator';
@@ -58,7 +59,8 @@ export class LocatorClient implements ILocatorClient {
     const migrations: { [locatorId: string]: MigrateFunctionsObject } = {};
 
     for (const locator of this.locators.values()) {
-      migrations[locator.id] = locator.migrations;
+      migrations[locator.id] =
+        typeof locator.migrations === 'function' ? locator.migrations() : locator.migrations;
     }
 
     return migrations;

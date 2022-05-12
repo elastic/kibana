@@ -15,8 +15,8 @@ import { getConfigPath } from '@kbn/utils';
 import {
   ElasticsearchService,
   EnrollResult,
-} from '../plugins/interactive_setup/server/elasticsearch_service';
-import { getDetailedErrorMessage } from '../plugins/interactive_setup/server/errors';
+} from '@kbn/interactive-setup-plugin/server/elasticsearch_service';
+import { getDetailedErrorMessage } from '@kbn/interactive-setup-plugin/server/errors';
 import {
   promptToken,
   getCommand,
@@ -39,7 +39,7 @@ program
 program.parse(process.argv);
 
 interface SetupOptions {
-  token?: string;
+  enrollmentToken?: string;
   silent?: boolean;
 }
 
@@ -49,7 +49,7 @@ const logger = new Logger(options);
 
 async function initCommand() {
   const token = decodeEnrollmentToken(
-    options.token ?? (options.silent ? undefined : await promptToken())
+    options.enrollmentToken ?? (options.silent ? undefined : await promptToken())
   );
   if (!token) {
     logger.error(chalk.red('Invalid enrollment token provided.'));

@@ -135,61 +135,57 @@ export function LayerPanels(
     [dispatchLens]
   );
 
-  const datasourcePublicAPIs = props.framePublicAPI.datasourceLayers;
-
   return (
     <EuiForm className="lnsConfigPanel">
-      {layerIds.map((layerId, layerIndex) =>
-        datasourcePublicAPIs[layerId] ? (
-          <LayerPanel
-            {...props}
-            activeVisualization={activeVisualization}
-            registerNewLayerRef={registerNewLayerRef}
-            key={layerId}
-            layerId={layerId}
-            layerIndex={layerIndex}
-            visualizationState={visualization.state}
-            updateVisualization={setVisualizationState}
-            updateDatasource={updateDatasource}
-            updateDatasourceAsync={updateDatasourceAsync}
-            updateAll={updateAll}
-            isOnlyLayer={
-              getRemoveOperation(
-                activeVisualization,
-                visualization.state,
-                layerId,
-                layerIds.length
-              ) === 'clear'
-            }
-            onEmptyDimensionAdd={(columnId, { groupId }) => {
-              // avoid state update if the datasource does not support initializeDimension
-              if (
-                activeDatasourceId != null &&
-                datasourceMap[activeDatasourceId]?.initializeDimension
-              ) {
-                dispatchLens(
-                  setLayerDefaultDimension({
-                    layerId,
-                    columnId,
-                    groupId,
-                  })
-                );
-              }
-            }}
-            onRemoveLayer={() => {
+      {layerIds.map((layerId, layerIndex) => (
+        <LayerPanel
+          {...props}
+          activeVisualization={activeVisualization}
+          registerNewLayerRef={registerNewLayerRef}
+          key={layerId}
+          layerId={layerId}
+          layerIndex={layerIndex}
+          visualizationState={visualization.state}
+          updateVisualization={setVisualizationState}
+          updateDatasource={updateDatasource}
+          updateDatasourceAsync={updateDatasourceAsync}
+          updateAll={updateAll}
+          isOnlyLayer={
+            getRemoveOperation(
+              activeVisualization,
+              visualization.state,
+              layerId,
+              layerIds.length
+            ) === 'clear'
+          }
+          onEmptyDimensionAdd={(columnId, { groupId }) => {
+            // avoid state update if the datasource does not support initializeDimension
+            if (
+              activeDatasourceId != null &&
+              datasourceMap[activeDatasourceId]?.initializeDimension
+            ) {
               dispatchLens(
-                removeOrClearLayer({
-                  visualizationId: activeVisualization.id,
+                setLayerDefaultDimension({
                   layerId,
-                  layerIds,
+                  columnId,
+                  groupId,
                 })
               );
-              removeLayerRef(layerId);
-            }}
-            toggleFullscreen={toggleFullscreen}
-          />
-        ) : null
-      )}
+            }
+          }}
+          onRemoveLayer={() => {
+            dispatchLens(
+              removeOrClearLayer({
+                visualizationId: activeVisualization.id,
+                layerId,
+                layerIds,
+              })
+            );
+            removeLayerRef(layerId);
+          }}
+          toggleFullscreen={toggleFullscreen}
+        />
+      ))}
       <AddLayerButton
         visualization={activeVisualization}
         visualizationState={visualization.state}

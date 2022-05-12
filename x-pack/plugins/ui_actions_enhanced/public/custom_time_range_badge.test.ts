@@ -12,7 +12,7 @@ import { mount } from 'enzyme';
 import { TimeRangeEmbeddable, TimeRangeContainer, TIME_RANGE_EMBEDDABLE } from './test_helpers';
 import { CustomTimeRangeBadge } from './custom_time_range_badge';
 import { ReactElement } from 'react';
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 test('Removing custom time range from badge resets embeddable back to container time', async () => {
   const container = new TimeRangeContainer(

@@ -29,12 +29,12 @@ export const registerSimulateRoute = ({
       },
     },
     async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
 
       const { pipeline, documents, verbose } = req.body;
 
       try {
-        const { body: response } = await clusterClient.asCurrentUser.ingest.simulate({
+        const response = await clusterClient.asCurrentUser.ingest.simulate({
           verbose,
           body: {
             pipeline,

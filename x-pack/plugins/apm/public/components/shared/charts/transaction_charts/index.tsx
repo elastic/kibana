@@ -12,6 +12,7 @@ import { ChartPointerEventContextProvider } from '../../../../context/chart_poin
 import { ServiceOverviewThroughputChart } from '../../../app/service_overview/service_overview_throughput_chart';
 import { LatencyChart } from '../latency_chart';
 import { TransactionBreakdownChart } from '../transaction_breakdown_chart';
+import { TransactionColdstartRateChart } from '../transaction_coldstart_rate_chart';
 import { FailedTransactionRateChart } from '../failed_transaction_rate_chart';
 
 export function TransactionCharts({
@@ -20,12 +21,18 @@ export function TransactionCharts({
   start,
   end,
   transactionName,
+  isServerlessContext,
+  comparisonEnabled,
+  offset,
 }: {
   kuery: string;
   environment: string;
   start: string;
   end: string;
   transactionName?: string;
+  isServerlessContext?: boolean;
+  comparisonEnabled?: boolean;
+  offset?: string;
 }) {
   return (
     <>
@@ -56,12 +63,24 @@ export function TransactionCharts({
             <EuiFlexItem>
               <FailedTransactionRateChart kuery={kuery} />
             </EuiFlexItem>
-            <EuiFlexItem>
-              <TransactionBreakdownChart
-                kuery={kuery}
-                environment={environment}
-              />
-            </EuiFlexItem>
+            {isServerlessContext ? (
+              <EuiFlexItem>
+                <TransactionColdstartRateChart
+                  kuery={kuery}
+                  transactionName={transactionName}
+                  environment={environment}
+                  comparisonEnabled={comparisonEnabled}
+                  offset={offset}
+                />
+              </EuiFlexItem>
+            ) : (
+              <EuiFlexItem>
+                <TransactionBreakdownChart
+                  kuery={kuery}
+                  environment={environment}
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGrid>
         </ChartPointerEventContextProvider>
       </AnnotationsContextProvider>

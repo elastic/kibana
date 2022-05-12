@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ChromeBreadcrumb } from 'src/core/public';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 
 import { BASE_PATH } from '../../../common/constants';
 import type { Page, DynamicPagePathValues } from '../page_paths';
@@ -156,12 +156,29 @@ const breadcrumbGetters: {
 };
 
 export function useBreadcrumbs(page: Page, values: DynamicPagePathValues = {}) {
-  const { chrome, http } = useKibana().services;
+  const { chrome, http, application } = useKibana().services;
+
   const breadcrumbs: ChromeBreadcrumb[] =
-    breadcrumbGetters[page]?.(values).map((breadcrumb) => ({
-      ...breadcrumb,
-      href: breadcrumb.href ? http.basePath.prepend(`${BASE_PATH}${breadcrumb.href}`) : undefined,
-    })) || [];
+    breadcrumbGetters[page]?.(values).map((breadcrumb) => {
+      const href = breadcrumb.href
+        ? http.basePath.prepend(`${BASE_PATH}${breadcrumb.href}`)
+        : undefined;
+
+      return {
+        ...breadcrumb,
+        href,
+        onClick: href
+          ? (ev: React.MouseEvent) => {
+              if (ev.metaKey || ev.altKey || ev.ctrlKey || ev.shiftKey) {
+                return;
+              }
+
+              ev.preventDefault();
+              application.navigateToUrl(href);
+            }
+          : undefined,
+      };
+    }) || [];
   const docTitle: string[] = [...breadcrumbs]
     .reverse()
     .map((breadcrumb) => breadcrumb.text as string);

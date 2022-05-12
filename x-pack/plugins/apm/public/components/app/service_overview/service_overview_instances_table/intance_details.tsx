@@ -26,7 +26,7 @@ import {
 } from '../../../../../common/elasticsearch_fieldnames';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { getAgentIcon } from '../../../shared/agent_icon/get_agent_icon';
 import { KeyValueFilterList } from '../../../shared/key_value_filter_list';
 import { pushNewItemToKueryBar } from '../../../shared/kuery_bar/utils';

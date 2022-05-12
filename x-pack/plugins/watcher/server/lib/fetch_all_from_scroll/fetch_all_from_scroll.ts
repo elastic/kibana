@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { ES_SCROLL_SETTINGS } from '../../../common/constants';
 
@@ -26,7 +26,7 @@ export function fetchAllFromScroll(
         scroll: ES_SCROLL_SETTINGS.KEEPALIVE,
         scroll_id: scrollId!,
       })
-      .then(({ body: innerResponse }) => {
+      .then((innerResponse) => {
         return fetchAllFromScroll(innerResponse, dataClient, hits);
       });
   }

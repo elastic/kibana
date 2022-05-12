@@ -9,15 +9,14 @@
 import supertest from 'supertest';
 import querystring from 'querystring';
 
-import { UnwrapPromise } from '@kbn/utility-types';
 import { registerFindRoute } from '../find';
-import { savedObjectsClientMock } from '../../../../../core/server/mocks';
+import { savedObjectsClientMock } from '../../../mocks';
 import { CoreUsageStatsClient } from '../../../core_usage_data';
 import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
 import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
 import { setupServer } from '../test_utils';
 
-type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
+type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
 describe('GET /api/saved_objects/_find', () => {
   let server: SetupServerReturn['server'];

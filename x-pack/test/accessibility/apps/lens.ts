@@ -15,8 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const kibanaServer = getService('kibanaServer');
 
-  // Failing: See https://github.com/elastic/kibana/issues/115614
-  describe.skip('Lens', () => {
+  describe('Lens Accessibility', () => {
     const lensChartName = 'MyLensChart';
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
@@ -120,8 +119,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('change chart type', async () => {
-      await PageObjects.lens.switchToVisualization('line');
+      await PageObjects.lens.openChartSwitchPopover();
+      await PageObjects.lens.waitForSearchInputValue('line');
       await a11y.testAppSnapshot();
+      await testSubjects.click('lnsChartSwitchPopover_line');
     });
 
     it('change chart type via suggestions', async () => {

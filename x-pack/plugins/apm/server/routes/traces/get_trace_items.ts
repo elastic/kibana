@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  QueryDslQueryContainer,
+  Sort,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '../../../common/processor_event';
 import {
   TRACE_ID,
@@ -14,7 +18,6 @@ import {
   PARENT_ID,
   ERROR_LOG_LEVEL,
 } from '../../../common/elasticsearch_fieldnames';
-import { rangeQuery } from '../../../../observability/server';
 import { Setup } from '../../lib/helpers/setup_request';
 
 export async function getTraceItems(
@@ -66,7 +69,7 @@ export async function getTraceItems(
         { _score: { order: 'asc' as const } },
         { [TRANSACTION_DURATION]: { order: 'desc' as const } },
         { [SPAN_DURATION]: { order: 'desc' as const } },
-      ],
+      ] as Sort,
       track_total_hits: true,
     },
   });

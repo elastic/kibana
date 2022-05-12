@@ -22,5 +22,9 @@ export const getConfigurationFilePaths = (argv: string[]): string[] => {
   if (rawPaths.length) {
     return rawPaths.map((path) => resolve(process.cwd(), path));
   }
-  return [getConfigPath()];
+
+  const configPath = getConfigPath();
+
+  // Pick up settings from dev.yml as well
+  return [configPath, configPath.replace('kibana.yml', 'kibana.dev.yml')];
 };

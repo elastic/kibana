@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { SwimlaneActionConnector } from './types';
 import SwimlaneActionConnectorFields from './swimlane_connectors';

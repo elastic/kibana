@@ -50,7 +50,15 @@ export const createThresholdAlertType = (
     producer: SERVER_APP_ID,
     async executor(execOptions) {
       const {
-        runOpts: { buildRuleMessage, bulkCreate, exceptionItems, completeRule, tuple, wrapHits },
+        runOpts: {
+          buildRuleMessage,
+          bulkCreate,
+          exceptionItems,
+          completeRule,
+          tuple,
+          wrapHits,
+          ruleDataReader,
+        },
         services,
         startedAt,
         state,
@@ -69,6 +77,7 @@ export const createThresholdAlertType = (
         tuple,
         version,
         wrapHits,
+        ruleDataReader,
       });
 
       return result;

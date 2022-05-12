@@ -22,7 +22,9 @@ const getHostsTabPath = () =>
   `${HostsTableType.uncommonProcesses}|` +
   `${HostsTableType.anomalies}|` +
   `${HostsTableType.events}|` +
-  `${HostsTableType.alerts})`;
+  `${HostsTableType.risk}|` +
+  `${HostsTableType.alerts}|` +
+  `${HostsTableType.sessions})`;
 
 const getHostDetailsTabPath = () =>
   `${hostDetailsPagePath}/:tabName(` +
@@ -30,52 +32,55 @@ const getHostDetailsTabPath = () =>
   `${HostsTableType.uncommonProcesses}|` +
   `${HostsTableType.anomalies}|` +
   `${HostsTableType.events}|` +
-  `${HostsTableType.alerts})`;
+  `${HostsTableType.risk}|` +
+  `${HostsTableType.alerts}|` +
+  `${HostsTableType.sessions})`;
 
-export const HostsContainer = React.memo(() => {
-  return (
-    <Switch>
-      <Route
-        exact
-        strict
-        path={HOSTS_PATH}
-        render={({ location: { search = '' } }) => (
-          <Redirect to={{ pathname: `${HOSTS_PATH}/${HostsTableType.hosts}`, search }} />
-        )}
-      />
+export const HostsContainer = React.memo(() => (
+  <Switch>
+    <Route path={`${HOSTS_PATH}/ml-hosts`}>
+      <MlHostConditionalContainer />
+    </Route>
+    <Route path={getHostsTabPath()}>
+      <Hosts />
+    </Route>
+    <Route
+      path={getHostDetailsTabPath()}
+      render={({
+        match: {
+          params: { detailName },
+        },
+      }) => (
+        <HostDetails
+          hostDetailsPagePath={hostDetailsPagePath}
+          detailName={decodeURIComponent(detailName)}
+        />
+      )}
+    />
+    <Route
+      path={hostDetailsPagePath}
+      render={({
+        match: {
+          params: { detailName },
+        },
+        location: { search = '' },
+      }) => (
+        <Redirect
+          to={{
+            pathname: `${HOSTS_PATH}/${detailName}/${HostsTableType.authentications}`,
+            search,
+          }}
+        />
+      )}
+    />
 
-      <Route path={`${HOSTS_PATH}/ml-hosts`}>
-        <MlHostConditionalContainer />
-      </Route>
-      <Route path={getHostsTabPath()}>
-        <Hosts />
-      </Route>
-      <Route
-        path={getHostDetailsTabPath()}
-        render={({
-          match: {
-            params: { detailName },
-          },
-        }) => <HostDetails hostDetailsPagePath={hostDetailsPagePath} detailName={detailName} />}
-      />
-      <Route
-        path={hostDetailsPagePath}
-        render={({
-          match: {
-            params: { detailName },
-          },
-          location: { search = '' },
-        }) => (
-          <Redirect
-            to={{
-              pathname: `${HOSTS_PATH}/${detailName}/${HostsTableType.authentications}`,
-              search,
-            }}
-          />
-        )}
-      />
-    </Switch>
-  );
-});
+    <Route
+      path={HOSTS_PATH}
+      render={({ location: { search = '' } }) => (
+        <Redirect to={{ pathname: `${HOSTS_PATH}/${HostsTableType.hosts}`, search }} />
+      )}
+    />
+  </Switch>
+));
 
 HostsContainer.displayName = 'HostsContainer';

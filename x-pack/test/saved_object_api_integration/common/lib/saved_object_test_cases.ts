@@ -106,3 +106,20 @@ export const CONFLICT_TEST_CASES: Record<string, CommonTestCase> = Object.freeze
     expectedNamespaces: EACH_SPACE,
   }),
 });
+
+/**
+ * These objects exist in the test data for all saved object test suites, but they are only used to test specific scenarios.
+ */
+export const OTHER_TEST_CASES: Record<string, CommonTestCase> = Object.freeze({
+  OUTBOUND_MISSING_REFERENCE_CONFLICT_1_OBJ: Object.freeze({
+    type: 'sharedtype',
+    id: 'outbound-missing-reference-conflict-1',
+    expectedNamespaces: [ALL_SPACES_ID],
+  }),
+  OUTBOUND_MISSING_REFERENCE_CONFLICT_2A_OBJ: Object.freeze({
+    type: 'sharedtype',
+    id: 'outbound-missing-reference-conflict-2a',
+    originId: 'outbound-missing-reference-conflict-2',
+    expectedNamespaces: [ALL_SPACES_ID],
+  }),
+});

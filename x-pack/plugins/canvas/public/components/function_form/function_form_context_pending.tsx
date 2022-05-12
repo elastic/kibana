@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { FC, useCallback, useEffect } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import { Loading } from '../loading';
 import { CanvasElement, ExpressionContext } from '../../../types';
@@ -18,29 +18,28 @@ interface FunctionFormContextPendingProps {
   updateContext: (element?: CanvasElement) => void;
 }
 
-export const FunctionFormContextPending: React.FunctionComponent<FunctionFormContextPendingProps> =
-  (props) => {
-    const { contextExpression, expressionType, context, updateContext } = props;
-    const prevContextExpression = usePrevious(contextExpression);
-    const fetchContext = useCallback(
-      (force = false) => {
-        // dispatch context update if none is provided
-        if (force || (context == null && expressionType.requiresContext)) {
-          updateContext();
-        }
-      },
-      [context, expressionType.requiresContext, updateContext]
-    );
+export const FunctionFormContextPending: FC<FunctionFormContextPendingProps> = (props) => {
+  const { contextExpression, expressionType, context, updateContext } = props;
+  const prevContextExpression = usePrevious(contextExpression);
+  const fetchContext = useCallback(
+    (force = false) => {
+      // dispatch context update if none is provided
+      if (force || (context == null && expressionType.requiresContext)) {
+        updateContext();
+      }
+    },
+    [context, expressionType.requiresContext, updateContext]
+  );
 
-    useEffect(() => {
-      const forceUpdate =
-        expressionType.requiresContext && prevContextExpression !== contextExpression;
-      fetchContext(forceUpdate);
-    }, [contextExpression, expressionType, fetchContext, prevContextExpression]);
+  useEffect(() => {
+    const forceUpdate =
+      expressionType.requiresContext && prevContextExpression !== contextExpression;
+    fetchContext(forceUpdate);
+  }, [contextExpression, expressionType, fetchContext, prevContextExpression]);
 
-    return (
-      <div className="canvasFunctionForm canvasFunctionForm--loading">
-        <Loading />
-      </div>
-    );
-  };
+  return (
+    <div className="canvasFunctionForm canvasFunctionForm--loading">
+      <Loading />
+    </div>
+  );
+};

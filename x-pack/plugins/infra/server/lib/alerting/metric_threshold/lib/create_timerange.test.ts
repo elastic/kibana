@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { createTimerange } from './create_timerange';
-import { Aggregators } from '../types';
 import moment from 'moment';
+import { Aggregators } from '../../../../../common/alerting/metrics';
+import { createTimerange } from './create_timerange';
 
 describe('createTimerange(interval, aggType, timeframe)', () => {
   describe('without timeframe', () => {

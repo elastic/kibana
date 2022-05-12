@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { Agent, BulkActionResult } from '../../types';
 import * as APIKeyService from '../api_keys';
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
-import { createAgentAction, bulkCreateAgentActions } from './actions';
+import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
 import {
   getAgentById,
@@ -53,7 +53,7 @@ export async function unenrollAgent(
   }
   const now = new Date().toISOString();
   await createAgentAction(esClient, {
-    agent_id: agentId,
+    agents: [agentId],
     created_at: now,
     type: 'UNENROLL',
   });
@@ -105,14 +105,11 @@ export async function unenrollAgents(
     await invalidateAPIKeysForAgents(agentsToUpdate);
   } else {
     // Create unenroll action for each agent
-    await bulkCreateAgentActions(
-      esClient,
-      agentsToUpdate.map((agent) => ({
-        agent_id: agent.id,
-        created_at: now,
-        type: 'UNENROLL',
-      }))
-    );
+    await createAgentAction(esClient, {
+      agents: agentsToUpdate.map((agent) => agent.id),
+      created_at: now,
+      type: 'UNENROLL',
+    });
   }
 
   // Update the necessary agents

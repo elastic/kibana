@@ -10,7 +10,8 @@
       "outDir": "target/types",
       "types": [
         "cypress",
-        "node"
+        "node",
+        "cypress-react-selector"
       ],
       "resolveJsonModule": true,
     },

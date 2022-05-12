@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Suspicious Image Load (taskschd.dll) from MS Office",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "library where process.name : (\"WINWORD.EXE\", \"EXCEL.EXE\", \"POWERPNT.EXE\", \"MSPUB.EXE\", \"MSACCESS.EXE\") and\n  event.action : \"load\" and\n  event.category : \"library\" and\n  dll.name : \"taskschd.dll\"\n",
   "references": [
     "https://medium.com/threatpunter/detecting-adversary-tradecraft-with-image-load-event-logging-and-eql-8de93338c16",
@@ -46,5 +47,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }

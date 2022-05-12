@@ -72,7 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
   const calendarId = `wizard-test-calendar_${Date.now()}`;
 
   describe('single metric', function () {
-    this.tags(['mlqa']);
+    this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
@@ -84,6 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
     });
 
     it('job creation loads the single metric wizard for the source data', async () => {
@@ -184,7 +185,6 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToJobManagement();
 
-      await ml.jobTable.waitForJobsToLoad();
       await ml.jobTable.filterWithSearchString(jobId, 1);
 
       await ml.testExecution.logTestStep(
@@ -320,7 +320,6 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToJobManagement();
 
-      await ml.jobTable.waitForJobsToLoad();
       await ml.jobTable.filterWithSearchString(jobIdClone, 1);
 
       await ml.testExecution.logTestStep(
@@ -352,7 +351,6 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep(
         'job deletion does not display the deleted job in the job list any more'
       );
-      await ml.jobTable.waitForJobsToLoad();
       await ml.jobTable.filterWithSearchString(jobIdClone, 0);
 
       await ml.testExecution.logTestStep(

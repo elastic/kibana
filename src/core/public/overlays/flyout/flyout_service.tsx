@@ -87,6 +87,7 @@ export interface OverlayFlyoutOpenOptions {
   size?: EuiFlyoutSize;
   maxWidth?: boolean | number | string;
   hideCloseButton?: boolean;
+  outsideClickCloses?: boolean;
   maskProps?: EuiOverlayMaskProps;
   /**
    * EuiFlyout onClose handler.

@@ -7,10 +7,7 @@
 
 import d3 from 'd3';
 import { useMemo } from 'react';
-import {
-  euiLightVars as euiThemeLight,
-  euiDarkVars as euiThemeDark,
-} from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars as euiThemeLight, euiDarkVars as euiThemeDark } from '@kbn/ui-theme';
 
 import { i18n } from '@kbn/i18n';
 

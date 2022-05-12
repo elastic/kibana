@@ -3,12 +3,9 @@
   "compilerOptions": {
     "allowJs": true,
     "declaration": true,
-    "declarationMap": true,
     "emitDeclarationOnly": true,
     "outDir": "./target_types",
     "rootDir": "src",
-    "sourceMap": true,
-    "sourceRoot": "../../../../packages/kbn-ui-shared-deps-npm/src",
     "types": [
       "node",
     ]

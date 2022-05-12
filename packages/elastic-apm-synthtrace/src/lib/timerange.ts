@@ -9,13 +9,16 @@
 import { Interval } from './interval';
 
 export class Timerange {
-  constructor(private from: number, private to: number) {}
+  constructor(private from: Date, private to: Date) {}
 
   interval(interval: string) {
-    return new Interval(this.from, this.to, interval);
+    return new Interval({ from: this.from, to: this.to, interval });
   }
 }
 
-export function timerange(from: number, to: number) {
-  return new Timerange(from, to);
+export function timerange(from: Date | number, to: Date | number) {
+  return new Timerange(
+    from instanceof Date ? from : new Date(from),
+    to instanceof Date ? to : new Date(to)
+  );
 }

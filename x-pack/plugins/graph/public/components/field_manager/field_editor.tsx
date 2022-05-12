@@ -25,7 +25,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FieldIcon } from '@kbn/react-field/field_icon';
+import { FieldIcon } from '@kbn/react-field';
 import classNames from 'classnames';
 import { WorkspaceField } from '../../types';
 import { iconChoices } from '../../helpers/style_choices';
@@ -133,7 +133,6 @@ export function FieldEditor({
           color={initialField.color}
           iconSide="right"
           className={classNames('gphFieldEditor__badge', {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'gphFieldEditor__badge--disabled': isDisabled,
           })}
           onClickAriaLabel={badgeDescription}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndexPattern } from 'src/plugins/data/public';
+import { DataView } from '@kbn/data-plugin/common';
 import { AGG_TYPE } from '../../../../common/constants';
 import { TileMetaFeature } from '../../../../common/descriptor_types';
 import { CountAggField } from './count_agg_field';
@@ -13,6 +13,7 @@ import { isMetricCountable } from '../../util/is_metric_countable';
 import { CountAggFieldParams } from './agg_field_types';
 import { addFieldToDSL, getField } from '../../../../common/elasticsearch_util';
 import { IField } from '../field';
+import { getAggRange } from '../../util/tile_meta_feature_utils';
 
 const TERMS_AGG_SHARD_SIZE = 5;
 
@@ -61,7 +62,7 @@ export class AggField extends CountAggField {
     return this._aggType;
   }
 
-  getValueAggDsl(indexPattern: IndexPattern): unknown {
+  getValueAggDsl(indexPattern: DataView): unknown {
     const field = getField(indexPattern, this.getRootName());
     const aggType = this._getAggType();
     const aggBody = aggType === AGG_TYPE.TERMS ? { size: 1, shard_size: TERMS_AGG_SHARD_SIZE } : {};
@@ -111,15 +112,6 @@ export class AggField extends CountAggField {
   }
 
   pluckRangeFromTileMetaFeature(metaFeature: TileMetaFeature) {
-    const minField = `aggregations.${this.getName()}.min`;
-    const maxField = `aggregations.${this.getName()}.max`;
-    return metaFeature.properties &&
-      typeof metaFeature.properties[minField] === 'number' &&
-      typeof metaFeature.properties[maxField] === 'number'
-      ? {
-          min: metaFeature.properties[minField] as number,
-          max: metaFeature.properties[maxField] as number,
-        }
-      : null;
+    return getAggRange(metaFeature, this.getName());
   }
 }

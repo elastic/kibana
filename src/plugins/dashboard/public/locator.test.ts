@@ -7,9 +7,9 @@
  */
 
 import { DashboardAppLocatorDefinition } from './locator';
-import { hashedItemStore } from '../../kibana_utils/public';
-import { mockStorage } from '../../kibana_utils/public/storage/hashed_item_store/mock';
-import { esFilters } from '../../data/public';
+import { hashedItemStore } from '@kbn/kibana-utils-plugin/public';
+import { mockStorage } from '@kbn/kibana-utils-plugin/public/storage/hashed_item_store/mock';
+import { FilterStateStore } from '@kbn/es-query';
 
 describe('dashboard locator', () => {
   beforeEach(() => {
@@ -79,7 +79,7 @@ describe('dashboard locator', () => {
           },
           query: { query: 'hi' },
           $state: {
-            store: esFilters.FilterStateStore.GLOBAL_STATE,
+            store: FilterStateStore.GLOBAL_STATE,
           },
         },
       ],

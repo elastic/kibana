@@ -16,16 +16,19 @@ import type {
   Logger,
   Plugin,
   PluginInitializerContext,
-} from 'src/core/server';
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-
+} from '@kbn/core/server';
 import type {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
-} from '../../features/server';
-import type { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
-import type { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
-import type { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
+} from '@kbn/features-plugin/server';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+
 import type { AuthenticatedUser, PrivilegeDeprecationsService, SecurityLicense } from '../common';
 import { SecurityLicenseService } from '../common/licensing';
 import type { AnonymousAccessServiceStart } from './anonymous_access';
@@ -242,6 +245,7 @@ export class SecurityPlugin
     this.sessionManagementService.setup({ config, http: core.http, taskManager });
     this.authenticationService.setup({
       http: core.http,
+      elasticsearch: core.elasticsearch,
       config,
       license,
       buildNumber: this.initializerContext.env.packageInfo.buildNum,
@@ -310,9 +314,7 @@ export class SecurityPlugin
     });
 
     return Object.freeze<SecurityPluginSetup>({
-      audit: {
-        asScoped: this.auditSetup.asScoped,
-      },
+      audit: this.auditSetup,
       authc: { getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request) },
       authz: {
         actions: this.authorizationSetup.actions,
@@ -324,11 +326,13 @@ export class SecurityPlugin
         mode: this.authorizationSetup.mode,
       },
       license,
-      privilegeDeprecationsService: getPrivilegeDeprecationsService(
-        this.authorizationSetup,
+      privilegeDeprecationsService: getPrivilegeDeprecationsService({
+        authz: this.authorizationSetup,
+        getFeatures: () =>
+          startServicesPromise.then((services) => services.features.getKibanaFeatures()),
         license,
-        this.logger.get('deprecations')
-      ),
+        logger: this.logger.get('deprecations'),
+      }),
     });
   }
 
@@ -345,6 +349,7 @@ export class SecurityPlugin
     const clusterClient = core.elasticsearch.client;
     const { watchOnlineStatus$ } = this.elasticsearchService.start();
     const { session } = this.sessionManagementService.start({
+      auditLogger: this.auditSetup!.withoutRequest,
       elasticsearchClient: clusterClient.asInternalUser,
       kibanaIndexName: this.getKibanaIndexName(),
       online$: watchOnlineStatus$(),

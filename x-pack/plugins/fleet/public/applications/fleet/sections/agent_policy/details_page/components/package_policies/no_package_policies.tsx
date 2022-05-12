@@ -9,12 +9,12 @@ import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
-import { useCapabilities, useStartServices } from '../../../../../hooks';
+import { useAuthz, useStartServices } from '../../../../../hooks';
 import { pagePathGetters, INTEGRATIONS_PLUGIN_ID } from '../../../../../constants';
 
 export const NoPackagePolicies = memo<{ policyId: string }>(({ policyId }) => {
   const { application } = useStartServices();
-  const hasWriteCapabilities = useCapabilities().write;
+  const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
 
   return (
     <EuiEmptyPrompt
@@ -35,7 +35,7 @@ export const NoPackagePolicies = memo<{ policyId: string }>(({ policyId }) => {
       }
       actions={
         <EuiButton
-          isDisabled={!hasWriteCapabilities}
+          isDisabled={!canWriteIntegrationPolicies}
           fill
           onClick={() =>
             application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
@@ -43,6 +43,7 @@ export const NoPackagePolicies = memo<{ policyId: string }>(({ policyId }) => {
               state: { forAgentPolicyId: policyId },
             })
           }
+          data-test-subj="addPackagePolicyButton"
         >
           <FormattedMessage
             id="xpack.fleet.policyDetailsPackagePolicies.createFirstButtonText"

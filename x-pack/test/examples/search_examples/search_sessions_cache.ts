@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async function () {
       await PageObjects.common.navigateToApp(appId, { insertTimestamp: false });
-      await comboBox.setCustom('indexPatternSelector', 'logstash-*');
+      await comboBox.setCustom('dataViewSelector', 'logstash-*');
       await comboBox.set('searchBucketField', 'extension.raw');
       await comboBox.set('searchMetricField', 'phpmemory');
     });

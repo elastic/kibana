@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { panAnimationDuration } from '@kbn/security-solution-plugin/public/resolver/store/camera/scaling_constants';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { panAnimationDuration } from '../../../../plugins/security_solution/public/resolver/store/camera/scaling_constants';
 
 const expectedDifference = 0.09;
 
@@ -29,8 +29,6 @@ export default function ({
 
   // FLAKY: https://github.com/elastic/kibana/issues/87425
   describe('Resolver test app', function () {
-    this.tags('ciGroup7');
-
     // Note: these tests are intended to run on the same page in serial.
     before(async function () {
       await pageObjects.common.navigateToApp('resolverTest');

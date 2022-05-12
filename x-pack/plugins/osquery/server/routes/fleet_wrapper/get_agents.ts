@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { IRouter } from '@kbn/core/server';
 import { PLUGIN_ID } from '../../../common';
-import { IRouter } from '../../../../../../src/core/server';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
@@ -24,8 +24,7 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
       try {
         agents = await osqueryContext.service
           .getAgentService()
-          ?.asScoped(request)
-          // @ts-expect-error update types
+          ?.asInternalUser // @ts-expect-error update types
           .listAgents(request.query);
       } catch (error) {
         return response.badRequest({ body: error });

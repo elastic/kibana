@@ -1,0 +1,79 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Detects the use of Win32 API Functions that can be used to capture user keystrokes in PowerShell scripts. Attackers use this technique to capture user input, looking for credentials and/or other valuable data.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-windows.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "PowerShell Keylogging Script",
+  "note": "## Triage and analysis.\n\n### Investigating PowerShell Keylogging Script\n\nPowerShell is one of the main tools system administrators use for automation, report routines, and other tasks. This\nmakes it available for use in various environments, and creates an attractive way for attackers to execute code.\n\nAttackers can abuse PowerShell capabilities to capture user keystrokes with the goal of stealing credentials and other\nvaluable information as credit card data and confidential conversations.\n\n#### Possible investigation steps:\n\n- Examine script content that triggered the detection. \n- Investigate the script execution chain (parent process tree).\n- Inspect any file or network events from the suspicious PowerShell host process instance.\n- Investigate other alerts related to the user/host in the last 48 hours.\n- Consider whether the user needs PowerShell to complete its tasks.\n- Investigate if the script stores the captured data locally.\n- Investigate if the script contains exfiltration capabilities and the destination of this exfiltration.\n- Assess network data to determine if the host communicated with the exfiltration server.\n\n### False positive analysis\n\n- Regular users do not have a business justification for using scripting utilities to capture keystrokes, making\nfalse positives unlikely. In the case of authorized benign true positives (B-TPs), exceptions can be added.\n\n### Related rules\n\n- PowerShell PSReflect Script - 56f2e9b5-4803-4e44-a0a4-a52dc79d57fe\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- The response must be prioritized if this alert involves key executives or potentially valuable targets for espionage.\n- Quarantine the involved host for forensic investigation, as well as eradication and recovery activities.\n- Configure AppLocker or equivalent software to restrict access to PowerShell for regular users.\n- Reset the password for the user account and other potentially compromised accounts (email, services, CRMs, etc.).\n\n## Config\n\nThe 'PowerShell Script Block Logging' logging policy must be enabled.\nSteps to implement the logging policy with with Advanced Audit Configuration:\n\n```\nComputer Configuration > \nAdministrative Templates > \nWindows PowerShell > \nTurn on PowerShell Script Block Logging (Enable)\n```\n\nSteps to implement the logging policy via registry:\n\n```\nreg add \"hklm\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging\" /v EnableScriptBlockLogging /t REG_DWORD /d 1\n```\n",
+  "query": "event.category:process and \n  ( \n   powershell.file.script_block_text : (GetAsyncKeyState or NtUserGetAsyncKeyState or GetKeyboardState or \"Get-Keystrokes\") or \n   powershell.file.script_block_text : (\n        (SetWindowsHookA or SetWindowsHookW or SetWindowsHookEx or SetWindowsHookExA or NtUserSetWindowsHookEx) and\n        (GetForegroundWindow or GetWindowTextA or GetWindowTextW or \"WM_KEYBOARD_LL\")\n   )\n   )\n",
+  "references": [
+    "https://github.com/EmpireProject/Empire/blob/master/data/module_source/collection/Get-Keystrokes.ps1",
+    "https://github.com/MojtabaTajik/FunnyKeylogger/blob/master/FunnyLogger.ps1"
+  ],
+  "risk_score": 73,
+  "rule_id": "bd2c86a0-8b61-4457-ab38-96943984e889",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Collection"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0009",
+        "name": "Collection",
+        "reference": "https://attack.mitre.org/tactics/TA0009/"
+      },
+      "technique": [
+        {
+          "id": "T1056",
+          "name": "Input Capture",
+          "reference": "https://attack.mitre.org/techniques/T1056/",
+          "subtechnique": [
+            {
+              "id": "T1056.001",
+              "name": "Keylogging",
+              "reference": "https://attack.mitre.org/techniques/T1056/001/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "reference": "https://attack.mitre.org/techniques/T1059/",
+          "subtechnique": [
+            {
+              "id": "T1059.001",
+              "name": "PowerShell",
+              "reference": "https://attack.mitre.org/techniques/T1059/001/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 4
+}

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Observable, of } from 'rxjs';
+import { lastValueFrom, Observable, of } from 'rxjs';
 
 import {
   coreMock,
   httpServerMock,
   httpServiceMock,
   loggingSystemMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 
 import { licenseMock } from '../../common/licensing/index.mock';
 import type { ConfigType } from '../config';
@@ -67,6 +67,10 @@ describe('#setup', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "asScoped": [Function],
+        "withoutRequest": Object {
+          "enabled": true,
+          "log": [Function],
+        },
       }
     `);
     audit.stop();
@@ -254,6 +258,82 @@ describe('#asScoped', () => {
   });
 });
 
+describe('#withoutRequest', () => {
+  it('logs event without additional meta data', async () => {
+    const audit = new AuditService(logger);
+    const auditSetup = audit.setup({
+      license,
+      config,
+      logging,
+      http,
+      getCurrentUser,
+      getSpaceId,
+      getSID,
+      recordAuditLoggingUsage,
+    });
+
+    await auditSetup.withoutRequest.log({ message: 'MESSAGE', event: { action: 'ACTION' } });
+    expect(logger.info).toHaveBeenCalledWith('MESSAGE', {
+      event: { action: 'ACTION' },
+    });
+    audit.stop();
+  });
+
+  it('does not log to audit logger if event matches ignore filter', async () => {
+    const audit = new AuditService(logger);
+    const auditSetup = audit.setup({
+      license,
+      config: {
+        enabled: true,
+        appender: {
+          type: 'console',
+          layout: {
+            type: 'json',
+          },
+        },
+        ignore_filters: [{ actions: ['ACTION'] }],
+      },
+      logging,
+      http,
+      getCurrentUser,
+      getSpaceId,
+      getSID,
+      recordAuditLoggingUsage,
+    });
+
+    await auditSetup.withoutRequest.log({ message: 'MESSAGE', event: { action: 'ACTION' } });
+    expect(logger.info).not.toHaveBeenCalled();
+    audit.stop();
+  });
+
+  it('does not log to audit logger if no event was generated', async () => {
+    const audit = new AuditService(logger);
+    const auditSetup = audit.setup({
+      license,
+      config: {
+        enabled: true,
+        appender: {
+          type: 'console',
+          layout: {
+            type: 'json',
+          },
+        },
+        ignore_filters: [{ actions: ['ACTION'] }],
+      },
+      logging,
+      http,
+      getCurrentUser,
+      getSpaceId,
+      getSID,
+      recordAuditLoggingUsage,
+    });
+
+    await auditSetup.withoutRequest.log(undefined);
+    expect(logger.info).not.toHaveBeenCalled();
+    audit.stop();
+  });
+});
+
 describe('#createLoggingConfig', () => {
   test('sets log level to `info` when audit logging is enabled and appender is defined', async () => {
     const features$ = of({
@@ -302,8 +382,8 @@ describe('#createLoggingConfig', () => {
       allowAuditLogging: true,
     });
 
-    const loggingConfig = await features$
-      .pipe(
+    const loggingConfig = await lastValueFrom(
+      features$.pipe(
         createLoggingConfig({
           enabled: false,
           appender: {
@@ -314,7 +394,7 @@ describe('#createLoggingConfig', () => {
           },
         })
       )
-      .toPromise();
+    );
 
     expect(loggingConfig.loggers![0].level).toEqual('off');
   });
@@ -324,8 +404,8 @@ describe('#createLoggingConfig', () => {
       allowAuditLogging: false,
     });
 
-    const loggingConfig = await features$
-      .pipe(
+    const loggingConfig = await lastValueFrom(
+      features$.pipe(
         createLoggingConfig({
           enabled: true,
           appender: {
@@ -336,7 +416,7 @@ describe('#createLoggingConfig', () => {
           },
         })
       )
-      .toPromise();
+    );
 
     expect(loggingConfig.loggers![0].level).toEqual('off');
   });

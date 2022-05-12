@@ -26,6 +26,7 @@ const createExecutionContextMock = () => {
     get: jest.fn(),
     getParentContextFrom: jest.fn(),
     getAsHeader: jest.fn(),
+    getAsLabels: jest.fn(),
   };
   mock.withContext.mockImplementation(withContextMock);
   return mock;
@@ -38,6 +39,7 @@ const createInternalSetupContractMock = () => {
 const createSetupContractMock = () => {
   const mock: jest.Mocked<ExecutionContextSetup> = {
     withContext: jest.fn(),
+    getAsLabels: jest.fn(),
   };
   mock.withContext.mockImplementation(withContextMock);
   return mock;

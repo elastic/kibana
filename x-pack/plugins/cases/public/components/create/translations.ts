@@ -9,10 +9,6 @@ import { i18n } from '@kbn/i18n';
 
 export * from '../../common/translations';
 
-export const CREATE_PAGE_TITLE = i18n.translate('xpack.cases.create.title', {
-  defaultMessage: 'Create new case',
-});
-
 export const STEP_ONE_TITLE = i18n.translate('xpack.cases.create.stepOneTitle', {
   defaultMessage: 'Case fields',
 });

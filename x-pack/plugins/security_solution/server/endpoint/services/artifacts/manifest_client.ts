@@ -9,7 +9,7 @@ import {
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectsUpdateResponse,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import {
   manifestSchemaVersion,

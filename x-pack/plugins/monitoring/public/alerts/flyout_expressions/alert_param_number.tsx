@@ -13,10 +13,10 @@ interface Props {
   value: number;
   details: { [key: string]: unknown };
   errors: string[];
-  setAlertParams: (property: string, value: number) => void;
+  setRuleParams: (property: string, value: number) => void;
 }
 export const AlertParamNumber: React.FC<Props> = (props: Props) => {
-  const { name, details, setAlertParams, errors } = props;
+  const { name, details, setRuleParams, errors } = props;
   const [value, setValue] = useState(props.value);
   return (
     <EuiFormRow label={details.label as string} error={errors} isInvalid={errors?.length > 0}>
@@ -30,7 +30,7 @@ export const AlertParamNumber: React.FC<Props> = (props: Props) => {
             newValue = 0;
           }
           setValue(newValue);
-          setAlertParams(name, newValue);
+          setRuleParams(name, newValue);
         }}
       />
     </EuiFormRow>

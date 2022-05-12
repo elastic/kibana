@@ -745,6 +745,16 @@ export const query = (specService: SpecDefinitionsService) => {
         // populated by a global rule
       },
     },
+    script_score: {
+      __template: {
+        script: {},
+        query: {},
+      },
+      script: {},
+      query: {},
+      min_score: '',
+      boost: 1.0,
+    },
     wrapper: {
       __template: {
         query: 'QUERY_BASE64_ENCODED',

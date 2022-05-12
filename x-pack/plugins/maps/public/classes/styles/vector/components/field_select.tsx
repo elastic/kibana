@@ -16,7 +16,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FieldIcon } from '@kbn/react-field/field_icon';
+import { FieldIcon } from '@kbn/react-field';
 import { FIELD_ORIGIN, VECTOR_STYLES } from '../../../../../common/constants';
 import { StyleField } from '../style_fields_helper';
 
@@ -51,7 +51,12 @@ function groupFieldsByOrigin(fields: StyleField[]) {
   function fieldsListToOptions(fieldsList: StyleField[]) {
     return fieldsList
       .map((field) => {
-        return { value: field, label: field.label };
+        return {
+          value: field,
+          label: field.label,
+          disabled: field.isUnsupported,
+          title: field.unsupportedMsg,
+        };
       })
       .sort((a, b) => {
         return a.label.toLowerCase().localeCompare(b.label.toLowerCase());

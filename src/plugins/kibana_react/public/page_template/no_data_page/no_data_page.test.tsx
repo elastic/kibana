@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { NoDataPage } from './no_data_page';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
 describe('NoDataPage', () => {
   test('render', () => {

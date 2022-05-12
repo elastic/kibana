@@ -10,7 +10,7 @@ import { isPopulatedObject } from '../util/object_utils';
 
 export function isMultiBucketAggregate(
   arg: unknown
-): arg is estypes.AggregationsMultiBucketAggregate {
+): arg is estypes.AggregationsMultiBucketAggregateBase {
   return isPopulatedObject(arg, ['buckets']);
 }
 

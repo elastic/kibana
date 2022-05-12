@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { AlertAdd } from '../application/sections/alert_form';
-import type { AlertAddProps } from '../types';
+import { RuleAdd } from '../application/sections/rule_form';
+import type { RuleAddProps as AlertAddProps } from '../types';
 
 export const getAddAlertFlyoutLazy = (props: AlertAddProps) => {
-  return <AlertAdd {...props} />;
+  return <RuleAdd {...props} />;
 };

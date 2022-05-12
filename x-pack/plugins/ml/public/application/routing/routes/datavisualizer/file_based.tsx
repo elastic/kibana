@@ -24,7 +24,11 @@ export const fileBasedRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
+  id: 'filedatavisualizer',
   path: '/filedatavisualizer',
+  title: i18n.translate('xpack.ml.dataVisualizer.file.docTitle', {
+    defaultMessage: 'File Data Visualizer',
+  }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
@@ -33,7 +37,6 @@ export const fileBasedRouteFactory = (
       text: i18n.translate('xpack.ml.dataVisualizer.fileBasedLabel', {
         defaultMessage: 'File',
       }),
-      href: '',
     },
   ],
 });

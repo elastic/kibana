@@ -10,16 +10,14 @@ import styled from 'styled-components';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiPopover,
   EuiContextMenu,
-  EuiButtonEmpty,
+  EuiButton,
   EuiIcon,
   EuiPortal,
 } from '@elastic/eui';
-import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { SO_SEARCH_LIMIT } from '../../../../constants';
 import type { Agent } from '../../../../types';
 import {
   AgentReassignAgentPolicyModal,
@@ -28,43 +26,26 @@ import {
 } from '../../components';
 import { useKibanaVersion } from '../../../../hooks';
 
-const Divider = styled.div`
-  width: 0;
-  height: ${(props) => props.theme.eui.euiSizeL};
-  border-left: ${(props) => props.theme.eui.euiBorderThin};
-`;
+import type { SelectionMode } from './types';
 
 const FlexItem = styled(EuiFlexItem)`
   height: ${(props) => props.theme.eui.euiSizeL};
 `;
-
-const Button = styled(EuiButtonEmpty)`
-  .euiButtonEmpty__text {
-    font-size: ${(props) => props.theme.eui.euiFontSizeXS};
-  }
-`;
-
-export type SelectionMode = 'manual' | 'query';
-
-export const AgentBulkActions: React.FunctionComponent<{
+export interface Props {
   totalAgents: number;
   totalInactiveAgents: number;
-  selectableAgents: number;
   selectionMode: SelectionMode;
-  setSelectionMode: (mode: SelectionMode) => void;
   currentQuery: string;
   selectedAgents: Agent[];
-  setSelectedAgents: (agents: Agent[]) => void;
   refreshAgents: () => void;
-}> = ({
+}
+
+export const AgentBulkActions: React.FunctionComponent<Props> = ({
   totalAgents,
   totalInactiveAgents,
-  selectableAgents,
   selectionMode,
-  setSelectionMode,
   currentQuery,
   selectedAgents,
-  setSelectedAgents,
   refreshAgents,
 }) => {
   const kibanaVersion = useKibanaVersion();
@@ -92,6 +73,7 @@ export const AgentBulkActions: React.FunctionComponent<{
           name: (
             <FormattedMessage
               id="xpack.fleet.agentBulkActions.reassignPolicy"
+              data-test-subj="agentBulkActionsReassign"
               defaultMessage="Assign to new policy"
             />
           ),
@@ -106,6 +88,7 @@ export const AgentBulkActions: React.FunctionComponent<{
           name: (
             <FormattedMessage
               id="xpack.fleet.agentBulkActions.unenrollAgents"
+              data-test-subj="agentBulkActionsUnenroll"
               defaultMessage="Unenroll agents"
             />
           ),
@@ -120,6 +103,7 @@ export const AgentBulkActions: React.FunctionComponent<{
           name: (
             <FormattedMessage
               id="xpack.fleet.agentBulkActions.upgradeAgents"
+              data-test-subj="agentBulkActionsUpgrade"
               defaultMessage="Upgrade agents"
             />
           ),
@@ -130,28 +114,9 @@ export const AgentBulkActions: React.FunctionComponent<{
             setIsUpgradeModalOpen(true);
           },
         },
-        {
-          name: (
-            <FormattedMessage
-              id="xpack.fleet.agentBulkActions.clearSelection"
-              defaultMessage="Clear selection"
-            />
-          ),
-          icon: <EuiIcon type="cross" size="m" />,
-          onClick: () => {
-            closeMenu();
-            setSelectionMode('manual');
-            setSelectedAgents([]);
-          },
-        },
       ],
     },
   ];
-
-  const showSelectEverything =
-    selectionMode === 'manual' &&
-    selectedAgents.length === selectableAgents &&
-    selectableAgents < totalAgents;
 
   const totalActiveAgents = totalAgents - totalInactiveAgents;
   const agentCount = selectionMode === 'manual' ? selectedAgents.length : totalActiveAgents;
@@ -196,51 +161,25 @@ export const AgentBulkActions: React.FunctionComponent<{
         </EuiPortal>
       )}
       <EuiFlexGroup gutterSize="m" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            {totalAgents > SO_SEARCH_LIMIT ? (
-              <FormattedMessage
-                id="xpack.fleet.agentBulkActions.totalAgentsWithLimit"
-                defaultMessage="Showing {count} of {total} agents"
-                values={{
-                  count: <FormattedNumber value={SO_SEARCH_LIMIT} />,
-                  total: <FormattedNumber value={totalAgents} />,
-                }}
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.fleet.agentBulkActions.totalAgents"
-                defaultMessage="Showing {count, plural, one {# agent} other {# agents}}"
-                values={{ count: totalAgents }}
-              />
-            )}
-          </EuiText>
-        </EuiFlexItem>
         {(selectionMode === 'manual' && selectedAgents.length) ||
         (selectionMode === 'query' && totalAgents > 0) ? (
           <>
-            <FlexItem grow={false}>
-              <Divider />
-            </FlexItem>
             <EuiFlexItem grow={false}>
               <EuiPopover
                 id="agentBulkActionsMenu"
                 button={
-                  <Button
-                    size="xs"
+                  <EuiButton
+                    fill
                     iconType="arrowDown"
                     iconSide="right"
-                    flush="left"
                     onClick={openMenu}
+                    data-test-subj="agentBulkActionsButton"
                   >
                     <FormattedMessage
-                      id="xpack.fleet.agentBulkActions.agentsSelected"
-                      defaultMessage="{count, plural, one {# agent} other {# agents} =all {All agents}} selected"
-                      values={{
-                        count: selectionMode === 'manual' ? selectedAgents.length : 'all',
-                      }}
+                      id="xpack.fleet.agentBulkActions.actions"
+                      defaultMessage="Actions"
                     />
-                  </Button>
+                  </EuiButton>
                 }
                 isOpen={isMenuOpen}
                 closePopover={closeMenu}
@@ -250,22 +189,6 @@ export const AgentBulkActions: React.FunctionComponent<{
                 <EuiContextMenu initialPanelId={0} panels={panels} />
               </EuiPopover>
             </EuiFlexItem>
-            {showSelectEverything ? (
-              <EuiFlexItem grow={false}>
-                <Button
-                  size="xs"
-                  iconType="pagesSelect"
-                  iconSide="left"
-                  flush="left"
-                  onClick={() => setSelectionMode('query')}
-                >
-                  <FormattedMessage
-                    id="xpack.fleet.agentBulkActions.selectAll"
-                    defaultMessage="Select everything on all pages"
-                  />
-                </Button>
-              </EuiFlexItem>
-            ) : null}
           </>
         ) : (
           <FlexItem grow={false} />

@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { EVENT_KIND, TIMESTAMP } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { BaseHit } from '../../../../../../common/detection_engine/types';
 import type { ConfigType } from '../../../../../config';
-import { buildRuleWithOverrides, buildRuleWithoutOverrides } from '../../../signals/build_rule';
 import { BuildReasonMessage } from '../../../signals/reason_formatters';
 import { getMergeStrategy } from '../../../signals/source_fields_merging/strategies';
 import { BaseSignalHit, SignalSource, SignalSourceHit, SimpleHit } from '../../../signals/types';
-import { RACAlert } from '../../types';
 import { additionalAlertFields, buildAlert } from './build_alert';
 import { filterSource } from './filter_source';
 import { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
+import { buildRuleNameFromMapping } from '../../../signals/mappings/build_rule_name_from_mapping';
+import { buildSeverityFromMapping } from '../../../signals/mappings/build_severity_from_mapping';
+import { buildRiskScoreFromMapping } from '../../../signals/mappings/build_risk_score_from_mapping';
+import { BaseFieldsLatest } from '../../../../../../common/detection_engine/schemas/alerts';
 
 const isSourceDoc = (
   hit: SignalSourceHit
@@ -49,23 +50,43 @@ export const buildBulkBody = (
   ignoreFields: ConfigType['alertIgnoreFields'],
   applyOverrides: boolean,
   buildReasonMessage: BuildReasonMessage
-): RACAlert => {
+): BaseFieldsLatest => {
   const mergedDoc = getMergeStrategy(mergeStrategy)({ doc, ignoreFields });
-  const rule = applyOverrides
-    ? buildRuleWithOverrides(completeRule, mergedDoc._source ?? {})
-    : buildRuleWithoutOverrides(completeRule);
   const eventFields = buildEventTypeAlert(mergedDoc);
   const filteredSource = filterSource(mergedDoc);
-  const reason = buildReasonMessage({ mergedDoc, rule });
+
+  const overrides = applyOverrides
+    ? {
+        nameOverride: buildRuleNameFromMapping({
+          eventSource: mergedDoc._source ?? {},
+          ruleName: completeRule.ruleConfig.name,
+          ruleNameMapping: completeRule.ruleParams.ruleNameOverride,
+        }).ruleName,
+        severityOverride: buildSeverityFromMapping({
+          eventSource: mergedDoc._source ?? {},
+          severity: completeRule.ruleParams.severity,
+          severityMapping: completeRule.ruleParams.severityMapping,
+        }).severity,
+        riskScoreOverride: buildRiskScoreFromMapping({
+          eventSource: mergedDoc._source ?? {},
+          riskScore: completeRule.ruleParams.riskScore,
+          riskScoreMapping: completeRule.ruleParams.riskScoreMapping,
+        }).riskScore,
+      }
+    : undefined;
+
+  const reason = buildReasonMessage({
+    name: overrides?.nameOverride ?? completeRule.ruleConfig.name,
+    severity: overrides?.severityOverride ?? completeRule.ruleParams.severity,
+    mergedDoc,
+  });
 
   if (isSourceDoc(mergedDoc)) {
     return {
       ...filteredSource,
       ...eventFields,
-      ...buildAlert([mergedDoc], rule, spaceId, reason),
+      ...buildAlert([mergedDoc], completeRule, spaceId, reason, overrides),
       ...additionalAlertFields({ ...mergedDoc, _source: { ...mergedDoc._source, ...eventFields } }),
-      [EVENT_KIND]: 'signal',
-      [TIMESTAMP]: new Date().toISOString(),
     };
   }
 

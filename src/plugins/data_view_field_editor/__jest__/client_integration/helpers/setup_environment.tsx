@@ -6,23 +6,24 @@
  * Side Public License, v 1.
  */
 
+// eslint-disable-next-line max-classes-per-file
 import './jest.mocks';
 
 import React, { FunctionComponent } from 'react';
-import axios from 'axios';
-import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import { merge } from 'lodash';
 
-import { notificationServiceMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
-import { dataPluginMock } from '../../../../data/public/mocks';
+import { defer } from 'rxjs';
+import { notificationServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { fieldFormatsMock as fieldFormats } from '@kbn/field-formats-plugin/common/mocks';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { FieldEditorProvider, Context } from '../../../public/components/field_editor_context';
 import { FieldPreviewProvider } from '../../../public/components/preview';
 import { initApi, ApiService } from '../../../public/lib';
 import { init as initHttpRequests } from './http_requests';
 
-const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 const dataStart = dataPluginMock.createStartContract();
-const { search, fieldFormats } = dataStart;
+const { search } = dataStart;
 
 export const spySearchQuery = jest.fn();
 export const spySearchQueryResponse = jest.fn(() => Promise.resolve({}));
@@ -36,40 +37,49 @@ export const setSearchResponseLatency = (ms: number) => {
 };
 
 spySearchQuery.mockImplementation(() => {
-  return {
-    toPromise: () => {
-      if (searchResponseDelay === 0) {
-        // no delay, it is synchronous
-        return spySearchQueryResponse();
-      }
+  return defer(() => {
+    if (searchResponseDelay === 0) {
+      // no delay, it is synchronous
+      return spySearchQueryResponse();
+    }
 
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve(undefined);
-        }, searchResponseDelay);
-      }).then(() => {
-        return spySearchQueryResponse();
-      });
-    },
-  };
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(undefined);
+      }, searchResponseDelay);
+    }).then(() => {
+      return spySearchQueryResponse();
+    });
+  });
 });
 search.search = spySearchQuery;
 
 let apiService: ApiService;
 
 export const setupEnvironment = () => {
-  // @ts-expect-error Axios does not fullfill HttpSetupn from core but enough for our tests
-  apiService = initApi(mockHttpClient);
-  const { server, httpRequestsMockHelpers } = initHttpRequests();
+  const { httpSetup, httpRequestsMockHelpers } = initHttpRequests();
+  apiService = initApi(httpSetup);
 
   return {
-    server,
+    server: httpSetup,
     httpRequestsMockHelpers,
   };
 };
 
+class MockDefaultFieldFormat extends FieldFormat {
+  static id = 'testDefaultFormat';
+  static title = 'TestDefaultFormat';
+}
+
+class MockCustomFieldFormat extends FieldFormat {
+  static id = 'upper';
+  static title = 'UpperCaseString';
+
+  htmlConvert = (value: string) => `<span>${value.toUpperCase()}</span>`;
+}
+
 // The format options available in the dropdown select for our tests.
-export const fieldFormatsOptions = [{ id: 'upper', title: 'UpperCaseString' } as any];
+export const fieldFormatsOptions = [MockCustomFieldFormat];
 
 export const indexPatternNameForTest = 'testIndexPattern';
 
@@ -86,20 +96,22 @@ export const WithFieldEditorDependencies =
 
     (
       fieldFormats.getDefaultType as jest.MockedFunction<typeof fieldFormats['getDefaultType']>
-    ).mockReturnValue({ id: 'testDefaultFormat', title: 'TestDefaultFormat' } as any);
+    ).mockReturnValue(MockDefaultFieldFormat);
 
     (
       fieldFormats.getInstance as jest.MockedFunction<typeof fieldFormats['getInstance']>
     ).mockImplementation((id: string) => {
-      if (id === 'upper') {
-        return {
-          convertObject: {
-            html(value: string = '') {
-              return `<span>${value.toUpperCase()}</span>`;
-            },
-          },
-        } as any;
+      if (id === MockCustomFieldFormat.id) {
+        return new MockCustomFieldFormat();
+      } else {
+        return new MockDefaultFieldFormat();
       }
+    });
+
+    (
+      fieldFormats.getDefaultInstance as jest.MockedFunction<typeof fieldFormats['getInstance']>
+    ).mockImplementation(() => {
+      return new MockDefaultFieldFormat();
     });
 
     const dependencies: Context = {

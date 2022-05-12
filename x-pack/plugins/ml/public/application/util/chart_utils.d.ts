@@ -9,7 +9,3 @@ import type { ChartType } from '../explorer/explorer_constants';
 
 export declare function numTicksForDateFormat(axisWidth: number, dateFormat: string): number;
 export declare function getChartType(config: any): ChartType;
-export declare function chartLimits(data: any[]): {
-  min: number;
-  max: number;
-};

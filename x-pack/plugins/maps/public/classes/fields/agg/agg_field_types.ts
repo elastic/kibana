@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { DataView } from '@kbn/data-plugin/common';
 import { IField } from '../field';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common';
 import { IESAggSource } from '../../sources/es_agg_source';
 import { FIELD_ORIGIN } from '../../../../common/constants';
 
 export interface IESAggField extends IField {
-  getValueAggDsl(indexPattern: IndexPattern): unknown | null;
+  getValueAggDsl(indexPattern: DataView): unknown | null;
   getBucketCount(): number;
 }
 

@@ -12,13 +12,13 @@ import {
 } from '../../../__mocks__/kea_logic';
 import { mockEngineValues, mockEngineActions } from '../../__mocks__';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
 import { Boost, BoostOperation, BoostType, FunctionalBoostFunction } from './types';
 
-import { RelevanceTuningLogic } from './';
+import { RelevanceTuningLogic } from '.';
 
 describe('RelevanceTuningLogic', () => {
   const { mount } = new LogicMounter(RelevanceTuningLogic);

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { isEmpty, filter, pickBy } from 'lodash';
+import { filter } from 'lodash';
 import { schema } from '@kbn/config-schema';
 
+import { IRouter } from '@kbn/core/server';
 import { PLUGIN_ID } from '../../../common';
-import { IRouter } from '../../../../../../src/core/server';
 import { savedQuerySavedObjectType } from '../../../common/types';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
@@ -48,7 +48,8 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
       options: { tags: [`access:${PLUGIN_ID}-writeSavedQueries`] },
     },
     async (context, request, response) => {
-      const savedObjectsClient = context.core.savedObjects.client;
+      const coreContext = await context.core;
+      const savedObjectsClient = coreContext.savedObjects.client;
       const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
 
       const {
@@ -77,20 +78,17 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
       const updatedSavedQuerySO = await savedObjectsClient.update(
         savedQuerySavedObjectType,
         request.params.id,
-        pickBy(
-          {
-            id,
-            description,
-            platform,
-            query,
-            version,
-            interval,
-            ecs_mapping: convertECSMappingToArray(ecs_mapping),
-            updated_by: currentUser,
-            updated_at: new Date().toISOString(),
-          },
-          (value) => !isEmpty(value)
-        ),
+        {
+          id,
+          description: description || '',
+          platform,
+          query,
+          version,
+          interval,
+          ecs_mapping: convertECSMappingToArray(ecs_mapping),
+          updated_by: currentUser,
+          updated_at: new Date().toISOString(),
+        },
         {
           refresh: 'wait_for',
         }

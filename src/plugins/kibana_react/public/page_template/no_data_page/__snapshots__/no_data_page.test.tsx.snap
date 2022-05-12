@@ -106,88 +106,22 @@ exports[`NoDataPage render 1`] = `
     }
   }
 >
-  <EuiText
-    textAlign="center"
-  >
-    <KibanaPageTemplateSolutionNavAvatar
-      iconType="logoElastic"
-      name="Elastic"
-      size="xxl"
-    />
-    <EuiSpacer />
-    <h1>
-      <FormattedMessage
-        defaultMessage="Welcome to Elastic {solution}!"
-        id="kibana-react.noDataPage.welcomeTitle"
-        values={
-          Object {
-            "solution": "Elastic",
-          }
-        }
-      />
-    </h1>
-    <EuiTextColor
-      color="subdued"
-    >
-      <p>
-        <FormattedMessage
-          defaultMessage="Add your data to get started, or {link} about {solution}."
-          id="kibana-react.noDataPage.intro"
-          values={
-            Object {
-              "link": <EuiLink
-                href="test"
-              >
-                <FormattedMessage
-                  defaultMessage="learn more"
-                  id="kibana-react.noDataPage.intro.link"
-                  values={Object {}}
-                />
-              </EuiLink>,
-              "solution": "Elastic",
-            }
-          }
-        />
-      </p>
-    </EuiTextColor>
-  </EuiText>
-  <EuiSpacer
-    size="xxl"
-  />
-  <EuiSpacer
-    size="l"
-  />
-  <EuiFlexGrid
-    columns={2}
-    style={
-      Object {
-        "justifyContent": "space-around",
-      }
+  <NoDataPageBody
+    actionCards={
+      Array [
+        <ElasticAgentCard
+          solution="Elastic"
+        />,
+        <ElasticAgentCard
+          solution="Elastic"
+        />,
+        <NoDataCard />,
+      ]
     }
-  >
-    <EuiFlexItem
-      className="kbnNoDataPageContents__item"
-      key="empty-page-agent-action"
-    >
-      <ElasticAgentCard
-        solution="Elastic"
-      />
-    </EuiFlexItem>
-    <EuiFlexItem
-      className="kbnNoDataPageContents__item"
-      key="empty-page-agent-action"
-    >
-      <ElasticAgentCard
-        solution="Elastic"
-      />
-    </EuiFlexItem>
-    <EuiFlexItem
-      className="kbnNoDataPageContents__item"
-      key="empty-page-custom-action"
-    >
-      <NoDataCard />
-    </EuiFlexItem>
-  </EuiFlexGrid>
+    docsLink="test"
+    pageTitle="Welcome to Elastic Elastic!"
+    solution="Elastic"
+  />
   <EuiSpacer
     size="xxl"
   />

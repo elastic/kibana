@@ -1,0 +1,10 @@
+[[kibana-troubleshooting]]
+== Troubleshooting
+
+{kib} provides the following tools for debugging issues:
+
+* <<kibana-troubleshooting-kibana-server-logs, Using {kib} server logs>>
+* <<kibana-troubleshooting-trace-query, Trace {es} query to the origin in {kib}>>
+
+include::using-server-logs.asciidoc[]
+include::trace-query.asciidoc[]

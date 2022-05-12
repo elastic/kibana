@@ -7,15 +7,17 @@
  */
 
 import { share } from 'rxjs/operators';
-import { HttpStart, IUiSettingsClient } from 'src/core/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { HttpStart, IUiSettingsClient } from '@kbn/core/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { buildEsQuery } from '@kbn/es-query';
 import { FilterManager } from './filter_manager';
 import { createAddToQueryLog } from './lib';
-import { TimefilterService, TimefilterSetup } from './timefilter';
+import { TimefilterService } from './timefilter';
+import type { TimefilterSetup } from './timefilter';
 import { createSavedQueryService } from './saved_query/saved_query_service';
 import { createQueryStateObservable } from './state_sync/create_global_query_observable';
-import { QueryStringContract, QueryStringManager } from './query_string';
+import type { QueryStringContract } from './query_string';
+import { QueryStringManager } from './query_string';
 import { getEsQueryConfig, TimeRange } from '../../common';
 import { getUiSettings } from '../services';
 import { NowProviderInternalContract } from '../now_provider';

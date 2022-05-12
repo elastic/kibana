@@ -8,8 +8,8 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { LocationDescriptorObject } from 'history';
-import { httpServiceMock, scopedHistoryMock } from '../../../../src/core/public/mocks';
-import { mountWithIntl } from '@kbn/test/jest';
+import { httpServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 // @ts-ignore
 import { uploadLicense } from '../public/application/store/actions/upload_license';

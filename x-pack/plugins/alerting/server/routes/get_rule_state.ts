@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../lib';
 import { RewriteResponseCase, verifyAccessAndContext } from './lib';
 import {
   AlertingRequestHandlerContext,
   INTERNAL_BASE_ALERTING_API_PATH,
-  AlertTaskState,
+  RuleTaskState,
 } from '../types';
 
 const paramSchema = schema.object({
   id: schema.string(),
 });
 
-const rewriteBodyRes: RewriteResponseCase<AlertTaskState> = ({
+const rewriteBodyRes: RewriteResponseCase<RuleTaskState> = ({
   alertTypeState,
   alertInstances,
   previousStartedAt,
@@ -44,7 +44,7 @@ export const getRuleStateRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = context.alerting.getRulesClient();
+        const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
         const state = await rulesClient.getAlertState({ id });
         return state ? res.ok({ body: rewriteBodyRes(state) }) : res.noContent();

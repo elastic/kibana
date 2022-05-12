@@ -5,42 +5,59 @@
  * 2.0.
  */
 
-jest.mock('nodemailer', () => ({
-  createTransport: jest.fn(),
-}));
-
-jest.mock('./send_email_graph_api', () => ({
-  sendEmailGraphApi: jest.fn(),
-}));
-jest.mock('./request_oauth_client_credentials_token', () => ({
-  requestOAuthClientCredentialsToken: jest.fn(),
-}));
-
-import { Logger } from '../../../../../../src/core/server';
+import axios from 'axios';
+import { Logger } from '@kbn/core/server';
 import { sendEmail } from './send_email';
-import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import nodemailer from 'nodemailer';
 import { ProxySettings } from '../../types';
 import { actionsConfigMock } from '../../actions_config.mock';
 import { CustomHostSettings } from '../../config';
 import { sendEmailGraphApi } from './send_email_graph_api';
-import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
+import { getOAuthClientCredentialsAccessToken } from './get_oauth_client_credentials_access_token';
+import { connectorTokenClientMock } from './connector_token_client.mock';
+
+jest.mock('nodemailer', () => ({
+  createTransport: jest.fn(),
+}));
+jest.mock('./send_email_graph_api', () => ({
+  sendEmailGraphApi: jest.fn(),
+}));
+jest.mock('./get_oauth_client_credentials_access_token', () => ({
+  getOAuthClientCredentialsAccessToken: jest.fn(),
+}));
+
+jest.mock('axios');
+const mockAxiosInstanceInterceptor = {
+  request: { eject: jest.fn(), use: jest.fn() },
+  response: { eject: jest.fn(), use: jest.fn() },
+};
 
 const createTransportMock = nodemailer.createTransport as jest.Mock;
 const sendMailMockResult = { result: 'does not matter' };
 const sendMailMock = jest.fn();
 const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
+const connectorTokenClient = connectorTokenClientMock.create();
+
 describe('send_email module', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     createTransportMock.mockReturnValue({ sendMail: sendMailMock });
     sendMailMock.mockResolvedValue(sendMailMockResult);
+
+    axios.create = jest.fn(() => {
+      const actual = jest.requireActual('axios');
+      return {
+        ...actual.create,
+        interceptors: mockAxiosInstanceInterceptor,
+      };
+    });
   });
 
   test('handles authenticated email using service', async () => {
     const sendEmailOptions = getSendEmailOptions({ transport: { service: 'other' } });
-    const result = await sendEmail(mockLogger, sendEmailOptions);
+    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -81,107 +98,53 @@ describe('send_email module', () => {
 
   test('uses OAuth 2.0 Client Credentials authentication for email using "exchange_server" service', async () => {
     const sendEmailGraphApiMock = sendEmailGraphApi as jest.Mock;
-    const requestOAuthClientCredentialsTokenMock = requestOAuthClientCredentialsToken as jest.Mock;
+    const getOAuthClientCredentialsAccessTokenMock =
+      getOAuthClientCredentialsAccessToken as jest.Mock;
     const sendEmailOptions = getSendEmailOptions({
       transport: {
         service: 'exchange_server',
         clientId: '123456',
+        tenantId: '98765',
         clientSecret: 'sdfhkdsjhfksdjfh',
       },
     });
-    requestOAuthClientCredentialsTokenMock.mockReturnValueOnce({
-      status: 200,
-      data: {
-        tokenType: 'Bearer',
-        accessToken: 'dfjsdfgdjhfgsjdf',
-        expiresIn: 123,
-      },
-    });
+    getOAuthClientCredentialsAccessTokenMock.mockReturnValueOnce(`Bearer dfjsdfgdjhfgsjdf`);
+    const date = new Date();
+    date.setDate(date.getDate() + 5);
 
     sendEmailGraphApiMock.mockReturnValue({
       status: 202,
     });
 
-    await sendEmail(mockLogger, sendEmailOptions);
-    expect(requestOAuthClientCredentialsTokenMock.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        "https://login.microsoftonline.com/undefined/oauth2/v2.0/token",
-        Object {
-          "context": Array [],
-          "debug": [MockFunction],
-          "error": [MockFunction],
-          "fatal": [MockFunction],
-          "get": [MockFunction],
-          "info": [MockFunction],
-          "log": [MockFunction],
-          "trace": [MockFunction],
-          "warn": [MockFunction],
-        },
-        Object {
-          "clientId": "123456",
-          "clientSecret": "sdfhkdsjhfksdjfh",
-          "scope": "https://graph.microsoft.com/.default",
-        },
-        Object {
-          "ensureActionTypeEnabled": [MockFunction],
-          "ensureHostnameAllowed": [MockFunction],
-          "ensureUriAllowed": [MockFunction],
-          "getCustomHostSettings": [MockFunction],
-          "getMicrosoftGraphApiUrl": [MockFunction] {
-            "calls": Array [
-              Array [],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          },
-          "getProxySettings": [MockFunction],
-          "getResponseSettings": [MockFunction],
-          "getSSLSettings": [MockFunction],
-          "isActionTypeEnabled": [MockFunction],
-          "isHostnameAllowed": [MockFunction],
-          "isUriAllowed": [MockFunction],
-        },
-      ]
-    `);
+    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
+    expect(getOAuthClientCredentialsAccessTokenMock).toHaveBeenCalledWith({
+      configurationUtilities: sendEmailOptions.configurationUtilities,
+      connectorId: '1',
+      connectorTokenClient,
+      credentials: {
+        config: { clientId: '123456', tenantId: '98765' },
+        secrets: { clientSecret: 'sdfhkdsjhfksdjfh' },
+      },
+      logger: mockLogger,
+      oAuthScope: 'https://graph.microsoft.com/.default',
+      tokenUrl: 'https://login.microsoftonline.com/98765/oauth2/v2.0/token',
+    });
 
+    delete sendEmailGraphApiMock.mock.calls[0][0].options.configurationUtilities;
+    sendEmailGraphApiMock.mock.calls[0].pop();
+    sendEmailGraphApiMock.mock.calls[0].pop();
     expect(sendEmailGraphApiMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "graphApiUrl": undefined,
           "headers": Object {
-            "Authorization": "undefined undefined",
+            "Authorization": "Bearer dfjsdfgdjhfgsjdf",
             "Content-Type": "application/json",
           },
           "messageHTML": "<p>a message</p>
       ",
           "options": Object {
-            "configurationUtilities": Object {
-              "ensureActionTypeEnabled": [MockFunction],
-              "ensureHostnameAllowed": [MockFunction],
-              "ensureUriAllowed": [MockFunction],
-              "getCustomHostSettings": [MockFunction],
-              "getMicrosoftGraphApiUrl": [MockFunction] {
-                "calls": Array [
-                  Array [],
-                ],
-                "results": Array [
-                  Object {
-                    "type": "return",
-                    "value": undefined,
-                  },
-                ],
-              },
-              "getProxySettings": [MockFunction],
-              "getResponseSettings": [MockFunction],
-              "getSSLSettings": [MockFunction],
-              "isActionTypeEnabled": [MockFunction],
-              "isHostnameAllowed": [MockFunction],
-              "isUriAllowed": [MockFunction],
-            },
+            "connectorId": "1",
             "content": Object {
               "message": "a message",
               "subject": "a subject",
@@ -203,6 +166,7 @@ describe('send_email module', () => {
               "clientSecret": "sdfhkdsjhfksdjfh",
               "password": "changeme",
               "service": "exchange_server",
+              "tenantId": "98765",
               "user": "elastic",
             },
           },
@@ -218,31 +182,44 @@ describe('send_email module', () => {
           "trace": [MockFunction],
           "warn": [MockFunction],
         },
-        Object {
-          "ensureActionTypeEnabled": [MockFunction],
-          "ensureHostnameAllowed": [MockFunction],
-          "ensureUriAllowed": [MockFunction],
-          "getCustomHostSettings": [MockFunction],
-          "getMicrosoftGraphApiUrl": [MockFunction] {
-            "calls": Array [
-              Array [],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          },
-          "getProxySettings": [MockFunction],
-          "getResponseSettings": [MockFunction],
-          "getSSLSettings": [MockFunction],
-          "isActionTypeEnabled": [MockFunction],
-          "isHostnameAllowed": [MockFunction],
-          "isUriAllowed": [MockFunction],
-        },
       ]
     `);
+  });
+
+  test('throws error if null access token returned when using OAuth 2.0 Client Credentials authentication', async () => {
+    const sendEmailGraphApiMock = sendEmailGraphApi as jest.Mock;
+    const getOAuthClientCredentialsAccessTokenMock =
+      getOAuthClientCredentialsAccessToken as jest.Mock;
+    const sendEmailOptions = getSendEmailOptions({
+      transport: {
+        service: 'exchange_server',
+        clientId: '123456',
+        tenantId: '98765',
+        clientSecret: 'sdfhkdsjhfksdjfh',
+      },
+    });
+    getOAuthClientCredentialsAccessTokenMock.mockReturnValueOnce(null);
+
+    await expect(() =>
+      sendEmail(mockLogger, sendEmailOptions, connectorTokenClient)
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Unable to retrieve access token for connectorId: 1"`
+    );
+
+    expect(getOAuthClientCredentialsAccessTokenMock).toHaveBeenCalledWith({
+      configurationUtilities: sendEmailOptions.configurationUtilities,
+      connectorId: '1',
+      connectorTokenClient,
+      credentials: {
+        config: { clientId: '123456', tenantId: '98765' },
+        secrets: { clientSecret: 'sdfhkdsjhfksdjfh' },
+      },
+      logger: mockLogger,
+      oAuthScope: 'https://graph.microsoft.com/.default',
+      tokenUrl: 'https://login.microsoftonline.com/98765/oauth2/v2.0/token',
+    });
+
+    expect(sendEmailGraphApiMock).not.toHaveBeenCalled();
   });
 
   test('handles unauthenticated email using not secure host/port', async () => {
@@ -264,7 +241,7 @@ describe('send_email module', () => {
       }
     );
 
-    const result = await sendEmail(mockLogger, sendEmailOptions);
+    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -314,7 +291,7 @@ describe('send_email module', () => {
     delete sendEmailOptions.transport.user;
     // @ts-expect-error
     delete sendEmailOptions.transport.password;
-    const result = await sendEmail(mockLogger, sendEmailOptions);
+    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -364,7 +341,7 @@ describe('send_email module', () => {
     // @ts-expect-error
     delete sendEmailOptions.transport.password;
 
-    const result = await sendEmail(mockLogger, sendEmailOptions);
+    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -405,7 +382,9 @@ describe('send_email module', () => {
     sendMailMock.mockReset();
     sendMailMock.mockRejectedValue(new Error('wops'));
 
-    await expect(sendEmail(mockLogger, sendEmailOptions)).rejects.toThrow('wops');
+    await expect(sendEmail(mockLogger, sendEmailOptions, connectorTokenClient)).rejects.toThrow(
+      'wops'
+    );
   });
 
   test('it bypasses with proxyBypassHosts when expected', async () => {
@@ -426,7 +405,7 @@ describe('send_email module', () => {
       }
     );
 
-    const result = await sendEmail(mockLogger, sendEmailOptions);
+    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -460,7 +439,7 @@ describe('send_email module', () => {
       }
     );
 
-    const result = await sendEmail(mockLogger, sendEmailOptions);
+    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -496,7 +475,7 @@ describe('send_email module', () => {
       }
     );
 
-    const result = await sendEmail(mockLogger, sendEmailOptions);
+    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -530,7 +509,7 @@ describe('send_email module', () => {
       }
     );
 
-    const result = await sendEmail(mockLogger, sendEmailOptions);
+    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -567,7 +546,7 @@ describe('send_email module', () => {
       }
     );
 
-    const result = await sendEmail(mockLogger, sendEmailOptions);
+    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
     expect(result).toBe(sendMailMockResult);
 
     // note in the object below, the rejectUnauthenticated got set to false,
@@ -610,7 +589,7 @@ describe('send_email module', () => {
       }
     );
 
-    const result = await sendEmail(mockLogger, sendEmailOptions);
+    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
     expect(result).toBe(sendMailMockResult);
 
     // in this case, rejectUnauthorized is true, as the custom host settings
@@ -657,7 +636,7 @@ describe('send_email module', () => {
       }
     );
 
-    const result = await sendEmail(mockLogger, sendEmailOptions);
+    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -675,6 +654,83 @@ describe('send_email module', () => {
         },
       ]
     `);
+  });
+
+  test('deletes saved access tokens if 4xx response received', async () => {
+    const createAxiosInstanceMock = axios.create as jest.Mock;
+    const sendEmailOptions = getSendEmailOptions({
+      transport: {
+        service: 'exchange_server',
+        clientId: '123456',
+        tenantId: '98765',
+        clientSecret: 'sdfhkdsjhfksdjfh',
+      },
+    });
+    (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValueOnce(
+      'Bearer clienttokentokentoken'
+    );
+
+    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
+    expect(createAxiosInstanceMock).toHaveBeenCalledTimes(1);
+    expect(createAxiosInstanceMock).toHaveBeenCalledWith();
+    expect(mockAxiosInstanceInterceptor.response.use).toHaveBeenCalledTimes(1);
+
+    const mockResponseCallback = (mockAxiosInstanceInterceptor.response.use as jest.Mock).mock
+      .calls[0][1];
+
+    const errorResponse = {
+      response: {
+        status: 403,
+        statusText: 'Forbidden',
+        data: {
+          error: {
+            message: 'Insufficient rights to query records',
+            detail: 'Field(s) present in the query do not have permission to be read',
+          },
+          status: 'failure',
+        },
+      },
+    };
+
+    await expect(() => mockResponseCallback(errorResponse)).rejects.toEqual(errorResponse);
+
+    expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith({
+      connectorId: '1',
+    });
+  });
+
+  test('does not delete saved access token if not 4xx error response received', async () => {
+    const createAxiosInstanceMock = axios.create as jest.Mock;
+    const sendEmailOptions = getSendEmailOptions({
+      transport: {
+        service: 'exchange_server',
+        clientId: '123456',
+        tenantId: '98765',
+        clientSecret: 'sdfhkdsjhfksdjfh',
+      },
+    });
+    (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValueOnce(
+      'Bearer clienttokentokentoken'
+    );
+
+    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
+    expect(createAxiosInstanceMock).toHaveBeenCalledTimes(1);
+    expect(createAxiosInstanceMock).toHaveBeenCalledWith();
+    expect(mockAxiosInstanceInterceptor.response.use).toHaveBeenCalledTimes(1);
+
+    const mockResponseCallback = (mockAxiosInstanceInterceptor.response.use as jest.Mock).mock
+      .calls[0][1];
+
+    const errorResponse = {
+      response: {
+        status: 500,
+        statusText: 'Server error',
+      },
+    };
+
+    await expect(() => mockResponseCallback(errorResponse)).rejects.toEqual(errorResponse);
+
+    expect(connectorTokenClient.deleteConnectorTokens).not.toHaveBeenCalled();
   });
 });
 
@@ -711,6 +767,7 @@ function getSendEmailOptions(
     },
     hasAuth: true,
     configurationUtilities,
+    connectorId: '1',
   };
 }
 
@@ -745,5 +802,6 @@ function getSendEmailOptionsNoAuth(
     },
     hasAuth: false,
     configurationUtilities,
+    connectorId: '2',
   };
 }

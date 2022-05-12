@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { jsonRt } from '@kbn/io-ts-utils/json_rt';
+import { jsonRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { decodeRequestParams } from './decode_request_params';
 

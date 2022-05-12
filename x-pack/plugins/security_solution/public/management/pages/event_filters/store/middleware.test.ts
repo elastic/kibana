@@ -19,7 +19,7 @@ import { initialEventFiltersPageState } from './builders';
 import { getInitialExceptionFromEvent } from './utils';
 import { createdEventFilterEntryMock, ecsEventMock } from '../test_utils';
 import { EventFiltersListPageState, EventFiltersService } from '../types';
-import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
+import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
 import { isFailedResourceState, isLoadedResourceState } from '../../../state';
 import { getListFetchError } from './selector';
 import type {
@@ -27,6 +27,7 @@ import type {
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { Immutable } from '../../../../../common/endpoint/types';
+import { parsePoliciesAndFilterToKql } from '../../../common/utils';
 
 const createEventFiltersServiceMock = (): jest.Mocked<EventFiltersService> => ({
   addEventFilters: jest.fn(),
@@ -94,18 +95,23 @@ describe('Event filters middleware', () => {
     });
 
     it.each([
-      [undefined, undefined],
-      [3, 50],
+      [undefined, undefined, undefined],
+      [3, 50, ['1', '2']],
     ])(
-      'should trigger api call to retrieve event filters with url params page_index[%s] page_size[%s]',
-      async (pageIndex, perPage) => {
+      'should trigger api call to retrieve event filters with url params page_index[%s] page_size[%s] included_policies[%s]',
+      async (pageIndex, perPage, policies) => {
         const dataLoaded = spyMiddleware.waitForAction('eventFiltersListPageDataChanged', {
           validate({ payload }) {
             return isLoadedResourceState(payload);
           },
         });
 
-        changeUrl((pageIndex && perPage && `?page_index=${pageIndex}&page_size=${perPage}`) || '');
+        changeUrl(
+          (pageIndex &&
+            perPage &&
+            `?page_index=${pageIndex}&page_size=${perPage}&included_policies=${policies}`) ||
+            ''
+        );
         await dataLoaded;
 
         expect(service.getList).toHaveBeenCalledWith({
@@ -113,6 +119,7 @@ describe('Event filters middleware', () => {
           perPage: perPage ?? 10,
           sortField: 'created_at',
           sortOrder: 'desc',
+          filter: policies ? parsePoliciesAndFilterToKql({ policies }) : undefined,
         });
       }
     );

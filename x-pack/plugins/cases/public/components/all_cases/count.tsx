@@ -56,3 +56,4 @@ export const Count: FunctionComponent<CountProps> = ({ refresh }) => {
     </EuiFlexGroup>
   );
 };
+Count.displayName = 'Count';

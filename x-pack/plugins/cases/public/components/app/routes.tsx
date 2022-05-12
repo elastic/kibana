@@ -18,8 +18,6 @@ import {
   getCreateCasePath,
   getCaseViewPath,
   getCaseViewWithCommentPath,
-  getSubCaseViewPath,
-  getSubCaseViewWithCommentPath,
   useAllCasesNavigation,
   useCaseViewNavigation,
 } from '../../common/navigation';
@@ -72,15 +70,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
         )}
       </Route>
 
-      <Route
-        exact
-        path={[
-          getSubCaseViewWithCommentPath(basePath),
-          getCaseViewWithCommentPath(basePath),
-          getSubCaseViewPath(basePath),
-          getCaseViewPath(basePath),
-        ]}
-      >
+      <Route exact path={[getCaseViewWithCommentPath(basePath), getCaseViewPath(basePath)]}>
         <CaseView
           onComponentInitialized={onComponentInitialized}
           actionsNavigation={actionsNavigation}
@@ -98,5 +88,8 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
     </Switch>
   );
 };
+CasesRoutesComponent.displayName = 'CasesRoutes';
 
 export const CasesRoutes = React.memo(CasesRoutesComponent);
+// eslint-disable-next-line import/no-default-export
+export { CasesRoutes as default };

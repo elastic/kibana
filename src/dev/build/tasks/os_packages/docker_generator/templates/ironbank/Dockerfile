@@ -60,7 +60,7 @@ COPY --chown=1000:0 config/kibana.yml /usr/share/kibana/config/kibana.yml
 
 # Add the launcher/wrapper script. It knows how to interpret environment
 # variables and translate them to Kibana CLI options.
-COPY bin/kibana-docker /usr/local/bin/
+COPY --chmod=755 bin/kibana-docker /usr/local/bin/
 
 # Remove the suid bit everywhere to mitigate "Stack Clash"
 RUN find / -xdev -perm -4000 -exec chmod u-s {} +

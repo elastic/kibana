@@ -28,12 +28,11 @@ export const mathColumn: ExpressionFunctionDefinition<
   inputTypes: ['datatable'],
   help: i18n.translate('expressions.functions.mathColumnHelpText', {
     defaultMessage:
-      'Adds a column calculated as the result of other columns. ' +
-      'Changes are made only when you provide arguments.' +
-      'See also {alterColumnFn} and {staticColumnFn}.',
+      'Adds a column by evaluating {tinymath} on each row. ' +
+      'This function is optimized for math and performs better than using a math expression in {mapColumnFn}.',
     values: {
-      alterColumnFn: '`alterColumn`',
-      staticColumnFn: '`staticColumn`',
+      mapColumnFn: '`mapColumn`',
+      tinymath: '`TinyMath`',
     },
   }),
   args: {
@@ -80,7 +79,7 @@ export const mathColumn: ExpressionFunctionDefinition<
       input.rows.map(async (row) => {
         const result = await math.fn(
           {
-            type: 'datatable',
+            ...input,
             columns: input.columns,
             rows: [row],
           },
@@ -129,7 +128,7 @@ export const mathColumn: ExpressionFunctionDefinition<
     columns.push(newColumn);
 
     return {
-      type: 'datatable',
+      ...input,
       columns,
       rows: newRows,
     } as Datatable;

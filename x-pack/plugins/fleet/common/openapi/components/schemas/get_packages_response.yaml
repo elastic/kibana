@@ -1,0 +1,14 @@
+title: Get Packages response
+type: object
+properties:
+  response:
+    type: array
+    deprecated: true
+    items:
+      $ref: ./search_result.yaml
+  items:
+    type: array
+    items:
+      $ref: ./search_result.yaml
+required:
+  - items

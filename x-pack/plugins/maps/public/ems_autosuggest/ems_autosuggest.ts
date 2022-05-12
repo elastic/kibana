@@ -16,6 +16,7 @@ export interface SampleValuesConfig {
 export interface EMSTermJoinConfig {
   layerId: string;
   field: string;
+  displayName: string;
 }
 
 interface UniqueMatch {
@@ -32,10 +33,19 @@ interface FileLayerFieldShim {
 export async function suggestEMSTermJoinConfig(
   sampleValuesConfig: SampleValuesConfig
 ): Promise<EMSTermJoinConfig | null> {
+  const fileLayers = await getEmsFileLayers();
+  return emsAutoSuggest(sampleValuesConfig, fileLayers);
+}
+
+export function emsAutoSuggest(
+  sampleValuesConfig: SampleValuesConfig,
+  fileLayers: FileLayer[]
+): EMSTermJoinConfig | null {
   const matches: EMSTermJoinConfig[] = [];
 
   if (sampleValuesConfig.sampleValuesColumnName) {
-    const matchesBasedOnColumnName = await suggestByName(
+    const matchesBasedOnColumnName = suggestByName(
+      fileLayers,
       sampleValuesConfig.sampleValuesColumnName,
       sampleValuesConfig.sampleValues
     );
@@ -44,7 +54,7 @@ export async function suggestEMSTermJoinConfig(
 
   if (sampleValuesConfig.sampleValues && sampleValuesConfig.sampleValues.length) {
     // Only looks at id-values in main manifest
-    const matchesBasedOnIds = await suggestByIdValues(sampleValuesConfig.sampleValues);
+    const matchesBasedOnIds = suggestByIdValues(fileLayers, sampleValuesConfig.sampleValues);
     matches.push(...matchesBasedOnIds);
   }
 
@@ -72,12 +82,11 @@ export async function suggestEMSTermJoinConfig(
   return uniqMatches.length ? uniqMatches[0].config : null;
 }
 
-async function suggestByName(
+function suggestByName(
+  fileLayers: FileLayer[],
   columnName: string,
   sampleValues?: Array<string | number>
-): Promise<EMSTermJoinConfig[]> {
-  const fileLayers = await getEmsFileLayers();
-
+): EMSTermJoinConfig[] {
   const matches: EMSTermJoinConfig[] = [];
   fileLayers.forEach((fileLayer) => {
     const emsFields: FileLayerFieldShim[] = fileLayer.getFields();
@@ -89,6 +98,7 @@ async function suggestByName(
       const emsConfig = {
         layerId: fileLayer.getId(),
         field: emsField.id,
+        displayName: fileLayer.getDisplayName(),
       };
       emsField.alias.forEach((alias: string) => {
         const regex = new RegExp(alias, 'i');
@@ -127,23 +137,23 @@ function allSamplesMatch(sampleValues: Array<string | number>, ids: string[]) {
   return true;
 }
 
-async function suggestByIdValues(
+function suggestByIdValues(
+  fileLayers: FileLayer[],
   sampleValues: Array<string | number>
-): Promise<EMSTermJoinConfig[]> {
+): EMSTermJoinConfig[] {
   const matches: EMSTermJoinConfig[] = [];
-  const fileLayers: FileLayer[] = await getEmsFileLayers();
   fileLayers.forEach((fileLayer) => {
     const emsFields: FileLayerFieldShim[] = fileLayer.getFields();
     emsFields.forEach((emsField: FileLayerFieldShim) => {
       if (!emsField.values || !emsField.values.length) {
         return;
       }
-      const emsConfig = {
-        layerId: fileLayer.getId(),
-        field: emsField.id,
-      };
       if (allSamplesMatch(sampleValues, emsField.values)) {
-        matches.push(emsConfig);
+        matches.push({
+          layerId: fileLayer.getId(),
+          field: emsField.id,
+          displayName: fileLayer.getDisplayName(),
+        });
       }
     });
   });

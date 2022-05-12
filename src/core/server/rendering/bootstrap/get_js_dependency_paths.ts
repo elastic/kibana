@@ -7,7 +7,7 @@
  */
 
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
-import UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
+import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 import type { PluginInfo } from './get_plugin_bundle_paths';
 
 export const getJsDependencyPaths = (

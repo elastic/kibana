@@ -8,3 +8,4 @@
 
 export * from './esaggs';
 export * from './esdsl';
+export * from './eql';

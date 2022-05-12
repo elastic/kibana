@@ -39,8 +39,18 @@ describe('collectSavedObjects()', () => {
       },
     });
 
-  const obj1 = { type: 'a', id: '1', attributes: { title: 'my title 1' } };
-  const obj2 = { type: 'b', id: '2', attributes: { title: 'my title 2' } };
+  const obj1 = {
+    type: 'a',
+    id: '1',
+    attributes: { title: 'my title 1' },
+    references: [{ type: 'b', id: '2', name: 'b2' }],
+  };
+  const obj2 = {
+    type: 'b',
+    id: '2',
+    attributes: { title: 'my title 2' },
+    references: [{ type: 'c', id: '3', name: 'c3' }],
+  };
 
   describe('module calls', () => {
     test('limit stream with empty input stream is called with null', async () => {
@@ -120,17 +130,24 @@ describe('collectSavedObjects()', () => {
       const readStream = createReadStream();
       const result = await collectSavedObjects({ readStream, supportedTypes: [], objectLimit });
 
-      expect(result).toEqual({ collectedObjects: [], errors: [], importIdMap: new Map() });
+      expect(result).toEqual({ collectedObjects: [], errors: [], importStateMap: new Map() });
     });
 
     test('collects objects from stream', async () => {
-      const readStream = createReadStream(obj1);
-      const supportedTypes = [obj1.type];
+      const readStream = createReadStream(obj1, obj2);
+      const supportedTypes = [obj1.type, obj2.type];
       const result = await collectSavedObjects({ readStream, supportedTypes, objectLimit });
 
-      const collectedObjects = [{ ...obj1, migrationVersion: {} }];
-      const importIdMap = new Map([[`${obj1.type}:${obj1.id}`, {}]]);
-      expect(result).toEqual({ collectedObjects, errors: [], importIdMap });
+      const collectedObjects = [
+        { ...obj1, migrationVersion: {} },
+        { ...obj2, migrationVersion: {} },
+      ];
+      const importStateMap = new Map([
+        [`a:1`, {}], // a:1 is included because it is present in the collected objects
+        [`b:2`, {}], // b:2 is included because it is present in the collected objects
+        [`c:3`, { isOnlyReference: true }], // c:3 is included because b:2 has a reference to c:3, but this is marked as `isOnlyReference` because c:3 is not present in the collected objects
+      ]);
+      expect(result).toEqual({ collectedObjects, errors: [], importStateMap });
     });
 
     test('unsupported types return as import errors', async () => {
@@ -140,21 +157,25 @@ describe('collectSavedObjects()', () => {
 
       const error = { type: 'unsupported_type' };
       const { title } = obj1.attributes;
-      const errors = [{ error, type: obj1.type, id: obj1.id, title, meta: { title } }];
-      expect(result).toEqual({ collectedObjects: [], errors, importIdMap: new Map() });
+      const errors = [{ error, type: obj1.type, id: obj1.id, meta: { title } }];
+      expect(result).toEqual({ collectedObjects: [], errors, importStateMap: new Map() });
     });
 
     test('returns mixed results', async () => {
       const readStream = createReadStream(obj1, obj2);
-      const supportedTypes = [obj2.type];
+      const supportedTypes = [obj1.type];
       const result = await collectSavedObjects({ readStream, supportedTypes, objectLimit });
 
-      const collectedObjects = [{ ...obj2, migrationVersion: {} }];
-      const importIdMap = new Map([[`${obj2.type}:${obj2.id}`, {}]]);
+      const collectedObjects = [{ ...obj1, migrationVersion: {} }];
+      const importStateMap = new Map([
+        [`a:1`, {}], // a:1 is included because it is present in the collected objects
+        [`b:2`, { isOnlyReference: true }], // b:2 was filtered out due to an unsupported type; b:2 is included because a:1 has a reference to b:2, but this is marked as `isOnlyReference` because b:2 is not present in the collected objects
+        // c:3 is not included at all, because b:2 was filtered out and there are no other references to c:3
+      ]);
       const error = { type: 'unsupported_type' };
-      const { title } = obj1.attributes;
-      const errors = [{ error, type: obj1.type, id: obj1.id, title, meta: { title } }];
-      expect(result).toEqual({ collectedObjects, errors, importIdMap });
+      const { title } = obj2.attributes;
+      const errors = [{ error, type: obj2.type, id: obj2.id, meta: { title } }];
+      expect(result).toEqual({ collectedObjects, errors, importStateMap });
     });
 
     describe('with optional filter', () => {
@@ -171,8 +192,8 @@ describe('collectSavedObjects()', () => {
 
         const error = { type: 'unsupported_type' };
         const { title } = obj1.attributes;
-        const errors = [{ error, type: obj1.type, id: obj1.id, title, meta: { title } }];
-        expect(result).toEqual({ collectedObjects: [], errors, importIdMap: new Map() });
+        const errors = [{ error, type: obj1.type, id: obj1.id, meta: { title } }];
+        expect(result).toEqual({ collectedObjects: [], errors, importStateMap: new Map() });
       });
 
       test('does not filter out objects when result === true', async () => {
@@ -187,11 +208,15 @@ describe('collectSavedObjects()', () => {
         });
 
         const collectedObjects = [{ ...obj2, migrationVersion: {} }];
-        const importIdMap = new Map([[`${obj2.type}:${obj2.id}`, {}]]);
+        const importStateMap = new Map([
+          // a:1 was filtered out due to an unsupported type; a:1 is not included because there are no other references to a:1
+          [`b:2`, {}], // b:2 is included because it is present in the collected objects
+          [`c:3`, { isOnlyReference: true }], // c:3 is included because b:2 has a reference to c:3, but this is marked as `isOnlyReference` because c:3 is not present in the collected objects
+        ]);
         const error = { type: 'unsupported_type' };
         const { title } = obj1.attributes;
-        const errors = [{ error, type: obj1.type, id: obj1.id, title, meta: { title } }];
-        expect(result).toEqual({ collectedObjects, errors, importIdMap });
+        const errors = [{ error, type: obj1.type, id: obj1.id, meta: { title } }];
+        expect(result).toEqual({ collectedObjects, errors, importStateMap });
       });
     });
   });

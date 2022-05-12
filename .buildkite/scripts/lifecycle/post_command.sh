@@ -2,6 +2,7 @@
 
 set -euo pipefail
 
+echo '--- Agent Debug Info'
 node .buildkite/scripts/lifecycle/print_agent_links.js || true
 
 IS_TEST_EXECUTION_STEP="$(buildkite-agent meta-data get "${BUILDKITE_JOB_ID}_is_test_execution_step" --default '')"
@@ -9,8 +10,9 @@ IS_TEST_EXECUTION_STEP="$(buildkite-agent meta-data get "${BUILDKITE_JOB_ID}_is_
 if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   echo "--- Upload Artifacts"
   buildkite-agent artifact upload 'target/junit/**/*'
-  buildkite-agent artifact upload 'target/kibana-*'
   buildkite-agent artifact upload 'target/kibana-coverage/jest/**/*'
+  buildkite-agent artifact upload 'target/kibana-coverage/functional/**/*'
+  buildkite-agent artifact upload 'target/kibana-*'
   buildkite-agent artifact upload 'target/kibana-security-solution/**/*.png'
   buildkite-agent artifact upload 'target/test-metrics/*'
   buildkite-agent artifact upload 'target/test-suites-ci-plan.json'

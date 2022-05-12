@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup, AppNavLinkStatus } from '../../../src/core/public';
-import { BfetchPublicSetup, BfetchPublicStart } from '../../../src/plugins/bfetch/public';
+import { Plugin, CoreSetup, AppNavLinkStatus } from '@kbn/core/public';
+import { BfetchPublicSetup, BfetchPublicStart } from '@kbn/bfetch-plugin/public';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { mount } from './mount';
-import { DeveloperExamplesSetup } from '../../developer_examples/public';
 
 export interface ExplorerService {
   double: (number: { num: number }) => Promise<{ num: number }>;

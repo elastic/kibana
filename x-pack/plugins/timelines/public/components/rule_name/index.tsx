@@ -8,37 +8,38 @@
 import { EuiLink } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
-import { CoreStart } from '../../../../../../src/core/public';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 interface RuleNameProps {
   name: string;
   id: string;
+  appId: string;
 }
 
 const appendSearch = (search?: string) =>
   isEmpty(search) ? '' : `${search?.startsWith('?') ? search : `?${search}`}`;
 
-const RuleNameComponents = ({ name, id }: RuleNameProps) => {
+const RuleNameComponents = ({ name, id, appId }: RuleNameProps) => {
   const { navigateToApp, getUrlForApp } = useKibana<CoreStart>().services.application;
 
   const hrefRuleDetails = useMemo(
     () =>
-      getUrlForApp('securitySolution', {
+      getUrlForApp(appId, {
         deepLinkId: 'rules',
         path: `/id/${id}${appendSearch(window.location.search)}`,
       }),
-    [getUrlForApp, id]
+    [getUrlForApp, id, appId]
   );
   const goToRuleDetails = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp('securitySolution', {
+      navigateToApp(appId, {
         deepLinkId: 'rules',
         path: `/id/${id}${appendSearch(window.location.search)}`,
       });
     },
-    [navigateToApp, id]
+    [navigateToApp, id, appId]
   );
   return (
     // eslint-disable-next-line @elastic/eui/href-or-on-click

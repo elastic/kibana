@@ -1799,30 +1799,17 @@ exports[`Field for json setting should render as read only if saving is disabled
     <div
       data-test-subj="advancedSetting-editField-json:test:setting"
     >
-      <EuiCodeEditor
-        aria-label="json test setting"
-        editorProps={
+      <FieldCodeEditor
+        a11yProps={
           Object {
-            "$blockScrolling": Infinity,
+            "aria-label": "json test setting",
           }
         }
-        height="auto"
         isReadOnly={true}
-        maxLines={30}
-        minLines={6}
-        mode="json"
         name="advancedSetting-editField-json:test:setting-editor"
         onChange={[Function]}
-        setOptions={
-          Object {
-            "showLineNumbers": false,
-            "tabSize": 2,
-          }
-        }
-        showGutter={false}
-        theme="textmate"
+        type="json"
         value="{\\"foo\\": \\"bar\\"}"
-        width="100%"
       />
     </div>
   </EuiFormRow>
@@ -1906,30 +1893,17 @@ exports[`Field for json setting should render as read only with help text if ove
     <div
       data-test-subj="advancedSetting-editField-json:test:setting"
     >
-      <EuiCodeEditor
-        aria-label="json test setting"
-        editorProps={
+      <FieldCodeEditor
+        a11yProps={
           Object {
-            "$blockScrolling": Infinity,
+            "aria-label": "json test setting",
           }
         }
-        height="auto"
         isReadOnly={true}
-        maxLines={30}
-        minLines={6}
-        mode="json"
         name="advancedSetting-editField-json:test:setting-editor"
         onChange={[Function]}
-        setOptions={
-          Object {
-            "showLineNumbers": false,
-            "tabSize": 2,
-          }
-        }
-        showGutter={false}
-        theme="textmate"
+        type="json"
         value="{\\"hello\\": \\"world\\"}"
-        width="100%"
       />
     </div>
   </EuiFormRow>
@@ -1989,30 +1963,17 @@ exports[`Field for json setting should render custom setting icon if it is custo
     <div
       data-test-subj="advancedSetting-editField-json:test:setting"
     >
-      <EuiCodeEditor
-        aria-label="json test setting"
-        editorProps={
+      <FieldCodeEditor
+        a11yProps={
           Object {
-            "$blockScrolling": Infinity,
+            "aria-label": "json test setting",
           }
         }
-        height="auto"
         isReadOnly={false}
-        maxLines={30}
-        minLines={6}
-        mode="json"
         name="advancedSetting-editField-json:test:setting-editor"
         onChange={[Function]}
-        setOptions={
-          Object {
-            "showLineNumbers": false,
-            "tabSize": 2,
-          }
-        }
-        showGutter={false}
-        theme="textmate"
+        type="json"
         value="{\\"foo\\": \\"bar\\"}"
-        width="100%"
       />
     </div>
   </EuiFormRow>
@@ -2103,30 +2064,17 @@ exports[`Field for json setting should render default value if there is no user 
     <div
       data-test-subj="advancedSetting-editField-json:test:setting"
     >
-      <EuiCodeEditor
-        aria-label="json test setting"
-        editorProps={
+      <FieldCodeEditor
+        a11yProps={
           Object {
-            "$blockScrolling": Infinity,
+            "aria-label": "json test setting",
           }
         }
-        height="auto"
         isReadOnly={false}
-        maxLines={30}
-        minLines={6}
-        mode="json"
         name="advancedSetting-editField-json:test:setting-editor"
         onChange={[Function]}
-        setOptions={
-          Object {
-            "showLineNumbers": false,
-            "tabSize": 2,
-          }
-        }
-        showGutter={false}
-        theme="textmate"
+        type="json"
         value="{\\"foo\\": \\"bar\\"}"
-        width="100%"
       />
     </div>
   </EuiFormRow>
@@ -2192,35 +2140,22 @@ exports[`Field for json setting should render unsaved value if there are unsaved
     <div
       data-test-subj="advancedSetting-editField-json:test:setting"
     >
-      <EuiCodeEditor
-        aria-describedby="json:test:setting-group json:test:setting-unsaved"
-        aria-label="json test setting"
-        editorProps={
+      <FieldCodeEditor
+        a11yProps={
           Object {
-            "$blockScrolling": Infinity,
+            "aria-describedby": "json:test:setting-group json:test:setting-unsaved",
+            "aria-label": "json test setting",
           }
         }
-        height="auto"
         isReadOnly={false}
-        maxLines={30}
-        minLines={6}
-        mode="json"
         name="advancedSetting-editField-json:test:setting-editor"
         onChange={[Function]}
-        setOptions={
-          Object {
-            "showLineNumbers": false,
-            "tabSize": 2,
-          }
-        }
-        showGutter={false}
-        theme="textmate"
+        type="json"
         value={
           Object {
             "foo": "bar2",
           }
         }
-        width="100%"
       />
     </div>
     <EuiScreenReaderOnly>
@@ -2318,30 +2253,17 @@ exports[`Field for json setting should render user value if there is user value 
     <div
       data-test-subj="advancedSetting-editField-json:test:setting"
     >
-      <EuiCodeEditor
-        aria-label="json test setting"
-        editorProps={
+      <FieldCodeEditor
+        a11yProps={
           Object {
-            "$blockScrolling": Infinity,
+            "aria-label": "json test setting",
           }
         }
-        height="auto"
         isReadOnly={false}
-        maxLines={30}
-        minLines={6}
-        mode="json"
         name="advancedSetting-editField-json:test:setting-editor"
         onChange={[Function]}
-        setOptions={
-          Object {
-            "showLineNumbers": false,
-            "tabSize": 2,
-          }
-        }
-        showGutter={false}
-        theme="textmate"
+        type="json"
         value="{\\"hello\\": \\"world\\"}"
-        width="100%"
       />
     </div>
   </EuiFormRow>
@@ -2390,30 +2312,17 @@ exports[`Field for markdown setting should render as read only if saving is disa
     <div
       data-test-subj="advancedSetting-editField-markdown:test:setting"
     >
-      <EuiCodeEditor
-        aria-label="markdown test setting"
-        editorProps={
+      <FieldCodeEditor
+        a11yProps={
           Object {
-            "$blockScrolling": Infinity,
+            "aria-label": "markdown test setting",
           }
         }
-        height="auto"
         isReadOnly={true}
-        maxLines={30}
-        minLines={6}
-        mode="markdown"
         name="advancedSetting-editField-markdown:test:setting-editor"
         onChange={[Function]}
-        setOptions={
-          Object {
-            "showLineNumbers": false,
-            "tabSize": 2,
-          }
-        }
-        showGutter={false}
-        theme="textmate"
+        type="markdown"
         value=""
-        width="100%"
       />
     </div>
   </EuiFormRow>
@@ -2494,30 +2403,17 @@ exports[`Field for markdown setting should render as read only with help text if
     <div
       data-test-subj="advancedSetting-editField-markdown:test:setting"
     >
-      <EuiCodeEditor
-        aria-label="markdown test setting"
-        editorProps={
+      <FieldCodeEditor
+        a11yProps={
           Object {
-            "$blockScrolling": Infinity,
+            "aria-label": "markdown test setting",
           }
         }
-        height="auto"
         isReadOnly={true}
-        maxLines={30}
-        minLines={6}
-        mode="markdown"
         name="advancedSetting-editField-markdown:test:setting-editor"
         onChange={[Function]}
-        setOptions={
-          Object {
-            "showLineNumbers": false,
-            "tabSize": 2,
-          }
-        }
-        showGutter={false}
-        theme="textmate"
+        type="markdown"
         value="**bold**"
-        width="100%"
       />
     </div>
   </EuiFormRow>
@@ -2577,30 +2473,17 @@ exports[`Field for markdown setting should render custom setting icon if it is c
     <div
       data-test-subj="advancedSetting-editField-markdown:test:setting"
     >
-      <EuiCodeEditor
-        aria-label="markdown test setting"
-        editorProps={
+      <FieldCodeEditor
+        a11yProps={
           Object {
-            "$blockScrolling": Infinity,
+            "aria-label": "markdown test setting",
           }
         }
-        height="auto"
         isReadOnly={false}
-        maxLines={30}
-        minLines={6}
-        mode="markdown"
         name="advancedSetting-editField-markdown:test:setting-editor"
         onChange={[Function]}
-        setOptions={
-          Object {
-            "showLineNumbers": false,
-            "tabSize": 2,
-          }
-        }
-        showGutter={false}
-        theme="textmate"
+        type="markdown"
         value=""
-        width="100%"
       />
     </div>
   </EuiFormRow>
@@ -2649,30 +2532,17 @@ exports[`Field for markdown setting should render default value if there is no u
     <div
       data-test-subj="advancedSetting-editField-markdown:test:setting"
     >
-      <EuiCodeEditor
-        aria-label="markdown test setting"
-        editorProps={
+      <FieldCodeEditor
+        a11yProps={
           Object {
-            "$blockScrolling": Infinity,
+            "aria-label": "markdown test setting",
           }
         }
-        height="auto"
         isReadOnly={false}
-        maxLines={30}
-        minLines={6}
-        mode="markdown"
         name="advancedSetting-editField-markdown:test:setting-editor"
         onChange={[Function]}
-        setOptions={
-          Object {
-            "showLineNumbers": false,
-            "tabSize": 2,
-          }
-        }
-        showGutter={false}
-        theme="textmate"
+        type="markdown"
         value=""
-        width="100%"
       />
     </div>
   </EuiFormRow>
@@ -2738,31 +2608,18 @@ exports[`Field for markdown setting should render unsaved value if there are uns
     <div
       data-test-subj="advancedSetting-editField-markdown:test:setting"
     >
-      <EuiCodeEditor
-        aria-describedby="markdown:test:setting-group markdown:test:setting-unsaved"
-        aria-label="markdown test setting"
-        editorProps={
+      <FieldCodeEditor
+        a11yProps={
           Object {
-            "$blockScrolling": Infinity,
+            "aria-describedby": "markdown:test:setting-group markdown:test:setting-unsaved",
+            "aria-label": "markdown test setting",
           }
         }
-        height="auto"
         isReadOnly={false}
-        maxLines={30}
-        minLines={6}
-        mode="markdown"
         name="advancedSetting-editField-markdown:test:setting-editor"
         onChange={[Function]}
-        setOptions={
-          Object {
-            "showLineNumbers": false,
-            "tabSize": 2,
-          }
-        }
-        showGutter={false}
-        theme="textmate"
+        type="markdown"
         value="Hello World"
-        width="100%"
       />
     </div>
     <EuiScreenReaderOnly>
@@ -2857,30 +2714,17 @@ exports[`Field for markdown setting should render user value if there is user va
     <div
       data-test-subj="advancedSetting-editField-markdown:test:setting"
     >
-      <EuiCodeEditor
-        aria-label="markdown test setting"
-        editorProps={
+      <FieldCodeEditor
+        a11yProps={
           Object {
-            "$blockScrolling": Infinity,
+            "aria-label": "markdown test setting",
           }
         }
-        height="auto"
         isReadOnly={false}
-        maxLines={30}
-        minLines={6}
-        mode="markdown"
         name="advancedSetting-editField-markdown:test:setting-editor"
         onChange={[Function]}
-        setOptions={
-          Object {
-            "showLineNumbers": false,
-            "tabSize": 2,
-          }
-        }
-        showGutter={false}
-        theme="textmate"
+        type="markdown"
         value="**bold**"
-        width="100%"
       />
     </div>
   </EuiFormRow>

@@ -153,7 +153,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('editing', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/106547
+    describe.skip('editing', () => {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.gotoDashboardLandingPage();

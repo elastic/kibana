@@ -14,6 +14,8 @@
   ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
+    { "path": "../../../src/plugins/expressions/tsconfig.json" },
     { "path": "../../../src/plugins/screenshot_mode/tsconfig.json" },
+    { "path": "../cloud/tsconfig.json" },
   ]
 }

@@ -10,10 +10,10 @@ import {
   parseEndpoint,
   routeValidationObject,
 } from '@kbn/server-route-repository';
-import { CoreSetup, CoreStart, Logger, RouteRegistrar } from 'kibana/server';
+import { CoreSetup, CoreStart, Logger, RouteRegistrar } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
-import { RuleDataPluginService } from '../../../rule_registry/server';
+import { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 import { ObservabilityRequestHandlerContext } from '../types';
 import { AbstractObservabilityServerRouteRepository } from './types';
 
@@ -31,7 +31,7 @@ export function registerRoutes({
   logger: Logger;
   ruleDataService: RuleDataPluginService;
 }) {
-  const routes = repository.getRoutes();
+  const routes = Object.values(repository);
 
   const router = core.setup.http.createRouter();
 

@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
-import { mockAppIndexPattern, mockIndexPattern, mockUxSeries, render } from '../rtl_helpers';
+import { mockAppDataView, mockDataView, mockUxSeries, render } from '../rtl_helpers';
 import { FilterLabel } from './filter_label';
 import * as useSeriesHook from '../hooks/use_series_filters';
 import { buildFilterLabel } from '../../filter_value_label/filter_value_label';
 
 // FLAKY: https://github.com/elastic/kibana/issues/115324
 describe.skip('FilterLabel', function () {
-  mockAppIndexPattern();
+  mockAppDataView();
 
   const invertFilter = jest.fn();
   jest.spyOn(useSeriesHook, 'useSeriesFilters').mockReturnValue({
@@ -30,7 +30,7 @@ describe.skip('FilterLabel', function () {
         negate={false}
         seriesId={0}
         removeFilter={jest.fn()}
-        indexPattern={mockIndexPattern}
+        dataView={mockDataView}
         series={mockUxSeries}
       />
     );
@@ -55,7 +55,7 @@ describe.skip('FilterLabel', function () {
         negate={false}
         seriesId={0}
         removeFilter={removeFilter}
-        indexPattern={mockIndexPattern}
+        dataView={mockDataView}
         series={mockUxSeries}
       />
     );
@@ -79,7 +79,7 @@ describe.skip('FilterLabel', function () {
         negate={false}
         seriesId={0}
         removeFilter={removeFilter}
-        indexPattern={mockIndexPattern}
+        dataView={mockDataView}
         series={mockUxSeries}
       />
     );
@@ -106,7 +106,7 @@ describe.skip('FilterLabel', function () {
         negate={true}
         seriesId={0}
         removeFilter={jest.fn()}
-        indexPattern={mockIndexPattern}
+        dataView={mockDataView}
         series={mockUxSeries}
       />
     );
@@ -126,7 +126,7 @@ describe.skip('FilterLabel', function () {
       buildFilterLabel({
         field: 'user_agent.name',
         label: 'Browser family',
-        indexPattern: mockIndexPattern,
+        dataView: mockDataView,
         value: 'Firefox',
         negate: false,
       })

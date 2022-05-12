@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
-import { EventActionOptions, SeverityActionOptions } from '.././types';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { EventActionOptions, SeverityActionOptions } from '../types';
 import PagerDutyParamsFields from './pagerduty_params';
 
 describe('PagerDutyParamsFields renders', () => {

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback, useState } from 'react';
+import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
+
+import { isEqual } from 'lodash';
 import {
   EuiFieldText,
   EuiSpacer,
@@ -17,27 +19,49 @@ import {
   EuiSuperSelectOption,
   EuiText,
   EuiHorizontalRule,
+  EuiTextArea,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EVENT_FILTERS_OPERATORS } from '@kbn/securitysolution-list-utils';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
 
-import { OperatingSystem } from '../../../../../../../common/endpoint/types';
+import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
+import type { OnChangeProps } from '@kbn/lists-plugin/public';
+import { PolicyData } from '../../../../../../../common/endpoint/types';
 import { AddExceptionComments } from '../../../../../../common/components/exceptions/add_exception_comments';
 import { filterIndexPatterns } from '../../../../../../common/components/exceptions/helpers';
 import { Loader } from '../../../../../../common/components/loader';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { useFetchIndex } from '../../../../../../common/containers/source';
 import { AppAction } from '../../../../../../common/store/actions';
-import { getExceptionBuilderComponentLazy } from '../../../../../../../../lists/public';
-import type { OnChangeProps } from '../../../../../../../../lists/public';
 import { useEventFiltersSelector } from '../../hooks';
 import { getFormEntryStateMutable, getHasNameError, getNewComment } from '../../../store/selector';
-import { NAME_LABEL, NAME_ERROR, NAME_PLACEHOLDER, OS_LABEL, RULE_NAME } from './translations';
+import {
+  NAME_LABEL,
+  NAME_ERROR,
+  DESCRIPTION_LABEL,
+  DESCRIPTION_PLACEHOLDER,
+  NAME_PLACEHOLDER,
+  OS_LABEL,
+  RULE_NAME,
+} from './translations';
 import { OS_TITLES } from '../../../../../common/translations';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID, EVENT_FILTER_LIST_TYPE } from '../../../constants';
 import { ABOUT_EVENT_FILTERS } from '../../translations';
+import {
+  EffectedPolicySelect,
+  EffectedPolicySelection,
+  EffectedPolicySelectProps,
+} from '../../../../../components/effected_policy_select';
+import {
+  getArtifactTagsByEffectedPolicySelection,
+  getArtifactTagsWithoutPolicies,
+  getEffectedPolicySelectionByTags,
+  isGlobalPolicyEffected,
+} from '../../../../../components/effected_policy_select/utils';
+import { useLicense } from '../../../../../../common/hooks/use_license';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -45,21 +69,69 @@ const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.LINUX,
 ];
 
+const getAddedFieldsCounts = (formFields: string[]): { [k: string]: number } =>
+  formFields.reduce<{ [k: string]: number }>((allFields, field) => {
+    if (field in allFields) {
+      allFields[field]++;
+    } else {
+      allFields[field] = 1;
+    }
+    return allFields;
+  }, {});
+
+const computeHasDuplicateFields = (formFieldsList: Record<string, number>): boolean =>
+  Object.values(formFieldsList).some((e) => e > 1);
 interface EventFiltersFormProps {
   allowSelectOs?: boolean;
+  policies: PolicyData[];
+  arePoliciesLoading: boolean;
 }
 export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
-  ({ allowSelectOs = false }) => {
-    const { http, data } = useKibana().services;
+  ({ allowSelectOs = false, policies, arePoliciesLoading }) => {
+    const { http, unifiedSearch } = useKibana().services;
+
     const dispatch = useDispatch<Dispatch<AppAction>>();
     const exception = useEventFiltersSelector(getFormEntryStateMutable);
     const hasNameError = useEventFiltersSelector(getHasNameError);
     const newComment = useEventFiltersSelector(getNewComment);
     const [hasBeenInputNameVisited, setHasBeenInputNameVisited] = useState(false);
+    const isPlatinumPlus = useLicense().isPlatinumPlus();
+    const [hasFormChanged, setHasFormChanged] = useState(false);
+    const [hasDuplicateFields, setHasDuplicateFields] = useState<boolean>(false);
 
     // This value has to be memoized to avoid infinite useEffect loop on useFetchIndex
     const indexNames = useMemo(() => ['logs-endpoint.events.*'], []);
     const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(indexNames);
+
+    const [selection, setSelection] = useState<EffectedPolicySelection>({
+      selected: [],
+      isGlobal: isGlobalPolicyEffected(exception?.tags),
+    });
+
+    const isEditMode = useMemo(() => !!exception?.item_id, [exception?.item_id]);
+    const [wasByPolicy, setWasByPolicy] = useState(!isGlobalPolicyEffected(exception?.tags));
+
+    const showAssignmentSection = useMemo(() => {
+      return (
+        isPlatinumPlus ||
+        (isEditMode &&
+          (!selection.isGlobal || (wasByPolicy && selection.isGlobal && hasFormChanged)))
+      );
+    }, [isEditMode, selection.isGlobal, hasFormChanged, isPlatinumPlus, wasByPolicy]);
+
+    // set current policies if not previously selected
+    useEffect(() => {
+      if (selection.selected.length === 0 && exception?.tags) {
+        setSelection(getEffectedPolicySelectionByTags(exception.tags, policies));
+      }
+    }, [exception?.tags, policies, selection.selected.length]);
+
+    // set initial state of `wasByPolicy` that checks if the initial state of the exception was by policy or not
+    useEffect(() => {
+      if (!hasFormChanged && exception?.tags) {
+        setWasByPolicy(!isGlobalPolicyEffected(exception?.tags));
+      }
+    }, [exception?.tags, hasFormChanged]);
 
     const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = useMemo(
       () => OPERATING_SYSTEMS.map((os) => ({ value: os, inputDisplay: OS_TITLES[os] })),
@@ -68,6 +140,16 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
 
     const handleOnBuilderChange = useCallback(
       (arg: OnChangeProps) => {
+        if (
+          (!hasFormChanged && arg.exceptionItems[0] === undefined) ||
+          isEqual(arg.exceptionItems[0]?.entries, exception?.entries)
+        ) {
+          const addedFields = arg.exceptionItems[0]?.entries.map((e) => e.field) || [''];
+          setHasDuplicateFields(computeHasDuplicateFields(getAddedFieldsCounts(addedFields)));
+          setHasFormChanged(true);
+          return;
+        }
+        setHasFormChanged(true);
         dispatch({
           type: 'eventFiltersChangeForm',
           payload: {
@@ -76,8 +158,10 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
                   entry: {
                     ...arg.exceptionItems[0],
                     name: exception?.name ?? '',
+                    description: exception?.description ?? '',
                     comments: exception?.comments ?? [],
                     os_types: exception?.os_types ?? [OperatingSystem.WINDOWS],
+                    tags: exception?.tags ?? [],
                   },
                   hasItemsError: arg.errorExists || !arg.exceptionItems[0]?.entries?.length,
                 }
@@ -87,12 +171,13 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
           },
         });
       },
-      [dispatch, exception?.name, exception?.comments, exception?.os_types]
+      [dispatch, exception, hasFormChanged]
     );
 
     const handleOnChangeName = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!exception) return;
+        setHasFormChanged(true);
         const name = e.target.value.toString().trim();
         dispatch({
           type: 'eventFiltersChangeForm',
@@ -105,9 +190,25 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
       [dispatch, exception]
     );
 
+    const handleOnDescriptionChange = useCallback(
+      (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        if (!exception) return;
+        setHasFormChanged(true);
+        const description = e.target.value.toString().trim();
+        dispatch({
+          type: 'eventFiltersChangeForm',
+          payload: {
+            entry: { ...exception, description },
+          },
+        });
+      },
+      [dispatch, exception]
+    );
+
     const handleOnChangeComment = useCallback(
       (value: string) => {
         if (!exception) return;
+        setHasFormChanged(true);
         dispatch({
           type: 'eventFiltersChangeForm',
           payload: {
@@ -124,7 +225,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
         getExceptionBuilderComponentLazy({
           allowLargeValueLists: false,
           httpService: http,
-          autocompleteService: data.autocomplete,
+          autocompleteService: unifiedSearch.autocomplete,
           exceptionListItems: [exception as ExceptionListItemSchema],
           listType: EVENT_FILTER_LIST_TYPE,
           listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
@@ -140,8 +241,9 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
           onChange: handleOnBuilderChange,
           listTypeSpecificIndexPatternFilter: filterIndexPatterns,
           operatorsList: EVENT_FILTERS_OPERATORS,
+          osTypes: exception?.os_types,
         }),
-      [data, handleOnBuilderChange, http, indexPatterns, exception]
+      [unifiedSearch, handleOnBuilderChange, http, indexPatterns, exception]
     );
 
     const nameInputMemo = useMemo(
@@ -166,6 +268,24 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
         </EuiFormRow>
       ),
       [hasNameError, exception?.name, handleOnChangeName, hasBeenInputNameVisited]
+    );
+
+    const descriptionInputMemo = useMemo(
+      () => (
+        <EuiFormRow label={DESCRIPTION_LABEL} fullWidth>
+          <EuiTextArea
+            id="eventFiltersFormInputDescription"
+            placeholder={DESCRIPTION_PLACEHOLDER}
+            defaultValue={exception?.description ?? ''}
+            onChange={handleOnDescriptionChange}
+            fullWidth
+            data-test-subj="eventFilters-form-description-input"
+            aria-label={DESCRIPTION_PLACEHOLDER}
+            maxLength={256}
+          />
+        </EuiFormRow>
+      ),
+      [exception?.description, handleOnDescriptionChange]
     );
 
     const osInputMemo = useMemo(
@@ -224,9 +344,10 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
           </EuiText>
           <EuiSpacer size="m" />
           {nameInputMemo}
+          {descriptionInputMemo}
         </>
       ),
-      [nameInputMemo]
+      [nameInputMemo, descriptionInputMemo]
     );
 
     const criteriaSection = useMemo(
@@ -262,6 +383,48 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
       [allowSelectOs, exceptionBuilderComponentMemo, osInputMemo]
     );
 
+    const handleOnChangeEffectScope: EffectedPolicySelectProps['onChange'] = useCallback(
+      (currentSelection) => {
+        if (currentSelection.isGlobal) {
+          // Preserve last selection inputs
+          setSelection({ ...selection, isGlobal: true });
+        } else {
+          setSelection(currentSelection);
+        }
+
+        if (!exception) return;
+        setHasFormChanged(true);
+
+        dispatch({
+          type: 'eventFiltersChangeForm',
+          payload: {
+            entry: {
+              ...exception,
+              tags: getArtifactTagsByEffectedPolicySelection(
+                currentSelection,
+                getArtifactTagsWithoutPolicies(exception?.tags ?? [])
+              ),
+            },
+          },
+        });
+      },
+      [dispatch, exception, selection]
+    );
+    const policiesSection = useMemo(
+      () => (
+        <EffectedPolicySelect
+          selected={selection.selected}
+          options={policies}
+          isGlobal={selection.isGlobal}
+          isLoading={arePoliciesLoading}
+          isPlatinumPlus={isPlatinumPlus}
+          onChange={handleOnChangeEffectScope}
+          data-test-subj={'effectedPolicies-select'}
+        />
+      ),
+      [policies, selection, isPlatinumPlus, handleOnChangeEffectScope, arePoliciesLoading]
+    );
+
     const commentsSection = useMemo(
       () => (
         <>
@@ -289,16 +452,34 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
       [commentsInputMemo]
     );
 
-    return !isIndexPatternLoading && exception ? (
+    if (isIndexPatternLoading || !exception) {
+      return <Loader size="xl" />;
+    }
+
+    return (
       <EuiForm component="div">
         {detailsSection}
         <EuiHorizontalRule />
         {criteriaSection}
+        {hasDuplicateFields && (
+          <>
+            <EuiSpacer size="xs" />
+            <EuiText color="subdued" size="xs" data-test-subj="duplicate-fields-warning-message">
+              <FormattedMessage
+                id="xpack.securitySolution.eventFilters.warningMessage.duplicateFields"
+                defaultMessage="Using multiples of the same filed values can degrade Endpoint performance and/or create ineffective rules"
+              />
+            </EuiText>
+          </>
+        )}
+        {showAssignmentSection && (
+          <>
+            <EuiHorizontalRule /> {policiesSection}
+          </>
+        )}
         <EuiHorizontalRule />
         {commentsSection}
       </EuiForm>
-    ) : (
-      <Loader size="xl" />
     );
   }
 );

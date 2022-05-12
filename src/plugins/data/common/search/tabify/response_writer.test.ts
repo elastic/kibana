@@ -9,7 +9,7 @@
 import { TabbedAggResponseWriter } from './response_writer';
 import { AggConfigs, BUCKET_TYPES, METRIC_TYPES } from '../aggs';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
-import { TabbedResponseWriterOptions } from './types';
+import type { TabbedResponseWriterOptions } from './types';
 
 describe('TabbedAggResponseWriter class', () => {
   let responseWriter: TabbedAggResponseWriter;
@@ -201,6 +201,7 @@ describe('TabbedAggResponseWriter class', () => {
             indexPatternId: '1234',
             params: {
               field: 'machine.os.raw',
+              emptyAsNull: false,
             },
             type: 'cardinality',
           },
@@ -264,6 +265,7 @@ describe('TabbedAggResponseWriter class', () => {
             indexPatternId: '1234',
             params: {
               field: 'machine.os.raw',
+              emptyAsNull: false,
             },
             type: 'cardinality',
           },

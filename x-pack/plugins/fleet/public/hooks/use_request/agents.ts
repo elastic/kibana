@@ -21,6 +21,8 @@ import type {
   GetAgentsResponse,
   GetAgentStatusRequest,
   GetAgentStatusResponse,
+  GetAgentIncomingDataRequest,
+  GetAgentIncomingDataResponse,
   PostAgentUpgradeRequest,
   PostBulkAgentUpgradeRequest,
   PostAgentUpgradeResponse,
@@ -66,6 +68,13 @@ export function useGetAgentStatus(query: GetAgentStatusRequest['query'], options
     path: agentRouteService.getStatusPath(),
     query,
     ...options,
+  });
+}
+export function sendGetAgentIncomingData(query: GetAgentIncomingDataRequest['query']) {
+  return sendRequest<GetAgentIncomingDataResponse>({
+    method: 'get',
+    path: agentRouteService.getIncomingDataPath(),
+    query,
   });
 }
 

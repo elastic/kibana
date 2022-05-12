@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { fetchLicenseType } from './fetch_license_type';
 
 describe('fetchLicenseType', () => {
@@ -13,18 +13,16 @@ describe('fetchLicenseType', () => {
   const availableCcs = false;
   const callCluster = {
     search: jest.fn().mockImplementation(() => ({
-      body: {
-        hits: {
-          hits: [
-            {
-              _source: {
-                license: {
-                  type: 'trial',
-                },
+      hits: {
+        hits: [
+          {
+            _source: {
+              license: {
+                type: 'trial',
               },
             },
-          ],
-        },
+          },
+        ],
       },
     })),
   } as unknown as ElasticsearchClient;
@@ -37,10 +35,8 @@ describe('fetchLicenseType', () => {
   it('should handle no license data', async () => {
     const customCallCluster = {
       search: jest.fn().mockImplementation(() => ({
-        body: {
-          hits: {
-            hits: [],
-          },
+        hits: {
+          hits: [],
         },
       })),
     } as unknown as ElasticsearchClient;

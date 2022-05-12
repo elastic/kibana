@@ -8,6 +8,8 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
+import type { SetEventsDeleted, SetEventsLoading } from '@kbn/timelines-plugin/common';
+import { StatefulEventContext } from '@kbn/timelines-plugin/public';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import {
   ColumnHeaderOptions,
@@ -18,8 +20,6 @@ import {
   TimelineId,
   TimelineTabs,
 } from '../../../../../../common/types/timeline';
-import type { SetEventsDeleted, SetEventsLoading } from '../../../../../../../timelines/common';
-import { BrowserFields } from '../../../../../common/containers/source';
 import {
   TimelineItem,
   TimelineNonEcsData,
@@ -39,13 +39,11 @@ import { getRowRenderer } from '../renderers/get_row_renderer';
 import { StatefulRowRenderer } from './stateful_row_renderer';
 import { NOTES_BUTTON_CLASS_NAME } from '../../properties/helpers';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
-import { getMappedNonEcsValue } from '../data_driven_columns';
-import { StatefulEventContext } from '../../../../../../../timelines/public';
+import { useGetMappedNonEcsValue } from '../data_driven_columns';
 
 interface Props {
   actionsColumnWidth: number;
   containerRef: React.MutableRefObject<HTMLDivElement | null>;
-  browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
   event: TimelineItem;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
@@ -78,7 +76,6 @@ EventsTrSupplementContainerWrapper.displayName = 'EventsTrSupplementContainerWra
 
 const StatefulEventComponent: React.FC<Props> = ({
   actionsColumnWidth,
-  browserFields,
   containerRef,
   columnHeaders,
   event,
@@ -115,21 +112,23 @@ const StatefulEventComponent: React.FC<Props> = ({
   const expandedDetail = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).expandedDetail ?? {}
   );
-  const hostName = useMemo(() => {
-    const hostNameArr = getMappedNonEcsValue({ data: event?.data, fieldName: 'host.name' });
-    return hostNameArr && hostNameArr.length > 0 ? hostNameArr[0] : null;
-  }, [event?.data]);
+  const hostNameArr = useGetMappedNonEcsValue({ data: event?.data, fieldName: 'host.name' });
 
+  const hostName = useMemo(() => {
+    return hostNameArr && hostNameArr.length > 0 ? hostNameArr[0] : null;
+  }, [hostNameArr]);
+  const hostIpList = useGetMappedNonEcsValue({ data: event?.data, fieldName: 'host.ip' });
+  const sourceIpList = useGetMappedNonEcsValue({ data: event?.data, fieldName: 'source.ip' });
+  const destinationIpList = useGetMappedNonEcsValue({
+    data: event?.data,
+    fieldName: 'destination.ip',
+  });
   const hostIPAddresses = useMemo(() => {
-    const hostIpList = getMappedNonEcsValue({ data: event?.data, fieldName: 'host.ip' }) ?? [];
-    const sourceIpList = getMappedNonEcsValue({ data: event?.data, fieldName: 'source.ip' }) ?? [];
-    const destinationIpList =
-      getMappedNonEcsValue({
-        data: event?.data,
-        fieldName: 'destination.ip',
-      }) ?? [];
-    return new Set([...hostIpList, ...sourceIpList, ...destinationIpList]);
-  }, [event?.data]);
+    const hostIps = hostIpList ?? [];
+    const sourceIps = sourceIpList ?? [];
+    const destinationIps = destinationIpList ?? [];
+    return new Set([...hostIps, ...sourceIps, ...destinationIps]);
+  }, [destinationIpList, sourceIpList, hostIpList]);
 
   const activeTab = tabType ?? TimelineTabs.query;
   const activeExpandedDetail = expandedDetail[activeTab];
@@ -234,31 +233,6 @@ const StatefulEventComponent: React.FC<Props> = ({
     [dispatch, timelineId]
   );
 
-  const RowRendererContent = useMemo(
-    () => (
-      <EventsTrSupplement>
-        <StatefulRowRenderer
-          ariaRowindex={ariaRowindex}
-          browserFields={browserFields}
-          containerRef={containerRef}
-          event={event}
-          lastFocusedAriaColindex={lastFocusedAriaColindex}
-          rowRenderers={rowRenderers}
-          timelineId={timelineId}
-        />
-      </EventsTrSupplement>
-    ),
-    [
-      ariaRowindex,
-      browserFields,
-      containerRef,
-      event,
-      lastFocusedAriaColindex,
-      rowRenderers,
-      timelineId,
-    ]
-  );
-
   return (
     <StatefulEventContext.Provider value={activeStatefulEventContext}>
       <EventsTrGroup
@@ -317,7 +291,16 @@ const StatefulEventComponent: React.FC<Props> = ({
             />
           </EventsTrSupplement>
 
-          {RowRendererContent}
+          <EventsTrSupplement>
+            <StatefulRowRenderer
+              ariaRowindex={ariaRowindex}
+              containerRef={containerRef}
+              event={event}
+              lastFocusedAriaColindex={lastFocusedAriaColindex}
+              rowRenderers={rowRenderers}
+              timelineId={timelineId}
+            />
+          </EventsTrSupplement>
         </EventsTrSupplementContainerWrapper>
       </EventsTrGroup>
     </StatefulEventContext.Provider>

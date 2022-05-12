@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, PluginConfigDescriptor } from '../../../../src/core/server';
+import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
 import { Plugin, PluginSetup, PluginStart } from './plugin';
 import { configSchema, ConfigSchema, ConfigType } from './config';
 import { SIGNALS_INDEX_KEY } from '../common/constants';
@@ -20,7 +20,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
     enableExperimental: true,
   },
   schema: configSchema,
-  deprecations: ({ renameFromRoot }) => [
+  deprecations: ({ renameFromRoot, unused }) => [
     renameFromRoot('xpack.siem.enabled', 'xpack.securitySolution.enabled', { level: 'critical' }),
     renameFromRoot(
       'xpack.siem.maxRuleImportExportSize',
@@ -47,6 +47,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
       `xpack.securitySolution.${SIGNALS_INDEX_KEY}`,
       { level: 'critical' }
     ),
+    unused('ruleExecutionLog.underlyingClient', { level: 'warning' }),
   ],
 };
 

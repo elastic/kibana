@@ -43,7 +43,7 @@ export const TextValueDisplay = memo<TextValueDisplayProps>(
     }, [bold, children]);
 
     return (
-      <EuiText size={size} data-test-subj={dataTestSubj}>
+      <EuiText className={cssClassNames} size={size} data-test-subj={dataTestSubj}>
         {withTooltip &&
         'string' === typeof children &&
         children.length > 0 &&

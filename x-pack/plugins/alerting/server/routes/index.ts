@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { IRouter } from '@kbn/core/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { ILicenseState } from '../lib';
 import { defineLegacyRoutes } from './legacy';
 import { AlertingRequestHandlerContext } from '../types';
-import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import { createRuleRoute } from './create_rule';
-import { getRuleRoute } from './get_rule';
+import { getRuleRoute, getInternalRuleRoute } from './get_rule';
 import { updateRuleRoute } from './update_rule';
 import { deleteRuleRoute } from './delete_rule';
 import { aggregateRulesRoute } from './aggregate_rules';
 import { disableRuleRoute } from './disable_rule';
 import { enableRuleRoute } from './enable_rule';
-import { findRulesRoute } from './find_rules';
+import { findRulesRoute, findInternalRulesRoute } from './find_rules';
 import { getRuleAlertSummaryRoute } from './get_rule_alert_summary';
+import { getRuleExecutionLogRoute } from './get_rule_execution_log';
 import { getRuleStateRoute } from './get_rule_state';
 import { healthRoute } from './health';
 import { resolveRuleRoute } from './resolve_rule';
@@ -29,6 +30,9 @@ import { muteAlertRoute } from './mute_alert';
 import { unmuteAllRuleRoute } from './unmute_all_rule';
 import { unmuteAlertRoute } from './unmute_alert';
 import { updateRuleApiKeyRoute } from './update_rule_api_key';
+import { bulkEditInternalRulesRoute } from './bulk_edit_rules';
+import { snoozeRuleRoute } from './snooze_rule';
+import { unsnoozeRuleRoute } from './unsnooze_rule';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
@@ -43,6 +47,7 @@ export function defineRoutes(opts: RouteOptions) {
   defineLegacyRoutes(opts);
   createRuleRoute(opts);
   getRuleRoute(router, licenseState);
+  getInternalRuleRoute(router, licenseState);
   resolveRuleRoute(router, licenseState);
   updateRuleRoute(router, licenseState);
   deleteRuleRoute(router, licenseState);
@@ -50,13 +55,18 @@ export function defineRoutes(opts: RouteOptions) {
   disableRuleRoute(router, licenseState);
   enableRuleRoute(router, licenseState);
   findRulesRoute(router, licenseState, usageCounter);
+  findInternalRulesRoute(router, licenseState, usageCounter);
   getRuleAlertSummaryRoute(router, licenseState);
+  getRuleExecutionLogRoute(router, licenseState);
   getRuleStateRoute(router, licenseState);
   healthRoute(router, licenseState, encryptedSavedObjects);
   ruleTypesRoute(router, licenseState);
-  muteAllRuleRoute(router, licenseState);
+  muteAllRuleRoute(router, licenseState, usageCounter);
   muteAlertRoute(router, licenseState);
   unmuteAllRuleRoute(router, licenseState);
   unmuteAlertRoute(router, licenseState);
   updateRuleApiKeyRoute(router, licenseState);
+  bulkEditInternalRulesRoute(router, licenseState);
+  snoozeRuleRoute(router, licenseState);
+  unsnoozeRuleRoute(router, licenseState);
 }

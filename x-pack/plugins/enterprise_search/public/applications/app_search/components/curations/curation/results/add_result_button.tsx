@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 
 import { CurationLogic } from '..';
 
-import { AddResultLogic } from './';
+import { AddResultLogic } from '.';
 
 export const AddResultButton: React.FC = () => {
   const { openFlyout } = useActions(AddResultLogic);

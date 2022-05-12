@@ -139,7 +139,7 @@ exports[`FieldIcon renders known field types murmur3 is rendered 1`] = `
 <EuiToken
   aria-label="murmur3"
   className="kbnFieldIcon"
-  iconType="tokenFile"
+  iconType="tokenSearchType"
   size="s"
   title="murmur3"
 />
@@ -192,6 +192,16 @@ exports[`FieldIcon renders known field types text is rendered 1`] = `
   iconType="tokenString"
   size="s"
   title="text"
+/>
+`;
+
+exports[`FieldIcon renders known field types version is rendered 1`] = `
+<EuiToken
+  aria-label="version"
+  className="kbnFieldIcon"
+  iconType="tokenTag"
+  size="s"
+  title="version"
 />
 `;
 

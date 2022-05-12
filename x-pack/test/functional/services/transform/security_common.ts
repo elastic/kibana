@@ -31,7 +31,7 @@ export function TransformSecurityCommonProvider({ getService }: FtrProviderConte
     {
       name: 'transform_dest',
       elasticsearch: {
-        indices: [{ names: ['user-*'], privileges: ['read', 'index', 'manage'] }],
+        indices: [{ names: ['user-*'], privileges: ['read', 'index', 'manage', 'delete'] }],
       },
       kibana: [],
     },
@@ -45,7 +45,7 @@ export function TransformSecurityCommonProvider({ getService }: FtrProviderConte
     {
       name: 'transform_ui_extras',
       elasticsearch: {
-        cluster: ['monitor'],
+        cluster: ['monitor', 'read_pipeline'],
       },
       kibana: [],
     },

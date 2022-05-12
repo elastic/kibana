@@ -11,11 +11,8 @@ import React, { useMemo } from 'react';
 import { matchPath, useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
-import type { ApplicationStart } from '../../../../../../../src/core/public';
-import {
-  KibanaPageTemplate,
-  KibanaPageTemplateProps,
-} from '../../../../../../../src/plugins/kibana_react/public';
+import type { ApplicationStart } from '@kbn/core/public';
+import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
 import type { NavigationSection } from '../../../services/navigation_registry';
 import { NavNameWithBadge, hideBadge } from './nav_name_with_badge';
 
@@ -71,11 +68,13 @@ export function ObservabilityPageTemplate({
 
           const isSelected =
             entry.app === currentAppId &&
-            matchPath(currentPath, {
-              path: entry.path,
-              exact: !!entry.matchFullPath,
-              strict: !entry.ignoreTrailingSlash,
-            }) != null;
+            (entry.matchPath
+              ? entry.matchPath(currentPath)
+              : matchPath(currentPath, {
+                  path: entry.path,
+                  exact: !!entry.matchFullPath,
+                  strict: !entry.ignoreTrailingSlash,
+                }) != null);
           const badgeLocalStorageId = `observability.nav_item_badge_visible_${entry.app}${entry.path}`;
           return {
             id: `${sectionIndex}.${entryIndex}`,

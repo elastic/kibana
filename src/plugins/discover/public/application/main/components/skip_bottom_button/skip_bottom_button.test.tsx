@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
 import { SkipBottomButton, SkipBottomButtonProps } from './skip_bottom_button';
 

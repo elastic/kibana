@@ -10,6 +10,7 @@ export interface FleetAuthz {
     all: boolean;
     setup: boolean;
     readEnrollmentTokens: boolean;
+    readAgentPolicies: boolean;
   };
 
   integrations: {
@@ -18,6 +19,7 @@ export interface FleetAuthz {
     installPackages: boolean;
     upgradePackages: boolean;
     removePackages: boolean;
+    uploadPackages: boolean;
 
     readPackageSettings: boolean;
     writePackageSettings: boolean;
@@ -37,15 +39,22 @@ interface CalculateParams {
     all: boolean;
     read: boolean;
   };
+
+  isSuperuser: boolean;
 }
 
-export const calculateAuthz = ({ fleet, integrations }: CalculateParams): FleetAuthz => ({
+export const calculateAuthz = ({
+  fleet,
+  integrations,
+  isSuperuser,
+}: CalculateParams): FleetAuthz => ({
   fleet: {
     all: fleet.all && (integrations.all || integrations.read),
 
     // These are currently used by Fleet Server setup
     setup: fleet.all || fleet.setup,
     readEnrollmentTokens: fleet.all || fleet.setup,
+    readAgentPolicies: fleet.all || fleet.setup,
   },
 
   integrations: {
@@ -54,11 +63,12 @@ export const calculateAuthz = ({ fleet, integrations }: CalculateParams): FleetA
     installPackages: fleet.all && integrations.all,
     upgradePackages: fleet.all && integrations.all,
     removePackages: fleet.all && integrations.all,
+    uploadPackages: isSuperuser,
 
     readPackageSettings: fleet.all && integrations.all,
     writePackageSettings: fleet.all && integrations.all,
 
-    readIntegrationPolicies: fleet.all && integrations.all,
+    readIntegrationPolicies: fleet.all && (integrations.all || integrations.read),
     writeIntegrationPolicies: fleet.all && integrations.all,
   },
 });

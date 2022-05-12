@@ -1,0 +1,72 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Detects the modification of Group Policy Object attributes to execute a scheduled task in the objects controlled by the GPO.",
+  "index": [
+    "winlogbeat-*",
+    "logs-system.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Scheduled Task Execution at Scale via GPO",
+  "note": "## Triage and analysis\n\n### Investigating Scheduled Task Execution at Scale via GPO\n\nGroup Policy Objects (GPOs) can be used by attackers to execute scheduled tasks at scale to compromise objects controlled\nby a given GPO. This is done by changing the contents of the `<GPOPath>\\Machine\\Preferences\\ScheduledTasks\\ScheduledTasks.xml`\nfile.\n\n#### Possible investigation steps\n\n- This attack abuses a legitimate mechanism of the Active Directory, so it is important to determine whether the activity\nis legitimate and the administrator is authorized to perform this operation.\n- Retrieve the contents of the `ScheduledTasks.xml` file, and check the `<Command>` and `<Arguments>` XML tags for any\npotentially malicious commands and binaries.\n- Investigate other alerts related to the user/host in the last 48 hours.\n- Scope which objects have been affected.\n\n### False positive analysis\n\n- Verify if the execution is allowed and done under change management, and if the execution is legitimate.\n\n### Related rules\n\n- Group Policy Abuse for Privilege Addition - b9554892-5e0e-424b-83a0-5aef95aa43bf\n- Startup/Logon Script added to Group Policy Object - 16fac1a1-21ee-4ca6-b720-458e3855d046\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- The investigation and containment must be performed in every computer controlled by the GPO, where necessary.\n- Remove the script from the GPO.\n- Check if other GPOs have suspicious scheduled tasks attached.\n\n## Config\n\nThe 'Audit Detailed File Share' audit policy must be configured (Success Failure).\nSteps to implement the logging policy with with Advanced Audit Configuration:\n\n```\nComputer Configuration > \nPolicies > \nWindows Settings > \nSecurity Settings > \nAdvanced Audit Policies Configuration > \nAudit Policies > \nObject Access > \nAudit Detailed File Share (Success,Failure)\n```\n\nThe 'Audit Directory Service Changes' audit policy must be configured (Success Failure).\nSteps to implement the logging policy with with Advanced Audit Configuration:\n\n```\nComputer Configuration > \nPolicies > \nWindows Settings > \nSecurity Settings > \nAdvanced Audit Policies Configuration > \nAudit Policies > \nDS Access > \nAudit Directory Service Changes (Success,Failure)\n```\n",
+  "query": "(event.code: \"5136\" and winlog.event_data.AttributeLDAPDisplayName:(\"gPCMachineExtensionNames\" or \"gPCUserExtensionNames\") and \n   winlog.event_data.AttributeValue:(*CAB54552-DEEA-4691-817E-ED4A4D1AFC72* and *AADCED64-746C-4633-A97C-D61349046527*)) \nor\n(event.code: \"5145\" and winlog.event_data.ShareName: \"\\\\\\\\*\\\\SYSVOL\" and winlog.event_data.RelativeTargetName: *ScheduledTasks.xml and\n  (message: WriteData or winlog.event_data.AccessList: *%%4417*))\n",
+  "references": [
+    "https://github.com/atc-project/atc-data/blob/master/docs/Logging_Policies/LP_0025_windows_audit_directory_service_changes.md",
+    "https://github.com/atc-project/atc-data/blob/f2bbb51ecf68e2c9f488e3c70dcdd3df51d2a46b/docs/Logging_Policies/LP_0029_windows_audit_detailed_file_share.md",
+    "https://labs.f-secure.com/tools/sharpgpoabuse",
+    "https://twitter.com/menasec1/status/1106899890377052160",
+    "https://github.com/SigmaHQ/sigma/blob/master/rules/windows/builtin/win_gpo_scheduledtasks.yml"
+  ],
+  "risk_score": 47,
+  "rule_id": "15a8ba77-1c13-4274-88fe-6bd14133861e",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Privilege Escalation",
+    "Active Directory"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1053",
+          "name": "Scheduled Task/Job",
+          "reference": "https://attack.mitre.org/techniques/T1053/",
+          "subtechnique": [
+            {
+              "id": "T1053.005",
+              "name": "Scheduled Task",
+              "reference": "https://attack.mitre.org/techniques/T1053/005/"
+            }
+          ]
+        },
+        {
+          "id": "T1484",
+          "name": "Domain Policy Modification",
+          "reference": "https://attack.mitre.org/techniques/T1484/",
+          "subtechnique": [
+            {
+              "id": "T1484.001",
+              "name": "Group Policy Modification",
+              "reference": "https://attack.mitre.org/techniques/T1484/001/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 3
+}

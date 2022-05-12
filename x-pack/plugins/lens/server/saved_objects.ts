@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'kibana/server';
+import { CoreSetup } from '@kbn/core/server';
+import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { getEditPath } from '../common';
-import { migrations } from './migrations/saved_object_migrations';
+import { getAllMigrations } from './migrations/saved_object_migrations';
+import { CustomVisualizationMigrations } from './migrations/types';
 
-export function setupSavedObjects(core: CoreSetup) {
+export function setupSavedObjects(
+  core: CoreSetup,
+  getFilterMigrations: () => MigrateFunctionsObject,
+  customVisualizationMigrations: CustomVisualizationMigrations
+) {
   core.savedObjects.registerType({
     name: 'lens',
     hidden: false,
@@ -25,7 +31,7 @@ export function setupSavedObjects(core: CoreSetup) {
         uiCapabilitiesPath: 'visualize.show',
       }),
     },
-    migrations,
+    migrations: () => getAllMigrations(getFilterMigrations(), customVisualizationMigrations),
     mappings: {
       properties: {
         title: {

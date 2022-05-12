@@ -36,7 +36,6 @@ export interface Props {
   showThisLayerOnly: (layerId: string) => void;
   supportsFitToBounds: boolean;
   toggleVisible: (layerId: string) => void;
-  editModeActiveForLayer: boolean;
   numLayers: number;
 }
 
@@ -84,14 +83,13 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
 
   async _getIsFeatureEditingEnabled(): Promise<boolean> {
     const vectorLayer = this.props.layer as IVectorLayer;
-    const layerSource = this.props.layer.getSource();
-    if (!(layerSource instanceof ESSearchSource)) {
+    const source = this.props.layer.getSource();
+    if (!(source instanceof ESSearchSource)) {
       return false;
     }
 
     if (
-      (layerSource as ESSearchSource).getSyncMeta().scalingType === SCALING_TYPES.CLUSTERS ||
-      (await vectorLayer.isFilteredByGlobalTime()) ||
+      (source as ESSearchSource).getSyncMeta().scalingType === SCALING_TYPES.CLUSTERS ||
       vectorLayer.isPreviewLayer() ||
       !vectorLayer.isVisible() ||
       vectorLayer.hasJoins()
@@ -191,11 +189,11 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
           'data-test-subj': 'editLayerButton',
           toolTipContent: this.state.isFeatureEditingEnabled
             ? null
-            : i18n.translate('xpack.maps.layerTocActions.editLayerTooltip', {
+            : i18n.translate('xpack.maps.layerTocActions.editFeaturesTooltip.disabledMessage', {
                 defaultMessage:
-                  'Edit features only supported for document layers without clustering, joins, or time filtering',
+                  'Edit features is only supported for layers without clustering and term joins',
               }),
-          disabled: !this.state.isFeatureEditingEnabled || this.props.editModeActiveForLayer,
+          disabled: !this.state.isFeatureEditingEnabled,
           onClick: async () => {
             this._closePopover();
             const supportedShapeTypes = await (

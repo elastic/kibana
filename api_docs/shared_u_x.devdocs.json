@@ -1,0 +1,94 @@
+{
+  "id": "sharedUX",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "start": {
+      "parentPluginId": "sharedUX",
+      "id": "def-public.SharedUXPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "SharedUXPluginStart",
+      "description": [
+        "\nThe Shared UX plugin public contract, containing prewired components, services, and\nother constructs useful to consumers."
+      ],
+      "path": "src/plugins/shared_ux/public/types/index.ts",
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "sharedUX",
+          "id": "def-public.SharedUXPluginStart.getContextServices",
+          "type": "Function",
+          "tags": [],
+          "label": "getContextServices",
+          "description": [
+            "\nA set of pre-wired services for use with `SharedUxServicesProvider`.\n\n```\nimport { SharedUxServicesProvider } from '@kbn/shared-ux-services';\n\npublic start(coreStart: CoreStart, startPlugins: MyPluginStartDeps): MyPluginStart {\n  const services = startPlugins.sharedUX.getContextServices();\n  return {\n    ServicesContext: ({ children }) => <SharedUxServicesProvider {...services}>{children}</SharedUxServicesProvider>,\n  };\n}\n```\n\nor\n\n```\nimport { SharedUxServicesProvider } from '@kbn/shared-ux-services';\n\npublic setup(coreSetup: CoreSetup, setupPlugins: MyPluginSetupDeps): MyPluginSetup {\n  const [coreStart, startPlugins] = await coreSetup.getStartServices();\n  coreSetup.application.register({\n    mount: async (params: AppMountParameters) => {\n      ReactDOM.render(\n        <SharedUxServicesProvider {...startPlugins.sharedUX.getContextServices()}>\n          <MyApp />\n        </SharedUxServicesProvider>,\n        params.element\n      );\n    }\n  );\n}\n```"
+          ],
+          "signature": [
+            "() => ",
+            "SharedUxServices"
+          ],
+          "path": "src/plugins/shared_ux/public/types/index.ts",
+          "deprecated": false,
+          "children": [],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "sharedUX",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [
+          "The ID of the Shared UX plugin."
+        ],
+        "signature": [
+          "\"sharedUX\""
+        ],
+        "path": "src/plugins/shared_ux/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "sharedUX",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [
+          "The name of the Shared UX plugin."
+        ],
+        "signature": [
+          "\"sharedUX\""
+        ],
+        "path": "src/plugins/shared_ux/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

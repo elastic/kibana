@@ -7,7 +7,7 @@
 
 import { cloneDeep, merge, unionBy } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import {
   EventHit,
   TimelineEventsQueries,
@@ -16,7 +16,7 @@ import {
   TimelineEventsDetailsItem,
   EventSource,
 } from '../../../../../../common/search_strategy';
-import { inspectStringifyObject } from '../../../../../../server/utils/build_query';
+import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { TimelineFactory } from '../../types';
 import { buildTimelineDetailsQuery } from './query.events_details.dsl';
 import {
@@ -24,6 +24,7 @@ import {
   getDataFromSourceHits,
   getDataSafety,
 } from '../../../../../../common/utils/field_formatters';
+import { buildEcsObjects } from '../../helpers/build_ecs_objects';
 
 export const timelineEventsDetails: TimelineFactory<TimelineEventsQueries.details> = {
   buildDsl: ({ authFilter, ...options }: TimelineEventsDetailsRequestOptions) => {
@@ -67,12 +68,13 @@ export const timelineEventsDetails: TimelineFactory<TimelineEventsQueries.detail
     );
 
     const data = unionBy('field', fieldsData, sourceData);
-
     const rawEventData = response.rawResponse.hits.hits[0];
+    const ecs = buildEcsObjects(rawEventData as EventHit);
 
     return {
       ...response,
       data,
+      ecs,
       inspect,
       rawEventData,
     };

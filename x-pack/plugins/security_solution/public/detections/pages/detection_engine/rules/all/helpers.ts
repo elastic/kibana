@@ -6,25 +6,8 @@
  */
 
 import { Query } from '@elastic/eui';
-import {
-  BulkRuleResponse,
-  RuleResponseBuckets,
-} from '../../../../containers/detection_engine/rules';
-
-/**
- * Separates rules/errors from bulk rules API response (create/update/delete)
- *
- * @param response BulkRuleResponse from bulk rules API
- */
-export const bucketRulesResponse = (response: BulkRuleResponse) =>
-  response.reduce<RuleResponseBuckets>(
-    (acc, cv): RuleResponseBuckets => {
-      return 'error' in cv
-        ? { rules: [...acc.rules], errors: [...acc.errors, cv] }
-        : { rules: [...acc.rules, cv], errors: [...acc.errors] };
-    },
-    { rules: [], errors: [] }
-  );
+import { ExportRulesDetails } from '../../../../../../common/detection_engine/schemas/response/export_rules_details_schema';
+import { BulkActionSummary } from '../../../../containers/detection_engine/rules';
 
 export const showRulesTable = ({
   rulesCustomInstalled,
@@ -71,16 +54,33 @@ export const getSearchFilters = ({
 
 /**
  * This function helps to parse NDJSON with exported rules
- * and retrieve the number of successfully exported rules.
+ * and retrieve the metadata of exported rules.
  *
  * @param blob a Blob received from an _export endpoint
- * @returns Number of exported rules
+ * @returns Export details
  */
-export const getExportedRulesCount = async (blob: Blob): Promise<number> => {
+export const getExportedRulesDetails = async (blob: Blob): Promise<ExportRulesDetails> => {
   const blobContent = await blob.text();
   // The Blob content is an NDJSON file, the last line of which contains export details.
   const exportDetailsJson = blobContent.split('\n').filter(Boolean).slice(-1)[0];
   const exportDetails = JSON.parse(exportDetailsJson);
 
-  return exportDetails.exported_count;
+  return exportDetails;
+};
+
+/**
+ * This function helps to parse NDJSON with exported rules
+ * and retrieve the object with counts of successfully exported/missing/total rules.
+ *
+ * @param blob a Blob received from an _export endpoint
+ * @returns Object of exported rules counts
+ */
+export const getExportedRulesCounts = async (blob: Blob): Promise<BulkActionSummary> => {
+  const details = await getExportedRulesDetails(blob);
+
+  return {
+    succeeded: details.exported_rules_count,
+    failed: details.missing_rules_count,
+    total: details.exported_rules_count + details.missing_rules_count,
+  };
 };

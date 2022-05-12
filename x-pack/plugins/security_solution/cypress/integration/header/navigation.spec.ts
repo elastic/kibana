@@ -19,7 +19,7 @@ import {
   EXCEPTIONS,
 } from '../../screens/security_header';
 
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 import { navigateFromHeaderTo } from '../../tasks/security_header';
 
 import {
@@ -49,12 +49,14 @@ import {
   OVERVIEW_PAGE,
   TIMELINES_PAGE,
 } from '../../screens/kibana_navigation';
-import { cleanKibana } from '../../tasks/common';
+
+before(() => {
+  login();
+});
 
 describe('top-level navigation common to all pages in the Security app', () => {
   before(() => {
-    cleanKibana();
-    loginAndWaitForPage(TIMELINES_URL);
+    visit(TIMELINES_URL);
   });
 
   it('navigates to the Overview page', () => {
@@ -113,7 +115,7 @@ describe('top-level navigation common to all pages in the Security app', () => {
 
 describe('Kibana navigation to all pages in the Security app ', () => {
   before(() => {
-    loginAndWaitForPage(KIBANA_HOME);
+    visit(KIBANA_HOME);
   });
   beforeEach(() => {
     openKibanaNavigation();

@@ -506,7 +506,7 @@ Testing React component that uses the `injectI18n` higher-order component is mor
 
 With shallow rendering only top level component is rendered, that is a wrapper itself, not the original component. Since we want to test the rendering of the original component, we need to access it via the wrapper's `WrappedComponent` property. Its value will be the component we passed into `injectI18n()`.
 
-When testing such component, use the `shallowWithIntl` helper function defined in `@kbn/test/jest` and pass the component's `WrappedComponent` property to render the wrapped component. This will shallow render the component with Enzyme and inject the necessary context and props to use the `intl` mock defined in `test_utils/mocks/intl`.
+When testing such component, use the `shallowWithIntl` helper function defined in `@kbn/test-jest-helpers` and pass the component's `WrappedComponent` property to render the wrapped component. This will shallow render the component with Enzyme and inject the necessary context and props to use the `intl` mock defined in `test_utils/mocks/intl`.
 
 Use the `mountWithIntl` helper function to mount render the component.
 

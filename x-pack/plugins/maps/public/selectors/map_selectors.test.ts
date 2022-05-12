@@ -37,7 +37,7 @@ import {
 
 import { LayerDescriptor, VectorLayerDescriptor } from '../../common/descriptor_types';
 import { ILayer } from '../classes/layers/layer';
-import { Filter } from '../../../../../src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
 import { ESSearchSource } from '../classes/sources/es_search_source';
 
 describe('getDataFilters', () => {

@@ -19,6 +19,14 @@ export const DATES = {
     },
   },
   '8.0.0': {
+    pods_only: {
+      min: new Date('2022-01-20T17:09:55.124Z').getTime(),
+      max: new Date('2022-01-20T17:14:57.378Z').getTime(),
+    },
+    hosts_only: {
+      min: new Date('2022-01-18T19:57:47.534Z').getTime(),
+      max: new Date('2022-01-18T20:02:50.043Z').getTime(),
+    },
     logs_and_metrics: {
       min: 1562786660845,
       max: 1562786716965,

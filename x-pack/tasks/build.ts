@@ -11,8 +11,10 @@ import { writeFileSync } from 'fs';
 import { promisify } from 'util';
 import { pipeline } from 'stream';
 
+import { discoverBazelPackages } from '@kbn/bazel-packages';
 import { REPO_ROOT } from '@kbn/utils';
-import { ToolingLog, transformFileStream, transformFileWithBabel } from '@kbn/dev-utils';
+import { transformFileStream, transformFileWithBabel } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import gulp from 'gulp';
 import del from 'del';
 import fancyLog from 'fancy-log';
@@ -48,6 +50,11 @@ async function reportTask() {
 }
 
 async function copySourceAndBabelify() {
+  // get bazel packages inside x-pack
+  const xpackBazelPackages = (await discoverBazelPackages())
+    .filter((pkg) => pkg.normalizedRepoRelativeDir.startsWith('x-pack/'))
+    .map((pkg) => `${pkg.normalizedRepoRelativeDir.replace('x-pack/', '')}/**`);
+
   // copy source files and apply some babel transformations in the process
   await asyncPipeline(
     vfs.src(
@@ -60,8 +67,6 @@ async function copySourceAndBabelify() {
         'index.js',
         '.i18nrc.json',
         'plugins/**/*',
-        'plugins/reporting/.phantom/*',
-        'plugins/reporting/.chromium/*',
         'typings/**/*',
       ],
       {
@@ -70,16 +75,25 @@ async function copySourceAndBabelify() {
         buffer: true,
         nodir: true,
         ignore: [
-          '**/*.{md,asciidoc}',
+          '**/*.{md,mdx,asciidoc}',
           '**/jest.config.js',
+          '**/jest.config.dev.js',
+          '**/jest_setup.js',
+          '**/jest.integration.config.js',
+          '**/*.stories.js',
           '**/*.{test,test.mocks,mock,mocks}.*',
           '**/*.d.ts',
           '**/node_modules/**',
           '**/public/**/*.{js,ts,tsx,json,scss}',
-          '**/{__tests__,__mocks__,__snapshots__,__fixtures__,__jest__,cypress}/**',
+          '**/{test,__tests__,__mocks__,__snapshots__,__fixtures__,__jest__,cypress,fixtures}/**',
           'plugins/*/target/**',
           'plugins/canvas/shareable_runtime/test/**',
+          'plugins/screenshotting/chromium/**',
           'plugins/telemetry_collection_xpack/schema/**', // Skip telemetry schemas
+          'plugins/apm/ftr_e2e/**',
+          'plugins/apm/scripts/**',
+          'plugins/lists/server/scripts/**',
+          ...xpackBazelPackages,
         ],
         allowEmpty: true,
       }

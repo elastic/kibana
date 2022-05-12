@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type { UnwrapPromise } from '@kbn/utility-types';
-import '../../../typings/rison_node';
-import '../../infra/types/eui';
-// EUIBasicTable
-import '../../reporting/public/components/report_listing';
-import '../../reporting/server/lib/puid';
+import '@kbn/infra-plugin/types/eui';
 import './apm_rum_react';
 
 // Allow unknown properties in an object
@@ -23,8 +18,6 @@ type AllowUnknownObjectProperties<T> = T extends object
       [key: string]: unknown;
     }
   : T;
-
-export type PromiseValueType<T extends Promise<any>> = UnwrapPromise<T>;
 
 export type Maybe<T> = T | null | undefined;
 

@@ -32,7 +32,7 @@ import {
 import type { MockedFleetStartServices, TestRenderer } from '../../../../../../mock';
 import { createIntegrationsTestRendererMock } from '../../../../../../mock';
 
-import { Detail } from './index';
+import { Detail } from '.';
 
 describe('when on integration detail', () => {
   const pkgkey = 'nginx-0.3.7';
@@ -85,7 +85,7 @@ describe('when on integration detail', () => {
       expect(renderResult.queryByTestId('agentPolicyCount')).toBeNull();
     });
 
-    it('should NOT the Policies tab', async () => {
+    it('should NOT display the Policies tab', async () => {
       await mockedApi.waitForApi();
       expect(renderResult.queryByTestId('tab-policies')).toBeNull();
     });
@@ -527,7 +527,11 @@ The logs were tested with version 1.10.
 On Windows, the module was tested with Nginx installed from the Chocolatey repository.
 `;
 
-  const agentsSetupResponse: GetFleetStatusResponse = { isReady: true, missing_requirements: [] };
+  const agentsSetupResponse: GetFleetStatusResponse = {
+    isReady: true,
+    missing_requirements: [],
+    missing_optional_features: [],
+  };
 
   const packagePoliciesResponse: GetPackagePoliciesResponse = {
     items: [
@@ -708,7 +712,6 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
           '2babac18-eb8e-4ce4-b53b-4b7c5f507019',
           'e8a37031-2907-44f6-89d2-98bd493f60dc',
         ],
-        is_default: true,
         is_managed: false,
         monitoring_enabled: ['logs', 'metrics'],
         revision: 6,
@@ -723,7 +726,6 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         description: 'Protect EU from COVID',
         status: 'active',
         package_policies: ['e8a37031-2907-44f6-89d2-98bd493f60cd'],
-        is_default: false,
         is_managed: false,
         monitoring_enabled: ['logs', 'metrics'],
         revision: 2,

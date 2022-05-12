@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { loadTracer } from '../load_tracer';
 import { createAsyncInstance, isAsyncInstance } from './async_instance';
@@ -15,6 +15,15 @@ import { createVerboseInstance } from './verbose_instance';
 import { GenericFtrService } from '../../public_types';
 
 export class ProviderCollection {
+  static callProviderFn(providerFn: any, ctx: any) {
+    if (providerFn.prototype instanceof GenericFtrService) {
+      const Constructor = providerFn as any as new (ctx: any) => any;
+      return new Constructor(ctx);
+    }
+
+    return providerFn(ctx);
+  }
+
   private readonly instances = new Map();
 
   constructor(private readonly log: ToolingLog, private readonly providers: Providers) {}
@@ -59,19 +68,12 @@ export class ProviderCollection {
   }
 
   public invokeProviderFn(provider: (args: any) => any) {
-    const ctx = {
+    return ProviderCollection.callProviderFn(provider, {
       getService: this.getService,
       hasService: this.hasService,
       getPageObject: this.getPageObject,
       getPageObjects: this.getPageObjects,
-    };
-
-    if (provider.prototype instanceof GenericFtrService) {
-      const Constructor = provider as any as new (ctx: any) => any;
-      return new Constructor(ctx);
-    }
-
-    return provider(ctx);
+    });
   }
 
   private findProvider(type: string, name: string) {

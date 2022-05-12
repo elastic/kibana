@@ -13,7 +13,7 @@ import type { ListsPluginRouter } from '../types';
 
 import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from './utils';
 
-export const exportExceptionListRoute = (router: ListsPluginRouter): void => {
+export const exportExceptionsRoute = (router: ListsPluginRouter): void => {
   router.post(
     {
       options: {
@@ -29,7 +29,7 @@ export const exportExceptionListRoute = (router: ListsPluginRouter): void => {
 
       try {
         const { id, list_id: listId, namespace_type: namespaceType } = request.query;
-        const exceptionListsClient = getExceptionListClient(context);
+        const exceptionListsClient = await getExceptionListClient(context);
 
         const exportContent = await exceptionListsClient.exportExceptionListAndItems({
           id,

@@ -8,7 +8,7 @@
 
 import Path from 'path';
 
-import { createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 import { REPO_ROOT } from '@kbn/utils';
 
 import { getServerWatchPaths } from './get_server_watch_paths';
@@ -76,7 +76,6 @@ it('produces the right watch and ignore list', () => {
       <absolute path>/x-pack/plugins/lists/server/scripts,
       <absolute path>/x-pack/plugins/security_solution/scripts,
       <absolute path>/x-pack/plugins/security_solution/server/lib/detection_engine/scripts,
-      <absolute path>/x-pack/plugins/metrics_entities/server/scripts,
       <absolute path>/x-pack/plugins/uptime/e2e,
     ]
   `);

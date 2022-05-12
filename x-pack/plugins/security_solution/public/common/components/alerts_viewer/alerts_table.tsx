@@ -8,6 +8,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
+import type { EntityType } from '@kbn/timelines-plugin/common';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../events_viewer';
@@ -20,7 +21,6 @@ import { useKibana } from '../../lib/kibana';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
-import type { EntityType } from '../../../../../timelines/common';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 
 export interface OwnProps {
@@ -80,7 +80,7 @@ const AlertsTableComponent: React.FC<Props> = ({
   const dispatch = useDispatch();
   const alertsFilter = useMemo(() => [...defaultAlertsFilters, ...pageFilters], [pageFilters]);
   const { filterManager } = useKibana().services.data.query;
-  const ACTION_BUTTON_COUNT = 4;
+  const ACTION_BUTTON_COUNT = 5;
 
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
 

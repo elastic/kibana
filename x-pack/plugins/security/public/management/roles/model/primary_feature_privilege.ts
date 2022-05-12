@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { FeatureKibanaPrivileges } from '../../../../../features/public';
+import type { FeatureKibanaPrivileges } from '@kbn/features-plugin/public';
+
 import { KibanaPrivilege } from './kibana_privilege';
 
 export class PrimaryFeaturePrivilege extends KibanaPrivilege {
@@ -26,5 +27,13 @@ export class PrimaryFeaturePrivilege extends KibanaPrivilege {
       return this.id;
     }
     return `minimal_${this.id}`;
+  }
+
+  public get requireAllSpaces() {
+    return this.config.requireAllSpaces ?? false;
+  }
+
+  public get disabled() {
+    return this.config.disabled ?? false;
   }
 }

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { CoreStart, OverlayRef } from 'src/core/public';
+import { CoreStart, OverlayRef } from '@kbn/core/public';
 
 import {
   toMountPoint,
@@ -75,7 +75,8 @@ export const getFieldDeleteModalOpener =
             fieldsToDelete={fieldsToDelete}
             closeModal={closeModal}
             confirmDelete={onConfirmDelete}
-          />
+          />,
+          { theme$: core.theme.theme$ }
         )
       );
 

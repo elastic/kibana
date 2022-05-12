@@ -1,0 +1,76 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<ToolbarButton /> is rendered 1`] = `
+<AddFromLibraryButton>
+  <ToolbarButton
+    iconType="folderOpen"
+    label="Add from library"
+  >
+    <EuiButton
+      color="primary"
+      fill={true}
+      iconSide="left"
+      iconType="folderOpen"
+      size="m"
+    >
+      <EuiButtonDisplay
+        baseClassName="euiButton"
+        color="primary"
+        disabled={false}
+        element="button"
+        fill={true}
+        iconSide="left"
+        iconType="folderOpen"
+        isDisabled={false}
+        size="m"
+        type="button"
+      >
+        <button
+          className="euiButton euiButton--primary euiButton--fill"
+          disabled={false}
+          style={
+            Object {
+              "minWidth": undefined,
+            }
+          }
+          type="button"
+        >
+          <EuiButtonContent
+            className="euiButton__content"
+            iconSide="left"
+            iconType="folderOpen"
+            textProps={
+              Object {
+                "className": "euiButton__text",
+              }
+            }
+          >
+            <span
+              className="euiButtonContent euiButton__content"
+            >
+              <EuiIcon
+                className="euiButtonContent__icon"
+                color="inherit"
+                size="m"
+                type="folderOpen"
+              >
+                <span
+                  className="euiButtonContent__icon"
+                  color="inherit"
+                  data-euiicon-type="folderOpen"
+                  size="m"
+                />
+              </EuiIcon>
+              <span
+                className="euiButton__text"
+              >
+                Add from library
+              </span>
+            </span>
+          </EuiButtonContent>
+        </button>
+      </EuiButtonDisplay>
+    </EuiButton>
+  </ToolbarButton>
+</AddFromLibraryButton>
+`;

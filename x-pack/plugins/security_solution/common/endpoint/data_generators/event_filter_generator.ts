@@ -5,26 +5,37 @@
  * 2.0.
  */
 
-import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  CreateExceptionListItemSchema,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { BaseDataGenerator } from './base_data_generator';
-import { getCreateExceptionListItemSchemaMock } from '../../../../lists/common/schemas/request/create_exception_list_item_schema.mock';
+import { ExceptionsListItemGenerator } from './exceptions_list_item_generator';
+import { BY_POLICY_ARTIFACT_TAG_PREFIX, GLOBAL_ARTIFACT_TAG } from '../service/artifacts';
 
+const EFFECT_SCOPE_TYPES = [BY_POLICY_ARTIFACT_TAG_PREFIX, GLOBAL_ARTIFACT_TAG];
 export class EventFilterGenerator extends BaseDataGenerator<CreateExceptionListItemSchema> {
-  generate(): CreateExceptionListItemSchema {
-    const overrides: Partial<CreateExceptionListItemSchema> = {
-      name: `generator event ${this.randomString(5)}`,
-      list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
-      item_id: `generator_endpoint_event_filter_${this.randomUUID()}`,
-      os_types: [this.randomOSFamily()] as CreateExceptionListItemSchema['os_types'],
-      tags: ['policy:all'],
-      namespace_type: 'agnostic',
-      meta: undefined,
-    };
-
-    return Object.assign<CreateExceptionListItemSchema, Partial<CreateExceptionListItemSchema>>(
-      getCreateExceptionListItemSchemaMock(),
-      overrides
+  generate(overrides: Partial<ExceptionListItemSchema> = {}): CreateExceptionListItemSchema {
+    const eventFilterGenerator = new ExceptionsListItemGenerator();
+    const eventFilterData: CreateExceptionListItemSchema = eventFilterGenerator.generateEventFilter(
+      {
+        name: `Generated event ${this.randomString(5)}`,
+        item_id: `generator_endpoint_event_filter_${this.randomUUID()}`,
+        list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
+        os_types: [this.randomOSFamily()] as CreateExceptionListItemSchema['os_types'],
+        tags: [this.randomChoice(EFFECT_SCOPE_TYPES)],
+        _version: undefined,
+        created_at: undefined,
+        created_by: undefined,
+        id: undefined,
+        tie_breaker_id: undefined,
+        updated_at: undefined,
+        updated_by: undefined,
+        ...overrides,
+      }
     );
+
+    return eventFilterData;
   }
 }

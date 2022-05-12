@@ -13,7 +13,7 @@ import {
   ConfigDeprecation,
   AddConfigDeprecation,
   ConfigDeprecationFactory,
-  DeprecatedConfigDetails,
+  FactoryConfigDeprecationDetails,
   ConfigDeprecationCommand,
 } from './types';
 
@@ -30,7 +30,7 @@ const _deprecate = (
   addDeprecation: AddConfigDeprecation,
   deprecatedKey: string,
   removeBy: string,
-  details?: Partial<DeprecatedConfigDetails>
+  details: FactoryConfigDeprecationDetails
 ): void => {
   const fullPath = getPath(rootPath, deprecatedKey);
   if (get(config, fullPath) === undefined) {
@@ -62,7 +62,7 @@ const _rename = (
   addDeprecation: AddConfigDeprecation,
   oldKey: string,
   newKey: string,
-  details?: Partial<DeprecatedConfigDetails>
+  details: FactoryConfigDeprecationDetails
 ): void | ConfigDeprecationCommand => {
   const fullOldPath = getPath(rootPath, oldKey);
   const oldValue = get(config, fullOldPath);
@@ -131,7 +131,7 @@ const _unused = (
   rootPath: string,
   addDeprecation: AddConfigDeprecation,
   unusedKey: string,
-  details?: Partial<DeprecatedConfigDetails>
+  details: FactoryConfigDeprecationDetails
 ): void | ConfigDeprecationCommand => {
   const fullPath = getPath(rootPath, unusedKey);
   if (get(config, fullPath) === undefined) {
@@ -164,7 +164,7 @@ const deprecate =
   (
     unusedKey: string,
     removeBy: string,
-    details?: Partial<DeprecatedConfigDetails>
+    details: FactoryConfigDeprecationDetails
   ): ConfigDeprecation =>
   (config, rootPath, addDeprecation) =>
     _deprecate(config, rootPath, addDeprecation, unusedKey, removeBy, details);
@@ -173,28 +173,28 @@ const deprecateFromRoot =
   (
     unusedKey: string,
     removeBy: string,
-    details?: Partial<DeprecatedConfigDetails>
+    details: FactoryConfigDeprecationDetails
   ): ConfigDeprecation =>
   (config, rootPath, addDeprecation) =>
     _deprecate(config, '', addDeprecation, unusedKey, removeBy, details);
 
 const rename =
-  (oldKey: string, newKey: string, details?: Partial<DeprecatedConfigDetails>): ConfigDeprecation =>
+  (oldKey: string, newKey: string, details: FactoryConfigDeprecationDetails): ConfigDeprecation =>
   (config, rootPath, addDeprecation) =>
     _rename(config, rootPath, addDeprecation, oldKey, newKey, details);
 
 const renameFromRoot =
-  (oldKey: string, newKey: string, details?: Partial<DeprecatedConfigDetails>): ConfigDeprecation =>
+  (oldKey: string, newKey: string, details: FactoryConfigDeprecationDetails): ConfigDeprecation =>
   (config, rootPath, addDeprecation) =>
     _rename(config, '', addDeprecation, oldKey, newKey, details);
 
 const unused =
-  (unusedKey: string, details?: Partial<DeprecatedConfigDetails>): ConfigDeprecation =>
+  (unusedKey: string, details: FactoryConfigDeprecationDetails): ConfigDeprecation =>
   (config, rootPath, addDeprecation) =>
     _unused(config, rootPath, addDeprecation, unusedKey, details);
 
 const unusedFromRoot =
-  (unusedKey: string, details?: Partial<DeprecatedConfigDetails>): ConfigDeprecation =>
+  (unusedKey: string, details: FactoryConfigDeprecationDetails): ConfigDeprecation =>
   (config, rootPath, addDeprecation) =>
     _unused(config, '', addDeprecation, unusedKey, details);
 

@@ -8,15 +8,16 @@
 import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { NotificationsSetup } from 'src/core/public';
+import { NotificationsSetup, ThemeServiceStart, DocLinksStart } from '@kbn/core/public';
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JOB_STATUSES } from '../../common/constants';
 import { JobId, JobSummary, JobSummarySet } from '../../common/types';
 import {
   getFailureToast,
-  getGeneralErrorToast,
+  getWarningToast,
   getSuccessToast,
-  getWarningFormulasToast,
+  getGeneralErrorToast,
   getWarningMaxSizeToast,
+  getWarningFormulasToast,
 } from '../notifier';
 import { Job } from './job';
 import { ReportingAPIClient } from './reporting_api_client';
@@ -30,14 +31,20 @@ function getReportStatus(src: Job): JobSummary {
     id: src.id,
     status: src.status,
     title: src.title,
-    jobtype: src.jobtype,
+    jobtype: src.prettyJobTypeName ?? src.jobtype,
     maxSizeReached: src.max_size_reached,
     csvContainsFormulas: src.csv_contains_formulas,
+    errorCode: src.error_code,
   };
 }
 
 export class ReportingNotifierStreamHandler {
-  constructor(private notifications: NotificationsSetup, private apiClient: ReportingAPIClient) {}
+  constructor(
+    private notifications: NotificationsSetup,
+    private apiClient: ReportingAPIClient,
+    private theme: ThemeServiceStart,
+    private docLinks: DocLinksStart
+  ) {}
 
   /*
    * Use Kibana Toast API to show our messages
@@ -54,7 +61,8 @@ export class ReportingNotifierStreamHandler {
             getWarningFormulasToast(
               job,
               this.apiClient.getManagementLink,
-              this.apiClient.getDownloadLink
+              this.apiClient.getDownloadLink,
+              this.theme
             )
           );
         } else if (job.maxSizeReached) {
@@ -62,12 +70,27 @@ export class ReportingNotifierStreamHandler {
             getWarningMaxSizeToast(
               job,
               this.apiClient.getManagementLink,
-              this.apiClient.getDownloadLink
+              this.apiClient.getDownloadLink,
+              this.theme
+            )
+          );
+        } else if (job.status === JOB_STATUSES.WARNINGS) {
+          this.notifications.toasts.addWarning(
+            getWarningToast(
+              job,
+              this.apiClient.getManagementLink,
+              this.apiClient.getDownloadLink,
+              this.theme
             )
           );
         } else {
           this.notifications.toasts.addSuccess(
-            getSuccessToast(job, this.apiClient.getManagementLink, this.apiClient.getDownloadLink)
+            getSuccessToast(
+              job,
+              this.apiClient.getManagementLink,
+              this.apiClient.getDownloadLink,
+              this.theme
+            )
           );
         }
       }
@@ -76,7 +99,13 @@ export class ReportingNotifierStreamHandler {
       for (const job of failedJobs) {
         const errorText = await this.apiClient.getError(job.id);
         this.notifications.toasts.addDanger(
-          getFailureToast(errorText, job, this.apiClient.getManagementLink)
+          getFailureToast(
+            errorText,
+            job,
+            this.apiClient.getManagementLink,
+            this.theme,
+            this.docLinks
+          )
         );
       }
       return { completed: completedJobs, failed: failedJobs };
@@ -120,7 +149,8 @@ export class ReportingNotifierStreamHandler {
             i18n.translate('xpack.reporting.publicNotifier.httpErrorMessage', {
               defaultMessage: 'Could not check Reporting job status!',
             }),
-            err
+            err,
+            this.theme
           )
         ); // prettier-ignore
         window.console.error(err);

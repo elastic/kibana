@@ -10,6 +10,7 @@
   "interval": "10m",
   "language": "kuery",
   "license": "Elastic License v2",
+  "max_signals": 10000,
   "name": "Credential Manipulation - Prevented - Elastic Endgame",
   "query": "event.kind:alert and event.module:endgame and endgame.metadata.type:prevention and (event.action:token_manipulation_event or endgame.event_subtype_full:token_manipulation_event)\n",
   "risk_score": 47,
@@ -20,5 +21,5 @@
     "Elastic Endgame"
   ],
   "type": "query",
-  "version": 6
+  "version": 7
 }

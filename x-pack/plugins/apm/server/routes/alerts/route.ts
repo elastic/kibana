@@ -11,7 +11,6 @@ import { getTransactionErrorCountChartPreview } from './chart_preview/get_transa
 import { getTransactionErrorRateChartPreview } from './chart_preview/get_transaction_error_rate';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 import { environmentRt, rangeRt } from '../default_api_types';
 
 const alertParamsRt = t.intersection([
@@ -37,7 +36,9 @@ const transactionErrorRateChartPreview = createApmServerRoute({
   endpoint: 'GET /internal/apm/alerts/chart_preview/transaction_error_rate',
   params: t.type({ query: alertParamsRt }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{ errorRateChartPreview: Array<{ x: number; y: number }> }> => {
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { _inspect, ...alertParams } = params.query;
@@ -55,7 +56,9 @@ const transactionErrorCountChartPreview = createApmServerRoute({
   endpoint: 'GET /internal/apm/alerts/chart_preview/transaction_error_count',
   params: t.type({ query: alertParamsRt }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{ errorCountChartPreview: Array<{ x: number; y: number }> }> => {
     const setup = await setupRequest(resources);
     const { params } = resources;
 
@@ -74,7 +77,11 @@ const transactionDurationChartPreview = createApmServerRoute({
   endpoint: 'GET /internal/apm/alerts/chart_preview/transaction_duration',
   params: t.type({ query: alertParamsRt }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    latencyChartPreview: Array<{ x: number; y: number | null }>;
+  }> => {
     const setup = await setupRequest(resources);
 
     const { params } = resources;
@@ -90,9 +97,9 @@ const transactionDurationChartPreview = createApmServerRoute({
   },
 });
 
-export const alertsChartPreviewRouteRepository =
-  createApmServerRouteRepository()
-    .add(transactionErrorRateChartPreview)
-    .add(transactionDurationChartPreview)
-    .add(transactionErrorCountChartPreview)
-    .add(transactionDurationChartPreview);
+export const alertsChartPreviewRouteRepository = {
+  ...transactionErrorRateChartPreview,
+  ...transactionDurationChartPreview,
+  ...transactionErrorCountChartPreview,
+  ...transactionDurationChartPreview,
+};

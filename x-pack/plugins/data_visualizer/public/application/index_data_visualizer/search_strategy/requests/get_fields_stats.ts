@@ -6,12 +6,12 @@
  */
 
 import type { Observable } from 'rxjs';
+import type { ISearchOptions } from '@kbn/data-plugin/common';
+import { ISearchStart } from '@kbn/data-plugin/public';
 import type { FieldStatsCommonRequestParams } from '../../../../../common/types/field_stats';
 import type { FieldStatsError } from '../../../../../common/types/field_stats';
-import type { ISearchOptions } from '../../../../../../../../src/plugins/data/common';
-import { ISearchStart } from '../../../../../../../../src/plugins/data/public';
 import type { FieldStats } from '../../../../../common/types/field_stats';
-import { JOB_FIELD_TYPES } from '../../../../../common';
+import { JOB_FIELD_TYPES } from '../../../../../common/constants';
 import { fetchDateFieldsStats } from './get_date_field_stats';
 import { fetchBooleanFieldsStats } from './get_boolean_field_stats';
 import { fetchFieldsExamples } from './get_field_examples';

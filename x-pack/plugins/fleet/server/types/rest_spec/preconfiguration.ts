@@ -15,3 +15,9 @@ export const PutPreconfigurationSchema = {
     packages: schema.maybe(PreconfiguredPackagesSchema),
   }),
 };
+
+export const PostResetOnePreconfiguredAgentPoliciesSchema = {
+  params: schema.object({
+    agentPolicyId: schema.string(),
+  }),
+};

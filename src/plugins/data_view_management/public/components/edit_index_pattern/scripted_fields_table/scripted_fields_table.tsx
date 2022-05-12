@@ -8,6 +8,7 @@
 
 import React, { Component } from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import {
   getSupportedScriptingLanguages,
   getDeprecatedScriptingLanguages,
@@ -15,22 +16,18 @@ import {
 
 import { Table, Header, CallOuts, DeleteScritpedFieldConfirmationModal } from './components';
 import { ScriptedFieldItem } from './types';
-import { IndexPatternManagmentContext } from '../../../types';
-
-import { IndexPattern, DataPublicPluginStart } from '../../../../../../plugins/data/public';
-import { useKibana } from '../../../../../../plugins/kibana_react/public';
 
 interface ScriptedFieldsTableProps {
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   fieldFilter?: string;
-  scriptedFieldLanguageFilter?: string;
+  scriptedFieldLanguageFilter: string[];
   helpers: {
     redirectToRoute: Function;
     getRouteHref?: Function;
   };
   onRemoveField?: () => void;
   painlessDocLink: string;
-  saveIndexPattern: DataPublicPluginStart['indexPatterns']['updateSavedObject'];
+  saveIndexPattern: DataViewsPublicPluginStart['updateSavedObject'];
   userEditPermission: boolean;
 }
 
@@ -41,16 +38,10 @@ interface ScriptedFieldsTableState {
   fields: ScriptedFieldItem[];
 }
 
-const withHooks = (Comp: typeof Component) => {
-  return (props: any) => {
-    const { application } = useKibana<IndexPatternManagmentContext>().services;
-    const userEditPermission = !!application?.capabilities?.indexPatterns?.save;
-
-    return <Comp userEditPermission={userEditPermission} {...props} />;
-  };
-};
-
-class ScriptedFields extends Component<ScriptedFieldsTableProps, ScriptedFieldsTableState> {
+export class ScriptedFieldsTable extends Component<
+  ScriptedFieldsTableProps,
+  ScriptedFieldsTableState
+> {
   constructor(props: ScriptedFieldsTableProps) {
     super(props);
 
@@ -92,9 +83,9 @@ class ScriptedFields extends Component<ScriptedFieldsTableProps, ScriptedFieldsT
 
     let languageFilteredFields = fields;
 
-    if (scriptedFieldLanguageFilter) {
-      languageFilteredFields = fields.filter(
-        (field) => field.lang === this.props.scriptedFieldLanguageFilter
+    if (scriptedFieldLanguageFilter.length) {
+      languageFilteredFields = fields.filter((field) =>
+        scriptedFieldLanguageFilter.includes(field.lang)
       );
     }
 
@@ -168,5 +159,3 @@ class ScriptedFields extends Component<ScriptedFieldsTableProps, ScriptedFieldsT
     );
   }
 }
-
-export const ScriptedFieldsTable = withHooks(ScriptedFields);

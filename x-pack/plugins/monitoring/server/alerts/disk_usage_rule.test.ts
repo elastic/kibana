@@ -9,7 +9,7 @@ import { DiskUsageRule } from './disk_usage_rule';
 import { RULE_DISK_USAGE } from '../../common/constants';
 import { fetchDiskUsageNodeStats } from '../lib/alerts/fetch_disk_usage_node_stats';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 type IDiskUsageAlertMock = DiskUsageRule & {
   defaultParams: {
@@ -40,7 +40,6 @@ jest.mock('../static_globals', () => ({
       config: {
         ui: {
           ccs: { enabled: true },
-          metricbeat: { index: 'metricbeat-*' },
           container: { elasticsearch: { enabled: false } },
         },
       },
@@ -97,13 +96,15 @@ describe('DiskUsageRule', () => {
     const executorOptions = {
       services: {
         scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-        alertInstanceFactory: jest.fn().mockImplementation(() => {
-          return {
-            replaceState,
-            scheduleActions,
-            getState,
-          };
-        }),
+        alertFactory: {
+          create: jest.fn().mockImplementation(() => {
+            return {
+              replaceState,
+              scheduleActions,
+              getState,
+            };
+          }),
+        },
       },
       state: {},
     };

@@ -8,25 +8,13 @@
 
 import { once } from 'lodash';
 import { createHashHistory } from 'history';
-import type { ScopedHistory, AppMountParameters } from 'kibana/public';
-import type { UiActionsStart } from 'src/plugins/ui_actions/public';
-import { DiscoverServices, HistoryLocationState } from './build_services';
-import { createGetterSetter } from '../../kibana_utils/public';
+import type { ScopedHistory, AppMountParameters } from '@kbn/core/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
+import { HistoryLocationState } from './build_services';
 import { DocViewsRegistry } from './services/doc_views/doc_views_registry';
 
-let services: DiscoverServices | null = null;
 let uiActions: UiActionsStart;
-
-export function getServices(): DiscoverServices {
-  if (!services) {
-    throw new Error('Discover services are not yet available');
-  }
-  return services;
-}
-
-export function setServices(newServices: DiscoverServices) {
-  services = newServices;
-}
 
 export const setUiActions = (pluginUiActions: UiActionsStart) => (uiActions = pluginUiActions);
 export const getUiActions = () => uiActions;

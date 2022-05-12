@@ -18,13 +18,13 @@ import { EuiText } from '@elastic/eui';
 import { EuiFieldText } from '@elastic/eui';
 import { EuiPageHeader } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
-import { AppMountParameters } from '../../../src/core/public';
-import { SharePluginSetup } from '../../../src/plugins/share/public';
+import { AppMountParameters } from '@kbn/core/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
 import {
   HelloLocatorV1Params,
   HelloLocatorV2Params,
   HELLO_LOCATOR,
-} from '../../locator_examples/public';
+} from '@kbn/locator-examples-plugin/public';
 
 interface Props {
   share: SharePluginSetup;
@@ -84,7 +84,11 @@ const ActionsExplorer = ({ share }: Props) => {
           if (!locator) return;
           let params: HelloLocatorV1Params | HelloLocatorV2Params = savedLink.params;
           if (savedLink.version === '0.0.1') {
-            const migration = locator.migrations['0.0.2'];
+            const migrations =
+              typeof locator.migrations === 'function'
+                ? locator.migrations()
+                : locator.migrations || {};
+            const migration = migrations['0.0.2'];
             if (migration) {
               params = migration(params) as HelloLocatorV2Params;
             }

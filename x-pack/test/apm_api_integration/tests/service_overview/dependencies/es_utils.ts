@@ -49,9 +49,6 @@ export function createServiceDependencyDocs({
       processor: {
         event: 'metric' as const,
       },
-      observer: {
-        version_major: 7,
-      },
       '@timestamp': new Date(time).toISOString(),
       service,
       agent: {
@@ -78,9 +75,6 @@ export function createServiceDependencyDocs({
       processor: {
         event: 'span' as const,
       },
-      observer: {
-        version_major: 7,
-      },
       '@timestamp': new Date(time).toISOString(),
       service,
       agent: {
@@ -105,9 +99,6 @@ export function createServiceDependencyDocs({
           {
             processor: {
               event: 'transaction' as const,
-            },
-            observer: {
-              version_major: 7,
             },
             '@timestamp': new Date(time + 1).toISOString(),
             event: {

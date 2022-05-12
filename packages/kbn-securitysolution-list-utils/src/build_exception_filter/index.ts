@@ -141,10 +141,12 @@ export const buildExceptionFilter = ({
   lists,
   excludeExceptions,
   chunkSize,
+  alias = null,
 }: {
   lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
   excludeExceptions: boolean;
   chunkSize: number;
+  alias: string | null;
 }): Filter | undefined => {
   // Remove exception items with large value lists. These are evaluated
   // elsewhere for the moment being.
@@ -154,7 +156,7 @@ export const buildExceptionFilter = ({
 
   const exceptionFilter: Filter = {
     meta: {
-      alias: null,
+      alias,
       disabled: false,
       negate: excludeExceptions,
     },
@@ -195,7 +197,7 @@ export const buildExceptionFilter = ({
 
     return {
       meta: {
-        alias: null,
+        alias,
         disabled: false,
         negate: excludeExceptions,
       },

@@ -110,6 +110,11 @@ export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
   const [isAuthenticationSettingsOpen, setIsAuthenticationSettingsOpen] = useState<boolean>(
     initialAuthenticationSettingsOpen
   );
+
+  useEffect(() => {
+    setIsAuthenticationSettingsOpen(initialAuthenticationSettingsOpen);
+  }, [initialAuthenticationSettingsOpen]);
+
   const [isLoadingEnrollmentApiKeys, setIsLoadingEnrollmentApiKeys] = useState(false);
 
   const onCreateEnrollmentApiKey = useCallback(
@@ -213,12 +218,12 @@ export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
             />
           ) : isLoadingEnrollmentApiKeys ? (
             <Loading />
-          ) : (
+          ) : agentPolicyId ? (
             <NoEnrollmentKeysCallout
               agentPolicyId={agentPolicyId}
               onCreateEnrollmentApiKey={onCreateEnrollmentApiKey}
             />
-          )}
+          ) : null}
         </>
       )}
     </>

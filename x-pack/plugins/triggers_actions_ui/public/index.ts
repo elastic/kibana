@@ -8,23 +8,30 @@
 // TODO: https://github.com/elastic/kibana/issues/110895
 /* eslint-disable @kbn/eslint/no_export_all */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { PluginInitializerContext } from '@kbn/core/server';
 import { Plugin } from './plugin';
 
 export type {
-  AlertAction,
-  Alert,
-  AlertTypeModel,
+  RuleAction,
+  Rule,
+  RuleType,
+  RuleTypeIndex,
+  RuleTypeModel,
+  RuleStatus,
   ActionType,
   ActionTypeRegistryContract,
   RuleTypeRegistryContract,
-  AlertTypeParamsExpressionProps,
+  RuleTypeParamsExpressionProps,
   ValidationResult,
   ActionVariables,
   ActionConnector,
   IErrorObject,
-  AlertFlyoutCloseReason,
-  AlertTypeParams,
+  RuleFlyoutCloseReason,
+  RuleTypeParams,
   AsApiContract,
+  RuleTableItem,
+  AlertsTableConfigurationRegistryContract,
 } from './types';
 
 export {
@@ -39,16 +46,26 @@ export { AlertConditions, AlertConditionsGroup } from './application/sections';
 
 export * from './common';
 
-export function plugin() {
-  return new Plugin();
+export function plugin(context: PluginInitializerContext) {
+  return new Plugin(context);
 }
 
 export { Plugin };
 export * from './plugin';
-export { loadAlertAggregations } from './application/lib/alert_api/aggregate';
+// TODO remove this import when we expose the Rules tables as a component
+export { loadRules } from './application/lib/rule_api/rules';
+export { deleteRules } from './application/lib/rule_api/delete';
+export { enableRule } from './application/lib/rule_api/enable';
+export { disableRule } from './application/lib/rule_api/disable';
+export { muteRule } from './application/lib/rule_api/mute';
+export { unmuteRule } from './application/lib/rule_api/unmute';
+export { snoozeRule } from './application/lib/rule_api/snooze';
+export { unsnoozeRule } from './application/lib/rule_api/unsnooze';
+export { loadRuleAggregations } from './application/lib/rule_api/aggregate';
+export { useLoadRuleTypes } from './application/hooks/use_load_rule_types';
 
 export { loadActionTypes } from './application/lib/action_connector_api/connector_types';
 
 export type { TIME_UNITS } from './application/constants';
 export { getTimeUnitLabel } from './common/lib/get_time_unit_label';
-export type { TriggersAndActionsUiServices } from '../public/application/app';
+export type { TriggersAndActionsUiServices } from './application/app';

@@ -1,0 +1,19 @@
+post:
+  summary: Generate service tokens
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: string
+  operationId: generate-service-token
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+  deprecated: true

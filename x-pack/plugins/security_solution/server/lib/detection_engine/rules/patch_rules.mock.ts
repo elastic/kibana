@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import { PatchRulesOptions } from './types';
-import { rulesClientMock } from '../../../../../alerting/server/mocks';
-import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
-import { getAlertMock } from '../routes/__mocks__/request_responses';
-import { getMlRuleParams, getQueryRuleParams } from '../schemas/rule_schemas.mock';
-import { ruleExecutionLogClientMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
+import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 
-export const getPatchRulesOptionsMock = (isRuleRegistryEnabled: boolean): PatchRulesOptions => ({
+import { PatchRulesOptions } from './types';
+import { getRuleMock } from '../routes/__mocks__/request_responses';
+import { getMlRuleParams, getQueryRuleParams } from '../schemas/rule_schemas.mock';
+
+export const getPatchRulesOptionsMock = (): PatchRulesOptions => ({
   author: ['Elastic'],
   buildingBlockType: undefined,
   rulesClient: rulesClientMock.create(),
-  savedObjectsClient: savedObjectsClientMock.create(),
-  spaceId: 'default',
-  ruleStatusClient: ruleExecutionLogClientMock.create(),
   anomalyThreshold: undefined,
   description: 'some description',
   enabled: true,
@@ -64,16 +60,13 @@ export const getPatchRulesOptionsMock = (isRuleRegistryEnabled: boolean): PatchR
   version: 1,
   exceptionsList: [],
   actions: [],
-  rule: getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()),
+  rule: getRuleMock(getQueryRuleParams()),
 });
 
-export const getPatchMlRulesOptionsMock = (isRuleRegistryEnabled: boolean): PatchRulesOptions => ({
+export const getPatchMlRulesOptionsMock = (): PatchRulesOptions => ({
   author: ['Elastic'],
   buildingBlockType: undefined,
   rulesClient: rulesClientMock.create(),
-  savedObjectsClient: savedObjectsClientMock.create(),
-  spaceId: 'default',
-  ruleStatusClient: ruleExecutionLogClientMock.create(),
   anomalyThreshold: 55,
   description: 'some description',
   enabled: true,
@@ -119,5 +112,5 @@ export const getPatchMlRulesOptionsMock = (isRuleRegistryEnabled: boolean): Patc
   version: 1,
   exceptionsList: [],
   actions: [],
-  rule: getAlertMock(isRuleRegistryEnabled, getMlRuleParams()),
+  rule: getRuleMock(getMlRuleParams()),
 });

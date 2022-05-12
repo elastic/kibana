@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from '@testing-library/react';
 import { SlackActionConnector } from '../types';
 import SlackActionFields from './slack_connectors';

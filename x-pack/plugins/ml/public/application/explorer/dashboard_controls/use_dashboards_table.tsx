@@ -8,7 +8,7 @@
 import type { EuiInMemoryTableProps } from '@elastic/eui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
-import type { DashboardSavedObject } from '../../../../../../../src/plugins/dashboard/public';
+import type { DashboardSavedObject } from '@kbn/dashboard-plugin/public';
 import { useDashboardService } from '../../services/dashboard_service';
 import { useMlKibana } from '../../contexts/kibana';
 
@@ -51,7 +51,6 @@ export const useDashboardTable = () => {
   }, []);
 
   const [dashboardItems, setDashboardItems] = useState<DashboardItem[]>([]);
-  const [selectedItems, setSelectedItems] = useState<DashboardItem[]>([]);
 
   const fetchDashboards = useCallback(
     debounce(async (query?: string) => {
@@ -75,8 +74,6 @@ export const useDashboardTable = () => {
     }, 500),
     []
   );
-  const selection: EuiTableProps['selection'] = {
-    onSelectionChange: setSelectedItems,
-  };
-  return { dashboardItems, selectedItems, selection, search, isLoading };
+
+  return { dashboardItems, search, isLoading };
 };

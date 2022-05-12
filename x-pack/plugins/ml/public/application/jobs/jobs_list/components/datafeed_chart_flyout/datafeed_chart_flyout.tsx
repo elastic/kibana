@@ -32,6 +32,7 @@ import {
   Axis,
   Chart,
   CurveType,
+  CustomAnnotationTooltip,
   LineAnnotation,
   LineSeries,
   LineAnnotationDatum,
@@ -68,6 +69,14 @@ function setLineAnnotationHeader(lineDatum: LineAnnotationDatum) {
   lineDatum.header = dateFormatter(lineDatum.dataValue);
   return lineDatum;
 }
+
+const customTooltip: CustomAnnotationTooltip = ({ details, datum }) => (
+  <div className="echAnnotation__tooltip">
+    {/* @ts-ignore 'header does not exist on type RectAnnotationDatum' */}
+    <p className="echAnnotation__header">{dateFormatter(datum.header)}</p>
+    <div className="echAnnotation__details">{details}</div>
+  </div>
+);
 
 export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, onClose }) => {
   const [data, setData] = useState<{
@@ -314,6 +323,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
                         <Settings
                           showLegend
                           legendPosition={Position.Bottom}
+                          // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
                           theme={{
                             lineSeriesStyle: {
                               point: {
@@ -385,6 +395,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
                             />
                             <RectAnnotation
                               key="annotation-results-rect"
+                              customTooltip={customTooltip}
                               dataValues={annotationData.rect}
                               id={i18n.translate(
                                 'xpack.ml.jobsList.datafeedChart.annotationRectSeriesId',

@@ -7,8 +7,8 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { mockMoment } from '../../../../utils/testHelpers';
-import { DetailView } from './index';
+import { mockMoment } from '../../../../utils/test_helpers';
+import { DetailView } from '.';
 
 describe('DetailView', () => {
   beforeEach(() => {

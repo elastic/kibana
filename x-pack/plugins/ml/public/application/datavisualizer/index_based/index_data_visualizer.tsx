@@ -5,27 +5,38 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useEffect, useState, useMemo } from 'react';
+import React, { FC, Fragment, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type {
+  IndexDataVisualizerSpec,
+  ResultLink,
+  GetAdditionalLinks,
+  GetAdditionalLinksParams,
+} from '@kbn/data-visualizer-plugin/public';
 import { useMlKibana, useTimefilter, useMlLocator } from '../../contexts/kibana';
-import { NavigationMenu } from '../../components/navigation_menu';
 import { HelpMenu } from '../../components/help_menu';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { isFullLicense } from '../../license';
 import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
 import { checkPermission } from '../../capabilities/check_capabilities';
+import { MlPageHeader } from '../../components/page_header';
 
-import type { ResultLink, IndexDataVisualizerSpec } from '../../../../../data_visualizer/public';
-
-interface GetUrlParams {
-  indexPatternId: string;
-  globalState: any;
+interface RecognizerModule {
+  id: string;
+  title: string;
+  query: Record<string, object>;
+  description: string;
+  logo: {
+    icon: string;
+  };
 }
 
 export const IndexDataVisualizerPage: FC = () => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
     services: {
+      http,
       docLinks,
       dataVisualizer,
       data: {
@@ -47,8 +58,12 @@ export const IndexDataVisualizerPage: FC = () => {
     }
   }, []);
 
-  const links: ResultLink[] = useMemo(
-    () => [
+  const getAsyncMLCards = async ({
+    dataViewId,
+    dataViewTitle,
+    globalState,
+  }: GetAdditionalLinksParams): Promise<ResultLink[]> => {
+    return [
       {
         id: 'create_ml_ad_job',
         title: i18n.translate('xpack.ml.indexDatavisualizer.actionsPanel.anomalyDetectionTitle', {
@@ -63,18 +78,18 @@ export const IndexDataVisualizerPage: FC = () => {
         ),
         icon: 'createAdvancedJob',
         type: 'file',
-        getUrl: async ({ indexPatternId, globalState }: GetUrlParams) => {
+        getUrl: async () => {
           return await mlLocator.getUrl({
             page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ADVANCED,
             pageState: {
-              index: indexPatternId,
+              index: dataViewId,
               globalState,
             },
           });
         },
-        canDisplay: async ({ indexPatternId }) => {
+        canDisplay: async () => {
           try {
-            const { timeFieldName } = await getDataView(indexPatternId);
+            const { timeFieldName } = await getDataView(dataViewId);
             return (
               isFullLicense() &&
               timeFieldName !== undefined &&
@@ -85,7 +100,7 @@ export const IndexDataVisualizerPage: FC = () => {
             return false;
           }
         },
-        dataTestSubj: 'dataVisualizerCreateAdvancedJobCard',
+        'data-test-subj': 'dataVisualizerCreateAdvancedJobCard',
       },
       {
         id: 'create_ml_dfa_job',
@@ -100,11 +115,11 @@ export const IndexDataVisualizerPage: FC = () => {
         ),
         icon: 'classificationJob',
         type: 'file',
-        getUrl: async ({ indexPatternId, globalState }: GetUrlParams) => {
+        getUrl: async () => {
           return await mlLocator.getUrl({
             page: ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB,
             pageState: {
-              index: indexPatternId,
+              index: dataViewId,
               globalState,
             },
           });
@@ -114,16 +129,70 @@ export const IndexDataVisualizerPage: FC = () => {
             isFullLicense() && checkPermission('canCreateDataFrameAnalytics') && mlNodesAvailable()
           );
         },
-        dataTestSubj: 'dataVisualizerCreateDataFrameAnalyticsCard',
+        'data-test-subj': 'dataVisualizerCreateDataFrameAnalyticsCard',
       },
-    ],
-    []
-  );
+    ];
+  };
 
+  const getAsyncRecognizedModuleCards = async (params: GetAdditionalLinksParams) => {
+    const { dataViewId, dataViewTitle } = params;
+    const modules = await http.fetch<RecognizerModule[]>(
+      `/api/ml/modules/recognize/${dataViewTitle}`,
+      {
+        method: 'GET',
+      }
+    );
+    return modules?.map(
+      (m): ResultLink => ({
+        id: m.id,
+        title: m.title,
+        description: m.description,
+        icon: m.logo.icon,
+        type: 'index',
+        getUrl: async () => {
+          return await mlLocator.getUrl({
+            page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER,
+            pageState: {
+              id: m.id,
+              index: dataViewId,
+            },
+          });
+        },
+        canDisplay: async () => {
+          try {
+            const { timeFieldName } = await getDataView(dataViewId);
+            return (
+              isFullLicense() &&
+              timeFieldName !== undefined &&
+              checkPermission('canCreateJob') &&
+              mlNodesAvailable()
+            );
+          } catch (error) {
+            return false;
+          }
+        },
+        'data-test-subj': m.id,
+      })
+    );
+  };
+
+  const getAdditionalLinks: GetAdditionalLinks = useMemo(
+    () => [getAsyncRecognizedModuleCards, getAsyncMLCards],
+    [mlLocator]
+  );
   return IndexDataVisualizer ? (
     <Fragment>
-      <NavigationMenu tabId="datavisualizer" />
-      {IndexDataVisualizer !== null && <IndexDataVisualizer additionalLinks={links} />}
+      {IndexDataVisualizer !== null ? (
+        <>
+          <MlPageHeader>
+            <FormattedMessage
+              id="xpack.ml.dataVisualizer.pageHeader"
+              defaultMessage="Data Visualizer"
+            />
+          </MlPageHeader>
+          <IndexDataVisualizer getAdditionalLinks={getAdditionalLinks} />
+        </>
+      ) : null}
       <HelpMenu docLink={docLinks.links.ml.guide} />
     </Fragment>
   ) : (

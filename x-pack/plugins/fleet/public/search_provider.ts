@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreSetup, CoreStart, ApplicationStart, IBasePath } from 'src/core/public';
+import type { CoreSetup, CoreStart, ApplicationStart, IBasePath } from '@kbn/core/public';
 
 import type { Observable } from 'rxjs';
 import { from, of, combineLatest } from 'rxjs';
@@ -15,7 +15,7 @@ import { ICON_TYPES } from '@elastic/eui';
 import type {
   GlobalSearchResultProvider,
   GlobalSearchProviderResult,
-} from '../../global_search/public';
+} from '@kbn/global-search-plugin/public';
 
 import { epmRouteService, INTEGRATIONS_PLUGIN_ID } from '../common';
 

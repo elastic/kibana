@@ -13,6 +13,7 @@ export default ({ getService, getPageObjects }) => {
     const testSubjects = getService('testSubjects');
     const isSaml = !!process.env.VM.includes('saml') || !!process.env.VM.includes('oidc');
     const clusterOverview = getService('monitoringClusterOverview');
+    const find = getService('find');
 
     before(async () => {
       await browser.setWindowSize(1200, 800);
@@ -30,6 +31,7 @@ export default ({ getService, getPageObjects }) => {
     });
 
     it('should have Monitoring already enabled', async () => {
+      await find.clickByLinkText('elasticsearch');
       await testSubjects.click('esOverview');
     });
 

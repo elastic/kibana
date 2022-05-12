@@ -12,12 +12,13 @@ import type {
   TinymathFunction,
   TinymathNamedArgument,
   TinymathVariable,
-} from 'packages/kbn-tinymath';
+} from '@kbn/tinymath';
+import type { Query } from '@kbn/data-plugin/public';
 import type {
   OperationDefinition,
   GenericIndexPatternColumn,
   GenericOperationDefinition,
-} from '../index';
+} from '..';
 import type { GroupedNodes } from './types';
 
 export const unquotedStringRegex = /[^0-9A-Za-z._@\[\]/]/;
@@ -46,6 +47,28 @@ export function getValueOrName(node: TinymathAST) {
     return node.value;
   }
   return node.name;
+}
+
+export function mergeWithGlobalFilter(
+  operation:
+    | OperationDefinition<GenericIndexPatternColumn, 'field'>
+    | OperationDefinition<GenericIndexPatternColumn, 'fullReference'>,
+  mappedParams: Record<string, string | number>,
+  globalFilter?: Query
+) {
+  if (globalFilter && operation.filterable) {
+    const languageKey = 'kql' in mappedParams ? 'kql' : 'lucene';
+    if (mappedParams[languageKey]) {
+      // ignore the initial empty string case
+      if (globalFilter.query) {
+        mappedParams[languageKey] = `(${globalFilter.query}) AND (${mappedParams[languageKey]})`;
+      }
+    } else {
+      const language = globalFilter.language === 'kuery' ? 'kql' : globalFilter.language;
+      mappedParams[language] = globalFilter.query as string;
+    }
+  }
+  return mappedParams;
 }
 
 export function getOperationParams(

@@ -9,7 +9,7 @@ Configuration options to be used to create a [cluster client](./kibana-plugin-co
 <b>Signature:</b>
 
 ```typescript
-export declare type ElasticsearchClientConfig = Pick<ElasticsearchConfig, 'customHeaders' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'requestHeadersWhitelist' | 'sniffInterval' | 'hosts' | 'username' | 'password' | 'serviceAccountToken'> & {
+export declare type ElasticsearchClientConfig = Pick<ElasticsearchConfig, 'customHeaders' | 'maxSockets' | 'compression' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'requestHeadersWhitelist' | 'sniffInterval' | 'hosts' | 'username' | 'password' | 'serviceAccountToken'> & {
     pingTimeout?: ElasticsearchConfig['pingTimeout'] | ClientOptions['pingTimeout'];
     requestTimeout?: ElasticsearchConfig['requestTimeout'] | ClientOptions['requestTimeout'];
     ssl?: Partial<ElasticsearchConfig['ssl']>;

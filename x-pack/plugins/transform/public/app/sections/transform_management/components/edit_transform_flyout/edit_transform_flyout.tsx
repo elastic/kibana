@@ -35,20 +35,22 @@ import { useApi } from '../../../../hooks/use_api';
 import { EditTransformFlyoutCallout } from './edit_transform_flyout_callout';
 import { EditTransformFlyoutForm } from './edit_transform_flyout_form';
 import {
-  applyFormFieldsToTransformConfig,
+  applyFormStateToTransformConfig,
   useEditTransformFlyout,
 } from './use_edit_transform_flyout';
+import { ManagedTransformsWarningCallout } from '../managed_transforms_callout/managed_transforms_callout';
+import { isManagedTransform } from '../../../../common/managed_transforms_utils';
 
 interface EditTransformFlyoutProps {
   closeFlyout: () => void;
   config: TransformConfigUnion;
-  indexPatternId?: string;
+  dataViewId?: string;
 }
 
 export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({
   closeFlyout,
   config,
-  indexPatternId,
+  dataViewId,
 }) => {
   const api = useApi();
   const toastNotifications = useToastNotifications();
@@ -58,7 +60,7 @@ export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({
 
   async function submitFormHandler() {
     setErrorMessage(undefined);
-    const requestConfig = applyFormFieldsToTransformConfig(config, state.formFields);
+    const requestConfig = applyFormStateToTransformConfig(config, state);
     const transformId = config.id;
 
     const resp = await api.updateTransform(transformId, requestConfig);
@@ -99,11 +101,16 @@ export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody banner={<EditTransformFlyoutCallout />}>
-        <EditTransformFlyoutForm
-          editTransformFlyout={[state, dispatch]}
-          indexPatternId={indexPatternId}
+      {isManagedTransform({ config }) ? (
+        <ManagedTransformsWarningCallout
+          count={1}
+          action={i18n.translate('xpack.transform.transformList.editManagedTransformsDescription', {
+            defaultMessage: 'editing',
+          })}
         />
+      ) : null}
+      <EuiFlyoutBody banner={<EditTransformFlyoutCallout />}>
+        <EditTransformFlyoutForm editTransformFlyout={[state, dispatch]} dataViewId={dataViewId} />
         {errorMessage !== undefined && (
           <>
             <EuiSpacer size="m" />

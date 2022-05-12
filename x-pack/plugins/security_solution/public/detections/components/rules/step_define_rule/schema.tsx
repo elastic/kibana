@@ -16,7 +16,11 @@ import {
   containsInvalidItems,
   customValidators,
 } from '../../../../common/components/threat_match/helpers';
-import { isThreatMatchRule, isThresholdRule } from '../../../../../common/detection_engine/utils';
+import {
+  isEqlRule,
+  isThreatMatchRule,
+  isThresholdRule,
+} from '../../../../../common/detection_engine/utils';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { FieldValueQueryBar } from '../query_bar';
 import {
@@ -30,6 +34,7 @@ import { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 import { debounceAsync, eqlValidator } from '../eql_query_bar/validators';
 import {
   CUSTOM_QUERY_REQUIRED,
+  EQL_QUERY_REQUIRED,
   INVALID_CUSTOM_QUERY,
   INDEX_HELPER_TEXT,
   THREAT_MATCH_INDEX_HELPER_TEXT,
@@ -82,16 +87,14 @@ export const schema: FormSchema<DefineStepRule> = {
           const { query, filters } = value as FieldValueQueryBar;
           const needsValidation = !isMlRule(formData.ruleType);
           if (!needsValidation) {
-            return;
+            return undefined;
           }
-
-          return isEmpty(query.query as string) && isEmpty(filters)
-            ? {
-                code: 'ERR_FIELD_MISSING',
-                path,
-                message: CUSTOM_QUERY_REQUIRED,
-              }
-            : undefined;
+          const isFieldEmpty = isEmpty(query.query as string) && isEmpty(filters);
+          if (!isFieldEmpty) {
+            return undefined;
+          }
+          const message = isEqlRule(formData.ruleType) ? EQL_QUERY_REQUIRED : CUSTOM_QUERY_REQUIRED;
+          return { code: 'ERR_FIELD_MISSING', path, message };
         },
       },
       {

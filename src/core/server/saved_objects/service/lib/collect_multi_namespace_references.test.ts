@@ -8,23 +8,22 @@
 
 import {
   mockFindLegacyUrlAliases,
+  mockFindSharedOriginObjects,
   mockRawDocExistsInNamespace,
 } from './collect_multi_namespace_references.test.mock';
 
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-
-import type { ElasticsearchClient } from '../../../elasticsearch';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 import { SavedObjectsSerializer } from '../../serialization';
 import {
-  ALIAS_SEARCH_PER_PAGE,
+  ALIAS_OR_SHARED_ORIGIN_SEARCH_PER_PAGE,
   CollectMultiNamespaceReferencesParams,
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsCollectMultiNamespaceReferencesOptions,
 } from './collect_multi_namespace_references';
 import { collectMultiNamespaceReferences } from './collect_multi_namespace_references';
 import type { CreatePointInTimeFinderFn } from './point_in_time_finder';
+import { SavedObjectsErrorHelpers } from './errors';
 
 const SPACES = ['default', 'another-space'];
 const VERSION_PROPS = { _seq_no: 1, _primary_term: 1 };
@@ -37,12 +36,14 @@ const MULTI_NAMESPACE_HIDDEN_OBJ_TYPE = 'type-d';
 beforeEach(() => {
   mockFindLegacyUrlAliases.mockReset();
   mockFindLegacyUrlAliases.mockResolvedValue(new Map()); // return an empty map by default
+  mockFindSharedOriginObjects.mockReset();
+  mockFindSharedOriginObjects.mockResolvedValue(new Map()); // return an empty map by default
   mockRawDocExistsInNamespace.mockReset();
   mockRawDocExistsInNamespace.mockReturnValue(true); // return true by default
 });
 
 describe('collectMultiNamespaceReferences', () => {
-  let client: DeeplyMockedKeys<ElasticsearchClient>;
+  let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
 
   /** Sets up the type registry, saved objects client, etc. and return the full parameters object to be passed to `collectMultiNamespaceReferences` */
   function setup(
@@ -84,33 +85,33 @@ describe('collectMultiNamespaceReferences', () => {
   function mockMgetResults(
     ...results: Array<{
       found: boolean;
+      originId?: string;
       references?: Array<{ type: string; id: string }>;
     }>
   ) {
-    client.mget.mockReturnValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        docs: results.map((x) => {
-          const references =
-            x.references?.map(({ type, id }) => ({ type, id, name: 'ref-name' })) ?? [];
-          return x.found
-            ? {
-                _id: 'doesnt-matter',
-                _index: 'doesnt-matter',
-                _source: {
-                  namespaces: SPACES,
-                  references,
-                },
-                ...VERSION_PROPS,
-                found: true,
-              }
-            : {
-                _id: 'doesnt-matter',
-                _index: 'doesnt-matter',
-                found: false,
-              };
-        }),
-      })
-    );
+    client.mget.mockResponseOnce({
+      docs: results.map((x) => {
+        const references =
+          x.references?.map(({ type, id }) => ({ type, id, name: 'ref-name' })) ?? [];
+        return x.found
+          ? {
+              _id: 'doesnt-matter',
+              _index: 'doesnt-matter',
+              _source: {
+                namespaces: SPACES,
+                originId: x.originId,
+                references,
+              },
+              ...VERSION_PROPS,
+              found: true,
+            }
+          : {
+              _id: 'doesnt-matter',
+              _index: 'doesnt-matter',
+              found: false,
+            };
+      }),
+    });
   }
 
   /** Asserts that mget is called for the given objects */
@@ -284,6 +285,23 @@ describe('collectMultiNamespaceReferences', () => {
       // obj3 is excluded from the results
     ]);
   });
+  it(`handles 404 responses that don't come from Elasticsearch`, async () => {
+    const createEsUnavailableNotFoundError = () => {
+      return SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
+    };
+    const obj1 = { type: MULTI_NAMESPACE_OBJ_TYPE_1, id: 'id-1' };
+    const params = setup([obj1]);
+    client.mget.mockReturnValueOnce(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(
+        { docs: [] },
+        { statusCode: 404 },
+        {}
+      )
+    );
+    await expect(() => collectMultiNamespaceReferences(params)).rejects.toThrowError(
+      createEsUnavailableNotFoundError()
+    );
+  });
 
   describe('legacy URL aliases', () => {
     it('uses findLegacyUrlAliases to search for legacy URL aliases', async () => {
@@ -308,7 +326,7 @@ describe('collectMultiNamespaceReferences', () => {
       expect(mockFindLegacyUrlAliases).toHaveBeenCalledWith(
         expect.anything(),
         [obj1, obj2, obj3],
-        ALIAS_SEARCH_PER_PAGE
+        ALIAS_OR_SHARED_ORIGIN_SEARCH_PER_PAGE
       );
       expect(result.objects).toEqual([
         {
@@ -333,7 +351,7 @@ describe('collectMultiNamespaceReferences', () => {
       expect(mockFindLegacyUrlAliases).toHaveBeenCalledWith(
         expect.anything(),
         [obj1],
-        ALIAS_SEARCH_PER_PAGE
+        ALIAS_OR_SHARED_ORIGIN_SEARCH_PER_PAGE
       );
     });
 
@@ -347,6 +365,83 @@ describe('collectMultiNamespaceReferences', () => {
 
       await expect(() => collectMultiNamespaceReferences(params)).rejects.toThrow(
         'Failed to retrieve legacy URL aliases: Oh no!'
+      );
+    });
+  });
+
+  describe('shared origins', () => {
+    it('uses findSharedOriginObjects to search for objects with shared origins', async () => {
+      const obj1 = { type: MULTI_NAMESPACE_OBJ_TYPE_1, id: 'id-1' };
+      const obj2 = { type: MULTI_NAMESPACE_OBJ_TYPE_1, id: 'id-x', originId: 'id-2' };
+      const obj3 = { type: MULTI_NAMESPACE_OBJ_TYPE_1, id: 'id-3' };
+      const params = setup([obj1, obj2], {});
+      mockMgetResults(
+        // results for obj1 and obj2
+        { found: true, references: [obj3] },
+        { found: true, originId: obj2.originId, references: [] }
+      );
+      mockMgetResults({ found: true, references: [] }); // results for obj3
+      mockFindSharedOriginObjects.mockResolvedValue(
+        new Map([
+          [`${obj1.type}:${obj1.id}`, new Set(['space-1'])],
+          [`${obj2.type}:${obj2.originId}`, new Set(['*'])],
+          [`${obj3.type}:${obj3.id}`, new Set(['space-1', 'space-2'])],
+        ])
+      );
+
+      const result = await collectMultiNamespaceReferences(params);
+      expect(client.mget).toHaveBeenCalledTimes(2);
+      expectMgetArgs(1, obj1, obj2);
+      expectMgetArgs(2, obj3); // obj3 is retrieved in a second cluster call
+      expect(mockFindSharedOriginObjects).toHaveBeenCalledTimes(1);
+      expect(mockFindSharedOriginObjects).toHaveBeenCalledWith(
+        expect.anything(),
+        [
+          { type: obj1.type, origin: obj1.id },
+          { type: obj2.type, origin: obj2.originId }, // If the found object has an `originId`, that is used instead of the object's `id`.
+          { type: obj3.type, origin: obj3.id },
+        ],
+        ALIAS_OR_SHARED_ORIGIN_SEARCH_PER_PAGE
+      );
+      expect(result.objects).toEqual([
+        // Note: in a realistic scenario, `spacesWithMatchingOrigins` would be a superset of `spaces`. But for the purposes of this unit
+        // test, it doesn't matter if they are different.
+        { ...obj1, spaces: SPACES, inboundReferences: [], spacesWithMatchingOrigins: ['space-1'] },
+        { ...obj2, spaces: SPACES, inboundReferences: [], spacesWithMatchingOrigins: ['*'] },
+        {
+          ...obj3,
+          spaces: SPACES,
+          inboundReferences: [{ ...obj1, name: 'ref-name' }],
+          spacesWithMatchingOrigins: ['space-1', 'space-2'],
+        },
+      ]);
+    });
+
+    it('omits objects that have an empty spaces array (the object does not exist, or we are not sure)', async () => {
+      const obj1 = { type: MULTI_NAMESPACE_OBJ_TYPE_1, id: 'id-1' };
+      const obj2 = { type: MULTI_NAMESPACE_OBJ_TYPE_1, id: 'id-2' };
+      const params = setup([obj1, obj2]);
+      mockMgetResults({ found: true }, { found: false }); // results for obj1 and obj2
+
+      await collectMultiNamespaceReferences(params);
+      expect(mockFindSharedOriginObjects).toHaveBeenCalledTimes(1);
+      expect(mockFindSharedOriginObjects).toHaveBeenCalledWith(
+        expect.anything(),
+        [{ type: obj1.type, origin: obj1.id }],
+        ALIAS_OR_SHARED_ORIGIN_SEARCH_PER_PAGE
+      );
+    });
+
+    it('handles findSharedOriginObjects errors', async () => {
+      const obj1 = { type: MULTI_NAMESPACE_OBJ_TYPE_1, id: 'id-1' };
+      const params = setup([obj1]);
+      mockMgetResults({ found: true }); // results for obj1
+      mockFindSharedOriginObjects.mockRejectedValue(
+        new Error('Failed to retrieve shared origin objects: Oh no!')
+      );
+
+      await expect(() => collectMultiNamespaceReferences(params)).rejects.toThrow(
+        'Failed to retrieve shared origin objects: Oh no!'
       );
     });
   });

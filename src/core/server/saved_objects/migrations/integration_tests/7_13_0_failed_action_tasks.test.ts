@@ -19,8 +19,7 @@ async function removeLogFile() {
   await fs.unlink(logFilePath).catch(() => void 0);
 }
 
-// FLAKY: https://github.com/elastic/kibana/issues/118626
-describe.skip('migration from 7.13 to 7.14+ with many failed action_tasks', () => {
+describe('migration from 7.13 to 7.14+ with many failed action_tasks', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
   let startES: () => Promise<kbnTestServer.TestElasticsearchUtils>;
@@ -56,7 +55,7 @@ describe.skip('migration from 7.13 to 7.14+ with many failed action_tasks', () =
     kibanaIndexName = '.kibana',
     taskManagerIndexName = '.kibana_task_manager'
   ): Promise<{ tasksCount: number; actionTaskParamsCount: number }> => {
-    const esClient: ElasticsearchClient = esServer.es.getKibanaEsClient();
+    const esClient: ElasticsearchClient = esServer.es.getClient();
 
     const actionTaskParamsResponse = await esClient.count({
       index: kibanaIndexName,
@@ -76,8 +75,8 @@ describe.skip('migration from 7.13 to 7.14+ with many failed action_tasks', () =
     });
 
     return {
-      actionTaskParamsCount: actionTaskParamsResponse.body.count,
-      tasksCount: tasksResponse.body.count,
+      actionTaskParamsCount: actionTaskParamsResponse.count,
+      tasksCount: tasksResponse.count,
     };
   };
 
@@ -129,6 +128,7 @@ function createRoot() {
         loggers: [
           {
             name: 'root',
+            level: 'info',
             appenders: ['file'],
           },
         ],

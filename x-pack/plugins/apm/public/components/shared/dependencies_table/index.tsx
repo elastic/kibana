@@ -9,6 +9,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
+  EuiToolTip,
+  EuiIcon,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -21,12 +23,16 @@ import {
 } from '../../../../common/utils/formatters';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { EmptyMessage } from '../EmptyMessage';
-import { ImpactBar } from '../ImpactBar';
+import { EmptyMessage } from '../empty_message';
+import { ImpactBar } from '../impact_bar';
 import { ListMetric } from '../list_metric';
 import { ITableColumn, ManagedTable } from '../managed_table';
 import { OverviewTableContainer } from '../overview_table_container';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
+import {
+  ChartType,
+  getTimeSeriesColor,
+} from '../charts/helper/get_timeseries_color';
 
 export type DependenciesItem = Omit<
   ConnectionStatsItemWithComparisonData,
@@ -45,6 +51,7 @@ interface Props {
   nameColumnTitle: React.ReactNode;
   status: FETCH_STATUS;
   compact?: boolean;
+  showPerPageOptions?: boolean;
 }
 
 export function DependenciesTable(props: Props) {
@@ -57,6 +64,7 @@ export function DependenciesTable(props: Props) {
     nameColumnTitle,
     status,
     compact = true,
+    showPerPageOptions = true,
   } = props;
 
   // SparkPlots should be hidden if we're in two-column view and size XL (1200px)
@@ -80,14 +88,23 @@ export function DependenciesTable(props: Props) {
       }),
       align: RIGHT_ALIGNMENT,
       render: (_, { currentStats, previousStats }) => {
+        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+          ChartType.LATENCY_AVG
+        );
+
         return (
           <ListMetric
             compact
-            color="euiColorVis1"
+            color={currentPeriodColor}
             hideSeries={!shouldShowSparkPlots}
+            isLoading={
+              status === FETCH_STATUS.LOADING ||
+              status === FETCH_STATUS.NOT_INITIATED
+            }
             series={currentStats.latency.timeseries}
             comparisonSeries={previousStats?.latency.timeseries}
             valueLabel={asMillisecondDuration(currentStats.latency.value)}
+            comparisonSeriesColor={previousPeriodColor}
           />
         );
       },
@@ -100,14 +117,23 @@ export function DependenciesTable(props: Props) {
       }),
       align: RIGHT_ALIGNMENT,
       render: (_, { currentStats, previousStats }) => {
+        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+          ChartType.THROUGHPUT
+        );
+
         return (
           <ListMetric
             compact
-            color="euiColorVis0"
+            color={currentPeriodColor}
             hideSeries={!shouldShowSparkPlots}
+            isLoading={
+              status === FETCH_STATUS.LOADING ||
+              status === FETCH_STATUS.NOT_INITIATED
+            }
             series={currentStats.throughput.timeseries}
             comparisonSeries={previousStats?.throughput.timeseries}
             valueLabel={asTransactionRate(currentStats.throughput.value)}
+            comparisonSeriesColor={previousPeriodColor}
           />
         );
       },
@@ -115,19 +141,49 @@ export function DependenciesTable(props: Props) {
     },
     {
       field: 'errorRateValue',
-      name: i18n.translate('xpack.apm.dependenciesTable.columnErrorRate', {
-        defaultMessage: 'Failed transaction rate',
-      }),
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.apm.dependenciesTable.columnErrorRateTip',
+            {
+              defaultMessage:
+                "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
+            }
+          )}
+        >
+          <>
+            {i18n.translate('xpack.apm.dependenciesTable.columnErrorRate', {
+              defaultMessage: 'Failed transaction rate',
+            })}
+            &nbsp;
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignCenter"
+            />
+          </>
+        </EuiToolTip>
+      ),
       align: RIGHT_ALIGNMENT,
       render: (_, { currentStats, previousStats }) => {
+        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+          ChartType.FAILED_TRANSACTION_RATE
+        );
+
         return (
           <ListMetric
             compact
-            color="euiColorVis7"
+            color={currentPeriodColor}
             hideSeries={!shouldShowSparkPlots}
+            isLoading={
+              status === FETCH_STATUS.LOADING ||
+              status === FETCH_STATUS.NOT_INITIATED
+            }
             series={currentStats.errorRate.timeseries}
             comparisonSeries={previousStats?.errorRate.timeseries}
             valueLabel={asPercent(currentStats.errorRate.value, 1)}
+            comparisonSeriesColor={previousPeriodColor}
           />
         );
       },
@@ -135,9 +191,30 @@ export function DependenciesTable(props: Props) {
     },
     {
       field: 'impactValue',
-      name: i18n.translate('xpack.apm.dependenciesTable.columnImpact', {
-        defaultMessage: 'Impact',
-      }),
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.apm.dependenciesTable.columnImpactTip',
+            {
+              defaultMessage:
+                'The most used and slowest endpoints in your service. Calculated by multiplying latency by throughput.',
+            }
+          )}
+        >
+          <>
+            {i18n.translate('xpack.apm.dependenciesTable.columnImpact', {
+              defaultMessage: 'Impact',
+            })}
+            &nbsp;
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignCenter"
+            />
+          </>
+        </EuiToolTip>
+      ),
       align: RIGHT_ALIGNMENT,
       render: (_, { currentStats, previousStats }) => {
         return (
@@ -184,7 +261,11 @@ export function DependenciesTable(props: Props) {
   );
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      data-test-subj="dependenciesTable"
+    >
       <EuiFlexItem>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
@@ -210,8 +291,8 @@ export function DependenciesTable(props: Props) {
             noItemsMessage={noItemsMessage}
             initialSortField="impactValue"
             initialSortDirection="desc"
-            initialPageSize={5}
             pagination={true}
+            showPerPageOptions={showPerPageOptions}
           />
         </OverviewTableContainer>
       </EuiFlexItem>

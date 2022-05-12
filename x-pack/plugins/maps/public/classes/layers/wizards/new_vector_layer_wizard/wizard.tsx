@@ -74,7 +74,7 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
 
   async _checkIndexPermissions() {
     return await getFileUpload().hasImportPermission({
-      checkCreateIndexPattern: true,
+      checkCreateDataView: true,
       checkHasManagePipeline: false,
       indexName: this.state.indexName,
     });
@@ -126,6 +126,7 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
       indexPatternId,
       geoField: 'coordinates',
       filterByMapBounds: false,
+      applyGlobalQuery: false,
     });
     const layerDescriptor = GeoJsonVectorLayer.createDescriptor(
       { sourceDescriptor },

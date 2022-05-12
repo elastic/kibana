@@ -17,7 +17,7 @@ import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { createHttpServer } from '../test_utils';
 import { HttpService } from '../http_service';
 import { Router } from '../router';
-import { loggerMock } from '@kbn/logging/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 
 let server: HttpService;
 let logger: ReturnType<typeof loggingSystemMock.create>;

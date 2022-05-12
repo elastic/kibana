@@ -1,0 +1,17 @@
+get:
+  summary: Data streams - List
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data_streams:
+                type: array
+                items:
+                  $ref: ../components/schemas/data_stream.yaml
+  operationId: data-streams-list
+parameters: []

@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import { getBreakpoint } from '@elastic/eui';
 
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { InventoryItemType } from '../../../../../common/inventory_models/types';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { InfraWaffleMapBounds, InfraWaffleMapOptions, InfraFormatter } from '../../../../lib/lib';
 import { NoData } from '../../../../components/empty_states';
 import { InfraLoadingPanel } from '../../../../components/loading';
@@ -18,6 +18,7 @@ import { Map } from './waffle/map';
 import { TableView } from './table_view';
 import { SnapshotNode } from '../../../../../common/http_api/snapshot_api';
 import { calculateBoundsFromNodes } from '../lib/calculate_bounds_from_nodes';
+import { Legend } from './waffle/legend';
 
 export interface KueryFilterQuery {
   kind: 'kuery';
@@ -130,6 +131,12 @@ export const NodesOverview = ({
         dataBounds={dataBounds}
         bottomMargin={bottomMargin}
         staticHeight={isStatic}
+      />
+      <Legend
+        formatter={formatter}
+        bounds={bounds}
+        dataBounds={dataBounds}
+        legend={options.legend}
       />
     </MapContainer>
   );

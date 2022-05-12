@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { AlertTypeParams } from '../../../../alerting/common';
-import type { AlertTypeModel, ValidationResult } from '../../../../triggers_actions_ui/public';
+import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import type { RuleTypeModel, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   RULE_DETAILS,
   RULE_LARGE_SHARD_SIZE,
@@ -20,7 +20,7 @@ import {
   LazyExpressionProps,
 } from '../components/param_details_form/lazy_expression';
 
-interface ValidateOptions extends AlertTypeParams {
+interface ValidateOptions extends RuleTypeParams {
   indexPattern: string;
 }
 
@@ -42,7 +42,7 @@ const validate = (inputValues: ValidateOptions): ValidationResult => {
 
 export function createLargeShardSizeAlertType(
   config: MonitoringConfig
-): AlertTypeModel<ValidateOptions> {
+): RuleTypeModel<ValidateOptions> {
   return {
     id: RULE_LARGE_SHARD_SIZE,
     description: RULE_DETAILS[RULE_LARGE_SHARD_SIZE].description,
@@ -50,7 +50,7 @@ export function createLargeShardSizeAlertType(
     documentationUrl(docLinks) {
       return `${docLinks.links.monitoring.alertsKibanaLargeShardSize}`;
     },
-    alertParamsExpression: (props: LazyExpressionProps) => (
+    ruleParamsExpression: (props: LazyExpressionProps) => (
       <LazyExpression
         {...props}
         config={config}

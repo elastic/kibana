@@ -18,7 +18,7 @@ import type {
   Filter,
 } from '../types';
 
-export type ViewerModalName = 'addModal' | 'editModal' | null;
+export type ViewerFlyoutName = 'addException' | 'editException' | null;
 
 export interface State {
   filterOptions: FilterOptions;
@@ -27,7 +27,7 @@ export interface State {
   exceptionToEdit: ExceptionListItemSchema | null;
   loadingItemIds: ExceptionListItemIdentifiers[];
   isInitLoading: boolean;
-  currentModal: ViewerModalName;
+  currentModal: ViewerFlyoutName;
   exceptionListTypeToEdit: ExceptionListType | null;
   totalEndpointItems: number;
   totalDetectionsItems: number;
@@ -47,7 +47,7 @@ export type Action =
       filters: Partial<Filter>;
     }
   | { type: 'updateIsInitLoading'; loading: boolean }
-  | { type: 'updateModalOpen'; modalName: ViewerModalName }
+  | { type: 'updateModalOpen'; modalName: ViewerFlyoutName }
   | {
       type: 'updateExceptionToEdit';
       lists: ExceptionListIdentifiers[];

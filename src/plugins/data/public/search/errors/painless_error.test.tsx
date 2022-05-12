@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 const startMock = coreMock.createStart();
 
 import { mount } from 'enzyme';
@@ -23,7 +23,6 @@ describe('PainlessError', () => {
     const e = new PainlessError({
       statusCode: 400,
       message: 'search_phase_execution_exception',
-      // @ts-expect-error searchPhaseException is not properly typed json
       attributes: searchPhaseException.error,
     });
     const component = mount(e.getErrorMessage(startMock.application));

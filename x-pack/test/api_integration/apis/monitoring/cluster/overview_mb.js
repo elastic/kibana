@@ -6,11 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import overviewFixture from './fixtures/overview';
+import overviewFixture from './fixtures/overview.json';
+import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const { setup, tearDown } = getLifecycleMethods(getService);
 
   describe('overview mb', function () {
     // TODO: https://github.com/elastic/stack-monitoring/issues/31
@@ -25,11 +26,11 @@ export default function ({ getService }) {
       const codePaths = ['all'];
 
       before('load clusters archive', () => {
-        return esArchiver.load(archive);
+        return setup(archive);
       });
 
       after('unload clusters archive', () => {
-        return esArchiver.unload(archive);
+        return tearDown();
       });
 
       it('should load multiple clusters', async () => {

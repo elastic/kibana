@@ -8,31 +8,48 @@
 
 import Path from 'path';
 import del from 'del';
+import Axios from 'axios';
 import { Task, downloadToDisk, downloadToString } from '../lib';
 
 export const DownloadCloudDependencies: Task = {
   description: 'Downloading cloud dependencies',
 
   async run(config, log, build) {
-    const downloadBeat = async (beat: string) => {
-      const subdomain = config.isRelease ? 'artifacts' : 'snapshots';
+    const subdomain = config.isRelease ? 'artifacts-staging' : 'artifacts-snapshot';
+
+    const downloadBeat = async (beat: string, id: string) => {
       const version = config.getBuildVersion();
-      const architecture = process.arch === 'arm64' ? 'arm64' : 'x86_64';
-      const url = `https://${subdomain}-no-kpi.elastic.co/downloads/beats/${beat}/${beat}-${version}-linux-${architecture}.tar.gz`;
-      const checksum = await downloadToString({ log, url: url + '.sha512', expectStatus: 200 });
-      const destination = config.resolveFromRepo('.beats', Path.basename(url));
-      return downloadToDisk({
-        log,
-        url,
-        destination,
-        shaChecksum: checksum.split(' ')[0],
-        shaAlgorithm: 'sha512',
-        maxAttempts: 3,
+      const localArchitecture = [process.arch === 'arm64' ? 'arm64' : 'x86_64'];
+      const allArchitectures = ['arm64', 'x86_64'];
+      const architectures = config.getDockerCrossCompile() ? allArchitectures : localArchitecture;
+      const downloads = architectures.map(async (arch) => {
+        const url = `https://${subdomain}.elastic.co/beats/${id}/downloads/beats/${beat}/${beat}-${version}-linux-${arch}.tar.gz`;
+        const checksum = await downloadToString({ log, url: url + '.sha512', expectStatus: 200 });
+        const destination = config.resolveFromRepo('.beats', Path.basename(url));
+        return downloadToDisk({
+          log,
+          url,
+          destination,
+          shaChecksum: checksum.split(' ')[0],
+          shaAlgorithm: 'sha512',
+          maxAttempts: 3,
+        });
       });
+      return Promise.all(downloads);
     };
 
+    let buildId = '';
+    const buildUrl = `https://${subdomain}.elastic.co/beats/latest/${config.getBuildVersion()}.json`;
+    try {
+      const latest = await Axios.get(buildUrl);
+      buildId = latest.data.build_id;
+    } catch (e) {
+      log.error(`Unable to find Beats artifacts for ${config.getBuildVersion()} at ${buildUrl}.`);
+      throw e;
+    }
     await del([config.resolveFromRepo('.beats')]);
-    await downloadBeat('metricbeat');
-    await downloadBeat('filebeat');
+
+    await downloadBeat('metricbeat', buildId);
+    await downloadBeat('filebeat', buildId);
   },
 };

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternFieldBase } from '@kbn/es-query';
+import { DataViewFieldBase } from '@kbn/es-query';
 
-// Copied from "src/plugins/data/common/index_patterns/fields/fields.mocks.ts" but with the types changed to "IndexPatternFieldBase" since that type is compatible.
+// Copied from "src/plugins/data/common/index_patterns/fields/fields.mocks.ts" but with the types changed to "DataViewFieldBase" since that type is compatible.
 // TODO: This should move out once those mocks are directly useable or in their own package, https://github.com/elastic/kibana/issues/100715
 
-export const fields: IndexPatternFieldBase[] = [
+export const fields: DataViewFieldBase[] = [
   {
     name: 'bytes',
     type: 'number',
@@ -309,6 +309,14 @@ export const fields: IndexPatternFieldBase[] = [
     readFromDocValues: false,
     subType: { nested: { path: 'nestedField.nestedChild' } },
   },
-] as unknown as IndexPatternFieldBase[];
+  {
+    name: 'file.path.text',
+    type: 'string',
+    esTypes: ['text'],
+    searchable: true,
+    aggregatable: false,
+    subType: { multi: { parent: 'file.path' } },
+  },
+] as unknown as DataViewFieldBase[];
 
 export const getField = (name: string) => fields.find((field) => field.name === name);

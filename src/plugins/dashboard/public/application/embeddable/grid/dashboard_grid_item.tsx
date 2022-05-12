@@ -20,6 +20,7 @@ type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style'
 
 interface Props extends PanelProps, DivProps {
   id: DashboardPanelState['explicitInput']['id'];
+  index?: number;
   type: DashboardPanelState['type'];
   container: DashboardContainer;
   focusedPanelId?: string;
@@ -35,6 +36,7 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
       expandedPanelId,
       focusedPanelId,
       id,
+      index,
       PanelComponent,
       type,
       isRenderable = true,
@@ -50,9 +52,7 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
     const hidePanel = expandedPanelId !== undefined && expandedPanelId !== id;
     const classes = classNames({
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'dshDashboardGrid__item--expanded': expandPanel,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'dshDashboardGrid__item--hidden': hidePanel,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       printViewport__vis: container.getInput().viewMode === ViewMode.PRINT,
@@ -72,6 +72,7 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
               // This key is used to force rerendering on embeddable type change while the id remains the same
               key={type}
               embeddableId={id}
+              index={index}
               {...{ container, PanelComponent }}
             />
             {children}

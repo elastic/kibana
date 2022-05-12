@@ -10,7 +10,7 @@ import type {
   HttpInterceptorResponseError,
   IAnonymousPaths,
   IHttpInterceptController,
-} from 'src/core/public';
+} from '@kbn/core/public';
 
 import { LogoutReason } from '../../common/types';
 import type { SessionExpired } from './session_expired';

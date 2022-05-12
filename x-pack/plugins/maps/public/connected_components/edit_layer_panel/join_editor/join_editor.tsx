@@ -8,7 +8,7 @@
 import React, { Fragment } from 'react';
 import uuid from 'uuid/v4';
 
-import { EuiButtonEmpty, EuiTitle, EuiSpacer, EuiTextAlign, EuiCallOut } from '@elastic/eui';
+import { EuiTitle, EuiSpacer, EuiTextAlign, EuiCallOut } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -17,6 +17,7 @@ import { JoinDocumentationPopover } from './resources/join_documentation_popover
 import { IVectorLayer } from '../../../classes/layers/vector_layer';
 import { JoinDescriptor } from '../../../../common/descriptor_types';
 import { SOURCE_TYPES } from '../../../../common/constants';
+import { AddJoinButton } from './add_join_button';
 
 export interface JoinField {
   label: string;
@@ -77,8 +78,9 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
     ]);
   };
 
-  const renderContent = () => {
+  function renderContent() {
     const disabledReason = layer.getJoinsDisabledReason();
+
     return disabledReason ? (
       <EuiCallOut color="warning">{disabledReason}</EuiCallOut>
     ) : (
@@ -86,23 +88,15 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
         {renderJoins()}
         <EuiSpacer size="s" />
         <EuiTextAlign textAlign="center">
-          <EuiButtonEmpty
-            onClick={addJoin}
-            size="xs"
-            iconType="plusInCircleFilled"
-            aria-label={i18n.translate('xpack.maps.layerPanel.joinEditor.addJoinAriaLabel', {
-              defaultMessage: 'Add join',
-            })}
-          >
-            <FormattedMessage
-              id="xpack.maps.layerPanel.joinEditor.addJoinButtonLabel"
-              defaultMessage="Add join"
-            />
-          </EuiButtonEmpty>
+          <AddJoinButton
+            addJoin={addJoin}
+            isLayerSourceMvt={layer.getSource().isMvt()}
+            numJoins={joins.length}
+          />
         </EuiTextAlign>
       </Fragment>
     );
-  };
+  }
 
   return (
     <div>

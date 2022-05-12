@@ -10,6 +10,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import {
   HostsQueries,
   HostOverviewRequestOptions,
@@ -19,7 +20,6 @@ import { useKibana } from '../../../common/lib/kibana';
 import { inputsModel } from '../../../common/store/inputs';
 import { createFilter } from '../../../common/containers/helpers';
 import { ESQuery } from '../../../../common/typed_json';
-import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
@@ -145,6 +145,13 @@ export const useHostOverview = ({
       abortCtrl.current.abort();
     };
   }, [overviewHostRequest, overviewHostSearch]);
+
+  useEffect(() => {
+    if (skip) {
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   return [loading, overviewHostResponse];
 };

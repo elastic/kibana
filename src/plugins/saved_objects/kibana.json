@@ -7,7 +7,7 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["data"],
+  "requiredPlugins": ["data", "dataViews"],
   "requiredBundles": [
     "kibanaUtils",
     "kibanaReact"

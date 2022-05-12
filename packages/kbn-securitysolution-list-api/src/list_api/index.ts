@@ -46,6 +46,14 @@ import {
   ImportListParams,
 } from './types';
 
+export type {
+  ApiParams,
+  DeleteListParams,
+  ExportListParams,
+  FindListsParams,
+  ImportListParams,
+} from './types';
+
 const findLists = async ({
   http,
   cursor,

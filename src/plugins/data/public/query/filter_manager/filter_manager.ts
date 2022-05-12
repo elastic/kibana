@@ -9,12 +9,12 @@
 import _ from 'lodash';
 import { Subject } from 'rxjs';
 
-import { IUiSettingsClient } from 'src/core/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 
 import { isFilterPinned, onlyDisabledFiltersChanged, Filter } from '@kbn/es-query';
+import { PersistableStateService } from '@kbn/kibana-utils-plugin/common/persistable_state';
 import { sortFilters } from './lib/sort_filters';
 import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
-import { PartitionedFilters } from './types';
 
 import {
   FilterStateStore,
@@ -23,13 +23,17 @@ import {
   COMPARE_ALL_OPTIONS,
   UI_SETTINGS,
 } from '../../../common';
-import { PersistableStateService } from '../../../../kibana_utils/common/persistable_state';
 import {
   getAllMigrations,
   inject,
   extract,
   telemetry,
 } from '../../../common/query/persistable_state';
+
+interface PartitionedFilters {
+  globalFilters: Filter[];
+  appFilters: Filter[];
+}
 
 export class FilterManager implements PersistableStateService<Filter[]> {
   private filters: Filter[] = [];

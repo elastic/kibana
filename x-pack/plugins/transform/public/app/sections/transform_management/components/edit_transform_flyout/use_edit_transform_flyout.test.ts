@@ -8,7 +8,7 @@
 import { TransformPivotConfig } from '../../../../../../common/types/transform';
 
 import {
-  applyFormFieldsToTransformConfig,
+  applyFormStateToTransformConfig,
   formReducerFactory,
   frequencyValidator,
   getDefaultState,
@@ -47,16 +47,13 @@ const getTransformConfigMock = (): TransformPivotConfig => ({
   description: 'the-description',
 });
 
-describe('Transform: applyFormFieldsToTransformConfig()', () => {
+describe('Transform: applyFormStateToTransformConfig()', () => {
   it('should exclude unchanged form fields', () => {
     const transformConfigMock = getTransformConfigMock();
 
     const formState = getDefaultState(transformConfigMock);
 
-    const updateConfig = applyFormFieldsToTransformConfig(
-      transformConfigMock,
-      formState.formFields
-    );
+    const updateConfig = applyFormStateToTransformConfig(transformConfigMock, formState);
 
     // This case will return an empty object. In the actual UI, this case should not happen
     // because the Update-Button will be disabled when no form field was changed.
@@ -84,10 +81,7 @@ describe('Transform: applyFormFieldsToTransformConfig()', () => {
       },
     });
 
-    const updateConfig = applyFormFieldsToTransformConfig(
-      transformConfigMock,
-      formState.formFields
-    );
+    const updateConfig = applyFormStateToTransformConfig(transformConfigMock, formState);
 
     expect(Object.keys(updateConfig)).toHaveLength(4);
     expect(updateConfig.description).toBe('the-new-description');
@@ -108,10 +102,7 @@ describe('Transform: applyFormFieldsToTransformConfig()', () => {
       },
     });
 
-    const updateConfig = applyFormFieldsToTransformConfig(
-      transformConfigMock,
-      formState.formFields
-    );
+    const updateConfig = applyFormStateToTransformConfig(transformConfigMock, formState);
 
     expect(Object.keys(updateConfig)).toHaveLength(2);
     expect(updateConfig.description).toBe('the-updated-description');
@@ -132,10 +123,7 @@ describe('Transform: applyFormFieldsToTransformConfig()', () => {
       },
     });
 
-    const updateConfig = applyFormFieldsToTransformConfig(
-      transformConfigMock,
-      formState.formFields
-    );
+    const updateConfig = applyFormStateToTransformConfig(transformConfigMock, formState);
     expect(Object.keys(updateConfig)).toHaveLength(1);
     // It should include the dependent unchanged destination index
     expect(updateConfig.dest?.index).toBe(transformConfigMock.dest.index);
@@ -159,10 +147,7 @@ describe('Transform: applyFormFieldsToTransformConfig()', () => {
       },
     });
 
-    const updateConfig = applyFormFieldsToTransformConfig(
-      transformConfigMock,
-      formState.formFields
-    );
+    const updateConfig = applyFormStateToTransformConfig(transformConfigMock, formState);
     expect(Object.keys(updateConfig)).toHaveLength(1);
     // It should include the dependent unchanged destination index
     expect(updateConfig.dest?.index).toBe(transformConfigMock.dest.index);
@@ -177,14 +162,31 @@ describe('Transform: applyFormFieldsToTransformConfig()', () => {
       description: 'the-updated-description',
     });
 
-    const updateConfig = applyFormFieldsToTransformConfig(
-      transformConfigMock,
-      formState.formFields
-    );
+    const updateConfig = applyFormStateToTransformConfig(transformConfigMock, formState);
     expect(Object.keys(updateConfig)).toHaveLength(1);
     // It should exclude the dependent unchanged destination section
     expect(typeof updateConfig.dest).toBe('undefined');
     expect(updateConfig.description).toBe('the-updated-description');
+  });
+
+  it('should return the config to reset retention policy', () => {
+    const transformConfigMock = getTransformConfigMock();
+
+    const formState = getDefaultState({
+      ...transformConfigMock,
+      retention_policy: {
+        time: { field: 'the-time-field', max_age: '1d' },
+      },
+    });
+
+    formState.formSections.retentionPolicy.enabled = false;
+
+    const updateConfig = applyFormStateToTransformConfig(transformConfigMock, formState);
+
+    expect(Object.keys(updateConfig)).toHaveLength(1);
+    // It should exclude the dependent unchanged destination section
+    expect(typeof updateConfig.dest).toBe('undefined');
+    expect(updateConfig.retention_policy).toBe(null);
   });
 });
 

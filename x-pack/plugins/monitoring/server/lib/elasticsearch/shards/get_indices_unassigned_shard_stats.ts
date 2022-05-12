@@ -7,8 +7,6 @@
 
 import { get } from 'lodash';
 // @ts-ignore
-import { checkParam } from '../../error_missing_required';
-// @ts-ignore
 import { createQuery } from '../../create_query';
 // @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
@@ -16,14 +14,12 @@ import { ElasticsearchMetric } from '../../metrics';
 import { calculateIndicesTotals } from './calculate_shard_stat_indices_totals';
 import { LegacyRequest } from '../../../types';
 import { ElasticsearchModifiedSource } from '../../../../common/types/es';
+import { getNewIndexPatterns } from '../../cluster/get_index_patterns';
+import { Globals } from '../../../static_globals';
 
-async function getUnassignedShardData(
-  req: LegacyRequest,
-  esIndexPattern: string,
-  cluster: ElasticsearchModifiedSource
-) {
-  const config = req.server.config();
-  const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
+async function getUnassignedShardData(req: LegacyRequest, cluster: ElasticsearchModifiedSource) {
+  const config = req.server.config;
+  const maxBucketSize = config.ui.max_bucket_size;
   const metric = ElasticsearchMetric.getMetricFields();
 
   const filters = [];
@@ -38,14 +34,26 @@ async function getUnassignedShardData(
     });
   }
 
+  const dataset = 'shard'; // data_stream.dataset
+  const type = 'shards'; // legacy
+  const moduleType = 'elasticsearch';
+  const indexPattern = getNewIndexPatterns({
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
+    moduleType,
+    dataset,
+  });
+
   const params = {
-    index: esIndexPattern,
+    index: indexPattern,
     size: 0,
     ignore_unavailable: true,
     body: {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
-        types: ['shard', 'shards'],
+        type,
+        dsDataset: `${moduleType}.${dataset}`,
+        metricset: dataset,
         clusterUuid: cluster.cluster_uuid ?? cluster.elasticsearch?.cluster?.id,
         metric,
         filters,
@@ -84,12 +92,9 @@ async function getUnassignedShardData(
 
 export async function getIndicesUnassignedShardStats(
   req: LegacyRequest,
-  esIndexPattern: string,
   cluster: ElasticsearchModifiedSource
 ) {
-  checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getShardStats');
-
-  const response = await getUnassignedShardData(req, esIndexPattern, cluster);
+  const response = await getUnassignedShardData(req, cluster);
   const indices = get(response, 'aggregations.indices.buckets', []).reduce(
     (accum: any, bucket: any) => {
       const index = bucket.key;

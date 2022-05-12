@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { ElasticsearchClient } from 'src/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
 import type {
@@ -55,29 +55,30 @@ export const getTransactionDurationRangesRequest = (
   };
 };
 
+interface Aggs extends estypes.AggregationsMultiBucketAggregateBase {
+  buckets: Array<{
+    from: number;
+    doc_count: number;
+  }>;
+}
+
 export const fetchTransactionDurationRanges = async (
   esClient: ElasticsearchClient,
   params: CorrelationsParams,
   rangesSteps: number[],
   termFilters?: FieldValuePair[]
 ): Promise<Array<{ key: number; doc_count: number }>> => {
-  const resp = await esClient.search<ResponseHit>(
+  const resp = await esClient.search<ResponseHit, { logspace_ranges: Aggs }>(
     getTransactionDurationRangesRequest(params, rangesSteps, termFilters)
   );
 
-  if (resp.body.aggregations === undefined) {
+  if (resp.aggregations === undefined) {
     throw new Error(
       'fetchTransactionDurationCorrelation failed, did not return aggregations.'
     );
   }
 
-  return (
-    resp.body.aggregations
-      .logspace_ranges as estypes.AggregationsMultiBucketAggregate<{
-      from: number;
-      doc_count: number;
-    }>
-  ).buckets
+  return resp.aggregations.logspace_ranges.buckets
     .map((d) => ({
       key: d.from,
       doc_count: d.doc_count,

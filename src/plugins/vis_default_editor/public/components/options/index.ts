@@ -19,3 +19,4 @@ export { RequiredNumberInputOption } from './required_number_input';
 export { TextInputOption } from './text_input';
 export { PercentageModeOption } from './percentage_mode';
 export { LongLegendOptions } from './long_legend_options';
+export { LegendSizeSettings } from './legend_size_settings';

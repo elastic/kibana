@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
+import type { KibanaFeature } from '@kbn/features-plugin/common';
+
 import {
   GLOBAL_RESOURCE,
   RESERVED_PRIVILEGES_APPLICATION_WILDCARD,
 } from '../../../common/constants';
 import type { Role, RoleKibanaPrivilege } from '../../../common/model';
+import { getDetailedErrorMessage } from '../../errors';
 import { PrivilegeSerializer } from '../privilege_serializer';
 import { ResourceSerializer } from '../resource_serializer';
 
@@ -25,15 +29,18 @@ export type ElasticsearchRole = Pick<Role, 'name' | 'metadata' | 'transient_meta
 };
 
 export function transformElasticsearchRoleToRole(
+  features: KibanaFeature[],
   elasticsearchRole: Omit<ElasticsearchRole, 'name'>,
   name: string,
-  application: string
+  application: string,
+  logger: Logger
 ): Role {
   const kibanaTransformResult = transformRoleApplicationsToKibanaPrivileges(
+    features,
     elasticsearchRole.applications,
-    application
+    application,
+    logger
   );
-
   return {
     name,
     metadata: elasticsearchRole.metadata,
@@ -53,8 +60,10 @@ export function transformElasticsearchRoleToRole(
 }
 
 function transformRoleApplicationsToKibanaPrivileges(
+  features: KibanaFeature[],
   roleApplications: ElasticsearchRole['applications'],
-  application: string
+  application: string,
+  logger: Logger
 ) {
   const roleKibanaApplications = roleApplications.filter(
     (roleApplication) =>
@@ -184,9 +193,47 @@ function transformRoleApplicationsToKibanaPrivileges(
     };
   }
 
-  return {
-    success: true,
-    value: roleKibanaApplications.map(({ resources, privileges }) => {
+  // if a feature privilege requires all spaces, but is assigned to other spaces, we won't transform these
+  if (
+    roleKibanaApplications.some(
+      (entry) =>
+        !entry.resources.includes(GLOBAL_RESOURCE) &&
+        features.some((f) =>
+          Object.entries(f.privileges ?? {}).some(
+            ([privName, featurePrivilege]) =>
+              featurePrivilege.requireAllSpaces &&
+              entry.privileges.includes(
+                PrivilegeSerializer.serializeFeaturePrivilege(f.id, privName)
+              )
+          )
+        )
+    )
+  ) {
+    return {
+      success: false,
+    };
+  }
+
+  // if a feature privilege has been disabled we won't transform these
+  if (
+    roleKibanaApplications.some((entry) =>
+      features.some((f) =>
+        Object.entries(f.privileges ?? {}).some(
+          ([privName, featurePrivilege]) =>
+            featurePrivilege.disabled &&
+            entry.privileges.includes(PrivilegeSerializer.serializeFeaturePrivilege(f.id, privName))
+        )
+      )
+    )
+  ) {
+    return {
+      success: false,
+    };
+  }
+
+  // try/catch block ensures graceful return on deserialize exceptions
+  try {
+    const transformResult = roleKibanaApplications.map(({ resources, privileges }) => {
       // if we're dealing with a global entry, which we've ensured above is only possible if it's the only item in the array
       if (resources.length === 1 && resources[0] === GLOBAL_RESOURCE) {
         const reservedPrivileges = privileges.filter((privilege) =>
@@ -246,8 +293,18 @@ function transformRoleApplicationsToKibanaPrivileges(
         }, {} as RoleKibanaPrivilege['feature']),
         spaces: resources.map((resource) => ResourceSerializer.deserializeSpaceResource(resource)),
       };
-    }),
-  };
+    });
+
+    return {
+      success: true,
+      value: transformResult,
+    };
+  } catch (e) {
+    logger.error(`Error transforming Elasticsearch role: ${getDetailedErrorMessage(e)}`);
+    return {
+      success: false,
+    };
+  }
 }
 
 const extractUnrecognizedApplicationNames = (

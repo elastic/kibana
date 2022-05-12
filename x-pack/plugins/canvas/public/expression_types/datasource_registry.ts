@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Registry } from '@kbn/interpreter/common';
+import { Registry } from '@kbn/interpreter';
 import { Datasource } from './datasource';
 import type { Datasource as DatasourceType, DatasourceProps } from './datasource';
 

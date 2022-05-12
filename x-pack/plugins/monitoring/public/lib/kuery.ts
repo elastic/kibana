@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { esKuery, IIndexPattern } from '../../../../../src/plugins/data/public';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { DataView } from '@kbn/data-views-plugin/public';
 
 export const convertKueryToElasticSearchQuery = (
   kueryExpression: string,
-  indexPattern: IIndexPattern
+  indexPattern: DataView
 ) => {
   try {
     return kueryExpression
-      ? JSON.stringify(
-          esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(kueryExpression), indexPattern)
-        )
+      ? JSON.stringify(toElasticsearchQuery(fromKueryExpression(kueryExpression), indexPattern))
       : '';
   } catch (err) {
     return '';

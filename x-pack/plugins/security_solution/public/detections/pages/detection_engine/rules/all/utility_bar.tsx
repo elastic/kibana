@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiContextMenuPanel, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import {
+  EuiContextMenu,
+  EuiContextMenuPanel,
+  EuiSwitch,
+  EuiSwitchEvent,
+  EuiContextMenuPanelDescriptor,
+} from '@elastic/eui';
 import React, { useCallback } from 'react';
 
 import {
@@ -16,19 +22,23 @@ import {
   UtilityBarText,
 } from '../../../../../common/components/utility_bar';
 import * as i18n from '../translations';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { useRulesTableContextOptional } from './rules_table/rules_table_context';
 
 interface AllRulesUtilityBarProps {
   canBulkEdit: boolean;
   isAllSelected?: boolean;
   isAutoRefreshOn?: boolean;
   numberSelectedItems: number;
-  onGetBatchItemsPopoverContent?: (closePopover: () => void) => JSX.Element[];
-  onRefresh?: (refreshRule: boolean) => void;
+  onGetBulkItemsPopoverContent?: (closePopover: () => void) => EuiContextMenuPanelDescriptor[];
+  onRefresh?: () => void;
   onRefreshSwitch?: (checked: boolean) => void;
   onToggleSelectAll?: () => void;
   paginationTotal: number;
-  showBulkActions: boolean;
+  hasBulkActions: boolean;
   hasPagination?: boolean;
+  isBulkActionInProgress?: boolean;
+  hasDisabledActions?: boolean;
 }
 
 export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
@@ -37,23 +47,33 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
     isAllSelected,
     isAutoRefreshOn,
     numberSelectedItems,
-    onGetBatchItemsPopoverContent,
+    onGetBulkItemsPopoverContent,
     onRefresh,
     onRefreshSwitch,
     onToggleSelectAll,
     paginationTotal,
-    showBulkActions = true,
+    hasBulkActions = true,
     hasPagination,
+    isBulkActionInProgress,
+    hasDisabledActions,
   }) => {
-    const handleGetBatchItemsPopoverContent = useCallback(
+    const { timelines } = useKibana().services;
+    const rulesTableContext = useRulesTableContextOptional();
+
+    const handleGetBulkItemsPopoverContent = useCallback(
       (closePopover: () => void): JSX.Element | null => {
-        if (onGetBatchItemsPopoverContent != null) {
-          return <EuiContextMenuPanel items={onGetBatchItemsPopoverContent(closePopover)} />;
+        if (onGetBulkItemsPopoverContent != null) {
+          return (
+            <EuiContextMenu
+              initialPanelId={0}
+              panels={onGetBulkItemsPopoverContent(closePopover)}
+            />
+          );
         } else {
           return null;
         }
       },
-      [onGetBatchItemsPopoverContent]
+      [onGetBulkItemsPopoverContent]
     );
 
     const handleAutoRefreshSwitch = useCallback(
@@ -85,10 +105,10 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
     );
 
     return (
-      <UtilityBar>
+      <UtilityBar border>
         <UtilityBarSection>
           <UtilityBarGroup>
-            {showBulkActions ? (
+            {hasBulkActions ? (
               <UtilityBarText dataTestSubj="showingRules">
                 {i18n.SHOWING_RULES(paginationTotal)}
               </UtilityBarText>
@@ -99,7 +119,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
             )}
           </UtilityBarGroup>
 
-          {showBulkActions ? (
+          {hasBulkActions ? (
             <>
               <UtilityBarGroup data-test-subj="tableBulkActions">
                 <UtilityBarText dataTestSubj="selectedRules">
@@ -108,6 +128,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
 
                 {canBulkEdit && onToggleSelectAll && hasPagination && (
                   <UtilityBarAction
+                    disabled={hasDisabledActions}
                     dataTestSubj="selectAllRules"
                     iconType={isAllSelected ? 'cross' : 'pagesSelect'}
                     iconSide="left"
@@ -119,16 +140,20 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
 
                 {canBulkEdit && (
                   <UtilityBarAction
+                    disabled={hasDisabledActions}
+                    inProgress={isBulkActionInProgress}
                     dataTestSubj="bulkActions"
                     iconSide="right"
                     iconType="arrowDown"
-                    popoverContent={handleGetBatchItemsPopoverContent}
+                    popoverPanelPaddingSize="none"
+                    popoverContent={handleGetBulkItemsPopoverContent}
                   >
                     {i18n.BATCH_ACTIONS}
                   </UtilityBarAction>
                 )}
 
                 <UtilityBarAction
+                  disabled={hasDisabledActions}
                   dataTestSubj="refreshRulesAction"
                   iconSide="left"
                   iconType="refresh"
@@ -137,6 +162,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
                   {i18n.REFRESH}
                 </UtilityBarAction>
                 <UtilityBarAction
+                  disabled={hasDisabledActions}
                   dataTestSubj="refreshSettings"
                   iconSide="right"
                   iconType="arrowDown"
@@ -159,6 +185,14 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
             </UtilityBarGroup>
           )}
         </UtilityBarSection>
+        {rulesTableContext && (
+          <UtilityBarSection>
+            {timelines.getLastUpdated({
+              showUpdating: rulesTableContext.state.isFetching,
+              updatedAt: rulesTableContext.state.lastUpdated,
+            })}
+          </UtilityBarSection>
+        )}
       </UtilityBar>
     );
   }

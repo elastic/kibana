@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
-import { CreateAggConfigParams, IndexPattern, UI_SETTINGS } from '../../../common';
+import { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
+import { CreateAggConfigParams, IndexPattern, UI_SETTINGS } from '../..';
 import { GetConfigFn } from '../../types';
 import {
   AggConfigs,
@@ -15,9 +15,8 @@ import {
   getAggTypes,
   getAggTypesFunctions,
   getCalculateAutoTimeExpression,
-} from './';
+} from '.';
 import { AggsCommonSetup, AggsCommonStart } from './types';
-import { getDatatableColumnUtilities } from './utils/datatable_column_meta';
 
 /** @internal */
 export const aggsRequiredUiSettings = [
@@ -32,12 +31,10 @@ export const aggsRequiredUiSettings = [
   UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX,
 ];
 
-/** @internal */
 export interface AggsCommonSetupDependencies {
   registerFunction: ExpressionsServiceSetup['registerFunction'];
 }
 
-/** @internal */
 export interface AggsCommonStartDependencies {
   getConfig: GetConfigFn;
   getIndexPattern(id: string): Promise<IndexPattern>;
@@ -69,11 +66,7 @@ export class AggsCommonService {
     };
   }
 
-  public start({
-    getConfig,
-    getIndexPattern,
-    isDefaultTimezone,
-  }: AggsCommonStartDependencies): AggsCommonStart {
+  public start({ getConfig }: AggsCommonStartDependencies): AggsCommonStart {
     const aggTypesStart = this.aggTypesRegistry.start();
     const calculateAutoTimeExpression = getCalculateAutoTimeExpression(getConfig);
 
@@ -88,11 +81,6 @@ export class AggsCommonService {
 
     return {
       calculateAutoTimeExpression,
-      datatableUtilities: getDatatableColumnUtilities({
-        getIndexPattern,
-        createAggConfigs,
-        aggTypesStart,
-      }),
       createAggConfigs,
       types: aggTypesStart,
     };

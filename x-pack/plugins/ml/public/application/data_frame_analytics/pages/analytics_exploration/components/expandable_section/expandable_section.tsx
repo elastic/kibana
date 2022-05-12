@@ -75,7 +75,12 @@ export const ExpandableSection: FC<ExpandableSectionProps> = ({
   }, [isExpanded, setPageUrlState, urlStateKey]);
 
   return (
-    <EuiPanel paddingSize="none" data-test-subj={`mlDFExpandableSection-${dataTestId}`}>
+    <EuiPanel
+      paddingSize="none"
+      data-test-subj={`mlDFExpandableSection-${dataTestId}`}
+      hasShadow={false}
+      hasBorder
+    >
       <div className="mlExpandableSection">
         <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
           <EuiFlexItem grow={false}>
@@ -84,6 +89,7 @@ export const ExpandableSection: FC<ExpandableSectionProps> = ({
               iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
               iconSide="right"
               flush="left"
+              data-test-subj={`mlDFExpandableSection-${dataTestId}-toggle-button`}
             >
               {title}
             </EuiButtonEmpty>
@@ -126,7 +132,12 @@ export const ExpandableSection: FC<ExpandableSectionProps> = ({
         )}
       </div>
       {isExpanded && (
-        <div className={contentPadding ? 'mlExpandableSection-contentPadding' : ''}>{content}</div>
+        <div
+          className={contentPadding ? 'mlExpandableSection-contentPadding' : ''}
+          data-test-subj={`mlDFExpandableSection-${dataTestId}-content`}
+        >
+          {content}
+        </div>
       )}
     </EuiPanel>
   );

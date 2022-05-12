@@ -6,19 +6,23 @@
  */
 
 import expect from '@kbn/expect';
+import { CASES_URL, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
+import { AttributesTypeUser } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
-  CASES_URL,
-  SECURITY_SOLUTION_OWNER,
-} from '../../../../../../plugins/cases/common/constants';
-import { getCase, getCaseSavedObjectsFromES, resolveCase } from '../../../../common/lib/utils';
+  deleteAllCaseItems,
+  getCase,
+  getCaseSavedObjectsFromES,
+  resolveCase,
+} from '../../../../common/lib/utils';
 import { superUser } from '../../../../common/lib/authentication/users';
-import { AttributesTypeUser } from '../../../../../../plugins/cases/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
+  const es = getService('es');
 
   describe('migrations', () => {
     // tests upgrading a 7.10.0 saved object to the latest version
@@ -135,8 +139,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       });
 
       describe('migrating connector id to a reference', () => {
-        const es = getService('es');
-
         it('preserves the connector id after migration in the API response', async () => {
           const theCase = await getCase({
             supertest,
@@ -330,6 +332,98 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             expect(comment.comment).to.be('a comment');
             expect(comment.owner).to.be(SECURITY_SOLUTION_OWNER);
           });
+        });
+      });
+    });
+
+    describe('8.1.0 removing type', () => {
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.13.2/case_and_collection.json'
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.13.2/case_and_collection.json'
+        );
+        await deleteAllCaseItems(es);
+      });
+
+      it('removes the type field from an individual case', async () => {
+        const caseInfo = await getCase({
+          supertest,
+          caseId: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
+        });
+
+        expect(caseInfo).not.to.have.property('type');
+      });
+
+      it('removes the type field from a collection case', async () => {
+        const caseInfo = await getCase({
+          supertest,
+          caseId: 'e49ad6e0-cf9d-11eb-a603-13e7747d215z',
+        });
+
+        expect(caseInfo).not.to.have.property('type');
+      });
+    });
+
+    describe('8.3.0', () => {
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_duration.json'
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_duration.json'
+        );
+        await deleteAllCaseItems(es);
+      });
+
+      describe('adding duration', () => {
+        it('calculates the correct duration for closed cases', async () => {
+          const caseInfo = await getCase({
+            supertest,
+            caseId: '4537b380-a512-11ec-b92f-859b9e89e434',
+          });
+
+          expect(caseInfo).to.have.property('duration');
+          expect(caseInfo.duration).to.be(120);
+        });
+
+        it('sets the duration to null to open cases', async () => {
+          const caseInfo = await getCase({
+            supertest,
+            caseId: '7537b580-a512-11ec-b94f-85979e89e434',
+          });
+
+          expect(caseInfo).to.have.property('duration');
+          expect(caseInfo.duration).to.be(null);
+        });
+
+        it('sets the duration to null to in-progress cases', async () => {
+          const caseInfo = await getCase({
+            supertest,
+            caseId: '1537b580-a512-11ec-b94f-85979e89e434',
+          });
+
+          expect(caseInfo).to.have.property('duration');
+          expect(caseInfo.duration).to.be(null);
+        });
+      });
+
+      describe('add severity', () => {
+        it('adds the severity field for existing documents', async () => {
+          const caseInfo = await getCase({
+            supertest,
+            caseId: '4537b380-a512-11ec-b92f-859b9e89e434',
+          });
+
+          expect(caseInfo).to.have.property('severity');
+          expect(caseInfo.severity).to.be('low');
         });
       });
     });

@@ -7,11 +7,7 @@
 
 import expect from '@kbn/expect';
 import { chunk } from 'lodash';
-import {
-  ALERT_STATUS_ACTIVE,
-  ALERT_STATUS_RECOVERED,
-  AlertStatus,
-} from '@kbn/rule-data-utils/alerts_as_data_status';
+import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, AlertStatus } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { WebElementWrapper } from '../../../../../../test/functional/services/lib/web_element_wrapper';
 
@@ -27,7 +23,7 @@ const ALERTS_TABLE_CONTAINER_SELECTOR = 'events-viewer-panel';
 const VIEW_RULE_DETAILS_SELECTOR = 'viewRuleDetails';
 const VIEW_RULE_DETAILS_FLYOUT_SELECTOR = 'viewRuleDetailsFlyout';
 
-const ACTION_COLUMN_INDEX = 1;
+const ACTION_COLUMN_INDEX = 0;
 
 type WorkflowStatus = 'open' | 'acknowledged' | 'closed';
 
@@ -79,6 +75,14 @@ export function ObservabilityAlertsCommonProvider({
     return await testSubjects.findAll('dataGridRowCell');
   };
 
+  const getAllDisabledCheckBoxInTable = async () => {
+    return await find.allByCssSelector('.euiDataGridRowCell input[type="checkbox"]:disabled');
+  };
+
+  const getAllEnabledCheckBoxInTable = async () => {
+    return await find.allByCssSelector('.euiDataGridRowCell input[type="checkbox"]:enabled');
+  };
+
   const getExperimentalDisclaimer = async () => {
     return testSubjects.existOrFail('o11yExperimentalDisclaimer');
   };
@@ -127,12 +131,14 @@ export function ObservabilityAlertsCommonProvider({
   };
 
   // Flyout
-  const getOpenFlyoutButton = async () => {
-    return await testSubjects.find('openFlyoutButton');
+  const getViewAlertDetailsFlyoutButton = async () => {
+    await openActionsMenuForRow(0);
+
+    return await testSubjects.find('viewAlertDetails');
   };
 
   const openAlertsFlyout = async () => {
-    await (await getOpenFlyoutButton()).click();
+    await (await getViewAlertDetailsFlyoutButton()).click();
     await retry.waitFor(
       'flyout open',
       async () => await testSubjects.exists(ALERTS_FLYOUT_SELECTOR, { timeout: 2500 })
@@ -261,7 +267,7 @@ export function ObservabilityAlertsCommonProvider({
 
     const datePickerButton = await testSubjects.find('superDatePickerShowDatesButton');
     const buttonText = await datePickerButton.getVisibleText();
-    return buttonText.substring(0, buttonText.indexOf('\n'));
+    return buttonText;
   };
 
   const getActionsButtonByIndex = async (index: number) => {
@@ -291,6 +297,8 @@ export function ObservabilityAlertsCommonProvider({
     getAlertsFlyoutOrFail,
     getAlertsFlyoutTitle,
     getAlertsFlyoutViewInAppButtonOrFail,
+    getAllDisabledCheckBoxInTable,
+    getAllEnabledCheckBoxInTable,
     getFilterForValueButton,
     getNoDataPageOrFail,
     getNoDataStateOrFail,

@@ -8,7 +8,7 @@
 import { Direction, EuiBasicTableProps, Pagination, PropertySort } from '@elastic/eui';
 import { useCallback, useMemo } from 'react';
 
-import { DataVisualizerTableState } from '../../../../../common';
+import type { DataVisualizerTableState } from '../../../../../common/types';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 

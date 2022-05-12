@@ -1,0 +1,75 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the use of .NET functionality for decompression and base64 decoding combined in PowerShell scripts, which malware and security tools heavily use to deobfuscate payloads and load them directly in memory to bypass defenses.",
+  "false_positives": [
+    "Legitimate PowerShell Scripts which makes use of compression and encoding."
+  ],
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-windows.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "PowerShell Suspicious Payload Encoded and Compressed",
+  "query": "event.category:process and \n  powershell.file.script_block_text : (\n    (\n      \"System.IO.Compression.DeflateStream\" or\n      \"System.IO.Compression.GzipStream\" or\n      \"IO.Compression.DeflateStream\" or\n      \"IO.Compression.GzipStream\"\n    ) and\n    FromBase64String\n  )\n",
+  "risk_score": 47,
+  "rule_id": "81fe9dc6-a2d7-4192-a2d8-eed98afc766a",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1140",
+          "name": "Deobfuscate/Decode Files or Information",
+          "reference": "https://attack.mitre.org/techniques/T1140/"
+        },
+        {
+          "id": "T1027",
+          "name": "Obfuscated Files or Information",
+          "reference": "https://attack.mitre.org/techniques/T1027/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "reference": "https://attack.mitre.org/techniques/T1059/",
+          "subtechnique": [
+            {
+              "id": "T1059.001",
+              "name": "PowerShell",
+              "reference": "https://attack.mitre.org/techniques/T1059/001/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 3
+}

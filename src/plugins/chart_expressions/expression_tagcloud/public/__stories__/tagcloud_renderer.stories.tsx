@@ -8,9 +8,10 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
+import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { tagcloudRenderer } from '../expression_renderers';
-import { Render } from '../../../../presentation_util/public/__stories__';
 import { TagcloudRendererConfig } from '../../common/types';
+import { ScaleOptions, Orientation } from '../../common/constants';
 import { palettes } from '../__mocks__/palettes';
 import { theme } from '../__mocks__/theme';
 
@@ -39,8 +40,8 @@ const config: TagcloudRendererConfig = {
     ],
   },
   visParams: {
-    scale: 'linear',
-    orientation: 'single',
+    scale: ScaleOptions.LINEAR,
+    orientation: Orientation.SINGLE,
     minFontSize: 18,
     maxFontSize: 72,
     showLabel: true,
@@ -78,7 +79,7 @@ storiesOf('renderers/tag_cloud_vis', module)
     return (
       <Render
         renderer={() => tagcloudRenderer({ palettes, theme })}
-        config={{ ...config, visParams: { ...config.visParams, scale: 'log' } }}
+        config={{ ...config, visParams: { ...config.visParams, scale: ScaleOptions.LOG } }}
         {...containerSize}
       />
     );
@@ -87,7 +88,7 @@ storiesOf('renderers/tag_cloud_vis', module)
     return (
       <Render
         renderer={() => tagcloudRenderer({ palettes, theme })}
-        config={{ ...config, visParams: { ...config.visParams, scale: 'square root' } }}
+        config={{ ...config, visParams: { ...config.visParams, scale: ScaleOptions.SQUARE_ROOT } }}
         {...containerSize}
       />
     );
@@ -96,7 +97,10 @@ storiesOf('renderers/tag_cloud_vis', module)
     return (
       <Render
         renderer={() => tagcloudRenderer({ palettes, theme })}
-        config={{ ...config, visParams: { ...config.visParams, orientation: 'right angled' } }}
+        config={{
+          ...config,
+          visParams: { ...config.visParams, orientation: Orientation.RIGHT_ANGLED },
+        }}
         {...containerSize}
       />
     );
@@ -105,7 +109,10 @@ storiesOf('renderers/tag_cloud_vis', module)
     return (
       <Render
         renderer={() => tagcloudRenderer({ palettes, theme })}
-        config={{ ...config, visParams: { ...config.visParams, orientation: 'multiple' } }}
+        config={{
+          ...config,
+          visParams: { ...config.visParams, orientation: Orientation.MULTIPLE },
+        }}
         {...containerSize}
       />
     );

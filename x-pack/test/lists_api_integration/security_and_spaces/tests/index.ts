@@ -10,8 +10,6 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('lists api security and spaces enabled', function () {
-    this.tags('ciGroup1');
-
     loadTestFile(require.resolve('./create_lists'));
     loadTestFile(require.resolve('./create_list_items'));
     loadTestFile(require.resolve('./read_lists'));
@@ -22,6 +20,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./delete_list_items'));
     loadTestFile(require.resolve('./find_lists'));
     loadTestFile(require.resolve('./find_list_items'));
+    loadTestFile(require.resolve('./import_exceptions'));
     loadTestFile(require.resolve('./import_list_items'));
     loadTestFile(require.resolve('./export_list_items'));
     loadTestFile(require.resolve('./export_exception_list'));

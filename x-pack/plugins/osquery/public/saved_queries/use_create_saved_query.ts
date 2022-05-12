@@ -29,6 +29,7 @@ export const useCreateSavedQuery = ({ withRedirect }: UseCreateSavedQueryProps) 
 
   return useMutation(
     (payload) =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       http.post<any>('/internal/osquery/saved_query', {
         body: JSON.stringify(payload),
       }),
@@ -44,6 +45,7 @@ export const useCreateSavedQuery = ({ withRedirect }: UseCreateSavedQueryProps) 
         if (withRedirect) {
           navigateToApp(PLUGIN_ID, { path: pagePathGetters.saved_queries() });
         }
+
         toasts.addSuccess(
           i18n.translate('xpack.osquery.newSavedQuery.successToastMessageText', {
             defaultMessage: 'Successfully saved "{savedQueryId}" query',

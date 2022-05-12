@@ -7,7 +7,7 @@
  */
 
 import { each } from 'lodash';
-import { IndexPatternBase, IndexPatternFieldBase } from '../../es_query';
+import { DataViewBase, DataViewFieldBase } from '../../es_query';
 import { fields, getField } from '../stubs';
 import {
   buildRangeFilter,
@@ -17,12 +17,12 @@ import {
 } from './range_filter';
 
 describe('Range filter builder', () => {
-  let indexPattern: IndexPatternBase;
+  let indexPattern: DataViewBase;
 
   beforeEach(() => {
     indexPattern = {
       id: 'id',
-    } as IndexPatternBase;
+    } as DataViewBase;
   });
 
   it('should be a function', () => {
@@ -145,7 +145,7 @@ describe('Range filter builder', () => {
   });
 
   describe('when given params where one side is infinite', () => {
-    let field: IndexPatternFieldBase;
+    let field: DataViewFieldBase;
     let filter: ScriptedRangeFilter;
 
     beforeEach(() => {
@@ -179,7 +179,7 @@ describe('Range filter builder', () => {
   });
 
   describe('when given params where both sides are infinite', () => {
-    let field: IndexPatternFieldBase;
+    let field: DataViewFieldBase;
     let filter: ScriptedRangeFilter;
 
     beforeEach(() => {
@@ -209,9 +209,9 @@ describe('Range filter builder', () => {
 });
 
 describe('getRangeFilterField', function () {
-  const indexPattern: IndexPatternBase = {
+  const indexPattern: DataViewBase = {
     fields,
-  } as unknown as IndexPatternBase;
+  } as unknown as DataViewBase;
 
   test('should return the name of the field a range query is targeting', () => {
     const field = indexPattern.fields.find((patternField) => patternField.name === 'bytes');

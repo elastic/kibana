@@ -185,8 +185,7 @@ export function TopValues({
         fieldName !== undefined &&
         fieldValue !== undefined
       ) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/correlations/field_value_stats',
+        return callApmApi('GET /internal/apm/correlations/field_value_stats', {
           params: {
             query: {
               ...params,

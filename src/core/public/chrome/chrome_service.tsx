@@ -55,7 +55,7 @@ export interface StartDeps {
 export class ChromeService {
   private isVisible$!: Observable<boolean>;
   private isForceHidden$!: BehaviorSubject<boolean>;
-  private readonly stop$ = new ReplaySubject(1);
+  private readonly stop$ = new ReplaySubject<void>(1);
   private readonly navControls = new NavControlsService();
   private readonly navLinks = new NavLinksService();
   private readonly recentlyAccessed = new RecentlyAccessedService();
@@ -212,7 +212,7 @@ export class ChromeService {
           breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
           breadcrumbsAppendExtension$={breadcrumbsAppendExtension$.pipe(takeUntil(this.stop$))}
           customNavLink$={customNavLink$.pipe(takeUntil(this.stop$))}
-          kibanaDocLink={docLinks.links.kibana}
+          kibanaDocLink={docLinks.links.kibana.guide}
           forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
           helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
           helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}

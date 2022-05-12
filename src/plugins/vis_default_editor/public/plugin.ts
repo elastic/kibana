@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin } from 'kibana/public';
+import { CoreSetup, Plugin } from '@kbn/core/public';
 
-import { VisualizePluginSetup } from '../../visualize/public';
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { DefaultEditorController } from './default_editor_controller';
 import { setTheme } from './services';
 
 export interface VisDefaultEditorSetupDependencies {
-  visualize: VisualizePluginSetup;
+  visualizations: VisualizationsSetup;
 }
 
 export class VisDefaultEditorPlugin
   implements Plugin<void, void, VisDefaultEditorSetupDependencies, {}>
 {
-  public setup(core: CoreSetup, { visualize }: VisDefaultEditorSetupDependencies) {
+  public setup(core: CoreSetup, { visualizations }: VisDefaultEditorSetupDependencies) {
     setTheme(core.theme);
-    if (visualize) {
-      visualize.visEditorsRegistry.registerDefault(DefaultEditorController);
+    if (visualizations) {
+      visualizations.visEditorsRegistry.registerDefault(DefaultEditorController);
     }
   }
 

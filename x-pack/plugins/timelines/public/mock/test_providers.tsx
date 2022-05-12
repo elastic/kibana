@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiDarkVars } from '@kbn/ui-theme';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import React from 'react';

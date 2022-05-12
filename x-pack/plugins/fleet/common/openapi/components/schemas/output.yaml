@@ -20,12 +20,21 @@ properties:
     type: string
   ca_trusted_fingerprint:
     type: string
-  api_key:
-    type: string
   config:
     type: object
   config_yaml:
     type: string
+  ssl:
+    type: object
+    properties: 
+      certificate:
+        type: string
+      certificate_authorities:
+        type: array
+        items:
+          type: string
+      key:
+        type: string
 required:
   - id
   - is_default

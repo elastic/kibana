@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 const bodySchema = schema.any();
 
@@ -23,18 +23,18 @@ export function registerUpdateRoute({ router, lib: { handleEsError } }: RouteDep
       validate: { body: bodySchema, params: paramsSchema },
     },
     async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
       const { indexName } = request.params as typeof paramsSchema.type;
       const params = {
         ignore_unavailable: true,
         allow_no_indices: false,
-        expand_wildcards: 'none',
+        expand_wildcards: 'none' as const,
         index: indexName,
         body: request.body,
       };
 
       try {
-        const { body: responseBody } = await client.asCurrentUser.indices.putSettings(params);
+        const responseBody = await client.asCurrentUser.indices.putSettings(params);
         return response.ok({ body: responseBody });
       } catch (error) {
         return handleEsError({ error, response });

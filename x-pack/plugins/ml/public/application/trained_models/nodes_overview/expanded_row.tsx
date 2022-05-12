@@ -15,11 +15,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { cloneDeep } from 'lodash';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { NodeItem } from './nodes_list';
-import { formatToListItems } from '../models_management/expanded_row';
+import { useListItemsFormatter } from '../models_management/expanded_row';
 import { AllocatedModels } from './allocated_models';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
-import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats/common';
 
 interface ExpandedRowProps {
   item: NodeItem;
@@ -28,17 +29,19 @@ interface ExpandedRowProps {
 export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
   const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
 
+  const formatToListItems = useListItemsFormatter();
+
   const {
     allocated_models: allocatedModels,
     attributes,
     memory_overview: memoryOverview,
+    id,
     ...details
-  } = item;
+  } = cloneDeep(item);
 
   // Process node attributes
   attributes['ml.machine_memory'] = bytesFormatter(attributes['ml.machine_memory']);
   attributes['ml.max_jvm_size'] = bytesFormatter(attributes['ml.max_jvm_size']);
-  delete attributes['xpack.installed'];
 
   return (
     <>

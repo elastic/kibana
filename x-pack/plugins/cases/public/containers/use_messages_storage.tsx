@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 export interface UseMessagesStorage {
   getMessages: (plugin: string) => string[];
@@ -16,7 +16,6 @@ export interface UseMessagesStorage {
   hasMessage: (plugin: string, id: string) => boolean;
 }
 
-// TODO: Removed const { storage } = useKibana().services; in favor of using the util directly
 export const useMessagesStorage = (): UseMessagesStorage => {
   const storage = useMemo(() => new Storage(localStorage), []);
 

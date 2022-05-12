@@ -51,7 +51,7 @@ export class RenderingService {
       });
 
     ReactDOM.render(
-      <CoreContextProvider i18n={i18n} theme={theme}>
+      <CoreContextProvider i18n={i18n} theme={theme} globalStyles={true}>
         <>
           {/* Fixed headers */}
           {chromeHeader}

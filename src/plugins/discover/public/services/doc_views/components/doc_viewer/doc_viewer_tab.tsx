@@ -11,8 +11,6 @@ import { isEqual } from 'lodash';
 import { DocViewRenderTab } from './doc_viewer_render_tab';
 import { DocViewerError } from './doc_viewer_render_error';
 import { DocViewRenderFn, DocViewRenderProps } from '../../doc_views_types';
-import { getServices } from '../../../../kibana_services';
-import { KibanaContextProvider } from '../../../../../../kibana_react/public';
 
 interface Props {
   id: number;
@@ -67,11 +65,7 @@ export class DocViewerTab extends React.Component<Props, State> {
 
     // doc view is provided by a react component
     if (Component) {
-      return (
-        <KibanaContextProvider services={{ uiSettings: getServices().uiSettings }}>
-          <Component {...renderProps} />
-        </KibanaContextProvider>
-      );
+      return <Component {...renderProps} />;
     }
 
     return (

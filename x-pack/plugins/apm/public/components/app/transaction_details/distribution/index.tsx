@@ -19,7 +19,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { useUiTracker } from '../../../../../../observability/public';
+import { useUiTracker } from '@kbn/observability-plugin/public';
 
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 
@@ -33,7 +33,7 @@ import { useWaterfallFetcher } from '../use_waterfall_fetcher';
 import { WaterfallWithSummary } from '../waterfall_with_summary';
 
 import { useTransactionDistributionChartData } from './use_transaction_distribution_chart_data';
-import { HeightRetainer } from '../../../shared/HeightRetainer';
+import { HeightRetainer } from '../../../shared/height_retainer';
 import { ChartTitleToolTip } from '../../correlations/chart_title_tool_tip';
 
 // Enforce min height so it's consistent across all tabs on the same level
@@ -59,6 +59,7 @@ interface TransactionDistributionProps {
   onClearSelection: () => void;
   selection?: Selection;
   traceSamples: TabContentProps['traceSamples'];
+  traceSamplesStatus: FETCH_STATUS;
 }
 
 export function TransactionDistribution({
@@ -66,9 +67,14 @@ export function TransactionDistribution({
   onClearSelection,
   selection,
   traceSamples,
+  traceSamplesStatus,
 }: TransactionDistributionProps) {
   const { urlParams } = useLegacyUrlParams();
   const { waterfall, status: waterfallStatus } = useWaterfallFetcher();
+
+  const isLoading =
+    waterfallStatus === FETCH_STATUS.LOADING ||
+    traceSamplesStatus === FETCH_STATUS.LOADING;
 
   const markerCurrentTransaction =
     waterfall.entryWaterfallTransaction?.doc.transaction.duration.us;
@@ -189,7 +195,7 @@ export function TransactionDistribution({
         <WaterfallWithSummary
           urlParams={urlParams}
           waterfall={waterfall}
-          isLoading={waterfallStatus === FETCH_STATUS.LOADING}
+          isLoading={isLoading}
           traceSamples={traceSamples}
         />
       </div>

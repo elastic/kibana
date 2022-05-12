@@ -6,27 +6,18 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Columns } from '../../paginated_table';
-import { AnomaliesByHost, Anomaly, NarrowDateRange } from '../types';
+import { AnomaliesByHost, Anomaly } from '../types';
 import { getRowItemDraggable } from '../../tables/helpers';
-import { EntityDraggable } from '../entity_draggable';
-import { createCompoundHostKey } from './create_compound_key';
+import { createCompoundAnomalyKey } from './create_compound_key';
 import { HostDetailsLink } from '../../links';
-
 import * as i18n from './translations';
-import { getEntries } from '../get_entries';
-import { DraggableScore } from '../score/draggable_score';
-import { ExplorerLink } from '../links/create_explorer_link';
 import { HostsType } from '../../../../hosts/store/model';
-import { escapeDataProviderId } from '../../drag_and_drop/helpers';
-import { FormattedRelativePreferenceDate } from '../../formatted_date';
+import { getAnomaliesDefaultTableColumns } from './get_anomalies_table_columns';
 
 export const getAnomaliesHostTableColumns = (
   startDate: string,
-  endDate: string,
-  interval: string,
-  narrowDateRange: NarrowDateRange
+  endDate: string
 ): [
   Columns<AnomaliesByHost['hostName'], AnomaliesByHost>,
   Columns<Anomaly['severity'], AnomaliesByHost>,
@@ -43,100 +34,21 @@ export const getAnomaliesHostTableColumns = (
       getRowItemDraggable({
         rowItem: hostName,
         attrName: 'host.name',
-        idPrefix: `anomalies-host-table-hostName-${createCompoundHostKey(
-          anomaliesByHost
+        idPrefix: `anomalies-host-table-hostName-${createCompoundAnomalyKey(
+          anomaliesByHost.anomaly
         )}-hostName`,
         render: (item) => <HostDetailsLink hostName={item} />,
       }),
   },
-  {
-    name: i18n.DETECTOR,
-    field: 'anomaly.jobId',
-    sortable: true,
-    render: (jobId, anomaliesByHost) => (
-      <ExplorerLink
-        score={anomaliesByHost.anomaly}
-        startDate={startDate}
-        endDate={endDate}
-        linkName={jobId}
-      />
-    ),
-  },
-  {
-    name: i18n.SCORE,
-    field: 'anomaly.severity',
-    sortable: true,
-    render: (_, anomaliesByHost) => (
-      <DraggableScore
-        id={escapeDataProviderId(
-          `anomalies-host-table-severity-${createCompoundHostKey(anomaliesByHost)}`
-        )}
-        score={anomaliesByHost.anomaly}
-      />
-    ),
-  },
-  {
-    name: i18n.ENTITY,
-    field: 'anomaly.entityValue',
-    sortable: true,
-    render: (entityValue, anomaliesByHost) => (
-      <EntityDraggable
-        idPrefix={`anomalies-host-table-entityValue${createCompoundHostKey(
-          anomaliesByHost
-        )}-entity`}
-        entityName={anomaliesByHost.anomaly.entityName}
-        entityValue={entityValue}
-      />
-    ),
-  },
-  {
-    name: i18n.INFLUENCED_BY,
-    field: 'anomaly.influencers',
-    render: (influencers, anomaliesByHost) => (
-      <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-        {influencers &&
-          influencers.map((influencer) => {
-            const [key, value] = getEntries(influencer);
-            const entityName = key != null ? key : '';
-            const entityValue = value != null ? value : '';
-            return (
-              <EuiFlexItem
-                key={`${entityName}-${entityValue}-${createCompoundHostKey(anomaliesByHost)}`}
-                grow={false}
-              >
-                <EuiFlexGroup gutterSize="none" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EntityDraggable
-                      idPrefix={`anomalies-host-table-influencers-${entityName}-${entityValue}-${createCompoundHostKey(
-                        anomaliesByHost
-                      )}`}
-                      entityName={entityName}
-                      entityValue={entityValue}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            );
-          })}
-      </EuiFlexGroup>
-    ),
-  },
-  {
-    name: i18n.TIME_STAMP,
-    field: 'anomaly.time',
-    sortable: true,
-    render: (time) => <FormattedRelativePreferenceDate value={time} />,
-  },
+  ...getAnomaliesDefaultTableColumns(startDate, endDate),
 ];
 
 export const getAnomaliesHostTableColumnsCurated = (
   pageType: HostsType,
   startDate: string,
-  endDate: string,
-  interval: string,
-  narrowDateRange: NarrowDateRange
+  endDate: string
 ) => {
-  const columns = getAnomaliesHostTableColumns(startDate, endDate, interval, narrowDateRange);
+  const columns = getAnomaliesHostTableColumns(startDate, endDate);
 
   // Columns to exclude from host details pages
   if (pageType === HostsType.details) {

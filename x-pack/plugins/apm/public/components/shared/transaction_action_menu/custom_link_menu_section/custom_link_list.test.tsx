@@ -12,7 +12,7 @@ import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,
-} from '../../../../utils/testHelpers';
+} from '../../../../utils/test_helpers';
 import { CustomLinkList } from './custom_link_list';
 
 describe('CustomLinkList', () => {

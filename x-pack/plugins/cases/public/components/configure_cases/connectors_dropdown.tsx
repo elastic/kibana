@@ -9,12 +9,11 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiIconTip, EuiSuperSelect } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { ConnectorTypes } from '../../../common/api';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ActionConnector } from '../../containers/configure/types';
 import * as i18n from './translations';
 import { useKibana } from '../../common/lib/kibana';
 import { getConnectorIcon, isDeprecatedConnector } from '../utils';
-import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 
 export interface Props {
   connectors: ActionConnector[];
@@ -23,7 +22,6 @@ export interface Props {
   onChange: (id: string) => void;
   selectedConnector: string;
   appendAddConnectorButton?: boolean;
-  hideConnectorServiceNowSir?: boolean;
 }
 
 const ICON_SIZE = 'm';
@@ -70,16 +68,11 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
   onChange,
   selectedConnector,
   appendAddConnectorButton = false,
-  hideConnectorServiceNowSir = false,
 }) => {
   const { triggersActionsUi } = useKibana().services;
   const connectorsAsOptions = useMemo(() => {
     const connectorsFormatted = connectors.reduce(
       (acc, connector) => {
-        if (hideConnectorServiceNowSir && connector.actionTypeId === ConnectorTypes.serviceNowSIR) {
-          return acc;
-        }
-
         return [
           ...acc,
           {
@@ -139,5 +132,6 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
     />
   );
 };
+ConnectorsDropdownComponent.displayName = 'ConnectorsDropdown';
 
 export const ConnectorsDropdown = React.memo(ConnectorsDropdownComponent);

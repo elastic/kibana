@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const LENS_GAUGE_RENDERER = 'lens_gauge_renderer';
+import { GaugeState as GaugeStateOriginal } from '@kbn/expression-gauge-plugin/common';
+import { LayerType } from '../../../common';
+
 export const LENS_GAUGE_ID = 'lnsGauge';
 
 export const GROUP_ID = {
@@ -14,3 +16,20 @@ export const GROUP_ID = {
   MAX: 'max',
   GOAL: 'goal',
 } as const;
+
+type GaugeState = Omit<GaugeStateOriginal, 'metric' | 'goal' | 'min' | 'max'> & {
+  metricAccessor?: string;
+  minAccessor?: string;
+  maxAccessor?: string;
+  goalAccessor?: string;
+};
+
+export type GaugeVisualizationState = GaugeState & {
+  layerId: string;
+  layerType: LayerType;
+};
+
+export type GaugeExpressionState = GaugeStateOriginal & {
+  layerId: string;
+  layerType: LayerType;
+};

@@ -12,25 +12,16 @@
 
 import { JsonValue } from '@kbn/utility-types';
 import { KueryNode, KueryQueryOptions } from '..';
-import { IndexPatternBase } from '../..';
+import { DataViewBase } from '../..';
 
-export type FunctionName =
-  | 'is'
-  | 'and'
-  | 'or'
-  | 'not'
-  | 'range'
-  | 'exists'
-  | 'geoBoundingBox'
-  | 'geoPolygon'
-  | 'nested';
+export type FunctionName = 'is' | 'and' | 'or' | 'not' | 'range' | 'exists' | 'nested';
 
 interface FunctionType {
   buildNode: (functionName: FunctionName, ...args: any[]) => FunctionTypeBuildNode;
   buildNodeWithArgumentNodes: (functionName: FunctionName, args: any[]) => FunctionTypeBuildNode;
   toElasticsearchQuery: (
     node: any,
-    indexPattern?: IndexPatternBase,
+    indexPattern?: DataViewBase,
     config?: KueryQueryOptions,
     context?: Record<string, any>
   ) => JsonValue;
@@ -53,17 +44,6 @@ export interface LiteralTypeBuildNode {
   value: null | boolean | number | string;
 }
 
-interface NamedArgType {
-  buildNode: (name: string, value: any) => NamedArgTypeBuildNode;
-  toElasticsearchQuery: (node: any) => JsonValue;
-}
-
-export interface NamedArgTypeBuildNode {
-  type: 'namedArg';
-  name: string;
-  value: any;
-}
-
 interface WildcardType {
   wildcardSymbol: string;
   buildNode: (value: string) => WildcardTypeBuildNode | KueryNode;
@@ -81,6 +61,5 @@ export interface WildcardTypeBuildNode {
 export interface NodeTypes {
   function: FunctionType;
   literal: LiteralType;
-  namedArg: NamedArgType;
   wildcard: WildcardType;
 }

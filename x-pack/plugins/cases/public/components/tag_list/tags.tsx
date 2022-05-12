@@ -30,5 +30,6 @@ const TagsComponent: React.FC<TagsProps> = ({ tags, color = 'default', gutterSiz
     )}
   </>
 );
+TagsComponent.displayName = 'Tags';
 
 export const Tags = memo(TagsComponent);

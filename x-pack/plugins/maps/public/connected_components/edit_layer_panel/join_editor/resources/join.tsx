@@ -9,7 +9,8 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { IndexPatternField, IndexPattern, Query } from 'src/plugins/data/public';
+import type { DataViewField, DataView, Query } from '@kbn/data-plugin/common';
+import { indexPatterns } from '@kbn/data-plugin/public';
 import { JoinExpression } from './join_expression';
 import { MetricsExpression } from './metrics_expression';
 import { WhereExpression } from './where_expression';
@@ -21,8 +22,6 @@ import {
   JoinDescriptor,
 } from '../../../../../common/descriptor_types';
 import { ILayer } from '../../../../classes/layers/layer';
-
-import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
 
 import { getIndexPatternService } from '../../../../kibana_services';
 import { getDataViewNotFoundMessage } from '../../../../../common/i18n_getters';
@@ -39,8 +38,8 @@ interface Props {
 }
 
 interface State {
-  rightFields: IndexPatternField[];
-  indexPattern?: IndexPattern;
+  rightFields: DataViewField[];
+  indexPattern?: DataView;
   loadError?: string;
 }
 

@@ -11,11 +11,11 @@ import {
   Fit,
   FitConfig,
   LineSeriesStyle,
+  RecursivePartial,
   SeriesColorAccessorFn,
   SeriesColorsArray,
 } from '@elastic/charts';
-import { DeepPartial } from 'utility-types';
-import { Maybe } from '../typings/common';
+import { Maybe } from './common';
 
 export interface Coordinate {
   x: number;
@@ -64,8 +64,8 @@ export interface APMChartSpec<
   y0Accessors?: Accessor;
   splitSeriesAccessors?: Accessor;
   markSizeAccessor?: string | AccessorFn;
-  lineSeriesStyle?: DeepPartial<LineSeriesStyle>;
-  areaSeriesStyle?: DeepPartial<AreaSeriesStyle>;
+  lineSeriesStyle?: RecursivePartial<LineSeriesStyle>;
+  areaSeriesStyle?: RecursivePartial<AreaSeriesStyle>;
   groupId?: string;
 }
 

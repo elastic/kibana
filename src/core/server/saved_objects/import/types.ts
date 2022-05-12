@@ -89,10 +89,6 @@ export interface SavedObjectsImportMissingReferencesError {
 export interface SavedObjectsImportFailure {
   id: string;
   type: string;
-  /**
-   * @deprecated Use `meta.title` instead
-   */
-  title?: string;
   meta: { title?: string; icon?: string };
   /**
    * If `overwrite` is specified, an attempt was made to overwrite an existing object.
@@ -118,7 +114,7 @@ export interface SavedObjectsImportSuccess {
    */
   destinationId?: string;
   /**
-   * @deprecated
+   * @deprecated Can be removed when https://github.com/elastic/kibana/issues/91615 is done.
    * If `createNewCopy` is specified, the new object has a new (undefined) origin ID. This is only needed for the case where
    * `createNewCopies` mode is disabled and ambiguous source conflicts are detected. When `createNewCopies` mode is permanently enabled,
    * this field will be redundant and can be removed.
@@ -159,6 +155,8 @@ export interface SavedObjectsImportOptions {
   namespace?: string;
   /** If true, will create new copies of import objects, each with a random `id` and undefined `originId`. */
   createNewCopies: boolean;
+  /** Refresh setting, defaults to `wait_for` */
+  refresh?: boolean | 'wait_for';
 }
 
 /**

@@ -5,17 +5,14 @@
  * 2.0.
  */
 
+import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import { getGaugeVisualization, isNumericDynamicMetric, isNumericMetric } from './visualization';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { GROUP_ID } from './constants';
-import type { DatasourcePublicAPI, Operation } from '../../types';
-import { chartPluginMock } from 'src/plugins/charts/public/mocks';
-import { CustomPaletteParams, layerTypes } from '../../../common';
-import {
-  EXPRESSION_GAUGE_NAME,
-  GaugeVisualizationState,
-} from '../../../common/expressions/gauge_chart';
-import { PaletteOutput } from 'src/plugins/charts/common';
+import type { DatasourceLayers, OperationDescriptor } from '../../types';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { layerTypes } from '../../../common';
+import type { GaugeVisualizationState } from './constants';
 
 function exampleState(): GaugeVisualizationState {
   return {
@@ -41,7 +38,6 @@ describe('gauge', () => {
       expect(getGaugeVisualization({ paletteService }).initialize(() => 'l1')).toEqual({
         layerId: 'l1',
         layerType: layerTypes.DATA,
-        title: 'Empty Gauge chart',
         shape: 'horizontalBullet',
         labelMajorMode: 'auto',
         ticksPosition: 'auto',
@@ -62,7 +58,7 @@ describe('gauge', () => {
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
         label: 'MyOperation',
-      } as Operation);
+      } as OperationDescriptor);
 
       frame.datasourceLayers = {
         first: mockDatasource.publicAPIMock,
@@ -284,6 +280,87 @@ describe('gauge', () => {
         ],
       });
     });
+
+    test('resolves configuration when with group error when max < minimum', () => {
+      const state: GaugeVisualizationState = {
+        ...exampleState(),
+        layerId: 'first',
+        metricAccessor: 'metric-accessor',
+        minAccessor: 'min-accessor',
+        maxAccessor: 'max-accessor',
+        goalAccessor: 'goal-accessor',
+      };
+      frame.activeData = {
+        first: {
+          type: 'datatable',
+          columns: [],
+          rows: [{ 'min-accessor': 10, 'max-accessor': 0 }],
+        },
+      };
+
+      expect(
+        getGaugeVisualization({
+          paletteService,
+        }).getConfiguration({ state, frame, layerId: 'first' })
+      ).toEqual({
+        groups: [
+          {
+            layerId: 'first',
+            groupId: GROUP_ID.METRIC,
+            groupLabel: 'Metric',
+            accessors: [{ columnId: 'metric-accessor', triggerIcon: 'none' }],
+            filterOperations: isNumericDynamicMetric,
+            supportsMoreColumns: false,
+            required: true,
+            dataTestSubj: 'lnsGauge_metricDimensionPanel',
+            enableDimensionEditor: true,
+            supportFieldFormat: true,
+          },
+          {
+            layerId: 'first',
+            groupId: GROUP_ID.MIN,
+            groupLabel: 'Minimum value',
+            accessors: [{ columnId: 'min-accessor' }],
+            filterOperations: isNumericMetric,
+            supportsMoreColumns: false,
+            dataTestSubj: 'lnsGauge_minDimensionPanel',
+            prioritizedOperation: 'min',
+            suggestedValue: expect.any(Function),
+            supportFieldFormat: false,
+            supportStaticValue: true,
+            invalid: true,
+            invalidMessage: 'Minimum value may not be greater than maximum value',
+          },
+          {
+            layerId: 'first',
+            groupId: GROUP_ID.MAX,
+            groupLabel: 'Maximum value',
+            accessors: [{ columnId: 'max-accessor' }],
+            filterOperations: isNumericMetric,
+            supportsMoreColumns: false,
+            dataTestSubj: 'lnsGauge_maxDimensionPanel',
+            prioritizedOperation: 'max',
+            suggestedValue: expect.any(Function),
+            supportFieldFormat: false,
+            supportStaticValue: true,
+            invalid: true,
+            invalidMessage: 'Minimum value may not be greater than maximum value',
+          },
+          {
+            layerId: 'first',
+            groupId: GROUP_ID.GOAL,
+            groupLabel: 'Goal value',
+            accessors: [{ columnId: 'goal-accessor' }],
+            filterOperations: isNumericMetric,
+            supportsMoreColumns: false,
+            required: false,
+            dataTestSubj: 'lnsGauge_goalDimensionPanel',
+            supportFieldFormat: false,
+            supportStaticValue: true,
+          },
+        ],
+      });
+    });
   });
 
   describe('#setDimension', () => {
@@ -319,7 +396,7 @@ describe('gauge', () => {
       colorMode: 'palette',
       ticksPosition: 'bands',
     };
-    test('removes metricAccessor correctly', () => {
+    test('removes metric correctly', () => {
       expect(
         getGaugeVisualization({
           paletteService,
@@ -334,7 +411,7 @@ describe('gauge', () => {
         minAccessor: 'min-accessor',
       });
     });
-    test('removes minAccessor correctly', () => {
+    test('removes min correctly', () => {
       expect(
         getGaugeVisualization({
           paletteService,
@@ -366,7 +443,7 @@ describe('gauge', () => {
     it('should return the type only if the layer is in the state', () => {
       const state: GaugeVisualizationState = {
         ...exampleState(),
-        minAccessor: 'minAccessor',
+        minAccessor: 'min-accessor',
         goalAccessor: 'value-accessor',
       };
       const instance = getGaugeVisualization({
@@ -378,13 +455,13 @@ describe('gauge', () => {
   });
 
   describe('#toExpression', () => {
-    let datasourceLayers: Record<string, DatasourcePublicAPI>;
+    let datasourceLayers: DatasourceLayers;
     beforeEach(() => {
       const mockDatasource = createMockDatasource('testDatasource');
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
         label: 'MyOperation',
-      } as Operation);
+      } as OperationDescriptor);
       datasourceLayers = {
         first: mockDatasource.publicAPIMock,
       };
@@ -399,26 +476,21 @@ describe('gauge', () => {
         maxAccessor: 'max-accessor',
         labelMinor: 'Subtitle',
       };
-      const attributes = {
-        title: 'Test',
-      };
       expect(
         getGaugeVisualization({
           paletteService,
-        }).toExpression(state, datasourceLayers, attributes)
+        }).toExpression(state, datasourceLayers)
       ).toEqual({
         type: 'expression',
         chain: [
           {
             type: 'function',
-            function: EXPRESSION_GAUGE_NAME,
+            function: 'gauge',
             arguments: {
-              title: ['Test'],
-              description: [''],
-              metricAccessor: ['metric-accessor'],
-              minAccessor: ['min-accessor'],
-              maxAccessor: ['max-accessor'],
-              goalAccessor: ['goal-accessor'],
+              metric: ['metric-accessor'],
+              min: ['min-accessor'],
+              max: ['max-accessor'],
+              goal: ['goal-accessor'],
               colorMode: ['none'],
               ticksPosition: ['auto'],
               labelMajorMode: ['auto'],
@@ -435,15 +507,12 @@ describe('gauge', () => {
       const state: GaugeVisualizationState = {
         ...exampleState(),
         layerId: 'first',
-        minAccessor: 'minAccessor',
-      };
-      const attributes = {
-        title: 'Test',
+        minAccessor: 'min-accessor',
       };
       expect(
         getGaugeVisualization({
           paletteService,
-        }).toExpression(state, datasourceLayers, attributes)
+        }).toExpression(state, datasourceLayers)
       ).toEqual(null);
     });
   });
@@ -463,7 +532,7 @@ describe('gauge', () => {
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
         label: 'MyOperation',
-      } as Operation);
+      } as OperationDescriptor);
       frame.datasourceLayers = {
         first: mockDatasource.publicAPIMock,
       };

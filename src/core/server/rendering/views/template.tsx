@@ -8,6 +8,7 @@
 
 import React, { FunctionComponent, createElement } from 'react';
 
+import { EUI_STYLES_GLOBAL } from '../../../utils';
 import { RenderingMetadata } from '../types';
 import { Fonts } from './fonts';
 import { Styles } from './styles';
@@ -42,6 +43,8 @@ export const Template: FunctionComponent<Props> = ({
         <link rel="icon" type="image/svg+xml" href={`${uiPublicUrl}/favicons/favicon.svg`} />
         <meta name="theme-color" content="#ffffff" />
         <meta name="color-scheme" content="light dark" />
+        {/* Inject EUI reset and global styles before all other component styles */}
+        <meta name={EUI_STYLES_GLOBAL} />
         <Styles darkMode={darkMode} stylesheetPaths={stylesheetPaths} />
 
         {/* Inject stylesheets into the <head> before scripts so that KP plugins with bundled styles will override them */}

@@ -52,7 +52,7 @@ export interface PaginationInputPaginated {
   querySize: number;
 }
 
-export type DocValueFields = estypes.SearchDocValueField;
+export type DocValueFields = estypes.QueryDslFieldAndFormat;
 
 export interface TimerangeFilter {
   range: {

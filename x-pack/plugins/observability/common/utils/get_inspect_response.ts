@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { KibanaRequest } from 'kibana/server';
-import type { RequestStatistics, RequestStatus } from '../../../../../src/plugins/inspector';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { KibanaRequest } from '@kbn/core/server';
+import type { RequestStatistics, RequestStatus } from '@kbn/inspector-plugin';
 import { InspectResponse } from '../../typings/common';
 import { WrappedElasticsearchClientError } from './unwrap_es_response';
 

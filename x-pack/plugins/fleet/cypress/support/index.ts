@@ -29,16 +29,24 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Chainable {
-      getBySel(value: string): Chainable<any>;
+      getBySel(value: string, ...args: any[]): Chainable<any>;
+      getKibanaVersion(): Chainable<string>;
     }
   }
 }
 
 function getBySel(selector: string, ...args: any[]) {
-  return cy.get(`[data-test-subj=${selector}]`, ...args);
+  return cy.get(`[data-test-subj="${selector}"]`, ...args);
+}
+
+function getKibanaVersion() {
+  return cy.request('/api/status').then(({ body }) => {
+    return body.version.number;
+  });
 }
 
 Cypress.Commands.add('getBySel', getBySel);
+Cypress.Commands.add('getKibanaVersion', getKibanaVersion);
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

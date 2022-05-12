@@ -1,0 +1,12 @@
+{
+    "include": [
+        "v8.0.0",
+        "\"Team:ResponseOps\",\"Feature:Canvas\""
+    ],
+    "exclude": [
+        "failed-test",
+        "Feature:Unit Testing",
+        "Feature:Functional Testing",
+        "release_note:skip"
+    ]
+}

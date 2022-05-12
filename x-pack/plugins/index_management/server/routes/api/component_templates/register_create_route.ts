@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import { serializeComponentTemplate } from '../../../../common/lib';
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 import { componentTemplateSchema } from './schema_validation';
 
 export const registerCreateRoute = ({
@@ -24,7 +24,7 @@ export const registerCreateRoute = ({
       },
     },
     async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
 
       const serializedComponentTemplate = serializeComponentTemplate(request.body);
 
@@ -32,11 +32,10 @@ export const registerCreateRoute = ({
 
       try {
         // Check that a component template with the same name doesn't already exist
-        const {
-          body: { component_templates: componentTemplates },
-        } = await client.asCurrentUser.cluster.getComponentTemplate({
-          name,
-        });
+        const { component_templates: componentTemplates } =
+          await client.asCurrentUser.cluster.getComponentTemplate({
+            name,
+          });
 
         if (componentTemplates.length) {
           return response.conflict({
@@ -55,7 +54,7 @@ export const registerCreateRoute = ({
       }
 
       try {
-        const { body: responseBody } = await client.asCurrentUser.cluster.putComponentTemplate({
+        const responseBody = await client.asCurrentUser.cluster.putComponentTemplate({
           name,
           // @ts-expect-error ComponentTemplateSerialized conflicts with @elastic/elasticsearch ClusterPutComponentTemplateRequest
           body: serializedComponentTemplate,

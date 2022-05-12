@@ -21,9 +21,6 @@ class MockCollectorSet {
   isUsageCollector(x) {
     return !!x.isUsageCollector;
   }
-  areAllCollectorsReady() {
-    return this.mockCollectors.every((collector) => collector.isReady());
-  }
   getCollectorByType(type) {
     return (
       this.mockCollectors.find((collector) => collector.type === type) || this.mockCollectors[0]

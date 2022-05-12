@@ -5,21 +5,30 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { AlertCluster, AlertDiskUsageNodeStats } from '../../../common/types/alerts';
+import { createDatasetFilter } from './create_dataset_query_filter';
+import { Globals } from '../../static_globals';
+import { CCS_REMOTE_PATTERN } from '../../../common/constants';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 
 export async function fetchDiskUsageNodeStats(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
-  index: string,
   duration: string,
   size: number,
   filterQuery?: string
 ): Promise<AlertDiskUsageNodeStats[]> {
   const clustersIds = clusters.map((cluster) => cluster.clusterUuid);
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    moduleType: 'elasticsearch',
+    dataset: 'node_stats',
+    ccs: CCS_REMOTE_PATTERN,
+  });
   const params = {
-    index,
+    index: indexPatterns,
     filter_path: ['aggregations'],
     body: {
       size: 0,
@@ -31,11 +40,7 @@ export async function fetchDiskUsageNodeStats(
                 cluster_uuid: clustersIds,
               },
             },
-            {
-              term: {
-                type: 'node_stats',
-              },
-            },
+            createDatasetFilter('node_stats', 'node_stats', 'elasticsearch.node_stats'),
             {
               range: {
                 timestamp: {
@@ -109,10 +114,15 @@ export async function fetchDiskUsageNodeStats(
     // meh
   }
 
-  const { body: response } = await esClient.search(params);
+  const response = await esClient.search(params);
   const stats: AlertDiskUsageNodeStats[] = [];
+
+  if (!response.aggregations) {
+    return stats;
+  }
+
   // @ts-expect-error declare type for aggregations explicitly
-  const { buckets: clusterBuckets } = response.aggregations?.clusters;
+  const { buckets: clusterBuckets } = response.aggregations.clusters;
 
   if (!clusterBuckets?.length) {
     return stats;

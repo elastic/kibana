@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import {
-  IndicesAlias,
-  IndicesIndexStatePrefixedSettings,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { asyncForEach } from '@kbn/std';
+import { groupBy } from 'lodash';
 import { getIlmPolicy, getIndexTemplate } from './documents';
 import { EsContext } from './context';
 
@@ -37,6 +34,22 @@ async function initializeEsResources(esContext: EsContext) {
   await steps.createInitialIndexIfNotExists();
 }
 
+export interface ParsedIndexAlias extends estypes.IndicesAliasDefinition {
+  indexName: string;
+  alias: string;
+  is_hidden?: boolean;
+}
+
+export function parseIndexAliases(aliasInfo: estypes.IndicesGetAliasResponse): ParsedIndexAlias[] {
+  return Object.keys(aliasInfo).flatMap((indexName: string) =>
+    Object.keys(aliasInfo[indexName].aliases).map((alias: string) => ({
+      ...aliasInfo[indexName].aliases[alias],
+      indexName,
+      alias,
+    }))
+  );
+}
+
 class EsInitializationSteps {
   constructor(private readonly esContext: EsContext) {
     this.esContext = esContext;
@@ -60,7 +73,7 @@ class EsInitializationSteps {
       this.esContext.logger.error(`error getting existing index templates - ${err.message}`);
     }
 
-    asyncForEach(Object.keys(indexTemplates), async (indexTemplateName: string) => {
+    await asyncForEach(Object.keys(indexTemplates), async (indexTemplateName: string) => {
       try {
         const hidden: string | boolean = indexTemplates[indexTemplateName]?.settings?.index?.hidden;
         // Check to see if this index template is hidden
@@ -97,11 +110,9 @@ class EsInitializationSteps {
       // should not block the rest of initialization, log the error and move on
       this.esContext.logger.error(`error getting existing indices - ${err.message}`);
     }
-    asyncForEach(Object.keys(indices), async (indexName: string) => {
+    await asyncForEach(Object.keys(indices), async (indexName: string) => {
       try {
-        const hidden: string | boolean | undefined = (
-          indices[indexName]?.settings as IndicesIndexStatePrefixedSettings
-        )?.index?.hidden;
+        const hidden: string | boolean | undefined = indices[indexName]?.settings?.index?.hidden;
 
         // Check to see if this index template is hidden
         if (hidden !== true && hidden !== 'true') {
@@ -131,22 +142,29 @@ class EsInitializationSteps {
       // should not block the rest of initialization, log the error and move on
       this.esContext.logger.error(`error getting existing index aliases - ${err.message}`);
     }
-    asyncForEach(Object.keys(indexAliases), async (indexName: string) => {
-      try {
-        const aliases = indexAliases[indexName]?.aliases;
-        const hasNotHiddenAliases: boolean = Object.keys(aliases).some((alias: string) => {
-          return (aliases[alias] as IndicesAlias)?.is_hidden !== true;
-        });
 
-        if (hasNotHiddenAliases) {
-          this.esContext.logger.debug(`setting existing "${indexName}" index aliases to hidden.`);
-          await this.esContext.esAdapter.setIndexAliasToHidden(indexName, indexAliases[indexName]);
+    // Flatten the results so we can group by index alias
+    const parsedAliasData = parseIndexAliases(indexAliases);
+
+    // Group by index alias name
+    const indexAliasData = groupBy(parsedAliasData, 'alias');
+
+    await asyncForEach(Object.keys(indexAliasData), async (aliasName: string) => {
+      try {
+        const aliasData = indexAliasData[aliasName];
+        const isNotHidden = aliasData.some((data) => data.is_hidden !== true);
+        if (isNotHidden) {
+          this.esContext.logger.debug(`setting existing "${aliasName}" index alias to hidden.`);
+          await this.esContext.esAdapter.setIndexAliasToHidden(
+            aliasName,
+            indexAliasData[aliasName]
+          );
         }
       } catch (err) {
         // errors when trying to set existing index aliases to is_hidden
         // should not block the rest of initialization, log the error and move on
         this.esContext.logger.error(
-          `error setting existing "${indexName}" index aliases - ${err.message}`
+          `error setting existing "${aliasName}" index aliases - ${err.message}`
         );
       }
     });

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { TextFieldWithMessageVariables } from './text_field_with_message_variables';
 
 describe('TextFieldWithMessageVariables', () => {

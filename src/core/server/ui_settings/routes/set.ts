@@ -26,7 +26,7 @@ export function registerSetRoute(router: IRouter) {
     { path: '/api/kibana/settings/{key}', validate },
     async (context, request, response) => {
       try {
-        const uiSettingsClient = context.core.uiSettings.client;
+        const uiSettingsClient = (await context.core).uiSettings.client;
 
         const { key } = request.params;
         const { value } = request.body;

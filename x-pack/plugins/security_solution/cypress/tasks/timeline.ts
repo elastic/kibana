@@ -73,7 +73,7 @@ import {
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
 
-import { closeFieldsBrowser, filterFieldsBrowser } from '../tasks/fields_browser';
+import { closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 
 export const hostExistsQuery = 'host.name: *';
 
@@ -109,7 +109,7 @@ export const goToNotesTab = (): Cypress.Chainable<JQuery<HTMLElement>> => {
       $el.find(NOTES_TAB_BUTTON).trigger('click');
       return $el.find(NOTES_TEXT_AREA);
     })
-    .should('be.visible');
+    .should('exist');
   return cy.root().find(NOTES_TAB_BUTTON);
 };
 
@@ -177,6 +177,8 @@ export const addFilter = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTML
 export const addDataProvider = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
   cy.get(TIMELINE_ADD_FIELD_BUTTON).click();
   cy.get(LOADING_INDICATOR).should('not.exist');
+  cy.focused().should('have.class', 'euiPopover__panel');
+  cy.get(TIMELINE_DATA_PROVIDER_FIELD).click();
   cy.get(TIMELINE_DATA_PROVIDER_FIELD)
     .find(TIMELINE_DATA_PROVIDER_FIELD_INPUT)
     .should('have.focus'); // make sure the focus is ready before start typing
@@ -281,7 +283,9 @@ export const openTimelineInspectButton = () => {
 
 export const openTimelineFromSettings = () => {
   const click = ($el: Cypress.ObjectLike) => cy.wrap($el).click();
+  cy.get(TIMELINE_SETTINGS_ICON).should('be.visible');
   cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').pipe(click);
+  cy.get(OPEN_TIMELINE_ICON).should('be.visible');
   cy.get(OPEN_TIMELINE_ICON).pipe(click);
 };
 
@@ -397,3 +401,15 @@ export const expandEventAction = () => {
   });
   cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).click();
 };
+
+export const setKibanaTimezoneToUTC = () =>
+  cy
+    .request({
+      method: 'POST',
+      url: 'api/kibana/settings',
+      body: { changes: { 'dateFormat:tz': 'UTC' } },
+      headers: { 'kbn-xsrf': 'set-kibana-timezone-utc' },
+    })
+    .then(() => {
+      cy.reload();
+    });

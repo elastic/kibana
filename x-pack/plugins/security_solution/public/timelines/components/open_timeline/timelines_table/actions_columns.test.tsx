@@ -7,7 +7,7 @@
 
 import { EuiButtonIconProps } from '@elastic/eui';
 import { cloneDeep, omit } from 'lodash/fp';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 

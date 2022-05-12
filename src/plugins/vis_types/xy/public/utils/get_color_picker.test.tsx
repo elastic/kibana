@@ -9,11 +9,11 @@
 import React from 'react';
 import { LegendColorPickerProps, XYChartSeriesIdentifier } from '@elastic/charts';
 import { EuiPopover } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ComponentType, ReactWrapper } from 'enzyme';
 import { getColorPicker } from './get_color_picker';
-import { ColorPicker } from '../../../../charts/public';
-import type { PersistedState } from '../../../../visualizations/public';
+import { ColorPicker } from '@kbn/charts-plugin/public';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
 
 jest.mock('@elastic/charts', () => {
   const original = jest.requireActual('@elastic/charts');

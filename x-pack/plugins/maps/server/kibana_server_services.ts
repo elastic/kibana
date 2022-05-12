@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreStart } from '../../../../src/core/server';
-import { StartDeps } from './plugin';
+import { CoreStart } from '@kbn/core/server';
+import { StartDeps } from './types';
 
 let coreStart: CoreStart;
 let pluginsStart: StartDeps;

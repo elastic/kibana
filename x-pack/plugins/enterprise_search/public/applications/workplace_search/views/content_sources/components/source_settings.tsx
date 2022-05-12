@@ -23,7 +23,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { HttpLogic } from '../../../../shared/http';
 import { EuiButtonEmptyTo } from '../../../../shared/react_router_helpers';
 import { AppLogic } from '../../../app_logic';
 import { ContentSection } from '../../../components/shared/content_section';
@@ -42,9 +41,9 @@ import {
   SAVE_CHANGES_BUTTON,
   REMOVE_BUTTON,
 } from '../../../constants';
-import { SourceDataItem } from '../../../types';
+import { getEditPath } from '../../../routes';
 import { handlePrivateKeyUpload } from '../../../utils';
-import { AddSourceLogic } from '../components/add_source/add_source_logic';
+
 import {
   SOURCE_SETTINGS_HEADING,
   SOURCE_SETTINGS_TITLE,
@@ -58,14 +57,15 @@ import {
   SYNC_DIAGNOSTICS_DESCRIPTION,
   SYNC_DIAGNOSTICS_BUTTON,
 } from '../constants';
-import { staticSourceData } from '../source_data';
 import { SourceLogic } from '../source_logic';
+
+import { AddSourceLogic } from './add_source/add_source_logic';
+
+import { DownloadDiagnosticsButton } from './download_diagnostics_button';
 
 import { SourceLayout } from './source_layout';
 
 export const SourceSettings: React.FC = () => {
-  const { http } = useValues(HttpLogic);
-
   const {
     updateContentSource,
     removeContentSource,
@@ -88,7 +88,7 @@ export const SourceSettings: React.FC = () => {
   const { isOrganization } = useValues(AppLogic);
 
   useEffect(() => {
-    getSourceConfigData(serviceType);
+    getSourceConfigData();
   }, []);
 
   const isGithubApp =
@@ -97,8 +97,7 @@ export const SourceSettings: React.FC = () => {
 
   const editPath = isGithubApp
     ? undefined // undefined for GitHub apps, as they are configured source-wide, and don't use a connector where you can edit the configuration
-    : (staticSourceData.find((source) => source.serviceType === serviceType) as SourceDataItem)
-        .editPath;
+    : getEditPath(serviceType);
 
   const [inputValue, setValue] = useState(name);
   const [confirmModalVisible, setModalVisibility] = useState(false);
@@ -108,13 +107,15 @@ export const SourceSettings: React.FC = () => {
   const showOauthConfig = !isGithubApp && isOrganization && !isEmpty(configuredFields);
   const showGithubAppConfig = isGithubApp;
 
-  const { clientId, clientSecret, publicKey, consumerKey, baseUrl } = configuredFields || {};
-
-  const diagnosticsPath = isOrganization
-    ? http.basePath.prepend(`/internal/workplace_search/org/sources/${id}/download_diagnostics`)
-    : http.basePath.prepend(
-        `/internal/workplace_search/account/sources/${id}/download_diagnostics`
-      );
+  const {
+    clientId,
+    clientSecret,
+    publicKey,
+    consumerKey,
+    baseUrl,
+    externalConnectorUrl,
+    externalConnectorApiKey,
+  } = configuredFields || {};
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => setValue(e.target.value);
 
@@ -199,6 +200,8 @@ export const SourceSettings: React.FC = () => {
             publicKey={publicKey}
             consumerKey={consumerKey}
             baseUrl={baseUrl}
+            externalConnectorUrl={externalConnectorUrl}
+            externalConnectorApiKey={externalConnectorApiKey}
           />
           <EuiFormRow>
             <EuiButtonEmptyTo to={editPath as string} flush="left">
@@ -241,15 +244,7 @@ export const SourceSettings: React.FC = () => {
         </ContentSection>
       )}
       <ContentSection title={SYNC_DIAGNOSTICS_TITLE} description={SYNC_DIAGNOSTICS_DESCRIPTION}>
-        <EuiButton
-          target="_blank"
-          href={diagnosticsPath}
-          isLoading={buttonLoading}
-          data-test-subj="DownloadDiagnosticsButton"
-          download={`${id}_${serviceType}_${Date.now()}_diagnostics.json`}
-        >
-          {SYNC_DIAGNOSTICS_BUTTON}
-        </EuiButton>
+        <DownloadDiagnosticsButton label={SYNC_DIAGNOSTICS_BUTTON} />
       </ContentSection>
       <ContentSection title={SOURCE_REMOVE_TITLE} description={SOURCE_REMOVE_DESCRIPTION}>
         <EuiButton

@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+export * from './fields_browser';
 export * from './timeline';

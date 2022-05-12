@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { healthRoute } from './health';
-import { httpServiceMock } from 'src/core/server/mocks';
-import { mockHandlerArguments } from './../_mock_handler_arguments';
+import { httpServiceMock } from '@kbn/core/server/mocks';
+import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { licenseStateMock } from '../../lib/license_state.mock';
-import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { rulesClientMock } from '../../rules_client.mock';
 import { HealthStatus, RecoveredActionGroup } from '../../types';
 import { alertsMock } from '../../mocks';
@@ -18,7 +18,7 @@ import { RegistryAlertTypeWithAuth } from '../../authorization';
 
 const rulesClient = rulesClientMock.create();
 
-jest.mock('../../lib/license_api_access.ts', () => ({
+jest.mock('../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
@@ -52,7 +52,6 @@ const ruleTypes = [
     },
     producer: 'test',
     enabledInLicense: true,
-    minimumScheduleInterval: '1m',
     defaultScheduleInterval: '10m',
   } as RegistryAlertTypeWithAuth,
 ];
@@ -137,6 +136,22 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
         alertingFrameworkHeath: {
+          // Legacy: pre-v8.0 typo
+          _deprecated: 'This state property has a typo, use "alertingFrameworkHealth" instead.',
+          decryptionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          executionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          readHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+        },
+        alertingFrameworkHealth: {
           decryptionHealth: {
             status: HealthStatus.OK,
             timestamp: currentDate,
@@ -179,6 +194,22 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
         alertingFrameworkHeath: {
+          // Legacy: pre-v8.0 typo
+          _deprecated: 'This state property has a typo, use "alertingFrameworkHealth" instead.',
+          decryptionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          executionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          readHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+        },
+        alertingFrameworkHealth: {
           decryptionHealth: {
             status: HealthStatus.OK,
             timestamp: currentDate,
@@ -221,6 +252,22 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
         alertingFrameworkHeath: {
+          // Legacy: pre-v8.0 typo
+          _deprecated: 'This state property has a typo, use "alertingFrameworkHealth" instead.',
+          decryptionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          executionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          readHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+        },
+        alertingFrameworkHealth: {
           decryptionHealth: {
             status: HealthStatus.OK,
             timestamp: currentDate,
@@ -263,6 +310,22 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
         alertingFrameworkHeath: {
+          // Legacy: pre-v8.0 typo
+          _deprecated: 'This state property has a typo, use "alertingFrameworkHealth" instead.',
+          decryptionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          executionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          readHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+        },
+        alertingFrameworkHealth: {
           decryptionHealth: {
             status: HealthStatus.OK,
             timestamp: currentDate,
@@ -305,6 +368,22 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
         alertingFrameworkHeath: {
+          // Legacy: pre-v8.0 typo
+          _deprecated: 'This state property has a typo, use "alertingFrameworkHealth" instead.',
+          decryptionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          executionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          readHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+        },
+        alertingFrameworkHealth: {
           decryptionHealth: {
             status: HealthStatus.OK,
             timestamp: currentDate,

@@ -8,7 +8,7 @@
 
 import moment from 'moment';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { PersistedLog } from '../persisted_log';
 import { TimeRange } from '../../../common';
 
@@ -41,6 +41,10 @@ export class TimeHistory {
 
   get() {
     return this.history.get();
+  }
+
+  get$() {
+    return this.history.get$();
   }
 }
 

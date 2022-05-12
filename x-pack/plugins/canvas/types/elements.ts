@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExpressionAstExpression } from 'src/plugins/expressions';
+import { ExpressionAstExpression } from '@kbn/expressions-plugin';
 import { CanvasElement } from '.';
 
 export interface ElementSpec {
@@ -47,6 +47,12 @@ export interface CustomElement {
    * the element object stringified
    */
   content: string;
+}
+
+export type CustomElementNode = Omit<PositionedElement, 'type'>;
+
+export interface CustomElementContent {
+  selectedNodes: CustomElementNode[];
 }
 
 export interface ElementPosition {

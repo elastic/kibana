@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import type { HttpSetup, ApplicationStart } from 'src/core/public';
+import type { CoreSetup, CoreStart } from '@kbn/core/public';
 
 export interface KibanaContext {
-  http: HttpSetup;
-  application: ApplicationStart;
+  http: CoreSetup['http'];
+  application: CoreStart['application'];
+  uiSettings: CoreStart['uiSettings'];
+  docLinks: CoreStart['docLinks'];
 }

@@ -18,7 +18,7 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTransactionTraceSamplesFetcher } from '../../../hooks/use_transaction_trace_samples_fetcher';
 
 import { maybe } from '../../../../common/utils/maybe';
-import { fromQuery, push, toQuery } from '../../shared/Links/url_helpers';
+import { fromQuery, push, toQuery } from '../../shared/links/url_helpers';
 
 import { failedTransactionsCorrelationsTab } from './failed_transactions_correlations_tab';
 import { latencyCorrelationsTab } from './latency_correlations_tab';
@@ -41,11 +41,12 @@ export function TransactionDetailsTabs() {
     tabs.find((tab) => tab.key === currentTab) ?? traceSamplesTab;
 
   const { environment, kuery, transactionName } = query;
-  const { traceSamplesData } = useTransactionTraceSamplesFetcher({
-    transactionName,
-    kuery,
-    environment,
-  });
+  const { traceSamplesData, traceSamplesStatus } =
+    useTransactionTraceSamplesFetcher({
+      transactionName,
+      kuery,
+      environment,
+    });
 
   const selectSampleFromChartSelection = (selection: XYBrushEvent) => {
     if (selection !== undefined) {
@@ -139,6 +140,7 @@ export function TransactionDetailsTabs() {
             sampleRangeTo,
             selectSampleFromChartSelection,
             traceSamples,
+            traceSamplesStatus,
           }}
         />
       </EuiPanel>

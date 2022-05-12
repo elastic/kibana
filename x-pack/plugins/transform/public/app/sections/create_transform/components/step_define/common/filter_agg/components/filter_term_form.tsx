@@ -30,7 +30,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
   selectedField,
 }) => {
   const api = useApi();
-  const { indexPattern, runtimeMappings } = useContext(CreateTransformWizardContext);
+  const { dataView, runtimeMappings } = useContext(CreateTransformWizardContext);
   const toastNotifications = useToastNotifications();
 
   const [options, setOptions] = useState<EuiComboBoxOptionOption[]>([]);
@@ -40,7 +40,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
   const fetchOptions = useCallback(
     debounce(async (searchValue: string) => {
       const esSearchRequest = {
-        index: indexPattern!.title,
+        index: dataView!.title,
         body: {
           ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
           query: {
@@ -69,7 +69,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
       if (
         !(
           isEsSearchResponseWithAggregations(response) &&
-          isMultiBucketAggregate<estypes.AggregationsKeyedBucketKeys>(
+          isMultiBucketAggregate<estypes.AggregationsSignificantLongTermsBucket>(
             response.aggregations.field_values
           )
         )
@@ -83,7 +83,10 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
       }
 
       setOptions(
-        response.aggregations.field_values.buckets.map((value) => ({ label: value.key + '' }))
+        (
+          response.aggregations.field_values
+            .buckets as estypes.AggregationsSignificantLongTermsBucket[]
+        ).map((value) => ({ label: value.key + '' }))
       );
     }, 600),
     [selectedField]

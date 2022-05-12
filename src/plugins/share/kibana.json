@@ -8,6 +8,6 @@
     "githubTeam": "kibana-app-services"
   },
   "description": "Adds URL Service and sharing capabilities to Kibana",
-  "requiredBundles": ["kibanaUtils"],
+  "requiredBundles": ["kibanaReact", "kibanaUtils"],
   "optionalPlugins": []
 }

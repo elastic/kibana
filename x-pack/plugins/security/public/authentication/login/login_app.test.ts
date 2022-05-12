@@ -7,8 +7,8 @@
 
 jest.mock('./login_page');
 
-import type { AppMount } from 'src/core/public';
-import { coreMock, scopedHistoryMock, themeServiceMock } from 'src/core/public/mocks';
+import type { AppMount } from '@kbn/core/public';
+import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 
 import { loginApp } from './login_app';
 
@@ -18,7 +18,7 @@ describe('loginApp', () => {
 
     loginApp.create({
       ...coreSetupMock,
-      config: { loginAssistanceMessage: '' },
+      config: { loginAssistanceMessage: '', sameSiteCookies: undefined },
     });
 
     expect(coreSetupMock.http.anonymousPaths.register).toHaveBeenCalledTimes(1);
@@ -43,7 +43,7 @@ describe('loginApp', () => {
 
     loginApp.create({
       ...coreSetupMock,
-      config: { loginAssistanceMessage: 'some-message' },
+      config: { loginAssistanceMessage: 'some-message', sameSiteCookies: undefined },
     });
 
     const [[{ mount }]] = coreSetupMock.application.register.mock.calls;

@@ -6,33 +6,37 @@
  */
 
 import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { EsIndexActionConnector } from '../types';
 import IndexActionConnectorFields from './es_index_connector';
 import { EuiComboBox, EuiSwitch, EuiSwitchEvent, EuiSelect } from '@elastic/eui';
+import { screen, render, fireEvent } from '@testing-library/react';
 jest.mock('../../../../common/lib/kibana');
+
+jest.mock('lodash', () => {
+  const module = jest.requireActual('lodash');
+  return {
+    ...module,
+    debounce: (fn: () => unknown) => fn,
+  };
+});
 
 jest.mock('../../../../common/index_controls', () => ({
   firstFieldOption: jest.fn(),
   getFields: jest.fn(),
   getIndexOptions: jest.fn(),
-  getIndexPatterns: jest.fn(),
 }));
 
-const { getIndexPatterns } = jest.requireMock('../../../../common/index_controls');
-getIndexPatterns.mockResolvedValueOnce([
+const { getIndexOptions } = jest.requireMock('../../../../common/index_controls');
+
+getIndexOptions.mockResolvedValueOnce([
   {
-    id: 'indexPattern1',
-    attributes: {
-      title: 'indexPattern1',
-    },
-  },
-  {
-    id: 'indexPattern2',
-    attributes: {
-      title: 'indexPattern2',
-    },
+    label: 'indexOption',
+    options: [
+      { label: 'indexPattern1', value: 'indexPattern1' },
+      { label: 'indexPattern2', value: 'indexPattern2' },
+    ],
   },
 ]);
 
@@ -59,6 +63,7 @@ function setupGetFieldsResponse(getFieldsWithDateMapping: boolean) {
     },
   ]);
 }
+
 describe('IndexActionConnectorFields renders', () => {
   test('renders correctly when creating connector', async () => {
     const props = {
@@ -280,5 +285,41 @@ describe('IndexActionConnectorFields renders', () => {
       .find(EuiSelect)
       .filter('[data-test-subj="executionTimeFieldSelect"]');
     expect(timeFieldSelect.prop('value')).toEqual('test1');
+  });
+
+  test('fetches index names on index combobox input change', async () => {
+    const mockIndexName = 'test-index';
+    const props = {
+      action: {
+        actionTypeId: '.index',
+        config: {},
+        secrets: {},
+      } as EsIndexActionConnector,
+      editActionConfig: () => {},
+      editActionSecrets: () => {},
+      errors: { index: [] },
+      readOnly: false,
+      setCallbacks: () => {},
+      isEdit: false,
+    };
+    render(<IndexActionConnectorFields {...props} />);
+
+    const indexComboBox = await screen.findByTestId('connectorIndexesComboBox');
+
+    // time field switch should show up if index has date type field mapping
+    setupGetFieldsResponse(true);
+
+    fireEvent.click(indexComboBox);
+
+    await act(async () => {
+      const event = { target: { value: mockIndexName } };
+      fireEvent.change(screen.getByRole('combobox'), event);
+    });
+
+    expect(getIndexOptions).toHaveBeenCalledTimes(1);
+    expect(getIndexOptions).toHaveBeenCalledWith(expect.anything(), mockIndexName);
+    expect(await screen.findAllByRole('option')).toHaveLength(2);
+    expect(screen.getByText('indexPattern1')).toBeInTheDocument();
+    expect(screen.getByText('indexPattern2')).toBeInTheDocument();
   });
 });

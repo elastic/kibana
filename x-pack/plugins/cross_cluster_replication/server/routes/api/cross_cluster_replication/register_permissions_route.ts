@@ -22,7 +22,7 @@ export const registerPermissionsRoute = ({
       validate: false,
     },
     license.guardApiRoute(async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
 
       if (!license.isEsSecurityEnabled) {
         // If security has been disabled in elasticsearch.yml. we'll just let the user use CCR
@@ -36,13 +36,12 @@ export const registerPermissionsRoute = ({
       }
 
       try {
-        const {
-          body: { has_all_requested: hasPermission, cluster },
-        } = await client.asCurrentUser.security.hasPrivileges({
-          body: {
-            cluster: ['manage', 'manage_ccr'],
-          },
-        });
+        const { has_all_requested: hasPermission, cluster } =
+          await client.asCurrentUser.security.hasPrivileges({
+            body: {
+              cluster: ['manage', 'manage_ccr'],
+            },
+          });
 
         const missingClusterPrivileges = Object.keys(cluster).reduce(
           (permissions: string[], permissionName: string) => {

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { Writable } from 'stream';
 import * as Rx from 'rxjs';
-import { ReportingCore } from '../../../';
-import { CancellationToken } from '../../../../common';
-import { cryptoFactory, LevelLogger } from '../../../lib';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { Writable } from 'stream';
+import { ReportingCore } from '../../..';
+import { CancellationToken } from '../../../../common/cancellation_token';
+import { cryptoFactory } from '../../../lib';
 import {
   createMockConfig,
   createMockConfigSchema,
@@ -17,7 +18,7 @@ import {
 } from '../../../test_helpers';
 import { generatePngObservable } from '../../common';
 import { TaskPayloadPNG } from '../types';
-import { runTaskFnFactory } from './';
+import { runTaskFnFactory } from '.';
 
 jest.mock('../../common/generate_png');
 
@@ -29,14 +30,7 @@ const cancellationToken = {
   on: jest.fn(),
 } as unknown as CancellationToken;
 
-const mockLoggerFactory = {
-  get: jest.fn().mockImplementation(() => ({
-    error: jest.fn(),
-    debug: jest.fn(),
-    warn: jest.fn(),
-  })),
-};
-const getMockLogger = () => new LevelLogger(mockLoggerFactory);
+const getMockLogger = () => loggingSystemMock.createLogger();
 
 const mockEncryptionKey = 'abcabcsecuresecret';
 const encryptHeaders = async (headers: Record<string, string>) => {
@@ -51,7 +45,6 @@ beforeEach(async () => {
   stream = { write: jest.fn((chunk) => (content += chunk)) } as unknown as typeof stream;
 
   const mockReportingConfig = createMockConfigSchema({
-    index: '.reporting-2018.10.10',
     encryptionKey: mockEncryptionKey,
     queue: {
       indexInterval: 'daily',
@@ -69,7 +62,7 @@ test(`passes browserTimezone to generatePng`, async () => {
   const encryptedHeaders = await encryptHeaders({});
   (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from('') }));
 
-  const runTask = await runTaskFnFactory(mockReporting, getMockLogger());
+  const runTask = runTaskFnFactory(mockReporting, getMockLogger());
   const browserTimezone = 'UTC';
   await runTask(
     'pngJobId',
@@ -88,16 +81,13 @@ test(`passes browserTimezone to generatePng`, async () => {
     expect.objectContaining({
       urls: ['localhost:80undefined/app/kibana#/something'],
       browserTimezone: 'UTC',
-      conditionalHeaders: expect.objectContaining({
-        conditions: expect.any(Object),
-        headers: {},
-      }),
+      headers: {},
     })
   );
 });
 
 test(`returns content_type of application/png`, async () => {
-  const runTask = await runTaskFnFactory(mockReporting, getMockLogger());
+  const runTask = runTaskFnFactory(mockReporting, getMockLogger());
   const encryptedHeaders = await encryptHeaders({});
 
   (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from('foo') }));
@@ -115,7 +105,7 @@ test(`returns content of generatePng`, async () => {
   const testContent = 'raw string from get_screenhots';
   (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from(testContent) }));
 
-  const runTask = await runTaskFnFactory(mockReporting, getMockLogger());
+  const runTask = runTaskFnFactory(mockReporting, getMockLogger());
   const encryptedHeaders = await encryptHeaders({});
   await runTask(
     'pngJobId',

@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
-import type {
-  TransportResult,
-  TransportRequestOptions,
-  TransportRequestParams,
-} from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 
 /**
  * Client used to query the elasticsearch cluster.
@@ -19,16 +14,9 @@ import type {
  * @public
  */
 export type ElasticsearchClient = Omit<
-  KibanaClient,
-  'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close' | 'diagnostic'
-> & {
-  transport: {
-    request<TResponse = unknown>(
-      params: TransportRequestParams,
-      options?: TransportRequestOptions
-    ): Promise<TransportResult<TResponse>>;
-  };
-};
+  Client,
+  'connectionPool' | 'serializer' | 'extend' | 'close' | 'diagnostic'
+>;
 
 /**
  * All response typings are maintained until elasticsearch-js provides them out of the box

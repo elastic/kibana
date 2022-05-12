@@ -8,7 +8,7 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import {
   defaultToEmptyTag,
@@ -39,7 +39,7 @@ describe('EmptyValue', () => {
           <p>{getEmptyString()}</p>
         </ThemeProvider>
       );
-      expect(wrapper.text()).toBe('(Empty String)');
+      expect(wrapper.text()).toBe('(Empty string)');
     });
   });
 

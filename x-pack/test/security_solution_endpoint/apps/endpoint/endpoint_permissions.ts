@@ -6,13 +6,13 @@
  */
 
 import expect from '@kbn/expect';
+import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   createUserAndRole,
   deleteUserAndRole,
   ROLES,
 } from '../../../common/services/security_solution';
-import { IndexedHostsAndAlertsResponse } from '../../../../plugins/security_solution/common/endpoint/index_data';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['security', 'endpoint', 'detections', 'hosts']);
@@ -62,8 +62,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await testSubjects.existOrFail('noIngestPermissions');
         });
 
-        // FIXME:PT skipped. need to fix security-team bug #1929
-        it.skip('should display endpoint data on Host Details', async () => {
+        it('should display endpoint data on Host Details', async () => {
           const endpoint = indexedData.hosts[0];
           await PageObjects.hosts.navigateToHostDetails(endpoint.host.name);
           const endpointSummary = await PageObjects.hosts.hostDetailsEndpointOverviewData();

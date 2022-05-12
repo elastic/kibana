@@ -44,8 +44,8 @@ import {
 
 export const AppSearch: React.FC<InitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
-  const { errorConnecting } = useValues(HttpLogic);
-  const { enterpriseSearchVersion, kibanaVersion, errorConnectingMessage } = props;
+  const { errorConnectingMessage } = useValues(HttpLogic);
+  const { enterpriseSearchVersion, kibanaVersion } = props;
   const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
 
   const showView = () => {
@@ -58,8 +58,8 @@ export const AppSearch: React.FC<InitialAppData> = (props) => {
           kibanaVersion={kibanaVersion}
         />
       );
-    } else if (errorConnecting) {
-      return <ErrorConnecting errorConnectingMessage={errorConnectingMessage} />;
+    } else if (errorConnectingMessage) {
+      return <ErrorConnecting />;
     }
 
     return <AppSearchConfigured {...(props as Required<InitialAppData>)} />;

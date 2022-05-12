@@ -9,11 +9,11 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { findTestSubject, nextTick } from '@kbn/test/jest';
+import { findTestSubject, nextTick } from '@kbn/test-jest-helpers';
 import { DashboardContainer, DashboardContainerServices } from './dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 import { I18nProvider } from '@kbn/i18n-react';
-import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 
 import { KibanaContextProvider } from '../../services/kibana_react';
 import {
@@ -31,16 +31,13 @@ import {
   ContactCardEmbeddableOutput,
   createEditModeAction,
 } from '../../services/embeddable_test_samples';
-import {
-  applicationServiceMock,
-  coreMock,
-  uiSettingsServiceMock,
-} from '../../../../../core/public/mocks';
-import { inspectorPluginMock } from '../../../../inspector/public/mocks';
-import { uiActionsPluginMock } from '../../../../ui_actions/public/mocks';
-import { getStubPluginServices } from '../../../../presentation_util/public';
+import { applicationServiceMock, coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
+import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
 
 const presentationUtil = getStubPluginServices();
+const theme = coreMock.createStart().theme;
 
 const options: DashboardContainerServices = {
   // TODO: clean up use of any
@@ -55,7 +52,7 @@ const options: DashboardContainerServices = {
   uiActions: {} as any,
   uiSettings: uiSettingsServiceMock.createStartContract(),
   http: coreMock.createStart().http,
-  theme: coreMock.createStart().theme,
+  theme,
   presentationUtil,
 };
 
@@ -133,26 +130,27 @@ test('DashboardContainer.replacePanel', async (done) => {
   const container = new DashboardContainer(initialInput, options);
   let counter = 0;
 
-  const subscriptionHandler = jest.fn(({ panels }) => {
-    counter++;
-    expect(panels[ID]).toBeDefined();
-    // It should be called exactly 2 times and exit the second time
-    switch (counter) {
-      case 1:
-        return expect(panels[ID].type).toBe(CONTACT_CARD_EMBEDDABLE);
+  const subscription = container.getInput$().subscribe(
+    jest.fn(({ panels }) => {
+      counter++;
+      expect(panels[ID]).toBeDefined();
+      // It should be called exactly 2 times and exit the second time
+      switch (counter) {
+        case 1:
+          return expect(panels[ID].type).toBe(CONTACT_CARD_EMBEDDABLE);
 
-      case 2: {
-        expect(panels[ID].type).toBe(EMPTY_EMBEDDABLE);
-        subscription.unsubscribe();
-        done();
+        case 2: {
+          expect(panels[ID].type).toBe(EMPTY_EMBEDDABLE);
+          subscription.unsubscribe();
+          done();
+          return;
+        }
+
+        default:
+          throw Error('Called too many times!');
       }
-
-      default:
-        throw Error('Called too many times!');
-    }
-  });
-
-  const subscription = container.getInput$().subscribe(subscriptionHandler);
+    })
+  );
 
   // replace the panel now
   container.replacePanel(container.getInput().panels[ID], {
@@ -161,7 +159,7 @@ test('DashboardContainer.replacePanel', async (done) => {
   });
 });
 
-test('Container view mode change propagates to existing children', async () => {
+test('Container view mode change propagates to existing children', async (done) => {
   const initialInput = getSampleDashboardInput({
     panels: {
       '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
@@ -171,12 +169,12 @@ test('Container view mode change propagates to existing children', async () => {
     },
   });
   const container = new DashboardContainer(initialInput, options);
-  await nextTick();
 
-  const embeddable = await container.getChild('123');
+  const embeddable = await container.untilEmbeddableLoaded('123');
   expect(embeddable.getInput().viewMode).toBe(ViewMode.VIEW);
   container.updateInput({ viewMode: ViewMode.EDIT });
   expect(embeddable.getInput().viewMode).toBe(ViewMode.EDIT);
+  done();
 });
 
 test('Container view mode change propagates to new children', async () => {
@@ -251,6 +249,7 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
             overlays={{} as any}
             inspector={inspector}
             SavedObjectFinder={() => null}
+            theme={theme}
           />
         </presentationUtil.ContextProvider>
       </KibanaContextProvider>

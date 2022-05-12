@@ -13,7 +13,7 @@ export type ExpressionFunctionClog = ExpressionFunctionDefinition<'clog', unknow
 export const clog: ExpressionFunctionClog = {
   name: 'clog',
   args: {},
-  help: 'Outputs the context to the console',
+  help: 'Outputs the _input_ in the console. This function is for debug purposes',
   fn: (input: unknown) => {
     // eslint-disable-next-line no-console
     console.log(input);

@@ -78,7 +78,9 @@ Array [
         <span
           color="#cc3b54"
           data-euiicon-type="dot"
-        />
+        >
+          
+        </span>
       </div>
       <div
         className="euiFlexItem euiFlexItem--flexGrowZero"
@@ -99,7 +101,9 @@ Array [
         <span
           color="#9b3067"
           data-euiicon-type="dot"
-        />
+        >
+          
+        </span>
       </div>
       <div
         className="euiFlexItem euiFlexItem--flexGrowZero"
@@ -120,7 +124,9 @@ Array [
         <span
           color="#d41e93"
           data-euiicon-type="dot"
-        />
+        >
+          
+        </span>
       </div>
       <div
         className="euiFlexItem euiFlexItem--flexGrowZero"

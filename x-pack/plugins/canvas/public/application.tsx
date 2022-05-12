@@ -15,13 +15,10 @@ import { BehaviorSubject } from 'rxjs';
 
 import { includes, remove } from 'lodash';
 
-import { AppMountParameters, CoreStart, CoreSetup, AppUpdater } from 'kibana/public';
+import { AppMountParameters, CoreStart, CoreSetup, AppUpdater } from '@kbn/core/public';
 
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-} from '../../../../src/plugins/kibana_react/public';
-import { PluginServices } from '../../../../src/plugins/presentation_util/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { PluginServices } from '@kbn/presentation-util-plugin/public';
 
 import { CanvasStartDeps, CanvasSetupDeps } from './plugin';
 import { App } from './components/app';

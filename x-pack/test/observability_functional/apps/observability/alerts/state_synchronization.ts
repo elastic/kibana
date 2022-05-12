@@ -93,8 +93,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     async function assertLogsStreamPageTimeRange(expected: string) {
       // Only handles relative time ranges
       const datePickerButton = await testSubjects.find('superDatePickerShowDatesButton');
-      const buttonText = await datePickerButton.getVisibleText();
-      const timerange = buttonText.substring(0, buttonText.indexOf('\n'));
+      const timerange = await datePickerButton.getVisibleText();
       expect(timerange).to.be(expected);
     }
 

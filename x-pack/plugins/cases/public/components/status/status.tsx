@@ -46,5 +46,6 @@ const StatusComponent: React.FC<Props> = ({
     </EuiBadge>
   );
 };
+StatusComponent.displayName = 'Status';
 
 export const Status = memo(StatusComponent);

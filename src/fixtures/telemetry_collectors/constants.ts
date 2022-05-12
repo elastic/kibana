@@ -7,7 +7,7 @@
  */
 
 import moment, { Moment } from 'moment';
-import { MakeSchemaFrom } from '../../plugins/usage_collection/server';
+import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 
 export interface Usage {
   locale: string;
@@ -65,3 +65,4 @@ export type RecordWithKnownProps = Record<MappedTypeProps, number>;
 export type RecordWithKnownAllProps = Record<MappedTypeAllProps, number>;
 
 export type IndexedAccessType = Pick<WithUnion, 'prop1' | 'prop2'>;
+export type OmitIndexedAccessType = Omit<WithUnion, 'prop1' | 'prop2'>;

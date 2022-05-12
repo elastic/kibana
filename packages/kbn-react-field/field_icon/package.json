@@ -1,5 +1,0 @@
-{
-  "main": "../target_node/field_icon/index.js",
-  "browser": "../target_webpack/field_icon/index.js",
-  "types": "../target_types/field_icon/index.d.ts"
-}

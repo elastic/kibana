@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Datatable } from 'src/plugins/expressions';
-import { FieldFormat } from '../../../field_formats/common';
+import { Datatable } from '@kbn/expressions-plugin';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { datatableToCSV } from './export_csv';
 
 function getDefaultOptions() {

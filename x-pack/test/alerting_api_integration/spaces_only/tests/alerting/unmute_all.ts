@@ -12,7 +12,7 @@ import {
   AlertUtils,
   checkAAD,
   getUrlPrefix,
-  getTestAlertData,
+  getTestRuleData,
   ObjectRemover,
 } from '../../../common/lib';
 
@@ -30,7 +30,7 @@ export default function createUnmuteTests({ getService }: FtrProviderContext) {
       const { body: createdAlert } = await supertestWithoutAuth
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData({ enabled: false }))
+        .send(getTestRuleData({ enabled: false }))
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
@@ -42,6 +42,7 @@ export default function createUnmuteTests({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .expect(200);
       expect(updatedAlert.mute_all).to.eql(false);
+      expect(updatedAlert.snooze_end_time).to.eql(undefined);
 
       // Ensure AAD isn't broken
       await checkAAD({
@@ -57,7 +58,7 @@ export default function createUnmuteTests({ getService }: FtrProviderContext) {
         const { body: createdAlert } = await supertestWithoutAuth
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
-          .send(getTestAlertData({ enabled: false }))
+          .send(getTestRuleData({ enabled: false }))
           .expect(200);
         objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
@@ -75,6 +76,7 @@ export default function createUnmuteTests({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .expect(200);
         expect(updatedAlert.mute_all).to.eql(false);
+        expect(updatedAlert.snooze_end_time).to.eql(undefined);
 
         // Ensure AAD isn't broken
         await checkAAD({

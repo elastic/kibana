@@ -8,7 +8,7 @@
 import { euiPaletteColorBlindBehindText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type { ActionAgentStatus } from '../types';
+import { ActionAgentStatus } from '../types';
 
 const visColors = euiPaletteColorBlindBehindText();
 const colorToHexMap = {
@@ -20,15 +20,19 @@ const colorToHexMap = {
   danger: visColors[9],
 };
 
-export const AGENT_STATUSES: ActionAgentStatus[] = ['success', 'pending', 'failed'];
+export const AGENT_STATUSES: ActionAgentStatus[] = [
+  ActionAgentStatus.SUCCESS,
+  ActionAgentStatus.PENDING,
+  ActionAgentStatus.FAILED,
+];
 
 export function getColorForAgentStatus(agentStatus: ActionAgentStatus): string {
   switch (agentStatus) {
-    case 'success':
+    case ActionAgentStatus.SUCCESS:
       return colorToHexMap.success;
-    case 'pending':
+    case ActionAgentStatus.PENDING:
       return colorToHexMap.default;
-    case 'failed':
+    case ActionAgentStatus.FAILED:
       return colorToHexMap.danger;
     default:
       throw new Error(`Unsupported action agent status ${agentStatus}`);
@@ -37,11 +41,11 @@ export function getColorForAgentStatus(agentStatus: ActionAgentStatus): string {
 
 export function getLabelForAgentStatus(agentStatus: ActionAgentStatus, expired: boolean): string {
   switch (agentStatus) {
-    case 'success':
+    case ActionAgentStatus.SUCCESS:
       return i18n.translate('xpack.osquery.liveQueryActionResults.summary.successfulLabelText', {
         defaultMessage: 'Successful',
       });
-    case 'pending':
+    case ActionAgentStatus.PENDING:
       return expired
         ? i18n.translate('xpack.osquery.liveQueryActionResults.summary.expiredLabelText', {
             defaultMessage: 'Expired',
@@ -49,7 +53,7 @@ export function getLabelForAgentStatus(agentStatus: ActionAgentStatus, expired: 
         : i18n.translate('xpack.osquery.liveQueryActionResults.summary.pendingLabelText', {
             defaultMessage: 'Not yet responded',
           });
-    case 'failed':
+    case ActionAgentStatus.FAILED:
       return i18n.translate('xpack.osquery.liveQueryActionResults.summary.failedLabelText', {
         defaultMessage: 'Failed',
       });

@@ -7,12 +7,9 @@
 
 import { ScreenshottingPlugin } from './plugin';
 
-/**
- * Screenshotting plugin entry point.
- */
-export function plugin(...args: ConstructorParameters<typeof ScreenshottingPlugin>) {
-  return new ScreenshottingPlugin(...args);
+export function plugin() {
+  return new ScreenshottingPlugin();
 }
 
+export type { LayoutParams } from '../common';
 export { LayoutTypes } from '../common';
-export type { ScreenshottingSetup, ScreenshottingStart } from './plugin';

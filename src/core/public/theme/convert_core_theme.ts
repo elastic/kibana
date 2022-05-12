@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { EuiThemeSystem, EuiThemeColorMode } from '@elastic/eui';
+import { COLOR_MODES_STANDARD } from '@elastic/eui';
+import type { EuiThemeSystem, EuiThemeColorModeStandard } from '@elastic/eui';
 import type { CoreTheme } from './types';
 
 /** @internal */
 export interface EuiTheme {
-  colorMode: EuiThemeColorMode;
+  colorMode: EuiThemeColorModeStandard;
   euiThemeSystem?: EuiThemeSystem;
 }
 
@@ -19,6 +20,6 @@ export interface EuiTheme {
 export const convertCoreTheme = (coreTheme: CoreTheme): EuiTheme => {
   const { darkMode } = coreTheme;
   return {
-    colorMode: darkMode ? 'DARK' : 'LIGHT',
+    colorMode: darkMode ? COLOR_MODES_STANDARD.dark : COLOR_MODES_STANDARD.light,
   };
 };

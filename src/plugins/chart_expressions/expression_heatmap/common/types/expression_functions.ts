@@ -6,14 +6,16 @@
  * Side Public License, v 1.
  */
 import { Position } from '@elastic/charts';
+import type { PaletteOutput } from '@kbn/coloring';
 import {
   Datatable,
   ExpressionFunctionDefinition,
   ExpressionValueRender,
-} from '../../../../expressions';
-import { ExpressionValueVisDimension } from '../../../../visualizations/common';
+} from '@kbn/expressions-plugin';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 
-import { CustomPaletteState, PaletteOutput } from '../../../../charts/common';
+import { CustomPaletteState } from '@kbn/charts-plugin/common';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
 import {
   EXPRESSION_HEATMAP_NAME,
   EXPRESSION_HEATMAP_LEGEND_NAME,
@@ -38,6 +40,11 @@ export interface HeatmapLegendConfig {
    * Defines if the legend items should be truncated
    */
   shouldTruncate?: boolean;
+  /**
+   * Exact legend width (vertical) or height (horizontal)
+   * Limited to max of 70% of the chart container dimension Vertical legends limited to min of 30% of computed width
+   */
+  legendSize?: LegendSize;
 }
 
 export type HeatmapLegendConfigResult = HeatmapLegendConfig & {
@@ -48,16 +55,16 @@ export interface HeatmapGridConfig {
   // grid
   strokeWidth?: number;
   strokeColor?: string;
-  cellHeight?: number;
-  cellWidth?: number;
   // cells
   isCellLabelVisible: boolean;
   // Y-axis
   isYAxisLabelVisible: boolean;
-  yAxisLabelWidth?: number;
-  yAxisLabelColor?: string;
+  isYAxisTitleVisible: boolean;
+  yTitle?: string;
   // X-axis
   isXAxisLabelVisible: boolean;
+  isXAxisTitleVisible: boolean;
+  xTitle?: string;
 }
 
 export type HeatmapGridConfigResult = HeatmapGridConfig & {
@@ -77,6 +84,7 @@ export interface HeatmapArguments {
   splitColumnAccessor?: string | ExpressionValueVisDimension;
   legend: HeatmapLegendConfigResult;
   gridConfig: HeatmapGridConfigResult;
+  ariaLabel?: string;
 }
 
 export type HeatmapInput = Datatable;

@@ -20,6 +20,7 @@ import {
   LineAnnotation,
   TooltipType,
   StackMode,
+  Placement,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { getTimezone } from '../../../lib/get_timezone';
@@ -36,7 +37,7 @@ import {
   MULTILAYER_TIME_AXIS_STYLE,
   renderEndzoneTooltip,
   useActiveCursor,
-} from '../../../../../../../charts/public';
+} from '@kbn/charts-plugin/public';
 import { getAxisLabelString } from '../../../components/lib/get_axis_label_string';
 import { calculateDomainForSeries } from './utils/series_domain_calculation';
 
@@ -73,10 +74,12 @@ export const TimeSeries = ({
   xAxisFormatter,
   annotations,
   syncColors,
+  syncTooltips,
   palettesService,
   interval,
   isLastBucketDropped,
   useLegacyTimeAxis,
+  ignoreDaylightTime,
 }) => {
   // If the color isn't configured by the user, use the color mapping service
   // to assign a color from the Kibana palette. Colors will be shared across the
@@ -152,7 +155,9 @@ export const TimeSeries = ({
   const shouldUseNewTimeAxis =
     series.every(
       ({ stack, bars, lines }) => (bars?.show && stack !== STACKED_OPTIONS.NONE) || lines?.show
-    ) && !useLegacyTimeAxis;
+    ) &&
+    !useLegacyTimeAxis &&
+    !ignoreDaylightTime;
 
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
@@ -210,7 +215,9 @@ export const TimeSeries = ({
           boundary: document.getElementById('app-fixed-viewport') ?? undefined,
           headerFormatter: tooltipFormatter,
         }}
-        externalPointerEvents={{ tooltip: { visible: false } }}
+        externalPointerEvents={{
+          tooltip: { visible: syncTooltips, placement: Placement.Right },
+        }}
       />
 
       {annotations.map(({ id, data, icon, color }) => {

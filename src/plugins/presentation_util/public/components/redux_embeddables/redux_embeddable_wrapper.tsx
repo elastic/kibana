@@ -15,17 +15,18 @@ import { Filter } from '@kbn/es-query';
 import { isEqual } from 'lodash';
 
 import {
-  ReduxContainerContextServices,
-  ReduxEmbeddableContextServices,
-  ReduxEmbeddableWrapperProps,
-} from './types';
-import {
   IContainer,
   IEmbeddable,
   EmbeddableInput,
   EmbeddableOutput,
   isErrorEmbeddable,
-} from '../../../../embeddable/public';
+} from '@kbn/embeddable-plugin/public';
+import {
+  ReduxEmbeddableWrapperProps,
+  ReduxContainerContextServices,
+  ReduxEmbeddableContextServices,
+  ReduxEmbeddableWrapperPropsWithChildren,
+} from './types';
 import { getManagedEmbeddablesStore } from './generic_embeddable_store';
 import { ReduxEmbeddableContext, useReduxEmbeddableContext } from './redux_embeddable_context';
 
@@ -78,7 +79,7 @@ export const getExplicitInput = <InputType extends EmbeddableInput = EmbeddableI
  * or ReduxContainerContext to interface with the state of the embeddable.
  */
 export const ReduxEmbeddableWrapper = <InputType extends EmbeddableInput = EmbeddableInput>(
-  props: PropsWithChildren<ReduxEmbeddableWrapperProps<InputType>>
+  props: ReduxEmbeddableWrapperPropsWithChildren<InputType>
 ) => {
   const { embeddable, reducers, diffInput } = useMemo(
     () => ({ ...getDefaultProps<InputType>(), ...props }),
@@ -93,10 +94,18 @@ export const ReduxEmbeddableWrapper = <InputType extends EmbeddableInput = Embed
           updateInputForChild: embeddable.updateInputForChild.bind(embeddable),
           removeEmbeddable: embeddable.removeEmbeddable.bind(embeddable),
           addNewEmbeddable: embeddable.addNewEmbeddable.bind(embeddable),
+          replaceEmbeddable: embeddable.replaceEmbeddable.bind(embeddable),
         };
       }
       return;
     }, [embeddable]);
+
+  const ReduxEmbeddableStoreProvider = useMemo(
+    () =>
+      ({ children }: PropsWithChildren<{}>) =>
+        <Provider store={getManagedEmbeddablesStore()}>{children}</Provider>,
+    []
+  );
 
   const reduxEmbeddableContext: ReduxEmbeddableContextServices | ReduxContainerContextServices =
     useMemo(() => {
@@ -145,19 +154,20 @@ export const ReduxEmbeddableWrapper = <InputType extends EmbeddableInput = Embed
       return {
         useEmbeddableDispatch: () => useDispatch<typeof store.dispatch>(),
         useEmbeddableSelector,
+        ReduxEmbeddableStoreProvider,
         actions: slice.actions as ReduxEmbeddableContextServices['actions'],
         containerActions,
       };
-    }, [reducers, embeddable, containerActions]);
+    }, [reducers, embeddable, containerActions, ReduxEmbeddableStoreProvider]);
 
   return (
-    <Provider store={getManagedEmbeddablesStore()}>
+    <ReduxEmbeddableStoreProvider>
       <ReduxEmbeddableContext.Provider value={reduxEmbeddableContext}>
         <ReduxEmbeddableSync diffInput={diffInput} embeddable={embeddable}>
           {props.children}
         </ReduxEmbeddableSync>
       </ReduxEmbeddableContext.Provider>
-    </Provider>
+    </ReduxEmbeddableStoreProvider>
   );
 };
 
@@ -225,3 +235,9 @@ const ReduxEmbeddableSync = <InputType extends EmbeddableInput = EmbeddableInput
 
   return <>{children}</>;
 };
+
+// required for dynamic import using React.lazy()
+// eslint-disable-next-line import/no-default-export
+export default ReduxEmbeddableWrapper;
+
+export type ReduxEmbeddableWrapperType = typeof ReduxEmbeddableWrapper;

@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 const bodySchema = schema.object({
   indices: schema.arrayOf(schema.string()),
@@ -18,11 +18,11 @@ export function registerOpenRoute({ router, lib: { handleEsError } }: RouteDepen
   router.post(
     { path: addBasePath('/indices/open'), validate: { body: bodySchema } },
     async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
       const { indices = [] } = request.body as typeof bodySchema.type;
 
       const params = {
-        expand_wildcards: 'none',
+        expand_wildcards: 'none' as const,
         format: 'json',
         index: indices,
       };

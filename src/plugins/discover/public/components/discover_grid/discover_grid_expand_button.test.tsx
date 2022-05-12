@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { ExpandButton } from './discover_grid_expand_button';
 import { DiscoverGridContext } from './discover_grid_context';
@@ -35,6 +35,7 @@ describe('Discover grid view button ', function () {
       <DiscoverGridContext.Provider value={contextMock}>
         <ExpandButton
           rowIndex={0}
+          colIndex={0}
           setCellProps={jest.fn()}
           columnId="test"
           isExpanded={false}
@@ -57,6 +58,7 @@ describe('Discover grid view button ', function () {
       <DiscoverGridContext.Provider value={contextMock}>
         <ExpandButton
           rowIndex={0}
+          colIndex={0}
           setCellProps={jest.fn()}
           columnId="test"
           isExpanded={false}
@@ -79,6 +81,7 @@ describe('Discover grid view button ', function () {
       <DiscoverGridContext.Provider value={contextMock}>
         <ExpandButton
           rowIndex={1}
+          colIndex={0}
           setCellProps={jest.fn()}
           columnId="test"
           isExpanded={false}

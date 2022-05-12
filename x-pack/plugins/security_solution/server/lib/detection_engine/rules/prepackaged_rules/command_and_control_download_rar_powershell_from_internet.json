@@ -13,7 +13,7 @@
     "packetbeat-*",
     "logs-endpoint.events.*"
   ],
-  "language": "lucene",
+  "language": "kuery",
   "license": "Elastic License v2",
   "name": "Roshal Archive (RAR) or PowerShell File Downloaded from the Internet",
   "note": "## Threat intel\n\nThis activity has been observed in FIN7 campaigns.",
@@ -52,5 +52,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 8
+  "version": 9
 }

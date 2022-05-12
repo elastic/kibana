@@ -1,4 +1,0 @@
-{
-  "main": "../target_node/strict_keys_rt",
-  "types": "../target_types/strict_keys_rt"
-}

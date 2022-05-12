@@ -6,13 +6,12 @@
  */
 
 import * as t from 'io-ts';
-import { maxSuggestions } from '../../../../observability/common';
+import { maxSuggestions } from '@kbn/observability-plugin/common';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getEnvironments } from './get_environments';
 import { rangeRt } from '../default_api_types';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 
 const environmentsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/environments',
@@ -25,7 +24,18 @@ const environmentsRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    environments: Array<
+      | 'ENVIRONMENT_NOT_DEFINED'
+      | 'ENVIRONMENT_ALL'
+      | t.Branded<
+          string,
+          import('./../../../../../../node_modules/@types/kbn__io-ts-utils/index').NonEmptyStringBrand
+        >
+    >;
+  }> => {
     const setup = await setupRequest(resources);
     const { context, params } = resources;
     const { serviceName, start, end } = params.query;
@@ -36,7 +46,8 @@ const environmentsRoute = createApmServerRoute({
       end,
       kuery: '',
     });
-    const size = await context.core.uiSettings.client.get<number>(
+    const coreContext = await context.core;
+    const size = await coreContext.uiSettings.client.get<number>(
       maxSuggestions
     );
     const environments = await getEnvironments({
@@ -52,5 +63,4 @@ const environmentsRoute = createApmServerRoute({
   },
 });
 
-export const environmentsRouteRepository =
-  createApmServerRouteRepository().add(environmentsRoute);
+export const environmentsRouteRepository = environmentsRoute;

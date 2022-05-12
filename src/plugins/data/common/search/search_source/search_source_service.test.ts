@@ -7,7 +7,7 @@
  */
 
 import { IndexPatternsContract } from '../..';
-import { SearchSourceService, SearchSourceDependencies } from './';
+import { SearchSourceService, SearchSourceDependencies } from '.';
 
 describe('SearchSource service', () => {
   let dependencies: jest.Mocked<SearchSourceDependencies>;
@@ -28,7 +28,14 @@ describe('SearchSource service', () => {
         dependencies
       );
 
-      expect(Object.keys(start)).toEqual(['create', 'createEmpty']);
+      expect(Object.keys(start)).toEqual([
+        'create',
+        'createEmpty',
+        'extract',
+        'inject',
+        'getAllMigrations',
+        'telemetry',
+      ]);
     });
   });
 });

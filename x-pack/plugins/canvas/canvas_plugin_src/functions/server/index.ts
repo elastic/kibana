@@ -7,5 +7,6 @@
 
 import { demodata } from './demodata';
 import { pointseries } from './pointseries';
+import { filters } from './filters';
 
-export const functions = [demodata, pointseries];
+export const functions = [filters, demodata, pointseries];

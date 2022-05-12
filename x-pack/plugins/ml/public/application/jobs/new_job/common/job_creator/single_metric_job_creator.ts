@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { JobCreator } from './job_creator';
@@ -22,7 +23,6 @@ import {
 } from '../../../../../../common/constants/aggregation_types';
 import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
-import type { DataView } from '../../../../../../../../../src/plugins/data_views/public';
 import { isSparseDataJob } from './util/general';
 
 export class SingleMetricJobCreator extends JobCreator {
@@ -72,7 +72,7 @@ export class SingleMetricJobCreator extends JobCreator {
       delete this._datafeed_config.aggregations;
 
       const functionName = this._aggs[0].dslName;
-      const timeField = this._job_config.data_description.time_field;
+      const timeField = this._job_config.data_description.time_field!;
 
       const duration = parseInterval(this._job_config.analysis_config.bucket_span, true);
       if (duration === null) {

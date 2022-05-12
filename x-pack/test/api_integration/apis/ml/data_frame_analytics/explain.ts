@@ -5,10 +5,10 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
+import { DeepPartial } from '@kbn/ml-plugin/common/types/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { DataFrameAnalyticsConfig } from '../../../../../plugins/ml/public/application/data_frame_analytics/common';
-import { DeepPartial } from '../../../../../plugins/ml/common/types/common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -90,12 +90,12 @@ export default ({ getService }: FtrProviderContext) => {
     testJobConfigs.forEach((testConfig) => {
       describe(`ExplainDataFrameAnalytics ${testConfig.jobType}`, async () => {
         it(`should explain ${testConfig.jobType} analytics job`, async () => {
-          const { body } = await supertest
+          const { body, status } = await supertest
             .post(`/api/ml/data_frame/analytics/_explain`)
             .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
             .set(COMMON_REQUEST_HEADERS)
-            .send(testConfig.config)
-            .expect(200);
+            .send(testConfig.config);
+          ml.api.assertResponseStatusCode(200, status, body);
 
           expect(body).to.have.property('field_selection');
           // eslint-disable-next-line
@@ -111,24 +111,24 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it(`should not allow user with only view permission to use explain endpoint for ${testConfig.jobType} job `, async () => {
-          const { body } = await supertest
+          const { body, status } = await supertest
             .post(`/api/ml/data_frame/analytics/_explain`)
             .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
             .set(COMMON_REQUEST_HEADERS)
-            .send(testConfig.config)
-            .expect(403);
+            .send(testConfig.config);
+          ml.api.assertResponseStatusCode(403, status, body);
 
           expect(body.error).to.eql('Forbidden');
           expect(body.message).to.eql('Forbidden');
         });
 
         it(`should not allow unauthorized user to use explain endpoint for ${testConfig.jobType} job`, async () => {
-          const { body } = await supertest
+          const { body, status } = await supertest
             .post(`/api/ml/data_frame/analytics/_explain`)
             .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
             .set(COMMON_REQUEST_HEADERS)
-            .send(testConfig.config)
-            .expect(403);
+            .send(testConfig.config);
+          ml.api.assertResponseStatusCode(403, status, body);
 
           expect(body.error).to.eql('Forbidden');
           expect(body.message).to.eql('Forbidden');

@@ -21,11 +21,13 @@ import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 
+import { FilterManager } from '@kbn/data-plugin/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { CellValueElementProps } from '../cell_rendering';
 import { Direction, TimelineItem } from '../../../../../common/search_strategy';
-import { useTimelineEvents } from '../../../containers/index';
+import { useTimelineEvents } from '../../../containers';
 import { useKibana } from '../../../../common/lib/kibana';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { StatefulBody } from '../body';
@@ -33,8 +35,6 @@ import { Footer, footerHeight } from '../footer';
 import { TimelineHeader } from '../header';
 import { calculateTotalPages, combineQueries } from '../helpers';
 import { TimelineRefetch } from '../refetch_timeline';
-import { FilterManager } from '../../../../../../../../src/plugins/data/public';
-import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/common';
 import {
   ControlColumnProps,
   KueryFilterQueryKind,
@@ -48,10 +48,10 @@ import { SuperDatePicker } from '../../../../common/components/super_date_picker
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import { inputsModel, inputsSelectors, State } from '../../../../common/store';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
+import { timelineDefaults } from '../../../store/timeline/defaults';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useTimelineEventsCountPortal } from '../../../../common/hooks/use_timeline_events_count';
-import { TimelineModel } from '../../../../timelines/store/timeline/model';
+import { TimelineModel } from '../../../store/timeline/model';
 import { TimelineDatePickerLock } from '../date_picker_lock';
 import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
 import { activeTimeline } from '../../../containers/active_timeline_context';
@@ -120,8 +120,13 @@ const DatePicker = styled(EuiFlexItem)`
     width: auto;
   }
 `;
-
 DatePicker.displayName = 'DatePicker';
+
+const SourcererFlex = styled(EuiFlexItem)`
+  align-items: flex-end;
+`;
+
+SourcererFlex.displayName = 'SourcererFlex';
 
 const VerticalRule = styled.div`
   width: 2px;
@@ -186,6 +191,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
   const {
     browserFields,
+    dataViewId,
     docValueFields,
     loading: loadingSourcerer,
     indexPattern,
@@ -194,8 +200,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     // in order to include the exclude filters in the search that are not stored in the timeline
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
+
   const { uiSettings } = useKibana().services;
-  const ACTION_BUTTON_COUNT = 5;
+  const ACTION_BUTTON_COUNT = 6;
 
   const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
   const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
@@ -276,18 +283,19 @@ export const QueryTabContentComponent: React.FC<Props> = ({
 
   const [isQueryLoading, { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
     useTimelineEvents({
+      dataViewId,
       docValueFields,
       endDate: end,
+      fields: getTimelineQueryFields(),
+      filterQuery: combinedQueries?.filterQuery,
       id: timelineId,
       indexNames: selectedPatterns,
-      fields: getTimelineQueryFields(),
       language: kqlQuery.language,
       limit: itemsPerPage,
-      filterQuery: combinedQueries?.filterQuery,
       runtimeMappings,
-      startDate: start,
       skip: !canQueryTimeline,
       sort: timelineQuerySortField,
+      startDate: start,
       timerangeKind,
     });
 
@@ -355,7 +363,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                   setFullScreen={setTimelineFullScreen}
                 />
               )}
-              <DatePicker grow={1}>
+              <DatePicker grow={10}>
                 <SuperDatePicker
                   id="timeline"
                   timelineId={timelineId}
@@ -365,11 +373,11 @@ export const QueryTabContentComponent: React.FC<Props> = ({
               <EuiFlexItem grow={false}>
                 <TimelineDatePickerLock />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <SourcererFlex grow={1}>
                 {activeTab === TimelineTabs.query && (
                   <Sourcerer scope={SourcererScopeName.timeline} />
                 )}
-              </EuiFlexItem>
+              </SourcererFlex>
             </EuiFlexGroup>
             <TimelineHeaderContainer data-test-subj="timelineHeader">
               <TimelineHeader

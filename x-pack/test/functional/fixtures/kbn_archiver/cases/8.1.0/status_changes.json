@@ -1,0 +1,271 @@
+{
+  "attributes": {
+    "closed_at": null,
+    "closed_by": null,
+    "connector": {
+      "fields": [],
+      "name": "none",
+      "type": ".none"
+    },
+    "created_at": "2022-01-05T15:00:00.000Z",
+    "created_by": {
+      "email": null,
+      "full_name": null,
+      "username": "j@j.com"
+    },
+    "description": "asdf",
+    "external_service": null,
+    "owner": "securitySolution",
+    "settings": {
+      "syncAlerts": true
+    },
+    "status": "open",
+    "tags": [],
+    "title": "Jon case",
+    "type": "individual",
+    "updated_at": "2022-01-05T18:11:23.273Z",
+    "updated_by": {
+      "email": null,
+      "full_name": null,
+      "username": "j@j.com"
+    }
+  },
+  "coreMigrationVersion": "8.1.0",
+  "id": "0215ff30-6e39-11ec-8e5f-bf82b2955cf8",
+  "migrationVersion": {
+    "cases": "8.0.0"
+  },
+  "references": [],
+  "type": "cases",
+  "updated_at": "2022-01-05T18:11:23.273Z"
+}
+
+{
+  "attributes": {
+    "action": "create",
+    "created_at": "2022-01-05T15:06:07.914Z",
+    "created_by": {
+      "email": null,
+      "full_name": null,
+      "username": "j@j.com"
+    },
+    "owner": "securitySolution",
+    "payload": {
+      "connector": {
+        "fields": null,
+        "name": "none",
+        "type": ".none"
+      },
+      "description": "asdf",
+      "owner": "securitySolution",
+      "settings": {
+        "syncAlerts": true
+      },
+      "status": "open",
+      "tags": [],
+      "title": "Jon case",
+      "type": "individual"
+    },
+    "type": "create_case"
+  },
+  "coreMigrationVersion": "8.1.0",
+  "id": "02b350a0-6e39-11ec-8e5f-bf82b2955cf8",
+  "migrationVersion": {
+    "cases-user-actions": "8.1.0"
+  },
+  "references": [
+    {
+      "id": "0215ff30-6e39-11ec-8e5f-bf82b2955cf8",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2022-01-05T15:06:07.914Z"
+}
+
+{
+  "attributes": {
+    "action": "update",
+    "created_at": "2022-01-05T15:10:00.000Z",
+    "created_by": {
+      "email": null,
+      "full_name": null,
+      "username": "j@j.com"
+    },
+    "owner": "securitySolution",
+    "payload": {
+      "status": "in-progress"
+    },
+    "type": "status"
+  },
+  "coreMigrationVersion": "8.1.0",
+  "id": "09448740-6e39-11ec-8e5f-bf82b2955cf8",
+  "migrationVersion": {
+    "cases-user-actions": "8.1.0"
+  },
+  "references": [
+    {
+      "id": "0215ff30-6e39-11ec-8e5f-bf82b2955cf8",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2022-01-05T15:06:18.932Z"
+}
+
+{
+  "attributes": {
+    "action": "update",
+    "created_at": "2022-01-05T15:20:00.000Z",
+    "created_by": {
+      "email": null,
+      "full_name": null,
+      "username": "j@j.com"
+    },
+    "owner": "securitySolution",
+    "payload": {
+      "status": "closed"
+    },
+    "type": "status"
+  },
+  "coreMigrationVersion": "8.1.0",
+  "id": "e0fb1e10-6e52-11ec-8e5f-bf82b2955cf8",
+  "migrationVersion": {
+    "cases-user-actions": "8.1.0"
+  },
+  "references": [
+    {
+      "id": "0215ff30-6e39-11ec-8e5f-bf82b2955cf8",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2022-01-05T18:11:18.257Z"
+}
+
+{
+  "attributes": {
+    "action": "update",
+    "created_at": "2022-01-05T15:30:00.000Z",
+    "created_by": {
+      "email": null,
+      "full_name": null,
+      "username": "j@j.com"
+    },
+    "owner": "securitySolution",
+    "payload": {
+      "status": "open"
+    },
+    "type": "status"
+  },
+  "coreMigrationVersion": "8.1.0",
+  "id": "e48fdd90-6e52-11ec-8e5f-bf82b2955cf8",
+  "migrationVersion": {
+    "cases-user-actions": "8.1.0"
+  },
+  "references": [
+    {
+      "id": "0215ff30-6e39-11ec-8e5f-bf82b2955cf8",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2022-01-05T18:11:24.265Z"
+}
+
+{
+  "attributes": {
+    "action": "update",
+    "created_at": "2022-01-05T15:40:00.000Z",
+    "created_by": {
+      "email": null,
+      "full_name": null,
+      "username": "j@j.com"
+    },
+    "owner": "securitySolution",
+    "payload": {
+      "status": "closed"
+    },
+    "type": "status"
+  },
+  "coreMigrationVersion": "8.1.0",
+  "id": "e48fdd90-6e52-11ec-8e5f-bf82b2955cfa",
+  "migrationVersion": {
+    "cases-user-actions": "8.1.0"
+  },
+  "references": [
+    {
+      "id": "0215ff30-6e39-11ec-8e5f-bf82b2955cf8",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2022-01-05T18:11:24.265Z"
+}
+
+{
+  "attributes": {
+    "action": "update",
+    "created_at": "2022-01-05T15:50:00.000Z",
+    "created_by": {
+      "email": null,
+      "full_name": null,
+      "username": "j@j.com"
+    },
+    "owner": "securitySolution",
+    "payload": {
+      "status": "open"
+    },
+    "type": "status"
+  },
+  "coreMigrationVersion": "8.1.0",
+  "id": "e48fdd90-6e52-11ec-8e5f-bf82b2955cfb",
+  "migrationVersion": {
+    "cases-user-actions": "8.1.0"
+  },
+  "references": [
+    {
+      "id": "0215ff30-6e39-11ec-8e5f-bf82b2955cf8",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2022-01-05T18:11:24.265Z"
+}
+
+{
+  "attributes": {
+    "action": "update",
+    "created_at": "2022-01-05T16:00:00.000Z",
+    "created_by": {
+      "email": null,
+      "full_name": null,
+      "username": "j@j.com"
+    },
+    "owner": "securitySolution",
+    "payload": {
+      "status": "closed"
+    },
+    "type": "status"
+  },
+  "coreMigrationVersion": "8.1.0",
+  "id": "e48fdd90-6e52-11ec-8e5f-bf82b2955cfc",
+  "migrationVersion": {
+    "cases-user-actions": "8.1.0"
+  },
+  "references": [
+    {
+      "id": "0215ff30-6e39-11ec-8e5f-bf82b2955cf8",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2022-01-05T18:11:24.265Z"
+}

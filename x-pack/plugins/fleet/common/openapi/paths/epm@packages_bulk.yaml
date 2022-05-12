@@ -1,0 +1,12 @@
+post:
+  summary: Packages - Bulk install
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/bulk_install_packages_response.yaml
+  operationId: bulk-install-packages
+parameters: []

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { MlClient } from '../../lib/ml_client';
-import { mlLog } from '../../lib/log';
+import type { MlClient } from '../ml_client';
+import { mlLog } from '../log';
 
 export function upgradeCheckProvider(mlClient: MlClient) {
   async function isUpgradeInProgress(): Promise<boolean> {
     let upgradeInProgress = false;
     try {
-      const { body } = await mlClient.info();
+      const body = await mlClient.info();
       // if ml indices are currently being migrated, upgrade_mode will be set to true
       // pass this back with the privileges to allow for the disabling of UI controls.
       upgradeInProgress = body.upgrade_mode === true;

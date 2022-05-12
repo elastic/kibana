@@ -6,13 +6,14 @@
  */
 
 import React, { FC, useCallback, useEffect, useState } from 'react';
+import { EMSTermJoinConfig } from '@kbn/maps-plugin/public';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { TopValues } from '../../../top_values';
-import { EMSTermJoinConfig } from '../../../../../../../../maps/public';
 import { useDataVisualizerKibana } from '../../../../../kibana_context';
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
 import { ChoroplethMap } from './choropleth_map';
+import { ErrorMessageContent } from './error_message';
 
 export const KeywordContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) => {
   const [EMSSuggestion, setEMSSuggestion] = useState<EMSTermJoinConfig | null | undefined>();
@@ -44,6 +45,9 @@ export const KeywordContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) =
   return (
     <ExpandedRowContent dataTestSubj={'dataVisualizerKeywordContent'}>
       <DocumentStatsTable config={config} />
+      {config.stats?.error && fieldName !== undefined ? (
+        <ErrorMessageContent fieldName={fieldName} error={config.stats?.error} />
+      ) : null}
       <TopValues
         stats={stats}
         fieldFormat={fieldFormat}

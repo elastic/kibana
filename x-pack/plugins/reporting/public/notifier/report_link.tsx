@@ -14,14 +14,14 @@ interface Props {
 
 export const ReportLink = ({ getUrl }: Props) => (
   <FormattedMessage
-    id="xpack.reporting.publicNotifier.reportLink.pickItUpFromPathDescription"
-    defaultMessage="Pick it up from {path}."
+    id="xpack.reporting.publicNotifier.reportLinkDescription"
+    defaultMessage="Download it now, or get it later in {path}."
     values={{
       path: (
         <a href={getUrl()}>
           <FormattedMessage
             id="xpack.reporting.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
-            defaultMessage="Stack Management &gt; Alerts and Insights &gt; Reporting"
+            defaultMessage="Stack Management &gt; Reporting"
           />
         </a>
       ),

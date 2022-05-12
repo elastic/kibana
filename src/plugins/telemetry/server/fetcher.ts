@@ -6,17 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { Observable, Subscription, timer } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { firstValueFrom, Observable, Subscription, timer } from 'rxjs';
 import fetch from 'node-fetch';
-import type { TelemetryCollectionManagerPluginStart } from 'src/plugins/telemetry_collection_manager/server';
+import type { TelemetryCollectionManagerPluginStart } from '@kbn/telemetry-collection-manager-plugin/server';
 import {
   PluginInitializerContext,
   Logger,
   SavedObjectsClientContract,
   SavedObjectsClient,
   CoreStart,
-} from '../../../core/server';
+} from '@kbn/core/server';
 import {
   getTelemetryChannelEndpoint,
   getTelemetryOptIn,
@@ -24,9 +23,10 @@ import {
   getTelemetryFailureDetails,
 } from '../common/telemetry_config';
 import { getTelemetrySavedObject, updateTelemetrySavedObject } from './telemetry_repository';
-import { REPORT_INTERVAL_MS, PAYLOAD_CONTENT_ENCODING } from '../common/constants';
+import { PAYLOAD_CONTENT_ENCODING } from '../common/constants';
 import type { EncryptedTelemetryPayload } from '../common/types';
 import { TelemetryConfigType } from './config';
+import { isReportIntervalExpired } from '../common/is_report_interval_expired';
 
 export interface FetcherTaskDepsStart {
   telemetryCollectionManager: TelemetryCollectionManagerPluginStart;
@@ -39,6 +39,7 @@ interface TelemetryConfig {
   failureCount: number;
   failureVersion: string | undefined;
   currentVersion: string;
+  lastReported: number | undefined;
 }
 
 export class FetcherTask {
@@ -59,10 +60,7 @@ export class FetcherTask {
     this.logger = initializerContext.logger.get('fetcher');
   }
 
-  public start(
-    { savedObjects, elasticsearch }: CoreStart,
-    { telemetryCollectionManager }: FetcherTaskDepsStart
-  ) {
+  public start({ savedObjects }: CoreStart, { telemetryCollectionManager }: FetcherTaskDepsStart) {
     this.internalRepository = new SavedObjectsClient(savedObjects.createInternalRepository());
     this.telemetryCollectionManager = telemetryCollectionManager;
 
@@ -75,10 +73,6 @@ export class FetcherTask {
     if (this.intervalId) {
       this.intervalId.unsubscribe();
     }
-  }
-
-  private async areAllCollectorsReady() {
-    return (await this.telemetryCollectionManager?.areAllCollectorsReady()) ?? false;
   }
 
   private async sendIfDue() {
@@ -102,10 +96,6 @@ export class FetcherTask {
     this.isSending = true;
 
     try {
-      const allCollectorsReady = await this.areAllCollectorsReady();
-      if (!allCollectorsReady) {
-        throw new Error('Not all collectors are ready.');
-      }
       clusters = await this.fetchTelemetry();
     } catch (err) {
       this.logger.warn(`Error fetching usage. (${err})`);
@@ -128,7 +118,7 @@ export class FetcherTask {
 
   private async getCurrentConfigs(): Promise<TelemetryConfig> {
     const telemetrySavedObject = await getTelemetrySavedObject(this.internalRepository!);
-    const config = await this.config$.pipe(take(1)).toPromise();
+    const config = await firstValueFrom(this.config$);
     const currentKibanaVersion = this.currentKibanaVersion;
     const configTelemetrySendUsageFrom = config.sendUsageFrom;
     const allowChangingOptInStatus = config.allowChangingOptInStatus;
@@ -156,6 +146,7 @@ export class FetcherTask {
       failureCount,
       failureVersion,
       currentVersion: currentKibanaVersion,
+      lastReported: telemetrySavedObject ? telemetrySavedObject.lastReported : void 0,
     };
   }
 
@@ -186,13 +177,16 @@ export class FetcherTask {
     failureCount,
     failureVersion,
     currentVersion,
+    lastReported,
   }: TelemetryConfig) {
     if (failureCount > 2 && failureVersion === currentVersion) {
       return false;
     }
 
     if (telemetryOptIn && telemetrySendUsageFrom === 'server') {
-      if (!this.lastReported || Date.now() - this.lastReported > REPORT_INTERVAL_MS) {
+      // Check both: in-memory and SO-driven value.
+      // This will avoid the server retrying over and over when it has issues with storing the state in the SO.
+      if (isReportIntervalExpired(this.lastReported) && isReportIntervalExpired(lastReported)) {
         return true;
       }
     }

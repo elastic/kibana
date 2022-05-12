@@ -21,6 +21,7 @@ import { FieldSelect } from '../../../dimension_panel/field_select';
 import type { TermsIndexPatternColumn } from './types';
 import type { IndexPattern, IndexPatternPrivateState } from '../../../types';
 import type { OperationSupportMatrix } from '../../../dimension_panel';
+import { supportedTypes } from './constants';
 
 const generateId = htmlIdGenerator();
 export const MAX_MULTI_FIELDS_SIZE = 3;
@@ -29,6 +30,7 @@ export interface FieldInputsProps {
   column: TermsIndexPatternColumn;
   indexPattern: IndexPattern;
   existingFields: IndexPatternPrivateState['existingFields'];
+  invalidFields?: string[];
   operationSupportMatrix: Pick<OperationSupportMatrix, 'operationByField'>;
   onChange: (newValues: string[]) => void;
 }
@@ -51,6 +53,7 @@ export function FieldInputs({
   indexPattern,
   existingFields,
   operationSupportMatrix,
+  invalidFields,
 }: FieldInputsProps) {
   const onChangeWrapped = useCallback(
     (values: WrappedValue[]) =>
@@ -73,9 +76,9 @@ export function FieldInputs({
   const onFieldSelectChange = useCallback(
     (choice, index = 0) => {
       const fields = [...localValues];
-      const newFieldName = indexPattern.getFieldByName(choice.field)?.displayName;
-      if (newFieldName != null) {
-        fields[index] = { id: generateId(), value: newFieldName };
+
+      if (indexPattern.getFieldByName(choice.field)) {
+        fields[index] = { id: generateId(), value: choice.field };
 
         // update the layer state
         handleInputChange(fields);
@@ -90,7 +93,7 @@ export function FieldInputs({
     return (
       <>
         <FieldSelect
-          fieldIsInvalid={false}
+          fieldIsInvalid={Boolean(invalidFields?.[0])}
           currentIndexPattern={indexPattern}
           existingFields={existingFields}
           operationByField={operationSupportMatrix.operationByField}
@@ -109,6 +112,7 @@ export function FieldInputs({
           label={i18n.translate('xpack.lens.indexPattern.terms.addField', {
             defaultMessage: 'Add field',
           })}
+          isDisabled={column.params.orderBy.type === 'rare'}
         />
       </>
     );
@@ -128,21 +132,31 @@ export function FieldInputs({
         {localValues.map(({ id, value, isNew }, index) => {
           // need to filter the available fields for multiple terms
           // * a scripted field should be removed
-          // * if a field has been used, should it be removed? Probably yes?
-          // * if a scripted field was used in a singular term, should it be marked as invalid for multi-terms? Probably yes?
+          // * a field of unsupported type should be removed
+          // * a field that has been used
+          // * a scripted field was used in a singular term, should be marked as invalid for multi-terms
           const filteredOperationByField = Object.keys(operationSupportMatrix.operationByField)
-            .filter(
-              (key) =>
-                (!rawValuesLookup.has(key) && !indexPattern.getFieldByName(key)?.scripted) ||
-                key === value
-            )
+            .filter((key) => {
+              if (key === value) {
+                return true;
+              }
+              const field = indexPattern.getFieldByName(key);
+              return (
+                !rawValuesLookup.has(key) &&
+                field &&
+                !field.scripted &&
+                supportedTypes.has(field.type)
+              );
+            })
             .reduce<OperationSupportMatrix['operationByField']>((memo, key) => {
               memo[key] = operationSupportMatrix.operationByField[key];
               return memo;
             }, {});
 
-          const shouldShowScriptedFieldError = Boolean(
-            value && indexPattern.getFieldByName(value)?.scripted && localValuesFilled.length > 1
+          const shouldShowError = Boolean(
+            value &&
+              ((indexPattern.getFieldByName(value)?.scripted && localValuesFilled.length > 1) ||
+                invalidFields?.includes(value))
           );
           return (
             <EuiDraggable
@@ -169,7 +183,7 @@ export function FieldInputs({
                   </EuiFlexItem>
                   <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
                     <FieldSelect
-                      fieldIsInvalid={false}
+                      fieldIsInvalid={shouldShowError}
                       currentIndexPattern={indexPattern}
                       existingFields={existingFields}
                       operationByField={filteredOperationByField}
@@ -179,7 +193,7 @@ export function FieldInputs({
                       onChoose={(choice) => {
                         onFieldSelectChange(choice, index);
                       }}
-                      isInvalid={shouldShowScriptedFieldError}
+                      isInvalid={shouldShowError}
                       data-test-subj={`indexPattern-dimension-field-${index}`}
                     />
                   </EuiFlexItem>
@@ -231,4 +245,22 @@ export function FieldInputs({
       />
     </>
   );
+}
+
+export function getInputFieldErrorMessage(isScriptedField: boolean, invalidFields: string[]) {
+  if (isScriptedField) {
+    return i18n.translate('xpack.lens.indexPattern.terms.scriptedFieldErrorShort', {
+      defaultMessage: 'Scripted fields are not supported when using multiple fields',
+    });
+  }
+  if (invalidFields.length) {
+    return i18n.translate('xpack.lens.indexPattern.terms.invalidFieldsErrorShort', {
+      defaultMessage:
+        'Invalid {invalidFieldsCount, plural, one {field} other {fields}}: {invalidFields}. Check your data view or pick another field.',
+      values: {
+        invalidFieldsCount: invalidFields.length,
+        invalidFields: invalidFields.map((fieldName) => `"${fieldName}"`).join(', '),
+      },
+    });
+  }
 }

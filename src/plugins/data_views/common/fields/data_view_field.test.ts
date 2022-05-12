@@ -10,7 +10,7 @@ import { IndexPatternField } from './data_view_field';
 import { IndexPattern } from '..';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldSpec, RuntimeField } from '../types';
-import { FieldFormat } from '../../../field_formats/common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 describe('Field', function () {
   function flatten(obj: Record<string, any>) {
@@ -27,7 +27,7 @@ describe('Field', function () {
     script: 'script',
     lang: 'java' as const,
     count: 1,
-    esTypes: ['text'], // note, this will get replaced by the runtime field type
+    esTypes: ['keyword'],
     aggregatable: true,
     filterable: true,
     searchable: true,

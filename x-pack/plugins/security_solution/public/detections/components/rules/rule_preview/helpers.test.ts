@@ -21,12 +21,6 @@ describe('query_preview/helpers', () => {
     });
 
     test('returns false if timeframe selection is "Last hour" and average hits per hour is less than one execution duration', () => {
-      const isItNoisy = isNoisy(10, 'h');
-
-      expect(isItNoisy).toBeFalsy();
-    });
-
-    test('returns false if timeframe selection is "Last hour" and hits is 0', () => {
       const isItNoisy = isNoisy(0, 'h');
 
       expect(isItNoisy).toBeFalsy();
@@ -81,6 +75,7 @@ describe('query_preview/helpers', () => {
           { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
         ],
         machineLearningJobId: ['test-ml-job-id'],
+        queryBar: { filters: [], query: { query: '', language: 'testlang' } },
       });
       expect(isDisabled).toEqual(true);
     });
@@ -96,6 +91,7 @@ describe('query_preview/helpers', () => {
           { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
         ],
         machineLearningJobId: ['test-ml-job-id'],
+        queryBar: { filters: [], query: { query: '', language: 'testlang' } },
       });
       expect(isDisabled).toEqual(true);
     });
@@ -111,6 +107,7 @@ describe('query_preview/helpers', () => {
           { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
         ],
         machineLearningJobId: ['test-ml-job-id'],
+        queryBar: { filters: [], query: { query: '', language: 'testlang' } },
       });
       expect(isDisabled).toEqual(true);
     });
@@ -126,6 +123,7 @@ describe('query_preview/helpers', () => {
           { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
         ],
         machineLearningJobId: ['test-ml-job-id'],
+        queryBar: { filters: [], query: { query: '', language: 'testlang' } },
       });
       expect(isDisabled).toEqual(true);
     });
@@ -139,6 +137,7 @@ describe('query_preview/helpers', () => {
         threatIndex: ['threat-*'],
         threatMapping: [],
         machineLearningJobId: ['test-ml-job-id'],
+        queryBar: { filters: [], query: { query: '', language: 'testlang' } },
       });
       expect(isDisabled).toEqual(true);
     });
@@ -152,6 +151,21 @@ describe('query_preview/helpers', () => {
         threatIndex: ['threat-*'],
         threatMapping: [],
         machineLearningJobId: [],
+        queryBar: { filters: [], query: { query: '', language: 'testlang' } },
+      });
+      expect(isDisabled).toEqual(true);
+    });
+
+    test('disabled when eql rule with no query', () => {
+      const isDisabled = getIsRulePreviewDisabled({
+        ruleType: 'eql',
+        isQueryBarValid: true,
+        isThreatQueryBarValid: true,
+        index: ['test-*'],
+        threatIndex: ['threat-*'],
+        threatMapping: [],
+        machineLearningJobId: [],
+        queryBar: { filters: [], query: { query: '', language: 'testlang' } },
       });
       expect(isDisabled).toEqual(true);
     });
@@ -167,6 +181,21 @@ describe('query_preview/helpers', () => {
           { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
         ],
         machineLearningJobId: ['test-ml-job-id'],
+        queryBar: { filters: [], query: { query: '', language: 'testlang' } },
+      });
+      expect(isDisabled).toEqual(false);
+    });
+
+    test('enabled when eql rule with query', () => {
+      const isDisabled = getIsRulePreviewDisabled({
+        ruleType: 'eql',
+        isQueryBarValid: true,
+        isThreatQueryBarValid: true,
+        index: ['test-*'],
+        threatIndex: ['threat-*'],
+        threatMapping: [],
+        machineLearningJobId: [],
+        queryBar: { filters: [], query: { query: 'any where true', language: 'testlang' } },
       });
       expect(isDisabled).toEqual(false);
     });

@@ -156,7 +156,6 @@ export const ComponentTemplatesSelector = ({
       {/* Selection */}
       <EuiFlexItem
         className={classNames('componentTemplatesSelector__selection', {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'componentTemplatesSelector__selection--is-empty': !hasSelection,
         })}
         data-test-subj="componentTemplatesSelection"

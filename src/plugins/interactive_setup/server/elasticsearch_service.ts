@@ -10,12 +10,11 @@ import { errors } from '@elastic/elasticsearch';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { Duration } from 'moment';
 import type { Observable } from 'rxjs';
-import { from, of, timer } from 'rxjs';
+import { firstValueFrom, from, of, timer } from 'rxjs';
 import {
   catchError,
   distinctUntilChanged,
   exhaustMap,
-  first,
   map,
   shareReplay,
   takeWhile,
@@ -28,9 +27,9 @@ import type {
   ICustomClusterClient,
   Logger,
   ScopeableRequest,
-} from 'src/core/server';
+} from '@kbn/core/server';
+import { pollEsNodesVersion } from '@kbn/core/server';
 
-import { pollEsNodesVersion } from '../../../../src/core/server';
 import { ElasticsearchConnectionStatus } from '../common';
 import type { Certificate, PingResult } from '../common';
 import { CompatibilityError } from './compatibility_error';
@@ -122,6 +121,7 @@ export class ElasticsearchService {
    * Elasticsearch client used to check Elasticsearch connection status.
    */
   private connectionStatusClient?: ICustomClusterClient;
+
   constructor(private readonly logger: Logger, private kibanaVersion: string) {}
 
   public setup({
@@ -199,10 +199,13 @@ export class ElasticsearchService {
       try {
         enrollmentResponse = await enrollClient
           .asScoped(scopeableRequest)
-          .asCurrentUser.transport.request<EnrollKibanaResponse>({
-            method: 'GET',
-            path: '/_security/enroll/kibana',
-          });
+          .asCurrentUser.transport.request<EnrollKibanaResponse>(
+            {
+              method: 'GET',
+              path: '/_security/enroll/kibana',
+            },
+            { meta: true }
+          );
       } catch (err) {
         // We expect that all hosts belong to exactly same node and any non-connection error for one host would mean
         // that enrollment will fail for any other host and we should bail out.
@@ -357,10 +360,13 @@ export class ElasticsearchService {
     this.logger.debug(`Verifying that host "${host}" responds with Elastic product header`);
 
     try {
-      const response = await client.asInternalUser.transport.request({
-        method: 'OPTIONS',
-        path: '/',
-      });
+      const response = await client.asInternalUser.transport.request(
+        {
+          method: 'OPTIONS',
+          path: '/',
+        },
+        { meta: true }
+      );
       if (response.headers?.['x-elastic-product'] !== 'Elasticsearch') {
         throw new Error('Host did not respond with valid Elastic product header.');
       }
@@ -381,15 +387,15 @@ export class ElasticsearchService {
   }
 
   private async checkCompatibility(internalClient: ElasticsearchClient) {
-    return pollEsNodesVersion({
-      internalClient,
-      log: this.logger,
-      kibanaVersion: this.kibanaVersion,
-      ignoreVersionMismatch: false,
-      esVersionCheckInterval: -1, // Passing a negative number here will result in immediate completion after the first value is emitted
-    })
-      .pipe(first())
-      .toPromise();
+    return firstValueFrom(
+      pollEsNodesVersion({
+        internalClient,
+        log: this.logger,
+        kibanaVersion: this.kibanaVersion,
+        ignoreVersionMismatch: false,
+        esVersionCheckInterval: -1, // Passing a negative number here will result in immediate completion after the first value is emitted
+      })
+    );
   }
 
   private static fetchPeerCertificate(host: string, port: string | number) {

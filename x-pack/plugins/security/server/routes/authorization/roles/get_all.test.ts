@@ -7,10 +7,10 @@
 
 import Boom from '@hapi/boom';
 
-import { kibanaResponseFactory } from 'src/core/server';
-import { coreMock, httpServerMock } from 'src/core/server/mocks';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import type { LicenseCheck } from '@kbn/licensing-plugin/server';
 
-import type { LicenseCheck } from '../../../../../licensing/server';
 import { routeDefinitionParamsMock } from '../../index.mock';
 import { defineGetAllRolesRoutes } from './get_all';
 
@@ -20,7 +20,7 @@ const reservedPrivilegesApplicationWildcard = 'kibana-*';
 interface TestOptions {
   name?: string;
   licenseCheckResult?: LicenseCheck;
-  apiResponse?: () => Promise<unknown>;
+  apiResponse?: () => unknown;
   asserts: { statusCode: number; result?: Record<string, any> };
 }
 
@@ -32,14 +32,20 @@ describe('GET all roles', () => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
       mockRouteDefinitionParams.authz.applicationName = application;
-      const mockContext = {
-        core: coreMock.createRequestHandlerContext(),
-        licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } } as any,
-      };
+      mockRouteDefinitionParams.getFeatures = jest.fn().mockResolvedValue([]);
+
+      const mockCoreContext = coreMock.createRequestHandlerContext();
+      const mockLicensingContext = {
+        license: { check: jest.fn().mockReturnValue(licenseCheckResult) },
+      } as any;
+      const mockContext = coreMock.createCustomRequestHandlerContext({
+        core: mockCoreContext,
+        licensing: mockLicensingContext,
+      });
 
       if (apiResponse) {
-        mockContext.core.elasticsearch.client.asCurrentUser.security.getRole.mockImplementation(
-          (async () => ({ body: await apiResponse() })) as any
+        mockCoreContext.elasticsearch.client.asCurrentUser.security.getRole.mockResponseImplementation(
+          (() => ({ body: apiResponse() })) as any
         );
       }
 
@@ -59,10 +65,10 @@ describe('GET all roles', () => {
 
       if (apiResponse) {
         expect(
-          mockContext.core.elasticsearch.client.asCurrentUser.security.getRole
+          mockCoreContext.elasticsearch.client.asCurrentUser.security.getRole
         ).toHaveBeenCalled();
       }
-      expect(mockContext.licensing.license.check).toHaveBeenCalledWith('security', 'basic');
+      expect(mockLicensingContext.license.check).toHaveBeenCalledWith('security', 'basic');
     });
   };
 
@@ -81,7 +87,7 @@ describe('GET all roles', () => {
     });
 
     getRolesTest(`return error if we have empty resources`, {
-      apiResponse: async () => ({
+      apiResponse: () => ({
         first_role: {
           cluster: [],
           indices: [],
@@ -110,7 +116,7 @@ describe('GET all roles', () => {
 
   describe('success', () => {
     getRolesTest(`transforms elasticsearch privileges`, {
-      apiResponse: async () => ({
+      apiResponse: () => ({
         first_role: {
           cluster: ['manage_watcher'],
           indices: [
@@ -162,7 +168,7 @@ describe('GET all roles', () => {
       getRolesTest(
         `transforms matching applications with * resource to kibana global base privileges`,
         {
-          apiResponse: async () => ({
+          apiResponse: () => ({
             first_role: {
               cluster: [],
               indices: [],
@@ -216,7 +222,7 @@ describe('GET all roles', () => {
       getRolesTest(
         `transforms matching applications with * resource to kibana global feature privileges`,
         {
-          apiResponse: async () => ({
+          apiResponse: () => ({
             first_role: {
               cluster: [],
               indices: [],
@@ -277,7 +283,7 @@ describe('GET all roles', () => {
       getRolesTest(
         `transforms matching applications with * resource to kibana _reserved privileges`,
         {
-          apiResponse: async () => ({
+          apiResponse: () => ({
             first_role: {
               cluster: [],
               indices: [],
@@ -332,7 +338,7 @@ describe('GET all roles', () => {
       getRolesTest(
         `transforms applications with wildcard and * resource to kibana _reserved privileges`,
         {
-          apiResponse: async () => ({
+          apiResponse: () => ({
             first_role: {
               cluster: [],
               indices: [],
@@ -389,7 +395,7 @@ describe('GET all roles', () => {
       getRolesTest(
         `transforms matching applications with space resources to kibana space base privileges`,
         {
-          apiResponse: async () => ({
+          apiResponse: () => ({
             first_role: {
               cluster: [],
               indices: [],
@@ -453,7 +459,7 @@ describe('GET all roles', () => {
       getRolesTest(
         `transforms matching applications with space resources to kibana space feature privileges`,
         {
-          apiResponse: async () => ({
+          apiResponse: () => ({
             first_role: {
               cluster: [],
               indices: [],
@@ -527,7 +533,7 @@ describe('GET all roles', () => {
     getRolesTest(
       `resource not * without space: prefix returns empty kibana section with _transform_error set to ['kibana']`,
       {
-        apiResponse: async () => ({
+        apiResponse: () => ({
           first_role: {
             cluster: [],
             indices: [],
@@ -575,7 +581,7 @@ describe('GET all roles', () => {
     getRolesTest(
       `* and a space in the same entry returns empty kibana section with _transform_error set to ['kibana']`,
       {
-        apiResponse: async () => ({
+        apiResponse: () => ({
           first_role: {
             cluster: [],
             indices: [],
@@ -623,7 +629,7 @@ describe('GET all roles', () => {
     getRolesTest(
       `* appearing in multiple entries returns empty kibana section with _transform_error set to ['kibana']`,
       {
-        apiResponse: async () => ({
+        apiResponse: () => ({
           first_role: {
             cluster: [],
             indices: [],
@@ -676,7 +682,7 @@ describe('GET all roles', () => {
     getRolesTest(
       `space appearing in multiple entries returns empty kibana section with _transform_error set to ['kibana']`,
       {
-        apiResponse: async () => ({
+        apiResponse: () => ({
           first_role: {
             cluster: [],
             indices: [],
@@ -729,7 +735,7 @@ describe('GET all roles', () => {
     getRolesTest(
       `space privilege assigned globally returns empty kibana section with _transform_error set to ['kibana']`,
       {
-        apiResponse: async () => ({
+        apiResponse: () => ({
           first_role: {
             cluster: [],
             indices: [],
@@ -782,7 +788,7 @@ describe('GET all roles', () => {
     getRolesTest(
       `space privilege with application wildcard returns empty kibana section with _transform_error set to ['kibana']`,
       {
-        apiResponse: async () => ({
+        apiResponse: () => ({
           first_role: {
             cluster: [],
             indices: [],
@@ -830,7 +836,7 @@ describe('GET all roles', () => {
     getRolesTest(
       `global base privilege assigned at a space returns empty kibana section with _transform_error set to ['kibana']`,
       {
-        apiResponse: async () => ({
+        apiResponse: () => ({
           first_role: {
             cluster: [],
             indices: [],
@@ -883,7 +889,7 @@ describe('GET all roles', () => {
     getRolesTest(
       `global base privilege with application wildcard returns empty kibana section with _transform_error set to ['kibana']`,
       {
-        apiResponse: async () => ({
+        apiResponse: () => ({
           first_role: {
             cluster: [],
             indices: [],
@@ -931,7 +937,7 @@ describe('GET all roles', () => {
     getRolesTest(
       `reserved privilege assigned at a space returns empty kibana section with _transform_error set to ['kibana']`,
       {
-        apiResponse: async () => ({
+        apiResponse: () => ({
           first_role: {
             cluster: [],
             indices: [],
@@ -984,7 +990,7 @@ describe('GET all roles', () => {
     getRolesTest(
       `reserved privilege assigned with a base privilege returns empty kibana section with _transform_error set to ['kibana']`,
       {
-        apiResponse: async () => ({
+        apiResponse: () => ({
           first_role: {
             cluster: [],
             indices: [],
@@ -1032,7 +1038,7 @@ describe('GET all roles', () => {
     getRolesTest(
       `reserved privilege assigned with a feature privilege returns populated kibana section`,
       {
-        apiResponse: async () => ({
+        apiResponse: () => ({
           first_role: {
             cluster: [],
             indices: [],
@@ -1099,7 +1105,7 @@ describe('GET all roles', () => {
     getRolesTest(
       `global base privilege assigned with a feature privilege returns empty kibana section with _transform_error set to ['kibana']`,
       {
-        apiResponse: async () => ({
+        apiResponse: () => ({
           first_role: {
             cluster: [],
             indices: [],
@@ -1147,7 +1153,7 @@ describe('GET all roles', () => {
     getRolesTest(
       `space base privilege assigned with a feature privilege returns empty kibana section with _transform_error set to ['kibana']`,
       {
-        apiResponse: async () => ({
+        apiResponse: () => ({
           first_role: {
             cluster: [],
             indices: [],
@@ -1193,7 +1199,7 @@ describe('GET all roles', () => {
     );
 
     getRolesTest(`transforms unrecognized applications`, {
-      apiResponse: async () => ({
+      apiResponse: () => ({
         first_role: {
           cluster: [],
           indices: [],
@@ -1238,7 +1244,7 @@ describe('GET all roles', () => {
     });
 
     getRolesTest(`returns a sorted list of roles`, {
-      apiResponse: async () => ({
+      apiResponse: () => ({
         z_role: {
           cluster: [],
           indices: [],

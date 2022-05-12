@@ -28,6 +28,7 @@ export function getSampleDashboardInput(
       to: 'now',
       from: 'now-15m',
     },
+    timeRestore: false,
     viewMode: ViewMode.VIEW,
     panels: {},
     ...overrides,

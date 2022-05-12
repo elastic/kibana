@@ -8,8 +8,8 @@
 import { EuiButton } from '@elastic/eui';
 import React from 'react';
 
-import { mountWithIntl } from '@kbn/test/jest';
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { LoggedOutPage } from './logged_out_page';
 

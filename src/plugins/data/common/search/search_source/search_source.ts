@@ -70,11 +70,12 @@ import {
   switchMap,
   tap,
 } from 'rxjs/operators';
-import { defer, EMPTY, from, Observable } from 'rxjs';
+import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildEsQuery, Filter } from '@kbn/es-query';
+import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
+import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
 import { normalizeSortRequest } from './normalize_sort_request';
-import { fieldWildcardFilter } from '../../../../kibana_utils/common';
 import {
   AggConfigSerialized,
   IIndexPattern,
@@ -95,7 +96,8 @@ import type {
   SearchSourceFields,
   SearchSourceOptions,
 } from './types';
-import { FetchHandlers, getSearchParamsFromRequest, RequestFailure, SearchRequest } from './fetch';
+import { getSearchParamsFromRequest, RequestFailure } from './fetch';
+import type { FetchHandlers, SearchRequest } from './fetch';
 import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 
 import {
@@ -104,8 +106,7 @@ import {
   isErrorResponse,
   isPartialResponse,
   UI_SETTINGS,
-} from '../../../common';
-import { getHighlightRequest } from '../../../../field_formats/common';
+} from '../..';
 import { extractReferences } from './extract_references';
 
 /** @internal */
@@ -324,11 +325,9 @@ export class SearchSource {
    * @removeBy 8.1
    */
   fetch(options: ISearchOptions = {}) {
-    return this.fetch$(options)
-      .toPromise()
-      .then((r) => {
-        return r.rawResponse as estypes.SearchResponse<any>;
-      });
+    return lastValueFrom(this.fetch$(options)).then((r) => {
+      return r.rawResponse as estypes.SearchResponse<any>;
+    });
   }
 
   /**

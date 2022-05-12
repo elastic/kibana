@@ -63,6 +63,7 @@ describe('migration from 7.7.2-xpack with 100k objects', () => {
           loggers: [
             {
               name: 'root',
+              level: 'info',
               appenders: ['file'],
             },
           ],
@@ -121,6 +122,6 @@ describe('migration from 7.7.2-xpack with 100k objects', () => {
 
     // Use a >= comparison since once Kibana has started it might create new
     // documents like telemetry tasks
-    expect(migratedIndexResponse.body.count).toBeGreaterThanOrEqual(oldIndexResponse.body.count);
+    expect(migratedIndexResponse.count).toBeGreaterThanOrEqual(oldIndexResponse.count);
   });
 });

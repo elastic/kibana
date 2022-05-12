@@ -26,6 +26,8 @@ import {
   CrawlConfig,
   CrawlRequestWithDetailsFromServer,
   CrawlRequestWithDetails,
+  DomainConfig,
+  DomainConfigFromServer,
 } from './types';
 
 export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): CrawlerDomain {
@@ -257,3 +259,12 @@ export const getCrawlRulePathPatternTooltip = (crawlRule: CrawlRule) => {
     }
   );
 };
+
+export const domainConfigServerToClient = (
+  domainConfigFromServer: DomainConfigFromServer
+): DomainConfig => ({
+  id: domainConfigFromServer.id,
+  name: domainConfigFromServer.name,
+  seedUrls: domainConfigFromServer.seed_urls,
+  sitemapUrls: domainConfigFromServer.sitemap_urls,
+});

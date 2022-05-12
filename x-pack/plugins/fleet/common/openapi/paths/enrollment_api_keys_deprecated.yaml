@@ -1,0 +1,55 @@
+get:
+  summary: Enrollment API Keys - List
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              list:
+                type: array
+                items:
+                  $ref: ../components/schemas/enrollment_api_key.yaml
+                deprecated: true
+              items:
+                type: array
+                items:
+                  $ref: ../components/schemas/enrollment_api_key.yaml
+              page:
+                type: number
+              perPage:
+                type: number
+              total:
+                type: number
+            required:
+              - items
+              - page
+              - perPage
+              - total
+  operationId: get-enrollment-api-keys
+  parameters: []
+  deprecated: true
+post:
+  summary: Enrollment API Key - Create
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              item:
+                $ref: ../components/schemas/enrollment_api_key.yaml
+              action:
+                type: string
+                enum:
+                  - created
+  operationId: create-enrollment-api-keys
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+  deprecated: true

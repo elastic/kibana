@@ -42,10 +42,22 @@ export function validateConnector<
   ExecutorResultData = void
 >(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: unknown) {
   if (actionType.validate && actionType.validate.connector) {
-    const connectorValue = value as { config: Config; secrets: Secrets };
-    const result = actionType.validate.connector(connectorValue.config, connectorValue.secrets);
-    if (result !== null) {
-      throw Boom.badRequest(`error validating action type connector: ${result}`);
+    try {
+      const connectorValue = value as { config: Config; secrets: Secrets };
+
+      // Connector config and secrets should be defined
+      if (connectorValue.config == null) {
+        throw new Error(`config must be defined`);
+      }
+      if (connectorValue.secrets == null) {
+        throw new Error(`secrets must be defined`);
+      }
+      const result = actionType.validate.connector(connectorValue.config, connectorValue.secrets);
+      if (result !== null) {
+        throw new Error(result);
+      }
+    } catch (err) {
+      throw Boom.badRequest(`error validating action type connector: ${err.message}`);
     }
   }
   return null;

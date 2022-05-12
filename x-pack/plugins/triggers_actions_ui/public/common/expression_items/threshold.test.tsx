@@ -7,7 +7,7 @@
 
 import * as React from 'react';
 import { shallow } from 'enzyme';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ThresholdExpression } from './threshold';
 
 describe('threshold expression', () => {
