@@ -13,7 +13,7 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import { QuerySetup, QueryStart } from '../query_service';
 import { connectToQueryState } from './connect_to_query_state';
-import { QueryState } from './types';
+import { QueryState } from '../query_state';
 import { FilterStateStore } from '../../../common';
 
 const GLOBAL_STATE_STORAGE_KEY = '_g';

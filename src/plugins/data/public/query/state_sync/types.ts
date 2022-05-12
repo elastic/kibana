@@ -6,17 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Filter, RefreshInterval, TimeRange, Query } from '../../../common';
-
-/**
- * All query state service state
- */
-export interface QueryState {
-  time?: TimeRange;
-  refreshInterval?: RefreshInterval;
-  filters?: Filter[];
-  query?: Query;
-}
+import type { QueryState } from '../query_state';
 
 type QueryStateChangePartial = {
   [P in keyof QueryState]?: boolean;

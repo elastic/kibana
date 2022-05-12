@@ -21,7 +21,7 @@ import { QueryService, QueryStart } from '../query_service';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { TimefilterContract } from '../timefilter';
 import { syncQueryStateWithUrl } from './sync_state_with_url';
-import { QueryState } from './types';
+import { QueryState } from '../query_state';
 import { createNowProviderMock } from '../../now_provider/mocks';
 
 const setupMock = coreMock.createSetup();
