@@ -300,7 +300,6 @@ export const performBulkActionRoute = (
         if (body.action === BulkAction.edit) {
           const { rules, errors } = await bulkEditRules({
             rulesClient,
-            isRuleRegistryEnabled,
             filter: query,
             ids: body.ids,
             actions: body.edit,
