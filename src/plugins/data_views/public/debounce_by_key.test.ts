@@ -13,8 +13,8 @@ describe('debounceByKey', () => {
     const fn = jest.fn();
     const fn2 = jest.fn();
 
-    const debouncedFn = debounceByKey(fn, 100);
-    const debouncedFn2 = debounceByKey(fn2, 100);
+    const debouncedFn = debounceByKey(fn, 1000);
+    const debouncedFn2 = debounceByKey(fn2, 1000);
 
     // debounces based on key, not params
     debouncedFn('a')(1);
