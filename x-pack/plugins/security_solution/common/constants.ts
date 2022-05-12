@@ -171,17 +171,23 @@ export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
   `${APP_PATH}${HOST_ISOLATION_EXCEPTIONS_PATH}` as const;
 export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
 
+// cloud logs to exclude from default index pattern
+export const EXCLUDE_ELASTIC_CLOUD_INDICES = ['-*elastic-cloud-logs-*'];
+
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events */
-export const DEFAULT_INDEX_PATTERN = [
+export const INCLUDE_INDEX_PATTERN = [
   'apm-*-transaction*',
-  'traces-apm*',
   'auditbeat-*',
   'endgame-*',
   'filebeat-*',
   'logs-*',
   'packetbeat-*',
+  'traces-apm*',
   'winlogbeat-*',
 ];
+
+/** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events, and the exclude index pattern */
+export const DEFAULT_INDEX_PATTERN = [...INCLUDE_INDEX_PATTERN, ...EXCLUDE_ELASTIC_CLOUD_INDICES];
 
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
 export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as const;

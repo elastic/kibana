@@ -4,7 +4,7 @@
   height: $euiFormControlHeight;
   display: flex;
 
-  > [aria-expanded='true'] {
+  >[aria-expanded='true'] {
     // Using filter allows it to adhere the children's bounds
     filter: drop-shadow(0 5.7px 12px rgba($euiShadowColor, shadowOpacity(.05)));
   }
@@ -52,7 +52,7 @@
 
   @include euiFormControlWithIcon($isIconOptional: true);
 
-  ~ .euiFormControlLayoutIcons {
+  ~.euiFormControlLayoutIcons {
     // By default form control layout icon is vertically centered, but our textarea
     // can expand to be multi-line, so we position it with padding that matches
     // the parent textarea padding
@@ -66,19 +66,5 @@
     border-bottom-left-radius: 0;
     margin-left: -1px;
     width: calc(100% + 1px);
-  }
-}
-
-.kbnQueryBar__datePickerWrapper {
-  .euiDatePopoverButton-isInvalid {
-    background-image: euiFormControlGradient($euiColorDanger);
-
-    // @todo Remove when EUI issue is resolved.
-    // @see https://github.com/elastic/eui/issues/4612
-    &:focus {
-      color: $euiTextColor;
-      background-color: $euiFormBackgroundColor;
-      background-image: euiFormControlGradient($euiColorPrimary);
-    }
   }
 }
