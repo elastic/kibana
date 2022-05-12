@@ -91,7 +91,7 @@ const tourStepDefinitions: TourStepDefinition[] = [
     imageName: 'sort.gif',
     imageAltText: i18n.translate('discover.dscTour.stepSort.imageAltText', {
       defaultMessage:
-        'Click a column header and select the desired sort order. Adjust a multi-field sort using the fields sorted pop-up.',
+        'Click a column header and select the desired sort order. Adjust a multi-field sort using the fields sorted popover.',
     }),
   },
   {
