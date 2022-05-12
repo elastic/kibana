@@ -28,6 +28,7 @@ import {
   removeServerGeneratedProperties,
   createLegacyRuleAction,
   getLegacyActionSO,
+  installPrePackagedRules,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -595,6 +596,34 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(rule.timeline_id).to.eql(timelineId);
         expect(rule.timeline_title).to.eql(timelineTitle);
+      });
+
+      it('should return error when trying to bulk edit immutable rule', async () => {
+        await installPrePackagedRules(supertest, log);
+        const { body: findBody } = await supertest
+          .get(
+            `${DETECTION_ENGINE_RULES_URL}/_find?per_page=1&filter=alert.attributes.params.immutable: true`
+          )
+          .set('kbn-xsrf', 'true')
+          .send();
+        const immutableRule = findBody.data[0];
+
+        const { body } = await postBulkAction().send({
+          ids: [immutableRule.id],
+          action: BulkAction.edit,
+          [BulkAction.edit]: [
+            {
+              type: BulkActionEditType.add_tags,
+              value: ['new-tag'],
+            },
+          ],
+        });
+
+        expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
+        expect(body.attributes.errors[0].message).to.be(
+          "Mutated params invalid: Elastic rule can't be edited"
+        );
+        expect(body.attributes.errors[0].rules[0].id).to.be(immutableRule.id);
       });
     });
 

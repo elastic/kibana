@@ -424,7 +424,7 @@ export const performBulkActionRoute = (
               abortSignal: abortController.signal,
             });
             created = bulkActionOutcome.results
-              .map(({ item }) => item)
+              .map(({ result }) => result)
               .filter((rule): rule is RuleAlertType => rule !== null);
             break;
           case BulkAction.export:
