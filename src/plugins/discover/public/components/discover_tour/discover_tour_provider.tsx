@@ -74,7 +74,7 @@ const tourStepDefinitions: TourStepDefinition[] = [
     ),
     imageName: 'reorder_columns.gif',
     imageAltText: i18n.translate('discover.dscTour.stepReorderColumns.imageAltText', {
-      defaultMessage: 'Use the Columns pop-up to drag the columns to the order you prefer.',
+      defaultMessage: 'Use the Columns popover to drag the columns to the order you prefer.',
     }),
   },
   {
