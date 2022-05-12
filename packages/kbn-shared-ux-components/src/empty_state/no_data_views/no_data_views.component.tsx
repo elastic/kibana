@@ -66,7 +66,7 @@ export const NoDataViews = ({
     <h2>
       <FormattedMessage
         id="sharedUXComponents.noDataViewsPrompt.noPermission.title"
-        defaultMessage="Create a data view by contacting your administrator"
+        defaultMessage="You need permission to create data views"
       />
     </h2>
   );
@@ -82,7 +82,7 @@ export const NoDataViews = ({
     <p>
       <FormattedMessage
         id="sharedUXComponents.noDataViewsPrompt.noPermission.dataViewExplanation"
-        defaultMessage="Data views identify the Elasticsearch data you want to explore. You can point data views to one or more data streams, indices, and index aliases, such as your log data from yesterday, or all indices that contain your log data. For more information, contact your administrator."
+        defaultMessage="Data views identify the Elasticsearch data that you want to explore. To create data views, ask your administrator for the required permissions."
       />
     </p>
   );
