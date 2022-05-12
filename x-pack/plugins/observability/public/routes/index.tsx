@@ -62,7 +62,11 @@ export const routes = {
   },
   [casesPath]: {
     handler: () => {
-      return <CasesPage />;
+      return (
+        <TrackApplicationView viewId={AlertingPages.cases}>
+          <CasesPage />
+        </TrackApplicationView>
+      );
     },
     params: {},
     exact: false,
@@ -96,7 +100,11 @@ export const routes = {
   },
   '/alerts/rules': {
     handler: () => {
-      return <RulesPage />;
+      return (
+        <TrackApplicationView viewId={AlertingPages.rules}>
+          <RulesPage />
+        </TrackApplicationView>
+      );
     },
     params: {},
     exact: true,

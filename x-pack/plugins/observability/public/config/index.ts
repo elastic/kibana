@@ -10,6 +10,6 @@ export { translations } from './translations';
 
 export enum AlertingPages {
   alerts = 'alerts',
-  case = 'cases',
+  cases = 'cases',
   rules = 'rules',
 }
