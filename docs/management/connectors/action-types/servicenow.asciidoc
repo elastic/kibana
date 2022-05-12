@@ -21,7 +21,8 @@ After upgrading from {stack} version 7.15.0 or earlier to version 7.16.0 or late
 * Create an RSA keypair and add an X.509 Certificate.
 * Create an OAuth JWT API endpoint for external clients with a JWT Verifiers Map.
 
-*Create a {sn} integration user*
+[float]
+===== Create a {sn} integration user
 
 To ensure authenticated communication between Elastic and {sn}, create a {sn} integration user and assign it the appropriate roles.
 
@@ -36,7 +37,8 @@ To ensure authenticated communication between Elastic and {sn}, create a {sn} in
 * `x_elas2_inc_int.integration_user`
 . Click *Save*.
 
-*Create a CORS rule*
+[float]
+===== Create a CORS rule
 
 A CORS rule is required for communication between Elastic and {sn}. To create a CORS rule:
 
@@ -49,11 +51,12 @@ A CORS rule is required for communication between Elastic and {sn}. To create a 
 . Go to the *HTTP methods* tab and select *GET*.
 . Click *Submit* to create the rule.
 
-*Create an RSA keypair and add an X.509 Certificate*
+[float]
+===== Create an RSA keypair and add an X.509 Certificate
 
 This step is required to use OAuth for authentication between Elastic and {sn}.
 
-To create an RSA keypair:
+*Create an RSA keypair:*
 
 . Use https://www.openssl.org/docs/man1.0.2/man1/genrsa.html[OpenSSL] to generate an RSA private key:
 +
@@ -75,6 +78,8 @@ openssl req -new -x509 -key example-private-key.pem -out example-sn-cert.pem -da
 ----
 --
 
+*Add an X.509 Certificate to ServiceNow:*
+
 . In your {sn} instance, go to *Certificates* and select *New*.
 . Configure the certificate as follows:
 +
@@ -88,7 +93,8 @@ image::management/connectors/images/servicenow-new-certificate.png[Shows new cer
 
 . Click *Submit* to create the certificate.
 
-*Create an OAuth JWT API endpoint for external clients with a JWT Verifiers Map*
+[float]
+===== Create an OAuth JWT API endpoint for external clients with a JWT Verifiers Map
 
 This step is required to use OAuth for authentication between Elastic and {sn}.
 
@@ -110,7 +116,7 @@ image::management/connectors/images/servicenow-jwt-endpoint.png[Shows applicatio
 image::management/connectors/images/servicenow-new-application.png[Shows new application form in ServiceNow]
 --
 
-. Remember the selected user field. You will use this as the *User Identifier Value* when creating the connector. For example, if you selected *Email* for *User field*, you will use the user's email for the *User Identifier Value*.
+IMPORTANT: Remember the selected user field. You will use this as the *User Identifier Value* when creating the connector. For example, if you selected *Email* for *User field*, you will use the user's email for the *User Identifier Value*.
 
 . Click *Submit* to create the application. You will be redirected to the list of applications.
 . Select the application you just created.
@@ -118,7 +124,7 @@ image::management/connectors/images/servicenow-new-application.png[Shows new app
 . Configure the new record as follows:
 +
 --
-* *Name*: Name the JWT verifier map.
+* *Name*: Name the JWT Verifier Map.
 * *Sys certificate*: Click the search icon and select the name of the certificate created in the previous step.
 
 [role="screenshot"]
@@ -169,9 +175,9 @@ Password::  Password for HTTP Basic authentication.
 User Identifier:: Identifier to use for OAuth type authentication. This identifier should be the *User field* you selected during setup. For example, if the selected *User field* is *Email*, the user identifier should be the user's email address.
 Client ID:: The client ID assigned to your OAuth application.
 Client Secret:: The client secret assigned to your OAuth application.
-JWT Key ID:: The key ID assigned to the JWT verifier map of your OAuth application.
+JWT Key ID:: The key ID assigned to the JWT Verifier Map of your OAuth application.
 Private Key:: The RSA private key generated during setup.
-Private Key Password:: The password for the RSA private key generated during setup, if any.
+Private Key Password:: The password for the RSA private key generated during setup, if set.
 
 [float]
 [[servicenow-connector-networking-configuration]]
@@ -239,10 +245,13 @@ Secrets defines sensitive information for the connector type.
 [[define-servicenow-ui]]
 ==== Define connector in Stack Management
 
-Define {sn} ITSM connector properties.
+Define {sn} ITSM connector properties. Choose whether to use OAuth for authentication.
 
 [role="screenshot"]
-image::management/connectors/images/servicenow-connector.png[ServiceNow connector]
+image::management/connectors/images/servicenow-connector-basic.png[ServiceNow connector using basic auth]
+
+[role="screenshot"]
+image::management/connectors/images/servicenow-connector-oauth.png[ServiceNow connector using OAuth]
 
 Test {sn} ITSM action parameters.
 
