@@ -41,6 +41,7 @@ export function useFetchLast24hAlerts({ http, features, ruleId }: UseFetchLast24
         http,
         features,
       });
+
       const { error, alertsCount } = await fetchLast24hAlertsAPI({ http, index, ruleId });
       if (error) throw error;
       setLast24hAlerts((oldState: FetchLast24hAlerts) => ({
@@ -76,7 +77,7 @@ export async function fetchIndexNameAPI({
   http: HttpSetup;
   features: string;
 }): Promise<IndexName> {
-  const res = await http.get<AsApiContract<IndexName>>(`${BASE_RAC_ALERTS_API_PATH}/index`, {
+  const res = await http.get<{ index_name: string[] }>(`${BASE_RAC_ALERTS_API_PATH}/index`, {
     query: { features },
   });
   return {
