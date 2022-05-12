@@ -35,6 +35,7 @@ import {
   GETTING_STARTED,
   THREAT_HUNTING,
   DASHBOARDS,
+  CREATE_NEW_RULE,
 } from '../translations';
 import {
   OVERVIEW_PATH,
@@ -62,7 +63,6 @@ import {
   RULES_CREATE_PATH,
 } from '../../../common/constants';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
-import { ADD_NEW_RULE } from '../../detections/pages/detection_engine/rules/translations';
 
 const FEATURE = {
   general: `${SERVER_APP_ID}.show`,
@@ -188,7 +188,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         deepLinks: [
           {
             id: SecurityPageName.rulesCreate,
-            title: ADD_NEW_RULE,
+            title: CREATE_NEW_RULE,
             path: RULES_CREATE_PATH,
             navLinkStatus: AppNavLinkStatus.hidden,
             searchable: false,

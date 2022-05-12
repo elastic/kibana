@@ -21,6 +21,7 @@ import {
 } from '../../common/constants';
 import {
   BLOCKLIST,
+  CREATE_NEW_RULE,
   ENDPOINTS,
   EVENT_FILTERS,
   EXCEPTIONS,
@@ -32,7 +33,6 @@ import {
 } from '../app/translations';
 import { NavigationCategories } from '../common/components/navigation/types';
 import { FEATURE, LinkItem } from '../common/links/types';
-import { ADD_NEW_RULE } from '../detections/pages/detection_engine/rules/translations';
 
 import { IconBlocklist } from './icons/blocklist';
 import { IconEndpoints } from './icons/endpoints';
@@ -77,7 +77,7 @@ export const links: LinkItem = {
     },
     {
       id: SecurityPageName.rulesCreate,
-      title: ADD_NEW_RULE,
+      title: CREATE_NEW_RULE,
       path: RULES_CREATE_PATH,
       globalNavEnabled: false,
       skipUrlState: true,
