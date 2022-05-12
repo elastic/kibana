@@ -51,7 +51,7 @@ describe('SessionView component', () => {
 
     it('can switch tabs to show host details', async () => {
       renderResult = mockedContext.render(<SessionViewDetailPanel {...props} />);
-      renderResult.queryByText('Host')?.click();
+      renderResult.queryByText('Metadata')?.click();
       expect(renderResult.queryByText('hostname')).toBeVisible();
       expect(renderResult.queryAllByText('james-fleet-714-2')).toHaveLength(2);
     });
