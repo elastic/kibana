@@ -248,21 +248,24 @@ describe('FieldTable', () => {
 
     it('should reset on filter change', () => {
       const result = render(
-        <FieldTable
-          {...defaultPaginationProps}
-          selectedCategoryIds={['destination', 'event', 'client', 'agent', 'host']}
-        />,
-        { wrapper: TestProviders }
+        <TestProviders>
+          <FieldTable
+            {...defaultPaginationProps}
+            selectedCategoryIds={['destination', 'event', 'client', 'agent', 'host']}
+          />
+        </TestProviders>
       );
 
       changePage(result);
       expect(isAtFirstPage(result)).toBeFalsy();
 
       result.rerender(
-        <FieldTable
-          {...defaultPaginationProps}
-          selectedCategoryIds={['destination', 'event', 'client', 'agent']}
-        />
+        <TestProviders>
+          <FieldTable
+            {...defaultPaginationProps}
+            selectedCategoryIds={['destination', 'event', 'client', 'agent']}
+          />
+        </TestProviders>
       );
 
       expect(isAtFirstPage(result)).toBeTruthy();
