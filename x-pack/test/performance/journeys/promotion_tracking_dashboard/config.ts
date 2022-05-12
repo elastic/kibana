@@ -5,11 +5,10 @@
  * 2.0.
  */
 import { FtrConfigProviderContext } from '@kbn/test';
-import * as saferLodashSet from '@elastic/safer-lodash-set';
 import { serializeApmGlobalLabels } from '../../utils';
 
-async function promotionTrackingDashboard({ readConfigFile, log }: FtrConfigProviderContext) {
-  const performanceConfig = await readConfigFile(require.resolve('../performance.config'));
+export default async function ({ readConfigFile, log }: FtrConfigProviderContext) {
+  const performanceConfig = await readConfigFile(require.resolve('../base.config'));
 
   const testFiles = [require.resolve('./promotion_tracking_dashboard')];
 
@@ -19,19 +18,20 @@ async function promotionTrackingDashboard({ readConfigFile, log }: FtrConfigProv
   };
 
   const apmGlobalLabels = {
-    ...performanceConfig.get('kbnTestServer').env,
-    ftrConfig: `x-pack/test/performance/tests/journeys/promotion_tracking_dashboard/promotion_tracking_dashboard.config.ts`,
+    ...performanceConfig.get('kbnTestServer').env.ELASTIC_APM_GLOBAL_LABELS,
+    ftrConfig: `x-pack/test/performance/tests/journeys/promotion_tracking_dashboard/config.ts`,
     performancePhase: process.env.TEST_PERFORMANCE_PHASE,
     journeyName: 'promotion_tracking_dashboard',
   };
 
-  saferLodashSet.set(
-    config,
-    'kbnTestServer.env.ELASTIC_APM_GLOBAL_LABELS',
-    serializeApmGlobalLabels(apmGlobalLabels)
-  );
-
-  return config;
+  return {
+    ...config,
+    kbnTestServer: {
+      ...config.kbnTestServer,
+      env: {
+        ...config.kbnTestServer.env,
+        ELASTIC_APM_GLOBAL_LABELS: serializeApmGlobalLabels(apmGlobalLabels),
+      },
+    },
+  };
 }
-
-export default promotionTrackingDashboard;

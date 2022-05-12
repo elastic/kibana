@@ -5,11 +5,10 @@
  * 2.0.
  */
 import { FtrConfigProviderContext } from '@kbn/test';
-import * as saferLodashSet from '@elastic/safer-lodash-set';
 import { serializeApmGlobalLabels } from '../../utils';
 
-async function manyFieldsDiscover({ readConfigFile, log }: FtrConfigProviderContext) {
-  const performanceConfig = await readConfigFile(require.resolve('../performance.config'));
+export default async function manyFieldsDiscover({ readConfigFile }: FtrConfigProviderContext) {
+  const performanceConfig = await readConfigFile(require.resolve('../base.config'));
 
   const testFiles = [require.resolve('./many_fields_discover')];
 
@@ -19,19 +18,20 @@ async function manyFieldsDiscover({ readConfigFile, log }: FtrConfigProviderCont
   };
 
   const apmGlobalLabels = {
-    ...performanceConfig.get('kbnTestServer').env,
-    ftrConfig: `x-pack/test/performance/tests/journeys/many_fields_discover/many_fields_discover.config.ts`,
+    ...performanceConfig.get('kbnTestServer').env.ELASTIC_APM_GLOBAL_LABELS,
+    ftrConfig: `x-pack/test/performance/tests/journeys/many_fields_discover/config.ts`,
     performancePhase: process.env.TEST_PERFORMANCE_PHASE,
     journeyName: 'many_fields_discover',
   };
 
-  saferLodashSet.set(
-    config,
-    'kbnTestServer.env.ELASTIC_APM_GLOBAL_LABELS',
-    serializeApmGlobalLabels(apmGlobalLabels)
-  );
-
-  return config;
+  return {
+    ...config,
+    kbnTestServer: {
+      ...config.kbnTestServer,
+      env: {
+        ...config.kbnTestServer.env,
+        ELASTIC_APM_GLOBAL_LABELS: serializeApmGlobalLabels(apmGlobalLabels),
+      },
+    },
+  };
 }
-
-export default manyFieldsDiscover;
