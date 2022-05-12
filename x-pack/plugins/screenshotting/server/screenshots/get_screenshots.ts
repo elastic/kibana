@@ -27,8 +27,8 @@ export const getScreenshots = async (
       const { position, attributes } = elementsPositionAndAttributes[i];
       const { boundingClientRect, scroll } = position;
 
-      // Default to use width from the layout object to avoid having the elements move around horizontally,
-      // which makes the position data no longer valid.
+      // Using width from the layout is preferred, it avoids the elements moving around horizontally,
+      // which would invalid the position data that was passed in.
       const width = layout.width || boundingClientRect.left + scroll.x + boundingClientRect.width;
 
       await browser.setViewport(
