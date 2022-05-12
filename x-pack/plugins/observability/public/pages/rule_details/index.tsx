@@ -122,12 +122,12 @@ export function RuleDetailsPage() {
 
   const getRuleConditionsWording = () => {
     const numberOfConditions = rule?.params.criteria ? (rule?.params.criteria as any[]).length : 0;
-    const message = numberOfConditions > 1 ? 'conditions' : 'condition';
     return (
       <>
         {numberOfConditions}{' '}
-        {i18n.translate('xpack.observability.ruleDetails.condition', {
-          defaultMessage: message,
+        {i18n.translate('xpack.observability.ruleDetails.conditions', {
+          defaultMessage: 'condition{s}',
+          values: { s: numberOfConditions > 1 ? 's' : '' },
         })}
       </>
     );
@@ -372,7 +372,7 @@ export function RuleDetailsPage() {
 
                 <EuiFlexGroup>
                   <ItemTitleRuleSummary
-                    translationKey="xpack.observability.ruleDetails.conditions"
+                    translationKey="xpack.observability.ruleDetails.conditionsTitle"
                     defaultMessage="Conditions"
                   />
                   <EuiFlexItem grow={3}>
