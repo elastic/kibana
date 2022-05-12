@@ -7,6 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { SavedObject } from '@kbn/core/server';
 import {
+  ConfigKey,
   MonitorFields,
   SyntheticsMonitor,
   EncryptedSyntheticsMonitor,
@@ -57,7 +58,12 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
     sendTelemetryEvents(
       server.logger,
       server.telemetry,
-      formatTelemetryEvent({ monitor: newMonitor, errors, kibanaVersion: server.kibanaVersion })
+      formatTelemetryEvent({
+        monitor: newMonitor,
+        errors,
+        isInlineScript: Boolean((monitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
+        kibanaVersion: server.kibanaVersion,
+      })
     );
 
     if (errors && errors.length > 0) {
