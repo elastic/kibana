@@ -105,6 +105,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('test.always-firing-SelectOption');
   }
 
+  async function discardNewRuleCreation() {
+    await testSubjects.click('cancelSaveRuleButton');
+    await testSubjects.existOrFail('confirmRuleCloseModal');
+    await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
+    await testSubjects.missingOrFail('confirmRuleCloseModal');
+  }
+
   describe('create alert', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
@@ -267,6 +274,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('confirmRuleCloseModal');
       await testSubjects.click('confirmRuleCloseModal > confirmModalCancelButton');
       await testSubjects.missingOrFail('confirmRuleCloseModal');
+
+      await discardNewRuleCreation();
     });
 
     it('should successfully test valid es_query alert', async () => {
@@ -281,9 +290,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('testQuerySuccess');
       await testSubjects.missingOrFail('testQueryError');
 
-      await testSubjects.click('cancelSaveRuleButton');
-      await testSubjects.existOrFail('confirmRuleCloseModal');
-      await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
+      await discardNewRuleCreation();
     });
 
     it('should show error when es_query is invalid', async () => {
@@ -299,6 +306,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('testQuery');
       await testSubjects.missingOrFail('testQuerySuccess');
       await testSubjects.existOrFail('testQueryError');
+
+      await discardNewRuleCreation();
     });
 
     it('should show all rule types on click euiFormControlLayoutClearButton', async () => {
@@ -318,6 +327,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         '.triggersActionsUI__ruleTypeNodeHeading'
       );
       expect(ruleTypesClearFilter.length).to.above(0);
+
+      await discardNewRuleCreation();
     });
   });
 };
