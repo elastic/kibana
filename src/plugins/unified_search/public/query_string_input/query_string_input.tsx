@@ -45,6 +45,7 @@ import { onRaf } from '../utils';
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import { QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
 import { getTheme, getAutocomplete } from '../services';
+import './query_string_input.scss';
 
 export interface QueryStringInputProps {
   indexPatterns: Array<DataView | string>;
