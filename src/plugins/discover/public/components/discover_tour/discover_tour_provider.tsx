@@ -164,7 +164,7 @@ const prepareTourSteps = (
             <EuiImage
               alt={stepDefinition.imageAltText}
               src={getAssetPath(stepDefinition.imageName)}
-              size={300}
+              size="fullWidth"
             />
           </>
         )}
