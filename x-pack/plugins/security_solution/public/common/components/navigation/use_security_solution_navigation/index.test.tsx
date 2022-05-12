@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
 import { useKibana } from '../../../lib/kibana/kibana_react';
 import { useGetUserCasesPermissions } from '../../../lib/kibana';
 import { SecurityPageName } from '../../../../app/types';
@@ -289,7 +289,7 @@ describe('useSecuritySolutionNavigation', () => {
     expect(result?.current?.items?.[2].items?.[2].id).toEqual(SecurityPageName.users);
   });
 
-  // TODO: Sergi/detectionAndResponse remove when no longer experimental
+  // TODO: [detectionResponse] remove when page is no longer experimental
   it('should include detectionAndResponse when feature flag is on', async () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
@@ -307,8 +307,10 @@ describe('useSecuritySolutionNavigation', () => {
       () => useSecuritySolutionNavigation(),
       { wrapper: TestProviders }
     );
+    const items = result.current?.items;
+    expect(items).toBeDefined();
     expect(
-      result.current?.items
+      items!
         .find((item) => item.id === 'manage')
         ?.items?.find((item) => item.id === 'host_isolation_exceptions')
     ).toBeUndefined();

@@ -69,4 +69,12 @@ PureComponent.argTypes = {
     options: ['logoKibana', 'logoObservability', 'logoSecurity'],
     defaultValue: 'logoKibana',
   },
+  children: {
+    control: 'text',
+    defaultValue: '',
+  },
+};
+
+PureComponent.parameters = {
+  layout: 'fullscreen',
 };

@@ -23,3 +23,8 @@ export const useFormatUrl = (page: SecurityPageName) => ({
   formatUrl: (path: string) => path,
   search: '',
 });
+
+export const useGetSecuritySolutionUrl =
+  () =>
+  ({ path }: { path: string }) =>
+    path;
