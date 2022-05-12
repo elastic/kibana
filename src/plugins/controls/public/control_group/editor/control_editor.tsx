@@ -219,23 +219,16 @@ export const ControlEditor = ({
           </EuiFormRow>
 
           <EuiFormRow label={ControlGroupStrings.manageControl.getControlTypeTitle()}>
-            {factory ? (
-              <EuiFlexGroup alignItems="center" gutterSize="xs">
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type={factory.getIconType()} />
-                </EuiFlexItem>
-                <EuiFlexItem>{factory.getDisplayName()}</EuiFlexItem>
-              </EuiFlexGroup>
-            ) : (
-              <EuiFlexGroup alignItems="center" gutterSize="xs">
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="alert" />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  {ControlGroupStrings.manageControl.getSelectFieldMessage()}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            )}
+            <EuiFlexGroup alignItems="center" gutterSize="xs">
+              <EuiFlexItem grow={false}>
+                <EuiIcon type={factory ? factory.getIconType() : 'alert'} />
+              </EuiFlexItem>
+              <EuiFlexItem data-test-subj="control-editor-type">
+                {factory
+                  ? factory.getDisplayName()
+                  : ControlGroupStrings.manageControl.getSelectFieldMessage()}
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFormRow>
           <EuiFormRow label={ControlGroupStrings.manageControl.getTitleInputTitle()}>
             <EuiFieldText
