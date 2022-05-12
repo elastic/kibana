@@ -18,6 +18,7 @@ import { getStorybookContextProvider } from '@kbn/custom-integrations-plugin/sto
 
 import { IntegrationsAppContext } from '../../public/applications/integrations/app';
 import type { FleetConfigType, FleetStartServices } from '../../public/plugin';
+import { ExperimentalFeaturesService } from '../../public/services';
 
 // TODO: These are contract leaks, and should be on the context, rather than a setter.
 import { setHttpClient } from '../../public/hooks/use_request';
@@ -49,7 +50,8 @@ export const StorybookContext: React.FC<{ storyContext?: Parameters<DecoratorFn>
   const history = new ScopedHistory(browserHistory, basepath);
 
   const isCloudEnabled = storyContext?.args.isCloudEnabled;
-
+  // @ts-ignore {} no assignable to parameter
+  ExperimentalFeaturesService.init({});
   const startServices: FleetStartServices = useMemo(
     () => ({
       ...stubbedStartServices,
