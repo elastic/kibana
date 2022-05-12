@@ -7,13 +7,12 @@
 
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { ValidFeatureId } from '@kbn/rule-data-utils';
-import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 
 import * as i18n from './translations';
-import { useHttp, useToasts } from '../common/lib/kibana';
+import { useToasts } from '../common/lib/kibana';
+import { getFeatureIds } from './api';
 
 export const useGetFeatureIds = (alertRegistrationContexts: string[]): ValidFeatureId[] => {
-  const http = useHttp();
   const [alertFeatureIds, setAlertFeatureIds] = useState<ValidFeatureId[]>([]);
   const toasts = useToasts();
   const isCancelledRef = useRef(false);
@@ -26,13 +25,8 @@ export const useGetFeatureIds = (alertRegistrationContexts: string[]): ValidFeat
         abortCtrlRef.current.abort();
         abortCtrlRef.current = new AbortController();
 
-        const response = await http.get<ValidFeatureId[]>(
-          `${BASE_RAC_ALERTS_API_PATH}/_feature_ids`,
-          {
-            signal: abortCtrlRef.current.signal,
-            query: { registrationContext },
-          }
-        );
+        const query = { registrationContext };
+        const response = await getFeatureIds(query, abortCtrlRef.current.signal);
 
         if (!isCancelledRef.current) {
           setAlertFeatureIds(response);
@@ -48,7 +42,7 @@ export const useGetFeatureIds = (alertRegistrationContexts: string[]): ValidFeat
         }
       }
     },
-    [http, toasts]
+    [toasts]
   );
 
   useEffect(() => {
