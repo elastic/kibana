@@ -45,7 +45,7 @@ export const getXDomain = (
   const xValues = uniq(
     layers
       .flatMap<number>(({ table, xAccessor }) =>
-        table.rows.map((row) => row[xAccessor!] && row[xAccessor!].valueOf())
+        table.rows.map((row) => xAccessor && row[xAccessor] && row[xAccessor].valueOf())
       )
       .filter(Boolean)
       .sort()

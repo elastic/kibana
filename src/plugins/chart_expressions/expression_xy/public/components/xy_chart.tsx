@@ -226,12 +226,12 @@ export function XYChart({
   const isTimeViz = Boolean(dataLayers.every((l) => l.xScaleType === 'time'));
   const isHistogramViz = dataLayers.every((l) => l.isHistogram);
 
-  const domains = useMemo(
-    () => getXDomain(dataLayers, minInterval, isTimeViz, isHistogramViz),
-    [dataLayers, minInterval, isTimeViz, isHistogramViz]
+  const { baseDomain: rawXDomain, extendedDomain: xDomain } = getXDomain(
+    dataLayers,
+    minInterval,
+    isTimeViz,
+    isHistogramViz
   );
-
-  const { baseDomain: rawXDomain, extendedDomain: xDomain } = domains;
 
   const yAxesMap = {
     left: yAxesConfiguration.find(({ groupId }) => groupId === 'left'),
