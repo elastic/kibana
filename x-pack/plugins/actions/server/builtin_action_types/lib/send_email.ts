@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import axios, { AxiosResponse } from 'axios';
 // info on nodemailer: https://nodemailer.com/about/
 import nodemailer from 'nodemailer';
 import { default as MarkdownIt } from 'markdown-it';
@@ -77,7 +78,7 @@ export async function sendEmail(
 }
 
 // send an email using MS Exchange Graph API
-async function sendEmailWithExchange(
+export async function sendEmailWithExchange(
   logger: Logger,
   options: SendEmailOptions,
   messageHTML: string,
@@ -113,6 +114,30 @@ async function sendEmailWithExchange(
     Authorization: accessToken,
   };
 
+  const axiosInstance = axios.create();
+  axiosInstance.interceptors.response.use(
+    async (response: AxiosResponse) => {
+      // Look for 4xx errors that indicate something is wrong with the request
+      // We don't know for sure that it is an access token issue but remove saved
+      // token just to be sure
+      if (response.status >= 400 && response.status < 500) {
+        await connectorTokenClient.deleteConnectorTokens({ connectorId });
+      }
+      return response;
+    },
+    async (error) => {
+      const statusCode = error?.response?.status;
+
+      // Look for 4xx errors that indicate something is wrong with the request
+      // We don't know for sure that it is an access token issue but remove saved
+      // token just to be sure
+      if (statusCode >= 400 && statusCode < 500) {
+        await connectorTokenClient.deleteConnectorTokens({ connectorId });
+      }
+      return Promise.reject(error);
+    }
+  );
+
   return await sendEmailGraphApi(
     {
       options,
@@ -121,7 +146,8 @@ async function sendEmailWithExchange(
       graphApiUrl: configurationUtilities.getMicrosoftGraphApiUrl(),
     },
     logger,
-    configurationUtilities
+    configurationUtilities,
+    axiosInstance
   );
 }
 
