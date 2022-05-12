@@ -43,7 +43,7 @@ function MarkdownOptions({ stateParams, setValue }: VisEditorOptionsProps<Markdo
             <EuiFlexItem grow={false}>
               <EuiText size="xs">
                 <EuiLink
-                  href="https://help.github.com/articles/github-flavored-markdown/"
+                  href="https://docs.github.com/en/get-started/writing-on-github/"
                   target="_blank"
                 >
                   <FormattedMessage
