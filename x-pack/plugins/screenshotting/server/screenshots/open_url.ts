@@ -30,9 +30,14 @@ export const openUrl = async (
   try {
     await browser.open(url, { context, headers, waitForSelector, timeout }, kbnLogger);
 
+    // Debug logging for viewport size and resizing
     await browser.evaluate(
       {
         fn() {
+          // eslint-disable-next-line no-console
+          console.log(
+            `Navigating URL with viewport size: width=${window.innerWidth} height=${window.innerHeight} scaleFactor:${window.devicePixelRatio}`
+          );
           window.addEventListener('resize', () => {
             // eslint-disable-next-line no-console
             console.log(

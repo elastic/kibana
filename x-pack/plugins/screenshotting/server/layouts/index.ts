@@ -38,6 +38,10 @@ export const DEFAULT_SELECTORS: LayoutSelectorDictionary = {
 
 export { createLayout } from './create_layout';
 
+/**
+ * Size of the desired initial viewport. This is needed to render the app before elements load into their
+ * layout. Once the elements are positioned, the viewport must be *resized* to include the entire element container.
+ */
 export const DEFAULT_VIEWPORT: Required<Pick<Viewport, 'width' | 'height' | 'deviceScaleFactor'>> =
   {
     width: 1950,

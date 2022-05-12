@@ -42,7 +42,7 @@ import {
   toPdf,
   toPng,
 } from '../formats';
-import { createLayout, DEFAULT_VIEWPORT, Layout } from '../layouts';
+import { createLayout, Layout } from '../layouts';
 import { EventLogger, Transactions } from './event_logger';
 import type { ScreenshotObservableOptions, ScreenshotObservableResult } from './observable';
 import { ScreenshotObservableHandler, UrlOrUrlWithContext } from './observable';
@@ -115,19 +115,9 @@ export class Screenshots {
   ): Observable<CaptureResult> {
     const { browserTimezone } = options;
 
+    const openUrlTimeout = durationToNumber(this.config.capture.timeouts.openUrl);
     return this.browserDriverFactory
-      .createPage(
-        {
-          browserTimezone,
-          openUrlTimeout: durationToNumber(this.config.capture.timeouts.openUrl),
-          defaultViewport: {
-            height: layout.height || DEFAULT_VIEWPORT.height,
-            width: layout.width || DEFAULT_VIEWPORT.width,
-            deviceScaleFactor: layout.getBrowserZoom(),
-          },
-        },
-        this.logger
-      )
+      .createPage({ browserTimezone, openUrlTimeout }, this.logger)
       .pipe(
         this.semaphore.acquire(),
         mergeMap(({ driver, unexpectedExit$, close }) => {

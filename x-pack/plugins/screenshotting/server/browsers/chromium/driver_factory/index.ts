@@ -11,7 +11,7 @@ import { getDataPath } from '@kbn/utils';
 import { spawn } from 'child_process';
 import del from 'del';
 import fs from 'fs';
-import _, { uniq } from 'lodash';
+import { uniq } from 'lodash';
 import path from 'path';
 import puppeteer, { Browser, ConsoleMessage, HTTPRequest, Page } from 'puppeteer';
 import { createInterface } from 'readline';
@@ -37,11 +37,6 @@ import { getMetrics, PerformanceMetrics } from './metrics';
 
 interface CreatePageOptions {
   browserTimezone?: string;
-  defaultViewport: {
-    width: number;
-    height: number;
-    deviceScaleFactor: number;
-  };
   openUrlTimeout: number;
 }
 
@@ -115,7 +110,7 @@ export class HeadlessChromiumDriverFactory {
       userDataDir: this.userDataDir,
       disableSandbox: this.config.browser.chromium.disableSandbox,
       proxy: this.config.browser.chromium.proxy,
-      windowSize: DEFAULT_VIEWPORT, // Approximate the default viewport size
+      windowSize: DEFAULT_VIEWPORT,
     });
   }
 
@@ -123,7 +118,7 @@ export class HeadlessChromiumDriverFactory {
    * Return an observable to objects which will drive screenshot capture for a page
    */
   createPage(
-    { browserTimezone, openUrlTimeout, defaultViewport }: CreatePageOptions,
+    { browserTimezone, openUrlTimeout }: CreatePageOptions,
     pLogger = this.logger
   ): Rx.Observable<CreatePageResult> {
     return new Rx.Observable((observer) => {
@@ -132,13 +127,6 @@ export class HeadlessChromiumDriverFactory {
 
       const chromiumArgs = this.getChromiumArgs();
       logger.debug(`Chromium launch args set to: ${chromiumArgs}`);
-
-      // NOTE: _.defaults assigns to the target object, so we copy it.
-      // NOTE NOTE: _.defaults is not the same as { ...DEFAULT_VIEWPORT, ...defaultViewport }
-      const viewport = _.defaults({ ...defaultViewport }, DEFAULT_VIEWPORT);
-      logger.debug(
-        `Launching with viewport: width=${viewport.width} height=${viewport.height} scaleFactor=${viewport.deviceScaleFactor}`
-      );
 
       (async () => {
         let browser: Browser | undefined;
@@ -150,8 +138,8 @@ export class HeadlessChromiumDriverFactory {
             ignoreHTTPSErrors: true,
             handleSIGHUP: false,
             args: chromiumArgs,
-            defaultViewport: viewport,
             env: { TZ: browserTimezone },
+            defaultViewport: DEFAULT_VIEWPORT,
           });
         } catch (err) {
           observer.error(
