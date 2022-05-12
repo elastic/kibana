@@ -8,7 +8,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { htmlIdGenerator, EuiButtonIcon, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 import { css } from '@emotion/react';
 
@@ -19,7 +19,6 @@ export interface LegendToggleProps {
 }
 
 const LegendToggleComponent = ({ onClick, showLegend, legendPosition }: LegendToggleProps) => {
-  const legendId = useMemo(() => htmlIdGenerator()('legend'), []);
   const { euiTheme } = useEuiTheme();
 
   const baseStyles = useMemo(
@@ -65,7 +64,6 @@ const LegendToggleComponent = ({ onClick, showLegend, legendPosition }: LegendTo
         defaultMessage: 'Toggle legend',
       })}
       aria-expanded={showLegend}
-      aria-controls={legendId}
       isSelected={showLegend}
       data-test-subj="vislibToggleLegend"
       title={i18n.translate('charts.legend.toggleLegendButtonTitle', {
