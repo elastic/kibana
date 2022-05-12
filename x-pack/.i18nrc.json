@@ -37,6 +37,7 @@
     "xpack.logstash": ["plugins/logstash"],
     "xpack.main": "legacy/plugins/xpack_main",
     "xpack.maps": ["plugins/maps"],
+    "xpack.aiops": ["plugins/aiops"],
     "xpack.ml": ["plugins/ml"],
     "xpack.monitoring": ["plugins/monitoring"],
     "xpack.osquery": ["plugins/osquery"],

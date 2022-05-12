@@ -48,6 +48,7 @@ export interface MlRoute {
   enableDatePicker?: boolean;
   'data-test-subj'?: string;
   actionMenu?: React.ReactNode;
+  disabled?: boolean;
 }
 
 export interface PageProps {

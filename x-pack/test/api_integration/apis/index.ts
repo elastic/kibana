@@ -31,6 +31,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./searchprofiler'));
     loadTestFile(require.resolve('./painless_lab'));
     loadTestFile(require.resolve('./file_upload'));
+    loadTestFile(require.resolve('./aiops'));
     loadTestFile(require.resolve('./ml'));
     loadTestFile(require.resolve('./watcher'));
     loadTestFile(require.resolve('./logs_ui'));

@@ -1,6 +1,7 @@
 pageLoadAssetSize:
   advancedSettings: 27596
   actions: 20000
+  aiops: 10000
   alerting: 106936
   apm: 64385
   canvas: 1066647
