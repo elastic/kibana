@@ -82,7 +82,13 @@ describe('StepDefinePackagePolicy', () => {
     };
   });
 
-  const validationResults = { name: null, description: null, namespace: null, inputs: {} };
+  const validationResults = {
+    name: null,
+    description: null,
+    namespace: null,
+    inputs: {},
+    vars: {},
+  };
 
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
