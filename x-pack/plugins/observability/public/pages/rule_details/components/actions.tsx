@@ -21,7 +21,7 @@ const mapActionTypeIcon: MapActionTypeIcon = {
   '.webhook': 'logoWebhook',
 };
 export function Actions({ actions }: ActionsProps) {
-  if (actions && actions.length <= 0) return <EuiText size="m">0</EuiText>;
+  if (actions && actions.length <= 0) return <EuiText size="s">0</EuiText>;
 
   const uniqueActions = Array.from(new Set(actions.map((action: any) => action.actionTypeId)));
   return (
