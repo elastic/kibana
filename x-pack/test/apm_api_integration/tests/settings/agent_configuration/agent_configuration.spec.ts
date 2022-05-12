@@ -169,7 +169,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
             const { status, body } = await getAllConfigurations();
 
             expect(status).to.equal(200);
-            expect(omitTimestampAndId(body.configurations)).to.eql([
+            expect(omitTimestamp(body.configurations)).to.eql([
               {
                 service: {},
                 settings: { transaction_sample_rate: '0.55' },
@@ -255,7 +255,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
           const { status, body } = await getAllConfigurations();
           expect(status).to.equal(200);
           expect(
-            orderBy(omitTimestampAndId(body.configurations), ['settings.transaction_sample_rate'])
+            orderBy(omitTimestamp(body.configurations), ['settings.transaction_sample_rate'])
           ).to.eql([
             {
               service: {},
@@ -399,20 +399,14 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
         };
 
         let agentConfiguration:
-          | APIReturnType<'GET /api/apm/settings/agent-configuration'>['configurations'][0]
+          | APIReturnType<'GET /api/apm/settings/agent-configuration/view'>
           | undefined;
 
         before(async () => {
           log.debug('creating agent configuration');
           await createConfiguration(testConfig);
-
-          const {
-            body: { configurations },
-          } = await getAllConfigurations();
-
-          agentConfiguration = configurations.find(
-            (x) => x.service.name === name && x.service.environment === environment
-          );
+          const { body } = await findExactConfiguration(name, environment);
+          agentConfiguration = body;
         });
 
         after(async () => {
@@ -523,8 +517,8 @@ async function waitFor(cb: () => Promise<boolean>, retries = 50): Promise<boolea
   return res;
 }
 
-function omitTimestampAndId(configs: AgentConfigurationIntake[]) {
-  return configs.map((config: AgentConfigurationIntake) => omit(config, '@timestamp', 'id'));
+function omitTimestamp(configs: AgentConfigurationIntake[]) {
+  return configs.map((config: AgentConfigurationIntake) => omit(config, '@timestamp'));
 }
 
 async function expectStatusCode(
