@@ -23,6 +23,16 @@ import {
   SERVICE_RUNTIME_NAME,
   SERVICE_RUNTIME_VERSION,
   SERVICE_VERSION,
+  NAMESPACE,
+  POD_UID,
+  CONTAINER_NAME,
+  POD_IP,
+  DEPLOYMENT_NAME,
+  NAMESPACE_UID,
+  PHASE,
+  NODE_NAME,
+  NODE_UID,
+  NODE_HOSTNAME,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
@@ -52,7 +62,21 @@ const serviceDetailsKeys = [
   SERVICE_RUNTIME_NAME,
   SERVICE_RUNTIME_VERSION,
 ];
-const containerDetailsKeys = [CONTAINER_ID, HOST_NAME, POD_NAME];
+const containerDetailsKeys = [
+  CONTAINER_ID,
+  CONTAINER_NAME,
+  DEPLOYMENT_NAME,
+  HOST_NAME,
+  POD_NAME,
+  POD_IP,
+  POD_UID,
+  NODE_HOSTNAME,
+  NODE_NAME,
+  NODE_UID,
+  NAMESPACE,
+  NAMESPACE_UID,
+  PHASE,
+];
 const cloudDetailsKeys = [
   CLOUD_AVAILABILITY_ZONE,
   CLOUD_INSTANCE_ID,

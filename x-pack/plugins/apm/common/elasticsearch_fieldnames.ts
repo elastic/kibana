@@ -116,9 +116,21 @@ export const HOST = 'host';
 export const HOST_HOSTNAME = 'host.hostname'; // Do not use. Please use `HOST_NAME` instead.
 export const HOST_NAME = 'host.name';
 export const HOST_OS_PLATFORM = 'host.os.platform';
+
 export const CONTAINER_ID = 'container.id';
+export const CONTAINER_NAME = 'container.name';
 export const KUBERNETES = 'kubernetes';
 export const POD_NAME = 'kubernetes.pod.name';
+export const POD_UID = 'kubernetes.pod.uid';
+export const POD_IP = 'kubernetes.pod.ip';
+export const DEPLOYMENT_NAME = 'kubernetes.deployment.name';
+export const NAMESPACE = 'kubernetes.namespace';
+export const NAMESPACE_UID = 'kubernetes.namespace.uid';
+export const KUBERNETES_NODE = 'kubernetes.node';
+export const PHASE = 'kubernetes.container.status.phase';
+export const NODE_HOSTNAME = 'kubernetes.node.hostname';
+export const NODE_NAME = 'kubernetes.node.name';
+export const NODE_UID = 'kubernetes.node.uid';
 
 export const CLIENT_GEO_COUNTRY_ISO_CODE = 'client.geo.country_iso_code';
 

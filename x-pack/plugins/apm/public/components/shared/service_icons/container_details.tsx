@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiDescriptionList } from '@elastic/eui';
+import { EuiDescriptionList, EuiBadge } from '@elastic/eui';
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -17,9 +17,10 @@ type ServiceDetailsReturnType =
 
 interface Props {
   container: ServiceDetailsReturnType['container'];
+  kubernetes: ServiceDetailsReturnType['kubernetes'];
 }
 
-export function ContainerDetails({ container }: Props) {
+export function ContainerDetails({ container, kubernetes }: Props) {
   if (!container) {
     return null;
   }
@@ -76,6 +77,46 @@ export function ContainerDetails({ container }: Props) {
         { defaultMessage: 'Orchestration' }
       ),
       description: container.type,
+    });
+  }
+
+  if (kubernetes?.namespace) {
+    listItems.push({
+      title: i18n.translate(
+        'xpack.apm.serviceIcons.serviceDetails.container.namespace',
+        { defaultMessage: 'Namespace' }
+      ),
+      description: <EuiBadge color="hollow">{kubernetes.namespace}</EuiBadge>,
+    });
+  }
+  if (kubernetes?.deployment?.name) {
+    listItems.push({
+      title: i18n.translate(
+        'xpack.apm.serviceIcons.serviceDetails.container.deployment.name',
+        { defaultMessage: 'Deployment name' }
+      ),
+      description: (
+        <EuiBadge color="hollow">{kubernetes?.deployment?.name}</EuiBadge>
+      ),
+    });
+  }
+  if (kubernetes?.pod?.name) {
+    listItems.push({
+      title: i18n.translate(
+        'xpack.apm.serviceIcons.serviceDetails.container.pod.name',
+        { defaultMessage: 'Pod name' }
+      ),
+      description: <EuiBadge color="hollow">{kubernetes?.pod?.name}</EuiBadge>,
+    });
+  }
+
+  if (kubernetes?.container?.status?.phase) {
+    listItems.push({
+      title: i18n.translate(
+        'xpack.apm.serviceIcons.serviceDetails.container.phase',
+        { defaultMessage: 'Container status ' }
+      ),
+      description: kubernetes.container.status.phase,
     });
   }
 
