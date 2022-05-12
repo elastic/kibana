@@ -120,11 +120,12 @@ export function RuleDetailsPage() {
 
   const getRuleConditionsWording = () => {
     const numberOfConditions = rule?.params.criteria ? (rule?.params.criteria as any[]).length : 0;
+    const message = numberOfConditions > 1 ? 'conditions' : 'condition';
     return (
       <>
         {numberOfConditions}{' '}
         {i18n.translate('xpack.observability.ruleDetails.condition', {
-          defaultMessage: numberOfConditions > 1 ? 'conditions' : 'condition',
+          defaultMessage: message,
         })}
       </>
     );
@@ -289,7 +290,8 @@ export function RuleDetailsPage() {
                   />
                   <ItemValueRuleSummary
                     extraSpace={false}
-                    itemValue={`${String(last24hAlerts)} ${i18n.translate(
+                    itemValue={`
+                    ${String(last24hAlerts)} ${i18n.translate(
                       'xpack.observability.ruleDetails.last24h',
                       {
                         defaultMessage: '(last 24 h)',
