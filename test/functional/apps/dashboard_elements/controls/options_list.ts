@@ -27,7 +27,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
 
-  // FAILING: https://github.com/elastic/kibana/issues/132049
   describe('Dashboard options list integration', () => {
     before(async () => {
       await common.navigateToApp('dashboard');
@@ -291,6 +290,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('Applies options list control options to dashboard', async () => {
+          await elasticChart.setNewChartUiDebugFlag();
           await retry.try(async () => {
             expect(await pieChart.getPieSliceCount()).to.be(2);
           });
@@ -301,7 +301,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await header.waitUntilLoadingHasFinished();
           await dashboard.clickUnsavedChangesContinueEditing('New Dashboard');
           await header.waitUntilLoadingHasFinished();
-          expect(await pieChart.getPieSliceCount()).to.be(2);
+          await elasticChart.setNewChartUiDebugFlag();
+          await retry.try(async () => {
+            expect(await pieChart.getPieSliceCount()).to.be(2);
+          });
 
           const selectionString = await dashboardControls.optionsListGetSelectionsString(controlId);
           expect(selectionString).to.be('hiss, grr');
