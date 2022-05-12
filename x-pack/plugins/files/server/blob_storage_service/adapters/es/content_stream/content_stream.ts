@@ -9,7 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { defaults, get } from 'lodash';
 import Puid from 'puid';
-import { Duplex } from 'stream';
+import { Duplex, Writable, Readable } from 'stream';
 
 import type { FileChunkDocument } from '../mappings';
 
@@ -186,7 +186,7 @@ export class ContentStream extends Duplex {
     });
   }
 
-  public getId(): undefined | string {
+  public getDocumentId(): undefined | string {
     return this.id;
   }
 
@@ -291,9 +291,13 @@ export class ContentStream extends Duplex {
 export interface ContentStreamArgs {
   client: ElasticsearchClient;
   /**
-   * Provide an ID to read from an existing document
+   * Provide an Elasticsearch document ID to read from an existing document
    */
   id?: string;
+
+  /**
+   * The Elasticsearch index name to read from or write to.
+   */
   index: string;
 
   /**
@@ -304,6 +308,20 @@ export interface ContentStreamArgs {
   parameters?: ContentStreamParameters;
 }
 
-export function getContentStream({ client, id, index, logger, parameters }: ContentStreamArgs) {
+function getContentStream({ client, id, index, logger, parameters }: ContentStreamArgs) {
   return new ContentStream(client, id, index, logger, parameters);
+}
+
+type WritableContentStream = Writable & Pick<ContentStream, 'getDocumentId'>;
+
+export function getWritableContentStream(args: ContentStreamArgs): WritableContentStream {
+  return getContentStream(args);
+}
+
+type ReadableContentStream = Readable;
+
+export function getReadableContentStream(
+  args: Omit<ContentStreamArgs, 'id'> & { id: string }
+): ReadableContentStream {
+  return getContentStream(args);
 }

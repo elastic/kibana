@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import { Writable, Readable, pipeline as _pipeline } from 'stream';
+import { promisify } from 'util';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
-import { ReadStream } from 'fs';
-
 import type { BlobStorage } from '../../types';
-
 import { mappings } from './mappings';
+import { getWritableContentStream, getReadableContentStream } from './content_stream';
 
 const BLOB_STORAGE_SYSTEM_INDEX_NAME = '.kibana_blob_storage';
+const pipeline = promisify(_pipeline);
 
 export class ElasticsearchBlobStorage implements BlobStorage {
   constructor(private readonly esClient: ElasticsearchClient, private readonly logger: Logger) {}
@@ -48,15 +49,55 @@ export class ElasticsearchBlobStorage implements BlobStorage {
     }
   }
 
-  async upload(fileName: string, content: ReadStream): Promise<{ uri: string }> {
-    throw new Error('Not implemented');
+  async upload(src: Readable): Promise<{ id: string }> {
+    try {
+      const dest = getWritableContentStream({
+        id: undefined, // We are creating a new file
+        client: this.esClient,
+        index: this.indexName,
+        logger: this.logger.get('content-stream-uploader'),
+        parameters: {
+          encoding: 'base64',
+        },
+      });
+      await pipeline(src, dest);
+      return {
+        id: dest.getDocumentId()!,
+      };
+    } catch (e) {
+      this.logger.error(`Could not write chunks to Elasticsearch: ${e}`);
+      throw e;
+    }
   }
 
-  async download(uri: string): Promise<ReadStream> {
-    throw new Error('Not implemented');
+  async download(id: string): Promise<Readable> {
+    return getReadableContentStream({
+      id,
+      client: this.esClient,
+      index: this.indexName,
+      logger: this.logger,
+      parameters: {
+        encoding: 'base64',
+      },
+    });
   }
 
-  async delete(uri: string): Promise<void> {
-    throw new Error('Not implemented');
+  async delete(id: string): Promise<void> {
+    try {
+      const dest = getWritableContentStream({
+        id,
+        client: this.esClient,
+        index: this.indexName,
+        logger: this.logger.get('content-stream-uploader'),
+        parameters: {
+          encoding: 'base64',
+        },
+      });
+      /** @note Overwriting existing content with an empty buffer to remove all the chunks. */
+      await promisify(dest.end.bind(dest, '', 'utf8'))();
+    } catch (e) {
+      this.logger.error(`Could not delete file: ${e}`);
+      throw e;
+    }
   }
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ReadStream } from 'fs';
+import type { Readable } from 'stream';
 
 /**
  * TODO: Finish this interface and document all methods
@@ -13,9 +13,9 @@ import type { ReadStream } from 'fs';
  * @internal
  */
 export interface BlobStorage {
-  upload(fileName: string, content: ReadStream): Promise<{ uri: string }>;
+  upload(content: Readable): Promise<{ id: string }>;
 
-  download(uri: string): Promise<ReadStream>;
+  download(id: string): Promise<Readable>;
 
-  delete(uri: string): Promise<void>;
+  delete(id: string): Promise<void>;
 }
