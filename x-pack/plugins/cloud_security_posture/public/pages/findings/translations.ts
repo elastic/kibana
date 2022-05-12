@@ -42,6 +42,10 @@ export const RESOURCE = i18n.translate('xpack.csp.findings.resourceLabel', {
   defaultMessage: 'Resource',
 });
 
+export const RESOURCE_NAME = i18n.translate('xpack.csp.findings.resourceLabel', {
+  defaultMessage: 'Resource Name',
+});
+
 export const GENERAL = i18n.translate('xpack.csp.findings.findingsFlyout.generalTabLabel', {
   defaultMessage: 'General',
 });

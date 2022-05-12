@@ -30,6 +30,10 @@ const getDetailsList = (data: CspFinding) => [
     description: moment(data['@timestamp']).format('MMMM D, YYYY @ HH:mm:ss.SSS'),
   },
   {
+    title: TEXT.RESOURCE_NAME,
+    description: data.resource.name,
+  },
+  {
     title: TEXT.RULE_NAME,
     description: data.rule.name,
   },
@@ -45,10 +49,6 @@ const getDetailsList = (data: CspFinding) => [
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-  },
-  {
-    title: TEXT.BENCHMARK,
-    description: data.rule.benchmark.name,
   },
   {
     title: TEXT.CIS_SECTION,
