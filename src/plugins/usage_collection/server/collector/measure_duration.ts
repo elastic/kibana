@@ -25,5 +25,5 @@ export const createPerformanceObsHook = () => {
   return () => {
     obs.disconnect();
     return marks;
-  }
-}
+  };
+};

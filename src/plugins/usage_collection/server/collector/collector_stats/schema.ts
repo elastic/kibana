@@ -20,7 +20,8 @@ export const collectorsStatsSchema: MakeSchemaFrom<CollectorsStats> = {
   total_is_ready_duration: {
     type: 'long',
     _meta: {
-      description: 'The total execution duration of the isReady function for all collectors in milliseconds',
+      description:
+        'The total execution duration of the isReady function for all collectors in milliseconds',
     },
   },
   total_fetch_duration: {
@@ -43,13 +44,14 @@ export const collectorsStatsSchema: MakeSchemaFrom<CollectorsStats> = {
     DYNAMIC_KEY: {
       type: 'long',
       _meta: {
-        description: 'The execution duration of the fetch function for the collector in milliseconds',
+        description:
+          'The execution duration of the fetch function for the collector in milliseconds',
       },
     },
   },
   not_ready: {
     count: {
-      type:'short',
+      type: 'short',
       _meta: {
         description: 'The number of collectors that returned false from the isReady function',
       },
@@ -59,7 +61,8 @@ export const collectorsStatsSchema: MakeSchemaFrom<CollectorsStats> = {
       items: {
         type: 'keyword',
         _meta: {
-          description: 'The name of the of collectors that returned false from the isReady function',
+          description:
+            'The name of the of collectors that returned false from the isReady function',
         },
       },
     },

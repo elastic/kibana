@@ -102,8 +102,8 @@ describe('CollectorSet', () => {
             not_ready_timeout: { count: 0, names: [] },
             succeeded: { count: 1, names: ['MY_TEST_COLLECTOR'] },
             failed: { count: 0, names: [] },
-            fetch_duration_breakdown: { 'MY_TEST_COLLECTOR': 0 },
-            is_ready_duration_breakdown: { 'MY_TEST_COLLECTOR': 0 },
+            fetch_duration_breakdown: { MY_TEST_COLLECTOR: 0 },
+            is_ready_duration_breakdown: { MY_TEST_COLLECTOR: 0 },
             total_duration: 0,
             total_fetch_duration: 0,
             total_is_ready_duration: 0,
@@ -137,8 +137,8 @@ describe('CollectorSet', () => {
             not_ready_timeout: { count: 0, names: [] },
             succeeded: { count: 0, names: [] },
             failed: { count: 1, names: ['MY_TEST_COLLECTOR'] },
-            fetch_duration_breakdown: { 'MY_TEST_COLLECTOR': 0 },
-            is_ready_duration_breakdown: { 'MY_TEST_COLLECTOR': 0 },
+            fetch_duration_breakdown: { MY_TEST_COLLECTOR: 0 },
+            is_ready_duration_breakdown: { MY_TEST_COLLECTOR: 0 },
             total_duration: 0,
             total_fetch_duration: 0,
             total_is_ready_duration: 0,
@@ -171,8 +171,8 @@ describe('CollectorSet', () => {
             not_ready_timeout: { count: 0, names: [] },
             succeeded: { count: 1, names: ['MY_TEST_COLLECTOR'] },
             failed: { count: 0, names: [] },
-            fetch_duration_breakdown: { 'MY_TEST_COLLECTOR': 0 },
-            is_ready_duration_breakdown: { 'MY_TEST_COLLECTOR': 0 },
+            fetch_duration_breakdown: { MY_TEST_COLLECTOR: 0 },
+            is_ready_duration_breakdown: { MY_TEST_COLLECTOR: 0 },
             total_duration: 0,
             total_fetch_duration: 0,
             total_is_ready_duration: 0,
@@ -204,8 +204,8 @@ describe('CollectorSet', () => {
             not_ready_timeout: { count: 0, names: [] },
             succeeded: { count: 1, names: ['MY_TEST_COLLECTOR'] },
             failed: { count: 0, names: [] },
-            fetch_duration_breakdown: { 'MY_TEST_COLLECTOR': 0 },
-            is_ready_duration_breakdown: { 'MY_TEST_COLLECTOR': 0 },
+            fetch_duration_breakdown: { MY_TEST_COLLECTOR: 0 },
+            is_ready_duration_breakdown: { MY_TEST_COLLECTOR: 0 },
             total_duration: 0,
             total_fetch_duration: 0,
             total_is_ready_duration: 0,
@@ -376,43 +376,39 @@ describe('CollectorSet', () => {
 
       expect(results).toMatchSnapshot([
         {
-          "result": {},
-          "type": "ready_col",
+          result: {},
+          type: 'ready_col',
         },
         {
-          "result": {
-            "failed": {
-              "count": 0,
-              "names": [],
+          result: {
+            failed: {
+              count: 0,
+              names: [],
             },
-            "fetch_duration_breakdown": {
-              "ready_col": 0,
+            fetch_duration_breakdown: {
+              ready_col: 0,
             },
-            "is_ready_duration_breakdown": {
-              "not_ready_col": 0,
-              "ready_col": 0,
+            is_ready_duration_breakdown: {
+              not_ready_col: 0,
+              ready_col: 0,
             },
-            "not_ready": {
-              "count": 1,
-              "names": [
-                "not_ready_col",
-              ],
+            not_ready: {
+              count: 1,
+              names: ['not_ready_col'],
             },
-            "not_ready_timeout": {
-              "count": 0,
-              "names": [],
+            not_ready_timeout: {
+              count: 0,
+              names: [],
             },
-            "succeeded": {
-              "count": 1,
-              "names": [
-                "ready_col",
-              ],
+            succeeded: {
+              count: 1,
+              names: ['ready_col'],
             },
-            "total_duration": 0,
-            "total_fetch_duration": 0,
-            "total_is_ready_duration": 0,
+            total_duration: 0,
+            total_fetch_duration: 0,
+            total_is_ready_duration: 0,
           },
-          "type": "usage_collector_stats",
+          type: 'usage_collector_stats',
         },
       ]);
     });
@@ -458,43 +454,39 @@ describe('CollectorSet', () => {
 
       expect(results).toMatchSnapshot([
         {
-          "result": {},
-          "type": "ready_col",
+          result: {},
+          type: 'ready_col',
         },
         {
-          "result": {
-            "failed": {
-              "count": 0,
-              "names": [],
+          result: {
+            failed: {
+              count: 0,
+              names: [],
             },
-            "fetch_duration_breakdown": {
-              "ready_col": 0,
+            fetch_duration_breakdown: {
+              ready_col: 0,
             },
-            "is_ready_duration_breakdown": {
-              "ready_col": expect.any(Number),
-              "timeout_col": 1000,
+            is_ready_duration_breakdown: {
+              ready_col: expect.any(Number),
+              timeout_col: 1000,
             },
-            "not_ready": {
-              "count": 0,
-              "names": [],
+            not_ready: {
+              count: 0,
+              names: [],
             },
-            "not_ready_timeout": {
-              "count": 1,
-              "names": [
-                "timeout_col",
-              ],
+            not_ready_timeout: {
+              count: 1,
+              names: ['timeout_col'],
             },
-            "succeeded": {
-              "count": 1,
-              "names": [
-                "ready_col",
-              ],
+            succeeded: {
+              count: 1,
+              names: ['ready_col'],
             },
-            "total_duration": expect.any(Number),
-            "total_fetch_duration": 0,
-            "total_is_ready_duration": expect.any(Number),
+            total_duration: expect.any(Number),
+            total_fetch_duration: 0,
+            total_is_ready_duration: expect.any(Number),
           },
-          "type": "usage_collector_stats",
+          type: 'usage_collector_stats',
         },
       ]);
     });

@@ -26,19 +26,23 @@ export interface CollectorsStats {
 export interface CollectorsStatsCollectorParams {
   nonReadyCollectorTypes: string[];
   timedOutCollectorsTypes: string[];
-  isReadyExecutionDurationByType: {duration: number, type: string }[];
-  fetchExecutionDurationByType: {duration: number, type: string, status: 'failed' | 'success'}[];
+  isReadyExecutionDurationByType: Array<{ duration: number; type: string }>;
+  fetchExecutionDurationByType: Array<{
+    duration: number;
+    type: string;
+    status: 'failed' | 'success';
+  }>;
 }
 
 export const usageCollectorsStatsCollector = (
-    usageCollection: Pick<CollectorSet, 'makeUsageCollector'>,
-    {
-      nonReadyCollectorTypes,
-      timedOutCollectorsTypes,
-      isReadyExecutionDurationByType,
-      fetchExecutionDurationByType
-    }: CollectorsStatsCollectorParams,
-  ) => {
+  usageCollection: Pick<CollectorSet, 'makeUsageCollector'>,
+  {
+    nonReadyCollectorTypes,
+    timedOutCollectorsTypes,
+    isReadyExecutionDurationByType,
+    fetchExecutionDurationByType,
+  }: CollectorsStatsCollectorParams
+) => {
   return usageCollection.makeUsageCollector<CollectorsStats>({
     type: 'usage_collector_stats',
     isReady: () => true,
@@ -47,9 +51,12 @@ export const usageCollectorsStatsCollector = (
       const totalIsReadyDuration = sumBy(isReadyExecutionDurationByType, 'duration');
       const totalFetchDuration = sumBy(fetchExecutionDurationByType, 'duration');
 
-      const succeededCollectorTypes = fetchExecutionDurationByType.filter(({ status }) => status === 'success').map(({ type }) => type);
-      const failedCollectorTypes = fetchExecutionDurationByType.filter(({ status }) => status === 'failed').map(({ type }) => type);
-
+      const succeededCollectorTypes = fetchExecutionDurationByType
+        .filter(({ status }) => status === 'success')
+        .map(({ type }) => type);
+      const failedCollectorTypes = fetchExecutionDurationByType
+        .filter(({ status }) => status === 'failed')
+        .map(({ type }) => type);
 
       const collectorsStats: CollectorsStats = {
         // isReady and fetch stats
@@ -75,8 +82,8 @@ export const usageCollectorsStatsCollector = (
           {} as Record<string, number>
         ),
 
-        fetch_duration_breakdown: fetchExecutionDurationByType.reduce((acc, {type, duration}) => {
-          acc[type] = duration
+        fetch_duration_breakdown: fetchExecutionDurationByType.reduce((acc, { type, duration }) => {
+          acc[type] = duration;
           return acc;
         }, {} as Record<string, number>),
       };
