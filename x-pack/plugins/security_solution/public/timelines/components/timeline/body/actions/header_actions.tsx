@@ -182,9 +182,9 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
           {timelinesUi.getFieldBrowser({
             browserFields,
             columnHeaders,
-            options: {...fieldBrowserOptions, timelineId},
+            options: { ...fieldBrowserOptions, timelineId },
             onToggleColumn: (id: string) => {},
-            onUpdateColumns: (columns: ColumnHeaderOptions[]) => {}
+            onUpdateColumns: (columns: ColumnHeaderOptions[]) => {},
           })}
         </FieldBrowserContainer>
       </EventsTh>

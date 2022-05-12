@@ -170,7 +170,6 @@ describe('FieldsBrowser', () => {
   });
 
   test('it renders the CreateFieldButton when it is provided and have a dataViewId', () => {
-
     const MyTestComponent = () => <div>{'test'}</div>;
 
     const wrapper = mount(
