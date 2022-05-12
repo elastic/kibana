@@ -7,7 +7,7 @@
  */
 
 import { buildSchema } from "./build_schema";
-import { EcsNestedSchema, TOP_LEVEL_NAME } from "./common/types";
+import { EcsNestedSchema, TOP_LEVEL_NAME } from "../src/common/types";
 
 describe('buildSchema', () => {
 

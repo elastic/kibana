@@ -63,7 +63,7 @@ export function runCli() {
         `,
         default: {
           s: 'tmp/ecs_nested.yml',
-          d: 'generated'
+          d: 'src/schemas'
         }
       },
       async run({ flags }) {
