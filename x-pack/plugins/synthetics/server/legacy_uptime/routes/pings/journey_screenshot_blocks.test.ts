@@ -28,7 +28,7 @@ describe('journey screenshot blocks route', () => {
   });
 
   it('returns status code 400 if hash list is invalid', async () => {
-    handlerContext = Object.assign({}, libs, {
+    handlerContext = Object.assign({}, handlerContext, {
       request: { body: { hashes: undefined } },
     });
 
