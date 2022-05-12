@@ -448,7 +448,7 @@ Deprecated connectors will continue to function with the rules they were added
 to and can be assigned to new rules. However, it is strongly recommended to
 update deprecated connectors or create new ones to ensure you have access to
 connector enhancements, such as updating incidents.
-For more information, refer to {kibana-pull}111550[#111550], 
+For more information, refer to {kibana-pull}105440[#105440], 
 {kibana-ref}/servicenow-action-type.html#servicenow-itsm-connector-update[Update a deprecated {sn-itsm} connector], and
 {kibana-ref}/servicenow-sir-action-type.html#servicenow-sir-connector-update[Update a deprecated {sn-sir} connector].
 ====
