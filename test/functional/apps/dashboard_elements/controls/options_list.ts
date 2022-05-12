@@ -32,8 +32,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.navigateToApp('dashboard');
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
-      await timePicker.setDefaultDataRange();
       await elasticChart.setNewChartUiDebugFlag();
+      await timePicker.setDefaultDataRange();
     });
 
     describe('Options List Control Editor selects relevant data views', async () => {
@@ -266,6 +266,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('Selections made in control apply to dashboard', async () => {
         it('Shows available options in options list', async () => {
+          await dashboard.waitForRenderComplete();
           await header.waitUntilLoadingHasFinished();
           await retry.try(async () => {
             await ensureAvailableOptionsEql(allAvailableOptions);
