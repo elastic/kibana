@@ -3,7 +3,7 @@
 }
 
 // only apply truncation inside of a table cell (not within popover)
-[data-test-subj='dataGridRowCell'] .lnsTableCell {
+.lnsDataTableContainer .lnsTableCell {
   @include euiTextTruncate;
 }
 
