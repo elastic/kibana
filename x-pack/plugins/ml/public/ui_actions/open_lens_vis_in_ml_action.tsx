@@ -10,12 +10,12 @@ import type { Embeddable } from '@kbn/lens-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { MlCoreSetup } from '../plugin';
 
-export const CREATE_ML_AD_JOB_ACTION = 'createMLADJobAction';
+export const CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION = 'createMLADJobAction';
 
-export function createMLADJobAction(getStartServices: MlCoreSetup['getStartServices']) {
+export function createLensVisToADJobAction(getStartServices: MlCoreSetup['getStartServices']) {
   return createAction<{ embeddable: Embeddable }>({
     id: 'create-ml-ad-job-action',
-    type: CREATE_ML_AD_JOB_ACTION,
+    type: CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION,
     getIconType(context): string {
       return 'machineLearningApp';
     },
