@@ -56,7 +56,7 @@ export function groupAxesByType(layers: CommonXYDataLayerConfig[]) {
       const yAccessor = getAccessorByDimension(accessor, table?.columns || []);
       const mode =
         yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === yAccessor)?.axisMode || 'auto';
-      let formatter: SerializedFieldFormat = getFormat(table, accessor) || {
+      let formatter: SerializedFieldFormat = getFormat(table.columns, accessor) || {
         id: 'number',
       };
       if (

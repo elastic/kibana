@@ -130,7 +130,7 @@ export const getFormattedTable = (
 
       return {
         ...formatters,
-        [id]: formatFactory(accessor ? getFormat(table, accessor) : meta.params),
+        [id]: formatFactory(accessor ? getFormat(table.columns, accessor) : meta.params),
       };
     },
     {}

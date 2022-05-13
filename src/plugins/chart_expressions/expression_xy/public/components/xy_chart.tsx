@@ -193,7 +193,7 @@ export function XYChart({
     : undefined;
 
   const xAxisFormatter = formatFactory(
-    dataLayers[0].xAccessor ? getFormat(dataLayers[0].table, dataLayers[0].xAccessor) : undefined
+    dataLayers[0].xAccessor ? getFormat(dataLayers[0].table.columns, dataLayers[0].xAccessor) : undefined
   );
 
   // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
@@ -395,14 +395,16 @@ export function XYChart({
     const { table } = layer;
 
     const xColumn = layer.xAccessor && getColumnByAccessor(layer.xAccessor, table.columns);
-    const xAccessor = layer.xAccessor ? getAccessorByDimension(layer.xAccessor, table.columns) : '';
+    const xAccessor = layer.xAccessor
+      ? getAccessorByDimension(layer.xAccessor, table.columns)
+      : undefined;
     const currentXFormatter =
-      layer.xAccessor && formattedDatatables[layer.layerId]?.formattedColumns[xAccessor] && xColumn
-        ? formatFactory(layer.xAccessor ? getFormat(table, layer.xAccessor) : undefined)
+      xAccessor && formattedDatatables[layer.layerId]?.formattedColumns[xAccessor] && xColumn
+        ? formatFactory(layer.xAccessor ? getFormat(table.columns, layer.xAccessor) : undefined)
         : xAxisFormatter;
 
     const rowIndex = table.rows.findIndex((row) => {
-      if (layer.xAccessor) {
+      if (xAccessor) {
         if (formattedDatatables[layer.layerId]?.formattedColumns[xAccessor]) {
           // stringify the value to compare with the chart value
           return currentXFormatter.convert(row[xAccessor]) === xyGeometry.x;
@@ -423,10 +425,10 @@ export function XYChart({
       const pointValue = xySeries.seriesKeys[0];
       const splitAccessor = layer.splitAccessor
         ? getAccessorByDimension(layer.splitAccessor, table.columns)
-        : '';
+        : undefined;
 
       const splitFormatter = formatFactory(
-        layer.splitAccessor ? getFormat(table, layer.splitAccessor) : undefined
+        layer.splitAccessor ? getFormat(table.columns, layer.splitAccessor) : undefined
       );
 
       points.push({

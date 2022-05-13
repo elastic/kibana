@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { uniq } from 'lodash';
+import { isUndefined, uniq } from 'lodash';
 import React from 'react';
 import moment from 'moment';
 import { Endzones } from '@kbn/charts-plugin/public';
@@ -63,8 +63,9 @@ export const getXDomain = (
       layers
         .flatMap<number>(({ table, xAccessor }) => {
           const accessor = xAccessor && getAccessorByDimension(xAccessor, table.columns);
-          return table.rows.map((row) => row[accessor!].valueOf());
+          return table.rows.map((row) => accessor && row[accessor] && row[accessor].valueOf());
         })
+        .filter((v) => !isUndefined(v))
         .sort()
     );
 

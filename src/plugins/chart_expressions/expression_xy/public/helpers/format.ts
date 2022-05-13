@@ -6,11 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { Datatable } from '@kbn/expressions-plugin';
+import { DatatableColumn } from '@kbn/expressions-plugin';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
 import { getFormatByAccessor, getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 
-export const getFormat = (table: Datatable, accessor: string | ExpressionValueVisDimension) =>
-  getFormatByAccessor(accessor, table.columns, {
-    id: getColumnByAccessor(accessor, table.columns)?.meta.type,
-  });
+export const getFormat = (
+  columns: DatatableColumn[],
+  accessor: string | ExpressionValueVisDimension
+) => {
+  const type = getColumnByAccessor(accessor, columns)?.meta.type;
+  return getFormatByAccessor(
+    accessor,
+    columns,
+    type
+      ? {
+          id: type,
+        }
+      : undefined
+  );
+};

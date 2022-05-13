@@ -51,7 +51,7 @@ export function getColorAssignments(
       }
       const splitAccessor = getAccessorByDimension(layer.splitAccessor, layer.table.columns);
       const column = layer.table.columns?.find(({ id }) => id === splitAccessor);
-      const columnFormatter = column && formatFactory(getFormat(layer.table, layer.splitAccessor));
+      const columnFormatter = column && formatFactory(getFormat(layer.table.columns, layer.splitAccessor));
       const splits =
         !column || !layer.table
           ? []
