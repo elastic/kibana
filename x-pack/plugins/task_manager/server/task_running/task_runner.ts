@@ -283,7 +283,7 @@ export class TaskManagerRunner implements TaskRunner {
         }`
       );
     }
-    this.logger.debug(`Running task ${this}`);
+    this.logger.debug(`Running task ${this}`, { tags: ['task:start', this.id, this.taskType] });
 
     const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
       childOf: this.instance.task.traceparent,
@@ -324,6 +324,8 @@ export class TaskManagerRunner implements TaskRunner {
       );
       if (apmTrans) apmTrans.end('failure');
       return processedResult;
+    } finally {
+      this.logger.debug(`Task ${this} ended`, { tags: ['task:end', this.id, this.taskType] });
     }
   }
 
