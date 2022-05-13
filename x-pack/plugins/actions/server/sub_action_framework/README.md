@@ -9,14 +9,14 @@ The Kibana actions plugin provides a framework to create executable actions that
 - Define a response schema for responses from external services.
 - Create connectors that are supported by the Cases management system.
 
-The framework is built on top of the current actions framework and it is not a replacement of it. All practices described on the plugin's main [README](../../README.md#developing-new-action-types) applies for this framework.
+The framework is built on top of the current actions framework and it is not a replacement of it. All practices described on the plugin's main [README](../../README.md#developing-new-action-types) applies to this framework also.
 
 ## Classes
 
-The framework provides two classes. The `BasicConnector` class and the `CaseConnector` class. When registering your connector you should provide a class that implements the business logic of your connector. The class must extend one of the two classes provided by the framework. The classes provides utility functions to register sub actions and make requests to external services.
+The framework provides two classes. The `SubActionConnector` class and the `CaseConnector` class. When registering your connector you should provide a class that implements the business logic of your connector. The class must extend one of the two classes provided by the framework. The classes provides utility functions to register sub actions and make requests to external services.
 
 
-If you extend the `BasicConnector`, you should implement the following abstract methods:
+If you extend the `SubActionConnector`, you should implement the following abstract methods:
 - `getResponseErrorMessage(error: AxiosError): string;`
 
 
@@ -42,13 +42,13 @@ interface ExternalServiceIncidentResponse {
 The `CaseConnector` class registers automatically the `pushToService` sub action and implements the corresponding method that is needed by Cases.
 
 
-### Diagrams
+### Class Diagrams
 
 ```mermaid
 classDiagram
-      BasicConnector <|-- CaseConnector
+      SubActionConnector <|-- CaseConnector
 
-      class BasicConnector{
+      class SubActionConnector{
         -subActions
         #config
         #secrets
@@ -71,11 +71,11 @@ classDiagram
 
 ```mermaid
 classDiagram
-      BasicConnector <|-- CaseConnector
-      BasicConnector <|-- Tines
+      SubActionConnector <|-- CaseConnector
+      SubActionConnector <|-- Tines
       CaseConnector <|-- ServiceNow
 
-      class BasicConnector{
+      class SubActionConnector{
         -subActions
         #config
         #secrets
@@ -106,21 +106,25 @@ classDiagram
 
 ## Usage
 
-This guide assumes that you have create a class that extends one of the two classes provided by the framework.
+This guide assumes that you created a class that extends one of the two classes provided by the framework.
 
 ### Register a sub action
 
-To register a sub action use the `registerSubAction` method provided by the framework. It expects the name of the sub action, the name of the method of the class that will be called when the sub action is triggered, and a validation schema for the sub action parameters. Example:
+To register a sub action use the `registerSubAction` method provided by the base classes. It expects the name of the sub action, the name of the method of the class that will be called when the sub action is triggered, and a validation schema for the sub action parameters. Example:
 
 ```
 this.registerSubAction({ name: 'fields', method: 'getFields', schema: schema.object({ incidentId: schema.string() }) })
 ```
 
-If you do not want to validate your params pass `null`.
+If your method does not accepts any arguments pass `null` to the schema property. Example:
+
+```
+this.registerSubAction({ name: 'noParams', method: 'noParams', schema: null })
+```
 
 ### Request to an external service
 
-To make a request to an external you should use the `request` method provided by the framework. It accepts all [request configuration of axios ](https://github.com/axios/axios#request-config) plus the expected response schema. Example:
+To make a request to an external you should use the `request` method provided by the base classes. It accepts all attributes of the [request configuration object](https://github.com/axios/axios#request-config) of axios plus the expected response schema. Example:
 
 ```
 const res = await this.request({
@@ -131,22 +135,47 @@ const res = await this.request({
       });
 ```
 
-The request method do the following:
+The message returned by the `getResponseErrorMessage` method will be used by the framework as an argument to the constructor of the `Error` class. Then the framework will thrown the `error`.
+
+The request method does the following:
 
 - Logs the request URL and method for debugging purposes.
 - Asserts the URL.
 - Normalizes the URL.
 - Ensures that the URL is in the allow list.
 - Configures proxies.
-- Removes `null` or `undefined` attributes from the data.
 - Validates the response.
 
-## Example
+### Error messages from external services
+
+Each external service has a different response schema for errors. For that reason, you have to implement the abstract method `getResponseErrorMessage` which returns a string representing the error message of the response. Example:
+
+```
+interface ErrorSchema {
+  errorMessage: string;
+  errorCode: number;
+}
+
+protected getResponseErrorMessage(error: AxiosError<ErrorSchema>) {
+    return `Message: ${error.response?.data.errorMessage}. Code: ${error.response?.data.errorCode}`;
+  }
+```
+
+### Remove null or undefined values from data
+
+There is a possibility that an external service would throw an error for fields with `null` values. For that reason, the base classes provide the `removeNullOrUndefinedFields` utility function to remove or `null` or `undefined` values from an object. Example:
+
+```
+// Returns { foo: 'foo' }
+this.removeNullOrUndefinedFields({ toBeRemoved: null, foo: 'foo' })
+```
+
+## Example: Sub action connector
 
 ```
 import { schema, TypeOf } from '@kbn/config-schema';
 import { AxiosError } from 'axios';
-import { BasicConnector } from './basic';
+import { SubActionConnector } from './basic';
 import { CaseConnector } from './case';
 import { ExternalServiceIncidentResponse, ServiceParams } from './types';
 
@@ -163,7 +192,7 @@ interface ErrorSchema {
   errorCode: number;
 }
 
-export class TestBasicConnector extends BasicConnector<TestConfig, TestSecrets> {
+export class TestBasicConnector extends SubActionConnector<TestConfig, TestSecrets> {
   constructor(params: ServiceParams<TestConfig, TestSecrets>) {
     super(params);
     this.registerSubAction({
@@ -195,7 +224,7 @@ export class TestBasicConnector extends BasicConnector<TestConfig, TestSecrets> 
 ```
 import { schema, TypeOf } from '@kbn/config-schema';
 import { AxiosError } from 'axios';
-import { BasicConnector } from './basic';
+import { SubActionConnector } from './basic';
 import { CaseConnector } from './case';
 import { ExternalServiceIncidentResponse, ServiceParams } from './types';
 
@@ -309,3 +338,19 @@ export class TestCaseConnector extends CaseConnector<TestConfig, TestSecrets> {
     return res;
   }
 ```
+
+### Example: Register sub action connector
+
+The actions framework exports the `registerSubActionConnectorType` to register sub action connectors. Example:
+
+```
+plugins.actions.registerSubActionConnectorType({
+  id: '.test-sub-action-connector',
+  name: 'Test: Sub action connector',
+  minimumLicenseRequired: 'platinum' as const,
+  schema: { config: TestConfigSchema, secrets: TestSecretsSchema },
+  Service: TestSubActionConnector,
+});
+```
+
+You can see a full example in [x-pack/test/alerting_api_integration/common/fixtures/plugins/alerts/server/sub_action_connector.ts](../../../../test/alerting_api_integration/common/fixtures/plugins/alerts/server/sub_action_connector.ts)

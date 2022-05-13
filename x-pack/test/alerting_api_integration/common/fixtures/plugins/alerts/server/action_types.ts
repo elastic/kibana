@@ -7,7 +7,7 @@
 
 import { CoreSetup } from '@kbn/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { ActionType, SubActionConnector } from '@kbn/actions-plugin/server';
+import { ActionType } from '@kbn/actions-plugin/server';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 import {
   getTestSubActionConnector,
