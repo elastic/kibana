@@ -21,7 +21,7 @@ import {
   VisualizeEditorVisInstance,
 } from '../types';
 import { VISUALIZE_APP_NAME } from '../../../common/constants';
-import { getTopNavConfig, updateDataView } from '../utils';
+import { getTopNavConfig } from '../utils';
 import type { NavigateToLensContext } from '../..';
 
 const LOCAL_STORAGE_EDIT_IN_LENS_BADGE = 'EDIT_IN_LENS_BADGE_VISIBLE';
@@ -154,9 +154,7 @@ const TopNav = ({
     hideLensBadge,
     hideTryInLensBadge,
   ]);
-  const [indexPatterns, setIndexPatterns] = useState<DataView[]>(
-    vis.data.indexPattern ? [vis.data.indexPattern] : []
-  );
+  const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
   const showDatePicker = () => {
     // tsvb loads without an indexPattern initially (TODO investigate).
     // hide timefilter only if timeFieldName is explicitly undefined.
@@ -216,7 +214,9 @@ const TopNav = ({
     const asyncSetIndexPattern = async () => {
       let indexes: DataView[] | undefined;
 
-      if (vis.type.getUsedIndexPattern) {
+      if (vis.data.indexPattern) {
+        indexes = [vis.data.indexPattern];
+      } else if (vis.type.getUsedIndexPattern) {
         indexes = await vis.type.getUsedIndexPattern(vis.params);
       }
       if (!indexes || !indexes.length) {
@@ -230,9 +230,7 @@ const TopNav = ({
       }
     };
 
-    if (!vis.data.indexPattern) {
-      asyncSetIndexPattern();
-    }
+    asyncSetIndexPattern();
   }, [vis.params, vis.type, vis.data.indexPattern, services.dataViews]);
 
   useEffect(() => {
@@ -256,15 +254,11 @@ const TopNav = ({
 
   const onChangeDataView = useCallback(
     async (selectedDataViewId: string) => {
-      const selectedDataView = await services.dataViews.get(selectedDataViewId);
-
-      if (selectedDataView) {
-        updateDataView(visInstance, selectedDataView);
-        setIndexPatterns([selectedDataView]);
-        eventEmitter.emit('updateEditor', true);
+      if (selectedDataViewId) {
+        eventEmitter.emit('updateDataView', selectedDataViewId);
       }
     },
-    [eventEmitter, services.dataViews, visInstance]
+    [eventEmitter]
   );
 
   return isChromeVisible ? (
