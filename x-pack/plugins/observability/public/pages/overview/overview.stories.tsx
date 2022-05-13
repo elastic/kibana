@@ -37,8 +37,7 @@ const sampleAPMIndices = { transaction: 'apm-*' } as ApmIndicesConfig;
 const withCore = makeDecorator({
   name: 'withCore',
   parameterName: 'core',
-  // @ts-expect-error update types
-  wrapper: (storyFn, context, { options: { theme, ...options } }) => {
+  wrapper: (storyFn, context) => {
     unregisterAll();
     const KibanaReactContext = createKibanaReactContext({
       application: {

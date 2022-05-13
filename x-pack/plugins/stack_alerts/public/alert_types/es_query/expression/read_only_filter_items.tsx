@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getDisplayValueFromFilter } from '@kbn/data-plugin/public';
@@ -30,7 +31,12 @@ export const ReadOnlyFilterItems = ({ filters, indexPatterns }: ReadOnlyFilterIt
   const filterList = filters.map((filter, index) => {
     const filterValue = getDisplayValueFromFilter(filter, indexPatterns);
     return (
-      <EuiFlexItem grow={false} className="globalFilterBar__flexItem">
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          max-width: 100%;
+        `}
+      >
         <FilterItemComponent
           key={`${filter.meta.key}${filterValue}`}
           id={`${index}`}
