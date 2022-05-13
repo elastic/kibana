@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { appendLayerIds, getDataLayers } from './layers';
+export { appendLayerIds, getDataLayers, getAccessors } from './layers';
 export { isTimeChart } from './visualization';

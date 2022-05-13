@@ -26,11 +26,13 @@ export async function createAgentAction(
   const timestamp = new Date().toISOString();
   const body: FleetServerAgentAction = {
     '@timestamp': timestamp,
-    expiration: new Date(Date.now() + ONE_MONTH_IN_MS).toISOString(),
+    expiration: newAgentAction.expiration ?? new Date(Date.now() + ONE_MONTH_IN_MS).toISOString(),
     agents: newAgentAction.agents,
     action_id: id,
     data: newAgentAction.data,
     type: newAgentAction.type,
+    start_time: newAgentAction.start_time,
+    minimum_execution_duration: newAgentAction.minimum_execution_duration,
   };
 
   await esClient.create({
@@ -49,18 +51,18 @@ export async function createAgentAction(
 
 export async function bulkCreateAgentActions(
   esClient: ElasticsearchClient,
-  newAgentActions: Array<Omit<AgentAction, 'id'>>
+  newAgentActions: NewAgentAction[]
 ): Promise<AgentAction[]> {
   const actions = newAgentActions.map((newAgentAction) => {
-    const id = uuid.v4();
+    const id = newAgentAction.id ?? uuid.v4();
     return {
       id,
       ...newAgentAction,
-    };
+    } as AgentAction;
   });
 
   if (actions.length === 0) {
-    return actions;
+    return [];
   }
 
   await esClient.bulk({
@@ -68,7 +70,9 @@ export async function bulkCreateAgentActions(
     body: actions.flatMap((action) => {
       const body: FleetServerAgentAction = {
         '@timestamp': new Date().toISOString(),
-        expiration: new Date(Date.now() + ONE_MONTH_IN_MS).toISOString(),
+        expiration: action.expiration ?? new Date(Date.now() + ONE_MONTH_IN_MS).toISOString(),
+        start_time: action.start_time,
+        minimum_execution_duration: action.minimum_execution_duration,
         agents: action.agents,
         action_id: action.id,
         data: action.data,

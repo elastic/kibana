@@ -35,7 +35,7 @@ exports[`Storyshots components/datasource/DatasourceComponent datasource with ex
     </span>
   </button>
   <div
-    className="euiSpacer euiSpacer--s"
+    className="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
   />
   <div
     className="euiCallOut euiCallOut--warning"
@@ -91,13 +91,13 @@ exports[`Storyshots components/datasource/DatasourceComponent simple datasource 
     </span>
   </button>
   <div
-    className="euiSpacer euiSpacer--s"
+    className="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
   />
   <div
     className="render_to_dom"
   />
   <hr
-    className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+    className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium css-l0kn38-euiHorizontalRule-full-m"
   />
   <div
     className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"

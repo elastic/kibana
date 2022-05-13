@@ -38,7 +38,6 @@ describe('xyVis', () => {
     const { data, args } = sampleArgs();
     const { layers, ...rest } = args;
     const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
-
     expect(
       xyVisFunction.fn(
         data,
@@ -58,7 +57,6 @@ describe('xyVis', () => {
     const { data, args } = sampleArgs();
     const { layers, ...rest } = args;
     const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
-
     expect(
       xyVisFunction.fn(
         data,
@@ -68,6 +66,48 @@ describe('xyVis', () => {
           minTimeBarInterval: '1h',
           referenceLineLayers: [],
           annotationLayers: [],
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  test('it should throw error if splitRowAccessor is pointing to the absent column', async () => {
+    const { data, args } = sampleArgs();
+    const { layers, ...rest } = args;
+    const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
+    const splitRowAccessor = 'absent-accessor';
+
+    expect(
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          referenceLineLayers: [],
+          annotationLayers: [],
+          splitRowAccessor,
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  test('it should throw error if splitColumnAccessor is pointing to the absent column', async () => {
+    const { data, args } = sampleArgs();
+    const { layers, ...rest } = args;
+    const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
+    const splitColumnAccessor = 'absent-accessor';
+
+    expect(
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          referenceLineLayers: [],
+          annotationLayers: [],
+          splitColumnAccessor,
         },
         createMockExecutionContext()
       )
