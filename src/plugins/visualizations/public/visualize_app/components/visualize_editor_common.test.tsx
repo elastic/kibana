@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import { EventEmitter } from 'events';
 
 import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import { VisualizeEditorCommon } from './visualize_editor_common';
@@ -56,7 +55,6 @@ describe('VisualizeEditorCommon', () => {
   it('should display a conflict callout if saved object conflicts', async () => {
     shallowWithIntl(
       <VisualizeEditorCommon
-        eventEmitter={new EventEmitter()}
         appState={null}
         hasUnsavedChanges={false}
         setHasUnsavedChanges={() => {}}
@@ -93,7 +91,6 @@ describe('VisualizeEditorCommon', () => {
   it('should redirect to new id if saved object aliasMatch', async () => {
     mountWithIntl(
       <VisualizeEditorCommon
-        eventEmitter={new EventEmitter()}
         appState={null}
         hasUnsavedChanges={false}
         setHasUnsavedChanges={() => {}}
@@ -130,7 +127,6 @@ describe('VisualizeEditorCommon', () => {
   it('should display a warning callout for new heatmap implementation with split aggs', async () => {
     const wrapper = shallowWithIntl(
       <VisualizeEditorCommon
-        eventEmitter={new EventEmitter()}
         appState={null}
         hasUnsavedChanges={false}
         setHasUnsavedChanges={() => {}}
@@ -172,7 +168,6 @@ describe('VisualizeEditorCommon', () => {
   it('should not display a warning callout for XY charts with split aggs', async () => {
     const wrapper = shallowWithIntl(
       <VisualizeEditorCommon
-        eventEmitter={new EventEmitter()}
         appState={null}
         hasUnsavedChanges={false}
         setHasUnsavedChanges={() => {}}
@@ -214,7 +209,6 @@ describe('VisualizeEditorCommon', () => {
   it('should display a warning callout for old pie implementation', async () => {
     const wrapper = shallowWithIntl(
       <VisualizeEditorCommon
-        eventEmitter={new EventEmitter()}
         appState={null}
         hasUnsavedChanges={false}
         setHasUnsavedChanges={() => {}}
@@ -256,7 +250,6 @@ describe('VisualizeEditorCommon', () => {
   it('should display a warning callout for old timelion implementation', async () => {
     const wrapper = shallowWithIntl(
       <VisualizeEditorCommon
-        eventEmitter={new EventEmitter()}
         appState={null}
         hasUnsavedChanges={false}
         setHasUnsavedChanges={() => {}}

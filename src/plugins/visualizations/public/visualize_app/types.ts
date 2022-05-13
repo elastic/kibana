@@ -73,6 +73,7 @@ export interface VisualizeAppStateTransitions {
   ) => ({ query, parentFilters }: { query?: Query; parentFilters?: Filter[] }) => VisualizeAppState;
   updateVisState: (state: VisualizeAppState) => (vis: SavedVisState) => VisualizeAppState;
   updateSavedQuery: (state: VisualizeAppState) => (savedQueryId?: string) => VisualizeAppState;
+  updateDataView: (state: VisualizeAppState) => (dataViewId?: string) => VisualizeAppState;
 }
 
 export type VisualizeAppStateContainer = ReduxLikeStateContainer<

@@ -14,6 +14,7 @@ import type {
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
 } from '../../types';
+import { VisualizeAppState } from '../../types';
 
 export const updateDataView = (visInstance: VisualizeEditorVisInstance, dataView: DataView) => {
   visInstance.vis.data.indexPattern = dataView;
@@ -27,22 +28,28 @@ export const useDataViewUpdates = (
   visInstance: VisualizeEditorVisInstance | undefined
 ) => {
   useEffect(() => {
-    if (appState) {
-      const onDataViewUpdate = async (dataViewId: string) => {
-        if (dataViewId && visInstance) {
-          const selectedDataView = await services.dataViews.get(dataViewId);
+    if (appState && visInstance) {
+      const syncDataView = async ({ dataView }: VisualizeAppState, setDirty = true) => {
+        if (
+          dataView &&
+          visInstance.vis.data.indexPattern &&
+          dataView !== visInstance.vis.data.indexPattern?.id
+        ) {
+          const selectedDataView = await services.dataViews.get(dataView);
 
           if (selectedDataView) {
             updateDataView(visInstance, selectedDataView);
-            eventEmitter.emit('updateEditor', true);
+            eventEmitter.emit('updateEditor', setDirty);
           }
         }
       };
 
-      eventEmitter.on('updateDataView', onDataViewUpdate);
+      syncDataView(appState.getState(), false);
+
+      const stateUpdatesSubscription = appState.state$.subscribe(syncDataView);
 
       return () => {
-        eventEmitter.off('updateDataView', onDataViewUpdate);
+        stateUpdatesSubscription.unsubscribe();
       };
     }
   }, [appState, eventEmitter, services.dataViews, visInstance]);

@@ -13,8 +13,7 @@ import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { EventEmitter } from 'events';
-import {
+import type {
   VisualizeServices,
   VisualizeAppState,
   VisualizeAppStateContainer,
@@ -41,7 +40,6 @@ interface VisualizeTopNavProps {
   visualizationIdFromUrl?: string;
   embeddableId?: string;
   onAppLeave: AppMountParameters['onAppLeave'];
-  eventEmitter: EventEmitter;
 }
 
 const TopNav = ({
@@ -59,7 +57,6 @@ const TopNav = ({
   visualizationIdFromUrl,
   embeddableId,
   onAppLeave,
-  eventEmitter,
 }: VisualizeTopNavProps) => {
   const { services } = useKibana<VisualizeServices>();
   const { TopNavMenu } = services.navigation.ui;
@@ -231,7 +228,27 @@ const TopNav = ({
     };
 
     asyncSetIndexPattern();
-  }, [vis.params, vis.type, vis.data.indexPattern, services.dataViews]);
+  }, [services.dataViews, vis.data.indexPattern, vis.params, vis.type]);
+
+  /** Synchronizing dataView with state **/
+  useEffect(() => {
+    const stateContainerSubscription = stateContainer.state$.subscribe(async ({ dataView }) => {
+      if (
+        dataView &&
+        visInstance.vis.data.indexPattern &&
+        dataView !== visInstance.vis.data.indexPattern?.id
+      ) {
+        const dataViewFromState = await services.dataViews.get(dataView);
+
+        if (dataViewFromState) {
+          setIndexPatterns([dataViewFromState]);
+        }
+      }
+    });
+    return () => {
+      stateContainerSubscription.unsubscribe();
+    };
+  }, [services.dataViews, stateContainer.state$, visInstance.vis.data.indexPattern]);
 
   useEffect(() => {
     const autoRefreshFetchSub = services.data.query.timefilter.timefilter
@@ -255,10 +272,10 @@ const TopNav = ({
   const onChangeDataView = useCallback(
     async (selectedDataViewId: string) => {
       if (selectedDataViewId) {
-        eventEmitter.emit('updateDataView', selectedDataViewId);
+        stateContainer.transitions.updateDataView(selectedDataViewId);
       }
     },
-    [eventEmitter]
+    [stateContainer.transitions]
   );
 
   return isChromeVisible ? (
