@@ -67,10 +67,12 @@ export const ReferenceLineAnnotations = ({ layers, ...rest }: ReferenceLineAnnot
         }
 
         if (isReferenceLine(layer)) {
-          return <ReferenceLine layer={layer} {...rest} />;
+          return <ReferenceLine key={`referenceLine-${layer.layerId}`} layer={layer} {...rest} />;
         }
 
-        return <ReferenceLineLayer layer={layer} {...rest} />;
+        return (
+          <ReferenceLineLayer key={`referenceLine-${layer.layerId}`} layer={layer} {...rest} />
+        );
       })}
     </>
   );
