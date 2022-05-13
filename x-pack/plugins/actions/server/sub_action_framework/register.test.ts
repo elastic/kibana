@@ -13,7 +13,7 @@ import {
   TestConfigSchema,
   TestConfig,
   TestSecrets,
-  TestBasicConnector,
+  TestSubActionConnector,
 } from './mocks';
 import { register } from './register';
 
@@ -26,7 +26,7 @@ describe('Registration', () => {
       config: TestConfigSchema,
       secrets: TestSecretsSchema,
     },
-    Service: TestBasicConnector,
+    Service: TestSubActionConnector,
   };
 
   const actionTypeRegistry = actionTypeRegistryMock.create();

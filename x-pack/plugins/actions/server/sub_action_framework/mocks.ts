@@ -25,7 +25,7 @@ interface ErrorSchema {
   errorCode: number;
 }
 
-export class TestBasicConnector extends SubActionConnector<TestConfig, TestSecrets> {
+export class TestSubActionConnector extends SubActionConnector<TestConfig, TestSecrets> {
   constructor(params: ServiceParams<TestConfig, TestSecrets>) {
     super(params);
     this.registerSubAction({

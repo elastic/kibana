@@ -138,7 +138,7 @@ describe('Executor', () => {
     ).rejects.toThrowError('You should register at least one subAction for your connector type');
   });
 
-  it('throws if the the sub action is not registered', async () => {
+  it('throws if the sub action is not registered', async () => {
     const executor = createExecutor(TestExecutor);
 
     await expect(async () =>

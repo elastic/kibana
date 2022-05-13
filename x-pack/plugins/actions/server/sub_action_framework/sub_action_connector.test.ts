@@ -13,7 +13,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { actionsMock } from '../mocks';
-import { TestBasicConnector } from './mocks';
+import { TestSubActionConnector } from './mocks';
 import { getCustomAgents } from '../builtin_action_types/lib/get_custom_agents';
 import { ActionsConfigurationUtilities } from '../actions_config';
 
@@ -36,7 +36,7 @@ describe('SubActionConnector', () => {
   let logger: MockedLogger;
   let services: ReturnType<typeof actionsMock.createServices>;
   let mockedActionsConfig: jest.Mocked<ActionsConfigurationUtilities>;
-  let service: TestBasicConnector;
+  let service: TestSubActionConnector;
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -56,7 +56,7 @@ describe('SubActionConnector', () => {
       timeout: 360000,
     });
 
-    service = new TestBasicConnector({
+    service = new TestSubActionConnector({
       configurationUtilities: mockedActionsConfig,
       logger,
       connector: { id: 'test-id', type: '.test' },

@@ -12,7 +12,7 @@ import {
   TestConfigSchema,
   TestConfig,
   TestSecrets,
-  TestBasicConnector,
+  TestSubActionConnector,
 } from './mocks';
 import { IService } from './types';
 import { buildValidators } from './validators';
@@ -43,7 +43,7 @@ describe('Validators', () => {
   });
 
   it('should create the config and secrets validators correctly', async () => {
-    const validator = createValidator(TestBasicConnector);
+    const validator = createValidator(TestSubActionConnector);
     const { config, secrets } = validator;
 
     expect(config).toEqual(TestConfigSchema);
@@ -51,13 +51,13 @@ describe('Validators', () => {
   });
 
   it('should validate the params correctly', async () => {
-    const validator = createValidator(TestBasicConnector);
+    const validator = createValidator(TestSubActionConnector);
     const { params } = validator;
     expect(params.validate({ subAction: 'test', subActionParams: {} }));
   });
 
   it('should allow any field in subActionParams', async () => {
-    const validator = createValidator(TestBasicConnector);
+    const validator = createValidator(TestSubActionConnector);
     const { params } = validator;
     expect(
       params.validate({
@@ -91,7 +91,7 @@ describe('Validators', () => {
     [['test']],
     [{ test: 'hello' }],
   ])('should throw if the subAction is %p', async (subAction) => {
-    const validator = createValidator(TestBasicConnector);
+    const validator = createValidator(TestSubActionConnector);
     const { params } = validator;
     expect(() => params.validate({ subAction, subActionParams: {} })).toThrow();
   });
