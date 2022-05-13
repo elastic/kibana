@@ -34,7 +34,6 @@ export const searchAfterAndBulkCreate = async ({
   exceptionsList,
   filter,
   inputIndexPattern,
-  dataViewId,
   listClient,
   logger,
   pageSize,
@@ -64,13 +63,12 @@ export const searchAfterAndBulkCreate = async ({
       });
     }
 
-    // logger.debug(`kibana index pattern ${JSON.stringify(kibanaIndexPattern, null, 2)}`);
     let runtimeMappings = {};
     let kibanaIndexPattern: SavedObject<DataViewAttributes> | null = null;
-    if (dataViewId != null) {
+    if (ruleParams.dataViewId != null) {
       kibanaIndexPattern = await services.savedObjectsClient.get<DataViewAttributes>(
         'index-pattern',
-        dataViewId
+        ruleParams.dataViewId
       );
       if (kibanaIndexPattern?.attributes.runtimeFieldMap != null) {
         runtimeMappings = JSON.parse(kibanaIndexPattern.attributes.runtimeFieldMap);
@@ -88,7 +86,7 @@ export const searchAfterAndBulkCreate = async ({
             searchAfterSortIds: sortIds,
             // TODO: use a kibana config key for determining whether to default to dataview or inputIndexPattern
             index:
-              dataViewId != null && kibanaIndexPattern != null // default to data view id if present on rule definition.
+              ruleParams.dataViewId != null && kibanaIndexPattern != null // default to data view id if present on rule definition.
                 ? kibanaIndexPattern.attributes.title.split(',')
                 : inputIndexPattern,
             runtimeMappings,

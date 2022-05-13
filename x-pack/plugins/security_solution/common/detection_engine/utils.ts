@@ -37,6 +37,7 @@ export const hasEqlSequenceQuery = (ruleQuery: string | undefined): boolean => {
   return false;
 };
 
+// these functions should be typeguards and accept an entire rule.
 export const isEqlRule = (ruleType: Type | undefined): boolean => ruleType === 'eql';
 export const isThresholdRule = (ruleType: Type | undefined): boolean => ruleType === 'threshold';
 export const isQueryRule = (ruleType: Type | undefined): boolean =>
