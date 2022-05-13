@@ -29,7 +29,6 @@ export type {
   LegendConfig,
   IconPosition,
   DataLayerArgs,
-  LensMultiTable,
   ValueLabelMode,
   AxisExtentMode,
   DataLayerConfig,
