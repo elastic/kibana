@@ -15,24 +15,33 @@ import { validateParams } from '../filter_bar/filter_editor/lib/filter_editor_ut
 export const getFieldValidityAndErrorMessage = (
   field: IFieldType,
   value?: string | undefined
-): { isInvalid: boolean; errorMessage: string | null } => {
+): { isInvalid: boolean; errorMessage?: string } => {
   const type = field.type;
   switch (type) {
     case KBN_FIELD_TYPES.DATE:
     case KBN_FIELD_TYPES.DATE_RANGE:
-      const isInvalid = !isEmpty(value) && !validateParams(value, field);
-      if (isInvalid) {
-        return {
-          isInvalid: true,
-          errorMessage: i18n.translate(
-            'unifiedSearch.filter.filterBar.invalidDateFormatProvidedErrorMessage',
-            {
-              defaultMessage: 'Invalid date format provided',
-            }
-          ),
-        };
+      if (!isEmpty(value) && !validateParams(value, field)) {
+        return invalidFormatError();
       }
+      break;
     default:
-      return { isInvalid: false, errorMessage: null };
+      break;
   }
+  return noError();
+};
+
+const noError = (): { isInvalid: boolean } => {
+  return { isInvalid: false };
+};
+
+const invalidFormatError = (): { isInvalid: boolean; errorMessage?: string } => {
+  return {
+    isInvalid: true,
+    errorMessage: i18n.translate(
+      'unifiedSearch.filter.filterBar.invalidDateFormatProvidedErrorMessage',
+      {
+        defaultMessage: 'Invalid date format provided',
+      }
+    ),
+  };
 };

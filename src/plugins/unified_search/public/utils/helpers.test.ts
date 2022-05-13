@@ -19,7 +19,6 @@ describe('Check field validity and error message', () => {
 
     expect(output).toEqual({
       isInvalid: false,
-      errorMessage: null,
     });
   });
 
