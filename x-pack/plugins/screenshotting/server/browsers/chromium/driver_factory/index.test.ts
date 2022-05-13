@@ -10,9 +10,8 @@ import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/serv
 import puppeteer from 'puppeteer';
 import * as Rx from 'rxjs';
 import { mergeMap, take } from 'rxjs/operators';
-import { HeadlessChromiumDriverFactory } from '.';
+import { DEFAULT_VIEWPORT, HeadlessChromiumDriverFactory } from '.';
 import { ConfigType } from '../../../config';
-import { DEFAULT_VIEWPORT } from '../../../layouts';
 
 jest.mock('puppeteer');
 
