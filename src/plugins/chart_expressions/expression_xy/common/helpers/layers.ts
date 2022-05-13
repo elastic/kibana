@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Datatable, PointSeriesColumnNames } from '@kbn/expressions-plugin/common';
 import {
   WithLayerId,
   ExtendedDataLayerConfig,
@@ -13,7 +14,6 @@ import {
   DataLayerArgs,
 } from '../types';
 import { LayerTypes } from '../constants';
-import { Datatable, PointSeriesColumnNames } from '@kbn/expressions-plugin/common';
 
 function isWithLayerId<T>(layer: T): layer is T & WithLayerId {
   return (layer as T & WithLayerId).layerId ? true : false;
