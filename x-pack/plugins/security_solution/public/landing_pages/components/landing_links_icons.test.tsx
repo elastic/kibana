@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fireEvent, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import React from 'react';
 import { SecurityPageName } from '../../app/types';
 import { NavLinkItem } from '../../common/links/types';
@@ -25,7 +25,7 @@ jest.mock('../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../common/lib/kibana');
   return {
     ...originalModule,
-    useNavigation: () => ({
+    useNavigateTo: () => ({
       navigateTo: mockNavigateTo,
     }),
   };
@@ -35,10 +35,8 @@ jest.mock('../../common/components/link_to', () => {
   const originalModule = jest.requireActual('../../common/components/link_to');
   return {
     ...originalModule,
-    useFormatUrl: (id: string) => ({
-      formatUrl: jest.fn().mockImplementation((path: string) => `/${id}`),
-      search: '',
-    }),
+    useGetSecuritySolutionUrl: () =>
+      jest.fn(({ deepLinkId }: { deepLinkId: string }) => `/${deepLinkId}`),
   };
 });
 
@@ -65,7 +63,7 @@ describe('LandingLinksIcons', () => {
       </TestProviders>
     );
 
-    fireEvent.click(getByText(title));
+    getByText(title).click();
 
     expect(mockNavigateTo).toHaveBeenCalledWith({ url: '/administration' });
   });
