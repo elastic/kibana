@@ -298,6 +298,7 @@ const TopNav = ({
                 label: vis.data.indexPattern!.title,
               },
               onChangeDataView,
+              showNewMenuTour: false,
             }
           : undefined
       }
