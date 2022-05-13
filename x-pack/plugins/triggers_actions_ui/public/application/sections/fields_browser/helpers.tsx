@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiLoadingSpinner } from '@elastic/eui';
+import { isEmpty } from 'lodash/fp';
+import { EuiBadge, EuiDataGridColumn, EuiLoadingSpinner } from '@elastic/eui';
 import styled from 'styled-components';
 
-import type { BrowserField, BrowserFields } from '../../../../../common/search_strategy';
-import { ColumnHeaderOptions } from '../../../../../common';
+import { BrowserField, BrowserFields } from './types';
 
 export const LoadingSpinner = styled(EuiLoadingSpinner)`
   cursor: pointer;
@@ -101,7 +101,7 @@ export const filterSelectedBrowserFields = ({
   columnHeaders,
 }: {
   browserFields: BrowserFields;
-  columnHeaders: ColumnHeaderOptions[];
+  columnHeaders: EuiDataGridColumn[];
 }): BrowserFields => {
   const selectedFieldIds = new Set(columnHeaders.map(({ id }) => id));
 
@@ -166,3 +166,29 @@ export const CategorySelectableContainer = styled.div`
   width: 300px;
 `;
 CategorySelectableContainer.displayName = 'CategorySelectableContainer';
+
+export const getIconFromType = (type: string | null | undefined) => {
+  switch (type) {
+    case 'string': // fall through
+    case 'keyword':
+      return 'string';
+    case 'number': // fall through
+    case 'long':
+      return 'number';
+    case 'date':
+      return 'clock';
+    case 'ip':
+    case 'geo_point':
+      return 'globe';
+    case 'object':
+      return 'questionInCircle';
+    case 'float':
+      return 'number';
+    default:
+      return 'questionInCircle';
+  }
+};
+
+/** Returns example text, or an empty string if the field does not have an example */
+export const getExampleText = (example: string | number | null | undefined): string =>
+  !isEmpty(example) ? `Example: ${example}` : '';

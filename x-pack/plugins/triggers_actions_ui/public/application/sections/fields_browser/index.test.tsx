@@ -15,13 +15,15 @@ import { FIELD_BROWSER_WIDTH } from './helpers';
 import { StatefulFieldsBrowserComponent } from '.';
 
 describe('StatefulFieldsBrowser', () => {
+  const timelineId = 'test';
+
   it('should render the Fields button, which displays the fields browser on click', () => {
     const result = render(
       <TestProviders>
         <StatefulFieldsBrowserComponent
           browserFields={mockBrowserFields}
           columnHeaders={[]}
-          width={FIELD_BROWSER_WIDTH}
+          timelineId={timelineId}
         />
       </TestProviders>
     );
@@ -33,7 +35,11 @@ describe('StatefulFieldsBrowser', () => {
     it('should NOT render the fields browser until the Fields button is clicked', () => {
       const result = render(
         <TestProviders>
-          <StatefulFieldsBrowserComponent browserFields={mockBrowserFields} columnHeaders={[]} />
+          <StatefulFieldsBrowserComponent
+            browserFields={mockBrowserFields}
+            columnHeaders={[]}
+            timelineId={timelineId}
+          />
         </TestProviders>
       );
 
@@ -43,7 +49,11 @@ describe('StatefulFieldsBrowser', () => {
     it('should render the fields browser when the Fields button is clicked', async () => {
       const result = render(
         <TestProviders>
-          <StatefulFieldsBrowserComponent browserFields={mockBrowserFields} columnHeaders={[]} />
+          <StatefulFieldsBrowserComponent
+            browserFields={mockBrowserFields}
+            columnHeaders={[]}
+            timelineId={timelineId}
+          />
         </TestProviders>
       );
       result.getByTestId('show-field-browser').click();
@@ -57,7 +67,11 @@ describe('StatefulFieldsBrowser', () => {
     it('should add a selected category, which creates the category badge', async () => {
       const result = render(
         <TestProviders>
-          <StatefulFieldsBrowserComponent browserFields={mockBrowserFields} columnHeaders={[]} />
+          <StatefulFieldsBrowserComponent
+            browserFields={mockBrowserFields}
+            columnHeaders={[]}
+            timelineId={timelineId}
+          />
         </TestProviders>
       );
 
@@ -79,7 +93,11 @@ describe('StatefulFieldsBrowser', () => {
     it('should remove a selected category, which deletes the category badge', async () => {
       const result = render(
         <TestProviders>
-          <StatefulFieldsBrowserComponent browserFields={mockBrowserFields} columnHeaders={[]} />
+          <StatefulFieldsBrowserComponent
+            browserFields={mockBrowserFields}
+            columnHeaders={[]}
+            timelineId={timelineId}
+          />
         </TestProviders>
       );
 
@@ -105,7 +123,11 @@ describe('StatefulFieldsBrowser', () => {
     it('should update the available categories according to the search input', async () => {
       const result = render(
         <TestProviders>
-          <StatefulFieldsBrowserComponent browserFields={mockBrowserFields} columnHeaders={[]} />
+          <StatefulFieldsBrowserComponent
+            browserFields={mockBrowserFields}
+            columnHeaders={[]}
+            timelineId={timelineId}
+          />
         </TestProviders>
       );
 
@@ -123,5 +145,40 @@ describe('StatefulFieldsBrowser', () => {
       });
       expect(result.queryByTestId('categories-selector-option-client')).toBeInTheDocument();
     });
+  });
+
+  it('should render the Fields Browser button as a settings gear when the isEventViewer prop is true', () => {
+    const isEventViewer = true;
+
+    const result = render(
+      <TestProviders>
+        <StatefulFieldsBrowserComponent
+          browserFields={mockBrowserFields}
+          columnHeaders={[]}
+          isEventViewer={isEventViewer}
+          timelineId={timelineId}
+        />
+      </TestProviders>
+    );
+
+    expect(result.getByTestId('show-field-browser')).toBeInTheDocument();
+  });
+
+  it('should render the Fields Browser button as a settings gear when the isEventViewer prop is false', () => {
+    const isEventViewer = false;
+
+    const result = render(
+      <TestProviders>
+        <StatefulFieldsBrowserComponent
+          browserFields={mockBrowserFields}
+          columnHeaders={[]}
+          isEventViewer={isEventViewer}
+          timelineId={timelineId}
+          width={FIELD_BROWSER_WIDTH}
+        />
+      </TestProviders>
+    );
+
+    expect(result.getByTestId('show-field-browser')).toBeInTheDocument();
   });
 });

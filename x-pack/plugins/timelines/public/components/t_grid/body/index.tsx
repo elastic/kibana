@@ -57,6 +57,7 @@ import type { TimelineItem, TimelineNonEcsData } from '../../../../common/search
 import { getColumnHeaders } from './column_headers/helpers';
 import {
   addBuildingBlockStyle,
+  getAlertColumnHeader,
   getEventIdToDataMapping,
   hasCellActions,
   mapSortDirectionToDirection,
@@ -79,6 +80,8 @@ import { checkBoxControlColumn } from './control_columns';
 import { ViewSelection } from '../event_rendered_view/selector';
 import { EventRenderedView } from '../event_rendered_view';
 import { REMOVE_COLUMN } from './column_headers/translations';
+import { defaultColumnHeaderType } from './column_headers/default_headers';
+import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
 
 const StatefulAlertStatusBulkActions = lazy(
   () => import('../toolbar/bulk_actions/alert_status_bulk_actions')
@@ -477,6 +480,44 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       ]
     );
 
+    const getColumnHeader = (timelineId: string, fieldName: string): ColumnHeaderOptions => ({
+      columnHeaderType: defaultColumnHeaderType,
+      id: fieldName,
+      initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+      ...getAlertColumnHeader(timelineId, fieldName),
+    });
+
+    const onToggleColumn = useCallback(
+      (fieldId: string) => {
+        if (columnHeaders.some(({ id }) => id === fieldId)) {
+          dispatch(
+            tGridActions.removeColumn({
+              columnId: fieldId,
+              id,
+            })
+          );
+        } else {
+          dispatch(
+            tGridActions.upsertColumn({
+              column: getColumnHeader(id, fieldId),
+              id,
+              index: 1,
+            })
+          );
+        }
+      },
+      [columnHeaders, dispatch, id]
+    );
+
+    const onUpdateColumns = useCallback(
+      (columns: ColumnHeaderOptions[]) => dispatch(tGridActions.updateColumns({ id, columns })),
+      [dispatch, id]
+    );
+
+    const { dataViewId, defaultColumns } = useDeepEqualSelector((state) =>
+      getManageTimeline(state, id)
+    );
+
     const toolbarVisibility: EuiDataGridToolBarVisibilityOptions = useMemo(
       () => ({
         additionalControls: (
@@ -506,9 +547,18 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                 <StatefulFieldsBrowser
                   data-test-subj="field-browser"
                   browserFields={browserFields}
-                  options={fieldBrowserOptions}
-                  timelineId={id}
+                  options={{
+                    ...fieldBrowserOptions,
+                    createFieldButton:
+                      dataViewId != null && dataViewId.length > 0
+                        ? fieldBrowserOptions?.createFieldButton
+                        : undefined,
+                    timelineId: id,
+                  }}
                   columnHeaders={columnHeaders}
+                  onToggleColumn={onToggleColumn}
+                  defaultColumns={defaultColumns}
+                  onUpdateColumns={onUpdateColumns}
                 />
               </>
             )}

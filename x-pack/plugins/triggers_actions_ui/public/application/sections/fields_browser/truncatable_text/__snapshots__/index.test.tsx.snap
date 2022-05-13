@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TruncatableText renders correctly against snapshot 1`] = `
+.c0,
+.c0 * {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+<span
+  className="c0"
+>
+  Hiding in plain sight
+</span>
+`;

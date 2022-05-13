@@ -71,9 +71,9 @@ export type FieldsBrowserComponentProps = Pick<FieldBrowserProps, 'width' | 'opt
    */
   onSearchInputChange: (newSearchInput: string) => void;
 
-  onUpdateColumns?: (columns: ColumnHeaderOptions[]) => void;
+  onUpdateColumns: (columns: ColumnHeaderOptions[]) => void;
 
-  onToggleColumn?: (id: string) => void;
+  onToggleColumn: (id: string) => void;
 
   /**
    * Focus will be restored to this button if the user presses Escape or clicks
@@ -129,7 +129,7 @@ const FieldsBrowserComponent: React.FC<FieldsBrowserComponentProps> = ({
   ];
 
   const onResetColumns = useCallback(() => {
-    if (defaultColumns && onUpdateColumns) {
+    if (defaultColumns) {
       onUpdateColumns(defaultColumns);
     }
     closeAndRestoreFocus();

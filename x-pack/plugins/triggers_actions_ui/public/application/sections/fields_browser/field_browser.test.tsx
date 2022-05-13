@@ -9,6 +9,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import { TestProviders, mockBrowserFields, defaultHeaders } from '../../../../mock';
+
 import { FieldsBrowser, FieldsBrowserComponentProps } from './field_browser';
 
 const onHide = jest.fn();
@@ -28,6 +29,7 @@ const testProps: FieldsBrowserComponentProps = {
   onToggleColumn: jest.fn(),
   onUpdateColumns: jest.fn(),
 };
+
 describe('FieldsBrowser', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -150,16 +152,35 @@ describe('FieldsBrowser', () => {
     expect(onSearchInputChange).toBeCalledWith(inputText);
   });
 
-  test('it renders the CreateFieldButton', () => {
+  test('does not render the CreateFieldButton when it is provided but does not have a dataViewId', () => {
     const MyTestComponent = () => <div>{'test'}</div>;
 
     const wrapper = mount(
-      <FieldsBrowser
-        {...testProps}
-        options={{
-          createFieldButton: MyTestComponent,
-        }}
-      />
+      <TestProviders>
+        <FieldsBrowser
+          {...testProps}
+          options={{
+            createFieldButton: MyTestComponent,
+          }}
+        />
+      </TestProviders>
+    );
+
+    expect(wrapper.find(MyTestComponent).exists()).toBeFalsy();
+  });
+
+  test('it renders the CreateFieldButton when it is provided and have a dataViewId', () => {
+    const MyTestComponent = () => <div>{'test'}</div>;
+
+    const wrapper = mount(
+      <TestProviders>
+        <FieldsBrowser
+          {...testProps}
+          options={{
+            createFieldButton: MyTestComponent,
+          }}
+        />
+      </TestProviders>
     );
 
     expect(wrapper.find(MyTestComponent).exists()).toBeTruthy();

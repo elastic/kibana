@@ -7,29 +7,23 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { TestProviders } from '../../../../mock';
 import { Search } from './search';
+import { render } from '@testing-library/react';
 
 describe('Search', () => {
   test('it renders the field search input with the expected placeholder text when the searchInput prop is empty', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Search isSearching={false} onSearchInputChange={jest.fn()} searchInput="" />
-      </TestProviders>
+    const wrapper = render(
+      <Search isSearching={false} onSearchInputChange={jest.fn()} searchInput="" />
     );
 
-    expect(wrapper.find('[data-test-subj="field-search"]').first().props().placeholder).toEqual(
-      'Field name'
-    );
+    expect(wrapper.getByTestId('field-search')?.getAttribute('placeholder')).toEqual('Field name');
   });
 
   test('it renders the "current" search value in the input when searchInput is not empty', () => {
     const searchInput = 'aFieldName';
 
     const wrapper = mount(
-      <TestProviders>
-        <Search isSearching={false} onSearchInputChange={jest.fn()} searchInput={searchInput} />
-      </TestProviders>
+      <Search isSearching={false} onSearchInputChange={jest.fn()} searchInput={searchInput} />
     );
 
     expect(wrapper.find('input').props().value).toEqual(searchInput);
@@ -37,9 +31,7 @@ describe('Search', () => {
 
   test('it renders the field search input with a spinner when isSearching is true', () => {
     const wrapper = mount(
-      <TestProviders>
-        <Search isSearching={true} onSearchInputChange={jest.fn()} searchInput="" />
-      </TestProviders>
+      <Search isSearching={true} onSearchInputChange={jest.fn()} searchInput="" />
     );
 
     expect(wrapper.find('.euiLoadingSpinner').first().exists()).toBe(true);
@@ -49,9 +41,7 @@ describe('Search', () => {
     const onSearchInputChange = jest.fn();
 
     const wrapper = mount(
-      <TestProviders>
-        <Search isSearching={false} onSearchInputChange={onSearchInputChange} searchInput="" />
-      </TestProviders>
+      <Search isSearching={false} onSearchInputChange={onSearchInputChange} searchInput="" />
     );
 
     wrapper
