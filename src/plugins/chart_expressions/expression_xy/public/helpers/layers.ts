@@ -10,13 +10,13 @@ import { Datatable } from '@kbn/expressions-plugin/common';
 import {
   CommonXYDataLayerConfig,
   CommonXYLayerConfig,
-  CommonXYReferenceLineLayerConfig,
+  ReferenceLineLayerConfig,
 } from '../../common/types';
 import { isDataLayer, isReferenceLayer } from './visualization';
 
 export function getFilteredLayers(layers: CommonXYLayerConfig[]) {
-  return layers.filter<CommonXYReferenceLineLayerConfig | CommonXYDataLayerConfig>(
-    (layer): layer is CommonXYReferenceLineLayerConfig | CommonXYDataLayerConfig => {
+  return layers.filter<ReferenceLineLayerConfig | CommonXYDataLayerConfig>(
+    (layer): layer is ReferenceLineLayerConfig | CommonXYDataLayerConfig => {
       let table: Datatable | undefined;
       let accessors: string[] = [];
       let xAccessor: undefined | string | number;

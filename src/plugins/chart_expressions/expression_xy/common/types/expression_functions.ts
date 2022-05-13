@@ -35,7 +35,7 @@ import {
   DATA_LAYER,
   AXIS_EXTENT_CONFIG,
   EXTENDED_DATA_LAYER,
-  EXTENDED_REFERENCE_LINE_LAYER,
+  REFERENCE_LINE_LAYER,
   ANNOTATION_LAYER,
   EndValues,
   EXTENDED_Y_CONFIG,
@@ -43,6 +43,7 @@ import {
   XY_VIS,
   LAYERED_XY_VIS,
   EXTENDED_ANNOTATION_LAYER,
+  REFERENCE_LINE_Y_CONFIG,
 } from '../constants';
 import { XYRender } from './expression_renderers';
 
@@ -269,11 +270,12 @@ export type ExtendedAnnotationLayerConfigResult = ExtendedAnnotationLayerArgs & 
   layerType: typeof LayerTypes.ANNOTATIONS;
 };
 
-export interface ReferenceLineArgs {
-  yConfig?: ExtendedYConfigResult[];
+export interface ReferenceLineArgs extends Omit<ExtendedYConfig, 'forAccessor'> {
+  name?: string;
+  value: number;
 }
 
-export interface ExtendedReferenceLineLayerArgs {
+export interface ReferenceLineLayerArgs {
   layerId?: string;
   accessors: string[];
   columnToLabel?: string;
@@ -285,21 +287,27 @@ export type XYLayerArgs = DataLayerArgs | ReferenceLineArgs | AnnotationLayerArg
 export type XYLayerConfig = DataLayerConfig | ReferenceLineConfig | AnnotationLayerConfig;
 export type XYExtendedLayerConfig =
   | ExtendedDataLayerConfig
-  | ExtendedReferenceLineLayerConfig
+  | ReferenceLineLayerConfig
   | ExtendedAnnotationLayerConfig;
 
 export type XYExtendedLayerConfigResult =
   | ExtendedDataLayerConfigResult
-  | ExtendedReferenceLineLayerConfigResult
+  | ReferenceLineLayerConfigResult
   | ExtendedAnnotationLayerConfigResult;
 
-export type ReferenceLineConfigResult = ReferenceLineArgs & {
+export interface ReferenceLineYConfig extends ReferenceLineArgs {
+  type: typeof REFERENCE_LINE_Y_CONFIG;
+}
+
+export interface ReferenceLineConfigResult {
   type: typeof REFERENCE_LINE;
   layerType: typeof LayerTypes.REFERENCELINE;
-};
+  lineLength: number;
+  yConfig: [ReferenceLineYConfig];
+}
 
-export type ExtendedReferenceLineLayerConfigResult = ExtendedReferenceLineLayerArgs & {
-  type: typeof EXTENDED_REFERENCE_LINE_LAYER;
+export type ReferenceLineLayerConfigResult = ReferenceLineLayerArgs & {
+  type: typeof REFERENCE_LINE_LAYER;
   layerType: typeof LayerTypes.REFERENCELINE;
   table: Datatable;
 };
@@ -320,7 +328,7 @@ export type ReferenceLineConfig = ReferenceLineConfigResult & WithLayerId;
 export type AnnotationLayerConfig = AnnotationLayerConfigResult & WithLayerId;
 
 export type ExtendedDataLayerConfig = ExtendedDataLayerConfigResult & WithLayerId;
-export type ExtendedReferenceLineLayerConfig = ExtendedReferenceLineLayerConfigResult & WithLayerId;
+export type ReferenceLineLayerConfig = ReferenceLineLayerConfigResult & WithLayerId;
 export type ExtendedAnnotationLayerConfig = ExtendedAnnotationLayerConfigResult & WithLayerId;
 
 export type ExtendedDataLayerConfigResult = Omit<ExtendedDataLayerArgs, 'palette'> & {
@@ -350,12 +358,10 @@ export type CommonXYLayerConfig = XYLayerConfig | XYExtendedLayerConfig;
 export type CommonXYDataLayerConfigResult = DataLayerConfigResult | ExtendedDataLayerConfigResult;
 export type CommonXYReferenceLineLayerConfigResult =
   | ReferenceLineConfigResult
-  | ExtendedReferenceLineLayerConfigResult;
+  | ReferenceLineLayerConfigResult;
 
 export type CommonXYDataLayerConfig = DataLayerConfig | ExtendedDataLayerConfig;
-export type CommonXYReferenceLineLayerConfig =
-  | ReferenceLineConfig
-  | ExtendedReferenceLineLayerConfig;
+export type CommonXYReferenceLineLayerConfig = ReferenceLineConfig | ReferenceLineLayerConfig;
 
 export type CommonXYAnnotationLayerConfig = AnnotationLayerConfig | ExtendedAnnotationLayerConfig;
 
@@ -381,15 +387,15 @@ export type ExtendedDataLayerFn = ExpressionFunctionDefinition<
 
 export type ReferenceLineFn = ExpressionFunctionDefinition<
   typeof REFERENCE_LINE,
-  Datatable,
+  Datatable | null,
   ReferenceLineArgs,
   ReferenceLineConfigResult
 >;
-export type ExtendedReferenceLineLayerFn = ExpressionFunctionDefinition<
-  typeof EXTENDED_REFERENCE_LINE_LAYER,
+export type ReferenceLineLayerFn = ExpressionFunctionDefinition<
+  typeof REFERENCE_LINE_LAYER,
   Datatable,
-  ExtendedReferenceLineLayerArgs,
-  ExtendedReferenceLineLayerConfigResult
+  ReferenceLineLayerArgs,
+  ReferenceLineLayerConfigResult
 >;
 
 export type YConfigFn = ExpressionFunctionDefinition<typeof Y_CONFIG, null, YConfig, YConfigResult>;

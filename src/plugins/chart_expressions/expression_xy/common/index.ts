@@ -58,6 +58,6 @@ export type {
   ReferenceLineLayerConfigResult,
   CommonXYReferenceLineLayerConfig,
   AxisTitlesVisibilityConfigResult,
-  ExtendedReferenceLineLayerConfigResult,
+  ReferenceLineLayerConfigResult,
   CommonXYReferenceLineLayerConfigResult,
 } from './types';

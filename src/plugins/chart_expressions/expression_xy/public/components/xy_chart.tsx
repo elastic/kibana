@@ -38,7 +38,13 @@ import {
   LegendSizeToPixels,
 } from '@kbn/visualizations-plugin/common/constants';
 import type { FilterEvent, BrushEvent, FormatFactory } from '../types';
-import type { CommonXYDataLayerConfig, SeriesType, XYChartProps } from '../../common/types';
+import type {
+  CommonXYDataLayerConfig,
+  ExtendedYConfig,
+  ReferenceLineYConfig,
+  SeriesType,
+  XYChartProps,
+} from '../../common/types';
 import {
   isHorizontalChart,
   getAnnotationsLayers,
@@ -47,6 +53,7 @@ import {
   getFormattedTablesByLayers,
   validateExtent,
   getFormat,
+  isReferenceLineYConfig,
 } from '../helpers';
 import {
   getFilteredLayers,
@@ -265,7 +272,9 @@ export function XYChart({
   const rangeAnnotations = getRangeAnnotations(annotationsLayers);
 
   const visualConfigs = [
-    ...referenceLineLayers.flatMap(({ yConfig }) => yConfig),
+    ...referenceLineLayers.flatMap<ExtendedYConfig | ReferenceLineYConfig | undefined>(
+      ({ yConfig }) => yConfig
+    ),
     ...groupedLineAnnotations,
   ].filter(Boolean);
 
@@ -343,9 +352,10 @@ export function XYChart({
           l.yConfig ? l.yConfig.map((yConfig) => ({ layerId: l.layerId, yConfig })) : []
         )
         .filter(({ yConfig }) => yConfig.axisMode === axis.groupId)
-        .map(
-          ({ layerId, yConfig }) =>
-            `${layerId}-${yConfig.forAccessor}-${yConfig.fill !== 'none' ? 'rect' : 'line'}`
+        .map(({ layerId, yConfig }) =>
+          isReferenceLineYConfig(yConfig)
+            ? `${layerId}-${yConfig.value}-${yConfig.fill !== 'none' ? 'rect' : 'line'}`
+            : `${layerId}-${yConfig.forAccessor}-${yConfig.fill !== 'none' ? 'rect' : 'line'}`
         ),
     };
   };

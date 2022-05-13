@@ -209,4 +209,12 @@ export const strings = {
     i18n.translate('expressionXY.annotationLayer.annotations.help', {
       defaultMessage: 'Annotations',
     }),
+  getReferenceLineNameHelp: () =>
+    i18n.translate('expressionXY.referenceLine.name.help', {
+      defaultMessage: 'Reference line name',
+    }),
+  getReferenceLineValueHelp: () =>
+    i18n.translate('expressionXY.referenceLine.Value.help', {
+      defaultMessage: 'Reference line value',
+    }),
 };

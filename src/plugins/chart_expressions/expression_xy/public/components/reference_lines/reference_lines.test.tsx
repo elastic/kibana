@@ -11,12 +11,12 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { LayerTypes } from '../../common/constants';
+import { LayerTypes } from '../../../common/constants';
 import {
   ReferenceLineLayerArgs,
   ReferenceLineLayerConfig,
   ExtendedYConfig,
-} from '../../common/types';
+} from '../../../common/types';
 import { ReferenceLineAnnotations, ReferenceLineAnnotationsProps } from './reference_lines';
 
 const row: Record<string, number> = {

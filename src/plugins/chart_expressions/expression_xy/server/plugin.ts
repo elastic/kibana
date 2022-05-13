@@ -22,7 +22,7 @@ import {
   referenceLineFunction,
   axisTitlesVisibilityConfigFunction,
   extendedDataLayerFunction,
-  extendedReferenceLineLayerFunction,
+  referenceLineLayerFunction,
   layeredXyVisFunction,
   extendedAnnotationLayerFunction,
 } from '../common/expression_functions';
@@ -43,7 +43,7 @@ export class ExpressionXyPlugin
     expressions.registerFunction(extendedAnnotationLayerFunction);
     expressions.registerFunction(labelsOrientationConfigFunction);
     expressions.registerFunction(referenceLineFunction);
-    expressions.registerFunction(extendedReferenceLineLayerFunction);
+    expressions.registerFunction(referenceLineLayerFunction);
     expressions.registerFunction(axisTitlesVisibilityConfigFunction);
     expressions.registerFunction(xyVisFunction);
     expressions.registerFunction(layeredXyVisFunction);

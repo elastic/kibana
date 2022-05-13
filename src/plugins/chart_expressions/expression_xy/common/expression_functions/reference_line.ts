@@ -6,7 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { LayerTypes, REFERENCE_LINE } from '../constants';
+import { i18n } from '@kbn/i18n';
+import {
+  AvailableReferenceLineIcons,
+  FillStyles,
+  IconPositions,
+  LayerTypes,
+  LineStyles,
+  REFERENCE_LINE,
+  REFERENCE_LINE_Y_CONFIG,
+  YAxisModes,
+} from '../constants';
 import { ReferenceLineFn } from '../types';
 import { strings } from '../i18n';
 
@@ -15,13 +25,77 @@ export const referenceLineFunction: ReferenceLineFn = {
   aliases: [],
   type: REFERENCE_LINE,
   help: strings.getRLHelp(),
-  inputTypes: ['datatable'],
-  args: {},
+  inputTypes: ['datatable', 'null'],
+  args: {
+    name: {
+      types: ['string'],
+      help: strings.getReferenceLineNameHelp(),
+    },
+    value: {
+      types: ['number'],
+      help: strings.getReferenceLineValueHelp(),
+    },
+    axisMode: {
+      types: ['string'],
+      options: [...Object.values(YAxisModes)],
+      help: strings.getAxisModeHelp(),
+      strict: true,
+    },
+    color: {
+      types: ['string'],
+      help: strings.getColorHelp(),
+    },
+    lineStyle: {
+      types: ['string'],
+      options: [...Object.values(LineStyles)],
+      help: i18n.translate('expressionXY.yConfig.lineStyle.help', {
+        defaultMessage: 'The style of the reference line',
+      }),
+      strict: true,
+    },
+    lineWidth: {
+      types: ['number'],
+      help: i18n.translate('expressionXY.yConfig.lineWidth.help', {
+        defaultMessage: 'The width of the reference line',
+      }),
+    },
+    icon: {
+      types: ['string'],
+      help: i18n.translate('expressionXY.yConfig.icon.help', {
+        defaultMessage: 'An optional icon used for reference lines',
+      }),
+      options: [...Object.values(AvailableReferenceLineIcons)],
+      strict: true,
+    },
+    iconPosition: {
+      types: ['string'],
+      options: [...Object.values(IconPositions)],
+      help: i18n.translate('expressionXY.yConfig.iconPosition.help', {
+        defaultMessage: 'The placement of the icon for the reference line',
+      }),
+      strict: true,
+    },
+    textVisibility: {
+      types: ['boolean'],
+      help: i18n.translate('expressionXY.yConfig.textVisibility.help', {
+        defaultMessage: 'Visibility of the label on the reference line',
+      }),
+    },
+    fill: {
+      types: ['string'],
+      options: [...Object.values(FillStyles)],
+      help: i18n.translate('expressionXY.yConfig.fill.help', {
+        defaultMessage: 'Fill',
+      }),
+      strict: true,
+    },
+  },
   fn(table, args) {
     return {
       type: REFERENCE_LINE,
       layerType: LayerTypes.REFERENCELINE,
-      table,
+      lineLength: table?.rows.length ?? 0,
+      yConfig: [{ ...args, type: REFERENCE_LINE_Y_CONFIG }],
     };
   },
 };
