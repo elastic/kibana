@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { WithLayerId, ExtendedDataLayerConfig, XYExtendedLayerConfigResult, DataLayerArgs } from '../types';
+import {
+  WithLayerId,
+  ExtendedDataLayerConfig,
+  XYExtendedLayerConfigResult,
+  DataLayerArgs,
+} from '../types';
 import { LayerTypes } from '../constants';
 import { Datatable, PointSeriesColumnNames } from '@kbn/expressions-plugin/common';
 
@@ -33,6 +38,7 @@ export function getDataLayers(layers: XYExtendedLayerConfigResult[]) {
     (layer): layer is ExtendedDataLayerConfig =>
       layer.layerType === LayerTypes.DATA || !layer.layerType
   );
+}
 
 export function getAccessors(args: DataLayerArgs, table: Datatable) {
   let splitAccessor = args.splitAccessor;
