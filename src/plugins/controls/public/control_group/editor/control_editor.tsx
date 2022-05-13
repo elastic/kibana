@@ -42,6 +42,7 @@ import {
   ControlEmbeddable,
   ControlInput,
   ControlWidth,
+  DataControlInput,
   IEditableControlFactory,
 } from '../../types';
 import { CONTROL_WIDTH_OPTIONS } from './editor_constants';
@@ -91,6 +92,11 @@ export const ControlEditor = ({
   const [currentWidth, setCurrentWidth] = useState(width);
   const [currentGrow, setCurrentGrow] = useState(grow);
   const [controlEditorValid, setControlEditorValid] = useState(false);
+  const [selectedField, setSelectedField] = useState<string | undefined>(
+    embeddable
+      ? (embeddable.getInput() as DataControlInput).fieldName // CLEAN THIS ONCE OTHER PR GETS IN
+      : undefined
+  );
 
   const getControlTypeEditor = (type: string) => {
     const factory = getControlFactory(type);
@@ -102,6 +108,8 @@ export const ControlEditor = ({
         onChange={onTypeEditorChange}
         setValidState={setControlEditorValid}
         initialInput={embeddable?.getInput()}
+        selectedField={selectedField}
+        setSelectedField={setSelectedField}
         setDefaultTitle={(newDefaultTitle) => {
           if (!currentTitle || currentTitle === defaultTitle) {
             setCurrentTitle(newDefaultTitle);
@@ -113,8 +121,8 @@ export const ControlEditor = ({
     ) : null;
   };
 
-  const getTypeButtons = (controlTypes: string[]) => {
-    return controlTypes.map((type) => {
+  const getTypeButtons = () => {
+    return getControlTypes().map((type) => {
       const factory = getControlFactory(type);
       const icon = (factory as EmbeddableFactoryDefinition).getIconType?.();
       const tooltip = (factory as EmbeddableFactoryDefinition).getDescription?.();
@@ -126,6 +134,12 @@ export const ControlEditor = ({
           isSelected={selectedType === type}
           onClick={() => {
             setSelectedType(type);
+            if (!isCreate)
+              setSelectedField(
+                embeddable && type === embeddable.type
+                  ? (embeddable.getInput() as DataControlInput).fieldName
+                  : undefined
+              );
           }}
         >
           <EuiIcon type={!icon || icon === 'empty' ? 'controlsHorizontal' : icon} size="l" />
@@ -156,9 +170,7 @@ export const ControlEditor = ({
       <EuiFlyoutBody data-test-subj="control-editor-flyout">
         <EuiForm>
           <EuiFormRow label={ControlGroupStrings.manageControl.getControlTypeTitle()}>
-            <EuiKeyPadMenu>
-              {isCreate ? getTypeButtons(getControlTypes()) : getTypeButtons([selectedType])}
-            </EuiKeyPadMenu>
+            <EuiKeyPadMenu>{getTypeButtons()}</EuiKeyPadMenu>
           </EuiFormRow>
           {selectedType && (
             <>

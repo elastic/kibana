@@ -7,11 +7,7 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  OPTIONS_LIST_CONTROL,
-  ControlWidth,
-  RANGE_SLIDER_CONTROL,
-} from '@kbn/controls-plugin/common';
+import { OPTIONS_LIST_CONTROL, ControlWidth } from '@kbn/controls-plugin/common';
 import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common/control_group/types';
 import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
@@ -82,7 +78,7 @@ export class DashboardPageControls extends FtrService {
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail('control-editor-flyout');
     });
-    await this.testSubjects.click(`create-${type}-control`);
+    await this.controlEditorSetType(type);
   }
 
   /* -----------------------------------------------------------
@@ -219,6 +215,33 @@ export class DashboardPageControls extends FtrService {
     return controlElement;
   }
 
+  public async createControl({
+    controlType,
+    dataViewTitle,
+    fieldName,
+    grow,
+    title,
+    width,
+  }: {
+    controlType: string;
+    title?: string;
+    fieldName: string;
+    width?: ControlWidth;
+    dataViewTitle?: string;
+    grow?: boolean;
+  }) {
+    this.log.debug(`Creating ${controlType} control ${title ?? fieldName}`);
+    await this.openCreateControlFlyout(controlType);
+
+    if (dataViewTitle) await this.controlsEditorSetDataView(dataViewTitle);
+    if (fieldName) await this.controlsEditorSetfield(fieldName);
+    if (title) await this.controlEditorSetTitle(title);
+    if (width) await this.controlEditorSetWidth(width);
+    if (grow !== undefined) await this.controlEditorSetGrow(grow);
+
+    await this.controlEditorSave();
+  }
+
   public async hoverOverExistingControl(controlId: string) {
     const elementToHover = await this.getControlElementById(controlId);
     await this.retry.try(async () => {
@@ -246,6 +269,14 @@ export class DashboardPageControls extends FtrService {
     await this.hoverOverExistingControl(controlId);
     await this.testSubjects.click(`control-action-${controlId}-delete`);
     await this.common.clickConfirmOnModal();
+  }
+
+  public async verifyControlType(controlId: string, expectedType: string) {
+    const controlButton = await this.find.byXPath(
+      `//div[@id='controlFrame--${controlId}']//button`
+    );
+    const testSubj = await controlButton.getAttribute('data-test-subj');
+    expect(testSubj).to.equal(`${expectedType}-${controlId}`);
   }
 
   // Options list functions
@@ -327,6 +358,7 @@ export class DashboardPageControls extends FtrService {
     this.log.debug(`Setting control width to ${width}`);
     await this.testSubjects.click(`control-editor-width-${width}`);
   }
+
   public async controlEditorSetGrow(grow: boolean) {
     this.log.debug(`Setting control grow to ${grow}`);
     const growSwitch = await this.testSubjects.find('control-editor-grow-switch');
@@ -368,32 +400,12 @@ export class DashboardPageControls extends FtrService {
     await this.testSubjects.click(`field-picker-select-${fieldName}`);
   }
 
-  // Options List editor functions
-  public async createOptionsListControl({
-    dataViewTitle,
-    fieldName,
-    width,
-    title,
-    grow,
-  }: {
-    title?: string;
-    fieldName: string;
-    width?: ControlWidth;
-    dataViewTitle?: string;
-    grow?: boolean;
-  }) {
-    this.log.debug(`Creating options list control ${title ?? fieldName}`);
-    await this.openCreateControlFlyout(OPTIONS_LIST_CONTROL);
-
-    if (dataViewTitle) await this.controlsEditorSetDataView(dataViewTitle);
-    if (fieldName) await this.controlsEditorSetfield(fieldName);
-    if (title) await this.controlEditorSetTitle(title);
-    if (width) await this.controlEditorSetWidth(width);
-    if (grow !== undefined) await this.controlEditorSetGrow(grow);
-
-    await this.controlEditorSave();
+  public async controlEditorSetType(type: string) {
+    this.log.debug(`Setting control type to ${type}`);
+    await this.testSubjects.click(`create-${type}-control`);
   }
 
+  // Options List editor functions
   public async optionsListEditorGetCurrentDataView(openAndCloseFlyout?: boolean) {
     if (openAndCloseFlyout) {
       await this.openCreateControlFlyout(OPTIONS_LIST_CONTROL);
@@ -470,31 +482,5 @@ export class DashboardPageControls extends FtrService {
     await this.rangeSliderOpenPopover(controlId);
     await this.rangeSliderPopoverAssertOpen();
     await this.testSubjects.click('rangeSlider__clearRangeButton');
-  }
-
-  // Range slider editor functions
-  public async createRangeSliderControl({
-    dataViewTitle,
-    fieldName,
-    width,
-    title,
-    grow,
-  }: {
-    title?: string;
-    fieldName: string;
-    width?: ControlWidth;
-    dataViewTitle?: string;
-    grow?: boolean;
-  }) {
-    this.log.debug(`Creating range slider control ${title ?? fieldName}`);
-    await this.openCreateControlFlyout(RANGE_SLIDER_CONTROL);
-
-    if (dataViewTitle) await this.controlsEditorSetDataView(dataViewTitle);
-    if (fieldName) await this.controlsEditorSetfield(fieldName);
-    if (title) await this.controlEditorSetTitle(title);
-    if (width) await this.controlEditorSetWidth(width);
-    if (grow) await this.controlEditorSetGrow(grow);
-
-    await this.controlEditorSave();
   }
 }

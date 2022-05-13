@@ -30,7 +30,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('adjust layout of controls', async () => {
       await dashboard.switchToEditMode();
-      await dashboardControls.createOptionsListControl({
+      await dashboardControls.createControl({
+        controlType: OPTIONS_LIST_CONTROL,
         dataViewTitle: 'animals-*',
         fieldName: 'sound.keyword',
       });
@@ -53,7 +54,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('sets default to width and grow of last created control', async () => {
-        await dashboardControls.createOptionsListControl({
+        await dashboardControls.createControl({
+          controlType: OPTIONS_LIST_CONTROL,
           dataViewTitle: 'animals-*',
           fieldName: 'name.keyword',
           width: 'small',
@@ -92,7 +94,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('when at least one control', async () => {
-        await dashboardControls.createOptionsListControl({
+        await dashboardControls.createControl({
+          controlType: OPTIONS_LIST_CONTROL,
           dataViewTitle: 'animals-*',
           fieldName: 'sound.keyword',
         });
