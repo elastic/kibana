@@ -72,10 +72,10 @@ export function FilterItem(props: FilterItemProps) {
   const { id, filter, indexPatterns, hiddenPanelOptions } = props;
 
   useEffect(() => {
-    // if (openQueryBarMenu) {
-    setRenderedComponent('menu');
-    // }
-  }, []);
+    if (isPopoverOpen) {
+      setRenderedComponent('menu');
+    }
+  }, [isPopoverOpen]);
 
   useEffect(() => {
     const index = props.filter.meta.index;
