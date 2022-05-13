@@ -90,7 +90,7 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
   timelineId,
   fieldBrowserOptions,
 }) => {
-  const { timelines: timelinesUi } = useKibana().services;
+  const { triggersActionsUi } = useKibana().services;
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const dispatch = useDispatch();
@@ -192,8 +192,8 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
     [columnHeaders, dispatch, timelineId]
   );
 
-  const onUpdateColumns = useCallback(
-    (columns: ColumnHeaderOptions[]) => dispatch(timelineActions.updateColumns({ id: timelineId, columns })),
+  const onResetColumns = useCallback(
+    (columnsIds: string[]) => dispatch(timelineActions.updateColumns({ id: timelineId, columns: defaultHeaders })),
     [dispatch, timelineId]
   );
 
@@ -216,13 +216,12 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
 
       <EventsTh role="button">
         <FieldBrowserContainer>
-          {timelinesUi.getFieldBrowser({
+          {triggersActionsUi.getFieldBrowser({
             browserFields,
-            columnHeaders,
+            columnIds: columnHeaders.map((columnHeader: ColumnHeaderOptions) => columnHeader.id),
             options: { ...fieldBrowserOptions, timelineId },
             onToggleColumn,
-            onUpdateColumns,
-            defaultColumns: defaultHeaders,
+            onResetColumns,
           })}
         </FieldBrowserContainer>
       </EventsTh>

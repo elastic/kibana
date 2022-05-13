@@ -37,6 +37,8 @@ import styled, { ThemeContext } from 'styled-components';
 import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { Filter } from '@kbn/es-query';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   TGridCellAction,
   BulkActionsProp,
@@ -66,11 +68,9 @@ import {
 
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import type { OnRowSelected, OnSelectAll } from '../types';
-import type { FieldBrowserOptions } from '../../../../common/types';
 import type { Refetch } from '../../../store/t_grid/inputs';
 import { getPageRowIndex } from '../../../../common/utils/pagination';
 import { StatefulEventContext } from '../../stateful_event_context';
-import { StatefulFieldsBrowser } from '../toolbar/fields_browser';
 import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { RowAction } from './row_action';
@@ -82,6 +82,7 @@ import { EventRenderedView } from '../event_rendered_view';
 import { REMOVE_COLUMN } from './column_headers/translations';
 import { defaultColumnHeaderType } from './column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
+import { TimelinesStartPlugins } from '../../../types';
 
 const StatefulAlertStatusBulkActions = lazy(
   () => import('../toolbar/bulk_actions/alert_status_bulk_actions')
@@ -342,6 +343,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     trailingControlColumns = EMPTY_CONTROL_COLUMNS,
     unit = defaultUnit,
   }) => {
+    const { triggersActionsUi } = useKibana<TimelinesStartPlugins>().services;
+
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
     const dispatch = useDispatch();
@@ -509,13 +512,13 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       [columnHeaders, dispatch, id]
     );
 
-    const onUpdateColumns = useCallback(
-      (columns: ColumnHeaderOptions[]) => dispatch(tGridActions.updateColumns({ id, columns })),
-      [dispatch, id]
-    );
-
     const { dataViewId, defaultColumns } = useDeepEqualSelector((state) =>
       getManageTimeline(state, id)
+    );
+
+    const onResetColumns = useCallback(
+      () => dispatch(tGridActions.updateColumns({ id, columns: defaultColumns })),
+      [dispatch, id]
     );
 
     const toolbarVisibility: EuiDataGridToolBarVisibilityOptions = useMemo(
@@ -544,22 +547,22 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
             ) : (
               <>
                 {additionalControls ?? null}
-                <StatefulFieldsBrowser
-                  data-test-subj="field-browser"
-                  browserFields={browserFields}
-                  options={{
+                {triggersActionsUi.getFieldBrowser({
+                  browserFields,
+                  columnIds: columnHeaders.map(
+                    (columnHeader: ColumnHeaderOptions) => columnHeader.id
+                  ),
+                  options: {
                     ...fieldBrowserOptions,
                     createFieldButton:
                       dataViewId != null && dataViewId.length > 0
                         ? fieldBrowserOptions?.createFieldButton
                         : undefined,
                     timelineId: id,
-                  }}
-                  columnHeaders={columnHeaders}
-                  onToggleColumn={onToggleColumn}
-                  defaultColumns={defaultColumns}
-                  onUpdateColumns={onUpdateColumns}
-                />
+                  },
+                  onToggleColumn,
+                  onResetColumns,
+                })}
               </>
             )}
           </>

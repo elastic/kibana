@@ -69,7 +69,6 @@ export interface FieldBrowserProps {
   width?: number;
 
   // all 3 props will be replaced with onChangeColumn
-  onUpdateColumns: (columnsIds: string[]) => void;
+  onResetColumns: () => void;
   onToggleColumn: (id: string) => void;
-  defaultColumnsIds?: string[];
 }

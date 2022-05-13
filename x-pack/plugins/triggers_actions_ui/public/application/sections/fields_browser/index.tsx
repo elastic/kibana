@@ -35,8 +35,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   options,
   width,
   onToggleColumn,
-  onUpdateColumns,
-  defaultColumnsIds,
+  onResetColumns,
 }) => {
   const customizeColumnsButtonRef = useRef<HTMLButtonElement | null>(null);
   /** all field names shown in the field browser must contain this string (when specified) */
@@ -158,8 +157,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
           selectedCategoryIds={selectedCategoryIds}
           width={width}
           onToggleColumn={onToggleColumn}
-          defaultColumnsIds={defaultColumnsIds}
-          onUpdateColumns={onUpdateColumns}
+          onResetColumns={onResetColumns}
         />
       )}
     </FieldsBrowserButtonContainer>

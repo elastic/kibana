@@ -70,11 +70,9 @@ export type FieldsBrowserComponentProps = Pick<FieldBrowserProps, 'width' | 'opt
    */
   onSearchInputChange: (newSearchInput: string) => void;
 
-  onUpdateColumns?: (columnsIds: string[]) => void;
+  onResetColumns?: () => void;
 
   onToggleColumn?: (id: string) => void;
-
-  defaultColumnsIds?: string[];
 
   /**
    * Focus will be restored to this button if the user presses Escape or clicks
@@ -103,9 +101,8 @@ const FieldsBrowserComponent: React.FC<FieldsBrowserComponentProps> = ({
   searchInput,
   selectedCategoryIds,
   width = FIELD_BROWSER_WIDTH,
-  onUpdateColumns,
+  onResetColumns,
   onToggleColumn,
-  defaultColumnsIds,
 }) => {
   const closeAndRestoreFocus = useCallback(() => {
     onHide();
@@ -128,12 +125,12 @@ const FieldsBrowserComponent: React.FC<FieldsBrowserComponentProps> = ({
     options?.getFieldTableColumns,
   ];
 
-  const onResetColumns = useCallback(() => {
-    if (defaultColumnsIds && onUpdateColumns) {
-      onUpdateColumns(defaultColumnsIds);
+  const resetColumns = useCallback(() => {
+    if (onResetColumns) {
+      onResetColumns();
     }
     closeAndRestoreFocus();
-  }, [onUpdateColumns, closeAndRestoreFocus]);
+  }, [onResetColumns, closeAndRestoreFocus]);
 
   return (
     <EuiModal onClose={closeAndRestoreFocus} style={{ width, maxWidth: width }}>
@@ -191,7 +188,7 @@ const FieldsBrowserComponent: React.FC<FieldsBrowserComponentProps> = ({
             <EuiButtonEmpty
               className={RESET_FIELDS_CLASS_NAME}
               data-test-subj="reset-fields"
-              onClick={onResetColumns}
+              onClick={resetColumns}
             >
               {i18n.RESET_FIELDS}
             </EuiButtonEmpty>

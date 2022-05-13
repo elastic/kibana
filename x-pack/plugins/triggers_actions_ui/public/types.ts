@@ -52,6 +52,8 @@ import type { RuleTagFilterProps } from './application/sections/rules_list/compo
 import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
 import type { RuleTagBadgeProps } from './application/sections/rules_list/components/rule_tag_badge';
 
+import type { FieldBrowserProps, FieldBrowserOptions } from './application/sections/fields_browser/types';
+
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
 type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
@@ -86,6 +88,8 @@ export type {
   RuleTagFilterProps,
   RuleStatusFilterProps,
   RuleTagBadgeProps,
+  FieldBrowserProps, 
+  FieldBrowserOptions,
 };
 export type { ActionType, AsApiContract };
 export {
@@ -435,3 +439,5 @@ export interface AlertsTableConfigurationRegistry {
 }
 
 export type RuleStatus = 'enabled' | 'disabled' | 'snoozed';
+
+
