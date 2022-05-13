@@ -115,9 +115,15 @@ export class Screenshots {
   ): Observable<CaptureResult> {
     const { browserTimezone } = options;
 
-    const openUrlTimeout = durationToNumber(this.config.capture.timeouts.openUrl);
     return this.browserDriverFactory
-      .createPage({ browserTimezone, openUrlTimeout }, this.logger)
+      .createPage(
+        {
+          browserTimezone,
+          openUrlTimeout: durationToNumber(this.config.capture.timeouts.openUrl),
+          defaultViewport: { width: layout.width },
+        },
+        this.logger
+      )
       .pipe(
         this.semaphore.acquire(),
         mergeMap(({ driver, unexpectedExit$, close }) => {

@@ -36,6 +36,7 @@ import { getMetrics, PerformanceMetrics } from './metrics';
 
 interface CreatePageOptions {
   browserTimezone?: string;
+  defaultViewport: { width?: number };
   openUrlTimeout: number;
 }
 
@@ -120,7 +121,7 @@ export class HeadlessChromiumDriverFactory {
       userDataDir: this.userDataDir,
       disableSandbox: this.config.browser.chromium.disableSandbox,
       proxy: this.config.browser.chromium.proxy,
-      windowSize: DEFAULT_VIEWPORT,
+      windowSize: DEFAULT_VIEWPORT, // Approximate the default viewport size
     });
   }
 
@@ -128,7 +129,7 @@ export class HeadlessChromiumDriverFactory {
    * Return an observable to objects which will drive screenshot capture for a page
    */
   createPage(
-    { browserTimezone, openUrlTimeout }: CreatePageOptions,
+    { browserTimezone, openUrlTimeout, defaultViewport }: CreatePageOptions,
     pLogger = this.logger
   ): Rx.Observable<CreatePageResult> {
     return new Rx.Observable((observer) => {
@@ -137,6 +138,18 @@ export class HeadlessChromiumDriverFactory {
 
       const chromiumArgs = this.getChromiumArgs();
       logger.debug(`Chromium launch args set to: ${chromiumArgs}`);
+
+      // We set the viewport width using the client-side layout info to reduce the chances of
+      // browser reflow. Only the window height is expected to be adjusted dramatically
+      // before taking a screenshot, to ensure the elements to capture are contained in the viewport.
+      const viewport = {
+        ...DEFAULT_VIEWPORT,
+        width: defaultViewport.width ?? DEFAULT_VIEWPORT.width,
+      };
+
+      logger.debug(
+        `Launching with viewport: width=${viewport.width} height=${viewport.height} scaleFactor=${viewport.deviceScaleFactor}`
+      );
 
       (async () => {
         let browser: Browser | undefined;
@@ -148,8 +161,10 @@ export class HeadlessChromiumDriverFactory {
             ignoreHTTPSErrors: true,
             handleSIGHUP: false,
             args: chromiumArgs,
-            env: { TZ: browserTimezone },
-            defaultViewport: DEFAULT_VIEWPORT,
+            defaultViewport: viewport,
+            env: {
+              TZ: browserTimezone,
+            },
           });
         } catch (err) {
           observer.error(
