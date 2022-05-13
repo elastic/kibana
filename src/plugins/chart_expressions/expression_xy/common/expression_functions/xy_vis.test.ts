@@ -18,7 +18,7 @@ describe('xyVis', () => {
     const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
     const result = await xyVisFunction.fn(
       data,
-      { ...rest, ...restLayerArgs, referenceLineLayers: [], annotationLayers: [] },
+      { ...rest, ...restLayerArgs, referenceLines: [], annotationLayers: [] },
       createMockExecutionContext()
     );
 
