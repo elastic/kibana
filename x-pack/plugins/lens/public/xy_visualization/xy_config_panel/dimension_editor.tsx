@@ -112,7 +112,11 @@ export function DimensionEditor(
 
   return (
     <>
-      <ColorPicker {...props} disabled={Boolean(localLayer.splitAccessor)} setConfig={setConfig} />
+      <ColorPicker
+        {...props}
+        disabled={Boolean(!localLayer.collapseFn && localLayer.splitAccessor)}
+        setConfig={setConfig}
+      />
 
       <EuiFormRow
         display="columnCompressed"
