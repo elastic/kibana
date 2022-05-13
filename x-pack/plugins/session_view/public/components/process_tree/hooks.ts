@@ -5,6 +5,7 @@
  * 2.0.
  */
 import memoizeOne from 'memoize-one';
+import { sortedUniqBy } from 'lodash';
 import { useState, useEffect, useMemo } from 'react';
 import {
   AlertStatusEventEntityIdMap,
@@ -115,7 +116,7 @@ export class ProcessImpl implements Process {
       });
     }
 
-    return _.sortedUniqBy(children.sort(sortProcesses), (child) => child.id);
+    return sortedUniqBy(children.sort(sortProcesses), (child) => child.id);
   });
 
   isVerbose() {
