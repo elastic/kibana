@@ -37,6 +37,9 @@ import * as i18n from '../column_headers/translations';
 import { timelineActions } from '../../../../store/timeline';
 import { isFullScreen } from '../column_headers';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { defaultColumnHeaderType, defaultHeaders } from '../column_headers/default_headers';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../constants';
+import { getAlertColumnHeader } from '../column_headers/helpers';
 
 const SortingColumnsContainer = styled.div`
   button {
@@ -160,6 +163,40 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
     [columnHeaders]
   );
 
+  const getColumnHeader = (timelineId: string, fieldName: string): ColumnHeaderOptions => ({
+    columnHeaderType: defaultColumnHeaderType,
+    id: fieldName,
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+    ...getAlertColumnHeader(timelineId, fieldName),
+  });
+
+  const onToggleColumn = useCallback(
+    (fieldId: string) => {
+      if (columnHeaders.some(({ id }) => id === fieldId)) {
+        dispatch(
+          timelineActions.removeColumn({
+            columnId: fieldId,
+            id: timelineId,
+          })
+        );
+      } else {
+        dispatch(
+          timelineActions.upsertColumn({
+            column: getColumnHeader(timelineId, fieldId),
+            id: timelineId,
+            index: 1,
+          })
+        );
+      }
+    },
+    [columnHeaders, dispatch, timelineId]
+  );
+
+  const onUpdateColumns = useCallback(
+    (columns: ColumnHeaderOptions[]) => dispatch(timelineActions.updateColumns({ id: timelineId, columns })),
+    [dispatch, timelineId]
+  );
+
   const ColumnSorting = useDataGridColumnSorting(myColumns, sortedColumns, {}, [], displayValues);
 
   return (
@@ -183,8 +220,9 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
             browserFields,
             columnHeaders,
             options: { ...fieldBrowserOptions, timelineId },
-            onToggleColumn: (id: string) => {},
-            onUpdateColumns: (columns: ColumnHeaderOptions[]) => {},
+            onToggleColumn,
+            onUpdateColumns,
+            defaultColumns: defaultHeaders,
           })}
         </FieldBrowserContainer>
       </EventsTh>
