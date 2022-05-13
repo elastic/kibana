@@ -29,6 +29,7 @@ import {
   RULES,
   TRUSTED_APPLICATIONS,
 } from '../app/translations';
+import { NavigationCategories } from '../common/components/navigation/types';
 import { FEATURE, LinkItem } from '../common/links/types';
 
 import { IconBlocklist } from './icons/blocklist';
@@ -156,3 +157,25 @@ export const links: LinkItem = {
     },
   ],
 };
+
+export const navigationCategories: NavigationCategories = [
+  {
+    label: i18n.translate('xpack.securitySolution.appLinks.category.siem', {
+      defaultMessage: 'SIEM',
+    }),
+    linkIds: [SecurityPageName.rules, SecurityPageName.exceptions],
+  },
+  {
+    label: i18n.translate('xpack.securitySolution.appLinks.category.endpoints', {
+      defaultMessage: 'ENDPOINTS',
+    }),
+    linkIds: [
+      SecurityPageName.endpoints,
+      SecurityPageName.policies,
+      SecurityPageName.trustedApps,
+      SecurityPageName.eventFilters,
+      SecurityPageName.blocklist,
+      SecurityPageName.hostIsolationExceptions,
+    ],
+  },
+] as const;

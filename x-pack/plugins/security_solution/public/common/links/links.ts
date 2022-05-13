@@ -8,9 +8,6 @@
 import { AppDeepLink, AppNavLinkStatus, Capabilities } from '@kbn/core/public';
 import { get } from 'lodash';
 import { SecurityPageName } from '../../../common/constants';
-import { useEnableExperimental } from '../hooks/use_experimental_features';
-import { useLicense } from '../hooks/use_license';
-import { useKibana } from '../lib/kibana';
 import { appLinks, getAppLinks } from './app_links';
 import {
   Feature,
@@ -195,12 +192,4 @@ export const getAncestorLinksInfo = (id: SecurityPageName): LinkInfo[] => {
  */
 export const needsUrlState = (id: SecurityPageName): boolean => {
   return !getNormalizedLink(id).skipUrlState;
-};
-
-export const useAppNavLinks = (): NavLinkItem[] => {
-  const license = useLicense();
-  const enableExperimental = useEnableExperimental();
-  const capabilities = useKibana().services.application.capabilities;
-
-  return getNavLinkItems({ enableExperimental, license, capabilities });
 };

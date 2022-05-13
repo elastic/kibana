@@ -10,37 +10,34 @@ import React from 'react';
 import { SecurityPageName } from '../../app/types';
 import { TestProviders } from '../../common/mock';
 import { LandingCategories } from './manage';
+import { NavLinkItem } from '../../common/links/types';
 
 const RULES_ITEM_LABEL = 'elastic rules!';
 const EXCEPTIONS_ITEM_LABEL = 'exceptional!';
-import { NavLinkItem } from '../../common/links/types';
 
-const mockAppLinks: NavLinkItem[] = [
-  {
-    id: SecurityPageName.administration,
-    path: '',
-    title: 'admin',
-    links: [
-      {
-        id: SecurityPageName.rules,
-        title: RULES_ITEM_LABEL,
-        description: '',
-        icon: 'testIcon1',
-        path: '',
-      },
-      {
-        id: SecurityPageName.exceptions,
-        title: EXCEPTIONS_ITEM_LABEL,
-        description: '',
-        icon: 'testIcon2',
-        path: '',
-      },
-    ],
-  },
-];
-
-jest.mock('../../common/links', () => ({
-  useAppNavLinks: jest.fn(() => mockAppLinks),
+const mockAppManageLink: NavLinkItem = {
+  id: SecurityPageName.administration,
+  path: '',
+  title: 'admin',
+  links: [
+    {
+      id: SecurityPageName.rules,
+      title: RULES_ITEM_LABEL,
+      description: '',
+      icon: 'testIcon1',
+      path: '',
+    },
+    {
+      id: SecurityPageName.exceptions,
+      title: EXCEPTIONS_ITEM_LABEL,
+      description: '',
+      icon: 'testIcon2',
+      path: '',
+    },
+  ],
+};
+jest.mock('../../common/components/navigation/nav_links', () => ({
+  useAppRootNavLink: jest.fn(() => mockAppManageLink),
 }));
 
 describe('LandingCategories', () => {
@@ -48,14 +45,14 @@ describe('LandingCategories', () => {
     const { queryByText } = render(
       <TestProviders>
         <LandingCategories
-          groups={[
+          categories={[
             {
               label: 'first tests category',
-              itemIds: [SecurityPageName.rules],
+              linkIds: [SecurityPageName.rules],
             },
             {
               label: 'second tests category',
-              itemIds: [SecurityPageName.exceptions],
+              linkIds: [SecurityPageName.exceptions],
             },
           ]}
         />
@@ -70,10 +67,10 @@ describe('LandingCategories', () => {
     const { queryAllByTestId } = render(
       <TestProviders>
         <LandingCategories
-          groups={[
+          categories={[
             {
               label: '',
-              itemIds: [SecurityPageName.exceptions, SecurityPageName.rules],
+              linkIds: [SecurityPageName.exceptions, SecurityPageName.rules],
             },
           ]}
         />
