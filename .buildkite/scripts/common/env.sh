@@ -41,7 +41,7 @@ export ELASTIC_APM_SERVER_URL=https://kibana-ci-apm.apm.us-central1.gcp.cloud.es
 export ELASTIC_APM_SECRET_TOKEN=7YKhoXsO4MzjhXjx2c
 
 if is_pr; then
-  if [[ "${GITHUB_PR_LABELS:-}" == *"ci:collect-apm"* ]]; then
+  if is_pr_with_label "ci:collect-apm"; then
     export ELASTIC_APM_ACTIVE=true
     export ELASTIC_APM_CONTEXT_PROPAGATION_ONLY=false
   else
@@ -101,3 +101,8 @@ export DISABLE_BOOTSTRAP_VALIDATION=true
 
 # Prevent Browserlist from logging on CI about outdated database versions
 export BROWSERSLIST_IGNORE_OLD_DATA=true
+
+# keys used to associate test group data in ci-stats with Jest execution order
+export TEST_GROUP_TYPE_UNIT="Jest Unit Tests"
+export TEST_GROUP_TYPE_INTEGRATION="Jest Integration Tests"
+export TEST_GROUP_TYPE_FUNCTIONAL="Functional Tests"

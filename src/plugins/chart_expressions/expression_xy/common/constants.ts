@@ -12,7 +12,6 @@ export const Y_CONFIG = 'yConfig';
 export const X_AXIS_CONFIG = 'xAxisConfig';
 export const Y_AXIS_CONFIG = 'yAxisConfig';
 export const EXTENDED_Y_CONFIG = 'extendedYConfig';
-export const MULTITABLE = 'lens_multitable';
 export const DATA_LAYER = 'dataLayer';
 export const EXTENDED_DATA_LAYER = 'extendedDataLayer';
 export const LEGEND_CONFIG = 'legendConfig';

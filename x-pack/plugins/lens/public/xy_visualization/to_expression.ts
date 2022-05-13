@@ -8,10 +8,9 @@
 import { Ast } from '@kbn/interpreter';
 import { ScaleType } from '@elastic/charts';
 import type { PaletteRegistry } from '@kbn/coloring';
-
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import type { YAxisConfig, AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
-import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import { LegendSize } from '@kbn/visualizations-plugin/common/constants';
 import {
   State,
   YConfig,
@@ -258,10 +257,11 @@ export const buildExpression = (
                       : [],
                     position: !state.legend.isInside ? [state.legend.position] : [],
                     isInside: state.legend.isInside ? [state.legend.isInside] : [],
-                    legendSize:
-                      !state.legend.isInside && state.legend.legendSize
-                        ? [state.legend.legendSize]
-                        : [],
+                    legendSize: state.legend.isInside
+                      ? [LegendSize.AUTO]
+                      : state.legend.legendSize
+                      ? [state.legend.legendSize]
+                      : [],
                     horizontalAlignment:
                       state.legend.horizontalAlignment && state.legend.isInside
                         ? [state.legend.horizontalAlignment]
@@ -344,11 +344,6 @@ export const buildExpression = (
   };
 };
 
-const buildTableExpression = (datasourceExpression: Ast): ExpressionAstExpression => ({
-  type: 'expression',
-  chain: [{ type: 'function', function: 'kibana', arguments: {} }, ...datasourceExpression.chain],
-});
-
 const axesToExpression = (
   axes: YAxisConfig[],
   validDataLayers: ValidXYDataLayerConfig[]
@@ -395,7 +390,7 @@ const referenceLineLayerToExpression = (
             : [],
           accessors: layer.accessors,
           columnToLabel: [JSON.stringify(getColumnToLabelMap(layer, datasourceLayer))],
-          ...(datasourceExpression ? { table: [buildTableExpression(datasourceExpression)] } : {}),
+          ...(datasourceExpression ? { table: [datasourceExpression] } : {}),
         },
       },
     ],
@@ -474,7 +469,7 @@ const dataLayerToExpression = (
           seriesType: [seriesType],
           accessors: layer.accessors,
           columnToLabel: [JSON.stringify(columnToLabel)],
-          ...(datasourceExpression ? { table: [buildTableExpression(datasourceExpression)] } : {}),
+          ...(datasourceExpression ? { table: [datasourceExpression] } : {}),
           palette: [
             {
               type: 'expression',

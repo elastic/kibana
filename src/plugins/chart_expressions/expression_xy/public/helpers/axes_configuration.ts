@@ -20,6 +20,7 @@ import {
 } from '../../common';
 import { AxisModes } from '../../common/constants';
 import { isDataLayer } from './visualization';
+import { getFormat } from './format';
 
 export interface Series {
   layer: string;
@@ -70,8 +71,8 @@ export function groupAxesByType(
         (axis) => yConfigByAccessor?.axisId && axis.id && axis.id === yConfigByAccessor?.axisId
       );
       const key = axisConfigById?.id || 'auto';
-      let formatter: SerializedFieldFormat = table.columns?.find((column) => column.id === accessor)
-        ?.meta?.params || { id: 'number' };
+      const col = table.columns?.find((column) => column.id === accessor);
+      let formatter: SerializedFieldFormat = col?.meta ? getFormat(col.meta) : { id: 'number' };
       if (
         isDataLayer(layer) &&
         (layer.isPercentage || axisConfigById?.mode === AxisModes.PERCENTAGE) &&

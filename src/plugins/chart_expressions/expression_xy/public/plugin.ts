@@ -17,7 +17,6 @@ import { ExpressionXyPluginSetup, ExpressionXyPluginStart, SetupDeps } from './t
 import {
   xyVisFunction,
   layeredXyVisFunction,
-  dataLayerFunction,
   extendedDataLayerFunction,
   yConfigFunction,
   xAxisConfigFunction,
@@ -57,7 +56,6 @@ export class ExpressionXyPlugin {
     expressions.registerFunction(yConfigFunction);
     expressions.registerFunction(extendedYConfigFunction);
     expressions.registerFunction(legendConfigFunction);
-    expressions.registerFunction(dataLayerFunction);
     expressions.registerFunction(extendedDataLayerFunction);
     expressions.registerFunction(axisExtentConfigFunction);
     expressions.registerFunction(xAxisConfigFunction);

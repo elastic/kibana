@@ -12,7 +12,6 @@ import { ExpressionXyPluginSetup, ExpressionXyPluginStart } from './types';
 import {
   xyVisFunction,
   legendConfigFunction,
-  dataLayerFunction,
   yConfigFunction,
   xAxisConfigFunction,
   yAxisConfigFunction,
@@ -36,7 +35,6 @@ export class ExpressionXyPlugin
     expressions.registerFunction(xAxisConfigFunction);
     expressions.registerFunction(extendedYConfigFunction);
     expressions.registerFunction(legendConfigFunction);
-    expressions.registerFunction(dataLayerFunction);
     expressions.registerFunction(extendedDataLayerFunction);
     expressions.registerFunction(axisExtentConfigFunction);
     expressions.registerFunction(annotationLayerFunction);

@@ -31,6 +31,7 @@ import { FormatFactory } from '../types';
 import { getSeriesColor } from './state';
 import { ColorAssignments } from './color_assignment';
 import { GroupsConfiguration } from './axes_configuration';
+import { getFormat } from './format';
 
 type SeriesSpec = LineSeriesProps & BarSeriesProps & AreaSeriesProps;
 
@@ -116,7 +117,7 @@ export const getFormattedTable = (
   xScaleType: XScaleType
 ): { table: Datatable; formattedColumns: Record<string, true> } => {
   const columnsFormatters = table.columns.reduce<Record<string, IFieldFormat>>(
-    (formatters, { id, meta }) => ({ ...formatters, [id]: formatFactory(meta.params) }),
+    (formatters, { id, meta }) => ({ ...formatters, [id]: formatFactory(getFormat(meta)) }),
     {}
   );
 

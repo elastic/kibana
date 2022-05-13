@@ -21,8 +21,6 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
 // @ts-ignore
-import { List } from '../../../components/logstash/pipeline_viewer/models/list';
-// @ts-ignore
 import { LogstashTemplate } from './logstash_template';
 // @ts-ignore
 import { DetailStatus } from '../../../components/logstash/detail_status';
