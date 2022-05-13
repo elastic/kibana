@@ -8,6 +8,7 @@
 
 import type { IFieldType } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { isEmpty } from 'lodash';
 import { validateParams } from '../filter_bar/filter_editor/lib/filter_editor_utils';
 
@@ -17,13 +18,13 @@ export const getFieldValidityAndErrorMessage = (
 ): { isInvalid: boolean; errorMessage: string[] } => {
   const type = field.type;
   switch (type) {
-    case 'string':
+    case KBN_FIELD_TYPES.STRING:
       return {
         isInvalid: !validateParams(value, field),
         errorMessage: [''],
       };
-    case 'date':
-    case 'date_range':
+    case KBN_FIELD_TYPES.DATE:
+    case KBN_FIELD_TYPES.DATE_RANGE:
       return {
         isInvalid: !isEmpty(value) && !validateParams(value, field),
         errorMessage: [
@@ -32,15 +33,15 @@ export const getFieldValidityAndErrorMessage = (
           }),
         ],
       };
-    case 'ip':
-    case 'ip_range':
+    case KBN_FIELD_TYPES.IP:
+    case KBN_FIELD_TYPES.IP_RANGE:
       return {
         isInvalid: !isEmpty(value) && !validateParams(value, field),
         errorMessage: [''],
       };
-    case 'number':
-    case 'number_range':
-    case 'boolean':
+    case KBN_FIELD_TYPES.NUMBER:
+    case KBN_FIELD_TYPES.NUMBER_RANGE:
+    case KBN_FIELD_TYPES.BOOLEAN:
     default:
       return { isInvalid: false, errorMessage: [''] };
   }
