@@ -185,7 +185,7 @@ export function XYChart({
     [dataLayers, formatFactory]
   );
 
-  if (filteredLayers.length === 0) {
+  if (dataLayers.length === 0) {
     const icon: IconType = getIconForSeriesType(getDataLayers(layers)?.[0]);
     return <EmptyPlaceholder className="xyChart__empty" icon={icon} />;
   }

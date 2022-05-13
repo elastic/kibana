@@ -4264,6 +4264,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
           "visible": true,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
           "rotation": 0,
           "visible": true,
@@ -4536,6 +4537,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
         "includeDataFromIds": Array [],
         "max": NaN,
         "min": NaN,
+        "padding": undefined,
       }
     }
     gridLine={
@@ -4554,6 +4556,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
           "visible": true,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
           "rotation": -90,
           "visible": false,
@@ -4854,6 +4857,9 @@ exports[`XYChart component split chart should render split chart if both, splitR
           ],
           "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
           "isHistogram": false,
+          "isHorizontal": false,
+          "isPercentage": false,
+          "isStacked": false,
           "layerId": "first",
           "layerType": "data",
           "palette": Object {
@@ -4952,6 +4958,10 @@ exports[`XYChart component split chart should render split chart if both, splitR
     yAxesConfiguration={
       Array [
         Object {
+          "extent": Object {
+            "mode": "full",
+            "type": "axisExtentConfig",
+          },
           "formatter": Object {
             "convert": [MockFunction] {
               "calls": Array [
@@ -4975,17 +4985,25 @@ exports[`XYChart component split chart should render split chart if both, splitR
             },
           },
           "groupId": "left",
+          "labelsOrientation": -90,
           "position": "left",
           "series": Array [
             Object {
               "accessor": "a",
+              "axisId": undefined,
               "layer": "first",
             },
             Object {
               "accessor": "b",
+              "axisId": undefined,
               "layer": "first",
             },
           ],
+          "showGridLines": false,
+          "showLabels": false,
+          "showTitle": true,
+          "title": "",
+          "type": "yAxisConfig",
         },
       ]
     }
@@ -5063,6 +5081,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
           "visible": true,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
           "rotation": 0,
           "visible": true,
@@ -5334,6 +5353,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
         "includeDataFromIds": Array [],
         "max": NaN,
         "min": NaN,
+        "padding": undefined,
       }
     }
     gridLine={
@@ -5352,6 +5372,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
           "visible": true,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
           "rotation": -90,
           "visible": false,
@@ -5652,6 +5673,9 @@ exports[`XYChart component split chart should render split chart if splitColumnA
           ],
           "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
           "isHistogram": false,
+          "isHorizontal": false,
+          "isPercentage": false,
+          "isStacked": false,
           "layerId": "first",
           "layerType": "data",
           "palette": Object {
@@ -5750,6 +5774,10 @@ exports[`XYChart component split chart should render split chart if splitColumnA
     yAxesConfiguration={
       Array [
         Object {
+          "extent": Object {
+            "mode": "full",
+            "type": "axisExtentConfig",
+          },
           "formatter": Object {
             "convert": [MockFunction] {
               "calls": Array [
@@ -5773,17 +5801,25 @@ exports[`XYChart component split chart should render split chart if splitColumnA
             },
           },
           "groupId": "left",
+          "labelsOrientation": -90,
           "position": "left",
           "series": Array [
             Object {
               "accessor": "a",
+              "axisId": undefined,
               "layer": "first",
             },
             Object {
               "accessor": "b",
+              "axisId": undefined,
               "layer": "first",
             },
           ],
+          "showGridLines": false,
+          "showLabels": false,
+          "showTitle": true,
+          "title": "",
+          "type": "yAxisConfig",
         },
       ]
     }
@@ -5861,6 +5897,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
           "visible": true,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
           "rotation": 0,
           "visible": true,
@@ -6132,6 +6169,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
         "includeDataFromIds": Array [],
         "max": NaN,
         "min": NaN,
+        "padding": undefined,
       }
     }
     gridLine={
@@ -6150,6 +6188,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
           "visible": true,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
           "rotation": -90,
           "visible": false,
@@ -6450,6 +6489,9 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
           ],
           "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
           "isHistogram": false,
+          "isHorizontal": false,
+          "isPercentage": false,
+          "isStacked": false,
           "layerId": "first",
           "layerType": "data",
           "palette": Object {
@@ -6548,6 +6590,10 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
     yAxesConfiguration={
       Array [
         Object {
+          "extent": Object {
+            "mode": "full",
+            "type": "axisExtentConfig",
+          },
           "formatter": Object {
             "convert": [MockFunction] {
               "calls": Array [
@@ -6571,17 +6617,25 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
             },
           },
           "groupId": "left",
+          "labelsOrientation": -90,
           "position": "left",
           "series": Array [
             Object {
               "accessor": "a",
+              "axisId": undefined,
               "layer": "first",
             },
             Object {
               "accessor": "b",
+              "axisId": undefined,
               "layer": "first",
             },
           ],
+          "showGridLines": false,
+          "showLabels": false,
+          "showTitle": true,
+          "title": "",
+          "type": "yAxisConfig",
         },
       ]
     }
