@@ -4176,6 +4176,10 @@ exports[`XYChart component split chart should render split chart if both, splitR
       }
     }
   />
+  <XYCurrentTime
+    enabled={false}
+    isDarkMode={false}
+  />
   <Component
     gridLine={
       Object {
@@ -4499,6 +4503,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
   />
   <DataLayers
     chartHasMoreThanOneBarSeries={true}
+    defaultXScaleType="ordinal"
     formatFactory={
       [MockFunction] {
         "calls": Array [
@@ -4975,6 +4980,10 @@ exports[`XYChart component split chart should render split chart if splitColumnA
       }
     }
   />
+  <XYCurrentTime
+    enabled={false}
+    isDarkMode={false}
+  />
   <Component
     gridLine={
       Object {
@@ -5297,6 +5306,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
   />
   <DataLayers
     chartHasMoreThanOneBarSeries={true}
+    defaultXScaleType="ordinal"
     formatFactory={
       [MockFunction] {
         "calls": Array [
@@ -5773,6 +5783,10 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
       }
     }
   />
+  <XYCurrentTime
+    enabled={false}
+    isDarkMode={false}
+  />
   <Component
     gridLine={
       Object {
@@ -6095,6 +6109,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
   />
   <DataLayers
     chartHasMoreThanOneBarSeries={true}
+    defaultXScaleType="ordinal"
     formatFactory={
       [MockFunction] {
         "calls": Array [
