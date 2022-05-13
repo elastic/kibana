@@ -154,12 +154,12 @@ describe('FieldsBrowser', () => {
     const MyTestComponent = () => <div>{'test'}</div>;
 
     const wrapper = mount(
-        <FieldsBrowser
-          {...testProps}
-          options={{
-            createFieldButton: MyTestComponent,
-          }}
-        />
+      <FieldsBrowser
+        {...testProps}
+        options={{
+          createFieldButton: MyTestComponent,
+        }}
+      />
     );
 
     expect(wrapper.find(MyTestComponent).exists()).toBeTruthy();
