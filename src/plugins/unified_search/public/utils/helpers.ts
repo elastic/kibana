@@ -18,11 +18,6 @@ export const getFieldValidityAndErrorMessage = (
 ): { isInvalid: boolean; errorMessage: string[] } => {
   const type = field.type;
   switch (type) {
-    case KBN_FIELD_TYPES.STRING:
-      return {
-        isInvalid: !validateParams(value, field),
-        errorMessage: [''],
-      };
     case KBN_FIELD_TYPES.DATE:
     case KBN_FIELD_TYPES.DATE_RANGE:
       return {
@@ -33,15 +28,6 @@ export const getFieldValidityAndErrorMessage = (
           }),
         ],
       };
-    case KBN_FIELD_TYPES.IP:
-    case KBN_FIELD_TYPES.IP_RANGE:
-      return {
-        isInvalid: !isEmpty(value) && !validateParams(value, field),
-        errorMessage: [''],
-      };
-    case KBN_FIELD_TYPES.NUMBER:
-    case KBN_FIELD_TYPES.NUMBER_RANGE:
-    case KBN_FIELD_TYPES.BOOLEAN:
     default:
       return { isInvalid: false, errorMessage: [''] };
   }

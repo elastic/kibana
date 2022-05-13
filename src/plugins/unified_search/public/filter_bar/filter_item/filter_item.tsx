@@ -392,35 +392,27 @@ export function FilterItem(props: FilterItemProps) {
     );
   }
 
-  const renderComponent = () => {
-    switch (renderedComponent) {
-      case 'menu':
-      default:
-        return <EuiContextMenu initialPanelId={0} panels={getPanels()} />;
-      case 'editFilter':
-        return (
-          <EuiContextMenuPanel
-            items={[
-              <div style={{ width: FILTER_EDITOR_WIDTH, maxWidth: '100%' }}>
-                <FilterEditor
-                  filter={filter}
-                  indexPatterns={indexPatterns}
-                  onSubmit={onSubmit}
-                  onCancel={() => {
-                    setIsPopoverOpen(false);
-                  }}
-                  timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
-                />
-              </div>,
-            ]}
-          />
-        );
-    }
-  };
-
   return (
     <EuiPopover anchorPosition="downLeft" {...popoverProps}>
-      {renderComponent()}
+      {renderedComponent === 'menu' ? (
+        <EuiContextMenu initialPanelId={0} panels={getPanels()} />
+      ) : (
+        <EuiContextMenuPanel
+          items={[
+            <div style={{ width: FILTER_EDITOR_WIDTH }}>
+              <FilterEditor
+                filter={filter}
+                indexPatterns={indexPatterns}
+                onSubmit={onSubmit}
+                onCancel={() => {
+                  setIsPopoverOpen(false);
+                }}
+                timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+              />
+            </div>,
+          ]}
+        />
+      )}
     </EuiPopover>
   );
 }
