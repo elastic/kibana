@@ -7,18 +7,19 @@
 import React from 'react';
 import { SecurityPageName } from '../../app/types';
 import { HeaderPage } from '../../common/components/header_page';
+import { useAppRootNavLink } from '../../common/components/navigation/nav_links';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { LandingLinksImages } from '../components/landing_links_images';
 import { THREAT_HUNTING_PAGE_TITLE } from './translations';
-import { useAppNavLink } from '../../common/links';
 
 export const ThreatHuntingLandingPage = () => {
-  const threatHuntinglinks = useAppNavLink(SecurityPageName.threatHuntingLanding);
+  const threatHuntinglinks = useAppRootNavLink(SecurityPageName.threatHuntingLanding)?.links ?? [];
+
   return (
     <SecuritySolutionPageWrapper>
       <HeaderPage title={THREAT_HUNTING_PAGE_TITLE} />
-      <LandingLinksImages items={threatHuntinglinks?.links ?? []} />
+      <LandingLinksImages items={threatHuntinglinks} />
       <SpyRoute pageName={SecurityPageName.threatHuntingLanding} />
     </SecuritySolutionPageWrapper>
   );
