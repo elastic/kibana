@@ -36,10 +36,10 @@ export const useDataViewUpdates = (
           dataView !== visInstance.vis.data.indexPattern?.id
         ) {
           const selectedDataView = await services.dataViews.get(dataView);
-
           if (selectedDataView) {
             updateDataView(visInstance, selectedDataView);
-            eventEmitter.emit('updateEditor', setDirty);
+            visInstance.embeddableHandler.reload();
+            eventEmitter.emit('updateEditor');
           }
         }
       };

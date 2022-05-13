@@ -143,7 +143,7 @@ function DefaultEditorSideBarComponent({
 
   // subscribe on external vis changes using browser history, for example press back button
   useEffect(() => {
-    const resetHandler = (setIsDirty?: boolean) => dispatch(discardChanges(vis, setIsDirty));
+    const resetHandler = () => dispatch(discardChanges(vis));
     eventEmitter.on('updateEditor', resetHandler);
 
     return () => {
