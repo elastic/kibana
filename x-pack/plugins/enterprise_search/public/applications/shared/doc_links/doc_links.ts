@@ -30,6 +30,7 @@ class DocLinks {
   public appSearchSynonyms: string;
   public appSearchWebCrawler: string;
   public appSearchWebCrawlerEventLogs: string;
+  public appSearchWebCrawlerReference: string;
   public clientsGoIndex: string;
   public clientsGuide: string;
   public clientsJavaBasicAuthentication: string;
@@ -58,6 +59,7 @@ class DocLinks {
   public enterpriseSearchUsersAccess: string;
   public kibanaSecurity: string;
   public licenseManagement: string;
+  public pluginsIngestAttachment: string;
   public queryDsl: string;
   public workplaceSearchApiKeys: string;
   public workplaceSearchBox: string;
@@ -110,6 +112,7 @@ class DocLinks {
     this.appSearchSynonyms = '';
     this.appSearchWebCrawler = '';
     this.appSearchWebCrawlerEventLogs = '';
+    this.appSearchWebCrawlerReference = '';
     this.clientsGoIndex = '';
     this.clientsGuide = '';
     this.clientsJavaBasicAuthentication = '';
@@ -138,6 +141,7 @@ class DocLinks {
     this.enterpriseSearchUsersAccess = '';
     this.kibanaSecurity = '';
     this.licenseManagement = '';
+    this.pluginsIngestAttachment = '';
     this.queryDsl = '';
     this.workplaceSearchApiKeys = '';
     this.workplaceSearchBox = '';
@@ -192,6 +196,7 @@ class DocLinks {
     this.appSearchSynonyms = docLinks.links.appSearch.synonyms;
     this.appSearchWebCrawler = docLinks.links.appSearch.webCrawler;
     this.appSearchWebCrawlerEventLogs = docLinks.links.appSearch.webCrawlerEventLogs;
+    this.appSearchWebCrawlerReference = docLinks.links.appSearch.webCrawlerReference;
     this.clientsGoIndex = docLinks.links.clients.goIndex;
     this.clientsGuide = docLinks.links.clients.guide;
     this.clientsJavaBasicAuthentication = docLinks.links.clients.javaBasicAuthentication;
@@ -220,6 +225,7 @@ class DocLinks {
     this.enterpriseSearchUsersAccess = docLinks.links.enterpriseSearch.usersAccess;
     this.kibanaSecurity = docLinks.links.kibana.xpackSecurity;
     this.licenseManagement = docLinks.links.enterpriseSearch.licenseManagement;
+    this.pluginsIngestAttachment = docLinks.links.plugins.ingestAttachment;
     this.queryDsl = docLinks.links.query.queryDsl;
     this.workplaceSearchApiKeys = docLinks.links.workplaceSearch.apiKeys;
     this.workplaceSearchBox = docLinks.links.workplaceSearch.box;
