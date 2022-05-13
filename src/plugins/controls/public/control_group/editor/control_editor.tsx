@@ -205,6 +205,7 @@ export const ControlEditor = ({
                       setCurrentGrow(!currentGrow);
                       updateGrow(!currentGrow);
                     }}
+                    data-test-subj="control-editor-grow-switch"
                   />
                 </EuiFormRow>
               ) : null}
