@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { Component } from 'react';
 import { EuiFieldNumber, EuiFieldText, EuiSelect } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import { isEmpty } from 'lodash';
+import React, { Component } from 'react';
 import { IFieldType } from '@kbn/data-views-plugin/common';
+import { validateParams } from './lib/filter_editor_utils';
 
 interface Props {
   value?: string | number;
@@ -45,7 +47,7 @@ class ValueInputTypeUI extends Component<Props> {
             placeholder={this.props.placeholder}
             value={value}
             onChange={this.onChange}
-            isInvalid={this.props.isInvalid}
+            isInvalid={!validateParams(value, this.props.field)}
             controlOnly={this.props.controlOnly}
             className={this.props.className}
           />
@@ -87,7 +89,7 @@ class ValueInputTypeUI extends Component<Props> {
             placeholder={this.props.placeholder}
             value={value}
             onChange={this.onChange}
-            isInvalid={this.props.isInvalid}
+            isInvalid={!isEmpty(value) && !validateParams(value, this.props.field)}
             controlOnly={this.props.controlOnly}
             className={this.props.className}
           />
