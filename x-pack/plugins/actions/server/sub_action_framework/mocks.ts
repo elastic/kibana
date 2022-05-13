@@ -33,6 +33,12 @@ export class TestSubActionConnector extends SubActionConnector<TestConfig, TestS
       method: 'testUrl',
       schema: schema.object({ url: schema.string() }),
     });
+
+    this.registerSubAction({
+      name: 'testData',
+      method: 'testData',
+      schema: null,
+    });
   }
 
   protected getResponseErrorMessage(error: AxiosError<ErrorSchema>) {
@@ -43,6 +49,17 @@ export class TestSubActionConnector extends SubActionConnector<TestConfig, TestS
     const res = await this.request({
       url,
       data,
+      headers: { 'X-Test-Header': 'test' },
+      responseSchema: schema.object({ status: schema.string() }),
+    });
+
+    return res;
+  }
+
+  public async testData({ data }: { data: Record<string, unknown> }) {
+    const res = await this.request({
+      url: 'https://example.com',
+      data: this.removeNullOrUndefinedFields(data),
       headers: { 'X-Test-Header': 'test' },
       responseSchema: schema.object({ status: schema.string() }),
     });

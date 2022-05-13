@@ -138,6 +138,25 @@ describe('SubActionConnector', () => {
       const { data } = axiosInstanceMock.mock.calls[0][1];
       expect(data).toEqual({ foo: 'foo' });
     });
+
+    it('removeNullOrUndefinedFields: removes null values and undefined values correctly', async () => {
+      await service.testData({ data: { foo: 'foo', bar: null, baz: undefined } });
+
+      expect(axiosInstanceMock).toHaveBeenCalledTimes(1);
+      const { data } = axiosInstanceMock.mock.calls[0][1];
+      expect(data).toEqual({ foo: 'foo' });
+    });
+
+    it.each([[null], [undefined], [[]], [() => {}], [new Date()]])(
+      'removeNullOrUndefinedFields: returns data if it is not an object',
+      async (dataToTest) => {
+        // @ts-expect-error
+        await service.testData({ data: dataToTest });
+
+        const { data } = axiosInstanceMock.mock.calls[0][1];
+        expect(data).toEqual({});
+      }
+    );
   });
 
   describe('Fetching', () => {
