@@ -131,15 +131,12 @@ describe('SubActionConnector', () => {
       expect(data).toEqual({});
     });
 
-    it('removes null and/or undefined attributes from data', async () => {
-      await service.testUrl({
-        url: 'https://example.com',
-        data: { foo: null, bar: undefined, test: 'valid' },
-      });
+    it('pass data to axios correctly if not null', async () => {
+      await service.testUrl({ url: 'https://example.com', data: { foo: 'foo' } });
 
       expect(axiosInstanceMock).toHaveBeenCalledTimes(1);
       const { data } = axiosInstanceMock.mock.calls[0][1];
-      expect(data).toEqual({ test: 'valid' });
+      expect(data).toEqual({ foo: 'foo' });
     });
   });
 

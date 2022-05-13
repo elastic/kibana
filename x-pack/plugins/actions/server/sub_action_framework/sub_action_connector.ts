@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isPlainObject } from 'lodash';
+import { isPlainObject, isEmpty } from 'lodash';
 import { Type } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, Method, AxiosError } from 'axios';
@@ -48,9 +48,11 @@ export abstract class SubActionConnector<Config, Secrets> {
   }
 
   private normalizeData(data: unknown | undefined | null) {
-    if (data == null) {
+    if (isEmpty(data)) {
       return {};
     }
+
+    return data;
   }
 
   private assertURL(url: string) {
