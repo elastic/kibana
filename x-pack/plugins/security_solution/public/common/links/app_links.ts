@@ -4,46 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
-import { SecurityPageName, THREAT_HUNTING_PATH } from '../../../common/constants';
-import { THREAT_HUNTING } from '../../app/translations';
-import { FEATURE, LinkItem, UserPermissions } from './types';
-import { links as hostsLinks } from '../../hosts/links';
+import { AppLinkItems } from './types';
 import { links as detectionLinks } from '../../detections/links';
-import { links as networkLinks } from '../../network/links';
-import { links as usersLinks } from '../../users/links';
 import { links as timelinesLinks } from '../../timelines/links';
 import { getCasesLinkItems } from '../../cases/links';
 import { links as managementLinks } from '../../management/links';
-import { gettingStartedLinks, dashboardsLandingLinks } from '../../overview/links';
+import { dashboardsLandingLinks, threatHuntingLandingLinks } from '../../landing_pages/links';
+import { gettingStartedLinks } from '../../overview/links';
 
-export const appLinks: Readonly<LinkItem[]> = Object.freeze([
-  gettingStartedLinks,
+export const appLinks: AppLinkItems = Object.freeze([
   dashboardsLandingLinks,
   detectionLinks,
-  {
-    id: SecurityPageName.threatHuntingLanding,
-    title: THREAT_HUNTING,
-    path: THREAT_HUNTING_PATH,
-    globalNavEnabled: false,
-    features: [FEATURE.general],
-    globalSearchKeywords: [
-      i18n.translate('xpack.securitySolution.appLinks.threatHunting', {
-        defaultMessage: 'Threat hunting',
-      }),
-    ],
-    links: [hostsLinks, networkLinks, usersLinks],
-  },
   timelinesLinks,
   getCasesLinkItems(),
+  threatHuntingLandingLinks,
+  gettingStartedLinks,
   managementLinks,
 ]);
-
-export const getAppLinks = async ({
-  enableExperimental,
-  license,
-  capabilities,
-}: UserPermissions) => {
-  // OLM team, implement async behavior here
-  return appLinks;
-};

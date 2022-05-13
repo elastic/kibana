@@ -10,7 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { getCasesDeepLinks } from '@kbn/cases-plugin/public';
-import { AppDeepLink, AppNavLinkStatus, Capabilities } from '@kbn/core/public';
+import { AppDeepLink, AppNavLinkStatus, AppUpdater, Capabilities } from '@kbn/core/public';
+import { Subject } from 'rxjs';
 import { SecurityPageName } from '../types';
 import {
   OVERVIEW,
@@ -60,6 +61,8 @@ import {
   DASHBOARDS_PATH,
 } from '../../../common/constants';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
+import { getAllAppLinks, appLinksUpdater$ } from '../../common/links';
+import { LinkItem } from '../../common/links/types';
 
 const FEATURE = {
   general: `${SERVER_APP_ID}.show`,
@@ -541,3 +544,37 @@ export function isPremiumLicense(licenseType?: LicenseType): boolean {
     licenseType === 'trial'
   );
 }
+
+/**
+ * New deep links code starts here.
+ * All the code above will be removed once the appLinks migration is over.
+ * The code below manages the new implementation using the unified appLinks.
+ */
+
+// Returns all deep links without filtering, for the initial application register
+export const getAllDeepLinks = (): AppDeepLink[] => formatDeepLinks(getAllAppLinks());
+
+const formatDeepLinks = (appLinks: readonly LinkItem[]): AppDeepLink[] =>
+  appLinks.map((appLink) => ({
+    id: appLink.id,
+    path: appLink.path,
+    title: appLink.title,
+    navLinkStatus: appLink.globalNavEnabled ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
+    ...(appLink.globalSearchKeywords != null ? { keywords: appLink.globalSearchKeywords } : {}),
+    ...(appLink.globalNavOrder != null ? { order: appLink.globalNavOrder } : {}),
+    ...(appLink.globalSearchEnabled != null ? { searchable: appLink.globalSearchEnabled } : {}),
+    ...(appLink.links && appLink.links?.length
+      ? {
+          deepLinks: formatDeepLinks(appLink.links),
+        }
+      : {}),
+  }));
+
+export const registerDeepLinksUpdater = (appUpdater$: Subject<AppUpdater>) => {
+  appLinksUpdater$.subscribe((appLinks) => {
+    appUpdater$.next(() => ({
+      navLinkStatus: AppNavLinkStatus.hidden, // needed to prevent main security link to switch to visible after update
+      deepLinks: formatDeepLinks(appLinks),
+    }));
+  });
+};

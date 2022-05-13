@@ -5,24 +5,17 @@
  * 2.0.
  */
 
-import { Capabilities } from '@kbn/core/types';
-import { LicenseType } from '@kbn/licensing-plugin/common/types';
-import { LicenseService } from '../../../common/license';
+import { Capabilities, PublicUiSettingsParams, UserProvidedValues } from '@kbn/core/types';
+import { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
-import { CASES_FEATURE_ID, SecurityPageName, SERVER_APP_ID } from '../../../common/constants';
+import { SecurityPageName } from '../../../common/constants';
 
-export const FEATURE = {
-  general: `${SERVER_APP_ID}.show`,
-  casesRead: `${CASES_FEATURE_ID}.read_cases`,
-  casesCrud: `${CASES_FEATURE_ID}.crud_cases`,
-};
-
-export type Feature = Readonly<typeof FEATURE[keyof typeof FEATURE]>;
-
-export interface UserPermissions {
-  enableExperimental: ExperimentalFeatures;
-  license?: LicenseService;
-  capabilities?: Capabilities;
+type UiSettings = Readonly<Record<string, PublicUiSettingsParams & UserProvidedValues>>;
+export interface LinksPermissions {
+  experimentalFeatures: Readonly<ExperimentalFeatures>;
+  capabilities: Capabilities;
+  uiSettings: UiSettings;
+  license?: ILicense;
 }
 
 export interface LinkItem {
@@ -32,7 +25,7 @@ export interface LinkItem {
    * Displays deep link when feature flag is enabled.
    */
   experimentalKey?: keyof ExperimentalFeatures;
-  features?: Feature[];
+  capabilities?: string[];
   /**
    * Hides deep link when feature flag is enabled.
    */
@@ -50,7 +43,10 @@ export interface LinkItem {
   path: string;
   skipUrlState?: boolean; // defaults to false
   title: string;
+  uiSettingsEnabled?: (uiSettings: UiSettings) => boolean;
 }
+
+export type AppLinkItems = Readonly<LinkItem[]>;
 
 export interface NavLinkItem {
   description?: string;

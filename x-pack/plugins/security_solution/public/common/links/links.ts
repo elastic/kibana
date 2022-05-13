@@ -5,130 +5,100 @@
  * 2.0.
  */
 
-import { AppDeepLink, AppNavLinkStatus, Capabilities } from '@kbn/core/public';
+import { Capabilities } from '@kbn/core/public';
 import { get } from 'lodash';
+import { BehaviorSubject } from 'rxjs';
 import { SecurityPageName } from '../../../common/constants';
-import { appLinks, getAppLinks } from './app_links';
+import { appLinks } from './app_links';
 import {
-  Feature,
+  AppLinkItems,
   LinkInfo,
   LinkItem,
-  NavLinkItem,
   NormalizedLink,
   NormalizedLinks,
-  UserPermissions,
+  LinksPermissions,
 } from './types';
 
-const createDeepLink = (link: LinkItem, linkProps?: UserPermissions): AppDeepLink => ({
-  id: link.id,
-  path: link.path,
-  title: link.title,
-  ...(link.links && link.links.length
-    ? {
-        deepLinks: reduceLinks<AppDeepLink>({
-          links: link.links,
-          linkProps,
-          formatFunction: createDeepLink,
-        }),
-      }
-    : {}),
-  ...(link.icon != null ? { euiIconType: link.icon } : {}),
-  ...(link.image != null ? { icon: link.image } : {}),
-  ...(link.globalSearchKeywords != null ? { keywords: link.globalSearchKeywords } : {}),
-  ...(link.globalNavEnabled != null
-    ? { navLinkStatus: link.globalNavEnabled ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden }
-    : {}),
-  ...(link.globalNavOrder != null ? { order: link.globalNavOrder } : {}),
-  ...(link.globalSearchEnabled != null ? { searchable: link.globalSearchEnabled } : {}),
-});
+export const appLinksUpdater$ = new BehaviorSubject<AppLinkItems>(appLinks);
 
-const createNavLinkItem = (link: LinkItem, linkProps?: UserPermissions): NavLinkItem => ({
-  id: link.id,
-  path: link.path,
-  title: link.title,
-  ...(link.description != null ? { description: link.description } : {}),
-  ...(link.icon != null ? { icon: link.icon } : {}),
-  ...(link.image != null ? { image: link.image } : {}),
-  ...(link.links && link.links.length
-    ? {
-        links: reduceLinks<NavLinkItem>({
-          links: link.links,
-          linkProps,
-          formatFunction: createNavLinkItem,
-        }),
-      }
-    : {}),
-  ...(link.skipUrlState != null ? { skipUrlState: link.skipUrlState } : {}),
-});
+export const getAllAppLinks = () => appLinks;
 
-const hasFeaturesCapability = (
-  features: Feature[] | undefined,
-  capabilities: Capabilities
-): boolean => {
-  if (!features) {
-    return true;
+export const updateAppLinks = (appLinksToUpdate: LinkItem[]) => {
+  appLinksUpdater$.next(Object.freeze(appLinksToUpdate));
+};
+
+export const updateFilteredAppLinks = (linksPermissions: LinksPermissions) => {
+  updateAppLinks(getFilteredAppLinks(appLinks, linksPermissions));
+};
+
+const getFilteredAppLinks = (
+  appLinkToFilter: AppLinkItems,
+  linksPermissions: LinksPermissions
+): LinkItem[] =>
+  appLinkToFilter.reduce<LinkItem[]>((acc, { links, ...appLink }) => {
+    if (!isLinkAllowed(appLink, linksPermissions)) {
+      return acc;
+    }
+    if (links) {
+      const childrenLinks = getFilteredAppLinks(links, linksPermissions);
+      if (childrenLinks.length > 0) {
+        acc.push({ ...appLink, links: childrenLinks });
+      }
+    } else {
+      acc.push(appLink);
+    }
+    return acc;
+  }, []);
+
+// const createNavLinkItem = (link: LinkItem, linkProps?: UserPermissions): NavLinkItem => ({
+//   id: link.id,
+//   path: link.path,
+//   title: link.title,
+//   ...(link.description != null ? { description: link.description } : {}),
+//   ...(link.icon != null ? { icon: link.icon } : {}),
+//   ...(link.image != null ? { image: link.image } : {}),
+//   ...(link.links && link.links.length
+//     ? {
+//         links: reduceLinks<NavLinkItem>({
+//           links: link.links,
+//           linkProps,
+//           formatFunction: createNavLinkItem,
+//         }),
+//       }
+//     : {}),
+//   ...(link.skipUrlState != null ? { skipUrlState: link.skipUrlState } : {}),
+// });
+
+// It checks if the user has at least one of the link capabilities needed
+const hasCapabilities = (linkCapabilities: string[], userCapabilities: Capabilities): boolean =>
+  linkCapabilities.some((linkCapability) => get(userCapabilities, linkCapability, false));
+
+const isLinkAllowed = (
+  link: LinkItem,
+  { license, experimentalFeatures, capabilities, uiSettings }: LinksPermissions
+) => {
+  const linkLicenseType = link.licenseType ?? 'basic';
+  if (license) {
+    if (!license.hasAtLeast(linkLicenseType)) {
+      return false;
+    }
+  } else if (linkLicenseType !== 'basic') {
+    return false;
   }
-  return features.some((featureKey) => get(capabilities, featureKey, false));
+  if (link.hideWhenExperimentalKey && experimentalFeatures[link.hideWhenExperimentalKey]) {
+    return false;
+  }
+  if (link.experimentalKey && !experimentalFeatures[link.experimentalKey]) {
+    return false;
+  }
+  if (link.capabilities && !hasCapabilities(link.capabilities, capabilities)) {
+    return false;
+  }
+  if (link.uiSettingsEnabled && !link.uiSettingsEnabled(uiSettings)) {
+    return false;
+  }
+  return true;
 };
-
-const isLinkAllowed = (link: LinkItem, linkProps?: UserPermissions) =>
-  !(
-    linkProps != null &&
-    // exclude link when license is basic and link is premium
-    ((linkProps.license && !linkProps.license.isAtLeast(link.licenseType ?? 'basic')) ||
-      // exclude link when enableExperimental[hideWhenExperimentalKey] is enabled and link has hideWhenExperimentalKey
-      (link.hideWhenExperimentalKey != null &&
-        linkProps.enableExperimental[link.hideWhenExperimentalKey]) ||
-      // exclude link when enableExperimental[experimentalKey] is disabled and link has experimentalKey
-      (link.experimentalKey != null && !linkProps.enableExperimental[link.experimentalKey]) ||
-      // exclude link when link is not part of enabled feature capabilities
-      (linkProps.capabilities != null &&
-        !hasFeaturesCapability(link.features, linkProps.capabilities)))
-  );
-
-export function reduceLinks<T>({
-  links,
-  linkProps,
-  formatFunction,
-}: {
-  links: Readonly<LinkItem[]>;
-  linkProps?: UserPermissions;
-  formatFunction: (link: LinkItem, linkProps?: UserPermissions) => T;
-}): T[] {
-  return links.reduce(
-    (deepLinks: T[], link: LinkItem) =>
-      isLinkAllowed(link, linkProps) ? [...deepLinks, formatFunction(link, linkProps)] : deepLinks,
-    []
-  );
-}
-
-export const getInitialDeepLinks = (): AppDeepLink[] => {
-  return appLinks.map((link) => createDeepLink(link));
-};
-
-export const getDeepLinks = async ({
-  enableExperimental,
-  license,
-  capabilities,
-}: UserPermissions): Promise<AppDeepLink[]> => {
-  const links = await getAppLinks({ enableExperimental, license, capabilities });
-  return reduceLinks<AppDeepLink>({
-    links,
-    linkProps: { enableExperimental, license, capabilities },
-    formatFunction: createDeepLink,
-  });
-};
-
-export const getNavLinkItems = ({
-  enableExperimental,
-  license,
-  capabilities,
-}: UserPermissions): NavLinkItem[] =>
-  reduceLinks<NavLinkItem>({
-    links: appLinks,
-    linkProps: { enableExperimental, license, capabilities },
-    formatFunction: createNavLinkItem,
-  });
 
 /**
  * Recursive function to create the `NormalizedLinks` structure from a `LinkItem` array parameter

@@ -16,6 +16,7 @@ import {
   POLICIES_PATH,
   RULES_PATH,
   SecurityPageName,
+  SERVER_APP_ID,
   TRUSTED_APPS_PATH,
 } from '../../common/constants';
 import {
@@ -29,7 +30,7 @@ import {
   RULES,
   TRUSTED_APPLICATIONS,
 } from '../app/translations';
-import { FEATURE, LinkItem } from '../common/links/types';
+import { LinkItem } from '../common/links/types';
 
 export const links: LinkItem = {
   id: SecurityPageName.administration,
@@ -37,7 +38,7 @@ export const links: LinkItem = {
   path: MANAGEMENT_PATH,
   skipUrlState: true,
   globalNavEnabled: false,
-  features: [FEATURE.general],
+  capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.manage', {
       defaultMessage: 'Manage',
