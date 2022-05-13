@@ -15,20 +15,24 @@ import { validateParams } from '../filter_bar/filter_editor/lib/filter_editor_ut
 export const getFieldValidityAndErrorMessage = (
   field: IFieldType,
   value?: string | undefined
-): { isInvalid: boolean; errorMessage: string[] } => {
+): { isInvalid: boolean; errorMessage: string | null } => {
   const type = field.type;
   switch (type) {
     case KBN_FIELD_TYPES.DATE:
     case KBN_FIELD_TYPES.DATE_RANGE:
-      return {
-        isInvalid: !isEmpty(value) && !validateParams(value, field),
-        errorMessage: [
-          i18n.translate('unifiedSearch.filter.filterBar.invalidDateFormatProvidedErrorMessage', {
-            defaultMessage: 'Invalid date format provided',
-          }),
-        ],
-      };
+      const isInvalid = !isEmpty(value) && !validateParams(value, field);
+      if (isInvalid) {
+        return {
+          isInvalid: true,
+          errorMessage: i18n.translate(
+            'unifiedSearch.filter.filterBar.invalidDateFormatProvidedErrorMessage',
+            {
+              defaultMessage: 'Invalid date format provided',
+            }
+          ),
+        };
+      }
     default:
-      return { isInvalid: false, errorMessage: [''] };
+      return { isInvalid: false, errorMessage: null };
   }
 };
