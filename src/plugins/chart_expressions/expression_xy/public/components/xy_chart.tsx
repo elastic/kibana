@@ -258,6 +258,7 @@ export function XYChart({
   };
 
   const referenceLineLayers = getReferenceLayers(layers);
+
   const annotationsLayers = getAnnotationsLayers(layers);
   const firstTable = dataLayers[0]?.table;
 

@@ -44,8 +44,9 @@ export const isReferenceLineOrLayer = (
 ): layer is CommonXYReferenceLineLayerConfig => layer.layerType === LayerTypes.REFERENCELINE;
 
 export const getReferenceLayers = (layers: CommonXYLayerConfig[]) =>
-  (layers || []).filter((layer): layer is CommonXYReferenceLineLayerConfig =>
-    isReferenceLayer(layer)
+  (layers || []).filter(
+    (layer): layer is CommonXYReferenceLineLayerConfig =>
+      isReferenceLayer(layer) || isReferenceLine(layer)
   );
 
 const isAnnotationLayerCommon = (

@@ -34,11 +34,13 @@ export const referenceLineFunction: ReferenceLineFn = {
     value: {
       types: ['number'],
       help: strings.getReferenceLineValueHelp(),
+      required: true,
     },
     axisMode: {
       types: ['string'],
       options: [...Object.values(YAxisModes)],
       help: strings.getAxisModeHelp(),
+      default: YAxisModes.AUTO,
       strict: true,
     },
     color: {
@@ -51,6 +53,7 @@ export const referenceLineFunction: ReferenceLineFn = {
       help: i18n.translate('expressionXY.yConfig.lineStyle.help', {
         defaultMessage: 'The style of the reference line',
       }),
+      default: LineStyles.SOLID,
       strict: true,
     },
     lineWidth: {
@@ -58,6 +61,7 @@ export const referenceLineFunction: ReferenceLineFn = {
       help: i18n.translate('expressionXY.yConfig.lineWidth.help', {
         defaultMessage: 'The width of the reference line',
       }),
+      default: 1,
     },
     icon: {
       types: ['string'],
@@ -73,6 +77,7 @@ export const referenceLineFunction: ReferenceLineFn = {
       help: i18n.translate('expressionXY.yConfig.iconPosition.help', {
         defaultMessage: 'The placement of the icon for the reference line',
       }),
+      default: IconPositions.AUTO,
       strict: true,
     },
     textVisibility: {
@@ -87,15 +92,23 @@ export const referenceLineFunction: ReferenceLineFn = {
       help: i18n.translate('expressionXY.yConfig.fill.help', {
         defaultMessage: 'Fill',
       }),
+      default: FillStyles.NONE,
       strict: true,
     },
   },
   fn(table, args) {
+    const textVisibility =
+      args.name !== undefined && args.textVisibility === undefined
+        ? true
+        : args.name === undefined
+        ? false
+        : args.textVisibility;
+
     return {
       type: REFERENCE_LINE,
       layerType: LayerTypes.REFERENCELINE,
       lineLength: table?.rows.length ?? 0,
-      yConfig: [{ ...args, type: REFERENCE_LINE_Y_CONFIG }],
+      yConfig: [{ ...args, textVisibility, type: REFERENCE_LINE_Y_CONFIG }],
     };
   },
 };

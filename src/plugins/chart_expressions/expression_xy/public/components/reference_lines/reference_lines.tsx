@@ -14,6 +14,7 @@ import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { CommonXYReferenceLineLayerConfig } from '../../../common/types';
 import { isReferenceLine, mapVerticalToHorizontalPlacement } from '../../helpers';
 import { ReferenceLineLayer } from './reference_line_layer';
+import { ReferenceLine } from './reference_line';
 
 export const computeChartMargins = (
   referenceLinePaddings: Partial<Record<Position, number>>,
@@ -66,7 +67,7 @@ export const ReferenceLineAnnotations = ({ layers, ...rest }: ReferenceLineAnnot
         }
 
         if (isReferenceLine(layer)) {
-          return <></>;
+          return <ReferenceLine layer={layer} {...rest} />;
         }
 
         return <ReferenceLineLayer layer={layer} {...rest} />;
