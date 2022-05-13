@@ -49,7 +49,7 @@ export const CrawlerOverview: React.FC = () => {
         description: (
           <FormattedMessage
             id="xpack.enterpriseSearch.appSearch.crawler.pdfExtractionMessage"
-            defaultMessage="Interested in extracting additional content types? Install the {ingestPluginDocumentationLink} and {depoymentSettingsDocumentationLink}."
+            defaultMessage="Interested in extracting additional content types? Install the {ingestPluginDocumentationLink} and {deploymentSettingsDocumentationLink}."
             values={{
               ingestPluginDocumentationLink: (
                 <EuiLink href={docLinks.pluginsIngestAttachment} target="_blank" external>
@@ -59,14 +59,14 @@ export const CrawlerOverview: React.FC = () => {
                   )}
                 </EuiLink>
               ),
-              depoymentSettingsDocumentationLink: (
+              deploymentSettingsDocumentationLink: (
                 <EuiLink
                   href={`${docLinks.appSearchWebCrawlerReference}#web-crawler-reference-binary-content-extraction`}
                   target="_blank"
                   external
                 >
                   {i18n.translate(
-                    'xpack.enterpriseSearch.appSearch.crawler.depoymentSettingsDocumentationLink',
+                    'xpack.enterpriseSearch.appSearch.crawler.deploymentSettingsDocumentationLink',
                     { defaultMessage: 'review your deployment settings' }
                   )}
                 </EuiLink>
