@@ -29,12 +29,12 @@ export function createLensVisToADJobAction(getStartServices: MlCoreSetup['getSta
       }
 
       try {
-        const [{ convertLensToADJob }, [coreStart]] = await Promise.all([
+        const [{ convertLensToADJob }, [, { share }]] = await Promise.all([
           import('../application/jobs/new_job/job_from_lens'),
           getStartServices(),
         ]);
 
-        convertLensToADJob(embeddable, coreStart);
+        await convertLensToADJob(embeddable, share);
       } catch (e) {
         return Promise.reject();
       }

@@ -5,32 +5,25 @@
  * 2.0.
  */
 
-import rison from 'rison-node';
-import type { CoreStart } from '@kbn/core/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { Embeddable } from '@kbn/lens-plugin/public';
 import { getJobsItemsFromEmbeddable } from './utils';
-import { PLUGIN_ID } from '../../../../../common/constants/app';
-import { ML_PAGES } from '../../../../../common/constants/locator';
+import { ML_PAGES, ML_APP_LOCATOR } from '../../../../../common/constants/locator';
 
-export function convertLensToADJob(embeddable: Embeddable, coreStart: CoreStart) {
+export async function convertLensToADJob(embeddable: Embeddable, share: SharePluginStart) {
   const { query, filters, to, from, vis } = getJobsItemsFromEmbeddable(embeddable);
-  const visRison = rison.encode<any>(vis);
-  const queryRison = rison.encode(query);
-  const filtersRison = rison.encode(filters);
+  const locator = share.url.locators.get(ML_APP_LOCATOR);
 
-  const params = [
-    ['vis', visRison],
-    ['from', from],
-    ['to', to],
-    ['query', queryRison],
-    ['filters', filtersRison],
-  ]
-    .map(([a, b]) => `${a}=${b}`)
-    .join('&');
-
-  const path = `${ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_FROM_LENS}?${params}`;
-  const url = coreStart.application.getUrlForApp(PLUGIN_ID, {
-    path,
+  const url = await locator?.getUrl({
+    page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_FROM_LENS,
+    pageState: {
+      vis: vis as any,
+      from,
+      to,
+      query,
+      filters,
+    },
   });
+
   window.open(url, '_blank');
 }
