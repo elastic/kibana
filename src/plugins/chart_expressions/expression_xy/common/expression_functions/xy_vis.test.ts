@@ -46,7 +46,7 @@ describe('xyVis', () => {
         {
           ...rest,
           ...restLayerArgs,
-          referenceLineLayers: [],
+          referenceLines: [],
           annotationLayers: [],
           splitRowAccessor,
         },
@@ -67,7 +67,7 @@ describe('xyVis', () => {
         {
           ...rest,
           ...restLayerArgs,
-          referenceLineLayers: [],
+          referenceLines: [],
           annotationLayers: [],
           splitColumnAccessor,
         },
