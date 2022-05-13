@@ -33,7 +33,7 @@ export const useDataViewUpdates = (
         if (
           dataView &&
           visInstance.vis.data.indexPattern &&
-          dataView !== visInstance.vis.data.indexPattern?.id
+          dataView !== visInstance.vis.data.indexPattern.id
         ) {
           const selectedDataView = await services.dataViews.get(dataView);
           if (selectedDataView) {

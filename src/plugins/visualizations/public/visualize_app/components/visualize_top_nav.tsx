@@ -236,7 +236,7 @@ const TopNav = ({
       if (
         dataView &&
         visInstance.vis.data.indexPattern &&
-        dataView !== visInstance.vis.data.indexPattern?.id
+        dataView !== visInstance.vis.data.indexPattern.id
       ) {
         const dataViewFromState = await services.dataViews.get(dataView);
 
