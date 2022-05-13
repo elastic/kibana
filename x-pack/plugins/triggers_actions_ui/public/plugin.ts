@@ -34,6 +34,7 @@ import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
 import { getRuleTagFilterLazy } from './common/get_rule_tag_filter';
 import { getRuleStatusFilterLazy } from './common/get_rule_status_filter';
 import { getRuleTagBadgeLazy } from './common/get_rule_tag_badge';
+import { getFieldsBrowserLazy } from './common/get_fields_browser';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
 import {
   ExperimentalFeatures,
@@ -57,6 +58,7 @@ import type {
 import { TriggersActionsUiConfigType } from '../common/types';
 import { registerAlertsTableConfiguration } from './application/sections/alerts_table/alerts_page/register_alerts_table_configuration';
 import { PLUGIN_ID } from './common/constants';
+import { FieldBrowserProps } from './application/sections/fields_browser/types';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -85,6 +87,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getRuleTagFilter: (props: RuleTagFilterProps) => ReactElement<RuleTagFilterProps>;
   getRuleStatusFilter: (props: RuleStatusFilterProps) => ReactElement<RuleStatusFilterProps>;
   getRuleTagBadge: (props: RuleTagBadgeProps) => ReactElement<RuleTagBadgeProps>;
+  getFieldBrowser: (props: FieldBrowserProps) => ReactElement<FieldBrowserProps>;
 }
 
 interface PluginsSetup {
@@ -266,6 +269,9 @@ export class Plugin
       },
       getRuleTagBadge: (props: RuleTagBadgeProps) => {
         return getRuleTagBadgeLazy(props);
+      },
+      getFieldBrowser: (props: FieldBrowserProps) => {
+        return getFieldsBrowserLazy(props);
       },
     };
   }

@@ -7,11 +7,11 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { EuiInMemoryTable, Pagination, Direction, EuiDataGridColumn } from '@elastic/eui';
+import { EuiInMemoryTable, Pagination, Direction } from '@elastic/eui';
 import { getFieldColumns, getFieldItems, isActionsColumn } from './field_items';
 import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from './helpers';
 import { FieldTableHeader } from './field_table_header';
-import { BrowserFields, GetFieldTableColumns } from './types';
+import type { BrowserFields, GetFieldTableColumns } from './types';
 
 const DEFAULT_SORTING: { field: string; direction: Direction } = {
   field: '',
@@ -19,7 +19,7 @@ const DEFAULT_SORTING: { field: string; direction: Direction } = {
 } as const;
 
 export interface FieldTableProps {
-  columnHeaders: EuiDataGridColumn[];
+  columnIds: string[];
   /**
    * A map of categoryId -> metadata about the fields in that category,
    * filtered such that the name of every field in the category includes
@@ -29,7 +29,7 @@ export interface FieldTableProps {
   /** when true, show only the the selected field */
   filterSelectedEnabled: boolean;
   onFilterSelectedChange: (enabled: boolean) => void;
-  onToggleColumn: (id: string) => void;
+  onToggleColumn?: (id: string) => void; // will be replaced with onChangeColumn
   /**
    * Optional function to customize field table columns
    */
@@ -61,7 +61,7 @@ const Count = styled.span`
 Count.displayName = 'Count';
 
 const FieldTableComponent: React.FC<FieldTableProps> = ({
-  columnHeaders,
+  columnIds,
   filteredBrowserFields,
   filterSelectedEnabled,
   getFieldTableColumns,
@@ -82,9 +82,9 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
       getFieldItems({
         browserFields: filteredBrowserFields,
         selectedCategoryIds,
-        columnHeaders,
+        columnIds,
       }),
-    [columnHeaders, filteredBrowserFields, selectedCategoryIds]
+    [columnIds, filteredBrowserFields, selectedCategoryIds]
   );
 
   /**

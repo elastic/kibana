@@ -10,13 +10,13 @@ import { EuiHighlight, EuiText } from '@elastic/eui';
 
 /** Renders a field name in it's non-dragging state */
 export const FieldName = React.memo<{
-  fieldId: string;
+  fieldName: string;
   highlight?: string;
-}>(({ fieldId, highlight = '' }) => {
+}>(({ fieldName, highlight = '' }) => {
   return (
     <EuiText size="xs">
-      <EuiHighlight data-test-subj={`field-${fieldId}-name`} search={highlight}>
-        {fieldId}
+      <EuiHighlight data-test-subj={`field-${fieldName}-name`} search={highlight}>
+        {fieldName}
       </EuiHighlight>
     </EuiText>
   );

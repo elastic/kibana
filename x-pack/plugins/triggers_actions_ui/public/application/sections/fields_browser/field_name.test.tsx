@@ -7,27 +7,12 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { mockBrowserFields, TestProviders } from '../../../../mock';
-import { getColumnsWithTimestamp } from '../../../utils/helpers';
 
 import { FieldName } from './field_name';
-
-const categoryId = 'base';
 const timestampFieldId = '@timestamp';
 
 const defaultProps = {
-  categoryId,
-  categoryColumns: getColumnsWithTimestamp({
-    browserFields: mockBrowserFields,
-    category: categoryId,
-  }),
-  closePopOverTrigger: false,
-  fieldId: timestampFieldId,
-  handleClosePopOverTrigger: jest.fn(),
-  hoverActionsOwnFocus: false,
-  onCloseRequested: jest.fn(),
-  onUpdateColumns: jest.fn(),
-  setClosePopOverTrigger: jest.fn(),
+  fieldName: timestampFieldId,
 };
 
 describe('FieldName', () => {
@@ -36,11 +21,7 @@ describe('FieldName', () => {
   });
 
   test('it renders the field name', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <FieldName {...defaultProps} />
-      </TestProviders>
-    );
+    const wrapper = mount(<FieldName {...defaultProps} />);
 
     expect(
       wrapper.find(`[data-test-subj="field-${timestampFieldId}-name"]`).first().text()
@@ -50,11 +31,7 @@ describe('FieldName', () => {
   test('it highlights the text specified by the `highlight` prop', () => {
     const highlight = 'stamp';
 
-    const wrapper = mount(
-      <TestProviders>
-        <FieldName {...{ ...defaultProps, highlight }} />
-      </TestProviders>
-    );
+    const wrapper = mount(<FieldName {...{ ...defaultProps, highlight }} />);
 
     expect(wrapper.find('mark').first().text()).toEqual(highlight);
   });

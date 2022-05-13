@@ -8,15 +8,16 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import { Search } from './search';
-import { render } from '@testing-library/react';
 
 describe('Search', () => {
   test('it renders the field search input with the expected placeholder text when the searchInput prop is empty', () => {
-    const wrapper = render(
+    const wrapper = mount(
       <Search isSearching={false} onSearchInputChange={jest.fn()} searchInput="" />
     );
 
-    expect(wrapper.getByTestId('field-search')?.getAttribute('placeholder')).toEqual('Field name');
+    expect(wrapper.find('[data-test-subj="field-search"]').first().props().placeholder).toEqual(
+      'Field name'
+    );
   });
 
   test('it renders the "current" search value in the input when searchInput is not empty', () => {

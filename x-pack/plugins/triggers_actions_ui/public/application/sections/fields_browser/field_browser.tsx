@@ -19,8 +19,6 @@ import {
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
-import type { BrowserFields } from '../../../../../common/search_strategy';
-import type { FieldBrowserProps, ColumnHeaderOptions } from '../../../../../common/types';
 import { Search } from './search';
 
 import { CLOSE_BUTTON_CLASS_NAME, FIELD_BROWSER_WIDTH, RESET_FIELDS_CLASS_NAME } from './helpers';
@@ -29,12 +27,13 @@ import * as i18n from './translations';
 import { CategoriesSelector } from './categories_selector';
 import { FieldTable } from './field_table';
 import { CategoriesBadges } from './categories_badges';
+import { BrowserFields, FieldBrowserProps } from './types';
 
 export type FieldsBrowserComponentProps = Pick<FieldBrowserProps, 'width' | 'options'> & {
   /**
    * The current column headers
    */
-  columnHeaders: ColumnHeaderOptions[];
+  columnIds: string[];
   /**
    * A map of categoryId -> metadata about the fields in that category,
    * filtered such that the name of every field in the category includes
@@ -71,9 +70,11 @@ export type FieldsBrowserComponentProps = Pick<FieldBrowserProps, 'width' | 'opt
    */
   onSearchInputChange: (newSearchInput: string) => void;
 
-  onUpdateColumns: (columns: ColumnHeaderOptions[]) => void;
+  onUpdateColumns?: (columnsIds: string[]) => void;
 
-  onToggleColumn: (id: string) => void;
+  onToggleColumn?: (id: string) => void;
+
+  defaultColumnsIds?: string[];
 
   /**
    * Focus will be restored to this button if the user presses Escape or clicks
@@ -81,7 +82,6 @@ export type FieldsBrowserComponentProps = Pick<FieldBrowserProps, 'width' | 'opt
    * of the popover.
    */
   restoreFocusTo: React.MutableRefObject<HTMLButtonElement | null>;
-  defaultColumns?: ColumnHeaderOptions[];
 };
 
 /**
@@ -90,7 +90,7 @@ export type FieldsBrowserComponentProps = Pick<FieldBrowserProps, 'width' | 'opt
  */
 const FieldsBrowserComponent: React.FC<FieldsBrowserComponentProps> = ({
   appliedFilterInput,
-  columnHeaders,
+  columnIds,
   filteredBrowserFields,
   filterSelectedEnabled,
   isSearching,
@@ -105,7 +105,7 @@ const FieldsBrowserComponent: React.FC<FieldsBrowserComponentProps> = ({
   width = FIELD_BROWSER_WIDTH,
   onUpdateColumns,
   onToggleColumn,
-  defaultColumns,
+  defaultColumnsIds,
 }) => {
   const closeAndRestoreFocus = useCallback(() => {
     onHide();
@@ -129,8 +129,8 @@ const FieldsBrowserComponent: React.FC<FieldsBrowserComponentProps> = ({
   ];
 
   const onResetColumns = useCallback(() => {
-    if (defaultColumns) {
-      onUpdateColumns(defaultColumns);
+    if (defaultColumnsIds && onUpdateColumns) {
+      onUpdateColumns(defaultColumnsIds);
     }
     closeAndRestoreFocus();
   }, [onUpdateColumns, closeAndRestoreFocus]);
@@ -174,7 +174,7 @@ const FieldsBrowserComponent: React.FC<FieldsBrowserComponentProps> = ({
           <EuiSpacer size="l" />
 
           <FieldTable
-            columnHeaders={columnHeaders}
+            columnIds={columnIds}
             filteredBrowserFields={filteredBrowserFields}
             filterSelectedEnabled={filterSelectedEnabled}
             searchInput={appliedFilterInput}

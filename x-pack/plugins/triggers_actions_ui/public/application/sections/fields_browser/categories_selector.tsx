@@ -17,11 +17,15 @@ import {
   EuiSelectable,
   FilterChecked,
 } from '@elastic/eui';
-import { BrowserFields } from '../../../../../common';
 import * as i18n from './translations';
-import { CountBadge, getFieldCount, CategoryName, CategorySelectableContainer } from './helpers';
-import { isEscape } from '../../../../../common/utils/accessibility';
-
+import {
+  CountBadge,
+  getFieldCount,
+  CategoryName,
+  CategorySelectableContainer,
+  isEscape,
+} from './helpers';
+import { BrowserFields } from './types';
 interface CategoriesSelectorProps {
   /**
    * A map of categoryId -> metadata about the fields in that category,

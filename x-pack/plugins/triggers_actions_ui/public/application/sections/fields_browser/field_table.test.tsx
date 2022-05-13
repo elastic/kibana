@@ -7,31 +7,16 @@
 
 import React from 'react';
 import { render, RenderResult } from '@testing-library/react';
-import { mockBrowserFields, TestProviders } from '../../../../mock';
-import { defaultColumnHeaderType } from '../../body/column_headers/default_headers';
-import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../../body/constants';
-
-import { ColumnHeaderOptions } from '../../../../../common';
 import { FieldTable, FieldTableProps } from './field_table';
+import { mockBrowserFields } from './mock';
+
 const timestampFieldId = '@timestamp';
 
-const columnHeaders: ColumnHeaderOptions[] = [
-  {
-    category: 'base',
-    columnHeaderType: defaultColumnHeaderType,
-    description:
-      'Date/time when the event originated.\nFor log events this is the date/time when the event was generated, and not when it was read.\nRequired field for all events.',
-    example: '2016-05-23T08:05:34.853Z',
-    id: timestampFieldId,
-    type: 'date',
-    aggregatable: true,
-    initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
-  },
-];
+const columnIds: string[] = [timestampFieldId];
 
 const defaultProps: FieldTableProps = {
   selectedCategoryIds: [],
-  columnHeaders: [],
+  columnIds: [],
   filteredBrowserFields: {},
   searchInput: '',
   filterSelectedEnabled: false,
@@ -45,20 +30,14 @@ describe('FieldTable', () => {
   const defaultPageSize = 10;
 
   it('should render empty field table', () => {
-    const result = render(
-      <TestProviders>
-        <FieldTable {...defaultProps} />
-      </TestProviders>
-    );
+    const result = render(<FieldTable {...defaultProps} />);
 
     expect(result.getByText('No items found')).toBeInTheDocument();
   });
 
   it('should render field table with fields of all categories', () => {
     const result = render(
-      <TestProviders>
-        <FieldTable {...defaultProps} filteredBrowserFields={mockBrowserFields} />
-      </TestProviders>
+      <FieldTable {...defaultProps} filteredBrowserFields={mockBrowserFields} />
     );
 
     expect(result.container.getElementsByClassName('euiTableRow').length).toBe(defaultPageSize);
@@ -74,13 +53,11 @@ describe('FieldTable', () => {
     );
 
     const result = render(
-      <TestProviders>
-        <FieldTable
-          {...defaultProps}
-          selectedCategoryIds={selectedCategoryIds}
-          filteredBrowserFields={mockBrowserFields}
-        />
-      </TestProviders>
+      <FieldTable
+        {...defaultProps}
+        selectedCategoryIds={selectedCategoryIds}
+        filteredBrowserFields={mockBrowserFields}
+      />
     );
 
     expect(result.container.getElementsByClassName('euiTableRow').length).toBe(fieldCount);
@@ -96,13 +73,11 @@ describe('FieldTable', () => {
     ];
 
     const result = render(
-      <TestProviders>
-        <FieldTable
-          {...defaultProps}
-          getFieldTableColumns={() => fieldTableColumns}
-          filteredBrowserFields={mockBrowserFields}
-        />
-      </TestProviders>
+      <FieldTable
+        {...defaultProps}
+        getFieldTableColumns={() => fieldTableColumns}
+        filteredBrowserFields={mockBrowserFields}
+      />
     );
 
     expect(result.getAllByText('Custom column').length).toBeGreaterThan(0);
@@ -111,13 +86,11 @@ describe('FieldTable', () => {
 
   it('should render field table with unchecked field', () => {
     const result = render(
-      <TestProviders>
-        <FieldTable
-          {...defaultProps}
-          selectedCategoryIds={['base']}
-          filteredBrowserFields={{ base: { fields: { [timestampFieldId]: timestampField } } }}
-        />
-      </TestProviders>
+      <FieldTable
+        {...defaultProps}
+        selectedCategoryIds={['base']}
+        filteredBrowserFields={{ base: { fields: { [timestampFieldId]: timestampField } } }}
+      />
     );
 
     const checkbox = result.getByTestId(`field-${timestampFieldId}-checkbox`);
@@ -126,14 +99,12 @@ describe('FieldTable', () => {
 
   it('should render field table with checked field', () => {
     const result = render(
-      <TestProviders>
-        <FieldTable
-          {...defaultProps}
-          selectedCategoryIds={['base']}
-          columnHeaders={columnHeaders}
-          filteredBrowserFields={{ base: { fields: { [timestampFieldId]: timestampField } } }}
-        />
-      </TestProviders>
+      <FieldTable
+        {...defaultProps}
+        selectedCategoryIds={['base']}
+        columnIds={columnIds}
+        filteredBrowserFields={{ base: { fields: { [timestampFieldId]: timestampField } } }}
+      />
     );
 
     const checkbox = result.getByTestId(`field-${timestampFieldId}-checkbox`);
@@ -154,11 +125,7 @@ describe('FieldTable', () => {
     };
 
     it('should paginate on page clicked', () => {
-      const result = render(
-        <TestProviders>
-          <FieldTable {...defaultPaginationProps} />
-        </TestProviders>
-      );
+      const result = render(<FieldTable {...defaultPaginationProps} />);
 
       expect(isAtFirstPage(result)).toBeTruthy();
 
@@ -168,11 +135,7 @@ describe('FieldTable', () => {
     });
 
     it('should not reset on field checked', () => {
-      const result = render(
-        <TestProviders>
-          <FieldTable {...defaultPaginationProps} />
-        </TestProviders>
-      );
+      const result = render(<FieldTable {...defaultPaginationProps} />);
 
       changePage(result);
 
@@ -185,8 +148,7 @@ describe('FieldTable', () => {
         <FieldTable
           {...defaultPaginationProps}
           selectedCategoryIds={['destination', 'event', 'client', 'agent', 'host']}
-        />,
-        { wrapper: TestProviders }
+        />
       );
 
       changePage(result);

@@ -16,7 +16,6 @@ import {
   EuiBadge,
   EuiBasicTableColumn,
   EuiTableActionsColumnType,
-  EuiDataGridColumn,
 } from '@elastic/eui';
 import { uniqBy } from 'lodash/fp';
 import styled from 'styled-components';
@@ -26,6 +25,7 @@ import * as i18n from './translations';
 import { BrowserFieldItem, BrowserFields, FieldTableColumns, GetFieldTableColumns } from './types';
 import { TruncatableText } from './truncatable_text';
 import { getExampleText, getIconFromType } from './helpers';
+import { getEmptyValue } from './empty_value';
 
 const TypeIcon = styled(EuiIcon)`
   margin: 0 4px;
@@ -46,15 +46,15 @@ Description.displayName = 'Description';
 export const getFieldItems = ({
   browserFields,
   selectedCategoryIds,
-  columnHeaders,
+  columnIds,
 }: {
   browserFields: BrowserFields;
   selectedCategoryIds: string[];
-  columnHeaders: EuiDataGridColumn[];
+  columnIds: string[];
 }): BrowserFieldItem[] => {
   const categoryIds =
     selectedCategoryIds.length > 0 ? selectedCategoryIds : Object.keys(browserFields);
-  const selectedFieldIds = new Set(columnHeaders.map(({ id }) => id));
+  const selectedFieldIds = new Set(columnIds);
 
   return uniqBy(
     'name',
@@ -77,7 +77,7 @@ export const getFieldItems = ({
     }, [])
   );
 };
-const getEmptyValue = () => '—';
+
 const getDefaultFieldTableColumns = (highlight: string): FieldTableColumns => [
   {
     field: 'name',
@@ -95,7 +95,7 @@ const getDefaultFieldTableColumns = (highlight: string): FieldTableColumns => [
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <FieldName fieldId={name} highlight={highlight} />
+            <FieldName fieldName={name} highlight={highlight} />
           </EuiFlexItem>
         </EuiFlexGroup>
       );
@@ -144,7 +144,7 @@ export const getFieldColumns = ({
   getFieldTableColumns,
   onHide,
 }: {
-  onToggleColumn: (id: string) => void;
+  onToggleColumn?: (id: string) => void;
   highlight?: string;
   getFieldTableColumns?: GetFieldTableColumns;
   onHide: () => void;
@@ -160,7 +160,7 @@ export const getFieldColumns = ({
           data-test-subj={`field-${name}-checkbox`}
           data-colindex={1}
           id={name}
-          onChange={() => onToggleColumn(name)}
+          onChange={onToggleColumn ? () => onToggleColumn(name) : () => {}}
         />
       </EuiToolTip>
     ),

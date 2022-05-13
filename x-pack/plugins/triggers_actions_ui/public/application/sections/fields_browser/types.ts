@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiDataGridColumn } from '@elastic/eui';
+import { EuiBasicTableColumn } from '@elastic/eui';
 import type { IFieldSubType } from '@kbn/es-query';
 import type { RuntimeField } from '@kbn/data-plugin/common';
 
@@ -60,14 +60,16 @@ export interface FieldBrowserOptions {
 
 export interface FieldBrowserProps {
   /** Selected column headers */
-  columnHeaders: EuiDataGridColumn[];
+  columnIds: string[];
   /** A map of categoryId -> metadata about the fields in that category */
   browserFields: BrowserFields;
   /** The options to customize the field browser, supporting columns rendering and button to create fields */
   options?: FieldBrowserOptions;
   /** The width of the field browser */
   width?: number;
-  onUpdateColumns: (columns: EuiDataGridColumn[]) => void;
+
+  // all 3 props will be replaced with onChangeColumn
+  onUpdateColumns: (columnsIds: string[]) => void;
   onToggleColumn: (id: string) => void;
-  defaultColumns?: EuiDataGridColumn[];
+  defaultColumnsIds?: string[];
 }

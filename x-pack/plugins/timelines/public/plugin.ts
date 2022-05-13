@@ -10,12 +10,11 @@ import { throttle } from 'lodash';
 
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreSetup, Plugin, CoreStart } from '@kbn/core/public';
-import type { LastUpdatedAtProps, LoadingPanelProps, FieldBrowserProps } from './components';
+import type { LastUpdatedAtProps, LoadingPanelProps } from './components';
 import {
   getLastUpdatedLazy,
   getLoadingPanelLazy,
   getTGridLazy,
-  getFieldsBrowserLazy,
 } from './methods';
 import type { TimelinesUIStart, TGridProps, TimelinesStartPlugins } from './types';
 import { tGridReducer } from './store/t_grid/reducer';
@@ -73,9 +72,6 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
       },
       getLastUpdated: (props: LastUpdatedAtProps) => {
         return getLastUpdatedLazy(props);
-      },
-      getFieldBrowser: (props: FieldBrowserProps) => {
-        return getFieldsBrowserLazy(props);
       },
       getUseAddToTimeline: () => {
         return useAddToTimeline;

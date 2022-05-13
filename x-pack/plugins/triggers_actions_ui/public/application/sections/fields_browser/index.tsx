@@ -9,6 +9,7 @@ import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { debounce } from 'lodash';
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+
 import { FieldsBrowser } from './field_browser';
 import { filterBrowserFieldsByFieldName, filterSelectedBrowserFields } from './helpers';
 import * as i18n from './translations';
@@ -29,13 +30,13 @@ FieldsBrowserButtonContainer.displayName = 'FieldsBrowserButtonContainer';
  * Manages the state of the field browser
  */
 export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
-  columnHeaders,
+  columnIds,
   browserFields,
   options,
   width,
   onToggleColumn,
   onUpdateColumns,
-  defaultColumns,
+  defaultColumnsIds,
 }) => {
   const customizeColumnsButtonRef = useRef<HTMLButtonElement | null>(null);
   /** all field names shown in the field browser must contain this string (when specified) */
@@ -72,9 +73,9 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   const selectionFilteredBrowserFields = useMemo<BrowserFields>(
     () =>
       filterSelectedEnabled
-        ? filterSelectedBrowserFields({ browserFields, columnHeaders })
+        ? filterSelectedBrowserFields({ browserFields, columnIds })
         : browserFields,
-    [browserFields, columnHeaders, filterSelectedEnabled]
+    [browserFields, columnIds, filterSelectedEnabled]
   );
 
   useEffect(() => {
@@ -140,7 +141,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
 
       {show && (
         <FieldsBrowser
-          columnHeaders={columnHeaders}
+          columnIds={columnIds}
           filteredBrowserFields={
             filteredBrowserFields != null ? filteredBrowserFields : browserFields
           }
@@ -157,7 +158,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
           selectedCategoryIds={selectedCategoryIds}
           width={width}
           onToggleColumn={onToggleColumn}
-          defaultColumns={defaultColumns}
+          defaultColumnsIds={defaultColumnsIds}
           onUpdateColumns={onUpdateColumns}
         />
       )}
@@ -165,4 +166,6 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   );
 };
 
-export const StatefulFieldsBrowser = React.memo(StatefulFieldsBrowserComponent);
+const StatefulFieldsBrowser = React.memo(StatefulFieldsBrowserComponent);
+// eslint-disable-next-line import/no-default-export
+export { StatefulFieldsBrowser as default };

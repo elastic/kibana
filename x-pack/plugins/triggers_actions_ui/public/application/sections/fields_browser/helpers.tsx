@@ -5,10 +5,9 @@
  * 2.0.
  */
 
+import { EuiBadge, EuiLoadingSpinner } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import { EuiBadge, EuiDataGridColumn, EuiLoadingSpinner } from '@elastic/eui';
 import styled from 'styled-components';
-
 import { BrowserField, BrowserFields } from './types';
 
 export const LoadingSpinner = styled(EuiLoadingSpinner)`
@@ -98,12 +97,12 @@ export function filterBrowserFieldsByFieldName({
  */
 export const filterSelectedBrowserFields = ({
   browserFields,
-  columnHeaders,
+  columnIds,
 }: {
   browserFields: BrowserFields;
-  columnHeaders: EuiDataGridColumn[];
+  columnIds: string[];
 }): BrowserFields => {
-  const selectedFieldIds = new Set(columnHeaders.map(({ id }) => id));
+  const selectedFieldIds = new Set(columnIds);
 
   const result: Record<string, Partial<BrowserField>> = {};
 
@@ -192,3 +191,6 @@ export const getIconFromType = (type: string | null | undefined) => {
 /** Returns example text, or an empty string if the field does not have an example */
 export const getExampleText = (example: string | number | null | undefined): string =>
   !isEmpty(example) ? `Example: ${example}` : '';
+
+/** Returns `true` if the escape key was pressed */
+export const isEscape = (event: React.KeyboardEvent): boolean => event.key === 'Escape';

@@ -72,12 +72,3 @@ export const getLoadingPanelLazy = (props: LoadingPanelProps) => {
     </Suspense>
   );
 };
-
-const FieldsBrowserLazy = lazy(() => import('../components/fields_browser'));
-export const getFieldsBrowserLazy = (props: FieldBrowserProps) => {
-  return (
-    <Suspense fallback={<EuiLoadingSpinner />}>
-      <FieldsBrowserLazy {...props} />
-    </Suspense>
-  );
-};
