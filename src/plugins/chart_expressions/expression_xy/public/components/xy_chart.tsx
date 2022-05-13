@@ -193,7 +193,9 @@ export function XYChart({
     : undefined;
 
   const xAxisFormatter = formatFactory(
-    dataLayers[0].xAccessor ? getFormat(dataLayers[0].table.columns, dataLayers[0].xAccessor) : undefined
+    dataLayers[0].xAccessor
+      ? getFormat(dataLayers[0].table.columns, dataLayers[0].xAccessor)
+      : undefined
   );
 
   // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers

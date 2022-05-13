@@ -44,7 +44,9 @@ export const getLegendAction = (
 
     const { table } = layer;
     const accessor = getAccessorByDimension(layer.splitAccessor, table.columns);
-    const formatter = formatFactory(accessor ? getFormat(table.columns, layer.splitAccessor) : undefined);
+    const formatter = formatFactory(
+      accessor ? getFormat(table.columns, layer.splitAccessor) : undefined
+    );
 
     const rowIndex = table.rows.findIndex((row) => {
       if (formattedDatatables[layer.layerId]?.formattedColumns[accessor]) {
