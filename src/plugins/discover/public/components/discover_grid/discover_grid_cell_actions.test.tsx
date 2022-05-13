@@ -10,18 +10,12 @@ jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    copyToClipboard: (value: string) => mockCopyToClipboard(value)
-  }
+    copyToClipboard: (value: string) => mockCopyToClipboard(value),
+  };
 });
 
 jest.mock('../../utils/use_discover_services', () => {
   const services = {
-    uiSettings: {
-      get: (key: string) => key === 'discover:maxDocFieldsDisplayed' && 200,
-    },
-    fieldFormats: {
-      getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => (value ? value : '-') })),
-    },
     toastNotifications: {
       addInfo: jest.fn(),
     },
