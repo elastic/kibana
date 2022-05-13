@@ -24,6 +24,7 @@ import {
   getDataRequestDescriptor,
   getLayerById,
   getLayerList,
+  getEditState,
 } from '../selectors/map_selectors';
 import {
   cancelRequest,
@@ -67,6 +68,7 @@ export type DataRequestContext = {
   dataFilters: DataFilters;
   forceRefreshDueToDrawing: boolean; // Boolean signaling data request triggered by a user updating layer features via drawing tools. When true, layer will re-load regardless of "source.applyForceRefresh" flag.
   isForceRefresh: boolean; // Boolean signaling data request triggered by auto-refresh timer or user clicking refresh button. When true, layer will re-load only when "source.applyForceRefresh" flag is set to true.
+  isFeatureEditorOpenForLayer: boolean; // Boolean signaling that feature editor menu is open for a layer. When true, layer will ignore all global and layer filtering so drawn features are displayed and not filtered out.
 };
 
 export function clearDataRequests(layer: ILayer) {
@@ -145,6 +147,7 @@ function getDataRequestContext(
       dispatch(registerCancelCallback(requestToken, callback)),
     forceRefreshDueToDrawing,
     isForceRefresh,
+    isFeatureEditorOpenForLayer: getEditState(getState())?.layerId === layerId,
   };
 }
 

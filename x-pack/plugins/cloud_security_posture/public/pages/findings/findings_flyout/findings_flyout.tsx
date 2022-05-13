@@ -15,7 +15,6 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
   EuiFlyoutBody,
-  EuiBadge,
   EuiTabs,
   EuiTab,
   EuiFlexGrid,
@@ -23,19 +22,31 @@ import {
   EuiFlexGroup,
   EuiIcon,
   type PropsOf,
+  EuiMarkdownFormat,
 } from '@elastic/eui';
 import { assertNever } from '@kbn/std';
+import moment from 'moment';
 import type { CspFinding } from '../types';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import * as TEXT from '../translations';
 import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
 import k8sLogoIcon from '../../../assets/icons/k8s_logo.svg';
 import { ResourceTab } from './resource_tab';
+import { JsonTab } from './json_tab';
 
-const tabs = ['remediation', 'resource', 'general'] as const;
+const tabs = [
+  { title: TEXT.REMEDIATION, id: 'remediation' },
+  { title: TEXT.RESOURCE, id: 'resource' },
+  { title: TEXT.GENERAL, id: 'general' },
+  { title: TEXT.JSON, id: 'json' },
+] as const;
 
 const CodeBlock: React.FC<PropsOf<typeof EuiCodeBlock>> = (props) => (
-  <EuiCodeBlock {...props} isCopyable paddingSize="s" />
+  <EuiCodeBlock isCopyable paddingSize="s" overflowHeight={300} {...props} />
+);
+
+const Markdown: React.FC<PropsOf<typeof EuiMarkdownFormat>> = (props) => (
+  <EuiMarkdownFormat textSize="s" {...props} />
 );
 
 type FindingsTab = typeof tabs[number];
@@ -73,20 +84,22 @@ const Cards = ({ data }: { data: Card[] }) => (
 );
 
 const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab }) => {
-  switch (tab) {
+  switch (tab.id) {
     case 'remediation':
       return <Cards data={getRemediationCards(findings)} />;
     case 'resource':
       return <ResourceTab data={findings} />;
     case 'general':
       return <Cards data={getGeneralCards(findings)} />;
+    case 'json':
+      return <JsonTab data={findings} />;
     default:
       assertNever(tab);
   }
 };
 
 export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) => {
-  const [tab, setTab] = useState<FindingsTab>('remediation');
+  const [tab, setTab] = useState<FindingsTab>(tabs[0]);
 
   return (
     <EuiFlyout onClose={onClose}>
@@ -106,13 +119,8 @@ export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) =>
         <EuiSpacer />
         <EuiTabs>
           {tabs.map((v) => (
-            <EuiTab
-              key={v}
-              isSelected={tab === v}
-              onClick={() => setTab(v)}
-              style={{ textTransform: 'capitalize' }}
-            >
-              {v}
+            <EuiTab key={v.id} isSelected={tab.id === v.id} onClick={() => setTab(v)}>
+              {v.title}
             </EuiTab>
           ))}
         </EuiTabs>
@@ -124,13 +132,11 @@ export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) =>
   );
 };
 
-const getGeneralCards = ({ rule }: CspFinding): Card[] => [
+const getGeneralCards = ({ rule, ...rest }: CspFinding): Card[] => [
   {
     title: TEXT.RULE,
     listItems: [
-      [TEXT.SEVERITY, ''],
-      [TEXT.INDEX, ''],
-      [TEXT.RULE_EVALUATED_AT, ''],
+      [TEXT.RULE_EVALUATED_AT, moment(rest['@timestamp']).format('MMMM D, YYYY @ HH:mm:ss.SSS')],
       [
         TEXT.FRAMEWORK_SOURCES,
         <EuiFlexGroup gutterSize="s">
@@ -142,40 +148,38 @@ const getGeneralCards = ({ rule }: CspFinding): Card[] => [
           </EuiFlexItem>
         </EuiFlexGroup>,
       ],
-      [TEXT.SECTION, ''],
-      [TEXT.PROFILE_APPLICABILITY, ''],
-      [TEXT.AUDIT, ''],
+      [TEXT.CIS_SECTION, rule.section],
+      [TEXT.PROFILE_APPLICABILITY, <Markdown>{rule.profile_applicability}</Markdown>],
       [TEXT.BENCHMARK, rule.benchmark.name],
       [TEXT.NAME, rule.name],
-      [TEXT.DESCRIPTION, rule.description],
-      [
-        TEXT.TAGS,
-        rule.tags.map((t) => (
-          <EuiBadge key={t} color="default">
-            {t}
-          </EuiBadge>
-        )),
-      ],
+      [TEXT.DESCRIPTION, <Markdown>{rule.description}</Markdown>],
+      [TEXT.AUDIT, <Markdown>{rule.audit}</Markdown>],
+      [TEXT.REFERENCES, <Markdown>{rule.references}</Markdown>],
     ],
   },
 ];
 
-const getRemediationCards = ({ result, ...rest }: CspFinding): Card[] => [
+const getRemediationCards = ({ result, rule, ...rest }: CspFinding): Card[] => [
   {
-    title: TEXT.RESULT,
+    title: TEXT.RESULT_DETAILS,
     listItems: [
-      [TEXT.EXPECTED, ''],
+      result.expected
+        ? [TEXT.EXPECTED, <CodeBlock>{JSON.stringify(result.expected, null, 2)}</CodeBlock>]
+        : ['', ''],
       [TEXT.EVIDENCE, <CodeBlock>{JSON.stringify(result.evidence, null, 2)}</CodeBlock>],
-      [TEXT.TIMESTAMP, <CodeBlock>{rest['@timestamp']}</CodeBlock>],
+      [
+        TEXT.RULE_EVALUATED_AT,
+        <span>{moment(rest['@timestamp']).format('MMMM D, YYYY @ HH:mm:ss.SSS')}</span>,
+      ],
     ],
   },
   {
     title: TEXT.REMEDIATION,
     listItems: [
-      ['', <CodeBlock>{rest.rule.remediation}</CodeBlock>],
-      [TEXT.IMPACT, rest.rule.impact],
-      [TEXT.DEFAULT_VALUE, ''],
-      [TEXT.RATIONALE, ''],
+      ['', <Markdown>{rule.remediation}</Markdown>],
+      [TEXT.IMPACT, <Markdown>{rule.impact}</Markdown>],
+      [TEXT.DEFAULT_VALUE, <Markdown>{rule.default_value}</Markdown>],
+      [TEXT.RATIONALE, <Markdown>{rule.rationale}</Markdown>],
     ],
   },
 ];

@@ -11,13 +11,13 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { AlertDetails } from './details';
 import { mockAlertsService } from '../test_utils/alerts';
-import { BaseHandlerCommonOptions } from '../types';
+import { SingleCaseBaseHandlerCommonOptions } from '../types';
 
 describe('AlertDetails', () => {
   let client: CasesClientMock;
   let mockServices: ReturnType<typeof createMockClientArgs>['mockServices'];
   let clientArgs: ReturnType<typeof createMockClientArgs>['clientArgs'];
-  let constructorOptions: BaseHandlerCommonOptions;
+  let constructorOptions: SingleCaseBaseHandlerCommonOptions;
 
   beforeEach(() => {
     client = createMockClient();
