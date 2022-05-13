@@ -13,7 +13,7 @@ import del from 'del';
 import fs from 'fs';
 import { uniq } from 'lodash';
 import path from 'path';
-import puppeteer, { Browser, ConsoleMessage, HTTPRequest, Page } from 'puppeteer';
+import puppeteer, { Browser, ConsoleMessage, HTTPRequest, Page, Viewport } from 'puppeteer';
 import { createInterface } from 'readline';
 import * as Rx from 'rxjs';
 import {
@@ -29,7 +29,6 @@ import {
 import { getChromiumDisconnectedError } from '..';
 import { errors } from '../../../../common';
 import { ConfigType } from '../../../config';
-import { DEFAULT_VIEWPORT } from '../../../layouts';
 import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
@@ -56,6 +55,17 @@ interface CreatePageResult {
 interface ClosePageResult {
   metrics?: PerformanceMetrics;
 }
+
+/**
+ * Size of the desired initial viewport. This is needed to render the app before elements load into their
+ * layout. Once the elements are positioned, the viewport must be *resized* to include the entire element container.
+ */
+export const DEFAULT_VIEWPORT: Required<Pick<Viewport, 'width' | 'height' | 'deviceScaleFactor'>> =
+  {
+    width: 1950,
+    height: 1200,
+    deviceScaleFactor: 1,
+  };
 
 // Default args used by pptr
 // https://github.com/puppeteer/puppeteer/blob/13ea347/src/node/Launcher.ts#L168

@@ -9,11 +9,15 @@ import type { Headers } from '@kbn/core/server';
 import { defer, forkJoin, Observable, throwError } from 'rxjs';
 import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
 import { errors, LayoutTypes } from '../../common';
-import type { Context, HeadlessChromiumDriver } from '../browsers';
-import { getChromiumDisconnectedError } from '../browsers';
+import {
+  Context,
+  DEFAULT_VIEWPORT,
+  getChromiumDisconnectedError,
+  HeadlessChromiumDriver,
+} from '../browsers';
 import { ConfigType, durationToNumber as toNumber } from '../config';
 import type { PdfScreenshotOptions } from '../formats';
-import { DEFAULT_VIEWPORT, Layout } from '../layouts';
+import { Layout } from '../layouts';
 import { Actions, EventLogger } from './event_logger';
 import type { ElementsPositionAndAttribute } from './get_element_position_data';
 import { getElementPositionAndAttributes } from './get_element_position_data';

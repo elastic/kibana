@@ -6,7 +6,6 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { Viewport } from 'puppeteer';
 import type { LayoutSelectorDictionary, Size } from '../../common/layout';
 import type { HeadlessChromiumDriver } from '../browsers';
 import type { BaseLayout } from './base_layout';
@@ -37,14 +36,3 @@ export const DEFAULT_SELECTORS: LayoutSelectorDictionary = {
 };
 
 export { createLayout } from './create_layout';
-
-/**
- * Size of the desired initial viewport. This is needed to render the app before elements load into their
- * layout. Once the elements are positioned, the viewport must be *resized* to include the entire element container.
- */
-export const DEFAULT_VIEWPORT: Required<Pick<Viewport, 'width' | 'height' | 'deviceScaleFactor'>> =
-  {
-    width: 1950,
-    height: 1200,
-    deviceScaleFactor: 1,
-  };
