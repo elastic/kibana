@@ -27,7 +27,7 @@ import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { JobCreatorType } from '../common/job_creator';
 import { createEmptyJob, createEmptyDatafeed } from '../common/job_creator/util/default_configs';
 import { stashJobForCloning } from '../common/job_creator/util/general';
-import { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
+import { CREATED_BY_LABEL, DEFAULT_BUCKET_SPAN } from '../../../../../common/constants/new_job';
 import { createQueries, getDefaultQuery } from '../utils/new_job_utils';
 import { lensOperationToMlFunction } from './utils';
 
@@ -155,7 +155,7 @@ async function createADJobFromLensSavedObject(
   jobConfig.analysis_config.detectors = createDetectors(fields, splitField);
 
   jobConfig.data_description.time_field = timeField.sourceField;
-  jobConfig.analysis_config.bucket_span = '15m';
+  jobConfig.analysis_config.bucket_span = DEFAULT_BUCKET_SPAN;
   if (splitField) {
     jobConfig.analysis_config.influencers = [splitField.sourceField];
   }
