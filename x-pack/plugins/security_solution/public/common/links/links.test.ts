@@ -361,6 +361,9 @@ describe('security app link helpers', () => {
           id: 'hosts',
           path: '/hosts',
           title: 'Hosts',
+          landingImage: 'test-file-stub',
+          description:
+            'A computer or other device that communicates with other hosts on a network. Hosts on a network include clients and servers -- that send or receive data, services or applications.',
         },
       ]);
     });
@@ -383,6 +386,9 @@ describe('security app link helpers', () => {
           id: 'hosts',
           path: '/hosts',
           title: 'Hosts',
+          landingImage: 'test-file-stub',
+          description:
+            'A computer or other device that communicates with other hosts on a network. Hosts on a network include clients and servers -- that send or receive data, services or applications.',
         },
         {
           id: 'uncommon_processes',
@@ -415,6 +421,9 @@ describe('security app link helpers', () => {
         id: 'hosts',
         path: '/hosts',
         title: 'Hosts',
+        landingImage: 'test-file-stub',
+        description:
+          'A computer or other device that communicates with other hosts on a network. Hosts on a network include clients and servers -- that send or receive data, services or applications.',
       });
     });
   });

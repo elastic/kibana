@@ -15,10 +15,16 @@ import {
 } from '../../common/constants';
 import { DETECTION_RESPONSE, GETTING_STARTED, OVERVIEW } from '../app/translations';
 import { LinkItem } from '../common/links/types';
+import overviewPageImg from '../common/images/overview_page.png';
+import detectionResponsePageImg from '../common/images/detection_response_page.png';
 
 export const overviewLinks: LinkItem = {
   id: SecurityPageName.overview,
   title: OVERVIEW,
+  landingImage: overviewPageImg,
+  description: i18n.translate('xpack.securitySolution.appLinks.overviewDescription', {
+    defaultMessage: 'What is going in your secuity environment',
+  }),
   path: OVERVIEW_PATH,
   globalNavEnabled: true,
   capabilities: [`${SERVER_APP_ID}.show`],
@@ -47,6 +53,11 @@ export const gettingStartedLinks: LinkItem = {
 export const detectionResponseLinks: LinkItem = {
   id: SecurityPageName.detectionAndResponse,
   title: DETECTION_RESPONSE,
+  landingImage: detectionResponsePageImg,
+  description: i18n.translate('xpack.securitySolution.appLinks.detectionAndResponseDescription', {
+    defaultMessage:
+      "Monitor the impact of application and device performance from the end user's point of view.",
+  }),
   path: DETECTION_RESPONSE_PATH,
   globalNavEnabled: false,
   experimentalKey: 'detectionResponseEnabled',

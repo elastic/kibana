@@ -7,6 +7,7 @@
 
 import { Capabilities, PublicUiSettingsParams, UserProvidedValues } from '@kbn/core/types';
 import { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
+import { IconType } from '@elastic/eui';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 import { SecurityPageName } from '../../../common/constants';
 
@@ -34,9 +35,17 @@ export interface LinkItem {
   globalSearchEnabled?: boolean;
   globalSearchKeywords?: string[];
   hideWhenExperimentalKey?: keyof ExperimentalFeatures;
-  icon?: string;
   id: SecurityPageName;
-  image?: string;
+  /**
+   * Icon that is displayed on menu navigation landing page.
+   * Only required for pages that are displayed inside a landing page.
+   */
+  landingIcon?: IconType;
+  /**
+   * Image that is displayed on menu navigation landing page.
+   * Only required for pages that are displayed inside a landing page.
+   */
+  landingImage?: string;
   isBeta?: boolean;
   licenseType?: LicenseType;
   links?: LinkItem[];
@@ -50,7 +59,7 @@ export type AppLinkItems = Readonly<LinkItem[]>;
 
 export interface NavLinkItem {
   description?: string;
-  icon?: string;
+  icon?: IconType;
   id: SecurityPageName;
   links?: NavLinkItem[];
   image?: string;
