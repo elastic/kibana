@@ -20,7 +20,7 @@ import { fetchEffectFactory } from '../effects/fetch_effect';
 import {
   createAlert,
   disableAlertById,
-  fetchAlertRecords,
+  fetchAnomalyAlertRecords,
   fetchConnectors,
   fetchMonitorAlertRecords,
   NewAlertParams,
@@ -44,9 +44,10 @@ export const createAlertAction = createAsyncAction<
 export const getConnectorsAction = createAsyncAction<{}, ActionConnector[]>('GET CONNECTORS');
 export const getMonitorAlertsAction = createAsyncAction<{}, AlertsResult | null>('GET ALERTS');
 
-export const getAnomalyAlertAction = createAsyncAction<MonitorIdParam, Rule<UptimeAlertTypeParams>>(
-  'GET EXISTING ALERTS'
-);
+export const getAnomalyAlertAction = createAsyncAction<
+  MonitorIdParam,
+  Rule<UptimeAlertTypeParams> | undefined
+>('GET EXISTING ALERTS');
 export const deleteAlertAction = createAsyncAction<{ alertId: string }, string | null>(
   'DELETE ALERTS'
 );
@@ -103,7 +104,11 @@ const showAlertDisabledFailed = (err: Error) => {
 export function* fetchAlertsEffect() {
   yield takeLatest(
     getAnomalyAlertAction.get,
-    fetchEffectFactory(fetchAlertRecords, getAnomalyAlertAction.success, getAnomalyAlertAction.fail)
+    fetchEffectFactory(
+      fetchAnomalyAlertRecords,
+      getAnomalyAlertAction.success,
+      getAnomalyAlertAction.fail
+    )
   );
 
   yield takeLatest(deleteAnomalyAlertAction.get, function* (action: Action<{ alertId: string }>) {
