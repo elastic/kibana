@@ -193,7 +193,8 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
   );
 
   const onUpdateColumns = useCallback(
-    (columns: ColumnHeaderOptions[]) => dispatch(timelineActions.updateColumns({ id: timelineId, columns })),
+    (columns: ColumnHeaderOptions[]) =>
+      dispatch(timelineActions.updateColumns({ id: timelineId, columns })),
     [dispatch, timelineId]
   );
 
