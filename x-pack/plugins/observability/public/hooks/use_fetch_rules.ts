@@ -7,9 +7,9 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { isEmpty } from 'lodash';
-import { loadRules } from '@kbn/triggers-actions-ui-plugin/public';
-import { RULES_LOAD_ERROR } from '../pages/rules/translations';
-import { FetchRulesProps, RuleState } from '../pages/rules/types';
+import { loadRules, loadRuleTags } from '@kbn/triggers-actions-ui-plugin/public';
+import { RULES_LOAD_ERROR, RULE_TAGS_LOAD_ERROR } from '../pages/rules/translations';
+import { FetchRulesProps, RuleState, TagsState } from '../pages/rules/types';
 import { OBSERVABILITY_RULE_TYPES } from '../pages/rules/config';
 import { useKibana } from '../utils/kibana_react';
 
@@ -18,6 +18,7 @@ export function useFetchRules({
   ruleLastResponseFilter,
   ruleStatusesFilter,
   typesFilter,
+  tagsFilter,
   setPage,
   page,
   sort,
@@ -33,6 +34,23 @@ export function useFetchRules({
 
   const [noData, setNoData] = useState<boolean>(true);
   const [initialLoad, setInitialLoad] = useState<boolean>(true);
+  const [tagsState, setTagsState] = useState<TagsState>({
+    data: [],
+    error: null,
+  });
+  const loadRuleTagsAggs = useCallback(async () => {
+    try {
+      const ruleTagsAggs = await loadRuleTags({
+        http,
+      });
+
+      if (ruleTagsAggs?.ruleTags) {
+        setTagsState({ data: ruleTagsAggs.ruleTags, error: null });
+      }
+    } catch (e) {
+      setTagsState((oldState: TagsState) => ({ ...oldState, error: RULE_TAGS_LOAD_ERROR }));
+    }
+  }, [http]);
 
   const fetchRules = useCallback(async () => {
     setRulesState((oldState) => ({ ...oldState, isLoading: true }));
@@ -43,10 +61,12 @@ export function useFetchRules({
         page,
         searchText,
         typesFilter: typesFilter.length > 0 ? typesFilter : OBSERVABILITY_RULE_TYPES,
+        tagsFilter,
         ruleExecutionStatusesFilter: ruleLastResponseFilter,
         ruleStatusesFilter,
         sort,
       });
+      await loadRuleTagsAggs();
       setRulesState((oldState) => ({
         ...oldState,
         isLoading: false,
@@ -60,8 +80,9 @@ export function useFetchRules({
       const isFilterApplied = !(
         isEmpty(searchText) &&
         isEmpty(ruleLastResponseFilter) &&
-        isEmpty(ruleStatusesFilter) &&
-        isEmpty(typesFilter)
+        isEmpty(typesFilter) &&
+        isEmpty(tagsFilter) &&
+        isEmpty(ruleStatusesFilter)
       );
 
       setNoData(response.data.length === 0 && !isFilterApplied);
@@ -75,6 +96,8 @@ export function useFetchRules({
     setPage,
     searchText,
     ruleLastResponseFilter,
+    tagsFilter,
+    loadRuleTagsAggs,
     ruleStatusesFilter,
     typesFilter,
     sort,
@@ -89,5 +112,6 @@ export function useFetchRules({
     setRulesState,
     noData,
     initialLoad,
+    tagsState,
   };
 }

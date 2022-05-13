@@ -125,6 +125,13 @@ export const RULES_LOAD_ERROR = i18n.translate('xpack.observability.rules.loadEr
   defaultMessage: 'Unable to load rules',
 });
 
+export const RULE_TAGS_LOAD_ERROR = i18n.translate(
+  'xpack.observability.rulesList.unableToLoadRuleTags',
+  {
+    defaultMessage: 'Unable to load rule tags',
+  }
+);
+
 export const RULES_SINGLE_TITLE = i18n.translate(
   'xpack.observability.rules.rulesTable.singleTitle',
   {
