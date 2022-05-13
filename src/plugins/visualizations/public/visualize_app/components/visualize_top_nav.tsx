@@ -266,7 +266,10 @@ const TopNav = ({
   }, [services.data.query.timefilter.timefilter, doReload]);
 
   const shouldShowDataViewPicker = Boolean(
-    vis.type.editorConfig?.enableDataViewChange && !vis.data.savedSearchId && vis.data.indexPattern
+    vis.type.editorConfig?.enableDataViewChange &&
+      !vis.data.savedSearchId &&
+      vis.data.indexPattern &&
+      indexPatterns.length
   );
 
   const onChangeDataView = useCallback(

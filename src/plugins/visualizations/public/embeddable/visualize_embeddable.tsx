@@ -384,8 +384,7 @@ export class VisualizeEmbeddable
 
     this.subscriptions.push(
       this.getOutput$().subscribe(
-        (output) =>
-          output.error && render(<VisualizationError error={output.error} />, this.domNode)
+        ({ error }) => error && render(<VisualizationError error={error} />, this.domNode)
       )
     );
 
