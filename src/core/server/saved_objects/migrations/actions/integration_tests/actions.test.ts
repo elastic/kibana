@@ -1586,10 +1586,12 @@ describe('migration actions', () => {
   });
 
   describe('createIndex', () => {
-    afterAll(async () => {
-      await client.indices.delete({ index: 'red_then_yellow_index' });
+    afterEach(async () => {
       // Restore the default setting of 1000 shards per node
       await client.cluster.putSettings({ persistent: { cluster: { max_shards_per_node: null } } });
+    });
+    afterAll(async () => {
+      await client.indices.delete({ index: 'red_then_yellow_index' });
     });
     it('resolves right after waiting for an index status to be yellow if the index already existed', async () => {
       expect.assertions(2);
