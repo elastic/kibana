@@ -193,7 +193,8 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
   );
 
   const onResetColumns = useCallback(
-    (columnsIds: string[]) => dispatch(timelineActions.updateColumns({ id: timelineId, columns: defaultHeaders })),
+    (columnsIds: string[]) =>
+      dispatch(timelineActions.updateColumns({ id: timelineId, columns: defaultHeaders })),
     [dispatch, timelineId]
   );
 

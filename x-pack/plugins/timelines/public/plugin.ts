@@ -11,11 +11,7 @@ import { throttle } from 'lodash';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreSetup, Plugin, CoreStart } from '@kbn/core/public';
 import type { LastUpdatedAtProps, LoadingPanelProps } from './components';
-import {
-  getLastUpdatedLazy,
-  getLoadingPanelLazy,
-  getTGridLazy,
-} from './methods';
+import { getLastUpdatedLazy, getLoadingPanelLazy, getTGridLazy } from './methods';
 import type { TimelinesUIStart, TGridProps, TimelinesStartPlugins } from './types';
 import { tGridReducer } from './store/t_grid/reducer';
 import { useDraggableKeyboardWrapper } from './components/drag_and_drop/draggable_keyboard_wrapper_hook';

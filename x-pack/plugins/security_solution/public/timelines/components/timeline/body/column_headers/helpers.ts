@@ -35,7 +35,7 @@ export const getColumnHeaders = (
 export const getColumnWidthFromType = (type: string): number =>
   type !== 'date' ? DEFAULT_COLUMN_MIN_WIDTH : DEFAULT_DATE_COLUMN_MIN_WIDTH;
 
-  export const getAlertColumnHeader = (timelineId: string, fieldId: string) =>
+export const getAlertColumnHeader = (timelineId: string, fieldId: string) =>
   timelineId === TimelineId.detectionsPage || timelineId === TimelineId.detectionsRulesDetailsPage
     ? defaultHeaders.find((c) => c.id === fieldId) ?? {}
     : {};
