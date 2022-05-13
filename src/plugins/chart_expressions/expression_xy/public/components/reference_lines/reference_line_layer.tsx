@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React, { FC, Fragment } from 'react';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { groupBy } from 'lodash';
 import { euiLightVars } from '@kbn/ui-theme';
@@ -209,10 +209,10 @@ export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
       );
     }
     return (
-      <>
+      <Fragment key={`${layer.layerId}-${yConfig.forAccessor}`}>
         {line}
         {rect}
-      </>
+      </Fragment>
     );
   });
 

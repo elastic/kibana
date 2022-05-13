@@ -18,6 +18,7 @@ import {
   ExtendedYConfig,
 } from '../../../common/types';
 import { ReferenceLineAnnotations, ReferenceLineAnnotationsProps } from './reference_lines';
+import { ReferenceLineLayer } from './reference_line_layer';
 
 const row: Record<string, number> = {
   xAccessorFirstId: 1,
@@ -112,13 +113,14 @@ describe('ReferenceLineAnnotations', () => {
             ])}
           />
         );
+        const referenceLineLayer = wrapper.find(ReferenceLineLayer).dive();
 
         const y0 = fill === 'above' ? 5 : undefined;
         const y1 = fill === 'above' ? undefined : 5;
 
-        expect(wrapper.find(LineAnnotation).exists()).toBe(true);
-        expect(wrapper.find(RectAnnotation).exists()).toBe(true);
-        expect(wrapper.find(RectAnnotation).prop('dataValues')).toEqual(
+        expect(referenceLineLayer.find(LineAnnotation).exists()).toBe(true);
+        expect(referenceLineLayer.find(RectAnnotation).exists()).toBe(true);
+        expect(referenceLineLayer.find(RectAnnotation).prop('dataValues')).toEqual(
           expect.arrayContaining([
             {
               coordinates: { x0: undefined, x1: undefined, y0, y1 },
@@ -150,13 +152,14 @@ describe('ReferenceLineAnnotations', () => {
             ])}
           />
         );
+        const referenceLineLayer = wrapper.find(ReferenceLineLayer).dive();
 
         const x0 = fill === 'above' ? 1 : undefined;
         const x1 = fill === 'above' ? undefined : 1;
 
-        expect(wrapper.find(LineAnnotation).exists()).toBe(true);
-        expect(wrapper.find(RectAnnotation).exists()).toBe(true);
-        expect(wrapper.find(RectAnnotation).prop('dataValues')).toEqual(
+        expect(referenceLineLayer.find(LineAnnotation).exists()).toBe(true);
+        expect(referenceLineLayer.find(RectAnnotation).exists()).toBe(true);
+        expect(referenceLineLayer.find(RectAnnotation).prop('dataValues')).toEqual(
           expect.arrayContaining([
             {
               coordinates: { ...emptyCoords, x0, x1 },
@@ -198,8 +201,9 @@ describe('ReferenceLineAnnotations', () => {
             ])}
           />
         );
+        const referenceLineLayer = wrapper.find(ReferenceLineLayer).dive();
 
-        expect(wrapper.find(RectAnnotation).first().prop('dataValues')).toEqual(
+        expect(referenceLineLayer.find(RectAnnotation).first().prop('dataValues')).toEqual(
           expect.arrayContaining([
             {
               coordinates: { ...emptyCoords, ...coordsA },
@@ -208,7 +212,7 @@ describe('ReferenceLineAnnotations', () => {
             },
           ])
         );
-        expect(wrapper.find(RectAnnotation).last().prop('dataValues')).toEqual(
+        expect(referenceLineLayer.find(RectAnnotation).last().prop('dataValues')).toEqual(
           expect.arrayContaining([
             {
               coordinates: { ...emptyCoords, ...coordsB },
@@ -247,8 +251,9 @@ describe('ReferenceLineAnnotations', () => {
             ])}
           />
         );
+        const referenceLineLayer = wrapper.find(ReferenceLineLayer).dive();
 
-        expect(wrapper.find(RectAnnotation).first().prop('dataValues')).toEqual(
+        expect(referenceLineLayer.find(RectAnnotation).first().prop('dataValues')).toEqual(
           expect.arrayContaining([
             {
               coordinates: { ...emptyCoords, ...coordsA },
@@ -257,7 +262,7 @@ describe('ReferenceLineAnnotations', () => {
             },
           ])
         );
-        expect(wrapper.find(RectAnnotation).last().prop('dataValues')).toEqual(
+        expect(referenceLineLayer.find(RectAnnotation).last().prop('dataValues')).toEqual(
           expect.arrayContaining([
             {
               coordinates: { ...emptyCoords, ...coordsB },
@@ -295,8 +300,9 @@ describe('ReferenceLineAnnotations', () => {
             ])}
           />
         );
+        const referenceLineLayer = wrapper.find(ReferenceLineLayer).dive();
 
-        expect(wrapper.find(RectAnnotation).first().prop('dataValues')).toEqual(
+        expect(referenceLineLayer.find(RectAnnotation).first().prop('dataValues')).toEqual(
           expect.arrayContaining([
             {
               coordinates: { ...emptyCoords, ...(axisMode === 'bottom' ? { x0: 1 } : { y0: 5 }) },
@@ -305,7 +311,7 @@ describe('ReferenceLineAnnotations', () => {
             },
           ])
         );
-        expect(wrapper.find(RectAnnotation).last().prop('dataValues')).toEqual(
+        expect(referenceLineLayer.find(RectAnnotation).last().prop('dataValues')).toEqual(
           expect.arrayContaining([
             {
               coordinates: { ...emptyCoords, ...(axisMode === 'bottom' ? { x1: 2 } : { y1: 10 }) },
@@ -344,8 +350,9 @@ describe('ReferenceLineAnnotations', () => {
             ])}
           />
         );
+        const referenceLineLayer = wrapper.find(ReferenceLineLayer).dive();
 
-        expect(wrapper.find(RectAnnotation).first().prop('dataValues')).toEqual(
+        expect(referenceLineLayer.find(RectAnnotation).first().prop('dataValues')).toEqual(
           expect.arrayContaining([
             {
               coordinates: { ...emptyCoords, ...coordsA },
@@ -354,7 +361,7 @@ describe('ReferenceLineAnnotations', () => {
             },
           ])
         );
-        expect(wrapper.find(RectAnnotation).last().prop('dataValues')).toEqual(
+        expect(referenceLineLayer.find(RectAnnotation).last().prop('dataValues')).toEqual(
           expect.arrayContaining([
             {
               coordinates: { ...emptyCoords, ...coordsB },
