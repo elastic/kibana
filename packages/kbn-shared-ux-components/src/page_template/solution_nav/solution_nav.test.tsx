@@ -10,14 +10,15 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { KibanaPageTemplateSolutionNav, KibanaPageTemplateSolutionNavProps } from './solution_nav';
 
-jest.mock('@elastic/eui', () => ({
-  useIsWithinBreakpoints: (args: string[]) => {
-    return args[0] === 'xs';
-  },
-  EuiSideNav: function Component() {
-    // no-op
-  },
-}));
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    useIsWithinBreakpoints: (args: string[]) => {
+      return args[0] === 'xs';
+    },
+  };
+});
 
 const items: KibanaPageTemplateSolutionNavProps['items'] = [
   {
@@ -59,6 +60,19 @@ const items: KibanaPageTemplateSolutionNavProps['items'] = [
 ];
 
 describe('KibanaPageTemplateSolutionNav', () => {
+  describe('heading', () => {
+    test('accepts more headingProps', () => {
+      const component = shallow(
+        <KibanaPageTemplateSolutionNav
+          name="Solution"
+          headingProps={{ id: 'testID', element: 'h3' }}
+        />
+      );
+
+      expect(component).toMatchSnapshot();
+    });
+  });
+
   test('renders', () => {
     const component = shallow(<KibanaPageTemplateSolutionNav name="Solution" items={items} />);
     expect(component).toMatchSnapshot();
@@ -69,6 +83,15 @@ describe('KibanaPageTemplateSolutionNav', () => {
       <KibanaPageTemplateSolutionNav name="Solution" icon="logoElastic" items={items} />
     );
     expect(component).toMatchSnapshot();
+  });
+
+  test('renders with children', () => {
+    const component = shallow(
+      <KibanaPageTemplateSolutionNav name="Solution" data-test-subj="DTS">
+        <span id="dummy_component" />
+      </KibanaPageTemplateSolutionNav>
+    );
+    expect(component.find('#dummy_component').length > 0).toBeTruthy();
   });
 
   test('accepts EuiSideNavProps', () => {

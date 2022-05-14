@@ -82,6 +82,7 @@ export const SHIPPER_DISPLAY = {
   sample_data: 'Sample data',
   tests: 'Tests',
   tutorial: 'Tutorials',
+  placeholders: 'Extra Integrations',
 };
 
 /**
@@ -113,6 +114,7 @@ export interface CustomIntegration {
   description: string;
   type: 'ui_link';
   uiInternalPath: string;
+  uiExternalLink?: string;
   isBeta: boolean;
   icons: CustomIntegrationIcon[];
   categories: IntegrationCategory[];

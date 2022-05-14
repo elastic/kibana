@@ -83,7 +83,7 @@ describe('Use cases toast hook', () => {
         theCase: mockCase,
         attachments: [alertComment as SupportedCaseAttachment],
       });
-      validateTitle('An alert has been added to "Another horrible breach!!');
+      validateTitle('An alert was added to "Another horrible breach!!');
     });
 
     it('should display a generic title when called with a non-alert attachament', () => {
@@ -130,7 +130,7 @@ describe('Use cases toast hook', () => {
         theCase: mockCase,
         attachments: [alertComment as SupportedCaseAttachment],
       });
-      validateContent('Alerts in this case have their status synched with the case status');
+      validateContent('The alert statuses are synched with the case status.');
     });
 
     it('renders empty content when called with an alert attachment and sync off', () => {
@@ -144,7 +144,7 @@ describe('Use cases toast hook', () => {
         theCase: { ...mockCase, settings: { ...mockCase.settings, syncAlerts: false } },
         attachments: [alertComment as SupportedCaseAttachment],
       });
-      validateContent('View Case');
+      validateContent('View case');
     });
 
     it('renders a correct successful message content', () => {
@@ -152,7 +152,7 @@ describe('Use cases toast hook', () => {
         <CaseToastSuccessContent content={'my content'} onViewCaseClick={onViewCaseClick} />
       );
       expect(result.getByTestId('toaster-content-sync-text')).toHaveTextContent('my content');
-      expect(result.getByTestId('toaster-content-case-view-link')).toHaveTextContent('View Case');
+      expect(result.getByTestId('toaster-content-case-view-link')).toHaveTextContent('View case');
       expect(onViewCaseClick).not.toHaveBeenCalled();
     });
 
@@ -161,7 +161,7 @@ describe('Use cases toast hook', () => {
         <CaseToastSuccessContent onViewCaseClick={onViewCaseClick} />
       );
       expect(result.queryByTestId('toaster-content-sync-text')).toBeFalsy();
-      expect(result.getByTestId('toaster-content-case-view-link')).toHaveTextContent('View Case');
+      expect(result.getByTestId('toaster-content-case-view-link')).toHaveTextContent('View case');
       expect(onViewCaseClick).not.toHaveBeenCalled();
     });
 
