@@ -112,7 +112,6 @@ export default function ({ getService }: FtrProviderContext) {
             from: FROM,
           },
           defaultIndex: ['auditbeat-*'],
-          docValueFields: [],
           inspect: false,
         },
         strategy: 'securitySolutionSearchStrategy',
@@ -122,8 +121,6 @@ export default function ({ getService }: FtrProviderContext) {
         host: {
           architecture: ['x86_64'],
           id: [CURSOR_ID],
-          ip: [],
-          mac: [],
           name: ['zeek-sensor-san-francisco'],
           os: {
             family: ['debian'],
@@ -135,9 +132,6 @@ export default function ({ getService }: FtrProviderContext) {
         cloud: {
           instance: {
             id: ['132972452'],
-          },
-          machine: {
-            type: [],
           },
           provider: ['digitalocean'],
           region: ['sfo2'],

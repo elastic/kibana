@@ -81,7 +81,9 @@ export const formatUncommonProcessesData = (
     fieldMap
   );
 
-  flattenedFields = set('node', processFlattenedFields, flattenedFields);
+  if (Object.keys(processFlattenedFields).length > 0) {
+    flattenedFields = set('node', processFlattenedFields, flattenedFields);
+  }
   flattenedFields.node._id = hit._id;
   flattenedFields.node.instances = instancesCount;
   flattenedFields.node.hosts = hit.host;

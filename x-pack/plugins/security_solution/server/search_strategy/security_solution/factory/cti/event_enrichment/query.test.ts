@@ -54,21 +54,16 @@ describe('buildEventEnrichmentQuery', () => {
     );
   });
 
-  it('includes specified docvalue_fields', () => {
-    const docValueFields = [
-      { field: '@timestamp', format: 'date_time' },
-      { field: 'event.created', format: 'date_time' },
-      { field: 'event.end', format: 'date_time' },
-    ];
-    const options = buildEventEnrichmentRequestOptionsMock({ docValueFields });
-    const query = buildEventEnrichmentQuery(options);
-    expect(query.body?.docvalue_fields).toEqual(expect.arrayContaining(docValueFields));
-  });
-
   it('requests all fields', () => {
     const options = buildEventEnrichmentRequestOptionsMock();
     const query = buildEventEnrichmentQuery(options);
-    expect(query.body?.fields).toEqual(['*']);
+    expect(query.body?.fields).toEqual([
+      '*',
+      {
+        field: '@timestamp',
+        format: 'strict_date_optional_time',
+      },
+    ]);
   });
 
   it('excludes _source', () => {

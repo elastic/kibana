@@ -248,7 +248,7 @@ describe('helpers', () => {
           value: '',
         },
         node: {
-          _id: '',
+          _id: 'id-123',
           hosts: [],
           instances: 0,
           process: {},
