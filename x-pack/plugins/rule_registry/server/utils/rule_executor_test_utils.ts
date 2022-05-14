@@ -17,10 +17,7 @@ import {
   RuleTypeState,
 } from '@kbn/alerting-plugin/server';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import {
-  searchSourceCommonMock,
-  searchSourceInstanceMock,
-} from '@kbn/data-plugin/common/search/search_source/mocks';
+import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 
 export const createDefaultAlertExecutorOptions = <
   Params extends RuleTypeParams = never,
@@ -79,10 +76,7 @@ export const createDefaultAlertExecutorOptions = <
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
     shouldWriteAlerts: () => shouldWriteAlerts,
     shouldStopExecution: () => false,
-    searchSourceUtils: {
-      searchSourceClient: searchSourceCommonMock,
-      wrappedFetch: () => searchSourceInstanceMock.fetch(),
-    },
+    searchSourceClient: searchSourceCommonMock,
   },
   state,
   updatedBy: null,
