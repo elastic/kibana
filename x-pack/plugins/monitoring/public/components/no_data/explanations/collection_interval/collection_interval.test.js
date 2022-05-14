@@ -32,7 +32,7 @@ describe('ExplainCollectionInterval', () => {
       />
     );
     const rendered = mountWithIntl(component);
-    expect(rendered).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
 
   test('should have a button that triggers ajax action', () => {
