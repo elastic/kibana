@@ -10,10 +10,7 @@ import {
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import {
-  searchSourceCommonMock,
-  searchSourceInstanceMock,
-} from '@kbn/data-plugin/common/search/search_source/mocks';
+import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { rulesClientMock } from './rules_client.mock';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { Alert, AlertFactoryDoneUtils } from './alert';
@@ -115,10 +112,7 @@ const createRuleExecutorServicesMock = <
     shouldWriteAlerts: () => true,
     shouldStopExecution: () => true,
     search: createAbortableSearchServiceMock(),
-    searchSourceUtils: {
-      searchSourceClient: searchSourceCommonMock,
-      wrappedFetch: () => searchSourceInstanceMock.fetch(),
-    },
+    searchSourceClient: searchSourceCommonMock,
   };
 };
 export type RuleExecutorServicesMock = ReturnType<typeof createRuleExecutorServicesMock>;

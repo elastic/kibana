@@ -72,6 +72,7 @@ import { IExecutionStatusAndMetrics } from '../lib/rule_execution_status';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { wrapSearchSourceClient } from '../lib/wrap_search_source_client';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+import { SearchMetrics } from '../lib/types';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -448,10 +449,15 @@ export class TaskRunner<
 
     const scopedClusterClientMetrics = wrappedScopedClusterClient.getMetrics();
     const searchSourceClientMetrics = wrappedSearchSourceClient.getMetrics();
-    const searchMetrics =
-      scopedClusterClientMetrics.numSearches !== 0
-        ? scopedClusterClientMetrics
-        : searchSourceClientMetrics;
+    const searchMetrics: SearchMetrics = {
+      numSearches: scopedClusterClientMetrics.numSearches + searchSourceClientMetrics.numSearches,
+      totalSearchDurationMs:
+        scopedClusterClientMetrics.totalSearchDurationMs +
+        searchSourceClientMetrics.totalSearchDurationMs,
+      esSearchDurationMs:
+        scopedClusterClientMetrics.esSearchDurationMs +
+        searchSourceClientMetrics.esSearchDurationMs,
+    };
     const ruleRunMetricsStore = new RuleRunMetricsStore();
 
     ruleRunMetricsStore.setNumSearches(searchMetrics.numSearches);

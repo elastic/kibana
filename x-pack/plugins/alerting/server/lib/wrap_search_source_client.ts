@@ -139,14 +139,18 @@ function wrapFetch$({
   logMetrics,
 }: WrapParams<ISearchSource>) {
   return (options?: ISearchOptions) => {
+    const searchOptions = options ?? {};
     const start = Date.now();
+
     logger.debug(
-      `executing query for rule ${rule.alertTypeId}:${rule.id} in space ${rule.spaceId}`
+      `executing query for rule ${rule.alertTypeId}:${rule.id} in space ${
+        rule.spaceId
+      } - with options ${JSON.stringify(searchOptions)}`
     );
 
     return pureSearchSource
       .fetch$({
-        ...options,
+        ...searchOptions,
         abortSignal: abortController.signal,
       })
       .pipe(

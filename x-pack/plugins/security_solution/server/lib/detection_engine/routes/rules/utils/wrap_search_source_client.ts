@@ -12,6 +12,7 @@ import {
   SearchSource,
   SerializedSearchSourceFields,
 } from '@kbn/data-plugin/common';
+import { catchError, throwError } from 'rxjs';
 
 interface Props {
   abortController: AbortController;
@@ -99,9 +100,21 @@ function wrapCreateCopy({ pureSearchSource, ...wrapParams }: WrapParams<ISearchS
 
 function wrapFetch$({ abortController, pureSearchSource }: WrapParams<ISearchSource>) {
   return (options?: ISearchOptions) => {
-    return pureSearchSource.fetch$({
-      ...options,
-      abortSignal: abortController.signal,
-    });
+    const searchOptions = options ?? {};
+    return pureSearchSource
+      .fetch$({
+        ...searchOptions,
+        abortSignal: abortController.signal,
+      })
+      .pipe(
+        catchError((error) => {
+          if (abortController.signal.aborted) {
+            return throwError(
+              () => new Error('Search has been aborted due to cancelled execution')
+            );
+          }
+          return throwError(() => error);
+        })
+      );
   };
 }
