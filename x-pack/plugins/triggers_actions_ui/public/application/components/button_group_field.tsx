@@ -6,7 +6,7 @@
  */
 
 import React, { memo, ReactNode } from 'react';
-import { EuiFieldPassword, EuiFormRow } from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import {
   getFieldValidityAndErrorMessage,
   UseField,
@@ -16,12 +16,13 @@ import { i18n } from '@kbn/i18n';
 
 const { emptyField } = fieldValidators;
 
-const getFieldConfig = ({ label }: { label: string }) => ({
+const getFieldConfig = ({ label, defaultValue }: { label: string; defaultValue?: string }) => ({
   label,
+  defaultValue,
   validations: [
     {
       validator: emptyField(
-        i18n.translate('xpack.triggersActionsUI.components.passwordField.error.requiredNameText', {
+        i18n.translate('xpack.triggersActionsUI.components.buttonGroupField.error.requiredField', {
           values: { label },
           defaultMessage: '{label} is required.',
         })
@@ -30,21 +31,23 @@ const getFieldConfig = ({ label }: { label: string }) => ({
   ],
 });
 
-interface PasswordFieldProps {
+interface Props {
   path: string;
   label: string;
+  defaultValue?: string;
   helpText?: string | ReactNode;
   [key: string]: any;
 }
 
-const PasswordFieldComponent: React.FC<PasswordFieldProps> = ({
+const ButtonGroupFieldComponent: React.FC<Props> = ({
   path,
   label,
   helpText,
+  defaultValue,
   ...rest
 }) => {
   return (
-    <UseField<string> path={path} config={getFieldConfig({ label })}>
+    <UseField<string> path={path} config={getFieldConfig({ label, defaultValue })}>
       {(field) => {
         const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
@@ -57,12 +60,14 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = ({
             isInvalid={isInvalid}
             fullWidth
           >
-            <EuiFieldPassword
-              isInvalid={isInvalid}
-              value={field.value}
-              onChange={field.onChange}
-              isLoading={field.isValidating}
-              fullWidth
+            <EuiButtonGroup
+              isFullWidth
+              buttonSize="m"
+              legend="Select"
+              color="primary"
+              options={[]}
+              idSelected={field.value}
+              onChange={field.setValue}
               {...rest}
             />
           </EuiFormRow>
@@ -72,4 +77,4 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = ({
   );
 };
 
-export const PasswordField = memo(PasswordFieldComponent);
+export const ButtonGroupField = memo(ButtonGroupFieldComponent);
