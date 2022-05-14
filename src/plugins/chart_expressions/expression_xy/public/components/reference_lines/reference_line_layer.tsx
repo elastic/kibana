@@ -13,13 +13,15 @@ import { euiLightVars } from '@kbn/ui-theme';
 import { AnnotationDomainType, LineAnnotation, Position, RectAnnotation } from '@elastic/charts';
 import { DatatableRow } from '@kbn/expressions-plugin/common';
 import { ExtendedYConfigResult, ReferenceLineLayerConfig } from '../../../common/types';
-import { getBaseIconPlacement } from './utils';
 import {
-  LINES_MARKER_SIZE,
-  mapVerticalToHorizontalPlacement,
-  Marker,
-  MarkerBody,
-} from '../../helpers';
+  getBaseIconPlacement,
+  getBottomRect,
+  getGroupId,
+  getHorizontalRect,
+  getLineAnnotationProps,
+  getSharedStyle,
+} from './utils';
+import { LINES_MARKER_SIZE } from '../../helpers';
 
 interface ReferenceLineLayerProps {
   layer: ReferenceLineLayerConfig;
@@ -47,29 +49,14 @@ const getRectDataValue = (
     ? row[yConfigsWithSameDirection[indexFromSameType + 1].forAccessor]
     : undefined;
 
+  const headerLabel = columnToLabelMap[yConfig.forAccessor];
+  const currentValue = row[yConfig.forAccessor];
+
   if (yConfig.axisMode === 'bottom') {
-    return {
-      coordinates: {
-        x0: isFillAbove ? row[yConfig.forAccessor] : nextValue,
-        y0: undefined,
-        x1: isFillAbove ? nextValue : row[yConfig.forAccessor],
-        y1: undefined,
-      },
-      header: columnToLabelMap[yConfig.forAccessor],
-      details: formatter?.convert(row[yConfig.forAccessor]) || row[yConfig.forAccessor],
-    };
+    return getBottomRect(headerLabel, isFillAbove, formatter, currentValue, nextValue);
   }
 
-  return {
-    coordinates: {
-      x0: undefined,
-      y0: isFillAbove ? row[yConfig.forAccessor] : nextValue,
-      x1: undefined,
-      y1: isFillAbove ? nextValue : row[yConfig.forAccessor],
-    },
-    header: columnToLabelMap[yConfig.forAccessor],
-    details: formatter?.convert(row[yConfig.forAccessor]) || row[yConfig.forAccessor],
-  };
+  return getHorizontalRect(headerLabel, isFillAbove, formatter, currentValue, nextValue);
 };
 
 export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
@@ -97,9 +84,10 @@ export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
     groupedByDirection.below.reverse();
   }
   const referenceLineElements = yConfigByValue.flatMap((yConfig) => {
+    const { axisMode } = yConfig;
+
     // Find the formatter for the given axis
-    const groupId =
-      yConfig.axisMode === 'bottom' ? undefined : yConfig.axisMode === 'right' ? 'right' : 'left';
+    const groupId = getGroupId(axisMode);
 
     const formatter = formatters[groupId || 'bottom'];
 
@@ -114,45 +102,22 @@ export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
     // the padding map is built for vertical chart
     const hasReducedPadding = paddingMap[markerPositionVertical] === LINES_MARKER_SIZE;
 
-    const props = {
+    const props = getLineAnnotationProps(
+      yConfig,
+      {
+        markerLabel: columnToLabelMap[yConfig.forAccessor],
+        markerBodyLabel:
+          yConfig.textVisibility && !hasReducedPadding
+            ? columnToLabelMap[yConfig.forAccessor]
+            : undefined,
+      },
+      axesMap,
+      paddingMap,
       groupId,
-      marker: (
-        <Marker
-          config={yConfig}
-          label={columnToLabelMap[yConfig.forAccessor]}
-          isHorizontal={isHorizontal}
-          hasReducedPadding={hasReducedPadding}
-        />
-      ),
-      markerBody: (
-        <MarkerBody
-          label={
-            yConfig.textVisibility && !hasReducedPadding
-              ? columnToLabelMap[yConfig.forAccessor]
-              : undefined
-          }
-          isHorizontal={
-            (!isHorizontal && yConfig.axisMode === 'bottom') ||
-            (isHorizontal && yConfig.axisMode !== 'bottom')
-          }
-        />
-      ),
-      // rotate the position if required
-      markerPosition: isHorizontal
-        ? mapVerticalToHorizontalPlacement(markerPositionVertical)
-        : markerPositionVertical,
-    };
+      isHorizontal
+    );
 
-    const sharedStyle = {
-      strokeWidth: yConfig.lineWidth || 1,
-      stroke: yConfig.color || defaultColor,
-      dash:
-        yConfig.lineStyle === 'dashed'
-          ? [(yConfig.lineWidth || 1) * 3, yConfig.lineWidth || 1]
-          : yConfig.lineStyle === 'dotted'
-          ? [yConfig.lineWidth || 1, yConfig.lineWidth || 1]
-          : undefined,
-    };
+    const sharedStyle = getSharedStyle(yConfig);
 
     const dataValuesSample = {
       dataValue: row[yConfig.forAccessor],

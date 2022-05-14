@@ -11,13 +11,13 @@ import { euiLightVars } from '@kbn/ui-theme';
 import { AnnotationDomainType, LineAnnotation, Position, RectAnnotation } from '@elastic/charts';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { ReferenceLineConfig, ReferenceLineYConfig } from '../../../common/types';
-import { getBaseIconPlacement } from './utils';
 import {
-  LINES_MARKER_SIZE,
-  mapVerticalToHorizontalPlacement,
-  Marker,
-  MarkerBody,
-} from '../../helpers';
+  getBottomRect,
+  getGroupId,
+  getHorizontalRect,
+  getLineAnnotationProps,
+  getSharedStyle,
+} from './utils';
 
 interface ReferenceLineProps {
   layer: ReferenceLineConfig;
@@ -28,31 +28,14 @@ interface ReferenceLineProps {
 }
 
 const getRectDataValue = (yConfig: ReferenceLineYConfig, formatter: FieldFormat | undefined) => {
-  const isFillAbove = yConfig.fill === 'above';
+  const { name, value, fill } = yConfig;
+  const isFillAbove = fill === 'above';
 
   if (yConfig.axisMode === 'bottom') {
-    return {
-      coordinates: {
-        x0: isFillAbove ? yConfig.value : undefined,
-        y0: undefined,
-        x1: isFillAbove ? undefined : yConfig.value,
-        y1: undefined,
-      },
-      header: yConfig.name,
-      details: formatter?.convert(yConfig.value) || yConfig.value,
-    };
+    return getBottomRect(name, isFillAbove, formatter, value);
   }
 
-  return {
-    coordinates: {
-      x0: undefined,
-      y0: isFillAbove ? yConfig.value : undefined,
-      x1: undefined,
-      y1: isFillAbove ? undefined : yConfig.value,
-    },
-    header: yConfig.name,
-    details: formatter?.convert(yConfig.value) || yConfig.value,
-  };
+  return getHorizontalRect(name, isFillAbove, formatter, value);
 };
 
 export const ReferenceLine: FC<ReferenceLineProps> = ({
@@ -73,55 +56,22 @@ export const ReferenceLine: FC<ReferenceLineProps> = ({
   const { name, value, axisMode } = yConfig;
 
   // Find the formatter for the given axis
-  const groupId = axisMode === 'bottom' ? undefined : axisMode === 'right' ? 'right' : 'left';
+  const groupId = getGroupId(axisMode);
 
   const formatter = formatters[groupId || 'bottom'];
 
   const defaultColor = euiLightVars.euiColorDarkShade;
 
-  // get the position for vertical chart
-  const markerPositionVertical = getBaseIconPlacement(
-    yConfig.iconPosition,
+  const props = getLineAnnotationProps(
+    yConfig,
+    { markerLabel: name, markerBodyLabel: name },
     axesMap,
-    yConfig.axisMode
-  );
-  // the padding map is built for vertical chart
-  const hasReducedPadding = paddingMap[markerPositionVertical] === LINES_MARKER_SIZE;
-
-  const props = {
+    paddingMap,
     groupId,
-    marker: (
-      <Marker
-        config={yConfig}
-        label={name}
-        isHorizontal={isHorizontal}
-        hasReducedPadding={hasReducedPadding}
-      />
-    ),
-    markerBody: (
-      <MarkerBody
-        label={yConfig.textVisibility && !hasReducedPadding ? name : undefined}
-        isHorizontal={
-          (!isHorizontal && axisMode === 'bottom') || (isHorizontal && axisMode !== 'bottom')
-        }
-      />
-    ),
-    // rotate the position if required
-    markerPosition: isHorizontal
-      ? mapVerticalToHorizontalPlacement(markerPositionVertical)
-      : markerPositionVertical,
-  };
+    isHorizontal
+  );
 
-  const sharedStyle = {
-    strokeWidth: yConfig.lineWidth || 1,
-    stroke: yConfig.color || defaultColor,
-    dash:
-      yConfig.lineStyle === 'dashed'
-        ? [(yConfig.lineWidth || 1) * 3, yConfig.lineWidth || 1]
-        : yConfig.lineStyle === 'dotted'
-        ? [yConfig.lineWidth || 1, yConfig.lineWidth || 1]
-        : undefined,
-  };
+  const sharedStyle = getSharedStyle(yConfig);
 
   const dataValuesSample = {
     dataValue: value,
@@ -147,7 +97,6 @@ export const ReferenceLine: FC<ReferenceLineProps> = ({
   let rect;
   if (yConfig.fill && yConfig.fill !== 'none') {
     const rectDataValuesSample = getRectDataValue(yConfig, formatter);
-
     const rectDataValues = new Array(lineLength).fill(rectDataValuesSample);
 
     rect = (
