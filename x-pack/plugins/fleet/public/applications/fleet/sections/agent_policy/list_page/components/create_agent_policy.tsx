@@ -33,7 +33,7 @@ const FlyoutWithHigherZIndex = styled(EuiFlyout)`
   z-index: ${(props) => props.theme.eui.euiZLevel5};
 `;
 
-interface Props extends EuiFlyoutProps {
+interface Props extends Omit<EuiFlyoutProps, 'onClose'> {
   onClose: (createdAgentPolicy?: AgentPolicy) => void;
 }
 
