@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel } from '@elastic/eui';
+import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import React from 'react';
 import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
 import k8sLogoIcon from '../../../assets/icons/k8s_logo.svg';
