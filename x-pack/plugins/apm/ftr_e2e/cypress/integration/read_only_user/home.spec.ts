@@ -46,7 +46,7 @@ describe.skip('Home page', () => {
 
     cy.url().should(
       'include',
-      'app/apm/services?comparisonEnabled=true&environment=ENVIRONMENT_ALL&rangeFrom=now-15m&rangeTo=now&offset=1d'
+      'app/apm/services?comparison=time&comparisonEnabled=true&environment=ENVIRONMENT_ALL&rangeFrom=now-15m&rangeTo=now&offset=1d'
     );
   });
 

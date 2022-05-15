@@ -18,6 +18,7 @@ import * as urlHelpers from '../links/url_helpers';
 import moment from 'moment';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { ComparisonOptionEnum } from './get_comparison_options';
 
 function getWrapper({
   rangeFrom,
@@ -36,7 +37,11 @@ function getWrapper({
     return (
       <MemoryRouter
         initialEntries={[
-          `/services?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}&environment=${environment}&offset=${offset}&comparisonEnabled=${comparisonEnabled}`,
+          `/services?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}&environment=${environment}&offset=${offset}&comparisonEnabled=${comparisonEnabled}&comparison=${
+            comparisonEnabled
+              ? ComparisonOptionEnum.Time
+              : ComparisonOptionEnum.False
+          }`,
         ]}
       >
         <MockApmPluginContextWrapper>
