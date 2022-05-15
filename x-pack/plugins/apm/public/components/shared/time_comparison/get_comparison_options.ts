@@ -99,9 +99,11 @@ function getTimeRangeSelectOptions({
 export function getComparisonOptions({
   start,
   end,
+  showExpectedBoundsOption,
 }: {
   start?: string;
   end?: string;
+  showExpectedBoundsOption?: boolean;
 }) {
   const momentStart = moment(start);
   const momentEnd = moment(end);
@@ -130,13 +132,15 @@ export function getComparisonOptions({
     end: momentEnd,
     msDiff,
   });
-  return [
-    ...timeComparisonOptions,
-    {
-      value: ComparisonOptionEnum.MlBounds,
-      text: i18n.translate('xpack.apm.comparison.mlExpectedBounds', {
-        defaultMessage: 'Expected bounds',
-      }),
-    },
-  ];
+  return showExpectedBoundsOption
+    ? [
+        ...timeComparisonOptions,
+        {
+          value: ComparisonOptionEnum.MlBounds,
+          text: i18n.translate('xpack.apm.comparison.mlExpectedBounds', {
+            defaultMessage: 'Expected bounds',
+          }),
+        },
+      ]
+    : timeComparisonOptions;
 }

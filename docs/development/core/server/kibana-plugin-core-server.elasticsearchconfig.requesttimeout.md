@@ -2,7 +2,7 @@
 
 [Home](./index.md) &gt; [kibana-plugin-core-server](./kibana-plugin-core-server.md) &gt; [ElasticsearchConfig](./kibana-plugin-core-server.elasticsearchconfig.md) &gt; [requestTimeout](./kibana-plugin-core-server.elasticsearchconfig.requesttimeout.md)
 
-### ElasticsearchConfig.requestTimeout property
+## ElasticsearchConfig.requestTimeout property
 
 Timeout after which HTTP request will be aborted and retried.
 
