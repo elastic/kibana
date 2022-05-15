@@ -76,16 +76,17 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
         return response.badRequest({ body: { message, attributes: { details, ...payload } } });
       }
 
-      const monitorWithRevision = formatSecrets({
+      const monitorWithRevision = {
         ...editedMonitor,
         revision: (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
-      });
+      };
+      const formattedMonitor = formatSecrets(monitorWithRevision);
 
       const editedMonitorSavedObject: SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor> =
         await savedObjectsClient.update<MonitorFields>(
           syntheticsMonitorType,
           monitorId,
-          monitor.type === 'browser' ? { ...monitorWithRevision, urls: '' } : monitorWithRevision
+          monitor.type === 'browser' ? { ...formattedMonitor, urls: '' } : formattedMonitor
         );
 
       const errors = await syncEditedMonitor({
@@ -143,6 +144,7 @@ export const syncEditedMonitor = async ({
       editedMonitorSavedObject,
       previousMonitor,
       server.kibanaVersion,
+      Boolean((monitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
       errors
     )
   );

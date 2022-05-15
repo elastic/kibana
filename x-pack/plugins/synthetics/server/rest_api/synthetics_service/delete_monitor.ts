@@ -7,6 +7,8 @@
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
+  ConfigKey,
+  MonitorFields,
   EncryptedSyntheticsMonitor,
   SyntheticsMonitorWithSecrets,
 } from '../../../common/runtime_types';
@@ -91,7 +93,13 @@ export const deleteMonitor = async ({
     sendTelemetryEvents(
       logger,
       telemetry,
-      formatTelemetryDeleteEvent(monitor, kibanaVersion, new Date().toISOString(), errors)
+      formatTelemetryDeleteEvent(
+        monitor,
+        kibanaVersion,
+        new Date().toISOString(),
+        Boolean((normalizedMonitor.attributes as MonitorFields)[ConfigKey.SOURCE_INLINE]),
+        errors
+      )
     );
 
     return errors;

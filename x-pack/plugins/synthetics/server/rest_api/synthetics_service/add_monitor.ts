@@ -7,6 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { SavedObject } from '@kbn/core/server';
 import {
+  ConfigKey,
   MonitorFields,
   SyntheticsMonitor,
   EncryptedSyntheticsMonitor,
@@ -80,6 +81,7 @@ export const syncNewMonitor = async ({
     formatTelemetryEvent({
       monitor: monitorSavedObject,
       errors,
+      isInlineScript: Boolean((monitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
       kibanaVersion: server.kibanaVersion,
     })
   );

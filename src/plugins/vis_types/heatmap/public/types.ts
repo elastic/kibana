@@ -9,6 +9,7 @@ import { UiCounterMetricType } from '@kbn/analytics';
 import type { Position } from '@elastic/charts';
 import type { ChartsPluginSetup, Style, Labels, ColorSchemas } from '@kbn/charts-plugin/public';
 import { Range } from '@kbn/expressions-plugin/public';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
 
 export interface HeatmapTypeProps {
   showElasticChartsOptions?: boolean;
@@ -23,7 +24,7 @@ export interface HeatmapVisParams {
   legendPosition: Position;
   truncateLegend?: boolean;
   maxLegendLines?: number;
-  legendSize?: number;
+  legendSize?: LegendSize;
   lastRangeIsRightOpen: boolean;
   percentageMode: boolean;
   valueAxes: ValueAxis[];
