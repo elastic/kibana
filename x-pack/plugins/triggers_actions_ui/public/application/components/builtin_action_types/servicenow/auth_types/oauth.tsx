@@ -6,12 +6,13 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { EuiFormRow, EuiFieldText, EuiFieldPassword, EuiTextArea } from '@elastic/eui';
+import { EuiFormRow, EuiFieldText, EuiFieldPassword, EuiTextArea, EuiIconTip } from '@elastic/eui';
 import { getEncryptedFieldNotifyLabel } from '../../../get_encrypted_field_notify_label';
 import type { ActionConnectorFieldsProps } from '../../../../../types';
 import type { ServiceNowActionConnector } from '../types';
 import * as i18n from '../translations';
 import { isFieldInvalid } from '../helpers';
+import { PRIVATE_KEY_PASSWORD_HELPER_TEXT } from '../translations';
 
 interface Props {
   action: ActionConnectorFieldsProps<ServiceNowActionConnector>['action'];
@@ -204,7 +205,16 @@ const OAuthComponent: React.FC<Props> = ({
         id="connector-servicenow-private-key-password"
         fullWidth
         error={errors.privateKeyPassword}
-        label={i18n.PRIVATE_KEY_PASSWORD_LABEL}
+        label={
+          <>
+            {i18n.PRIVATE_KEY_PASSWORD_LABEL}{' '}
+            <EuiIconTip
+              position="right"
+              type="questionInCircle"
+              content={PRIVATE_KEY_PASSWORD_HELPER_TEXT}
+            />
+          </>
+        }
       >
         <EuiFieldPassword
           fullWidth

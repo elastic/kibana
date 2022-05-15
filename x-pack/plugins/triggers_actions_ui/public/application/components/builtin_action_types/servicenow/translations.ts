@@ -353,7 +353,7 @@ export const KEY_ID_LABEL = i18n.translate(
 export const USER_EMAIL_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.userEmailTextFieldLabel',
   {
-    defaultMessage: 'User Identifier (Email)',
+    defaultMessage: 'User Identifier',
   }
 );
 
@@ -368,6 +368,13 @@ export const PRIVATE_KEY_PASSWORD_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.privateKeyPassTextFieldLabel',
   {
     defaultMessage: 'Private Key Password',
+  }
+);
+
+export const PRIVATE_KEY_PASSWORD_HELPER_TEXT = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.privateKeyPassLabelHelpText',
+  {
+    defaultMessage: 'This is only required if you have set a password on your private key',
   }
 );
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -37,9 +37,10 @@ const CredentialsComponent: React.FC<Props> = ({
   editActionSecrets,
   editActionConfig,
 }) => {
-  const { isOAuth } = action.config;
+  const [isOAuth, setIsOAuth] = useState(action.config.isOAuth);
 
   const switchIsOAuth = (e: EuiSwitchEvent) => {
+    setIsOAuth(e.target.checked);
     editActionConfig('isOAuth', e.target.checked);
     if (!e.target.checked) {
       editActionConfig('clientId', null);
