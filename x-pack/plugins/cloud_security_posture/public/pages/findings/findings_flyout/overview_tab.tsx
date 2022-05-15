@@ -95,19 +95,19 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
     () => [
       {
         initialIsOpen: true,
-        title: 'Details',
+        title: TEXT.DETAILS,
         id: 'detailsAccordion',
         listItems: getDetailsList(data),
       },
       {
         initialIsOpen: true,
-        title: 'Remediation',
+        title: TEXT.REMEDIATION,
         id: 'remediationAccordion',
         listItems: getRemediationList(data),
       },
       {
         initialIsOpen: false,
-        title: 'Evidence',
+        title: TEXT.EVIDENCE,
         id: 'evidenceAccordion',
         listItems: getEvidenceList(data),
       },

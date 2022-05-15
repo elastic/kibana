@@ -253,6 +253,10 @@ export const NO_FINDINGS = i18n.translate('xpack.csp.findings.nonFindingsLabel',
   defaultMessage: 'There are no Findings',
 });
 
+export const DETAILS = i18n.translate('xpack.csp.findings.findingsFlyout.detailsTabLabel', {
+  defaultMessage: 'Details',
+});
+
 export const FINDINGS_SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.csp.findings.searchBar.searchPlaceholder',
   { defaultMessage: 'Search findings (eg. resource.section : "API Server")' }
