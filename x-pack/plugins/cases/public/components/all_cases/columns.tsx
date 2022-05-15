@@ -53,10 +53,6 @@ const MediumShadeText = styled.p`
   color: ${({ theme }) => theme.eui.euiColorMediumShade};
 `;
 
-const Spacer = styled.span`
-  margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
-`;
-
 const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
 
@@ -183,14 +179,20 @@ export const useCasesColumns = ({
         if (createdBy != null) {
           return (
             <>
-              <EuiAvatar
-                className="userAction__circle"
-                name={createdBy.fullName ? createdBy.fullName : createdBy.username ?? i18n.UNKNOWN}
-                size="s"
-              />
-              <Spacer data-test-subj="case-table-column-createdBy">
-                {createdBy.username ?? i18n.UNKNOWN}
-              </Spacer>
+              <EuiToolTip
+                position="top"
+                content={createdBy.username ?? i18n.UNKNOWN}
+                data-test-subj="case-table-column-createdBy-tooltip"
+              >
+                <EuiAvatar
+                  className="userAction__circle"
+                  name={
+                    createdBy.fullName ? createdBy.fullName : createdBy.username ?? i18n.UNKNOWN
+                  }
+                  size="s"
+                  data-test-subj="case-table-column-createdBy"
+                />
+              </EuiToolTip>
             </>
           );
         }
