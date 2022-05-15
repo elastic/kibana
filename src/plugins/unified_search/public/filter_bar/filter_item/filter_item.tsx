@@ -29,8 +29,7 @@ import {
 import { FilterEditor } from '../filter_editor';
 import { FilterView } from '../filter_view';
 import { getIndexPatterns } from '../../services';
-
-type PanelOptions = 'pinFilter' | 'editFilter' | 'negateFilter' | 'disableFilter' | 'deleteFilter';
+import { FilterPanelOption } from '../../types';
 
 export interface FilterItemProps {
   id: string;
@@ -41,7 +40,7 @@ export interface FilterItemProps {
   onRemove: () => void;
   intl: InjectedIntl;
   uiSettings: IUiSettingsClient;
-  hiddenPanelOptions?: PanelOptions[];
+  hiddenPanelOptions?: FilterPanelOption[];
   timeRangeForSuggestionsOverride?: boolean;
 }
 
@@ -247,7 +246,7 @@ export function FilterItem(props: FilterItemProps) {
 
     if (hiddenPanelOptions && hiddenPanelOptions.length > 0) {
       mainPanelItems = mainPanelItems.filter(
-        (pItem) => !hiddenPanelOptions.includes(pItem['data-test-subj'] as PanelOptions)
+        (pItem) => !hiddenPanelOptions.includes(pItem['data-test-subj'] as FilterPanelOption)
       );
     }
     return [

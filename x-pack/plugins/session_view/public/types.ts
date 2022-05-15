@@ -90,6 +90,34 @@ export interface DetailPanelHost {
   };
 }
 
+export interface DetailPanelContainer {
+  id: string;
+  name: string;
+  image: {
+    name: string;
+    tag: string;
+    hash: {
+      all: string;
+    };
+  };
+}
+
+export interface DetailPanelOrchestrator {
+  resource: {
+    name: string;
+    type: string;
+    ip: string;
+  };
+  namespace: string;
+  cluster: {
+    name: string;
+    id: string;
+  };
+  parent: {
+    type: string;
+  };
+}
+
 export interface SessionViewStart {
   getSessionView: (props: SessionViewDeps) => JSX.Element;
 }

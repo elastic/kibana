@@ -44,6 +44,7 @@ import { AddFilterPopover } from './add_filter_popover';
 import { DataViewPicker, DataViewPickerProps } from '../dataview_picker';
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import type { SuggestionsListSize } from '../typeahead/suggestions_component';
+import './query_bar.scss';
 
 const SuperDatePicker = React.memo(
   EuiSuperDatePicker as any
