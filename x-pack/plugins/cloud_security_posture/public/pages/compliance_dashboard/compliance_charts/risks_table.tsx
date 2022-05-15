@@ -49,7 +49,9 @@ export const RisksTable = ({
         truncateText: true,
         name: TEXT.CIS_SECTION,
         render: (name: GroupedFindingsEvaluation['name']) => (
-          <EuiLink onClick={() => onCellClick(name)}>{name}</EuiLink>
+          <EuiLink onClick={() => onCellClick(name)} className="eui-textTruncate">
+            {name}
+          </EuiLink>
         ),
       },
       {
