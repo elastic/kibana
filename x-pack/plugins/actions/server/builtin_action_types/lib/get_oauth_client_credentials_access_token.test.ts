@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import sinon from 'sinon';
 import { Logger } from '@kbn/core/server';
 import { asyncForEach } from '@kbn/std';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -20,7 +21,15 @@ const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 const configurationUtilities = actionsConfigMock.create();
 const connectorTokenClient = connectorTokenClientMock.create();
 
+let clock: sinon.SinonFakeTimers;
+
 describe('getOAuthClientCredentialsAccessToken', () => {
+  beforeAll(() => {
+    clock = sinon.useFakeTimers(new Date('2021-01-01T12:00:00.000Z'));
+  });
+  beforeEach(() => clock.reset());
+  afterAll(() => clock.restore());
+
   const getOAuthClientCredentialsAccessTokenOpts = {
     connectorId: '123',
     logger,
@@ -52,8 +61,8 @@ describe('getOAuthClientCredentialsAccessToken', () => {
         connectorId: '123',
         tokenType: 'access_token',
         token: 'testtokenvalue',
-        createdAt: new Date().toISOString(),
-        expiresAt: new Date(Date.now() + 10000000000).toISOString(),
+        createdAt: new Date('2021-01-01T08:00:00.000Z').toISOString(),
+        expiresAt: new Date('2021-01-02T13:00:00.000Z').toISOString(),
       },
     });
     const accessToken = await getOAuthClientCredentialsAccessToken(
@@ -95,14 +104,15 @@ describe('getOAuthClientCredentialsAccessToken', () => {
       connectorId: '123',
       token: null,
       newToken: 'access_token brandnewaccesstoken',
+      tokenRequestDate: 1609502400000,
       expiresInSec: 1000,
       deleteExisting: false,
     });
   });
 
   test('creates new assertion if stored access token exists but is expired', async () => {
-    const createdAt = new Date().toISOString();
-    const expiresAt = new Date(Date.now() - 100).toISOString();
+    const createdAt = new Date('2021-01-01T08:00:00.000Z').toISOString();
+    const expiresAt = new Date('2021-01-01T09:00:00.000Z').toISOString();
     connectorTokenClient.get.mockResolvedValueOnce({
       hasErrors: false,
       connectorToken: {
@@ -147,6 +157,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
         expiresAt,
       },
       newToken: 'access_token brandnewaccesstoken',
+      tokenRequestDate: 1609502400000,
       expiresInSec: 1000,
       deleteExisting: false,
     });
@@ -210,6 +221,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
     (requestOAuthClientCredentialsToken as jest.Mock).mockResolvedValueOnce({
       tokenType: 'access_token',
       accessToken: 'brandnewaccesstoken',
+      tokenRequestDate: 1609502400000,
       expiresIn: 1000,
     });
     connectorTokenClient.updateOrReplace.mockRejectedValueOnce(new Error('updateOrReplace error'));
@@ -268,6 +280,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
     (requestOAuthClientCredentialsToken as jest.Mock).mockResolvedValueOnce({
       tokenType: 'access_token',
       accessToken: 'brandnewaccesstoken',
+      tokenRequestDate: 1609502400000,
       expiresIn: 1000,
     });
 
