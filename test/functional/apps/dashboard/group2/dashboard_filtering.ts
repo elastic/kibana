@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardExpect = getService('dashboardExpect');
   const pieChart = getService('pieChart');
   const queryBar = getService('queryBar');
+  const elasticChart = getService('elasticChart');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const renderable = getService('renderable');
   const testSubjects = getService('testSubjects');
@@ -47,6 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await queryBar.clickQuerySubmitButton();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
+      await elasticChart.setNewChartUiDebugFlag(true);
     };
 
     before(async () => {
@@ -85,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('filters on pie charts', async () => {
-        await pieChart.expectPieSliceCount(0);
+        await pieChart.expectEmptyPieChart();
       });
 
       it('area, bar and heatmap charts filtered', async () => {
@@ -150,7 +152,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('filters on pie charts', async () => {
-        await pieChart.expectPieSliceCount(0);
+        await pieChart.expectEmptyPieChart();
       });
 
       it('area, bar and heatmap charts filtered', async () => {
@@ -253,6 +255,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('nested filtering', () => {
       before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
+        await elasticChart.setNewChartUiDebugFlag(true);
       });
 
       it('visualization saved with a query filters data', async () => {
@@ -323,10 +326,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardAddPanel.addVisualization(
           'Filter Test: animals: linked to search with filter'
         );
-        await pieChart.expectPieSliceCount(7);
+        await elasticChart.setNewChartUiDebugFlag(true);
+        await pieChart.expectSliceCountForAllPies(7);
       });
 
       it('Pie chart linked to saved search filters shows no data with conflicting dashboard query', async () => {
+        await elasticChart.setNewChartUiDebugFlag(true);
         await queryBar.setQuery('weightLbs<40');
         await queryBar.submitQuery();
         await PageObjects.dashboard.waitForRenderComplete();

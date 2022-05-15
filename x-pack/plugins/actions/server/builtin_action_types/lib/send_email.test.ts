@@ -5,10 +5,21 @@
  * 2.0.
  */
 
+import axios from 'axios';
+import { Logger } from '@kbn/core/server';
+import { sendEmail } from './send_email';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import nodemailer from 'nodemailer';
+import { ProxySettings } from '../../types';
+import { actionsConfigMock } from '../../actions_config.mock';
+import { CustomHostSettings } from '../../config';
+import { sendEmailGraphApi } from './send_email_graph_api';
+import { getOAuthClientCredentialsAccessToken } from './get_oauth_client_credentials_access_token';
+import { connectorTokenClientMock } from './connector_token_client.mock';
+
 jest.mock('nodemailer', () => ({
   createTransport: jest.fn(),
 }));
-
 jest.mock('./send_email_graph_api', () => ({
   sendEmailGraphApi: jest.fn(),
 }));
@@ -16,36 +27,32 @@ jest.mock('./get_oauth_client_credentials_access_token', () => ({
   getOAuthClientCredentialsAccessToken: jest.fn(),
 }));
 
-import { Logger } from '@kbn/core/server';
-import { sendEmail } from './send_email';
-import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import nodemailer from 'nodemailer';
-import { ProxySettings } from '../../types';
-import { actionsConfigMock } from '../../actions_config.mock';
-import { CustomHostSettings } from '../../config';
-import { sendEmailGraphApi } from './send_email_graph_api';
-import { getOAuthClientCredentialsAccessToken } from './get_oauth_client_credentials_access_token';
-import { ConnectorTokenClient } from './connector_token_client';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+jest.mock('axios');
+const mockAxiosInstanceInterceptor = {
+  request: { eject: jest.fn(), use: jest.fn() },
+  response: { eject: jest.fn(), use: jest.fn() },
+};
 
 const createTransportMock = nodemailer.createTransport as jest.Mock;
 const sendMailMockResult = { result: 'does not matter' };
 const sendMailMock = jest.fn();
 const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
-const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
 
-const connectorTokenClient = new ConnectorTokenClient({
-  unsecuredSavedObjectsClient,
-  encryptedSavedObjectsClient,
-  logger: mockLogger,
-});
+const connectorTokenClient = connectorTokenClientMock.create();
 
 describe('send_email module', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     createTransportMock.mockReturnValue({ sendMail: sendMailMock });
     sendMailMock.mockResolvedValue(sendMailMockResult);
+
+    axios.create = jest.fn(() => {
+      const actual = jest.requireActual('axios');
+      return {
+        ...actual.create,
+        interceptors: mockAxiosInstanceInterceptor,
+      };
+    });
   });
 
   test('handles authenticated email using service', async () => {
@@ -124,6 +131,7 @@ describe('send_email module', () => {
     });
 
     delete sendEmailGraphApiMock.mock.calls[0][0].options.configurationUtilities;
+    sendEmailGraphApiMock.mock.calls[0].pop();
     sendEmailGraphApiMock.mock.calls[0].pop();
     expect(sendEmailGraphApiMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -646,6 +654,83 @@ describe('send_email module', () => {
         },
       ]
     `);
+  });
+
+  test('deletes saved access tokens if 4xx response received', async () => {
+    const createAxiosInstanceMock = axios.create as jest.Mock;
+    const sendEmailOptions = getSendEmailOptions({
+      transport: {
+        service: 'exchange_server',
+        clientId: '123456',
+        tenantId: '98765',
+        clientSecret: 'sdfhkdsjhfksdjfh',
+      },
+    });
+    (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValueOnce(
+      'Bearer clienttokentokentoken'
+    );
+
+    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
+    expect(createAxiosInstanceMock).toHaveBeenCalledTimes(1);
+    expect(createAxiosInstanceMock).toHaveBeenCalledWith();
+    expect(mockAxiosInstanceInterceptor.response.use).toHaveBeenCalledTimes(1);
+
+    const mockResponseCallback = (mockAxiosInstanceInterceptor.response.use as jest.Mock).mock
+      .calls[0][1];
+
+    const errorResponse = {
+      response: {
+        status: 403,
+        statusText: 'Forbidden',
+        data: {
+          error: {
+            message: 'Insufficient rights to query records',
+            detail: 'Field(s) present in the query do not have permission to be read',
+          },
+          status: 'failure',
+        },
+      },
+    };
+
+    await expect(() => mockResponseCallback(errorResponse)).rejects.toEqual(errorResponse);
+
+    expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith({
+      connectorId: '1',
+    });
+  });
+
+  test('does not delete saved access token if not 4xx error response received', async () => {
+    const createAxiosInstanceMock = axios.create as jest.Mock;
+    const sendEmailOptions = getSendEmailOptions({
+      transport: {
+        service: 'exchange_server',
+        clientId: '123456',
+        tenantId: '98765',
+        clientSecret: 'sdfhkdsjhfksdjfh',
+      },
+    });
+    (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValueOnce(
+      'Bearer clienttokentokentoken'
+    );
+
+    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
+    expect(createAxiosInstanceMock).toHaveBeenCalledTimes(1);
+    expect(createAxiosInstanceMock).toHaveBeenCalledWith();
+    expect(mockAxiosInstanceInterceptor.response.use).toHaveBeenCalledTimes(1);
+
+    const mockResponseCallback = (mockAxiosInstanceInterceptor.response.use as jest.Mock).mock
+      .calls[0][1];
+
+    const errorResponse = {
+      response: {
+        status: 500,
+        statusText: 'Server error',
+      },
+    };
+
+    await expect(() => mockResponseCallback(errorResponse)).rejects.toEqual(errorResponse);
+
+    expect(connectorTokenClient.deleteConnectorTokens).not.toHaveBeenCalled();
   });
 });
 
