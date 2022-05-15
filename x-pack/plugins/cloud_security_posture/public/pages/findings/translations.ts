@@ -42,7 +42,7 @@ export const RESOURCE = i18n.translate('xpack.csp.findings.resourceLabel', {
   defaultMessage: 'Resource',
 });
 
-export const RESOURCE_NAME = i18n.translate('xpack.csp.findings.resourceLabel', {
+export const RESOURCE_NAME = i18n.translate('xpack.csp.findings.resourceNameLabel', {
   defaultMessage: 'Resource Name',
 });
 
