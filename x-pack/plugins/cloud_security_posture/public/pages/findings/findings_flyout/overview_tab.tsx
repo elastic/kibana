@@ -17,12 +17,15 @@ import {
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import moment from 'moment';
-import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
+import type { EuiDescriptionListProps, EuiAccordionProps } from '@elastic/eui';
 import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
 import k8sLogoIcon from '../../../assets/icons/k8s_logo.svg';
 import * as TEXT from '../translations';
 import { CspFinding } from '../types';
 import { CodeBlock, Markdown } from './findings_flyout';
+
+type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
+  Pick<EuiDescriptionListProps, 'listItems'>;
 
 const getDetailsList = (data: CspFinding) => [
   {
@@ -88,7 +91,7 @@ const getEvidenceList = ({ result }: CspFinding) =>
   ].filter(Boolean) as EuiDescriptionListProps['listItems'];
 
 export const OverviewTab = ({ data }: { data: CspFinding }) => {
-  const accordions = useMemo(
+  const accordions: Accordion[] = useMemo(
     () => [
       {
         initialIsOpen: true,
