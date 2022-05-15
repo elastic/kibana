@@ -59,7 +59,5 @@ const getRuleList = ({ rule }: CspFinding) => [
 ];
 
 export const RuleTab = ({ data }: { data: CspFinding }) => (
-  <EuiPanel hasShadow={false} hasBorder>
-    <EuiDescriptionList listItems={getRuleList(data)} />
-  </EuiPanel>
+  <EuiDescriptionList listItems={getRuleList(data)} />
 );
