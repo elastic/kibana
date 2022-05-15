@@ -6,34 +6,38 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSteps, EuiText } from '@elastic/eui';
-import { DataStream } from '../types';
-import { MonitorTypeStep } from './monitor_type_step';
-import { MonitorDetailsStep } from './monitor_details_step';
-import { MonitorForm } from '../form';
+import { EuiSteps, EuiText } from '@elastic/eui';
+import { useFormContext } from 'react-hook-form';
+import { ConfigKey, DataStream } from '../types';
+import { StepFields } from './step_fields';
 import { AdvancedConfig } from '../advanced';
 
 const MONITOR_TYPE_STEP = {
   title: 'Select a monitor type',
-  children: <MonitorTypeStep />,
+  children: (
+    <StepFields description="Choose a monitor that best fits your use case" stepKey="step1" />
+  ),
 };
 const MONITOR_DETAILS_STEP = {
   title: 'Monitor details',
-  children: <MonitorDetailsStep />,
+  children: (
+    <StepFields
+      description="Provide some details about how your monitor should run"
+      stepKey="step2"
+    />
+  ),
+};
+const MONITOR_SCRIPT_STEP = {
+  title: 'Add a script',
+  children: (
+    <StepFields
+      description="Use Elastic Script Recorder to generate a script and then upload it. Alternatively, you can write your own Playwright script and paste it in the script editor."
+      stepKey="step3"
+    />
+  ),
 };
 
-const BROWSER_STEPS = [
-  MONITOR_TYPE_STEP,
-  MONITOR_DETAILS_STEP,
-  {
-    title: 'Add a script',
-    children: (
-      <EuiText>
-        <p>Do this 3rd</p>
-      </EuiText>
-    ),
-  },
-];
+const BROWSER_STEPS = [MONITOR_TYPE_STEP, MONITOR_DETAILS_STEP, MONITOR_SCRIPT_STEP];
 
 const SINGLE_PAGE_BROWSER_STEPS = [MONITOR_TYPE_STEP, MONITOR_DETAILS_STEP];
 
@@ -41,17 +45,7 @@ const HTTP_STEPS = [MONITOR_TYPE_STEP, MONITOR_DETAILS_STEP];
 
 const ICMP_STEPS = [MONITOR_TYPE_STEP, MONITOR_DETAILS_STEP];
 
-const TCP_STEPS = [
-  MONITOR_TYPE_STEP,
-  {
-    title: 'Monitor details',
-    children: (
-      <EuiText>
-        <p>Do this second</p>
-      </EuiText>
-    ),
-  },
-];
+const TCP_STEPS = [MONITOR_TYPE_STEP, MONITOR_DETAILS_STEP];
 
 const STEPS = {
   [DataStream.BROWSER]: BROWSER_STEPS,
@@ -62,10 +56,13 @@ const STEPS = {
 };
 
 export const MonitorSteps = () => {
+  const { watch } = useFormContext();
+  const [type]: [DataStream] = watch([ConfigKey.MONITOR_TYPE]);
+
   return (
-    <MonitorForm>
-      <EuiSteps steps={STEPS[DataStream.BROWSER]} headingElement="h3" />
+    <>
+      <EuiSteps steps={STEPS[type]} headingElement="h3" />
       <AdvancedConfig />
-    </MonitorForm>
+    </>
   );
 };

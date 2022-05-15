@@ -12,7 +12,7 @@ import {
   BrowserFields,
   MonitorFields,
   ScheduleUnit,
-} from '../../../../common/runtime_types';
+} from '../types';
 import { validate } from './validation';
 
 describe('[Monitor Management] validation', () => {

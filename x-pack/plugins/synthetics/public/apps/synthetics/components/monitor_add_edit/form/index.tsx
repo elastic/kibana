@@ -9,35 +9,25 @@ import React from 'react';
 import { EuiButton, EuiForm } from '@elastic/eui';
 import { FormProvider } from 'react-hook-form';
 import { useFormWrapped } from './use_form_wrapped';
-import { MonitorType, MonitorTypeRadioGroup } from '../fields/monitor_type_radio_group';
-import { ConfigKey } from '../types';
+import { DataStream } from '../types';
+import { DEFAULT_FORM_FIELDS } from './defaults';
 
 export const MonitorForm: React.FC = ({ children }) => {
   const methods = useFormWrapped({
-    mode: 'onBlur',
+    mode: 'onTouched',
     reValidateMode: 'onChange',
     defaultValues: {
-      select: '',
-      'source.inline.script': '',
-      [ConfigKey.REQUEST_HEADERS_CHECK]: {},
-      [ConfigKey.REQUEST_BODY_CHECK]: {
-        value: '',
-        type: 'javascript',
-      },
-      [ConfigKey.RESPONSE_STATUS_CHECK]: [],
+      ...DEFAULT_FORM_FIELDS[DataStream.BROWSER],
     },
     shouldFocusError: true,
   });
   const {
-    formState: { errors, isValid, isSubmitted },
-    control,
+    formState: { isValid, isSubmitted },
     handleSubmit,
-    register,
   } = methods;
 
   const formSubmitter = (data: Record<string, any>) => {
     console.warn('data', data);
-    alert(JSON.stringify(data, null, 2));
   };
 
   return (

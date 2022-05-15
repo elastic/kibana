@@ -4,15 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ConfigKey, DataStream, ScheduleUnit, MonitorFields, Validator, Validation } from './types';
+import {
+  ConfigKey,
+  DataStream,
+  ScheduleUnit,
+  MonitorFields,
+  Validator,
+  Validation,
+} from '../types';
 
-export const digitsOnly = /^[0-9]*$/g;
-export const includesValidPort = /[^\:]+:[0-9]{1,5}$/g;
+export const DIGITS_ONLY = /^[0-9]*$/g;
+export const INCLUDES_VALID_PORT = /[^\:]+:[0-9]{1,5}$/g;
+export const WHOLE_NUMBERS_ONLY = /^[0-9]+(.?[0]+)?$/;
+export const FLOATS_ONLY = /^[0-9]+(.?[0-9]+)?$/;
 
 type ValidationLibrary = Record<string, Validator>;
 
 // returns true if invalid
-function validateHeaders<T>(headers: T): boolean {
+export function validateHeaders<T>(headers: T): boolean {
   return Object.keys(headers).some((key) => {
     if (key) {
       const whiteSpaceRegEx = /[\s]/g;
@@ -24,7 +33,7 @@ function validateHeaders<T>(headers: T): boolean {
 }
 
 // returns true if invalid
-const validateTimeout = ({
+export const validateTimeout = ({
   scheduleNumber,
   scheduleUnit,
   timeout,
@@ -82,7 +91,7 @@ const validateCommon: ValidationLibrary = {
 const validateHTTP: ValidationLibrary = {
   [ConfigKey.RESPONSE_STATUS_CHECK]: ({ [ConfigKey.RESPONSE_STATUS_CHECK]: value }) => {
     const statusCodes = value as MonitorFields[ConfigKey.RESPONSE_STATUS_CHECK];
-    return statusCodes.length ? statusCodes.some((code) => !`${code}`.match(digitsOnly)) : false;
+    return statusCodes.length ? statusCodes.some((code) => !`${code}`.match(DIGITS_ONLY)) : false;
   },
   [ConfigKey.RESPONSE_HEADERS_CHECK]: ({ [ConfigKey.RESPONSE_HEADERS_CHECK]: value }) => {
     const headers = value as MonitorFields[ConfigKey.RESPONSE_HEADERS_CHECK];
@@ -93,7 +102,7 @@ const validateHTTP: ValidationLibrary = {
     return validateHeaders<MonitorFields[ConfigKey.REQUEST_HEADERS_CHECK]>(headers);
   },
   [ConfigKey.MAX_REDIRECTS]: ({ [ConfigKey.MAX_REDIRECTS]: value }) =>
-    (!!value && !`${value}`.match(digitsOnly)) ||
+    (!!value && !`${value}`.match(DIGITS_ONLY)) ||
     parseFloat(value as MonitorFields[ConfigKey.MAX_REDIRECTS]) < 0,
   [ConfigKey.URLS]: ({ [ConfigKey.URLS]: value }) => !value,
   ...validateCommon,
@@ -101,7 +110,7 @@ const validateHTTP: ValidationLibrary = {
 
 const validateTCP: Record<string, Validator> = {
   [ConfigKey.HOSTS]: ({ [ConfigKey.HOSTS]: value }) => {
-    return !value || !`${value}`.match(includesValidPort);
+    return !value || !`${value}`.match(INCLUDES_VALID_PORT);
   },
   ...validateCommon,
 };
@@ -110,7 +119,7 @@ const validateICMP: ValidationLibrary = {
   [ConfigKey.HOSTS]: ({ [ConfigKey.HOSTS]: value }) => !value,
   [ConfigKey.WAIT]: ({ [ConfigKey.WAIT]: value }) =>
     !!value &&
-    !digitsOnly.test(`${value}`) &&
+    !DIGITS_ONLY.test(`${value}`) &&
     parseFloat(value as MonitorFields[ConfigKey.WAIT]) < 0,
   ...validateCommon,
 };

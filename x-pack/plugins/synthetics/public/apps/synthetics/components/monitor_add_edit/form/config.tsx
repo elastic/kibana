@@ -7,35 +7,62 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { UseFormReturn } from 'react-hook-form';
 import {
+  EuiButtonGroup,
   EuiCheckbox,
   EuiCode,
   EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiFieldText,
   EuiFieldNumber,
-  EuiSelect,
   EuiFieldPassword,
+  EuiSelect,
+  EuiSwitch,
+  EuiLink,
+  EuiTextArea,
 } from '@elastic/eui';
 import { MonitorTypeRadioGroup } from '../fields/monitor_type_radio_group';
-import { DataStream, ConfigKey, HTTPMethod } from '../types';
+import {
+  DataStream,
+  ConfigKey,
+  HTTPMethod,
+  MonacoEditorLangId,
+  MonitorFields,
+  ScreenshotOption,
+  TLSVersion,
+  VerificationMode,
+} from '../types';
 import { HeaderField } from '../fields/header_field';
 import { RequestBodyField } from '../fields/request_body_field';
 import { ResponseBodyIndexField } from '../fields/index_response_body_field';
 import { ComboBox } from '../fields/combo_box';
+import { SourceField } from '../fields/source_field';
+import { DEFAULT_FORM_FIELDS } from './defaults';
+import { validate, validateHeaders, WHOLE_NUMBERS_ONLY, FLOATS_ONLY } from './validation';
 
 export interface FieldMeta {
-  key: ConfigKey;
+  fieldKey: string;
   component: React.ComponentType<any>;
   label?: string;
   ariaLabel?: string;
   helpText?: string | React.ReactNode;
-  props?: Record<string, any>;
+  props?: (params: {
+    value: any;
+    setValue: UseFormReturn['setValue'];
+    reset: UseFormReturn['reset'];
+  }) => Record<string, any>;
   controlled?: boolean;
   required?: boolean;
+  useSetValue?: boolean;
   onChange?: (
     event: React.ChangeEvent<HTMLInputElement>,
     formOnChange: (event: React.ChangeEvent<HTMLInputElement>) => void
   ) => void;
+  showWhen?: [string, any]; // show field when another field equals an arbitrary value
+  validation?: (dependencies: unknown[]) => Parameters<UseFormReturn['register']>[1];
+  error?: React.ReactNode;
+  dependencies?: string[]; // fields that another field may depend for or validation. Values are passed to the validation function
 }
 
 export interface AdvancedFieldGroup {
@@ -54,31 +81,106 @@ export type FieldConfig = Record<
   }
 >;
 
-export const FIELD: Record<ConfigKey, FieldMeta> = {
+export type StepKey = 'step1' | 'step2' | 'step3';
+
+export const FIELD: Record<string, FieldMeta> = {
   [ConfigKey.MONITOR_TYPE]: {
-    key: ConfigKey.MONITOR_TYPE,
+    fieldKey: ConfigKey.MONITOR_TYPE,
+    required: true,
     component: MonitorTypeRadioGroup,
     ariaLabel: 'Monitor Type',
+    controlled: true,
+    props: ({ value, reset }) => ({
+      onChange: (_: string, monitorType: string) => {
+        const defaultFields = DEFAULT_FORM_FIELDS[monitorType as DataStream];
+        reset(defaultFields);
+      },
+      selectedOption: value,
+      options: [
+        {
+          id: 'syntheticsMonitorTypeBrowser',
+          label: 'Browser Ping',
+          value: DataStream.BROWSER,
+          descriptionTitle: 'Browser Ping',
+          description:
+            'A lightweight API check to validate the availability of a web service or endpoint.',
+          link: '#',
+          icon: 'online',
+        },
+        {
+          id: 'syntheticsMonitorTypeHTTP',
+          label: 'HTTP Ping',
+          value: DataStream.HTTP,
+          descriptionTitle: 'HTTP Ping',
+          description:
+            'A lightweight API check to validate the availability of a web service or endpoint.',
+          link: '#',
+          icon: 'online',
+        },
+        {
+          id: 'syntheticsMonitorTypeTCP',
+          label: 'TCP Ping',
+          value: DataStream.TCP,
+          descriptionTitle: 'Option 2 Title',
+          description:
+            'A lightweight API check to validate the availability of a web service or endpoint.',
+          link: '#',
+          icon: 'online',
+        },
+        {
+          id: 'syntheticsMonitorTypeICMP',
+          label: 'ICMP Ping',
+          value: DataStream.ICMP,
+          descriptionTitle: 'Option 3 Title',
+          description:
+            'A lightweight API check to validate the availability of a web service or endpoint.',
+          link: '#',
+          icon: 'online',
+        },
+      ],
+    }),
+    validation: () => ({
+      required: true,
+    }),
   },
   [ConfigKey.URLS]: {
-    key: ConfigKey.URLS,
+    fieldKey: ConfigKey.URLS,
+    required: true,
     component: EuiFieldText,
     label: 'Website URL',
     helpText: 'For example, https://www.elastic.co',
   },
+  [`${ConfigKey.HOSTS}__tcp`]: {
+    fieldKey: ConfigKey.HOSTS,
+    required: true,
+    component: EuiFieldText,
+    label: 'Host:Port',
+  },
+  [`${ConfigKey.HOSTS}__icmp`]: {
+    fieldKey: ConfigKey.HOSTS,
+    required: true,
+    component: EuiFieldText,
+    label: 'Host',
+  },
   [ConfigKey.NAME]: {
-    key: ConfigKey.NAME,
+    fieldKey: ConfigKey.NAME,
+    required: true,
     component: EuiFieldText,
     label: 'Monitor name',
     helpText: 'Choose a name to help identify this monitor in the future.',
+    validation: () => ({
+      validate: (value) => Boolean(value.trim()),
+    }),
+    error: 'Monitor name is required',
   },
   [ConfigKey.SCHEDULE]: {
-    key: `${ConfigKey.SCHEDULE}.number`,
+    fieldKey: `${ConfigKey.SCHEDULE}.number`,
+    required: true,
     component: EuiSelect,
     label: 'Frequency',
     helpText:
       'How often do you want to run this test? Higher frequencies will increase your total cost.',
-    props: {
+    props: () => ({
       options: [
         {
           value: '3',
@@ -93,72 +195,157 @@ export const FIELD: Record<ConfigKey, FieldMeta> = {
           text: 'Every 60 minutes',
         },
       ],
+    }),
+  },
+  [ConfigKey.TAGS]: {
+    fieldKey: ConfigKey.TAGS,
+    component: ComboBox,
+    label: 'Tags',
+    helpText:
+      'A list of tags that will be sent with each monitor event. Useful for searching and segmenting data.',
+    controlled: true,
+    props: ({ value }: { value: string[] }) => ({
+      selectedOptions: value,
+    }),
+  },
+  [ConfigKey.TIMEOUT]: {
+    fieldKey: ConfigKey.TIMEOUT,
+    component: EuiFieldNumber,
+    label: 'Timeout in seconds',
+    helpText: 'The total time allowed for testing the connection and exchanging data.',
+    props: () => ({
+      min: 1,
+      step: 'any',
+    }),
+    dependencies: [ConfigKey.SCHEDULE],
+    validation: ([schedule]) => {
+      return {
+        validate: (value) => {
+          switch (true) {
+            case value < 0:
+              return 'Timeout must be greater than or equal to 0.';
+            case value > parseFloat((schedule as MonitorFields[ConfigKey.SCHEDULE]).number) * 60:
+              return 'Timemout must be less than the monitor frequency.';
+            case !Boolean(`${value}`.match(FLOATS_ONLY)):
+              return 'Timeout is invalid.';
+            default:
+              return true;
+          }
+        },
+      };
     },
   },
+  [ConfigKey.APM_SERVICE_NAME]: {
+    fieldKey: ConfigKey.APM_SERVICE_NAME,
+    component: EuiFieldText,
+    label: 'APM service name',
+    helpText:
+      'Corrseponds to the service.name ECS field from APM. Set this to enable integrations between APM and Synthetics data.',
+    controlled: true,
+    props: ({ value }: { value: string[] }) => ({
+      selectedOptions: value,
+    }),
+  },
+  [ConfigKey.NAMESPACE]: {
+    fieldKey: ConfigKey.NAMESPACE,
+    component: EuiFieldText,
+    label: 'Data stream namespace',
+    helpText: (
+      <span>
+        {
+          "Change the default namespace. This setting changes the name of the monitor's data stream. "
+        }
+        <EuiLink href="#">Learn More</EuiLink>
+      </span>
+    ),
+    controlled: true,
+    props: ({ value }: { value: string[] }) => ({
+      selectedOptions: value,
+    }),
+  },
   [ConfigKey.MAX_REDIRECTS]: {
-    key: ConfigKey.MAX_REDIRECTS,
+    fieldKey: ConfigKey.MAX_REDIRECTS,
     component: EuiFieldNumber,
     label: 'Max redirects',
     helpText: 'The total number of redirects to follow.',
-    props: {
+    props: () => ({
       min: 0,
       max: 10,
       step: 1,
-    },
+    }),
+    validation: () => ({
+      min: 0,
+      pattern: WHOLE_NUMBERS_ONLY,
+    }),
+    error: 'Max redirects is invalid.',
+  },
+  [ConfigKey.WAIT]: {
+    fieldKey: ConfigKey.WAIT,
+    component: EuiFieldNumber,
+    label: 'Wait',
+    helpText:
+      'The duration to wait before emitting another ICMP Echo Request if no response is received.',
+    props: () => ({
+      min: 1,
+      step: 1,
+    }),
+    validation: () => ({
+      min: 1,
+      pattern: WHOLE_NUMBERS_ONLY,
+    }),
+    error: 'Wait duration is invalid.',
   },
   [ConfigKey.USERNAME]: {
-    key: ConfigKey.USERNAME,
+    fieldKey: ConfigKey.USERNAME,
     component: EuiFieldText,
     label: 'Username',
     helpText: 'Username for authenticating with the server.',
   },
   [ConfigKey.PASSWORD]: {
-    key: ConfigKey.PASSWORD,
+    fieldKey: ConfigKey.PASSWORD,
     component: EuiFieldPassword,
     label: 'Password',
     helpText: 'Password for authenticating with the server.',
   },
   [ConfigKey.PROXY_URL]: {
-    key: ConfigKey.PROXY_URL,
-    component: EuiFieldText,
-    label: 'Proxy URL',
-    helpText: 'HTTP Proxy URL.',
-  },
-  [ConfigKey.PROXY_URL]: {
-    key: ConfigKey.PROXY_URL,
+    fieldKey: ConfigKey.PROXY_URL,
     component: EuiFieldText,
     label: 'Proxy URL',
     helpText: 'HTTP Proxy URL.',
   },
   [ConfigKey.REQUEST_METHOD_CHECK]: {
-    key: ConfigKey.REQUEST_METHOD_CHECK,
+    fieldKey: ConfigKey.REQUEST_METHOD_CHECK,
     component: EuiSelect,
     label: 'Request Method',
     helpText: 'The HTTP method to use.',
-    props: {
+    props: () => ({
       options: Object.keys(HTTPMethod).map((method) => ({
         value: method,
         text: method,
       })),
-    },
+    }),
   },
   [ConfigKey.REQUEST_HEADERS_CHECK]: {
-    key: ConfigKey.REQUEST_HEADERS_CHECK,
+    fieldKey: ConfigKey.REQUEST_HEADERS_CHECK,
     component: HeaderField,
-    label: 'Request Method',
+    label: 'Request Headers',
     helpText:
       'A dictionary of additional HTTP headers to send. By default the client will set the User-Agent header to identify itself.',
     controlled: true,
+    validation: () => ({
+      validate: (headers) => !validateHeaders(headers),
+    }),
+    error: 'Header key must be a valid HTTP token.',
   },
   [ConfigKey.REQUEST_BODY_CHECK]: {
-    key: ConfigKey.REQUEST_BODY_CHECK,
+    fieldKey: ConfigKey.REQUEST_BODY_CHECK,
     component: RequestBodyField,
     label: 'Request Body',
     helpText: 'Request body content.',
     controlled: true,
   },
   [ConfigKey.RESPONSE_HEADERS_INDEX]: {
-    key: ConfigKey.RESPONSE_HEADERS_INDEX,
+    fieldKey: ConfigKey.RESPONSE_HEADERS_INDEX,
     component: EuiCheckbox,
     helpText: (
       <>
@@ -169,13 +356,14 @@ export const FIELD: Record<ConfigKey, FieldMeta> = {
         <EuiCode>http.response.body.headers</EuiCode>
       </>
     ),
-    props: {
+    props: () => ({
       label: 'Index response headers',
-    },
+      id: 'sampleId', // checkbox needs an id or it won't work
+    }),
     controlled: true,
   },
   [ConfigKey.RESPONSE_BODY_INDEX]: {
-    key: ConfigKey.RESPONSE_BODY_INDEX,
+    fieldKey: ConfigKey.RESPONSE_BODY_INDEX,
     component: ResponseBodyIndexField,
     helpText: (
       <>
@@ -186,22 +374,231 @@ export const FIELD: Record<ConfigKey, FieldMeta> = {
         <EuiCode>http.response.body.contents</EuiCode>
       </>
     ),
-    props: {
+    props: () => ({
       label: 'Index response body',
-    },
+    }),
     controlled: true,
   },
   [ConfigKey.RESPONSE_STATUS_CHECK]: {
-    key: ConfigKey.RESPONSE_STATUS_CHECK,
+    fieldKey: ConfigKey.RESPONSE_STATUS_CHECK,
     component: ComboBox,
     label: 'Check response status equals',
     helpText:
       'A list of expected status codes. Press enter to add a new code. 4xx and 5xx codes are considered down by default. Other codes are considered up.',
     controlled: true,
+    props: ({ value }: { value: string[] }) => ({
+      selectedOptions: value,
+    }),
+    validation: () => ({
+      validate: (value) => {
+        const validateFn = validate[DataStream.HTTP][ConfigKey.RESPONSE_STATUS_CHECK];
+        if (validateFn) {
+          return !validateFn({
+            [ConfigKey.RESPONSE_STATUS_CHECK]: value,
+          });
+        }
+      },
+    }),
+    error: 'Status code must contain digits only.',
+  },
+  [ConfigKey.RESPONSE_HEADERS_CHECK]: {
+    fieldKey: ConfigKey.RESPONSE_HEADERS_CHECK,
+    component: HeaderField,
+    label: 'Check response headers contain',
+    helpText: 'A list of expected response headers.',
+    controlled: true,
+    validation: () => ({
+      validate: (headers) => !validateHeaders(headers),
+    }),
+    error: 'Header key must be a valid HTTP token.',
+  },
+  [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: {
+    fieldKey: ConfigKey.RESPONSE_BODY_CHECK_POSITIVE,
+    component: ComboBox,
+    label: 'Check response body contains',
+    helpText:
+      'A list of regular expressions to match the body output. Press enter to add a new expression. Only a single expression needs to match.',
+    controlled: true,
+    props: ({ value }: { value: string[] }) => ({
+      selectedOptions: value,
+    }),
+  },
+  [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: {
+    fieldKey: ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE,
+    component: ComboBox,
+    label: 'Check response body does not contain',
+    helpText:
+      'A list of regular expressions to match the the body output negatively. Press enter to add a new expression. Return match failed if single expression matches.',
+    controlled: true,
+    props: ({ value }: { value: string[] }) => ({
+      selectedOptions: value,
+    }),
+  },
+  [ConfigKey.RESPONSE_RECEIVE_CHECK]: {
+    fieldKey: ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE,
+    component: EuiFieldText,
+    label: 'Check response contains.',
+    helpText: 'The expected remote host response.',
+  },
+  [`${ConfigKey.PROXY_URL}__tcp`]: {
+    fieldKey: ConfigKey.PROXY_URL,
+    component: EuiFieldText,
+    label: 'Proxy URL',
+    helpText:
+      'The URL of the SOCKS5 proxy to use when connecting to the server. The value must be a URL with a scheme of socks5://.',
+  },
+  [ConfigKey.REQUEST_SEND_CHECK]: {
+    fieldKey: ConfigKey.REQUEST_SEND_CHECK,
+    component: EuiFieldText,
+    label: 'Request payload',
+    helpText: 'A payload string to send to the remote host.',
+  },
+  [ConfigKey.SOURCE_INLINE]: {
+    fieldKey: 'source.inline',
+    required: true,
+    component: SourceField,
+    ariaLabel: 'Monitor script',
+    controlled: true,
+    props: () => ({
+      id: 'javascript',
+      languageId: MonacoEditorLangId.JAVASCRIPT,
+    }),
+    validation: () => ({
+      validate: (value) => Boolean(value.script),
+    }),
+    error: 'Monitor script is required',
+  },
+  isTLSEnabled: {
+    fieldKey: 'isTLSEnabled',
+    component: EuiSwitch,
+    controlled: true,
+    props: ({ setValue }) => {
+      return {
+        id: 'syntheticsIsTLSEnabledSwitch',
+        label: 'Use custom TLS configuration',
+        onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
+          setValue('isTLSEnabled', event.target.checked);
+        },
+      };
+    },
+  },
+  [ConfigKey.TLS_VERIFICATION_MODE]: {
+    fieldKey: ConfigKey.TLS_VERIFICATION_MODE,
+    component: EuiSelect,
+    label: 'Verification Mode',
+    helpText:
+      'Verifies that the provided certificate is signed by a trusted authority (CA) and also verifies that the server’s hostname (or IP address) matches the names identified within the certificate. If the Subject Alternative Name is empty, it returns an error.',
+    showWhen: ['isTLSEnabled', true],
+    props: () => ({
+      options: Object.keys(VerificationMode).map((method) => ({
+        value: method,
+        text: method,
+      })),
+    }),
+  },
+  [ConfigKey.TLS_VERSION]: {
+    fieldKey: ConfigKey.TLS_VERSION,
+    component: EuiComboBox,
+    label: 'Supported TLS protocols',
+    controlled: true,
+    showWhen: ['isTLSEnabled', true],
+    props: ({ value, setValue }: { value: string[]; setValue: UseFormReturn['setValue'] }) => {
+      return {
+        options: Object.values(TLSVersion).map((version) => ({
+          label: version,
+        })),
+        selectedOptions: Object.values(value).map((version) => ({
+          label: version,
+        })),
+        onChange: (updatedValues: Array<EuiComboBoxOptionOption<TLSVersion>>) => {
+          setValue(
+            ConfigKey.TLS_VERSION,
+            updatedValues.map((option) => option.label as TLSVersion)
+          );
+        },
+      };
+    },
+  },
+  [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]: {
+    fieldKey: ConfigKey.TLS_CERTIFICATE_AUTHORITIES,
+    component: EuiTextArea,
+    label: 'Certificate Authorities',
+    helpText: 'PEM formatted custom certificate authorities.',
+    showWhen: ['isTLSEnabled', true],
+  },
+  [ConfigKey.TLS_CERTIFICATE]: {
+    fieldKey: ConfigKey.TLS_CERTIFICATE,
+    component: EuiTextArea,
+    label: 'Client certificate',
+    helpText: 'PEM formatted certificate for TLS client authentication.',
+    showWhen: ['isTLSEnabled', true],
+  },
+  [ConfigKey.TLS_KEY]: {
+    fieldKey: ConfigKey.TLS_KEY,
+    component: EuiTextArea,
+    label: 'Client key',
+    helpText: 'PEM formatted certificate key for TLS client authentication.',
+    showWhen: ['isTLSEnabled', true],
+  },
+  [ConfigKey.TLS_KEY_PASSPHRASE]: {
+    fieldKey: ConfigKey.TLS_KEY_PASSPHRASE,
+    component: EuiFieldPassword,
+    label: 'Client key passphrase',
+    helpText: 'Certificate key passphrase for TLS client authentication.',
+    showWhen: ['isTLSEnabled', true],
+  },
+  [ConfigKey.SCREENSHOTS]: {
+    fieldKey: ConfigKey.SCREENSHOTS,
+    component: EuiButtonGroup,
+    label: 'Screenshot options',
+    helpText: 'Set this option to manage the screenshots captured by the synthetics agent.',
+    controlled: true,
+    props: ({
+      value,
+      setValue,
+    }: {
+      value: ScreenshotOption;
+      setValue: UseFormReturn['setValue'];
+    }) => ({
+      type: 'single',
+      idSelected: value,
+      onChange: (option: ScreenshotOption) => setValue(ConfigKey.SCREENSHOTS, option),
+      options: Object.values(ScreenshotOption).map((option) => ({
+        id: option,
+        label: option.replace(/-/g, ' '),
+      })),
+      css: {
+        'text-transform': 'capitalize',
+      },
+    }),
   },
 };
 
-export const ADVANCED_FIELD_CONFIG = {
+const TLS_OPTIONS = {
+  title: 'TLS Options',
+  description: 'TLS Description',
+  components: [
+    FIELD.isTLSEnabled,
+    FIELD[ConfigKey.TLS_VERIFICATION_MODE],
+    FIELD[ConfigKey.TLS_VERSION],
+    FIELD[ConfigKey.TLS_CERTIFICATE_AUTHORITIES],
+    FIELD[ConfigKey.TLS_CERTIFICATE],
+    FIELD[ConfigKey.TLS_KEY],
+    FIELD[ConfigKey.TLS_KEY_PASSPHRASE],
+  ],
+};
+
+const DEFAULT_DATA_OPTIONS = {
+  title: 'Data options',
+  description: 'A description goes here',
+  components: [
+    FIELD[ConfigKey.TAGS],
+    FIELD[ConfigKey.APM_SERVICE_NAME],
+    FIELD[ConfigKey.NAMESPACE],
+  ],
+};
+
+export const HTTP_ADVANCED = {
   requestConfig: {
     title: 'Request configuration',
     description:
@@ -223,7 +620,25 @@ export const ADVANCED_FIELD_CONFIG = {
   responseChecks: {
     title: 'Response checks',
     description: 'Configure the expected HTTP response.',
-    components: [FIELD[ConfigKey.RESPONSE_STATUS_CHECK]],
+    components: [
+      FIELD[ConfigKey.RESPONSE_STATUS_CHECK],
+      FIELD[ConfigKey.RESPONSE_HEADERS_CHECK],
+      FIELD[ConfigKey.RESPONSE_BODY_CHECK_POSITIVE],
+      FIELD[ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE],
+    ],
+  },
+};
+
+export const TCP_ADVANCED = {
+  requestConfig: {
+    title: 'Request configuration',
+    description: 'Configure the payload sent to the remote host.',
+    components: [FIELD[`${ConfigKey.PROXY_URL}__tcp`], FIELD[ConfigKey.REQUEST_SEND_CHECK]],
+  },
+  responseChecks: {
+    title: 'Response checks',
+    description: 'Configure the expected response from the remote host.',
+    components: [FIELD[ConfigKey.RESPONSE_RECEIVE_CHECK]],
   },
 };
 
@@ -235,11 +650,56 @@ export const FIELD_CONFIG: FieldConfig = {
       FIELD[ConfigKey.NAME],
       FIELD[ConfigKey.SCHEDULE],
       FIELD[ConfigKey.MAX_REDIRECTS],
+      FIELD[ConfigKey.TIMEOUT],
     ],
     advanced: [
-      ADVANCED_FIELD_CONFIG.requestConfig,
-      ADVANCED_FIELD_CONFIG.responseConfig,
-      ADVANCED_FIELD_CONFIG.responseChecks,
+      DEFAULT_DATA_OPTIONS,
+      HTTP_ADVANCED.requestConfig,
+      HTTP_ADVANCED.responseConfig,
+      HTTP_ADVANCED.responseChecks,
+      TLS_OPTIONS,
     ],
+  },
+  [DataStream.TCP]: {
+    step1: [FIELD[ConfigKey.MONITOR_TYPE]],
+    step2: [
+      FIELD[`${ConfigKey.HOSTS}__tcp`],
+      FIELD[ConfigKey.NAME],
+      FIELD[ConfigKey.SCHEDULE],
+      FIELD[ConfigKey.TIMEOUT],
+    ],
+    advanced: [
+      DEFAULT_DATA_OPTIONS,
+      TCP_ADVANCED.requestConfig,
+      TCP_ADVANCED.responseChecks,
+      TLS_OPTIONS,
+    ],
+  },
+  [DataStream.BROWSER]: {
+    step1: [FIELD[ConfigKey.MONITOR_TYPE]],
+    step2: [FIELD[ConfigKey.NAME], FIELD[ConfigKey.SCHEDULE]],
+    step3: [FIELD[ConfigKey.SOURCE_INLINE]],
+    advanced: [
+      {
+        ...DEFAULT_DATA_OPTIONS,
+        components: [
+          FIELD[ConfigKey.TAGS],
+          FIELD[ConfigKey.APM_SERVICE_NAME],
+          FIELD[ConfigKey.SCREENSHOTS],
+          FIELD[ConfigKey.NAMESPACE],
+        ],
+      },
+    ],
+  },
+  [DataStream.ICMP]: {
+    step1: [FIELD[ConfigKey.MONITOR_TYPE]],
+    step2: [
+      FIELD[`${ConfigKey.HOSTS}__icmp`],
+      FIELD[ConfigKey.NAME],
+      FIELD[ConfigKey.SCHEDULE],
+      FIELD[ConfigKey.WAIT],
+      FIELD[ConfigKey.TIMEOUT],
+    ],
+    advanced: [DEFAULT_DATA_OPTIONS],
   },
 };

@@ -6,3 +6,4 @@
  */
 
 export * from '../../../../../common/runtime_types/monitor_management';
+export * from '../../../../../common/types/monitor_validation';

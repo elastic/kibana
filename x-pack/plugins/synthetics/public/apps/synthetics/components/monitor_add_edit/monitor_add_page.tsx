@@ -8,6 +8,7 @@
 import React from 'react';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { MonitorSteps } from './steps';
+import { MonitorForm } from './form';
 import { useMonitorAddEditBreadcrumbs } from './use_breadcrumbs';
 
 export const MonitorAddPage: React.FC = () => {
@@ -16,8 +17,8 @@ export const MonitorAddPage: React.FC = () => {
   useMonitorAddEditBreadcrumbs();
 
   return (
-    <>
+    <MonitorForm>
       <MonitorSteps />
-    </>
+    </MonitorForm>
   );
 };
