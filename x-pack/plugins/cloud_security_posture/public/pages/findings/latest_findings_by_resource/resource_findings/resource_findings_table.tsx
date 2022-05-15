@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiEmptyPrompt, EuiBasicTable, type Criteria, EuiBasicTableProps } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiBasicTable, CriteriaWithPagination, Pagination } from '@elastic/eui';
 import { extractErrorMessage } from '../../../../../common/utils/helpers';
 import * as TEXT from '../../translations';
 import type { ResourceFindingsResult } from './use_resource_findings';
@@ -13,8 +13,8 @@ import { getFindingsColumns } from '../../layout/findings_layout';
 import type { CspFinding } from '../../types';
 
 interface Props extends ResourceFindingsResult {
-  pagination: EuiBasicTableProps<CspFinding>['pagination'];
-  setTableOptions(options: Pick<Criteria<CspFinding>, 'page'>): void;
+  pagination: Pagination;
+  setTableOptions(options: CriteriaWithPagination<CspFinding>): void;
 }
 
 const columns = getFindingsColumns();

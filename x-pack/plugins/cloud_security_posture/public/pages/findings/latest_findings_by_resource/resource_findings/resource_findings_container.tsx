@@ -18,15 +18,15 @@ import { findingsNavigation } from '../../../../common/navigation/constants';
 import { ResourceFindingsQuery, useResourceFindings } from './use_resource_findings';
 import { useUrlQuery } from '../../../../common/hooks/use_url_query';
 import type { FindingsBaseURLQuery } from '../../types';
-import { getBaseQuery, getEsPaginationFromEui, getEuiPaginationFromEs } from '../../utils';
+import { getBaseQuery, getPaginationQuery, getPaginationTableParams } from '../../utils';
 import { ResourceFindingsTable } from './resource_findings_table';
 import { FindingsSearchBar } from '../../layout/findings_search_bar';
 
 const getDefaultQuery = (): FindingsBaseURLQuery & ResourceFindingsQuery => ({
   query: { language: 'kuery', query: '' },
   filters: [],
-  from: 0,
-  size: 10,
+  pageIndex: 0,
+  pageSize: 10,
 });
 
 const BackToResourcesButton = () => (
@@ -47,14 +47,16 @@ export const ResourceFindings = ({ dataView }: { dataView: DataView }) => {
   const { urlQuery, setUrlQuery } = useUrlQuery(getDefaultQuery);
 
   const resourceFindings = useResourceFindings({
+    resourceId: params.resourceId,
     ...getBaseQuery({
       dataView,
       filters: urlQuery.filters,
       query: urlQuery.query,
     }),
-    resourceId: params.resourceId,
-    size: urlQuery.size,
-    from: urlQuery.from,
+    ...getPaginationQuery({
+      pageSize: urlQuery.pageSize,
+      pageIndex: urlQuery.pageIndex,
+    }),
   });
 
   return (
@@ -86,15 +88,13 @@ export const ResourceFindings = ({ dataView }: { dataView: DataView }) => {
           loading={resourceFindings.isFetching}
           data={resourceFindings.data}
           error={resourceFindings.error}
-          pagination={getEuiPaginationFromEs({
-            size: urlQuery.size,
-            from: urlQuery.from,
-            total: resourceFindings.data?.total,
+          pagination={getPaginationTableParams({
+            pageSize: urlQuery.pageSize,
+            pageIndex: urlQuery.pageIndex,
+            totalItemCount: resourceFindings.data?.total || 0,
           })}
           setTableOptions={({ page }) =>
-            setUrlQuery({
-              ...(page && getEsPaginationFromEui(page)),
-            })
+            setUrlQuery({ pageIndex: page.index, pageSize: page.size })
           }
         />
       </PageWrapper>

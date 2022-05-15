@@ -70,7 +70,7 @@ describe('<FindingsTable />', () => {
       loading: false,
       data: { page: [], total: 0 },
       error: null,
-      sorting: {},
+      sorting: { sort: { field: '@timestamp', direction: 'desc' } },
       pagination: { pageSize: 10, pageIndex: 1, totalItemCount: 0 },
       setTableOptions: jest.fn(),
     };
@@ -92,7 +92,7 @@ describe('<FindingsTable />', () => {
       loading: false,
       data: { page: data, total: 10 },
       error: null,
-      sorting: {},
+      sorting: { sort: { field: '@timestamp', direction: 'desc' } },
       pagination: { pageSize: 10, pageIndex: 1, totalItemCount: 0 },
       setTableOptions: jest.fn(),
     };

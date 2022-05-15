@@ -6,9 +6,8 @@
  */
 
 import { buildEsQuery } from '@kbn/es-query';
-import type { DataView, EsQuerySortValue } from '@kbn/data-plugin/common';
-import { Criteria, EuiBasicTableProps } from '@elastic/eui';
-import { SortDirection } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-plugin/common';
+import { EuiBasicTableProps, Pagination } from '@elastic/eui';
 import type { FindingsBaseEsQuery, FindingsBaseURLQuery } from './types';
 
 export const getBaseQuery = ({
@@ -23,39 +22,22 @@ export const getBaseQuery = ({
   query: buildEsQuery(dataView, query, filters),
 });
 
-export const getEuiSortFromEs = <T extends unknown>(
-  sort: EsQuerySortValue[]
-): EuiBasicTableProps<T>['sorting'] => {
-  if (!sort.length) return;
+type TablePagination = NonNullable<EuiBasicTableProps<unknown>['pagination']>;
 
-  const entry = Object.entries(sort[0])?.[0];
-  if (!entry) return;
-
-  const [field, direction] = entry;
-  return { sort: { field: field as keyof T, direction: direction as SortDirection } };
-};
-
-export const getEsSortFromEui = <T>(sort: NonNullable<Criteria<T>['sort']>) => ({
-  sort: [{ [sort.field]: sort.direction as SortDirection }],
+export const getPaginationTableParams = (
+  params: TablePagination & Pick<Required<TablePagination>, 'pageIndex' | 'pageSize'>,
+  pageSizeOptions = [10, 25, 100],
+  showPerPageOptions = true
+): Required<TablePagination> => ({
+  ...params,
+  pageSizeOptions,
+  showPerPageOptions,
 });
 
-export const getEuiPaginationFromEs = <T extends unknown>({
-  size: pageSize,
-  from,
-  total,
-}: {
-  total?: number | undefined;
-  size: number;
-  from: number;
-}): EuiBasicTableProps<T>['pagination'] => ({
+export const getPaginationQuery = ({
+  pageIndex,
   pageSize,
-  pageIndex: Math.ceil(from / pageSize),
-  totalItemCount: total || 0,
-  pageSizeOptions: [10, 25, 100],
-  showPerPageOptions: true,
-});
-
-export const getEsPaginationFromEui = (page: NonNullable<Criteria<unknown>['page']>) => ({
-  from: page.index * page.size,
-  size: page.size,
+}: Pick<Pagination, 'pageIndex' | 'pageSize'>) => ({
+  from: pageIndex * pageSize,
+  size: pageSize,
 });

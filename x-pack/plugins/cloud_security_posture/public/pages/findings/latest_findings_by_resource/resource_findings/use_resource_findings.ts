@@ -8,17 +8,20 @@ import { useQuery } from 'react-query';
 import { lastValueFrom } from 'rxjs';
 import { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Pagination } from '@elastic/eui';
 import { useKibana } from '../../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../latest_findings/use_latest_findings';
 import type { CspFinding, FindingsBaseEsQuery, FindingsQueryResult } from '../../types';
 
-interface UseResourceFindingsOptions extends FindingsBaseEsQuery, ResourceFindingsQuery {
+interface UseResourceFindingsOptions extends FindingsBaseEsQuery {
   resourceId: string;
+  from: NonNullable<estypes.SearchRequest['from']>;
+  size: NonNullable<estypes.SearchRequest['size']>;
 }
 
 export interface ResourceFindingsQuery {
-  from: number;
-  size: number;
+  pageIndex: Pagination['pageIndex'];
+  pageSize: Pagination['pageSize'];
 }
 
 export type ResourceFindingsResult = FindingsQueryResult<
@@ -30,12 +33,12 @@ const getResourceFindingsQuery = ({
   index,
   query,
   resourceId,
-  size,
   from,
+  size,
 }: UseResourceFindingsOptions): estypes.SearchRequest => ({
   index,
-  size,
   from,
+  size,
   body: {
     query: {
       ...query,
@@ -51,8 +54,8 @@ export const useResourceFindings = ({
   index,
   query,
   resourceId,
-  size,
   from,
+  size,
 }: UseResourceFindingsOptions) => {
   const {
     data,
@@ -60,11 +63,11 @@ export const useResourceFindings = ({
   } = useKibana().services;
 
   return useQuery(
-    ['csp_resource_findings', { index, query, resourceId, size, from }],
+    ['csp_resource_findings', { index, query, resourceId, from, size }],
     () =>
       lastValueFrom<IEsSearchResponse<CspFinding>>(
         data.search.search({
-          params: getResourceFindingsQuery({ index, query, resourceId, size, from }),
+          params: getResourceFindingsQuery({ index, query, resourceId, from, size }),
         })
       ),
     {

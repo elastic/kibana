@@ -6,13 +6,14 @@
  */
 import React, { useMemo, useState } from 'react';
 import {
-  type Criteria,
   EuiEmptyPrompt,
   EuiBasicTable,
   EuiBasicTableColumn,
-  EuiBasicTableProps,
+  type Pagination,
+  type EuiBasicTableProps,
+  type CriteriaWithPagination,
+  type EuiTableActionsColumnType,
 } from '@elastic/eui';
-import { EuiTableActionsColumnType } from '@elastic/eui/src/components/basic_table/table_types';
 import { extractErrorMessage } from '../../../../common/utils/helpers';
 import * as TEST_SUBJECTS from '../test_subjects';
 import * as TEXT from '../translations';
@@ -21,10 +22,12 @@ import type { CspFindingsResult } from './use_latest_findings';
 import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
 import { getExpandColumn, getFindingsColumns } from '../layout/findings_layout';
 
+type TableProps = Required<EuiBasicTableProps<CspFinding>>;
+
 interface BaseFindingsTableProps {
-  pagination: EuiBasicTableProps<CspFinding>['pagination'];
-  sorting: EuiBasicTableProps<CspFinding>['sorting'];
-  setTableOptions(options: Criteria<CspFinding>): void;
+  pagination: Pagination;
+  sorting: TableProps['sorting'];
+  setTableOptions(options: CriteriaWithPagination<CspFinding>): void;
 }
 
 type FindingsTableProps = CspFindingsResult & BaseFindingsTableProps;
