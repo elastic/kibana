@@ -50,6 +50,7 @@ const getFakeFindings = (name: string): CspFinding & { id: string } => ({
     version: chance.string(),
   },
   resource: {
+    name: chance.string(),
     filename: chance.string(),
     type: chance.string(),
     path: chance.string(),

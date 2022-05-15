@@ -69,6 +69,7 @@ interface CspFindingResource {
   mode: string;
   path: string;
   type: string;
+  name: string;
   [other_keys: string]: unknown;
 }
 
