@@ -63,8 +63,8 @@ export const LatestFindingsContainer = ({ dataView }: { dataView: DataView }) =>
           total={findingsGroupByNone.data?.total || 0}
           passed={findingsCount.data?.passed || 0}
           failed={findingsCount.data?.failed || 0}
-          pageStart={urlQuery.pageIndex + 1} // API index is 0, but UI is 1
-          pageEnd={urlQuery.pageIndex + urlQuery.pageSize}
+          pageStart={urlQuery.pageIndex * urlQuery.pageSize + 1} // API index is 0, but UI is 1
+          pageEnd={urlQuery.pageIndex * urlQuery.pageSize + urlQuery.pageSize}
         />
         <EuiSpacer />
         <FindingsTable
