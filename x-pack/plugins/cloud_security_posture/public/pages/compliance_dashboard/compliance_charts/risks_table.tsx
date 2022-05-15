@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import {
   EuiBasicTable,
+  EuiBasicTableColumn,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,46 +18,6 @@ import {
 import { ComplianceDashboardData, GroupedFindingsEvaluation } from '../../../../common/types';
 import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
 import * as TEXT from '../translations';
-import { INTERNAL_FEATURE_FLAGS } from '../../../../common/constants';
-
-const mockData = [
-  {
-    name: 'pods',
-    totalFindings: 2,
-    totalPassed: 1,
-    totalFailed: 1,
-  },
-  {
-    name: 'etcd',
-    totalFindings: 5,
-    totalPassed: 0,
-    totalFailed: 5,
-  },
-  {
-    name: 'cluster',
-    totalFindings: 2,
-    totalPassed: 2,
-    totalFailed: 0,
-  },
-  {
-    name: 'system',
-    totalFindings: 10,
-    totalPassed: 6,
-    totalFailed: 4,
-  },
-  {
-    name: 'api',
-    totalFindings: 19100,
-    totalPassed: 2100,
-    totalFailed: 17000,
-  },
-  {
-    name: 'server',
-    totalFindings: 7,
-    totalPassed: 4,
-    totalFailed: 3,
-  },
-];
 
 export interface RisksTableProps {
   data: ComplianceDashboardData['groupedFindingsEvaluation'];
@@ -81,13 +42,16 @@ export const RisksTable = ({
   onCellClick,
   onViewAllClick,
 }: RisksTableProps) => {
-  const columns = useMemo(
+  const columns: Array<EuiBasicTableColumn<GroupedFindingsEvaluation>> = useMemo(
     () => [
       {
         field: 'name',
+        truncateText: true,
         name: TEXT.CIS_SECTION,
         render: (name: GroupedFindingsEvaluation['name']) => (
-          <EuiLink onClick={() => onCellClick(name)}>{name}</EuiLink>
+          <EuiLink onClick={() => onCellClick(name)} className="eui-textTruncate">
+            {name}
+          </EuiLink>
         ),
       },
       {
@@ -119,7 +83,7 @@ export const RisksTable = ({
       <EuiFlexItem>
         <EuiBasicTable<GroupedFindingsEvaluation>
           rowHeader="name"
-          items={INTERNAL_FEATURE_FLAGS.showRisksMock ? getTopRisks(mockData, maxItems) : items}
+          items={items}
           columns={columns}
         />
       </EuiFlexItem>

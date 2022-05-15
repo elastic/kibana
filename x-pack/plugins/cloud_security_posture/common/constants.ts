@@ -30,7 +30,6 @@ export const RULE_FAILED = `failed`;
 export const INTERNAL_FEATURE_FLAGS = {
   showBenchmarks: true,
   showManageRulesMock: false,
-  showRisksMock: false,
   showFindingsGroupBy: true,
 } as const;
 
