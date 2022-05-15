@@ -144,7 +144,7 @@ export const syncEditedMonitor = async ({
       editedMonitorSavedObject,
       previousMonitor,
       server.kibanaVersion,
-      Boolean((monitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
+      Boolean((editedMonitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
       errors
     )
   );
