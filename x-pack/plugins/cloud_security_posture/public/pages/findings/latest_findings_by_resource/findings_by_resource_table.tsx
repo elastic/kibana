@@ -27,7 +27,9 @@ import { findingsNavigation } from '../../../common/navigation/constants';
 export const formatNumber = (value: number) =>
   value < 1000 ? value : numeral(value).format('0.0a');
 
-type CspFindingsByResource = NonNullable<CspFindingsByResourceResult['data']>['page'][number];
+export type CspFindingsByResource = NonNullable<
+  CspFindingsByResourceResult['data']
+>['page'][number];
 
 interface Props extends CspFindingsByResourceResult {
   pagination: Pagination;
@@ -35,7 +37,7 @@ interface Props extends CspFindingsByResourceResult {
 }
 
 export const getResourceId = (resource: CspFindingsByResource) =>
-  [resource.resource_id, resource.cluster_id, resource.cis_section].join('/');
+  [resource.resource_id, ...resource.cis_sections].join('/');
 
 const FindingsByResourceTableComponent = ({
   error,
@@ -80,7 +82,7 @@ const columns: Array<EuiTableFieldDataColumnType<CspFindingsByResource>> = [
     ),
   },
   {
-    field: 'cis_section',
+    field: 'cis_sections',
     truncateText: true,
     name: (
       <FormattedMessage
@@ -88,6 +90,7 @@ const columns: Array<EuiTableFieldDataColumnType<CspFindingsByResource>> = [
         defaultMessage="CIS Section"
       />
     ),
+    render: (sections: string[]) => sections.join(', '),
   },
   {
     field: 'failed_findings',

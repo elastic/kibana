@@ -121,9 +121,9 @@ export const useFindingsByResource = ({ index, query, from, size }: UseResourceF
 
 const createFindingsByResource = (bucket: FindingsAggBucket) => ({
   resource_id: bucket.key,
-  cis_section: (bucket.cis_sections.buckets as estypes.AggregationsStringRareTermsBucketKeys[]).map(
-    (v) => v.key
-  ),
+  cis_sections: (
+    bucket.cis_sections.buckets as estypes.AggregationsStringRareTermsBucketKeys[]
+  ).map((v) => v.key),
   failed_findings: {
     total: bucket.doc_count,
     normalized: bucket.doc_count > 0 ? bucket.failed_findings.doc_count / bucket.doc_count : 0,
