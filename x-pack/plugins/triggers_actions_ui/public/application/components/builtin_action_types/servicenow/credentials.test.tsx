@@ -45,7 +45,7 @@ describe('Credentials', () => {
     expect(screen.queryByLabelText('JWT Verifier Key ID')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Client Secret')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Private Key')).not.toBeInTheDocument();
-    expect(screen.queryByLabelText(/Private Key Password/)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Private Key Password')).not.toBeInTheDocument();
   });
 
   it('switches to oauth form', async () => {
@@ -79,6 +79,6 @@ describe('Credentials', () => {
     expect(screen.getByLabelText('JWT Verifier Key ID')).toBeInTheDocument();
     expect(screen.getByLabelText('Client Secret')).toBeInTheDocument();
     expect(screen.getByLabelText('Private Key')).toBeInTheDocument();
-    expect(screen.getByLabelText(/Private Key Password/)).toBeInTheDocument();
+    expect(screen.getByLabelText('Private Key Password')).toBeInTheDocument();
   });
 });
