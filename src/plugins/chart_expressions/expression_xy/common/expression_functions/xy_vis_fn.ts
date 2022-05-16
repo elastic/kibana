@@ -9,6 +9,7 @@
 import moment from 'moment';
 import {
   Dimension,
+  getColumnByAccessor,
   prepareLogTable,
   validateAccessor,
 } from '@kbn/visualizations-plugin/common/utils';
@@ -27,18 +28,19 @@ import {
   validateValueLabels,
 } from './validate';
 
-function normalizeTable(data: Datatable, xAccessor?: string) {
-  if (xAccessor) {
+function normalizeTable(data: Datatable, xAccessor?: string | ExpressionValueVisDimension) {
+  const xColumnId = xAccessor && getColumnByAccessor(xAccessor, data.columns)?.id;
+  if (xColumnId) {
     const xColumn = data.columns.find((col) => col.id === xAccessor);
     data.rows = data.rows.reduce<Datatable['rows']>((normalizedRows, row) => {
       return [
         ...normalizedRows,
         {
           ...row,
-          [xAccessor]:
-            xColumn?.meta.type === 'date' && typeof row[xAccessor] === 'string'
-              ? moment(row[xAccessor]).valueOf()
-              : row[xAccessor],
+          [xColumnId]:
+            xColumn?.meta.type === 'date' && typeof row[xColumnId] === 'string'
+              ? moment(row[xColumnId]).valueOf()
+              : row[xColumnId],
         },
       ];
     }, []);
