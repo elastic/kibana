@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// @ts-ignore
-import { checkParam, MissingRequiredError } from '../../error_missing_required';
 import { Cluster, LegacyRequest } from '../../../types';
 import { getNewIndexPatterns } from '../../cluster/get_index_patterns';
 import { Globals } from '../../../static_globals';
