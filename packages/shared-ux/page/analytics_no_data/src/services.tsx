@@ -75,9 +75,7 @@ export interface AnalyticsNoDataPageKibanaDependencies {
   coreStart: {
     application: {
       capabilities: {
-        navLinks: {
-          integrations: boolean;
-        };
+        navLinks: Record<string, boolean>;
       };
       currentAppId$: Observable<string | undefined>;
       navigateToUrl: (url: string) => Promise<void>;

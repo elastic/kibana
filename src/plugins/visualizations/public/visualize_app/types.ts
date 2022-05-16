@@ -25,6 +25,7 @@ import type {
   IKbnUrlStateStorage,
   ReduxLikeStateContainer,
 } from '@kbn/kibana-utils-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 
 import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import type { Filter } from '@kbn/es-query';
@@ -83,7 +84,9 @@ export interface VisualizeServices extends CoreStart {
   stateTransferService: EmbeddableStateTransfer;
   embeddable: EmbeddableStart;
   history: History;
+  dataViewEditor: DataViewEditorStart;
   kbnUrlStateStorage: IKbnUrlStateStorage;
+  core: CoreStart;
   urlForwarding: UrlForwardingStart;
   pluginInitializerContext: PluginInitializerContext;
   chrome: ChromeStart;
