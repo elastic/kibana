@@ -361,6 +361,8 @@ export default function (providerContext: FtrProviderContext) {
         type: 'epm-packages',
         id: 'all_assets',
       });
+
+      console.log('RES:', JSON.stringify(res, null, 2));
       expect(res.attributes).eql({
         installed_kibana_space_id: 'default',
         installed_kibana: [
