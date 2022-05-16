@@ -47,6 +47,12 @@ export interface ComplianceDashboardData {
   trend: PostureTrend[];
 }
 
+export interface CspRulesStatus {
+  all: number;
+  enabled: number;
+  disabled: number;
+}
+
 export interface Benchmark {
   package_policy: Pick<
     PackagePolicy,
@@ -61,4 +67,5 @@ export interface Benchmark {
     | 'created_by'
   >;
   agent_policy: Pick<GetAgentPoliciesResponseItem, 'id' | 'name' | 'agents'>;
+  rules: CspRulesStatus;
 }

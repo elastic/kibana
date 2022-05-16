@@ -7,7 +7,7 @@
 
 // @ts-expect-error missing type def
 import stringify from 'json-stringify-safe';
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { Logger } from '@kbn/core/server';
 import { request } from './axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
@@ -25,11 +25,13 @@ const MICROSOFT_GRAPH_API_HOST = 'https://graph.microsoft.com/v1.0';
 export async function sendEmailGraphApi(
   sendEmailOptions: SendEmailGraphApiOptions,
   logger: Logger,
-  configurationUtilities: ActionsConfigurationUtilities
+  configurationUtilities: ActionsConfigurationUtilities,
+  axiosInstance?: AxiosInstance
 ): Promise<AxiosResponse> {
   const { options, headers, messageHTML, graphApiUrl } = sendEmailOptions;
 
-  const axiosInstance = axios.create();
+  // Create a new axios instance if one is not provided
+  axiosInstance = axiosInstance ?? axios.create();
 
   // POST /users/{id | userPrincipalName}/sendMail
   const res = await request({

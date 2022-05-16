@@ -57,7 +57,7 @@ export const TimeSlider: FC<TimeSliderProps> = ({
         max?: number;
       });
 
-  const { value } = useEmbeddableSelector((state) => state);
+  const { value, id } = useEmbeddableSelector((state) => state);
 
   const dispatchChange = useCallback(
     (range: [number | null, number | null]) => {
@@ -77,6 +77,7 @@ export const TimeSlider: FC<TimeSliderProps> = ({
 
   return (
     <Component
+      id={id}
       onChange={onChangeComplete}
       value={value ?? [null, null]}
       range={[min, max]}

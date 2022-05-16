@@ -96,6 +96,8 @@ describe('migrations v2 model', () => {
     excludeFromUpgradeFilterHooks: {},
     migrationDocLinks: {
       resolveMigrationFailures: 'resolveMigrationFailures',
+      repeatedTimeoutRequests: 'repeatedTimeoutRequests',
+      routingAllocationDisabled: 'routingAllocationDisabled',
     },
   };
 
@@ -280,16 +282,21 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
-      test('INIT -> FATAL when cluster routing allocation is not enabled', () => {
+      test('INIT -> INIT when cluster routing allocation is incompatible', () => {
         const res: ResponseType<'INIT'> = Either.left({
-          type: 'unsupported_cluster_routing_allocation',
+          type: 'incompatible_cluster_routing_allocation',
         });
         const newState = model(initState, res) as FatalState;
 
-        expect(newState.controlState).toEqual('FATAL');
-        expect(newState.reason).toMatchInlineSnapshot(
-          `"The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {\\"transient\\": {\\"cluster.routing.allocation.enable\\": null}, \\"persistent\\": {\\"cluster.routing.allocation.enable\\": null}}"`
-        );
+        expect(newState.controlState).toEqual('INIT');
+        expect(newState.retryCount).toEqual(1);
+        expect(newState.retryDelay).toEqual(2000);
+        expect(newState.logs[0]).toMatchInlineSnapshot(`
+          Object {
+            "level": "error",
+            "message": "Action failed with '[incompatible_cluster_routing_allocation] Incompatible Elasticsearch cluster settings detected. Remove the persistent and transient Elasticsearch cluster setting 'cluster.routing.allocation.enable' or set it to a value of 'all' to allow migrations to proceed. Refer to routingAllocationDisabled for more information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
+          }
+        `);
       });
       test("INIT -> FATAL when .kibana points to newer version's index", () => {
         const res: ResponseType<'INIT'> = Either.right({
@@ -572,6 +579,12 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('LEGACY_CREATE_REINDEX_TARGET');
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
+        expect(newState.logs[0]).toMatchInlineSnapshot(`
+          Object {
+            "level": "error",
+            "message": "Action failed with '[index_not_yellow_timeout] Timeout waiting for ... Refer to repeatedTimeoutRequests for information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
+          }
+        `);
       });
       test('LEGACY_CREATE_REINDEX_TARGET -> LEGACY_REINDEX resets retry count and retry delay if action succeeds', () => {
         const res: ResponseType<'LEGACY_CREATE_REINDEX_TARGET'> =
@@ -740,6 +753,12 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('WAIT_FOR_YELLOW_SOURCE');
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
+        expect(newState.logs[0]).toMatchInlineSnapshot(`
+          Object {
+            "level": "error",
+            "message": "Action failed with '[index_not_yellow_timeout] Timeout waiting for ... Refer to repeatedTimeoutRequests for information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
+          }
+        `);
       });
 
       test('WAIT_FOR_YELLOW_SOURCE -> CHECK_UNKNOWN_DOCUMENTS resets retry count and delay if action succeeds', () => {
@@ -959,6 +978,12 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('CREATE_REINDEX_TEMP');
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
+        expect(newState.logs[0]).toMatchInlineSnapshot(`
+          Object {
+            "level": "error",
+            "message": "Action failed with '[index_not_yellow_timeout] Timeout waiting for ... Refer to repeatedTimeoutRequests for information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
+          }
+        `);
       });
       it('CREATE_REINDEX_TEMP -> REINDEX_SOURCE_TO_TEMP_OPEN_PIT resets retry count if action succeeds', () => {
         const res: ResponseType<'CREATE_REINDEX_TEMP'> = Either.right('create_index_succeeded');
@@ -1293,6 +1318,12 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('CLONE_TEMP_TO_TARGET');
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
+        expect(newState.logs[0]).toMatchInlineSnapshot(`
+          Object {
+            "level": "error",
+            "message": "Action failed with '[index_not_yellow_timeout] Timeout waiting for ... Refer to repeatedTimeoutRequests for information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
+          }
+        `);
       });
       it('CREATE_NEW_TARGET -> MARK_VERSION_INDEX_READY resets the retry count and delay', () => {
         const res: ResponseType<'CLONE_TEMP_TO_TARGET'> = Either.right({
