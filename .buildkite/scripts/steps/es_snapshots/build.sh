@@ -65,6 +65,10 @@ export DOCKER_TLS_CERTDIR="$CERTS_DIR"
 export DOCKER_HOST=localhost:2377
 
 echo "--- Build Elasticsearch"
+(buildkite-agent meta-data get ES_SNAPSHOT_VERSION
+  ARTIFACTS_SUMMARY=$(curl -s "https://artifacts-snapshot.elastic.co/beats/latest/$FULL_VERSION.json" | jq -re '.summary_url')
+
+
 ./gradlew \
   :distribution:archives:darwin-aarch64-tar:assemble \
   :distribution:archives:darwin-tar:assemble \
