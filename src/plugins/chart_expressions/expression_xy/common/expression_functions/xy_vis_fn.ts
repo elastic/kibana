@@ -63,11 +63,11 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
     ...restArgs
   } = args;
 
-  validateAccessor(xAccessor, data.columns);
-  validateAccessor(splitAccessor, data.columns);
-  accessors.forEach((accessor) => validateAccessor(accessor, data.columns));
-
   const dataLayers: DataLayerConfigResult[] = [createDataLayer(args, data)];
+
+  validateAccessor(dataLayers[0].xAccessor, data.columns);
+  validateAccessor(dataLayers[0].splitAccessor, data.columns);
+  dataLayers[0].accessors.forEach((accessor) => validateAccessor(accessor, data.columns));
 
   const layers: XYLayerConfig[] = [
     ...appendLayerIds(dataLayers, 'dataLayers'),
