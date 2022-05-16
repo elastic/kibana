@@ -209,17 +209,22 @@ describe('Table Helpers', () => {
     });
 
     test('it shows correct number of overflow items when maxOverflowItems are not exceeded', () => {
-      const wrapper = shallow(
-        <RowItemOverflowComponent
-          rowItems={items}
-          attrName="attrName"
-          idPrefix="idPrefix"
-          maxOverflowItems={5}
-          overflowIndexStart={1}
-        />
+      const wrapper = mount(
+        <TestProviders>
+          <RowItemOverflowComponent
+            rowItems={items}
+            attrName="attrName"
+            idPrefix="idPrefix"
+            maxOverflowItems={5}
+            overflowIndexStart={1}
+          />
+        </TestProviders>
       );
+      wrapper.find('[data-test-subj="overflow-button"]').first().simulate('click');
+
       expect(
-        wrapper.find('[data-test-subj="overflow-items"]').prop<JSX.Element[]>('children')?.length
+        wrapper.find('[data-test-subj="overflow-items"]').last().prop<JSX.Element[]>('children')
+          ?.length
       ).toEqual(2);
     });
 

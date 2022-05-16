@@ -332,7 +332,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
         rowItems.slice(overflowIndexStart).map((rowItem, index) => {
           return (
             <EuiFlexItem grow={1} key={`${rowItem}-${index}`}>
-              {(render && render(rowItem)) ?? defaultToEmptyTag(rowItem)}{' '}
+              {(render && render(rowItem)) ?? defaultToEmptyTag(rowItem)}
             </EuiFlexItem>
           );
         }),
