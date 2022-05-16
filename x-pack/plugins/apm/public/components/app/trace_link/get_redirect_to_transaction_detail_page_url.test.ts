@@ -34,7 +34,7 @@ describe('getRedirectToTransactionDetailPageUrl', () => {
 
     it('formats url correctly', () => {
       expect(url).toBe(
-        '/services/opbeans-node/transactions/view?traceId=trace_id&transactionId=transaction_id&transactionName=transaction_name&transactionType=request&rangeFrom=2020-01-01T00%3A00%3A00.000Z&rangeTo=2020-01-01T00%3A05%3A00.000Z'
+        '/services/opbeans-node/transactions/view?traceId=trace_id&transactionId=transaction_id&transactionName=transaction_name&transactionType=request&rangeFrom=2020-01-01T00%3A00%3A00.000Z&rangeTo=2020-01-01T00%3A05%3A00.000Z&waterfallItemId='
       );
     });
   });
@@ -48,7 +48,7 @@ describe('getRedirectToTransactionDetailPageUrl', () => {
 
     it('uses timerange provided', () => {
       expect(url).toBe(
-        '/services/opbeans-node/transactions/view?traceId=trace_id&transactionId=transaction_id&transactionName=transaction_name&transactionType=request&rangeFrom=2020-01-01T00%3A02%3A00.000Z&rangeTo=2020-01-01T00%3A17%3A59.999Z'
+        '/services/opbeans-node/transactions/view?traceId=trace_id&transactionId=transaction_id&transactionName=transaction_name&transactionType=request&rangeFrom=2020-01-01T00%3A02%3A00.000Z&rangeTo=2020-01-01T00%3A17%3A59.999Z&waterfallItemId='
       );
     });
   });

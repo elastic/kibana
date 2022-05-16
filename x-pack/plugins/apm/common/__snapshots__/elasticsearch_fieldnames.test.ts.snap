@@ -203,6 +203,12 @@ exports[`Error SPAN_DURATION 1`] = `undefined`;
 
 exports[`Error SPAN_ID 1`] = `undefined`;
 
+exports[`Error SPAN_LINKS 1`] = `undefined`;
+
+exports[`Error SPAN_LINKS_SPAN_ID 1`] = `undefined`;
+
+exports[`Error SPAN_LINKS_TRACE_ID 1`] = `undefined`;
+
 exports[`Error SPAN_NAME 1`] = `undefined`;
 
 exports[`Error SPAN_SELF_TIME_SUM 1`] = `undefined`;
@@ -445,6 +451,12 @@ exports[`Span SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM 1`] = `undefined`;
 exports[`Span SPAN_DURATION 1`] = `1337`;
 
 exports[`Span SPAN_ID 1`] = `"span id"`;
+
+exports[`Span SPAN_LINKS 1`] = `undefined`;
+
+exports[`Span SPAN_LINKS_SPAN_ID 1`] = `undefined`;
+
+exports[`Span SPAN_LINKS_TRACE_ID 1`] = `undefined`;
 
 exports[`Span SPAN_NAME 1`] = `"span name"`;
 
@@ -702,6 +714,12 @@ exports[`Transaction SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM 1`] = `undefined
 exports[`Transaction SPAN_DURATION 1`] = `undefined`;
 
 exports[`Transaction SPAN_ID 1`] = `undefined`;
+
+exports[`Transaction SPAN_LINKS 1`] = `undefined`;
+
+exports[`Transaction SPAN_LINKS_SPAN_ID 1`] = `undefined`;
+
+exports[`Transaction SPAN_LINKS_TRACE_ID 1`] = `undefined`;
 
 exports[`Transaction SPAN_NAME 1`] = `undefined`;
 
