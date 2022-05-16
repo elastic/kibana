@@ -82,6 +82,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     maps: deps.maps,
     triggersActionsUi: deps.triggersActionsUi,
     dataVisualizer: deps.dataVisualizer,
+    aiops: deps.aiops,
     usageCollection: deps.usageCollection,
     fieldFormats: deps.fieldFormats,
     dashboard: deps.dashboard,
@@ -135,6 +136,7 @@ export const renderApp = (
     dashboard: deps.dashboard,
     maps: deps.maps,
     dataVisualizer: deps.dataVisualizer,
+    aiops: deps.aiops,
     dataViews: deps.data.dataViews,
   });
 
