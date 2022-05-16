@@ -184,7 +184,6 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     const fetchSingleDataView = async () => {
       if (dataViewId != null && dataViewId !== '') {
         const dv = await data.dataViews.get(dataViewId);
-        console.error('ABOUT TO SET INDEX PATTERN TO DATA VIEW');
         setIndexPattern(dv);
       }
     };

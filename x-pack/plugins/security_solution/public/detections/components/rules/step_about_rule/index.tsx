@@ -126,7 +126,6 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     const fetchSingleDataView = async () => {
       if (defineRuleData?.dataViewId != null && defineRuleData?.dataViewId !== '') {
         const dv = await data.dataViews.get(defineRuleData?.dataViewId);
-        console.error('ABOUT TO SET INDEX PATTERN TO DATA VIEW');
         setIndexPattern(dv);
       }
     };

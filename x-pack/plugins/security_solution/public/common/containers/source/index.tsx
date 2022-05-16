@@ -195,13 +195,10 @@ export const useFetchIndex = (
   );
 
   useEffect(() => {
-    // console.error('FETCH', indexNames, previousIndexesName.current);
     if (!isEmpty(indexNames) && !isEqual(previousIndexesName.current, indexNames)) {
-      console.error('executing another search', indexNames);
       indexFieldsSearch(indexNames);
     }
     return () => {
-      console.error('CANCELLED FETCH');
       searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
     };
