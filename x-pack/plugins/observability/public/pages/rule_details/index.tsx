@@ -31,12 +31,14 @@ import {
   snoozeRule,
   unsnoozeRule,
   deleteRules,
+  useLoadRuleTypes,
+  RuleType,
 } from '@kbn/triggers-actions-ui-plugin/public';
 // TODO: use a Delete modal from triggersActionUI when it's sharable
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { DeleteModalConfirmation } from '../rules/components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from '../rules/components/center_justified_spinner';
-import { getHealthColor } from '../rules/config';
+import { getHealthColor, OBSERVABILITY_SOLUTIONS } from '../rules/config';
 import {
   RuleDetailsPathParams,
   EVENT_ERROR_LOG_TAB,
@@ -68,8 +70,13 @@ export function RuleDetailsPage() {
 
   const { ruleId } = useParams<RuleDetailsPathParams>();
   const { ObservabilityPageTemplate } = usePluginContext();
-  const { isRuleLoading, rule, ruleType, errorRule, reloadRule } = useFetchRule({ ruleId, http });
+  const { isRuleLoading, rule, errorRule, reloadRule } = useFetchRule({ ruleId, http });
+  const { ruleTypes } = useLoadRuleTypes({
+    filteredSolutions: OBSERVABILITY_SOLUTIONS,
+  });
+
   const [features, setFeatures] = useState<string>('');
+  const [ruleType, setRuleType] = useState<RuleType<string, string>>();
   const [ruleToDelete, setRuleToDelete] = useState<string[]>([]);
   const [isPageLoading, setIsPageLoading] = useState(false);
   const { last24hAlerts } = useFetchLast24hAlerts({
@@ -96,12 +103,14 @@ export function RuleDetailsPage() {
   }, []);
 
   useEffect(() => {
-    if (ruleType && rule) {
-      if (rule.consumer === ALERTS_FEATURE_ID && ruleType.producer) {
-        setFeatures(ruleType.producer);
+    if (ruleTypes.length && rule) {
+      const matchedRuleType = ruleTypes.find((type) => type.id === rule.ruleTypeId);
+      if (rule.consumer === ALERTS_FEATURE_ID && matchedRuleType && matchedRuleType.producer) {
+        setRuleType(matchedRuleType);
+        setFeatures(matchedRuleType.producer);
       } else setFeatures(rule.consumer);
     }
-  }, [ruleType, rule]);
+  }, [rule, ruleTypes]);
 
   useBreadcrumbs([
     {
