@@ -21,8 +21,8 @@ import { getDefaultQuery } from '../utils/new_job_utils';
 export async function resolver(
   lensSavedObjectId: string | undefined,
   lensSavedObjectRisonString: string | undefined,
-  from: string,
-  to: string,
+  fromRisonStrong: string,
+  toRisonStrong: string,
   queryRisonString: string,
   filtersRisonString: string
 ) {
@@ -46,6 +46,19 @@ export async function resolver(
     filters = rison.decode(filtersRisonString) as Filter[];
   } catch (error) {
     filters = [];
+  }
+
+  let from: string;
+  let to: string;
+  try {
+    from = rison.decode(fromRisonStrong) as string;
+  } catch (error) {
+    from = '';
+  }
+  try {
+    to = rison.decode(toRisonStrong) as string;
+  } catch (error) {
+    to = '';
   }
 
   const dataViewClient = getDataViews();
