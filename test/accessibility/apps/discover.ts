@@ -155,13 +155,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('discoverChartOptionsToggle');
     });
 
-    //https://github.com/elastic/eui/issues/5900
+    // https://github.com/elastic/eui/issues/5900
     it.skip('a11y test for data grid sort panel', async () => {
       await testSubjects.click('dataGridColumnSortingButton');
       await a11y.testAppSnapshot();
       await browser.pressKeys(browser.keys.ESCAPE);
     });
-
 
     it('a11y test for setting row height for display panel', async () => {
       await testSubjects.click('dataGridDisplaySelectorPopover');
