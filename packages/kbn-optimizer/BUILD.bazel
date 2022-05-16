@@ -24,10 +24,8 @@ filegroup(
 )
 
 NPM_MODULE_EXTRA_FILES = [
-  "limits.yml",
   "package.json",
-  "postcss.config.js",
-  "README.md"
+  "postcss.config.js"
 ]
 
 RUNTIME_DEPS = [

@@ -1,30 +1,21 @@
 ---
-id: kibDevDocsOpsWelcome
-slug: /kibana-dev-docs/ops/welcome
-title: Welcome
-description: Operations Home
-date: 2021-05-16
+id: kibDevDocsOpsLanding
+slug: /kibana-dev-docs/ops
+title: Operations Landing
+description: Links to all the documentation maintained by the Kibana Operations team
 tags: ['kibana', 'dev', 'contributor', 'operations']
+layout: landing
 ---
 
-Welcome to the ops docs!
+<DocLandingHero
+  title='Welcome to the ops docs!'
+  description="👋 Here you will find documentation about all the things the Kibana Operations team manages. Feel free to look around and ask questions!"
+/>
 
-## Build tooling
-- <DocLink id="kibDevDocsOpsEslintConfigKibana" text="@elastic/eslint-config-kibana"/>
-
-<DocCallOut color="warning" title="Experimental">
-  This is an example callout
-</DocCallOut>
-
-<DocCallOut title="@internal tags">
-  Another example callout
-</DocCallOut>
-
-This is a DocLink: <DocLink id="kibPlatformIntro" section="public-plugin-api" text="public API"/>
-
-## Heading
-
-This is a list
-
-1. item 1
-2. item 2
+<DocRelatedArticles
+  sectionTitle='Build tooling'
+  items={[
+    { pageId: "kibDevDocsOpsOptimizer" },
+    { pageId: "kibDevDocsOpsEslintConfigKibana" }
+  ]}
+/>
