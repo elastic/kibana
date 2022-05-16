@@ -55,7 +55,7 @@ class BlocklistDataLoaderError extends Error {
   }
 }
 
-const handleThrowAxiosHttpError = (err: AxiosError): never => {
+const handleThrowAxiosHttpError = (err: AxiosError<{ message?: string }>): never => {
   let message = err.message;
 
   if (err.response) {
