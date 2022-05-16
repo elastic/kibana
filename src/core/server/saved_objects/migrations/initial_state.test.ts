@@ -9,10 +9,12 @@
 import { ByteSizeValue } from '@kbn/config-schema';
 import * as Option from 'fp-ts/Option';
 import { DocLinksServiceSetup } from '../../doc_links';
-import { docLinksServiceMock } from '../../mocks';
+import { docLinksServiceMock, loggingSystemMock } from '../../mocks';
 import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { createInitialState } from './initial_state';
+
+const mockLogger = loggingSystemMock.create();
 
 describe('createInitialState', () => {
   let typeRegistry: SavedObjectTypeRegistry;
@@ -41,6 +43,7 @@ describe('createInitialState', () => {
         migrationsConfig,
         typeRegistry,
         docLinks,
+        logger: mockLogger.get(),
       })
     ).toEqual({
       batchSize: 1000,
@@ -150,6 +153,7 @@ describe('createInitialState', () => {
       migrationsConfig,
       typeRegistry,
       docLinks,
+      logger: mockLogger.get(),
     });
 
     expect(initialState.knownTypes).toEqual(['foo', 'bar']);
@@ -176,6 +180,7 @@ describe('createInitialState', () => {
       migrationsConfig,
       typeRegistry,
       docLinks,
+      logger: mockLogger.get(),
     });
 
     expect(initialState.excludeFromUpgradeFilterHooks).toEqual({ foo: fooExcludeOnUpgradeHook });
@@ -195,6 +200,7 @@ describe('createInitialState', () => {
       migrationsConfig,
       typeRegistry,
       docLinks,
+      logger: mockLogger.get(),
     });
 
     expect(Option.isSome(initialState.preMigrationScript)).toEqual(true);
@@ -217,6 +223,7 @@ describe('createInitialState', () => {
           migrationsConfig,
           typeRegistry,
           docLinks,
+          logger: mockLogger.get(),
         }).preMigrationScript
       )
     ).toEqual(true);
@@ -235,6 +242,7 @@ describe('createInitialState', () => {
         migrationsConfig,
         typeRegistry,
         docLinks,
+        logger: mockLogger.get(),
       }).outdatedDocumentsQuery
     ).toMatchInlineSnapshot(`
         Object {
@@ -275,6 +283,7 @@ describe('createInitialState', () => {
   });
 
   it('initializes the `ignoreUnknownObjects` flag to false if the value provided in the config does not match the current kibana version', () => {
+    const logger = mockLogger.get();
     const initialState = createInitialState({
       kibanaVersion: '8.1.0',
       targetMappings: {
@@ -289,9 +298,14 @@ describe('createInitialState', () => {
       },
       typeRegistry,
       docLinks,
+      logger,
     });
 
-    expect(initialState.ignoreUnknownObjects).toBeFalsy();
+    expect(initialState.ignoreUnknownObjects).toEqual(false);
+    expect(logger.warn).toBeCalledTimes(1);
+    expect(logger.warn).toBeCalledWith(
+      'The flag `migrations.ignoreUnknownObjects` is defined but does not match the current kibana version; unknown objects will NOT be ignored.'
+    );
   });
 
   it('initializes the `ignoreUnknownObjects` flag to true if the value provided in the config matches the current kibana version', () => {
@@ -309,8 +323,9 @@ describe('createInitialState', () => {
       },
       typeRegistry,
       docLinks,
+      logger: mockLogger.get(),
     });
 
-    expect(initialState.ignoreUnknownObjects).toBeTruthy();
+    expect(initialState.ignoreUnknownObjects).toEqual(true);
   });
 });

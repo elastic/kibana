@@ -109,11 +109,11 @@ Unable to complete saved object migrations for the [.kibana] index: Migration fa
 --------------------------------------------
 
 In 8.3+ deployments, you also have the possibility to simply ignore the unknown documents and proceed with the upgrade.
-This can be achieved with a new configuration flag `migrations.ignoreUnknownObjects` that must be set to the version you are upgrading to. For instance, for an upgrade to 8.3, you can define the following setting in kibana.yml:
+This can be achieved with a new configuration flag `migrations.ignoreUnknownObjects` that must be set to the version you are upgrading to. For instance, for an upgrade to 8.3.0, you can define the following setting in kibana.yml:
 
 [source,yaml]
 --------------------------------------------
-migrations.ignoreUnknownObjects: "8.3"
+migrations.ignoreUnknownObjects: "8.3.0"
 --------------------------------------------
 
 [float]

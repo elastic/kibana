@@ -11,6 +11,9 @@ import fs from 'fs/promises';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
+import { Env } from '@kbn/config';
+import { REPO_ROOT } from '@kbn/utils';
+import { getEnvOptions } from '../../../config/mocks';
 
 const logFilePath = Path.join(__dirname, '7_13_unknown_types.log');
 
@@ -106,7 +109,7 @@ describe('migration v2', () => {
   });
 
   describe('when `ignoreUnknownObjects` matches current kibana version', () => {
-    const currentVersion = kbnTestServer.getCurrentKibanaVersion();
+    const currentVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 
     it('continues with the migration even when unknown types are found in the source index', async () => {
       // Start kibana with foo and space types disabled

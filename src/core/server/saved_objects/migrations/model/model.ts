@@ -372,12 +372,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           { level: 'warning', message: extractIgnoredUnknownDocs(res.right.unknownDocs) },
         ];
 
+        const unknownTypeTerms = [...new Set(res.right.unknownDocs.map(({ type }) => type))].map(
+          (type) => ({ term: { type } })
+        );
+
         const unknownTypesQuery = {
           bool: {
-            must_not: res.right.unknownDocs
-              .map(({ type }) => type)
-              .filter((type, index, types) => types.indexOf(type) === index)
-              .map((type) => ({ term: { type } })),
+            must_not: unknownTypeTerms,
           },
         };
 

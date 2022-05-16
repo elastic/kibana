@@ -14,6 +14,7 @@ import type { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { InitState } from './state';
 import { excludeUnusedTypesQuery } from './core';
 import { DocLinksServiceStart } from '../../doc_links';
+import { Logger } from '../../logging';
 
 /**
  * Construct the initial state for the model
@@ -27,6 +28,7 @@ export const createInitialState = ({
   migrationsConfig,
   typeRegistry,
   docLinks,
+  logger,
 }: {
   kibanaVersion: string;
   targetMappings: IndexMapping;
@@ -36,6 +38,7 @@ export const createInitialState = ({
   migrationsConfig: SavedObjectsMigrationConfigType;
   typeRegistry: ISavedObjectTypeRegistry;
   docLinks: DocLinksServiceStart;
+  logger: Logger;
 }): InitState => {
   const outdatedDocumentsQuery = {
     bool: {
@@ -69,6 +72,15 @@ export const createInitialState = ({
   );
   // short key to access savedObjects entries directly from docLinks
   const migrationDocLinks = docLinks.links.kibanaUpgradeSavedObjects;
+
+  if (
+    migrationsConfig.ignoreUnknownObjects &&
+    migrationsConfig.ignoreUnknownObjects !== kibanaVersion
+  ) {
+    logger.warn(
+      'The flag `migrations.ignoreUnknownObjects` is defined but does not match the current kibana version; unknown objects will NOT be ignored.'
+    );
+  }
 
   return {
     controlState: 'INIT',

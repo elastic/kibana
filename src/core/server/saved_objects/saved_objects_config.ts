@@ -7,12 +7,15 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { valid } from 'semver';
 import type { ServiceConfigDescriptor } from '../internal_types';
 
 const migrationSchema = schema.object({
   batchSize: schema.number({ defaultValue: 1_000 }),
   maxBatchSizeBytes: schema.byteSize({ defaultValue: '100mb' }), // 100mb is the default http.max_content_length Elasticsearch config value
-  ignoreUnknownObjects: schema.maybe(schema.string()),
+  ignoreUnknownObjects: schema.maybe(
+    schema.string({ validate: (value) => (valid(value) ? value : undefined) })
+  ),
   scrollDuration: schema.string({ defaultValue: '15m' }),
   pollInterval: schema.number({ defaultValue: 1_500 }),
   skip: schema.boolean({ defaultValue: false }),
