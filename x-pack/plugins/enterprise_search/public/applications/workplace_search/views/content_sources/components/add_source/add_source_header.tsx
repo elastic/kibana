@@ -18,6 +18,8 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { SourceIcon } from '../../../../components/shared/source_icon';
 
 interface AddSourceHeaderProps {
@@ -56,7 +58,12 @@ export const AddSourceHeader: React.FC<AddSourceHeaderProps> = ({
           </EuiTitle>
           <EuiText size="xs" color="subdued">
             {serviceType === 'external'
-              ? 'Externally deployed connector package'
+              ? i18n.translate(
+                  'xpack.enterpriseSearch.workplaceSearch.addSource.addSourceHeader.externalConnectorLabel',
+                  {
+                    defaultMessage: 'Externally deployed connector package',
+                  }
+                )
               : categories.map((category) => startCase(category)).join(', ')}
           </EuiText>
         </EuiFlexItem>
