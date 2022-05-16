@@ -270,7 +270,16 @@ export class SavedObjectsRepository {
       mappings,
       client,
       typeRegistry,
-      hooks,
+      hooks = {
+        preHooks: {
+          get: [],
+          create: [],
+        },
+        postHooks: {
+          get: [],
+          create: [],
+        },
+      },
       serializer,
       migrator,
       allowedTypes = [],
