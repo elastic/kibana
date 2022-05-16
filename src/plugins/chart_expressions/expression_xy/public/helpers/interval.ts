@@ -7,6 +7,7 @@
  */
 
 import { search } from '@kbn/data-plugin/public';
+import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { XYChartProps } from '../../common';
 import { getFilteredLayers } from './layers';
 import { isDataLayer } from './visualization';
@@ -15,9 +16,10 @@ export function calculateMinInterval({ args: { layers } }: XYChartProps) {
   const filteredLayers = getFilteredLayers(layers);
   if (filteredLayers.length === 0) return;
   const isTimeViz = filteredLayers.every((l) => isDataLayer(l) && l.xScaleType === 'time');
-  const xColumn = filteredLayers[0].table.columns.find(
-    (column) => isDataLayer(filteredLayers[0]) && column.id === filteredLayers[0].xAccessor
-  );
+  const xColumn =
+    isDataLayer(filteredLayers[0]) &&
+    filteredLayers[0].xAccessor &&
+    getColumnByAccessor(filteredLayers[0].xAccessor, filteredLayers[0].table.columns);
 
   if (!xColumn) return;
   if (!isTimeViz) {
