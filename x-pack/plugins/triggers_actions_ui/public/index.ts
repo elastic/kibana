@@ -68,7 +68,7 @@ export { muteRule } from './application/lib/rule_api/mute';
 export { unmuteRule } from './application/lib/rule_api/unmute';
 export { snoozeRule } from './application/lib/rule_api/snooze';
 export { unsnoozeRule } from './application/lib/rule_api/unsnooze';
-export { loadRuleAggregations } from './application/lib/rule_api/aggregate';
+export { loadRuleAggregations, loadRuleTags } from './application/lib/rule_api/aggregate';
 export { useLoadRuleTypes } from './application/hooks/use_load_rule_types';
 export { loadRule } from './application/lib/rule_api/get_rule';
 export { loadAllActions } from './application/lib/action_connector_api';
