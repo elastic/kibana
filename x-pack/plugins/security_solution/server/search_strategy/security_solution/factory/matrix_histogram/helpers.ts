@@ -18,7 +18,7 @@ export const getGenericData = <T>(
 ): MatrixHistogramData[] => {
   let result: MatrixHistogramData[] = [];
   data.forEach((bucketData: unknown) => {
-    // if key is not a string, use key_as_string instead.
+    // if key_as_string is present use it, else default to the existing key
     const group = get('key_as_string', bucketData) ?? get('key', bucketData);
     const histData = getOr([], keyBucket, bucketData).map(
       // eslint-disable-next-line @typescript-eslint/naming-convention
