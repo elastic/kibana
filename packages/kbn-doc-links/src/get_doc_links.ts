@@ -444,6 +444,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       guide: `${KIBANA_DOCS}maps.html`,
       importGeospatialPrivileges: `${KIBANA_DOCS}import-geospatial-data.html#import-geospatial-privileges`,
       gdalTutorial: `${ELASTIC_WEBSITE_URL}blog/how-to-ingest-geospatial-data-into-elasticsearch-with-gdal`,
+      termJoinsExample: `${KIBANA_DOCS}terms-join.html#_example_term_join`,
     },
     monitoring: {
       alertsKibana: `${KIBANA_DOCS}kibana-alerts.html`,

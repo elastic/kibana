@@ -16763,7 +16763,6 @@
     "xpack.maps.layerPanel.join.deleteJoinAriaLabel": "Supprimer la liaison",
     "xpack.maps.layerPanel.join.deleteJoinTitle": "Supprimer la liaison",
     "xpack.maps.layerPanel.joinEditor.termJoinsTitle": "Liaisons de terme",
-    "xpack.maps.layerPanel.joinEditor.termJoinTooltip": "Utilisez les liaisons de terme pour ajouter à ce calque les propriétés de style basées sur les données.",
     "xpack.maps.layerPanel.joinExpression.helpText": "Configurez la clé partagée.",
     "xpack.maps.layerPanel.joinExpression.joinPopoverTitle": "Liaison",
     "xpack.maps.layerPanel.joinExpression.leftFieldLabel": "Champ gauche",
