@@ -74,7 +74,7 @@ export class ElasticsearchBlobStorage implements BlobStorage {
         id: undefined, // We are creating a new file
         client: this.esClient,
         index: this.indexName,
-        logger: this.logger.get('content-stream-uploader'),
+        logger: this.logger.get('content-stream-upload'),
         parameters: {
           encoding: 'base64',
         },
@@ -95,7 +95,7 @@ export class ElasticsearchBlobStorage implements BlobStorage {
       id,
       client: this.esClient,
       index: this.indexName,
-      logger: this.logger,
+      logger: this.logger.get('content-stream-download'),
       parameters: {
         encoding: 'base64',
         size,
@@ -109,7 +109,7 @@ export class ElasticsearchBlobStorage implements BlobStorage {
         id,
         client: this.esClient,
         index: this.indexName,
-        logger: this.logger.get('content-stream-uploader'),
+        logger: this.logger.get('content-stream-delete'),
         parameters: {
           encoding: 'base64',
         },
