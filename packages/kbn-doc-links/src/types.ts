@@ -98,6 +98,7 @@ export interface DocLinks {
     readonly synonyms: string;
     readonly webCrawler: string;
     readonly webCrawlerEventLogs: string;
+    readonly webCrawlerReference: string;
   };
   readonly enterpriseSearch: {
     readonly configuration: string;
@@ -338,6 +339,7 @@ export interface DocLinks {
     azureRepo: string;
     gcsRepo: string;
     hdfsRepo: string;
+    ingestAttachment: string;
     s3Repo: string;
     snapshotRestoreRepos: string;
     mapperSize: string;
