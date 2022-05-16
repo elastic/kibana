@@ -731,10 +731,10 @@ function clearInspectorAdapters(layer: ILayer, adapters: Adapters) {
     adapters.vectorTiles.removeLayer(layer.getId());
   }
 
-  if (adapters.requests && 'getJoins' in layer) {
+  if (adapters.requests && 'getValidJoins' in layer) {
     const vectorLayer = layer as IVectorLayer;
     adapters.requests!.resetRequest((layer.getSource() as IESSource).getId());
-    vectorLayer.getJoins().forEach((join) => {
+    vectorLayer.getValidJoins().forEach((join) => {
       adapters.requests!.resetRequest(join.getRightJoinSource().getId());
     });
   }
