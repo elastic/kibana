@@ -108,7 +108,7 @@ export enum SecurityPageName {
   overview = 'overview',
   policies = 'policy',
   rules = 'rules',
-  rulesCreate = 'rules_create',
+  rulesCreate = 'rules-create',
   timelines = 'timelines',
   timelinesTemplates = 'timelines-templates',
   trustedApps = 'trusted_apps',
@@ -120,7 +120,7 @@ export enum SecurityPageName {
   sessions = 'sessions',
   usersEvents = 'users-events',
   usersExternalAlerts = 'users-external_alerts',
-  threatHuntingLanding = 'threat-hunting',
+  threatHuntingLanding = 'threat_hunting',
   dashboardsLanding = 'dashboards',
 }
 
