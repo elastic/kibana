@@ -7,6 +7,7 @@
  */
 
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import { FormatFactory } from '../types';
 import {
   AxisExtentConfig,
@@ -59,10 +60,12 @@ export function groupAxesByType(layers: CommonXYDataLayerConfig[]) {
     const { table } = layer;
     layer.accessors.forEach((accessor) => {
       const yConfig: Array<YConfig | ExtendedYConfig> | undefined = layer.yConfig;
+      const yAccessor = getAccessorByDimension(accessor, table?.columns || []);
       const mode =
-        yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode || 'auto';
-      const col = table.columns?.find((column) => column.id === accessor);
-      let formatter: SerializedFieldFormat = col?.meta ? getFormat(col.meta) : { id: 'number' };
+        yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === yAccessor)?.axisMode || 'auto';
+      let formatter: SerializedFieldFormat = getFormat(table.columns, accessor) || {
+        id: 'number',
+      };
       if (
         isDataLayer(layer) &&
         layer.seriesType.includes('percentage') &&
@@ -77,7 +80,7 @@ export function groupAxesByType(layers: CommonXYDataLayerConfig[]) {
       }
       series[mode].push({
         layer: layer.layerId,
-        accessor,
+        accessor: yAccessor,
         fieldFormat: formatter,
       });
     });

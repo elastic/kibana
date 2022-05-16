@@ -62,7 +62,7 @@ export const links: LinkItem = {
     {
       id: SecurityPageName.hostsRisk,
       title: i18n.translate('xpack.securitySolution.appLinks.hosts.risk', {
-        defaultMessage: 'Hosts by risk',
+        defaultMessage: 'Host risk',
       }),
       path: `${HOSTS_PATH}/hostRisk`,
       experimentalKey: 'riskyHostsEnabled',
