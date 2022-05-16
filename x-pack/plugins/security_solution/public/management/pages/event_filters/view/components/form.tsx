@@ -216,9 +216,9 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         const name = event.target.value.trim();
         setHasNameError(!name);
         processChanged({ name });
-        setHasFormChanged(true);
+        if (!hasFormChanged) setHasFormChanged(true);
       },
-      [exception, processChanged]
+      [exception, hasFormChanged, processChanged]
     );
 
     const nameInputMemo = useMemo(
@@ -249,10 +249,10 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     const handleOnDescriptionChange = useCallback(
       (event: React.ChangeEvent<HTMLTextAreaElement>) => {
         if (!exception) return;
-        setHasFormChanged(true);
+        if (!hasFormChanged) setHasFormChanged(true);
         processChanged({ description: event.target.value.toString().trim() });
       },
-      [exception, processChanged]
+      [exception, hasFormChanged, processChanged]
     );
     const descriptionInputMemo = useMemo(
       () => (
@@ -286,9 +286,9 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           os_types: [os],
           entries: exception.entries,
         });
-        setHasFormChanged(true);
+        if (!hasFormChanged) setHasFormChanged(true);
       },
-      [exception, processChanged]
+      [exception, hasFormChanged, processChanged]
     );
 
     const osInputMemo = useMemo(
@@ -312,9 +312,9 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         if (!exception) return;
         setNewComment(value);
         processChanged({ comments: [{ comment: value }] });
-        setHasFormChanged(true);
+        if (!hasFormChanged) setHasFormChanged(true);
       },
-      [exception, processChanged]
+      [exception, hasFormChanged, processChanged]
     );
     const commentsInputMemo = useMemo(
       () => (
@@ -388,7 +388,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         if (hasDuplicates) {
           const addedFields = arg.exceptionItems[0]?.entries.map((e) => e.field) || [''];
           setHasDuplicateFields(computeHasDuplicateFields(getAddedFieldsCounts(addedFields)));
-          setHasFormChanged(true);
+          if (!hasFormChanged) setHasFormChanged(true);
           return;
         }
         const updatedItem: Partial<ArtifactFormComponentProps['item']> =
@@ -409,7 +409,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
 
         setAreConditionsValid(hasValidConditions);
         processChanged(updatedItem);
-        setHasFormChanged(true);
+        if (!hasFormChanged) setHasFormChanged(true);
       },
       [exception, hasFormChanged, processChanged]
     );
@@ -492,9 +492,9 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           setSelectedPolicies(change.selected);
         }
         processChanged({ tags });
-        setHasFormChanged(true);
+        if (!hasFormChanged) setHasFormChanged(true);
       },
-      [processChanged, setSelectedPolicies]
+      [processChanged, hasFormChanged, setSelectedPolicies]
     );
 
     const policiesSection = useMemo(
