@@ -50,6 +50,7 @@ export const applyBulkActionEditToRule = (
       );
 
       rule.params.index = addItemsToArray(rule.params.index ?? [], action.value);
+      rule.params.dataViewId = undefined;
       break;
 
     case BulkActionEditType.delete_index_patterns:
@@ -59,6 +60,7 @@ export const applyBulkActionEditToRule = (
       );
 
       rule.params.index = deleteItemsFromArray(rule.params.index ?? [], action.value);
+      rule.params.dataViewId = undefined;
 
       invariant(
         rule.params.index.length !== 0,
@@ -74,6 +76,7 @@ export const applyBulkActionEditToRule = (
       invariant(action.value.length !== 0, "Index patterns can't be overwritten with empty list");
 
       rule.params.index = action.value;
+      rule.params.dataViewId = undefined;
       break;
 
     // timeline actions

@@ -115,6 +115,13 @@ const IndexPatternsFormComponent = ({
 
   return (
     <BulkEditFormWrapper form={form} onClose={onClose} onSubmit={handleSubmit} title={formTitle}>
+      <EuiCallOut color="warning" size="s" data-test-subj="bulkEditRulesIndexPatternsWarning">
+        <FormattedMessage
+          id="xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.setIndexPatternsWithDataViewsWarningCallout"
+          defaultMessage="If you have selected rules which depend on a data view this action will force those rules to read from the index pattern defined on the rule, not the dataview, and may result in broken rules."
+          values={{ rulesCount }}
+        />
+      </EuiCallOut>
       <CommonUseField
         path="index"
         config={{ ...schema.index, label: indexLabel, helpText: indexHelpText }}

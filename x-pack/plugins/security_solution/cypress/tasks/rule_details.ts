@@ -19,6 +19,7 @@ import {
 import {
   ALERTS_TAB,
   BACK_TO_RULES,
+  DATA_VIEW_DETAILS,
   EXCEPTIONS_TAB,
   FIELDS_BROWSER_BTN,
   REFRESH_BUTTON,
@@ -119,5 +120,11 @@ export const getDetails = (title: string) =>
 export const hasIndexPatterns = (indexPatterns: string) => {
   cy.get(DEFINITION_DETAILS).within(() => {
     getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns);
+  });
+};
+
+export const doesNotHaveDataView = () => {
+  cy.get(DEFINITION_DETAILS).within(() => {
+    getDetails(DATA_VIEW_DETAILS).should('not.exist');
   });
 };
