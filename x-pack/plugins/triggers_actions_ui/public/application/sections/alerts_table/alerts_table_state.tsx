@@ -35,17 +35,17 @@ export interface AlertsTableStateProps {
 }
 
 interface AlertsTableStorage {
-  columns?: EuiDataGridColumn[];
-  sort?: estypes.SortCombinations[];
+  columns: EuiDataGridColumn[];
+  sort: estypes.SortCombinations[];
 }
 
 const EmptyConfiguration = {
   id: '',
   columns: [],
-  sorts: [],
+  sort: [],
 };
 
-const AlertsTableState: React.FunctionComponent = ({
+const AlertsTableState = ({
   alertsTableConfigurationRegistry,
   configurationId,
   id,
@@ -59,17 +59,17 @@ const AlertsTableState: React.FunctionComponent = ({
     : EmptyConfiguration;
 
   const storage = useRef(new Storage(window.localStorage));
-  const localAlertsTableConfig = storage.current.get(id) as AlertsTableStorage;
-  const storageAlertsTable = useRef<{
-    columns: EuiDataGridColumn[];
-    sort: estypes.SortCombinations[];
-  }>({
-    columns: isEmpty(localAlertsTableConfig?.columns)
-      ? alertsTableConfiguration.columns
-      : localAlertsTableConfig?.columns,
-    sort: isEmpty(localAlertsTableConfig?.sort)
-      ? alertsTableConfiguration.sort
-      : localAlertsTableConfig?.sort,
+  const localAlertsTableConfig = storage.current.get(id) as Partial<AlertsTableStorage>;
+
+  const storageAlertsTable = useRef<AlertsTableStorage>({
+    columns:
+      localAlertsTableConfig.columns && !isEmpty(localAlertsTableConfig?.columns)
+        ? localAlertsTableConfig?.columns ?? []
+        : alertsTableConfiguration?.columns ?? [],
+    sort:
+      localAlertsTableConfig.sort && !isEmpty(localAlertsTableConfig?.sort)
+        ? localAlertsTableConfig?.sort ?? []
+        : alertsTableConfiguration?.sort ?? [],
   });
 
   const [showCheckboxes] = useState(false);
@@ -93,11 +93,11 @@ const AlertsTableState: React.FunctionComponent = ({
     setPagination(_pagination);
   }, []);
   const onSortChange = useCallback(
-    (_sort: Array<EuiDataGridSorting['columns']>) => {
-      const newSort = _sort.map(({ id: fieldId, direction }) => {
+    (_sort: EuiDataGridSorting['columns']) => {
+      const newSort = _sort.map((sortItem) => {
         return {
-          [fieldId]: {
-            order: direction,
+          [sortItem.id]: {
+            order: sortItem.direction,
           },
         };
       });

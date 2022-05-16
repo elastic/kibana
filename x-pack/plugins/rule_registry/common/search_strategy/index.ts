@@ -53,13 +53,13 @@ type Join<K, P> = K extends string | number
   ? P extends string | number
     ? `${K}${'' extends P ? '' : '.'}${P}`
     : never
-  : never;
+  : string;
 
 type DotNestedKeys<T, D extends number = 10> = [D] extends [never]
   ? never
   : T extends object
   ? { [K in keyof T]-?: Join<K, DotNestedKeys<T[K], Prev[D]>> }[keyof T]
-  : '';
+  : never;
 
 export type EcsFields = DotNestedKeys<Omit<Ecs, 'ecs'>>;
 export type EcsFieldsResponse = {

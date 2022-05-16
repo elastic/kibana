@@ -21,6 +21,7 @@ import {
   EuiProgress,
   EuiLoadingContent,
 } from '@elastic/eui';
+import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { AlertsField } from '../../../../types';
 
 const SAMPLE_TITLE_LABEL = i18n.translate(

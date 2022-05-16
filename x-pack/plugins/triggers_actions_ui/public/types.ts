@@ -399,7 +399,7 @@ export interface FetchAlertData {
   getInspectQuery: () => { request: {}; response: {} };
   onColumnsChange: (columns: EuiDataGridControlColumn[]) => void;
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
-  onSortChange: (sort: Array<EuiDataGridSorting['columns']>) => void;
+  onSortChange: (sort: EuiDataGridSorting['columns']) => void;
   refresh: () => void;
   sort: estypes.SortCombinations[];
 }
@@ -434,6 +434,7 @@ export type RenderCellValueProps = EuiDataGridCellValueElementProps & {
 export interface AlertsTableConfigurationRegistry {
   id: string;
   columns: EuiDataGridColumn[];
+  sort?: estypes.SortCombinations[];
 }
 
 export type RuleStatus = 'enabled' | 'disabled' | 'snoozed';

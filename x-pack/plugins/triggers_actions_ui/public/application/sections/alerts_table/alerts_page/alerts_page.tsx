@@ -8,6 +8,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { get } from 'lodash';
 import {
   EuiDataGridControlColumn,
+  EuiDataGridSorting,
   EuiFlexItem,
   EuiFlexGroup,
   EuiSpacer,
@@ -39,6 +40,11 @@ const defaultPagination = {
   pageIndex: 0,
 };
 
+const emptyConfiguration = {
+  id: '',
+  columns: [],
+};
+
 const defaultSort: estypes.SortCombinations[] = [
   {
     'event.action': {
@@ -57,15 +63,21 @@ const AlertsPage: React.FunctionComponent = () => {
   const [sort, setSort] = useState<estypes.SortCombinations[]>(defaultSort);
   const [pagination, setPagination] = useState(defaultPagination);
 
+  const alertsTableConfigurationRegistry = useKibana().services.alertsTableConfigurationRegistry;
+  const hasAlertsTableConfiguration = alertsTableConfigurationRegistry.has(PLUGIN_ID);
+  const alertsTableConfiguration = hasAlertsTableConfiguration
+    ? alertsTableConfigurationRegistry.get(PLUGIN_ID)
+    : emptyConfiguration;
+
   const onPageChange = (_pagination: RuleRegistrySearchRequestPagination) => {
     setPagination(_pagination);
   };
-  const onSortChange = (_sort: Array<{ id: string; direction: 'asc' | 'desc' }>) => {
+  const onSortChange = (_sort: EuiDataGridSorting['columns']) => {
     setSort(
-      _sort.map(({ id, direction }) => {
+      _sort.map((sortItem) => {
         return {
-          [id]: {
-            order: direction,
+          [sortItem.id]: {
+            order: sortItem.direction,
           },
         };
       })
@@ -132,11 +144,12 @@ const AlertsPage: React.FunctionComponent = () => {
       refresh: () => {
         asyncSearch();
       },
+      sort,
     };
   };
 
   const tableProps = {
-    configurationId: PLUGIN_ID,
+    columns: alertsTableConfiguration.columns,
     consumers,
     bulkActions: [],
     deletedEventIds: [],

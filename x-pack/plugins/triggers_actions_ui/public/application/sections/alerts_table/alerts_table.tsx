@@ -35,8 +35,15 @@ const AlertsFlyout = lazy(() => import('./alerts_flyout'));
 
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
   const [rowClasses, setRowClasses] = useState<EuiDataGridStyle['rowClasses']>({});
-  const { activePage, alerts, alertsCount, isLoading, onPageChange, onSortChange, sortingFields } =
-    props.useFetchAlertsData();
+  const {
+    activePage,
+    alerts,
+    alertsCount,
+    isLoading,
+    onPageChange,
+    onSortChange,
+    sort: sortingFields,
+  } = props.useFetchAlertsData();
   const { sortingColumns, onSort } = useSorting(onSortChange, sortingFields);
   const {
     pagination,

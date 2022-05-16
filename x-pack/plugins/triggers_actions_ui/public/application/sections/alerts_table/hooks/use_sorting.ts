@@ -27,7 +27,7 @@ const formatGridColumns = (cols: estypes.SortCombinations[]): EuiDataGridSorting
 };
 
 export type UseSorting = (
-  onSortChange: (sort: Array<EuiDataGridSorting['columns']>) => void,
+  onSortChange: (sort: EuiDataGridSorting['columns']) => void,
   defaultSort: estypes.SortCombinations[]
 ) => {
   sortingColumns: EuiDataGridSorting['columns'];
@@ -35,7 +35,7 @@ export type UseSorting = (
 };
 
 export function useSorting(
-  onSortChange: (sort: Array<EuiDataGridSorting['columns']>) => void,
+  onSortChange: (sort: EuiDataGridSorting['columns']) => void,
   defaultSort: estypes.SortCombinations[] = DefaultSort
 ) {
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>(

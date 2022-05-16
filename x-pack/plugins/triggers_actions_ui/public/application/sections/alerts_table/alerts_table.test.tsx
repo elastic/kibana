@@ -5,13 +5,14 @@
  * 2.0.
  */
 import React from 'react';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+
 import { AlertsTable } from './alerts_table';
-import { AlertsData, AlertsField } from '../../../types';
+import { AlertsField } from '../../../types';
 import { PLUGIN_ID } from '../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 jest.mock('@kbn/data-plugin/public');
 jest.mock('../../../common/lib/kibana');
 
@@ -40,15 +41,7 @@ alertsTableConfigurationRegistryMock.get.mockImplementation((plugin: string) => 
 });
 
 describe('AlertsTable', () => {
-  const consumers = [
-    AlertConsumers.APM,
-    AlertConsumers.LOGS,
-    AlertConsumers.UPTIME,
-    AlertConsumers.INFRASTRUCTURE,
-    AlertConsumers.SIEM,
-  ];
-
-  const alerts: AlertsData[] = [
+  const alerts = [
     {
       [AlertsField.name]: ['one'],
       [AlertsField.reason]: ['two'],
@@ -57,7 +50,7 @@ describe('AlertsTable', () => {
       [AlertsField.name]: ['three'],
       [AlertsField.reason]: ['four'],
     },
-  ];
+  ] as unknown as EcsFieldsResponse[];
 
   const fetchAlertsData = {
     activePage: 0,
@@ -70,6 +63,7 @@ describe('AlertsTable', () => {
     onPageChange: jest.fn(),
     onSortChange: jest.fn(),
     refresh: jest.fn(),
+    sort: [],
   };
 
   const useFetchAlertsData = () => {
@@ -77,8 +71,7 @@ describe('AlertsTable', () => {
   };
 
   const tableProps = {
-    configurationId: PLUGIN_ID,
-    consumers,
+    columns: [{ id: AlertsField.name }, { id: AlertsField.reason }],
     bulkActions: [],
     deletedEventIds: [],
     disabledCellActions: [],
@@ -182,20 +175,6 @@ describe('AlertsTable', () => {
         expect(wrapper.queryByTestId('testHeader')).not.toBe(null);
         expect(wrapper.queryByTestId('testCell')).not.toBe(null);
       });
-    });
-  });
-
-  describe('Alerts table configuration registry', () => {
-    it('should read the configuration from the registry', async () => {
-      render(<AlertsTable {...tableProps} />);
-      expect(alertsTableConfigurationRegistryMock.has).toHaveBeenCalledWith(PLUGIN_ID);
-      expect(alertsTableConfigurationRegistryMock.get).toHaveBeenCalledWith(PLUGIN_ID);
-    });
-
-    it('should render an empty error state when the plugin id owner is not registered', async () => {
-      const props = { ...tableProps, configurationId: 'none' };
-      const result = render(<AlertsTable {...props} />);
-      expect(result.getByTestId('alertsTableNoConfiguration')).toBeTruthy();
     });
   });
 });
