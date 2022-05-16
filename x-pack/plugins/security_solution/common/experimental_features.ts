@@ -23,6 +23,7 @@ export const allowedExperimentalValues = Object.freeze({
   pendingActionResponsesWithAck: true,
   policyListEnabled: true,
   policyResponseInFleetEnabled: false,
+  groupedNavigation: true,
 
   /**
    * This is used for enabling the end to end tests for the security_solution telemetry.

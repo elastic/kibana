@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Datatable, PointSeriesColumnNames } from '@kbn/expressions-plugin/common';
 import { WithLayerId } from '../types';
 
 function isWithLayerId<T>(layer: T): layer is T & WithLayerId {
@@ -24,4 +25,21 @@ export function appendLayerIds<T>(
       ...l,
       layerId: isWithLayerId(l) ? l.layerId : generateLayerId(keyword, index),
     }));
+}
+
+export function getAccessors<T, U extends { splitAccessor?: T; xAccessor?: T; accessors: T[] }>(
+  args: U,
+  table: Datatable
+) {
+  let splitAccessor: T | string | undefined = args.splitAccessor;
+  let xAccessor: T | string | undefined = args.xAccessor;
+  let accessors: Array<T | string> = args.accessors ?? [];
+  if (!splitAccessor && !xAccessor && !(accessors && accessors.length)) {
+    const y = table.columns.find((column) => column.id === PointSeriesColumnNames.Y)?.id;
+    xAccessor = table.columns.find((column) => column.id === PointSeriesColumnNames.X)?.id;
+    splitAccessor = table.columns.find((column) => column.id === PointSeriesColumnNames.COLOR)?.id;
+    accessors = y ? [y] : [];
+  }
+
+  return { splitAccessor, xAccessor, accessors };
 }
