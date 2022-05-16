@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable no-console */
 
 import { get, isEmpty, isNumber, isObject, isString } from 'lodash/fp';
 
@@ -41,46 +43,90 @@ export const isGeoField = (field: string) =>
 export const isRuleParametersFieldOrSubfield = (field: string, prependField?: string) =>
   prependField?.includes(ALERT_RULE_PARAMETERS) || field === ALERT_RULE_PARAMETERS;
 
-export const getDataFromSourceHits = (
+let counter = 0;
+
+export function getDataFromSourceHits(
   sources: EventSource,
   category?: string,
-  path?: string
-): TimelineEventsDetailsItem[] =>
-  Object.keys(sources ?? {}).reduce<TimelineEventsDetailsItem[]>((accumulator, source) => {
-    const item: EventSource = get(source, sources);
-    if (Array.isArray(item) || isString(item) || isNumber(item)) {
-      const field = path ? `${path}.${source}` : source;
-      const fieldCategory = getFieldCategory(field);
+  path?: string,
+  isRecurring: boolean = false
+): TimelineEventsDetailsItem[] {
+  let myCounter: number | undefined;
+  let start: number | undefined;
+  if (!isRecurring) {
+    myCounter = counter++;
+    start = Date.now();
+    console.log(myCounter, 'getDataFromSourceHits()');
+  }
+  const result = Object.keys(sources ?? {}).reduce<TimelineEventsDetailsItem[]>(
+    (accumulator, source) => {
+      const item: EventSource = get(source, sources);
+      if (Array.isArray(item) || isString(item) || isNumber(item)) {
+        const field = path ? `${path}.${source}` : source;
+        const fieldCategory = getFieldCategory(field);
 
-      const objArrStr = toObjectArrayOfStrings(item);
-      const strArr = objArrStr.map(({ str }) => str);
-      const isObjectArray = objArrStr.some((o) => o.isObjectArray);
+        const objArrStr = toObjectArrayOfStrings(item);
+        const strArr = objArrStr.map(({ str }) => str);
+        const isObjectArray = objArrStr.some((o) => o.isObjectArray);
 
-      return [
-        ...accumulator,
-        {
-          category: fieldCategory,
-          field,
-          values: strArr,
-          originalValue: strArr,
-          isObjectArray,
-        } as TimelineEventsDetailsItem,
-      ];
-    } else if (isObject(item)) {
-      return [
-        ...accumulator,
-        ...getDataFromSourceHits(item, category || source, path ? `${path}.${source}` : source),
-      ];
-    }
-    return accumulator;
-  }, []);
+        return [
+          ...accumulator,
+          {
+            category: fieldCategory,
+            field,
+            values: strArr,
+            originalValue: strArr,
+            isObjectArray,
+          } as TimelineEventsDetailsItem,
+        ];
+      } else if (isObject(item)) {
+        return [
+          ...accumulator,
+          ...getDataFromSourceHits(
+            item,
+            category || source,
+            path ? `${path}.${source}` : source,
+            true
+          ),
+        ];
+      }
+      return accumulator;
+    },
+    []
+  );
+  if (!isRecurring) {
+    const end = Date.now();
+    console.log(myCounter, 'getDataFromSourceHits return', end - start!);
+  }
+  return result;
+}
 
-export const getDataFromFieldsHits = (
+export function getDataFromFieldsHits(
   fields: EventHit['fields'],
   prependField?: string,
-  prependFieldCategory?: string
-): TimelineEventsDetailsItem[] =>
-  Object.keys(fields).reduce<TimelineEventsDetailsItem[]>((accumulator, field) => {
+  prependFieldCategory?: string,
+  isRecurring: boolean = false
+): TimelineEventsDetailsItem[] {
+  let myCounter: number | undefined;
+  let start: number | undefined;
+  if (!isRecurring) {
+    myCounter = counter++;
+    if (myCounter === 54) {
+      // with my fixtures, and my exact user flow, 54 is the stable identifier for the call that never returns.
+      console.log(
+        'i dont return',
+        'fields',
+        fields,
+        'prependField',
+        prependField,
+        'prependFieldCategory',
+        prependFieldCategory
+      );
+    }
+    start = Date.now();
+    console.log(myCounter, 'getDataFromFieldsHits()');
+  }
+  const result = Object.keys(fields).reduce<TimelineEventsDetailsItem[]>((accumulator, field) => {
     const item: unknown[] = fields[field];
     const fieldCategory =
       prependFieldCategory != null ? prependFieldCategory : getFieldCategory(field);
@@ -119,15 +165,21 @@ export const getDataFromFieldsHits = (
     if (isRuleParametersFieldOrSubfield(field, prependField)) {
       nestedFields = Array.isArray(item)
         ? item
-            .reduce((acc, i) => [...acc, getDataFromFieldsHits(i, dotField, fieldCategory)], [])
+            .reduce(
+              (acc, i) => [...acc, getDataFromFieldsHits(i, dotField, fieldCategory, true)],
+              []
+            )
             .flat()
-        : getDataFromFieldsHits(item, dotField, fieldCategory);
+        : getDataFromFieldsHits(item, dotField, fieldCategory, true);
     } else {
       nestedFields = Array.isArray(item)
         ? item
-            .reduce((acc, i) => [...acc, getDataFromFieldsHits(i, dotField, fieldCategory)], [])
+            .reduce(
+              (acc, i) => [...acc, getDataFromFieldsHits(i, dotField, fieldCategory, true)],
+              []
+            )
             .flat()
-        : getDataFromFieldsHits(item, prependField, fieldCategory);
+        : getDataFromFieldsHits(item, prependField, fieldCategory, true);
     }
 
     // combine duplicate fields
@@ -158,6 +210,12 @@ export const getDataFromFieldsHits = (
 
     return Object.values(flat);
   }, []);
+  if (!isRecurring) {
+    const end = Date.now();
+    console.log(myCounter, 'getDataFromFieldsHits return', end - start!);
+  }
+  return result;
+}
 
 export const getDataSafety = <A, T>(fn: (args: A) => T, args: A): Promise<T> =>
   new Promise((resolve) => setTimeout(() => resolve(fn(args))));

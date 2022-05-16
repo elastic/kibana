@@ -238,6 +238,15 @@ describe('Events Details Helpers', () => {
       const result = getDataFromFieldsHits(ruleParameterFields);
       expect(result).toEqual(ruleParametersResultFields);
     });
+
+    // I put 'STRESS_TEST' in the name so i could easly run just this test from the CLI
+    it('completes in linear time with respect to the fields STRESS_TEST', async () => {
+      const fixture = await import('./field_formatters_get_data_from_fields_hits_fixture.json');
+      // I don't really care what the result is. This doesn't return in linear time, i.e. it's never returning for me.
+      // casting to any here. this test is never intended to be merged into `main`. its a stress test used to prove that the function isn't returning and therefore causing kibana to become nonresponsive.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect(getDataFromFieldsHits(fixture as any)).toBeInstanceOf(Array);
+    });
   });
 
   it('#getDataFromSourceHits', () => {
