@@ -54,7 +54,7 @@ export const ControlGroupStrings = {
       }),
     getWidthInputTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.widthInputTitle', {
-        defaultMessage: 'Control width',
+        defaultMessage: 'Minimum width',
       }),
     getSaveChangesTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.saveChangesTitle', {

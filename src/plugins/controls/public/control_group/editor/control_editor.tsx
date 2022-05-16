@@ -186,16 +186,7 @@ export const ControlEditor = ({
                   }}
                 />
               </EuiFormRow>
-              <EuiFormRow
-                label={
-                  <>
-                    {ControlGroupStrings.manageControl.getWidthInputTitle()}
-                    <EuiToolTip content="This width will act as the minimum width when the expand setting is enabled.">
-                      <EuiIcon type="iInCircle" />
-                    </EuiToolTip>
-                  </>
-                }
-              >
+              <EuiFormRow label={<>{ControlGroupStrings.manageControl.getWidthInputTitle()}</>}>
                 <EuiButtonGroup
                   color="primary"
                   legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
@@ -210,7 +201,14 @@ export const ControlEditor = ({
               {updateGrow ? (
                 <EuiFormRow>
                   <EuiSwitch
-                    label={ControlGroupStrings.manageControl.getGrowSwitchTitle()}
+                    label={
+                      <>
+                        {ControlGroupStrings.manageControl.getGrowSwitchTitle()}&nbsp;
+                        <EuiToolTip content="This width will act as the minimum width when the expand setting is enabled.">
+                          <EuiIcon type="iInCircle" />
+                        </EuiToolTip>
+                      </>
+                    }
                     color="primary"
                     checked={currentGrow}
                     onChange={() => {
