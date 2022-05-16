@@ -169,9 +169,19 @@
     {
       "label": "Operations",
       "items": [
-        { "id": "kibDevDocsOpsLanding" },
-        { "id": "kibDevDocsOpsOptimizer" },
-        { "id": "kibDevDocsOpsEslintConfigKibana" }
+        { "id": "kibDevDocsOpsOverview", "label": "Overview" },
+        {
+          "label": "Build tooling",
+          "items": [
+            { "id": "kibDevDocsOpsOptimizer" }
+          ]
+        },
+        {
+          "label": "Linting/Validation",
+          "items": [
+            { "id": "kibDevDocsOpsEslintConfigKibana" }
+          ]
+        }
       ]
     }
   ]
