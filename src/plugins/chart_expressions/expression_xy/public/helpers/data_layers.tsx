@@ -329,9 +329,9 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     data: rows,
     xScaleType: xColumnId ? layer.xScaleType : 'ordinal',
     yScaleType:
-      formatter?.id === 'bytes' && layer.yScaleType === ScaleType.Linear
+      formatter?.id === 'bytes' && yAxis?.scale === ScaleType.Linear
         ? ScaleType.LinearBinary
-        : layer.yScaleType,
+        : yAxis?.scale || ScaleType.Linear,
     color: (series) =>
       getColor(series, {
         layer,

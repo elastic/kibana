@@ -101,7 +101,6 @@ export interface DataLayerArgs {
   hide?: boolean;
   splitAccessor?: string | ExpressionValueVisDimension;
   columnToLabel?: string; // Actually a JSON key-value pair
-  yScaleType: YScaleType;
   xScaleType: XScaleType;
   isHistogram: boolean;
   palette: PaletteOutput;
@@ -120,7 +119,6 @@ export interface ExtendedDataLayerArgs {
   hide?: boolean;
   splitAccessor?: string;
   columnToLabel?: string; // Actually a JSON key-value pair
-  yScaleType: YScaleType;
   xScaleType: XScaleType;
   isHistogram: boolean;
   palette: PaletteOutput;
@@ -187,6 +185,8 @@ export interface XYArgs extends DataLayerArgs {
   yRightTitle: string;
   yLeftExtent: AxisExtentConfigResult;
   yRightExtent: AxisExtentConfigResult;
+  yLeftScale: YScaleType;
+  yRightScale: YScaleType;
   legend: LegendConfigResult;
   endValue?: EndValue;
   emphasizeFitting?: boolean;
@@ -213,6 +213,8 @@ export interface LayeredXYArgs {
   yRightTitle: string;
   yLeftExtent: AxisExtentConfigResult;
   yRightExtent: AxisExtentConfigResult;
+  yLeftScale: YScaleType;
+  yRightScale: YScaleType;
   legend: LegendConfigResult;
   endValue?: EndValue;
   emphasizeFitting?: boolean;
@@ -236,6 +238,8 @@ export interface XYProps {
   yRightTitle: string;
   yLeftExtent: AxisExtentConfigResult;
   yRightExtent: AxisExtentConfigResult;
+  yLeftScale: YScaleType;
+  yRightScale: YScaleType;
   legend: LegendConfigResult;
   endValue?: EndValue;
   emphasizeFitting?: boolean;

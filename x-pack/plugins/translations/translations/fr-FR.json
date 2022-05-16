@@ -3454,7 +3454,6 @@
     "expressionXY.dataLayer.xAccessor.help": "Axe X",
     "expressionXY.dataLayer.xScaleType.help": "Type d’échelle de l’axe x",
     "expressionXY.dataLayer.yConfig.help": "Configuration supplémentaire pour les axes y",
-    "expressionXY.dataLayer.yScaleType.help": "Type d’échelle des axes y",
     "expressionXY.gridlinesConfig.help": "Configurer l’aspect du quadrillage du graphique xy",
     "expressionXY.gridlinesConfig.x.help": "Spécifie si le quadrillage de l'axe X est visible ou non.",
     "expressionXY.gridlinesConfig.yLeft.help": "Spécifie si le quadrillage de l'axe Y de gauche est visible ou non.",

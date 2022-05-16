@@ -145,9 +145,6 @@ Object {
                     "linear",
                   ],
                   "yConfig": Array [],
-                  "yScaleType": Array [
-                    "linear",
-                  ],
                 },
                 "function": "extendedDataLayer",
                 "type": "function",
@@ -234,6 +231,9 @@ Object {
             "type": "expression",
           },
         ],
+        "yLeftScale": Array [
+          "linear",
+        ],
         "yRightExtent": Array [
           Object {
             "chain": Array [
@@ -255,6 +255,9 @@ Object {
             ],
             "type": "expression",
           },
+        ],
+        "yRightScale": Array [
+          "linear",
         ],
         "yRightTitle": Array [
           "",
