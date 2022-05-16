@@ -103,6 +103,8 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
         },
       }
     }
+    fieldType="keyword"
+    isAggregatable={false}
     key="idPrefix-attrName-item1-0"
     render={[Function]}
   />
@@ -123,6 +125,8 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
         },
       }
     }
+    fieldType="keyword"
+    isAggregatable={false}
     key="idPrefix-attrName-item2-1"
     render={[Function]}
   />
@@ -143,13 +147,17 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
         },
       }
     }
+    fieldType="keyword"
+    isAggregatable={false}
     key="idPrefix-attrName-item3-2"
     render={[Function]}
   />
    
   <Memo(RowItemOverflowComponent)
     attrName="attrName"
+    fieldType="keyword"
     idPrefix="idPrefix"
+    isAggregatable={false}
     maxOverflowItems={5}
     overflowIndexStart={5}
     rowItems={

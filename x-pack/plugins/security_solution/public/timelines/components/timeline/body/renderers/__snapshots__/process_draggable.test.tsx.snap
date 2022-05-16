@@ -12,7 +12,9 @@ exports[`ProcessDraggable rendering it renders against shallow snapshot 1`] = `
       contextId="context-123"
       eventId="event-123"
       field="process.name"
+      fieldType="keyword"
       iconType="console"
+      isAggregatable={true}
       value="process-name-1"
     />
   </EuiFlexItem>
@@ -23,6 +25,8 @@ exports[`ProcessDraggable rendering it renders against shallow snapshot 1`] = `
       contextId="context-123"
       eventId="event-123"
       field="process.pid"
+      fieldType="keyword"
+      isAggregatable={true}
       queryValue="123"
       value="(123)"
     />

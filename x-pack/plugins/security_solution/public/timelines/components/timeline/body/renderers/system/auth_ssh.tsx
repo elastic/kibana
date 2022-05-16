@@ -30,6 +30,8 @@ export const AuthSsh = React.memo<Props>(
             isDraggable={isDraggable}
             value={sshSignature}
             iconType="document"
+            isAggregatable={true}
+            fieldType="keyword"
           />
         </TokensFlexItem>
       )}
@@ -42,6 +44,8 @@ export const AuthSsh = React.memo<Props>(
             isDraggable={isDraggable}
             value={sshMethod}
             iconType="document"
+            isAggregatable={true}
+            fieldType="keyword"
           />
         </TokensFlexItem>
       )}

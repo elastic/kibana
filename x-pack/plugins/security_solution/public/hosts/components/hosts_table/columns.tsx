@@ -51,6 +51,8 @@ export const getHostsColumns = (
                 kqlQuery: '',
                 queryMatch: { field: 'host.name', value: hostName[0], operator: IS_OPERATOR },
               }}
+              isAggregatable={true}
+              fieldType={'keyword'}
               render={(dataProvider, _, snapshot) =>
                 snapshot.isDragging ? (
                   <DragEffects>

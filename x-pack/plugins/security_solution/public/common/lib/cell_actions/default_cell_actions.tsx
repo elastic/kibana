@@ -324,6 +324,7 @@ export const cellActions: TGridCellAction[] = [
             contextId={`expanded-value-${columnId}-row-${pageRowIndex}-${timelineId}`}
             eventId={eventId}
             fieldFormat={fieldFormat}
+            isAggregatable={header.aggregatable ?? false}
             fieldName={fieldName}
             fieldType={fieldType}
             isButton={true}

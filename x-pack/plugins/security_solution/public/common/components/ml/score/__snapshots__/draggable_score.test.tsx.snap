@@ -17,6 +17,8 @@ exports[`draggable_score renders correctly against snapshot 1`] = `
       },
     }
   }
+  fieldType="keyword"
+  isAggregatable={true}
   key="draggable-score-draggable-wrapper-some-id"
   render={[Function]}
 />
@@ -39,6 +41,8 @@ exports[`draggable_score renders correctly against snapshot when the index is no
       },
     }
   }
+  fieldType="keyword"
+  isAggregatable={true}
   key="draggable-score-draggable-wrapper-some-id"
   render={[Function]}
 />

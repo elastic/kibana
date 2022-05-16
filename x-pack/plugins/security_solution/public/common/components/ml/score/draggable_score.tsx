@@ -69,6 +69,8 @@ export const DraggableScoreComponent = ({
       key={`draggable-score-draggable-wrapper-${id}`}
       dataProvider={dataProviderProp}
       render={render}
+      isAggregatable={true}
+      fieldType="keyword"
     />
   );
 };

@@ -27,6 +27,8 @@ describe('Duration', () => {
           eventId="abc"
           fieldName="event.duration"
           isDraggable={true}
+          isAggregatable={true}
+          fieldType={'keyword'}
           value={`${ONE_MILLISECOND_AS_NANOSECONDS}`}
         />
       </TestProviders>

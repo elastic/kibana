@@ -34,6 +34,8 @@ export const ArgsComponent = ({ args, contextId, eventId, processTitle, isDragga
               field="process.args"
               isDraggable={isDraggable}
               value={arg}
+              fieldType="keyword"
+              isAggregatable={true}
             />
           </TokensFlexItem>
         ))}
@@ -46,6 +48,8 @@ export const ArgsComponent = ({ args, contextId, eventId, processTitle, isDragga
             field="process.title"
             isDraggable={isDraggable}
             value={processTitle}
+            fieldType="keyword"
+            isAggregatable={true}
           />
         </TokensFlexItem>
       )}
