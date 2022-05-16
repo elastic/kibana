@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { of } from 'rxjs';
 import { renderHook } from '@testing-library/react-hooks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -17,15 +18,18 @@ import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { ApmIndicesConfig } from '../../common/typings';
 import { act } from '@testing-library/react';
+import { createCallObservabilityApi } from '../services/call_observability_api';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 const sampleAPMIndices = { transaction: 'apm-*' } as ApmIndicesConfig;
 
 const core = coreMock.createStart();
+const data = dataPluginMock.createStartContract();
 
 function wrapper({ children }: { children: React.ReactElement }) {
   const history = createMemoryHistory();
   return (
-    <KibanaContextProvider services={{ ...core }}>
+    <KibanaContextProvider services={{ ...core, data }}>
       <Router history={history}>
         <HasDataContextProvider>{children}</HasDataContextProvider>
       </Router>
@@ -54,7 +58,17 @@ function registerApps<T extends ObservabilityFetchDataPlugins>(
 }
 
 describe('HasDataContextProvider', () => {
-  beforeAll(() => {});
+  beforeAll(() => {
+    createCallObservabilityApi(core.http);
+
+    // @ts-expect-error `search` mock is not correctly typed
+    data.search.search.mockReturnValue(of({ rawResponse: { hits: { total: 0 } } }));
+  });
+
+  afterAll(() => {
+    // @ts-expect-error `search` mock is not correctly typed
+    data.search.search.mockReset();
+  });
 
   describe('when no plugin has registered', () => {
     it('hasAnyData returns undefined and all apps return undefined', async () => {
@@ -515,17 +529,11 @@ describe('HasDataContextProvider', () => {
 
   describe('with alerts', () => {
     beforeAll(() => {
-      core.http.get.mockResolvedValue({
-        data: [
-          { id: 2, consumer: 'apm' },
-          { id: 3, consumer: 'uptime' },
-        ],
-      });
+      // @ts-expect-error `search` mock is not correctly typed
+      data.search.search.mockReturnValueOnce(of({ rawResponse: { hits: { total: 1 } } }));
     });
 
-    afterAll(() => {
-      core.http.get.mockReset();
-    });
+    afterAll(() => {});
 
     it('returns if alerts are available', async () => {
       const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
