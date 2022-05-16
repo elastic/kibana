@@ -55,8 +55,7 @@ export interface AlertListItem {
   sortPriority: number;
 }
 export interface ItemTitleRuleSummaryProps {
-  translationKey: string;
-  defaultMessage: string;
+  children: string;
 }
 export interface ItemValueRuleSummaryProps {
   itemValue: string;

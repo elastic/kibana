@@ -5,20 +5,14 @@
  * 2.0.
  */
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { ItemTitleRuleSummaryProps } from '../types';
 
-export function ItemTitleRuleSummary({
-  translationKey,
-  defaultMessage,
-}: ItemTitleRuleSummaryProps) {
+export function ItemTitleRuleSummary({ children }: ItemTitleRuleSummaryProps) {
   return (
     <EuiTitle size="xxs">
       <EuiFlexItem style={{ whiteSpace: 'nowrap' }} grow={1}>
-        {i18n.translate(`${translationKey}`, {
-          defaultMessage,
-        })}
+        {children}
       </EuiFlexItem>
     </EuiTitle>
   );
