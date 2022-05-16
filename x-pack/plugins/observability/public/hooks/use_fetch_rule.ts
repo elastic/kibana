@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { loadRule, loadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
 import { FetchRuleProps, FetchRule } from '../pages/rule_details/types';
 import { RULE_LOAD_ERROR } from '../pages/rule_details/translations';
@@ -17,9 +17,6 @@ export function useFetchRule({ ruleId, http }: FetchRuleProps) {
     ruleType: undefined,
     errorRule: undefined,
   });
-  const isCancelledRef = useRef(false);
-  const abortCtrlRef = useRef(new AbortController());
-
   const fetchRuleSummary = useCallback(async () => {
     try {
       const [rule, ruleTypes] = await Promise.all([
