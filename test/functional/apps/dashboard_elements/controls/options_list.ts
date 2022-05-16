@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -27,8 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
 
-  // FAILING: https://github.com/elastic/kibana/issues/132049
-  describe.skip('Dashboard options list integration', () => {
+  describe('Dashboard options list integration', () => {
     before(async () => {
       await common.navigateToApp('dashboard');
       await dashboard.gotoDashboardLandingPage();
@@ -58,7 +58,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('selects the last used data view by default', async () => {
-        await dashboardControls.createOptionsListControl({
+        await dashboardControls.createControl({
+          controlType: OPTIONS_LIST_CONTROL,
           dataViewTitle: 'animals-*',
           fieldName: 'sound.keyword',
         });
@@ -71,7 +72,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Options List Control creation and editing experience', async () => {
       it('can add a new options list control from a blank state', async () => {
-        await dashboardControls.createOptionsListControl({
+        await dashboardControls.createControl({
+          controlType: OPTIONS_LIST_CONTROL,
           dataViewTitle: 'logstash-*',
           fieldName: 'machine.os.raw',
         });
@@ -79,7 +81,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('can add a second options list control with a non-default data view', async () => {
-        await dashboardControls.createOptionsListControl({
+        await dashboardControls.createControl({
+          controlType: OPTIONS_LIST_CONTROL,
           dataViewTitle: 'animals-*',
           fieldName: 'sound.keyword',
         });
@@ -187,7 +190,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       before(async () => {
         await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
-        await dashboardControls.createOptionsListControl({
+        await dashboardControls.createControl({
+          controlType: OPTIONS_LIST_CONTROL,
           dataViewTitle: 'animals-*',
           fieldName: 'sound.keyword',
           title: 'Animal Sounds',
@@ -267,12 +271,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('Selections made in control apply to dashboard', async () => {
         it('Shows available options in options list', async () => {
-          await ensureAvailableOptionsEql(allAvailableOptions);
+          await queryBar.setQuery('');
+          await queryBar.submitQuery();
+          await dashboard.waitForRenderComplete();
+          await header.waitUntilLoadingHasFinished();
+          await retry.try(async () => {
+            await ensureAvailableOptionsEql(allAvailableOptions);
+          });
         });
 
         it('Can search options list for available options', async () => {
           await dashboardControls.optionsListOpenPopover(controlId);
           await dashboardControls.optionsListPopoverSearchForOption('meo');
+          await ensureAvailableOptionsEql(['meow'], true);
+          await dashboardControls.optionsListPopoverClearSearch();
+          await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+        });
+
+        it('Can search options list for available options case insensitive', async () => {
+          await dashboardControls.optionsListOpenPopover(controlId);
+          await dashboardControls.optionsListPopoverSearchForOption('MEO');
           await ensureAvailableOptionsEql(['meow'], true);
           await dashboardControls.optionsListPopoverClearSearch();
           await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
@@ -305,9 +323,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           const selectionString = await dashboardControls.optionsListGetSelectionsString(controlId);
           expect(selectionString).to.be('hiss, grr');
-        });
 
-        after(async () => {
           await dashboardControls.optionsListOpenPopover(controlId);
           await dashboardControls.optionsListPopoverClearSelections();
           await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
