@@ -151,7 +151,7 @@ const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
 
   const headerTitle = (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      <EuiFlexItem grow={false}>{i18nHosts.HOSTS_BY_RISK}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{i18nHosts.HOST_RISK_TITLE}</EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiIconTip
           color="subdued"

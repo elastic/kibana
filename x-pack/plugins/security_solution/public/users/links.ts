@@ -41,7 +41,7 @@ export const links: LinkItem = {
     {
       id: SecurityPageName.usersRisk,
       title: i18n.translate('xpack.securitySolution.appLinks.users.risk', {
-        defaultMessage: 'Users by risk',
+        defaultMessage: 'User risk',
       }),
       path: `${USERS_PATH}/userRisk`,
       experimentalKey: 'riskyUsersEnabled',
