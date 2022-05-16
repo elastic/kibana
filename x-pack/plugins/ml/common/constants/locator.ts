@@ -51,6 +51,8 @@ export const ML_PAGES = {
   FILTER_LISTS_EDIT: 'settings/filter_lists/edit_filter_list',
   ACCESS_DENIED: 'access-denied',
   OVERVIEW: 'overview',
+  AIOPS: 'aiops',
+  AIOPS_EXPLAIN_LOG_RATE_SPIKES: 'aiops/explain_log_rate_spikes',
 } as const;
 
 export type MlPages = typeof ML_PAGES[keyof typeof ML_PAGES];
