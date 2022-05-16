@@ -14,6 +14,7 @@ import {
   DocLinksStart,
   HttpSetup,
   ApplicationStart,
+  ThemeServiceStart,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -44,6 +45,7 @@ export interface IndexPatternManagmentContext {
   IndexPatternEditor: DataViewEditorStart['IndexPatternEditorComponent'];
   fieldFormats: FieldFormatsStart;
   spaces?: SpacesPluginStart;
+  theme: ThemeServiceStart;
 }
 
 export type IndexPatternManagmentContextValue =
