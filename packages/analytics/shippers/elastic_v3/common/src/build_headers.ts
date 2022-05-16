@@ -8,7 +8,7 @@
 
 export function buildHeaders(clusterUuid: string, version: string, licenseId?: string) {
   return {
-    'content-type': 'application/x-njson',
+    'content-type': 'application/x-ndjson',
     'x-elastic-cluster-id': clusterUuid,
     'x-elastic-stack-version': version,
     ...(licenseId && { 'x-elastic-license-id': licenseId }),
