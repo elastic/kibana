@@ -35,7 +35,7 @@
           "job_tags": {
       "euid": "8007",
       "maturity": "release",
-      "author": "Elastic",
+      "author": "@randomuserid/Elastic",
       "version": "3",
       "updated_date": "5/16/2022"
   },
