@@ -246,24 +246,24 @@ function getConsumerMultiple({
 /**
  * Data ingestion summary:
  *
- * Service A (go)
+ * producer-internal-only (go)
  * --Transaction A
  * ----Span A
  *
- * Service B (java)
+ * producer-external-only (java)
  * --Transaction B
  * ----Span B
  * ------span.links=external link
  * ----Span B1
  *
- * Service C (ruby)
+ * producer-consumer (ruby)
  * --Transaction C
  * ------span.links=Service A / Span A
  * ------span.links=Service B / Transaction B
  * ------span.links=External ID / Span B
  * ----Span C
  *
- * Service D (nodejs)
+ * consumer-multiple (nodejs)
  * --Transaction D
  * ------span.links= Service C / Span C | Service A / Span A
  * ----Span E

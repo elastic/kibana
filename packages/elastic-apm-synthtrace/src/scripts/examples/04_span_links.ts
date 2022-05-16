@@ -30,46 +30,50 @@ function getSpanLinksFromEvents(events: ApmFields[]) {
 const scenario: Scenario<ApmFields> = async () => {
   return {
     generate: ({ from, to }) => {
-      const instanceGo = apm.service('Service A', 'production', 'go').instance('instance-a');
-      const serviceAEvents = timerange(
+      const producerInternalOnlyInstance = apm
+        .service('producer-internal-only', 'production', 'go')
+        .instance('instance-a');
+      const producerInternalOnlyEvents = timerange(
         new Date('2022-04-25T19:00:00.000Z'),
         new Date('2022-04-25T19:01:00.000Z')
       )
         .interval('1m')
         .rate(1)
         .generator((timestamp) => {
-          return instanceGo
+          return producerInternalOnlyInstance
             .transaction('Transaction A')
             .timestamp(timestamp)
             .duration(1000)
             .success()
             .children(
-              instanceGo
-                .span('GET /service_A', 'custom')
+              producerInternalOnlyInstance
+                .span('Span A', 'custom')
                 .timestamp(timestamp + 50)
                 .duration(100)
                 .success()
             );
         });
 
-      const serviceAAsArray = serviceAEvents.toArray();
-      const serviceALinks = getSpanLinksFromEvents(serviceAAsArray);
+      const producerInternalOnlyApmFields = producerInternalOnlyEvents.toArray();
+      const spanASpanLink = getSpanLinksFromEvents(producerInternalOnlyApmFields);
 
-      const instanceJava = apm.service('Service B', 'production', 'java').instance('instance-b');
-      const serviceBevents = timerange(from, to)
+      const producerConsumerInstance = apm
+        .service('producer-consumer', 'production', 'java')
+        .instance('instance-b');
+      const producerConsumerEvents = timerange(from, to)
         .interval('1m')
         .rate(1)
         .generator((timestamp) => {
-          return instanceJava
+          return producerConsumerInstance
             .transaction('Transaction B')
             .timestamp(timestamp)
             .duration(1000)
             .success()
             .children(
-              instanceJava
-                .span('GET /service_B', 'external')
+              producerConsumerInstance
+                .span('Span B', 'external')
                 .defaults({
-                  'span.links': shuffle([...generateExternalSpanLinks(), ...serviceALinks]),
+                  'span.links': shuffle([...generateExternalSpanLinks(), ...spanASpanLink]),
                 })
                 .timestamp(timestamp + 50)
                 .duration(900)
@@ -77,32 +81,32 @@ const scenario: Scenario<ApmFields> = async () => {
             );
         });
 
-      const serviceBAsArray = serviceBevents.toArray();
-      const serviceBLinks = getSpanLinksFromEvents(serviceBAsArray);
+      const producerConsumerApmFields = producerConsumerEvents.toArray();
+      const spanBSpanLink = getSpanLinksFromEvents(producerConsumerApmFields);
 
-      const instanceRuby = apm.service('Service C', 'production', 'ruby').instance('instance-c');
-      const serviceC = timerange(from, to)
+      const consumerInstance = apm.service('consumer', 'production', 'ruby').instance('instance-c');
+      const consumerEvents = timerange(from, to)
         .interval('1m')
         .rate(1)
         .generator((timestamp) => {
-          return instanceRuby
+          return consumerInstance
             .transaction('Transaction C')
             .timestamp(timestamp)
             .duration(1000)
             .success()
             .children(
-              instanceRuby
-                .span('GET /service_C', 'external')
-                .defaults({ 'span.links': serviceBLinks })
+              consumerInstance
+                .span('Span C', 'external')
+                .defaults({ 'span.links': spanBSpanLink })
                 .timestamp(timestamp + 50)
                 .duration(900)
                 .success()
             );
         });
 
-      return new EntityArrayIterable(serviceAAsArray)
-        .merge(serviceC)
-        .merge(new EntityArrayIterable(serviceBAsArray));
+      return new EntityArrayIterable(producerInternalOnlyApmFields)
+        .merge(consumerEvents)
+        .merge(new EntityArrayIterable(producerConsumerApmFields));
     },
   };
 };
