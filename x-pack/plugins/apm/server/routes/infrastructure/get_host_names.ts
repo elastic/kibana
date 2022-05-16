@@ -42,6 +42,11 @@ export const getHostNames = async ({
                 'container.id': containerIds,
               },
             },
+            {
+              terms: {
+                'event.dataset': ['kubernetes.container'],
+              },
+            },
             ...rangeQuery(start, end),
           ],
         },
