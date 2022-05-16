@@ -61,6 +61,7 @@ export const NoDataViews = ({ onDataViewCreated }: Props) => {
       onSave: (dataView) => {
         onDataViewCreated(dataView);
       },
+      showEmptyPrompt: false,
     });
 
     if (setDataViewEditorRef) {
