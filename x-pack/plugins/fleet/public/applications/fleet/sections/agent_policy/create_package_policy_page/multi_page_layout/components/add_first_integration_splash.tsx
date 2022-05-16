@@ -172,19 +172,21 @@ const NotObscuredByBottomBar = styled('div')`
   padding-bottom: 100px;
 `;
 
-// TODO: add proper link
-const CenteredDocLink = () => (
-  <EuiFlexGroup justifyContent="spaceAround">
-    <EuiFlexItem grow={false}>
-      <EuiLink href="http://www.elastic.co" target="_blank">
-        <FormattedMessage
-          id="xpack.fleet.addFirstIntegrationSplash.learnMoreLink"
-          defaultMessage="Learn more about Elastic Agent"
-        />
-      </EuiLink>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+const CenteredDocLink = () => {
+  const { docLinks } = useStartServices();
+  return (
+    <EuiFlexGroup justifyContent="spaceAround">
+      <EuiFlexItem grow={false}>
+        <EuiLink href={docLinks.links.fleet.guide} target="_blank">
+          <FormattedMessage
+            id="xpack.fleet.addFirstIntegrationSplash.learnMoreLink"
+            defaultMessage="Learn more about Elastic Agent"
+          />
+        </EuiLink>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 const InstallBottomBar: React.FC<{
   isLoading: boolean;
