@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { uniq } from 'lodash';
+import { isUndefined, uniq } from 'lodash';
 import React from 'react';
 import moment from 'moment';
 import { Endzones } from '@kbn/charts-plugin/public';
@@ -42,20 +42,12 @@ export const getXDomain = (
   isHistogram: boolean
 ) => {
   const appliedTimeRange = getAppliedTimeRange(layers)?.timeRange;
-  const xValues = uniq(
-    layers
-      .flatMap<number>(({ table, xAccessor }) =>
-        table.rows.map((row) => xAccessor && row[xAccessor] && row[xAccessor].valueOf())
-      )
-      .filter(Boolean)
-      .sort()
-  );
   const from = appliedTimeRange?.from;
   const to = appliedTimeRange?.to;
   const baseDomain = isTimeViz
     ? {
-        min: from ? moment(from).valueOf() : xValues[0],
-        max: to ? moment(to).valueOf() : xValues[xValues.length - 1],
+        min: from ? moment(from).valueOf() : NaN,
+        max: to ? moment(to).valueOf() : NaN,
         minInterval,
       }
     : isHistogram
@@ -63,6 +55,14 @@ export const getXDomain = (
     : undefined;
 
   if (isHistogram && isFullyQualified(baseDomain)) {
+    const xValues = uniq(
+      layers
+        .flatMap<number>(({ table, xAccessor }) =>
+          table.rows.map((row) => xAccessor && row[xAccessor] && row[xAccessor].valueOf())
+        )
+        .filter((v) => !isUndefined(v))
+        .sort()
+    );
     const [firstXValue] = xValues;
     const lastXValue = xValues[xValues.length - 1];
 

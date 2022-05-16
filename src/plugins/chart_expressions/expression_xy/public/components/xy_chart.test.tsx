@@ -238,8 +238,8 @@ describe('XYChart component', () => {
       // real auto interval is 30mins = 1800000
       expect(component.find(Settings).prop('xDomain')).toMatchInlineSnapshot(`
         Object {
-          "max": "2019-01-02T05:00:00.000Z",
-          "min": "2019-01-02T05:00:00.000Z",
+          "max": NaN,
+          "min": NaN,
           "minInterval": 50,
         }
       `);
