@@ -9,7 +9,7 @@
     "windows",
     "winlogbeat"
   ],
-  "description": "Security: Windows - Looks for rare and unusual Windows services which may indicate execution of unauthorized services, malware, or persistence mechanisms.",
+  "description": "Security: Windows - Looks for rare and unusual Windows service names which may indicate execution of unauthorized services, malware, or persistence mechanisms.",
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
