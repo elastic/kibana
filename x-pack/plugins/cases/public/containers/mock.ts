@@ -12,6 +12,7 @@ import type {
   SingleCaseMetrics,
   SingleCaseMetricsFeature,
   AlertComment,
+  CasesMetrics,
 } from '../../common/ui/types';
 import {
   Actions,
@@ -290,6 +291,10 @@ export const casesStatus: CasesStatus = {
   countOpenCases: 20,
   countInProgressCases: 40,
   countClosedCases: 130,
+};
+
+export const casesMetrics: CasesMetrics = {
+  mttr: 12,
 };
 
 export const basicPush = {

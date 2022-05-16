@@ -9,7 +9,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 
 import { CaseStatuses } from '../../../common/api';
-import { Stats } from './stats';
+import { StatusStats } from './status_stats';
 
 describe('Stats', () => {
   const defaultProps = {
@@ -19,13 +19,13 @@ describe('Stats', () => {
     dataTestSubj: 'test-stats',
   };
   it('it renders', async () => {
-    const wrapper = mount(<Stats {...defaultProps} />);
+    const wrapper = mount(<StatusStats {...defaultProps} />);
 
     expect(wrapper.find(`[data-test-subj="test-stats"]`).exists()).toBeTruthy();
   });
 
   it('shows the count', async () => {
-    const wrapper = mount(<Stats {...defaultProps} />);
+    const wrapper = mount(<StatusStats {...defaultProps} />);
 
     expect(
       wrapper.find(`[data-test-subj="test-stats"] .euiDescriptionList__description`).first().text()
@@ -33,14 +33,14 @@ describe('Stats', () => {
   });
 
   it('shows the loading spinner', async () => {
-    const wrapper = mount(<Stats {...defaultProps} isLoading={true} />);
+    const wrapper = mount(<StatusStats {...defaultProps} isLoading={true} />);
 
     expect(wrapper.find(`[data-test-subj="test-stats-loading-spinner"]`).exists()).toBeTruthy();
   });
 
   describe('Status title', () => {
     it('shows the correct title for status open', async () => {
-      const wrapper = mount(<Stats {...defaultProps} />);
+      const wrapper = mount(<StatusStats {...defaultProps} />);
 
       expect(
         wrapper.find(`[data-test-subj="test-stats"] .euiDescriptionList__title`).first().text()
@@ -48,7 +48,9 @@ describe('Stats', () => {
     });
 
     it('shows the correct title for status in-progress', async () => {
-      const wrapper = mount(<Stats {...defaultProps} caseStatus={CaseStatuses['in-progress']} />);
+      const wrapper = mount(
+        <StatusStats {...defaultProps} caseStatus={CaseStatuses['in-progress']} />
+      );
 
       expect(
         wrapper.find(`[data-test-subj="test-stats"] .euiDescriptionList__title`).first().text()
@@ -56,7 +58,7 @@ describe('Stats', () => {
     });
 
     it('shows the correct title for status closed', async () => {
-      const wrapper = mount(<Stats {...defaultProps} caseStatus={CaseStatuses.closed} />);
+      const wrapper = mount(<StatusStats {...defaultProps} caseStatus={CaseStatuses.closed} />);
 
       expect(
         wrapper.find(`[data-test-subj="test-stats"] .euiDescriptionList__title`).first().text()
