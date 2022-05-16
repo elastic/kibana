@@ -309,6 +309,26 @@ export default function (providerContext: FtrProviderContext) {
           fleetServerVersion
         );
       });
+
+      beforeEach(async () => {
+        es.updateByQuery({
+          index: '.fleet-agents',
+          body: {
+            script: "ctx._source.remove('upgrade_started_at')",
+            query: {
+              bool: {
+                must: [
+                  {
+                    exists: {
+                      field: 'upgrade_started_at',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        });
+      });
       it('should respond 200 to bulk upgrade upgradeable agents and update the agent SOs', async () => {
         await es.update({
           id: 'agent1',
@@ -328,7 +348,7 @@ export default function (providerContext: FtrProviderContext) {
             doc: {
               local_metadata: {
                 elastic: {
-                  agent: { upgradeable: true, version: '0.0.0' },
+                  agent: { upgradeable: false, version: '0.0.0' },
                 },
               },
             },
@@ -352,7 +372,6 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should create a .fleet-actions document with the agents, version, and upgrade window', async () => {
-        const kibanaVersion = await kibanaServer.version.get();
         await es.update({
           id: 'agent1',
           refresh: 'wait_for',
@@ -377,7 +396,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agents/bulk_upgrade`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            version: kibanaVersion,
+            version: fleetServerVersion,
             agents: ['agent1', 'agent2'],
             rollout_duration_seconds: 6000,
           })
@@ -421,9 +440,10 @@ export default function (providerContext: FtrProviderContext) {
             doc: {
               local_metadata: {
                 elastic: {
-                  agent: { upgradeable: true, version: '0.0.0' },
+                  agent: { upgradeable: false, version: '0.0.0' },
                 },
               },
+              upgrade_started_at: undefined,
             },
           },
         });

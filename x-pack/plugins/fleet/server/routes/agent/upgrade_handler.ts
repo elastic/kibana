@@ -101,7 +101,7 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
   try {
     checkKibanaVersion(version, kibanaVersion, false);
     checkSourceUriAllowed(sourceUri);
-    checkFleetServerVersion(version, agents, soClient, esClient);
+    await checkFleetServerVersion(version, agents, soClient, esClient);
   } catch (err) {
     return response.customError({
       statusCode: 400,
