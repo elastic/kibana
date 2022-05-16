@@ -11,7 +11,7 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import { EuiIconProps, withEuiTheme, WithEuiThemeProps } from '@elastic/eui';
-import { get, isEqual, isEmpty } from 'lodash';
+import { get, isEqual } from 'lodash';
 import memoizeOne from 'memoize-one';
 
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -208,32 +208,27 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
     );
   }
 
-  private checkDataViewsExistsAndHasAnyElement(dataViews: DataView[] | undefined): boolean {
-    return dataViews !== undefined && dataViews.length > 0;
-  }
-
-  private checkSomeDataViewsHaveValueTimeFieldName(dataViews: DataView[]) {
-    return dataViews.some((dataView) => !isEmpty(dataView.timeFieldName));
-  }
-
   /*
    * This Function is here to show the toggle in saved query form
    * in case you the date range (from/to)
    */
   private shouldRenderTimeFilterInSavedQueryForm(): boolean {
     const { dateRangeFrom, dateRangeTo, showDatePicker, indexPatterns } = this.props;
-    const defaultCheck: boolean =
-      showDatePicker ||
-      (!showDatePicker && dateRangeFrom !== undefined && dateRangeTo !== undefined);
 
-    if (this.checkDataViewsExistsAndHasAnyElement(indexPatterns)) {
-      const isSomeDataViewsHaveTimeFieldName = this.checkSomeDataViewsHaveValueTimeFieldName(
-        indexPatterns!
-      );
-      return isSomeDataViewsHaveTimeFieldName && defaultCheck;
-    } else {
-      return defaultCheck;
+    if (
+      !(
+        showDatePicker ||
+        (!showDatePicker && dateRangeFrom !== undefined && dateRangeTo !== undefined)
+      )
+    )
+      return false;
+
+    if (indexPatterns !== undefined && indexPatterns?.length > 0) {
+      // return true if at least one of the DateView has timeFieldName
+      return indexPatterns.some((dataView) => Boolean(dataView.timeFieldName));
     }
+
+    return true;
   }
 
   public onSave = async (savedQueryMeta: SavedQueryMeta, saveAsNew = false) => {
