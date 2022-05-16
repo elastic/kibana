@@ -37,6 +37,7 @@ export type {
   RuleSummary,
   AlertStatus,
   AlertsTableConfigurationRegistryContract,
+  RuleEventLogListProps,
 } from './types';
 
 export {
