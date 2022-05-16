@@ -4829,7 +4829,6 @@ exports[`XYChart component split chart should render split chart if both, splitR
           "type": "dataLayer",
           "xAccessor": "c",
           "xScaleType": "ordinal",
-          "yScaleType": "linear",
         },
       ]
     }
@@ -4870,6 +4869,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
           },
           "groupId": "left",
           "position": "left",
+          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
@@ -5627,7 +5627,6 @@ exports[`XYChart component split chart should render split chart if splitColumnA
           "type": "dataLayer",
           "xAccessor": "c",
           "xScaleType": "ordinal",
-          "yScaleType": "linear",
         },
       ]
     }
@@ -5668,6 +5667,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
           },
           "groupId": "left",
           "position": "left",
+          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
@@ -6425,7 +6425,6 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
           "type": "dataLayer",
           "xAccessor": "c",
           "xScaleType": "ordinal",
-          "yScaleType": "linear",
         },
       ]
     }
@@ -6466,6 +6465,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
           },
           "groupId": "left",
           "position": "left",
+          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
