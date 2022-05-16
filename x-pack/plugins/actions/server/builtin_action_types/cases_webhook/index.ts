@@ -12,6 +12,12 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
 import { Logger } from '@kbn/core/server';
+import {
+  CasesWebhookExecutorResultData,
+  CasesWebhookPublicConfigurationType,
+  CasesWebhookSecretConfigurationType,
+  ExecutorParams,
+} from './types';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_rersponse_retry_header';
 import { nullableType } from '../lib/nullable';
 import { isOk, promiseResult, Result } from '../lib/result_type';
@@ -20,6 +26,7 @@ import { ActionsConfigurationUtilities } from '../../actions_config';
 import { request } from '../lib/axios_utils';
 import { renderMustacheString } from '../../lib/mustache_renderer';
 import { createExternalService } from './service';
+import { ExecutorParamsSchema } from './schema';
 
 // config definition
 export enum CasesWebhookMethods {
@@ -58,8 +65,8 @@ export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 // secrets definition
 export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
 const secretSchemaProps = {
-  user: schema.nullable(schema.string()),
-  password: schema.nullable(schema.string()),
+  user: schema.string(),
+  password: schema.string(),
 };
 const SecretsSchema = schema.object(secretSchemaProps, {
   validate: (secrets) => {
@@ -87,7 +94,12 @@ export function getActionType({
 }: {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
-}): CasesWebhookActionType {
+}): ActionType<
+  CasesWebhookPublicConfigurationType,
+  CasesWebhookSecretConfigurationType,
+  ExecutorParams,
+  CasesWebhookExecutorResultData
+> {
   return {
     id: ActionTypeId,
     minimumLicenseRequired: 'gold',
@@ -99,22 +111,9 @@ export function getActionType({
         validate: curry(validateActionTypeConfig)(configurationUtilities),
       }),
       secrets: SecretsSchema,
-      params: ParamsSchema,
+      params: ExecutorParamsSchema,
     },
-    renderParameterTemplates,
     executor: curry(executor)({ logger, configurationUtilities }),
-  };
-}
-
-function renderParameterTemplates(
-  params: ActionParamsType,
-  variables: Record<string, unknown>
-): ActionParamsType {
-  if (!params.summary) return params;
-  if (!params.description) return params;
-  return {
-    summary: renderMustacheString(params.summary, variables, 'json'),
-    description: renderMustacheString(params.description, variables, 'json'),
   };
 }
 
@@ -160,6 +159,7 @@ export async function executor(
   const actionId = execOptions.actionId;
   const { summary, description } = execOptions.params;
 
+  console.log('call createExternalService');
   const externalService = createExternalService(
     actionId,
     {

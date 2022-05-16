@@ -440,15 +440,20 @@ export const ExternalServiceColumn: React.FC<Props> = ({ theCase, connectors }) 
           />
         </IconWrapper>
       )}
-      <EuiLink
-        data-test-subj={`case-table-column-external`}
-        title={theCase.externalService?.connectorName}
-        href={theCase.externalService?.externalUrl}
-        target="_blank"
-        aria-label={i18n.PUSH_LINK_ARIA(theCase.externalService?.connectorName)}
-      >
-        {theCase.externalService?.externalTitle}
-      </EuiLink>
+      {theCase.externalService?.externalUrl !== 'replace_cases_webhook' ? (
+        <EuiLink
+          data-test-subj={`case-table-column-external`}
+          title={theCase.externalService?.connectorName}
+          href={theCase.externalService?.externalUrl}
+          target="_blank"
+          aria-label={i18n.PUSH_LINK_ARIA(theCase.externalService?.connectorName)}
+        >
+          {theCase.externalService?.externalTitle}
+        </EuiLink>
+      ) : (
+        `${theCase.externalService?.connectorName} incident`
+      )}
+
       {hasDataToPush
         ? renderStringField(i18n.REQUIRES_UPDATE, `case-table-column-external-requiresUpdate`)
         : renderStringField(i18n.UP_TO_DATE, `case-table-column-external-upToDate`)}

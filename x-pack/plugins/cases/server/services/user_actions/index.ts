@@ -586,6 +586,13 @@ const addReferenceIdToPayload = (
       externalService: {
         ...userActionAttributes.payload.externalService,
         connector_id: connectorId ?? NONE_CONNECTOR_ID,
+        ...(userActionAttributes.payload.externalService.external_url == null
+          ? {
+              external_id: 'replace_cases_webhook',
+              external_title: 'replace_cases_webhook',
+              external_url: 'replace_cases_webhook',
+            }
+          : {}),
       },
     };
   }

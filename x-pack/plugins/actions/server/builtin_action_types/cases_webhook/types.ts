@@ -6,6 +6,8 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
+import { PushToServiceResponse } from '../jira/types';
+import { ExecutorParamsSchema } from '../jira/schema';
 import { ActionTypeExecutorResult } from '../../../common';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import {
@@ -35,9 +37,13 @@ export interface ExternalServiceIncidentResponse {
   pushedDate: string;
 }
 
+export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
+
 export interface ExternalService {
-  createIncident: (params: CreateIncidentParams) => Promise<ActionTypeExecutorResult>;
+  createIncident: (params: CreateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
 }
+export type CasesWebhookExecutorResultData = ExternalServiceIncidentResponse;
+
 export interface ResponseError {
   errorMessages: string[] | null | undefined;
   errors: { [k: string]: string } | null | undefined;

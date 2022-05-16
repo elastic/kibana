@@ -20,7 +20,6 @@ export const createMappings = async (
 
   try {
     const mappings = casesConnectors.get(connector.type)?.getMapping() ?? [];
-    console.log('mappings', mappings);
 
     const theMapping = await connectorMappingsService.post({
       unsecuredSavedObjectsClient,

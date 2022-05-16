@@ -14,3 +14,7 @@ export const CasesWebhookFieldsRT = rt.record(
 );
 
 export type CasesWebhookFieldsType = rt.TypeOf<typeof CasesWebhookFieldsRT>;
+
+export enum CasesWebhookConnectorType {
+  Cases = 'cases',
+}

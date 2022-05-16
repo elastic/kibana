@@ -6,6 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import {
+  ExecutorSubActionCommonFieldsParamsSchema,
+  ExecutorSubActionGetIncidentParamsSchema,
+  ExecutorSubActionHandshakeParamsSchema,
+  ExecutorSubActionPushParamsSchema,
+} from '../jira/schema';
 
 export const ExternalIncidentServiceConfiguration = {
   url: schema.string(),
@@ -24,3 +30,10 @@ export const ExternalIncidentServiceSecretConfiguration = {
 export const ExternalIncidentServiceSecretConfigurationSchema = schema.object(
   ExternalIncidentServiceSecretConfiguration
 );
+
+export const ExecutorParamsSchema = schema.oneOf([
+  schema.object({
+    subAction: schema.literal('pushToService'),
+    subActionParams: ExecutorSubActionPushParamsSchema,
+  }),
+]);

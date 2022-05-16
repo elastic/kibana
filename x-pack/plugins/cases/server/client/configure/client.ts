@@ -392,7 +392,7 @@ async function create(
 
     const creationDate = new Date().toISOString();
     let mappings: ConnectorMappingsAttributes[] = [];
-    console.log('configuration', configuration);
+
     try {
       mappings = await casesClientInternal.configuration.createMappings({
         connector: configuration.connector,
