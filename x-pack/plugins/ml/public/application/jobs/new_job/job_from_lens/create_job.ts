@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { merge } from 'lodash';
+import { mergeWith } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
@@ -315,5 +315,15 @@ function combineQueriesAndFilters(
     kibanaConfig
   );
 
-  return merge(dashboardQueries, visQueries);
+  const mergedQueries = mergeWith(
+    dashboardQueries,
+    visQueries,
+    (objValue: estypes.QueryDslQueryContainer, srcValue: estypes.QueryDslQueryContainer) => {
+      if (Array.isArray(objValue)) {
+        return objValue.concat(srcValue);
+      }
+    }
+  );
+
+  return mergedQueries;
 }
