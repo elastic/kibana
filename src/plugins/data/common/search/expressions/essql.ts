@@ -17,8 +17,9 @@ import {
   ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
 
-import { map, zipObject } from 'lodash';
-import { lastValueFrom } from 'rxjs';
+import { zipObject } from 'lodash';
+import { Observable, defer, throwError } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { NowProviderPublicContract } from '../../../public';
 import { getEsQueryConfig } from '../../es_query';
@@ -34,7 +35,7 @@ import {
 } from '..';
 
 type Input = KibanaContext | null;
-type Output = Promise<Datatable>;
+type Output = Observable<Datatable>;
 
 interface Arguments {
   query: string;
@@ -129,86 +130,87 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
         }),
       },
     },
-    async fn(input, { count, parameter, query, timeField, timezone }, { getKibanaRequest }) {
-      const { nowProvider, search, uiSettings } = await getStartDependencies(() => {
-        const request = getKibanaRequest?.();
-        if (!request) {
-          throw new Error(
-            'A KibanaRequest is required to run queries on the server. ' +
-              'Please provide a request object to the expression execution params.'
-          );
-        }
-
-        return request;
-      });
-
-      const params: SqlRequestParams = {
-        query,
-        fetch_size: count,
-        time_zone: timezone,
-        params: parameter,
-        field_multi_value_leniency: true,
-      };
-
-      if (input) {
-        const esQueryConfigs = getEsQueryConfig(
-          uiSettings as Parameters<typeof getEsQueryConfig>[0]
-        );
-        const timeFilter =
-          input.timeRange &&
-          getTime(undefined, input.timeRange, {
-            fieldName: timeField,
-            forceNow: nowProvider?.get(),
-          });
-
-        params.filter = buildEsQuery(
-          undefined,
-          input.query || [],
-          [...(input.filters ?? []), ...(timeFilter ? [timeFilter] : [])],
-          esQueryConfigs
-        );
-      }
-
-      try {
-        const { rawResponse: body } = await lastValueFrom(
-          search<SqlSearchStrategyRequest, SqlSearchStrategyResponse>(
-            { params },
-            { strategy: SQL_SEARCH_STRATEGY }
-          )
-        );
-
-        const columns =
-          body.columns?.map(({ name, type }) => ({
-            id: sanitize(name),
-            name: sanitize(name),
-            meta: { type: normalizeType(type) },
-          })) ?? [];
-        const columnNames = map(columns, 'name');
-        const rows = body.rows.map((row) => zipObject(columnNames, row));
-
-        return {
-          type: 'datatable',
-          meta: {
-            type: 'essql',
-          },
-          columns,
-          rows,
-        };
-      } catch (e) {
-        let message = `Unexpected error from Elasticsearch: ${e.message}`;
-        if (e.err) {
-          const { type, reason } = e.err.attributes;
-          if (type === 'parsing_exception') {
-            message = `Couldn't parse Elasticsearch SQL query. You may need to add double quotes to names containing special characters. Check your query and try again. Error: ${reason}`;
-          } else {
-            message = `Unexpected error from Elasticsearch: ${type} - ${reason}`;
+    fn(input, { count, parameter, query, timeField, timezone }, { abortSignal, getKibanaRequest }) {
+      return defer(() =>
+        getStartDependencies(() => {
+          const request = getKibanaRequest?.();
+          if (!request) {
+            throw new Error(
+              'A KibanaRequest is required to run queries on the server. ' +
+                'Please provide a request object to the expression execution params.'
+            );
           }
-        }
 
-        // Re-write the error message before surfacing it up
-        e.message = message;
-        throw e;
-      }
+          return request;
+        })
+      ).pipe(
+        switchMap(({ nowProvider, search, uiSettings }) => {
+          const params: SqlRequestParams = {
+            query,
+            fetch_size: count,
+            time_zone: timezone,
+            params: parameter,
+            field_multi_value_leniency: true,
+          };
+
+          if (input) {
+            const esQueryConfigs = getEsQueryConfig(
+              uiSettings as Parameters<typeof getEsQueryConfig>[0]
+            );
+            const timeFilter =
+              input.timeRange &&
+              getTime(undefined, input.timeRange, {
+                fieldName: timeField,
+                forceNow: nowProvider?.get(),
+              });
+
+            params.filter = buildEsQuery(
+              undefined,
+              input.query || [],
+              [...(input.filters ?? []), ...(timeFilter ? [timeFilter] : [])],
+              esQueryConfigs
+            );
+          }
+
+          return search<SqlSearchStrategyRequest, SqlSearchStrategyResponse>(
+            { params },
+            { abortSignal, strategy: SQL_SEARCH_STRATEGY }
+          );
+        }),
+        map(({ rawResponse: body }) => {
+          const columns =
+            body.columns?.map(({ name, type }) => ({
+              id: sanitize(name),
+              name: sanitize(name),
+              meta: { type: normalizeType(type) },
+            })) ?? [];
+          const columnNames = columns.map(({ name }) => name);
+          const rows = body.rows.map((row) => zipObject(columnNames, row));
+
+          return {
+            type: 'datatable',
+            meta: {
+              type: 'essql',
+            },
+            columns,
+            rows,
+          } as Datatable;
+        }),
+        catchError((error) => {
+          if (!error.err) {
+            error.message = `Unexpected error from Elasticsearch: ${error.message}`;
+          } else {
+            const { type, reason } = error.err.attributes;
+            if (type === 'parsing_exception') {
+              error.message = `Couldn't parse Elasticsearch SQL query. You may need to add double quotes to names containing special characters. Check your query and try again. Error: ${reason}`;
+            } else {
+              error.message = `Unexpected error from Elasticsearch: ${type} - ${reason}`;
+            }
+          }
+
+          return throwError(() => error);
+        })
+      );
     },
   };
 
