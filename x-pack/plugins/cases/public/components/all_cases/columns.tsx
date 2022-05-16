@@ -178,22 +178,18 @@ export const useCasesColumns = ({
       render: (createdBy: Case['createdBy']) => {
         if (createdBy != null) {
           return (
-            <>
-              <EuiToolTip
-                position="top"
-                content={createdBy.username ?? i18n.UNKNOWN}
-                data-test-subj="case-table-column-createdBy-tooltip"
-              >
-                <EuiAvatar
-                  className="userAction__circle"
-                  name={
-                    createdBy.fullName ? createdBy.fullName : createdBy.username ?? i18n.UNKNOWN
-                  }
-                  size="s"
-                  data-test-subj="case-table-column-createdBy"
-                />
-              </EuiToolTip>
-            </>
+            <EuiToolTip
+              position="top"
+              content={createdBy.username ?? i18n.UNKNOWN}
+              data-test-subj="case-table-column-createdBy-tooltip"
+            >
+              <EuiAvatar
+                className="userAction__circle"
+                name={createdBy.fullName ? createdBy.fullName : createdBy.username ?? i18n.UNKNOWN}
+                size="s"
+                data-test-subj="case-table-column-createdBy"
+              />
+            </EuiToolTip>
           );
         }
         return getEmptyTagValue();
