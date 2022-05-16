@@ -22,6 +22,11 @@ import {
   ALERT_GROUP_ITEM_COUNT_TEST_ID,
   ALERT_GROUP_ITEM_TITLE_TEST_ID,
 } from '../detail_panel_alert_group_item';
+import { useDateFormat } from '../../hooks';
+import { formatDate } from '@elastic/eui';
+
+jest.mock('../../hooks/use_date_format');
+const mockUseDateFormat = useDateFormat as jest.Mock;
 
 const ACCORDION_BUTTON_CLASS = '.euiAccordion__button';
 const VIEW_MODE_GROUP = 'groupView';
@@ -38,6 +43,7 @@ describe('DetailPanelAlertTab component', () => {
     mockedContext = createAppRootMockRenderer();
     mockOnJumpToEvent = jest.fn((process) => process);
     mockShowAlertDetails = jest.fn((alertId) => alertId);
+    mockUseDateFormat.mockImplementation(() => 'YYYY-MM-DDTHH:mm:ss.SSS');
   });
 
   describe('When DetailPanelAlertTab is mounted', () => {
@@ -207,7 +213,7 @@ describe('DetailPanelAlertTab component', () => {
       );
 
       expect(renderResult.queryAllByTestId(ALERT_LIST_ITEM_TIMESTAMP_TEST_ID)[0]).toHaveTextContent(
-        mockAlerts[0]['@timestamp']!
+        formatDate(mockAlerts[0]['@timestamp']!, useDateFormat())
       );
 
       expect(renderResult.queryAllByTestId(ALERT_LIST_ITEM_ARGS_TEST_ID)[0]).toHaveTextContent(

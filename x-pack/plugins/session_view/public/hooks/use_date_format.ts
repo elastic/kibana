@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export { useEuiTheme } from './use_eui_theme';
-export { useDateFormat } from './use_date_format';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+
+export const useDateFormat = (): string => useUiSetting<string>('dateFormat');

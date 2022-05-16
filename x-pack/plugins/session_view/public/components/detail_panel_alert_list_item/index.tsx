@@ -15,11 +15,13 @@ import {
   EuiAccordion,
   EuiPanel,
   EuiHorizontalRule,
+  formatDate,
 } from '@elastic/eui';
 import { ProcessEvent } from '../../../common/types/process_tree';
 import { useStyles } from './styles';
 import { DetailPanelAlertActions } from '../detail_panel_alert_actions';
 import { dataOrDash } from '../../utils/data_or_dash';
+import { useDateFormat } from '../../hooks';
 
 export const ALERT_LIST_ITEM_TEST_ID = 'sessionView:detailPanelAlertListItem';
 export const ALERT_LIST_ITEM_ARGS_TEST_ID = 'sessionView:detailPanelAlertListItemArgs';
@@ -44,12 +46,13 @@ export const DetailPanelAlertListItem = ({
   minimal,
 }: DetailPanelAlertsListItemDeps) => {
   const styles = useStyles(minimal, isInvestigated);
+  const dateFormat = useDateFormat();
 
   if (!event.kibana) {
     return null;
   }
 
-  const timestamp = event['@timestamp'];
+  const timestampRaw = event['@timestamp'];
   const rule = event.kibana?.alert?.rule;
   const uuid = rule?.uuid || '';
   const name = rule?.name || '';
@@ -57,6 +60,8 @@ export const DetailPanelAlertListItem = ({
   const { args } = event.process ?? {};
 
   const forceState = !isInvestigated ? 'open' : undefined;
+
+  const timestamp = formatDate(timestampRaw, dateFormat);
 
   return minimal ? (
     <div data-test-subj={ALERT_LIST_ITEM_TEST_ID} css={styles.firstAlertPad}>
