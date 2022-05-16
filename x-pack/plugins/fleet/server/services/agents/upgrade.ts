@@ -250,7 +250,7 @@ export async function getCurrentBulkUpgrades(
       return {
         ...upgradeAction,
         nbAgentsAck: count,
-        complete: upgradeAction.nbAgents < count,
+        complete: upgradeAction.nbAgents <= count,
       };
     },
     { concurrency: 20 }
