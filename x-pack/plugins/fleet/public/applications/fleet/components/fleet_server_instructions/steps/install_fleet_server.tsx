@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { PLATFORM_TYPE } from '../../../hooks';
-import { useDefaultOutput, useKibanaVersion } from '../../../hooks';
+import { useStartServices, useDefaultOutput, useKibanaVersion } from '../../../hooks';
 
 import { PlatformSelector } from '../..';
 
@@ -58,6 +58,7 @@ const InstallFleetServerStepContent: React.FunctionComponent<{
   fleetServerPolicyId?: string;
   deploymentMode: DeploymentMode;
 }> = ({ serviceToken, fleetServerHost, fleetServerPolicyId, deploymentMode }) => {
+  const { docLinks } = useStartServices();
   const kibanaVersion = useKibanaVersion();
   const { output } = useDefaultOutput();
 
@@ -87,11 +88,7 @@ const InstallFleetServerStepContent: React.FunctionComponent<{
           defaultMessage="Install Fleet Server agent on a centralized host so that other hosts you wish to monitor can connect to it. In production, we recommend using one or more dedicated hosts. For additional guidance, see our {installationLink}."
           values={{
             installationLink: (
-              <EuiLink
-                target="_blank"
-                external
-                href="https://www.elastic.co/guide/en/fleet/current/elastic-agent-installation.html"
-              >
+              <EuiLink target="_blank" external href={docLinks.links.fleet.installElasticAgent}>
                 <FormattedMessage
                   id="xpack.fleet.enrollmentInstructions.installationMessage.link"
                   defaultMessage="installation docs"
