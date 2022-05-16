@@ -45,7 +45,7 @@ const ConsoleWindow = styled.div`
 `;
 
 export const Console = memo<ConsoleProps>(
-  ({ prompt, commandService, managedKey, ...commonProps }) => {
+  ({ prompt, commands, HelpComponent, managedKey, ...commonProps }) => {
     const consoleWindowRef = useRef<HTMLDivElement | null>(null);
     const inputFocusRef: CommandInputProps['focusRef'] = useRef(null);
     const getTestId = useTestIdGenerator(commonProps['data-test-subj']);
@@ -72,8 +72,9 @@ export const Console = memo<ConsoleProps>(
 
     return (
       <ConsoleStateProvider
-        commandService={commandService}
+        commands={commands}
         scrollToBottom={scrollToBottom}
+        HelpComponent={HelpComponent}
         dataTestSubj={commonProps['data-test-subj']}
       >
         {/*

@@ -9,15 +9,16 @@
 import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
 import { $Values } from '@kbn/utility-types';
 import type { PaletteOutput } from '@kbn/coloring';
-import { Datatable } from '@kbn/expressions-plugin';
+import { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
+import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
 import {
   AxisExtentModes,
   FillStyles,
   FittingFunctions,
   IconPositions,
   LayerTypes,
-  MULTITABLE,
   LineStyles,
   SeriesTypes,
   ValueLabelModes,
@@ -34,9 +35,17 @@ import {
   LEGEND_CONFIG,
   DATA_LAYER,
   AXIS_EXTENT_CONFIG,
+  EXTENDED_DATA_LAYER,
+  EXTENDED_REFERENCE_LINE_LAYER,
   ANNOTATION_LAYER,
   EndValues,
+  EXTENDED_Y_CONFIG,
+  AvailableReferenceLineIcons,
+  XY_VIS,
+  LAYERED_XY_VIS,
+  EXTENDED_ANNOTATION_LAYER,
 } from '../constants';
+import { XYRender } from './expression_renderers';
 
 export type EndValue = $Values<typeof EndValues>;
 export type LayerType = $Values<typeof LayerTypes>;
@@ -51,6 +60,7 @@ export type IconPosition = $Values<typeof IconPositions>;
 export type ValueLabelMode = $Values<typeof ValueLabelModes>;
 export type AxisExtentMode = $Values<typeof AxisExtentModes>;
 export type FittingFunction = $Values<typeof FittingFunctions>;
+export type AvailableReferenceLineIcon = $Values<typeof AvailableReferenceLineIcons>;
 
 export interface AxesSettingsConfig {
   x: boolean;
@@ -69,11 +79,8 @@ export interface AxisConfig {
   hide?: boolean;
 }
 
-export interface YConfig {
-  forAccessor: string;
-  axisMode?: YAxisMode;
-  color?: string;
-  icon?: string;
+export interface ExtendedYConfig extends YConfig {
+  icon?: AvailableReferenceLineIcon;
   lineWidth?: number;
   lineStyle?: LineStyle;
   fill?: FillStyle;
@@ -81,12 +88,32 @@ export interface YConfig {
   textVisibility?: boolean;
 }
 
+export interface YConfig {
+  forAccessor: string;
+  axisMode?: YAxisMode;
+  color?: string;
+}
+
+export interface DataLayerArgs {
+  accessors: Array<ExpressionValueVisDimension | string>;
+  seriesType: SeriesType;
+  xAccessor?: string | ExpressionValueVisDimension;
+  hide?: boolean;
+  splitAccessor?: string | ExpressionValueVisDimension;
+  columnToLabel?: string; // Actually a JSON key-value pair
+  yScaleType: YScaleType;
+  xScaleType: XScaleType;
+  isHistogram: boolean;
+  palette: PaletteOutput;
+  yConfig?: YConfigResult[];
+}
+
 export interface ValidLayer extends DataLayerConfigResult {
   xAccessor: NonNullable<DataLayerConfigResult['xAccessor']>;
 }
 
-export interface DataLayerArgs {
-  layerId: string;
+export interface ExtendedDataLayerArgs {
+  layerId?: string;
   accessors: string[];
   seriesType: SeriesType;
   xAccessor?: string;
@@ -96,9 +123,9 @@ export interface DataLayerArgs {
   yScaleType: YScaleType;
   xScaleType: XScaleType;
   isHistogram: boolean;
-  // palette will always be set on the expression
   palette: PaletteOutput;
   yConfig?: YConfigResult[];
+  table?: Datatable;
 }
 
 export interface LegendConfig {
@@ -121,11 +148,11 @@ export interface LegendConfig {
   /**
    * Horizontal Alignment of the legend when it is set inside chart
    */
-  horizontalAlignment?: HorizontalAlignment;
+  horizontalAlignment?: typeof HorizontalAlignment.Right | typeof HorizontalAlignment.Left;
   /**
    * Vertical Alignment of the legend when it is set inside chart
    */
-  verticalAlignment?: VerticalAlignment;
+  verticalAlignment?: typeof VerticalAlignment.Top | typeof VerticalAlignment.Bottom;
   /**
    * Number of columns when legend is set inside chart
    */
@@ -144,7 +171,7 @@ export interface LegendConfig {
    * Exact legend width (vertical) or height (horizontal)
    * Limited to max of 70% of the chart container dimension Vertical legends limited to min of 30% of computed width
    */
-  legendSize?: number;
+  legendSize?: LegendSize;
 }
 
 export interface LabelsOrientationConfig {
@@ -154,19 +181,43 @@ export interface LabelsOrientationConfig {
 }
 
 // Arguments to XY chart expression, with computed properties
-export interface XYArgs {
-  title?: string;
-  description?: string;
+export interface XYArgs extends DataLayerArgs {
   xTitle: string;
   yTitle: string;
   yRightTitle: string;
   yLeftExtent: AxisExtentConfigResult;
   yRightExtent: AxisExtentConfigResult;
   legend: LegendConfigResult;
-  valueLabels: ValueLabelMode;
-  layers: XYLayerConfigResult[];
   endValue?: EndValue;
   emphasizeFitting?: boolean;
+  valueLabels: ValueLabelMode;
+  referenceLineLayers: ReferenceLineLayerConfigResult[];
+  annotationLayers: AnnotationLayerConfigResult[];
+  fittingFunction?: FittingFunction;
+  axisTitlesVisibilitySettings?: AxisTitlesVisibilityConfigResult;
+  tickLabelsVisibilitySettings?: TickLabelsConfigResult;
+  gridlinesVisibilitySettings?: GridlinesConfigResult;
+  labelsOrientation?: LabelsOrientationConfigResult;
+  curveType?: XYCurveType;
+  fillOpacity?: number;
+  hideEndzones?: boolean;
+  valuesInLegend?: boolean;
+  ariaLabel?: string;
+  splitRowAccessor?: ExpressionValueVisDimension | string;
+  splitColumnAccessor?: ExpressionValueVisDimension | string;
+}
+
+export interface LayeredXYArgs {
+  xTitle: string;
+  yTitle: string;
+  yRightTitle: string;
+  yLeftExtent: AxisExtentConfigResult;
+  yRightExtent: AxisExtentConfigResult;
+  legend: LegendConfigResult;
+  endValue?: EndValue;
+  emphasizeFitting?: boolean;
+  valueLabels: ValueLabelMode;
+  layers?: XYExtendedLayerConfigResult[];
   fittingFunction?: FittingFunction;
   axisTitlesVisibilitySettings?: AxisTitlesVisibilityConfigResult;
   tickLabelsVisibilitySettings?: TickLabelsConfigResult;
@@ -179,51 +230,116 @@ export interface XYArgs {
   ariaLabel?: string;
 }
 
+export interface XYProps {
+  xTitle: string;
+  yTitle: string;
+  yRightTitle: string;
+  yLeftExtent: AxisExtentConfigResult;
+  yRightExtent: AxisExtentConfigResult;
+  legend: LegendConfigResult;
+  endValue?: EndValue;
+  emphasizeFitting?: boolean;
+  valueLabels: ValueLabelMode;
+  layers: CommonXYLayerConfig[];
+  fittingFunction?: FittingFunction;
+  axisTitlesVisibilitySettings?: AxisTitlesVisibilityConfigResult;
+  tickLabelsVisibilitySettings?: TickLabelsConfigResult;
+  gridlinesVisibilitySettings?: GridlinesConfigResult;
+  labelsOrientation?: LabelsOrientationConfigResult;
+  curveType?: XYCurveType;
+  fillOpacity?: number;
+  hideEndzones?: boolean;
+  valuesInLegend?: boolean;
+  ariaLabel?: string;
+  splitRowAccessor?: ExpressionValueVisDimension | string;
+  splitColumnAccessor?: ExpressionValueVisDimension | string;
+}
+
 export interface AnnotationLayerArgs {
   annotations: EventAnnotationOutput[];
-  layerId: string;
   hide?: boolean;
 }
+
+export type ExtendedAnnotationLayerArgs = AnnotationLayerArgs & {
+  layerId?: string;
+};
 
 export type AnnotationLayerConfigResult = AnnotationLayerArgs & {
   type: typeof ANNOTATION_LAYER;
   layerType: typeof LayerTypes.ANNOTATIONS;
 };
 
+export type ExtendedAnnotationLayerConfigResult = ExtendedAnnotationLayerArgs & {
+  type: typeof EXTENDED_ANNOTATION_LAYER;
+  layerType: typeof LayerTypes.ANNOTATIONS;
+};
+
 export interface ReferenceLineLayerArgs {
-  layerId: string;
+  accessors: Array<ExpressionValueVisDimension | string>;
+  columnToLabel?: string;
+  yConfig?: ExtendedYConfigResult[];
+}
+
+export interface ExtendedReferenceLineLayerArgs {
+  layerId?: string;
   accessors: string[];
   columnToLabel?: string;
-  yConfig?: YConfigResult[];
+  yConfig?: ExtendedYConfigResult[];
+  table?: Datatable;
 }
 
 export type XYLayerArgs = DataLayerArgs | ReferenceLineLayerArgs | AnnotationLayerArgs;
+export type XYLayerConfig = DataLayerConfig | ReferenceLineLayerConfig | AnnotationLayerConfig;
+export type XYExtendedLayerConfig =
+  | ExtendedDataLayerConfig
+  | ExtendedReferenceLineLayerConfig
+  | ExtendedAnnotationLayerConfig;
 
-export type XYLayerConfigResult =
-  | DataLayerConfigResult
-  | ReferenceLineLayerConfigResult
-  | AnnotationLayerConfigResult;
-
-export interface LensMultiTable {
-  type: typeof MULTITABLE;
-  tables: Record<string, Datatable>;
-  dateRange?: {
-    fromDate: Date;
-    toDate: Date;
-  };
-}
+export type XYExtendedLayerConfigResult =
+  | ExtendedDataLayerConfigResult
+  | ExtendedReferenceLineLayerConfigResult
+  | ExtendedAnnotationLayerConfigResult;
 
 export type ReferenceLineLayerConfigResult = ReferenceLineLayerArgs & {
   type: typeof REFERENCE_LINE_LAYER;
   layerType: typeof LayerTypes.REFERENCELINE;
+  table: Datatable;
 };
 
-export type DataLayerConfigResult = DataLayerArgs & {
+export type ExtendedReferenceLineLayerConfigResult = ExtendedReferenceLineLayerArgs & {
+  type: typeof EXTENDED_REFERENCE_LINE_LAYER;
+  layerType: typeof LayerTypes.REFERENCELINE;
+  table: Datatable;
+};
+
+export type DataLayerConfigResult = Omit<DataLayerArgs, 'palette'> & {
   type: typeof DATA_LAYER;
   layerType: typeof LayerTypes.DATA;
+  palette: PaletteOutput;
+  table: Datatable;
+};
+
+export interface WithLayerId {
+  layerId: string;
+}
+
+export type DataLayerConfig = DataLayerConfigResult & WithLayerId;
+export type ReferenceLineLayerConfig = ReferenceLineLayerConfigResult & WithLayerId;
+export type AnnotationLayerConfig = AnnotationLayerConfigResult & WithLayerId;
+
+export type ExtendedDataLayerConfig = ExtendedDataLayerConfigResult & WithLayerId;
+export type ExtendedReferenceLineLayerConfig = ExtendedReferenceLineLayerConfigResult & WithLayerId;
+export type ExtendedAnnotationLayerConfig = ExtendedAnnotationLayerConfigResult & WithLayerId;
+
+export type ExtendedDataLayerConfigResult = Omit<ExtendedDataLayerArgs, 'palette'> & {
+  type: typeof EXTENDED_DATA_LAYER;
+  layerType: typeof LayerTypes.DATA;
+  palette: PaletteOutput;
+  table: Datatable;
 };
 
 export type YConfigResult = YConfig & { type: typeof Y_CONFIG };
+export type ExtendedYConfigResult = ExtendedYConfig & { type: typeof EXTENDED_Y_CONFIG };
 
 export type AxisTitlesVisibilityConfigResult = AxesSettingsConfig & {
   type: typeof AXIS_TITLES_VISIBILITY_CONFIG;
@@ -237,3 +353,64 @@ export type LegendConfigResult = LegendConfig & { type: typeof LEGEND_CONFIG };
 export type AxisExtentConfigResult = AxisExtentConfig & { type: typeof AXIS_EXTENT_CONFIG };
 export type GridlinesConfigResult = AxesSettingsConfig & { type: typeof GRID_LINES_CONFIG };
 export type TickLabelsConfigResult = AxesSettingsConfig & { type: typeof TICK_LABELS_CONFIG };
+
+export type CommonXYLayerConfig = XYLayerConfig | XYExtendedLayerConfig;
+export type CommonXYDataLayerConfigResult = DataLayerConfigResult | ExtendedDataLayerConfigResult;
+export type CommonXYReferenceLineLayerConfigResult =
+  | ReferenceLineLayerConfigResult
+  | ExtendedReferenceLineLayerConfigResult;
+
+export type CommonXYDataLayerConfig = DataLayerConfig | ExtendedDataLayerConfig;
+export type CommonXYReferenceLineLayerConfig =
+  | ReferenceLineLayerConfig
+  | ExtendedReferenceLineLayerConfig;
+
+export type CommonXYAnnotationLayerConfig = AnnotationLayerConfig | ExtendedAnnotationLayerConfig;
+
+export type XyVisFn = ExpressionFunctionDefinition<
+  typeof XY_VIS,
+  Datatable,
+  XYArgs,
+  Promise<XYRender>
+>;
+export type LayeredXyVisFn = ExpressionFunctionDefinition<
+  typeof LAYERED_XY_VIS,
+  Datatable,
+  LayeredXYArgs,
+  Promise<XYRender>
+>;
+
+export type ExtendedDataLayerFn = ExpressionFunctionDefinition<
+  typeof EXTENDED_DATA_LAYER,
+  Datatable,
+  ExtendedDataLayerArgs,
+  Promise<ExtendedDataLayerConfigResult>
+>;
+
+export type ReferenceLineLayerFn = ExpressionFunctionDefinition<
+  typeof REFERENCE_LINE_LAYER,
+  Datatable,
+  ReferenceLineLayerArgs,
+  ReferenceLineLayerConfigResult
+>;
+export type ExtendedReferenceLineLayerFn = ExpressionFunctionDefinition<
+  typeof EXTENDED_REFERENCE_LINE_LAYER,
+  Datatable,
+  ExtendedReferenceLineLayerArgs,
+  ExtendedReferenceLineLayerConfigResult
+>;
+
+export type YConfigFn = ExpressionFunctionDefinition<typeof Y_CONFIG, null, YConfig, YConfigResult>;
+export type ExtendedYConfigFn = ExpressionFunctionDefinition<
+  typeof EXTENDED_Y_CONFIG,
+  null,
+  ExtendedYConfig,
+  ExtendedYConfigResult
+>;
+
+export type LegendConfigFn = ExpressionFunctionDefinition<
+  typeof LEGEND_CONFIG,
+  null,
+  LegendConfig,
+  Promise<LegendConfigResult>
+>;

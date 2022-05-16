@@ -35,7 +35,7 @@ import {
 import { fetchEffectFactory } from './fetch_effect';
 
 export function* fetchMonitorManagementEffect() {
-  yield takeLatest(
+  yield takeLeading(
     getMonitors,
     fetchEffectFactory(fetchMonitorManagementList, getMonitorsSuccess, getMonitorsFailure)
   );
@@ -47,7 +47,7 @@ export function* fetchMonitorManagementEffect() {
       getServiceLocationsFailure
     )
   );
-  yield takeLatest(
+  yield takeLeading(
     getSyntheticsEnablement,
     fetchEffectFactory(
       fetchGetSyntheticsEnablement,
