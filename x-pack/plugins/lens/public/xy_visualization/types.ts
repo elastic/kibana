@@ -46,6 +46,7 @@ export interface XYDataLayerConfig {
   yConfig?: YConfig[];
   splitAccessor?: string;
   palette?: PaletteOutput;
+  collapseFn?: string;
   xScaleType?: XScaleType;
   isHistogram?: boolean;
   columnToLabel?: string;
