@@ -189,6 +189,8 @@ export const esResponseData = () => ({
       ],
     },
   },
+  indexFields: [],
+  indicesExist: [],
   isPartial: false,
   isRunning: false,
   total: 1,

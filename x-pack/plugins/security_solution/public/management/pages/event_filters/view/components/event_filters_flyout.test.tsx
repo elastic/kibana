@@ -96,6 +96,7 @@ describe('Event filter flyout', () => {
 
   describe('On initial render', () => {
     const exception = exceptionsGenerator.generateEventFilterForCreate({
+      meta: {},
       entries: [
         {
           field: 'event.category',
@@ -149,6 +150,7 @@ describe('Event filter flyout', () => {
 
   describe('When valid form state', () => {
     const exceptionOptions: Partial<ExceptionListItemSchema> = {
+      meta: {},
       entries: [
         {
           field: 'event.category',
