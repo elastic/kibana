@@ -33,6 +33,10 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('GET /api/fleet/agents/current_upgrades', () => {
       before(async () => {
+        await es.deleteByQuery({
+          index: AGENT_ACTIONS_INDEX,
+          q: '*',
+        });
         // Action 1 non expired and non complete
         await es.index({
           refresh: 'wait_for',
@@ -74,7 +78,7 @@ export default function (providerContext: FtrProviderContext) {
           document: {
             type: 'UPGRADE',
             action_id: 'action3',
-            agents: ['agent1', 'agent2', 'agent3'],
+            agents: ['agent1', 'agent2'],
             expiration: moment().add(1, 'day').toISOString(),
           },
         });
@@ -143,17 +147,6 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
       it('should respond 200 and the current upgrades', async () => {
-        // const kibanaVersion = await kibanaServer.version.get();
-        // await es.update({
-        //   id: 'agent1',
-        //   refresh: 'wait_for',
-        //   index: AGENTS_INDEX,
-        //   body: {
-        //     doc: {
-        //       local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-        //     },
-        //   },
-        // });
         const res = await supertest.get(`/api/fleet/agents/current_upgrades`).expect(200);
         const actionIds = res.body.items.map((item: any) => item.actionId);
         expect(actionIds).length(2);
