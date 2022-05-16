@@ -15,7 +15,7 @@ import {
 } from '../../common/api/example_stream';
 import { API_ENDPOINT } from '../../common/api';
 
-import { streamFactory } from './stream_factory';
+import { streamFactory } from '../lib/stream_factory';
 
 export const defineExampleStreamRoute = (router: IRouter, logger: Logger) => {
   router.post(
@@ -37,8 +37,9 @@ export const defineExampleStreamRoute = (router: IRouter, logger: Logger) => {
         shouldStop = true;
       });
 
-      const { DELIMITER, end, push, stream } =
-        streamFactory<typeof API_ENDPOINT.EXAMPLE_STREAM>(logger);
+      const { DELIMITER, end, push, responseWithHeaders, stream } = streamFactory<
+        typeof API_ENDPOINT.EXAMPLE_STREAM
+      >(logger, request.headers);
 
       const entities = [
         'kimchy',
@@ -102,9 +103,7 @@ export const defineExampleStreamRoute = (router: IRouter, logger: Logger) => {
       // do not call this using `await` so it will run asynchronously while we return the stream already.
       pushStreamUpdate();
 
-      return response.ok({
-        body: stream,
-      });
+      return response.ok(responseWithHeaders);
     }
   );
 };

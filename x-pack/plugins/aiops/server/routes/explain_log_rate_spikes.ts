@@ -16,7 +16,7 @@ import {
 } from '../../common/api/explain_log_rate_spikes';
 import { API_ENDPOINT } from '../../common/api';
 
-import { streamFactory } from './stream_factory';
+import { streamFactory } from '../lib/stream_factory';
 
 export const defineExplainLogRateSpikesRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -60,8 +60,9 @@ export const defineExplainLogRateSpikesRoute = (
       const doc = res.rawResponse.hits.hits.pop();
       const fields = Object.keys(doc?._source ?? {});
 
-      const { end, push, stream } =
-        streamFactory<typeof API_ENDPOINT.EXPLAIN_LOG_RATE_SPIKES>(logger);
+      const { end, push, responseWithHeaders } = streamFactory<
+        typeof API_ENDPOINT.EXPLAIN_LOG_RATE_SPIKES
+      >(logger, request.headers);
 
       async function pushField() {
         setTimeout(() => {
@@ -83,9 +84,7 @@ export const defineExplainLogRateSpikesRoute = (
 
       pushField();
 
-      return response.ok({
-        body: stream,
-      });
+      return response.ok(responseWithHeaders);
     }
   );
 };
