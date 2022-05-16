@@ -23,7 +23,18 @@ import { exceptionsListAllHttpMocks } from '../../../../mocks/exceptions_list_ht
 import { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
 import { POLICY_ARTIFACT_DELETE_MODAL_LABELS } from './translations';
 
-describe('Policy details artifacts delete modal', () => {
+const listType: CreateExceptionListSchema['type'][] = (
+  [
+    'endpoint_events',
+    'detection',
+    'endpoint',
+    'endpoint_trusted_apps',
+    'endpoint_host_isolation_exceptions',
+    'endpoint_blocklists',
+  ]
+);
+
+describe.each(listType)('Policy details %s artifact delete modal', (type) => {
   let policyId: string;
   let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
@@ -39,16 +50,7 @@ describe('Policy details artifacts delete modal', () => {
     onCloseMock = jest.fn();
     mockedApi = exceptionsListAllHttpMocks(mockedContext.coreStart.http);
     render = async () => {
-      const type: CreateExceptionListSchema['type'] = (
-        [
-          'endpoint_events',
-          'detection',
-          'endpoint',
-          'endpoint_trusted_apps',
-          'endpoint_host_isolation_exceptions',
-          'endpoint_blocklists',
-        ] as Array<CreateExceptionListSchema['type']>
-      )[Math.floor(Math.random() * 5)];
+
       await act(async () => {
         renderResult = mockedContext.render(
           <PolicyArtifactsDeleteModal
