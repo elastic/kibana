@@ -75,3 +75,12 @@ export const useAppUrl = jest.fn().mockReturnValue({
       mockStartServicesMock.application.getUrlForApp(appId, options)
     ),
 });
+export const useNavigateTo = jest.fn().mockReturnValue({
+  navigateTo: jest.fn().mockImplementation(({ appId = APP_UI_ID, url, ...options }) => {
+    if (url) {
+      mockStartServicesMock.application.navigateToUrl(url);
+    } else {
+      mockStartServicesMock.application.navigateToApp(appId, options);
+    }
+  }),
+});

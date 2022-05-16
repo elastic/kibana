@@ -112,6 +112,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       synonyms: `${APP_SEARCH_DOCS}synonyms-guide.html`,
       webCrawler: `${APP_SEARCH_DOCS}web-crawler.html`,
       webCrawlerEventLogs: `${APP_SEARCH_DOCS}view-web-crawler-events-logs.html`,
+      webCrawlerReference: `${APP_SEARCH_DOCS}web-crawler-reference.html`,
     },
     enterpriseSearch: {
       configuration: `${ENTERPRISE_SEARCH_DOCS}configuration.html`,
@@ -443,6 +444,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       guide: `${KIBANA_DOCS}maps.html`,
       importGeospatialPrivileges: `${KIBANA_DOCS}import-geospatial-data.html#import-geospatial-privileges`,
       gdalTutorial: `${ELASTIC_WEBSITE_URL}blog/how-to-ingest-geospatial-data-into-elasticsearch-with-gdal`,
+      termJoinsExample: `${KIBANA_DOCS}terms-join.html#_example_term_join`,
     },
     monitoring: {
       alertsKibana: `${KIBANA_DOCS}kibana-alerts.html`,
@@ -526,6 +528,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       azureRepo: `${ELASTICSEARCH_DOCS}repository-azure.html`,
       gcsRepo: `${ELASTICSEARCH_DOCS}repository-gcs.html`,
       hdfsRepo: `${PLUGIN_DOCS}repository-hdfs.html`,
+      ingestAttachment: `${PLUGIN_DOCS}ingest-attachment.html`,
       s3Repo: `${ELASTICSEARCH_DOCS}repository-s3.html`,
       snapshotRestoreRepos: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html`,
       mapperSize: `${PLUGIN_DOCS}mapper-size-usage.html`,
@@ -650,6 +653,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       resolveMigrationFailures: `${KIBANA_DOCS}resolve-migrations-failures.html`,
       repeatedTimeoutRequests: `${KIBANA_DOCS}resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail`,
       routingAllocationDisabled: `${KIBANA_DOCS}resolve-migrations-failures.html#routing-allocation-disabled`,
+      clusterShardLimitExceeded: `${KIBANA_DOCS}resolve-migrations-failures.html#cluster-shard-limit-exceeded`,
     },
   });
 };
