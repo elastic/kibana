@@ -128,7 +128,7 @@ const getExistingMonitor = async (
       filter,
     }
   );
-  return savedObjects[0];
+  return savedObjects?.[0];
 };
 
 const getAllPushMonitorsForSuite = async (
@@ -169,7 +169,7 @@ const getPushMonitorsForSuite = async (
   return await savedObjectsClient.find<EncryptedSyntheticsMonitor>({
     type: syntheticsMonitorType,
     page,
-    perPage: 1,
+    perPage: 500,
     filter: getSuiteFilter(projectId),
   });
 };
