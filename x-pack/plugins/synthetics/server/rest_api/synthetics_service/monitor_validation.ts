@@ -82,12 +82,34 @@ export function validateMonitor(monitorFields: MonitorFields): {
   return { valid: true, reason: '', details: '', payload: monitorFields };
 }
 
-export function validatePushMonitor(monitorFields: PushBrowserMonitor): {
+export function validatePushMonitor(
+  monitorFields: PushBrowserMonitor,
+  projectId: string
+): {
   valid: boolean;
   reason: string;
   details: string;
   payload: object;
 } {
+  const isValidId = new RegExp(/^[0-9A-Za-z-._~]+$/);
+  const isJourneyIdValid = isValidId.test(monitorFields.id);
+  const isProjectIdValid = isValidId.test(projectId);
+  const projectIdError = !isProjectIdValid
+    ? `Project id is invalid. Project id: ${projectId}. `
+    : '';
+  const journeyIdError = !isJourneyIdValid
+    ? `Journey id is invalid. Journey id: ${monitorFields.id}.`
+    : '';
+
+  if (!isProjectIdValid || !isJourneyIdValid) {
+    return {
+      valid: false,
+      reason:
+        'Failed to save or update monitor. Journey id or Project id is not valid. Id must match pattern ^[0-9A-Za-z-._~]$',
+      details: `${projectIdError}${journeyIdError}`,
+      payload: monitorFields,
+    };
+  }
   // Cast it to ICMPCodec to satisfy typing. During runtime, correct codec will be used to decode.
   const decodedMonitor = PushBrowserMonitorCodec.decode(monitorFields);
 

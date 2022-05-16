@@ -247,7 +247,7 @@ const configurePushMonitor = async ({
     // check to see if monitor already exists
     const normalizedMonitor = normalizePushedMonitor({ locations, monitor, projectId });
 
-    const validationResult = validatePushMonitor(monitor);
+    const validationResult = validatePushMonitor(monitor, projectId);
 
     if (!validationResult.valid) {
       const { reason: message, details, payload } = validationResult;
