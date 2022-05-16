@@ -95,8 +95,13 @@ describe('Service overview: Time Comparison', () => {
       apisToIntercept.map(({ endpoint, name }) => {
         cy.intercept('GET', endpoint).as(name);
       });
+      cy.intercept(
+        'GET',
+        '/internal/apm/services/opbeans-java/metadata/icons?*'
+      ).as('iconsRequest');
       cy.visit(serviceOverviewHref);
-      cy.contains('opbeans-java', { timeout: 10000 });
+      cy.wait('@iconsRequest', { timeout: 10000 });
+      cy.contains('opbeans-java');
 
       cy.get('[data-test-subj="comparisonSelect"]').should('be.enabled');
       const offset = `offset=1d`;

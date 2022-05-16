@@ -93,7 +93,7 @@ describe('Error details', () => {
             '/internal/apm/services/opbeans-java/errors/0000000000000000000000000Error%200?*'
           ).as('errorRequest');
           cy.visit(errorDetailsPageHref);
-          cy.wait('@errorRequest');
+          cy.wait('@errorRequest', { timeout: 10000 });
           cy.contains('Error group 00000');
           cy.contains('View 1 occurrence in Discover.').click({ force: true });
           cy.url().should('include', 'app/discover');

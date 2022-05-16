@@ -153,7 +153,7 @@ describe('Service Overview', () => {
         'GET',
         '/internal/apm/services/opbeans-node/transaction_types?*'
       ).as('transactionTypesRequest');
-      cy.wait('@transactionTypesRequest');
+      cy.wait('@transactionTypesRequest', { requestTimeout: 10000 });
       cy.get('[data-test-subj="headerFilterTransactionType"]').should(
         'have.value',
         'request'
