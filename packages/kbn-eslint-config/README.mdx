@@ -1,12 +1,12 @@
 ---
-id: kibDevDocsOpsEslintConfigKibana
-slug: /kibana-dev-docs/ops/eslint-config-kibana
-title: "@elastic/eslint-config-kibana"
+id: kibDevDocsOpsEslintConfig
+slug: /kibana-dev-docs/ops/eslint-config
+title: "@kbn/eslint-config"
 description: A package holding the main eslint configs on Kibana
 date: 2022-05-16
 tags: ['kibana', 'dev', 'contributor', 'operations', 'eslint', 'custom', 'config']
 ---
-kib
+
 This package is used to group and provide the eslint configurations used by the Kibana team.
 
 ## Usage
@@ -16,7 +16,7 @@ To use this eslint config, just reference it in your `.eslintrc`:
 ```javascript
 {
   extends: [
-    '@elastic/eslint-config-kibana'
+    '@kbn/eslint-config'
   ]
 }
 ```
@@ -24,14 +24,14 @@ To use this eslint config, just reference it in your `.eslintrc`:
 ## Optional jest config
 
 If the project uses the [jest test runner](https://facebook.github.io/jest/), 
-the `@elastic/eslint-config-kibana/jest` config can be extended as well to use 
+the `@kbn/eslint-config/jest` config can be extended as well to use 
 `eslint-plugin-jest` and add settings specific to it:
 
 ```javascript
 {
   extends: [
-    '@elastic/eslint-config-kibana',
-    '@elastic/eslint-config-kibana/jest'
+    '@kbn/eslint-config',
+    '@kbn/eslint-config/jest'
   ]
 }
 ```
