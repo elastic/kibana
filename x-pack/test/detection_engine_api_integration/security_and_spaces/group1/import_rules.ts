@@ -1031,7 +1031,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(body).to.eql({
             success: false,
             success_count: 1,
-            rules_count: 2,
+            rules_count: 1,
             errors: [
               {
                 rule_id: 'rule-1',
