@@ -26,7 +26,8 @@ export interface AlertsBucket {
 }
 
 export interface AlertsGroupBucket {
-  key: string;
+  key: string | number;
+  key_as_string?: string;
   alerts: {
     buckets: AlertsBucket[];
   };
