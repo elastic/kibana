@@ -25,13 +25,8 @@ export function EndpointPageProvider({ getService, getPageObjects }: FtrProvider
       await pageObjects.header.waitUntilLoadingHasFinished();
     },
 
-    async ensureIsOnEndpointListPage(timeout = 20000) {
-      await retry.waitForWithTimeout('Endpoint page to exist', timeout, () =>
-        testSubjects
-          .existOrFail('endpointPage')
-          .then(() => true)
-          .catch(() => false)
-      );
+    async ensureIsOnEndpointListPage() {
+      await testSubjects.existOrFail('endpointPage');
     },
 
     async waitForTableToHaveData(dataTestSubj: string, timeout = 2000) {

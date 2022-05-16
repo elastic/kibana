@@ -43,6 +43,16 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
     async ensureIsOnListPage() {
       await testSubjects.existOrFail('policyListPage');
     },
+
+    /**
+     * Ensures the first endpoint count link is clicked on and the user is taken to the endpoint list page
+     */
+    async clickEndpointCountLink() {
+      const endpointCount = (await testSubjects.findAll('policyEndpointCountLink'))[0];
+      await endpointCount.click();
+      await testSubjects.exists('endpointPage');
+    },
+
     /**
      * Finds and returns the Policy Details Page Save button
      */
