@@ -37,7 +37,7 @@ export const postAgentUpgradeHandler: RequestHandler<
   const { version, source_uri: sourceUri, force } = request.body;
   const kibanaVersion = appContextService.getKibanaVersion();
   try {
-    checkKibanaVersion(version, kibanaVersion, true);
+    checkKibanaVersion(version, kibanaVersion);
     checkSourceUriAllowed(sourceUri);
   } catch (err) {
     return response.customError({
@@ -99,7 +99,7 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
   } = request.body;
   const kibanaVersion = appContextService.getKibanaVersion();
   try {
-    checkKibanaVersion(version, kibanaVersion, false);
+    checkKibanaVersion(version, kibanaVersion);
     checkSourceUriAllowed(sourceUri);
     await checkFleetServerVersion(version, agents, soClient, esClient);
   } catch (err) {
@@ -135,11 +135,7 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
   }
 };
 
-export const checkKibanaVersion = (
-  version: string,
-  kibanaVersion: string,
-  shouldBeSame: boolean
-) => {
+export const checkKibanaVersion = (version: string, kibanaVersion: string) => {
   // get version number only in case "-SNAPSHOT" is in it
   const kibanaVersionNumber = semverCoerce(kibanaVersion)?.version;
   if (!kibanaVersionNumber) throw new Error(`kibanaVersion ${kibanaVersionNumber} is not valid`);
@@ -147,18 +143,10 @@ export const checkKibanaVersion = (
   if (!versionToUpgradeNumber)
     throw new Error(`version to upgrade ${versionToUpgradeNumber} is not valid`);
 
-  if (shouldBeSame) {
-    // only allow upgrading to the same version as the installed kibana version
-    if (kibanaVersionNumber !== versionToUpgradeNumber)
-      throw new Error(
-        `cannot upgrade agent to ${versionToUpgradeNumber} because it is different than the installed kibana version ${kibanaVersionNumber}`
-      );
-  } else {
-    if (semverGt(version, kibanaVersion))
-      throw new Error(
-        `cannot upgrade agent to ${versionToUpgradeNumber} because it is higher than the installed kibana version ${kibanaVersionNumber}`
-      );
-  }
+  if (semverGt(version, kibanaVersion))
+    throw new Error(
+      `cannot upgrade agent to ${versionToUpgradeNumber} because it is higher than the installed kibana version ${kibanaVersionNumber}`
+    );
 };
 
 const checkSourceUriAllowed = (sourceUri?: string) => {
