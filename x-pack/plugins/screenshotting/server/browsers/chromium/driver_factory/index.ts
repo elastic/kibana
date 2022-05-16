@@ -7,20 +7,19 @@
 
 import { getDataPath } from '@kbn/utils';
 import { spawn } from 'child_process';
-import _ from 'lodash';
 import del from 'del';
 import fs from 'fs';
 import { uniq } from 'lodash';
 import path from 'path';
-import puppeteer, { Browser, ConsoleMessage, HTTPRequest, Page } from 'puppeteer';
+import puppeteer, { Browser, ConsoleMessage, HTTPRequest, Page, Viewport } from 'puppeteer';
 import { createInterface } from 'readline';
 import * as Rx from 'rxjs';
 import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 import {
   catchError,
+  concatMap,
   ignoreElements,
   map,
-  concatMap,
   mergeMap,
   reduce,
   takeUntil,
@@ -28,9 +27,9 @@ import {
 } from 'rxjs/operators';
 import type { Logger } from 'src/core/server';
 import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
-import { ConfigType } from '../../../config';
-import { errors } from '../../../../common';
 import { getChromiumDisconnectedError } from '../';
+import { errors } from '../../../../common';
+import { ConfigType } from '../../../config';
 import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
@@ -38,12 +37,7 @@ import { getMetrics, PerformanceMetrics } from './metrics';
 
 interface CreatePageOptions {
   browserTimezone?: string;
-  defaultViewport: {
-    /** Size in pixels */
-    width?: number;
-    /** Size in pixels */
-    height?: number;
-  };
+  defaultViewport: { width?: number };
   openUrlTimeout: number;
 }
 
@@ -64,10 +58,16 @@ interface ClosePageResult {
   metrics?: PerformanceMetrics;
 }
 
-export const DEFAULT_VIEWPORT = {
-  width: 1950,
-  height: 1200,
-};
+/**
+ * Size of the desired initial viewport. This is needed to render the app before elements load into their
+ * layout. Once the elements are positioned, the viewport must be *resized* to include the entire element container.
+ */
+export const DEFAULT_VIEWPORT: Required<Pick<Viewport, 'width' | 'height' | 'deviceScaleFactor'>> =
+  {
+    width: 1950,
+    height: 1200,
+    deviceScaleFactor: 1,
+  };
 
 // Default args used by pptr
 // https://github.com/puppeteer/puppeteer/blob/13ea347/src/node/Launcher.ts#L168
@@ -142,6 +142,17 @@ export class HeadlessChromiumDriverFactory {
       const logger = pLogger.get('browser-driver');
       logger.info(`Creating browser page driver`);
 
+      // We set the viewport width using the client-side layout info to reduce the chances of
+      // browser reflow. Only the window height is expected to be adjusted dramatically
+      // before taking a screenshot, to ensure the elements to capture are contained in the viewport.
+      const viewport = {
+        ...DEFAULT_VIEWPORT,
+        width: defaultViewport.width ?? DEFAULT_VIEWPORT.width,
+      };
+
+      logger.debug(
+        `Launching with viewport: width=${viewport.width} height=${viewport.height} scaleFactor=${viewport.deviceScaleFactor}`
+      );
       const chromiumArgs = this.getChromiumArgs();
       logger.debug(`Chromium launch args set to: ${chromiumArgs}`);
 
@@ -154,13 +165,7 @@ export class HeadlessChromiumDriverFactory {
           ignoreHTTPSErrors: true,
           handleSIGHUP: false,
           args: chromiumArgs,
-
-          // We optionally set this at page creation to reduce the chances of
-          // browser reflow. In most cases only the height needs to be adjusted
-          // before taking a screenshot.
-          // NOTE: _.defaults assigns to the target object, so we copy it.
-          // NOTE NOTE: _.defaults is not the same as { ...DEFAULT_VIEWPORT, ...defaultViewport }
-          defaultViewport: _.defaults({ ...defaultViewport }, DEFAULT_VIEWPORT),
+          defaultViewport: viewport,
           env: {
             TZ: browserTimezone,
           },
