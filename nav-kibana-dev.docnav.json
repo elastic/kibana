@@ -165,6 +165,12 @@
         { "id": "kibVisTypeTimeseriesPluginApi" },
         { "id": "kibVisualizationsPluginApi" }
       ]
+    },
+    {
+      "label": "Operations",
+      "items": [
+        { "id": "kibDevDocsOpsWelcome" }
+      ]
     }
   ]
 }
