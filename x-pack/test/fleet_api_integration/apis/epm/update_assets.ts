@@ -362,7 +362,6 @@ export default function (providerContext: FtrProviderContext) {
         id: 'all_assets',
       });
 
-      console.log('RES:', JSON.stringify(res, null, 2));
       expect(res.attributes).eql({
         installed_kibana_space_id: 'default',
         installed_kibana: [
@@ -489,6 +488,7 @@ export default function (providerContext: FtrProviderContext) {
           { id: 'bf3b0b65-9fdc-53c6-a9ca-e76140e56490', type: 'epm-packages-assets' },
           { id: '7f4c5aca-b4f5-5f0a-95af-051da37513fc', type: 'epm-packages-assets' },
           { id: '4281a436-45a8-54ab-9724-fda6849f789d', type: 'epm-packages-assets' },
+          { id: '6a87d1a5-adf8-5a30-82c4-4c3b8298272b', type: 'epm-packages-assets' },
           { id: 'cb0bbdd7-e043-508b-91c0-09e4cc0f5a3c', type: 'epm-packages-assets' },
           { id: '24a74223-5fdb-52ca-9cb5-b2cdd2a42b07', type: 'epm-packages-assets' },
           { id: '2e56f08b-1d06-55ed-abee-4708e1ccf0aa', type: 'epm-packages-assets' },
