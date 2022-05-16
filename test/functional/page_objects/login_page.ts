@@ -45,6 +45,9 @@ export class LoginPageObject extends FtrService {
   }
 
   private async regularLogin(user: string, pwd: string) {
+    if (await this.testSubjects.exists('loginCard-basic/cloud-basic')) {
+      await this.testSubjects.click('loginCard-basic/cloud-basic');
+    }
     await this.testSubjects.setValue('loginUsername', user);
     await this.testSubjects.setValue('loginPassword', pwd);
     await this.testSubjects.click('loginSubmit');
