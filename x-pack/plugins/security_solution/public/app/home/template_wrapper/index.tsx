@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import { EuiPanel } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { AppLeaveHandler } from '@kbn/core/public';
-import { KibanaPageTemplate, NO_DATA_PAGE_TEMPLATE_PROPS } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-components';
 import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
 import { TimelineId } from '../../../../common/types/timeline';
 import { getTimelineShowStatusByIdSelector } from '../../../timelines/components/flyout/selectors';
@@ -26,6 +26,17 @@ import { gutterTimeline } from '../../../common/lib/helpers';
 import { useKibana } from '../../../common/lib/kibana';
 import { useShowPagesWithEmptyView } from '../../../common/utils/empty_view/use_show_pages_with_empty_view';
 import { useIsPolicySettingsBarVisible } from '../../../management/pages/policy/view/policy_hooks';
+
+const NO_DATA_PAGE_MAX_WIDTH = 950;
+
+const NO_DATA_PAGE_TEMPLATE_PROPS = {
+  restrictWidth: NO_DATA_PAGE_MAX_WIDTH,
+  template: 'centeredBody',
+  pageContentProps: {
+    hasShadow: false,
+    color: 'transparent',
+  },
+};
 
 /**
  * Need to apply the styles via a className to effect the containing bottom bar
