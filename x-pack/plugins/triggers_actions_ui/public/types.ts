@@ -51,6 +51,7 @@ import type { ComponentOpts as RuleStatusDropdownProps } from './application/sec
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
 import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
 import type { RuleTagBadgeProps } from './application/sections/rules_list/components/rule_tag_badge';
+import type { RuleEventLogListProps } from './application/sections/rule_details/components/rule_event_log_list';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
@@ -86,6 +87,7 @@ export type {
   RuleTagFilterProps,
   RuleStatusFilterProps,
   RuleTagBadgeProps,
+  RuleEventLogListProps,
 };
 export type { ActionType, AsApiContract };
 export {
