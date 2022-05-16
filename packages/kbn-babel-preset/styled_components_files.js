@@ -9,7 +9,7 @@
 module.exports = {
   /**
    * Synchronized regex list of files that use `styled-components`.
-   * Used by `kbn-babel-preset` and `elastic-eslint-config-kibana`.
+   * Used by `kbn-babel-preset` and `kbn-eslint-config`.
    */
   USES_STYLED_COMPONENTS: [
     /packages[\/\\]kbn-ui-shared-deps-(npm|src)[\/\\]/,
