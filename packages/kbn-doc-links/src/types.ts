@@ -408,5 +408,6 @@ export interface DocLinks {
     readonly resolveMigrationFailures: string;
     readonly repeatedTimeoutRequests: string;
     readonly routingAllocationDisabled: string;
+    readonly clusterShardLimitExceeded: string;
   };
 }

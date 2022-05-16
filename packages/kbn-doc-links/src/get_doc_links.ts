@@ -653,6 +653,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       resolveMigrationFailures: `${KIBANA_DOCS}resolve-migrations-failures.html`,
       repeatedTimeoutRequests: `${KIBANA_DOCS}resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail`,
       routingAllocationDisabled: `${KIBANA_DOCS}resolve-migrations-failures.html#routing-allocation-disabled`,
+      clusterShardLimitExceeded: `${KIBANA_DOCS}resolve-migrations-failures.html#cluster-shard-limit-exceeded`,
     },
   });
 };
