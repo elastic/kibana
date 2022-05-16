@@ -12,7 +12,7 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
-import { ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient, IBasePath } from '@kbn/core/server';
 import {
   ActionGroup,
   ActionGroupIdsOf,
@@ -166,39 +166,13 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
 
       const { getRecoveredAlerts } = services.alertFactory.done();
       const recoveredAlerts = getRecoveredAlerts();
-      for (const alert of recoveredAlerts) {
-        const recoveredAlertId = alert.getId();
-        const indexedStartedAt = getAlertStartedDate(recoveredAlertId) ?? startedAt.toISOString();
-        const relativeViewInAppUrl = getLogsAppAlertUrl(new Date(indexedStartedAt).getTime());
-        const viewInAppUrl = basePath.publicBaseUrl
-          ? new URL(basePath.prepend(relativeViewInAppUrl), basePath.publicBaseUrl).toString()
-          : relativeViewInAppUrl;
-
-        const baseContext = {
-          group: hasGroupBy(validatedParams) ? recoveredAlertId : null,
-          timestamp: startedAt.toISOString(),
-          viewInAppUrl,
-        };
-
-        if (isRatioRuleParams(validatedParams)) {
-          const { criteria } = validatedParams;
-          const context = {
-            ...baseContext,
-            numeratorConditions: createConditionsMessageForCriteria(getNumerator(criteria)),
-            denominatorConditions: createConditionsMessageForCriteria(getDenominator(criteria)),
-            isRatio: true,
-          };
-          alert.setContext(context);
-        } else {
-          const { criteria } = validatedParams;
-          const context = {
-            ...baseContext,
-            conditions: createConditionsMessageForCriteria(criteria),
-            isRatio: false,
-          };
-          alert.setContext(context);
-        }
-      }
+      processRecoveredAlerts(
+        recoveredAlerts,
+        startedAt,
+        getAlertStartedDate,
+        basePath,
+        validatedParams
+      );
     } catch (e) {
       throw new Error(e);
     }
@@ -841,6 +815,52 @@ const getGroupedResults = async (query: object, esClient: ElasticsearchClient) =
   }
 
   return compositeGroupBuckets;
+};
+
+type LogThresholdRecoveredAlert = {
+  getId: () => string;
+} & LogThresholdAlert;
+
+const processRecoveredAlerts = (
+  recoveredAlerts: LogThresholdRecoveredAlert[],
+  startedAt: Date,
+  getAlertStartedDate: (alertId: string) => string | null,
+  basePath: IBasePath,
+  validatedParams: RuleParams
+) => {
+  for (const alert of recoveredAlerts) {
+    const recoveredAlertId = alert.getId();
+    const indexedStartedAt = getAlertStartedDate(recoveredAlertId) ?? startedAt.toISOString();
+    const relativeViewInAppUrl = getLogsAppAlertUrl(new Date(indexedStartedAt).getTime());
+    const viewInAppUrl = basePath.publicBaseUrl
+      ? new URL(basePath.prepend(relativeViewInAppUrl), basePath.publicBaseUrl).toString()
+      : relativeViewInAppUrl;
+
+    const baseContext = {
+      group: hasGroupBy(validatedParams) ? recoveredAlertId : null,
+      timestamp: startedAt.toISOString(),
+      viewInAppUrl,
+    };
+
+    if (isRatioRuleParams(validatedParams)) {
+      const { criteria } = validatedParams;
+      const context = {
+        ...baseContext,
+        numeratorConditions: createConditionsMessageForCriteria(getNumerator(criteria)),
+        denominatorConditions: createConditionsMessageForCriteria(getDenominator(criteria)),
+        isRatio: true,
+      };
+      alert.setContext(context);
+    } else {
+      const { criteria } = validatedParams;
+      const context = {
+        ...baseContext,
+        conditions: createConditionsMessageForCriteria(criteria),
+        isRatio: false,
+      };
+      alert.setContext(context);
+    }
+  }
 };
 
 const createConditionsMessageForCriteria = (criteria: CountCriteria) =>
