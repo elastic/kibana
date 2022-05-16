@@ -93,7 +93,7 @@ export const dataVizIndexOrSearchRouteFactory = (
       mode={MODE.DATAVISUALIZER}
     />
   ),
-  breadcrumbs: getExplainLogRateSpikesBreadcrumbs(navigateToPath, basePath),
+  breadcrumbs: getDataVisBreadcrumbs(navigateToPath, basePath),
 });
 
 export const explainLogRateSpikesIndexOrSearchRouteFactory = (
@@ -113,7 +113,7 @@ export const explainLogRateSpikesIndexOrSearchRouteFactory = (
       mode={MODE.DATAVISUALIZER}
     />
   ),
-  breadcrumbs: getDataVisBreadcrumbs(navigateToPath, basePath),
+  breadcrumbs: getExplainLogRateSpikesBreadcrumbs(navigateToPath, basePath),
 });
 
 const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) => {
