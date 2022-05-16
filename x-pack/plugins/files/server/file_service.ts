@@ -14,16 +14,15 @@ import { fileObjectType } from './saved_objects';
  */
 export class InternalFileService {
   constructor(
-    private readonly savedObjectsSetup: SavedObjectsServiceSetup,
     // @ts-ignore FIXME:
     private readonly savedObjectsStart: SavedObjectsServiceStart,
     // @ts-ignore FIXME:
     private readonly blobStorageService: BlobStorageService,
+    // @ts-ignore FIXME:
     private readonly logger: Logger
   ) {}
 
-  setup(): void {
-    this.savedObjectsSetup.registerType(fileObjectType);
-    this.logger.debug('Setup complete');
+  static setup(savedObjectsSetup: SavedObjectsServiceSetup): void {
+    savedObjectsSetup.registerType(fileObjectType);
   }
 }
