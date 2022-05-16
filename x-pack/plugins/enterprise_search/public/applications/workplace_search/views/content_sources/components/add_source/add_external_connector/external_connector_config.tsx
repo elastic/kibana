@@ -13,10 +13,12 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiLink,
   EuiSpacer,
   EuiSteps,
 } from '@elastic/eui';
@@ -87,6 +89,7 @@ export const ExternalConnectorConfig: React.FC = () => {
         documentationUrl={documentationUrl}
         applicationPortalUrl={applicationPortalUrl}
         applicationLinkTitle={applicationLinkTitle}
+        discussUrl="https://discuss.elastic.co/c/enterprise-search/84"
       />
       <EuiSpacer />
       <EuiForm isInvalid={!urlValid}>
@@ -127,6 +130,28 @@ export const ExternalConnectorConfig: React.FC = () => {
       <form onSubmit={handleFormSubmission}>
         <EuiSteps steps={configSteps} />
       </form>
+      <EuiSpacer />
+      <EuiFlexGroup justifyContent="center">
+        <EuiFlexItem grow={false}>
+          <EuiCallOut
+            size="s"
+            color="primary"
+            iconType="email"
+            title={
+              <EuiLink href="https://www.elastic.co/kibana/feedback" external>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.workplaceSearch.sources.feedbackCallOutText',
+                  {
+                    defaultMessage:
+                      'Have feedback about deploying a {name} Connector Package? Let us know.',
+                    values: { name },
+                  }
+                )}
+              </EuiLink>
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </Layout>
   );
 };

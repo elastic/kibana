@@ -12,67 +12,102 @@ import { useValues } from 'kea';
 import {
   EuiEmptyPrompt,
   EuiImage,
-  EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiSpacer,
+  EuiButton,
 } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
 
 import { EuiButtonTo } from '../../../../../shared/react_router_helpers';
 
-import { getSourcesPath, getAddPath } from '../../../../routes';
+import { getSourcesPath, getAddPath, getEditPath } from '../../../../routes';
 
 import { SourcesLogic } from '../../sources_logic';
 
 import illustration from './illustration.svg';
+
+import './byo_source_prompt.scss';
 
 export const BYOSourcePrompt: React.FC = () => {
   const { externalConfigured } = useValues(SourcesLogic);
 
   return (
     <EuiEmptyPrompt
+      className="byoSourcePrompt"
       icon={<EuiImage size="l" src={illustration} alt="" />}
-      title={<h2>Don&apos;t see what you&apos;re looking for?</h2>}
+      title={
+        <h2>
+          {i18n.translate(
+            'xpack.enterpriseSearch.workplaceSearch.contentSource.addSource.byoSourcePrompt.title',
+            {
+              defaultMessage: "Don't see what you're looking for?",
+            }
+          )}
+        </h2>
+      }
       layout="horizontal"
       color="plain"
       body={
         <>
-          <p>Build and deploy your own custom connector package.</p>
           <p>
-            Read our <EuiLink>documentation</EuiLink> to learn more about our
-            <EuiLink>Connector Package Framework</EuiLink>
+            {i18n.translate(
+              'xpack.enterpriseSearch.workplaceSearch.contentSource.addSource.byoSourcePrompt.description',
+              {
+                defaultMessage: 'Build, modify and deploy a connector package for your use case.?',
+              }
+            )}
           </p>
         </>
       }
       actions={
         <>
-          {externalConfigured && (
-            <EuiText size="m" color="warning">
-              <p>
-                <i>You&apos;ve already configured an external connector</i>
-              </p>
-            </EuiText>
-          )}
           <EuiSpacer size="m" />
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiButtonTo
-                to={getSourcesPath(getAddPath('external'), true) + '/connector_registration'}
-                color="primary"
-                fill
-                isDisabled={externalConfigured}
-              >
-                Register Your Deployment
-              </EuiButtonTo>
+              {externalConfigured ? (
+                <EuiButtonTo
+                  to={getEditPath('external')}
+                  color="primary"
+                  fill
+                  isDisabled={externalConfigured}
+                >
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.workplaceSearch.contentSource.addSource.byoSourcePrompt.reviewButtonLabel',
+                    {
+                      defaultMessage: 'Review your connector package',
+                    }
+                  )}
+                </EuiButtonTo>
+              ) : (
+                <EuiButtonTo
+                  to={getSourcesPath(getAddPath('external'), true) + '/intro'}
+                  color="primary"
+                  fill
+                  isDisabled={externalConfigured}
+                >
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.workplaceSearch.contentSource.addSource.byoSourcePrompt.registerButtonLabel',
+                    {
+                      defaultMessage: 'Register your deployment',
+                    }
+                  )}
+                </EuiButtonTo>
+              )}
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiButtonTo
-                to={getSourcesPath(getAddPath('external'), true) + '/intro'}
+              <EuiButton
+                href={''} // TODO Update this
                 color="primary"
               >
-                Learn More
-              </EuiButtonTo>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.workplaceSearch.contentSource.addSource.byoSourcePrompt.learnMoreButtonLabel',
+                  {
+                    defaultMessage: 'Learn more',
+                  }
+                )}
+              </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </>
