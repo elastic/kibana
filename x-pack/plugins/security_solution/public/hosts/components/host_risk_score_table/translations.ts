@@ -29,8 +29,8 @@ export const HOST_RISK_TOOLTIP = i18n.translate(
   }
 );
 
-export const HOSTS_BY_RISK = i18n.translate('xpack.securitySolution.hostsRiskTable.hostsTitle', {
-  defaultMessage: 'Hosts by risk',
+export const HOST_RISK_TITLE = i18n.translate('xpack.securitySolution.hostsRiskTable.hostsTitle', {
+  defaultMessage: 'Host risk',
 });
 
 export const HOST_RISK_TABLE_TOOLTIP = i18n.translate(
