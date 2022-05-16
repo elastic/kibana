@@ -32,6 +32,7 @@ filegroup(
     "//packages/kbn-es-query:build",
     "//packages/kbn-es:build",
     "//packages/kbn-eslint-config:build",
+    "//packages/kbn-eslint-import-resolver-kibana:build",
     "//packages/kbn-eslint-plugin-eslint:build",
     "//packages/kbn-expect:build",
     "//packages/kbn-field-types:build",

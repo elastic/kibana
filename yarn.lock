@@ -3003,6 +3003,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/eslint-import-resolver-kibana@link:bazel-bin/packages/kbn-eslint-import-resolver-kibana":
+  version "0.0.0"
+  uid ""
+
 "@kbn/eslint-plugin-eslint@link:bazel-bin/packages/kbn-eslint-plugin-eslint":
   version "0.0.0"
   uid ""
