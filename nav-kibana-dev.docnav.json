@@ -189,6 +189,12 @@
             { "id": "kibDevDocsOpsEslintWithTypes" },
             { "id": "kibDevDocsOpsEslintPluginImports" }
           ]
+        },
+        {
+          "label": "Utilities",
+          "items": [
+            { "id": "kibDevDocsToolingLog" }
+          ]
         }
       ]
     }
