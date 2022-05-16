@@ -14,14 +14,13 @@ import {
   EuiText,
   htmlIdGenerator,
 } from '@elastic/eui';
-
-import { formatResponse } from './policy_response_friendly_names';
-import { POLICY_STATUS_TO_HEALTH_COLOR } from '../host_constants';
 import {
-  Immutable,
   HostPolicyResponseAppliedAction,
   HostPolicyResponseConfiguration,
-} from '../../../../../../common/endpoint/types';
+  Immutable,
+} from '../../../../common/endpoint/types';
+import { POLICY_STATUS_TO_HEALTH_COLOR } from '../../pages/endpoint_hosts/view/host_constants';
+import { formatResponse } from './policy_response_friendly_names';
 
 /**
  * Nested accordion in the policy response detailing any concerned
@@ -129,21 +128,18 @@ const ResponseActions = memo(
 
 ResponseActions.displayName = 'ResponseActions';
 
+export interface PolicyResponseProps {
+  responseConfig: Immutable<HostPolicyResponseConfiguration>;
+  responseActions: Immutable<HostPolicyResponseAppliedAction[]>;
+  responseAttentionCount: Map<string, number>;
+}
+
 /**
  * A policy response is returned by the endpoint and shown in the host details after a user modifies a policy
  */
 export const PolicyResponse = memo(
-  ({
-    responseConfig,
-    responseActions,
-    responseAttentionCount,
-  }: {
-    responseConfig: Immutable<HostPolicyResponseConfiguration>;
-    responseActions: Immutable<HostPolicyResponseAppliedAction[]>;
-    responseAttentionCount: Map<string, number>;
-  }) => {
+  ({ responseConfig, responseActions, responseAttentionCount }: PolicyResponseProps) => {
     const generateId = useMemo(() => htmlIdGenerator(), []);
-
     return (
       <>
         {Object.entries(responseConfig).map(([key, val]) => {

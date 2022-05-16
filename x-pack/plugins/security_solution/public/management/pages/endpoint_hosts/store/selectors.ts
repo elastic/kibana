@@ -13,12 +13,12 @@ import { decode } from 'rison-node';
 import { Query } from '@kbn/es-query';
 import {
   Immutable,
-  HostPolicyResponseAppliedAction,
-  HostPolicyResponseConfiguration,
   HostPolicyResponseActionStatus,
   HostStatus,
   ActivityLog,
   HostMetadata,
+  HostPolicyResponse,
+  ImmutableObject,
 } from '../../../../../common/endpoint/types';
 import { EndpointState, EndpointIndexUIQueryParams } from '../types';
 import { extractListPaginationParams } from '../../../common/routing';
@@ -99,45 +99,9 @@ export const patterns = (state: Immutable<EndpointState>) => state.patterns;
 
 export const patternsError = (state: Immutable<EndpointState>) => state.patternsError;
 
-/**
- * Returns the full policy response from the endpoint after a user modifies a policy.
- */
-const detailsPolicyAppliedResponse = (state: Immutable<EndpointState>) =>
-  state.policyResponse && state.policyResponse.Endpoint.policy.applied;
-
-/**
- * Returns the policy response timestamp from the endpoint after a user modifies a policy.
- */
-export const policyResponseTimestamp = (state: Immutable<EndpointState>) =>
-  state.policyResponse && state.policyResponse['@timestamp'];
-
-/**
- * Returns the Endpoint Package Policy Revision number, which correlates to the `applied_policy_version`
- * property on the endpoint policy response message.
- * @param state
- */
-export const policyResponseAppliedRevision = (state: Immutable<EndpointState>): string => {
-  return String(state.policyResponse?.Endpoint.policy.applied.endpoint_policy_version || '');
-};
-
-/**
- * Returns the response configurations from the endpoint after a user modifies a policy.
- */
-export const policyResponseConfigurations: (
-  state: Immutable<EndpointState>
-) => undefined | Immutable<HostPolicyResponseConfiguration> = createSelector(
-  detailsPolicyAppliedResponse,
-  (applied) => {
-    return applied?.response?.configurations;
-  }
-);
-
-/**
- * Returns a map of the number of failed and warning policy response actions per configuration.
- */
-export const policyResponseFailedOrWarningActionCount: (
-  state: Immutable<EndpointState>
-) => Map<string, number> = createSelector(detailsPolicyAppliedResponse, (applied) => {
+export const getFailedOrWarningActionCountFromPolicyResponse = (
+  applied: ImmutableObject<HostPolicyResponse['Endpoint']['policy']['applied']> | undefined
+): Map<string, number> => {
   const failureOrWarningByConfigType = new Map<string, number>();
   if (applied?.response?.configurations !== undefined && applied?.actions !== undefined) {
     Object.entries(applied.response.configurations).map(([key, val]) => {
@@ -157,24 +121,7 @@ export const policyResponseFailedOrWarningActionCount: (
     });
   }
   return failureOrWarningByConfigType;
-});
-
-/**
- * Returns the actions taken by the endpoint for each response configuration after a user modifies a policy.
- */
-export const policyResponseActions: (
-  state: Immutable<EndpointState>
-) => undefined | Immutable<HostPolicyResponseAppliedAction[]> = createSelector(
-  detailsPolicyAppliedResponse,
-  (applied) => {
-    return applied?.actions;
-  }
-);
-
-export const policyResponseLoading = (state: Immutable<EndpointState>): boolean =>
-  state.policyResponseLoading;
-
-export const policyResponseError = (state: Immutable<EndpointState>) => state.policyResponseError;
+};
 
 export const isOnEndpointPage = (state: Immutable<EndpointState>) => {
   return (
