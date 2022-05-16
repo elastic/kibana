@@ -2989,6 +2989,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/dev-cli-errors@link:bazel-bin/packages/kbn-dev-cli-errors":
+  version "0.0.0"
+  uid ""
+
+"@kbn/dev-cli-runner@link:bazel-bin/packages/kbn-dev-cli-runner":
+  version "0.0.0"
+  uid ""
+
+"@kbn/dev-proc-runner@link:bazel-bin/packages/kbn-dev-proc-runner":
+  version "0.0.0"
+  uid ""
+
 "@kbn/dev-utils@link:bazel-bin/packages/kbn-dev-utils":
   version "0.0.0"
   uid ""
@@ -6105,6 +6117,18 @@
   uid ""
 
 "@types/kbn__datemath@link:bazel-bin/packages/kbn-datemath/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__dev-cli-errors@link:bazel-bin/packages/kbn-dev-cli-errors/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__dev-cli-runner@link:bazel-bin/packages/kbn-dev-cli-runner/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__dev-proc-runner@link:bazel-bin/packages/kbn-dev-proc-runner/npm_module_types":
   version "0.0.0"
   uid ""
 
