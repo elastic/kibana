@@ -385,25 +385,25 @@ describe('CollectorSet', () => {
               count: 0,
               names: [],
             },
-            "fetch_duration_breakdown": [{
-              "name": "ready_col",
-              "duration": 0,
-            }],
-            "is_ready_duration_breakdown": [
+            fetch_duration_breakdown: [
               {
-                "name": "ready_col",
-                "duration": 0,
-              },
-              {
-                "name": "not_ready_col",
-                "duration": 0,
+                name: 'ready_col',
+                duration: 0,
               },
             ],
-            "not_ready": {
-              "count": 1,
-              "names": [
-                "not_ready_col",
-              ],
+            is_ready_duration_breakdown: [
+              {
+                name: 'ready_col',
+                duration: 0,
+              },
+              {
+                name: 'not_ready_col',
+                duration: 0,
+              },
+            ],
+            not_ready: {
+              count: 1,
+              names: ['not_ready_col'],
             },
             not_ready_timeout: {
               count: 0,
@@ -472,25 +472,25 @@ describe('CollectorSet', () => {
               count: 0,
               names: [],
             },
-            "fetch_duration_breakdown": [
+            fetch_duration_breakdown: [
               {
-                "name": "ready_col",
-                "duration": 0,
+                name: 'ready_col',
+                duration: 0,
               },
             ],
-            "is_ready_duration_breakdown": [
+            is_ready_duration_breakdown: [
               {
-                "name": "ready_col",
-                "duration": expect.any(Number),
+                name: 'ready_col',
+                duration: expect.any(Number),
               },
               {
-                "name": "timeout_col",
-                "duration": expect.any(Number),
-              }
+                name: 'timeout_col',
+                duration: expect.any(Number),
+              },
             ],
-            "not_ready": {
-              "count": 0,
-              "names": [],
+            not_ready: {
+              count: 0,
+              names: [],
             },
             not_ready_timeout: {
               count: 1,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { withTimeout } from '@kbn/std';
-import { snakeCase, } from 'lodash';
+import { snakeCase } from 'lodash';
 
 import type {
   Logger,
@@ -114,7 +114,6 @@ export class CollectorSet {
     const timeoutMs = this.maximumWaitTimeForAllCollectorsInS * SECOND_IN_MS;
     const collectorsWithStatus: CollectorWithStatus[] = await Promise.all(
       [...collectors.values()].map(async (collector) => {
-        
         const wrappedPromise = perfTimerify(
           `is_ready_${collector.type}`,
           async (): Promise<boolean> => {
@@ -124,9 +123,8 @@ export class CollectorSet {
               this.logger.debug(`Collector ${collector.type} failed to get ready. ${err}`);
               return false;
             }
-          },
+          }
         );
-
 
         const isReadyWithTimeout = await withTimeout<boolean>({
           promise: wrappedPromise(),
@@ -189,10 +187,13 @@ export class CollectorSet {
     };
   };
 
-  private fetchCollector = async (collector: AnyCollector, context: CollectorFetchContext): Promise<{
-    result?: unknown,
-    status: 'failed' | 'success',
-    type: string,
+  private fetchCollector = async (
+    collector: AnyCollector,
+    context: CollectorFetchContext
+  ): Promise<{
+    result?: unknown;
+    status: 'failed' | 'success';
+    type: string;
   }> => {
     const { type } = collector;
     this.logger.debug(`Fetching data from ${type} collector`);
@@ -204,7 +205,9 @@ export class CollectorSet {
     };
 
     try {
-      const result = await this.executionContext.withContext(executionContext, () => collector.fetch(context));
+      const result = await this.executionContext.withContext(executionContext, () =>
+        collector.fetch(context)
+      );
       return { type, result, status: 'success' as const };
     } catch (err) {
       this.logger.warn(err);
@@ -230,7 +233,7 @@ export class CollectorSet {
       readyCollectors.map(async (collector) => {
         const wrappedPromise = perfTimerify(
           `fetch_${collector.type}`,
-          async () => await this.fetchCollector(collector, context),
+          async () => await this.fetchCollector(collector, context)
         );
 
         return await wrappedPromise();

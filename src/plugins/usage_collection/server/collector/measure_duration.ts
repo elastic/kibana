@@ -25,19 +25,17 @@ export const createPerformanceObsHook = () => {
   return () => {
     obs.disconnect();
     return marks;
-  }
-}
+  };
+};
 
 /**
  * A wrapper around performance.timerify which defined the name of the returned
  * wrapped function to help identify observed function types inside the `PerformanceObserver`.
- * 
+ *
  * @param name name of the function used to track the performance of the function execution
  * @param fn the function to be wrapped by the performance.timerify method.
- * @returns 
+ * @returns
  */
 export const perfTimerify = <T extends (...params: unknown[]) => unknown>(name: string, fn: T) => {
-  return performance.timerify(
-    Object.defineProperty(fn, 'name', { value: name })
-  );
-}
+  return performance.timerify(Object.defineProperty(fn, 'name', { value: name }));
+};
