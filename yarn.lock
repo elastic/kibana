@@ -1514,10 +1514,10 @@
     "@elastic/transport" "^8.0.2"
     tslib "^2.3.0"
 
-"@elastic/ems-client@8.3.1":
-  version "8.3.1"
-  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-8.3.1.tgz#cb08f591c7249cf8dc4591ee4022c330973f24b3"
-  integrity sha512-0UZWxxH9a8/mILwjimpO1MluDxtjhzzCGCN94lcqFw5sgPX8PFhjgwk2eLJM4fS4lDaES6fg3rf3DAHAYYwrQw==
+"@elastic/ems-client@8.3.2":
+  version "8.3.2"
+  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-8.3.2.tgz#a12eafcfd9ac8d3068da78a5a77503ea8a89f67c"
+  integrity sha512-81u+Z7+4Y2Fu+sTl9QOKdG3SVeCzzpfyCsHFR8X0V2WFCpQa+SU4sSN9WhdLHz/pe9oi6Gtt5eFMF90TOO/ckg==
   dependencies:
     "@types/geojson" "^7946.0.7"
     "@types/lru-cache" "^5.1.0"
