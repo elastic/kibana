@@ -66,6 +66,12 @@ const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.LINUX,
 ];
 
+// OS options
+const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = OPERATING_SYSTEMS.map((os) => ({
+  value: os,
+  inputDisplay: OS_TITLES[os],
+}));
+
 const getAddedFieldsCounts = (formFields: string[]): { [k: string]: number } =>
   formFields.reduce<{ [k: string]: number }>((allFields, field) => {
     if (field in allFields) {
@@ -265,12 +271,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
       [exception?.description, handleOnDescriptionChange]
     );
 
-    // OS and handler
-    const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = useMemo(
-      () => OPERATING_SYSTEMS.map((os) => ({ value: os, inputDisplay: OS_TITLES[os] })),
-      []
-    );
-
+    // selected OS and handler
     const selectedOs = useMemo((): OperatingSystem => {
       if (!exception?.os_types?.length) {
         return OperatingSystem.WINDOWS;
@@ -302,7 +303,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           />
         </EuiFormRow>
       ),
-      [osOptions, handleOnOsChange, selectedOs]
+      [handleOnOsChange, selectedOs]
     );
 
     // comments and handler
