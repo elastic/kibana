@@ -707,6 +707,10 @@ const expectAssetsInstalled = ({
           type: 'epm-packages-assets',
         },
         {
+          id: 'test-id-7',
+          type: 'epm-packages-assets',
+        },
+        {
           id: 'e786cbd9-0f3b-5a0b-82a6-db25145ebf58',
           type: 'epm-packages-assets',
         },
