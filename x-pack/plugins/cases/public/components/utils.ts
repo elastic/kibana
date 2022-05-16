@@ -74,14 +74,13 @@ export const getConnectorIcon = (
 
 // TODO: Remove when the applications are certified
 export const isDeprecatedConnector = (connector?: CaseActionConnector): boolean => {
-  /**
-   * It is not possible to know if a preconfigured connector
-   * is deprecated or not as the config property of a
-   * preconfigured connector is not returned by the
-   * actions framework
-   */
-  if (connector == null || connector.config == null || connector.isPreconfigured) {
+  if (connector == null || connector.config == null) {
     return false;
+  }
+
+  // since 8.3 the backend reports deprecated connectors
+  if (connector.isDeprecated) {
+    return true;
   }
 
   if (connector.actionTypeId === '.servicenow' || connector.actionTypeId === '.servicenow-sir') {

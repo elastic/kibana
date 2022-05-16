@@ -46,6 +46,7 @@ describe('Utils', () => {
       config: { usesTableApi: false },
       secrets: {},
       isPreconfigured: false,
+      isDeprecated: false,
     };
 
     it('returns false if the connector is not defined', () => {
@@ -84,8 +85,13 @@ describe('Utils', () => {
       ).toBe(true);
     });
 
-    it('returns false if the connector preconfigured', () => {
-      expect(isDeprecatedConnector({ ...connector, isPreconfigured: true })).toBe(false);
+    it('returns true if the connector is marked as deprecated', () => {
+      expect(isDeprecatedConnector({ ...connector, isDeprecated: true })).toBe(true);
+    });
+    it('returns true if the connector is marked as deprecated (preconfigured connector)', () => {
+      expect(
+        isDeprecatedConnector({ ...connector, isDeprecated: true, isPreconfigured: true })
+      ).toBe(true);
     });
 
     it('returns false if the config is undefined', () => {
