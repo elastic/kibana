@@ -43,7 +43,8 @@ export const collectorsStatsSchema: MakeSchemaFrom<CollectorsStats> = {
       duration: {
         type: 'long',
         _meta: {
-          description: 'The execution duration of the isReady function for the collector in milliseconds',
+          description:
+            'The execution duration of the isReady function for the collector in milliseconds',
         },
       },
     },
@@ -60,7 +61,8 @@ export const collectorsStatsSchema: MakeSchemaFrom<CollectorsStats> = {
       duration: {
         type: 'long',
         _meta: {
-          description: 'The execution duration of the fetch function for the collector in milliseconds',
+          description:
+            'The execution duration of the fetch function for the collector in milliseconds',
         },
       },
     },

@@ -19,8 +19,8 @@ export interface CollectorsStats {
   total_duration: number;
   total_is_ready_duration: number;
   total_fetch_duration: number;
-  is_ready_duration_breakdown: Array<{name: string; duration: number}>;
-  fetch_duration_breakdown: Array<{name: string; duration: number}>;
+  is_ready_duration_breakdown: Array<{ name: string; duration: number }>;
+  fetch_duration_breakdown: Array<{ name: string; duration: number }>;
 }
 
 export interface CollectorsStatsCollectorParams {
@@ -74,8 +74,13 @@ export const usageCollectorsStatsCollector = (
         total_duration: totalIsReadyDuration + totalFetchDuration,
 
         // durations breakdown
-        is_ready_duration_breakdown: isReadyExecutionDurationByType.map(({ type: name, duration }) => ({ name, duration})),
-        fetch_duration_breakdown: fetchExecutionDurationByType.map(({ type: name, duration }) => ({ name, duration})),
+        is_ready_duration_breakdown: isReadyExecutionDurationByType.map(
+          ({ type: name, duration }) => ({ name, duration })
+        ),
+        fetch_duration_breakdown: fetchExecutionDurationByType.map(({ type: name, duration }) => ({
+          name,
+          duration,
+        })),
       };
 
       return collectorsStats;
