@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback, useRef, useEffect, useContext } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import {
   EuiBasicTable,
   EuiFlexGroup,
@@ -31,6 +31,7 @@ import {
   useBreadcrumbs,
   useKibanaVersion,
   useStartServices,
+  useFlyoutContext,
 } from '../../../hooks';
 import { AgentEnrollmentFlyout, AgentPolicySummaryLine } from '../../../components';
 import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../../services';
@@ -44,8 +45,6 @@ import {
   FleetServerOnPremUnhealthyCallout,
 } from '../components';
 import { useFleetServerUnhealthy } from '../hooks/use_fleet_server_unhealthy';
-
-import { agentFlyoutContext } from '..';
 
 import { AgentTableHeader } from './components/table_header';
 import type { SelectionMode } from './components/types';
@@ -125,7 +124,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     isOpen: false,
   });
 
-  const flyoutContext = useContext(agentFlyoutContext);
+  const flyoutContext = useFlyoutContext();
 
   // Agent actions states
   const [agentToReassign, setAgentToReassign] = useState<Agent | undefined>(undefined);
@@ -145,6 +144,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     }
 
     if (selectedTags.length) {
+      if (kueryBuilder) {
+        kueryBuilder = `(${kueryBuilder}) and`;
+      }
       kueryBuilder = `${kueryBuilder} ${AGENTS_PREFIX}.tags : (${selectedTags
         .map((tag) => `"${tag}"`)
         .join(' or ')})`;
@@ -330,7 +332,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   // Fleet server unhealthy status
   const { isUnhealthy: isFleetServerUnhealthy } = useFleetServerUnhealthy();
   const onClickAddFleetServer = useCallback(() => {
-    flyoutContext?.openFleetServerFlyout();
+    flyoutContext.openFleetServerFlyout();
   }, [flyoutContext]);
 
   const columns = [
@@ -339,6 +341,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       name: i18n.translate('xpack.fleet.agentList.hostColumnTitle', {
         defaultMessage: 'Host',
       }),
+      width: '185px',
       render: (host: string, agent: Agent) => (
         <EuiLink href={getHref('agent_details', { agentId: agent.id })}>
           {safeMetadata(host)}
@@ -347,7 +350,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'active',
-      width: '120px',
+      width: '85px',
       name: i18n.translate('xpack.fleet.agentList.statusColumnTitle', {
         defaultMessage: 'Status',
       }),
@@ -355,7 +358,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'tags',
-      width: '240px',
+      width: '210px',
       name: i18n.translate('xpack.fleet.agentList.tagsColumnTitle', {
         defaultMessage: 'Tags',
       }),
@@ -366,12 +369,13 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       name: i18n.translate('xpack.fleet.agentList.policyColumnTitle', {
         defaultMessage: 'Agent policy',
       }),
+      width: '260px',
       render: (policyId: string, agent: Agent) => {
         const agentPolicy = agentPoliciesIndexedById[policyId];
         const showWarning = agent.policy_revision && agentPolicy?.revision > agent.policy_revision;
 
         return (
-          <EuiFlexGroup gutterSize="s" alignItems="center" style={{ minWidth: 0 }}>
+          <EuiFlexGroup gutterSize="none" style={{ minWidth: 0 }} direction="column">
             {agentPolicy && <AgentPolicySummaryLine policy={agentPolicy} />}
             {showWarning && (
               <EuiFlexItem grow={false}>
@@ -391,7 +395,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'local_metadata.elastic.agent.version',
-      width: '200px',
+      width: '120px',
       name: i18n.translate('xpack.fleet.agentList.versionTitle', {
         defaultMessage: 'Version',
       }),
@@ -420,6 +424,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       name: i18n.translate('xpack.fleet.agentList.lastCheckinTitle', {
         defaultMessage: 'Last activity',
       }),
+      width: '180px',
       render: (lastCheckin: string, agent: any) =>
         lastCheckin ? <FormattedRelative value={lastCheckin} /> : null,
     },
