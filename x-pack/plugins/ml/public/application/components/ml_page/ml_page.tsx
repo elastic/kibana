@@ -71,7 +71,10 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
   );
 
   const routeList = useMemo(
-    () => Object.values(routes).map((routeFactory) => routeFactory(navigateToPath, basePath.get())),
+    () =>
+      Object.values(routes)
+        .map((routeFactory) => routeFactory(navigateToPath, basePath.get()))
+        .filter((d) => !d.disabled),
     []
   );
 
