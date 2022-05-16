@@ -20,6 +20,7 @@ import {
   PostBulkAgentReassignRequestSchema,
   PostAgentUpgradeRequestSchema,
   PostBulkAgentUpgradeRequestSchema,
+  PostCancelActionRequestSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import type { FleetConfigType } from '../..';
@@ -35,7 +36,10 @@ import {
   postBulkAgentsReassignHandler,
   getAgentDataHandler,
 } from './handlers';
-import { postNewAgentActionHandlerBuilder } from './actions_handlers';
+import {
+  postNewAgentActionHandlerBuilder,
+  postCancelActionHandlerBuilder,
+} from './actions_handlers';
 import { postAgentUnenrollHandler, postBulkAgentsUnenrollHandler } from './unenroll_handler';
 import { postAgentUpgradeHandler, postBulkAgentsUpgradeHandler } from './upgrade_handler';
 
@@ -96,6 +100,22 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     },
     postNewAgentActionHandlerBuilder({
       getAgent: AgentService.getAgentById,
+      cancelAgentAction: AgentService.cancelAgentAction,
+      createAgentAction: AgentService.createAgentAction,
+    })
+  );
+
+  router.post(
+    {
+      path: AGENT_API_ROUTES.CANCEL_ACTIONS_PATTERN,
+      validate: PostCancelActionRequestSchema,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    postCancelActionHandlerBuilder({
+      getAgent: AgentService.getAgentById,
+      cancelAgentAction: AgentService.cancelAgentAction,
       createAgentAction: AgentService.createAgentAction,
     })
   );

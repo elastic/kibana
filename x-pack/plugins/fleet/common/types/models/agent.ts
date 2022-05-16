@@ -34,7 +34,8 @@ export type AgentActionType =
   | 'UNENROLL'
   | 'UPGRADE'
   | 'SETTINGS'
-  | 'POLICY_REASSIGN';
+  | 'POLICY_REASSIGN'
+  | 'CANCEL';
 
 export interface NewAgentAction {
   type: AgentActionType;
