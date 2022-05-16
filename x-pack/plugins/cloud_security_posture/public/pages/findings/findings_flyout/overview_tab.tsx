@@ -29,16 +29,16 @@ type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
 
 const getDetailsList = (data: CspFinding) => [
   {
+    title: TEXT.RULE_NAME,
+    description: data.rule.name,
+  },
+  {
     title: TEXT.EVALUATED_AT,
     description: moment(data['@timestamp']).format('MMMM D, YYYY @ HH:mm:ss.SSS'),
   },
   {
     title: TEXT.RESOURCE_NAME,
     description: data.resource.name,
-  },
-  {
-    title: TEXT.RULE_NAME,
-    description: data.rule.name,
   },
   {
     title: TEXT.FRAMEWORK_SOURCES,
@@ -127,7 +127,7 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
                   <strong>{accordion.title}</strong>
                 </EuiText>
               }
-              arrowDisplay="right"
+              arrowDisplay="left"
               initialIsOpen={accordion.initialIsOpen}
             >
               <EuiSpacer size="m" />

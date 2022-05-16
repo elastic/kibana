@@ -80,7 +80,7 @@ export const ResourceTab = ({ data }: { data: CspFinding }) => {
                   <strong>{accordion.title}</strong>
                 </EuiText>
               }
-              arrowDisplay="right"
+              arrowDisplay="left"
               initialIsOpen
             >
               <EuiDescriptionList
