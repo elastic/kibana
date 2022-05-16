@@ -1272,7 +1272,7 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
               }
             >
               <a
-                className="euiLink euiLink--primary"
+                className="euiLink css-102pf9n-euiLink-primary"
                 href="https://www.elastic.co"
                 rel=""
                 title="Powered by Elastic.co"
@@ -1532,7 +1532,7 @@ exports[`Storyshots shareables/Footer contextual: hello 1`] = `
               }
             >
               <a
-                className="euiLink euiLink--primary"
+                className="euiLink css-102pf9n-euiLink-primary"
                 href="https://www.elastic.co"
                 rel=""
                 title="Powered by Elastic.co"

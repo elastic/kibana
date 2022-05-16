@@ -39,7 +39,7 @@ exports[`Storyshots arguments/SeriesStyle simple 1`] = `
         >
           <button
             aria-label="Color: Auto"
-            className="euiLink euiLink--primary"
+            className="euiLink css-102pf9n-euiLink-primary"
             disabled={false}
             onClick={[Function]}
             type="button"
@@ -92,7 +92,7 @@ exports[`Storyshots arguments/SeriesStyle/components simple: defaults 1`] = `
         >
           <button
             aria-label="Color: Auto"
-            className="euiLink euiLink--primary"
+            className="euiLink css-102pf9n-euiLink-primary"
             disabled={false}
             onClick={[Function]}
             type="button"
@@ -145,7 +145,7 @@ exports[`Storyshots arguments/SeriesStyle/components simple: no labels 1`] = `
         >
           <button
             aria-label="Color: Auto"
-            className="euiLink euiLink--primary"
+            className="euiLink css-102pf9n-euiLink-primary"
             disabled={false}
             onClick={[Function]}
             type="button"
@@ -198,7 +198,7 @@ exports[`Storyshots arguments/SeriesStyle/components simple: no series 1`] = `
         >
           <button
             aria-label="Color: Auto"
-            className="euiLink euiLink--primary"
+            className="euiLink css-102pf9n-euiLink-primary"
             disabled={false}
             onClick={[Function]}
             type="button"
@@ -270,7 +270,7 @@ exports[`Storyshots arguments/SeriesStyle/components simple: with series 1`] = `
         >
           <button
             aria-label="Color: Auto"
-            className="euiLink euiLink--primary"
+            className="euiLink css-102pf9n-euiLink-primary"
             disabled={false}
             onClick={[Function]}
             type="button"

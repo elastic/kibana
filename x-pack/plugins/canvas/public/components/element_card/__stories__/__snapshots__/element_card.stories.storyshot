@@ -27,7 +27,7 @@ exports[`Storyshots components/Elements/ElementCard with click handler 1`] = `
       className="euiCard__content"
     >
       <span
-        className="euiTitle euiTitle--small euiCard__title"
+        className="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
         id="generated-idTitle"
       >
         <button
@@ -82,7 +82,7 @@ exports[`Storyshots components/Elements/ElementCard with image 1`] = `
       className="euiCard__content"
     >
       <span
-        className="euiTitle euiTitle--small euiCard__title"
+        className="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
         id="generated-idTitle"
       >
         Element 1
@@ -130,7 +130,7 @@ exports[`Storyshots components/Elements/ElementCard with tags 1`] = `
       className="euiCard__content"
     >
       <span
-        className="euiTitle euiTitle--small euiCard__title"
+        className="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
         id="generated-idTitle"
       >
         <button
@@ -299,7 +299,7 @@ exports[`Storyshots components/Elements/ElementCard with title and description 1
       className="euiCard__content"
     >
       <span
-        className="euiTitle euiTitle--small euiCard__title"
+        className="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
         id="generated-idTitle"
       >
         Element 1

@@ -75,7 +75,7 @@ exports[`Storyshots arguments/AxisConfig extended 1`] = `
     </div>
   </div>
   <div
-    className="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+    className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
   />
 </div>
 `;
@@ -155,7 +155,7 @@ exports[`Storyshots arguments/AxisConfig/components extended 1`] = `
     </div>
   </div>
   <div
-    className="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+    className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
   />
 </div>
 `;

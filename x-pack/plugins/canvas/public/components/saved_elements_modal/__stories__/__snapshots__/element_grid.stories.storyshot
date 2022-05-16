@@ -34,7 +34,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
           className="euiCard__content"
         >
           <span
-            className="euiTitle euiTitle--small euiCard__title"
+            className="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
             id="generated-idTitle"
           >
             <button
@@ -145,7 +145,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
           className="euiCard__content"
         >
           <span
-            className="euiTitle euiTitle--small euiCard__title"
+            className="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
             id="generated-idTitle"
           >
             <button
@@ -256,7 +256,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
           className="euiCard__content"
         >
           <span
-            className="euiTitle euiTitle--small euiCard__title"
+            className="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
             id="generated-idTitle"
           >
             <button
