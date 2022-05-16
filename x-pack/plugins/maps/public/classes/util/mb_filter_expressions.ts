@@ -55,7 +55,7 @@ export function getFillFilterExpression(
 ): FilterSpecification {
   return getFilterExpression(
     [
-      // explicit EXCLUDE_CENTROID_FEATURES filter not needed. Centroids are points and are filtered out by geometry narrowing
+      // explicit "exclude centroid features" filter not needed. Label features are points and are filtered out by geometry narrowing
       [
         'any',
         ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
@@ -73,7 +73,7 @@ export function getLineFilterExpression(
 ): FilterSpecification {
   return getFilterExpression(
     [
-      // explicit EXCLUDE_CENTROID_FEATURES filter not needed. Centroids are points and are filtered out by geometry narrowing
+      // explicit "exclude centroid features" filter not needed. Label features are points and are filtered out by geometry narrowing
       [
         'any',
         ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],

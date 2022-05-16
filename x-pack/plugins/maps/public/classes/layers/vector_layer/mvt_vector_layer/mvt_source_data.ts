@@ -23,6 +23,7 @@ export interface MvtSourceData {
 }
 
 export async function syncMvtSourceData({
+  hasLabels,
   layerId,
   layerName,
   prevDataRequest,
@@ -30,6 +31,7 @@ export async function syncMvtSourceData({
   source,
   syncContext,
 }: {
+  hasLabels: boolean;
   layerId: string;
   layerName: string;
   prevDataRequest: DataRequest | undefined;
@@ -72,7 +74,7 @@ export async function syncMvtSourceData({
         ? uuid()
         : prevData.refreshToken;
 
-    const tileUrl = await source.getTileUrl(requestMeta, refreshToken);
+    const tileUrl = await source.getTileUrl(requestMeta, refreshToken, hasLabels);
     if (source.isESSource()) {
       source.getInspectorAdapters()?.vectorTiles.addLayer(layerId, layerName, tileUrl);
     }

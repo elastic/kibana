@@ -52,6 +52,7 @@ describe('syncMvtSourceData', () => {
     const syncContext = new MockSyncContext({ dataFilters: {} });
 
     await syncMvtSourceData({
+      hasLabels: false,
       layerId: 'layer1',
       layerName: 'my layer',
       prevDataRequest: undefined,
@@ -99,6 +100,7 @@ describe('syncMvtSourceData', () => {
     };
 
     await syncMvtSourceData({
+      hasLabels: false,
       layerId: 'layer1',
       layerName: 'my layer',
       prevDataRequest: {
@@ -142,6 +144,7 @@ describe('syncMvtSourceData', () => {
     };
 
     await syncMvtSourceData({
+      hasLabels: false,
       layerId: 'layer1',
       layerName: 'my layer',
       prevDataRequest: {
@@ -182,6 +185,7 @@ describe('syncMvtSourceData', () => {
     };
 
     await syncMvtSourceData({
+      hasLabels: false,
       layerId: 'layer1',
       layerName: 'my layer',
       prevDataRequest: {
@@ -230,6 +234,7 @@ describe('syncMvtSourceData', () => {
     };
 
     await syncMvtSourceData({
+      hasLabels: false,
       layerId: 'layer1',
       layerName: 'my layer',
       prevDataRequest: {
@@ -270,6 +275,7 @@ describe('syncMvtSourceData', () => {
     };
 
     await syncMvtSourceData({
+      hasLabels: false,
       layerId: 'layer1',
       layerName: 'my layer',
       prevDataRequest: {
@@ -310,6 +316,7 @@ describe('syncMvtSourceData', () => {
     };
 
     await syncMvtSourceData({
+      hasLabels: false,
       layerId: 'layer1',
       layerName: 'my layer',
       prevDataRequest: {
@@ -343,6 +350,7 @@ describe('syncMvtSourceData', () => {
     };
 
     await syncMvtSourceData({
+      hasLabels: false,
       layerId: 'layer1',
       layerName: 'my layer',
       prevDataRequest: undefined,
