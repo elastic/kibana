@@ -58,7 +58,7 @@ $controlMinWidth: $euiSize * 14;
     }
   }
 
-  @media only screen and (max-width: 767px) {
+  @include euiBreakpoint('xs', 's', 'm') {
     width: 100%;
     &--small {
       min-width:unset;
@@ -142,7 +142,7 @@ $controlMinWidth: $euiSize * 14;
     min-width: $largeControl;
   }
 
-  @media only screen and (max-width: 767px) {
+  @include euiBreakpoint('xs', 's', 'm') {
     &--small {
       min-width:unset;
     }
