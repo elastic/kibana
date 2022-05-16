@@ -174,8 +174,16 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   clearEventsLoading,
   clearSelected,
 }) => {
-  const { navigateToApp } = useKibana().services.application;
-  const { data } = useKibana().services;
+  const {
+    data,
+    application: {
+      navigateToApp,
+      capabilities: { actions },
+    },
+    timelines: timelinesUi,
+    spaces: spacesApi,
+  } = useKibana().services;
+
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -254,28 +262,22 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   useEffect(() => {
     const fetchDataViews = async () => {
       const dataViewsRefs = await data.dataViews.getIdsWithTitle();
-      const dataViewIdIndexPatternMap = dataViewsRefs.reduce(
-        (acc, item) => ({
-          ...acc,
-          [item.id]: item,
-        }),
-        {}
-      );
-      setDataViewOptions(dataViewIdIndexPatternMap);
+      if (dataViewsRefs.length > 0) {
+        const dataViewIdIndexPatternMap = dataViewsRefs.reduce(
+          (acc, item) => ({
+            ...acc,
+            [item.id]: item,
+          }),
+          {}
+        );
+        setDataViewOptions(dataViewIdIndexPatternMap);
+      }
     };
     fetchDataViews();
   }, [data.dataViews]);
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
-  const {
-    services: {
-      application: {
-        capabilities: { actions },
-      },
-      timelines: timelinesUi,
-      spaces: spacesApi,
-    },
-  } = useKibana();
+
   const hasActionsPrivileges = useMemo(() => {
     if (rule?.actions != null && rule?.actions.length > 0 && isBoolean(actions.show)) {
       return actions.show;

@@ -92,10 +92,51 @@ jest.mock('react-router-dom', () => {
   };
 });
 
-jest.mock('../../../../../common/lib/kibana');
-
 const mockRedirectLegacyUrl = jest.fn();
 const mockGetLegacyUrlConflict = jest.fn();
+jest.mock('../../../../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../../../../common/lib/kibana');
+  return {
+    ...originalModule,
+    useKibana: () => ({
+      services: {
+        storage: {
+          get: jest.fn().mockReturnValue(true),
+        },
+        application: {
+          getUrlForApp: (appId: string, options?: { path?: string }) =>
+            `/app/${appId}${options?.path}`,
+          navigateToApp: jest.fn(),
+          capabilities: {
+            actions: {
+              delete: true,
+              save: true,
+              show: true,
+            },
+          },
+        },
+        data: {
+          dataViews: {
+            getIdsWithTitle: () => [],
+          },
+          search: {
+            search: () => ({
+              subscribe: () => ({
+                unsubscribe: jest.fn(),
+              }),
+            }),
+          },
+        },
+        spaces: {
+          ui: {
+            components: { getLegacyUrlConflict: mockGetLegacyUrlConflict },
+            redirectLegacyUrl: mockRedirectLegacyUrl,
+          },
+        },
+      },
+    }),
+  };
+});
 
 const state: State = {
   ...mockGlobalState,
@@ -152,16 +193,6 @@ describe('RuleDetailsPageComponent', () => {
   async function setup() {
     mockRedirectLegacyUrl.mockReset();
     mockGetLegacyUrlConflict.mockReset();
-    const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useKibanaMock().services.spaces = {
-      ui: {
-        // @ts-expect-error
-        components: { getLegacyUrlConflict: mockGetLegacyUrlConflict },
-        redirectLegacyUrl: mockRedirectLegacyUrl,
-      },
-    };
   }
 
   it('renders correctly with no outcome property on rule', async () => {
