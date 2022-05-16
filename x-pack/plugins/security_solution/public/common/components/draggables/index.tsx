@@ -23,6 +23,8 @@ export interface DefaultDraggableType {
   hideTopN?: boolean;
   id: string;
   isDraggable?: boolean;
+  fieldType?: string;
+  isAggregatable?: boolean;
   field: string;
   value?: string | number | null;
   name?: string | null;
@@ -102,6 +104,8 @@ export const DefaultDraggable = React.memo<DefaultDraggableType>(
     id,
     isDraggable = true,
     field,
+    fieldType = '',
+    isAggregatable = false,
     value,
     name,
     children,
@@ -151,6 +155,8 @@ export const DefaultDraggable = React.memo<DefaultDraggableType>(
     return (
       <DraggableWrapper
         dataProvider={dataProviderProp}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
         hideTopN={hideTopN}
         isDraggable={isDraggable}
         render={renderCallback}
@@ -198,6 +204,8 @@ const DraggableBadgeComponent: React.FC<BadgeDraggableType> = ({
   value,
   iconType,
   isDraggable,
+  isAggregatable,
+  fieldType,
   name,
   color = 'hollow',
   children,
@@ -208,6 +216,8 @@ const DraggableBadgeComponent: React.FC<BadgeDraggableType> = ({
     <DefaultDraggable
       id={`draggable-badge-default-draggable-${contextId}-${eventId}-${field}-${value}`}
       isDraggable={isDraggable}
+      isAggregatable={isAggregatable}
+      fieldType={fieldType}
       field={field}
       name={name}
       value={value}
