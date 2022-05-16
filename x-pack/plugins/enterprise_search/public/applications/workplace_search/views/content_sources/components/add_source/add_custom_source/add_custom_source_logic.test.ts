@@ -14,7 +14,6 @@ import { sourceConfigData } from '../../../../../__mocks__/content_sources.mock'
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { docLinks } from '../../../../../../shared/doc_links';
 import { itShowsServerErrorAsFlashMessage } from '../../../../../../test_helpers';
 
 jest.mock('../../../../../app_logic', () => ({
@@ -22,34 +21,16 @@ jest.mock('../../../../../app_logic', () => ({
 }));
 import { AppLogic } from '../../../../../app_logic';
 
-import { SOURCE_NAMES } from '../../../../../constants';
-import { CustomSource, SourceDataItem } from '../../../../../types';
+import { CustomSource } from '../../../../../types';
 
 import { AddCustomSourceLogic, AddCustomSourceSteps } from './add_custom_source_logic';
-
-const CUSTOM_SOURCE_DATA_ITEM: SourceDataItem = {
-  name: SOURCE_NAMES.CUSTOM,
-  iconName: SOURCE_NAMES.CUSTOM,
-  serviceType: 'custom',
-  configuration: {
-    isPublicKey: false,
-    hasOauthRedirect: false,
-    needsBaseUrl: false,
-    documentationUrl: docLinks.workplaceSearchCustomSources,
-    applicationPortalUrl: '',
-  },
-  accountContextOnly: false,
-};
 
 const DEFAULT_VALUES = {
   currentStep: AddCustomSourceSteps.ConfigureCustomStep,
   buttonLoading: false,
   customSourceNameValue: '',
   newCustomSource: {} as CustomSource,
-  sourceData: CUSTOM_SOURCE_DATA_ITEM,
 };
-
-const MOCK_PROPS = { initialValue: '', sourceData: CUSTOM_SOURCE_DATA_ITEM };
 
 const MOCK_NAME = 'name';
 
@@ -60,7 +41,7 @@ describe('AddCustomSourceLogic', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mount({}, MOCK_PROPS);
+    mount({});
   });
 
   it('has expected default values', () => {
@@ -112,12 +93,9 @@ describe('AddCustomSourceLogic', () => {
 
   describe('listeners', () => {
     beforeEach(() => {
-      mount(
-        {
-          customSourceNameValue: MOCK_NAME,
-        },
-        MOCK_PROPS
-      );
+      mount({
+        customSourceNameValue: MOCK_NAME,
+      });
     });
 
     describe('organization context', () => {
@@ -151,11 +129,7 @@ describe('AddCustomSourceLogic', () => {
               customSourceNameValue: MOCK_NAME,
             },
             {
-              ...MOCK_PROPS,
-              sourceData: {
-                ...CUSTOM_SOURCE_DATA_ITEM,
-                serviceType: 'sharepoint-server',
-              },
+              baseServiceType: 'share_point_server',
             }
           );
 
@@ -165,7 +139,7 @@ describe('AddCustomSourceLogic', () => {
             body: JSON.stringify({
               service_type: 'custom',
               name: MOCK_NAME,
-              base_service_type: 'sharepoint-server',
+              base_service_type: 'share_point_server',
             }),
           });
         });
@@ -199,11 +173,7 @@ describe('AddCustomSourceLogic', () => {
               customSourceNameValue: MOCK_NAME,
             },
             {
-              ...MOCK_PROPS,
-              sourceData: {
-                ...CUSTOM_SOURCE_DATA_ITEM,
-                serviceType: 'sharepoint-server',
-              },
+              baseServiceType: 'share_point_server',
             }
           );
 
@@ -215,7 +185,7 @@ describe('AddCustomSourceLogic', () => {
               body: JSON.stringify({
                 service_type: 'custom',
                 name: MOCK_NAME,
-                base_service_type: 'sharepoint-server',
+                base_service_type: 'share_point_server',
               }),
             }
           );

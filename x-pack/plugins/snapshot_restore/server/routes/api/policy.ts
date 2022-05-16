@@ -210,6 +210,7 @@ export function registerPolicyRoutes({
         const body: PolicyIndicesResponse = {
           dataStreams: resolvedIndicesResponse.data_streams.map(({ name }) => name).sort(),
           indices: resolvedIndicesResponse.indices
+            .filter((index) => !index.attributes.includes('system'))
             .flatMap((index) => (index.data_stream ? [] : index.name))
             .sort(),
         };
@@ -217,6 +218,22 @@ export function registerPolicyRoutes({
         return res.ok({
           body,
         });
+      } catch (e) {
+        return handleEsError({ error: e, response: res });
+      }
+    })
+  );
+
+  // Get policy feature states
+  router.get(
+    { path: addBasePath('policies/features'), validate: false },
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
+
+      try {
+        const response = await clusterClient.asCurrentUser.features.getFeatures();
+
+        return res.ok({ body: response });
       } catch (e) {
         return handleEsError({ error: e, response: res });
       }

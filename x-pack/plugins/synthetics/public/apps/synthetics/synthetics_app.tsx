@@ -17,7 +17,6 @@ import {
 } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { InspectorContextProvider } from '@kbn/observability-plugin/public';
-import { SyntheticsAlertsFlyoutWrapper } from './components/overview/alerts/alerts_containers/synthetics_alerts_flyout_wrapper';
 import { SyntheticsAppProps } from './contexts';
 
 import {
@@ -30,7 +29,7 @@ import {
 
 import { PageRouter } from './routes';
 import { store, storage, setBasePath } from './state';
-import { kibanaService } from './utils/kibana_service';
+import { kibanaService } from '../../utils/kibana_service';
 import { ActionMenu } from './components/common/header/action_menu';
 
 const Application = (props: SyntheticsAppProps) => {
@@ -99,7 +98,6 @@ const Application = (props: SyntheticsAppProps) => {
                                 application={core.application}
                               >
                                 <InspectorContextProvider>
-                                  <SyntheticsAlertsFlyoutWrapper />
                                   <PageRouter />
                                   <ActionMenu appMountParameters={appMountParameters} />
                                 </InspectorContextProvider>

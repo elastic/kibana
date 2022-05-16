@@ -34,7 +34,7 @@ export interface GetOneAgentResponse {
 
 export interface PostNewAgentActionRequest {
   body: {
-    action: NewAgentAction;
+    action: Omit<NewAgentAction, 'agents'>;
   };
   params: {
     agentId: string;
