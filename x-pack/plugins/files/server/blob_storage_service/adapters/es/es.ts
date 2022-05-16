@@ -13,8 +13,15 @@ import type { BlobStorage } from '../../types';
 import { mappings } from './mappings';
 import { getWritableContentStream, getReadableContentStream } from './content_stream';
 
-export const BLOB_STORAGE_SYSTEM_INDEX_NAME = '.kibana_blob_storage';
 const pipeline = promisify(_pipeline);
+
+/**
+ * @internal
+ *
+ * Export this value for convenience to be used in tests. Do not use outside of
+ * this adapter.
+ */
+export const BLOB_STORAGE_SYSTEM_INDEX_NAME = '.kibana_blob_storage';
 
 export class ElasticsearchBlobStorage implements BlobStorage {
   constructor(private readonly esClient: ElasticsearchClient, private readonly logger: Logger) {}

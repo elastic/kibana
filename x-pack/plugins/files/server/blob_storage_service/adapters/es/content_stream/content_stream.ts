@@ -7,7 +7,7 @@
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { defaults, get } from 'lodash';
+import { defaults } from 'lodash';
 import Puid from 'puid';
 import { Duplex, Writable, Readable } from 'stream';
 
@@ -25,6 +25,15 @@ type Callback = (error?: Error) => void;
 export type ContentStreamEncoding = 'base64' | 'raw';
 
 export interface ContentStreamParameters {
+  /**
+   * The maximum size allowed per chunk.
+   *
+   * @default 4mb
+   */
+  maxChunkSize?: string;
+  /**
+   * The file size in bytes. This can be used to optimize downloading.
+   */
   size?: number;
   /**
    * Content encoding. By default, it is Base64.
@@ -69,10 +78,10 @@ export class ContentStream extends Duplex {
     private id: undefined | string,
     private index: string,
     private logger: Logger,
-    { encoding = 'base64', size = -1 }: ContentStreamParameters = {}
+    parameters: ContentStreamParameters = {}
   ) {
     super();
-    this.parameters = { encoding, size };
+    this.parameters = defaults(parameters, { encoding: 'base64', size: -1, maxChunkSize: '4mb' });
   }
 
   private decode(content: string) {
@@ -83,18 +92,13 @@ export class ContentStream extends Duplex {
     return buffer.toString(this.parameters.encoding === 'base64' ? 'base64' : undefined);
   }
 
-  private async getMaxContentSize() {
-    const body = await this.client.cluster.getSettings({ include_defaults: true });
-    const { persistent, transient, defaults: defaultSettings } = body;
-    const settings = defaults({}, persistent, transient, defaultSettings);
-    const maxContentSize = get(settings, 'http.max_content_length', '100mb');
-
-    return ByteSizeValue.parse(maxContentSize).getValueInBytes();
+  private getMaxContentSize(): number {
+    return ByteSizeValue.parse(this.parameters.maxChunkSize).getValueInBytes();
   }
 
-  private async getMaxChunkSize() {
+  private getMaxChunkSize() {
     if (!this.maxChunkSize) {
-      const maxContentSize = (await this.getMaxContentSize()) - REQUEST_SPAN_SIZE_IN_BYTES;
+      const maxContentSize = this.getMaxContentSize() - REQUEST_SPAN_SIZE_IN_BYTES;
 
       this.maxChunkSize =
         this.parameters.encoding === 'base64'
@@ -265,7 +269,7 @@ export class ContentStream extends Duplex {
   }
 
   private async flushAllFullChunks() {
-    const maxChunkSize = await this.getMaxChunkSize();
+    const maxChunkSize = this.getMaxChunkSize();
 
     while (this.bytesBuffered >= maxChunkSize && this.buffers.length) {
       await this.flush(maxChunkSize);

@@ -223,9 +223,7 @@ describe('ContentStream', () => {
     });
 
     it('should split raw data into chunks', async () => {
-      client.cluster.getSettings.mockResponseOnce(
-        set<any>({}, 'defaults.http.max_content_length', 1028)
-      );
+      stream = getContentStream({ params: { encoding: 'raw', maxChunkSize: '1028B' } });
       stream.end('123456');
       await new Promise((resolve) => stream.once('finish', resolve));
 
@@ -259,9 +257,7 @@ describe('ContentStream', () => {
     });
 
     it('should encode every chunk separately', async () => {
-      client.cluster.getSettings.mockResponseOnce(
-        set<any>({}, 'defaults.http.max_content_length', 1028)
-      );
+      base64Stream = getContentStream({ params: { encoding: 'base64', maxChunkSize: '1028B' } });
       base64Stream.end('12345678');
       await new Promise((resolve) => base64Stream.once('finish', resolve));
 
