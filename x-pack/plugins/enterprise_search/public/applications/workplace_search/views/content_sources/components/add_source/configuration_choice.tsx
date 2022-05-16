@@ -182,7 +182,7 @@ export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
                 }
               )}
               to={getEditPath('external')}
-              data-test-subj="ReviewExternalConnectorCard"
+              data-test-subj="ExternalConnectorCard"
             />
           ) : (
             <ConnectorCard {...externalConnectorProps} data-test-subj="ExternalConnectorCard" />
