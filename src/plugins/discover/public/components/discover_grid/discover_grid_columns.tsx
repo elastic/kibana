@@ -8,15 +8,22 @@
 
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiDataGridColumn, EuiIconTip, EuiScreenReaderOnly } from '@elastic/eui';
+import {
+  EuiDataGridColumn,
+  EuiIconTip,
+  EuiListGroupItemProps,
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ExpandButton } from './discover_grid_expand_button';
 import { DiscoverGridSettings } from './types';
+import { ElasticSearchHit, HitsFlattened } from '../../types';
 import { buildCellActions } from './discover_grid_cell_actions';
 import { getSchemaByKbnType } from './discover_grid_schema';
 import { SelectButton } from './discover_grid_document_selection';
 import { defaultTimeColumnWidth } from './constants';
 import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './copy_column_button';
+import { DiscoverServices } from '../../build_services';
 
 export function getLeadControlColumns() {
   return [
@@ -51,13 +58,25 @@ export function getLeadControlColumns() {
   ];
 }
 
-export function buildEuiGridColumn(
-  columnName: string,
-  columnWidth: number | undefined = 0,
-  indexPattern: DataView,
-  defaultColumns: boolean,
-  isSortEnabled: boolean
-) {
+export function buildEuiGridColumn({
+  columnName,
+  columnWidth = 0,
+  indexPattern,
+  defaultColumns,
+  isSortEnabled,
+  rows,
+  rowsFlattened,
+  services,
+}: {
+  columnName: string;
+  columnWidth: number | undefined;
+  indexPattern: DataView;
+  defaultColumns: boolean;
+  isSortEnabled: boolean;
+  rows: ElasticSearchHit[];
+  rowsFlattened: HitsFlattened;
+  services: DiscoverServices;
+}) {
   const indexPatternField = indexPattern.getFieldByName(columnName);
   const column: EuiDataGridColumn = {
     id: columnName,
@@ -81,10 +100,10 @@ export function buildEuiGridColumn(
             },
       showMoveLeft: !defaultColumns,
       showMoveRight: !defaultColumns,
-      additional:
-        columnName === '_source'
-          ? [buildCopyColumnValuesButton(columnName)]
-          : [buildCopyColumnNameButton(columnName), buildCopyColumnValuesButton(columnName)],
+      additional: [
+        buildCopyColumnNameButton(columnName, services),
+        buildCopyColumnValuesButton(columnName, rows, rowsFlattened, indexPattern, services),
+      ].filter((item) => !!item) as EuiListGroupItemProps[],
     },
     cellActions: indexPatternField ? buildCellActions(indexPatternField) : [],
   };
@@ -120,26 +139,57 @@ export function buildEuiGridColumn(
   return column;
 }
 
-export function getEuiGridColumns(
-  columns: string[],
-  settings: DiscoverGridSettings | undefined,
-  indexPattern: DataView,
-  showTimeCol: boolean,
-  defaultColumns: boolean,
-  isSortEnabled: boolean
-) {
+export function getEuiGridColumns({
+  columns,
+  rows,
+  rowsFlattened,
+  settings,
+  indexPattern,
+  showTimeCol,
+  defaultColumns,
+  isSortEnabled,
+  services,
+}: {
+  columns: string[];
+  rows: ElasticSearchHit[];
+  rowsFlattened: HitsFlattened;
+  settings: DiscoverGridSettings | undefined;
+  indexPattern: DataView;
+  showTimeCol: boolean;
+  defaultColumns: boolean;
+  isSortEnabled: boolean;
+  services: DiscoverServices;
+}) {
   const timeFieldName = indexPattern.timeFieldName;
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
 
   if (showTimeCol && indexPattern.timeFieldName && !columns.find((col) => col === timeFieldName)) {
     const usedColumns = [indexPattern.timeFieldName, ...columns];
     return usedColumns.map((column) =>
-      buildEuiGridColumn(column, getColWidth(column), indexPattern, defaultColumns, isSortEnabled)
+      buildEuiGridColumn({
+        columnName: column,
+        columnWidth: getColWidth(column),
+        indexPattern,
+        defaultColumns,
+        isSortEnabled,
+        rows,
+        rowsFlattened,
+        services,
+      })
     );
   }
 
   return columns.map((column) =>
-    buildEuiGridColumn(column, getColWidth(column), indexPattern, defaultColumns, isSortEnabled)
+    buildEuiGridColumn({
+      columnName: column,
+      columnWidth: getColWidth(column),
+      indexPattern,
+      defaultColumns,
+      isSortEnabled,
+      rows,
+      rowsFlattened,
+      services,
+    })
   );
 }
 

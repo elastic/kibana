@@ -319,15 +319,28 @@ export const DiscoverGrid = ({
 
   const euiGridColumns = useMemo(
     () =>
-      getEuiGridColumns(
-        displayedColumns,
+      getEuiGridColumns({
+        columns: displayedColumns,
+        rows: displayedRows,
+        rowsFlattened: displayedRowsFlattened,
         settings,
         indexPattern,
         showTimeCol,
         defaultColumns,
-        isSortEnabled
-      ),
-    [displayedColumns, indexPattern, showTimeCol, settings, defaultColumns, isSortEnabled]
+        isSortEnabled,
+        services,
+      }),
+    [
+      displayedColumns,
+      displayedRows,
+      displayedRowsFlattened,
+      indexPattern,
+      showTimeCol,
+      settings,
+      defaultColumns,
+      isSortEnabled,
+      services,
+    ]
   );
 
   const hideTimeColumn = useMemo(

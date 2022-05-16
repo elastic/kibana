@@ -7,28 +7,41 @@
  */
 
 import React from 'react';
-import { copyToClipboard, EuiListGroupItemProps } from '@elastic/eui';
+import { EuiListGroupItemProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { ElasticSearchHit, HitsFlattened } from '../../types';
+import {
+  copyColumnValuesToClipboard,
+  copyColumnNameToClipboard,
+} from '../../utils/copy_to_clipboard';
+import { DiscoverServices } from '../../build_services';
 
 function buildCopyColumnButton({
   label,
-  textToCopy,
+  onCopy,
 }: {
   label: EuiListGroupItemProps['label'];
-  textToCopy: string;
+  onCopy: () => unknown;
 }) {
   const copyToClipBoardButton: EuiListGroupItemProps = {
     size: 'xs',
     label,
     iconType: 'copyClipboard',
     iconProps: { size: 'm' },
-    onClick: () => copyToClipboard(textToCopy),
+    onClick: onCopy,
   };
 
   return copyToClipBoardButton;
 }
 
-export function buildCopyColumnNameButton(columnName: string) {
+export function buildCopyColumnNameButton(
+  columnName: string,
+  services: DiscoverServices
+): EuiListGroupItemProps | null {
+  if (columnName === '_source') {
+    return null;
+  }
   return buildCopyColumnButton({
     label: (
       <FormattedMessage
@@ -36,11 +49,20 @@ export function buildCopyColumnNameButton(columnName: string) {
         defaultMessage="Copy name"
       />
     ),
-    textToCopy: columnName,
+    onCopy: () => copyColumnNameToClipboard({ columnId: columnName, services }),
   });
 }
 
-export function buildCopyColumnValuesButton(columnName: string) {
+export function buildCopyColumnValuesButton(
+  columnName: string,
+  rows: ElasticSearchHit[],
+  rowsFlattened: HitsFlattened,
+  dataView: DataView | undefined,
+  services: DiscoverServices
+): EuiListGroupItemProps | null {
+  if (!dataView) {
+    return null;
+  }
   return buildCopyColumnButton({
     label: (
       <FormattedMessage
@@ -48,6 +70,13 @@ export function buildCopyColumnValuesButton(columnName: string) {
         defaultMessage="Copy column"
       />
     ),
-    textToCopy: columnName,
+    onCopy: () =>
+      copyColumnValuesToClipboard({
+        columnId: columnName,
+        rows,
+        rowsFlattened,
+        dataView,
+        services,
+      }),
   });
 }

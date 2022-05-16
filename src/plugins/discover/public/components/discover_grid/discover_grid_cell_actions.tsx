@@ -7,12 +7,12 @@
  */
 
 import React, { useContext } from 'react';
-import { copyToClipboard, EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { DiscoverGridContext, GridContext } from './discover_grid_context';
 import { useDiscoverServices } from '../../utils/use_discover_services';
-import { formatFieldValue } from '../../utils/format_value';
+import { copyValueToClipboard } from '../../utils/copy_to_clipboard';
 
 function onFilterCell(
   context: GridContext,
@@ -87,7 +87,7 @@ export const FilterOutBtn = ({
 
 export const CopyBtn = ({ Component, rowIndex, columnId }: EuiDataGridColumnCellActionProps) => {
   const { indexPattern: dataView, rowsFlattened, rows } = useContext(DiscoverGridContext);
-  const { fieldFormats, toastNotifications } = useDiscoverServices();
+  const services = useDiscoverServices();
 
   const buttonTitle = i18n.translate('discover.grid.copyClipboardButtonTitle', {
     defaultMessage: 'Copy value of {column}',
@@ -97,22 +97,13 @@ export const CopyBtn = ({ Component, rowIndex, columnId }: EuiDataGridColumnCell
   return (
     <Component
       onClick={() => {
-        const rowFlattened = rowsFlattened[rowIndex];
-        const field = dataView.fields.getByName(columnId);
-        const value = rowFlattened[columnId];
-
-        const valueFormatted =
-          field?.type === '_source'
-            ? JSON.stringify(rowFlattened, null, 2)
-            : formatFieldValue(value, rows[rowIndex], fieldFormats, dataView, field, 'text');
-        copyToClipboard(valueFormatted);
-        const infoTitle = i18n.translate('discover.grid.copyClipboardToastTitle', {
-          defaultMessage: 'Copied value of {column} to clipboard.',
-          values: { column: columnId },
-        });
-
-        toastNotifications.addInfo({
-          title: infoTitle,
+        copyValueToClipboard({
+          rowIndex,
+          rows,
+          rowsFlattened,
+          columnId,
+          dataView,
+          services,
         });
       }}
       iconType="copyClipboard"
