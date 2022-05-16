@@ -310,6 +310,7 @@ export interface DocLinks {
     guide: string;
     importGeospatialPrivileges: string;
     gdalTutorial: string;
+    termJoinsExample: string;
   }>;
   readonly monitoring: Record<string, string>;
   readonly reporting: Readonly<{
