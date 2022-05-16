@@ -18,7 +18,7 @@ const Accordion = euiStyled(EuiAccordion)`
 `;
 
 const CausedByContainer = euiStyled('h5')`
-  padding: ${({ theme }) => theme.eui.spacerSizes.s} 0;
+  padding: ${({ theme }) => theme.eui.euiSizeS} 0;
 `;
 
 const CausedByHeading = euiStyled('span')`
