@@ -904,9 +904,12 @@ function convertSnoozes(
       snoozeSchedule: snoozeEndTime
         ? [
             {
-              startTime: new Date().toISOString(),
               duration: Date.parse(snoozeEndTime as string) - Date.now(),
-              timeZone: moment.tz.guess(),
+              rRule: {
+                dtstart: new Date().toISOString(),
+                tzid: moment.tz.guess(),
+                count: 1,
+              },
             },
           ]
         : [],

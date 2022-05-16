@@ -5,12 +5,31 @@
  * 2.0.
  */
 
+import type { WeekdayStr } from 'rrule';
+
 export type RuleSnooze = Array<{
-  startTime: string;
   duration: number;
-  timeZone: string;
+  rRule: Partial<RRuleRecord> & Pick<RRuleRecord, 'dtstart' | 'tzid'>;
   // For scheduled/recurring snoozes, `id` uniquely identifies them so that they can be displayed, modified, and deleted individually
   id?: string;
-  // An iCal RRULE string to define a recurrence schedule, see https://github.com/jakubroztocil/rrule for the spec
-  rRule?: string;
 }>;
+
+// An iCal RRULE  to define a recurrence schedule, see https://github.com/jakubroztocil/rrule for the spec
+export interface RRuleRecord {
+  dtstart: string;
+  tzid: string;
+  freq?: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+  until?: string;
+  count?: number;
+  interval?: number;
+  wkst?: WeekdayStr;
+  byweekday?: Array<string | number>;
+  bymonth?: number[];
+  bysetpos?: number[];
+  bymonthday: number;
+  byyearday: number[];
+  byweekno: number[];
+  byhour: number[];
+  byminute: number[];
+  bysecond: number[];
+}

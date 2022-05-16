@@ -2333,7 +2333,7 @@ describe('successful migrations', () => {
         const migratedMutedAlert830 = migration830(mutedAlert, migrationContext);
 
         expect(migratedMutedAlert830.attributes.snoozeSchedule.length).toEqual(1);
-        expect(migratedMutedAlert830.attributes.snoozeSchedule[0].startTime).toEqual(
+        expect(migratedMutedAlert830.attributes.snoozeSchedule[0].rRule.dtstart).toEqual(
           '1970-01-01T00:00:00.000Z'
         );
         expect(migratedMutedAlert830.attributes.snoozeSchedule[0].duration).toEqual(86400000);

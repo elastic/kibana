@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { rrulestr } from 'rrule';
+import { RRule, ByWeekday, Weekday, WeekdayStr } from 'rrule';
 import { SanitizedRule, RuleTypeParams } from '../../common/rule';
 
 type RuleSnoozeProps = Pick<SanitizedRule<RuleTypeParams>, 'muteAll' | 'snoozeSchedule'>;
@@ -17,8 +17,8 @@ export function getRuleSnoozeEndTime(rule: RuleSnoozeProps): Date | null {
 
   const now = Date.now();
   for (const snooze of rule.snoozeSchedule) {
-    const { startTime, duration, rRule } = snooze;
-    const startTimeMS = Date.parse(startTime);
+    const { duration, rRule } = snooze;
+    const startTimeMS = Date.parse(rRule.dtstart);
     const initialEndTime = startTimeMS + duration;
     // If now is during the first occurrence of the snooze
 
@@ -27,7 +27,15 @@ export function getRuleSnoozeEndTime(rule: RuleSnoozeProps): Date | null {
     // Check to see if now is during a recurrence of the snooze
     if (rRule) {
       try {
-        const recurrenceRule = rrulestr(rRule);
+        const rRuleOptions = {
+          ...rRule,
+          dtstart: new Date(rRule.dtstart),
+          until: rRule.until ? new Date(rRule.until) : null,
+          wkst: rRule.wkst ? Weekday.fromStr(rRule.wkst) : null,
+          byweekday: rRule.byweekday ? parseByWeekday(rRule.byweekday) : null,
+        };
+
+        const recurrenceRule = new RRule(rRuleOptions);
         const lastOccurrence = recurrenceRule.before(new Date(now), true);
         if (!lastOccurrence) continue;
         const lastOccurrenceEndTime = lastOccurrence.getTime() + duration;
@@ -46,4 +54,14 @@ export function isRuleSnoozed(rule: RuleSnoozeProps) {
     return true;
   }
   return Boolean(getRuleSnoozeEndTime(rule));
+}
+
+function parseByWeekday(byweekday: Array<string | number>): ByWeekday[] {
+  return byweekday.map((w) => {
+    if (typeof w === 'number') return w;
+    if (['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'].includes(w)) return w as WeekdayStr;
+    const dayOfWeek = w.slice(-2) as WeekdayStr;
+    const nthDay = w.slice(0, 2);
+    return RRule[dayOfWeek].nth(Number(nthDay));
+  });
 }

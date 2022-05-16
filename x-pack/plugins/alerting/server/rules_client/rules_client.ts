@@ -1022,7 +1022,7 @@ export class RulesClient {
         },
         snoozed: {
           date_range: {
-            field: 'alert.attributes.snoozeSchedule.startTime',
+            field: 'alert.attributes.snoozeSchedule.rRule.dtstart',
             format: 'strict_date_time',
             ranges: [{ from: 'now' }],
           },
@@ -2152,9 +2152,12 @@ export class RulesClient {
           }
         : {
             snoozeSchedule: clearUnscheduledSnooze(attributes).concat({
-              startTime: new Date().toISOString(),
               duration: Date.parse(snoozeEndTime) - Date.now(),
-              timeZone: 'UTC',
+              rRule: {
+                dtstart: new Date().toISOString(),
+                tzid: 'UTC',
+                count: 1,
+              },
             }),
             muteAll: false,
           };
@@ -2630,9 +2633,13 @@ export class RulesClient {
   ): PartialRule<Params> | PartialRuleWithLegacyId<Params> {
     const snoozeScheduleDates = snoozeSchedule?.map((s) => ({
       ...s,
-      startTime: new Date(s.startTime),
+      rRule: {
+        ...s.rRule,
+        dtstart: new Date(s.rRule.dtstart),
+        ...(s.rRule.until ? { until: new Date(s.rRule.until) } : {}),
+      },
     }));
-    const includeSnoozeSchedule = snoozeSchedule !== undefined && !excludeFromPublicApi;
+    const includeSnoozeSchedule = snoozeSchedule !== undefined;
     const rule = {
       id,
       notifyWhen,
