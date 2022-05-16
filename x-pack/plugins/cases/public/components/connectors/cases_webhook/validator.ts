@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { CasesWebhookConnectorType } from '../../../../common/api';
 import { ValidationConfig } from '../../../common/shared_imports';
 import { CaseActionConnector } from '../../types';
 

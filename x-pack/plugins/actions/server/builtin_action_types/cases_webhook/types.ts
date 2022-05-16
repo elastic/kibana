@@ -6,9 +6,7 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { PushToServiceResponse } from '../jira/types';
 import { ExecutorParamsSchema } from '../jira/schema';
-import { ActionTypeExecutorResult } from '../../../common';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import {
   ExternalIncidentServiceConfigurationSchema,

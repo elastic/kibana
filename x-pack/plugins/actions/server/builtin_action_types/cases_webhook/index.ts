@@ -6,11 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { curry, isString } from 'lodash';
-import axios, { AxiosError, AxiosResponse } from 'axios';
+import { curry } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { map, getOrElse } from 'fp-ts/lib/Option';
 import { Logger } from '@kbn/core/server';
 import {
   CasesWebhookExecutorResultData,
@@ -18,13 +15,9 @@ import {
   CasesWebhookSecretConfigurationType,
   ExecutorParams,
 } from './types';
-import { getRetryAfterIntervalFromHeaders } from '../lib/http_rersponse_retry_header';
 import { nullableType } from '../lib/nullable';
-import { isOk, promiseResult, Result } from '../lib/result_type';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../../types';
 import { ActionsConfigurationUtilities } from '../../actions_config';
-import { request } from '../lib/axios_utils';
-import { renderMustacheString } from '../../lib/mustache_renderer';
 import { createExternalService } from './service';
 import { ExecutorParamsSchema } from './schema';
 

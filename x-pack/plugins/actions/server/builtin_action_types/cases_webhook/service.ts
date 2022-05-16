@@ -8,15 +8,12 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
 
 import { Logger } from '@kbn/core/server';
-import { pipe } from 'fp-ts/pipeable';
-import { getOrElse, map } from 'fp-ts/Option';
 import { ActionTypeExecutorResult } from '../../../common';
 import { isOk, promiseResult, Result } from '../lib/result_type';
 import {
   CreateIncidentParams,
   ExternalServiceCredentials,
   ResponseError,
-  ExternalServiceIncidentResponse,
   ExternalService,
   CasesWebhookPublicConfigurationType,
   CasesWebhookSecretConfigurationType,
@@ -25,7 +22,6 @@ import {
 import * as i18n from './translations';
 import { request, getErrorMessage, throwIfResponseIsNotValid } from '../lib/axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
-import { getRetryAfterIntervalFromHeaders } from '../lib/http_rersponse_retry_header';
 
 const VERSION = '2';
 const BASE_URL = `rest/api/${VERSION}`;

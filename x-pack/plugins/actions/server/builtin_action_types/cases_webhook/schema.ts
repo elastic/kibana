@@ -6,12 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
-  ExecutorSubActionCommonFieldsParamsSchema,
-  ExecutorSubActionGetIncidentParamsSchema,
-  ExecutorSubActionHandshakeParamsSchema,
-  ExecutorSubActionPushParamsSchema,
-} from '../jira/schema';
+import { ExecutorSubActionPushParamsSchema } from '../jira/schema';
 
 export const ExternalIncidentServiceConfiguration = {
   url: schema.string(),

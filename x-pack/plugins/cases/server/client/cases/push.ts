@@ -21,7 +21,6 @@ import {
   CommentType,
   CommentRequestAlertType,
   ConnectorTypes,
-  NONE_CONNECTOR_ID,
 } from '../../../common/api';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
 
