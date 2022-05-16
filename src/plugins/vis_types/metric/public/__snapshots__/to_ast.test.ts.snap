@@ -59,6 +59,25 @@ Object {
             "type": "expression",
           },
         ],
+        "labelFont": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "align": Array [
+                    "center",
+                  ],
+                  "size": Array [
+                    "14",
+                  ],
+                },
+                "function": "font",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
         "percentageMode": Array [
           true,
         ],
@@ -124,6 +143,25 @@ Object {
                   ],
                   "weight": Array [
                     "bold",
+                  ],
+                },
+                "function": "font",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "labelFont": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "align": Array [
+                    "center",
+                  ],
+                  "size": Array [
+                    "14",
                   ],
                 },
                 "function": "font",

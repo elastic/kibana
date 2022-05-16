@@ -92,6 +92,8 @@ const RegistryEventDetailsLineComponent: React.FC<Props> = ({
                 isDraggable={isDraggable}
                 tooltipContent={registryKeyTooltipContent}
                 value={registryKey}
+                isAggregatable={true}
+                fieldType="keyword"
               />
             </TokensFlexItem>
           </>
@@ -110,6 +112,8 @@ const RegistryEventDetailsLineComponent: React.FC<Props> = ({
                 isDraggable={isDraggable}
                 tooltipContent={registryPathTooltipContent}
                 value={registryPath}
+                isAggregatable={true}
+                fieldType="keyword"
               />
             </TokensFlexItem>
           </>
