@@ -12,7 +12,7 @@ import { cloneDeep } from 'lodash';
 
 import axios from 'axios';
 
-import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { InfoResponse, LicenseGetResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import { TelemetryQueue } from './queue';
 
@@ -35,6 +35,7 @@ export class TelemetryEventsSender {
   private isOptedIn?: boolean = true; // Assume true until the first check
   private esClient?: ElasticsearchClient;
   private clusterInfo?: InfoResponse;
+  private licenseInfo?: LicenseGetResponse;
 
   constructor(logger: Logger) {
     this.logger = logger;
@@ -48,6 +49,7 @@ export class TelemetryEventsSender {
     this.telemetryStart = telemetryStart;
     this.esClient = core?.elasticsearch.client.asInternalUser;
     this.clusterInfo = await this.fetchClusterInfo();
+    this.licenseInfo = await this.fetchLicenseInfo();
 
     this.logger.debug(`Starting local task`);
     setTimeout(() => {
@@ -95,11 +97,7 @@ export class TelemetryEventsSender {
     }
 
     for (const channel of Object.keys(this.queuesPerChannel)) {
-      await this.sendEvents(
-        await this.fetchTelemetryUrl(channel),
-        this.clusterInfo,
-        this.queuesPerChannel[channel]
-      );
+      await this.sendEvents(await this.fetchTelemetryUrl(channel), this.queuesPerChannel[channel]);
     }
 
     this.isSending = false;
@@ -107,21 +105,27 @@ export class TelemetryEventsSender {
 
   private async fetchClusterInfo(): Promise<InfoResponse> {
     if (this.esClient === undefined || this.esClient === null) {
-      throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
+      throw Error('elasticsearch client is unavailable: cannot retrieve cluster information');
     }
 
     return await this.esClient.info();
   }
 
-  public async sendEvents(
-    telemetryUrl: string,
-    clusterInfo: InfoResponse | undefined,
-    queue: TelemetryQueue<any>
-  ) {
-    const events = queue.getEvents();
+  private async fetchLicenseInfo() {
+    if (this.esClient === undefined || this.esClient === null) {
+      throw Error('elasticsearch client is unavailable: cannot retrieve license information');
+    }
+
+    return await this.esClient.license.get();
+  }
+
+  public async sendEvents(telemetryUrl: string, queue: TelemetryQueue<any>) {
+    let events = queue.getEvents();
     if (events.length === 0) {
       return;
     }
+
+    events = events.map((event) => ({ ...event, license: this.licenseInfo?.license }));
 
     try {
       this.logger.debug(`Telemetry URL: ${telemetryUrl}`);
@@ -130,13 +134,7 @@ export class TelemetryEventsSender {
 
       this.logger.debug(JSON.stringify(events));
 
-      await this.send(
-        events,
-        telemetryUrl,
-        clusterInfo?.cluster_uuid,
-        clusterInfo?.version?.number,
-        clusterInfo?.cluster_name
-      );
+      await this.send(events, telemetryUrl);
     } catch (err) {
       this.logger.debug(`Error sending telemetry events data: ${err}`);
       queue.clearEvents();
@@ -159,13 +157,13 @@ export class TelemetryEventsSender {
     return telemetryUrl.toString();
   }
 
-  private async send(
-    events: unknown[],
-    telemetryUrl: string,
-    clusterUuid: string | undefined,
-    clusterVersionNumber: string | undefined,
-    clusterName: string | undefined
-  ) {
+  private async send(events: unknown[], telemetryUrl: string) {
+    const {
+      cluster_name: clusterName,
+      cluster_uuid: clusterUuid,
+      version: clusterVersion,
+    } = this.clusterInfo ?? {};
+
     // using ndjson so that each line will be wrapped in json envelope on server side
     // see https://github.com/elastic/infra/blob/master/docs/telemetry/telemetry-next-dataflow.md#json-envelope
     const ndjson = this.transformDataToNdjson(events);
@@ -176,7 +174,7 @@ export class TelemetryEventsSender {
           'Content-Type': 'application/x-ndjson',
           ...(clusterUuid ? { 'X-Elastic-Cluster-ID': clusterUuid } : undefined),
           ...(clusterName ? { 'X-Elastic-Cluster-Name': clusterName } : undefined),
-          'X-Elastic-Stack-Version': clusterVersionNumber ? clusterVersionNumber : '8.2.0',
+          'X-Elastic-Stack-Version': clusterVersion?.number ? clusterVersion.number : '8.2.0',
         },
       });
       this.logger.debug(`Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
