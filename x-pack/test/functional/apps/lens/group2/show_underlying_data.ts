@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.enableFilter();
       // turn off the KQL switch to change the language to lucene
       await testSubjects.click('indexPattern-filter-by-input > switchQueryLanguageButton');
-      await testSubjects.click('languageToggle');
+      await testSubjects.click('luceneLanguageMenuItem');
       await testSubjects.click('indexPattern-filter-by-input > switchQueryLanguageButton');
       // apparently setting a filter requires some time before and after typing to work properly
       await PageObjects.common.sleep(1000);

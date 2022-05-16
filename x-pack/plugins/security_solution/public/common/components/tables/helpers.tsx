@@ -27,6 +27,8 @@ interface GetRowItemDraggableParams {
   attrName: string;
   idPrefix: string;
   render?: (item: string) => JSX.Element;
+  fieldType?: string;
+  isAggregatable?: boolean;
   displayCount?: number;
   dragDisplayValue?: string;
   maxOverflow?: number;
@@ -36,6 +38,8 @@ export const getRowItemDraggable = ({
   rowItem,
   attrName,
   idPrefix,
+  fieldType,
+  isAggregatable,
   render,
   dragDisplayValue,
 }: GetRowItemDraggableParams): JSX.Element => {
@@ -58,6 +62,8 @@ export const getRowItemDraggable = ({
             operator: IS_OPERATOR,
           },
         }}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
         render={(dataProvider, _, snapshot) =>
           snapshot.isDragging ? (
             <DragEffects>
@@ -79,6 +85,8 @@ interface GetRowItemDraggablesParams {
   attrName: string;
   idPrefix: string;
   render?: (item: string) => JSX.Element;
+  fieldType?: string;
+  isAggregatable?: boolean;
   displayCount?: number;
   dragDisplayValue?: string;
   maxOverflow?: number;
@@ -89,6 +97,8 @@ export const getRowItemDraggables = ({
   idPrefix,
   render,
   dragDisplayValue,
+  fieldType = 'keyword',
+  isAggregatable = false,
   displayCount = 5,
   maxOverflow = 5,
 }: GetRowItemDraggablesParams): JSX.Element => {
@@ -113,6 +123,8 @@ export const getRowItemDraggables = ({
                 operator: IS_OPERATOR,
               },
             }}
+            fieldType={fieldType}
+            isAggregatable={isAggregatable}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
                 <DragEffects>
@@ -137,6 +149,8 @@ export const getRowItemDraggables = ({
           maxOverflowItems={maxOverflow}
           overflowIndexStart={displayCount}
           rowItems={rowItems}
+          fieldType={fieldType}
+          isAggregatable={isAggregatable}
         />
       </>
     ) : (
@@ -154,6 +168,8 @@ interface RowItemOverflowProps {
   maxOverflowItems: number;
   overflowIndexStart: number;
   rowItems: string[];
+  fieldType?: string;
+  isAggregatable?: boolean;
 }
 
 export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
@@ -163,6 +179,8 @@ export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
   maxOverflowItems = 5,
   overflowIndexStart = 5,
   rowItems,
+  fieldType,
+  isAggregatable,
 }) => {
   return (
     <>
@@ -176,6 +194,8 @@ export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
               overflowIndexStart={overflowIndexStart}
               rowItems={rowItems}
               moreMaxHeight="none"
+              fieldType={fieldType}
+              isAggregatable={isAggregatable}
             />
 
             {rowItems.length > overflowIndexStart + maxOverflowItems && (
