@@ -22,12 +22,18 @@ const LazyWrapper: FC = ({ children }) => (
   </EuiErrorBoundary>
 );
 
+/**
+ * Lazy-wrapped ExplainLogRateSpikes React component
+ */
 export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = (props) => (
   <LazyWrapper>
     <ExplainLogRateSpikesLazy {...props} />
   </LazyWrapper>
 );
 
+/**
+ * Lazy-wrapped SingleEndpointStreamingDemo React component
+ */
 export const SingleEndpointStreamingDemo: FC = () => (
   <LazyWrapper>
     <SingleEndpointStreamingDemoLazy />
