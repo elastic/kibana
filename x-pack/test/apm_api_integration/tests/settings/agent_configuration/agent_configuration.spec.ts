@@ -312,7 +312,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
           service: { name: 'myservice', environment: 'production' },
           settings: { transaction_sample_rate: '0.9' },
         };
-        let etag: string | undefined;
+        let etag: string;
 
         before(async () => {
           log.debug('creating agent configuration');

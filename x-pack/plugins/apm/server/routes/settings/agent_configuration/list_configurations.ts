@@ -31,8 +31,7 @@ export async function listConfigurations({ setup }: { setup: Setup }) {
       ...hit._source,
       applied_by_agent:
         hit._source.applied_by_agent ||
-        (hit._source.etag !== undefined &&
-          configsAppliedToAgentsThroughFleet.hasOwnProperty(hit._source.etag)),
+        configsAppliedToAgentsThroughFleet.hasOwnProperty(hit._source.etag),
     };
   });
 }
