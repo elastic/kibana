@@ -78,6 +78,7 @@ interface AlertsTableTGridProps {
   stateStorageKey: string;
   storage: IStorageWrapper;
   setRefetch: (ref: () => void) => void;
+  itemsPerPage?: number;
 }
 
 interface ObservabilityActionsProps extends ActionProps {
@@ -309,7 +310,16 @@ const FIELDS_WITHOUT_CELL_ACTIONS = [
 ];
 
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
-  const { indexNames, rangeFrom, rangeTo, kuery, setRefetch, stateStorageKey, storage } = props;
+  const {
+    indexNames,
+    rangeFrom,
+    rangeTo,
+    kuery,
+    setRefetch,
+    stateStorageKey,
+    storage,
+    itemsPerPage,
+  } = props;
 
   const {
     timelines,
@@ -405,6 +415,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       filters: [],
       hasAlertsCrudPermissions,
       indexNames,
+      itemsPerPage,
       itemsPerPageOptions: [10, 25, 50],
       loadingText: translations.alertsTable.loadingTextLabel,
       footerText: translations.alertsTable.footerTextLabel,
@@ -455,6 +466,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     deletedEventIds,
     onStateChange,
     tGridState,
+    itemsPerPage,
   ]);
 
   const handleFlyoutClose = () => setFlyoutAlert(undefined);

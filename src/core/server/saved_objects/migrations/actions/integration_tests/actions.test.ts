@@ -167,8 +167,7 @@ describe('migration actions', () => {
         Object {
           "_tag": "Left",
           "left": Object {
-            "message": "[unsupported_cluster_routing_allocation] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue.",
-            "type": "unsupported_cluster_routing_allocation",
+            "type": "incompatible_cluster_routing_allocation",
           },
         }
       `);
@@ -188,8 +187,7 @@ describe('migration actions', () => {
         Object {
           "_tag": "Left",
           "left": Object {
-            "message": "[unsupported_cluster_routing_allocation] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue.",
-            "type": "unsupported_cluster_routing_allocation",
+            "type": "incompatible_cluster_routing_allocation",
           },
         }
       `);
@@ -209,8 +207,7 @@ describe('migration actions', () => {
         Object {
           "_tag": "Left",
           "left": Object {
-            "message": "[unsupported_cluster_routing_allocation] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue.",
-            "type": "unsupported_cluster_routing_allocation",
+            "type": "incompatible_cluster_routing_allocation",
           },
         }
       `);

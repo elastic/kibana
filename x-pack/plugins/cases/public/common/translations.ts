@@ -148,7 +148,7 @@ export const TAGS_HELP = i18n.translate('xpack.cases.createCase.fieldTagsHelpTex
 });
 
 export const TAGS_EMPTY_ERROR = i18n.translate('xpack.cases.createCase.fieldTagsEmptyError', {
-  defaultMessage: 'A tag must contain at least one non-space character',
+  defaultMessage: 'A tag must contain at least one non-space character.',
 });
 
 export const NO_TAGS = i18n.translate('xpack.cases.caseView.noTags', {
@@ -229,8 +229,7 @@ export const SYNC_ALERTS_SWITCH_LABEL_OFF = i18n.translate(
 );
 
 export const SYNC_ALERTS_HELP = i18n.translate('xpack.cases.components.create.syncAlertHelpText', {
-  defaultMessage:
-    'Enabling this option will sync the status of alerts in this case with the case status.',
+  defaultMessage: 'Enabling this option will sync the alert statuses with the case status.',
 });
 
 export const ALERT = i18n.translate('xpack.cases.common.alertLabel', {
@@ -274,12 +273,12 @@ export const CASE_ALERT_SUCCESS_TOAST = (title: string, quantity: number = 1) =>
 export const CASE_ALERT_SUCCESS_SYNC_TEXT = i18n.translate(
   'xpack.cases.actions.caseAlertSuccessSyncText',
   {
-    defaultMessage: 'Alerts in this case have their status synched with the case status',
+    defaultMessage: 'The alert statuses are synched with the case status.',
   }
 );
 
 export const VIEW_CASE = i18n.translate('xpack.cases.actions.viewCase', {
-  defaultMessage: 'View Case',
+  defaultMessage: 'View case',
 });
 
 export const APP_TITLE = i18n.translate('xpack.cases.common.appTitle', {
