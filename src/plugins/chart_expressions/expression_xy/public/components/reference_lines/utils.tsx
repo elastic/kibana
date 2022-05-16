@@ -68,7 +68,7 @@ export const getSharedStyle = (yConfig: ReferenceLineYConfig | ExtendedYConfigRe
 
 export const getLineAnnotationProps = (
   yConfig: ReferenceLineYConfig | ExtendedYConfigResult,
-  labels: { markerLabel: string | undefined; markerBodyLabel: string | undefined },
+  labels: { markerLabel?: string; markerBodyLabel?: string },
   axesMap: Record<'left' | 'right', boolean>,
   paddingMap: Partial<Record<Position, number>>,
   groupId: 'left' | 'right' | undefined,

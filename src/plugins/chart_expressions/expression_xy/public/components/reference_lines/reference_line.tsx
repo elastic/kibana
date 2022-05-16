@@ -64,7 +64,12 @@ export const ReferenceLine: FC<ReferenceLineProps> = ({
 
   const props = getLineAnnotationProps(
     yConfig,
-    { markerLabel: name, markerBodyLabel: name },
+    yConfig.textVisibility
+      ? {
+          markerLabel: yConfig.icon ? undefined : name,
+          markerBodyLabel: yConfig.icon ? name : undefined,
+        }
+      : {},
     axesMap,
     paddingMap,
     groupId,
