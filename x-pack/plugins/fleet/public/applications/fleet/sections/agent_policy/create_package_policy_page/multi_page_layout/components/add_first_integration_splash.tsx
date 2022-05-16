@@ -172,7 +172,7 @@ const NotObscuredByBottomBar = styled('div')`
   padding-bottom: 100px;
 `;
 
-const CenteredDocLink = () => {
+const CenteredLearnMoreLink = () => {
   const { docLinks } = useStartServices();
   return (
     <EuiFlexGroup justifyContent="spaceAround">
@@ -275,7 +275,7 @@ export const AddFirstIntegrationSplashScreen: React.FC<{
         <EuiSpacer size="xxl" />
         <EuiSpacer size="xxl" />
         <NotObscuredByBottomBar>
-          <CenteredDocLink />
+          <CenteredLearnMoreLink />
         </NotObscuredByBottomBar>
         <InstallBottomBar
           cancelUrl={cancelUrl}

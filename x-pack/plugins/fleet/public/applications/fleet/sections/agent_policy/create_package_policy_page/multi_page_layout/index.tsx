@@ -35,12 +35,11 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({ from }
     );
   }, [packageInfo?.policy_templates, params]);
 
-  const spashScreenNext = () => {}; // TODO: this will display the add package policy steps
+  const splashScreenNext = () => {}; // TODO: (in following PR) this will display the add package policy steps
 
   const { cancelClickHandler, cancelUrl } = useCancelAddPackagePolicy({
     from,
     pkgkey: params.pkgkey,
-    // agentPolicyId, TODO: Provide agent policy
   });
 
   return (
@@ -51,7 +50,7 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({ from }
       packageInfo={packageInfo}
       cancelUrl={cancelUrl}
       cancelClickHandler={cancelClickHandler}
-      onNext={spashScreenNext}
+      onNext={splashScreenNext}
     />
   );
 };
