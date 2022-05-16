@@ -32,20 +32,36 @@ export const collectorsStatsSchema: MakeSchemaFrom<CollectorsStats> = {
     },
   },
   is_ready_duration_breakdown: {
-    DYNAMIC_KEY: {
-      type: 'long',
-      _meta: {
-        description:
-          'The execution duration of the isReady function for the collector in milliseconds',
+    type: 'array',
+    items: {
+      name: {
+        type: 'text',
+        _meta: {
+          description: 'The name of the collector',
+        },
+      },
+      duration: {
+        type: 'long',
+        _meta: {
+          description: 'The execution duration of the isReady function for the collector in milliseconds',
+        },
       },
     },
   },
   fetch_duration_breakdown: {
-    DYNAMIC_KEY: {
-      type: 'long',
-      _meta: {
-        description:
-          'The execution duration of the fetch function for the collector in milliseconds',
+    type: 'array',
+    items: {
+      name: {
+        type: 'text',
+        _meta: {
+          description: 'The name of the collector',
+        },
+      },
+      duration: {
+        type: 'long',
+        _meta: {
+          description: 'The execution duration of the fetch function for the collector in milliseconds',
+        },
       },
     },
   },

@@ -66,16 +66,34 @@ describe('usageCollectorsStatsCollector', () => {
             "FAILED_COLLECTOR",
           ],
         },
-        "fetch_duration_breakdown": Object {
-          "FAILED_COLLECTOR": 2.2,
-          "SUCCESS_COLLECTOR": 1.2,
-          "SUCCESS_COLLECTOR_2": 8,
-        },
-        "is_ready_duration_breakdown": Object {
-          "FAILED_COLLECTOR": 12,
-          "SUCCESS_COLLECTOR": 10.2,
-          "SUCCESS_COLLECTOR_2": 4.2,
-        },
+        "fetch_duration_breakdown": Array [
+          Object {
+            "duration": 1.2,
+            "name": "SUCCESS_COLLECTOR",
+          },
+          Object {
+            "duration": 8,
+            "name": "SUCCESS_COLLECTOR_2",
+          },
+          Object {
+            "duration": 2.2,
+            "name": "FAILED_COLLECTOR",
+          },
+        ],
+        "is_ready_duration_breakdown": Array [
+          Object {
+            "duration": 10.2,
+            "name": "SUCCESS_COLLECTOR",
+          },
+          Object {
+            "duration": 4.2,
+            "name": "SUCCESS_COLLECTOR_2",
+          },
+          Object {
+            "duration": 12,
+            "name": "FAILED_COLLECTOR",
+          },
+        ],
         "not_ready": Object {
           "count": 1,
           "names": Array [

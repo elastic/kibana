@@ -102,8 +102,8 @@ describe('CollectorSet', () => {
             not_ready_timeout: { count: 0, names: [] },
             succeeded: { count: 1, names: ['MY_TEST_COLLECTOR'] },
             failed: { count: 0, names: [] },
-            fetch_duration_breakdown: { MY_TEST_COLLECTOR: 0 },
-            is_ready_duration_breakdown: { MY_TEST_COLLECTOR: 0 },
+            fetch_duration_breakdown: [{ name: 'MY_TEST_COLLECTOR', duration: 0 }],
+            is_ready_duration_breakdown: [{ name: 'MY_TEST_COLLECTOR', duration: 0 }],
             total_duration: 0,
             total_fetch_duration: 0,
             total_is_ready_duration: 0,
@@ -137,8 +137,8 @@ describe('CollectorSet', () => {
             not_ready_timeout: { count: 0, names: [] },
             succeeded: { count: 0, names: [] },
             failed: { count: 1, names: ['MY_TEST_COLLECTOR'] },
-            fetch_duration_breakdown: { MY_TEST_COLLECTOR: 0 },
-            is_ready_duration_breakdown: { MY_TEST_COLLECTOR: 0 },
+            fetch_duration_breakdown: [{ name: 'MY_TEST_COLLECTOR', duration: 0 }],
+            is_ready_duration_breakdown: [{ name: 'MY_TEST_COLLECTOR', duration: 0 }],
             total_duration: 0,
             total_fetch_duration: 0,
             total_is_ready_duration: 0,
@@ -171,8 +171,8 @@ describe('CollectorSet', () => {
             not_ready_timeout: { count: 0, names: [] },
             succeeded: { count: 1, names: ['MY_TEST_COLLECTOR'] },
             failed: { count: 0, names: [] },
-            fetch_duration_breakdown: { MY_TEST_COLLECTOR: 0 },
-            is_ready_duration_breakdown: { MY_TEST_COLLECTOR: 0 },
+            fetch_duration_breakdown: [{ name: 'MY_TEST_COLLECTOR', duration: 0 }],
+            is_ready_duration_breakdown: [{ name: 'MY_TEST_COLLECTOR', duration: 0 }],
             total_duration: 0,
             total_fetch_duration: 0,
             total_is_ready_duration: 0,
@@ -204,8 +204,8 @@ describe('CollectorSet', () => {
             not_ready_timeout: { count: 0, names: [] },
             succeeded: { count: 1, names: ['MY_TEST_COLLECTOR'] },
             failed: { count: 0, names: [] },
-            fetch_duration_breakdown: { MY_TEST_COLLECTOR: 0 },
-            is_ready_duration_breakdown: { MY_TEST_COLLECTOR: 0 },
+            fetch_duration_breakdown: [{ name: 'MY_TEST_COLLECTOR', duration: 0 }],
+            is_ready_duration_breakdown: [{ name: 'MY_TEST_COLLECTOR', duration: 0 }],
             total_duration: 0,
             total_fetch_duration: 0,
             total_is_ready_duration: 0,
@@ -385,16 +385,25 @@ describe('CollectorSet', () => {
               count: 0,
               names: [],
             },
-            fetch_duration_breakdown: {
-              ready_col: 0,
-            },
-            is_ready_duration_breakdown: {
-              not_ready_col: 0,
-              ready_col: 0,
-            },
-            not_ready: {
-              count: 1,
-              names: ['not_ready_col'],
+            "fetch_duration_breakdown": [{
+              "name": "ready_col",
+              "duration": 0,
+            }],
+            "is_ready_duration_breakdown": [
+              {
+                "name": "ready_col",
+                "duration": 0,
+              },
+              {
+                "name": "not_ready_col",
+                "duration": 0,
+              },
+            ],
+            "not_ready": {
+              "count": 1,
+              "names": [
+                "not_ready_col",
+              ],
             },
             not_ready_timeout: {
               count: 0,
@@ -463,16 +472,25 @@ describe('CollectorSet', () => {
               count: 0,
               names: [],
             },
-            fetch_duration_breakdown: {
-              ready_col: 0,
-            },
-            is_ready_duration_breakdown: {
-              ready_col: expect.any(Number),
-              timeout_col: 1000,
-            },
-            not_ready: {
-              count: 0,
-              names: [],
+            "fetch_duration_breakdown": [
+              {
+                "name": "ready_col",
+                "duration": 0,
+              },
+            ],
+            "is_ready_duration_breakdown": [
+              {
+                "name": "ready_col",
+                "duration": expect.any(Number),
+              },
+              {
+                "name": "timeout_col",
+                "duration": expect.any(Number),
+              }
+            ],
+            "not_ready": {
+              "count": 0,
+              "names": [],
             },
             not_ready_timeout: {
               count: 1,

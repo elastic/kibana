@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 import { withTimeout } from '@kbn/std';
-import { snakeCase } from 'lodash';
-import { performance } from 'perf_hooks';
+import { snakeCase, } from 'lodash';
 
 import type {
   Logger,
@@ -20,7 +19,7 @@ import { Collector } from './collector';
 import type { ICollector, CollectorOptions, CollectorFetchContext } from './types';
 import { UsageCollector, UsageCollectorOptions } from './usage_collector';
 import { DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S } from '../../common/constants';
-import { createPerformanceObsHook } from './measure_duration';
+import { createPerformanceObsHook, perfTimerify } from './measure_duration';
 import { usageCollectorsStatsCollector } from './collector_stats';
 
 const SECOND_IN_MS = 1000;
@@ -115,20 +114,19 @@ export class CollectorSet {
     const timeoutMs = this.maximumWaitTimeForAllCollectorsInS * SECOND_IN_MS;
     const collectorsWithStatus: CollectorWithStatus[] = await Promise.all(
       [...collectors.values()].map(async (collector) => {
-        const wrappedPromise = performance.timerify(
-          Object.defineProperty(
-            async (): Promise<boolean> => {
-              try {
-                return await collector.isReady();
-              } catch (err) {
-                this.logger.debug(`Collector ${collector.type} failed to get ready. ${err}`);
-                return false;
-              }
-            },
-            'name',
-            { value: `is_ready_${collector.type}` }
-          )
+        
+        const wrappedPromise = perfTimerify(
+          `is_ready_${collector.type}`,
+          async (): Promise<boolean> => {
+            try {
+              return await collector.isReady();
+            } catch (err) {
+              this.logger.debug(`Collector ${collector.type} failed to get ready. ${err}`);
+              return false;
+            }
+          },
         );
+
 
         const isReadyWithTimeout = await withTimeout<boolean>({
           promise: wrappedPromise(),
@@ -191,13 +189,10 @@ export class CollectorSet {
     };
   };
 
-  private fetchCollector = async (
-    collector: AnyCollector,
-    context: CollectorFetchContext
-  ): Promise<{
-    fetchResult?: unknown;
-    status: 'failed' | 'success';
-    type: string;
+  private fetchCollector = async (collector: AnyCollector, context: CollectorFetchContext): Promise<{
+    result?: unknown,
+    status: 'failed' | 'success',
+    type: string,
   }> => {
     const { type } = collector;
     this.logger.debug(`Fetching data from ${type} collector`);
@@ -209,10 +204,8 @@ export class CollectorSet {
     };
 
     try {
-      const fetchResult = await this.executionContext.withContext(executionContext, () =>
-        collector.fetch(context)
-      );
-      return { type, fetchResult, status: 'success' as const };
+      const result = await this.executionContext.withContext(executionContext, () => collector.fetch(context));
+      return { type, result, status: 'success' as const };
     } catch (err) {
       this.logger.warn(err);
       this.logger.warn(`Unable to fetch data from ${type} collector`);
@@ -235,14 +228,9 @@ export class CollectorSet {
 
     const fetchExecutions = await Promise.all(
       readyCollectors.map(async (collector) => {
-        const wrappedPromise = performance.timerify(
-          Object.defineProperty(
-            async () => {
-              return await this.fetchCollector(collector, context);
-            },
-            'name',
-            { value: `fetch_${collector.type}` }
-          )
+        const wrappedPromise = perfTimerify(
+          `fetch_${collector.type}`,
+          async () => await this.fetchCollector(collector, context),
         );
 
         return await wrappedPromise();
@@ -292,7 +280,9 @@ export class CollectorSet {
 
     return [
       ...fetchExecutions
-        .map(({ type, fetchResult }) => ({ type, result: fetchResult }))
+        // pluck type and result from collector object
+        .map(({ type, result }) => ({ type, result }))
+        // only keep data of collectors thar returned a result
         .filter(
           (response): response is { type: string; result: unknown } =>
             typeof response?.result !== 'undefined'
