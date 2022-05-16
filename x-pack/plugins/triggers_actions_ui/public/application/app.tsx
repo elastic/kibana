@@ -31,7 +31,7 @@ import {
 } from '../types';
 import { Section, routeToRuleDetails, legacyRouteToRuleDetails } from './constants';
 
-import { setSavedObjectsClient } from '../common/lib/data_apis';
+import { setDataViewsService } from '../common/lib/data_apis';
 import { KibanaContextProvider } from '../common/lib/kibana';
 
 const TriggersActionsUIHome = lazy(() => import('./home'));
@@ -67,12 +67,12 @@ export const renderApp = (deps: TriggersAndActionsUiServices) => {
 };
 
 export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
-  const { savedObjects, uiSettings, theme$ } = deps;
+  const { dataViews, uiSettings, theme$ } = deps;
   const sections: Section[] = ['rules', 'connectors', 'alerts', '__components_sandbox'];
   const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
 
   const sectionsRegex = sections.join('|');
-  setSavedObjectsClient(savedObjects.client);
+  setDataViewsService(dataViews);
   return (
     <I18nProvider>
       <EuiThemeProvider darkMode={isDarkMode}>
