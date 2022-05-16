@@ -7,6 +7,7 @@
 
 import { isEmpty } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import ReactDOM from 'react-dom';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
@@ -87,11 +88,15 @@ export const useTimelineEventsDetails = ({
           .subscribe({
             next: (response) => {
               if (isCompleteResponse(response)) {
-                setLoading(false);
-                setTimelineDetailsResponse(response.data || []);
-                setRawEventData(response.rawResponse.hits.hits[0]);
-                setEcsData(response.ecs || null);
-                searchSubscription$.current.unsubscribe();
+                Promise.resolve().then(() => {
+                  ReactDOM.unstable_batchedUpdates(() => {
+                    setLoading(false);
+                    setTimelineDetailsResponse(response.data || []);
+                    setRawEventData(response.rawResponse.hits.hits[0]);
+                    setEcsData(response.ecs || null);
+                    searchSubscription$.current.unsubscribe();
+                  });
+                });
               } else if (isErrorResponse(response)) {
                 setLoading(false);
                 addWarning(i18n.FAIL_TIMELINE_DETAILS);

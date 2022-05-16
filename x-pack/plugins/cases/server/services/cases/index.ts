@@ -16,6 +16,7 @@ import {
   SavedObjectsBulkUpdateResponse,
   SavedObjectsUpdateResponse,
   SavedObjectsResolveResponse,
+  SavedObjectsFindOptions,
 } from '@kbn/core/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -52,6 +53,8 @@ import {
 } from './transform';
 import { ESCaseAttributes } from './types';
 import { AttachmentService } from '../attachments';
+import { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
+import { createCaseError } from '../../common/error';
 
 interface GetCaseIdsByAlertIdArgs {
   alertId: string;
@@ -624,6 +627,40 @@ export class CasesService {
     } catch (error) {
       this.log.error(`Error on UPDATE case ${cases.map((c) => c.caseId).join(', ')}: ${error}`);
       throw error;
+    }
+  }
+
+  public async executeAggregations({
+    aggregationBuilders,
+    options,
+  }: {
+    aggregationBuilders: Array<AggregationBuilder<unknown>>;
+    options?: Omit<SavedObjectsFindOptions, 'aggs' | 'type'>;
+  }): Promise<AggregationResponse> {
+    try {
+      const builtAggs = aggregationBuilders.reduce((acc, agg) => {
+        return { ...acc, ...agg.build() };
+      }, {});
+
+      const res = await this.unsecuredSavedObjectsClient.find<
+        ESCaseAttributes,
+        AggregationResponse
+      >({
+        sortField: defaultSortField,
+        ...options,
+        aggs: builtAggs,
+        type: CASE_SAVED_OBJECT,
+      });
+
+      return res.aggregations;
+    } catch (error) {
+      const aggregationNames = aggregationBuilders.map((agg) => agg.getName());
+
+      throw createCaseError({
+        message: `Failed to execute aggregations [${aggregationNames.join(',')}]: ${error}`,
+        error,
+        logger: this.log,
+      });
     }
   }
 }

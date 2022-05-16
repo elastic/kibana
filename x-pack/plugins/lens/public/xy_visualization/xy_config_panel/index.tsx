@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Position, ScaleType, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
+import { Position, ScaleType } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AxesSettingsConfig, AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
 import type { VisualizationToolbarProps, FramePublicAPI } from '../../types';
 import { State, XYState } from '../types';
 import { isHorizontalChart } from '../state_helpers';
@@ -21,6 +22,7 @@ import { getScaleType } from '../to_expression';
 import { TooltipWrapper } from '../../shared_components';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import { getDataLayers } from '../visualization_helpers';
+import { LegendSettingsPopoverProps } from '../../shared_components/legend_settings_popover';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -293,6 +295,10 @@ export const XyToolbar = memo(function XyToolbar(
     props.frame.datasourceLayers
   ).truncateText;
 
+  const legendSize = state.legend.legendSize;
+
+  const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
+
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
@@ -380,8 +386,10 @@ export const XyToolbar = memo(function XyToolbar(
             }}
             onAlignmentChange={(value) => {
               const [vertical, horizontal] = value.split('_');
-              const verticalAlignment = vertical as VerticalAlignment;
-              const horizontalAlignment = horizontal as HorizontalAlignment;
+              const verticalAlignment = vertical as LegendSettingsPopoverProps['verticalAlignment'];
+              const horizontalAlignment =
+                horizontal as LegendSettingsPopoverProps['horizontalAlignment'];
+
               setState({
                 ...state,
                 legend: { ...state.legend, verticalAlignment, horizontalAlignment },
@@ -395,16 +403,17 @@ export const XyToolbar = memo(function XyToolbar(
                 valuesInLegend: !state.valuesInLegend,
               });
             }}
-            legendSize={state.legend.legendSize}
-            onLegendSizeChange={(legendSize) => {
+            legendSize={legendSize}
+            onLegendSizeChange={(newLegendSize) => {
               setState({
                 ...state,
                 legend: {
                   ...state.legend,
-                  legendSize,
+                  legendSize: newLegendSize,
                 },
               });
             }}
+            showAutoLegendSizeOption={hadAutoLegendSize}
           />
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -446,6 +455,13 @@ export const XyToolbar = memo(function XyToolbar(
               hasBarOrAreaOnAxis={hasBarOrAreaOnLeftAxis}
               dataBounds={dataBounds.left}
               hasPercentageAxis={hasPercentageAxis(axisGroups, 'left', state)}
+              scale={state?.yLeftScale}
+              setScale={(scale) => {
+                setState({
+                  ...state,
+                  yLeftScale: scale,
+                });
+              }}
             />
           </TooltipWrapper>
 
@@ -507,6 +523,13 @@ export const XyToolbar = memo(function XyToolbar(
               setExtent={setRightExtent}
               hasBarOrAreaOnAxis={hasBarOrAreaOnRightAxis}
               dataBounds={dataBounds.right}
+              scale={state?.yRightScale}
+              setScale={(scale) => {
+                setState({
+                  ...state,
+                  yRightScale: scale,
+                });
+              }}
             />
           </TooltipWrapper>
         </EuiFlexGroup>

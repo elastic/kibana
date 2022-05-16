@@ -28,19 +28,21 @@ import {
   getNetworkDetailsUrl,
   getCreateCaseUrl,
   useFormatUrl,
+  useGetSecuritySolutionUrl,
 } from '../link_to';
 import {
   FlowTarget,
   FlowTargetSourceDest,
 } from '../../../../common/search_strategy/security_solution/network';
-import { useUiSetting$, useKibana, useNavigation } from '../../lib/kibana';
+import { useUiSetting$, useKibana, useNavigateTo } from '../../lib/kibana';
 import { isUrlInvalid } from '../../utils/validators';
 
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../app/types';
-import { getUsersDetailsUrl } from '../link_to/redirect_to_users';
+import { getTabsOnUsersDetailsUrl, getUsersDetailsUrl } from '../link_to/redirect_to_users';
 import { LinkAnchor, GenericLinkButton, PortContainer, Comma, LinkButton } from './helpers';
 import { HostsTableType } from '../../../hosts/store/model';
+import { UsersTableType } from '../../../users/store/model';
 
 export { LinkButton, LinkAnchor } from './helpers';
 
@@ -52,10 +54,11 @@ const UserDetailsLinkComponent: React.FC<{
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   userName: string;
+  userTab?: UsersTableType;
   title?: string;
   isButton?: boolean;
   onClick?: (e: SyntheticEvent) => void;
-}> = ({ children, Component, userName, isButton, onClick, title }) => {
+}> = ({ children, Component, userName, isButton, onClick, title, userTab }) => {
   const encodedUserName = encodeURIComponent(userName);
 
   const { formatUrl, search } = useFormatUrl(SecurityPageName.users);
@@ -65,17 +68,29 @@ const UserDetailsLinkComponent: React.FC<{
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.users,
-        path: getUsersDetailsUrl(encodedUserName, search),
+        path: userTab
+          ? getTabsOnUsersDetailsUrl(encodedUserName, userTab, search)
+          : getUsersDetailsUrl(encodedUserName, search),
       });
     },
-    [encodedUserName, navigateToApp, search]
+    [encodedUserName, navigateToApp, search, userTab]
+  );
+
+  const href = useMemo(
+    () =>
+      formatUrl(
+        userTab
+          ? getTabsOnUsersDetailsUrl(encodedUserName, userTab)
+          : getUsersDetailsUrl(encodedUserName)
+      ),
+    [formatUrl, encodedUserName, userTab]
   );
 
   return isButton ? (
     <GenericLinkButton
       Component={Component}
       dataTestSubj="data-grid-user-details"
-      href={formatUrl(getUsersDetailsUrl(encodedUserName))}
+      href={href}
       onClick={onClick ?? goToUsersDetails}
       title={title ?? userName}
     >
@@ -85,7 +100,7 @@ const UserDetailsLinkComponent: React.FC<{
     <LinkAnchor
       data-test-subj="users-link-anchor"
       onClick={onClick ?? goToUsersDetails}
-      href={formatUrl(getUsersDetailsUrl(encodedUserName))}
+      href={href}
     >
       {children ? children : userName}
     </LinkAnchor>
@@ -519,20 +534,46 @@ interface SecuritySolutionLinkProps {
   path?: string;
 }
 
-type LinkClickEvent = MouseEvent<HTMLButtonElement | HTMLAnchorElement>;
-type LinkClickEventHandler = MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
-
-interface SecuritySolutionInjectedLinkProps {
-  onClick?: LinkClickEventHandler;
-  href?: string;
+interface LinkProps {
+  onClick: MouseEventHandler;
+  href: string;
 }
+
+type GetSecuritySolutionProps = (
+  params: SecuritySolutionLinkProps & { onClick?: MouseEventHandler }
+) => LinkProps;
+
+/**
+ * It returns the `onClick` and `href` props to use in link components based on the` deepLinkId` and `path` parameters.
+ */
+export const useGetSecuritySolutionLinkProps = (): GetSecuritySolutionProps => {
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
+  const { navigateTo } = useNavigateTo();
+
+  const getSecuritySolutionProps = useCallback<GetSecuritySolutionProps>(
+    ({ deepLinkId, path, onClick: onClickProps }) => {
+      const url = getSecuritySolutionUrl({ deepLinkId, path });
+      return {
+        href: url,
+        onClick: (ev: MouseEvent) => {
+          ev.preventDefault();
+          navigateTo({ url });
+          if (onClickProps) {
+            onClickProps(ev);
+          }
+        },
+      };
+    },
+    [getSecuritySolutionUrl, navigateTo]
+  );
+
+  return getSecuritySolutionProps;
+};
 
 /**
  * HOC that wraps any Link component and makes it a Security solutions internal navigation Link.
- *
- * It injects `onClick` and 'href' into the Link component calculated based on the` deepLinkId` and `path` parameters.
  */
-export const withSecuritySolutionLink = <T extends SecuritySolutionInjectedLinkProps>(
+export const withSecuritySolutionLink = <T extends Partial<LinkProps>>(
   WrappedComponent: React.FC<T>
 ) => {
   const SecuritySolutionLink: React.FC<Omit<T & SecuritySolutionLinkProps, 'href'>> = ({
@@ -541,38 +582,27 @@ export const withSecuritySolutionLink = <T extends SecuritySolutionInjectedLinkP
     onClick: onClickProps,
     ...rest
   }) => {
-    const { formatUrl } = useFormatUrl(deepLinkId);
-    const { navigateTo } = useNavigation();
-    const url = useMemo(() => formatUrl(path ?? ''), [formatUrl, path]);
-
-    const onClick = useCallback(
-      (ev: LinkClickEvent) => {
-        ev.preventDefault();
-
-        if (onClickProps) {
-          onClickProps(ev);
-        }
-
-        navigateTo({ url });
-      },
-      [navigateTo, url, onClickProps]
-    );
-
-    return <WrappedComponent onClick={onClick} href={url} {...(rest as unknown as T)} />;
+    const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
+    const { onClick, href } = getSecuritySolutionLinkProps({
+      deepLinkId,
+      path,
+      onClick: onClickProps,
+    });
+    return <WrappedComponent onClick={onClick} href={href} {...(rest as unknown as T)} />;
   };
   return SecuritySolutionLink;
 };
 
 /**
- * Security Solutions internal link.
+ * Security Solutions internal link button.
  *
- * `const example = () => <SecuritySolutionLinkButton deepLinkId={SecurityPageName.hosts} />;`
+ * `<SecuritySolutionLinkButton deepLinkId={SecurityPageName.hosts} />;`
  */
 export const SecuritySolutionLinkButton = withSecuritySolutionLink(LinkButton);
 
 /**
- * Security Solutions internal link.
+ * Security Solutions internal link anchor.
  *
- * `const example = () => <SecuritySolutionLinkAnchor deepLinkId={SecurityPageName.hosts} />;`
+ * `<SecuritySolutionLinkAnchor deepLinkId={SecurityPageName.hosts} />;`
  */
 export const SecuritySolutionLinkAnchor = withSecuritySolutionLink(LinkAnchor);
