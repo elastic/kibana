@@ -211,9 +211,7 @@ function isEndpointAdvancedPolicyValidForLicense(policy: PolicyConfig, license: 
   const defaults = policyFactoryWithoutPaidFeatures();
 
   // only platinum or higher may use rollback
-  if (
-    policy.windows.advanced?.rollback === true || policy.windows.advanced?.rollback === 'true'
-  ) {
+  if (policy.windows.advanced?.rollback === true || policy.windows.advanced?.rollback === 'true') {
     console.log('LICENSE CHECK.....');
     return false;
   }
