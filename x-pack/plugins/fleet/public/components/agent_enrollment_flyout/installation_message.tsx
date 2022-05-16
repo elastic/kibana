@@ -12,7 +12,7 @@ import semverMajor from 'semver/functions/major';
 import semverMinor from 'semver/functions/minor';
 import semverPatch from 'semver/functions/patch';
 
-import { useKibanaVersion } from '../../hooks';
+import { useKibanaVersion, useStartServices } from '../../hooks';
 
 import type { K8sMode } from './types';
 
@@ -21,6 +21,7 @@ interface Props {
 }
 
 export const InstallationMessage: React.FunctionComponent<Props> = ({ isK8s }) => {
+  const { docLinks } = useStartServices();
   const kibanaVersion = useKibanaVersion();
   const kibanaVersionURLString = useMemo(
     () =>
@@ -54,11 +55,7 @@ export const InstallationMessage: React.FunctionComponent<Props> = ({ isK8s }) =
                 </EuiLink>
               ),
               installationLink: (
-                <EuiLink
-                  target="_blank"
-                  external
-                  href="https://www.elastic.co/guide/en/fleet/current/elastic-agent-installation.html"
-                >
+                <EuiLink target="_blank" external href={docLinks.links.fleet.installElasticAgent}>
                   <FormattedMessage
                     id="xpack.fleet.enrollmentInstructions.installationMessage.link"
                     defaultMessage="installation docs"
