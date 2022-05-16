@@ -188,6 +188,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         dateRangeFrom={undefined}
         dateRangeTo={undefined}
         timeHistory={timeHistory}
+        hiddenFilterPanelOptions={['pinFilter', 'disableFilter']}
       />
 
       <EuiSpacer size="s" />
