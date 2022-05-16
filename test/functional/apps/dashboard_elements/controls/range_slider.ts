@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -80,7 +81,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('create and edit', async () => {
       it('can create a new range slider control from a blank state', async () => {
-        await dashboardControls.createRangeSliderControl({
+        await dashboardControls.createControl({
+          controlType: RANGE_SLIDER_CONTROL,
           dataViewTitle: 'logstash-*',
           fieldName: 'bytes',
           width: 'small',
@@ -89,7 +91,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('can add a second range list control with a non-default data view', async () => {
-        await dashboardControls.createRangeSliderControl({
+        await dashboardControls.createControl({
+          controlType: RANGE_SLIDER_CONTROL,
           dataViewTitle: 'kibana_sample_data_flights',
           fieldName: 'AvgTicketPrice',
           width: 'medium',
@@ -204,7 +207,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('disables inputs when no data available', async () => {
-        await dashboardControls.createRangeSliderControl({
+        await dashboardControls.createControl({
+          controlType: RANGE_SLIDER_CONTROL,
           dataViewTitle: 'logstash-*',
           fieldName: 'bytes',
           width: 'small',
