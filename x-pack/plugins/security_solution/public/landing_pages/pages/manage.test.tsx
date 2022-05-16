@@ -10,14 +10,13 @@ import React from 'react';
 import { SecurityPageName } from '../../app/types';
 import { TestProviders } from '../../common/mock';
 import { LandingCategories } from './manage';
-import { NavLinkItem } from '../../common/links/types';
+import { NavLinkItem } from '../../common/components/navigation/types';
 
 const RULES_ITEM_LABEL = 'elastic rules!';
 const EXCEPTIONS_ITEM_LABEL = 'exceptional!';
 
 const mockAppManageLink: NavLinkItem = {
   id: SecurityPageName.administration,
-  path: '',
   title: 'admin',
   links: [
     {
@@ -25,14 +24,12 @@ const mockAppManageLink: NavLinkItem = {
       title: RULES_ITEM_LABEL,
       description: '',
       icon: 'testIcon1',
-      path: '',
     },
     {
       id: SecurityPageName.exceptions,
       title: EXCEPTIONS_ITEM_LABEL,
       description: '',
       icon: 'testIcon2',
-      path: '',
     },
   ],
 };

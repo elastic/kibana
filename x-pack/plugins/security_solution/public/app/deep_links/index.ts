@@ -564,7 +564,7 @@ const formatDeepLinks = (appLinks: AppLinkItems): AppDeepLink[] =>
     navLinkStatus: appLink.globalNavEnabled ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
     ...(appLink.globalSearchKeywords != null ? { keywords: appLink.globalSearchKeywords } : {}),
     ...(appLink.globalNavOrder != null ? { order: appLink.globalNavOrder } : {}),
-    ...(appLink.globalSearchEnabled != null ? { searchable: appLink.globalSearchEnabled } : {}),
+    ...(appLink.globalSearchEnabled !== false ? { searchable: appLink.globalSearchEnabled } : {}),
     ...(appLink.links && appLink.links?.length
       ? {
           deepLinks: formatDeepLinks(appLink.links),

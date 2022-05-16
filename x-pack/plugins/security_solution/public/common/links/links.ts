@@ -66,6 +66,8 @@ const getFilteredAppLinks = (
       const childrenLinks = getFilteredAppLinks(links, linksPermissions);
       if (childrenLinks.length > 0) {
         acc.push({ ...appLink, links: childrenLinks });
+      } else {
+        acc.push(appLink);
       }
     } else {
       acc.push(appLink);
@@ -79,7 +81,7 @@ const hasCapabilities = (linkCapabilities: string[], userCapabilities: Capabilit
 
 const isLinkAllowed = (
   link: LinkItem,
-  { license, experimentalFeatures, capabilities, uiSettings }: LinksPermissions
+  { license, experimentalFeatures, capabilities }: LinksPermissions
 ) => {
   const linkLicenseType = link.licenseType ?? 'basic';
   if (license) {
@@ -96,9 +98,6 @@ const isLinkAllowed = (
     return false;
   }
   if (link.capabilities && !hasCapabilities(link.capabilities, capabilities)) {
-    return false;
-  }
-  if (link.uiSettingsEnabled && !link.uiSettingsEnabled(uiSettings)) {
     return false;
   }
   return true;

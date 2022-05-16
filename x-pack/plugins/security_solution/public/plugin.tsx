@@ -224,12 +224,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     }
     licenseService.start(plugins.licensing.license$);
     const licensing = licenseService.getLicenseInformation$();
-    const uiSettings = core.uiSettings.getAll();
 
     const linksPermissions: LinksPermissions = {
       experimentalFeatures: this.experimentalFeatures,
       capabilities: core.application.capabilities,
-      uiSettings,
     };
 
     /**

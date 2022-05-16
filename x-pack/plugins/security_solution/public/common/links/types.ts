@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { Capabilities, PublicUiSettingsParams, UserProvidedValues } from '@kbn/core/types';
+import { Capabilities } from '@kbn/core/types';
 import { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
 import { IconType } from '@elastic/eui';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 import { SecurityPageName } from '../../../common/constants';
-
-type UiSettings = Readonly<Record<string, PublicUiSettingsParams & UserProvidedValues>>;
 
 /**
  * Permissions related parameters needed for the links to be filtered
@@ -20,7 +18,6 @@ export interface LinksPermissions {
   capabilities: Capabilities;
   experimentalFeatures: Readonly<ExperimentalFeatures>;
   license?: ILicense;
-  uiSettings: UiSettings;
 }
 
 export interface LinkItem {
@@ -62,6 +59,10 @@ export interface LinkItem {
    */
   id: SecurityPageName;
   /**
+   * Displays the "Beta" badge
+   */
+  isBeta?: boolean;
+  /**
    * Icon that is displayed on menu navigation landing page.
    * Only required for pages that are displayed inside a landing page.
    */
@@ -72,7 +73,7 @@ export interface LinkItem {
    */
   landingImage?: string;
   /**
-   * Minimum licence required to enable the link
+   * Minimum license required to enable the link
    */
   licenseType?: LicenseType;
   /**
@@ -95,11 +96,6 @@ export interface LinkItem {
    * Title of the link
    */
   title: string;
-  /**
-   * Callback to filter the link based in uiSettings (kibana advanced settings)
-   * Return false to exclude the link
-   */
-  uiSettingsEnabled?: (uiSettings: UiSettings) => boolean;
 }
 
 export type AppLinkItems = Readonly<LinkItem[]>;

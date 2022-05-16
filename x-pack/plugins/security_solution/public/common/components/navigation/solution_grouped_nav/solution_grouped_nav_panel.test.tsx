@@ -9,18 +9,15 @@ import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { SecurityPageName } from '../../../../app/types';
 import { TestProviders } from '../../../mock';
-import { PortalNavItem } from './solution_grouped_nav_item';
-import {
-  SolutionGroupedNavPanel,
-  SolutionGroupedNavPanelProps,
-} from './solution_grouped_nav_panel';
+import { SolutionNavPanel, SolutionNavPanelProps } from './solution_grouped_nav_panel';
+import { DefaultSideNavItem } from './types';
 
 const mockUseShowTimeline = jest.fn((): [boolean] => [false]);
 jest.mock('../../../utils/timeline/use_show_timeline', () => ({
   useShowTimeline: () => mockUseShowTimeline(),
 }));
 
-const mockItems: PortalNavItem[] = [
+const mockItems: DefaultSideNavItem[] = [
   {
     id: SecurityPageName.hosts,
     label: 'Hosts',
@@ -37,16 +34,11 @@ const mockItems: PortalNavItem[] = [
 
 const PANEL_TITLE = 'test title';
 const mockOnClose = jest.fn();
-const renderNavPanel = (props: Partial<SolutionGroupedNavPanelProps> = {}) =>
+const renderNavPanel = (props: Partial<SolutionNavPanelProps> = {}) =>
   render(
     <>
       <div data-test-subj="outsideClickDummy" />
-      <SolutionGroupedNavPanel
-        items={mockItems}
-        title={PANEL_TITLE}
-        onClose={mockOnClose}
-        {...props}
-      />
+      <SolutionNavPanel items={mockItems} title={PANEL_TITLE} onClose={mockOnClose} {...props} />
     </>,
     {
       wrapper: TestProviders,

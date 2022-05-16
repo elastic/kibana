@@ -113,7 +113,7 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
 
   return (
     <>
-      <EuiFlexGroup gutterSize="none" direction="column">
+      <EuiFlexGroup gutterSize="none" direction="column" css=''>
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="none" direction="column">
             <EuiFlexItem>
