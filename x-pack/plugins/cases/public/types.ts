@@ -21,9 +21,8 @@ import {
   CasesByAlertId,
   CasesByAlertIDRequest,
   CasesFindRequest,
-  CasesResponse,
+  CasesMetricsRequest,
   CasesStatusRequest,
-  CasesStatusResponse,
   CommentRequestAlertType,
   CommentRequestUserType,
 } from '../common/api';
@@ -36,6 +35,7 @@ import type { GetCasesProps } from './client/ui/get_cases';
 import { GetAllCasesSelectorModalProps } from './client/ui/get_all_cases_selector_modal';
 import { GetCreateCaseFlyoutProps } from './client/ui/get_create_case_flyout';
 import { GetRecentCasesProps } from './client/ui/get_recent_cases';
+import { Cases, CasesStatus, CasesMetrics } from '../common/ui';
 
 export interface CasesPluginSetup {
   security: SecurityPluginSetup;
@@ -76,8 +76,9 @@ export interface CasesUiStart {
   api: {
     getRelatedCases: (alertId: string, query: CasesByAlertIDRequest) => Promise<CasesByAlertId>;
     cases: {
-      find: (query: CasesFindRequest) => Promise<CasesResponse>;
-      getAllCasesMetrics: (query: CasesStatusRequest) => Promise<CasesStatusResponse>;
+      find: (query: CasesFindRequest, signal?: AbortSignal) => Promise<Cases>;
+      getCasesStatus: (query: CasesStatusRequest, signal?: AbortSignal) => Promise<CasesStatus>;
+      getCasesMetrics: (query: CasesMetricsRequest, signal?: AbortSignal) => Promise<CasesMetrics>;
     };
   };
   ui: {
