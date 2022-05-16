@@ -61,9 +61,11 @@ export function TransactionDetailLink({
       transactionId,
       transactionName,
       transactionType,
-      comparison: defaultComparisonEnabled
-        ? ComparisonOptionEnum.Time
-        : ComparisonOptionEnum.False,
+      comparison:
+        urlParams.comparison ??
+        (defaultComparisonEnabled
+          ? ComparisonOptionEnum.Time
+          : ComparisonOptionEnum.False),
       offset,
       ...pickKeys(urlParams as APMQueryParams, ...persistedFilters),
       ...pickBy({ latencyAggregationType, environment }, identity),

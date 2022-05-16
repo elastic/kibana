@@ -50,8 +50,7 @@ export function RedirectWithOffset({
       urlComparisonEnabled: urlComparisonEnabled
         ? toBoolean(urlComparisonEnabled as string)
         : undefined,
-    }).toString();
-
+    });
     const comparisonTypeEnumValue = comparisonType as
       | TimeRangeComparisonEnum.DayBefore
       | TimeRangeComparisonEnum.WeekBefore;
@@ -63,13 +62,10 @@ export function RedirectWithOffset({
         to={qs.stringifyUrl({
           url: location.pathname,
           query: {
-            comparison:
-              query.comparison ??
-              (comparisonEnabled
-                ? ComparisonOptionEnum.Time
-                : ComparisonOptionEnum.False),
-            // @todo: remove without page blanking
-            comparisonEnabled,
+            comparison: comparisonEnabled
+              ? query.comparison
+              : ComparisonOptionEnum.False,
+            comparisonEnabled: comparisonEnabled.toString(),
             ...(dayOrWeekOffset ? { offset: dayOrWeekOffset } : {}),
             ...queryRest,
           },

@@ -56,8 +56,14 @@ export function TimeComparison() {
     ({ value }) => value === offset || value === ComparisonOptionEnum.MlBounds
   );
 
+  const comparisonEnabled = comparison !== ComparisonOptionEnum.False;
+
   // Replaces type when current one is no longer available in the select options
-  if (comparisonOptions.length !== 0 && !isSelectedComparisonTypeAvailable) {
+  if (
+    comparisonEnabled &&
+    comparisonOptions.length !== 0 &&
+    !isSelectedComparisonTypeAvailable
+  ) {
     urlHelpers.replace(history, {
       query: {
         offset: comparisonOptions[0].value,
@@ -67,7 +73,6 @@ export function TimeComparison() {
     return null;
   }
 
-  const comparisonEnabled = comparison !== ComparisonOptionEnum.False;
   return (
     <EuiSelect
       fullWidth={isSmall}
