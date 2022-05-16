@@ -6,9 +6,9 @@
  */
 import { omit, pick } from 'lodash';
 
-import { KibanaFeature } from '../../../../features/server';
-import { loggerMock } from '../../../../../../src/core/server/logging/logger.mock';
+import { loggerMock } from '@kbn/logging-mocks';
 
+import { KibanaFeature } from '../../../../features/server';
 import { transformElasticsearchRoleToRole } from './elasticsearch_role';
 import type { ElasticsearchRole } from './elasticsearch_role';
 
