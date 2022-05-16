@@ -51,20 +51,20 @@ The collector can be found under `stack_stats.kibana.plugins.usage_collector_sta
   "total_fetch_duration": 0.35939233100000006,
   "total_duration": 0.4343925780000001,
   "is_ready_duration_breakdown": {
-    "task_manager": 0.001828041,
-    "ui_counters": 0.001790625,
-    "usage_counters": 0.001778125,
-    "kibana_stats": 0.001764709,
-    "kibana": 0.001748917,
-      ...
+    { "name": "task_manager", "duration": 0.001828041 },
+    { "name": "ui_counters", "duration": 0.001790625 },
+    { "name": "usage_counters", "duration": 0.001778125 },
+    { "name": "kibana_stats", "duration": 0.001764709 },
+    { "name": "kibana", "duration": 0.001748917 },
+    ...
   },
   "fetch_duration_breakdown": {
-    "task_manager": 0.011157708,
-    "ui_counters": 0.011002625,
-    "usage_counters": 0.009945833,
-    "kibana_stats": 0.009424458,
-    "kibana": 0.009406416,
-      ...
+    { "name": "task_manager", "duration": 0.011157708 },
+    { "name": "ui_counters", "duration": 0.011002625 },
+    { "name": "usage_counters", "duration": 0.009945833 },
+    { "name": "kibana_stats", "duration": 0.009424458 },
+    { "name": "kibana", "duration": 0.009406416 },
+    ...
   }
 }
 ```
