@@ -42,15 +42,13 @@ export const CollapsibleFeatureStatesList: React.FunctionComponent<Props> = ({ f
   return (
     <>
       <EuiText data-test-subj="featureStatesList">
-        <ul>
-          {items.map((feature) => (
-            <li key={feature}>
-              <EuiTitle size="xs">
-                <span>{feature}</span>
-              </EuiTitle>
-            </li>
-          ))}
-        </ul>
+        {items.map((feature) => (
+          <div key={feature}>
+            <EuiTitle size="xs">
+              <span>{feature}</span>
+            </EuiTitle>
+          </div>
+        ))}
       </EuiText>
       {hiddenItemsCount ? (
         <>

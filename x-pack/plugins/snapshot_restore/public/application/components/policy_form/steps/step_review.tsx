@@ -133,7 +133,7 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="xxl" />
 
       {/* Snapshot settings summary */}
       <EuiTitle size="s">
