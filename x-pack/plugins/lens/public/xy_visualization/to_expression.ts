@@ -250,6 +250,8 @@ export const buildExpression = (
           fillOpacity: [state.fillOpacity || 0.3],
           yLeftExtent: [axisExtentConfigToExpression(state.yLeftExtent, validDataLayers)],
           yRightExtent: [axisExtentConfigToExpression(state.yRightExtent, validDataLayers)],
+          yLeftScale: [state.yLeftScale || 'linear'],
+          yRightScale: [state.yRightScale || 'linear'],
           axisTitlesVisibilitySettings: [
             {
               type: 'expression',
@@ -421,9 +423,6 @@ const dataLayerToExpression = (
           layerId: [layer.layerId],
           hide: [Boolean(layer.hide)],
           xAccessor: layer.xAccessor ? [layer.xAccessor] : [],
-          yScaleType: [
-            getScaleType(metadata[layer.layerId][layer.accessors[0]], ScaleType.Ordinal),
-          ],
           xScaleType: [getScaleType(metadata[layer.layerId][layer.xAccessor], ScaleType.Linear)],
           isHistogram: [isHistogramDimension],
           splitAccessor: layer.collapseFn || !layer.splitAccessor ? [] : [layer.splitAccessor],
