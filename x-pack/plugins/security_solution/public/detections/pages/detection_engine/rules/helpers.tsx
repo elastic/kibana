@@ -111,6 +111,11 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
         }
       : {}),
   },
+  eqlOptions: {
+    timestampField: rule.timestamp_field,
+    eventCategoryField: rule.event_category_override,
+    tiebreakerField: rule.tiebreaker_field,
+  },
 });
 
 export const getScheduleStepsData = (rule: Rule): ScheduleStepRule => {

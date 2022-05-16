@@ -45,6 +45,7 @@ import { stepDefineDefaultValue } from '../../../../components/rules/step_define
 import { stepAboutDefaultValue } from '../../../../components/rules/step_about_rule/default_value';
 import { stepActionsDefaultValue } from '../../../../components/rules/step_rule_actions';
 import { FieldValueThreshold } from '../../../../components/rules/threshold_input';
+import { EqlOptionsSelected } from '../../../../../../common/search_strategy';
 
 export const getTimeTypeValue = (time: string): { unit: string; value: number } => {
   const timeObj = {
@@ -266,6 +267,18 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         saved_id: ruleFields.queryBar?.saved_id,
         ...(ruleType === 'query' &&
           ruleFields.queryBar?.saved_id && { type: 'saved_query' as Type }),
+        ...(ruleType === 'eql' &&
+          ruleFields.eqlOptions?.timestampField && {
+            timestamp_field: ruleFields.eqlOptions.timestampField,
+          }),
+        ...(ruleType === 'eql' &&
+          ruleFields.eqlOptions?.eventCategoryField && {
+            event_category_override: ruleFields.eqlOptions.eventCategoryField,
+          }),
+        ...(ruleType === 'eql' &&
+          ruleFields.eqlOptions?.tiebreakerField && {
+            tiebreaker_field: ruleFields.eqlOptions.tiebreakerField,
+          }),
       };
   return {
     ...baseFields,
@@ -405,6 +418,7 @@ export const formatPreviewRule = ({
   threshold,
   machineLearningJobId,
   anomalyThreshold,
+  eqlOptions,
 }: {
   index: string[];
   threatIndex: string[];
@@ -416,6 +430,7 @@ export const formatPreviewRule = ({
   threshold: FieldValueThreshold;
   machineLearningJobId: string[];
   anomalyThreshold: number;
+  eqlOptions: EqlOptionsSelected;
 }): CreateRulesSchema => {
   const defineStepData = {
     ...stepDefineDefaultValue,
@@ -428,6 +443,7 @@ export const formatPreviewRule = ({
     threshold,
     machineLearningJobId,
     anomalyThreshold,
+    eqlOptions,
   };
   const aboutStepData = {
     ...stepAboutDefaultValue,

@@ -35,6 +35,7 @@ export interface EqlQueryBarProps {
   idAria?: string;
   optionsData?: EqlOptionsData;
   optionsSelected?: EqlOptionsSelected;
+  isSizeOptionDisabled?: boolean;
   onOptionsChange?: (field: FieldsEqlOptions, newValue: string | null) => void;
   onValidityChange?: (arg: boolean) => void;
   onValiditingChange?: (arg: boolean) => void;
@@ -46,6 +47,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
   idAria,
   optionsData,
   optionsSelected,
+  isSizeOptionDisabled,
   onOptionsChange,
   onValidityChange,
   onValiditingChange,
@@ -121,6 +123,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
         <EqlQueryBarFooter
           errors={errorMessages}
           isLoading={isValidating}
+          isSizeOptionDisabled={isSizeOptionDisabled}
           optionsData={optionsData}
           optionsSelected={optionsSelected}
           onOptionsChange={onOptionsChange}

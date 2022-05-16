@@ -34,6 +34,7 @@ import { EqlOverviewLink } from './eql_overview_link';
 export interface Props {
   errors: string[];
   isLoading?: boolean;
+  isSizeOptionDisabled?: boolean;
   optionsData?: EqlOptionsData;
   optionsSelected?: EqlOptionsSelected;
   onOptionsChange?: (field: FieldsEqlOptions, newValue: string | null) => void;
@@ -68,6 +69,7 @@ const singleSelection = { asPlainText: true };
 export const EqlQueryBarFooter: FC<Props> = ({
   errors,
   isLoading,
+  isSizeOptionDisabled,
   optionsData,
   optionsSelected,
   onOptionsChange,
@@ -192,17 +194,19 @@ export const EqlQueryBarFooter: FC<Props> = ({
               >
                 <EuiPopoverTitle>{i18n.EQL_SETTINGS_TITLE}</EuiPopoverTitle>
                 <div style={{ width: '300px' }}>
-                  <EuiFormRow
-                    label={i18n.EQL_OPTIONS_SIZE_LABEL}
-                    helpText={i18n.EQL_OPTIONS_SIZE_HELPER}
-                  >
-                    <EuiFieldNumber
-                      value={localSize}
-                      onChange={handleSizeField}
-                      min={1}
-                      max={10000}
-                    />
-                  </EuiFormRow>
+                  {!isSizeOptionDisabled && (
+                    <EuiFormRow
+                      label={i18n.EQL_OPTIONS_SIZE_LABEL}
+                      helpText={i18n.EQL_OPTIONS_SIZE_HELPER}
+                    >
+                      <EuiFieldNumber
+                        value={localSize}
+                        onChange={handleSizeField}
+                        min={1}
+                        max={10000}
+                      />
+                    </EuiFormRow>
+                  )}
                   <EuiFormRow
                     label={i18n.EQL_OPTIONS_EVENT_CATEGORY_FIELD_LABEL}
                     helpText={i18n.EQL_OPTIONS_EVENT_CATEGORY_FIELD_HELPER}

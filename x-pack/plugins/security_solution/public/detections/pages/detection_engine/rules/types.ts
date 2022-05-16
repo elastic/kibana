@@ -29,6 +29,7 @@ import {
   SortOrder,
   TimestampOverride,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { EqlOptionsSelected } from '../../../../../common/search_strategy';
 
 export interface EuiBasicTableSortTypes {
   field: string;
@@ -134,6 +135,7 @@ export interface DefineStepRule {
   threatIndex: ThreatIndex;
   threatQueryBar: FieldValueQueryBar;
   threatMapping: ThreatMapping;
+  eqlOptions: EqlOptionsSelected;
 }
 
 export interface ScheduleStepRule {
@@ -173,6 +175,9 @@ export interface DefineStepRuleJson {
   timeline_id?: string;
   timeline_title?: string;
   type: Type;
+  timestamp_field?: string;
+  event_category_override?: string;
+  tiebreaker_field?: string;
 }
 
 export interface AboutStepRuleJson {

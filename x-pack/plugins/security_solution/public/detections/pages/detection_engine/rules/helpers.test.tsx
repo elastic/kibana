@@ -103,6 +103,11 @@ describe('rule helpers', () => {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
           title: 'Titled timeline',
         },
+        eqlOptions: {
+          timestampField: undefined,
+          eventCategoryField: undefined,
+          tiebreakerField: undefined,
+        },
       };
 
       const aboutRuleStepData: AboutStepRule = {
@@ -232,6 +237,11 @@ describe('rule helpers', () => {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
           title: 'Untitled timeline',
         },
+        eqlOptions: {
+          timestampField: undefined,
+          eventCategoryField: undefined,
+          tiebreakerField: undefined,
+        },
       };
 
       expect(result).toEqual(expected);
@@ -273,6 +283,11 @@ describe('rule helpers', () => {
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
           title: 'Untitled timeline',
+        },
+        eqlOptions: {
+          timestampField: undefined,
+          eventCategoryField: undefined,
+          tiebreakerField: undefined,
         },
       };
 

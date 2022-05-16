@@ -790,7 +790,7 @@ describe('rules_schema', () => {
 
     test('should return 3 fields for a rule of type "eql"', () => {
       const fields = addEqlFields({ type: 'eql' });
-      expect(fields.length).toEqual(3);
+      expect(fields.length).toEqual(5);
     });
   });
 });
