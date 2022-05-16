@@ -123,6 +123,23 @@ describe('policy_config and licenses', () => {
       expect(valid).toBeTruthy();
     });
 
+    it('allows advanced rollback option when Platinum', () => {
+      const policy = policyFactory();
+      policy.windows.advanced = { rollback: true }; // make policy change
+      const valid = isEndpointPolicyValidForLicense(policy, Platinum);
+      expect(valid).toBeTruthy();
+    });
+
+    it('blocks advanced rollback option when below Platinum', () => {
+      const policy = policyFactory();
+      policy.windows.advanced = { rollback: true }; // make policy change
+      let valid = isEndpointPolicyValidForLicense(policy, Gold);
+      expect(valid).toBeFalsy();
+
+      valid = isEndpointPolicyValidForLicense(policy, Basic);
+      expect(valid).toBeFalsy();
+    });
+
     describe('ransomware protection checks', () => {
       it('blocks ransomware to be turned on for Gold and below licenses', () => {
         const policy = policyFactoryWithoutPaidFeatures();

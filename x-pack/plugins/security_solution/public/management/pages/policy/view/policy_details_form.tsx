@@ -104,7 +104,7 @@ export const PolicyDetailsForm = memo(() => {
       </EuiButtonEmpty>
 
       <EuiSpacer size="l" />
-      {showAdvancedPolicy && <AdvancedPolicyForms />}
+      {showAdvancedPolicy && <AdvancedPolicyForms isPlatinumPlus={isPlatinumPlus} />}
     </>
   );
 });

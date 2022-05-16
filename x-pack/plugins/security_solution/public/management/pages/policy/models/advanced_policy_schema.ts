@@ -12,6 +12,7 @@ interface AdvancedPolicySchemaType {
   first_supported_version: string;
   last_supported_version?: string;
   documentation: string;
+  license?: string;
 }
 
 export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
@@ -883,5 +884,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
           'Allows users to control whether kprobes or ebpf are used to gather data. Possible options are kprobes, ebpf, or auto. Default: kprobes',
       }
     ),
+  },
+  {
+    key: 'windows.advanced.rollback',
+    first_supported_version: '8.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.rollback',
+      {
+        defaultMessage:
+          'Experimental',
+      }
+    ),
+    license: 'platinum',
   },
 ];
