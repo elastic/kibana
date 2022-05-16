@@ -9,7 +9,7 @@ import { isEmpty } from 'lodash/fp';
 
 import { ChromeBreadcrumb } from '@kbn/core/public';
 
-import * as i18n from './translations';
+import * as i18n from '../../translations';
 import { GetUrlForApp } from '../../../common/components/navigation/types';
 import { APP_UI_ID } from '../../../../common/constants';
 import { SecurityPageName } from '../../../app/types';
