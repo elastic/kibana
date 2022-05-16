@@ -7,15 +7,19 @@
 
 import React from 'react';
 import { RuleStatusDropdownSandbox } from './rule_status_dropdown_sandbox';
+import { RuleTagFilterSandbox } from './rule_tag_filter_sandbox';
 import { RuleStatusFilterSandbox } from './rule_status_filter_sandbox';
 import { RuleTagBadgeSandbox } from './rule_tag_badge_sandbox';
+import { RuleEventLogListSandbox } from './rule_event_log_list_sandbox';
 
 export const InternalShareableComponentsSandbox: React.FC<{}> = () => {
   return (
     <>
       <RuleStatusDropdownSandbox />
+      <RuleTagFilterSandbox />
       <RuleStatusFilterSandbox />
       <RuleTagBadgeSandbox />
+      <RuleEventLogListSandbox />
     </>
   );
 };
