@@ -43,11 +43,7 @@ export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
 
     const alert: CSSObject = {
       fontFamily: font.family,
-      display: 'flex',
-      gap: size.s,
-      alignItems: 'center',
-      padding: `0 ${size.base}`,
-      boxSizing: 'content-box',
+      padding: `0 ${size.m}`,
       cursor: 'pointer',
       '&:not(:last-child)': {
         marginBottom: size.s,
@@ -58,10 +54,14 @@ export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
       },
       '&& button': {
         flexShrink: 0,
-        marginRight: size.s,
+        marginRight: size.xs,
         '&:hover, &:focus, &:focus-within': {
           backgroundColor: transparentize(euiVars.buttonsBackgroundNormalDefaultPrimary, 0.2),
         },
+      },
+      '&& .euiFlexItem': {
+        marginTop: size.xxs,
+        marginBottom: size.xxs,
       },
     };
 
@@ -70,14 +70,18 @@ export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
     };
 
     const alertName: CSSObject = {
-      padding: `${size.xs} 0`,
       color: colors.title,
+    };
+
+    const actionBadge: CSSObject = {
+      textTransform: 'capitalize',
     };
 
     return {
       alert,
       alertStatus,
       alertName,
+      actionBadge,
     };
   }, [euiTheme, isInvestigated, isSelected, euiVars]);
 

@@ -8,7 +8,6 @@
 import React from 'react';
 import {
   mockData,
-  mockAlerts,
   nullMockData,
   deepNullMockData,
 } from '../../../common/mocks/constants/session_view_process.mock';
@@ -24,7 +23,6 @@ describe('ProcessTree component', () => {
   const props: ProcessTreeDeps = {
     sessionEntityId: sessionLeader.process!.entity_id!,
     data: mockData,
-    alerts: mockAlerts,
     isFetching: false,
     fetchNextPage: jest.fn(),
     hasNextPage: false,
