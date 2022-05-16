@@ -11,7 +11,7 @@ import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useUiTracker } from '@kbn/observability-plugin/public';
-import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -34,23 +34,22 @@ export function TimeComparison() {
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const history = useHistory();
   const { isSmall } = useBreakpoints();
+  const { core } = useApmPluginContext();
+
   const {
-    query: { rangeFrom, rangeTo, offset, comparison, environment },
+    query: { rangeFrom, rangeTo, offset, comparison },
   } = useAnyOfApmParams('/services', '/backends/*', '/services/{serviceName}');
 
-  const { anomalyDetectionJobsStatus, anomalyDetectionJobsData } =
-    useAnomalyDetectionJobsContext();
-  const showExpectedBoundsOption =
-    anomalyDetectionJobsStatus === 'success' &&
-    Array.isArray(anomalyDetectionJobsData?.jobs) &&
-    anomalyDetectionJobsData?.jobs.some((j) => j.environment === environment);
-
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const canGetJobs = !!core.application.capabilities.ml?.canGetJobs;
 
-  const comparisonOptions = useMemo(
-    () => getComparisonOptions({ start, end, showExpectedBoundsOption }),
-    [start, end, showExpectedBoundsOption]
-  );
+  const comparisonOptions = useMemo(() => {
+    return getComparisonOptions({
+      start,
+      end,
+      showExpectedBoundsOption: canGetJobs,
+    });
+  }, [start, end, canGetJobs]);
 
   const isSelectedComparisonTypeAvailable = comparisonOptions.some(
     ({ value }) => value === offset || value === ComparisonOptionEnum.MlBounds
