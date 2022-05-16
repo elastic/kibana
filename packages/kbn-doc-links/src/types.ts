@@ -98,6 +98,7 @@ export interface DocLinks {
     readonly synonyms: string;
     readonly webCrawler: string;
     readonly webCrawlerEventLogs: string;
+    readonly webCrawlerReference: string;
   };
   readonly enterpriseSearch: {
     readonly configuration: string;
@@ -337,6 +338,7 @@ export interface DocLinks {
     azureRepo: string;
     gcsRepo: string;
     hdfsRepo: string;
+    ingestAttachment: string;
     s3Repo: string;
     snapshotRestoreRepos: string;
     mapperSize: string;
@@ -359,7 +361,6 @@ export interface DocLinks {
     installElasticAgent: string;
     installElasticAgentStandalone: string;
     upgradeElasticAgent: string;
-    upgradeElasticAgent712lower: string;
     learnMoreBlog: string;
     apiKeysLearnMore: string;
     onPremRegistry: string;
