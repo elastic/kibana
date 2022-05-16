@@ -135,7 +135,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
             cluster: [],
             indices: [
               {
-                names: ['search-source-alert', 'search-source-alert-output'],
+                names: [
+                  'search-source-alert',
+                  'search-source-alert-output',
+                  'another-search-source-alert',
+                ],
                 privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
                 field_security: { grant: ['*'], except: [] },
               },

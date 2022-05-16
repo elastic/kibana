@@ -70,7 +70,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
       zIndex={8000}
       display="block"
     >
-      <div style={{ width: '450px' }}>
+      <div style={{ width: '450px' }} data-test-subj="chooseDataViewPopoverContent">
         <EuiPopoverTitle>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem>
