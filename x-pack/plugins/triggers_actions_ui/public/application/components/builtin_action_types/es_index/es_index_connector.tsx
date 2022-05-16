@@ -139,6 +139,14 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
             setTimeFields(getTimeFieldOptions(currentEsFields as any));
           };
 
+          const onSearchComboChange = (value: string) => {
+            if (value !== undefined) {
+              field.clearErrors(VALIDATION_TYPES.ARRAY_ITEM);
+            }
+
+            loadIndexOptions(value);
+          };
+
           return (
             <EuiFormRow
               id="indexConnectorSelectSearchBox"
@@ -189,7 +197,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
                 }
                 isDisabled={readOnly}
                 onChange={onComboChange}
-                onSearchChange={loadIndexOptions}
+                onSearchChange={onSearchComboChange}
               />
             </EuiFormRow>
           );
