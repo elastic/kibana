@@ -44,6 +44,7 @@ export function sendTelemetryEvents(
 export function formatTelemetryEvent({
   monitor,
   kibanaVersion,
+  isInlineScript,
   lastUpdatedAt,
   durationSinceLastUpdated,
   deletedAt,
@@ -51,6 +52,7 @@ export function formatTelemetryEvent({
 }: {
   monitor: SavedObject<EncryptedSyntheticsMonitor>;
   kibanaVersion: string;
+  isInlineScript: boolean;
   lastUpdatedAt?: string;
   durationSinceLastUpdated?: number;
   deletedAt?: string;
@@ -71,7 +73,7 @@ export function formatTelemetryEvent({
     monitorNameLength: attributes[ConfigKey.NAME].length,
     monitorInterval: scheduleToMilli(attributes[ConfigKey.SCHEDULE]),
     stackVersion: kibanaVersion,
-    scriptType: getScriptType(attributes as Partial<MonitorFields>),
+    scriptType: getScriptType(attributes as Partial<MonitorFields>, isInlineScript),
     errors:
       errors && errors?.length
         ? errors.map((e) => ({
@@ -92,6 +94,7 @@ export function formatTelemetryUpdateEvent(
   currentMonitor: SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor>,
   previousMonitor: SavedObject<EncryptedSyntheticsMonitor>,
   kibanaVersion: string,
+  isInlineScript: boolean,
   errors?: ServiceLocationErrors | null
 ) {
   let durationSinceLastUpdated: number = 0;
@@ -106,6 +109,7 @@ export function formatTelemetryUpdateEvent(
     kibanaVersion,
     durationSinceLastUpdated,
     lastUpdatedAt: previousMonitor.updated_at,
+    isInlineScript,
     errors,
   });
 }
@@ -114,6 +118,7 @@ export function formatTelemetryDeleteEvent(
   previousMonitor: SavedObject<EncryptedSyntheticsMonitor>,
   kibanaVersion: string,
   deletedAt: string,
+  isInlineScript: boolean,
   errors?: ServiceLocationErrors | null
 ) {
   let durationSinceLastUpdated: number = 0;
@@ -128,21 +133,20 @@ export function formatTelemetryDeleteEvent(
     durationSinceLastUpdated,
     lastUpdatedAt: previousMonitor.updated_at,
     deletedAt,
+    isInlineScript,
     errors,
   });
 }
 
 function getScriptType(
-  attributes: Partial<MonitorFields>
+  attributes: Partial<MonitorFields>,
+  isInlineScript: boolean
 ): 'inline' | 'recorder' | 'zip' | undefined {
   if (attributes[ConfigKey.SOURCE_ZIP_URL]) {
     return 'zip';
-  } else if (
-    attributes[ConfigKey.SOURCE_INLINE] &&
-    attributes[ConfigKey.METADATA]?.script_source?.is_generated_script
-  ) {
+  } else if (isInlineScript && attributes[ConfigKey.METADATA]?.script_source?.is_generated_script) {
     return 'recorder';
-  } else if (attributes[ConfigKey.SOURCE_INLINE]) {
+  } else if (isInlineScript) {
     return 'inline';
   }
 

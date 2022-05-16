@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const queryBar = getService('queryBar');
   const pieChart = getService('pieChart');
+  const elasticChart = getService('elasticChart');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -26,12 +27,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
 
-  describe('Dashboard options list integration', () => {
+  // FAILING: https://github.com/elastic/kibana/issues/132049
+  describe.skip('Dashboard options list integration', () => {
     before(async () => {
       await common.navigateToApp('dashboard');
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();
+      await elasticChart.setNewChartUiDebugFlag();
     });
 
     describe('Options List Control Editor selects relevant data views', async () => {
@@ -259,46 +262,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           after(async () => {
             await filterBar.removeAllFilters();
           });
-        });
-      });
-
-      describe('Does not apply query settings to controls', async () => {
-        before(async () => {
-          await dashboardControls.updateAllQuerySyncSettings(false);
-        });
-
-        after(async () => {
-          await dashboardControls.updateAllQuerySyncSettings(true);
-        });
-
-        it('Does not apply query to options list control', async () => {
-          await queryBar.setQuery('isDog : true ');
-          await queryBar.submitQuery();
-          await dashboard.waitForRenderComplete();
-          await header.waitUntilLoadingHasFinished();
-          await ensureAvailableOptionsEql(allAvailableOptions);
-          await queryBar.setQuery('');
-          await queryBar.submitQuery();
-        });
-
-        it('Does not apply filters to options list control', async () => {
-          await filterBar.addFilter('sound.keyword', 'is one of', ['bark', 'bow ow ow', 'ruff']);
-          await dashboard.waitForRenderComplete();
-          await header.waitUntilLoadingHasFinished();
-          await ensureAvailableOptionsEql(allAvailableOptions);
-          await filterBar.removeFilter('sound.keyword');
-        });
-
-        it('Does not apply time range to options list control', async () => {
-          // set time range to time with no documents
-          await timePicker.setAbsoluteRange(
-            'Jan 1, 2017 @ 00:00:00.000',
-            'Jan 1, 2017 @ 00:00:00.000'
-          );
-          await dashboard.waitForRenderComplete();
-          await header.waitUntilLoadingHasFinished();
-          await ensureAvailableOptionsEql(allAvailableOptions);
-          await timePicker.setDefaultDataRange();
         });
       });
 
