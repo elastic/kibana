@@ -18,6 +18,10 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 
+jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
+  bulkMarkApiKeysForInvalidation: jest.fn(),
+}));
+
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -450,7 +454,6 @@ describe('enable()', () => {
   });
 
   test('enables a rule if conflict errors received when scheduling a task', async () => {
-    const createdAt = new Date().toISOString();
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       ...existingRuleWithoutApiKey,
       attributes: {
@@ -460,15 +463,6 @@ describe('enable()', () => {
         apiKeyOwner: null,
         updatedBy: 'elastic',
       },
-    });
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '123',
-        createdAt,
-      },
-      references: [],
     });
     taskManager.schedule.mockRejectedValueOnce(
       Object.assign(new Error('Conflict!'), { statusCode: 409 })

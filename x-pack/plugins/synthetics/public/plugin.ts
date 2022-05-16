@@ -125,7 +125,6 @@ export class UptimePlugin
     });
 
     registerUptimeRoutesWithNavigation(core, plugins);
-    registerSyntheticsRoutesWithNavigation(core, plugins);
 
     const { observabilityRuleTypeRegistry } = plugins.observability;
 
@@ -196,6 +195,8 @@ export class UptimePlugin
     const isSyntheticsViewEnabled = core.uiSettings.get<boolean>(enableNewSyntheticsView);
 
     if (isSyntheticsViewEnabled) {
+      registerSyntheticsRoutesWithNavigation(core, plugins);
+
       // Register the Synthetics UI plugin
       core.application.register({
         id: 'synthetics',
