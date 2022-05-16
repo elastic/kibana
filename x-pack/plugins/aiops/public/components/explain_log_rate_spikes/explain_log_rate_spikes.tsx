@@ -15,6 +15,9 @@ import { useStreamFetchReducer } from '../../hooks/use_stream_fetch_reducer';
 
 import { initialState, streamReducer } from './stream_reducer';
 
+/**
+ * ExplainLogRateSpikes props require a data view.
+ */
 export interface ExplainLogRateSpikesProps {
   dataView: DataView;
 }

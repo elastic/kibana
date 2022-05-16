@@ -7,12 +7,12 @@
 
 import { AiopsPlugin } from './plugin';
 
-export { ExplainLogRateSpikes, SingleEndpointStreamingDemo } from './shared_lazy_components';
-
 // This exports static code and TypeScript types,
 // as well as, Kibana Platform `plugin()` initializer.
 export function plugin() {
   return new AiopsPlugin();
 }
 
+export type { ExplainLogRateSpikesProps } from './components/explain_log_rate_spikes';
+export { ExplainLogRateSpikes, SingleEndpointStreamingDemo } from './shared_lazy_components';
 export type { AiopsPluginSetup, AiopsPluginStart } from './types';
