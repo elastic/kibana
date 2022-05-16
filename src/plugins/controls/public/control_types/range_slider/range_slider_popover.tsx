@@ -131,7 +131,7 @@ export const RangeSliderPopover: FC<Props> = ({
             onChange={(event) => {
               onChange([event.target.value, isNaN(upperBoundValue) ? '' : String(upperBoundValue)]);
             }}
-            disabled={!hasAvailableRange || isLoading}
+            disabled={isLoading}
             placeholder={`${hasAvailableRange ? roundedMin : ''}`}
             isInvalid={isInvalid}
             data-test-subj="rangeSlider__lowerBoundFieldNumber"
@@ -153,7 +153,7 @@ export const RangeSliderPopover: FC<Props> = ({
             onChange={(event) => {
               onChange([isNaN(lowerBoundValue) ? '' : String(lowerBoundValue), event.target.value]);
             }}
-            disabled={!hasAvailableRange || isLoading}
+            disabled={isLoading}
             placeholder={`${hasAvailableRange ? roundedMax : ''}`}
             isInvalid={isInvalid}
             data-test-subj="rangeSlider__upperBoundFieldNumber"
