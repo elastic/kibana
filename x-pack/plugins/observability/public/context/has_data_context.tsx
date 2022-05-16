@@ -112,6 +112,22 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
                   indices: resultInfraMetrics?.indices,
                 });
                 break;
+              case 'alert':
+                const alerts = await lastValueFrom(
+                  data.search.search({
+                    params: {
+                      index: alertIndices,
+                      ignore_unavailable: true,
+                      allow_no_indices: true,
+                      size: 0,
+                      terminate_after: 1,
+                      track_total_hits: 1,
+                    },
+                  })
+                );
+                const hasAlerts = (alerts?.rawResponse.hits.total ?? 0) > 0;
+                updateState({ hasData: hasAlerts });
+                break;
             }
           } catch (e) {
             setHasDataMap((prevState) => ({
@@ -125,46 +141,8 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
         });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isExploratoryView]
+    [isExploratoryView, alertIndices]
   );
-
-  useEffect(() => {
-    async function fetchAlerts() {
-      try {
-        const alerts = await lastValueFrom(
-          data.search.search({
-            params: {
-              index: alertIndices,
-              ignore_unavailable: true,
-              allow_no_indices: true,
-              size: 0,
-              terminate_after: 1,
-              track_total_hits: 1,
-            },
-          })
-        );
-        const hasAlerts = (alerts?.rawResponse.hits.total ?? 0) > 0;
-
-        setHasDataMap((prevState) => ({
-          ...prevState,
-          alert: {
-            hasData: hasAlerts,
-            status: FETCH_STATUS.SUCCESS,
-          },
-        }));
-      } catch (e) {
-        setHasDataMap((prevState) => ({
-          ...prevState,
-          alert: {
-            hasData: undefined,
-            status: FETCH_STATUS.FAILURE,
-          },
-        }));
-      }
-    }
-
-    fetchAlerts();
-  }, [forceUpdate, alertIndices, data]);
 
   const isAllRequestsComplete = apps.every((app) => {
     const appStatus = hasDataMap[app]?.status;
