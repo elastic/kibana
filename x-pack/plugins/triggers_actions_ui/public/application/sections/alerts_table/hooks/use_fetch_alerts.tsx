@@ -19,15 +19,8 @@ import type {
   RuleRegistrySearchResponse,
 } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
+import { DefaultSort } from './constants';
 import * as i18n from './translations';
-
-const defaultSort: estypes.SortCombinations[] = [
-  {
-    '@timestamp': {
-      order: 'asc',
-    },
-  },
-];
 
 interface FetchAlertsArgs {
   featureIds: ValidFeatureId[];
@@ -85,7 +78,7 @@ const initialAlertState: AlertStateReducer = {
       pageIndex: 0,
       pageSize: 50,
     },
-    sort: defaultSort,
+    sort: DefaultSort,
   },
   response: {
     alerts: [],

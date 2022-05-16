@@ -11,15 +11,17 @@ import {
   EuiDataGridControlColumn,
   EuiProgress,
   EuiDataGridSorting,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ValidFeatureId } from '@kbn/rule-data-utils';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { useFetchAlerts } from './hooks';
+import { useFetchAlerts } from './hooks/use_fetch_alerts';
 import { AlertsTable } from './alerts_table';
 import { AlertsTableConfigurationRegistry, RenderCellValueProps } from '../../../types';
 import { TypeRegistry } from '../../type_registry';
+import { ALERTS_TABLE_CONF_ERROR_MESSAGE, ALERTS_TABLE_CONF_ERROR_TITLE } from './translations';
 
 const DefaultPagination = {
   pageSize: 10,
@@ -63,11 +65,15 @@ const AlertsTableState = ({
 
   const storageAlertsTable = useRef<AlertsTableStorage>({
     columns:
-      localAlertsTableConfig.columns && !isEmpty(localAlertsTableConfig?.columns)
+      localAlertsTableConfig &&
+      localAlertsTableConfig.columns &&
+      !isEmpty(localAlertsTableConfig?.columns)
         ? localAlertsTableConfig?.columns ?? []
         : alertsTableConfiguration?.columns ?? [],
     sort:
-      localAlertsTableConfig.sort && !isEmpty(localAlertsTableConfig?.sort)
+      localAlertsTableConfig &&
+      localAlertsTableConfig.sort &&
+      !isEmpty(localAlertsTableConfig?.sort)
         ? localAlertsTableConfig?.sort ?? []
         : alertsTableConfiguration?.sort ?? [],
   });
@@ -172,13 +178,20 @@ const AlertsTableState = ({
     [columns, pagination.pageSize, showCheckboxes, useFetchAlertsData]
   );
 
-  return (
+  return hasAlertsTableConfiguration ? (
     <>
       {isLoading && (
         <EuiProgress size="xs" color="accent" data-test-subj="internalAlertsPageLoading" />
       )}
       <AlertsTable {...tableProps} />
     </>
+  ) : (
+    <EuiEmptyPrompt
+      data-test-subj="alertsTableNoConfiguration"
+      iconType="watchesApp"
+      title={<h2>{ALERTS_TABLE_CONF_ERROR_TITLE}</h2>}
+      body={<p>{ALERTS_TABLE_CONF_ERROR_MESSAGE}</p>}
+    />
   );
 };
 

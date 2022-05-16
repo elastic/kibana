@@ -25,9 +25,14 @@ export const getRegistrationContextFromAlerts = (comments: Comment[]): string[] 
     if (comment.type === CommentType.alert) {
       const indices = Array.isArray(comment.index) ? comment.index : [comment.index];
       indices.forEach((index) => {
-        const registrationContext = getRegistrationContextFromIndex(index);
-        if (registrationContext) {
-          registrationContexts.add(registrationContext);
+        // That's legacy code, we created some index alias so everything should work as expected
+        if (index.startsWith('.siem-signals')) {
+          registrationContexts.add('security');
+        } else {
+          const registrationContext = getRegistrationContextFromIndex(index);
+          if (registrationContext) {
+            registrationContexts.add(registrationContext);
+          }
         }
       });
       return registrationContexts;
@@ -38,8 +43,7 @@ export const getRegistrationContextFromAlerts = (comments: Comment[]): string[] 
 };
 
 export const getRegistrationContextFromIndex = (indexName: string): string | null => {
-  const regex = new RegExp('.alerts-(.*?).alerts');
-  const found = indexName.match(regex);
+  const found = indexName.match(/\.alerts-(.*?).alerts/);
   if (found && found.length > 1) {
     return `${found[1]}`;
   }

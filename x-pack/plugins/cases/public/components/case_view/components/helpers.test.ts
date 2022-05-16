@@ -24,6 +24,18 @@ const comment3 = {
   alertId: ['nested1', 'nested2', 'nested3'],
 };
 
+const commentSiemSignal = {
+  ...alertComment,
+  alertId: 'alert-id-siem',
+  index: '.siem-signals-default-000008',
+};
+
+const commentIsBad = {
+  ...alertComment,
+  alertId: 'alert-id-bad',
+  index: 'bad-siem-signals-default-000008',
+};
+
 describe('Case view helpers', () => {
   describe('getRegistrationContextFromAlerts', () => {
     it('returns the correct registration context', () => {
@@ -34,6 +46,16 @@ describe('Case view helpers', () => {
     it('dedupes contexts', () => {
       const result = getRegistrationContextFromAlerts([comment, comment]);
       expect(result).toEqual(['matchme']);
+    });
+
+    it('returns the correct registration when find a .siem-signals* index', () => {
+      const result = getRegistrationContextFromAlerts([commentSiemSignal, comment2]);
+      expect(result).toEqual(['security', 'another']);
+    });
+
+    it('returns empty when the index is not formatted as expected', () => {
+      const result = getRegistrationContextFromAlerts([commentIsBad]);
+      expect(result).toEqual([]);
     });
   });
 

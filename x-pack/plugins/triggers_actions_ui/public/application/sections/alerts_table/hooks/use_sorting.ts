@@ -4,17 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EuiDataGridSorting } from '@elastic/eui';
 import { useCallback, useState } from 'react';
 
-const DefaultSort: estypes.SortCombinations[] = [
-  {
-    '@timestamp': {
-      order: 'asc',
-    },
-  },
-];
+import { DefaultSort } from './constants';
 
 const formatGridColumns = (cols: estypes.SortCombinations[]): EuiDataGridSorting['columns'] => {
   const colsSorting: EuiDataGridSorting['columns'] = [];

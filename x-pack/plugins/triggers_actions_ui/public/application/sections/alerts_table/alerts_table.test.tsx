@@ -5,40 +5,25 @@
  * 2.0.
  */
 import React from 'react';
-
-import { AlertsTable } from './alerts_table';
-import { AlertsField } from '../../../types';
-import { PLUGIN_ID } from '../../../common/constants';
-import { useKibana } from '../../../common/lib/kibana';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
+
+import { AlertsTable } from './alerts_table';
+import { AlertsField } from '../../../types';
+
 jest.mock('@kbn/data-plugin/public');
-jest.mock('../../../common/lib/kibana');
 
 const columns = [
   {
-    id: 'kibana.alert.rule.name',
+    id: AlertsField.name,
     displayAsText: 'Name',
   },
   {
-    id: 'kibana.alert.rule.category',
-    displayAsText: 'Category',
+    id: AlertsField.reason,
+    displayAsText: 'Reason',
   },
 ];
-
-const hookUseKibanaMock = useKibana as jest.Mock;
-const alertsTableConfigurationRegistryMock =
-  hookUseKibanaMock().services.alertsTableConfigurationRegistry;
-alertsTableConfigurationRegistryMock.has.mockImplementation((plugin: string) => {
-  return plugin === PLUGIN_ID;
-});
-alertsTableConfigurationRegistryMock.get.mockImplementation((plugin: string) => {
-  if (plugin === PLUGIN_ID) {
-    return { columns };
-  }
-  return {};
-});
 
 describe('AlertsTable', () => {
   const alerts = [
@@ -71,7 +56,7 @@ describe('AlertsTable', () => {
   };
 
   const tableProps = {
-    columns: [{ id: AlertsField.name }, { id: AlertsField.reason }],
+    columns,
     bulkActions: [],
     deletedEventIds: [],
     disabledCellActions: [],
@@ -87,11 +72,6 @@ describe('AlertsTable', () => {
     useFetchAlertsData,
     'data-test-subj': 'testTable',
   };
-
-  beforeEach(() => {
-    alertsTableConfigurationRegistryMock.get.mockClear();
-    alertsTableConfigurationRegistryMock.has.mockClear();
-  });
 
   describe('Alerts table UI', () => {
     it('should support sorting', async () => {

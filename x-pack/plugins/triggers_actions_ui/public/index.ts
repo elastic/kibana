@@ -32,7 +32,6 @@ export type {
   AsApiContract,
   RuleTableItem,
   AlertsTableProps,
-  AlertsData,
   BulkActionsObjectProp,
   RuleSummary,
   AlertStatus,
