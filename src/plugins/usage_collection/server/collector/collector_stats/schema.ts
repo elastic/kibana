@@ -35,7 +35,7 @@ export const collectorsStatsSchema: MakeSchemaFrom<CollectorsStats> = {
     type: 'array',
     items: {
       name: {
-        type: 'text',
+        type: 'keyword',
         _meta: {
           description: 'The name of the collector',
         },
@@ -52,7 +52,7 @@ export const collectorsStatsSchema: MakeSchemaFrom<CollectorsStats> = {
     type: 'array',
     items: {
       name: {
-        type: 'text',
+        type: 'keyword',
         _meta: {
           description: 'The name of the collector',
         },

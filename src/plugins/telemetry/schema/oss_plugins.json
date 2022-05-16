@@ -9635,7 +9635,7 @@
           "items": {
             "properties": {
               "name": {
-                "type": "text",
+                "type": "keyword",
                 "_meta": {
                   "description": "The name of the collector"
                 }
@@ -9654,7 +9654,7 @@
           "items": {
             "properties": {
               "name": {
-                "type": "text",
+                "type": "keyword",
                 "_meta": {
                   "description": "The name of the collector"
                 }
