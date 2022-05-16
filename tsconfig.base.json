@@ -265,6 +265,8 @@
       "@kbn/exploratory-view-example-plugin/*": ["x-pack/examples/exploratory_view_example/*"],
       "@kbn/reporting-example-plugin": ["x-pack/examples/reporting_example"],
       "@kbn/reporting-example-plugin/*": ["x-pack/examples/reporting_example/*"],
+      "@kbn/response-stream": ["x-pack/examples/reporting_example"],
+      "@kbn/response-stream/*": ["x-pack/examples/response_stream/*"],
       "@kbn/screenshotting-example-plugin": ["x-pack/examples/screenshotting_example"],
       "@kbn/screenshotting-example-plugin/*": ["x-pack/examples/screenshotting_example/*"],
       "@kbn/testing-embedded-lens-plugin": ["x-pack/examples/testing_embedded_lens"],
