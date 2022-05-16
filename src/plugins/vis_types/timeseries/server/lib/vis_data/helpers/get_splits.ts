@@ -7,7 +7,7 @@
  */
 
 import Color from 'color';
-import { get, isPlainObject } from 'lodash';
+import { get, isArray, isPlainObject } from 'lodash';
 import { overwrite } from '.';
 
 import { calculateLabel } from '../../../../common/calculate_label';
@@ -68,11 +68,15 @@ export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta =
             ...bucket.column_filter,
           };
         }
+        const isMultiFieldsTerms = isArray(bucket.key);
 
         bucket.id = `${series.id}${SERIES_SEPARATOR}${bucket.key}`;
         bucket.splitByLabel = splitByLabel;
         bucket.label = formatKey(bucket.key, series);
-        bucket.labelFormatted = bucket.key_as_string ? formatKey(bucket.key_as_string, series) : '';
+        bucket.labelFormatted =
+          !isMultiFieldsTerms && bucket.key_as_string
+            ? formatKey(bucket.key_as_string, series)
+            : '';
         bucket.color = color.string();
         bucket.meta = meta;
         bucket.termsSplitKey = bucket.key;

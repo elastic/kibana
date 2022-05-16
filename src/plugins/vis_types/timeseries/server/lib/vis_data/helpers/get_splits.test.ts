@@ -232,6 +232,72 @@ describe('getSplits(resp, panel, series)', () => {
     ]);
   });
 
+  test('should return a splits for terms group without labelFormatted for multi fields terms aggregation', async () => {
+    const resp = {
+      aggregations: {
+        SERIES: {
+          buckets: [
+            {
+              key: [12, '4107'],
+              key_as_string: '12|4107',
+              timeseries: { buckets: [] },
+              SIBAGG: { value: 1 },
+            },
+            {
+              key: [12, '4108'],
+              key_as_string: '12|4108',
+              timeseries: { buckets: [] },
+              SIBAGG: { value: 2 },
+            },
+          ],
+          meta: { bucketSize: 10 },
+        },
+      },
+    };
+    const series = {
+      id: 'SERIES',
+      label: '--{{key}}--',
+      color: '#F00',
+      split_mode: 'terms',
+      terms_field: ['my_text', 'my_number'],
+      terms_size: 10,
+      metrics: [
+        { id: 'AVG', type: 'avg', field: 'cpu' },
+        { id: 'SIBAGG', type: 'avg_bucket', field: 'AVG' },
+      ],
+    } as unknown as Series;
+    const panel = { type: 'top_n' } as Panel;
+
+    expect(await getSplits(resp, panel, series, undefined, () => [])).toEqual([
+      {
+        id: 'SERIES╰┄►12,4107',
+        key: [12, '4107'],
+        key_as_string: '12|4107',
+        label: '--12,4107--',
+        labelFormatted: '',
+        meta: { bucketSize: 10 },
+        color: 'rgb(255, 0, 0)',
+        splitByLabel: 'Overall Average of Average of cpu',
+        termsSplitKey: [12, '4107'],
+        timeseries: { buckets: [] },
+        SIBAGG: { value: 1 },
+      },
+      {
+        id: 'SERIES╰┄►12,4108',
+        key: [12, '4108'],
+        key_as_string: '12|4108',
+        label: '--12,4108--',
+        labelFormatted: '',
+        meta: { bucketSize: 10 },
+        color: 'rgb(255, 0, 0)',
+        splitByLabel: 'Overall Average of Average of cpu',
+        termsSplitKey: [12, '4108'],
+        timeseries: { buckets: [] },
+        SIBAGG: { value: 2 },
+      },
+    ]);
+  });
+
   test('should return a splits for filters group bys', async () => {
     const resp = {
       aggregations: {

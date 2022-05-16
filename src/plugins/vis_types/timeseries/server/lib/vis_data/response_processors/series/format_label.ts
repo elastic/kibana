@@ -7,6 +7,7 @@
  */
 
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { BUCKET_TYPES, PANEL_TYPES, TSVB_METRIC_TYPES } from '../../../../../common/enums';
 import {
   createCachedFieldValueFormatter,
@@ -57,6 +58,10 @@ export function formatLabel(
         fieldFormatService
       );
 
+      const termsFieldType = fetchedIndex?.indexPattern?.fields.find(
+        ({ name }) => name === termsField
+      )?.type;
+
       results
         .filter(({ seriesId }) => series.id === seriesId)
         .forEach((item) => {
@@ -66,6 +71,9 @@ export function formatLabel(
 
           if (formatted) {
             item.label = formatted;
+          }
+
+          if (formatted && termsFieldType === KBN_FIELD_TYPES.DATE) {
             item.labelFormatted = formatted;
           }
         });
