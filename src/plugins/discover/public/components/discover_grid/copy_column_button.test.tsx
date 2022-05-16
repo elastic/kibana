@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { buildCopyColumnNameButton } from './copy_column_name_button';
+import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './copy_column_button';
 import { EuiButton } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
@@ -15,8 +15,24 @@ const execCommandMock = (global.document.execCommand = jest.fn());
 const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
 
 describe('Copy to clipboard button', () => {
-  it('should copy to clipboard on click', () => {
+  it('should copy a column name to clipboard on click', () => {
     const { label, iconType, onClick } = buildCopyColumnNameButton('test-field-name');
+    execCommandMock.mockImplementationOnce(() => true);
+
+    const wrapper = mountWithIntl(
+      <EuiButton iconType={iconType} onClick={onClick}>
+        {label}
+      </EuiButton>
+    );
+
+    wrapper.find(EuiButton).simulate('click');
+
+    expect(execCommandMock).toHaveBeenCalledWith('copy');
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it('should copy column values to clipboard on click', () => {
+    const { label, iconType, onClick } = buildCopyColumnValuesButton('test-field-name');
     execCommandMock.mockImplementationOnce(() => true);
 
     const wrapper = mountWithIntl(
