@@ -98,7 +98,7 @@ export const BYOSourcePrompt: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiButton
-                href={''} // TODO Update this
+                href={''} // TODO Update this when we have a doclink
                 color="primary"
               >
                 {i18n.translate(
