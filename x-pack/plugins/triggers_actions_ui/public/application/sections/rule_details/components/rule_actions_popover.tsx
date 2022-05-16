@@ -84,6 +84,7 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
               },
               {
                 disabled: !canSaveRule,
+                className: 'ruleActionsPopover__deleteButton',
                 'data-test-subj': 'deleteRuleButton',
                 onClick: () => {
                   setIsPopoverOpen(false);

@@ -148,6 +148,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
         },
         {
           disabled: !item.isEditable,
+          className: 'collapsedItemActions__deleteButton',
           'data-test-subj': 'deleteRule',
           onClick: () => {
             setIsPopoverOpen(!isPopoverOpen);
