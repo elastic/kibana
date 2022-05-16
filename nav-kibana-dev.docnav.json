@@ -170,7 +170,8 @@
       "label": "Operations",
       "items": [
         { "id": "kibDevDocsOpsLanding" },
-        { "id": "kibDevDocsOpsOptimizer" }
+        { "id": "kibDevDocsOpsOptimizer" },
+        { "id": "kibDevDocsOpsEslintConfigKibana" }
       ]
     }
   ]
