@@ -284,6 +284,7 @@ function AlertsPage() {
               setRefetch={setRefetch}
               stateStorageKey={ALERT_TABLE_STATE_STORAGE_KEY}
               storage={new Storage(window.localStorage)}
+              itemsPerPage={50}
             />
           </CasesContext>
         </EuiFlexItem>

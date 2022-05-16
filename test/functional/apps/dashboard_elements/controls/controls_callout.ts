@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
+
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -47,7 +49,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('adding control hides the empty control callout', async () => {
-        await dashboardControls.createOptionsListControl({
+        await dashboardControls.createControl({
+          controlType: OPTIONS_LIST_CONTROL,
           dataViewTitle: 'animals-*',
           fieldName: 'sound.keyword',
         });
