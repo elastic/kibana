@@ -109,6 +109,7 @@ export const useLensButtonToggle = ({
           for (let i = 0; i < node.children.length; i++) {
             const child = node.children[i];
             if (
+              child.position &&
               child.position.start.offset < selectionStart &&
               selectionStart < child.position.end.offset
             ) {
