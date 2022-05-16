@@ -8,6 +8,7 @@ import React, { useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import type { DataView } from '@kbn/data-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { number } from 'io-ts';
 import { FindingsTable } from './latest_findings_table';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
 import * as TEST_SUBJECTS from '../test_subjects';
@@ -108,7 +109,8 @@ const getFindingsDistribution = ({
   pageSize,
 }: Record<'currentPageSize' | 'total' | 'passed' | 'failed', number | undefined> &
   Record<'pageIndex' | 'pageSize', number>) => {
-  if (!total || !passed || !failed || !currentPageSize) return;
+  if (!number.is(total) || !number.is(passed) || !number.is(failed) || !number.is(currentPageSize))
+    return;
 
   return {
     total,
