@@ -43,7 +43,7 @@ export const USERS = i18n.translate('xpack.securitySolution.navigation.users', {
 });
 
 export const RULES = i18n.translate('xpack.securitySolution.navigation.rules', {
-  defaultMessage: 'SIEM rules',
+  defaultMessage: 'Rules',
 });
 
 export const EXCEPTIONS = i18n.translate('xpack.securitySolution.navigation.exceptions', {
@@ -71,7 +71,7 @@ export const ENDPOINTS = i18n.translate('xpack.securitySolution.search.administr
 export const POLICIES = i18n.translate(
   'xpack.securitySolution.navigation.administration.policies',
   {
-    defaultMessage: 'Endpoint policies',
+    defaultMessage: 'Policies',
   }
 );
 export const TRUSTED_APPLICATIONS = i18n.translate(
@@ -90,7 +90,7 @@ export const EVENT_FILTERS = i18n.translate(
 export const HOST_ISOLATION_EXCEPTIONS = i18n.translate(
   'xpack.securitySolution.search.administration.hostIsolationExceptions',
   {
-    defaultMessage: 'Host isolation IP exceptions',
+    defaultMessage: 'Host isolation exceptions',
   }
 );
 export const DETECT = i18n.translate('xpack.securitySolution.navigation.detect', {

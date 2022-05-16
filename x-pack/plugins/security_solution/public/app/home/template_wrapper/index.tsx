@@ -46,7 +46,6 @@ const NO_DATA_PAGE_TEMPLATE_PROPS = {
 const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
   $isShowingTimelineOverlay?: boolean;
   $addBottomPadding?: boolean;
-  $isGroupedNav?: boolean;
 }>`
   .${BOTTOM_BAR_CLASSNAME} {
     animation: 'none !important'; // disable the default bottom bar slide animation
@@ -112,7 +111,6 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
       <StyledKibanaPageTemplate
         $addBottomPadding={addBottomPadding}
         $isShowingTimelineOverlay={isShowingTimelineOverlay}
-        $isGroupedNav={isGroupedNavEnabled}
         bottomBarProps={SecuritySolutionBottomBarProps}
         bottomBar={
           userHasSecuritySolutionVisible && <SecuritySolutionBottomBar onAppLeave={onAppLeave} />

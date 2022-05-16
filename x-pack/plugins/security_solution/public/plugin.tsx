@@ -47,7 +47,7 @@ import {
   SOURCERER_API_URL,
 } from '../common/constants';
 
-import { getAllDeepLinks, registerDeepLinksUpdater } from './app/deep_links';
+import { getDeepLinks } from './app/deep_links';
 import { getSubPluginRoutesByCapabilities, manageOldSiemRoutes } from './helpers';
 import { SecurityAppStore } from './common/store/store';
 import { licenseService } from './common/hooks/use_license';
@@ -64,8 +64,6 @@ import {
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
 import { initDataView, SourcererModel, KibanaDataView } from './common/store/sourcerer/model';
 import { SecurityDataView } from './common/containers/sourcerer/api';
-import { updateAllAppLinks } from './common/links';
-import { LinksPermissions } from './common/links/types';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   readonly kibanaVersion: string;
@@ -142,7 +140,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       searchable: true,
       updater$: this.appUpdater$,
       euiIconType: APP_ICON_SOLUTION,
-      deepLinks: getAllDeepLinks(),
+      deepLinks: getDeepLinks(this.experimentalFeatures),
       mount: async (params: AppMountParameters) => {
         // required to show the alert table inside cases
         const { alertsTableConfigurationRegistry } = plugins.triggersActionsUi;
@@ -225,26 +223,31 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     licenseService.start(plugins.licensing.license$);
     const licensing = licenseService.getLicenseInformation$();
 
-    const linksPermissions: LinksPermissions = {
-      experimentalFeatures: this.experimentalFeatures,
-      capabilities: core.application.capabilities,
-    };
-
     /**
      * Register deepLinks and pass an appUpdater for each subPlugin, to change deepLinks as needed when licensing changes.
      */
-    registerDeepLinksUpdater(this.appUpdater$);
-
     if (licensing !== null) {
       this.licensingSubscription = licensing.subscribe((currentLicense) => {
         if (currentLicense.type !== undefined) {
-          updateAllAppLinks({ ...linksPermissions, license: currentLicense });
-        } else {
-          updateAllAppLinks(linksPermissions);
+          this.appUpdater$.next(() => ({
+            navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
+            deepLinks: getDeepLinks(
+              this.experimentalFeatures,
+              currentLicense.type,
+              core.application.capabilities
+            ),
+          }));
         }
       });
     } else {
-      updateAllAppLinks(linksPermissions);
+      this.appUpdater$.next(() => ({
+        navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
+        deepLinks: getDeepLinks(
+          this.experimentalFeatures,
+          undefined,
+          core.application.capabilities
+        ),
+      }));
     }
 
     return {};
