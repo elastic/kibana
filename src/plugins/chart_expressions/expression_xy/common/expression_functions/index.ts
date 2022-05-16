@@ -19,5 +19,5 @@ export * from './axis_extent_config';
 export * from './tick_labels_config';
 export * from './labels_orientation_config';
 export * from './reference_line';
-export * from './extended_reference_line_layer';
+export * from './reference_line_layer';
 export * from './axis_titles_visibility_config';
