@@ -16,9 +16,12 @@ import {
   ReferenceLineLayerArgs,
   ReferenceLineLayerConfig,
   ExtendedYConfig,
+  ReferenceLineArgs,
+  ReferenceLineConfig,
 } from '../../../common/types';
 import { ReferenceLineAnnotations, ReferenceLineAnnotationsProps } from './reference_lines';
 import { ReferenceLineLayer } from './reference_line_layer';
+import { ReferenceLine } from './reference_line';
 
 const row: Record<string, number> = {
   xAccessorFirstId: 1,
@@ -55,6 +58,20 @@ function createLayers(yConfigs: ReferenceLineLayerArgs['yConfig']): ReferenceLin
   ];
 }
 
+function createReferenceLine(
+  layerId: string,
+  lineLength: number,
+  args: ReferenceLineArgs
+): ReferenceLineConfig {
+  return {
+    layerId,
+    type: 'referenceLine',
+    layerType: 'referenceLine',
+    lineLength,
+    yConfig: [{ type: 'referenceLineYConfig', ...args }],
+  };
+}
+
 interface YCoords {
   y0: number | undefined;
   y1: number | undefined;
@@ -71,7 +88,7 @@ function getAxisFromId(layerPrefix: string): ExtendedYConfig['axisMode'] {
 const emptyCoords = { x0: undefined, x1: undefined, y0: undefined, y1: undefined };
 
 describe('ReferenceLineAnnotations', () => {
-  describe('with fill', () => {
+  describe('referenceLineLayers', () => {
     let formatters: Record<'left' | 'right' | 'bottom', FieldFormat | undefined>;
     let defaultProps: Omit<ReferenceLineAnnotationsProps, 'data' | 'layers'>;
 
@@ -366,6 +383,266 @@ describe('ReferenceLineAnnotations', () => {
             {
               coordinates: { ...emptyCoords, ...coordsB },
               details: coordsB.y1 ?? coordsB.y0,
+              header: undefined,
+            },
+          ])
+        );
+      }
+    );
+  });
+
+  describe('referenceLines', () => {
+    let formatters: Record<'left' | 'right' | 'bottom', FieldFormat | undefined>;
+    let defaultProps: Omit<ReferenceLineAnnotationsProps, 'data' | 'layers'>;
+
+    beforeEach(() => {
+      formatters = {
+        left: { convert: jest.fn((x) => x) } as unknown as FieldFormat,
+        right: { convert: jest.fn((x) => x) } as unknown as FieldFormat,
+        bottom: { convert: jest.fn((x) => x) } as unknown as FieldFormat,
+      };
+
+      defaultProps = {
+        formatters,
+        isHorizontal: false,
+        axesMap: { left: true, right: false },
+        paddingMap: {},
+      };
+    });
+
+    it.each([
+      ['yAccessorLeft', 'above'],
+      ['yAccessorLeft', 'below'],
+      ['yAccessorRight', 'above'],
+      ['yAccessorRight', 'below'],
+    ] as Array<[string, ExtendedYConfig['fill']]>)(
+      'should render a RectAnnotation for a reference line with fill set: %s %s',
+      (layerPrefix, fill) => {
+        const axisMode = getAxisFromId(layerPrefix);
+        const value = 5;
+        const wrapper = shallow(
+          <ReferenceLineAnnotations
+            {...defaultProps}
+            layers={[
+              createReferenceLine(layerPrefix, 1, {
+                axisMode,
+                lineStyle: 'solid',
+                fill,
+                value,
+              }),
+            ]}
+          />
+        );
+        const referenceLine = wrapper.find(ReferenceLine).dive();
+
+        const y0 = fill === 'above' ? value : undefined;
+        const y1 = fill === 'above' ? undefined : value;
+
+        expect(referenceLine.find(LineAnnotation).exists()).toBe(true);
+        expect(referenceLine.find(RectAnnotation).exists()).toBe(true);
+        expect(referenceLine.find(RectAnnotation).prop('dataValues')).toEqual(
+          expect.arrayContaining([
+            {
+              coordinates: { x0: undefined, x1: undefined, y0, y1 },
+              details: y0 ?? y1,
+              header: undefined,
+            },
+          ])
+        );
+      }
+    );
+
+    it.each([
+      ['xAccessor', 'above'],
+      ['xAccessor', 'below'],
+    ] as Array<[string, ExtendedYConfig['fill']]>)(
+      'should render a RectAnnotation for a reference line with fill set: %s %s',
+      (layerPrefix, fill) => {
+        const value = 1;
+        const wrapper = shallow(
+          <ReferenceLineAnnotations
+            {...defaultProps}
+            layers={[
+              createReferenceLine(layerPrefix, 1, {
+                axisMode: 'bottom',
+                lineStyle: 'solid',
+                fill,
+                value,
+              }),
+            ]}
+          />
+        );
+        const referenceLine = wrapper.find(ReferenceLine).dive();
+
+        const x0 = fill === 'above' ? value : undefined;
+        const x1 = fill === 'above' ? undefined : value;
+
+        expect(referenceLine.find(LineAnnotation).exists()).toBe(true);
+        expect(referenceLine.find(RectAnnotation).exists()).toBe(true);
+        expect(referenceLine.find(RectAnnotation).prop('dataValues')).toEqual(
+          expect.arrayContaining([
+            {
+              coordinates: { ...emptyCoords, x0, x1 },
+              details: x0 ?? x1,
+              header: undefined,
+            },
+          ])
+        );
+      }
+    );
+
+    it.each([
+      ['yAccessorLeft', 'above', { y0: 10, y1: undefined }, { y0: 10, y1: undefined }],
+      ['yAccessorLeft', 'below', { y0: undefined, y1: 5 }, { y0: undefined, y1: 5 }],
+    ] as Array<[string, ExtendedYConfig['fill'], YCoords, YCoords]>)(
+      'should avoid overlap between two reference lines with fill in the same direction: 2 x %s %s',
+      (layerPrefix, fill, coordsA, coordsB) => {
+        const axisMode = getAxisFromId(layerPrefix);
+        const value = coordsA.y0 ?? coordsA.y1!;
+        const wrapper = shallow(
+          <ReferenceLineAnnotations
+            {...defaultProps}
+            layers={[
+              createReferenceLine(layerPrefix, 10, {
+                axisMode,
+                lineStyle: 'solid',
+                fill,
+                value,
+              }),
+              createReferenceLine(layerPrefix, 10, {
+                axisMode,
+                lineStyle: 'solid',
+                fill,
+                value,
+              }),
+            ]}
+          />
+        );
+        const referenceLine = wrapper.find(ReferenceLine).first().dive();
+
+        expect(referenceLine.find(RectAnnotation).first().prop('dataValues')).toEqual(
+          expect.arrayContaining([
+            {
+              coordinates: { ...emptyCoords, ...coordsA },
+              details: value,
+              header: undefined,
+            },
+          ])
+        );
+        expect(referenceLine.find(RectAnnotation).last().prop('dataValues')).toEqual(
+          expect.arrayContaining([
+            {
+              coordinates: { ...emptyCoords, ...coordsB },
+              details: value,
+              header: undefined,
+            },
+          ])
+        );
+      }
+    );
+
+    it.each([
+      ['xAccessor', 'above', { x0: 1, x1: undefined }, { x0: 1, x1: undefined }],
+      ['xAccessor', 'below', { x0: undefined, x1: 1 }, { x0: undefined, x1: 1 }],
+    ] as Array<[string, ExtendedYConfig['fill'], XCoords, XCoords]>)(
+      'should avoid overlap between two reference lines with fill in the same direction: 2 x %s %s',
+      (layerPrefix, fill, coordsA, coordsB) => {
+        const value = coordsA.x0 ?? coordsA.x1!;
+        const wrapper = shallow(
+          <ReferenceLineAnnotations
+            {...defaultProps}
+            layers={[
+              createReferenceLine(layerPrefix, 10, {
+                axisMode: 'bottom',
+                lineStyle: 'solid',
+                fill,
+                value,
+              }),
+              createReferenceLine(layerPrefix, 10, {
+                axisMode: 'bottom',
+                lineStyle: 'solid',
+                fill,
+                value,
+              }),
+            ]}
+          />
+        );
+        const referenceLine1 = wrapper.find(ReferenceLine).first().dive();
+
+        expect(referenceLine1.find(RectAnnotation).first().prop('dataValues')).toEqual(
+          expect.arrayContaining([
+            {
+              coordinates: { ...emptyCoords, ...coordsA },
+              details: value,
+              header: undefined,
+            },
+          ])
+        );
+
+        const referenceLine2 = wrapper.find(ReferenceLine).last().dive();
+
+        expect(referenceLine2.find(RectAnnotation).last().prop('dataValues')).toEqual(
+          expect.arrayContaining([
+            {
+              coordinates: { ...emptyCoords, ...coordsB },
+              details: value,
+              header: undefined,
+            },
+          ])
+        );
+      }
+    );
+
+    it.each(['yAccessorLeft', 'yAccessorRight', 'xAccessor'])(
+      'should let areas in different directions overlap: %s',
+      (layerPrefix) => {
+        const axisMode = getAxisFromId(layerPrefix);
+        const value1 = 1;
+        const value2 = 10;
+        const wrapper = shallow(
+          <ReferenceLineAnnotations
+            {...defaultProps}
+            layers={[
+              createReferenceLine(layerPrefix, 10, {
+                axisMode,
+                lineStyle: 'solid',
+                fill: 'above',
+                value: value1,
+              }),
+              createReferenceLine(layerPrefix, 10, {
+                axisMode,
+                lineStyle: 'solid',
+                fill: 'below',
+                value: value2,
+              }),
+            ]}
+          />
+        );
+        const referenceLine1 = wrapper.find(ReferenceLine).first().dive();
+
+        expect(referenceLine1.find(RectAnnotation).first().prop('dataValues')).toEqual(
+          expect.arrayContaining([
+            {
+              coordinates: {
+                ...emptyCoords,
+                ...(axisMode === 'bottom' ? { x0: value1 } : { y0: value1 }),
+              },
+              details: value1,
+              header: undefined,
+            },
+          ])
+        );
+
+        const referenceLine2 = wrapper.find(ReferenceLine).last().dive();
+
+        expect(referenceLine2.find(RectAnnotation).last().prop('dataValues')).toEqual(
+          expect.arrayContaining([
+            {
+              coordinates: {
+                ...emptyCoords,
+                ...(axisMode === 'bottom' ? { x1: value2 } : { y1: value2 }),
+              },
+              details: value2,
               header: undefined,
             },
           ])
