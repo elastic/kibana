@@ -22,10 +22,6 @@ const errorDetailsPageHref = url.format({
 });
 
 describe('Error details', () => {
-  beforeEach(() => {
-    cy.loginAsReadOnlyUser();
-  });
-
   describe('when data is loaded', () => {
     before(async () => {
       await synthtrace.index(
@@ -38,6 +34,10 @@ describe('Error details', () => {
 
     after(async () => {
       await synthtrace.clean();
+    });
+
+    beforeEach(() => {
+      cy.loginAsReadOnlyUser();
     });
 
     it('has no detectable a11y violations on load', () => {
@@ -65,6 +65,10 @@ describe('Error details', () => {
     });
 
     describe('when error has data', () => {
+      beforeEach(() => {
+        cy.loginAsReadOnlyUser();
+      });
+
       it('shows errors distribution chart', () => {
         cy.visit(errorDetailsPageHref);
         cy.contains('Error group 00000');
