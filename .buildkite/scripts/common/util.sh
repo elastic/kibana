@@ -14,6 +14,25 @@ is_pr() {
   false
 }
 
+is_pr_with_label() {
+  match="$1"
+
+  IFS=',' read -ra labels <<< "${GITHUB_PR_LABELS:-}"
+
+  for label in "${labels[@]}"
+  do
+    if [ "$label" == "$match" ]; then
+      return
+    fi
+  done
+
+  false
+}
+
+is_auto_commit_disabled() {
+  is_pr_with_label "ci:no-auto-commit"
+}
+
 check_for_changed_files() {
   RED='\033[0;31m'
   YELLOW='\033[0;33m'
@@ -23,7 +42,7 @@ check_for_changed_files() {
   GIT_CHANGES="$(git ls-files --modified -- . ':!:.bazelrc')"
 
   if [ "$GIT_CHANGES" ]; then
-    if [[ "$SHOULD_AUTO_COMMIT_CHANGES" == "true" && "${BUILDKITE_PULL_REQUEST:-}" ]]; then
+    if ! is_auto_commit_disabled && [[ "$SHOULD_AUTO_COMMIT_CHANGES" == "true" && "${BUILDKITE_PULL_REQUEST:-}" ]]; then
       NEW_COMMIT_MESSAGE="[CI] Auto-commit changed files from '$1'"
       PREVIOUS_COMMIT_MESSAGE="$(git log -1 --pretty=%B)"
 
