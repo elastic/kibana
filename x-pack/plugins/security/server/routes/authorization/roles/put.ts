@@ -53,6 +53,7 @@ export function definePutRolesRoutes({
       path: '/api/security/role/{name}',
       validate: {
         params: schema.object({ name: schema.string({ minLength: 1, maxLength: 1024 }) }),
+        query: schema.object({ createOnly: schema.boolean({ defaultValue: false }) }),
         body: getPutPayloadSchema(() => {
           const privileges = authz.privileges.get();
           return {
@@ -64,7 +65,7 @@ export function definePutRolesRoutes({
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const { name } = request.params;
-
+      const { createOnly } = request.query;
       try {
         const esClient = (await context.core).elasticsearch.client;
         const [features, rawRoles] = await Promise.all([
@@ -79,6 +80,14 @@ export function definePutRolesRoutes({
               message: `Role cannot be updated due to validation errors: ${JSON.stringify(
                 validationErrors
               )}`,
+            },
+          });
+        }
+
+        if (createOnly && Object.keys(rawRoles).length) {
+          return response.conflict({
+            body: {
+              message: `Role already exists and cannot be created: ${name}`,
             },
           });
         }

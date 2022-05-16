@@ -19,7 +19,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type { ChangeEvent, FunctionComponent, HTMLProps } from 'react';
+import type { ChangeEvent, FocusEvent, FunctionComponent, HTMLProps } from 'react';
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 
 import type {
@@ -302,6 +302,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
   // eventually enable validation after the first time user tries to save a role.
   const { current: validator } = useRef(new RoleValidator({ shouldValidate: false }));
   const [formError, setFormError] = useState<RoleValidationResult | null>(null);
+  const [creatingRoleAlreadyExists, setCreatingRoleAlreadyExists] = useState<boolean>(false);
   const runAsUsers = useRunAsUsers(userAPIClient, fatalErrors);
   const indexPatternsTitles = useIndexPatternsTitles(dataViews, fatalErrors, notifications);
   const privileges = usePrivileges(privilegesAPIClient, fatalErrors);
@@ -397,13 +398,18 @@ export const EditRolePage: FunctionComponent<Props> = ({
             ) : undefined
           }
           {...validator.validateRoleName(role)}
+          {...(creatingRoleAlreadyExists
+            ? { error: 'A role with this name already exists.', isInvalid: true }
+            : {})}
         >
           <EuiFieldText
             name={'name'}
             value={role.name || ''}
             onChange={onNameChange}
+            onBlur={onNameBlur}
             data-test-subj={'roleFormNameInput'}
             readOnly={isRoleReserved || isEditingExistingRole}
+            isInvalid={creatingRoleAlreadyExists}
           />
         </EuiFormRow>
       </EuiPanel>
@@ -415,6 +421,17 @@ export const EditRolePage: FunctionComponent<Props> = ({
       ...role,
       name: e.target.value,
     });
+
+  const onNameBlur = (e: FocusEvent<HTMLInputElement>) => {
+    // ToDo: ask Thom about how to implement this better such that we're not redundantly handling multiple events when name hasn't changed
+    // ToDo: limit queued events? only execute handler on latest posted event? Check if the state has changed? NO! Because state set is asynchronous.
+    // ToDo: State change wipes event queue? https://stackoverflow.com/questions/36514629/does-react-discard-queued-events-on-state-change
+    if (!isEditingExistingRole /* && role state changed? */) {
+      doesRoleExist().then((roleExists) => {
+        setCreatingRoleAlreadyExists(roleExists);
+      });
+    }
+  };
 
   const getElasticsearchPrivileges = () => {
     return (
@@ -529,7 +546,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
       setFormError(null);
 
       try {
-        await rolesAPIClient.saveRole({ role });
+        await rolesAPIClient.saveRole({ role, createOnly: !isEditingExistingRole });
       } catch (error) {
         notifications.toasts.addDanger(
           error?.body?.message ??
@@ -548,6 +565,15 @@ export const EditRolePage: FunctionComponent<Props> = ({
       );
 
       backToRoleList();
+    }
+  };
+
+  const doesRoleExist = async (): Promise<boolean> => {
+    try {
+      await rolesAPIClient.getRole(role.name);
+      return true;
+    } catch (error) {
+      return false;
     }
   };
 
