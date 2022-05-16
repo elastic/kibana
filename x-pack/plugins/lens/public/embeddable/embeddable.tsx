@@ -466,7 +466,7 @@ export class Embeddable
     this.activeDataInfo.activeData = adapters?.tables?.tables;
     if (this.input.onLoad) {
       // once onData$ is get's called from expression renderer, loading becomes false
-      this.input.onLoad(false);
+      this.input.onLoad(false, this.activeDataInfo.activeData);
     }
   };
 

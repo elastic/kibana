@@ -278,6 +278,13 @@ export function DiscoverHistogram({
           style={{ height: '100%' }}
           onBrushEnd={onBrushEnd}
           timeRange={{ from, to }}
+          onLoad={(_, activeData) => {
+            if (!activeData) return;
+            alert(`Total count is ${activeData?.layer1?.meta?.statistics?.totalCount}.`);
+            // TODO somehow use this total count instead of the separate request?
+            // TODO pass the inspector data and merge it with the top level inspector?
+
+          }}
           attributes={{
             title: 'Prefilled from example app',
             references: [
