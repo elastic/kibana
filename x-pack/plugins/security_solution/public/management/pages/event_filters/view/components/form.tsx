@@ -118,7 +118,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     const { http, unifiedSearch } = useKibana().services;
 
     const [hasFormChanged, setHasFormChanged] = useState(false);
-    const [hasNameError, setHasNameError] = useState<boolean>(!exception.name);
+    const [hasNameError, toggleHasNameError] = useState<boolean>(!exception.name);
     const [newComment, setNewComment] = useState('');
     const [hasBeenInputNameVisited, setHasBeenInputNameVisited] = useState(false);
     const [selectedPolicies, setSelectedPolicies] = useState<PolicyData[]>([]);
@@ -214,7 +214,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
       (event: React.ChangeEvent<HTMLInputElement>) => {
         if (!exception) return;
         const name = event.target.value.trim();
-        setHasNameError(!name);
+        toggleHasNameError(!name);
         processChanged({ name });
         if (!hasFormChanged) setHasFormChanged(true);
       },
