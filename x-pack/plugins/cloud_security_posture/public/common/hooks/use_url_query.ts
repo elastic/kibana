@@ -33,7 +33,6 @@ export const useUrlQuery = <T extends object>(getDefaultQuery: () => T) => {
 
   // Set initial query
   useEffect(() => {
-    // TODO: condition should be if decoding failed
     if (search) return;
 
     replace({ search: encodeQuery(getDefaultQuery() as RisonObject) });

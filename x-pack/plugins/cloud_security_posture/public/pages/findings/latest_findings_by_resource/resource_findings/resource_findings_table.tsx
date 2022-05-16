@@ -5,17 +5,27 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiEmptyPrompt, EuiBasicTable } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiBasicTable, CriteriaWithPagination, Pagination } from '@elastic/eui';
 import { extractErrorMessage } from '../../../../../common/utils/helpers';
 import * as TEXT from '../../translations';
 import type { ResourceFindingsResult } from './use_resource_findings';
 import { getFindingsColumns } from '../../layout/findings_layout';
+import type { CspFinding } from '../../types';
 
-type FindingsGroupByResourceProps = ResourceFindingsResult;
+interface Props extends ResourceFindingsResult {
+  pagination: Pagination;
+  setTableOptions(options: CriteriaWithPagination<CspFinding>): void;
+}
 
 const columns = getFindingsColumns();
 
-const ResourceFindingsTableComponent = ({ error, data, loading }: FindingsGroupByResourceProps) => {
+const ResourceFindingsTableComponent = ({
+  error,
+  data,
+  loading,
+  pagination,
+  setTableOptions,
+}: Props) => {
   if (!loading && !data?.page.length)
     return <EuiEmptyPrompt iconType="logoKibana" title={<h2>{TEXT.NO_FINDINGS}</h2>} />;
 
@@ -25,6 +35,8 @@ const ResourceFindingsTableComponent = ({ error, data, loading }: FindingsGroupB
       error={error ? extractErrorMessage(error) : undefined}
       items={data?.page || []}
       columns={columns}
+      onChange={setTableOptions}
+      pagination={pagination}
     />
   );
 };

@@ -8,12 +8,20 @@ import { useQuery } from 'react-query';
 import { lastValueFrom } from 'rxjs';
 import { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Pagination } from '@elastic/eui';
 import { useKibana } from '../../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../latest_findings/use_latest_findings';
 import type { CspFinding, FindingsBaseEsQuery, FindingsQueryResult } from '../../types';
 
 interface UseResourceFindingsOptions extends FindingsBaseEsQuery {
   resourceId: string;
+  from: NonNullable<estypes.SearchRequest['from']>;
+  size: NonNullable<estypes.SearchRequest['size']>;
+}
+
+export interface ResourceFindingsQuery {
+  pageIndex: Pagination['pageIndex'];
+  pageSize: Pagination['pageSize'];
 }
 
 export type ResourceFindingsResult = FindingsQueryResult<
@@ -21,12 +29,16 @@ export type ResourceFindingsResult = FindingsQueryResult<
   unknown
 >;
 
-export const getResourceFindingsQuery = ({
+const getResourceFindingsQuery = ({
   index,
   query,
   resourceId,
+  from,
+  size,
 }: UseResourceFindingsOptions): estypes.SearchRequest => ({
   index,
+  from,
+  size,
   body: {
     query: {
       ...query,
@@ -38,21 +50,28 @@ export const getResourceFindingsQuery = ({
   },
 });
 
-export const useResourceFindings = ({ index, query, resourceId }: UseResourceFindingsOptions) => {
+export const useResourceFindings = ({
+  index,
+  query,
+  resourceId,
+  from,
+  size,
+}: UseResourceFindingsOptions) => {
   const {
     data,
     notifications: { toasts },
   } = useKibana().services;
 
   return useQuery(
-    ['csp_resource_findings', { index, query, resourceId }],
+    ['csp_resource_findings', { index, query, resourceId, from, size }],
     () =>
       lastValueFrom<IEsSearchResponse<CspFinding>>(
         data.search.search({
-          params: getResourceFindingsQuery({ index, query, resourceId }),
+          params: getResourceFindingsQuery({ index, query, resourceId, from, size }),
         })
       ),
     {
+      keepPreviousData: true,
       select: ({ rawResponse: { hits } }) => ({
         page: hits.hits.map((hit) => hit._source!),
         total: hits.total as number,
