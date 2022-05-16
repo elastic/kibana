@@ -41,19 +41,21 @@ export async function findExactConfiguration({
     },
   };
 
-  const resp = await internalClient.search<AgentConfiguration, typeof params>(
-    'find_exact_agent_configuration',
-    params
-  );
+  const [agentConfig, configsAppliedToAgentsThroughFleet] = await Promise.all([
+    internalClient.search<AgentConfiguration, typeof params>(
+      'find_exact_agent_configuration',
+      params
+    ),
+    getConfigsAppliedToAgentsThroughFleet({ setup }),
+  ]);
 
-  const hit = resp.hits.hits[0] as SearchHit<AgentConfiguration> | undefined;
+  const hit = agentConfig.hits.hits[0] as
+    | SearchHit<AgentConfiguration>
+    | undefined;
 
   if (!hit) {
     return;
   }
-
-  const configsAppliedToAgentsThroughFleet =
-    await getConfigsAppliedToAgentsThroughFleet({ setup });
 
   return {
     id: hit._id,

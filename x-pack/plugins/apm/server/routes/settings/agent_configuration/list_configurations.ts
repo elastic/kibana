@@ -18,20 +18,22 @@ export async function listConfigurations({ setup }: { setup: Setup }) {
     size: 200,
   };
 
-  const resp = await internalClient.search<AgentConfiguration>(
-    'list_agent_configuration',
-    params
-  );
+  const [agentConfigs, configsAppliedToAgentsThroughFleet] = await Promise.all([
+    internalClient.search<AgentConfiguration>(
+      'list_agent_configuration',
+      params
+    ),
+    getConfigsAppliedToAgentsThroughFleet({ setup }),
+  ]);
 
-  const configsAppliedToAgentsThroughFleet =
-    await getConfigsAppliedToAgentsThroughFleet({ setup });
-
-  return resp.hits.hits.map(convertConfigSettingsToString).map((hit) => {
-    return {
-      ...hit._source,
-      applied_by_agent:
-        hit._source.applied_by_agent ||
-        configsAppliedToAgentsThroughFleet.hasOwnProperty(hit._source.etag),
-    };
-  });
+  return agentConfigs.hits.hits
+    .map(convertConfigSettingsToString)
+    .map((hit) => {
+      return {
+        ...hit._source,
+        applied_by_agent:
+          hit._source.applied_by_agent ||
+          configsAppliedToAgentsThroughFleet.hasOwnProperty(hit._source.etag),
+      };
+    });
 }
