@@ -60,6 +60,7 @@ import {
   KUBERNETES_PATH,
   THREAT_HUNTING_PATH,
   DASHBOARDS_PATH,
+  MANAGE_PATH,
 } from '../../../common/constants';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 
@@ -448,7 +449,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
   {
     id: SecurityPageName.administration,
     title: MANAGE,
-    path: ENDPOINTS_PATH,
+    path: MANAGE_PATH,
     navLinkStatus: AppNavLinkStatus.hidden,
     features: [FEATURE.general],
     keywords: [
