@@ -55,12 +55,18 @@ const actionTooltips = {
   ),
 };
 
-const managedBadge = i18n.translate(
-  'xpack.indexLifecycleMgmt.policyTable.templateBadgeType.managed',
-  {
+const managedPolicyTooltips = {
+  badge: i18n.translate('xpack.indexLifecycleMgmt.policyTable.templateBadgeType.managedLabel', {
     defaultMessage: 'Managed',
-  }
-);
+  }),
+  badgeTooltip: i18n.translate(
+    'xpack.indexLifecycleMgmt.policyTable.templateBadgeType.managedDescription',
+    {
+      defaultMessage:
+        'This policy is preconfigured and managed by Elastic; editing or deleting this policy might break Kibana.',
+    }
+  ),
+};
 
 interface Props {
   policies: PolicyFromES[];
@@ -101,6 +107,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
       ? policies
       : policies.filter((item) => !item.policy?._meta?.managed);
   }, [policies, managedPoliciesVisible]);
+
   const columns: Array<EuiBasicTableColumn<PolicyFromES>> = [
     {
       'data-test-subj': 'policy-name',
@@ -126,9 +133,11 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
             {isManaged && (
               <>
                 &nbsp;
-                <EuiBadge color="hollow" data-test-subj="templateTypeBadge">
-                  {managedBadge}
-                </EuiBadge>
+                <EuiToolTip content={managedPolicyTooltips.badgeTooltip}>
+                  <EuiBadge color="hollow" data-test-subj="templateTypeBadge">
+                    {managedPolicyTooltips.badge}
+                  </EuiBadge>
+                </EuiToolTip>
               </>
             )}
           </>

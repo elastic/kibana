@@ -107,7 +107,7 @@ export class ConfirmDelete extends Component<Props> {
               id="confirmDeletePolicyCheckbox"
               label={
                 <FormattedMessage
-                  id="xpack.idxMgmt.deletePolicyModal.confirmDeleteCheckboxLabel"
+                  id="xpack.indexLifecycleMgmt.deletePolicyModal.confirmDeleteCheckboxLabel"
                   defaultMessage="I understand the consequences of deleting a managed policy"
                 />
               }

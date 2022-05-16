@@ -84,7 +84,7 @@ export const EditWarning: FunctionComponent = () => {
             <EuiCallOut
               title={
                 <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.deletePolicyModal.proceedWithCautionCallOutTitle"
+                  id="xpack.indexLifecycleMgmt.editPolicyModal.proceedWithCautionCallOutTitle"
                   defaultMessage="Editing a managed policy can break Kibana"
                 />
               }
@@ -94,7 +94,7 @@ export const EditWarning: FunctionComponent = () => {
             >
               <p>
                 <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.deletePolicyModal.proceedWithCautionCallOutDescription"
+                  id="xpack.indexLifecycleMgmt.editPolicyModal.proceedWithCautionCallOutDescription"
                   defaultMessage="Managed policies are critical for internal operations."
                 />
               </p>
