@@ -61,6 +61,7 @@ interface RangeSliderDataFetchProps {
   dataViewId: string;
   query?: ControlInput['query'];
   filters?: ControlInput['filters'];
+  validate?: boolean;
 }
 
 const fieldMissingError = (fieldName: string) =>
@@ -101,6 +102,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       max: '',
       loading: true,
       fieldFormatter: (value: string) => value,
+      isInvalid: false,
     };
     this.updateComponentState(this.componentState);
 
@@ -124,6 +126,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
   private setupSubscriptions = () => {
     const dataFetchPipe = this.getInput$().pipe(
       map((newInput) => ({
+        validate: !Boolean(newInput.ignoreParentSettings?.ignoreValidations),
         lastReloadRequestTime: newInput.lastReloadRequestTime,
         dataViewId: newInput.dataViewId,
         fieldName: newInput.fieldName,

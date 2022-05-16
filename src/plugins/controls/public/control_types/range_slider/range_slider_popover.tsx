@@ -228,19 +228,17 @@ export const RangeSliderPopover: FC<Props> = ({
             {errorMessage || helpText}
           </EuiText>
         </EuiFlexItem>
-        {hasAvailableRange ? (
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={RangeSliderStrings.popover.getClearRangeButtonTitle()}>
-              <EuiButtonIcon
-                iconType="eraser"
-                color="danger"
-                onClick={() => onChange(['', ''])}
-                aria-label={RangeSliderStrings.popover.getClearRangeButtonTitle()}
-                data-test-subj="rangeSlider__clearRangeButton"
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        ) : null}
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={RangeSliderStrings.popover.getClearRangeButtonTitle()}>
+            <EuiButtonIcon
+              iconType="eraser"
+              color="danger"
+              onClick={() => onChange(['', ''])}
+              aria-label={RangeSliderStrings.popover.getClearRangeButtonTitle()}
+              data-test-subj="rangeSlider__clearRangeButton"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiInputPopover>
   );
