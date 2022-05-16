@@ -6,17 +6,15 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
 import {
   Dimension,
-  getColumnByAccessor,
   prepareLogTable,
   validateAccessor,
 } from '@kbn/visualizations-plugin/common/utils';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
 import { LayerTypes, XY_VIS_RENDERER, DATA_LAYER } from '../constants';
-import { appendLayerIds, getAccessors } from '../helpers';
+import { appendLayerIds, getAccessors, normalizeTable } from '../helpers';
 import { DataLayerConfigResult, XYLayerConfig, XyVisFn, XYArgs } from '../types';
 import { getLayerDimensions } from '../utils';
 import {
@@ -28,39 +26,24 @@ import {
   validateValueLabels,
 } from './validate';
 
-function normalizeTable(data: Datatable, xAccessor?: string | ExpressionValueVisDimension) {
-  const xColumnId = xAccessor && getColumnByAccessor(xAccessor, data.columns)?.id;
-  if (xColumnId) {
-    const xColumn = data.columns.find((col) => col.id === xAccessor);
-    data.rows = data.rows.reduce<Datatable['rows']>((normalizedRows, row) => {
-      return [
-        ...normalizedRows,
-        {
-          ...row,
-          [xColumnId]:
-            xColumn?.meta.type === 'date' && typeof row[xColumnId] === 'string'
-              ? moment(row[xColumnId]).valueOf()
-              : row[xColumnId],
-        },
-      ];
-    }, []);
-  }
-}
-
-const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult => ({
-  type: DATA_LAYER,
-  seriesType: args.seriesType,
-  hide: args.hide,
-  columnToLabel: args.columnToLabel,
-  yScaleType: args.yScaleType,
-  xScaleType: args.xScaleType,
-  isHistogram: args.isHistogram,
-  palette: args.palette,
-  yConfig: args.yConfig,
-  layerType: LayerTypes.DATA,
-  table,
-  ...getAccessors<string | ExpressionValueVisDimension, XYArgs>(args, table),
-});
+const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult => {
+  const accessors = getAccessors<string | ExpressionValueVisDimension, XYArgs>(args, table);
+  const normalizedTable = normalizeTable(table, accessors.xAccessor);
+  return {
+    type: DATA_LAYER,
+    seriesType: args.seriesType,
+    hide: args.hide,
+    columnToLabel: args.columnToLabel,
+    yScaleType: args.yScaleType,
+    xScaleType: args.xScaleType,
+    isHistogram: args.isHistogram,
+    palette: args.palette,
+    yConfig: args.yConfig,
+    layerType: LayerTypes.DATA,
+    table: normalizedTable,
+    ...accessors,
+  };
+};
 
 export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   validateAccessor(args.splitRowAccessor, data.columns);
@@ -83,8 +66,6 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
     palette,
     ...restArgs
   } = args;
-
-  normalizeTable(data, xAccessor);
 
   const dataLayers: DataLayerConfigResult[] = [createDataLayer(args, data)];
 
