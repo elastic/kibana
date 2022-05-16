@@ -144,6 +144,7 @@ export const ControlGroup = () => {
                             isEditable={isEditable}
                             dragInfo={{ index, draggingIndex }}
                             embeddableId={controlId}
+                            embeddableType={panels[controlId].type}
                             key={controlId}
                           />
                         )
