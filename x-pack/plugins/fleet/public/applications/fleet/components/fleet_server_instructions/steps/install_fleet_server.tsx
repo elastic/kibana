@@ -8,7 +8,7 @@
 import React from 'react';
 
 import type { EuiStepProps } from '@elastic/eui';
-import { EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -84,7 +84,21 @@ const InstallFleetServerStepContent: React.FunctionComponent<{
       <EuiText>
         <FormattedMessage
           id="xpack.fleet.fleetServerFlyout.installFleetServerInstructions"
-          defaultMessage="Install Fleet Server agent on a centralized host so that other hosts you wish to monitor can connect to it. In production, we recommend using one or more dedicated hosts. "
+          defaultMessage="Install Fleet Server agent on a centralized host so that other hosts you wish to monitor can connect to it. In production, we recommend using one or more dedicated hosts. For additional guidance, see our {installationLink}."
+          values={{
+            installationLink: (
+              <EuiLink
+                target="_blank"
+                external
+                href="https://www.elastic.co/guide/en/fleet/current/elastic-agent-installation.html"
+              >
+                <FormattedMessage
+                  id="xpack.fleet.enrollmentInstructions.installationMessage.link"
+                  defaultMessage="installation docs"
+                />
+              </EuiLink>
+            ),
+          }}
         />
       </EuiText>
 
