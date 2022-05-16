@@ -6,8 +6,10 @@
  */
 import React from 'react';
 import styled from 'styled-components';
+import useWindowSize from 'react-use/lib/useWindowSize';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiImageProps } from '@elastic/eui';
 import {
   EuiImage,
   EuiTitle,
@@ -20,6 +22,9 @@ import {
   EuiSpacer,
   EuiLink,
   EuiButtonEmpty,
+  EuiHideFor,
+  EuiShowFor,
+  isWithinMaxBreakpoint,
 } from '@elastic/eui';
 
 import type { RegistryPolicyTemplate, PackageInfo } from '../../../../../types';
@@ -35,28 +40,54 @@ const PaddedCentralTitle = styled('h1')`
   padding-top: 15px;
   padding-bottom: 45px;
 `;
+
+const SubtitleText = styled(EuiText)`
+  max-width: 250px;
+  margin: 0 auto;
+  text-align: center;
+`;
+// step numbers are not centered in smaller layouts without this
+const CenteredEuiStepNumber = styled(EuiStepNumber)`
+  margin: 0 auto;
+`;
+
+// step numbers are not centered in smaller layouts without this
+const CenteredEuiImage = (props: EuiImageProps) => (
+  <div style={{ margin: '0 auto' }}>
+    <EuiImage {...props} />
+  </div>
+);
+
 const AddIntegrationStepsIllustrations = () => {
   const { http } = useStartServices();
   const assetsBasePath = http.basePath.prepend('/plugins/fleet/assets/');
-
+  const { width } = useWindowSize();
+  const isScreenSmall = isWithinMaxBreakpoint(width, 's');
+  const ResponsiveStepGroup: React.FC = ({ children }) => (
+    <EuiFlexGroup
+      direction="column"
+      gutterSize={isScreenSmall ? 'xs' : 'l'}
+      alignItems="center"
+      justifyContent="center"
+      wrap={true}
+    >
+      {children}
+    </EuiFlexGroup>
+  );
   return (
     <EuiFlexGroup alignItems="center" justifyContent="spaceEvenly" gutterSize="none">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup
-          direction="column"
-          gutterSize="l"
-          alignItems="center"
-          justifyContent="center"
-          wrap={true}
-        >
+        <ResponsiveStepGroup>
           <EuiFlexItem>
-            <EuiStepNumber status="incomplete" number={1} />
+            <CenteredEuiStepNumber status="incomplete" number={1} />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiImage
-              alt="Illustration of installing the Elastic Agent"
-              src={assetsBasePath + '1_install_agent.svg'}
-            />
+            <div style={{ margin: '0 auto' }}>
+              <CenteredEuiImage
+                alt="Illustration of installing the Elastic Agent"
+                src={assetsBasePath + '1_install_agent.svg'}
+              />
+            </div>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText textAlign="center">
@@ -67,34 +98,35 @@ const AddIntegrationStepsIllustrations = () => {
                 />
               </h4>
             </EuiText>
-            <EuiText textAlign="center" style={{ maxWidth: '250px' }}>
+            <SubtitleText>
               <FormattedMessage
                 id="xpack.fleet.addFirstIntegrationSplash.installAgentStep"
                 defaultMessage="Install agents on the hosts that you want to connect to Elastic."
               />
-            </EuiText>
+            </SubtitleText>
           </EuiFlexItem>
-        </EuiFlexGroup>
+        </ResponsiveStepGroup>
       </EuiFlexItem>
+      <EuiShowFor sizes={['s', 'xs']}>
+        <EuiFlexItem grow={false}>
+          <EuiSpacer size="xl" />
+        </EuiFlexItem>
+      </EuiShowFor>
+      <EuiHideFor sizes={['s', 'xs']}>
+        <EuiFlexItem grow={false}>
+          <CenteredEuiImage
+            alt="Illustration of an arrow pointing from left to right"
+            src={assetsBasePath + 'arrow_right_curve_over.svg'}
+          />
+        </EuiFlexItem>
+      </EuiHideFor>
       <EuiFlexItem grow={false}>
-        <EuiImage
-          alt="Illustration of an arrow pointing from left to right"
-          src={assetsBasePath + 'arrow_right_curve_over.svg'}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup
-          direction="column"
-          gutterSize="l"
-          alignItems="center"
-          justifyContent="center"
-          wrap={true}
-        >
+        <ResponsiveStepGroup>
           <EuiFlexItem>
-            <EuiStepNumber status="incomplete" number={2} />
+            <CenteredEuiStepNumber status="incomplete" number={2} />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiImage
+            <CenteredEuiImage
               alt="Illustration of adding an integration"
               src={assetsBasePath + '2_add_integration.svg'}
             />
@@ -108,34 +140,35 @@ const AddIntegrationStepsIllustrations = () => {
                 />
               </h4>
             </EuiText>
-            <EuiText textAlign="center" style={{ maxWidth: '250px' }}>
+            <SubtitleText>
               <FormattedMessage
                 id="xpack.fleet.addFirstIntegrationSplash.addIntegrationStep"
                 defaultMessage="Make a few selections to finalize how Elastic receives your data."
               />
-            </EuiText>
+            </SubtitleText>
           </EuiFlexItem>
-        </EuiFlexGroup>
+        </ResponsiveStepGroup>
       </EuiFlexItem>
+      <EuiShowFor sizes={['s', 'xs']}>
+        <EuiFlexItem grow={false}>
+          <EuiSpacer size="xl" />
+        </EuiFlexItem>
+      </EuiShowFor>
+      <EuiHideFor sizes={['s', 'xs']}>
+        <EuiFlexItem grow={false}>
+          <CenteredEuiImage
+            alt="Illustration of an arrow pointing from left to right"
+            src={assetsBasePath + 'arrow_right_curve_under.svg'}
+          />
+        </EuiFlexItem>
+      </EuiHideFor>
       <EuiFlexItem grow={false}>
-        <EuiImage
-          alt="Illustration of an arrow pointing from left to right"
-          src={assetsBasePath + 'arrow_right_curve_under.svg'}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup
-          direction="column"
-          gutterSize="l"
-          alignItems="center"
-          justifyContent="center"
-          wrap={true}
-        >
+        <ResponsiveStepGroup>
           <EuiFlexItem>
-            <EuiStepNumber status="incomplete" number={3} />
+            <CenteredEuiStepNumber status="incomplete" number={3} />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiImage
+            <CenteredEuiImage
               alt="Illustration of a dashboard with data"
               src={assetsBasePath + '3_confirm_data.svg'}
             />
@@ -149,14 +182,14 @@ const AddIntegrationStepsIllustrations = () => {
                 />
               </h4>
             </EuiText>
-            <EuiText textAlign="center" style={{ maxWidth: '250px' }}>
+            <SubtitleText>
               <FormattedMessage
                 id="xpack.fleet.addFirstIntegrationSplash.confirmDataStep"
                 defaultMessage="Explore and analyze the incoming data."
               />
-            </EuiText>
+            </SubtitleText>
           </EuiFlexItem>
-        </EuiFlexGroup>
+        </ResponsiveStepGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
