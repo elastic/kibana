@@ -183,30 +183,18 @@ export function LayerSettings(props: Props) {
         ),
         value: AUTOSELECT_EMS_LOCALE,
       },
-      {
-        text: i18n.translate('xpack.maps.layerPanel.settingsPanel.labelLanguageEnglishDropDown', {
-          defaultMessage: 'English',
-        }),
-        value: 'en',
-      },
-      {
-        text: i18n.translate('xpack.maps.layerPanel.settingsPanel.labelLanguageChineseDropDown', {
-          defaultMessage: 'Chinese',
-        }),
-        value: 'zh-cn',
-      },
-      {
-        text: i18n.translate('xpack.maps.layerPanel.settingsPanel.labelLanguageJapaneseDropDown', {
-          defaultMessage: 'Japanese',
-        }),
-        value: 'ja-jp',
-      },
-      {
-        text: i18n.translate('xpack.maps.layerPanel.settingsPanel.labelLanguageFrenchDropDown', {
-          defaultMessage: 'French',
-        }),
-        value: 'fr-fr',
-      },
+      { value: 'ar', text: 'العربية' },
+      { value: 'de', text: 'Deutsch' },
+      { value: 'en', text: 'English' },
+      { value: 'es', text: 'Español' },
+      { value: 'fr-fr', text: 'Français' },
+      { value: 'hi-in', text: 'हिन्दी' },
+      { value: 'it', text: 'Italiano' },
+      { value: 'ja-jp', text: '日本語' },
+      { value: 'ko', text: '한국어' },
+      { value: 'pt-pt', text: 'Português' },
+      { value: 'ru-ru', text: 'русский' },
+      { value: 'zh-cn', text: '简体中文' },
     ];
 
     return (
