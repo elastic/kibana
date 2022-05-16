@@ -169,7 +169,8 @@
     {
       "label": "Operations",
       "items": [
-        { "id": "kibDevDocsOpsWelcome" }
+        { "id": "kibDevDocsOpsLanding" },
+        { "id": "kibDevDocsOpsOptimizer" }
       ]
     }
   ]
