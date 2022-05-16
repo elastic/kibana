@@ -48,7 +48,7 @@ export function getColorAssignments(
 
   return mapValues(layersPerPalette, (paletteLayers) => {
     const seriesPerLayer = paletteLayers.map((layer, layerIndex) => {
-      if (!layer.splitAccessor) {
+      if (layer.collapseFn || !layer.splitAccessor) {
         return { numberOfSeries: layer.accessors.length, splits: [] };
       }
       const splitAccessor = layer.splitAccessor;
@@ -108,7 +108,7 @@ export function getAccessorColorConfig(
   if (isAnnotationsLayer(layer)) {
     return getAnnotationsAccessorColorConfig(layer);
   }
-  const layerContainsSplits = Boolean(layer.splitAccessor);
+  const layerContainsSplits = !layer.collapseFn && layer.splitAccessor;
   const currentPalette: PaletteOutput = layer.palette || { type: 'palette', name: 'default' };
   const totalSeriesCount = colorAssignments[currentPalette.name]?.totalSeriesCount;
   return layer.accessors.map((accessor) => {
