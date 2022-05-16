@@ -71,7 +71,7 @@ export function DiscoverMainRoute() {
     async (searchSource: ISearchSource) => {
       try {
         const hasUserDataView = await data.dataViews.hasData.hasUserDataView().catch(() => false);
-        const hasEsData = await data.dataViews.hasData.hasESData().catch(() => true);
+        const hasEsData = await data.dataViews.hasData.hasESData().catch(() => false);
         if (!hasUserDataView || !hasEsData) {
           setShowNoDataPage(true);
           return;
