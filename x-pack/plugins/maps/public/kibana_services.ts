@@ -46,6 +46,7 @@ export const getTimeFilter = () => pluginsStart.data.query.timefilter.timefilter
 export const getToasts = () => coreStart.notifications.toasts;
 export const getSavedObjectsClient = () => coreStart.savedObjects.client;
 export const getCoreChrome = () => coreStart.chrome;
+export const getDevToolsCapabilities = () => coreStart.application.capabilities.dev_tools;
 export const getMapsCapabilities = () => coreStart.application.capabilities.maps;
 export const getVisualizeCapabilities = () => coreStart.application.capabilities.visualize;
 export const getDocLinks = () => coreStart.docLinks;
@@ -58,6 +59,7 @@ export const getCoreI18n = () => coreStart.i18n;
 export const getSearchService = () => pluginsStart.data.search;
 export const getEmbeddableService = () => pluginsStart.embeddable;
 export const getNavigateToApp = () => coreStart.application.navigateToApp;
+export const getNavigateToUrl = () => coreStart.application.navigateToUrl;
 export const getSavedObjectsTagging = () => pluginsStart.savedObjectsTagging;
 export const getPresentationUtilContext = () => pluginsStart.presentationUtil.ContextProvider;
 export const getSecurityService = () => pluginsStart.security;
@@ -65,6 +67,9 @@ export const getSpacesApi = () => pluginsStart.spaces;
 export const getTheme = () => coreStart.theme;
 export const getUsageCollection = () => pluginsStart.usageCollection;
 export const getApplication = () => coreStart.application;
+export const isScreenshotMode = () => {
+  return pluginsStart.screenshotMode ? pluginsStart.screenshotMode.isScreenshotMode() : false;
+};
 
 // xpack.maps.* kibana.yml settings from this plugin
 let mapAppConfig: MapsConfigType;
