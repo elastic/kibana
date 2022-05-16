@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IconType } from '@elastic/eui';
 import { UrlStateType } from '../url_state/constants';
 import { SecurityPageName } from '../../../app/types';
 import { UrlState } from '../url_state/types';
@@ -83,3 +84,13 @@ export interface NavigationCategory {
 }
 
 export type NavigationCategories = Readonly<NavigationCategory[]>;
+export interface NavLinkItem {
+  description?: string;
+  icon?: IconType;
+  id: SecurityPageName;
+  links?: NavLinkItem[];
+  image?: string;
+  title: string;
+  skipUrlState?: boolean;
+  disabled?: boolean;
+}

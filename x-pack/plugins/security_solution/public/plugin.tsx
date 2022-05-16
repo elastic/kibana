@@ -64,7 +64,7 @@ import {
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
 import { initDataView, SourcererModel, KibanaDataView } from './common/store/sourcerer/model';
 import { SecurityDataView } from './common/containers/sourcerer/api';
-import { updateFilteredAppLinks } from './common/links';
+import { updateAllAppLinks } from './common/links';
 import { LinksPermissions } from './common/links/types';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
@@ -240,13 +240,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (licensing !== null) {
       this.licensingSubscription = licensing.subscribe((currentLicense) => {
         if (currentLicense.type !== undefined) {
-          updateFilteredAppLinks({ ...linksPermissions, license: currentLicense });
+          updateAllAppLinks({ ...linksPermissions, license: currentLicense });
         } else {
-          updateFilteredAppLinks(linksPermissions);
+          updateAllAppLinks(linksPermissions);
         }
       });
     } else {
-      updateFilteredAppLinks(linksPermissions);
+      updateAllAppLinks(linksPermissions);
     }
 
     return {};

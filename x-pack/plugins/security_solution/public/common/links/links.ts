@@ -7,9 +7,10 @@
 
 import { Capabilities } from '@kbn/core/public';
 import { get } from 'lodash';
+import { useEffect, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { SecurityPageName } from '../../../common/constants';
-import { appLinks } from './app_links';
+import { getAllAppLinks } from './app_links';
 import {
   AppLinkItems,
   LinkInfo,
@@ -19,16 +20,38 @@ import {
   LinksPermissions,
 } from './types';
 
-export const appLinksUpdater$ = new BehaviorSubject<AppLinkItems>(appLinks);
+/**
+ * App links updater, it keeps the value of the app links in sync with all application.
+ * It can be updated using `updateAppLinks` or `updateAllAppLinks`.
+ * Read it using `subscribeAppLinks` or `useAppLinks` hook.
+ */
+const appLinksUpdater$ = new BehaviorSubject<AppLinkItems>(getAllAppLinks());
 
-export const getAllAppLinks = () => appLinks;
+export const useAppLinks = (): AppLinkItems => {
+  const [appLinks, setAppLinks] = useState(appLinksUpdater$.getValue());
 
-export const updateAppLinks = (appLinksToUpdate: LinkItem[]) => {
-  appLinksUpdater$.next(Object.freeze(appLinksToUpdate));
+  useEffect(() => {
+    const linksSubscription = subscribeAppLinks((newAppLinks) => {
+      setAppLinks(newAppLinks);
+    });
+    return () => linksSubscription.unsubscribe();
+  }, []);
+
+  return appLinks;
 };
 
-export const updateFilteredAppLinks = (linksPermissions: LinksPermissions) => {
-  updateAppLinks(getFilteredAppLinks(appLinks, linksPermissions));
+export const subscribeAppLinks = (onChange: (appItems: AppLinkItems) => void) =>
+  appLinksUpdater$.subscribe(onChange);
+
+export const updateAppLinks = (
+  appLinksToUpdate: AppLinkItems,
+  linksPermissions: LinksPermissions
+) => {
+  appLinksUpdater$.next(Object.freeze(getFilteredAppLinks(appLinksToUpdate, linksPermissions)));
+};
+
+export const updateAllAppLinks = (linksPermissions: LinksPermissions) => {
+  updateAppLinks(getAllAppLinks(), linksPermissions);
 };
 
 const getFilteredAppLinks = (
@@ -49,25 +72,6 @@ const getFilteredAppLinks = (
     }
     return acc;
   }, []);
-
-// const createNavLinkItem = (link: LinkItem, linkProps?: UserPermissions): NavLinkItem => ({
-//   id: link.id,
-//   path: link.path,
-//   title: link.title,
-//   ...(link.description != null ? { description: link.description } : {}),
-//   ...(link.icon != null ? { icon: link.icon } : {}),
-//   ...(link.image != null ? { image: link.image } : {}),
-//   ...(link.links && link.links.length
-//     ? {
-//         links: reduceLinks<NavLinkItem>({
-//           links: link.links,
-//           linkProps,
-//           formatFunction: createNavLinkItem,
-//         }),
-//       }
-//     : {}),
-//   ...(link.skipUrlState != null ? { skipUrlState: link.skipUrlState } : {}),
-// });
 
 // It checks if the user has at least one of the link capabilities needed
 const hasCapabilities = (linkCapabilities: string[], userCapabilities: Capabilities): boolean =>
@@ -126,7 +130,9 @@ const getNormalizedLinks = (
 /**
  * Normalized indexed version of the global `links` array, referencing the parent by id, instead of having nested links children
  */
-const normalizedLinks: Readonly<NormalizedLinks> = Object.freeze(getNormalizedLinks(appLinks));
+const normalizedLinks: Readonly<NormalizedLinks> = Object.freeze(
+  getNormalizedLinks(getAllAppLinks())
+);
 
 /**
  * Returns the `NormalizedLink` from a link id parameter.

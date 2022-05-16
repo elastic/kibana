@@ -29,6 +29,7 @@ export const links: LinkItem = {
         defaultMessage: 'Templates',
       }),
       path: `${TIMELINES_PATH}/template`,
+      sideNavDisabled: true,
     },
   ],
 };

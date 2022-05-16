@@ -12,7 +12,7 @@ import {
   EVENT_FILTERS_PATH,
   EXCEPTIONS_PATH,
   HOST_ISOLATION_EXCEPTIONS_PATH,
-  MANAGEMENT_PATH,
+  MANAGE_PATH,
   POLICIES_PATH,
   RULES_PATH,
   SecurityPageName,
@@ -46,7 +46,7 @@ const FIX_ME_TEMPORARY_DESCRIPTION = 'Description here';
 export const links: LinkItem = {
   id: SecurityPageName.administration,
   title: MANAGE,
-  path: MANAGEMENT_PATH,
+  path: MANAGE_PATH,
   skipUrlState: true,
   globalNavEnabled: false,
   capabilities: [`${SERVER_APP_ID}.show`],

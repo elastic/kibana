@@ -13,8 +13,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFocusTrap,
+  EuiHorizontalRule,
   EuiOutsideClickDetector,
   EuiPortal,
+  EuiSpacer,
   EuiTitle,
   EuiWindowEvent,
   keys,
@@ -22,18 +24,37 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { EuiPanelStyled } from './solution_grouped_nav_panel.styles';
-import { PortalNavItem } from './solution_grouped_nav_item';
 import { useShowTimeline } from '../../../utils/timeline/use_show_timeline';
+import type { DefaultSideNavItem } from './types';
+import { NavigationCategories } from '../types';
 
-export interface SolutionGroupedNavPanelProps {
+export interface SolutionNavPanelProps {
   onClose: () => void;
   title: string;
-  items: PortalNavItem[];
+  items: DefaultSideNavItem[];
+  categories?: NavigationCategories;
+}
+export interface SolutionNavPanelCategoriesProps {
+  categories: NavigationCategories;
+  items: DefaultSideNavItem[];
+  onClose: () => void;
+}
+export interface SolutionNavPanelItemsProps {
+  items: DefaultSideNavItem[];
+  onClose: () => void;
+}
+export interface SolutionNavPanelItemProps {
+  item: DefaultSideNavItem;
+  onClose: () => void;
 }
 
-const SolutionGroupedNavPanelComponent: React.FC<SolutionGroupedNavPanelProps> = ({
+/**
+ * Renders the side navigation panel for secondary links
+ */
+const SolutionNavPanelComponent: React.FC<SolutionNavPanelProps> = ({
   onClose,
   title,
+  categories,
   items,
 }) => {
   const [hasTimelineBar] = useShowTimeline();
@@ -41,9 +62,7 @@ const SolutionGroupedNavPanelComponent: React.FC<SolutionGroupedNavPanelProps> =
   const isTimelineVisible = hasTimelineBar && isLargerBreakpoint;
   const panelClasses = classNames('eui-yScroll');
 
-  /**
-   * ESC key closes SideNav
-   */
+  // ESC key closes PanelNav
   const onKeyDown = useCallback(
     (ev: KeyboardEvent) => {
       if (ev.key === keys.ESCAPE) {
@@ -76,25 +95,15 @@ const SolutionGroupedNavPanelComponent: React.FC<SolutionGroupedNavPanelProps> =
 
                 <EuiFlexItem>
                   <EuiDescriptionList>
-                    {items.map(({ id, href, onClick, label, description }: PortalNavItem) => (
-                      <Fragment key={id}>
-                        <EuiDescriptionListTitle>
-                          <a
-                            data-test-subj={`groupedNavPanelLink-${id}`}
-                            href={href}
-                            onClick={(ev) => {
-                              onClose();
-                              if (onClick) {
-                                onClick(ev);
-                              }
-                            }}
-                          >
-                            {label}
-                          </a>
-                        </EuiDescriptionListTitle>
-                        <EuiDescriptionListDescription>{description}</EuiDescriptionListDescription>
-                      </Fragment>
-                    ))}
+                    {categories ? (
+                      <SolutionNavPanelCategories
+                        categories={categories}
+                        items={items}
+                        onClose={onClose}
+                      />
+                    ) : (
+                      <SolutionNavPanelItems items={items} onClose={onClose} />
+                    )}
                   </EuiDescriptionList>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -105,5 +114,68 @@ const SolutionGroupedNavPanelComponent: React.FC<SolutionGroupedNavPanelProps> =
     </>
   );
 };
+export const SolutionNavPanel = React.memo(SolutionNavPanelComponent);
 
-export const SolutionGroupedNavPanel = React.memo(SolutionGroupedNavPanelComponent);
+const SolutionNavPanelCategories: React.FC<SolutionNavPanelCategoriesProps> = ({
+  categories,
+  items,
+  onClose,
+}) => {
+  const itemsById = new Map(items.map((item) => [item.id, item]));
+
+  return (
+    <>
+      {categories.map(({ label, linkIds }) => {
+        const links = linkIds.reduce<DefaultSideNavItem[]>((acc, linkId) => {
+          const link = itemsById.get(linkId);
+          if (link) {
+            acc.push(link);
+          }
+          return acc;
+        }, []);
+
+        return (
+          <Fragment key={label}>
+            <EuiTitle size="xxxs">
+              <h2>{label}</h2>
+            </EuiTitle>
+            <EuiHorizontalRule margin="s" />
+            <SolutionNavPanelItems items={links} onClose={onClose} />
+            <EuiSpacer size="l" />
+          </Fragment>
+        );
+      })}
+    </>
+  );
+};
+
+const SolutionNavPanelItems: React.FC<SolutionNavPanelItemsProps> = ({ items, onClose }) => (
+  <>
+    {items.map((item) => (
+      <SolutionNavPanelItem key={item.id} item={item} onClose={onClose} />
+    ))}
+  </>
+);
+
+const SolutionNavPanelItem: React.FC<SolutionNavPanelItemProps> = ({
+  item: { id, href, onClick, label, description },
+  onClose,
+}) => (
+  <>
+    <EuiDescriptionListTitle>
+      <a
+        data-test-subj={`groupedNavPanelLink-${id}`}
+        href={href}
+        onClick={(ev) => {
+          onClose();
+          if (onClick) {
+            onClick(ev);
+          }
+        }}
+      >
+        {label}
+      </a>
+    </EuiDescriptionListTitle>
+    <EuiDescriptionListDescription>{description}</EuiDescriptionListDescription>
+  </>
+);

@@ -22,7 +22,7 @@ export const ManageLandingPage = () => (
   <SecuritySolutionPageWrapper>
     <HeaderPage title={MANAGE_PAGE_TITLE} />
     <LandingCategories categories={navigationCategories} />
-    <SpyRoute pageName={SecurityPageName.dashboardsLanding} />
+    <SpyRoute pageName={SecurityPageName.administration} />
   </SecuritySolutionPageWrapper>
 );
 

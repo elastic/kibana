@@ -12,7 +12,7 @@ import { links as managementLinks } from '../../management/links';
 import { dashboardsLandingLinks, threatHuntingLandingLinks } from '../../landing_pages/links';
 import { gettingStartedLinks } from '../../overview/links';
 
-export const appLinks: AppLinkItems = Object.freeze([
+const appLinks: AppLinkItems = Object.freeze([
   dashboardsLandingLinks,
   detectionLinks,
   timelinesLinks,
@@ -21,3 +21,5 @@ export const appLinks: AppLinkItems = Object.freeze([
   gettingStartedLinks,
   managementLinks,
 ]);
+
+export const getAllAppLinks = () => appLinks;

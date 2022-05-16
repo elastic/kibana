@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export * from './links';
-export * from './app_links';
-export * from './types';
+export { SecuritySideNav } from './security_side_nav';

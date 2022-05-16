@@ -26,6 +26,7 @@ import { gutterTimeline } from '../../../common/lib/helpers';
 import { useKibana } from '../../../common/lib/kibana';
 import { useShowPagesWithEmptyView } from '../../../common/utils/empty_view/use_show_pages_with_empty_view';
 import { useIsPolicySettingsBarVisible } from '../../../management/pages/policy/view/policy_hooks';
+import { useIsGroupedNavigationEnabled } from '../../../common/components/navigation/helpers';
 
 const NO_DATA_PAGE_MAX_WIDTH = 950;
 
@@ -44,8 +45,8 @@ const NO_DATA_PAGE_TEMPLATE_PROPS = {
  */
 const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
   $isShowingTimelineOverlay?: boolean;
-  $isTimelineBottomBarVisible?: boolean;
-  $isPolicySettingsVisible?: boolean;
+  $isBottomBarVisible?: boolean;
+  $isGroupedNav?: boolean;
 }>`
   .${BOTTOM_BAR_CLASSNAME} {
     animation: 'none !important'; // disable the default bottom bar slide animation
@@ -63,8 +64,8 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
   }
 
   // If the bottom bar is visible add padding to the navigation
-  ${({ $isTimelineBottomBarVisible }) =>
-    $isTimelineBottomBarVisible &&
+  ${({ $isBottomBarVisible, $isGroupedNav }) =>
+    ($isBottomBarVisible || $isGroupedNav) &&
     `
     @media (min-width: 768px) {
       .kbnPageTemplateSolutionNav {
@@ -73,14 +74,12 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
     }
   `}
 
-  // If the policy settings bottom bar is visible add padding to the navigation
-  ${({ $isPolicySettingsVisible }) =>
-    $isPolicySettingsVisible &&
+  ${({ $isGroupedNav }) =>
+    $isGroupedNav &&
     `
-    @media (min-width: 768px) {
-      .kbnPageTemplateSolutionNav {
-        padding-bottom: ${gutterTimeline};
-      }
+    .kbnPageTemplateSolutionNav {
+      display: flex;
+      flex-direction: column;
     }
   `}
 `;
@@ -98,6 +97,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
     const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
       getTimelineShowStatus(state, TimelineId.active)
     );
+    const isGroupedNavEnabled = useIsGroupedNavigationEnabled();
 
     const userHasSecuritySolutionVisible = useKibana().services.application.capabilities.siem.show;
     const showEmptyState = useShowPagesWithEmptyView();
@@ -117,9 +117,9 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
      */
     return (
       <StyledKibanaPageTemplate
-        $isTimelineBottomBarVisible={isTimelineBottomBarVisible}
+        $isBottomBarVisible={isTimelineBottomBarVisible || isPolicySettingsVisible}
         $isShowingTimelineOverlay={isShowingTimelineOverlay}
-        $isPolicySettingsVisible={isPolicySettingsVisible}
+        $isGroupedNav={isGroupedNavEnabled}
         bottomBarProps={SecuritySolutionBottomBarProps}
         bottomBar={
           userHasSecuritySolutionVisible && <SecuritySolutionBottomBar onAppLeave={onAppLeave} />
