@@ -7,7 +7,7 @@
 import type { CreatePackagePolicyRouteState } from '../../../../../types';
 import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, pagePathGetters } from '../../../../../constants';
 
-// TODO: decide better way to infer this
+// TODO: (in following PR) decide better way to infer this list of "special" integrations
 const SPECIAL_PACKAGES = ['apm', 'endpoint', 'synthetics'];
 interface GetInstallPkgRouteOptionsParams {
   currentPath: string;

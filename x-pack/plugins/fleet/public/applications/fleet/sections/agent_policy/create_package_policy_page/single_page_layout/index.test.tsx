@@ -89,7 +89,7 @@ jest.mock('react-router-dom', () => ({
 
 import { CreatePackagePolicySinglePage } from '.';
 
-// mock console.debug to prevent noisy logs ifrom ./index.tsx
+// mock console.debug to prevent noisy logs from console.debugs in ./index.tsx
 let consoleDebugMock: any;
 beforeAll(() => {
   consoleDebugMock = jest.spyOn(console, 'debug').mockImplementation(() => {});
