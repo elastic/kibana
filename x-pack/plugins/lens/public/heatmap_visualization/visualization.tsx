@@ -295,8 +295,14 @@ export const getHeatmapVisualization = ({
     }
   },
 
-  toExpression(state, datasourceLayers, attributes): Ast | null {
+  toExpression(
+    state,
+    datasourceLayers,
+    attributes,
+    datasourceExpressionsByLayers = {}
+  ): Ast | null {
     const datasource = datasourceLayers[state.layerId];
+    const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
 
     const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
     // When we add a column it could be empty, and therefore have no order
@@ -304,9 +310,11 @@ export const getHeatmapVisualization = ({
     if (!originalOrder || !state.valueAccessor) {
       return null;
     }
+
     return {
       type: 'expression',
       chain: [
+        ...(datasourceExpression?.chain ?? []),
         {
           type: 'function',
           function: FUNCTION_NAME,
@@ -382,8 +390,9 @@ export const getHeatmapVisualization = ({
     };
   },
 
-  toPreviewExpression(state, datasourceLayers): Ast | null {
+  toPreviewExpression(state, datasourceLayers, datasourceExpressionsByLayers = {}): Ast | null {
     const datasource = datasourceLayers[state.layerId];
+    const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
 
     const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
     // When we add a column it could be empty, and therefore have no order
@@ -395,6 +404,7 @@ export const getHeatmapVisualization = ({
     return {
       type: 'expression',
       chain: [
+        ...(datasourceExpression?.chain ?? []),
         {
           type: 'function',
           function: FUNCTION_NAME,

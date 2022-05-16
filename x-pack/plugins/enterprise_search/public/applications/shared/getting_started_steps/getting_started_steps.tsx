@@ -21,13 +21,18 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { ENTERPRISE_SEARCH_OVERVIEW_PLUGIN } from '../../../../common/constants';
 import { ELASTICSEARCH_GUIDE_PATH } from '../../enterprise_search_overview/routes';
 
 import { EuiLinkTo } from '../react_router_helpers';
 
 import { IconRow } from './icon_row';
 
-export const GettingStartedSteps: React.FC = () => {
+export interface GettingStartedStepsProps {
+  step?: 'first' | 'second';
+}
+
+export const GettingStartedSteps: React.FC<GettingStartedStepsProps> = ({ step = 'first' }) => {
   // TODO replace with logic file
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -58,7 +63,7 @@ export const GettingStartedSteps: React.FC = () => {
                   <IconRow />
                 </>
               ),
-              status: 'current',
+              status: (step === 'first' && 'current') || 'complete',
             },
             {
               title: i18n.translate(
@@ -84,6 +89,7 @@ export const GettingStartedSteps: React.FC = () => {
                       <EuiPopover
                         button={
                           <EuiButton
+                            disabled={step !== 'second'}
                             iconType="arrowDown"
                             iconSide="right"
                             fill
@@ -139,7 +145,10 @@ export const GettingStartedSteps: React.FC = () => {
                       </EuiPopover>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiLinkTo to={ELASTICSEARCH_GUIDE_PATH}>
+                      <EuiLinkTo
+                        shouldNotCreateHref
+                        to={ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL + ELASTICSEARCH_GUIDE_PATH}
+                      >
                         <EuiIcon type="iInCircle" />
                         &nbsp;
                         {i18n.translate(
@@ -151,7 +160,7 @@ export const GettingStartedSteps: React.FC = () => {
                   </EuiFlexGroup>
                 </>
               ),
-              status: 'incomplete',
+              status: (step === 'second' && 'current') || 'incomplete',
             },
             {
               title: i18n.translate(

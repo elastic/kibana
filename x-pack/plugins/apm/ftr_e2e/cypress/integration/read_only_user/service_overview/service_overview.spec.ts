@@ -220,14 +220,18 @@ describe('Service Overview', () => {
         'suggestionsRequest'
       );
 
-      cy.get('[data-test-subj="environmentFilter"]').type('pro').click();
+      cy.get('[data-test-subj="environmentFilter"]').type('production');
 
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: ['@suggestionsRequest'],
-        value: 'fieldValue=pro',
+        value: 'fieldValue=production',
       });
 
-      cy.contains('button', 'production').click();
+      cy.get(
+        '[data-test-subj="comboBoxOptionsList environmentFilter-optionsList"]'
+      )
+        .contains('production')
+        .click({ force: true });
 
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: aliasNames,

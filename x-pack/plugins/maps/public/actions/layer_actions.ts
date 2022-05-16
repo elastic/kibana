@@ -22,7 +22,7 @@ import {
   getSelectedLayerId,
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
-import { cancelRequest } from '../reducers/non_serializable_instances';
+import { cancelRequest, getInspectorAdapters } from '../reducers/non_serializable_instances';
 import { setDrawMode, updateFlyout } from './ui_actions';
 import {
   ADD_LAYER,
@@ -452,6 +452,9 @@ function updateLayerType(layerId: string, newLayerType: string) {
       return;
     }
     dispatch(clearDataRequests(layer));
+    if (layer.getSource().isESSource()) {
+      getInspectorAdapters(getState()).vectorTiles?.removeLayer(layerId);
+    }
     dispatch({
       type: UPDATE_LAYER_PROP,
       id: layerId,
@@ -597,6 +600,9 @@ function removeLayerFromLayerList(layerId: string) {
     });
     dispatch(updateTooltipStateForLayer(layerGettingRemoved));
     layerGettingRemoved.destroy();
+    if (layerGettingRemoved.getSource().isESSource()) {
+      getInspectorAdapters(getState())?.vectorTiles.removeLayer(layerId);
+    }
     dispatch({
       type: REMOVE_LAYER,
       id: layerId,
