@@ -33,10 +33,10 @@ describe('ConnectInstance', () => {
   const setSourcePasswordValue = jest.fn();
   const setSourceSubdomainValue = jest.fn();
   const setSourceIndexPermissionsValue = jest.fn();
-  const getSourceConnectData = jest.fn((_, redirectOauth) => {
+  const getSourceConnectData = jest.fn((redirectOauth) => {
     redirectOauth();
   });
-  const createContentSource = jest.fn((_, redirectFormCreated) => {
+  const createContentSource = jest.fn((redirectFormCreated) => {
     redirectFormCreated();
   });
 
