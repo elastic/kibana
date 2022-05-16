@@ -14,7 +14,9 @@ const migrationSchema = schema.object({
   batchSize: schema.number({ defaultValue: 1_000 }),
   maxBatchSizeBytes: schema.byteSize({ defaultValue: '100mb' }), // 100mb is the default http.max_content_length Elasticsearch config value
   ignoreUnknownObjects: schema.maybe(
-    schema.string({ validate: (value) => (valid(value) ? value : undefined) })
+    schema.string({
+      validate: (value) => (valid(value) ? undefined : 'The value is not a valid semantic version'),
+    })
   ),
   scrollDuration: schema.string({ defaultValue: '15m' }),
   pollInterval: schema.number({ defaultValue: 1_500 }),
