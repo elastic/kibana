@@ -74,14 +74,16 @@ export const links: LinkItem = {
         }),
       ],
       globalSearchEnabled: true,
-    },
-    {
-      id: SecurityPageName.rulesCreate,
-      title: CREATE_NEW_RULE,
-      path: RULES_CREATE_PATH,
-      globalNavEnabled: false,
-      skipUrlState: true,
-      hideTimeline: true,
+      links: [
+        {
+          id: SecurityPageName.rulesCreate,
+          title: CREATE_NEW_RULE,
+          path: RULES_CREATE_PATH,
+          globalNavEnabled: false,
+          skipUrlState: true,
+          hideTimeline: true,
+        },
+      ],
     },
     {
       id: SecurityPageName.exceptions,
