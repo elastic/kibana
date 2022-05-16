@@ -339,21 +339,26 @@ const myRuleType: RuleType<
 			// matching identifiers.
 			const alert = services.alertFactory.create(server);
 
-			// State from the last execution. This will exist if an alert was
-			// created and executed in the previous execution
-			const { cpuUsage: previousCpuUsage } = alert.getState();
+			// alertFactory.create() could return null if the maximum number of allowed
+			// alerts has been reached.
 
-			// Replace state entirely with new values
-			alert.replaceState({
-				cpuUsage: currentCpuUsage,
-			});
+			if (alert) {
+				// State from the last execution. This will exist if an alert was
+				// created and executed in the previous execution
+				const { cpuUsage: previousCpuUsage } = alert.getState();
 
-			// 'default' refers to the id of a group of actions to be scheduled 
-			// for execution, see 'actions' in create rule section
-			alert.scheduleActions('default', {
-				server,
-				hasCpuUsageIncreased: currentCpuUsage > previousCpuUsage,
-			});
+				// Replace state entirely with new values
+				alert.replaceState({
+					cpuUsage: currentCpuUsage,
+				});
+
+				// 'default' refers to the id of a group of actions to be scheduled 
+				// for execution, see 'actions' in create rule section
+				alert.scheduleActions('default', {
+					server,
+					hasCpuUsageIncreased: currentCpuUsage > previousCpuUsage,
+				});
+			}
 		}
 
 		// Returning updated rule type level state, this will become available

@@ -35,6 +35,7 @@ import { RulesClient } from '../rules_client';
 import { NormalizedRuleType } from '../rule_type_registry';
 import { InMemoryMetrics } from '../monitoring';
 import { ActionsConfigMap } from '../lib/get_actions_config_map';
+import { RulesConfigMap } from '../lib/get_rules_config_map';
 
 export interface TaskRunnerContext {
   logger: Logger;
@@ -55,6 +56,7 @@ export interface TaskRunnerContext {
   supportsEphemeralTasks: boolean;
   maxEphemeralActionsPerRule: number;
   actionsConfigMap: ActionsConfigMap;
+  rulesConfigMap: RulesConfigMap;
   cancelAlertsOnRuleTimeout: boolean;
   usageCounter?: UsageCounter;
 }

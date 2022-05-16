@@ -24,6 +24,7 @@ export interface CreateAlertFactoryOpts<
   ActionGroupIds extends string
 > {
   alerts: Record<string, Alert<InstanceState, InstanceContext, ActionGroupIds>>;
+  maxAlerts: number;
   logger: Logger;
   canSetRecoveryContext?: boolean;
 }
@@ -35,21 +36,34 @@ export function createAlertFactory<
 >({
   alerts,
   logger,
+  maxAlerts,
   canSetRecoveryContext = false,
 }: CreateAlertFactoryOpts<InstanceState, InstanceContext, ActionGroupIds>) {
   // Keep track of which alerts we started with so we can determine which have recovered
   const initialAlertIds = new Set(Object.keys(alerts));
+
+  // Keep track of the number of alerts requested for creation
+  let numAlertsCreated = 0;
+
   let isDone = false;
   return {
-    create: (id: string): Alert<InstanceState, InstanceContext, ActionGroupIds> => {
+    create: (id: string): Alert<InstanceState, InstanceContext, ActionGroupIds> | null => {
       if (isDone) {
         throw new Error(`Can't create new alerts after calling done() in AlertsFactory.`);
       }
-      if (!alerts[id]) {
-        alerts[id] = new Alert<InstanceState, InstanceContext, ActionGroupIds>(id);
-      }
 
-      return alerts[id];
+      if (numAlertsCreated++ >= maxAlerts) {
+        logger.warn(
+          `Rule run generated ${numAlertsCreated} which is greater than the allowed max of ${maxAlerts}. This alert will be discarded.`
+        );
+        return null;
+      } else {
+        if (!alerts[id]) {
+          alerts[id] = new Alert<InstanceState, InstanceContext, ActionGroupIds>(id);
+        }
+
+        return alerts[id];
+      }
     },
     done: (): AlertFactoryDoneUtils<InstanceState, InstanceContext, ActionGroupIds> => {
       isDone = true;

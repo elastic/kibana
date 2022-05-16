@@ -215,8 +215,10 @@ export function getAlertType(
       };
       const actionContext = addMessages(options, baseContext, params);
       const alert = alertFactory.create(alertId);
-      alert.scheduleActions(ActionGroupId, actionContext);
-      logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
+      if (alert) {
+        alert.scheduleActions(ActionGroupId, actionContext);
+        logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
+      }
     }
 
     const { getRecoveredAlerts } = services.alertFactory.done();

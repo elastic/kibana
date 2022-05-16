@@ -80,6 +80,7 @@ import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
 import { registerNodeCollector, registerClusterCollector, InMemoryMetrics } from './monitoring';
 import { getRuleTaskTimeout } from './lib/get_rule_task_timeout';
 import { getActionsConfigMap } from './lib/get_actions_config_map';
+import { getRulesConfigMap } from './lib/get_rules_config_map';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -440,6 +441,7 @@ export class AlertingPlugin {
       maxEphemeralActionsPerRule: this.config.maxEphemeralActionsPerAlert,
       cancelAlertsOnRuleTimeout: this.config.cancelAlertsOnRuleTimeout,
       actionsConfigMap: getActionsConfigMap(this.config.rules.run.actions),
+      rulesConfigMap: getRulesConfigMap(this.config.rules.run),
       usageCounter: this.usageCounter,
     });
 

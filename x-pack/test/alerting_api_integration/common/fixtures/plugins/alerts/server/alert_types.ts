@@ -122,16 +122,19 @@ async function alwaysFiringExecutor(alertExecutorOptions: any) {
   }
 
   if (group) {
-    const instance = services.alertFactory.create('1').replaceState({ instanceStateValue: true });
+    const instance = services.alertFactory.create('1');
+    if (instance) {
+      instance.replaceState({ instanceStateValue: true });
 
-    if (subgroup) {
-      instance.scheduleActionsWithSubGroup(group, subgroup, {
-        instanceContextValue: true,
-      });
-    } else {
-      instance.scheduleActions(group, {
-        instanceContextValue: true,
-      });
+      if (subgroup) {
+        instance.scheduleActionsWithSubGroup(group, subgroup, {
+          instanceContextValue: true,
+        });
+      } else {
+        instance.scheduleActions(group, {
+          instanceContextValue: true,
+        });
+      }
     }
   }
 
@@ -177,10 +180,10 @@ function getCumulativeFiringAlertType() {
       const runCount = (state.runCount || 0) + 1;
 
       times(runCount, (index) => {
-        services.alertFactory
-          .create(`instance-${index}`)
-          .replaceState({ instanceStateValue: true })
-          .scheduleActions(group);
+        const alert = services.alertFactory.create(`instance-${index}`);
+        if (alert) {
+          alert.replaceState({ instanceStateValue: true }).scheduleActions(group);
+        }
       });
 
       return {
@@ -446,14 +449,18 @@ function getPatternFiringAlertType() {
       for (const [instanceId, instancePattern] of Object.entries(pattern)) {
         const scheduleByPattern = instancePattern[patternIndex];
         if (scheduleByPattern === true) {
-          services.alertFactory.create(instanceId).scheduleActions('default', {
-            ...EscapableStrings,
-            deep: DeepContextVariables,
-          });
+          const alert = services.alertFactory.create(instanceId);
+          if (alert) {
+            alert.scheduleActions('default', {
+              ...EscapableStrings,
+              deep: DeepContextVariables,
+            });
+          }
         } else if (typeof scheduleByPattern === 'string') {
-          services.alertFactory
-            .create(instanceId)
-            .scheduleActionsWithSubGroup('default', scheduleByPattern);
+          const alert = services.alertFactory.create(instanceId);
+          if (alert) {
+            alert.scheduleActionsWithSubGroup('default', scheduleByPattern);
+          }
         }
       }
 
@@ -538,7 +545,10 @@ function getLongRunningPatternRuleType(cancelAlertsOnRuleTimeout: boolean = true
         return {};
       }
 
-      services.alertFactory.create('alert').scheduleActions('default', {});
+      const alert = services.alertFactory.create('alert');
+      if (alert) {
+        alert.scheduleActions('default', {});
+      }
 
       // run long if pattern says to
       if (pattern[globalPatternIndex++] === true) {

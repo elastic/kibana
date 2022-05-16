@@ -392,6 +392,9 @@ export class TaskRunner<
             >({
               alerts,
               logger: this.logger,
+              maxAlerts:
+                this.context.rulesConfigMap[this.ruleType.id]?.alerts.max ||
+                this.context.rulesConfigMap.default.alerts.max,
               canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
             }),
             shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),

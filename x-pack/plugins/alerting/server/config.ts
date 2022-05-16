@@ -11,6 +11,9 @@ import { validateDurationSchema, parseDuration } from './lib';
 const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
 const ruleTypeSchema = schema.object({
   id: schema.string(),
+  alerts: schema.object({
+    max: schema.number({ max: 10000 }),
+  }),
   timeout: schema.maybe(schema.string({ validate: validateDurationSchema })),
 });
 
@@ -43,6 +46,9 @@ const rulesSchema = schema.object({
       max: schema.number({ defaultValue: 100000, max: 100000 }),
       connectorTypeOverrides: schema.maybe(schema.arrayOf(connectorTypeSchema)),
     }),
+    alerts: schema.object({
+      max: schema.number({ defaultValue: 10000, max: 10000 }),
+    }),
     ruleTypeOverrides: schema.maybe(schema.arrayOf(ruleTypeSchema)),
   }),
 });
@@ -68,3 +74,4 @@ export type RulesConfig = TypeOf<typeof rulesSchema>;
 export type AlertingRulesConfig = Pick<AlertingConfig['rules'], 'minimumScheduleInterval'>;
 export type ActionsConfig = RulesConfig['run']['actions'];
 export type ActionTypeConfig = Omit<ActionsConfig, 'connectorTypeOverrides'>;
+export type RuleTypeConfig = Omit<RulesConfig['run'], 'actions' | 'ruleTypeOverrides'>;

@@ -140,7 +140,9 @@ export function registerAnomalyDetectionAlertType({
       if (executionResult) {
         const alertInstanceName = executionResult.name;
         const alertInstance = services.alertFactory.create(alertInstanceName);
-        alertInstance.scheduleActions(ANOMALY_SCORE_MATCH_GROUP_ID, executionResult);
+        if (alertInstance) {
+          alertInstance.scheduleActions(ANOMALY_SCORE_MATCH_GROUP_ID, executionResult);
+        }
       }
     },
   });

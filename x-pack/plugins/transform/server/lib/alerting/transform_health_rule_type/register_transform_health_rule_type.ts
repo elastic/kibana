@@ -117,7 +117,9 @@ export function getTransformHealthRuleType(): RuleType<
       if (executionResult.length > 0) {
         executionResult.forEach(({ name: alertInstanceName, context }) => {
           const alertInstance = alertFactory.create(alertInstanceName);
-          alertInstance.scheduleActions(TRANSFORM_ISSUE, context);
+          if (alertInstance) {
+            alertInstance.scheduleActions(TRANSFORM_ISSUE, context);
+          }
         });
       }
     },

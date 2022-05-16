@@ -70,7 +70,10 @@ export const alertType: RuleType<
 
     if (getOperator(op)(peopleInCraft.length, outerSpaceCapacity)) {
       peopleInCraft.forEach(({ craft, name }) => {
-        services.alertFactory.create(name).replaceState({ craft }).scheduleActions('default');
+        const alert = services.alertFactory.create(name);
+        if (alert) {
+          alert.replaceState({ craft }).scheduleActions('default');
+        }
       });
     }
 

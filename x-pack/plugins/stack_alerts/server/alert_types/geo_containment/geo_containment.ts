@@ -113,7 +113,10 @@ export function getActiveEntriesAndGenerateAlerts(
       };
       const alertInstanceId = `${entityName}-${context.containingBoundaryName}`;
       if (shapeLocationId !== OTHER_CATEGORY) {
-        alertFactory.create(alertInstanceId).scheduleActions(ActionGroupId, context);
+        const alert = alertFactory.create(alertInstanceId);
+        if (alert) {
+          alert.scheduleActions(ActionGroupId, context);
+        }
       }
     });
 
