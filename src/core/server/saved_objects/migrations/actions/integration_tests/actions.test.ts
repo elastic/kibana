@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient } from '../../../../';
+import { ElasticsearchClient } from '../../../..';
 import * as kbnTestServer from '../../../../../test_helpers/kbn_server';
 import { SavedObjectsRawDoc } from '../../../serialization';
 import {
@@ -35,7 +35,7 @@ import {
   transformDocs,
   waitForIndexStatusYellow,
   initAction,
-} from '../../actions';
+} from '..';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import { errors } from '@elastic/elasticsearch';
@@ -385,42 +385,6 @@ describe('migration actions', () => {
       const yellowStatusResponse = await client.cluster.health({ index: 'red_then_yellow_index' });
       expect(yellowStatusResponse.status).toBe('yellow');
     });
-<<<<<<< HEAD
-=======
-    it('resolves left with "index_not_yellow_timeout" after waiting for an index status to be yellow timeout', async () => {
-      // Create a red index
-      await client.indices
-        .create({
-          index: 'red_index',
-          timeout: '5s',
-          body: {
-            mappings: { properties: {} },
-            settings: {
-              // Allocate no replicas so that this index stays red
-              number_of_replicas: '0',
-              // Disable all shard allocation so that the index status is red
-              index: { routing: { allocation: { enable: 'none' } } },
-            },
-          },
-        })
-        .catch((e) => {});
-      // try to wait for index status yellow:
-      const task = waitForIndexStatusYellow({
-        client,
-        index: 'red_index',
-        timeout: '1s',
-      });
-      await expect(task()).resolves.toMatchInlineSnapshot(`
-          Object {
-            "_tag": "Left",
-            "left": Object {
-              "message": "[index_not_yellow_timeout] Timeout waiting for the status of the [red_index] index to become 'yellow'",
-              "type": "index_not_yellow_timeout",
-            },
-          }
-      `);
-    });
->>>>>>> 638bfbee3d1 (migrations incorrectly detects cluster routing allocation setting as incompatible (#131712))
   });
 
   describe('cloneIndex', () => {
@@ -544,8 +508,8 @@ describe('migration actions', () => {
         Object {
           "_tag": "Left",
           "left": Object {
-            "message": "[index_not_yellow_timeout] Timeout waiting for the status of the [clone_red_index] index to become 'yellow'",
-            "type": "index_not_yellow_timeout",
+            "message": "Timeout waiting for the status of the [clone_red_index] index to become 'yellow'",
+            "type": "retryable_es_client_error",
           },
         }
       `);
