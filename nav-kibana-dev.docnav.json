@@ -171,6 +171,12 @@
       "items": [
         { "id": "kibDevDocsOpsOverview", "label": "Overview" },
         {
+          "label": "CI",
+          "items": [
+            { "id": "kibDevDocsOpsCiStats" }
+          ]
+        },
+        {
           "label": "Build tooling",
           "items": [
             { "id": "kibDevDocsOpsOptimizer" }
