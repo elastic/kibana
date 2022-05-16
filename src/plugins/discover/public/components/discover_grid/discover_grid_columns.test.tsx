@@ -207,7 +207,7 @@ describe('Discover grid columns', function () {
             />
           </React.Fragment>,
           "id": "timestamp",
-          "initialWidth": 190,
+          "initialWidth": 210,
           "isSortable": true,
           "schema": "datetime",
         },

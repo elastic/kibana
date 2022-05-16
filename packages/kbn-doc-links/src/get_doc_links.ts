@@ -47,6 +47,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       metaData: `${APM_DOCS}guide/${DOC_LINK_VERSION}/data-model-metadata.html`,
       overview: `${APM_DOCS}guide/${DOC_LINK_VERSION}/apm-overview.html`,
       tailSamplingPolicies: `${APM_DOCS}guide/${DOC_LINK_VERSION}/configure-tail-based-sampling.html`,
+      elasticAgent: `${APM_DOCS}guide/${DOC_LINK_VERSION}/upgrade-to-apm-integration.html`,
     },
     canvas: {
       guide: `${KIBANA_DOCS}canvas.html`,
@@ -111,6 +112,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       synonyms: `${APP_SEARCH_DOCS}synonyms-guide.html`,
       webCrawler: `${APP_SEARCH_DOCS}web-crawler.html`,
       webCrawlerEventLogs: `${APP_SEARCH_DOCS}view-web-crawler-events-logs.html`,
+      webCrawlerReference: `${APP_SEARCH_DOCS}web-crawler-reference.html`,
     },
     enterpriseSearch: {
       configuration: `${ENTERPRISE_SEARCH_DOCS}configuration.html`,
@@ -525,6 +527,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       azureRepo: `${ELASTICSEARCH_DOCS}repository-azure.html`,
       gcsRepo: `${ELASTICSEARCH_DOCS}repository-gcs.html`,
       hdfsRepo: `${PLUGIN_DOCS}repository-hdfs.html`,
+      ingestAttachment: `${PLUGIN_DOCS}ingest-attachment.html`,
       s3Repo: `${ELASTICSEARCH_DOCS}repository-s3.html`,
       snapshotRestoreRepos: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html`,
       mapperSize: `${PLUGIN_DOCS}mapper-size-usage.html`,
@@ -602,7 +605,6 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       installElasticAgent: `${FLEET_DOCS}install-fleet-managed-elastic-agent.html`,
       installElasticAgentStandalone: `${FLEET_DOCS}install-standalone-elastic-agent.html`,
       upgradeElasticAgent: `${FLEET_DOCS}upgrade-elastic-agent.html`,
-      upgradeElasticAgent712lower: `${FLEET_DOCS}upgrade-elastic-agent.html#upgrade-7.12-lower`,
       learnMoreBlog: `${ELASTIC_WEBSITE_URL}blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
       apiKeysLearnMore: `${KIBANA_DOCS}api-keys.html`,
       onPremRegistry: `${FLEET_DOCS}air-gapped.html`,
@@ -648,6 +650,8 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     kibanaUpgradeSavedObjects: {
       resolveMigrationFailures: `${KIBANA_DOCS}resolve-migrations-failures.html`,
+      repeatedTimeoutRequests: `${KIBANA_DOCS}resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail`,
+      routingAllocationDisabled: `${KIBANA_DOCS}resolve-migrations-failures.html#routing-allocation-disabled`,
     },
   });
 };

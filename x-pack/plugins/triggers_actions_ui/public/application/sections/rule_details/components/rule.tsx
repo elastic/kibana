@@ -18,8 +18,6 @@ import {
   EuiTabbedContent,
   EuiText,
 } from '@elastic/eui';
-// @ts-ignore
-import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import {
@@ -33,7 +31,7 @@ import {
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
 import './rule.scss';
-import { getHealthColor } from '../../rules_list/components/rule_status_filter';
+import { getHealthColor } from '../../rules_list/components/rule_execution_status_filter';
 import {
   rulesStatusesTranslationsMapping,
   ALERT_STATUS_LICENSE_ERROR,

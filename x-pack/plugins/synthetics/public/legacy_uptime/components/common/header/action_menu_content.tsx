@@ -17,7 +17,7 @@ import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_cont
 import { useGetUrlParams } from '../../../hooks';
 import { ToggleAlertFlyoutButton } from '../../overview/alerts/alerts_containers';
 import { MONITOR_ROUTE, SETTINGS_ROUTE } from '../../../../../common/constants';
-import { stringifyUrlParams } from '../../../lib/helper/stringify_url_params';
+import { stringifyUrlParams } from '../../../../apps/synthetics/utils/url_params/stringify_url_params';
 import { InspectorHeaderLink } from './inspector_header_link';
 import { monitorStatusSelector } from '../../../state/selectors';
 import { ManageMonitorsBtn } from './manage_monitors_btn';

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { ActionLicense, AllCases, Case, CasesStatus, CaseUserActions, Comment } from './types';
+import { ActionLicense, Cases, Case, CasesStatus, CaseUserActions, Comment } from './types';
 
 import type {
   ResolvedCase,
   SingleCaseMetrics,
   SingleCaseMetricsFeature,
   AlertComment,
+  CasesMetrics,
 } from '../../common/ui/types';
 import {
   Actions,
@@ -31,6 +32,7 @@ import {
   UserActionTypes,
   UserActionWithResponse,
   CommentUserAction,
+  CaseSeverity,
 } from '../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { UseGetCasesState, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
@@ -154,6 +156,7 @@ export const basicCase: Case = {
     fields: null,
   },
   description: 'Security banana Issue',
+  severity: CaseSeverity.LOW,
   duration: null,
   externalService: null,
   status: CaseStatuses.open,
@@ -247,6 +250,7 @@ export const mockCase: Case = {
     fields: null,
   },
   duration: null,
+  severity: CaseSeverity.LOW,
   description: 'Security banana Issue',
   externalService: null,
   status: CaseStatuses.open,
@@ -287,6 +291,10 @@ export const casesStatus: CasesStatus = {
   countOpenCases: 20,
   countInProgressCases: 40,
   countClosedCases: 130,
+};
+
+export const casesMetrics: CasesMetrics = {
+  mttr: 12,
 };
 
 export const basicPush = {
@@ -330,7 +338,7 @@ export const cases: Case[] = [
   caseWithAlertsSyncOff,
 ];
 
-export const allCases: AllCases = {
+export const allCases: Cases = {
   cases,
   page: 1,
   perPage: 5,
@@ -512,6 +520,7 @@ export const getUserAction = (
           description: 'a desc',
           connector: { ...getJiraConnector() },
           status: CaseStatuses.open,
+          severity: CaseSeverity.LOW,
           title: 'a title',
           tags: ['a tag'],
           settings: { syncAlerts: true },
