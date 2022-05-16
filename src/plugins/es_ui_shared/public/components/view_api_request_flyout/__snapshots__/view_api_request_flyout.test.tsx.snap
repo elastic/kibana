@@ -41,10 +41,10 @@ exports[`ViewApiRequestFlyout is rendered 1`] = `
           </p>
         </div>
         <div
-          class="euiSpacer euiSpacer--l"
+          class="euiSpacer euiSpacer--l css-jz428s-euiSpacer-l"
         />
         <div
-          class="euiSpacer euiSpacer--s"
+          class="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
         />
         <div
           class="eui-textRight"
@@ -75,7 +75,7 @@ exports[`ViewApiRequestFlyout is rendered 1`] = `
           </span>
         </div>
         <div
-          class="euiSpacer euiSpacer--s"
+          class="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
         />
         <div>
           <pre>
