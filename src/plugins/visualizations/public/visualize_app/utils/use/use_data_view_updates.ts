@@ -7,6 +7,7 @@
  */
 
 import { useEffect } from 'react';
+import type { Subscription } from 'rxjs';
 import type { EventEmitter } from 'events';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type {
@@ -28,6 +29,8 @@ export const useDataViewUpdates = (
   visInstance: VisualizeEditorVisInstance | undefined
 ) => {
   useEffect(() => {
+    let stateUpdatesSubscription: Subscription;
+
     if (appState && visInstance) {
       const syncDataView = async ({ dataView }: VisualizeAppState, setDirty = true) => {
         if (
@@ -45,12 +48,10 @@ export const useDataViewUpdates = (
       };
 
       syncDataView(appState.getState(), false);
-
-      const stateUpdatesSubscription = appState.state$.subscribe(syncDataView);
-
-      return () => {
-        stateUpdatesSubscription.unsubscribe();
-      };
+      stateUpdatesSubscription = appState.state$.subscribe(syncDataView);
     }
+    return () => {
+      stateUpdatesSubscription?.unsubscribe();
+    };
   }, [appState, eventEmitter, services.dataViews, visInstance]);
 };
