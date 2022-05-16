@@ -34,7 +34,6 @@ import type {
   CommonXYAnnotationLayerConfig,
   CollectiveConfig,
 } from '../../common';
-
 import { AnnotationIcon, hasIcon, Marker, MarkerBody } from '../helpers';
 import { mapVerticalToHorizontalPlacement, LINES_MARKER_SIZE } from '../helpers';
 
