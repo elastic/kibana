@@ -38,15 +38,40 @@ const getInternalConnectorConfigurableFields = (
   configuration: Configuration
 ): SourceConfigFormElement[] => {
   const internalConnectorFields: SourceConfigFormElement[] = [
-    { key: 'client_id', label: 'Client ID' },
-    { key: 'client_secret', label: 'Client Secret' },
+    {
+      key: 'client_id',
+      label: i18n.translate(
+        'xpack.enterpriseSearch.workplaceSearch.contentSource.saveConfig.clientIDLabel',
+        {
+          defaultMessage: 'Client ID',
+        }
+      ),
+    },
+    {
+      key: 'client_secret',
+      label: i18n.translate(
+        'xpack.enterpriseSearch.workplaceSearch.contentSource.saveConfig.clientSecretLabel',
+        {
+          defaultMessage: 'Client Secret',
+        }
+      ),
+    },
   ];
 
-  if (configuration.needsBaseUrl) {
-    internalConnectorFields.push({ key: 'base_url', label: 'Base Url' });
-  }
-
-  return internalConnectorFields;
+  return configuration.needsBaseUrl
+    ? [
+        ...internalConnectorFields,
+        {
+          key: 'base_url',
+          label: i18n.translate(
+            'xpack.enterpriseSearch.workplaceSearch.contentSource.saveConfig.baseUrlLabel',
+            {
+              defaultMessage: 'Base URL',
+            }
+          ),
+        },
+      ]
+    : internalConnectorFields;
 };
 
 interface SaveConfigProps {
