@@ -69,6 +69,7 @@ export function LatencyChart({ height, kuery }: Props) {
   const preferredAnomalyTimeseries = usePreferredServiceAnomalyTimeseries(
     ApmMlDetectorType.txLatency
   );
+  const previousPeriodColor = latencyChartsData.previousPeriod?.areaColor;
 
   const timeseries = [
     currentPeriod,
@@ -133,6 +134,7 @@ export function LatencyChart({ height, kuery }: Props) {
           timeseries={timeseries}
           yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
           anomalyTimeseries={preferredAnomalyTimeseries}
+          comparisonColor={previousPeriodColor}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

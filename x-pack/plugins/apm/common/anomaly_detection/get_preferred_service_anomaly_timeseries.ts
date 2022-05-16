@@ -33,8 +33,7 @@ export function getPreferredServiceAnomalyTimeseries({
       : environment;
 
   return seriesForType.find(
-    (serie) =>
-      serie.environment === preferredEnvironment &&
-      (fallbackToTransactions ? serie.version <= 2 : serie.version >= 3)
+    (serie) => serie.environment === preferredEnvironment // &&
+    // (fallbackToTransactions ? serie.version <= 2 : serie.version >= 3)
   );
 }

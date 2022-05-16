@@ -60,6 +60,7 @@ interface Props {
   yDomain?: YDomainRange;
   anomalyTimeseries?: ServiceAnomalyTimeseries;
   customTheme?: Record<string, unknown>;
+  comparisonColor?: string;
 }
 export function TimeseriesChart({
   id,
@@ -72,6 +73,7 @@ export function TimeseriesChart({
   showAnnotations = true,
   yDomain,
   anomalyTimeseries,
+  comparisonColor,
   customTheme = {},
 }: Props) {
   const history = useHistory();
@@ -94,6 +96,7 @@ export function TimeseriesChart({
   const anomalyChartTimeseries = getChartAnomalyTimeseries({
     anomalyTimeseries,
     theme,
+    comparisonColor,
   });
 
   const xFormatter = niceTimeFormatter([min, max]);
