@@ -23,16 +23,14 @@ import { exceptionsListAllHttpMocks } from '../../../../mocks/exceptions_list_ht
 import { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
 import { POLICY_ARTIFACT_DELETE_MODAL_LABELS } from './translations';
 
-const listType: CreateExceptionListSchema['type'][] = (
-  [
-    'endpoint_events',
-    'detection',
-    'endpoint',
-    'endpoint_trusted_apps',
-    'endpoint_host_isolation_exceptions',
-    'endpoint_blocklists',
-  ]
-);
+const listType: Array<CreateExceptionListSchema['type']> = [
+  'endpoint_events',
+  'detection',
+  'endpoint',
+  'endpoint_trusted_apps',
+  'endpoint_host_isolation_exceptions',
+  'endpoint_blocklists',
+];
 
 describe.each(listType)('Policy details %s artifact delete modal', (type) => {
   let policyId: string;
@@ -50,7 +48,6 @@ describe.each(listType)('Policy details %s artifact delete modal', (type) => {
     onCloseMock = jest.fn();
     mockedApi = exceptionsListAllHttpMocks(mockedContext.coreStart.http);
     render = async () => {
-
       await act(async () => {
         renderResult = mockedContext.render(
           <PolicyArtifactsDeleteModal
