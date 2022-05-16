@@ -30,11 +30,9 @@ const serviceGroupsRoute = createApmServerRoute({
     const { context } = resources;
     const {
       savedObjects: { client: savedObjectsClient },
-      uiSettings: { client: uiSettingsClient },
     } = await context.core;
     const serviceGroups = await getServiceGroups({
       savedObjectsClient,
-      uiSettingsClient,
     });
     return { serviceGroups };
   },

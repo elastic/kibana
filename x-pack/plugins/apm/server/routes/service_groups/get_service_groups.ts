@@ -5,32 +5,23 @@
  * 2.0.
  */
 
-import {
-  IUiSettingsClient,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
-import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import {
   ServiceGroup,
   SavedServiceGroup,
   APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
+  MAX_NUMBER_OF_SERVICE_GROUPS,
 } from '../../../common/service_groups';
 
 export async function getServiceGroups({
   savedObjectsClient,
-  uiSettingsClient,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  uiSettingsClient: IUiSettingsClient;
 }): Promise<SavedServiceGroup[]> {
-  const maxNumberOfServices = await uiSettingsClient.get<number>(
-    apmServiceGroupMaxNumberOfServices
-  );
-
   const result = await savedObjectsClient.find<ServiceGroup>({
     type: APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
     page: 1,
-    perPage: maxNumberOfServices,
+    perPage: MAX_NUMBER_OF_SERVICE_GROUPS,
   });
   return result.saved_objects.map(
     ({ id, attributes, updated_at: upatedAt }) => ({
