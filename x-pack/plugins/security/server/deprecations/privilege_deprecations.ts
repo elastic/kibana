@@ -42,7 +42,8 @@ export const getPrivilegeDeprecationsService = (
           // @ts-expect-error `SecurityIndicesPrivileges.names` expected to be `string[]`
           elasticsearchRole,
           roleName,
-          authz.applicationName
+          authz.applicationName,
+          logger
         )
       );
     } catch (e) {
