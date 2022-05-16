@@ -165,7 +165,7 @@ Connector using OAuth
 --
  my-servicenow:
    name: preconfigured-oauth-servicenow-connector-type
-   actionTypeId: .servicenow
+   actionTypeId: .servicenow-itom
    config:
      apiUrl: https://example.service-now.com/
      usesTableApi: false
