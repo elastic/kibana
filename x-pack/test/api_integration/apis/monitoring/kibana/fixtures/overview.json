@@ -175,6 +175,88 @@
           [1504027540000, null]
         ]
       }
+    ],
+    "kibana_cluster_action_overdue_count": [
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": { "min": 1504027457000, "max": 1504027568000 },
+        "metric": {
+          "app": "kibana",
+          "field": "kibana.cluster_actions.overdue.count",
+          "metricAgg": "max",
+          "label": "Action Overdue Count",
+          "description": "Number of overdue actions across the entire cluster.",
+          "units": "",
+          "format": "0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [1504027460000, null],
+          [1504027470000, null],
+          [1504027480000, null],
+          [1504027490000, null],
+          [1504027500000, null],
+          [1504027510000, null],
+          [1504027520000, null],
+          [1504027530000, null],
+          [1504027540000, null]
+        ]
+      }
+    ],
+    "kibana_cluster_action_overdue_duration": [
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": { "min": 1504027457000, "max": 1504027568000 },
+        "metric": {
+          "app": "kibana",
+          "field": "kibana.cluster_actions.overdue.delay.p50",
+          "metricAgg": "max",
+          "label": "Average Action Overdue Delay",
+          "description": "Average delay of all overdue actions across the entire cluster.",
+          "units": "",
+          "format": "0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [1504027460000, null],
+          [1504027470000, null],
+          [1504027480000, null],
+          [1504027490000, null],
+          [1504027500000, null],
+          [1504027510000, null],
+          [1504027520000, null],
+          [1504027530000, null],
+          [1504027540000, null]
+        ]
+      },
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": { "min": 1504027457000, "max": 1504027568000 },
+        "metric": {
+          "app": "kibana",
+          "field": "kibana.cluster_actions.overdue.delay.p99",
+          "metricAgg": "max",
+          "label": "Worst Action Overdue Delay",
+          "description": "Worst delay of all overdue actions across the entire cluster.",
+          "units": "",
+          "format": "0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [1504027460000, null],
+          [1504027470000, null],
+          [1504027480000, null],
+          [1504027490000, null],
+          [1504027500000, null],
+          [1504027510000, null],
+          [1504027520000, null],
+          [1504027530000, null],
+          [1504027540000, null]
+        ]
+      }
     ]
   }
 }
