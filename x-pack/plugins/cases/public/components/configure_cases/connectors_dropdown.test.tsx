@@ -269,4 +269,26 @@ describe('ConnectorsDropdown', () => {
     );
     expect(tooltips[0]).toBeInTheDocument();
   });
+
+  test('it shows the deprecated tooltip when the connector is deprecated by configuration', () => {
+    const connector = connectors[0];
+    render(
+      <ConnectorsDropdown
+        {...props}
+        connectors={[
+          {
+            ...connector,
+            isDeprecated: true,
+          },
+        ]}
+        selectedConnector={connector.id}
+      />,
+      { wrapper: ({ children }) => <TestProviders>{children}</TestProviders> }
+    );
+
+    const tooltips = screen.getAllByText(
+      'This connector is deprecated. Update it, or create a new one.'
+    );
+    expect(tooltips[0]).toBeInTheDocument();
+  });
 });

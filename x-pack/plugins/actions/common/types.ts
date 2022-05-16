@@ -35,6 +35,7 @@ export interface ActionResult {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   config: Record<string, any>;
   isPreconfigured: boolean;
+  isDeprecated?: boolean;
 }
 
 // the result returned from an action type executor function
