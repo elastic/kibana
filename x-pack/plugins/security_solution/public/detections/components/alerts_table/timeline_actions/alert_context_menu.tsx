@@ -91,6 +91,10 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   const isAgentEndpoint = useMemo(() => ecsRowData.agent?.type?.includes('endpoint'), [ecsRowData]);
 
   const isEndpointEvent = useMemo(() => isEvent && isAgentEndpoint, [isEvent, isAgentEndpoint]);
+  const timelineIdAllowsAddEventFilter = useMemo(
+    () => timelineId === TimelineId.hostsPageEvents || timelineId === TimelineId.usersPageEvents,
+    [timelineId]
+  );
 
   const onButtonClick = useCallback(() => {
     setPopover(!isPopoverOpen);
@@ -176,14 +180,10 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   });
   const { eventFilterActionItems } = useEventFilterAction({
     onAddEventFilterClick: handleOnAddEventFilterClick,
-    disabled:
-      !isEndpointEvent ||
-      !canCreateEndpointEventFilters ||
-      timelineId !== TimelineId.hostsPageEvents,
-    tooltipMessage:
-      timelineId !== TimelineId.hostsPageEvents
-        ? i18n.ACTION_ADD_EVENT_FILTER_DISABLED_TOOLTIP
-        : undefined,
+    disabled: !isEndpointEvent || !canCreateEndpointEventFilters || !timelineIdAllowsAddEventFilter,
+    tooltipMessage: !timelineIdAllowsAddEventFilter
+      ? i18n.ACTION_ADD_EVENT_FILTER_DISABLED_TOOLTIP
+      : undefined,
   });
   const items: React.ReactElement[] = useMemo(
     () =>
