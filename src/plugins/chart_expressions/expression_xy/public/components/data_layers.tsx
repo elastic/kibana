@@ -15,6 +15,8 @@ import {
 import React, { FC } from 'react';
 import { PaletteRegistry } from '@kbn/coloring';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
+import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
+
 import {
   CommonXYDataLayerConfig,
   EndValue,
@@ -71,7 +73,8 @@ export const DataLayers: FC<Props> = ({
     <>
       {layers.flatMap((layer) =>
         layer.accessors.map((accessor, accessorIndex) => {
-          const { seriesType, columnToLabel, layerId } = layer;
+          const { seriesType, columnToLabel, layerId, table } = layer;
+          const yColumnId = getAccessorByDimension(accessor, table.columns);
           const columnToLabelMap: Record<string, string> = columnToLabel
             ? JSON.parse(columnToLabel)
             : {};
@@ -84,12 +87,12 @@ export const DataLayers: FC<Props> = ({
           const isPercentage = seriesType.includes('percentage');
 
           const yAxis = yAxesConfiguration.find((axisConfiguration) =>
-            axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
+            axisConfiguration.series.find((currentSeries) => currentSeries.accessor === yColumnId)
           );
 
           const seriesProps = getSeriesProps({
             layer,
-            accessor,
+            accessor: yColumnId,
             chartHasMoreThanOneBarSeries,
             colorAssignments,
             formatFactory,

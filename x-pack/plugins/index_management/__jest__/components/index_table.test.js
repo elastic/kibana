@@ -9,14 +9,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import { findTestSubject } from '@elastic/eui/lib/test';
-
-/**
- * The below import is required to avoid a console error warn from brace package
- * console.warn ../node_modules/brace/index.js:3999
-      Could not load worker ReferenceError: Worker is not defined
-          at createWorker (/<path-to-repo>/node_modules/brace/index.js:17992:5)
- */
-import { mountWithIntl, stubWebWorker } from '@kbn/test-jest-helpers'; // eslint-disable-line no-unused-vars
+import { mountWithIntl } from '@kbn/test-jest-helpers'; // eslint-disable-line no-unused-vars
 import { init as initHttpRequests } from '../client_integration/helpers/http_requests';
 
 import { BASE_PATH } from '../../common/constants';
