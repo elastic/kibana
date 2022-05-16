@@ -2151,7 +2151,7 @@ export class RulesClient {
             snoozeSchedule: clearUnscheduledSnooze(attributes),
           }
         : {
-            snoozeSchedule: (attributes.snoozeSchedule ?? []).concat({
+            snoozeSchedule: clearUnscheduledSnooze(attributes).concat({
               startTime: new Date().toISOString(),
               duration: Date.parse(snoozeEndTime) - Date.now(),
               timeZone: 'UTC',
