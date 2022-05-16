@@ -44,7 +44,7 @@ Notify::      This value limits how often actions are repeated when an alert rem
 [[alerting-concepts-suppressing-duplicate-notifications]]
 [NOTE]
 ==============================================
-Since actions are executed per alert, a rule can end up generating a large number of actions. Take the following example where a rule is monitoring three servers every minute for CPU usage > 0.9, and the rule is set to notify **Every time alert is active**:
+Since actions are triggered per alert, a rule can end up generating a large number of actions. Take the following example where a rule is monitoring three servers every minute for CPU usage > 0.9, and the rule is set to notify **Every time alert is active**:
 
 * Minute 1: server X123 > 0.9. *One email* is sent for server X123.
 * Minute 2: X123 and Y456 > 0.9. *Two emails* are sent, one for X123 and one for Y456.
@@ -163,8 +163,8 @@ A rule can have one of the following statuses:
 
 `active`:: The conditions for the rule have been met, and the associated actions should be invoked.
 `ok`:: The conditions for the rule have not been met, and the associated actions are not invoked.
-`error`:: An error was encountered during rule execution.
-`pending`:: The rule has not yet executed.  The rule was either just created, or enabled after being disabled.
+`error`:: An error was encountered by the rule.
+`pending`:: The rule has not yet run.  The rule was either just created, or enabled after being disabled.
 `unknown`:: A problem occurred when calculating the status. Most likely, something went wrong with the alerting code.
 
 [float]

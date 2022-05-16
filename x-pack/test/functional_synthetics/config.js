@@ -28,7 +28,7 @@ export default async function ({ readConfigFile }) {
     require.resolve('../../../test/common/config.js')
   );
   const kibanaFunctionalConfig = await readConfigFile(
-    require.resolve('../../../test/functional/config.js')
+    require.resolve('../../../test/functional/config.base.js')
   );
 
   // mount the config file for the package registry as well as
@@ -75,7 +75,6 @@ export default async function ({ readConfigFile }) {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
-        'visualization:visualize:legacyPieChartsLibrary': true,
       },
     },
     // the apps section defines the urls that
