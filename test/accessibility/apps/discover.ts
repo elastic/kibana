@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const TEST_COLUMN_NAMES = ['dayOfWeek', 'DestWeather'];
   const toasts = getService('toasts');
+  const browser = getService('browser');
 
   describe('Discover a11y tests', () => {
     before(async () => {
@@ -154,12 +155,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('discoverChartOptionsToggle');
     });
 
+    //https://github.com/elastic/eui/issues/5900
+    it.skip('a11y test for data grid sort panel', async () => {
+      await testSubjects.click('dataGridColumnSortingButton');
+      await a11y.testAppSnapshot();
+      await browser.pressKeys(browser.keys.ESCAPE);
+    });
+
+
+    it('a11y test for setting row height for display panel', async () => {
+      await testSubjects.click('dataGridDisplaySelectorPopover');
+      await a11y.testAppSnapshot();
+      await browser.pressKeys(browser.keys.ESCAPE);
+    });
+
+    it('a11y test for data grid in full screen', async () => {
+      await testSubjects.click('dataGridFullScreenButton');
+      await a11y.testAppSnapshot();
+      await browser.pressKeys(browser.keys.ESCAPE);
+    });
+
     it('a11y test for field statistics data grid view', async () => {
       await PageObjects.discover.clickViewModeFieldStatsButton();
       await a11y.testAppSnapshot();
     });
 
-    it('a11y test for data grid in full screen with collapsed side bar', async () => {
+    it('a11y test for data grid with collapsed side bar', async () => {
       await PageObjects.discover.closeSidebar();
       await a11y.testAppSnapshot();
       await PageObjects.discover.toggleSidebarCollapse();
