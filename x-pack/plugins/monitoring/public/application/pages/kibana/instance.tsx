@@ -111,6 +111,22 @@ const KibanaInstance = ({ data, alerts }: { data: any; alerts: any }) => {
               />
               <EuiSpacer />
             </EuiFlexItem>
+            <EuiFlexItem grow={true}>
+              <MonitoringTimeseriesContainer
+                series={data.metrics.kibana_instance_action_executions}
+                onBrush={onBrush}
+                zoomInfo={zoomInfo}
+              />
+              <EuiSpacer />
+            </EuiFlexItem>
+            <EuiFlexItem grow={true}>
+              <MonitoringTimeseriesContainer
+                series={data.metrics.kibana_instance_action_failures}
+                onBrush={onBrush}
+                zoomInfo={zoomInfo}
+              />
+              <EuiSpacer />
+            </EuiFlexItem>
           </EuiFlexGrid>
         </EuiPageContent>
       </EuiPageBody>
