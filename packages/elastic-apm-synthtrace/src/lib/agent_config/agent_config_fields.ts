@@ -6,25 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { Fields } from '../entity';
+import { ApmFields } from '../apm/apm_fields';
 
-export interface Observer {
-  hostname: string;
-  id: string;
-  ephemeral_id: string;
-  type: string;
-  version: string;
-}
-
-export type AgentConfigFields = Fields &
+export type AgentConfigFields = Pick<
+  ApmFields,
+  | '@timestamp'
+  | 'processor.event'
+  | 'processor.name'
+  | 'metricset.name'
+  | 'observer'
+  | 'ecs.version'
+  | 'event.ingested'
+> &
   Partial<{
-    'processor.event': string;
-    'processor.name': string;
     'labels.etag': string;
-    'metricset.name': string;
-    observer: Observer;
     agent_config_applied: number;
-    'ecs.version': string;
     'event.agent_id_status': string;
-    'event.ingested': string;
   }>;

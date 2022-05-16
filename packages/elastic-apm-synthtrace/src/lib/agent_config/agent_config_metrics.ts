@@ -12,7 +12,7 @@ import { AgentConfigFields } from './agent_config_fields';
 export class AgentConfigMetrics extends Serializable<AgentConfigFields> {
   timestamp(timestamp: number): this {
     super.timestamp(timestamp);
-    this.fields['event.ingested'] = new Date(timestamp).toISOString();
+    this.fields['event.ingested'] = new Date(timestamp).getTime();
     return this;
   }
 }
