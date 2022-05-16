@@ -241,6 +241,7 @@ describe('Fleet - validatePackagePolicy()', () => {
           ],
         },
       ],
+      vars: {},
     };
 
     const invalidPackagePolicy: NewPackagePolicy = {
@@ -332,6 +333,7 @@ describe('Fleet - validatePackagePolicy()', () => {
           ],
         },
       ],
+      vars: {},
     };
 
     const noErrorsValidationResults = {
@@ -370,6 +372,7 @@ describe('Fleet - validatePackagePolicy()', () => {
           vars: { 'var-name': null },
         },
       },
+      vars: {},
     };
 
     it('returns no errors for valid package policy', () => {
@@ -416,6 +419,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             streams: { 'with-no-stream-vars-bar': {} },
           },
         },
+        vars: {},
       });
     });
 
@@ -487,6 +491,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             streams: { 'with-no-stream-vars-bar': {} },
           },
         },
+        vars: {},
       });
     });
 
@@ -505,6 +510,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         description: null,
         namespace: null,
         inputs: null,
+        vars: {},
       });
       expect(
         validatePackagePolicy(
@@ -520,6 +526,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         description: null,
         namespace: null,
         inputs: null,
+        vars: {},
       });
     });
 
@@ -538,6 +545,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         description: null,
         namespace: null,
         inputs: null,
+        vars: {},
       });
       expect(
         validatePackagePolicy(
@@ -553,6 +561,59 @@ describe('Fleet - validatePackagePolicy()', () => {
         description: null,
         namespace: null,
         inputs: null,
+        vars: {},
+      });
+    });
+
+    it('returns no errors when required field is present but empty', () => {
+      expect(
+        validatePackagePolicy(
+          {
+            ...validPackagePolicy,
+            inputs: [
+              {
+                type: 'foo',
+                policy_template: 'pkgPolicy1',
+                enabled: true,
+                vars: {
+                  'foo-input-var-name': { value: '', type: 'text' },
+                  'foo-input2-var-name': { value: '', type: 'text' },
+                  'foo-input3-var-name': { value: ['test'], type: 'text' },
+                },
+                streams: [
+                  {
+                    data_stream: { dataset: 'foo', type: 'logs' },
+                    enabled: true,
+                    vars: { 'var-name': { value: 'test_yaml: value', type: 'yaml' } },
+                  },
+                ],
+              },
+            ],
+          },
+          mockPackage,
+          safeLoad
+        )
+      ).toEqual({
+        name: null,
+        description: null,
+        namespace: null,
+        inputs: {
+          foo: {
+            streams: {
+              foo: {
+                vars: {
+                  'var-name': null,
+                },
+              },
+            },
+            vars: {
+              'foo-input-var-name': null,
+              'foo-input2-var-name': null,
+              'foo-input3-var-name': null,
+            },
+          },
+        },
+        vars: {},
       });
     });
 
@@ -678,6 +739,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             },
           },
         },
+        vars: {},
         name: null,
         namespace: null,
       });
