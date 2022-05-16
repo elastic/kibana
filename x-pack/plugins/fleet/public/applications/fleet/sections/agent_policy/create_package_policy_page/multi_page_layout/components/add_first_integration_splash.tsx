@@ -78,7 +78,7 @@ const AddIntegrationStepsIllustrations = () => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiImage
-          alt="Illustration of installing the Elastic Agent"
+          alt="Illustration of an arrow pointing from left to right"
           src={assetsBasePath + 'arrow_right_curve_over.svg'}
         />
       </EuiFlexItem>
@@ -119,7 +119,7 @@ const AddIntegrationStepsIllustrations = () => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiImage
-          alt="Illustration of installing the Elastic Agent"
+          alt="Illustration of an arrow pointing from left to right"
           src={assetsBasePath + 'arrow_right_curve_under.svg'}
         />
       </EuiFlexItem>
