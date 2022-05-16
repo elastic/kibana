@@ -49,6 +49,9 @@ describe('buildTimelineDetailsQuery', () => {
             },
           },
           "runtime_mappings": Object {},
+          "stored_fields": Array [
+            "*",
+          ],
         },
         "ignore_unavailable": true,
         "index": ".siem-signals-default",
