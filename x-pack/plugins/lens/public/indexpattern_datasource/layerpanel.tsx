@@ -22,7 +22,6 @@ export function LayerPanel({ state, layerId, onChangeIndexPattern }: IndexPatter
   const layer = state.layers[layerId];
 
   const indexPattern = state.indexPatterns[layer.indexPatternId];
-
   const notFoundTitleLabel = i18n.translate('xpack.lens.layerPanel.missingDataView', {
     defaultMessage: 'Data view not found',
   });

@@ -27,8 +27,8 @@ export interface InitActionParams {
   indices: string[];
 }
 
-export interface UnsupportedClusterRoutingAllocation {
-  type: 'unsupported_cluster_routing_allocation';
+export interface IncompatibleClusterRoutingAllocation {
+  type: 'incompatible_cluster_routing_allocation';
 }
 
 export const checkClusterRoutingAllocationEnabledTask =
@@ -36,24 +36,25 @@ export const checkClusterRoutingAllocationEnabledTask =
     client,
   }: {
     client: ElasticsearchClient;
-  }): TaskEither.TaskEither<RetryableEsClientError | UnsupportedClusterRoutingAllocation, {}> =>
+  }): TaskEither.TaskEither<RetryableEsClientError | IncompatibleClusterRoutingAllocation, {}> =>
   () => {
     return client.cluster
       .getSettings({
         flat_settings: true,
       })
       .then((settings) => {
-        const clusterRoutingAllocations: string[] =
+        // transient settings take preference over persistent settings
+        const clusterRoutingAllocation =
           settings?.transient?.[routingAllocationEnable] ??
-          settings?.persistent?.[routingAllocationEnable] ??
-          [];
+          settings?.persistent?.[routingAllocationEnable];
 
-        const clusterRoutingAllocationEnabled =
-          [...clusterRoutingAllocations].length === 0 ||
-          [...clusterRoutingAllocations].every((s: string) => s === 'all'); // if set, only allow 'all'
+        const clusterRoutingAllocationEnabledIsAll =
+          clusterRoutingAllocation === undefined || clusterRoutingAllocation === 'all';
 
-        if (!clusterRoutingAllocationEnabled) {
-          return Either.left({ type: 'unsupported_cluster_routing_allocation' as const });
+        if (!clusterRoutingAllocationEnabledIsAll) {
+          return Either.left({
+            type: 'incompatible_cluster_routing_allocation' as const,
+          });
         } else {
           return Either.right({});
         }
@@ -65,7 +66,7 @@ export const initAction = ({
   client,
   indices,
 }: InitActionParams): TaskEither.TaskEither<
-  RetryableEsClientError | UnsupportedClusterRoutingAllocation,
+  RetryableEsClientError | IncompatibleClusterRoutingAllocation,
   FetchIndexResponse
 > => {
   return pipe(

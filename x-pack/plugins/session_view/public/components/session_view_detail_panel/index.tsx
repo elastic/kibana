@@ -9,9 +9,9 @@ import { EuiTabs, EuiTab, EuiNotificationBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiTabProps } from '../../types';
 import { Process, ProcessEvent } from '../../../common/types/process_tree';
-import { getDetailPanelProcess, getSelectedTabContent } from './helpers';
+import { getSelectedTabContent } from './helpers';
 import { DetailPanelProcessTab } from '../detail_panel_process_tab';
-import { DetailPanelHostTab } from '../detail_panel_host_tab';
+import { DetailPanelMetadataTab } from '../detail_panel_metadata_tab';
 import { useStyles } from './styles';
 import { DetailPanelAlertTab } from '../detail_panel_alert_tab';
 import { ALERT_COUNT_THRESHOLD } from '../../../common/constants';
@@ -35,7 +35,6 @@ export const SessionViewDetailPanel = ({
   onShowAlertDetails,
 }: SessionViewDetailPanelDeps) => {
   const [selectedTabId, setSelectedTabId] = useState('process');
-  const processDetail = useMemo(() => getDetailPanelProcess(selectedProcess), [selectedProcess]);
 
   const alertsCount = useMemo(() => {
     if (!alerts) {
@@ -54,14 +53,20 @@ export const SessionViewDetailPanel = ({
         name: i18n.translate('xpack.sessionView.detailsPanel.process', {
           defaultMessage: 'Process',
         }),
-        content: <DetailPanelProcessTab processDetail={processDetail} />,
+        content: <DetailPanelProcessTab selectedProcess={selectedProcess} />,
       },
       {
-        id: 'host',
-        name: i18n.translate('xpack.sessionView.detailsPanel.host', {
-          defaultMessage: 'Host',
+        id: 'metadata',
+        name: i18n.translate('xpack.sessionView.detailsPanel.metadata', {
+          defaultMessage: 'Metadata',
         }),
-        content: <DetailPanelHostTab processHost={selectedProcess?.events[0]?.host} />,
+        content: (
+          <DetailPanelMetadataTab
+            processHost={selectedProcess?.events[0]?.host}
+            processContainer={selectedProcess?.events[0]?.container}
+            processOrchestrator={selectedProcess?.events[0]?.orchestrator}
+          />
+        ),
       },
       {
         id: 'alerts',
@@ -85,12 +90,11 @@ export const SessionViewDetailPanel = ({
     ];
   }, [
     alerts,
+    selectedProcess,
     alertsCount,
-    processDetail,
-    selectedProcess?.events,
+    onJumpToEvent,
     onShowAlertDetails,
     investigatedAlertId,
-    onJumpToEvent,
   ]);
 
   const onSelectedTabChanged = useCallback((id: string) => {
