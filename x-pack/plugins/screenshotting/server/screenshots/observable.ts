@@ -233,7 +233,7 @@ export class ScreenshotObservableHandler {
           const elements =
             data.elementsPositionAndAttributes ??
             getDefaultElementPosition(this.layout.getViewport(1));
-          const screenshots = await getScreenshots(this.driver, this.logger, elements);
+          const screenshots = await getScreenshots(this.driver, this.logger, elements, this.layout);
           const { timeRange, error: setupError } = data;
 
           return {

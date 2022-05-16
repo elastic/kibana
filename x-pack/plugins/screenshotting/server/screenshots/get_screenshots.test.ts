@@ -7,6 +7,8 @@
 
 import type { Logger } from 'src/core/server';
 import { createMockBrowserDriver } from '../browsers/mock';
+import { Layout } from '../layouts';
+import { createMockLayout } from '../layouts/mock';
 import { getScreenshots } from './get_screenshots';
 
 describe('getScreenshots', () => {
@@ -28,12 +30,14 @@ describe('getScreenshots', () => {
   ];
   let browser: ReturnType<typeof createMockBrowserDriver>;
   let logger: jest.Mocked<Logger>;
+  let layout: Layout;
 
   beforeEach(async () => {
     browser = createMockBrowserDriver();
     logger = { info: jest.fn() } as unknown as jest.Mocked<Logger>;
 
     browser.evaluate.mockImplementation(({ fn, args }) => (fn as Function)(...args));
+    layout = createMockLayout();
   });
 
   afterEach(() => {
@@ -41,7 +45,7 @@ describe('getScreenshots', () => {
   });
 
   it('should return screenshots', async () => {
-    await expect(getScreenshots(browser, logger, elementsPositionAndAttributes)).resolves
+    await expect(getScreenshots(browser, logger, elementsPositionAndAttributes, layout)).resolves
       .toMatchInlineSnapshot(`
             Array [
               Object {
@@ -87,7 +91,7 @@ describe('getScreenshots', () => {
   });
 
   it('should forward elements positions', async () => {
-    await getScreenshots(browser, logger, elementsPositionAndAttributes);
+    await getScreenshots(browser, logger, elementsPositionAndAttributes, layout);
 
     expect(browser.screenshot).toHaveBeenCalledTimes(2);
     expect(browser.screenshot).toHaveBeenNthCalledWith(
@@ -104,7 +108,7 @@ describe('getScreenshots', () => {
     browser.screenshot.mockResolvedValue(Buffer.from(''));
 
     await expect(
-      getScreenshots(browser, logger, elementsPositionAndAttributes)
+      getScreenshots(browser, logger, elementsPositionAndAttributes, layout)
     ).rejects.toBeInstanceOf(Error);
   });
 });
