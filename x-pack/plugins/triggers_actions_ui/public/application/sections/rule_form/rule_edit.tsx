@@ -123,7 +123,8 @@ export const RuleEdit = ({
     }
   };
 
-  async function onSaveRule(): Promise<Rule | undefined> {
+  async function onSaveRule(): Promise<void> {
+    setIsSaving(true);
     try {
       if (
         !isLoading &&
@@ -139,7 +140,10 @@ export const RuleEdit = ({
             },
           })
         );
-        return newRule;
+        onClose(RuleFlyoutCloseReason.SAVED);
+        if (onSaveHandler) {
+          onSaveHandler();
+        }
       } else {
         setRule(
           getRuleWithInvalidatedFields(rule, ruleParamsErrors, ruleBaseErrors, ruleActionsErrors)
@@ -153,6 +157,7 @@ export const RuleEdit = ({
           })
       );
     }
+    setIsSaving(false);
   }
 
   return (
@@ -254,17 +259,7 @@ export const RuleEdit = ({
                         type="submit"
                         iconType="check"
                         isLoading={isSaving}
-                        onClick={async () => {
-                          setIsSaving(true);
-                          const savedRule = await onSaveRule();
-                          setIsSaving(false);
-                          if (savedRule) {
-                            onClose(RuleFlyoutCloseReason.SAVED);
-                            if (onSaveHandler) {
-                              onSaveHandler();
-                            }
-                          }
-                        }}
+                        onClick={async () => await onSaveRule()}
                       >
                         <FormattedMessage
                           id="xpack.triggersActionsUI.sections.ruleEdit.saveButtonLabel"
