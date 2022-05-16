@@ -7,10 +7,14 @@
 
 import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+export interface FileChunkDocument {
+  content: string;
+  head_chunk_id?: string;
+}
+
 export const mappings: MappingTypeMapping = {
   properties: {
-    chunk: { type: 'long' },
-    content: { type: 'object', enabled: false }, // Base64 encoded content
-    size: { type: 'long' },
+    content: { type: 'binary' }, // Base64 encoded content
+    head_chunk_id: { type: 'keyword' },
   },
 } as const;
