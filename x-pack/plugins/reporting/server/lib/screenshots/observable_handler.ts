@@ -8,6 +8,7 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
+import { DEFAULT_VIEWPORT } from '../../../common/constants';
 import { numberToDuration } from '../../../common/schema_utils';
 import { UrlOrUrlLocatorTuple } from '../../../common/types';
 import { HeadlessChromiumDriver } from '../../browsers';
@@ -29,6 +30,20 @@ import { openUrl } from './open_url';
 import { waitForRenderComplete } from './wait_for_render';
 import { waitForVisualizations } from './wait_for_visualizations';
 
+const getDefaultElementPosition = (dimensions: { height?: number; width?: number } | null) => {
+  const height = dimensions?.height || DEFAULT_VIEWPORT.height;
+  const width = dimensions?.width || DEFAULT_VIEWPORT.width;
+
+  return [
+    {
+      position: {
+        boundingClientRect: { top: 0, left: 0, height, width },
+        scroll: { x: 0, y: 0 },
+      },
+      attributes: {},
+    },
+  ];
+};
 export class ScreenshotObservableHandler {
   private conditionalHeaders: ScreenshotObservableOpts['conditionalHeaders'];
   private layout: ScreenshotObservableOpts['layout'];
@@ -87,15 +102,9 @@ export class ScreenshotObservableHandler {
     const waitTimeout = this.timeouts.waitForElements.timeoutValue;
 
     return Rx.defer(() => getNumberOfItems(waitTimeout, driver, this.layout, this.logger)).pipe(
-      mergeMap((itemsCount) => {
-        // set the viewport to the dimentions from the job, to allow elements to flow into the expected layout
-        const viewport = this.layout.getViewport(itemsCount) || getDefaultViewPort();
-
-        return Rx.forkJoin([
-          driver.setViewport(viewport, this.logger),
-          waitForVisualizations(waitTimeout, driver, itemsCount, this.layout, this.logger),
-        ]);
-      }),
+      mergeMap((itemsCount) =>
+        waitForVisualizations(waitTimeout, driver, itemsCount, this.layout, this.logger)
+      ),
       this.waitUntil(this.timeouts.waitForElements)
     );
   }
@@ -147,8 +156,8 @@ export class ScreenshotObservableHandler {
 
           const elements =
             data.elementsPositionAndAttributes ??
-            getDefaultElementPosition(this.layout.getViewport(1));
-          const screenshots = await getScreenshots(this.driver, elements, this.logger);
+            getDefaultElementPosition(this.layout.getViewport());
+          const screenshots = await getScreenshots(this.driver, this.layout, elements, this.logger);
           const { timeRange, error: setupError } = data;
 
           return {
@@ -167,31 +176,3 @@ export class ScreenshotObservableHandler {
     }
   }
 }
-
-const DEFAULT_SCREENSHOT_CLIP_HEIGHT = 1200;
-const DEFAULT_SCREENSHOT_CLIP_WIDTH = 1800;
-
-const getDefaultElementPosition = (dimensions: { height?: number; width?: number } | null) => {
-  const height = dimensions?.height || DEFAULT_SCREENSHOT_CLIP_HEIGHT;
-  const width = dimensions?.width || DEFAULT_SCREENSHOT_CLIP_WIDTH;
-
-  return [
-    {
-      position: {
-        boundingClientRect: { top: 0, left: 0, height, width },
-        scroll: { x: 0, y: 0 },
-      },
-      attributes: {},
-    },
-  ];
-};
-
-/*
- * If Kibana is showing a non-HTML error message, the viewport might not be
- * provided by the browser.
- */
-const getDefaultViewPort = () => ({
-  height: DEFAULT_SCREENSHOT_CLIP_HEIGHT,
-  width: DEFAULT_SCREENSHOT_CLIP_WIDTH,
-  zoom: 1,
-});

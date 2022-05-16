@@ -17,6 +17,7 @@ import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 import { ignoreElements, map, mergeMap, tap } from 'rxjs/operators';
 import { getChromiumDisconnectedError } from '../';
 import { ReportingCore } from '../../..';
+import { DEFAULT_VIEWPORT } from '../../../../common/constants';
 import { durationToNumber } from '../../../../common/schema_utils';
 import { CaptureConfig } from '../../../../server/types';
 import { LevelLogger } from '../../../lib';
@@ -24,6 +25,11 @@ import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
 import { getMetrics, Metrics } from './metrics';
+
+interface CreatePageOptions {
+  browserTimezone?: string;
+  defaultViewport: { width?: number };
+}
 
 type BrowserConfig = CaptureConfig['browser']['chromium'];
 
@@ -61,7 +67,7 @@ export class HeadlessChromiumDriverFactory {
    * Return an observable to objects which will drive screenshot capture for a page
    */
   createPage(
-    { browserTimezone }: { browserTimezone?: string },
+    { browserTimezone, defaultViewport }: CreatePageOptions,
     pLogger: LevelLogger
   ): Rx.Observable<{ driver: HeadlessChromiumDriver; exit$: Rx.Observable<never> }> {
     // FIXME: 'create' is deprecated
@@ -69,6 +75,17 @@ export class HeadlessChromiumDriverFactory {
       const logger = pLogger.clone(['browser-driver']);
       logger.info(`Creating browser page driver`);
 
+      // We set the viewport width using the client-side layout info to reduce the chances of
+      // browser reflow. Only the window height is expected to be adjusted dramatically
+      // before taking a screenshot, to ensure the elements to capture are contained in the viewport.
+      const viewport = {
+        ...DEFAULT_VIEWPORT,
+        width: defaultViewport.width ?? DEFAULT_VIEWPORT.width,
+      };
+
+      logger.debug(
+        `Launching with viewport: width=${viewport.width} height=${viewport.height} scaleFactor=${viewport.deviceScaleFactor}`
+      );
       const chromiumArgs = this.getChromiumArgs();
       logger.debug(`Chromium launch args set to: ${chromiumArgs}`);
 
@@ -85,6 +102,7 @@ export class HeadlessChromiumDriverFactory {
           ignoreHTTPSErrors: true,
           handleSIGHUP: false,
           args: chromiumArgs,
+          defaultViewport: viewport,
           env: {
             TZ: browserTimezone,
           },
