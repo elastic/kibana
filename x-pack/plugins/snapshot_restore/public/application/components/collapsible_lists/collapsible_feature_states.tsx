@@ -9,29 +9,43 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTitle, EuiLink, EuiIcon, EuiText, EuiSpacer } from '@elastic/eui';
 
+import { FEATURE_STATES_NONE_OPTION } from '../../../../common/constants';
 import { useCollapsibleList } from './use_collapsible_list';
 
 interface Props {
-  dataStreams: string[] | string | undefined;
+  featureStates: string[] | undefined;
 }
 
-export const CollapsibleDataStreamsList: React.FunctionComponent<Props> = ({ dataStreams }) => {
+export const CollapsibleFeatureStatesList: React.FunctionComponent<Props> = ({ featureStates }) => {
   const { isShowingFullList, setIsShowingFullList, items, hiddenItemsCount } = useCollapsibleList({
-    items: dataStreams,
+    items: featureStates,
   });
 
-  return items === 'all' ? (
-    <FormattedMessage
-      id="xpack.snapshotRestore.dataStreamsList.allDataStreamsValue"
-      defaultMessage="All data streams"
-    />
-  ) : (
+  if (items === 'all' || items.length === 0) {
+    return (
+      <FormattedMessage
+        id="xpack.snapshotRestore.featureStatesList.allFeaturesLabel"
+        defaultMessage="All features"
+      />
+    );
+  }
+
+  if (items.find((option) => option === FEATURE_STATES_NONE_OPTION)) {
+    return (
+      <FormattedMessage
+        id="xpack.snapshotRestore.featureStatesList.noneFeaturesLabel"
+        defaultMessage="No features"
+      />
+    );
+  }
+
+  return (
     <>
-      <EuiText>
-        {items.map((dataStream) => (
-          <div key={dataStream}>
+      <EuiText data-test-subj="featureStatesList">
+        {items.map((feature) => (
+          <div key={feature}>
             <EuiTitle size="xs">
-              <span>{dataStream}</span>
+              <span>{feature}</span>
             </EuiTitle>
           </div>
         ))}
@@ -46,14 +60,14 @@ export const CollapsibleDataStreamsList: React.FunctionComponent<Props> = ({ dat
           >
             {isShowingFullList ? (
               <FormattedMessage
-                id="xpack.snapshotRestore.dataStreamsList.dataStreamsCollapseAllLink"
-                defaultMessage="Hide {count, plural, one {# data stream} other {# data streams}}"
+                id="xpack.snapshotRestore.featureStatesList.featureStatesCollapseAllLink"
+                defaultMessage="Hide {count, plural, one {# feature} other {# features}}"
                 values={{ count: hiddenItemsCount }}
               />
             ) : (
               <FormattedMessage
-                id="xpack.snapshotRestore.dataStreamsList.dataStreamsExpandAllLink"
-                defaultMessage="Show {count, plural, one {# data stream} other {# data streams}}"
+                id="xpack.snapshotRestore.featureStatesList.featureStatesExpandAllLink"
+                defaultMessage="Show {count, plural, one {# feature} other {# features}}"
                 values={{ count: hiddenItemsCount }}
               />
             )}{' '}

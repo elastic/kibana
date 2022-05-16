@@ -5,14 +5,4 @@
  * 2.0.
  */
 
-export interface PolicyIndicesResponse {
-  indices: string[];
-  dataStreams: string[];
-}
-
-export interface PolicyFeaturesResponse {
-  features: Array<{
-    name: string;
-    description: string;
-  }>;
-}
+export { PolicyFeatureStatesSummary } from './policy_feature_states_summary';

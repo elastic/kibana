@@ -114,6 +114,7 @@ describe('Snapshot serialization and deserialization', () => {
         indices: ['index1', 'index2', 'index3'],
         dataStreams: [],
         includeGlobalState: false,
+        featureStates: ['kibana'],
         // Failures are grouped and sorted by index, and the failures themselves are sorted by shard.
         indexFailures: [
           {
