@@ -112,6 +112,7 @@ export const buildServices = memoize(function (
     },
     navigation: plugins.navigation,
     share: plugins.share,
+    lens: plugins.lens,
     urlForwarding: plugins.urlForwarding,
     timefilter: plugins.data.query.timefilter.timefilter,
     toastNotifications: core.notifications.toasts,

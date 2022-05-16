@@ -68,7 +68,7 @@ export function DiscoverHistogram({
   timefilterUpdateHandler,
   stateContainer,
 }: DiscoverHistogramProps) {
-  const { data, theme, uiSettings, fieldFormats } = useDiscoverServices();
+  const { data, theme, uiSettings, fieldFormats, lens } = useDiscoverServices();
   const chartTheme = theme.useChartsTheme();
   const chartBaseTheme = theme.useChartsBaseTheme();
 
@@ -267,55 +267,111 @@ export function DiscoverHistogram({
     );
   }
 
+  const LensComponent = lens.EmbeddableComponent;
+
   return (
     <React.Fragment>
       <div className="dscHistogram" data-test-subj="discoverChart" data-time-range={timeRangeText}>
-        <Chart size="100%">
-          <Settings
-            xDomain={xDomain}
-            onBrushEnd={onBrushEnd as BrushEndListener}
-            onElementClick={onElementClick(xInterval)}
-            tooltip={tooltipProps}
-            theme={chartTheme}
-            baseTheme={chartBaseTheme}
-            allowBrushingLastHistogramBin={true}
-          />
-          <Axis
-            id="discover-histogram-left-axis"
-            position={Position.Left}
-            ticks={2}
-            integersOnly
-            tickFormat={(value) => xAxisFormatter.convert(value)}
-          />
-          <Axis
-            id="discover-histogram-bottom-axis"
-            position={Position.Bottom}
-            tickFormat={formatXValue}
-            timeAxisLayerCount={useLegacyTimeAxis ? 0 : 2}
-            style={useLegacyTimeAxis ? {} : MULTILAYER_TIME_AXIS_STYLE}
-          />
-          <CurrentTime isDarkMode={isDarkMode} domainEnd={domainEnd} />
-          <Endzones
-            isDarkMode={isDarkMode}
-            domainStart={domainStart}
-            domainEnd={domainEnd}
-            interval={xDomain.minInterval}
-            domainMin={xDomain.min}
-            domainMax={xDomain.max}
-          />
-          <HistogramBarSeries
-            id="discover-histogram"
-            minBarHeight={2}
-            xScaleType={ScaleType.Time}
-            yScaleType={ScaleType.Linear}
-            xAccessor="x"
-            yAccessors={['y']}
-            data={chartData.values}
-            yNice
-            timeZone={timeZone}
-            name={chartData.yAxisLabel}
-          />
-        </Chart>
+        <LensComponent
+          id=""
+          viewMode="view"
+          style={{ height: '100%' }}
+          onBrushEnd={onBrushEnd}
+          timeRange={{ from, to }}
+          attributes={{
+            title: 'Prefilled from example app',
+            references: [
+              {
+                id: '8bfa4530-d4fa-11ec-b4ea-f396d4c13af0',
+                name: 'indexpattern-datasource-current-indexpattern',
+                type: 'index-pattern',
+              },
+              {
+                id: '8bfa4530-d4fa-11ec-b4ea-f396d4c13af0',
+                name: 'indexpattern-datasource-layer-layer1',
+                type: 'index-pattern',
+              },
+            ],
+            state: {
+              datasourceStates: {
+                indexpattern: {
+                  layers: {
+                    layer1: {
+                      columnOrder: ['col1', 'col2'],
+                      columns: {
+                        col2: {
+                          dataType: 'number',
+                          isBucketed: false,
+                          label: 'Count of records',
+                          operationType: 'count',
+                          scale: 'ratio',
+                          sourceField: '___records___',
+                        },
+                        col1: {
+                          dataType: 'date',
+                          isBucketed: true,
+                          label: '@timestamp',
+                          operationType: 'date_histogram',
+                          params: {
+                            interval:
+                              stateContainer.appStateContainer.getState().interval || 'auto',
+                          },
+                          scale: 'interval',
+                          sourceField: '@timestamp',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              filters: stateContainer.appStateContainer.getState().filters || [],
+              query: stateContainer.appStateContainer.getState().query || {
+                language: 'kuery',
+                query: '',
+              },
+              visualization: {
+                axisTitlesVisibilitySettings: {
+                  x: false,
+                  yLeft: false,
+                  yRight: true,
+                },
+                fittingFunction: 'None',
+                gridlinesVisibilitySettings: {
+                  x: true,
+                  yLeft: true,
+                  yRight: true,
+                },
+                layers: [
+                  {
+                    accessors: ['col2'],
+                    layerId: 'layer1',
+                    layerType: 'data',
+                    seriesType: 'bar_stacked',
+                    xAccessor: 'col1',
+                    yConfig: [
+                      {
+                        forAccessor: 'col2',
+                        color: 'green',
+                      },
+                    ],
+                  },
+                ],
+                legend: {
+                  isVisible: true,
+                  position: 'right',
+                },
+                preferredSeriesType: 'bar_stacked',
+                tickLabelsVisibilitySettings: {
+                  x: true,
+                  yLeft: true,
+                  yRight: true,
+                },
+                valueLabels: 'hide',
+              },
+            },
+            visualizationType: 'lnsXY',
+          }}
+        />
       </div>
       {timeRange}
     </React.Fragment>

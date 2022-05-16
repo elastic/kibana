@@ -21,7 +21,7 @@ import {
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
-import { DiscoverSetup } from '@kbn/discover-plugin/public';
+import { DiscoverAppLocator } from '@kbn/discover-plugin/public';
 import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { execute, isCompatible, isLensEmbeddable } from './open_in_discover_helpers';
@@ -36,7 +36,7 @@ interface EmbeddableQueryInput extends EmbeddableInput {
 export type EmbeddableWithQueryInput = IEmbeddable<EmbeddableQueryInput>;
 
 interface UrlDrilldownDeps {
-  discover: Pick<DiscoverSetup, 'locator'>;
+  locator: () => DiscoverAppLocator | undefined;
   hasDiscoverAccess: () => boolean;
 }
 
@@ -109,7 +109,7 @@ export class OpenInDiscoverDrilldown
 
   public readonly isCompatible = async (config: Config, context: ActionContext) => {
     return isCompatible({
-      discover: this.deps.discover,
+      locator: this.deps.locator(),
       hasDiscoverAccess: this.deps.hasDiscoverAccess(),
       ...context,
       embeddable: context.embeddable as IEmbeddable,
@@ -127,7 +127,7 @@ export class OpenInDiscoverDrilldown
       context.timeFieldName
     );
     execute({
-      discover: this.deps.discover,
+      locator: this.deps.locator(),
       hasDiscoverAccess: this.deps.hasDiscoverAccess(),
       ...context,
       embeddable: context.embeddable as IEmbeddable,

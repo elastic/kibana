@@ -42,9 +42,9 @@ import {
 } from '@kbn/ui-actions-plugin/public';
 import { VISUALIZE_EDITOR_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import type { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { AdvancedUiActionsSetup } from '@kbn/ui-actions-enhanced-plugin/public';
+import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   IndexPatternDatasource as IndexPatternDatasourceType,
@@ -107,8 +107,8 @@ export interface LensPluginSetupDependencies {
   eventAnnotation: EventAnnotationPluginSetup;
   globalSearch?: GlobalSearchPluginSetup;
   usageCollection?: UsageCollectionSetup;
-  discover?: DiscoverSetup;
   uiActionsEnhanced: AdvancedUiActionsSetup;
+  share?: SharePluginSetup;
 }
 
 export interface LensPluginStartDependencies {
@@ -131,7 +131,7 @@ export interface LensPluginStartDependencies {
   inspector: InspectorStartContract;
   spaces: SpacesPluginStart;
   usageCollection?: UsageCollectionStart;
-  discover?: DiscoverStart;
+  share?: SharePluginStart;
 }
 
 export interface LensPublicSetup {
@@ -245,7 +245,7 @@ export class LensPlugin {
       globalSearch,
       usageCollection,
       uiActionsEnhanced,
-      discover,
+      share,
     }: LensPluginSetupDependencies
   ) {
     const startServices = createStartServicesGetter(core.getStartServices);
@@ -291,14 +291,14 @@ export class LensPlugin {
 
     visualizations.registerAlias(getLensAliasConfig());
 
-    if (discover) {
-      uiActionsEnhanced.registerDrilldown(
-        new OpenInDiscoverDrilldown({
-          discover,
-          hasDiscoverAccess: () => this.hasDiscoverAccess,
-        })
-      );
-    }
+    // if (locator) {
+    uiActionsEnhanced.registerDrilldown(
+      new OpenInDiscoverDrilldown({
+        locator: () => share?.url.locators.get('discover'),
+        hasDiscoverAccess: () => this.hasDiscoverAccess,
+      })
+    );
+    // }
 
     setupExpressions(
       expressions,
@@ -459,7 +459,10 @@ export class LensPlugin {
 
     startDependencies.uiActions.addTriggerAction(
       CONTEXT_MENU_TRIGGER,
-      createOpenInDiscoverAction(startDependencies.discover!, this.hasDiscoverAccess)
+      createOpenInDiscoverAction(
+        startDependencies.share?.url.locators.get('discover'),
+        this.hasDiscoverAccess
+      )
     );
 
     return {

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { createAction } from '@kbn/ui-actions-plugin/public';
-import type { DiscoverStart } from '@kbn/discover-plugin/public';
+import type { DiscoverAppLocator } from '@kbn/discover-plugin/public';
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { execute, isCompatible } from './open_in_discover_helpers';
 
@@ -18,7 +18,7 @@ interface Context {
 }
 
 export const createOpenInDiscoverAction = (
-  discover: Pick<DiscoverStart, 'locator'>,
+  locator: DiscoverAppLocator | undefined,
   hasDiscoverAccess: boolean
 ) =>
   createAction<Context>({
@@ -31,9 +31,9 @@ export const createOpenInDiscoverAction = (
         defaultMessage: 'Explore data in Discover',
       }),
     isCompatible: async (context: Context) => {
-      return isCompatible({ hasDiscoverAccess, discover, embeddable: context.embeddable });
+      return isCompatible({ hasDiscoverAccess, locator, embeddable: context.embeddable });
     },
     execute: async (context: Context) => {
-      return execute({ ...context, discover, hasDiscoverAccess });
+      return execute({ ...context, locator, hasDiscoverAccess });
     },
   });
