@@ -291,7 +291,7 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     user: {
       identifier: true,
       domain: true,
-      type: true
+      type: true,
     },
     version: true,
   },
