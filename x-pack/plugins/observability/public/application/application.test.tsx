@@ -10,11 +10,12 @@ import { noop } from 'lodash';
 import React from 'react';
 import { Observable } from 'rxjs';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { themeServiceMock } from '@kbn/core/public/mocks';
+import { httpServiceMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
 import { ObservabilityPublicPluginsStart } from '../plugin';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 import { renderApp } from '.';
+import { createCallObservabilityApi } from '../services/call_observability_api';
 
 describe('renderApp', () => {
   const originalConsole = global.console;
@@ -55,7 +56,7 @@ describe('renderApp', () => {
       },
       i18n: { Context: ({ children }: { children: React.ReactNode }) => children },
       uiSettings: { get: () => false },
-      http: { basePath: { prepend: (path: string) => path } },
+      http: httpServiceMock.createStartContract(),
       theme: themeServiceMock.createStartContract(),
     } as unknown as CoreStart;
 
@@ -73,6 +74,8 @@ describe('renderApp', () => {
       setHeaderActionMenu: noop,
       theme$: themeServiceMock.createTheme$(),
     } as unknown as AppMountParameters;
+
+    createCallObservabilityApi(core.http);
 
     expect(() => {
       const unmount = renderApp({
