@@ -128,7 +128,7 @@ const getExistingMonitor = async (
       filter,
     }
   );
-  return savedObjects[0];
+  return savedObjects?.[0];
 };
 
 const getAllPushMonitorsForSuite = async (
