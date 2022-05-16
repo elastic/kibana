@@ -5,8 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiButtonEmpty, EuiLink, EuiInMemoryTable, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
+import React, { useMemo, useState } from 'react';
+import {
+  EuiButtonEmpty,
+  EuiLink,
+  EuiInMemoryTable,
+  EuiToolTip,
+  EuiButtonIcon,
+  EuiBadge,
+  EuiFlexItem,
+  EuiSwitch,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -15,6 +24,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { useHistory } from 'react-router-dom';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { PolicyFromES } from '../../../../../common/types';
 import { useKibana } from '../../../../shared_imports';
 import { getIndicesListPath, getPolicyEditPath } from '../../../services/navigation';
@@ -45,6 +55,13 @@ const actionTooltips = {
   ),
 };
 
+const managedBadge = i18n.translate(
+  'xpack.indexLifecycleMgmt.policyTable.templateBadgeType.managed',
+  {
+    defaultMessage: 'Managed',
+  }
+);
+
 interface Props {
   policies: PolicyFromES[];
 }
@@ -54,9 +71,36 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
   const {
     services: { getUrlForApp },
   } = useKibana();
-
+  const [managedPoliciesVisible, setManagedPoliciesVisible] = useState<boolean>(false);
   const { setListAction } = usePolicyListContext();
+  const searchOptions = useMemo(
+    () => ({
+      box: { incremental: true, 'data-test-subj': 'ilmSearchBar' },
+      toolsRight: (
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            id="checkboxShowHiddenIndices"
+            data-test-subj="includeHiddenPoliciesToggle"
+            checked={managedPoliciesVisible}
+            onChange={(event) => setManagedPoliciesVisible(event.target.checked)}
+            label={
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.policyTable.hiddenPoliciesSwitchLabel"
+                defaultMessage="Include managed system policies"
+              />
+            }
+          />
+        </EuiFlexItem>
+      ),
+    }),
+    [managedPoliciesVisible]
+  );
 
+  const filteredPolicies = useMemo(() => {
+    return managedPoliciesVisible
+      ? policies
+      : policies.filter((item) => !item.policy?._meta?.managed);
+  }, [policies, managedPoliciesVisible]);
   const columns: Array<EuiBasicTableColumn<PolicyFromES>> = [
     {
       'data-test-subj': 'policy-name',
@@ -65,17 +109,29 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
         defaultMessage: 'Name',
       }),
       sortable: true,
-      render: (value: string) => {
+      render: (value: string, item) => {
+        const isManaged = item.policy?._meta?.managed;
         return (
-          <EuiLink
-            className="eui-textBreakAll"
-            data-test-subj="policyTablePolicyNameLink"
-            {...reactRouterNavigate(history, getPolicyEditPath(value), () =>
-              trackUiMetric(METRIC_TYPE.CLICK, UIM_EDIT_CLICK)
+          <>
+            <EuiLink
+              className="eui-textBreakAll"
+              data-test-subj="policyTablePolicyNameLink"
+              {...reactRouterNavigate(history, getPolicyEditPath(value), () =>
+                trackUiMetric(METRIC_TYPE.CLICK, UIM_EDIT_CLICK)
+              )}
+            >
+              {value}
+            </EuiLink>
+
+            {isManaged && (
+              <>
+                &nbsp;
+                <EuiBadge color="hollow" data-test-subj="templateTypeBadge">
+                  {managedBadge}
+                </EuiBadge>
+              </>
             )}
-          >
-            {value}
-          </EuiLink>
+          </>
         );
       },
     },
@@ -191,11 +247,9 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
           direction: 'asc',
         },
       }}
-      search={{
-        box: { incremental: true, 'data-test-subj': 'ilmSearchBar' },
-      }}
+      search={searchOptions}
       tableLayout="auto"
-      items={policies}
+      items={filteredPolicies}
       columns={columns}
       rowProps={(policy: PolicyFromES) => ({ 'data-test-subj': `policyTableRow-${policy.name}` })}
     />
