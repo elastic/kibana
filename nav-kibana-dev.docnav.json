@@ -179,7 +179,7 @@
         {
           "label": "Linting/Validation",
           "items": [
-            { "id": "kibDevDocsOpsEslintConfigKibana" },
+            { "id": "kibDevDocsOpsEslintConfig" },
             { "id": "kibDevDocsOpsEslintPluginImports" }
           ]
         }
