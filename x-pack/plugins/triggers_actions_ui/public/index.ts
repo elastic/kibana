@@ -32,6 +32,8 @@ export type {
   AsApiContract,
   RuleTableItem,
   AlertsTableConfigurationRegistryContract,
+  AlertsTableFlyoutBaseProps,
+  AlertsData,
 } from './types';
 
 export {
