@@ -322,8 +322,8 @@ paths:
                     type: integer
                     description: >-
                       The elapsed time from the creation of the case to its
-                      closure (in seconds). If an error occurs or the case has
-                      not been closed, the duration is set to null.
+                      closure (in seconds). If the case has not been closed, the
+                      duration is set to null.
                     example: 120
                   external_service:
                     type: object
@@ -743,8 +743,8 @@ paths:
                     type: integer
                     description: >-
                       The elapsed time from the creation of the case to its
-                      closure (in seconds). If an error occurs or the case has
-                      not been closed, the duration is set to null.
+                      closure (in seconds). If the case has not been closed, the
+                      duration is set to null.
                     example: 120
                   external_service:
                     type: object
@@ -1135,8 +1135,8 @@ paths:
                     type: integer
                     description: >-
                       The elapsed time from the creation of the case to its
-                      closure (in seconds). If an error occurs or the case has
-                      not been closed, the duration is set to null.
+                      closure (in seconds). If the case has not been closed, the
+                      duration is set to null.
                     example: 120
                   external_service:
                     type: object
@@ -1558,8 +1558,8 @@ paths:
                     type: integer
                     description: >-
                       The elapsed time from the creation of the case to its
-                      closure (in seconds). If an error occurs or the case has
-                      not been closed, the duration is set to null.
+                      closure (in seconds). If the case has not been closed, the
+                      duration is set to null.
                     example: 120
                   external_service:
                     type: object
