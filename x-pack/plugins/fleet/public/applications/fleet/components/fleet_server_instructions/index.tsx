@@ -108,9 +108,7 @@ const Header: React.FunctionComponent<{
         options={tabs}
         idSelected={currentTabId}
         onChange={(id) => onTabClick(id)}
-        css={`
-          max-width: 500px;
-        `}
+        style={{ maxWidth: '500px' }}
       />
     </>
   );
