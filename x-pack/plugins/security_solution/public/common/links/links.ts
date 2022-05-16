@@ -204,3 +204,7 @@ export const useAppNavLinks = (): NavLinkItem[] => {
 
   return getNavLinkItems({ enableExperimental, license, capabilities });
 };
+
+export const useAppNavLink = (pageName: SecurityPageName): NavLinkItem | undefined => {
+  return useAppNavLinks().find(({ id }) => id === pageName);
+};

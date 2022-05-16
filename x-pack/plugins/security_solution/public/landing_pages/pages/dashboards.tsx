@@ -11,12 +11,10 @@ import { SecuritySolutionPageWrapper } from '../../common/components/page_wrappe
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { LandingLinksImages } from '../components/landing_links_images';
 import { DASHBOARDS_PAGE_TITLE } from './translations';
-import { useAppNavLinks } from '../../common/links';
+import { useAppNavLink } from '../../common/links';
 
 export const DashboardsLandingPage = () => {
-  const dashboardlinks = useAppNavLinks().find(
-    ({ id }) => id === SecurityPageName.dashboardsLanding
-  );
+  const dashboardlinks = useAppNavLink(SecurityPageName.dashboardsLanding);
 
   return (
     <SecuritySolutionPageWrapper>

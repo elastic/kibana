@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { SecurityPageName } from '../../app/types';
 import { HeaderPage } from '../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { useAppNavLinks } from '../../common/links';
+import { useAppNavLink } from '../../common/links';
 import { NavLinkItem } from '../../common/links/types';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { LandingLinksIcons } from '../components/landing_links_icons';
@@ -39,7 +39,7 @@ const navItemsFromIds = (itemIds: SecurityPageName[], links: NavLinkItem[]) =>
   compact(itemIds.map(getNavItembyId(links)));
 
 export const LandingCategories = React.memo(({ groups }: { groups: LandingNavGroup[] }) => {
-  const manageLink = useAppNavLinks().find(({ id }) => id === SecurityPageName.administration);
+  const manageLink = useAppNavLink(SecurityPageName.administration);
 
   return (
     <>

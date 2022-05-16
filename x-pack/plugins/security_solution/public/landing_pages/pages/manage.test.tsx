@@ -15,32 +15,30 @@ const RULES_ITEM_LABEL = 'elastic rules!';
 const EXCEPTIONS_ITEM_LABEL = 'exceptional!';
 import { NavLinkItem } from '../../common/links/types';
 
-const mockAppLinks: NavLinkItem[] = [
-  {
-    id: SecurityPageName.administration,
-    path: '',
-    title: 'admin',
-    links: [
-      {
-        id: SecurityPageName.rules,
-        title: RULES_ITEM_LABEL,
-        description: '',
-        icon: 'testIcon1',
-        path: '',
-      },
-      {
-        id: SecurityPageName.exceptions,
-        title: EXCEPTIONS_ITEM_LABEL,
-        description: '',
-        icon: 'testIcon2',
-        path: '',
-      },
-    ],
-  },
-];
+const mockAppLinks: NavLinkItem = {
+  id: SecurityPageName.administration,
+  path: '',
+  title: 'admin',
+  links: [
+    {
+      id: SecurityPageName.rules,
+      title: RULES_ITEM_LABEL,
+      description: '',
+      icon: 'testIcon1',
+      path: '',
+    },
+    {
+      id: SecurityPageName.exceptions,
+      title: EXCEPTIONS_ITEM_LABEL,
+      description: '',
+      icon: 'testIcon2',
+      path: '',
+    },
+  ],
+};
 
 jest.mock('../../common/links', () => ({
-  useAppNavLinks: jest.fn(() => mockAppLinks),
+  useAppNavLink: jest.fn(() => mockAppLinks),
 }));
 
 describe('LandingCategories', () => {

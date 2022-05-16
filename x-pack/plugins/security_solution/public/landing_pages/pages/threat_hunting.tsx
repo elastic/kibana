@@ -11,12 +11,10 @@ import { SecuritySolutionPageWrapper } from '../../common/components/page_wrappe
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { LandingLinksImages } from '../components/landing_links_images';
 import { THREAT_HUNTING_PAGE_TITLE } from './translations';
-import { useAppNavLinks } from '../../common/links';
+import { useAppNavLink } from '../../common/links';
 
 export const ThreatHuntingLandingPage = () => {
-  const threatHuntinglinks = useAppNavLinks().find(
-    ({ id }) => id === SecurityPageName.threatHuntingLanding
-  );
+  const threatHuntinglinks = useAppNavLink(SecurityPageName.threatHuntingLanding);
   return (
     <SecuritySolutionPageWrapper>
       <HeaderPage title={THREAT_HUNTING_PAGE_TITLE} />
