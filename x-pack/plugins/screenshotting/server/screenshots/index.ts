@@ -73,7 +73,7 @@ export function getScreenshots(
       {
         browserTimezone,
         openUrlTimeout,
-        defaultViewport: { height: layout.height, width: layout.width },
+        defaultViewport: { width: layout.width },
       },
       logger
     )

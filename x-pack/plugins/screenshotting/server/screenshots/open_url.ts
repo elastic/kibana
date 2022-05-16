@@ -11,7 +11,7 @@ import type { Layout } from 'src/plugins/screenshot_mode/common';
 import { Context } from '../../common';
 import type { HeadlessChromiumDriver } from '../browsers';
 import type { ConditionalHeaders } from '../browsers';
-import { DEFAULT_PAGELOAD_SELECTOR } from './constants';
+import { CONTEXT_DEBUG, DEFAULT_PAGELOAD_SELECTOR } from './constants';
 
 type Url = string;
 type UrlWithContext = [url: Url, context: Context];
@@ -45,6 +45,27 @@ export const openUrl = async (
     await browser.open(
       url,
       { conditionalHeaders, context, layout, waitForSelector, timeout },
+      logger
+    );
+
+    // Debug logging for viewport size and resizing
+    await browser.evaluate(
+      {
+        fn() {
+          // eslint-disable-next-line no-console
+          console.log(
+            `Navigating URL with viewport size: width=${window.innerWidth} height=${window.innerHeight} scaleFactor:${window.devicePixelRatio}`
+          );
+          window.addEventListener('resize', () => {
+            // eslint-disable-next-line no-console
+            console.log(
+              `Detected a viewport resize: width=${window.innerWidth} height=${window.innerHeight} scaleFactor:${window.devicePixelRatio}`
+            );
+          });
+        },
+        args: [],
+      },
+      { context: CONTEXT_DEBUG },
       logger
     );
   } catch (err) {
