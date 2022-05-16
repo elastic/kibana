@@ -9,7 +9,6 @@ import type { PluginInitializerContext, CoreSetup, Plugin, Logger } from '@kbn/c
 
 import { BlobStorageService } from './blob_storage_service';
 import { InternalFileService } from './file_service';
-import { fileObjectType } from './saved_objects';
 
 export class FilesPlugin implements Plugin {
   private readonly logger: Logger;
@@ -21,7 +20,7 @@ export class FilesPlugin implements Plugin {
   }
 
   public setup(core: CoreSetup) {
-    core.savedObjects.registerType(fileObjectType);
+    InternalFileService.setup(core.savedObjects);
 
     this.readyPromise = core.getStartServices().then(async ([coreStart]) => {
       const esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -30,7 +29,6 @@ export class FilesPlugin implements Plugin {
         this.logger.get('blob-storage-service')
       );
       this.fileService = new InternalFileService(
-        core.savedObjects,
         coreStart.savedObjects,
         blobStorageService,
         this.logger.get('files-service')
@@ -41,7 +39,7 @@ export class FilesPlugin implements Plugin {
   }
 
   public start() {
-    this.readyPromise!.then(() => {
+    this.readyPromise.then(() => {
       this.logger.info(`Files ready: ${Boolean(this.fileService)}`);
     });
     return {};

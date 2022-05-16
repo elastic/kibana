@@ -5,17 +5,39 @@
  * 2.0.
  */
 
-import type { ReadStream } from 'fs';
+import type { Readable } from 'stream';
 
 /**
- * TODO: Finish this interface and document all methods
+ * An interface that must be implemented by any blob storage adapter.
+ *
+ * @note
+ * The blob storage target must be fully managed by Kibana through this interface
+ * to avoid corrupting stored data.
+ *
+ * @note
+ * File IDs are stored in Kibana Saved Objects as references to a file.
  *
  * @internal
  */
 export interface BlobStorage {
-  upload(fileName: string, content: ReadStream): Promise<{ uri: string }>;
+  /**
+   * Upload a new file.
+   *
+   * Generates a random file ID and returns it upon successfully uploading a
+   * file.
+   */
+  upload(content: Readable): Promise<{ id: string }>;
 
-  download(uri: string): Promise<ReadStream>;
+  /**
+   * Download a file.
+   *
+   * Given an ID, and optional file size, retrieve the file contents as a readable
+   * stream.
+   */
+  download(args: { id: string; size?: number }): Promise<Readable>;
 
-  delete(uri: string): Promise<void>;
+  /**
+   * Delete a file given a unique ID.
+   */
+  delete(id: string): Promise<void>;
 }
