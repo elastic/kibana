@@ -95,7 +95,6 @@ export const tGridIntegratedProps: TGridIntegratedProps = {
   dataViewId: 'data-view-id',
   deletedEventIds: [],
   disabledCellActions: [],
-  docValueFields: mockDocValueFields,
   end: '2021-08-19T00:30:00.000Z',
   entityType: 'alerts',
   filterStatus: 'open',

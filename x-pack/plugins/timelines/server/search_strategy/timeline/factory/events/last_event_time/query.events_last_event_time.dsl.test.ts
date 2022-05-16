@@ -25,7 +25,7 @@ describe('buildLastEventTimeQuery', () => {
             Object {
               "field": "@timestamp",
               "format": "strict_date_optional_time",
-            }
+            },
           ],
           "query": Object {
             "bool": Object {

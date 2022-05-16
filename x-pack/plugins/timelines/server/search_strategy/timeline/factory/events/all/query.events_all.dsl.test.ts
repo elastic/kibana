@@ -49,7 +49,14 @@ describe('buildTimelineEventsAllQuery', () => {
               },
             },
           },
-          "fields": Array [],
+          "fields": Array [
+            "signal.*",
+            "kibana.alert.*",
+            Object {
+              "field": "@timestamp",
+              "format": "strict_date_optional_time",
+            },
+          ],
           "from": 0,
           "query": Object {
             "bool": Object {
