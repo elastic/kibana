@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiPortal,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,6 +23,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Agent, AgentPolicy } from '../../../../types';
 import { AgentEnrollmentFlyout, SearchBar } from '../../../../components';
 import { AGENTS_INDEX } from '../../../../constants';
+
+import { MAX_TAG_DISPLAY_LENGTH, truncateTag } from '../utils';
 
 import { AgentBulkActions } from './bulk_actions';
 import type { SelectionMode } from './types';
@@ -231,7 +234,13 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                           }
                         }}
                       >
-                        {tag}
+                        {tag.length > MAX_TAG_DISPLAY_LENGTH ? (
+                          <EuiToolTip content={tag}>
+                            <span>{truncateTag(tag)}</span>
+                          </EuiToolTip>
+                        ) : (
+                          tag
+                        )}
                       </EuiFilterSelectItem>
                     ))}
                   </div>

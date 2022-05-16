@@ -144,6 +144,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     }
 
     if (selectedTags.length) {
+      if (kueryBuilder) {
+        kueryBuilder = `(${kueryBuilder}) and`;
+      }
       kueryBuilder = `${kueryBuilder} ${AGENTS_PREFIX}.tags : (${selectedTags
         .map((tag) => `"${tag}"`)
         .join(' or ')})`;
@@ -338,6 +341,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       name: i18n.translate('xpack.fleet.agentList.hostColumnTitle', {
         defaultMessage: 'Host',
       }),
+      width: '185px',
       render: (host: string, agent: Agent) => (
         <EuiLink href={getHref('agent_details', { agentId: agent.id })}>
           {safeMetadata(host)}
@@ -346,7 +350,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'active',
-      width: '120px',
+      width: '85px',
       name: i18n.translate('xpack.fleet.agentList.statusColumnTitle', {
         defaultMessage: 'Status',
       }),
@@ -354,7 +358,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'tags',
-      width: '240px',
+      width: '210px',
       name: i18n.translate('xpack.fleet.agentList.tagsColumnTitle', {
         defaultMessage: 'Tags',
       }),
@@ -365,12 +369,13 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       name: i18n.translate('xpack.fleet.agentList.policyColumnTitle', {
         defaultMessage: 'Agent policy',
       }),
+      width: '260px',
       render: (policyId: string, agent: Agent) => {
         const agentPolicy = agentPoliciesIndexedById[policyId];
         const showWarning = agent.policy_revision && agentPolicy?.revision > agent.policy_revision;
 
         return (
-          <EuiFlexGroup gutterSize="s" alignItems="center" style={{ minWidth: 0 }}>
+          <EuiFlexGroup gutterSize="none" style={{ minWidth: 0 }} direction="column">
             {agentPolicy && <AgentPolicySummaryLine policy={agentPolicy} />}
             {showWarning && (
               <EuiFlexItem grow={false}>
@@ -390,7 +395,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'local_metadata.elastic.agent.version',
-      width: '200px',
+      width: '120px',
       name: i18n.translate('xpack.fleet.agentList.versionTitle', {
         defaultMessage: 'Version',
       }),
@@ -419,6 +424,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       name: i18n.translate('xpack.fleet.agentList.lastCheckinTitle', {
         defaultMessage: 'Last activity',
       }),
+      width: '180px',
       render: (lastCheckin: string, agent: any) =>
         lastCheckin ? <FormattedRelative value={lastCheckin} /> : null,
     },
