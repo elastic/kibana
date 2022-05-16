@@ -273,10 +273,12 @@ describe('Field Renderers', () => {
     test('it should only render the items after overflowIndexStart', () => {
       const wrapper = mount(
         <MoreContainer
+          fieldType="keyword"
           idPrefix={idPrefix}
-          rowItems={rowItems}
+          isAggregatable={true}
           moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
           overflowIndexStart={5}
+          rowItems={rowItems}
         />
       );
 
@@ -286,10 +288,12 @@ describe('Field Renderers', () => {
     test('it should render all the items when overflowIndexStart is zero', () => {
       const wrapper = mount(
         <MoreContainer
+          fieldType="keyword"
           idPrefix={idPrefix}
-          rowItems={rowItems}
+          isAggregatable={true}
           moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
           overflowIndexStart={0}
+          rowItems={rowItems}
         />
       );
 
@@ -299,10 +303,12 @@ describe('Field Renderers', () => {
     test('it should have the overflow `auto` style to enable scrolling when necessary', () => {
       const wrapper = mount(
         <MoreContainer
+          fieldType="keyword"
           idPrefix={idPrefix}
-          rowItems={rowItems}
+          isAggregatable={true}
           moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
           overflowIndexStart={5}
+          rowItems={rowItems}
         />
       );
 
@@ -314,10 +320,12 @@ describe('Field Renderers', () => {
     test('it should use the moreMaxHeight prop as the value for the max-height style', () => {
       const wrapper = mount(
         <MoreContainer
+          fieldType="keyword"
           idPrefix={idPrefix}
-          rowItems={rowItems}
+          isAggregatable={true}
           moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
           overflowIndexStart={5}
+          rowItems={rowItems}
         />
       );
 
@@ -331,11 +339,13 @@ describe('Field Renderers', () => {
 
       mount(
         <MoreContainer
+          fieldType="keyword"
           idPrefix={idPrefix}
-          render={render}
-          rowItems={rowItems}
+          isAggregatable={true}
           moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
           overflowIndexStart={5}
+          render={render}
+          rowItems={rowItems}
         />
       );
 
