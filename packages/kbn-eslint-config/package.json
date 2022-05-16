@@ -1,6 +1,6 @@
 {
-  "name": "@elastic/eslint-config-kibana",
-  "version": "0.15.0",
+  "name": "@kbn/eslint-config",
+  "version": "1.0.0",
   "description": "The eslint config used by the kibana team",
   "main": ".eslintrc.js",
   "repository": {
@@ -14,7 +14,7 @@
   "author": "Spencer Alger <email@spalger.com>",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/elastic/kibana/tree/main/packages/elastic-eslint-config-kibana"
+    "url": "https://github.com/elastic/kibana/tree/main/packages/kbn-eslint-config"
   },
-  "homepage": "https://github.com/elastic/kibana/tree/main/packages/elastic-eslint-config-kibana"
+  "homepage": "https://github.com/elastic/kibana/tree/main/packages/kbn-eslint-config"
 }
