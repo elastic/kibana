@@ -12,11 +12,7 @@ import { wrapIntoCustomErrorResponse } from '../../../errors';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
 import { transformElasticsearchRoleToRole } from './model';
 
-export function defineGetRolesRoutes({
-  router,
-  authz,
-  logger,
-}: RouteDefinitionParams) {
+export function defineGetRolesRoutes({ router, authz, logger }: RouteDefinitionParams) {
   router.get(
     {
       path: '/api/security/role/{name}',

@@ -11,11 +11,7 @@ import { createLicensedRouteHandler } from '../../licensed_route_handler';
 import type { ElasticsearchRole } from './model';
 import { transformElasticsearchRoleToRole } from './model';
 
-export function defineGetAllRolesRoutes({
-  router,
-  authz,
-  logger,
-}: RouteDefinitionParams) {
+export function defineGetAllRolesRoutes({ router, authz, logger }: RouteDefinitionParams) {
   router.get(
     { path: '/api/security/role', validate: false },
     createLicensedRouteHandler(async (context, request, response) => {

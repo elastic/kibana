@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
-import type { KibanaFeature } from '@kbn/features-plugin/common';
-
+import type { Logger } from '../../../../../../src/core/server';
 import {
   GLOBAL_RESOURCE,
   RESERVED_PRIVILEGES_APPLICATION_WILDCARD,
@@ -186,44 +184,6 @@ function transformRoleApplicationsToKibanaPrivileges(
 
   // if we have resources duplicated in entries, we won't transform these
   if (allResources.length !== getUniqueList(allResources).length) {
-    return {
-      success: false,
-    };
-  }
-
-  // if a feature privilege requires all spaces, but is assigned to other spaces, we won't transform these
-  if (
-    roleKibanaApplications.some(
-      (entry) =>
-        !entry.resources.includes(GLOBAL_RESOURCE) &&
-        features.some((f) =>
-          Object.entries(f.privileges ?? {}).some(
-            ([privName, featurePrivilege]) =>
-              featurePrivilege.requireAllSpaces &&
-              entry.privileges.includes(
-                PrivilegeSerializer.serializeFeaturePrivilege(f.id, privName)
-              )
-          )
-        )
-    )
-  ) {
-    return {
-      success: false,
-    };
-  }
-
-  // if a feature privilege has been disabled we won't transform these
-  if (
-    roleKibanaApplications.some((entry) =>
-      features.some((f) =>
-        Object.entries(f.privileges ?? {}).some(
-          ([privName, featurePrivilege]) =>
-            featurePrivilege.disabled &&
-            entry.privileges.includes(PrivilegeSerializer.serializeFeaturePrivilege(f.id, privName))
-        )
-      )
-    )
-  ) {
     return {
       success: false,
     };
