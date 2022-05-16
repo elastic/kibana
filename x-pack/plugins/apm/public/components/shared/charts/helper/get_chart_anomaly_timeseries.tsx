@@ -21,9 +21,11 @@ import { APMChartSpec } from '../../../../../typings/timeseries';
 export function getChartAnomalyTimeseries({
   anomalyTimeseries,
   theme,
+  comparisonColor,
 }: {
   anomalyTimeseries?: ServiceAnomalyTimeseries;
   theme: EuiTheme;
+  comparisonColor?: string;
 }):
   | {
       boundaries: APMChartSpec[];
@@ -46,7 +48,7 @@ export function getChartAnomalyTimeseries({
           opacity: 0,
         },
       },
-      color: rgba(theme.eui.euiColorVis1, 0.5),
+      color: rgba(comparisonColor ?? theme.eui.euiColorVis1, 0.5),
       stackAccessors: ['x'],
       yAccessors: ['y0'],
       y0Accessors: ['y1'],
