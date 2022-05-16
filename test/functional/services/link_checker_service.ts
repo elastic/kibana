@@ -42,8 +42,8 @@ export function LinkCheckerServiceProvider({ getService }: FtrProviderContext) {
               log.error(`-----link bad url found ${url} response: ${response.status}`);
             }
           } catch (err) {
-            badLinks.push(url);
-            log.debug(`-----link ${url} response: ${err}`);
+            badLinks.push(`-----link ${url} response: ${err}`);
+            log.error(`-----link ${url} response: ${err}`);
           }
         }
       } catch (err) {
