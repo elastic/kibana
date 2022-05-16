@@ -48,6 +48,7 @@ export const useFindingsCounter = ({ index, query }: FindingsBaseEsQuery) => {
         })
       ),
     {
+      keepPreviousData: true,
       onError: (err) => showErrorToast(toasts, err),
       select: (response) =>
         Object.fromEntries(
