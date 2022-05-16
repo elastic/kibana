@@ -26,7 +26,7 @@ exports[`<RolesGridPage /> renders permission denied if required 1`] = `
           class="euiEmptyPrompt__contentInner"
         >
           <h2
-            class="euiTitle euiTitle--medium"
+            class="euiTitle css-1w464ad-euiTitle-m"
           >
             You need permission to manage roles
           </h2>
@@ -34,7 +34,7 @@ exports[`<RolesGridPage /> renders permission denied if required 1`] = `
             class="euiTextColor euiTextColor--subdued"
           >
             <div
-              class="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
+              class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
             />
             <div
               class="euiText euiText--medium"
