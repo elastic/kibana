@@ -87,7 +87,7 @@ export const RangeSliderPopover: FC<Props> = ({
   const ticks = [];
   const levels = [];
 
-  if (hasAvailableRange) {
+  if (hasAvailableRange && isPopoverOpen) {
     ticks.push({ value: rangeSliderMin, label: fieldFormatter(String(rangeSliderMin)) });
     ticks.push({ value: rangeSliderMax, label: fieldFormatter(String(rangeSliderMax)) });
     levels.push({ min: roundedMin, max: roundedMax, color: 'success' });
