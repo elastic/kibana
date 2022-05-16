@@ -6,22 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Filter, Query } from '@kbn/es-query';
-
-import { TimeRange } from '@kbn/data-plugin/public';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { OptionsListRequestBody, OptionsListResponse } from '../control_types/options_list/types';
-
-export type OptionsListRequest = Omit<
-  OptionsListRequestBody,
-  'filters' | 'fieldName' | 'fieldSpec'
-> & {
-  timeRange?: TimeRange;
-  field: DataViewField;
-  dataView: DataView;
-  filters?: Filter[];
-  query?: Query;
-};
+import { OptionsListRequest, OptionsListResponse } from '../control_types/options_list/types';
 
 export interface ControlsOptionsListService {
   runOptionsListRequest: (
