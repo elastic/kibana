@@ -22,6 +22,14 @@ class ResponseStream extends Stream.PassThrough {
 
 const DELIMITER = '\n';
 
+/**
+ * Sets up a response stream with support for gzip compression depending on provided
+ * request headers.
+ *
+ * @param logger - Kibana provided logger.
+ * @param headers - Request headers.
+ * @returns An object with stream attributes and methods.
+ */
 export function streamFactory<T extends ApiEndpoint>(logger: Logger, headers: Headers) {
   const isCompressed = acceptCompression(headers);
 

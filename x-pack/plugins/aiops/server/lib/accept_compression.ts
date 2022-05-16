@@ -7,6 +7,12 @@
 
 import type { Headers } from '@kbn/core/server';
 
+/**
+ * Returns whether request headers accept a response using gzip compression.
+ *
+ * @param headers - Request headers.
+ * @returns boolean
+ */
 export function acceptCompression(headers: Headers) {
   let compressed = false;
 
