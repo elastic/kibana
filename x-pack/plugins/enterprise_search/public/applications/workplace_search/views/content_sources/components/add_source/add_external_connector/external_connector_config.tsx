@@ -143,8 +143,7 @@ export const ExternalConnectorConfig: React.FC = () => {
                   'xpack.enterpriseSearch.workplaceSearch.sources.feedbackCallOutText',
                   {
                     defaultMessage:
-                      'Have feedback about deploying a {name} Connector Package? Let us know.',
-                    values: { name },
+                      'Have feedback about deploying a connector package? Let us know.',
                   }
                 )}
               </EuiLink>
