@@ -12,6 +12,7 @@
                     "should": [
                     {"term": {"event.category": "authentication"}},
                     {"term": {"event.outcome": "success"}}
+                    ]
                 }}
             ]
         }
