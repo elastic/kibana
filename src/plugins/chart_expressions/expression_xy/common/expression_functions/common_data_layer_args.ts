@@ -16,17 +16,17 @@ type CommonDataLayerFnArgs = {
   [key in keyof CommonDataLayerArgs]: ArgumentType<CommonDataLayerArgs[key]>;
 };
 
-export const commonDataLayerArgs: CommonDataLayerFnArgs = {
+export const commonDataLayerArgs: Omit<
+  CommonDataLayerFnArgs,
+  'accessors' | 'xAccessor' | 'splitAccessor'
+> = {
   hide: {
     types: ['boolean'],
     default: false,
     help: strings.getHideHelp(),
   },
-  xAccessor: {
-    types: ['string'],
-    help: strings.getXAccessorHelp(),
-  },
   seriesType: {
+    aliases: ['_'],
     types: ['string'],
     options: [...Object.values(SeriesTypes)],
     help: strings.getSeriesTypeHelp(),
@@ -49,15 +49,6 @@ export const commonDataLayerArgs: CommonDataLayerFnArgs = {
     help: strings.getYScaleTypeHelp(),
     default: YScaleTypes.LINEAR,
     strict: true,
-  },
-  splitAccessor: {
-    types: ['string'],
-    help: strings.getSplitAccessorHelp(),
-  },
-  accessors: {
-    types: ['string'],
-    help: strings.getAccessorsHelp(),
-    multi: true,
   },
   yConfig: {
     types: [Y_CONFIG],
