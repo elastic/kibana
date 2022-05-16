@@ -22,25 +22,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'contains linked children',
     { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
     () => {
-      type GenerateSpanLinksDataIds = ReturnType<typeof generateSpanLinksData>['ids'];
-      let serviceAIds: GenerateSpanLinksDataIds['serviceAIds'];
-      let serviceBIds: GenerateSpanLinksDataIds['serviceBIds'];
-      let serviceCIds: GenerateSpanLinksDataIds['serviceCIds'];
-      let serviceDIds: GenerateSpanLinksDataIds['serviceDIds'];
+      let ids: ReturnType<typeof generateSpanLinksData>['ids'];
 
       before(async () => {
-        const { events, ids } = generateSpanLinksData();
+        const spanLinksData = generateSpanLinksData();
 
-        serviceAIds = ids.serviceAIds;
-        serviceBIds = ids.serviceBIds;
-        serviceCIds = ids.serviceCIds;
-        serviceDIds = ids.serviceDIds;
+        ids = spanLinksData.ids;
 
         await synthtraceEsClient.index(
-          new EntityArrayIterable(events.serviceAAsArray).merge(
-            new EntityArrayIterable(events.serviceBAsArray),
-            new EntityArrayIterable(events.serviceCAsArray),
-            new EntityArrayIterable(events.serviceDAsArray)
+          new EntityArrayIterable(spanLinksData.apmFields.producerInternalOnly).merge(
+            new EntityArrayIterable(spanLinksData.apmFields.producerExternalOnly),
+            new EntityArrayIterable(spanLinksData.apmFields.producerConsumer),
+            new EntityArrayIterable(spanLinksData.apmFields.producerMultiple)
           )
         );
       });
@@ -61,64 +54,70 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
         }
 
-        describe('Service A trace', () => {
+        describe('producer-internal-only trace', () => {
           let traces: Awaited<ReturnType<typeof fetchTraces>>['body'];
           before(async () => {
-            const tracesResponse = await fetchTraces({ traceId: serviceAIds.traceId });
+            const tracesResponse = await fetchTraces({ traceId: ids.producerInternalOnly.traceId });
             traces = tracesResponse.body;
           });
 
           it('contains two children link on Span A', () => {
             expect(Object.values(traces.linkedChildrenOfSpanCountBySpanId).length).to.equal(1);
-            expect(traces.linkedChildrenOfSpanCountBySpanId[serviceAIds.spanAId]).to.equal(2);
+            expect(
+              traces.linkedChildrenOfSpanCountBySpanId[ids.producerInternalOnly.spanAId]
+            ).to.equal(2);
           });
         });
 
-        describe('Service B trace', () => {
+        describe('producer-external-only trace', () => {
           let traces: Awaited<ReturnType<typeof fetchTraces>>['body'];
           before(async () => {
-            const tracesResponse = await fetchTraces({ traceId: serviceBIds.traceId });
+            const tracesResponse = await fetchTraces({ traceId: ids.producerExternalOnly.traceId });
             traces = tracesResponse.body;
           });
 
           it('contains two children link on Span B', () => {
             expect(Object.values(traces.linkedChildrenOfSpanCountBySpanId).length).to.equal(2);
-            expect(traces.linkedChildrenOfSpanCountBySpanId[serviceBIds.spanBId]).to.equal(1);
-            expect(traces.linkedChildrenOfSpanCountBySpanId[serviceBIds.transactionBId]).to.equal(
-              1
-            );
+            expect(
+              traces.linkedChildrenOfSpanCountBySpanId[ids.producerExternalOnly.spanBId]
+            ).to.equal(1);
+            expect(
+              traces.linkedChildrenOfSpanCountBySpanId[ids.producerExternalOnly.transactionBId]
+            ).to.equal(1);
           });
         });
 
-        describe('Service C trace', () => {
+        describe('producer-consumer trace', () => {
           let traces: Awaited<ReturnType<typeof fetchTraces>>['body'];
           before(async () => {
-            const tracesResponse = await fetchTraces({ traceId: serviceCIds.traceId });
+            const tracesResponse = await fetchTraces({ traceId: ids.producerConsumer.traceId });
             traces = tracesResponse.body;
           });
 
           it('contains one children link on transaction C and two on span C', () => {
             expect(Object.values(traces.linkedChildrenOfSpanCountBySpanId).length).to.equal(2);
-            expect(traces.linkedChildrenOfSpanCountBySpanId[serviceCIds.transactionCId]).to.equal(
+            expect(
+              traces.linkedChildrenOfSpanCountBySpanId[ids.producerConsumer.transactionCId]
+            ).to.equal(1);
+            expect(traces.linkedChildrenOfSpanCountBySpanId[ids.producerConsumer.spanCId]).to.equal(
               1
             );
-            expect(traces.linkedChildrenOfSpanCountBySpanId[serviceCIds.spanCId]).to.equal(1);
           });
         });
 
-        describe('Service D trace', () => {
+        describe('consumer-multiple trace', () => {
           let traces: Awaited<ReturnType<typeof fetchTraces>>['body'];
           before(async () => {
-            const tracesResponse = await fetchTraces({ traceId: serviceDIds.traceId });
+            const tracesResponse = await fetchTraces({ traceId: ids.producerMultiple.traceId });
             traces = tracesResponse.body;
           });
 
           it('contains no children', () => {
             expect(Object.values(traces.linkedChildrenOfSpanCountBySpanId).length).to.equal(0);
-            expect(traces.linkedChildrenOfSpanCountBySpanId[serviceDIds.transactionDId]).to.equal(
-              undefined
-            );
-            expect(traces.linkedChildrenOfSpanCountBySpanId[serviceDIds.spanEId]).to.equal(
+            expect(
+              traces.linkedChildrenOfSpanCountBySpanId[ids.producerMultiple.transactionDId]
+            ).to.equal(undefined);
+            expect(traces.linkedChildrenOfSpanCountBySpanId[ids.producerMultiple.spanEId]).to.equal(
               undefined
             );
           });
@@ -169,7 +168,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           };
         }
 
-        describe('Service A span links details', () => {
+        describe('producer-internal-only span links details', () => {
           let transactionALinksDetails: Awaited<ReturnType<typeof fetchChildrenAndParentsDetails>>;
           let spanALinksDetails: Awaited<ReturnType<typeof fetchChildrenAndParentsDetails>>;
           before(async () => {
@@ -177,14 +176,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               [
                 fetchChildrenAndParentsDetails({
                   kuery: '',
-                  traceId: serviceAIds.traceId,
-                  spanId: serviceAIds.transactionAId,
+                  traceId: ids.producerInternalOnly.traceId,
+                  spanId: ids.producerInternalOnly.transactionAId,
                   processorEvent: ProcessorEvent.transaction,
                 }),
                 fetchChildrenAndParentsDetails({
                   kuery: '',
-                  traceId: serviceAIds.traceId,
-                  spanId: serviceAIds.spanAId,
+                  traceId: ids.producerInternalOnly.traceId,
+                  spanId: ids.producerInternalOnly.spanAId,
                   processorEvent: ProcessorEvent.span,
                 }),
               ]
@@ -207,15 +206,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             const serviceCDetails = spanALinksDetails.childrenLinks.spanLinksDetails.find(
               (childDetails) => {
                 return (
-                  childDetails.traceId === serviceCIds.traceId &&
-                  childDetails.spanId === serviceCIds.transactionCId
+                  childDetails.traceId === ids.producerConsumer.traceId &&
+                  childDetails.spanId === ids.producerConsumer.transactionCId
                 );
               }
             );
             expect(serviceCDetails?.details).to.eql({
-              serviceName: 'Service C',
+              serviceName: 'producer-consumer',
               agentName: 'ruby',
-              transactionId: serviceCIds.transactionCId,
+              transactionId: ids.producerConsumer.transactionCId,
               spanName: 'Transaction C',
               duration: 1000000,
             });
@@ -223,22 +222,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             const serviceDDetails = spanALinksDetails.childrenLinks.spanLinksDetails.find(
               (childDetails) => {
                 return (
-                  childDetails.traceId === serviceDIds.traceId &&
-                  childDetails.spanId === serviceDIds.transactionDId
+                  childDetails.traceId === ids.producerMultiple.traceId &&
+                  childDetails.spanId === ids.producerMultiple.transactionDId
                 );
               }
             );
             expect(serviceDDetails?.details).to.eql({
-              serviceName: 'Service D',
+              serviceName: 'consumer-multiple',
               agentName: 'nodejs',
-              transactionId: serviceDIds.transactionDId,
+              transactionId: ids.producerMultiple.transactionDId,
               spanName: 'Transaction D',
               duration: 1000000,
             });
           });
         });
 
-        describe('Service B span links details', () => {
+        describe('producer-external-only span links details', () => {
           let transactionBLinksDetails: Awaited<ReturnType<typeof fetchChildrenAndParentsDetails>>;
           let spanBLinksDetails: Awaited<ReturnType<typeof fetchChildrenAndParentsDetails>>;
           before(async () => {
@@ -246,14 +245,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               [
                 fetchChildrenAndParentsDetails({
                   kuery: '',
-                  traceId: serviceBIds.traceId,
-                  spanId: serviceBIds.transactionBId,
+                  traceId: ids.producerExternalOnly.traceId,
+                  spanId: ids.producerExternalOnly.transactionBId,
                   processorEvent: ProcessorEvent.transaction,
                 }),
                 fetchChildrenAndParentsDetails({
                   kuery: '',
-                  traceId: serviceBIds.traceId,
-                  spanId: serviceBIds.spanBId,
+                  traceId: ids.producerExternalOnly.traceId,
+                  spanId: ids.producerExternalOnly.spanBId,
                   processorEvent: ProcessorEvent.span,
                 }),
               ]
@@ -262,7 +261,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             spanBLinksDetails = spanALinksDetailsResponse;
           });
 
-          it('returns Service C as children of transaction B', () => {
+          it('returns producer-consumer as children of transaction B', () => {
             expect(transactionBLinksDetails.childrenLinks.spanLinksDetails.length).to.be(1);
           });
 
@@ -273,20 +272,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           it('returns external parent on Span B', () => {
             expect(spanBLinksDetails.parentsLinks.spanLinksDetails.length).to.be(1);
             expect(spanBLinksDetails.parentsLinks.spanLinksDetails).to.eql([
-              { traceId: '1', spanId: '2' },
+              { traceId: 'trace#1', spanId: 'span#1' },
             ]);
           });
 
-          it('returns Service D as child on Span B', () => {
+          it('returns consumer-multiple as child on Span B', () => {
             expect(spanBLinksDetails.childrenLinks.spanLinksDetails.length).to.be(1);
             expect(spanBLinksDetails.childrenLinks.spanLinksDetails).to.eql([
               {
-                traceId: serviceDIds.traceId,
-                spanId: serviceDIds.spanEId,
+                traceId: ids.producerMultiple.traceId,
+                spanId: ids.producerMultiple.spanEId,
                 details: {
-                  serviceName: 'Service D',
+                  serviceName: 'consumer-multiple',
                   agentName: 'nodejs',
-                  transactionId: serviceDIds.transactionDId,
+                  transactionId: ids.producerMultiple.transactionDId,
                   spanName: 'Span E',
                   duration: 100000,
                   spanSubtype: 'http',
@@ -297,7 +296,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
         });
 
-        describe('Service C span links details', () => {
+        describe('producer-consumer span links details', () => {
           let transactionCLinksDetails: Awaited<ReturnType<typeof fetchChildrenAndParentsDetails>>;
           let spanCLinksDetails: Awaited<ReturnType<typeof fetchChildrenAndParentsDetails>>;
           before(async () => {
@@ -305,14 +304,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               [
                 fetchChildrenAndParentsDetails({
                   kuery: '',
-                  traceId: serviceCIds.traceId,
-                  spanId: serviceCIds.transactionCId,
+                  traceId: ids.producerConsumer.traceId,
+                  spanId: ids.producerConsumer.transactionCId,
                   processorEvent: ProcessorEvent.transaction,
                 }),
                 fetchChildrenAndParentsDetails({
                   kuery: '',
-                  traceId: serviceCIds.traceId,
-                  spanId: serviceCIds.spanCId,
+                  traceId: ids.producerConsumer.traceId,
+                  spanId: ids.producerConsumer.spanCId,
                   processorEvent: ProcessorEvent.span,
                 }),
               ]
@@ -321,16 +320,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             spanCLinksDetails = spanALinksDetailsResponse;
           });
 
-          it('returns Service A Span A, Service B Transaction B, and External link as parents of Transaction C', () => {
+          it('returns producer-internal-only Span A, producer-external-only Transaction B, and External link as parents of Transaction C', () => {
             expect(transactionCLinksDetails.parentsLinks.spanLinksDetails.length).to.be(3);
             expect(transactionCLinksDetails.parentsLinks.spanLinksDetails).to.eql([
               {
-                traceId: serviceAIds.traceId,
-                spanId: serviceAIds.spanAId,
+                traceId: ids.producerInternalOnly.traceId,
+                spanId: ids.producerInternalOnly.spanAId,
                 details: {
-                  serviceName: 'Service A',
+                  serviceName: 'producer-internal-only',
                   agentName: 'go',
-                  transactionId: serviceAIds.transactionAId,
+                  transactionId: ids.producerInternalOnly.transactionAId,
                   spanName: 'Span A',
                   duration: 100000,
                   spanSubtype: 'http',
@@ -338,33 +337,33 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 },
               },
               {
-                traceId: serviceBIds.traceId,
-                spanId: serviceBIds.transactionBId,
+                traceId: ids.producerExternalOnly.traceId,
+                spanId: ids.producerExternalOnly.transactionBId,
                 details: {
-                  serviceName: 'Service B',
+                  serviceName: 'producer-external-only',
                   agentName: 'java',
-                  transactionId: serviceBIds.transactionBId,
+                  transactionId: ids.producerExternalOnly.transactionBId,
                   duration: 1000000,
                   spanName: 'Transaction B',
                 },
               },
               {
-                traceId: serviceCIds.externalTraceId,
-                spanId: serviceBIds.spanBId,
+                traceId: ids.producerConsumer.externalTraceId,
+                spanId: ids.producerExternalOnly.spanBId,
               },
             ]);
           });
 
-          it('returns Service D Span E as child of Transaction C', () => {
+          it('returns consumer-multiple Span E as child of Transaction C', () => {
             expect(transactionCLinksDetails.childrenLinks.spanLinksDetails.length).to.be(1);
             expect(transactionCLinksDetails.childrenLinks.spanLinksDetails).to.eql([
               {
-                traceId: serviceDIds.traceId,
-                spanId: serviceDIds.spanEId,
+                traceId: ids.producerMultiple.traceId,
+                spanId: ids.producerMultiple.spanEId,
                 details: {
-                  serviceName: 'Service D',
+                  serviceName: 'consumer-multiple',
                   agentName: 'nodejs',
-                  transactionId: serviceDIds.transactionDId,
+                  transactionId: ids.producerMultiple.transactionDId,
                   spanName: 'Span E',
                   duration: 100000,
                   spanSubtype: 'http',
@@ -378,16 +377,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expect(spanCLinksDetails.parentsLinks.spanLinksDetails.length).to.be(0);
           });
 
-          it('returns Service D as Child on Service C', () => {
+          it('returns consumer-multiple as Child on producer-consumer', () => {
             expect(spanCLinksDetails.childrenLinks.spanLinksDetails.length).to.be(1);
             expect(spanCLinksDetails.childrenLinks.spanLinksDetails).to.eql([
               {
-                traceId: serviceDIds.traceId,
-                spanId: serviceDIds.transactionDId,
+                traceId: ids.producerMultiple.traceId,
+                spanId: ids.producerMultiple.transactionDId,
                 details: {
-                  serviceName: 'Service D',
+                  serviceName: 'consumer-multiple',
                   agentName: 'nodejs',
-                  transactionId: serviceDIds.transactionDId,
+                  transactionId: ids.producerMultiple.transactionDId,
                   spanName: 'Transaction D',
                   duration: 1000000,
                 },
@@ -396,7 +395,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
         });
 
-        describe('Service D span links details', () => {
+        describe('consumer-multiple span links details', () => {
           let transactionDLinksDetails: Awaited<ReturnType<typeof fetchChildrenAndParentsDetails>>;
           let spanELinksDetails: Awaited<ReturnType<typeof fetchChildrenAndParentsDetails>>;
           before(async () => {
@@ -404,14 +403,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               [
                 fetchChildrenAndParentsDetails({
                   kuery: '',
-                  traceId: serviceDIds.traceId,
-                  spanId: serviceDIds.transactionDId,
+                  traceId: ids.producerMultiple.traceId,
+                  spanId: ids.producerMultiple.transactionDId,
                   processorEvent: ProcessorEvent.transaction,
                 }),
                 fetchChildrenAndParentsDetails({
                   kuery: '',
-                  traceId: serviceDIds.traceId,
-                  spanId: serviceDIds.spanEId,
+                  traceId: ids.producerMultiple.traceId,
+                  spanId: ids.producerMultiple.spanEId,
                   processorEvent: ProcessorEvent.span,
                 }),
               ]
@@ -420,16 +419,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             spanELinksDetails = spanALinksDetailsResponse;
           });
 
-          it('returns Service A Span A and Service C Span C as parents of Transaction D', () => {
+          it('returns producer-internal-only Span A and producer-consumer Span C as parents of Transaction D', () => {
             expect(transactionDLinksDetails.parentsLinks.spanLinksDetails.length).to.be(2);
             expect(transactionDLinksDetails.parentsLinks.spanLinksDetails).to.eql([
               {
-                traceId: serviceAIds.traceId,
-                spanId: serviceAIds.spanAId,
+                traceId: ids.producerInternalOnly.traceId,
+                spanId: ids.producerInternalOnly.spanAId,
                 details: {
-                  serviceName: 'Service A',
+                  serviceName: 'producer-internal-only',
                   agentName: 'go',
-                  transactionId: serviceAIds.transactionAId,
+                  transactionId: ids.producerInternalOnly.transactionAId,
                   spanName: 'Span A',
                   duration: 100000,
                   spanSubtype: 'http',
@@ -437,12 +436,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 },
               },
               {
-                traceId: serviceCIds.traceId,
-                spanId: serviceCIds.spanCId,
+                traceId: ids.producerConsumer.traceId,
+                spanId: ids.producerConsumer.spanCId,
                 details: {
-                  serviceName: 'Service C',
+                  serviceName: 'producer-consumer',
                   agentName: 'ruby',
-                  transactionId: serviceCIds.transactionCId,
+                  transactionId: ids.producerConsumer.transactionCId,
                   spanName: 'Span C',
                   duration: 100000,
                   spanSubtype: 'http',
@@ -456,17 +455,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expect(transactionDLinksDetails.childrenLinks.spanLinksDetails.length).to.be(0);
           });
 
-          it('returns Service B Span B and Service C Transaction C as parents of Span E', () => {
+          it('returns producer-external-only Span B and producer-consumer Transaction C as parents of Span E', () => {
             expect(spanELinksDetails.parentsLinks.spanLinksDetails.length).to.be(2);
 
             expect(spanELinksDetails.parentsLinks.spanLinksDetails).to.eql([
               {
-                traceId: serviceBIds.traceId,
-                spanId: serviceBIds.spanBId,
+                traceId: ids.producerExternalOnly.traceId,
+                spanId: ids.producerExternalOnly.spanBId,
                 details: {
-                  serviceName: 'Service B',
+                  serviceName: 'producer-external-only',
                   agentName: 'java',
-                  transactionId: serviceBIds.transactionBId,
+                  transactionId: ids.producerExternalOnly.transactionBId,
                   spanName: 'Span B',
                   duration: 100000,
                   spanSubtype: 'http',
@@ -474,12 +473,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 },
               },
               {
-                traceId: serviceCIds.traceId,
-                spanId: serviceCIds.transactionCId,
+                traceId: ids.producerConsumer.traceId,
+                spanId: ids.producerConsumer.transactionCId,
                 details: {
-                  serviceName: 'Service C',
+                  serviceName: 'producer-consumer',
                   agentName: 'ruby',
-                  transactionId: serviceCIds.transactionCId,
+                  transactionId: ids.producerConsumer.transactionCId,
                   spanName: 'Transaction C',
                   duration: 1000000,
                 },

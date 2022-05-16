@@ -44,72 +44,76 @@ describe('Span links', () => {
     });
 
     describe('span links count on trace waterfall', () => {
-      it('Shows two children and no parents on Service A Span A', () => {
-        cy.visit(getServiceInventoryUrl({ serviceName: 'Service A' }));
+      it('Shows two children and no parents on producer-internal-only Span A', () => {
+        cy.visit(
+          getServiceInventoryUrl({ serviceName: 'producer-internal-only' })
+        );
         cy.contains('Transaction A').click();
         cy.contains('2 Span links');
         cy.get(
-          `[data-test-subj="spanLinksBadge_${ids.serviceAIds.spanAId}"]`
+          `[data-test-subj="spanLinksBadge_${ids.producerInternalOnlyIds.spanAId}"]`
         ).realHover();
         cy.contains('2 Span links found');
         cy.contains('2 incoming');
         cy.contains('0 outgoing');
       });
 
-      it('Shows one parent and one children on Service B Span B', () => {
-        cy.visit(getServiceInventoryUrl({ serviceName: 'Service B' }));
+      it('Shows one parent and one children on producer-external-only Span B', () => {
+        cy.visit(
+          getServiceInventoryUrl({ serviceName: 'producer-external-only' })
+        );
         cy.contains('Transaction B').click();
         cy.contains('2 Span links');
         cy.get(
-          `[data-test-subj="spanLinksBadge_${ids.serviceBIds.spanBId}"]`
+          `[data-test-subj="spanLinksBadge_${ids.producerExternalOnlyIds.spanBId}"]`
         ).realHover();
         cy.contains('2 Span links found');
         cy.contains('1 incoming');
         cy.contains('1 outgoing');
       });
 
-      it('Shows one parent and one children on Service C Transaction C', () => {
-        cy.visit(getServiceInventoryUrl({ serviceName: 'Service C' }));
+      it('Shows one parent and one children on producer-consumer Transaction C', () => {
+        cy.visit(getServiceInventoryUrl({ serviceName: 'producer-consumer' }));
         cy.contains('Transaction C').click();
         cy.contains('2 Span links');
         cy.get(
-          `[data-test-subj="spanLinksBadge_${ids.serviceCIds.transactionCId}"]`
+          `[data-test-subj="spanLinksBadge_${ids.producerConsumerIds.transactionCId}"]`
         ).realHover();
         cy.contains('2 Span links found');
         cy.contains('1 incoming');
         cy.contains('1 outgoing');
       });
 
-      it('Shows no parent and one children on Service C Span C', () => {
-        cy.visit(getServiceInventoryUrl({ serviceName: 'Service C' }));
+      it('Shows no parent and one children on producer-consumer Span C', () => {
+        cy.visit(getServiceInventoryUrl({ serviceName: 'producer-consumer' }));
         cy.contains('Transaction C').click();
         cy.contains('1 Span link');
         cy.get(
-          `[data-test-subj="spanLinksBadge_${ids.serviceCIds.spanCId}"]`
+          `[data-test-subj="spanLinksBadge_${ids.producerConsumerIds.spanCId}"]`
         ).realHover();
         cy.contains('1 Span link found');
         cy.contains('1 incoming');
         cy.contains('0 outgoing');
       });
 
-      it('Shows two parents and one children on Service D Transaction D', () => {
-        cy.visit(getServiceInventoryUrl({ serviceName: 'Service D' }));
+      it('Shows two parents and one children on consumer-multiple Transaction D', () => {
+        cy.visit(getServiceInventoryUrl({ serviceName: 'consumer-multiple' }));
         cy.contains('Transaction D').click();
         cy.contains('2 Span links');
         cy.get(
-          `[data-test-subj="spanLinksBadge_${ids.serviceDIds.transactionDId}"]`
+          `[data-test-subj="spanLinksBadge_${ids.producerMultipleIds.transactionDId}"]`
         ).realHover();
         cy.contains('2 Span links found');
         cy.contains('0 incoming');
         cy.contains('2 outgoing');
       });
 
-      it('Shows two parents and one children on Service D Span E', () => {
-        cy.visit(getServiceInventoryUrl({ serviceName: 'Service D' }));
+      it('Shows two parents and one children on consumer-multiple Span E', () => {
+        cy.visit(getServiceInventoryUrl({ serviceName: 'consumer-multiple' }));
         cy.contains('Transaction D').click();
         cy.contains('2 Span links');
         cy.get(
-          `[data-test-subj="spanLinksBadge_${ids.serviceDIds.spanEId}"]`
+          `[data-test-subj="spanLinksBadge_${ids.producerMultipleIds.spanEId}"]`
         ).realHover();
         cy.contains('2 Span links found');
         cy.contains('0 incoming');
@@ -118,28 +122,30 @@ describe('Span links', () => {
     });
 
     describe('span link flyout', () => {
-      it('Shows children details on Service A Span A', () => {
-        cy.visit(getServiceInventoryUrl({ serviceName: 'Service A' }));
+      it('Shows children details on producer-internal-only Span A', () => {
+        cy.visit(
+          getServiceInventoryUrl({ serviceName: 'producer-internal-only' })
+        );
         cy.contains('Transaction A').click();
         cy.contains('Span A').click();
         cy.get('[data-test-subj="spanLinksTab"]').click();
-        cy.contains('Service C')
+        cy.contains('producer-consumer')
           .should('have.attr', 'href')
-          .and('include', '/services/Service C/overview');
+          .and('include', '/services/producer-consumer/overview');
         cy.contains('Transaction C')
           .should('have.attr', 'href')
           .and(
             'include',
-            `/link-to/transaction/${ids.serviceCIds.transactionCId}?waterfallItemId=${ids.serviceCIds.transactionCId}`
+            `/link-to/transaction/${ids.producerConsumerIds.transactionCId}?waterfallItemId=${ids.producerConsumerIds.transactionCId}`
           );
-        cy.contains('Service D')
+        cy.contains('consumer-multiple')
           .should('have.attr', 'href')
-          .and('include', '/services/Service D/overview');
+          .and('include', '/services/consumer-multiple/overview');
         cy.contains('Transaction D')
           .should('have.attr', 'href')
           .and(
             'include',
-            `link-to/transaction/${ids.serviceDIds.transactionDId}?waterfallItemId=${ids.serviceDIds.transactionDId}`
+            `link-to/transaction/${ids.producerMultipleIds.transactionDId}?waterfallItemId=${ids.producerMultipleIds.transactionDId}`
           );
         cy.get('[data-test-subj="spanLinkTypeSelect"]').should(
           'contain.text',
@@ -147,20 +153,22 @@ describe('Span links', () => {
         );
       });
 
-      it('Shows children and parents details on Service B Span B', () => {
-        cy.visit(getServiceInventoryUrl({ serviceName: 'Service B' }));
+      it('Shows children and parents details on producer-external-only Span B', () => {
+        cy.visit(
+          getServiceInventoryUrl({ serviceName: 'producer-external-only' })
+        );
         cy.contains('Transaction B').click();
         cy.contains('Span B').click();
         cy.get('[data-test-subj="spanLinksTab"]').click();
 
-        cy.contains('Service D')
+        cy.contains('consumer-multiple')
           .should('have.attr', 'href')
-          .and('include', '/services/Service D/overview');
+          .and('include', '/services/consumer-multiple/overview');
         cy.contains('Span E')
           .should('have.attr', 'href')
           .and(
             'include',
-            `link-to/transaction/${ids.serviceDIds.transactionDId}?waterfallItemId=${ids.serviceDIds.spanEId}`
+            `link-to/transaction/${ids.producerMultipleIds.transactionDId}?waterfallItemId=${ids.producerMultipleIds.spanEId}`
           );
         cy.get('[data-test-subj="spanLinkTypeSelect"]').select(
           'Outgoing links (1)'
@@ -169,50 +177,52 @@ describe('Span links', () => {
         cy.contains('trace#1-span#1');
       });
 
-      it('Shows children and parents details on Service C Transaction C', () => {
-        cy.visit(getServiceInventoryUrl({ serviceName: 'Service C' }));
+      it('Shows children and parents details on producer-consumer Transaction C', () => {
+        cy.visit(getServiceInventoryUrl({ serviceName: 'producer-consumer' }));
         cy.contains('Transaction C').click();
-        cy.get(`[aria-controls="${ids.serviceCIds.transactionCId}"]`).click();
+        cy.get(
+          `[aria-controls="${ids.producerConsumerIds.transactionCId}"]`
+        ).click();
         cy.get('[data-test-subj="spanLinksTab"]').click();
 
-        cy.contains('Service D')
+        cy.contains('consumer-multiple')
           .should('have.attr', 'href')
-          .and('include', '/services/Service D/overview');
+          .and('include', '/services/consumer-multiple/overview');
         cy.contains('Span E')
           .should('have.attr', 'href')
           .and(
             'include',
-            `link-to/transaction/${ids.serviceDIds.transactionDId}?waterfallItemId=${ids.serviceDIds.spanEId}`
+            `link-to/transaction/${ids.producerMultipleIds.transactionDId}?waterfallItemId=${ids.producerMultipleIds.spanEId}`
           );
 
         cy.get('[data-test-subj="spanLinkTypeSelect"]').select(
           'Outgoing links (1)'
         );
-        cy.contains('Service A')
+        cy.contains('producer-internal-only')
           .should('have.attr', 'href')
-          .and('include', '/services/Service A/overview');
+          .and('include', '/services/producer-internal-only/overview');
         cy.contains('Span A')
           .should('have.attr', 'href')
           .and(
             'include',
-            `link-to/transaction/${ids.serviceAIds.transactionAId}?waterfallItemId=${ids.serviceAIds.spanAId}`
+            `link-to/transaction/${ids.producerInternalOnlyIds.transactionAId}?waterfallItemId=${ids.producerInternalOnlyIds.spanAId}`
           );
       });
 
-      it('Shows children and parents details on Service C Span C', () => {
-        cy.visit(getServiceInventoryUrl({ serviceName: 'Service C' }));
+      it('Shows children and parents details on producer-consumer Span C', () => {
+        cy.visit(getServiceInventoryUrl({ serviceName: 'producer-consumer' }));
         cy.contains('Transaction C').click();
         cy.contains('Span C').click();
         cy.get('[data-test-subj="spanLinksTab"]').click();
 
-        cy.contains('Service D')
+        cy.contains('consumer-multiple')
           .should('have.attr', 'href')
-          .and('include', '/services/Service D/overview');
+          .and('include', '/services/consumer-multiple/overview');
         cy.contains('Transaction D')
           .should('have.attr', 'href')
           .and(
             'include',
-            `link-to/transaction/${ids.serviceDIds.transactionDId}?waterfallItemId=${ids.serviceDIds.transactionDId}`
+            `link-to/transaction/${ids.producerMultipleIds.transactionDId}?waterfallItemId=${ids.producerMultipleIds.transactionDId}`
           );
 
         cy.get('[data-test-subj="spanLinkTypeSelect"]').should(
@@ -221,30 +231,32 @@ describe('Span links', () => {
         );
       });
 
-      it('Shows children and parents details on Service D Transaction D', () => {
-        cy.visit(getServiceInventoryUrl({ serviceName: 'Service D' }));
+      it('Shows children and parents details on consumer-multiple Transaction D', () => {
+        cy.visit(getServiceInventoryUrl({ serviceName: 'consumer-multiple' }));
         cy.contains('Transaction D').click();
-        cy.get(`[aria-controls="${ids.serviceDIds.transactionDId}"]`).click();
+        cy.get(
+          `[aria-controls="${ids.producerMultipleIds.transactionDId}"]`
+        ).click();
         cy.get('[data-test-subj="spanLinksTab"]').click();
 
-        cy.contains('Service C')
+        cy.contains('producer-consumer')
           .should('have.attr', 'href')
-          .and('include', '/services/Service C/overview');
+          .and('include', '/services/producer-consumer/overview');
         cy.contains('Span C')
           .should('have.attr', 'href')
           .and(
             'include',
-            `link-to/transaction/${ids.serviceCIds.transactionCId}?waterfallItemId=${ids.serviceCIds.spanCId}`
+            `link-to/transaction/${ids.producerConsumerIds.transactionCId}?waterfallItemId=${ids.producerConsumerIds.spanCId}`
           );
 
-        cy.contains('Service A')
+        cy.contains('producer-internal-only')
           .should('have.attr', 'href')
-          .and('include', '/services/Service A/overview');
+          .and('include', '/services/producer-internal-only/overview');
         cy.contains('Span A')
           .should('have.attr', 'href')
           .and(
             'include',
-            `link-to/transaction/${ids.serviceAIds.transactionAId}?waterfallItemId=${ids.serviceAIds.spanAId}`
+            `link-to/transaction/${ids.producerInternalOnlyIds.transactionAId}?waterfallItemId=${ids.producerInternalOnlyIds.spanAId}`
           );
 
         cy.get('[data-test-subj="spanLinkTypeSelect"]').should(
@@ -253,30 +265,30 @@ describe('Span links', () => {
         );
       });
 
-      it('Shows children and parents details on Service D Span E', () => {
-        cy.visit(getServiceInventoryUrl({ serviceName: 'Service D' }));
+      it('Shows children and parents details on consumer-multiple Span E', () => {
+        cy.visit(getServiceInventoryUrl({ serviceName: 'consumer-multiple' }));
         cy.contains('Transaction D').click();
         cy.contains('Span E').click();
         cy.get('[data-test-subj="spanLinksTab"]').click();
 
-        cy.contains('Service B')
+        cy.contains('producer-external-only')
           .should('have.attr', 'href')
-          .and('include', '/services/Service B/overview');
+          .and('include', '/services/producer-external-only/overview');
         cy.contains('Span B')
           .should('have.attr', 'href')
           .and(
             'include',
-            `link-to/transaction/${ids.serviceBIds.transactionBId}?waterfallItemId=${ids.serviceBIds.spanBId}`
+            `link-to/transaction/${ids.producerExternalOnlyIds.transactionBId}?waterfallItemId=${ids.producerExternalOnlyIds.spanBId}`
           );
 
-        cy.contains('Service C')
+        cy.contains('producer-consumer')
           .should('have.attr', 'href')
-          .and('include', '/services/Service C/overview');
+          .and('include', '/services/producer-consumer/overview');
         cy.contains('Transaction C')
           .should('have.attr', 'href')
           .and(
             'include',
-            `link-to/transaction/${ids.serviceCIds.transactionCId}?waterfallItemId=${ids.serviceCIds.transactionCId}`
+            `link-to/transaction/${ids.producerConsumerIds.transactionCId}?waterfallItemId=${ids.producerConsumerIds.transactionCId}`
           );
 
         cy.get('[data-test-subj="spanLinkTypeSelect"]').should(

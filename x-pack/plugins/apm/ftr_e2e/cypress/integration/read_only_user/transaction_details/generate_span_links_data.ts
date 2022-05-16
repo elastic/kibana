@@ -8,25 +8,25 @@ import { apm, EntityArrayIterable, timerange } from '@elastic/apm-synthtrace';
 import { synthtrace } from '../../../../synthtrace';
 import { SpanLink } from '../../../../../typings/es_schemas/raw/fields/span_links';
 
-function getServiceAData() {
-  const serviceAInstanceGo = apm
-    .service('Service A', 'production', 'go')
+function getProducerInternalOnly() {
+  const producerInternalOnlyInstance = apm
+    .service('producer-internal-only', 'production', 'go')
     .instance('instance a');
 
-  const serviceAEvents = timerange(
+  const events = timerange(
     new Date('2022-01-01T00:00:00.000Z'),
     new Date('2022-01-01T00:01:00.000Z')
   )
     .interval('1m')
     .rate(1)
     .generator((timestamp) => {
-      return serviceAInstanceGo
+      return producerInternalOnlyInstance
         .transaction(`Transaction A`)
         .timestamp(timestamp)
         .duration(1000)
         .success()
         .children(
-          serviceAInstanceGo
+          producerInternalOnlyInstance
             .span(`Span A`, 'external', 'http')
             .timestamp(timestamp + 50)
             .duration(100)
@@ -34,15 +34,13 @@ function getServiceAData() {
         );
     });
 
-  const serviceAAsArray = serviceAEvents.toArray();
-  const transactionA = serviceAAsArray.find(
+  const apmFields = events.toArray();
+  const transactionA = apmFields.find(
     (item) => item['processor.event'] === 'transaction'
   );
-  const spanA = serviceAAsArray.find(
-    (item) => item['processor.event'] === 'span'
-  );
+  const spanA = apmFields.find((item) => item['processor.event'] === 'span');
 
-  const serviceAIds =
+  const ids =
     spanA && transactionA
       ? {
           transactionAId: transactionA['transaction.id']!,
@@ -50,39 +48,36 @@ function getServiceAData() {
           spanAId: spanA['span.id']!,
         }
       : {};
-  const serviceASpanALink = spanA
-    ? {
-        trace: { id: spanA['trace.id']! },
-        span: { id: spanA['span.id']! },
-      }
+  const spanASpanLink = spanA
+    ? { trace: { id: spanA['trace.id']! }, span: { id: spanA['span.id']! } }
     : undefined;
 
   return {
-    serviceAIds,
-    serviceASpanALink,
-    serviceAAsArray,
+    ids,
+    spanASpanLink,
+    apmFields,
   };
 }
 
-function getServiceBData() {
-  const serviceBInstanceJava = apm
-    .service('Service B', 'production', 'java')
+function getProducerExternalOnly() {
+  const producerExternalOnlyInstance = apm
+    .service('producer-external-only', 'production', 'java')
     .instance('instance b');
 
-  const serviceBEvents = timerange(
+  const events = timerange(
     new Date('2022-01-01T00:02:00.000Z'),
     new Date('2022-01-01T00:03:00.000Z')
   )
     .interval('1m')
     .rate(1)
     .generator((timestamp) => {
-      return serviceBInstanceJava
+      return producerExternalOnlyInstance
         .transaction(`Transaction B`)
         .timestamp(timestamp)
         .duration(1000)
         .success()
         .children(
-          serviceBInstanceJava
+          producerExternalOnlyInstance
             .span(`Span B`, 'external', 'http')
             .defaults({
               'span.links': [
@@ -92,7 +87,7 @@ function getServiceBData() {
             .timestamp(timestamp + 50)
             .duration(100)
             .success(),
-          serviceBInstanceJava
+          producerExternalOnlyInstance
             .span(`Span B.1`, 'external', 'http')
             .timestamp(timestamp + 50)
             .duration(100)
@@ -100,15 +95,15 @@ function getServiceBData() {
         );
     });
 
-  const serviceBAsArray = serviceBEvents.toArray();
-  const transactionB = serviceBAsArray.find(
+  const apmFields = events.toArray();
+  const transactionB = apmFields.find(
     (item) => item['processor.event'] === 'transaction'
   );
-  const spanB = serviceBAsArray.find(
+  const spanB = apmFields.find(
     (item) =>
       item['processor.event'] === 'span' && item['span.name'] === 'Span B'
   );
-  const serviceBIds =
+  const ids =
     spanB && transactionB
       ? {
           traceId: spanB['trace.id']!,
@@ -117,7 +112,7 @@ function getServiceBData() {
         }
       : {};
 
-  const serviceBSpanBLink = spanB
+  const spanBSpanLink = spanB
     ? {
         trace: { id: spanB['trace.id']! },
         span: { id: spanB['span.id']! },
@@ -125,38 +120,40 @@ function getServiceBData() {
     : undefined;
 
   return {
-    serviceBIds,
-    serviceBSpanBLink,
-    serviceBAsArray,
+    ids,
+    spanBSpanLink,
+    apmFields,
   };
 }
 
-function getServiceCData({
-  serviceASpanALink,
+function getProducerConsumer({
+  producerInternalOnlySpanASpanLink,
 }: {
-  serviceASpanALink?: SpanLink;
+  producerInternalOnlySpanASpanLink?: SpanLink;
 }) {
-  const serviceCInstanceRuby = apm
-    .service('Service C', 'production', 'ruby')
+  const producerConsumerInstance = apm
+    .service('producer-consumer', 'production', 'ruby')
     .instance('instance c');
 
-  const serviceCEvents = timerange(
+  const events = timerange(
     new Date('2022-01-01T00:04:00.000Z'),
     new Date('2022-01-01T00:05:00.000Z')
   )
     .interval('1m')
     .rate(1)
     .generator((timestamp) => {
-      return serviceCInstanceRuby
+      return producerConsumerInstance
         .transaction(`Transaction C`)
         .defaults({
-          'span.links': serviceASpanALink ? [serviceASpanALink] : [],
+          'span.links': producerInternalOnlySpanASpanLink
+            ? [producerInternalOnlySpanASpanLink]
+            : [],
         })
         .timestamp(timestamp)
         .duration(1000)
         .success()
         .children(
-          serviceCInstanceRuby
+          producerConsumerInstance
             .span(`Span C`, 'external', 'http')
             .timestamp(timestamp + 50)
             .duration(100)
@@ -164,27 +161,27 @@ function getServiceCData({
         );
     });
 
-  const serviceCAsArray = serviceCEvents.toArray();
-  const transactionC = serviceCAsArray.find(
+  const apmFields = events.toArray();
+  const transactionC = apmFields.find(
     (item) => item['processor.event'] === 'transaction'
   );
-  const serviceCTransactionCLink = transactionC
+  const transactionCSpanLink = transactionC
     ? {
         trace: { id: transactionC['trace.id']! },
         span: { id: transactionC['transaction.id']! },
       }
     : undefined;
-  const spanC = serviceCAsArray.find(
+  const spanC = apmFields.find(
     (item) =>
       item['processor.event'] === 'span' || item['span.name'] === 'Span C'
   );
-  const serviceCSpanCLink = spanC
+  const spanCSpanLink = spanC
     ? {
         trace: { id: spanC['trace.id']! },
         span: { id: spanC['span.id']! },
       }
     : undefined;
-  const serviceCIds =
+  const ids =
     spanC && transactionC
       ? {
           traceId: transactionC['trace.id']!,
@@ -193,53 +190,60 @@ function getServiceCData({
         }
       : {};
   return {
-    serviceCTransactionCLink,
-    serviceCSpanCLink,
-    serviceCIds,
-    serviceCAsArray,
+    transactionCSpanLink,
+    spanCSpanLink,
+    ids,
+    apmFields,
   };
 }
 
-function getServiceDData({
-  serviceASpanALink,
-  serviceBSpanBLink,
-  serviceCSpanCLink,
-  serviceCTransactionCLink,
+function getConsumerMultiple({
+  producerInternalOnlySpanASpanLink,
+  producerExternalOnlySpanBSpanLink,
+  producerConsumerSpanCSpanLink,
+  producerConsumerTransactionCSpanLink,
 }: {
-  serviceASpanALink?: SpanLink;
-  serviceBSpanBLink?: SpanLink;
-  serviceCSpanCLink?: SpanLink;
-  serviceCTransactionCLink?: SpanLink;
+  producerInternalOnlySpanASpanLink?: SpanLink;
+  producerExternalOnlySpanBSpanLink?: SpanLink;
+  producerConsumerSpanCSpanLink?: SpanLink;
+  producerConsumerTransactionCSpanLink?: SpanLink;
 }) {
-  const serviceDInstanceNode = apm
-    .service('Service D', 'production', 'nodejs')
+  const consumerMultipleInstance = apm
+    .service('consumer-multiple', 'production', 'nodejs')
     .instance('instance d');
 
-  const serviceDEvents = timerange(
+  const events = timerange(
     new Date('2022-01-01T00:06:00.000Z'),
     new Date('2022-01-01T00:07:00.000Z')
   )
     .interval('1m')
     .rate(1)
     .generator((timestamp) => {
-      return serviceDInstanceNode
+      return consumerMultipleInstance
         .transaction(`Transaction D`)
         .defaults({
           'span.links':
-            serviceASpanALink && serviceCSpanCLink
-              ? [serviceASpanALink, serviceCSpanCLink]
+            producerInternalOnlySpanASpanLink && producerConsumerSpanCSpanLink
+              ? [
+                  producerInternalOnlySpanASpanLink,
+                  producerConsumerSpanCSpanLink,
+                ]
               : [],
         })
         .timestamp(timestamp)
         .duration(1000)
         .success()
         .children(
-          serviceDInstanceNode
+          consumerMultipleInstance
             .span(`Span E`, 'external', 'http')
             .defaults({
               'span.links':
-                serviceBSpanBLink && serviceCTransactionCLink
-                  ? [serviceBSpanBLink, serviceCTransactionCLink]
+                producerExternalOnlySpanBSpanLink &&
+                producerConsumerTransactionCSpanLink
+                  ? [
+                      producerExternalOnlySpanBSpanLink,
+                      producerConsumerTransactionCSpanLink,
+                    ]
                   : [],
             })
             .timestamp(timestamp + 50)
@@ -247,15 +251,13 @@ function getServiceDData({
             .success()
         );
     });
-  const serviceDAsArray = serviceDEvents.toArray();
-  const transactionD = serviceDAsArray.find(
+  const apmFields = events.toArray();
+  const transactionD = apmFields.find(
     (item) => item['processor.event'] === 'transaction'
   );
-  const spanE = serviceDAsArray.find(
-    (item) => item['processor.event'] === 'span'
-  );
+  const spanE = apmFields.find((item) => item['processor.event'] === 'span');
 
-  const serviceDIds =
+  const ids =
     transactionD && spanE
       ? {
           traceId: transactionD['trace.id']!,
@@ -265,63 +267,60 @@ function getServiceDData({
       : {};
 
   return {
-    serviceDIds,
-    serviceDAsArray,
+    ids,
+    apmFields,
   };
 }
 
 /**
  * Data ingestion summary:
  *
- * Service A (go)
+ * producer-internal-only (go)
  * --Transaction A
  * ----Span A
  *
- * Service B (java)
+ * producer-external-only (java)
  * --Transaction B
  * ----Span B
  * ------span.links=external link
  * ----Span B1
  *
- * Service C (ruby)
+ * producer-consumer (ruby)
  * --Transaction C
- * ------span.links=Service A / Span A
+ * ------span.links=producer-internal-only / Span A
  * ----Span C
  *
- * Service D (nodejs)
+ * consumer-multiple (nodejs)
  * --Transaction D
- * ------span.links= Service C / Span C | Service A / Span A
+ * ------span.links= producer-consumer / Span C | producer-internal-only / Span A
  * ----Span E
- * ------span.links= Service B / Span B | Service C / Transaction C
+ * ------span.links= producer-external-only / Span B | producer-consumer / Transaction C
  */
 export async function generateSpanLinksData() {
-  const { serviceAAsArray, serviceAIds, serviceASpanALink } = getServiceAData();
-  const { serviceBAsArray, serviceBIds, serviceBSpanBLink } = getServiceBData();
-  const {
-    serviceCAsArray,
-    serviceCIds,
-    serviceCSpanCLink,
-    serviceCTransactionCLink,
-  } = getServiceCData({ serviceASpanALink });
-  const { serviceDAsArray, serviceDIds } = getServiceDData({
-    serviceASpanALink,
-    serviceBSpanBLink,
-    serviceCSpanCLink,
-    serviceCTransactionCLink,
+  const producerInternalOnly = getProducerInternalOnly();
+  const producerExternalOnly = getProducerExternalOnly();
+  const producerConsumer = getProducerConsumer({
+    producerInternalOnlySpanASpanLink: producerInternalOnly.spanASpanLink,
+  });
+  const producerMultiple = getConsumerMultiple({
+    producerInternalOnlySpanASpanLink: producerInternalOnly.spanASpanLink,
+    producerConsumerSpanCSpanLink: producerConsumer.spanCSpanLink,
+    producerConsumerTransactionCSpanLink: producerConsumer.transactionCSpanLink,
+    producerExternalOnlySpanBSpanLink: producerExternalOnly.spanBSpanLink,
   });
 
   await synthtrace.index(
-    new EntityArrayIterable(serviceAAsArray).merge(
-      new EntityArrayIterable(serviceBAsArray),
-      new EntityArrayIterable(serviceCAsArray),
-      new EntityArrayIterable(serviceDAsArray)
+    new EntityArrayIterable(producerInternalOnly.apmFields).merge(
+      new EntityArrayIterable(producerExternalOnly.apmFields),
+      new EntityArrayIterable(producerConsumer.apmFields),
+      new EntityArrayIterable(producerMultiple.apmFields)
     )
   );
 
   return {
-    serviceAIds,
-    serviceBIds,
-    serviceCIds,
-    serviceDIds,
+    producerInternalOnlyIds: producerInternalOnly.ids,
+    producerExternalOnlyIds: producerExternalOnly.ids,
+    producerConsumerIds: producerConsumer.ids,
+    producerMultipleIds: producerMultiple.ids,
   };
 }
