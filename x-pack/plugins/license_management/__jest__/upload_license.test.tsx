@@ -89,7 +89,7 @@ describe('UploadLicense', () => {
     const rendered = mountWithIntl(component);
     store.dispatch(uploadLicense('INVALID', 'trial'));
     rendered.update();
-    expect(rendered).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
 
   it('should display an error when ES says license is invalid', async () => {
@@ -98,7 +98,7 @@ describe('UploadLicense', () => {
     const invalidLicense = JSON.stringify({ license: { type: 'basic' } });
     await uploadLicense(invalidLicense)(store.dispatch, null, thunkServices);
     rendered.update();
-    expect(rendered).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
 
   it('should display an error when ES says license is expired', async () => {
@@ -107,7 +107,7 @@ describe('UploadLicense', () => {
     const invalidLicense = JSON.stringify({ license: { type: 'basic' } });
     await uploadLicense(invalidLicense)(store.dispatch, null, thunkServices);
     rendered.update();
-    expect(rendered).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
 
   it('should display a modal when license requires acknowledgement', async () => {
@@ -117,7 +117,7 @@ describe('UploadLicense', () => {
     });
     await uploadLicense(unacknowledgedLicense, 'trial')(store.dispatch, null, thunkServices);
     const rendered = mountWithIntl(component);
-    expect(rendered).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
 
   it('should refresh xpack info and navigate to BASE_PATH when ES accepts new license', async () => {
@@ -134,6 +134,6 @@ describe('UploadLicense', () => {
     const license = JSON.stringify({ license: { type: 'basic' } });
     await uploadLicense(license)(store.dispatch, null, thunkServices);
     rendered.update();
-    expect(rendered).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
 });

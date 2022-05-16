@@ -28,9 +28,15 @@ export interface ControlFrameProps {
   customPrepend?: JSX.Element;
   enableActions?: boolean;
   embeddableId: string;
+  embeddableType: string;
 }
 
-export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: ControlFrameProps) => {
+export const ControlFrame = ({
+  customPrepend,
+  enableActions,
+  embeddableId,
+  embeddableType,
+}: ControlFrameProps) => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
   const {
     useEmbeddableSelector,
@@ -42,7 +48,7 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
   const { overlays } = pluginServices.getHooks();
   const { openConfirm } = overlays.useService();
 
-  const embeddable = useChildEmbeddable({ untilEmbeddableLoaded, embeddableId });
+  const embeddable = useChildEmbeddable({ untilEmbeddableLoaded, embeddableId, embeddableType });
 
   const [title, setTitle] = useState<string>();
 
