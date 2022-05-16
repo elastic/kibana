@@ -11,11 +11,11 @@ export const latestFindingsMapping: MappingTypeMapping = {
     result: {
       properties: {
         evaluation: {
-          type: 'keyword',
+          type: 'text',
           fields: {
             keyword: {
               ignore_above: 1024,
-              type: 'text',
+              type: 'keyword',
             },
           },
         },
@@ -24,11 +24,11 @@ export const latestFindingsMapping: MappingTypeMapping = {
     agent: {
       properties: {
         id: {
-          type: 'keyword',
+          type: 'text',
           fields: {
             keyword: {
               ignore_above: 1024,
-              type: 'text',
+              type: 'keyword',
             },
           },
         },
@@ -38,49 +38,49 @@ export const latestFindingsMapping: MappingTypeMapping = {
       type: 'date',
     },
     cycle_id: {
-      type: 'keyword',
+      type: 'text',
       fields: {
         keyword: {
           ignore_above: 1024,
-          type: 'text',
+          type: 'keyword',
         },
       },
     },
     resource: {
       properties: {
         type: {
-          type: 'keyword',
+          type: 'text',
           fields: {
             keyword: {
               ignore_above: 256,
-              type: 'text',
+              type: 'keyword',
             },
           },
         },
         id: {
-          type: 'keyword',
+          type: 'text',
           fields: {
             keyword: {
               ignore_above: 256,
-              type: 'text',
+              type: 'keyword',
             },
           },
         },
         name: {
-          type: 'keyword',
+          type: 'text',
           fields: {
             keyword: {
               ignore_above: 1024,
-              type: 'text',
+              type: 'keyword',
             },
           },
         },
         sub_type: {
-          type: 'keyword',
+          type: 'text',
           fields: {
             keyword: {
               ignore_above: 1024,
-              type: 'text',
+              type: 'keyword',
             },
           },
         },
@@ -92,11 +92,11 @@ export const latestFindingsMapping: MappingTypeMapping = {
     },
     resource_id: {
       // deprecated - the new field is resource.id
-      type: 'keyword',
+      type: 'text',
       fields: {
         keyword: {
           ignore_above: 1024,
-          type: 'text',
+          type: 'keyword',
         },
       },
     },
@@ -115,33 +115,33 @@ export const latestFindingsMapping: MappingTypeMapping = {
         benchmark: {
           properties: {
             name: {
-              type: 'keyword',
+              type: 'text',
               fields: {
                 keyword: {
                   ignore_above: 1024,
-                  type: 'text',
+                  type: 'keyword',
                 },
               },
             },
           },
         },
         section: {
-          type: 'keyword',
+          type: 'text',
           fields: {
             keyword: {
               ignore_above: 1024,
-              type: 'text',
+              type: 'keyword',
             },
           },
         },
       },
     },
     cluster_id: {
-      type: 'keyword',
+      type: 'text',
       fields: {
         keyword: {
           ignore_above: 1024,
-          type: 'text',
+          type: 'keyword',
         },
       },
     },
