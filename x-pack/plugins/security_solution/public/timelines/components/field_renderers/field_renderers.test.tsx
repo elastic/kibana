@@ -351,10 +351,12 @@ describe('Field Renderers', () => {
       const wrapper = mount(
         <TestProviders>
           <DefaultFieldRendererOverflow
+            fieldType="keyword"
             idPrefix={idPrefix}
-            rowItems={rowItems}
+            isAggregatable={true}
             moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={5}
+            rowItems={rowItems}
           />
         </TestProviders>
       );
@@ -367,10 +369,12 @@ describe('Field Renderers', () => {
       const wrapper = mount(
         <TestProviders>
           <DefaultFieldRendererOverflow
+            fieldType="keyword"
             idPrefix={idPrefix}
-            rowItems={rowItems}
+            isAggregatable={true}
             moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={5}
+            rowItems={rowItems}
           />
         </TestProviders>
       );

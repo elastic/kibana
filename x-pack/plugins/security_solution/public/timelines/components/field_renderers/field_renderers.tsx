@@ -247,11 +247,13 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
         <EuiFlexItem grow={false}>
           <DefaultFieldRendererOverflow
             attrName={attrName}
-            rowItems={rowItems}
+            fieldType="keyword"
             idPrefix={idPrefix}
-            render={render as OverflowRenderer}
-            overflowIndexStart={displayCount}
+            isAggregatable={true}
             moreMaxHeight={moreMaxHeight}
+            overflowIndexStart={displayCount}
+            render={render as OverflowRenderer}
+            rowItems={rowItems}
           />
         </EuiFlexItem>
       </DraggableContainerFlexGroup>
@@ -271,8 +273,10 @@ type RowItemTypes = string | ReputationLinkSetting;
 
 interface DefaultFieldRendererOverflowProps {
   attrName?: string;
+  fieldType?: string;
   rowItems: string[] | ReputationLinkSetting[];
   idPrefix: string;
+  isAggregatable?: boolean;
   render?: (item: RowItemTypes) => React.ReactNode;
   overflowIndexStart?: number;
   moreMaxHeight: string;
@@ -281,7 +285,9 @@ interface DefaultFieldRendererOverflowProps {
 interface MoreContainerProps {
   attrName?: string;
   dragDisplayValue?: string;
+  fieldType?: string;
   idPrefix: string;
+  isAggregatable?: boolean;
   moreMaxHeight: string;
   overflowIndexStart: number;
   render?: (item: RowItemTypes) => React.ReactNode;
@@ -296,7 +302,9 @@ export const MoreContainer = React.memo<MoreContainerProps>(
   ({
     attrName,
     dragDisplayValue,
+    fieldType,
     idPrefix,
+    isAggregatable,
     moreMaxHeight,
     overflowIndexStart,
     render,
@@ -332,6 +340,8 @@ export const MoreContainer = React.memo<MoreContainerProps>(
                   isDraggable={false}
                   render={() => (render && render(rowItem)) ?? defaultToEmptyTag(rowItem)}
                   timelineId={undefined}
+                  fieldType={fieldType}
+                  isAggregatable={isAggregatable}
                 />
               </EuiFlexItem>
             );
@@ -339,7 +349,16 @@ export const MoreContainer = React.memo<MoreContainerProps>(
 
           return acc;
         }, []),
-      [attrName, dragDisplayValue, idPrefix, overflowIndexStart, render, rowItems]
+      [
+        attrName,
+        dragDisplayValue,
+        fieldType,
+        idPrefix,
+        isAggregatable,
+        overflowIndexStart,
+        render,
+        rowItems,
+      ]
     );
 
     const moreItems = useMemo(
@@ -373,7 +392,16 @@ export const MoreContainer = React.memo<MoreContainerProps>(
 MoreContainer.displayName = 'MoreContainer';
 
 export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverflowProps>(
-  ({ attrName, idPrefix, moreMaxHeight, overflowIndexStart = 5, render, rowItems }) => {
+  ({
+    attrName,
+    idPrefix,
+    moreMaxHeight,
+    overflowIndexStart = 5,
+    render,
+    rowItems,
+    fieldType,
+    isAggregatable,
+  }) => {
     const [isOpen, setIsOpen] = useState(false);
     const togglePopover = useCallback(() => setIsOpen((currentIsOpen) => !currentIsOpen), []);
     const button = useMemo(
@@ -410,6 +438,8 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
               rowItems={rowItems}
               moreMaxHeight={moreMaxHeight}
               overflowIndexStart={overflowIndexStart}
+              fieldType={fieldType}
+              isAggregatable={isAggregatable}
             />
           </EuiPopover>
         )}
