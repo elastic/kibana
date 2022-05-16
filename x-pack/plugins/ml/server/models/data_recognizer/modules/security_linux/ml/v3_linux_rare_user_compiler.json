@@ -32,6 +32,14 @@
       "time_field": "@timestamp"
     },
     "custom_settings": {
+        "custom_settings": {
+    "job_tags": {
+      "euid": "4018",
+      "maturity": "release",
+      "author": "@randomuserid/Elastic",
+      "version": "3",
+      "updated_date": "5/16/2022"
+  },
       "created_by": "ml-module-security-linux-v3",
       "custom_urls": [
         {

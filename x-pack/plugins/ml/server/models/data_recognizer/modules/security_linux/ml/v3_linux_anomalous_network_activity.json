@@ -32,6 +32,14 @@
     "time_field": "@timestamp"
   },
   "custom_settings": {
+    "custom_settings": {
+    "job_tags": {
+      "euid": "4004",
+      "maturity": "release",
+      "author": "@randomuserid/Elastic",
+      "version": "3",
+      "updated_date": "5/16/2022"
+  },
     "custom_urls": [
       {
         "url_name": "Host Details by process name",
