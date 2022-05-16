@@ -169,7 +169,7 @@ const getPushMonitorsForSuite = async (
   return await savedObjectsClient.find<EncryptedSyntheticsMonitor>({
     type: syntheticsMonitorType,
     page,
-    perPage: 1,
+    perPage: 500,
     filter: getSuiteFilter(projectId),
   });
 };
