@@ -15,16 +15,64 @@ describe('xyVis', () => {
   test('it renders with the specified data and args', async () => {
     const { data, args } = sampleArgs();
     const { layers, ...rest } = args;
+    const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
     const result = await xyVisFunction.fn(
       data,
-      { ...rest, dataLayers: [sampleLayer], referenceLineLayers: [], annotationLayers: [] },
+      { ...rest, ...restLayerArgs, referenceLineLayers: [], annotationLayers: [] },
       createMockExecutionContext()
     );
 
     expect(result).toEqual({
       type: 'render',
       as: XY_VIS,
-      value: { args: { ...rest, layers: [sampleLayer] } },
+      value: {
+        args: {
+          ...rest,
+          layers: [{ layerType, table: data, layerId: 'dataLayers-0', type, ...restLayerArgs }],
+        },
+      },
     });
+  });
+
+  test('it should throw error if splitRowAccessor is pointing to the absent column', async () => {
+    const { data, args } = sampleArgs();
+    const { layers, ...rest } = args;
+    const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
+    const splitRowAccessor = 'absent-accessor';
+
+    expect(
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          referenceLineLayers: [],
+          annotationLayers: [],
+          splitRowAccessor,
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  test('it should throw error if splitColumnAccessor is pointing to the absent column', async () => {
+    const { data, args } = sampleArgs();
+    const { layers, ...rest } = args;
+    const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
+    const splitColumnAccessor = 'absent-accessor';
+
+    expect(
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          referenceLineLayers: [],
+          annotationLayers: [],
+          splitColumnAccessor,
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
   });
 });
