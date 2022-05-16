@@ -6,8 +6,13 @@
  * Side Public License, v 1.
  */
 
+import {
+  Dimension,
+  prepareLogTable,
+  validateAccessor,
+} from '@kbn/visualizations-plugin/common/utils';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { Dimension, prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
 import { LayerTypes, XY_VIS_RENDERER, DATA_LAYER } from '../constants';
 import { appendLayerIds, getAccessors } from '../helpers';
 import { DataLayerConfigResult, XYLayerConfig, XyVisFn, XYArgs } from '../types';
@@ -33,10 +38,13 @@ const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult 
   yConfig: args.yConfig,
   layerType: LayerTypes.DATA,
   table,
-  ...getAccessors(args, table),
+  ...getAccessors<string | ExpressionValueVisDimension, XYArgs>(args, table),
 });
 
 export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
+  validateAccessor(args.splitRowAccessor, data.columns);
+  validateAccessor(args.splitColumnAccessor, data.columns);
+
   const {
     referenceLineLayers = [],
     annotationLayers = [],
@@ -56,6 +64,10 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   } = args;
 
   const dataLayers: DataLayerConfigResult[] = [createDataLayer(args, data)];
+
+  validateAccessor(dataLayers[0].xAccessor, data.columns);
+  validateAccessor(dataLayers[0].splitAccessor, data.columns);
+  dataLayers[0].accessors.forEach((accessor) => validateAccessor(accessor, data.columns));
 
   const layers: XYLayerConfig[] = [
     ...appendLayerIds(dataLayers, 'dataLayers'),

@@ -86,7 +86,11 @@ describe('empty RulesPage', () => {
         },
       ],
     });
-    useFetchRules.mockReturnValue({ rulesState, noData: true });
+    useFetchRules.mockReturnValue({
+      rulesState,
+      noData: true,
+      tagsState: { data: [], error: null },
+    });
     wrapper = mountWithIntl(<RulesPage />);
   }
   it('renders empty screen', async () => {
@@ -138,7 +142,11 @@ describe('empty RulesPage with show only capability', () => {
         ruleTaskTimeout: '1m',
       },
     ];
-    useFetchRules.mockReturnValue({ rulesState, noData: true });
+    useFetchRules.mockReturnValue({
+      rulesState,
+      noData: true,
+      tagsState: { data: [], error: null },
+    });
     useLoadRuleTypes.mockReturnValue({ ruleTypes });
 
     wrapper = mountWithIntl(<RulesPage />);
@@ -352,7 +360,7 @@ describe('RulesPage with items', () => {
       ruleTypes,
       ruleTypeIndex: mockedRuleTypeIndex,
     });
-    useFetchRules.mockReturnValue({ rulesState });
+    useFetchRules.mockReturnValue({ rulesState, tagsState: { data: [], error: null } });
     wrapper = mountWithIntl(<RulesPage />);
     await act(async () => {
       await nextTick();
@@ -509,7 +517,7 @@ describe('RulesPage with items and show only capability', () => {
       error: null,
       totalItemCount: 3,
     };
-    useFetchRules.mockReturnValue({ rulesState });
+    useFetchRules.mockReturnValue({ rulesState, tagsState: { data: [], error: null } });
 
     const mockedRuleTypeIndex = new Map(
       Object.entries({
