@@ -16,6 +16,7 @@ import { useRuleWithFallback } from '../../../detections/containers/detection_en
 import { TestProviders, TestProvidersComponent } from '../../mock';
 import { TimelineId } from '../../../../common/types';
 import { mockBrowserFields } from '../../containers/source/mock';
+import * as i18n from './translations';
 
 jest.mock('../../lib/kibana');
 
@@ -68,7 +69,14 @@ describe('AlertSummaryView', () => {
       </TestProviders>
     );
 
-    ['host.name', 'user.name', 'Rule type', 'query', 'Source event id'].forEach((fieldId) => {
+    [
+      'host.name',
+      'user.name',
+      i18n.RULE_TYPE,
+      'query',
+      i18n.SOURCE_EVENT_ID,
+      i18n.SESSION_ID,
+    ].forEach((fieldId) => {
       expect(getByText(fieldId));
     });
   });
