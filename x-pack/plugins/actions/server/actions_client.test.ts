@@ -115,6 +115,7 @@ beforeEach(() => {
   };
   actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
   actionsClient = new ActionsClient({
+    logger,
     actionTypeRegistry,
     unsecuredSavedObjectsClient,
     scopedClusterClient,
@@ -532,6 +533,7 @@ describe('create()', () => {
 
     actionTypeRegistry = new ActionTypeRegistry(localActionTypeRegistryParams);
     actionsClient = new ActionsClient({
+      logger,
       actionTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
@@ -635,6 +637,7 @@ describe('get()', () => {
 
     test('ensures user is authorised to get preconfigured type of action', async () => {
       actionsClient = new ActionsClient({
+        logger,
         actionTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
@@ -693,6 +696,7 @@ describe('get()', () => {
 
     test('throws when user is not authorised to get preconfigured of action', async () => {
       actionsClient = new ActionsClient({
+        logger,
         actionTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
@@ -813,6 +817,7 @@ describe('get()', () => {
 
   test('return predefined action with id', async () => {
     actionsClient = new ActionsClient({
+      logger,
       actionTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
@@ -886,6 +891,7 @@ describe('getAll()', () => {
       );
 
       actionsClient = new ActionsClient({
+        logger,
         actionTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
@@ -1026,6 +1032,7 @@ describe('getAll()', () => {
     );
 
     actionsClient = new ActionsClient({
+      logger,
       actionTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
@@ -1106,6 +1113,7 @@ describe('getBulk()', () => {
       );
 
       actionsClient = new ActionsClient({
+        logger,
         actionTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
@@ -1240,6 +1248,7 @@ describe('getBulk()', () => {
     );
 
     actionsClient = new ActionsClient({
+      logger,
       actionTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
@@ -1297,6 +1306,7 @@ describe('getOAuthAccessToken()', () => {
     requestBody: OAuthParams
   ): ReturnType<ActionsClient['getOAuthAccessToken']> {
     actionsClient = new ActionsClient({
+      logger,
       actionTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
@@ -1321,7 +1331,7 @@ describe('getOAuthAccessToken()', () => {
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
     });
-    return actionsClient.getOAuthAccessToken(requestBody, logger, configurationUtilities);
+    return actionsClient.getOAuthAccessToken(requestBody, configurationUtilities);
   }
 
   describe('authorization', () => {
@@ -1601,6 +1611,14 @@ describe('delete()', () => {
       await actionsClient.delete({ id: '1' });
       expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledTimes(1);
     });
+
+    test(`failing to delete tokens logs error instead of throw`, async () => {
+      connectorTokenClient.deleteConnectorTokens.mockRejectedValueOnce(new Error('Fail'));
+      await expect(actionsClient.delete({ id: '1' })).resolves.toBeUndefined();
+      expect(logger.error).toHaveBeenCalledWith(
+        `Failed to delete auth tokens for connector "1" after delete: Fail`
+      );
+    });
   });
 
   describe('auditLogger', () => {
@@ -1711,6 +1729,14 @@ describe('update()', () => {
     test(`deletes any existing authorization tokens`, async () => {
       await updateOperation();
       expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledTimes(1);
+    });
+
+    test(`failing to delete tokens logs error instead of throw`, async () => {
+      connectorTokenClient.deleteConnectorTokens.mockRejectedValueOnce(new Error('Fail'));
+      await expect(updateOperation()).resolves.toBeTruthy();
+      expect(logger.error).toHaveBeenCalledWith(
+        `Failed to delete auth tokens for connector "my-action" after update: Fail`
+      );
     });
   });
 
@@ -2314,6 +2340,7 @@ describe('isActionTypeEnabled()', () => {
 describe('isPreconfigured()', () => {
   test('should return true if connector id is in list of preconfigured connectors', () => {
     actionsClient = new ActionsClient({
+      logger,
       actionTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
@@ -2350,6 +2377,7 @@ describe('isPreconfigured()', () => {
 
   test('should return false if connector id is not in list of preconfigured connectors', () => {
     actionsClient = new ActionsClient({
+      logger,
       actionTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
