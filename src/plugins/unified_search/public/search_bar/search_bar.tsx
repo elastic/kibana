@@ -215,15 +215,9 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
   private shouldRenderTimeFilterInSavedQueryForm(): boolean {
     const { dateRangeFrom, dateRangeTo, showDatePicker, indexPatterns } = this.props;
 
-    if (
-      !(
-        showDatePicker ||
-        (!showDatePicker && dateRangeFrom !== undefined && dateRangeTo !== undefined)
-      )
-    )
-      return false;
+    if (!showDatePicker && dateRangeFrom !== undefined && dateRangeTo !== undefined) return false;
 
-    if (indexPatterns !== undefined && indexPatterns?.length > 0) {
+    if (indexPatterns?.length) {
       // return true if at least one of the DateView has timeFieldName
       return indexPatterns.some((dataView) => Boolean(dataView.timeFieldName));
     }
