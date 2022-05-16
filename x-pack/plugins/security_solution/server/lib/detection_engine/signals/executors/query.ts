@@ -39,7 +39,7 @@ export const queryExecutor = async ({
   bulkCreate,
   wrapHits,
 }: {
-  completeRule: CompleteRule<QueryRuleParams | SavedQueryRuleParams>;
+  completeRule: CompleteRule<QueryRuleParams> | CompleteRule<SavedQueryRuleParams>;
   tuple: RuleRangeTuple;
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];

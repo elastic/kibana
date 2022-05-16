@@ -10,14 +10,19 @@ import {
   isQueryRule,
   isThreatMatchRule,
   isThresholdRule,
+  isMlRule,
 } from '../../../../common/detection_engine/utils';
 
 import {
+  MachineLearningRuleParams,
   EqlRuleParams,
   QueryRuleParams,
   ThreatRuleParams,
   ThresholdRuleParams,
 } from './rule_schemas';
+
+export const isMlRuleParams = (obj: unknown): obj is MachineLearningRuleParams =>
+  isMlRule((obj as MachineLearningRuleParams).type);
 
 export const isEqlRuleParams = (obj: unknown): obj is EqlRuleParams =>
   isEqlRule((obj as EqlRuleParams).type);
@@ -30,3 +35,11 @@ export const isThreatRuleParams = (obj: unknown): obj is ThreatRuleParams =>
 
 export const isThresholdRuleParams = (obj: unknown): obj is ThresholdRuleParams =>
   isThresholdRule((obj as ThresholdRuleParams).type);
+
+export const hasDataViewInParams = (
+  obj: unknown
+): obj is EqlRuleParams | QueryRuleParams | ThresholdRuleParams | ThreatRuleParams =>
+  isEqlRuleParams(obj) ||
+  isQueryRuleParams(obj) ||
+  isThreatRuleParams(obj) ||
+  isThresholdRuleParams(obj);

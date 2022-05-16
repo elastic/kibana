@@ -26,8 +26,6 @@ import { useSourcererDataView } from '../../../../../common/containers/sourcerer
 import { useParams } from 'react-router-dom';
 import { mockHistory, Router } from '../../../../../common/mock/router';
 
-import { useKibana } from '../../../../../common/lib/kibana';
-
 import { fillEmptySeverityMappings } from '../helpers';
 
 // Test will fail because we will to need to mock some core services to make the test work

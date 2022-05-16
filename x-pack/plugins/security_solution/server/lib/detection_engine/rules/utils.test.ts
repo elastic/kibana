@@ -111,6 +111,7 @@ describe('utils', () => {
         calculateVersion(true, 1, {
           author: [],
           buildingBlockType: undefined,
+          dataViewId: undefined,
           description: 'some description change',
           eventCategoryOverride: undefined,
           falsePositives: undefined,
@@ -163,6 +164,7 @@ describe('utils', () => {
         calculateVersion(true, 2, {
           author: [],
           buildingBlockType: undefined,
+          dataViewId: undefined,
           description: 'some description change',
           eventCategoryOverride: undefined,
           falsePositives: undefined,
@@ -215,6 +217,7 @@ describe('utils', () => {
         calculateVersion(false, 1, {
           author: [],
           buildingBlockType: undefined,
+          dataViewId: undefined,
           description: 'some description change',
           eventCategoryOverride: undefined,
           falsePositives: undefined,

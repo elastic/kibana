@@ -44,6 +44,7 @@ export const isQueryRule = (ruleType: Type | undefined): boolean =>
   ruleType === 'query' || ruleType === 'saved_query';
 export const isThreatMatchRule = (ruleType: Type | undefined): boolean =>
   ruleType === 'threat_match';
+export const isMlRule = (ruleType: Type | undefined): boolean => ruleType === 'machine_learning';
 
 export const normalizeThresholdField = (
   thresholdField: string | string[] | null | undefined

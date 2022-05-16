@@ -31,7 +31,15 @@ import {
 } from '../../../../common/detection_engine/types';
 import { BuildRuleMessage } from './rule_messages';
 import { ITelemetryEventsSender } from '../../telemetry/sender';
-import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
+import {
+  CompleteRule,
+  QueryRuleParams,
+  MachineLearningRuleParams,
+  ThresholdRuleParams,
+  ThreatRuleParams,
+  RuleParams,
+  SavedQueryRuleParams,
+} from '../schemas/rule_schemas';
 import { GenericBulkCreateResponse } from '../rule_types/factories';
 import { BuildReasonMessage } from './reason_formatters';
 import {
@@ -301,7 +309,12 @@ export interface SearchAfterAndBulkCreateParams {
     from: moment.Moment;
     maxSignals: number;
   };
-  completeRule: CompleteRule<RuleParams>;
+  completeRule:
+    | CompleteRule<QueryRuleParams>
+    | CompleteRule<SavedQueryRuleParams>
+    | CompleteRule<MachineLearningRuleParams>
+    | CompleteRule<ThreatRuleParams>
+    | CompleteRule<ThresholdRuleParams>;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   listClient: ListClient;
   exceptionsList: ExceptionListItemSchema[];

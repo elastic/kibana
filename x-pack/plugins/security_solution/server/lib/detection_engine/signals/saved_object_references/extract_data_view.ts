@@ -9,7 +9,6 @@ import { Logger, SavedObjectReference } from '@kbn/core/server';
 import {
   EqlRuleParams,
   QueryRuleParams,
-  SavedQueryRuleParams,
   ThreatRuleParams,
   ThresholdRuleParams,
 } from '../../schemas/rule_schemas';

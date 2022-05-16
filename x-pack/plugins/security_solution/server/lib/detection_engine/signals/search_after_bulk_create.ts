@@ -22,6 +22,7 @@ import {
 } from './utils';
 import { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
 import { withSecuritySpan } from '../../../utils/with_security_span';
+import { hasDataViewInParams } from '../schemas/utils';
 
 // search_after through documents and re-index using bulk endpoint.
 export const searchAfterAndBulkCreate = async ({
@@ -65,7 +66,9 @@ export const searchAfterAndBulkCreate = async ({
 
     let runtimeMappings = {};
     let kibanaIndexPattern: SavedObject<DataViewAttributes> | null = null;
-    if (ruleParams.dataViewId != null) {
+    // hasDataViewInParams is a typeguard that asserts ruleParams are either
+    // threat match, threshold, eql, or query rule types
+    if (hasDataViewInParams(ruleParams) && ruleParams.dataViewId != null) {
       kibanaIndexPattern = await services.savedObjectsClient.get<DataViewAttributes>(
         'index-pattern',
         ruleParams.dataViewId
@@ -86,7 +89,9 @@ export const searchAfterAndBulkCreate = async ({
             searchAfterSortIds: sortIds,
             // TODO: use a kibana config key for determining whether to default to dataview or inputIndexPattern
             index:
-              ruleParams.dataViewId != null && kibanaIndexPattern != null // default to data view id if present on rule definition.
+              hasDataViewInParams(ruleParams) &&
+              ruleParams.dataViewId != null &&
+              kibanaIndexPattern != null // default to data view id if present on rule definition.
                 ? kibanaIndexPattern.attributes.title.split(',')
                 : inputIndexPattern,
             runtimeMappings,

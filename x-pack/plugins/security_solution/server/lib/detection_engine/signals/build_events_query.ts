@@ -231,7 +231,7 @@ export const buildEqlSearchRequest = (
         },
       },
       // TODO: ensure null / undefined runtimeMappings doesn't blow anything up
-      runtime_mappings: runtimeMappings,
+      runtime_mappings: runtimeMappings ?? {},
       event_category_field: eventCategoryOverride,
       fields,
     },

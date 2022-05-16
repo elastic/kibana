@@ -14,7 +14,7 @@ import {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { DataViewAttributes, SavedObject } from '@kbn/data-views-plugin/common';
+import { DataViewAttributes } from '@kbn/data-views-plugin/common';
 
 import { buildEqlSearchRequest } from '../build_events_query';
 import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';

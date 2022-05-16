@@ -15,13 +15,11 @@ import {
   EuiRadioGroup,
 } from '@elastic/eui';
 import React, { FC, memo, useCallback, useState, useEffect, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
 
 import styled from 'styled-components';
 import { isEqual } from 'lodash';
 
-import { DataViewListItem } from '@kbn/data-views-plugin/common';
-import { DataViewBase } from '@kbn/es-query';
+import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import {
   DEFAULT_INDEX_KEY,
   DEFAULT_THREAT_INDEX_KEY,
@@ -29,11 +27,10 @@ import {
 } from '../../../../../common/constants';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { getScopeFromPath, useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
-import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
+import { useUiSetting$ } from '../../../../common/lib/kibana';
 import { filterRuleFieldsForType } from '../../../pages/detection_engine/rules/create/helpers';
 import {
   DefineStepRule,
@@ -71,10 +68,6 @@ import { ThreatMatchInput } from '../threatmatch_input';
 import { BrowserField, BrowserFields, useFetchIndex } from '../../../../common/containers/source';
 import { RulePreview } from '../rule_preview';
 import { getIsRulePreviewDisabled } from '../rule_preview/helpers';
-import { Sourcerer } from '../../../../common/components/sourcerer';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { sourcererSelectors } from '../../../../common/store/sourcerer';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -156,9 +149,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   kibanaDataViews,
 }) => {
   const dataViewRadioButtonId = 'dataView';
-  const { data } = useKibana().services;
-  const { pathname } = useLocation();
-  const sourcererPathName = getScopeFromPath(pathname);
 
   // const {
   //   // browserFields,
@@ -240,11 +230,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   // TODO: update the logic for browserField stuff.
   // if 'index' is selected, use these browser fields
   // otherwise use the dataview browserfields
-  const [
-    initIsIndexPatternLoading,
-    { browserFields, indexPatterns: initIndexPattern },
-    indexFieldsSearch,
-  ] = useFetchIndex(index, false);
+  const [initIsIndexPatternLoading, { browserFields, indexPatterns: initIndexPattern }] =
+    useFetchIndex(index, false);
 
   const [indexPattern, setIndexPattern] = useState<DataViewBase>(initIndexPattern);
   const [isIndexPatternLoading, setIsIndexPatternLoading] = useState(initIsIndexPatternLoading);
@@ -295,7 +282,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     setRadioIdSelected(optionId);
   };
 
-  const [aggFields, setAggregatableFields] = useState([]);
+  const [aggFields, setAggregatableFields] = useState<DataViewFieldBase[]>([]);
 
   useEffect(() => {
     const { fields } = indexPattern;

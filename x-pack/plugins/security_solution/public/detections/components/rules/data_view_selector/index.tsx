@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { DataViewBase } from '@kbn/es-query';
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import * as i18n from './translations';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -18,7 +19,7 @@ interface DataViewSelectorProps {
   kibanaDataViews: { [x: string]: DataViewListItem };
   field: FieldHook;
   dataViewId?: string;
-  setIndexPattern: (indexPattern: DataView) => void;
+  setIndexPattern: (indexPattern: DataViewBase) => void;
   setIsIndexPatternLoading: (b: boolean) => void;
 }
 
