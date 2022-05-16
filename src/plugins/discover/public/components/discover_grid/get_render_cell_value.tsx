@@ -184,12 +184,13 @@ function renderPopoverContent({
 }) {
   const closeButton = (
     <EuiButtonIcon
-      iconType="cross"
       aria-label={i18n.translate('discover.grid.closePopover', {
         defaultMessage: `Close popover`,
       })}
-      size="xs"
+      data-test-subj="docTableClosePopover"
       iconSize="s"
+      iconType="cross"
+      size="xs"
       onClick={closePopover}
     />
   );

@@ -8,24 +8,28 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { findTestSubject } from '@elastic/eui/lib/test';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { getRenderCellValueFn } from './get_render_cell_value';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { flattenHit } from '@kbn/data-plugin/public';
 import { ElasticSearchHit } from '../../types';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+
+const mockServices = {
+  uiSettings: {
+    get: (key: string) => key === 'discover:maxDocFieldsDisplayed' && 200,
+  },
+  fieldFormats: {
+    getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => (value ? value : '-') })),
+  },
+};
 
 jest.mock('../../utils/use_discover_services', () => {
-  const services = {
-    uiSettings: {
-      get: (key: string) => key === 'discover:maxDocFieldsDisplayed' && 200,
-    },
-    fieldFormats: {
-      getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => (value ? value : '-') })),
-    },
-  };
   const originalModule = jest.requireActual('../../utils/use_discover_services');
   return {
     ...originalModule,
-    useDiscoverServices: () => services,
+    useDiscoverServices: () => mockServices,
   };
 });
 
@@ -120,11 +124,12 @@ describe('Discover grid cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div class=\\"euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive\\"><div class=\\"euiFlexItem\\"><span class=\\"dscDiscoverGrid__cellPopoverValue\\">100</span></div><div class=\\"euiFlexItem euiFlexItem--flexGrowZero\\"><button class=\\"euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall\\" type=\\"button\\" aria-label=\\"Close popover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
+      `"<div class=\\"euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive\\"><div class=\\"euiFlexItem\\"><span class=\\"dscDiscoverGrid__cellPopoverValue\\">100</span></div><div class=\\"euiFlexItem euiFlexItem--flexGrowZero\\"><button class=\\"euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
     );
   });
 
   it('renders bytes column correctly using fields when details is true', () => {
+    const closePopoverMockFn = jest.fn();
     const DiscoverGridCellValue = getRenderCellValueFn(
       indexPatternMock,
       rowsFields,
@@ -132,9 +137,9 @@ describe('Discover grid cell rendering', function () {
       false,
       [],
       100,
-      jest.fn()
+      closePopoverMockFn
     );
-    const component = shallow(
+    const component = mountWithIntl(
       <DiscoverGridCellValue
         rowIndex={0}
         colIndex={0}
@@ -146,8 +151,10 @@ describe('Discover grid cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div class=\\"euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive\\"><div class=\\"euiFlexItem\\"><span class=\\"dscDiscoverGrid__cellPopoverValue\\">100</span></div><div class=\\"euiFlexItem euiFlexItem--flexGrowZero\\"><button class=\\"euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall\\" type=\\"button\\" aria-label=\\"Close popover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
+      `"<div class=\\"euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive\\"><div class=\\"euiFlexItem\\"><span class=\\"dscDiscoverGrid__cellPopoverValue\\">100</span></div><div class=\\"euiFlexItem euiFlexItem--flexGrowZero\\"><button class=\\"euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
     );
+    findTestSubject(component, 'docTableClosePopover').simulate('click');
+    expect(closePopoverMockFn).toHaveBeenCalledTimes(1);
   });
 
   it('renders _source column correctly', () => {
@@ -264,6 +271,7 @@ describe('Discover grid cell rendering', function () {
             >
               <EuiButtonIcon
                 aria-label="Close popover"
+                data-test-subj="docTableClosePopover"
                 iconSize="s"
                 iconType="cross"
                 onClick={[MockFunction]}
@@ -496,6 +504,7 @@ describe('Discover grid cell rendering', function () {
             >
               <EuiButtonIcon
                 aria-label="Close popover"
+                data-test-subj="docTableClosePopover"
                 iconSize="s"
                 iconType="cross"
                 onClick={[MockFunction]}
@@ -621,6 +630,7 @@ describe('Discover grid cell rendering', function () {
   });
 
   it('collect object fields and renders them as json in details', () => {
+    const closePopoverMockFn = jest.fn();
     const DiscoverGridCellValue = getRenderCellValueFn(
       indexPatternMock,
       rowsFieldsWithTopLevelObject,
@@ -628,7 +638,7 @@ describe('Discover grid cell rendering', function () {
       true,
       [],
       100,
-      jest.fn()
+      closePopoverMockFn
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -659,6 +669,7 @@ describe('Discover grid cell rendering', function () {
             >
               <EuiButtonIcon
                 aria-label="Close popover"
+                data-test-subj="docTableClosePopover"
                 iconSize="s"
                 iconType="cross"
                 onClick={[MockFunction]}
@@ -682,6 +693,35 @@ describe('Discover grid cell rendering', function () {
         </EuiFlexItem>
       </EuiFlexGroup>
     `);
+  });
+
+  it('renders a functional close button when CodeEditor is rendered', () => {
+    const closePopoverMockFn = jest.fn();
+    const DiscoverGridCellValue = getRenderCellValueFn(
+      indexPatternMock,
+      rowsFieldsWithTopLevelObject,
+      rowsFieldsWithTopLevelObject.map(flatten),
+      true,
+      [],
+      100,
+      closePopoverMockFn
+    );
+    const component = mountWithIntl(
+      <KibanaContextProvider services={mockServices}>
+        <DiscoverGridCellValue
+          rowIndex={0}
+          colIndex={0}
+          columnId="object"
+          isDetails={true}
+          isExpanded={false}
+          isExpandable={true}
+          setCellProps={jest.fn()}
+        />
+      </KibanaContextProvider>
+    );
+    const gridSelectionBtn = findTestSubject(component, 'docTableClosePopover');
+    gridSelectionBtn.simulate('click');
+    expect(closePopoverMockFn).toHaveBeenCalledTimes(1);
   });
 
   it('does not collect subfields when the the column is unmapped but part of fields response', () => {
@@ -852,6 +892,7 @@ describe('Discover grid cell rendering', function () {
         >
           <EuiButtonIcon
             aria-label="Close popover"
+            data-test-subj="docTableClosePopover"
             iconSize="s"
             iconType="cross"
             onClick={[MockFunction]}
