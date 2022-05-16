@@ -27,7 +27,6 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
   'kibana.alert.rule.category': true,
   'kibana.alert.rule.consumer': true,
   'kibana.alert.rule.created_at': true,
-  'kibana.alert.rule.description': true,
   'kibana.alert.rule.enabled': true,
   'kibana.alert.rule.exceptions_list': true,
   'kibana.alert.rule.execution.uuid': true,
@@ -276,7 +275,26 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     },
   },
   // winlog
-  winlog: true,
+  winlog: {
+    api: true,
+    channel: true,
+    event_data: true,
+    event_id: true,
+    keywords: true,
+    logon: true,
+    opcode: true,
+    process: true,
+    provider_guid: true,
+    provider_name: true,
+    record_id: true,
+    task: true,
+    user: {
+      identifier: true,
+      domain: true,
+      type: true
+    },
+    version: true,
+  },
   // ml signal fields
   influencers: true,
   signal: {
