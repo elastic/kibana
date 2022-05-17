@@ -40,17 +40,18 @@ type NormalizedPublicFields = Omit<
   | ConfigKey.PORT
   | ConfigKey.URLS
   | ConfigKey.ENABLED // should we allow enabled?
-  | ConfigKey.NAMESPACE // should we allow namespace?
 >;
 
 export const normalizePushedMonitor = ({
   locations = [],
   monitor,
   projectId,
+  namespace,
 }: {
   locations: Locations;
   monitor: PushBrowserMonitor;
   projectId: string;
+  namespace: string;
 }): BrowserFields => {
   const defaultFields = DEFAULT_FIELDS[DataStream.BROWSER];
   const normalizedFields: NormalizedPublicFields = {
@@ -95,6 +96,9 @@ export const normalizePushedMonitor = ({
       : defaultFields[ConfigKey.PARAMS],
     [ConfigKey.JOURNEY_FILTERS_MATCH]:
       monitor.filter?.match || defaultFields[ConfigKey.JOURNEY_FILTERS_MATCH],
+    [ConfigKey.NAMESPACE]: namespace || defaultFields[ConfigKey.NAMESPACE],
+    [ConfigKey.ORIGINAL_SPACE]: namespace || defaultFields[ConfigKey.ORIGINAL_SPACE],
+    [ConfigKey.CUSTOM_HEARTBEAT_ID]: `${monitor.id}-${projectId}-${namespace}`,
   };
   return {
     ...DEFAULT_FIELDS[DataStream.BROWSER],
@@ -106,12 +110,14 @@ export const normalizePushedMonitors = ({
   locations = [],
   monitors = [],
   projectId,
+  namespace,
 }: {
   locations: Locations;
   monitors: PushBrowserMonitor[];
   projectId: string;
+  namespace: string;
 }) => {
   return monitors.map((monitor) => {
-    return normalizePushedMonitor({ monitor, locations, projectId });
+    return normalizePushedMonitor({ monitor, locations, projectId, namespace });
   });
 };

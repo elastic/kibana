@@ -401,7 +401,7 @@ export class SyntheticsService {
     return (monitors ?? []).map((monitor) => {
       const attributes = monitor.attributes as unknown as MonitorFields;
       const pushBrowserMonitorId = attributes[ConfigKey.IS_PUSH_MONITOR]
-        ? `${attributes[ConfigKey.JOURNEY_ID]}-${attributes[ConfigKey.PROJECT_ID]}`
+        ? attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
         : undefined;
       return {
         ...normalizeSecrets(monitor).attributes,

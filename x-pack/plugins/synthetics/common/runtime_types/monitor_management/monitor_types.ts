@@ -212,6 +212,8 @@ export const EncryptedBrowserSimpleFieldsCodec = t.intersection([
       [ConfigKey.JOURNEY_ID]: t.string,
       [ConfigKey.PROJECT_ID]: t.string,
       [ConfigKey.IS_PUSH_MONITOR]: t.boolean,
+      [ConfigKey.ORIGINAL_SPACE]: t.string,
+      [ConfigKey.CUSTOM_HEARTBEAT_ID]: t.string,
     }),
   ]),
   ZipUrlTLSFieldsCodec,

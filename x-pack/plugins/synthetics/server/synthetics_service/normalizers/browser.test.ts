@@ -95,7 +95,12 @@ describe('browser normalizers', () => {
     ];
 
     it('properly normalizes browser monitor', () => {
-      const actual = normalizePushedMonitors({ locations, monitors, projectId });
+      const actual = normalizePushedMonitors({
+        locations,
+        monitors,
+        projectId,
+        namespace: 'test-space',
+      });
       expect(actual).toEqual([
         {
           ...DEFAULT_FIELDS[DataStream.BROWSER],

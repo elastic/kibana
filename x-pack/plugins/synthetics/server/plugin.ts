@@ -84,6 +84,7 @@ export class Plugin implements PluginType {
       logger: this.logger,
       telemetry: this.telemetryEventsSender,
       isDev: this.initContext.env.mode.dev,
+      spaces: plugins.spaces,
     } as UptimeServerSetup;
 
     if (this.server.config.service) {

@@ -6,7 +6,7 @@
  */
 import uuid from 'uuid';
 import expect from '@kbn/expect';
-import { PushMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
+import { ConfigKey, PushMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -396,7 +396,13 @@ export default function ({ getService }: FtrProviderContext) {
             return deleteMonitor(monitor.id, pushMonitors.project, 'default', username, password);
           }),
         ]);
-        await deleteMonitor(pushMonitors.monitors[0].id, pushMonitors.project, username, password);
+        await deleteMonitor(
+          pushMonitors.monitors[0].id,
+          pushMonitors.project,
+          SPACE_ID,
+          username,
+          password
+        );
         await security.user.delete(username);
         await security.role.delete(roleName);
       }
@@ -550,6 +556,116 @@ export default function ({ getService }: FtrProviderContext) {
             return deleteMonitor(monitor.id, pushMonitors.project);
           }),
         ]);
+      }
+    });
+
+    it('push monitors - saves space as data stream namespace', async () => {
+      const username = 'admin';
+      const roleName = `synthetics_admin`;
+      const password = `${username}-password`;
+      const SPACE_ID = `test-space-${uuid.v4()}`;
+      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
+      try {
+        await security.role.create(roleName, {
+          kibana: [
+            {
+              feature: {
+                uptime: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+        await security.user.create(username, {
+          password,
+          roles: [roleName],
+          full_name: 'a kibana user',
+        });
+        await supertest
+          .put(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS_PUSH}`)
+          .auth(username, password)
+          .set('kbn-xsrf', 'true')
+          .send(pushMonitors)
+          .expect(200);
+        // expect monitor not to have been deleted
+        const getResponse = await supertest
+          .get(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}`)
+          .auth(username, password)
+          .query({
+            query: `${syntheticsMonitorType}.attributes.journey_id: ${pushMonitors.monitors[0].id}`,
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+        const { monitors } = getResponse.body;
+        expect(monitors.length).eql(1);
+        expect(monitors[0].attributes[ConfigKey.NAMESPACE]).eql(SPACE_ID);
+      } finally {
+        await deleteMonitor(
+          pushMonitors.monitors[0].id,
+          pushMonitors.project,
+          SPACE_ID,
+          username,
+          password
+        );
+        await security.user.delete(username);
+        await security.role.delete(roleName);
+      }
+    });
+
+    it('push monitors - formats custom id appropriately', async () => {
+      const username = 'admin';
+      const roleName = `synthetics_admin`;
+      const password = `${username}-password`;
+      const SPACE_ID = `test-space-${uuid.v4()}`;
+      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
+      try {
+        await security.role.create(roleName, {
+          kibana: [
+            {
+              feature: {
+                uptime: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+        await security.user.create(username, {
+          password,
+          roles: [roleName],
+          full_name: 'a kibana user',
+        });
+        await supertest
+          .put(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS_PUSH}`)
+          .auth(username, password)
+          .set('kbn-xsrf', 'true')
+          .send(pushMonitors)
+          .expect(200);
+        // expect monitor not to have been deleted
+        const getResponse = await supertest
+          .get(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}`)
+          .auth(username, password)
+          .query({
+            query: `${syntheticsMonitorType}.attributes.journey_id: ${pushMonitors.monitors[0].id}`,
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+        const { monitors } = getResponse.body;
+        expect(monitors.length).eql(1);
+        expect(monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]).eql(
+          `${pushMonitors.monitors[0].id}-${pushMonitors.project}-${SPACE_ID}`
+        );
+      } finally {
+        await deleteMonitor(
+          pushMonitors.monitors[0].id,
+          pushMonitors.project,
+          SPACE_ID,
+          username,
+          password
+        );
+        await security.user.delete(username);
+        await security.role.delete(roleName);
       }
     });
   });

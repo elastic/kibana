@@ -8,6 +8,7 @@
 // values must match keys in the integration package
 export enum ConfigKey {
   APM_SERVICE_NAME = 'service.name',
+  CUSTOM_HEARTBEAT_ID = 'custom_heartbeat_id',
   ENABLED = 'enabled',
   HOSTS = 'hosts',
   IGNORE_HTTPS_ERRORS = 'ignore_https_errors',
@@ -24,6 +25,7 @@ export enum ConfigKey {
   PARAMS = 'params',
   PASSWORD = 'password',
   PLAYWRIGHT_OPTIONS = 'playwright_options',
+  ORIGINAL_SPACE = 'original_space', // the original space the montior was saved in. Used by push monitors to ensure uniqueness of monitor id sent to heartbeat and prevent data collisions
   PORT = 'url.port',
   PROXY_URL = 'proxy_url',
   PROXY_USE_LOCAL_RESOLVER = 'proxy_use_local_resolver',

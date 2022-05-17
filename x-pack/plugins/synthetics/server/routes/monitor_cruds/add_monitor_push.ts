@@ -25,12 +25,14 @@ export const addPublicSyntheticsMonitorRoute: UMRestApiRouteFactory = (libs: UMS
   },
   handler: async ({ request, response, savedObjectsClient, server }): Promise<any> => {
     const monitors = (request.body?.monitors as PushBrowserMonitor[]) || [];
+    const spaceId = server.spaces.spacesService.getSpaceId(request);
     const { keep_stale: keepStale, project: projectId } = request.body || {};
     const locations: Locations = (await getServiceLocations(server)).locations;
     const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
     const pushMonitorFormatter = new PushMonitorFormatter({
       projectId,
+      spaceId,
       keepStale,
       locations,
       encryptedSavedObjectsClient,

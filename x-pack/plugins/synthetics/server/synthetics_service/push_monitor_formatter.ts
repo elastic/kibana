@@ -43,6 +43,7 @@ type FailedMonitors = Array<{ id: string; reason: string; details: string; paylo
 
 export class PushMonitorFormatter {
   private projectId: string;
+  private spaceId: string;
   private keepStale: boolean;
   private locations: Locations;
   private savedObjectsClient: SavedObjectsClientContract;
@@ -64,6 +65,7 @@ export class PushMonitorFormatter {
     savedObjectsClient,
     encryptedSavedObjectsClient,
     projectId,
+    spaceId,
     monitors,
     server,
   }: {
@@ -72,10 +74,12 @@ export class PushMonitorFormatter {
     savedObjectsClient: SavedObjectsClientContract;
     encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
     projectId: string;
+    spaceId: string;
     monitors: PushBrowserMonitor[];
     server: UptimeServerSetup;
   }) {
     this.projectId = projectId;
+    this.spaceId = spaceId;
     this.locations = locations;
     this.keepStale = keepStale;
     this.savedObjectsClient = savedObjectsClient;
@@ -105,6 +109,7 @@ export class PushMonitorFormatter {
         locations: this.locations,
         monitor,
         projectId: this.projectId,
+        namespace: this.spaceId,
       });
 
       const validationResult = validatePushMonitor(monitor, this.projectId);
