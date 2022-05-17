@@ -47,11 +47,12 @@ describe('CspDirectives', () => {
       directives.addDirectiveValue('style-src', 'strict-dynamic');
       directives.addDirectiveValue('style-src', 'report-sample');
       directives.addDirectiveValue('style-src', 'unsafe-inline');
+      directives.addDirectiveValue('style-src', 'unsafe-eval');
       directives.addDirectiveValue('style-src', 'unsafe-hashes');
       directives.addDirectiveValue('style-src', 'unsafe-allow-redirects');
 
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"style-src 'none' 'self' 'strict-dynamic' 'report-sample' 'unsafe-inline' 'unsafe-hashes' 'unsafe-allow-redirects'"`
+        `"style-src 'none' 'self' 'strict-dynamic' 'report-sample' 'unsafe-inline' 'unsafe-eval' 'unsafe-hashes' 'unsafe-allow-redirects'"`
       );
     });
 
@@ -62,11 +63,12 @@ describe('CspDirectives', () => {
       directives.addDirectiveValue('style-src', `'strict-dynamic'`);
       directives.addDirectiveValue('style-src', `'report-sample'`);
       directives.addDirectiveValue('style-src', `'unsafe-inline'`);
+      directives.addDirectiveValue('style-src', `'unsafe-eval'`);
       directives.addDirectiveValue('style-src', `'unsafe-hashes'`);
       directives.addDirectiveValue('style-src', `'unsafe-allow-redirects'`);
 
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"style-src 'none' 'self' 'strict-dynamic' 'report-sample' 'unsafe-inline' 'unsafe-hashes' 'unsafe-allow-redirects'"`
+        `"style-src 'none' 'self' 'strict-dynamic' 'report-sample' 'unsafe-inline' 'unsafe-eval' 'unsafe-hashes' 'unsafe-allow-redirects'"`
       );
     });
   });

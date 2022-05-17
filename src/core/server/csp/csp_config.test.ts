@@ -8,6 +8,7 @@
 
 import { CspConfig } from './csp_config';
 import { config as cspConfig, CspConfigType } from './config';
+import { mockConfig, mockUnsafeEvalDefaultValue } from './csp_config.test.mocks';
 
 // CSP rules aren't strictly additive, so any change can potentially expand or
 // restrict the policy in a way we consider a breaking change. For that reason,
@@ -115,9 +116,6 @@ describe('CspConfig', () => {
     });
 
     describe('unsafe_eval', () => {
-      const isKibanaDistributable =
-        require('../../../../package.json').build?.distributable === true; // eslint-disable-line @typescript-eslint/no-var-requires
-
       test('when "unsafe_eval" is set to `false`, the `unsafe-eval` CSP should not be set', () => {
         const config = new CspConfig({
           ...defaultConfig,
@@ -142,29 +140,24 @@ describe('CspConfig', () => {
         );
       });
 
-      if (isKibanaDistributable) {
-        test('in a distributable, when "unsafe_eval" is not set, the `unsafe-eval` CSP should be set', () => {
-          const config = new CspConfig({
-            ...defaultConfig,
-            script_src: ['foo', 'bar'],
-          });
+      test('when "unsafe_eval" is not set, the `unsafe-eval` CSP should be set according to the default value', () => {
+        // The default value for `unsafe_eval` depends on whether Kibana is a distributable or not.
+        // To test both scenarios, we mock the config to randomly change the default value.
+        const mockedConfig = mockConfig.create().schema.validate({});
 
-          expect(config.header).toEqual(
-            `script-src 'self' 'unsafe-eval' foo bar; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
-          );
+        const config = new CspConfig({
+          ...mockedConfig,
+          script_src: ['foo', 'bar'],
         });
-      } else {
-        test('not in a distributable, when "unsafe_eval" is not set, the `unsafe-eval` CSP should be not set', () => {
-          const config = new CspConfig({
-            ...defaultConfig,
-            script_src: ['foo', 'bar'],
-          });
 
-          expect(config.header).toEqual(
-            `script-src 'self' foo bar; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
-          );
-        });
-      }
+        expect(config.header).toEqual(
+          mockUnsafeEvalDefaultValue === true
+            ? `script-src 'self' 'unsafe-eval' foo bar; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+            : `script-src 'self' foo bar; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+        );
+
+        mockConfig.reset();
+      });
     });
 
     describe('allows "disableEmbedding" to be set', () => {
