@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import {getDataPath} from '@kbn/utils';
-import {spawn} from 'child_process';
+import { getDataPath } from '@kbn/utils';
+import { spawn } from 'child_process';
 import del from 'del';
 import fs from 'fs';
-import {uniq} from 'lodash';
+import { uniq } from 'lodash';
 import path from 'path';
-import puppeteer, {Browser, ConsoleMessage, HTTPRequest, Page, Viewport} from 'puppeteer';
-import {createInterface} from 'readline';
+import puppeteer, { Browser, ConsoleMessage, HTTPRequest, Page, Viewport } from 'puppeteer';
+import { createInterface } from 'readline';
 import * as Rx from 'rxjs';
-import {InnerSubscriber} from 'rxjs/internal/InnerSubscriber';
+import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 import {
   catchError,
   concatMap,
@@ -23,16 +23,16 @@ import {
   mergeMap,
   reduce,
   takeUntil,
-  tap
+  tap,
 } from 'rxjs/operators';
-import type {Logger} from 'src/core/server';
-import type {ScreenshotModePluginSetup} from 'src/plugins/screenshot_mode/server';
-import {getChromiumDisconnectedError} from '../';
-import {ConfigType} from '../../../config';
-import {safeChildProcess} from '../../safe_child_process';
-import {HeadlessChromiumDriver} from '../driver';
-import {args} from './args';
-import {getMetrics, PerformanceMetrics} from './metrics';
+import type { Logger } from 'src/core/server';
+import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
+import { getChromiumDisconnectedError } from '../';
+import { ConfigType } from '../../../config';
+import { safeChildProcess } from '../../safe_child_process';
+import { HeadlessChromiumDriver } from '../driver';
+import { args } from './args';
+import { getMetrics, PerformanceMetrics } from './metrics';
 
 interface CreatePageOptions {
   browserTimezone?: string;
@@ -444,5 +444,4 @@ export class HeadlessChromiumDriverFactory {
   }
 }
 
-export type {PerformanceMetrics};
-
+export type { PerformanceMetrics };
