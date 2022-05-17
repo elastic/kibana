@@ -94,11 +94,6 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
       if (!hasUserDataView || !hasEsData) {
         setShowNoDataPage(true);
       }
-
-      const defaultDataView = await dataViews.getDefaultDataView();
-      if (!defaultDataView) {
-        setShowNoDataPage(true);
-      }
     };
 
     // call the function
