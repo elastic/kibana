@@ -8,6 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { isValidInterval } from '@kbn/data-plugin/common';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { AxisExtentModes, ValueLabelModes } from '../constants';
 import {
   SeriesType,
@@ -131,7 +132,7 @@ export const validateValueLabels = (
 };
 
 export const validateMarkSizeForChartType = (
-  markSizeAccessor: string | undefined,
+  markSizeAccessor: ExpressionValueVisDimension | string | undefined,
   seriesType: SeriesType
 ) => {
   if (markSizeAccessor && !seriesType.includes('line') && !seriesType.includes('area')) {

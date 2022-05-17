@@ -299,8 +299,13 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     : undefined;
   const splitFormatter = formatFactory(splitHint);
 
-  const markSizeColumn = table?.columns.find((col) => col.id === markSizeAccessor);
-  const markFormatter = formatFactory(markSizeColumn?.meta?.params);
+  const markSizeColumnId = markSizeAccessor
+    ? getAccessorByDimension(markSizeAccessor, table.columns)
+    : undefined;
+
+  const markFormatter = formatFactory(
+    markSizeAccessor ? getFormat(table.columns, markSizeAccessor) : undefined
+  );
 
   // what if row values are not primitive? That is the case of, for instance, Ranges
   // remaps them to their serialized version with the formatHint metadata
@@ -334,7 +339,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     id: splitColumnId ? `${splitColumnId}-${accessor}` : accessor,
     xAccessor: xColumnId || 'unifiedX',
     yAccessors: [accessor],
-    markSizeAccessor: markSizeColumn ? markSizeColumn.id : undefined,
+    markSizeAccessor: markSizeColumnId,
     markFormat: (value) => markFormatter.convert(value),
     data: rows,
     xScaleType: xColumnId ? layer.xScaleType : 'ordinal',
@@ -356,14 +361,14 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     stackMode: isPercentage ? StackMode.Percentage : undefined,
     timeZone,
     areaSeriesStyle: {
-      point: getPointConfig(xColumnId, markSizeColumn?.id, emphasizeFitting),
+      point: getPointConfig(xColumnId, markSizeColumnId, emphasizeFitting),
       ...(fillOpacity && { area: { opacity: fillOpacity } }),
       ...(emphasizeFitting && {
         fit: { area: { opacity: fillOpacity || 0.5 }, line: getLineConfig() },
       }),
     },
     lineSeriesStyle: {
-      point: getPointConfig(xColumnId, markSizeColumn?.id, emphasizeFitting),
+      point: getPointConfig(xColumnId, markSizeColumnId, emphasizeFitting),
       ...(emphasizeFitting && { fit: { line: getLineConfig() } }),
     },
     name(d) {

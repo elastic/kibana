@@ -100,7 +100,7 @@ export interface DataLayerArgs {
   xAccessor?: string | ExpressionValueVisDimension;
   hide?: boolean;
   splitAccessor?: string | ExpressionValueVisDimension;
-  markSizeAccessor?: string;
+  markSizeAccessor?: string | ExpressionValueVisDimension;
   columnToLabel?: string; // Actually a JSON key-value pair
   xScaleType: XScaleType;
   isHistogram: boolean;

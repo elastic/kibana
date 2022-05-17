@@ -26,6 +26,7 @@ import {
   validateMarkSizeRatioLimits,
   validateValueLabels,
   validateMinTimeBarInterval,
+  validateMarkSizeForChartType,
 } from './validate';
 
 const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult => {
@@ -42,6 +43,7 @@ const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult 
     yConfig: args.yConfig,
     layerType: LayerTypes.DATA,
     table: normalizedTable,
+    markSizeAccessor: args.markSizeAccessor,
     ...accessors,
   };
 };
@@ -64,6 +66,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
     isHistogram,
     yConfig,
     palette,
+    markSizeAccessor,
     ...restArgs
   } = args;
 
@@ -72,6 +75,9 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   validateAccessor(dataLayers[0].xAccessor, data.columns);
   validateAccessor(dataLayers[0].splitAccessor, data.columns);
   dataLayers[0].accessors.forEach((accessor) => validateAccessor(accessor, data.columns));
+
+  validateMarkSizeForChartType(dataLayers[0].markSizeAccessor, args.seriesType);
+  validateAccessor(dataLayers[0].markSizeAccessor, data.columns);
 
   const layers: XYLayerConfig[] = [
     ...appendLayerIds(dataLayers, 'dataLayers'),
