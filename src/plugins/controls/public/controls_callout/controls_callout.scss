@@ -23,7 +23,7 @@
       }
     }
     @include euiBreakpoint('xs', 's') {
-      min-height: $euiSize * 3.5;
+      min-height: $euiSizeS * 6;
 
       .emptyStateText {
         padding-left: 0;
