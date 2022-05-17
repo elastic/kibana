@@ -130,7 +130,7 @@ export const links: LinkItem = {
       id: SecurityPageName.eventFilters,
       title: EVENT_FILTERS,
       description: i18n.translate('xpack.securitySolution.appLinks.eventFiltersDescription', {
-        defaultMessage: 'Exclude unwanted applications from running on your hosts.',
+        defaultMessage: 'Exclude high volume or unwanted events being written into Elasticsearch.',
       }),
       landingIcon: IconEventFilters,
       path: EVENT_FILTERS_PATH,
@@ -150,7 +150,7 @@ export const links: LinkItem = {
       id: SecurityPageName.blocklist,
       title: BLOCKLIST,
       description: i18n.translate('xpack.securitySolution.appLinks.blocklistDescription', {
-        defaultMessage: 'Exclude high volume or unwanted events being written into Elasticsearch.',
+        defaultMessage: 'Exclude unwanted applications from running on your hosts.',
       }),
       landingIcon: IconBlocklist,
       path: BLOCKLIST_PATH,
