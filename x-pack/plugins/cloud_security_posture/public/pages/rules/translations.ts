@@ -39,9 +39,12 @@ export const SECTION = i18n.translate('xpack.csp.rules.rulesTable.rulesTableColu
   defaultMessage: 'Section',
 });
 
-export const CIS_SECTION = i18n.translate('xpack.csp.rules.rulesTable.rulesTableColumn.sectionLabel', {
-  defaultMessage: 'CIS Section',
-});
+export const CIS_SECTION = i18n.translate(
+  'xpack.csp.rules.rulesTable.rulesTableColumn.sectionLabel',
+  {
+    defaultMessage: 'CIS Section',
+  }
+);
 
 export const LAST_MODIFIED = i18n.translate(
   'xpack.csp.rules.rulesTable.rulesTableColumn.lastModifiedLabel',
