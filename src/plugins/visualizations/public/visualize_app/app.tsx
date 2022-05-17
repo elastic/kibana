@@ -18,7 +18,7 @@ import {
   AnalyticsNoDataPageKibanaProvider,
   AnalyticsNoDataPage,
 } from '@kbn/shared-ux-page-analytics-no-data';
-import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { VisualizeServices } from './types';
 import {
   VisualizeEditor,
@@ -71,8 +71,7 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const onDataViewCreated = useCallback(async (dataView: unknown) => {
-    const dataViewId = (dataView as DataView).id;
-    if (dataViewId) {
+    if (dataView) {
       setShowNoDataPage(false);
     }
   }, []);
