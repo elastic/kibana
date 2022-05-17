@@ -1,0 +1,53 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import React from 'react';
+import styled from 'styled-components';
+
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiBottomBar, EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } from '@elastic/eui';
+
+const CenteredRoundedBottomBar = styled(EuiBottomBar)`
+  max-width: 820px;
+  margin: 0 auto;
+  border-radius: 8px 8px 0px 0px;
+`;
+
+export const CreatePackagePolicyBottomBar: React.FC<{
+  isLoading?: boolean;
+  cancelClickHandler: React.ReactEventHandler;
+  cancelUrl: string;
+  actionMessage: React.ReactElement;
+  onNext: () => void;
+}> = ({ isLoading, onNext, cancelClickHandler, cancelUrl, actionMessage }) => (
+  <CenteredRoundedBottomBar>
+    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false}>
+          {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+          <EuiButtonEmpty color="ghost" size="s" href={cancelUrl} onClick={cancelClickHandler}>
+            <FormattedMessage
+              id="xpack.fleet.createPackagePolicyBottomBar.backButton"
+              defaultMessage="Go back"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton color="primary" fill size="m" isLoading={isLoading} onClick={onNext}>
+          {isLoading ? (
+            <FormattedMessage
+              id="xpack.fleet.createPackagePolicyBottomBar.loading"
+              defaultMessage="Loading..."
+            />
+          ) : (
+            actionMessage
+          )}
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </CenteredRoundedBottomBar>
+);

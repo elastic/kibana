@@ -10,18 +10,16 @@ import useWindowSize from 'react-use/lib/useWindowSize';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiImageProps } from '@elastic/eui';
+
 import {
   EuiImage,
   EuiTitle,
-  EuiBottomBar,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
   EuiStepNumber,
   EuiText,
   EuiSpacer,
   EuiLink,
-  EuiButtonEmpty,
   EuiHideFor,
   EuiShowFor,
   isWithinMaxBreakpoint,
@@ -34,6 +32,8 @@ import { pkgKeyFromPackageInfo } from '../../../../../services';
 import { WithHeaderLayout } from '../../../../../layouts';
 import { useStartServices } from '../../../../../hooks';
 import type { RequestError } from '../../../../../hooks';
+
+import { CreatePackagePolicyBottomBar } from '.';
 
 const CentralTitle = styled('h1')`
   text-align: center;
@@ -207,12 +207,6 @@ const AddIntegrationStepsIllustrations = () => {
   );
 };
 
-const CenteredRoundedBottomBar = styled(EuiBottomBar)`
-  max-width: 820px;
-  margin: 0 auto;
-  border-radius: 8px 8px 0px 0px;
-`;
-
 const NotObscuredByBottomBar = styled('div')`
   padding-bottom: 100px;
 `;
@@ -232,44 +226,6 @@ const CenteredLearnMoreLink = () => {
     </EuiFlexGroup>
   );
 };
-
-const InstallBottomBar: React.FC<{
-  isLoading: boolean;
-  cancelClickHandler: React.ReactEventHandler;
-  cancelUrl: string;
-  onNext: () => void;
-}> = ({ isLoading, onNext, cancelClickHandler, cancelUrl }) => (
-  <CenteredRoundedBottomBar>
-    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <EuiFlexItem grow={false}>
-          {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-          <EuiButtonEmpty color="ghost" size="s" href={cancelUrl} onClick={cancelClickHandler}>
-            <FormattedMessage
-              id="xpack.fleet.addFirstIntegrationSplash.backButton"
-              defaultMessage="Go back"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton color="primary" fill size="m" isLoading={isLoading} onClick={onNext}>
-          {isLoading ? (
-            <FormattedMessage
-              id="xpack.fleet.addFirstIntegrationSplash.loading"
-              defaultMessage="Loading..."
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.fleet.addFirstIntegrationSplash.installAgentButton"
-              defaultMessage="Install Elastic Agent"
-            />
-          )}
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </CenteredRoundedBottomBar>
-);
 
 export const AddFirstIntegrationSplashScreen: React.FC<{
   integrationInfo?: RegistryPolicyTemplate;
@@ -320,11 +276,17 @@ export const AddFirstIntegrationSplashScreen: React.FC<{
         <NotObscuredByBottomBar>
           <CenteredLearnMoreLink />
         </NotObscuredByBottomBar>
-        <InstallBottomBar
+        <CreatePackagePolicyBottomBar
           cancelUrl={cancelUrl}
           cancelClickHandler={cancelClickHandler}
           isLoading={isLoading}
           onNext={onNext}
+          actionMessage={
+            <FormattedMessage
+              id="xpack.fleet.addFirstIntegrationSplash.installAgentButton"
+              defaultMessage="Install Elastic Agent"
+            />
+          }
         />
         {packageInfo && (
           <IntegrationBreadcrumb

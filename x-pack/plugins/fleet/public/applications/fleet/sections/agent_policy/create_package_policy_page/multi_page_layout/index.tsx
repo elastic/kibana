@@ -4,54 +4,68 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo } from 'react';
-// import { FormattedMessage } from '@kbn/i18n-react';
-// import styled from 'styled-components';
-// import {
-//   EuiFlexGroup,
-//   EuiFlexItem,
-//   EuiText,
-//   EuiDescriptionList,
-//   EuiDescriptionListTitle,
-//   EuiDescriptionListDescription,
-//   EuiButtonEmpty,
-//   EuiSpacer,
-// } from '@elastic/eui';
+import React, { useMemo, useState } from 'react';
+import { useRouteMatch } from 'react-router-dom';
 
-import type { AgentPolicy, PackageInfo, RegistryPolicyTemplate } from '../../../../types';
-import type { EditPackagePolicyFrom } from '../types';
+import { splitPkgKey } from '../../../../../../../common';
 
-import { AddFirstIntegrationSplashScreen } from './add_first_integration_splash';
-export const CreatePackagePolicyMultiPageLayout: React.FunctionComponent<{
-  from: EditPackagePolicyFrom;
-  cancelUrl: string;
-  onCancel?: React.ReactEventHandler;
-  agentPolicy?: AgentPolicy;
-  packageInfo?: PackageInfo;
-  integrationInfo?: RegistryPolicyTemplate;
-  'data-test-subj'?: string;
-  tabs?: Array<{
-    title: string;
-    isSelected: boolean;
-    onClick: React.ReactEventHandler;
-  }>;
-}> = memo(
-  ({
+import { useGetPackageInfoByKey } from '../../../../hooks';
+
+import type { AddToPolicyParams, CreatePackagePolicyParams } from '../types';
+import { useCancelAddPackagePolicy } from '../hooks';
+
+import { AddFirstIntegrationSplashScreen, MultiPageStepsLayout } from './components';
+
+export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({ from }) => {
+  const { params } = useRouteMatch<AddToPolicyParams>();
+
+  const { pkgName, pkgVersion } = splitPkgKey(params.pkgkey);
+  const [onSplash, setOnSplash] = useState(true);
+  const {
+    data: packageInfoData,
+    error: packageInfoError,
+    isLoading: isPackageInfoLoading,
+  } = useGetPackageInfoByKey(pkgName, pkgVersion);
+
+  const packageInfo = useMemo(() => packageInfoData?.item, [packageInfoData]);
+
+  const integrationInfo = useMemo(() => {
+    if (!params.integration) return;
+    return packageInfo?.policy_templates?.find(
+      (policyTemplate) => policyTemplate.name === params.integration
+    );
+  }, [packageInfo?.policy_templates, params]);
+
+  const splashScreenNext = () => {
+    setOnSplash(false);
+  }; // TODO: (in following PR) this will display the add package policy steps
+
+  const { cancelClickHandler, cancelUrl } = useCancelAddPackagePolicy({
     from,
-    cancelUrl,
-    onCancel,
-    agentPolicy,
-    packageInfo,
-    integrationInfo,
-    children,
-    'data-test-subj': dataTestSubj,
-    tabs = [],
-  }) => {
+    pkgkey: params.pkgkey,
+  });
+
+  if (onSplash || !packageInfo) {
     return (
       <AddFirstIntegrationSplashScreen
+        isLoading={isPackageInfoLoading}
+        error={packageInfoError}
         integrationInfo={integrationInfo}
         packageInfo={packageInfo}
+        cancelUrl={cancelUrl}
+        cancelClickHandler={cancelClickHandler}
+        onNext={splashScreenNext}
       />
     );
   }
-);
+
+  return (
+    <MultiPageStepsLayout
+      packageInfo={packageInfo}
+      integrationInfo={integrationInfo}
+      cancelUrl={cancelUrl}
+      cancelClickHandler={cancelClickHandler}
+      onNext={splashScreenNext}
+    />
+  );
+};
