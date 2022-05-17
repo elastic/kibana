@@ -10,7 +10,7 @@ import { resolve, relative } from 'path';
 
 import execa from 'execa';
 
-import { run } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/utils';
 
 import { File } from '../file';

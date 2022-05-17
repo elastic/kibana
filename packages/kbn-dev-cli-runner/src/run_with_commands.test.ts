@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { RunWithCommands } from './run_with_commands';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
-import { ProcRunner } from '../proc_runner';
+import { ProcRunner } from '@kbn/dev-proc-runner';
+
+import { RunWithCommands } from './run_with_commands';
 
 const testLog = new ToolingLog();
 const testLogWriter = new ToolingLogCollectingWriter();

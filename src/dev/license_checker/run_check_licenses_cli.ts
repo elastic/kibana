@@ -7,7 +7,7 @@
  */
 
 import { REPO_ROOT } from '@kbn/utils';
-import { run } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-cli-runner';
 import { getInstalledPackages } from '../npm';
 
 import { LICENSE_ALLOWED, DEV_ONLY_LICENSE_ALLOWED, LICENSE_OVERRIDES } from './config';

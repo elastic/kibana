@@ -187,6 +187,44 @@ module.exports = {
           'sortPackageJson',
         ]
       },
+      {
+        fromPackage: '@kbn/dev-utils',
+        toPackage: '@kbn/dev-cli-runner',
+        exportNames: [
+          'run',
+          'Command',
+          'RunWithCommands',
+          'CleanupTask',
+          'Command',
+          'CommandRunFn',
+          'FlagOptions',
+          'Flags',
+          'RunContext',
+          'RunFn',
+          'RunOptions',
+          'RunWithCommands',
+          'RunWithCommandsOptions',
+          'getFlags',
+          'mergeFlagOptions'
+        ]
+      },
+      {
+        fromPackage: '@kbn/dev-utils',
+        toPackage: '@kbn/dev-cli-errors',
+        exportNames: [
+          'createFailError',
+          'createFlagError',
+          'isFailError',
+        ]
+      },
+      {
+        fromPackage: '@kbn/dev-utils',
+        toPackage: '@kbn/dev-proc-runner',
+        exportNames: [
+          'withProcRunner',
+          'ProcRunner',
+        ]
+      },
     ]],
 
     '@kbn/eslint/no_async_promise_body': 'error',

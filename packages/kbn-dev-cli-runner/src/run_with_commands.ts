@@ -7,12 +7,13 @@
  */
 
 import { ToolingLog, pickLevelFromFlags } from '@kbn/tooling-log';
+import { withProcRunner } from '@kbn/dev-proc-runner';
+import { createFlagError } from '@kbn/dev-cli-errors';
+
 import { RunContext, RunOptions } from './run';
 import { getFlags, FlagOptions, mergeFlagOptions } from './flags';
 import { Cleanup } from './cleanup';
 import { getHelpForAllCommands, getCommandLevelHelp } from './help';
-import { createFlagError } from './fail';
-import { withProcRunner } from '../proc_runner';
 import { Metrics } from './metrics';
 
 export type CommandRunFn<T> = (context: RunContext & T) => Promise<void> | void;

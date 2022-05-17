@@ -7,8 +7,8 @@
  */
 
 import getopts from 'getopts';
-
 import { LOG_LEVEL_FLAGS, DEFAULT_LOG_LEVEL } from '@kbn/tooling-log';
+
 import { RunOptions } from './run';
 
 export interface Flags {

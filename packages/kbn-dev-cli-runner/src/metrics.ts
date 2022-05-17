@@ -7,8 +7,9 @@
  */
 
 import path from 'path';
-import { REPO_ROOT } from '@kbn/utils';
+
 import normalizePath from 'normalize-path';
+import { REPO_ROOT } from '@kbn/utils';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { ToolingLog } from '@kbn/tooling-log';
 

@@ -11,7 +11,8 @@ import Fs from 'fs';
 
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 
-import { run, createFlagError, createFailError } from './run';
+import { createFlagError, createFailError } from '@kbn/dev-cli-errors';
+import { run } from '@kbn/dev-cli-runner';
 
 export function shipCiStatsCli() {
   run(

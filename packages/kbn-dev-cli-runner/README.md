@@ -1,4 +1,4 @@
-# @kbn/dev-utils > run()
+# @kbn/dev-cli-runner
 
 Helper functions for writing little scripts for random build/ci/dev tasks.
 
@@ -8,7 +8,7 @@ Define the function that should validate the CLI arguments and call your task fn
 
 ```ts
 // dev/my_task/run_my_task.ts
-import { createFlagError, run } from '@kbn/dev-utils';
+import { createFlagError, run } from '@kbn/dev-cli-runner';
 
 run(
   async ({ flags, log }) => {
