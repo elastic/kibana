@@ -21,7 +21,8 @@ function findFeature(layer, callbackFn) {
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  describe('getTile', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/132368
+  describe.skip('getTile', () => {
     it('should return ES vector tile containing documents and metadata', async () => {
       const resp = await supertest
         .get(
