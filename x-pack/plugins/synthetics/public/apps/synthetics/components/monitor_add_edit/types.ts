@@ -7,3 +7,11 @@
 
 export * from '../../../../../common/runtime_types/monitor_management';
 export * from '../../../../../common/types/monitor_validation';
+
+export enum FormMonitorType {
+  SINGLE = 'single',
+  MULTISTEP = 'multistep',
+  HTTP = 'http',
+  TCP = 'tcp',
+  ICMP = 'icmp',
+}

@@ -22,10 +22,12 @@ import {
   EuiLink,
   EuiTextArea,
 } from '@elastic/eui';
+import { useMonitorName } from '../fields/use_monitor_name';
 import { MonitorTypeRadioGroup } from '../fields/monitor_type_radio_group';
 import {
-  DataStream,
   ConfigKey,
+  DataStream,
+  FormMonitorType,
   HTTPMethod,
   MonacoEditorLangId,
   MonitorFields,
@@ -39,6 +41,7 @@ import { ResponseBodyIndexField } from '../fields/index_response_body_field';
 import { ComboBox } from '../fields/combo_box';
 import { SourceField } from '../fields/source_field';
 import { DEFAULT_FORM_FIELDS } from './defaults';
+import { StepFields } from '../steps/step_fields';
 import { validate, validateHeaders, WHOLE_NUMBERS_ONLY, FLOATS_ONLY } from './validation';
 
 export interface FieldMeta {
@@ -55,6 +58,13 @@ export interface FieldMeta {
   controlled?: boolean;
   required?: boolean;
   useSetValue?: boolean;
+  customHook?: (value: unknown) => {
+    // custom hooks are only supported for controlled components and only supported for determining error validation
+    func: Function;
+    params: unknown;
+    fieldKey: string;
+    error: string;
+  };
   onChange?: (
     event: React.ChangeEvent<HTMLInputElement>,
     formOnChange: (event: React.ChangeEvent<HTMLInputElement>) => void
@@ -72,7 +82,7 @@ export interface AdvancedFieldGroup {
 }
 
 export type FieldConfig = Record<
-  DataStream,
+  FormMonitorType,
   {
     step1: FieldMeta[];
     step2: FieldMeta[];
@@ -83,72 +93,144 @@ export type FieldConfig = Record<
 
 export type StepKey = 'step1' | 'step2' | 'step3';
 
+interface Step {
+  title: string;
+  children: React.ReactNode;
+}
+
+export type StepMap = Record<FormMonitorType, Step[]>;
+
+const MONITOR_TYPE_STEP: Step = {
+  title: 'Select a monitor type',
+  children: (
+    <StepFields description="Choose a monitor that best fits your use case" stepKey="step1" />
+  ),
+};
+const MONITOR_DETAILS_STEP: Step = {
+  title: 'Monitor details',
+  children: (
+    <StepFields
+      description="Provide some details about how your monitor should run"
+      stepKey="step2"
+    />
+  ),
+};
+const MONITOR_SCRIPT_STEP: Step = {
+  title: 'Add a script',
+  children: (
+    <StepFields
+      description="Use Elastic Script Recorder to generate a script and then upload it. Alternatively, you can write your own Playwright script and paste it in the script editor."
+      stepKey="step3"
+    />
+  ),
+};
+
+export const ADD_MONITOR_STEPS: StepMap = {
+  [FormMonitorType.MULTISTEP]: [MONITOR_TYPE_STEP, MONITOR_DETAILS_STEP, MONITOR_SCRIPT_STEP],
+  [FormMonitorType.SINGLE]: [MONITOR_TYPE_STEP, MONITOR_DETAILS_STEP],
+  [FormMonitorType.HTTP]: [MONITOR_TYPE_STEP, MONITOR_DETAILS_STEP],
+  [FormMonitorType.ICMP]: [MONITOR_TYPE_STEP, MONITOR_DETAILS_STEP],
+  [FormMonitorType.TCP]: [MONITOR_TYPE_STEP, MONITOR_DETAILS_STEP],
+};
+
+export const EDIT_MONITOR_STEPS: StepMap = {
+  [FormMonitorType.MULTISTEP]: [MONITOR_SCRIPT_STEP, MONITOR_DETAILS_STEP, MONITOR_SCRIPT_STEP],
+  [FormMonitorType.SINGLE]: [MONITOR_DETAILS_STEP],
+  [FormMonitorType.HTTP]: [MONITOR_DETAILS_STEP],
+  [FormMonitorType.ICMP]: [MONITOR_DETAILS_STEP],
+  [FormMonitorType.TCP]: [MONITOR_DETAILS_STEP],
+};
+
+export const MONITOR_TYPE_CONFIG = {
+  [FormMonitorType.MULTISTEP]: {
+    id: 'syntheticsMonitorTypeMultiStep',
+    label: 'Multistep',
+    value: FormMonitorType.MULTISTEP,
+    descriptionTitle: 'Multistep Browser Journey',
+    description:
+      'A lightweight API check to validate the availability of a web service or endpoint.',
+    link: '#',
+    icon: 'videoPlayer',
+    beta: true,
+  },
+  [FormMonitorType.SINGLE]: {
+    id: 'syntheticsMonitorTypeSingle',
+    label: 'Single Page',
+    value: FormMonitorType.SINGLE,
+    descriptionTitle: 'Single Page Browser Test',
+    description:
+      'A lightweight API check to validate the availability of a web service or endpoint.',
+    link: '#',
+    icon: 'videoPlayer',
+    beta: true,
+  },
+  [FormMonitorType.HTTP]: {
+    id: 'syntheticsMonitorTypeHTTP',
+    label: 'HTTP Ping',
+    value: FormMonitorType.HTTP,
+    descriptionTitle: 'HTTP Ping',
+    description:
+      'A lightweight API check to validate the availability of a web service or endpoint.',
+    link: '#',
+    icon: 'online',
+    beta: false,
+  },
+  [FormMonitorType.ICMP]: {
+    id: 'syntheticsMonitorTypeICMP',
+    label: 'ICMP Ping',
+    value: FormMonitorType.ICMP,
+    descriptionTitle: 'ICMP Ping',
+    description:
+      'A lightweight API check to validate the availability of a web service or endpoint.',
+    link: '#',
+    icon: 'online',
+    beta: false,
+  },
+  [FormMonitorType.TCP]: {
+    id: 'syntheticsMonitorTypeTCP',
+    label: 'TCP Ping',
+    value: FormMonitorType.TCP,
+    descriptionTitle: 'TCP Ping',
+    description:
+      'A lightweight API check to validate the availability of a web service or endpoint.',
+    link: '#',
+    icon: 'online',
+    beta: false,
+  },
+};
+
 export const FIELD: Record<string, FieldMeta> = {
   [ConfigKey.MONITOR_TYPE]: {
-    fieldKey: ConfigKey.MONITOR_TYPE,
+    fieldKey: 'formMonitorType',
     required: true,
     component: MonitorTypeRadioGroup,
     ariaLabel: 'Monitor Type',
     controlled: true,
     props: ({ value, reset }) => ({
-      onChange: (_: string, monitorType: string) => {
-        const defaultFields = DEFAULT_FORM_FIELDS[monitorType as DataStream];
+      onChange: (_: string, monitorType: FormMonitorType) => {
+        const defaultFields = DEFAULT_FORM_FIELDS[monitorType];
         reset(defaultFields);
       },
       selectedOption: value,
-      options: [
-        {
-          id: 'syntheticsMonitorTypeBrowser',
-          label: 'Browser Ping',
-          value: DataStream.BROWSER,
-          descriptionTitle: 'Browser Ping',
-          description:
-            'A lightweight API check to validate the availability of a web service or endpoint.',
-          link: '#',
-          icon: 'online',
-        },
-        {
-          id: 'syntheticsMonitorTypeHTTP',
-          label: 'HTTP Ping',
-          value: DataStream.HTTP,
-          descriptionTitle: 'HTTP Ping',
-          description:
-            'A lightweight API check to validate the availability of a web service or endpoint.',
-          link: '#',
-          icon: 'online',
-        },
-        {
-          id: 'syntheticsMonitorTypeTCP',
-          label: 'TCP Ping',
-          value: DataStream.TCP,
-          descriptionTitle: 'Option 2 Title',
-          description:
-            'A lightweight API check to validate the availability of a web service or endpoint.',
-          link: '#',
-          icon: 'online',
-        },
-        {
-          id: 'syntheticsMonitorTypeICMP',
-          label: 'ICMP Ping',
-          value: DataStream.ICMP,
-          descriptionTitle: 'Option 3 Title',
-          description:
-            'A lightweight API check to validate the availability of a web service or endpoint.',
-          link: '#',
-          icon: 'online',
-        },
-      ],
+      options: Object.values(MONITOR_TYPE_CONFIG),
     }),
     validation: () => ({
       required: true,
     }),
   },
-  [ConfigKey.URLS]: {
+  [`${ConfigKey.URLS}__single`]: {
     fieldKey: ConfigKey.URLS,
     required: true,
     component: EuiFieldText,
     label: 'Website URL',
-    helpText: 'For example, https://www.elastic.co',
+    helpText: 'For example, https://www.elastic.co.',
+  },
+  [`${ConfigKey.URLS}__http`]: {
+    fieldKey: ConfigKey.URLS,
+    required: true,
+    component: EuiFieldText,
+    label: 'URL',
+    helpText: 'For example, your service endpoint.',
   },
   [`${ConfigKey.HOSTS}__tcp`]: {
     fieldKey: ConfigKey.HOSTS,
@@ -166,10 +248,19 @@ export const FIELD: Record<string, FieldMeta> = {
     fieldKey: ConfigKey.NAME,
     required: true,
     component: EuiFieldText,
+    controlled: true,
     label: 'Monitor name',
     helpText: 'Choose a name to help identify this monitor in the future.',
+    customHook: (value: unknown) => ({
+      fieldKey: 'nameAlreadyExists',
+      func: useMonitorName,
+      params: { search: value as string },
+      error: 'Monitor name already exists',
+    }),
     validation: () => ({
-      validate: (value) => Boolean(value.trim()),
+      validate: {
+        notEmpty: (value) => Boolean(value.trim()),
+      },
     }),
     error: 'Monitor name is required',
   },
@@ -187,12 +278,20 @@ export const FIELD: Record<string, FieldMeta> = {
           text: 'Every 3 minutes',
         },
         {
+          value: '5',
+          text: 'Every 5 minutes',
+        },
+        {
           value: '10',
           text: 'Every 10 minutes',
         },
         {
+          value: '30',
+          text: 'Every 30 minutes',
+        },
+        {
           value: '60',
-          text: 'Every 60 minutes',
+          text: 'Every hour',
         },
       ],
     }),
@@ -490,9 +589,9 @@ export const FIELD: Record<string, FieldMeta> = {
       'Verifies that the provided certificate is signed by a trusted authority (CA) and also verifies that the server’s hostname (or IP address) matches the names identified within the certificate. If the Subject Alternative Name is empty, it returns an error.',
     showWhen: ['isTLSEnabled', true],
     props: () => ({
-      options: Object.keys(VerificationMode).map((method) => ({
+      options: Object.values(VerificationMode).map((method) => ({
         value: method,
-        text: method,
+        text: method.toUpperCase(),
       })),
     }),
   },
@@ -643,10 +742,10 @@ export const TCP_ADVANCED = {
 };
 
 export const FIELD_CONFIG: FieldConfig = {
-  [DataStream.HTTP]: {
+  [FormMonitorType.HTTP]: {
     step1: [FIELD[ConfigKey.MONITOR_TYPE]],
     step2: [
-      FIELD[ConfigKey.URLS],
+      FIELD[`${ConfigKey.URLS}__http`],
       FIELD[ConfigKey.NAME],
       FIELD[ConfigKey.SCHEDULE],
       FIELD[ConfigKey.MAX_REDIRECTS],
@@ -660,7 +759,7 @@ export const FIELD_CONFIG: FieldConfig = {
       TLS_OPTIONS,
     ],
   },
-  [DataStream.TCP]: {
+  [FormMonitorType.TCP]: {
     step1: [FIELD[ConfigKey.MONITOR_TYPE]],
     step2: [
       FIELD[`${ConfigKey.HOSTS}__tcp`],
@@ -675,7 +774,7 @@ export const FIELD_CONFIG: FieldConfig = {
       TLS_OPTIONS,
     ],
   },
-  [DataStream.BROWSER]: {
+  [FormMonitorType.MULTISTEP]: {
     step1: [FIELD[ConfigKey.MONITOR_TYPE]],
     step2: [FIELD[ConfigKey.NAME], FIELD[ConfigKey.SCHEDULE]],
     step3: [FIELD[ConfigKey.SOURCE_INLINE]],
@@ -691,7 +790,22 @@ export const FIELD_CONFIG: FieldConfig = {
       },
     ],
   },
-  [DataStream.ICMP]: {
+  [FormMonitorType.SINGLE]: {
+    step1: [FIELD[ConfigKey.MONITOR_TYPE]],
+    step2: [FIELD[`${ConfigKey.URLS}__single`], FIELD[ConfigKey.NAME], FIELD[ConfigKey.SCHEDULE]],
+    advanced: [
+      {
+        ...DEFAULT_DATA_OPTIONS,
+        components: [
+          FIELD[ConfigKey.TAGS],
+          FIELD[ConfigKey.APM_SERVICE_NAME],
+          FIELD[ConfigKey.SCREENSHOTS],
+          FIELD[ConfigKey.NAMESPACE],
+        ],
+      },
+    ],
+  },
+  [FormMonitorType.ICMP]: {
     step1: [FIELD[ConfigKey.MONITOR_TYPE]],
     step2: [
       FIELD[`${ConfigKey.HOSTS}__icmp`],

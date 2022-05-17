@@ -5,27 +5,13 @@
  * 2.0.
  */
 import React, { memo } from 'react';
-import { Controller, UseFormReturn, useFormContext, FieldError } from 'react-hook-form';
+import { Controller, useFormContext, FieldError } from 'react-hook-form';
 import { EuiFormRow } from '@elastic/eui';
 import { ControlledField } from './controlled_field';
 import { OptionalLabel } from '../fields/optional_label';
+import { FieldMeta } from './config';
 
-interface Props {
-  component: React.ComponentType<any>;
-  helpText?: React.ReactNode;
-  ariaLabel?: string;
-  label?: string;
-  props?: any;
-  fieldKey: string;
-  useSetValue?: boolean;
-  showWhen?: [string, any];
-  controlled?: boolean;
-  required?: boolean;
-  validation?: (dependencies: unknown[]) => Parameters<UseFormReturn['register']>[1];
-  error?: React.ReactNode;
-  fieldError?: FieldError;
-  dependencies?: string[];
-}
+type Props = FieldMeta & { fieldError: FieldError };
 
 export const Field = memo<Props>(
   ({
@@ -43,8 +29,9 @@ export const Field = memo<Props>(
     error,
     fieldError,
     dependencies,
+    customHook,
   }: Props) => {
-    const { register, watch, control } = useFormContext();
+    const { register, watch, control, setValue, reset } = useFormContext();
     let show = true;
     let dependenciesValues = [];
     if (showWhen) {
@@ -78,20 +65,18 @@ export const Field = memo<Props>(
         }}
         render={({ field, fieldState: fieldStateT }) => {
           return (
-            <EuiFormRow
-              {...formRowProps}
+            <ControlledField
+              field={field}
+              component={Component}
+              props={props}
+              useSetValue={useSetValue}
+              fieldKey={fieldKey}
               isInvalid={Boolean(fieldStateT.error)}
-              error={fieldStateT.error?.message || error}
-            >
-              <ControlledField
-                field={field}
-                component={Component}
-                props={props}
-                useSetValue={useSetValue}
-                fieldKey={fieldKey}
-                isInvalid={Boolean(fieldStateT.error)}
-              />
-            </EuiFormRow>
+              customHook={customHook}
+              formRowProps={formRowProps}
+              fieldState={fieldStateT}
+              error={error}
+            />
           );
         }}
       />
@@ -106,7 +91,7 @@ export const Field = memo<Props>(
             required,
             ...(validation ? validation(dependenciesValues) : {}),
           })}
-          {...(props ? props() : {})}
+          {...(props ? props({ value: '', setValue, reset }) : {})}
           isInvalid={Boolean(fieldError)}
           fullWidth
         />

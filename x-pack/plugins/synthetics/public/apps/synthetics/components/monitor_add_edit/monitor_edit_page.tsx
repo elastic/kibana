@@ -8,12 +8,18 @@
 import React from 'react';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { MonitorSteps } from './steps';
+import { MonitorForm } from './form';
 import { useMonitorAddEditBreadcrumbs } from './use_breadcrumbs';
+import { EDIT_MONITOR_STEPS } from './form/config';
 
 export const MonitorEditPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'edit-monitor' });
   useTrackPageview({ app: 'synthetics', path: 'edit-monitor', delay: 15000 });
   useMonitorAddEditBreadcrumbs();
 
-  return <MonitorSteps />;
+  return (
+    <MonitorForm>
+      <MonitorSteps stepMap={EDIT_MONITOR_STEPS} isEditFlow={true} />
+    </MonitorForm>
+  );
 };

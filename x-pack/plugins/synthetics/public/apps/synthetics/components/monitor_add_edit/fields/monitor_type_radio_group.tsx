@@ -6,18 +6,16 @@
  */
 
 import React from 'react';
-import { Controller, ControllerRenderProps, FieldValues, useFormContext } from 'react-hook-form';
 import {
-  EuiCallOut,
+  EuiPanel,
+  EuiText,
   EuiLink,
   EuiSpacer,
   EuiKeyPadMenu,
   EuiKeyPadMenuItem,
   EuiIcon,
-  EuiRadioGroupOption,
   EuiKeyPadMenuItemProps,
 } from '@elastic/eui';
-import { ConfigKey, DataStream } from '../types';
 
 export type MonitorTypeRadioOption = EuiKeyPadMenuItemProps & {
   icon: string;
@@ -86,11 +84,16 @@ export const MonitorTypeRadioGroup = ({
       </EuiKeyPadMenu>
       <EuiSpacer />
       {selectedOption && (
-        <EuiCallOut title={selectedOption.descriptionTitle} size="s">
-          <span>{selectedOption.description}</span>
+        <EuiPanel color="primary">
+          <EuiText size="s">
+            <h4>{selectedOption.descriptionTitle}</h4>
+          </EuiText>
+          <EuiText size="s" color="subdued">
+            <span>{`${selectedOption.description} `}</span>
+            <EuiLink href={selectedOption.link}>Learn more</EuiLink>
+          </EuiText>
           <EuiSpacer size="xs" />
-          <EuiLink href={selectedOption.link}>Learn more</EuiLink>
-        </EuiCallOut>
+        </EuiPanel>
       )}
     </>
   );

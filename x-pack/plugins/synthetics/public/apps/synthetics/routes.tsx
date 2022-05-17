@@ -8,6 +8,7 @@
 import React, { FC, useEffect } from 'react';
 import { EuiPageTemplateProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Route, Switch } from 'react-router-dom';
+import { OutPortal } from 'react-reverse-portal';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
@@ -18,6 +19,7 @@ import { OverviewPage } from './components/overview/overview_page';
 import { SyntheticsPageTemplateComponent } from './components/common/pages/synthetics_page_template';
 import { NotFoundPage } from './components/common/pages/not_found';
 import { ServiceAllowedWrapper } from './components/common/wrappers/service_allowed_wrapper';
+import { MonitorTypePortalNode } from './components/monitor_add_edit/monitor_type_portal_node';
 import {
   MONITOR_ADD_ROUTE,
   MONITOR_EDIT_ROUTE,
@@ -152,6 +154,7 @@ const getRoutes = (): RouteProps[] => {
             defaultMessage="Edit Monitor"
           />
         ),
+        rightSideItems: [<OutPortal node={MonitorTypePortalNode} />],
       },
     },
   ];

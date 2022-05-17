@@ -5,7 +5,14 @@
  * 2.0.
  */
 import React from 'react';
-import { UseFormReturn, ControllerRenderProps, useFormContext } from 'react-hook-form';
+import { EuiFormRow, EuiFormRowProps } from '@elastic/eui';
+import {
+  UseFormReturn,
+  ControllerRenderProps,
+  ControllerFieldState,
+  useFormContext,
+} from 'react-hook-form';
+import { FieldMeta } from './config';
 
 interface Props {
   component: React.ComponentType<any>;
@@ -13,7 +20,11 @@ interface Props {
   fieldKey: string;
   useSetValue?: boolean;
   field: ControllerRenderProps;
+  fieldState: ControllerFieldState;
   isInvalid: boolean;
+  customHook: FieldMeta['customHook'];
+  formRowProps: Partial<EuiFormRowProps>;
+  error: React.ReactNode;
 }
 
 const setFieldValue = (key: string, setValue: UseFormReturn['setValue']) => (value: any) => {
@@ -27,19 +38,37 @@ export const ControlledField = ({
   useSetValue,
   field,
   isInvalid,
+  formRowProps,
+  fieldState,
+  customHook,
+  error,
 }: Props) => {
   const { setValue, reset } = useFormContext();
+  const noop = () => {};
+  let hook: Function = noop;
+  let hookProps;
+  if (customHook) {
+    hookProps = customHook(field.value);
+    hook = hookProps.func;
+  }
+  const { [hookProps?.fieldKey as string]: hookResult } = hook(hookProps?.params) || {};
   const onChange = useSetValue ? setFieldValue(fieldKey, setValue) : field.onChange;
   const generatedProps = props ? props({ value: field.value, setValue, reset }) : {};
   return (
-    <Component
-      {...field}
-      checked={field.value}
-      defaultValue={field.value}
-      onChange={onChange}
-      {...generatedProps}
-      isInvalid={isInvalid}
-      fullWidth
-    />
+    <EuiFormRow
+      {...formRowProps}
+      isInvalid={hookResult || Boolean(fieldState.error)}
+      error={fieldState.error?.message || error || hookProps?.error}
+    >
+      <Component
+        {...field}
+        checked={field.value}
+        defaultValue={field.value}
+        onChange={onChange}
+        {...generatedProps}
+        isInvalid={isInvalid}
+        fullWidth
+      />
+    </EuiFormRow>
   );
 };

@@ -6,28 +6,34 @@
  */
 
 import { DEFAULT_FIELDS } from '../constants';
-import { DataStream } from '../types';
+import { DataStream, FormMonitorType } from '../types';
 
-export const DEFAULT_FORM_FIELDS = {
-  [DataStream.BROWSER]: {
+export const DEFAULT_FORM_FIELDS: Record<FormMonitorType, Record<string, any>> = {
+  [FormMonitorType.SINGLE]: {
+    ...DEFAULT_FIELDS[DataStream.BROWSER],
+    formMonitorType: FormMonitorType.SINGLE,
+  },
+  [FormMonitorType.MULTISTEP]: {
     ...DEFAULT_FIELDS[DataStream.BROWSER],
     'source.inline': {
       type: 'recorder',
       script: '',
       fileName: '',
     },
-    isTLSEnabled: false,
+    formMonitorType: FormMonitorType.MULTISTEP,
   },
-  [DataStream.HTTP]: {
+  [FormMonitorType.HTTP]: {
     ...DEFAULT_FIELDS[DataStream.HTTP],
     isTLSEnabled: false,
+    formMonitorType: FormMonitorType.HTTP,
   },
-  [DataStream.TCP]: {
+  [FormMonitorType.TCP]: {
     ...DEFAULT_FIELDS[DataStream.TCP],
     isTLSEnabled: false,
+    formMonitorType: FormMonitorType.TCP,
   },
-  [DataStream.ICMP]: {
+  [FormMonitorType.ICMP]: {
     ...DEFAULT_FIELDS[DataStream.ICMP],
-    isTLSEnabled: false,
+    formMonitorType: FormMonitorType.ICMP,
   },
 };

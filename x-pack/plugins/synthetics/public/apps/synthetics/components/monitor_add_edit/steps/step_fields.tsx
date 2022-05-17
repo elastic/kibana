@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Step } from './step';
 import { FIELD_CONFIG, StepKey } from '../form/config';
 import { Field } from '../form/field';
-import { ConfigKey, DataStream } from '../types';
+import { FormMonitorType } from '../types';
 
 export const StepFields = ({ description, stepKey }: { description: string; stepKey: StepKey }) => {
   const {
     watch,
     formState: { errors },
   } = useFormContext();
-  const [type]: [DataStream] = watch([ConfigKey.MONITOR_TYPE]);
+  const [type]: [FormMonitorType] = watch(['formMonitorType']);
 
   return (
     <Step description={description}>

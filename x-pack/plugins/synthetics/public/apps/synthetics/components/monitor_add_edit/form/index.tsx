@@ -6,41 +6,39 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiForm } from '@elastic/eui';
+import { EuiForm, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormProvider } from 'react-hook-form';
 import { useFormWrapped } from './use_form_wrapped';
-import { DataStream } from '../types';
+import { FormMonitorType } from '../types';
 import { DEFAULT_FORM_FIELDS } from './defaults';
+import { ActionBar } from './submit';
 
 export const MonitorForm: React.FC = ({ children }) => {
   const methods = useFormWrapped({
     mode: 'onTouched',
     reValidateMode: 'onChange',
-    defaultValues: {
-      ...DEFAULT_FORM_FIELDS[DataStream.BROWSER],
-    },
+    defaultValues: DEFAULT_FORM_FIELDS[FormMonitorType.SINGLE],
     shouldFocusError: true,
   });
   const {
     formState: { isValid, isSubmitted },
-    handleSubmit,
   } = methods;
-
-  const formSubmitter = (data: Record<string, any>) => {
-    console.warn('data', data);
-  };
 
   return (
     <FormProvider {...methods}>
-      <EuiForm
-        isInvalid={isSubmitted && !isValid}
-        component="form"
-        onSubmit={handleSubmit(formSubmitter)}
-        noValidate
-      >
+      <EuiForm isInvalid={isSubmitted && !isValid} component="form" noValidate>
         {children}
-        <EuiButton type="submit" />
+        <EuiSpacer />
+        <ActionBar />
       </EuiForm>
+      <EuiSpacer size="l" />
+      <EuiText size="xs" color="subdued">
+        <p>
+          You consent to the transfer of testing instructions and the output of such instructions
+          (including any data shown therein) to your selected testing location, on infrastructure
+          provided by a cloud service provider chosen by Elastic.
+        </p>
+      </EuiText>
     </FormProvider>
   );
 };
