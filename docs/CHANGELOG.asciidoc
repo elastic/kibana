@@ -431,6 +431,27 @@ The `KIBANA_PATH_CONF` environment variable is deprecated and will be removed in
 *Impact* +
 Use <<settings,`KBN_PATH_CONF`>>.
 ====
+
+[discrete]
+[[deprecation-105440]]
+.Deprecates ServiceNow connectors
+[%collapsible]
+====
+*Details* +
+{sn-itsm} and {sn-sir} connectors created in {stack} version 7.15.0 or earlier
+are marked as deprecated after you upgrade to version 7.16.0 or later.
+Deprecated connectors have a yellow icon after their name and display a warning
+message when selected.
+
+*Impact* +
+Deprecated connectors will continue to function with the rules they were added
+to and can be assigned to new rules. However, it is strongly recommended to
+update deprecated connectors or create new ones to ensure you have access to
+connector enhancements, such as updating incidents.
+For more information, refer to {kibana-pull}105440[#105440], 
+{kibana-ref}/servicenow-action-type.html#servicenow-itsm-connector-update[Update a deprecated {sn-itsm} connector], and
+{kibana-ref}/servicenow-sir-action-type.html#servicenow-sir-connector-update[Update a deprecated {sn-sir} connector].
+====
       
 [float]
 [[features-7.16.0]]
