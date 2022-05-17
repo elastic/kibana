@@ -6,7 +6,7 @@
  */
 
 import { Readable } from 'stream';
-import { InternalFileService } from './file_service';
+import { InternalFileService } from '../file_service';
 
 describe('FileService', () => {
   let fileService: InternalFileService;

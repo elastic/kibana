@@ -8,46 +8,15 @@
 import { Logger } from '@kbn/core/server';
 import { omit } from 'lodash';
 import { Readable } from 'stream';
-import { File as IFile, FileSavedObject, FileSavedObjectAttributes, FileStatus } from '../common';
-import { BlobStorageService } from './blob_storage_service';
-import { InternalFileService } from './file_service';
-
-type Action =
-  | { action: 'create'; payload: FileSavedObjectAttributes }
-  | {
-      action: 'uploading';
-      payload?: undefined;
-    }
-  | { action: 'uploaded'; payload: { content_ref: string; size: number } }
-  | { action: 'uploadError'; payload?: undefined };
-
-export function createDefaultFileAttributes(): Pick<
+import {
+  File as IFile,
+  FileSavedObject,
   FileSavedObjectAttributes,
-  'created_at' | 'updated_at' | 'status'
-> {
-  const dateString = new Date().toISOString();
-  return {
-    created_at: dateString,
-    updated_at: dateString,
-    status: 'AWAITING_UPLOAD',
-  };
-}
-
-function fileAttributesReducer(
-  state: FileSavedObjectAttributes,
-  { action, payload }: Action
-): FileSavedObjectAttributes {
-  switch (action) {
-    case 'uploading':
-      return { ...state, content_ref: undefined, status: 'UPLOADING' };
-    case 'uploaded':
-      return { ...state, ...payload, status: 'READY' };
-    case 'uploadError':
-      return { ...state, status: 'ERROR', content_ref: undefined };
-    default:
-      return state;
-  }
-}
+  FileStatus,
+} from '../../common';
+import { BlobStorageService } from '../blob_storage_service';
+import { InternalFileService } from '../file_service';
+import { fileAttributesReducer, Action } from './file_attributes_reducer';
 
 /**
  * Public file class that wraps all functionality consumers will need at the
@@ -78,6 +47,7 @@ export class File implements IFile {
     return Boolean(this.fileSO.attributes.status === 'READY' && this.fileSO.attributes.content_ref);
   }
 
+  // TODO: Use security audit logger to log file content upload
   async uploadContent(content: Readable): Promise<void> {
     if (this.hasContent()) {
       this.logger.error('File content already uploaded.');
@@ -100,6 +70,7 @@ export class File implements IFile {
     }
   }
 
+  // TODO: Use security audit logger to log file deletion
   async delete(): Promise<void> {
     const { attributes, id } = this.fileSO;
     if (attributes.content_ref) {

@@ -45,6 +45,7 @@ export class InternalFileService {
   private readonly savedObjectType = fileObjectType.name;
 
   // TODO: Enforce that file kind exists based on registry
+  // TODO: Use security audit logger to log file creation
   public async createFile(args: CreateFileArgs): Promise<IFile> {
     const fileSO = await this.savedObjectsService
       .createInternalRepository()
