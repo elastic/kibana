@@ -10,11 +10,9 @@ import React, { useEffect } from 'react';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect } from 'react-router-dom';
+import { monitorListSelector } from '../../state/monitor_management/selectors';
 import { GETTING_STARTED_ROUTE } from '../../../../../common/constants';
-import {
-  fetchMonitorListAction,
-  monitorListSelector,
-} from '../../state/monitor_management/monitor_list';
+import { fetchMonitorListAction } from '../../state/monitor_management/monitor_list';
 import { useSyntheticsSettingsContext } from '../../contexts';
 import { useOverviewBreadcrumbs } from './use_breadcrumbs';
 

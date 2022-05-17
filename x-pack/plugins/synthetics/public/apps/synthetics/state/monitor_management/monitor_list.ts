@@ -5,52 +5,44 @@
  * 2.0.
  */
 
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createReducer } from '@reduxjs/toolkit';
 import { takeLeading } from 'redux-saga/effects';
+import { IHttpFetchError } from '@kbn/core/public';
+import { createAsyncAction, Nullable } from '../utils/actions';
 import {
   FetchMonitorManagementListQueryArgs,
   MonitorManagementListResult,
   MonitorManagementListResultCodec,
 } from '../../../../../common/runtime_types';
-import { SyntheticsAppState } from '../root_reducer';
 import { fetchEffectFactory } from '../utils/fetch_effect';
 import { apiService } from '../../../../utils/api_service';
 import { API_URLS } from '../../../../../common/constants';
 
-export const monitorListSlice = createSlice({
-  name: 'monitorList',
-  initialState: {
+export const fetchMonitorListAction = createAsyncAction<void, MonitorManagementListResult>(
+  'fetchMonitorListAction'
+);
+
+export const monitorListReducer = createReducer(
+  {
     data: {} as MonitorManagementListResult,
     loading: false,
+    error: null as Nullable<IHttpFetchError>,
   },
-  reducers: {
-    fetchMonitorListAction: (state, action) => {
-      return {
-        ...state,
-        loading: true,
-      };
-    },
-    fetchMonitorListActionSuccess: (state, action: PayloadAction<MonitorManagementListResult>) => {
-      return {
-        ...state,
-        loading: false,
-        data: action.payload,
-      };
-    },
-    fetchMonitorListActionFail: (state, action) => {
-      return {
-        ...state,
-        loading: false,
-        data: action.payload,
-      };
-    },
-  },
-});
-
-export const { fetchMonitorListAction, fetchMonitorListActionSuccess, fetchMonitorListActionFail } =
-  monitorListSlice.actions;
-
-export const monitorListSelector = (state: SyntheticsAppState) => state.monitorList.data;
+  (builder) => {
+    builder
+      .addCase(fetchMonitorListAction.get, (state, action) => {
+        state.loading = true;
+      })
+      .addCase(fetchMonitorListAction.success, (state, action) => {
+        state.loading = false;
+        state.data = action.payload;
+      })
+      .addCase(fetchMonitorListAction.fail, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+  }
+);
 
 export const fetchMonitorManagementList = async (
   params: FetchMonitorManagementListQueryArgs
@@ -64,11 +56,11 @@ export const fetchMonitorManagementList = async (
 
 export function* fetchMonitorListEffect() {
   yield takeLeading(
-    fetchMonitorListAction,
+    String(fetchMonitorListAction.get),
     fetchEffectFactory(
       fetchMonitorManagementList,
-      fetchMonitorListActionSuccess,
-      fetchMonitorListActionFail
+      fetchMonitorListAction.success,
+      fetchMonitorListAction.fail
     )
   );
 }
