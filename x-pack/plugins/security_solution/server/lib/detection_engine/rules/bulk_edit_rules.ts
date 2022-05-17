@@ -51,6 +51,6 @@ export const bulkEditRules = ({
 
       return ruleParamsModifier(ruleParams, paramsActions);
     },
-    ...(filter ? { filter: enrichFilterWithRuleTypeMapping(filter) } : {}),
+    ...(!ids ? { filter: enrichFilterWithRuleTypeMapping(filter) } : {}),
   });
 };

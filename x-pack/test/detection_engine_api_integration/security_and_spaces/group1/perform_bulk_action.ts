@@ -431,6 +431,65 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(deletedTagsRule.tags).to.eql(['tag2']);
       });
 
+      it('should migrate legacy actions on edit', async () => {
+        const ruleId = 'ruleId';
+        const [connector, ruleToDuplicate] = await Promise.all([
+          supertest
+            .post(`/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'My action',
+              connector_type_id: '.slack',
+              secrets: {
+                webhookUrl: 'http://localhost:1234',
+              },
+            }),
+          createRule(supertest, log, getSimpleRule(ruleId, true)),
+        ]);
+        await createLegacyRuleAction(supertest, ruleToDuplicate.id, connector.body.id);
+
+        // check for legacy sidecar action
+        const sidecarActionsResults = await getLegacyActionSO(es);
+        expect(sidecarActionsResults.hits.hits.length).to.eql(1);
+        expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(
+          ruleToDuplicate.id
+        );
+
+        const { body: setTagsBody } = await postBulkAction().send({
+          query: '',
+          action: BulkAction.edit,
+          [BulkAction.edit]: [
+            {
+              type: BulkActionEditType.set_tags,
+              value: ['reset-tag'],
+            },
+          ],
+        });
+
+        expect(setTagsBody.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+
+        // Check that the updates have been persisted
+        const { body: setTagsRule } = await fetchRule(ruleId).expect(200);
+
+        // Sidecar should be removed
+        const sidecarActionsPostResults = await getLegacyActionSO(es);
+        expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
+
+        expect(setTagsRule.tags).to.eql(['reset-tag']);
+
+        expect(setTagsRule.actions).to.eql([
+          {
+            action_type_id: '.slack',
+            group: 'default',
+            id: connector.body.id,
+            params: {
+              message:
+                'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+            },
+          },
+        ]);
+      });
+
       it('should set, add and delete index patterns in rules', async () => {
         const ruleId = 'ruleId';
         const indices = ['index1-*', 'index2-*'];
