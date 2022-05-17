@@ -7,11 +7,11 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiFormRow, EuiFieldText, EuiFieldPassword } from '@elastic/eui';
-import type { ActionConnectorFieldsProps } from '../../../../types';
-import * as i18n from './translations';
-import type { ServiceNowActionConnector } from './types';
-import { isFieldInvalid } from './helpers';
-import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
+import type { ActionConnectorFieldsProps } from '../../../../../types';
+import * as i18n from '../translations';
+import type { ServiceNowActionConnector } from '../types';
+import { isFieldInvalid } from '../helpers';
+import { getEncryptedFieldNotifyLabel } from '../../../get_encrypted_field_notify_label';
 
 interface Props {
   action: ActionConnectorFieldsProps<ServiceNowActionConnector>['action'];
