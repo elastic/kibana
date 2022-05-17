@@ -4270,6 +4270,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
     tooltip={
       Object {
         "boundary": undefined,
+        "customTooltip": undefined,
         "headerFormatter": [Function],
       }
     }
@@ -4974,6 +4975,28 @@ exports[`XYChart component split chart should render split chart if both, splitR
     shouldShowValueLabels={true}
     syncColors={false}
     timeZone="UTC"
+    titles={
+      Object {
+        "first": Object {
+          "splitColumnTitles": Object {
+            "b": "b",
+          },
+          "splitRowTitles": Object {
+            "c": "c",
+          },
+          "splitSeriesTitles": Object {
+            "d": "ColD",
+          },
+          "xTitles": Object {
+            "c": "c",
+          },
+          "yTitles": Object {
+            "a": "a",
+            "b": "b",
+          },
+        },
+      }
+    }
     valueLabels="hide"
     yAxesConfiguration={
       Array [
@@ -5069,6 +5092,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
     tooltip={
       Object {
         "boundary": undefined,
+        "customTooltip": undefined,
         "headerFormatter": [Function],
       }
     }
@@ -5772,6 +5796,26 @@ exports[`XYChart component split chart should render split chart if splitColumnA
     shouldShowValueLabels={true}
     syncColors={false}
     timeZone="UTC"
+    titles={
+      Object {
+        "first": Object {
+          "splitColumnTitles": Object {
+            "b": "b",
+          },
+          "splitRowTitles": Object {},
+          "splitSeriesTitles": Object {
+            "d": "ColD",
+          },
+          "xTitles": Object {
+            "c": "c",
+          },
+          "yTitles": Object {
+            "a": "a",
+            "b": "b",
+          },
+        },
+      }
+    }
     valueLabels="hide"
     yAxesConfiguration={
       Array [
@@ -5867,6 +5911,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
     tooltip={
       Object {
         "boundary": undefined,
+        "customTooltip": undefined,
         "headerFormatter": [Function],
       }
     }
@@ -6570,6 +6615,26 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
     shouldShowValueLabels={true}
     syncColors={false}
     timeZone="UTC"
+    titles={
+      Object {
+        "first": Object {
+          "splitColumnTitles": Object {},
+          "splitRowTitles": Object {
+            "b": "b",
+          },
+          "splitSeriesTitles": Object {
+            "d": "ColD",
+          },
+          "xTitles": Object {
+            "c": "c",
+          },
+          "yTitles": Object {
+            "a": "a",
+            "b": "b",
+          },
+        },
+      }
+    }
     valueLabels="hide"
     yAxesConfiguration={
       Array [
