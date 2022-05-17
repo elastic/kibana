@@ -50,7 +50,7 @@ Object {
           "href": "securitySolutionUI/rules?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
           "id": "rules",
           "isSelected": false,
-          "name": "SIEM rules",
+          "name": "Rules",
           "onClick": [Function],
         },
         Object {
@@ -148,7 +148,7 @@ Object {
           "href": "securitySolutionUI/host_isolation_exceptions",
           "id": "host_isolation_exceptions",
           "isSelected": false,
-          "name": "Host isolation IP exceptions",
+          "name": "Host isolation exceptions",
           "onClick": [Function],
         },
         Object {
