@@ -186,6 +186,7 @@
           "label": "Linting/Validation",
           "items": [
             { "id": "kibDevDocsOpsEslintConfig" },
+            { "id": "kibDevDocsOpsEslintPluginEslint" },
             { "id": "kibDevDocsOpsEslintWithTypes" },
             { "id": "kibDevDocsOpsEslintPluginImports" }
           ]
