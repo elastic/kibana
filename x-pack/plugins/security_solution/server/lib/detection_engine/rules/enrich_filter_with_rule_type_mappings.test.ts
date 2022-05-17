@@ -23,7 +23,7 @@ const allAlertTypeIds = `(alert.attributes.alertTypeId: ${EQL_RULE_TYPE_ID}
  OR alert.attributes.alertTypeId: ${INDICATOR_RULE_TYPE_ID}
  OR alert.attributes.alertTypeId: ${THRESHOLD_RULE_TYPE_ID})`.replace(/[\n\r]/g, '');
 
-describe('find_rules', () => {
+describe('enrichFilterWithRuleTypeMapping', () => {
   test('it returns a full filter with an AND if sent down', () => {
     expect(enrichFilterWithRuleTypeMapping('alert.attributes.enabled: true')).toEqual(
       `${allAlertTypeIds} AND alert.attributes.enabled: true`
