@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash';
@@ -18,19 +17,24 @@ import type {
   RuleRegistrySearchRequest,
   RuleRegistrySearchResponse,
 } from '@kbn/rule-registry-plugin/common/search_strategy';
+import {
+  QueryDslFieldAndFormat,
+  QueryDslQueryContainer,
+  SortCombinations,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DefaultSort } from './constants';
 import * as i18n from './translations';
 
 interface FetchAlertsArgs {
   featureIds: ValidFeatureId[];
-  fields: estypes.QueryDslFieldAndFormat[];
-  query: Pick<estypes.QueryDslQueryContainer, 'bool' | 'ids'>;
+  fields: QueryDslFieldAndFormat[];
+  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   pagination: {
     pageIndex: number;
     pageSize: number;
   };
-  sort: estypes.SortCombinations[];
+  sort: SortCombinations[];
   skip: boolean;
 }
 
