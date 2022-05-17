@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { appendLayerIds } from './layers';
+export { appendLayerIds, getAccessors } from './layers';
+export { normalizeTable } from './table';

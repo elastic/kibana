@@ -188,6 +188,36 @@ describe('InvestigateInResolverAction', () => {
         expect(wrapper.find(addEndpointEventFilterButton).first().exists()).toEqual(true);
         expect(wrapper.find(addEndpointEventFilterButton).first().props().disabled).toEqual(true);
       });
+
+      test('it enables AddEndpointEventFilter when timeline id is user events page', () => {
+        const wrapper = mount(
+          <AlertContextMenu {...endpointEventProps} timelineId={TimelineId.usersPageEvents} />,
+          {
+            wrappingComponent: TestProviders,
+          }
+        );
+
+        wrapper.find(actionMenuButton).simulate('click');
+        expect(wrapper.find(addEndpointEventFilterButton).first().exists()).toEqual(true);
+        expect(wrapper.find(addEndpointEventFilterButton).first().props().disabled).toEqual(false);
+      });
+
+      test('it disables AddEndpointEventFilter when timeline id is user events page but is not from endpoint', () => {
+        const customProps = {
+          ...props,
+          ecsRowData: { ...ecsRowData, agent: { type: ['other'] }, event: { kind: ['event'] } },
+        };
+        const wrapper = mount(
+          <AlertContextMenu {...customProps} timelineId={TimelineId.usersPageEvents} />,
+          {
+            wrappingComponent: TestProviders,
+          }
+        );
+
+        wrapper.find(actionMenuButton).simulate('click');
+        expect(wrapper.find(addEndpointEventFilterButton).first().exists()).toEqual(true);
+        expect(wrapper.find(addEndpointEventFilterButton).first().props().disabled).toEqual(true);
+      });
     });
     describe('when users can NOT access endpoint management', () => {
       beforeEach(() => {
@@ -200,6 +230,19 @@ describe('InvestigateInResolverAction', () => {
       test('it disables AddEndpointEventFilter when timeline id is host events page but cannot acces endpoint management', () => {
         const wrapper = mount(
           <AlertContextMenu {...endpointEventProps} timelineId={TimelineId.hostsPageEvents} />,
+          {
+            wrappingComponent: TestProviders,
+          }
+        );
+
+        wrapper.find(actionMenuButton).simulate('click');
+        expect(wrapper.find(addEndpointEventFilterButton).first().exists()).toEqual(true);
+        expect(wrapper.find(addEndpointEventFilterButton).first().props().disabled).toEqual(true);
+      });
+
+      test('it disables AddEndpointEventFilter when timeline id is user events page but cannot acces endpoint management', () => {
+        const wrapper = mount(
+          <AlertContextMenu {...endpointEventProps} timelineId={TimelineId.usersPageEvents} />,
           {
             wrappingComponent: TestProviders,
           }
