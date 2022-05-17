@@ -38,7 +38,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const RULE_NAME = 'test-search-source-alert';
   let sourceDataViewId: string;
   let outputDataViewId: string;
-  let anotherSourceDataViewId: string;
   let connectorId: string;
 
   const createSourceIndex = () =>
@@ -252,13 +251,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      [OUTPUT_DATA_INDEX, SOURCE_DATA_INDEX].forEach((current) =>
-        es.transport.request({
-          path: `/${current}`,
-          method: 'DELETE',
-        })
-      );
-      await deleteDataViews([sourceDataViewId, outputDataViewId, anotherSourceDataViewId]);
+      es.transport.request({
+        path: `/${OUTPUT_DATA_INDEX}`,
+        method: 'DELETE',
+      });
+      await deleteDataViews([sourceDataViewId, outputDataViewId]);
       await deleteConnector(connectorId);
       const alertsToDelete = await getAlertsByName(RULE_NAME);
       await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
@@ -316,10 +313,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await openOutputIndex();
       await navigateToResults();
 
-      const hasFilter = await filterBar.hasFilter('message', 'msg-1');
       const { message, title } = await getLastToast();
       const queryString = await queryBar.getQueryString();
-      await PageObjects.common.sleep(3000);
+      const hasFilter = await filterBar.hasFilter('message.keyword', 'msg-1');
 
       expect(queryString).to.be.equal('message:msg-1');
       expect(hasFilter).to.be.equal(true);
