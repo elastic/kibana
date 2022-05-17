@@ -23,7 +23,7 @@ export const overviewLinks: LinkItem = {
   title: OVERVIEW,
   landingImage: overviewPageImg,
   description: i18n.translate('xpack.securitySolution.appLinks.overviewDescription', {
-    defaultMessage: 'What is going in your secuity environment.',
+    defaultMessage: 'What is going on in your security environment.',
   }),
   path: OVERVIEW_PATH,
   globalNavEnabled: true,
