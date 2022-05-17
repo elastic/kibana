@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'data view selector to include a newly created dataview',
         5000,
         async () => {
-          const addNewVizButton = await testSubjects.exists('createVisualizationPromptButton');
+          const addNewVizButton = await testSubjects.exists('newItemButton');
           expect(addNewVizButton).to.be(true);
           return addNewVizButton;
         }
