@@ -21,13 +21,19 @@ export default ({ getService }: FtrProviderContext) => {
   const ALERTS_FEATURE_IDS_URL = `${TEST_URL}/_feature_ids`;
   const SPACE1 = 'space1';
 
-  const getApmFeatureIdByRegistrationContexts = async (user: User, space: string, expectedStatusCode: number = 200) => {
+  const getApmFeatureIdByRegistrationContexts = async (
+    user: User,
+    space: string,
+    expectedStatusCode: number = 200
+  ) => {
     const resp = await supertestWithoutAuth
-      .get(`${getSpaceUrlPrefix(space)}${ALERTS_FEATURE_IDS_URL}?registrationContext=observability.apm`)
+      .get(
+        `${getSpaceUrlPrefix(space)}${ALERTS_FEATURE_IDS_URL}?registrationContext=observability.apm`
+      )
       .auth(user.username, user.password)
       .set('kbn-xsrf', 'true')
       .expect(expectedStatusCode);
-    console.log(resp.body)
+    console.log(resp.body);
     return resp.body as string[];
   };
 
