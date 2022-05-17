@@ -9,6 +9,7 @@ import React, { memo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut } from '@elastic/eui';
+import { ActionDetails } from '../../../../common/endpoint/types';
 import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details';
 import { EndpointCommandDefinitionMeta } from './types';
 import { useSendIsolateEndpointRequest } from '../../hooks/endpoint/use_send_isolate_endpoint_request';
@@ -16,12 +17,16 @@ import { CommandExecutionComponentProps } from '../console/types';
 
 export const IsolateActionResult = memo<
   CommandExecutionComponentProps<
-    { actionId?: string; actionRequestSent?: boolean },
+    {
+      actionId?: string;
+      actionRequestSent?: boolean;
+      completedActionDetails?: ActionDetails;
+    },
     EndpointCommandDefinitionMeta
   >
 >(({ command, setStore, store, status, setStatus }) => {
   const endpointId = command.commandDefinition?.meta?.endpointId;
-  const actionId = store.actionId;
+  const { actionId, completedActionDetails } = store;
   const isPending = status === 'pending';
   const actionRequestSent = Boolean(store.actionRequestSent);
 
@@ -58,16 +63,40 @@ export const IsolateActionResult = memo<
   useEffect(() => {
     if (actionDetails?.data.isCompleted) {
       setStatus('success');
+      setStore((prevState) => {
+        return {
+          ...prevState,
+          completedActionDetails: actionDetails.data,
+        };
+      });
     }
-  }, [actionDetails?.data.isCompleted, setStatus]);
+  }, [actionDetails?.data, setStatus, setStore]);
 
   // Show nothing if still pending
   if (isPending) {
     return null;
   }
 
-  // If the action failed, then show error
-  // TODO: implement failure in action request or response
+  // Show errors
+  if (completedActionDetails?.errors) {
+    return (
+      <EuiCallOut
+        color="danger"
+        iconType="alert"
+        title={i18n.translate(
+          'xpack.securitySolution.endpointResponseActions.isolate.errorMessageTitle',
+          { defaultMessage: 'Failure' }
+        )}
+        data-test-subj="isolateErrorCallout"
+      >
+        <FormattedMessage
+          id="xpack.securitySolution.endpointResponseActions.isolate.errorMessage"
+          defaultMessage="Isolate action failed with: {errors}"
+          values={{ errors: completedActionDetails.errors.join(' | ') }}
+        />
+      </EuiCallOut>
+    );
+  }
 
   // Show Success
   return (
