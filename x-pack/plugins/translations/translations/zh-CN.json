@@ -21021,8 +21021,6 @@
     "xpack.reporting.screencapture.readVisualizationsError": "尝试读取页面以获取可视化面板信息时发生错误：{error}",
     "xpack.reporting.screencapture.renderErrorsFound": "找到 {count} 条错误消息。请参阅报告对象了解更多信息。",
     "xpack.reporting.screencapture.renderIsComplete": "渲染已完成",
-    "xpack.reporting.screencapture.screenshotsTaken": "已捕获的屏幕截图：{numScreenhots}",
-    "xpack.reporting.screencapture.takingScreenshots": "正在捕获屏幕截图",
     "xpack.reporting.screencapture.waitingForRenderComplete": "正在等候渲染完成",
     "xpack.reporting.screencapture.waitingForRenderedElements": "正在等候 {itemsCount} 个已渲染元素进入 DOM",
     "xpack.reporting.screenCapturePanelContent.canvasLayoutHelpText": "删除边框和页脚徽标",
