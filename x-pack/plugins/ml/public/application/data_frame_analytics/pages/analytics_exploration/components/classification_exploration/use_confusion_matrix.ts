@@ -78,7 +78,7 @@ export const useConfusionMatrix = (
 
       let requiresKeyword = false;
       const dependentVariable = getDependentVar(jobConfig.analysis);
-      const resultsField = jobConfig.dest.results_field;
+      const resultsField = jobConfig.dest.results_field!;
       const isTraining = isTrainingFilter(searchQuery, resultsField);
 
       try {

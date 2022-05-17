@@ -13,13 +13,6 @@ import {
   State,
 } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 
-export interface FetchExplainDataReturnType {
-  success: boolean;
-  expectedMemory: string;
-  fieldSelection: FieldSelectionItem[];
-  errorMessage: string;
-}
-
 export const fetchExplainData = async (formState: State['form']) => {
   const jobConfig = getJobConfigFromFormState(formState);
   let errorMessage = '';

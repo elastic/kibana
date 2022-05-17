@@ -51,7 +51,9 @@ export const EditActionFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
 
   const [allowLazyStart, setAllowLazyStart] = useState<string>(initialAllowLazyStart);
   const [description, setDescription] = useState<string>(config.description || '');
-  const [modelMemoryLimit, setModelMemoryLimit] = useState<string>(config.model_memory_limit);
+  const [modelMemoryLimit, setModelMemoryLimit] = useState<string | undefined>(
+    config.model_memory_limit
+  );
   const [mmlValidationError, setMmlValidationError] = useState<string | undefined>();
   const [maxNumThreads, setMaxNumThreads] = useState<number | undefined>(config.max_num_threads);
 

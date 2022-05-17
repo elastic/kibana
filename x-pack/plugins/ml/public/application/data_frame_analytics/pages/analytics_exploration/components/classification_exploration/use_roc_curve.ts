@@ -58,7 +58,7 @@ export const useRocCurve = (
       setIsLoading(true);
 
       const dependentVariable = getDependentVar(jobConfig.analysis);
-      const resultsField = jobConfig.dest.results_field;
+      const resultsField = jobConfig.dest.results_field!;
 
       const newRocCurveData: RocCurveDataRow[] = [];
 
