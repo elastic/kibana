@@ -7,9 +7,10 @@
  */
 
 import { pickLevelFromFlags, ToolingLog, LogLevel } from '@kbn/tooling-log';
-import { createFlagError } from './fail';
+import { ProcRunner, withProcRunner } from '@kbn/dev-proc-runner';
+import { createFlagError } from '@kbn/dev-cli-errors';
+
 import { Flags, getFlags, FlagOptions } from './flags';
-import { ProcRunner, withProcRunner } from '../proc_runner';
 import { getHelp } from './help';
 import { CleanupTask, Cleanup } from './cleanup';
 import { Metrics, MetricsMeta } from './metrics';
