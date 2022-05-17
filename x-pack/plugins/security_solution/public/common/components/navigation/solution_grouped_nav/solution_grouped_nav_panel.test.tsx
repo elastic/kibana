@@ -34,11 +34,18 @@ const mockItems: DefaultSideNavItem[] = [
 
 const PANEL_TITLE = 'test title';
 const mockOnClose = jest.fn();
+const mockOnOutsideClick = jest.fn();
 const renderNavPanel = (props: Partial<SolutionNavPanelProps> = {}) =>
   render(
     <>
       <div data-test-subj="outsideClickDummy" />
-      <SolutionNavPanel items={mockItems} title={PANEL_TITLE} onClose={mockOnClose} {...props} />
+      <SolutionNavPanel
+        items={mockItems}
+        title={PANEL_TITLE}
+        onClose={mockOnClose}
+        onOutsideClick={mockOnOutsideClick}
+        {...props}
+      />
     </>,
     {
       wrapper: TestProviders,
@@ -104,7 +111,7 @@ describe('SolutionGroupedNav', () => {
       const result = renderNavPanel();
       result.getByTestId('outsideClickDummy').click();
       waitFor(() => {
-        expect(mockOnClose).toHaveBeenCalled();
+        expect(mockOnOutsideClick).toHaveBeenCalled();
       });
     });
   });
