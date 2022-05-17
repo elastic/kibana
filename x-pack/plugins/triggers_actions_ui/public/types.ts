@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart } from '@kbn/core/public';
 import type { ComponentType } from 'react';
@@ -49,6 +48,7 @@ import {
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 
+import { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TypeRegistry } from './application/type_registry';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
@@ -401,7 +401,7 @@ export interface FetchAlertData {
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
   onSortChange: (sort: EuiDataGridSorting['columns']) => void;
   refresh: () => void;
-  sort: estypes.SortCombinations[];
+  sort: SortCombinations[];
 }
 
 export interface BulkActionsObjectProp {
@@ -434,7 +434,7 @@ export type RenderCellValueProps = EuiDataGridCellValueElementProps & {
 export interface AlertsTableConfigurationRegistry {
   id: string;
   columns: EuiDataGridColumn[];
-  sort?: estypes.SortCombinations[];
+  sort?: SortCombinations[];
 }
 
 export type RuleStatus = 'enabled' | 'disabled' | 'snoozed';
