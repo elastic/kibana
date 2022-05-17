@@ -9,7 +9,7 @@
 import './app.scss';
 import React, { useEffect, useCallback, useState } from 'react';
 import { Route, Switch, useLocation } from 'react-router-dom';
-
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { syncQueryStateWithUrl } from '@kbn/data-plugin/public';
@@ -68,6 +68,7 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
   } = useKibana<VisualizeServices>();
   const { pathname } = useLocation();
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const onDataViewCreated = useCallback(async (dataView: unknown) => {
     const dataViewId = (dataView as DataView).id;
@@ -94,11 +95,20 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
       if (!hasUserDataView || !hasEsData) {
         setShowNoDataPage(true);
       }
+      setIsLoading(false);
     };
 
     // call the function
     checkESOrDataViewExist();
   }, [dataViews]);
+
+  if (isLoading) {
+    return (
+      <div className="visAppLoadingWrapper">
+        <EuiLoadingSpinner size="xl" />
+      </div>
+    );
+  }
 
   // Visualize app should return the noData component if there is no data view or data source
   if (showNoDataPage) {
