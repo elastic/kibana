@@ -9,6 +9,7 @@ import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typ
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { latestFindingsTransform } from './latest_findings_transform';
 import { benchmarkScoreTransform } from './benchmark_score_transform';
+import { CSP_INGEST_TIMESTAMP_PIPELINE } from '../../common/constants';
 
 // TODO: Move transforms to integration package
 export const initializeCspTransforms = async (
@@ -26,11 +27,64 @@ export const initializeTransform = async (
   transform: TransformPutTransformRequest,
   logger: Logger
 ) => {
-  return createTransformIfNotExists(esClient, transform, logger).then((succeeded) => {
-    if (succeeded) {
-      startTransformIfNotStarted(esClient, transform.transform_id, logger);
+  const createPipelineResponse = await createPipelineIfNotExists(
+    esClient,
+    CSP_INGEST_TIMESTAMP_PIPELINE,
+    logger
+  );
+  if (createPipelineResponse) {
+    return createTransformIfNotExists(esClient, transform, logger).then((succeeded) => {
+      if (succeeded) {
+        startTransformIfNotStarted(esClient, transform.transform_id, logger);
+      }
+    });
+  }
+};
+
+/**
+ * Checks if a transform exists, And if not creates it
+ *
+ * @param pipelineId - the pipeline id to create. If a pipeline with the same pipelineId already exists, nothing is created or updated.
+ *
+ * @return true if the pipeline exits or created, false otherwise.
+ */
+export const createPipelineIfNotExists = async (
+  esClient: ElasticsearchClient,
+  pipelineId: string,
+  logger: Logger
+) => {
+  try {
+    const pipelines = await esClient.ingest.getPipeline();
+    if (!pipelines.hasOwnProperty(pipelineId)) {
+      await esClient.ingest.putPipeline({
+        id: pipelineId,
+        description: 'Pipeline for adding event timestamp to score transform',
+        processors: [
+          {
+            set: {
+              field: 'event.ingested',
+              value: '{{_ingest.timestamp}}',
+            },
+          },
+        ],
+        on_failure: [
+          {
+            set: {
+              field: 'error.message',
+              value: '{{ _ingest.on_failure_message }}',
+            },
+          },
+        ],
+      });
     }
-  });
+
+    return true;
+  } catch (existErr) {
+    const existError = transformError(existErr);
+    logger.error(`Failed to create CSP pipeline ${pipelineId} error: ${existError.message}`);
+
+    return false;
+  }
 };
 
 /**

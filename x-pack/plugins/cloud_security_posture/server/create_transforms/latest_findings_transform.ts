@@ -26,7 +26,7 @@ export const latestFindingsTransform: TransformPutTransformRequest = {
   retention_policy: {
     time: {
       field: '@timestamp',
-      max_age: '3d',
+      max_age: '5h',
     },
   },
   latest: {

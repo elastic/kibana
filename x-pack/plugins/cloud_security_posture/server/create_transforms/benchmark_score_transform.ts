@@ -9,6 +9,7 @@ import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/ap
 import {
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+  CSP_INGEST_TIMESTAMP_PIPELINE,
 } from '../../common/constants';
 
 export const benchmarkScoreTransform: TransformPutTransformRequest = {
@@ -19,26 +20,21 @@ export const benchmarkScoreTransform: TransformPutTransformRequest = {
   },
   dest: {
     index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+    pipeline: CSP_INGEST_TIMESTAMP_PIPELINE,
   },
-  frequency: '30m',
+  frequency: '5m',
   sync: {
     time: {
       field: 'event.ingested',
-      delay: '60s',
     },
   },
-  retention_policy: {
-    time: {
-      field: '@timestamp',
-      max_age: '30d',
-    },
-  },
+
   pivot: {
     group_by: {
       '@timestamp': {
         date_histogram: {
           field: '@timestamp',
-          calendar_interval: '1m',
+          fixed_interval: '5h',
         },
       },
     },
