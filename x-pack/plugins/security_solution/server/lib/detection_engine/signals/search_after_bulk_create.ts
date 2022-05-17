@@ -44,6 +44,7 @@ export const searchAfterAndBulkCreate = async ({
   tuple,
   wrapHits,
 }: SearchAfterAndBulkCreateParams): Promise<SearchAfterAndBulkCreateReturnType> => {
+  // eslint-disable-next-line complexity
   return withSecuritySpan('searchAfterAndBulkCreate', async () => {
     const ruleParams = completeRule.ruleParams;
     let toReturn = createSearchAfterReturnType();
@@ -68,7 +69,11 @@ export const searchAfterAndBulkCreate = async ({
     let kibanaIndexPattern: SavedObject<DataViewAttributes> | null = null;
     // hasDataViewInParams is a typeguard that asserts ruleParams are either
     // threat match, threshold, eql, or query rule types
-    if (hasDataViewInParams(ruleParams) && ruleParams.dataViewId != null) {
+    if (
+      hasDataViewInParams(ruleParams) &&
+      ruleParams.dataViewId != null &&
+      ruleParams.dataViewId !== ''
+    ) {
       kibanaIndexPattern = await services.savedObjectsClient.get<DataViewAttributes>(
         'index-pattern',
         ruleParams.dataViewId

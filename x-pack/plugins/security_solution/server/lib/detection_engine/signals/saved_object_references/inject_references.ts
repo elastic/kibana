@@ -63,7 +63,10 @@ export const injectReferences = <TParams extends RuleParams>({
       logger,
       savedObjectReferences,
     });
-    ruleParamsWithSavedObjectReferences = { ...ruleParamsWithSavedObjectReferences, dataView };
+    ruleParamsWithSavedObjectReferences = {
+      ...ruleParamsWithSavedObjectReferences,
+      dataViewId: dataView,
+    };
   }
 
   return ruleParamsWithSavedObjectReferences;

@@ -171,7 +171,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
   const [threatIndexModified, setThreatIndexModified] = useState(false);
-  const [radioIdSelected, setRadioIdSelected] = useState(dataViewRadioButtonId);
 
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
@@ -235,6 +234,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   const [indexPattern, setIndexPattern] = useState<DataViewBase>(initIndexPattern);
   const [isIndexPatternLoading, setIsIndexPatternLoading] = useState(initIsIndexPatternLoading);
+  const [radioIdSelected, setRadioIdSelected] = useState(
+    isUpdateView && (formDataViewId == null || formDataViewId === '')
+      ? 'indexPatterns'
+      : dataViewRadioButtonId
+  );
 
   useEffect(() => {
     if (radioIdSelected === 'indexPatterns') {

@@ -86,10 +86,14 @@ export const DataViewSelector = ({
         onChange={onChangeIndexPatterns}
         // TODO: optimize this, pass down array of data view ids
         // at the same time we grab the data views in the top level form component
-        options={Object.keys(kibanaDataViews).map((dvId) => ({
-          label: dvId,
-          id: dvId,
-        }))}
+        options={
+          kibanaDataViews != null && Object.keys(kibanaDataViews).length > 0
+            ? Object.keys(kibanaDataViews).map((dvId) => ({
+                label: dvId,
+                id: dvId,
+              }))
+            : []
+        }
         selectedOptions={selectedOptions}
         aria-label={i18n.PICK_INDEX_PATTERNS}
         placeholder={i18n.PICK_INDEX_PATTERNS}

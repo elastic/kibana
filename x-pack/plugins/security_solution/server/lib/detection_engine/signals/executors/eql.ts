@@ -72,7 +72,7 @@ export const eqlExecutor = async ({
       result.warning = true;
     }
 
-    const inputIndex = await getInputIndex({
+    let inputIndex = await getInputIndex({
       experimentalFeatures,
       services,
       version,
@@ -80,11 +80,14 @@ export const eqlExecutor = async ({
     });
 
     let runtimeMappings: estypes.MappingRuntimeFields = {};
-    if (ruleParams.dataViewId != null) {
+    if (ruleParams.dataViewId != null && ruleParams.dataViewId !== '') {
       const dataView = await services.savedObjectsClient.get<DataViewAttributes>(
         'index-pattern',
         ruleParams.dataViewId
       );
+      if (dataView != null && dataView.attributes.title != null) {
+        inputIndex = dataView.attributes.title.split(',');
+      }
       if (dataView?.attributes.runtimeFieldMap != null) {
         runtimeMappings = JSON.parse(dataView.attributes.runtimeFieldMap);
         logger.debug(`runtime mappings ${runtimeMappings}`);

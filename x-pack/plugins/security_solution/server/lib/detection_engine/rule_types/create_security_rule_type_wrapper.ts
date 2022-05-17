@@ -142,7 +142,11 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               let kibanaIndexPattern: SavedObject<DataViewAttributes> | null = null;
               // hasDataViewInParams is a typeguard that asserts ruleParams are either
               // threat match, threshold, eql, or query rule types
-              if (hasDataViewInParams(params) && params.dataViewId != null) {
+              if (
+                hasDataViewInParams(params) &&
+                params.dataViewId != null &&
+                params.dataViewId !== ''
+              ) {
                 kibanaIndexPattern = await services.savedObjectsClient.get<DataViewAttributes>(
                   'index-pattern',
                   params.dataViewId
@@ -193,6 +197,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               }
             }
           } catch (exc) {
+            console.error(exc);
             const errorMessage = buildRuleMessage(`Check privileges failed to execute ${exc}`);
             logger.warn(errorMessage);
             await ruleExecutionLogger.logStatusChange({
