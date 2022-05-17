@@ -457,6 +457,12 @@ Example: `https`
 [[xpack-security-ecs-audit-correlation]]
 ==== Correlating ECS audit events
 
+[IMPORTANT]
+============================================================================
+Audit events correlation requires the use of <<xpack-security-ecs-audit-logging, ECS audit logger>>.
+`trace.id` field is only produced when `xpack.security.audit.appender` is configured.
+============================================================================
+
 Audit events can be correlated in two ways:
 
 1. Multiple {kib} audit events that resulted from the same request can be correlated together.
