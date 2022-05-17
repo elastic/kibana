@@ -218,7 +218,6 @@ function renderPopoverContent({
       <EuiFlexItem>
         <span
           className="dscDiscoverGrid__cellPopoverValue eui-textBreakWord"
-
           // formatFieldValue guarantees sanitized values
           // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{
