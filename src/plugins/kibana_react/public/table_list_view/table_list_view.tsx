@@ -77,7 +77,7 @@ export interface TableListViewState<V> {
   filter: string;
   selectedIds: string[];
   totalItems: number;
-  tableSort: {
+  tableSort?: {
     field: keyof V;
     direction: Direction;
   };
@@ -88,7 +88,7 @@ export interface TableListViewState<V> {
 // and not supporting server-side paging.
 // This component does not try to tackle these problems (yet) and is just feature matching the legacy component
 // TODO support server side sorting/paging once title and description are sortable on the server.
-class TableListView<V extends { [key: string]: unknown }> extends React.Component<
+class TableListView<V extends {}> extends React.Component<
   TableListViewProps<V>,
   TableListViewState<V>
 > {
@@ -115,10 +115,6 @@ class TableListView<V extends { [key: string]: unknown }> extends React.Componen
       showLimitError: false,
       filter: props.initialFilter,
       selectedIds: [],
-      tableSort: {
-        field: '',
-        direction: 'asc',
-      },
     };
   }
 
@@ -140,7 +136,7 @@ class TableListView<V extends { [key: string]: unknown }> extends React.Componen
       // We check if the saved object have the "updatedAt" metadata
       // to render or not that column in the table
       const hasUpdatedAtMetadata = Boolean(
-        this.state.items.find((item) => Boolean(item.updatedAt))
+        this.state.items.find((item: { updatedAt?: string }) => Boolean(item.updatedAt))
       );
 
       this.setState((prev) => {
@@ -148,7 +144,7 @@ class TableListView<V extends { [key: string]: unknown }> extends React.Componen
           hasUpdatedAtMetadata,
           tableSort: hasUpdatedAtMetadata
             ? {
-                field: 'updatedAt',
+                field: 'updatedAt' as keyof V,
                 direction: 'desc' as const,
               }
             : prev.tableSort,
@@ -521,11 +517,10 @@ class TableListView<V extends { [key: string]: unknown }> extends React.Componen
 
     // Add "Last update" column
     if (this.state.hasUpdatedAtMetadata) {
-      const renderUpdatedAt = (dateTime: string) => {
+      const renderUpdatedAt = (dateTime?: string) => {
         if (!dateTime) {
           return <span />;
         }
-
         const updatedAt = moment(dateTime);
 
         if (updatedAt.diff(moment(), 'days') > -7) {
@@ -543,7 +538,8 @@ class TableListView<V extends { [key: string]: unknown }> extends React.Componen
         name: i18n.translate('kibana-react.tableListView.lastUpdatedColumnTitle', {
           defaultMessage: 'Last updated',
         }),
-        render: (field: string, record) => renderUpdatedAt(record.updatedAt as string),
+        render: (field: string, record: { updatedAt?: string }) =>
+          renderUpdatedAt(record.updatedAt),
         sortable: true,
       });
     }
