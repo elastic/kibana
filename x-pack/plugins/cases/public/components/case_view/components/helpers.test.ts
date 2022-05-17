@@ -36,11 +36,32 @@ const commentIsBad = {
   index: 'bad-siem-signals-default-000008',
 };
 
+const multipleIndices = {
+  ...alertComment,
+  alertId: ['test-id-1', 'test-id-2', 'test-id-3', 'test-id-4', 'test-id-5', 'test-id-6'],
+  index: [
+    '.internal.alerts-security.alerts-default-000001',
+    '.internal.alerts-observability.logs.alerts-default-000001',
+    '.internal.alerts-observability.uptime.alerts-default-000001',
+    '.internal.alerts-observability.metrics.alerts-default-000001',
+    '.internal.alerts-observability.apm.alerts-space2-000001',
+    '.internal.alerts-observability.logs.alerts-space1-000001',
+  ],
+};
+
 describe('Case view helpers', () => {
   describe('getRegistrationContextFromAlerts', () => {
     it('returns the correct registration context', () => {
-      const result = getRegistrationContextFromAlerts([comment, comment2]);
-      expect(result).toEqual(['matchme', 'another']);
+      const result = getRegistrationContextFromAlerts([comment, comment2, multipleIndices]);
+      expect(result).toEqual([
+        'matchme',
+        'another',
+        'security',
+        'observability.logs',
+        'observability.uptime',
+        'observability.metrics',
+        'observability.apm',
+      ]);
     });
 
     it('dedupes contexts', () => {

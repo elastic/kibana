@@ -22,7 +22,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { DefaultSort } from './constants';
 import * as i18n from './translations';
 
-interface FetchAlertsArgs {
+export interface FetchAlertsArgs {
   featureIds: ValidFeatureId[];
   fields: estypes.QueryDslFieldAndFormat[];
   query: Pick<estypes.QueryDslQueryContainer, 'bool' | 'ids'>;
@@ -162,6 +162,7 @@ const useFetchAlerts = ({
   const fetchAlerts = useCallback(
     (request: AlertRequest | null) => {
       if (request == null || skip) {
+        dispatch({ type: 'loading', loading: false });
         return;
       }
 
@@ -205,7 +206,6 @@ const useFetchAlerts = ({
                   searchSubscription$.current.unsubscribe();
                 } else if (isErrorResponse(response)) {
                   dispatch({ type: 'loading', loading: false });
-                  // TODO add i118n
                   data.search.showError(new Error(i18n.ERROR_FETCH_ALERTS));
                   searchSubscription$.current.unsubscribe();
                 }
