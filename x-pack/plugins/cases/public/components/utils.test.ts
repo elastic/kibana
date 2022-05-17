@@ -52,37 +52,8 @@ describe('Utils', () => {
     it('returns false if the connector is not defined', () => {
       expect(isDeprecatedConnector()).toBe(false);
     });
-
-    it('returns false if the connector is not ITSM or SecOps', () => {
-      expect(isDeprecatedConnector(connector)).toBe(false);
-    });
-
-    it('returns false if the connector is .servicenow and the usesTableApi=false', () => {
-      expect(isDeprecatedConnector({ ...connector, actionTypeId: '.servicenow' })).toBe(false);
-    });
-
-    it('returns false if the connector is .servicenow-sir and the usesTableApi=false', () => {
-      expect(isDeprecatedConnector({ ...connector, actionTypeId: '.servicenow-sir' })).toBe(false);
-    });
-
-    it('returns true if the connector is .servicenow and the usesTableApi=true', () => {
-      expect(
-        isDeprecatedConnector({
-          ...connector,
-          actionTypeId: '.servicenow',
-          config: { usesTableApi: true },
-        })
-      ).toBe(true);
-    });
-
-    it('returns true if the connector is .servicenow-sir and the usesTableApi=true', () => {
-      expect(
-        isDeprecatedConnector({
-          ...connector,
-          actionTypeId: '.servicenow-sir',
-          config: { usesTableApi: true },
-        })
-      ).toBe(true);
+    it('returns false if the connector is marked as deprecated', () => {
+      expect(isDeprecatedConnector({ ...connector, isDeprecated: false })).toBe(false);
     });
 
     it('returns true if the connector is marked as deprecated', () => {
@@ -92,13 +63,6 @@ describe('Utils', () => {
       expect(
         isDeprecatedConnector({ ...connector, isDeprecated: true, isPreconfigured: true })
       ).toBe(true);
-    });
-
-    it('returns false if the config is undefined', () => {
-      expect(
-        // @ts-expect-error
-        isDeprecatedConnector({ ...connector, config: undefined })
-      ).toBe(false);
     });
   });
 });
