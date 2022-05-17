@@ -183,7 +183,7 @@ const fetchRulesByQueryOrIds = async ({
   const { data, total } = await findRules({
     rulesClient,
     perPage: MAX_RULES_TO_PROCESS_TOTAL,
-    filter: query !== '' ? query : undefined,
+    filter: query,
     page: undefined,
     sortField: undefined,
     sortOrder: undefined,
