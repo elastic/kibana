@@ -15,6 +15,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
   const TEST_COLUMN_NAMES = ['dayOfWeek', 'DestWeather'];
+  const toasts = getService('toasts');
+  const browser = getService('browser');
 
   describe('Discover a11y tests', () => {
     before(async () => {
@@ -98,6 +100,93 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.clickSavedQueriesPopOver();
       await testSubjects.click('saved-query-management-load-button');
       await savedQueryManagementComponent.deleteSavedQuery('test');
+      await a11y.testAppSnapshot();
+    });
+
+    // adding a11y tests for the new data grid
+    it('a11y test on single document view', async () => {
+      await testSubjects.click('docTableExpandToggleColumn');
+      await PageObjects.discover.clickDocViewerTab(0);
+      await a11y.testAppSnapshot();
+    });
+
+    it('a11y test on JSON view of the document', async () => {
+      await PageObjects.discover.clickDocViewerTab(1);
+      await a11y.testAppSnapshot();
+    });
+
+    it('a11y test for actions on a field', async () => {
+      await PageObjects.discover.clickDocViewerTab(0);
+      await testSubjects.click('openFieldActionsButton-Cancelled');
+      await a11y.testAppSnapshot();
+    });
+
+    it('a11y test for data-grid table with columns', async () => {
+      await testSubjects.click('toggleColumnButton-Cancelled');
+      await testSubjects.click('openFieldActionsButton-Carrier');
+      await testSubjects.click('toggleColumnButton-Carrier');
+      await testSubjects.click('euiFlyoutCloseButton');
+      await toasts.dismissAllToasts();
+      await a11y.testAppSnapshot();
+    });
+
+    it('a11y test for data-grid actions on columns', async () => {
+      await testSubjects.click('dataGridHeaderCellActionButton-Carrier');
+      await a11y.testAppSnapshot();
+    });
+
+    it('a11y test for chart options panel', async () => {
+      await testSubjects.click('discoverChartOptionsToggle');
+      await a11y.testAppSnapshot();
+    });
+
+    it('a11y test for data grid with hidden chart', async () => {
+      await testSubjects.click('discoverChartToggle');
+      await a11y.testAppSnapshot();
+      await testSubjects.click('discoverChartOptionsToggle');
+      await testSubjects.click('discoverChartToggle');
+    });
+
+    it('a11y test for time interval panel', async () => {
+      await testSubjects.click('discoverChartOptionsToggle');
+      await testSubjects.click('discoverTimeIntervalPanel');
+      await a11y.testAppSnapshot();
+      await testSubjects.click('contextMenuPanelTitleButton');
+      await testSubjects.click('discoverChartOptionsToggle');
+    });
+
+    // https://github.com/elastic/eui/issues/5900
+    it.skip('a11y test for data grid sort panel', async () => {
+      await testSubjects.click('dataGridColumnSortingButton');
+      await a11y.testAppSnapshot();
+      await browser.pressKeys(browser.keys.ESCAPE);
+    });
+
+    it('a11y test for setting row height for display panel', async () => {
+      await testSubjects.click('dataGridDisplaySelectorPopover');
+      await a11y.testAppSnapshot();
+      await browser.pressKeys(browser.keys.ESCAPE);
+    });
+
+    it('a11y test for data grid in full screen', async () => {
+      await testSubjects.click('dataGridFullScreenButton');
+      await a11y.testAppSnapshot();
+      await browser.pressKeys(browser.keys.ESCAPE);
+    });
+
+    it('a11y test for field statistics data grid view', async () => {
+      await PageObjects.discover.clickViewModeFieldStatsButton();
+      await a11y.testAppSnapshot();
+    });
+
+    it('a11y test for data grid with collapsed side bar', async () => {
+      await PageObjects.discover.closeSidebar();
+      await a11y.testAppSnapshot();
+      await PageObjects.discover.toggleSidebarCollapse();
+    });
+
+    it('a11y test for adding a field from side bar', async () => {
+      await testSubjects.click('indexPattern-add-field_btn');
       await a11y.testAppSnapshot();
     });
   });
