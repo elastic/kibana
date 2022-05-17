@@ -19,6 +19,30 @@ const getCollectionMode = (indice) => {
   return 'Unknown collection mode';
 };
 
+/**
+ * builds a normalized representation of the monitoring state from the provided
+ * query buckets with a cluster->product->entity->metricset hierarchy where
+ *  cluster: the monitored cluster identifier
+ *  product: the monitored products (eg elasticsearch)
+ *  entity: the product unit of work (eg node)
+ *  metricset: the collected metricsets for a given entity
+ *
+ * example:
+ * {
+ *   "f-05NylTQg2G7rQXHnvYbA": {
+ *     "elasticsearch": {
+ *       "9NXA8Ov5QCeWAalKIHWFJg": {
+ *         "shard": {
+ *           "Metricbeat 8": {
+ *             "index": ".ds-.monitoring-es-8-mb-2022.05.17-000001",
+ *             "lastSeen": "2022-05-17T16:56:52.929Z"
+ *           }
+ *         }
+ *       }
+ *     }
+ *   }
+ * }
+ */
 export const buildMonitoredClusters = (clustersBuckets) => {
   const monitoredClusters = clustersBuckets.reduce(
     (clusters, { key, meta, doc_count, ...products }) => {
