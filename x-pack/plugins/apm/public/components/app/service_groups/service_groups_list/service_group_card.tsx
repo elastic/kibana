@@ -106,7 +106,7 @@ export function ServiceGroupsCard({
                 }
               )}
             >
-              {cardProps.description as JSX.Element}
+              <>{cardProps.description}</>
             </ServiceGroupsTour>
           }
         />
