@@ -101,11 +101,6 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
       if (!hasUserDataView || !hasEsData) {
         history.push({ pathname: VisualizeConstants.NO_DATA, search: history.location.search });
       }
-
-      const defaultDataView = await dataViews.getDefaultDataView();
-      if (!defaultDataView) {
-        history.push({ pathname: VisualizeConstants.NO_DATA, search: history.location.search });
-      }
       setIsLoading(false);
     };
 
