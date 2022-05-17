@@ -23,6 +23,8 @@ import type {
 } from '@kbn/lens-plugin/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 
+import { i18n } from '@kbn/i18n';
+
 import type { JobCreatorType } from '../common/job_creator';
 import { createEmptyJob, createEmptyDatafeed } from '../common/job_creator/util/default_configs';
 import { stashJobForCloning } from '../common/job_creator/util/general';
@@ -30,13 +32,13 @@ import { CREATED_BY_LABEL, DEFAULT_BUCKET_SPAN } from '../../../../../common/con
 import { ErrorType } from '../../../../../common/util/errors';
 import { createQueries } from '../utils/new_job_utils';
 import {
-  lensOperationToMlFunction,
   getVisTypeFactory,
   isCompatibleLayer,
   hasIncompatibleProperties,
   hasSourceField,
   isTermsField,
   isStringField,
+  getMlFunction,
 } from './utils';
 
 type VisualizationType = Awaited<ReturnType<LensPublicStart['getXyVisTypes']>>[number];
@@ -86,7 +88,11 @@ export async function canCreateAndStashADJob(
       end = max?.valueOf();
 
       if (start === undefined || end === undefined || isNaN(start) || isNaN(end)) {
-        throw Error('Incompatible time range');
+        throw Error(
+          i18n.translate('xpack.ml.newJob.fromLens.createJob.error.timeRange', {
+            defaultMessage: 'Incompatible time range',
+          })
+        );
       }
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -219,7 +225,11 @@ async function extractFields(
   dataViewClient: DataViewsContract
 ) {
   if (!isCompatibleLayer(layer)) {
-    throw new Error('Layer is incompatible. Only chart layers can be used.');
+    throw Error(
+      i18n.translate('xpack.ml.newJob.fromLens.createJob.error.incompatibleLayerType', {
+        defaultMessage: 'Layer is incompatible. Only chart layers can be used.',
+      })
+    );
   }
 
   const indexpattern = vis.state.datasourceStates.indexpattern as IndexPatternPersistedState;
@@ -228,16 +238,23 @@ async function extractFields(
   );
   if (compatibleIndexPatternLayer === undefined) {
     throw Error(
-      'Visualization does not contain any layers which can be used for creating an anomaly detection job.'
+      i18n.translate('xpack.ml.newJob.fromLens.createJob.error.noCompatibleLayers', {
+        defaultMessage:
+          'Visualization does not contain any layers which can be used for creating an anomaly detection job.',
+      })
     );
   }
 
   const [layerId, columnsLayer] = compatibleIndexPatternLayer;
 
-  const columns = getColumns(columnsLayer);
+  const columns = getColumns(columnsLayer, layer);
   const timeField = Object.values(columns).find(({ dataType }) => dataType === 'date');
   if (timeField === undefined) {
-    throw Error('Cannot find a date field.');
+    throw Error(
+      i18n.translate('xpack.ml.newJob.fromLens.createJob.error.noDateField', {
+        defaultMessage: 'Cannot find a date field.',
+      })
+    );
   }
 
   const fields = layer.accessors.map((a) => columns[a]);
@@ -249,20 +266,37 @@ async function extractFields(
     isTermsField(splitField) &&
     splitField.params.secondaryFields?.length
   ) {
-    throw Error('Selected split field contains more than one field');
+    throw Error(
+      i18n.translate('xpack.ml.newJob.fromLens.createJob.error.splitFieldHasMultipleFields', {
+        defaultMessage: 'Selected split field contains more than one field.',
+      })
+    );
   }
 
   if (splitField !== null && isStringField(splitField) === false) {
-    throw Error('Selected split field type must be string');
+    throw Error(
+      i18n.translate('xpack.ml.newJob.fromLens.createJob.error.splitFieldMustBeString', {
+        defaultMessage: 'Selected split field type must be string.',
+      })
+    );
   }
 
   const dataView = await getDataViewFromLens(vis.references, layerId, dataViewClient);
   if (dataView === null) {
-    throw Error('No data views can be found in the visualization.');
+    throw Error(
+      i18n.translate('xpack.ml.newJob.fromLens.createJob.error.noDataViews', {
+        defaultMessage: 'No data views can be found in the visualization.',
+      })
+    );
   }
 
   if (timeField.sourceField !== dataView.timeFieldName) {
-    throw Error('Selected time field must be the default time field configured for data view.');
+    throw Error(
+      i18n.translate('xpack.ml.newJob.fromLens.createJob.error.timeFieldNotInDataView', {
+        defaultMessage:
+          'Selected time field must be the default time field configured for data view.',
+      })
+    );
   }
 
   return { fields, timeField, splitField, dataView };
@@ -273,14 +307,8 @@ function createDetectors(
   splitField: FieldBasedIndexPatternColumn | null
 ) {
   return fields.map(({ operationType, sourceField }) => {
-    const func = lensOperationToMlFunction(operationType);
-    if (func === null) {
-      throw Error(
-        `Selected function ${operationType} is not supported by anomaly detection detectors`
-      );
-    }
     return {
-      function: func,
+      function: getMlFunction(operationType),
       field_name: sourceField,
       ...(splitField ? { partition_field_name: splitField.sourceField } : {}),
     };
@@ -301,15 +329,34 @@ async function getDataViewFromLens(
   return dataViewClient.get(dv.id);
 }
 
-function getColumns(layer: Omit<IndexPatternLayer, 'indexPatternId'>) {
-  const { columns } = layer;
-  if (
-    Object.values(columns).some(
-      (c) => hasSourceField(c) === false || hasIncompatibleProperties(c) === true
-    )
-  ) {
-    throw Error('Columns contain settings which are incompatible with ML detectors');
+function getColumns(
+  { columns }: Omit<IndexPatternLayer, 'indexPatternId'>,
+  layer: XYDataLayerConfig
+) {
+  layer.accessors.forEach((a) => {
+    const col = columns[a];
+    // fail early if any of the cols being used as accessors
+    // contain functions we don't support
+    return col.dataType !== 'date' && getMlFunction(col.operationType);
+  });
+
+  if (Object.values(columns).some((c) => hasSourceField(c) === false)) {
+    throw Error(
+      i18n.translate('xpack.ml.newJob.fromLens.createJob.error.colsNoSourceField', {
+        defaultMessage: 'Some columns do not contain a source field.',
+      })
+    );
   }
+
+  if (Object.values(columns).some((c) => hasIncompatibleProperties(c) === true)) {
+    throw Error(
+      i18n.translate('xpack.ml.newJob.fromLens.createJob.error.colsUsingFilterTimeSift', {
+        defaultMessage:
+          'Columns contain settings which are incompatible with ML detectors, time shift and filter by are not supported.',
+      })
+    );
+  }
+
   return columns as Record<string, FieldBasedIndexPatternColumn>;
 }
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type {
   Embeddable,
   LensPublicStart,
@@ -42,13 +43,21 @@ export function getJobsItemsFromEmbeddable(embeddable: Embeddable) {
   const { query, filters, timeRange } = embeddable.getInput();
 
   if (timeRange === undefined) {
-    throw Error('Time range not specified.');
+    throw Error(
+      i18n.translate('xpack.ml.newJob.fromLens.createJob.error.noTimeRange', {
+        defaultMessage: 'Time range not specified.',
+      })
+    );
   }
   const { to, from } = timeRange;
 
   const vis = embeddable.getSavedVis();
   if (vis === undefined) {
-    throw Error('Visualization cannot be found.');
+    throw Error(
+      i18n.translate('xpack.ml.newJob.fromLens.createJob.error.visNotFound', {
+        defaultMessage: 'Visualization cannot be found.',
+      })
+    );
   }
 
   return {
@@ -60,8 +69,8 @@ export function getJobsItemsFromEmbeddable(embeddable: Embeddable) {
   };
 }
 
-export function lensOperationToMlFunction(op: string) {
-  switch (op) {
+export function lensOperationToMlFunction(operationType: string) {
+  switch (operationType) {
     case 'average':
       return 'mean';
     case 'count':
@@ -82,6 +91,20 @@ export function lensOperationToMlFunction(op: string) {
   }
 }
 
+export function getMlFunction(operationType: string) {
+  const func = lensOperationToMlFunction(operationType);
+  if (func === null) {
+    throw Error(
+      i18n.translate('xpack.ml.newJob.fromLens.createJob.error.incorrectFunction', {
+        defaultMessage:
+          'Selected function {operationType} is not supported by anomaly detection detectors',
+        values: { operationType },
+      })
+    );
+  }
+  return func;
+}
+
 export async function getVisTypeFactory(lens: LensPublicStart) {
   const visTypes = await lens.getXyVisTypes();
   return (layer: XYLayerConfig) => {
@@ -94,12 +117,16 @@ export async function getVisTypeFactory(lens: LensPublicStart) {
         };
       case layerTypes.ANNOTATIONS:
         return {
-          label: 'Annotations',
+          label: i18n.translate('xpack.ml.newJob.fromLens.createJob.VisType.annotations', {
+            defaultMessage: 'Annotations',
+          }),
           icon: LensIconChartBarAnnotations,
         };
       case layerTypes.REFERENCELINE:
         return {
-          label: 'Reference line',
+          label: i18n.translate('xpack.ml.newJob.fromLens.createJob.VisType.referenceLine', {
+            defaultMessage: 'Reference line',
+          }),
           icon: LensIconChartBarReferenceLine,
         };
       default:
