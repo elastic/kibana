@@ -54,7 +54,7 @@ export const MethodApi: React.FC = () => {
         </EuiText>
       }
       docsUrl="#"
-      type="API endpoint"
+      type="api"
     >
       <EuiPanel hasBorder>
         <EuiTitle size="xs">
@@ -72,7 +72,7 @@ export const MethodApi: React.FC = () => {
 curl -X POST '${searchIndexApiUrl}${name}/document' \\
   -H 'Content-Type: application/json' \\
   -H 'Authorization: Bearer ${apiKey}' \\
-  -d '${DOCUMENTS_API_JSON_EXAMPLE}'
+  -d '${JSON.stringify(DOCUMENTS_API_JSON_EXAMPLE, null, 2)}'
 `}
             </EuiCodeBlock>
           </>

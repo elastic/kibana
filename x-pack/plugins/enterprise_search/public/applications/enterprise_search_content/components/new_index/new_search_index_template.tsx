@@ -33,7 +33,7 @@ import { i18n } from '@kbn/i18n';
 
 import { Engine } from '../../../app_search/components/engine/types';
 
-import { SUPPORTED_LANGUAGES } from './constants';
+import { SUPPORTED_LANGUAGES, NEW_INDEX_TEMPLATE_TYPES } from './constants';
 import { NewSearchIndexLogic } from './new_search_index_logic';
 
 export interface ISearchIndex {
@@ -80,7 +80,7 @@ export const NewSearchIndexTemplate: React.FC<ISearchIndex> = ({
                 'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.title',
                 {
                   defaultMessage: 'New {type}',
-                  values: { type },
+                  values: { type: NEW_INDEX_TEMPLATE_TYPES[type] },
                 }
               )}
             </h2>
@@ -107,7 +107,7 @@ export const NewSearchIndexTemplate: React.FC<ISearchIndex> = ({
                   'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputLabel',
                   {
                     defaultMessage: 'Name your {type}',
-                    values: { type },
+                    values: { type: NEW_INDEX_TEMPLATE_TYPES[type] },
                   }
                 )}
                 fullWidth
@@ -117,13 +117,13 @@ export const NewSearchIndexTemplate: React.FC<ISearchIndex> = ({
                     'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputPlaceholder',
                     {
                       defaultMessage: 'Set a name for the {type}',
-                      values: { type },
+                      values: { type: NEW_INDEX_TEMPLATE_TYPES[type] },
                     }
                   )}
                   fullWidth
                   isInvalid={false}
                   value={rawName}
-                  onChange={(event) => handleNameChange(event)}
+                  onChange={handleNameChange}
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -138,7 +138,7 @@ export const NewSearchIndexTemplate: React.FC<ISearchIndex> = ({
               >
                 <EuiSelect
                   options={SUPPORTED_LANGUAGES}
-                  onChange={(event) => handleLanguageChange(event)}
+                  onChange={handleLanguageChange}
                   value={language}
                 />
               </EuiFormRow>
