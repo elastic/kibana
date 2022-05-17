@@ -126,7 +126,7 @@ export default function ({
             'ecommerce_map',
             updateBaselines
           );
-          expect(percentDifference.toFixed(3)).to.be.lessThan(0.031);
+          expect(percentDifference.toFixed(3)).to.be.lessThan(0.05);
         });
       });
       describe('space: ' + space + ', name: flights', () => {
@@ -150,7 +150,7 @@ export default function ({
             'flights_map',
             updateBaselines
           );
-          expect(percentDifference.toFixed(3)).to.be.lessThan(0.031);
+          expect(percentDifference.toFixed(3)).to.be.lessThan(0.05);
         });
       });
       describe('space: ' + space + ', name: web logs', () => {
@@ -175,7 +175,7 @@ export default function ({
             'web_logs_map',
             updateBaselines
           );
-          expect(percentDifference.toFixed(3)).to.be.lessThan(0.031);
+          expect(percentDifference.toFixed(3)).to.be.lessThan(0.05);
         });
       });
     });
