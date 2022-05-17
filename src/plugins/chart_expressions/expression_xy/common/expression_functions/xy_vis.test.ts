@@ -88,6 +88,25 @@ describe('xyVis', () => {
     ).rejects.toThrowErrorMatchingSnapshot();
   });
 
+  test('it should throw error if addTimeMarker applied for not time chart', async () => {
+    const { data, args } = sampleArgs();
+    const { layers, ...rest } = args;
+    const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
+    expect(
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          addTimeMarker: true,
+          referenceLineLayers: [],
+          annotationLayers: [],
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
   test('it should throw error if splitRowAccessor is pointing to the absent column', async () => {
     const { data, args } = sampleArgs();
     const { layers, ...rest } = args;
