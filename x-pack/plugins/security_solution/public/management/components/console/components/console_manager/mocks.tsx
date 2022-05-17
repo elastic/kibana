@@ -33,6 +33,11 @@ export const getNewConsoleRegistrationMock = (
   };
 };
 
+/**
+ * A set of queries and user action helper methods for interacting with the ConsoleManager test component
+ * and ConsoleManager
+ * @param renderResult
+ */
 export const getConsoleManagerMockRenderResultQueriesAndActions = (
   renderResult: ReturnType<AppContextTestRender['render']>
 ) => {
@@ -67,6 +72,21 @@ export const getConsoleManagerMockRenderResultQueriesAndActions = (
         expect(
           renderResult.getByTestId('consolePopupWrapper').classList.contains('is-hidden')
         ).toBe(false);
+      });
+    },
+
+    hideOpenedConsole: async () => {
+      const hideConsoleButton = renderResult.queryByTestId('consolePopupHideButton');
+
+      if (!hideConsoleButton) {
+        return;
+      }
+
+      userEvent.click(hideConsoleButton);
+      await waitFor(() => {
+        expect(
+          renderResult.getByTestId('consolePopupWrapper').classList.contains('is-hidden')
+        ).toBe(true);
       });
     },
   };

@@ -25,16 +25,17 @@ export const IsolateActionResult = memo<
   const isPending = status === 'pending';
   const actionRequestSent = Boolean(store.actionRequestSent);
 
-  const isolateHost = useSendIsolateEndpointRequest();
+  const isolateHostApi = useSendIsolateEndpointRequest();
 
-  const { data } = useGetActionDetails(actionId ?? '-', {
+  const { data: actionDetails } = useGetActionDetails(actionId ?? '-', {
     enabled: Boolean(actionId) && isPending,
     refetchInterval: isPending ? 3000 : false,
   });
 
+  // Send Isolate request if not yet done
   useEffect(() => {
     if (!actionRequestSent && endpointId) {
-      isolateHost.mutate({
+      isolateHostApi.mutate({
         endpoint_ids: [endpointId],
         comment: command.args.args?.comment?.value,
       });
@@ -43,21 +44,22 @@ export const IsolateActionResult = memo<
         return { ...prevState, actionRequestSent: true };
       });
     }
-  }, [actionRequestSent, command.args.args?.comment?.value, endpointId, isolateHost, setStore]);
+  }, [actionRequestSent, command.args.args?.comment?.value, endpointId, isolateHostApi, setStore]);
 
+  // If isolate request was created, store the action id if necessary
   useEffect(() => {
-    if (isolateHost.isSuccess && actionId !== isolateHost.data.action) {
+    if (isolateHostApi.isSuccess && actionId !== isolateHostApi.data.action) {
       setStore((prevState) => {
-        return { ...prevState, actionId: isolateHost.data.action };
+        return { ...prevState, actionId: isolateHostApi.data.action };
       });
     }
-  }, [actionId, isolateHost?.data?.action, isolateHost.isSuccess, setStore]);
+  }, [actionId, isolateHostApi?.data?.action, isolateHostApi.isSuccess, setStore]);
 
   useEffect(() => {
-    if (data?.data.isCompleted) {
+    if (actionDetails?.data.isCompleted) {
       setStatus('success');
     }
-  }, [data?.data.isCompleted, setStatus]);
+  }, [actionDetails?.data.isCompleted, setStatus]);
 
   // Show nothing if still pending
   if (isPending) {
@@ -76,6 +78,7 @@ export const IsolateActionResult = memo<
         'xpack.securitySolution.endpointResponseActions.isolate.successMessageTitle',
         { defaultMessage: 'Success' }
       )}
+      data-test-subj="isolateSuccessCallout"
     >
       <FormattedMessage
         id="xpack.securitySolution.endpointResponseActions.isolate.successMessage"
