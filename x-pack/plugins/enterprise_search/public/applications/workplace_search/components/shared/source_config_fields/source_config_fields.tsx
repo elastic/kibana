@@ -28,30 +28,32 @@ import {
   COPIED_TOOLTIP,
   COPY_TOOLTIP,
 } from '../../../constants';
+import { SourceConfigData } from '../../../views/content_sources/components/add_source/add_source_logic';
 import { ApiKey } from '../api_key';
 import { CredentialItem } from '../credential_item';
 
 interface SourceConfigFieldsProps {
   isOauth1?: boolean;
-  clientId?: string;
-  clientSecret?: string;
-  publicKey?: string;
-  consumerKey?: string;
-  baseUrl?: string;
-  externalConnectorUrl?: string;
-  externalConnectorApiKey?: string;
+  sourceConfigData: SourceConfigData;
 }
 
 export const SourceConfigFields: React.FC<SourceConfigFieldsProps> = ({
   isOauth1,
-  clientId,
-  clientSecret,
-  publicKey,
-  consumerKey,
-  baseUrl,
-  externalConnectorApiKey,
-  externalConnectorUrl,
+  sourceConfigData,
 }) => {
+  const { configuredFields } = sourceConfigData;
+
+  // TODO use configurableFields instead of static field names
+  const {
+    public_key: publicKey,
+    consumer_key: consumerKey,
+    client_id: clientId,
+    client_secret: clientSecret,
+    base_url: baseUrl,
+    external_connector_api_key: externalConnectorApiKey,
+    external_connector_url: externalConnectorUrl,
+  } = configuredFields;
+
   const credentialItem = (label: string, item?: string) =>
     item && (
       <>

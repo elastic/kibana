@@ -8,7 +8,6 @@
 import React, { useEffect, useState, ChangeEvent, FormEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
-import { isEmpty } from 'lodash';
 
 import {
   EuiButton,
@@ -21,7 +20,11 @@ import {
   EuiSpacer,
   EuiFilePicker,
 } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+
+import { SAVE_BUTTON_LABEL } from '../../../../shared/constants';
 
 import { EuiButtonEmptyTo } from '../../../../shared/react_router_helpers';
 import { AppLogic } from '../../../app_logic';
@@ -81,9 +84,7 @@ export const SourceSettings: React.FC = () => {
     isConfigurationUpdateButtonLoading,
   } = useValues(SourceLogic);
 
-  const {
-    sourceConfigData: { configuredFields },
-  } = useValues(AddSourceLogic);
+  const { sourceConfigData } = useValues(AddSourceLogic);
 
   const { isOrganization } = useValues(AppLogic);
 
@@ -104,18 +105,8 @@ export const SourceSettings: React.FC = () => {
   const showConfirm = () => setModalVisibility(true);
   const hideConfirm = () => setModalVisibility(false);
 
-  const showOauthConfig = !isGithubApp && isOrganization && !isEmpty(configuredFields);
+  const showOauthConfig = !isGithubApp && isOrganization;
   const showGithubAppConfig = isGithubApp;
-
-  const {
-    clientId,
-    clientSecret,
-    publicKey,
-    consumerKey,
-    baseUrl,
-    externalConnectorUrl,
-    externalConnectorApiKey,
-  } = configuredFields || {};
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => setValue(e.target.value);
 
@@ -193,16 +184,7 @@ export const SourceSettings: React.FC = () => {
       </ContentSection>
       {showOauthConfig && (
         <ContentSection title={SOURCE_CONFIG_TITLE}>
-          <SourceConfigFields
-            isOauth1={isOauth1}
-            clientId={clientId}
-            clientSecret={clientSecret}
-            publicKey={publicKey}
-            consumerKey={consumerKey}
-            baseUrl={baseUrl}
-            externalConnectorUrl={externalConnectorUrl}
-            externalConnectorApiKey={externalConnectorApiKey}
-          />
+          <SourceConfigFields isOauth1={isOauth1} sourceConfigData={sourceConfigData} />
           <EuiFormRow>
             <EuiButtonEmptyTo to={editPath as string} flush="left">
               {SOURCE_CONFIG_LINK}
@@ -228,7 +210,10 @@ export const SourceSettings: React.FC = () => {
                 <EuiFilePicker
                   key={secret!.fingerprint} // clear staged file by rerendering the file picker each time the fingerprint changes
                   onChange={(files) => handlePrivateKeyUpload(files, setStagedPrivateKey)}
-                  initialPromptText="Upload a new .pem file to rotate the private key"
+                  initialPromptText={i18n.translate(
+                    'xpack.enterpriseSearch.workplaceSearch.sources.sourceSettings.pemKeyPrompText',
+                    { defaultMessage: 'Upload a new .pem file to rotate the private key' }
+                  )}
                   accept=".pem"
                 />
               </>
@@ -238,7 +223,7 @@ export const SourceSettings: React.FC = () => {
               isLoading={isConfigurationUpdateButtonLoading}
               disabled={!stagedPrivateKey}
             >
-              {isConfigurationUpdateButtonLoading ? 'Loading…' : 'Save'}
+              {SAVE_BUTTON_LABEL}
             </EuiButton>
           </EuiForm>
         </ContentSection>
