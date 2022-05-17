@@ -491,6 +491,23 @@ describe('policy_config and licenses', () => {
       );
     });
 
+    it('resets Platinum-paid advanced fields for lower license tiers', () => {
+      const defaults = policyFactoryWithoutPaidFeatures(); // reference
+      const policy = policyFactory(); // what we will modify, and should be reset
+
+      policy.windows.advanced = { rollback: true };
+      policy.windows.advanced = { memory_protection: { shellcode_trampoline_detection: true } };
+
+      const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Gold);
+
+      expect(retPolicy.windows.advanced?.rollback).toEqual(defaults.windows.advanced?.rollback);
+
+      // Preserves non-license gated advanced settings.
+      expect(retPolicy.windows.advanced?.memory_protection.shellcode_trampoline_detection).toEqual(
+        true
+      );
+    });
+
     it('sets ransomware supported field to false when license is below Platinum', () => {
       const defaults = policyFactoryWithoutPaidFeatures(); // reference
       const policy = policyFactory(); // what we will modify, and should be reset
