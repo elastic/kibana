@@ -53,10 +53,16 @@ export default function retainAPIKeyTests({ getService }: FtrProviderContext) {
             )
             .expect(200);
           objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
+          objectRemover.add(space.id, createdConnector.id, 'connector', 'alerting');
 
           const {
             body: { apiKey, apiKeyOwner },
           } = await alertUtils.getAPIKeyRequest(createdRule.id);
+
+          expect(apiKey).not.to.be(null);
+          expect(apiKey).not.to.be(undefined);
+          expect(apiKeyOwner).not.to.be(null);
+          expect(apiKeyOwner).not.to.be(undefined);
 
           await alertUtils.getDisableRequest(createdRule.id);
 

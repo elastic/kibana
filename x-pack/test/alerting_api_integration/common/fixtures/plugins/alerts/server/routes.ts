@@ -368,7 +368,7 @@ export function defineRoutes(
 
   router.get(
     {
-      path: '/api/alerting/rule/{id}/_get_api_key',
+      path: '/api/alerts_fixture/rule/{id}/_get_api_key',
       validate: {
         params: schema.object({
           id: schema.string(),

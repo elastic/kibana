@@ -78,7 +78,7 @@ export class AlertUtils {
 
   public getAPIKeyRequest(ruleId: string) {
     const request = this.supertestWithoutAuth.get(
-      `${getUrlPrefix(this.space.id)}/api/alerting/rule/${ruleId}/_get_api_key`
+      `${getUrlPrefix(this.space.id)}/api/alerts_fixture/rule/${ruleId}/_get_api_key`
     );
     if (this.user) {
       return request.auth(this.user.username, this.user.password);
