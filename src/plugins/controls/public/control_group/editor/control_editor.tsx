@@ -14,7 +14,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
 
 import {
@@ -32,7 +32,6 @@ import {
   EuiButtonEmpty,
   EuiSpacer,
   EuiIcon,
-  EuiToolTip,
   EuiSwitch,
 } from '@elastic/eui';
 import { DataViewListItem, DataView, DataViewField } from '@kbn/data-views-plugin/common';
@@ -74,7 +73,6 @@ interface ControlEditorState {
   dataViewListItems: DataViewListItem[];
   selectedDataView?: DataView;
   selectedField?: DataViewField;
-  fieldRegistry?: DataControlFieldRegistry;
 }
 
 const FieldPicker = withSuspense(LazyFieldPicker, null);
@@ -136,26 +134,27 @@ export const ControlEditor = ({
     return fieldRegistry;
   };
 
-  const getCompatibleControlTypes = (dataView?: DataView) => {
-    if (!dataView) return {};
-    const fieldRegistry: DataControlFieldRegistry = doubleLinkFields(dataView);
+  const fieldRegistry = useMemo(() => {
+    if (!state.selectedDataView) return;
+    const newFieldRegistry: DataControlFieldRegistry = doubleLinkFields(state.selectedDataView);
 
     const controlFactories = getControlTypes().map(
       (controlType) => getControlFactory(controlType) as IEditableControlFactory
     );
-    dataView.fields.map((dataViewField) => {
+    state.selectedDataView.fields.map((dataViewField) => {
       for (const factory of controlFactories) {
         if (factory.isFieldCompatible) {
-          factory.isFieldCompatible(fieldRegistry[dataViewField.name]);
+          factory.isFieldCompatible(newFieldRegistry[dataViewField.name]);
         }
       }
 
-      if (fieldRegistry[dataViewField.name]?.compatibleControlTypes.length === 0) {
-        delete fieldRegistry[dataViewField.name];
+      if (newFieldRegistry[dataViewField.name]?.compatibleControlTypes.length === 0) {
+        delete newFieldRegistry[dataViewField.name];
       }
     });
-    setState((s) => ({ ...s, fieldRegistry }));
-  };
+
+    return newFieldRegistry;
+  }, [state.selectedDataView, getControlFactory, getControlTypes]);
 
   useMount(() => {
     let mounted = true;
@@ -171,7 +170,6 @@ export const ControlEditor = ({
         dataView = await get(initialId);
       }
       if (!mounted) return;
-      getCompatibleControlTypes(dataView);
       setState((s) => ({
         ...s,
         selectedDataView: dataView,
@@ -188,7 +186,7 @@ export const ControlEditor = ({
     [selectedField, setControlEditorValid, state.selectedDataView]
   );
 
-  const { selectedDataView: dataView, fieldRegistry } = state;
+  const { selectedDataView: dataView } = state;
   const controlType =
     selectedField && fieldRegistry && fieldRegistry[selectedField].compatibleControlTypes[0];
   const factory = controlType && getControlFactory(controlType);
@@ -218,7 +216,6 @@ export const ControlEditor = ({
                 onTypeEditorChange({ dataViewId });
                 setSelectedField(undefined);
                 get(dataViewId).then((newDataView) => {
-                  getCompatibleControlTypes(newDataView);
                   setState((s) => ({ ...s, selectedDataView: newDataView }));
                 });
               }}
@@ -232,15 +229,15 @@ export const ControlEditor = ({
           <EuiFormRow label={ControlGroupStrings.manageControl.getFieldTitle()}>
             <FieldPicker
               filterPredicate={(field: DataViewField) => {
-                return state.fieldRegistry ? Boolean(state.fieldRegistry[field.name]) : false;
+                return Boolean(fieldRegistry?.[field.name]);
               }}
               selectedFieldName={selectedField}
               dataView={dataView}
               onSelectField={(field) => {
                 onTypeEditorChange({
                   fieldName: field.name,
-                  parentFieldName: state.fieldRegistry?.[field.name].parentFieldName,
-                  childFieldName: state.fieldRegistry?.[field.name].childFieldName,
+                  parentFieldName: fieldRegistry?.[field.name].parentFieldName,
+                  childFieldName: fieldRegistry?.[field.name].childFieldName,
                 });
 
                 const newDefaultTitle = field.displayName ?? field.name;
@@ -308,18 +305,21 @@ export const ControlEditor = ({
             </EuiFormRow>
           )}
           {removeControl && (
-            <EuiButtonEmpty
-              aria-label={`delete-${title}`}
-              iconType="trash"
-              flush="left"
-              color="danger"
-              onClick={() => {
-                onCancel();
-                removeControl();
-              }}
-            >
-              {ControlGroupStrings.management.getDeleteButtonTitle()}
-            </EuiButtonEmpty>
+            <>
+              <EuiSpacer size="l" />
+              <EuiButtonEmpty
+                aria-label={`delete-${title}`}
+                iconType="trash"
+                flush="left"
+                color="danger"
+                onClick={() => {
+                  onCancel();
+                  removeControl();
+                }}
+              >
+                {ControlGroupStrings.management.getDeleteButtonTitle()}
+              </EuiButtonEmpty>
+            </>
           )}
         </EuiForm>
       </EuiFlyoutBody>
