@@ -266,9 +266,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     return [...columnFields, ...requiredFieldsForActions];
   };
 
-  const timelineQuerySortField = sort.map(({ columnId, columnType, sortDirection }) => ({
+  const timelineQuerySortField = sort.map(({ columnId, columnType, esTypes, sortDirection }) => ({
     field: columnId,
     direction: sortDirection as Direction,
+    esTypes: esTypes ?? [],
     type: columnType,
   }));
 

@@ -47,6 +47,7 @@ export interface TimelineRequestBasicOptions extends IEsSearchRequest {
 
 export interface TimelineRequestSortField<Field = string> extends SortField<Field> {
   type: string;
+  esTypes: string[];
 }
 
 export interface TimelineRequestOptionsPaginated<Field = string>

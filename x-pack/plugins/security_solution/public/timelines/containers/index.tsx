@@ -95,11 +95,12 @@ const getTimelineEvents = (timelineEdges: TimelineEdges[]): TimelineItem[] =>
   timelineEdges.map((e: TimelineEdges) => e.node);
 
 const ID = 'timelineEventsQuery';
-export const initSortDefault = [
+export const initSortDefault: TimelineRequestSortField[] = [
   {
     field: '@timestamp',
     direction: Direction.asc,
-    type: 'number',
+    type: 'date',
+    esTypes: ['date'],
   },
 ];
 
