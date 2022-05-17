@@ -7,7 +7,7 @@
  */
 
 import { ArgumentType } from '@kbn/expressions-plugin/common';
-import { SeriesTypes, XScaleTypes, YScaleTypes, Y_CONFIG } from '../constants';
+import { SeriesTypes, XScaleTypes, Y_CONFIG } from '../constants';
 import { strings } from '../i18n';
 import { DataLayerArgs, ExtendedDataLayerArgs } from '../types';
 
@@ -16,17 +16,17 @@ type CommonDataLayerFnArgs = {
   [key in keyof CommonDataLayerArgs]: ArgumentType<CommonDataLayerArgs[key]>;
 };
 
-export const commonDataLayerArgs: CommonDataLayerFnArgs = {
+export const commonDataLayerArgs: Omit<
+  CommonDataLayerFnArgs,
+  'accessors' | 'xAccessor' | 'splitAccessor'
+> = {
   hide: {
     types: ['boolean'],
     default: false,
     help: strings.getHideHelp(),
   },
-  xAccessor: {
-    types: ['string'],
-    help: strings.getXAccessorHelp(),
-  },
   seriesType: {
+    aliases: ['_'],
     types: ['string'],
     options: [...Object.values(SeriesTypes)],
     help: strings.getSeriesTypeHelp(),
@@ -43,21 +43,6 @@ export const commonDataLayerArgs: CommonDataLayerFnArgs = {
     types: ['boolean'],
     default: false,
     help: strings.getIsHistogramHelp(),
-  },
-  yScaleType: {
-    options: [...Object.values(YScaleTypes)],
-    help: strings.getYScaleTypeHelp(),
-    default: YScaleTypes.LINEAR,
-    strict: true,
-  },
-  splitAccessor: {
-    types: ['string'],
-    help: strings.getSplitAccessorHelp(),
-  },
-  accessors: {
-    types: ['string'],
-    help: strings.getAccessorsHelp(),
-    multi: true,
   },
   yConfig: {
     types: [Y_CONFIG],

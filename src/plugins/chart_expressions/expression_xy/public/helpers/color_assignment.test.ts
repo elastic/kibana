@@ -52,7 +52,6 @@ describe('color_assignment', () => {
     {
       layerId: 'first',
       type: 'dataLayer',
-      yScaleType: 'linear',
       xScaleType: 'linear',
       isHistogram: true,
       seriesType: 'bar',
@@ -65,7 +64,6 @@ describe('color_assignment', () => {
     {
       layerId: 'second',
       type: 'dataLayer',
-      yScaleType: 'linear',
       xScaleType: 'linear',
       isHistogram: true,
       seriesType: 'bar',
