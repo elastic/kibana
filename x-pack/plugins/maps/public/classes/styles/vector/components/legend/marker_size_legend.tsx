@@ -14,7 +14,9 @@ import { getIsDarkMode } from '../../../../../kibana_services';
 import { CircleIcon } from './circle_icon';
 import { IDynamicStyleProperty } from '../../properties/dynamic_style_property';
 
-const MIN_MARKER_DISTANCE = 8; // leave at least 16 pixels between markers to provide space for labels
+const FONT_SIZE = 10;
+const HALF_FONT_SIZE = FONT_SIZE / 2;
+const MIN_MARKER_DISTANCE = (FONT_SIZE * 1.5) / 2;
 
 function getSymbolSizeIcons() {
   const defaultStyle = {
@@ -75,11 +77,9 @@ export class MarkerSizeLegend extends Component<Props, State> {
     return this.props.style.formatField(value);
   }
 
-  _renderSize() {
+  _renderMarkers() {
     const fieldMeta = this.props.style.getRangeFieldMeta();
     const options = this.props.style.getOptions();
-    console.log('options', options);
-    console.log('fieldMeta', fieldMeta);
     if (!fieldMeta || !options) {
       return null;
     }
@@ -91,21 +91,22 @@ export class MarkerSizeLegend extends Component<Props, State> {
     };
 
     const svgStyle = {
-      height: `${(options.maxSize * 2) + circleStyle.strokeWidth}`,
+      height: '100%',
       width: '100%',
     };
 
-    const cx = (options.maxSize * 2) + circleStyle.strokeWidth; // put circle center in middle
+    const svgHeight = (options.maxSize * 2) + HALF_FONT_SIZE + (circleStyle.strokeWidth * 2);
+
+    const cx = options.maxSize + circleStyle.strokeWidth; // put circle center in middle
 
     function makeMarker(radius: number, formattedValue: string) {
-      const diameter = radius * 2;
-      console.log('radius', radius);
-      console.log('diameter', diameter);
-      const circleTopY = (options.maxSize * 2) - diameter;
+      const circleBottomY = svgHeight - circleStyle.strokeWidth;
+      const circleCenterY = circleBottomY - radius;
+      const circleTopY = circleCenterY - radius;
       return <g>
-        <line style={{ stroke: '#D8D8D8' }} x1={cx} y1={circleTopY} x2={(options.maxSize * 2) * 1.75} y2={circleTopY}/>
-        <text style={{ fontSize: '12px' }}x={(options.maxSize * 2) * 1.75} y={circleTopY + 6}>{formattedValue}</text>
-        <circle style={circleStyle} cx={cx} cy={options.maxSize * 2 - radius } r={radius}/>
+        <line style={{ stroke: '#D8D8D8' }} x1={cx} y1={circleTopY} x2={cx * 2.25} y2={circleTopY}/>
+        <text style={{ fontSize: FONT_SIZE }} x={(cx * 2.25) + HALF_FONT_SIZE} y={circleTopY + HALF_FONT_SIZE}>{formattedValue}</text>
+        <circle style={circleStyle} cx={cx} cy={circleCenterY} r={radius}/>
       </g>
     }
 
@@ -115,33 +116,40 @@ export class MarkerSizeLegend extends Component<Props, State> {
     }
 
     function getValue(percentage: number) {
-      const delta = Math.pow(fieldMeta.max, 2) - Math.pow(fieldMeta.min, 2);
-      const value = Math.sqrt(percentage * delta) + fieldMeta.min;
-      return delta > 1 ? Math.round(value) : value;
+      console.log('percentage', percentage);
+      const delta = fieldMeta.max - fieldMeta.min;
+      const valueAtPercentage = (percentage * delta) + fieldMeta.min;
+      
+      const sqrtMin = Math.sqrt(fieldMeta.min);
+      const sqrtMax = Math.sqrt(fieldMeta.max);
+      const sqrtValue = Math.sqrt(valueAtPercentage);
+      const sqrtPercentage = sqrtValue / sqrtMax;
+      console.log('sqrtPercentage', sqrtPercentage);
+
+      return fieldMeta.max * sqrtPercentage;
     }
 
-    console.log('smallest', getValue(0));
-    console.log('center', getValue(.5));
-    console.log('largest', getValue(1));
+    const markers = [];
 
-    const smallestMarker = makeMarker(options.minSize, this._formatValue(fieldMeta.min));
+    if (fieldMeta.delta > 1) {
+      const smallestMarker = makeMarker(options.minSize, this._formatValue(fieldMeta.min));
+      markers.push(smallestMarker);
+
+      const markerDelta = options.maxSize - options.minSize;
+      if (markerDelta > MIN_MARKER_DISTANCE * 3) {
+        markers.push(makeMarker(getMarkerRadius(.25), this._formatValue(getValue(.25))));
+        markers.push(makeMarker(getMarkerRadius(.5), this._formatValue(getValue(.5))));
+        markers.push(makeMarker(getMarkerRadius(.75), this._formatValue(getValue(.75))));
+      } else if (markerDelta > MIN_MARKER_DISTANCE) {
+        markers.push(makeMarker(getMarkerRadius(.5), this._formatValue(getValue(.5))));
+      }
+    }
+
     const largestMarker = makeMarker(options.maxSize, this._formatValue(fieldMeta.max));
+    markers.push(largestMarker);
 
-    const markerDelta = options.maxSize - options.minSize;
-    const centerDiameter = getMarkerRadius(.5);
-    const middleMarkers = [];
-    if (markerDelta > MIN_MARKER_DISTANCE * 3) {
-      middleMarkers.push(makeMarker(getMarkerRadius(.25), this._formatValue(getValue(.25))));
-      middleMarkers.push(makeMarker(centerDiameter, this._formatValue(getValue(.5))));
-      middleMarkers.push(makeMarker(getMarkerRadius(.75), this._formatValue(getValue(.75))));
-    } else if (markerDelta > MIN_MARKER_DISTANCE) {
-      middleMarkers.push(makeMarker(centerDiameter, this._formatValue(getValue(.5))));
-    }
-
-    return <svg style={svgStyle} xmlns="http://www.w3.org/2000/svg">
-          {smallestMarker}
-          {middleMarkers}
-          {largestMarker}
+    return <svg height={svgHeight} xmlns="http://www.w3.org/2000/svg">
+          {markers}
         </svg>;
   }
 
@@ -159,7 +167,7 @@ export class MarkerSizeLegend extends Component<Props, State> {
             </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {this._renderSize()}
+        {this._renderMarkers()}
       </div>
     );
   }
