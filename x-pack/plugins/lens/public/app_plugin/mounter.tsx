@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import { PreloadedState } from '@reduxjs/toolkit';
 import { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
@@ -15,10 +15,15 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import {
+  AnalyticsNoDataPageKibanaProvider,
+  AnalyticsNoDataPage,
+} from '@kbn/shared-ux-page-analytics-no-data';
 
 import { ACTION_VISUALIZE_LENS_FIELD } from '@kbn/ui-actions-plugin/public';
 import { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { LensReportManager, setReportManager, trackUiEvent } from '../lens_ui_telemetry';
 
 import { App } from './app';
@@ -214,12 +219,24 @@ export async function mountApp(
 
   const EditorRenderer = React.memo(
     (props: { id?: string; history: History<unknown>; editByValue?: boolean }) => {
+      const [editorState, setEditorState] = useState<'loading' | 'no_data' | 'data'>('loading');
       const redirectCallback = useCallback(
         (id?: string) => {
           redirectTo(props.history, id);
         },
         [props.history]
       );
+      useEffect(() => {
+        (async () => {
+          const hasUserDataView = await data.dataViews.hasData.hasUserDataView().catch(() => false);
+          const hasEsData = await data.dataViews.hasData.hasESData().catch(() => true);
+          if (!hasUserDataView || !hasEsData) {
+            setEditorState('no_data');
+            return;
+          }
+          setEditorState('data');
+        })();
+      }, [props.history]);
       trackUiEvent('loaded');
       const initialInput = getInitialInput(props.id, props.editByValue);
 
@@ -231,6 +248,28 @@ export async function mountApp(
       }
       lensStore.dispatch(setState(getPreloadedState(storeDeps) as LensAppState));
       lensStore.dispatch(loadInitial({ redirectCallback, initialInput, history: props.history }));
+
+      if (editorState === 'loading') {
+        return <EuiLoadingSpinner />;
+      }
+
+      if (editorState === 'no_data') {
+        const analyticsServices = {
+          coreStart,
+          dataViews: data.dataViews,
+          dataViewEditor: startDependencies.dataViewEditor,
+        };
+        return (
+          <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
+            <AnalyticsNoDataPage
+              onDataViewCreated={() => {
+                setEditorState('data');
+              }}
+            />
+            ;
+          </AnalyticsNoDataPageKibanaProvider>
+        );
+      }
 
       return (
         <Provider store={lensStore}>
