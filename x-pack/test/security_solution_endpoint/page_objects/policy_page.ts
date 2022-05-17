@@ -48,9 +48,12 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
      * Ensures the first endpoint count link is clicked on and the user is taken to the endpoint list page
      */
     async clickEndpointCountLink() {
+      const sleep = (ms = 2000) => new Promise((resolve) => setTimeout(resolve, ms));
       const endpointCount = (await testSubjects.findAll('policyEndpointCountLink'))[0];
+      sleep();
       await endpointCount.click();
-      await testSubjects.exists('endpointPage');
+      sleep();
+      await testSubjects.existOrFail('endpointPage');
     },
 
     /**

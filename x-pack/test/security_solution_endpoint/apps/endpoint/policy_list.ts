@@ -80,7 +80,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       // FLAKY: https://github.com/elastic/kibana/issues/131602
       describe('when the endpoint count link is clicked', () => {
-        before(async () => await pageObjects.policy.clickEndpointCountLink());
+        before(async () => {
+          await pageObjects.policy.clickEndpointCountLink();
+        });
         it('navigates to the endpoint list page filtered by policy', async () => {
           // await pageObjects.policy.clickEndpointCountLink();
           await pageObjects.endpoint.ensureIsOnEndpointListPage();
