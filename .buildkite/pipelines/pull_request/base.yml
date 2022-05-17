@@ -16,7 +16,7 @@ steps:
     timeout_in_minutes: 60
 
   - command: .buildkite/scripts/steps/functional/performance_playwright.sh
-    label: ':muscle: Performance Tests'
+    label: '💪🏻 Performance Tests'
     agents:
       queue: n2-4-spot
     depends_on: build
