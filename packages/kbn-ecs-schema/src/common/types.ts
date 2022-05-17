@@ -6,15 +6,14 @@
  * Side Public License, v 1.
  */
 
-export type EcsNestedSchema = Record<string, GroupDetails>;
-export type GroupSchema = Record<string, FieldDetails>;
-
 export const TOP_LEVEL_NAME = 'topLevel';
 export const TOP_LEVEL_GROUPS = ['base', 'tracing'];
 
-export type GroupDetails = {
-  fields: Record<string, FieldDetails>;
-};
+export type EcsNestedSpec = Record<string, GroupSpec>;
+export type GroupSpec = { fields: Group; };
+
+export type Schema = Record<string, Group>;
+export type Group = Record<string, FieldDetails>;
 
 export interface FieldDetails {
   dashed_name: string;

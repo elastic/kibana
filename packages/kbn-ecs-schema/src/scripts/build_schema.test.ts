@@ -7,23 +7,23 @@
  */
 
 import { buildSchema } from './build_schema';
-import { EcsNestedSchema, TOP_LEVEL_NAME } from '../common/types';
+import { EcsNestedSpec, TOP_LEVEL_NAME } from '../common/types';
 
 describe('buildSchema', () => {
 
-  const testSchema: EcsNestedSchema = {
+  const spec: EcsNestedSpec = {
     myGroup: {
       fields: {
         id: {
-        dashed_name: 'myGroup-id',
-        description: 'My group\'s id.',
-        example: 123456,
-        flat_name: 'myGroup.id',
-        level: 'extended',
-        name: 'id',
-        normalize: [],
-        short: 'Id.',
-        type: 'long'
+          dashed_name: 'myGroup-id',
+          description: 'My group\'s id.',
+          example: 123456,
+          flat_name: 'myGroup.id',
+          level: 'extended',
+          name: 'id',
+          normalize: [],
+          short: 'Id.',
+          type: 'long'
         },
         timestamp: {
           dashed_name: 'myGroup-timestamp',
@@ -70,13 +70,13 @@ describe('buildSchema', () => {
   };
 
   test('empty result if no schema input', () => {
-    const schema: EcsNestedSchema = {};
+    const schema: EcsNestedSpec = {};
     let result = buildSchema(schema);
     expect(Object.keys(result).length).toBe(0);
   });
 
   test('actual build with top-level and non', () => {
-    let result = buildSchema(testSchema);
+    let result = buildSchema(spec);
 
     const resultGroups = Object.keys(result);
 

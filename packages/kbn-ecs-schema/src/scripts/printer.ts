@@ -8,15 +8,15 @@
 
 import util from 'util';
 
-import { GroupSchema, FieldDetails, TOP_LEVEL_NAME } from '../common/types';
+import { Group, Schema, TOP_LEVEL_NAME } from '../common/types';
 import { append, write } from './write_file';
 
-export function printSchema(schema: GroupSchema, outPath: string) {
+export function printSchema(schema: Schema, outPath: string) {
   printGroupFiles(schema, outPath);
   printIndex(schema[TOP_LEVEL_NAME], Object.keys(schema), outPath);
 }
 
-function printGroupFiles(schema: GroupSchema, outPath: string) {
+function printGroupFiles(schema: Schema, outPath: string) {
   for (const group in schema) {    
     if (group !== TOP_LEVEL_NAME) {
       console.log(`Writing ${group} to ${outPath}/${group.toLowerCase()}.ts`);
@@ -27,7 +27,7 @@ function printGroupFiles(schema: GroupSchema, outPath: string) {
   }  
 }
 
-function printIndex(topLevelFields: FieldDetails, groups: string[], outPath: string){
+function printIndex(topLevelFields: Group, groups: string[], outPath: string){
   /** The base fields belong at the top level, so remove them from the others for printing. */
   groups = groups.filter(item => item !== TOP_LEVEL_NAME);
 
