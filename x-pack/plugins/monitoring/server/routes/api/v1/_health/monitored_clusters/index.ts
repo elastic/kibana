@@ -10,13 +10,6 @@ import { merge } from 'lodash';
 import { buildMonitoredClusters } from './build_monitored_clusters';
 import { monitoredClustersQuery, stableMetricsetsQuery } from './monitored_clusters_query';
 
-const getClustersBuckets = ({ clusters, standalone }) => {
-  return clusters.buckets.concat({
-    key: 'standalone',
-    ...standalone,
-  });
-};
-
 export const fetchMonitoredClusters = async (search) => {
   const index = '*:.monitoring-*,.monitoring-*';
 
@@ -27,7 +20,7 @@ export const fetchMonitoredClusters = async (search) => {
       ignore_unavailable: true,
       body: monitoredClustersQuery(),
     })
-      .then((response) => getClustersBuckets(response.aggregations))
+      .then((response) => response.aggregations.clusters.buckets)
       .then(buildMonitoredClusters),
 
     search({
@@ -36,7 +29,7 @@ export const fetchMonitoredClusters = async (search) => {
       ignore_unavailable: true,
       body: stableMetricsetsQuery(),
     })
-      .then((response) => getClustersBuckets(response.aggregations))
+      .then((response) => response.aggregations.clusters.buckets)
       .then(buildMonitoredClusters),
   ]);
 
