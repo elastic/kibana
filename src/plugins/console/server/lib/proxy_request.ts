@@ -22,7 +22,7 @@ interface Args {
   timeout: number;
   headers: http.OutgoingHttpHeaders;
   rejectUnauthorized?: boolean;
-  path: string;
+  originalPath?: string;
 }
 
 /**
@@ -54,14 +54,13 @@ export const proxyRequest = ({
   timeout,
   payload,
   rejectUnauthorized,
-  path,
+  originalPath,
 }: Args) => {
-  const { hostname, port, protocol, search } = uri;
+  const { hostname, port, protocol, search, pathname: percentEncodedPath } = uri;
   const client = uri.protocol === 'https:' ? https : http;
   let pathname = uri.pathname;
   let resolved = false;
-  // Compare original request path to percent-encoded path returned by node URL method
-  const requiresEncoding = trimStart(path, '/') !== trimStart(pathname, '/');
+  const requiresEncoding = trimStart(originalPath, '/') !== trimStart(percentEncodedPath, '/');
 
   if (requiresEncoding) {
     pathname = encodePathname(pathname);

@@ -43,7 +43,6 @@ describe(`Console's send request`, () => {
         payload: null as any,
         timeout: 0, // immediately timeout
         uri: new URL('http://noone.nowhere.none'),
-        path: '',
       });
       fail('Should not reach here!');
     } catch (e) {
@@ -71,7 +70,6 @@ describe(`Console's send request`, () => {
       payload: null as any,
       timeout: 30000,
       uri: new URL('http://noone.nowhere.none'),
-      path: '',
     });
 
     expect(result1).toEqual('done');
@@ -92,7 +90,6 @@ describe(`Console's send request`, () => {
       payload: null as any,
       timeout: 30000,
       uri: new URL('http://noone.nowhere.none'),
-      path: '',
     });
 
     expect(result2).toEqual('done');
@@ -129,7 +126,6 @@ describe(`Console's send request`, () => {
         payload: null as any,
         timeout: 30000,
         uri,
-        path: '%{[@metadata][beat]}-%{[@metadata][version]}-2020.08.23',
       });
 
       expect(result).toEqual('done');
@@ -147,7 +143,6 @@ describe(`Console's send request`, () => {
         payload: null as any,
         timeout: 30000,
         uri: new URL(`http://noone.nowhere.none/%3Cmy-index-%7Bnow%2Fd%7D%3E`),
-        path: '%3Cmy-index-%7Bnow%2Fd%7D%3E',
       });
 
       expect(result).toEqual('done');
@@ -163,7 +158,7 @@ describe(`Console's send request`, () => {
         payload: null as any,
         timeout: 30000,
         uri: new URL(`http://noone.nowhere.none/my-index/_doc/this%2Fis%2Fa%2Fdoc`),
-        path: 'my-index/_doc/this%2Fis%2Fa%2Fdoc',
+        originalPath: 'my-index/_doc/this%2Fis%2Fa%2Fdoc',
       });
 
       expect(result).toEqual('done');

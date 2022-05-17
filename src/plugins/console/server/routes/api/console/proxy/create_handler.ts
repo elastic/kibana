@@ -175,7 +175,7 @@ export const createHandler =
           payload: body,
           rejectUnauthorized,
           agent,
-          path,
+          originalPath: path,
         });
 
         break;
