@@ -52,40 +52,19 @@ export function InfraTabs() {
     [environment, kuery, serviceName, start, end]
   );
 
-  const containerIds = data?.infrastructureData.containerIds;
-  const podNames = data?.infrastructureData.podNames;
-  const hostNames = data?.infrastructureData.hostNames;
-
-  const { data: containersData, status: containersStatus } = useFetcher(
-    (callApmApi) => {
-      if (containerIds && containerIds.length > 0) {
-        return callApmApi('GET /internal/apm/container/host_names', {
-          params: {
-            query: {
-              start,
-              end,
-              containerIds: JSON.stringify(containerIds),
-            },
-          },
-        });
-      }
-    },
-    [containerIds, start, end]
-  );
+  const containerIds = data?.containerIds;
+  const podNames = data?.podNames;
+  const hostNames = data?.hostNames;
 
   const tabs = useTabs({
     containerIds: containerIds || [],
     podNames: podNames || [],
     hostNames: hostNames || [],
-    containersHostNames: containersData?.hostNames || [],
     start,
     end,
   });
 
-  if (
-    status === FETCH_STATUS.LOADING ||
-    containersStatus === FETCH_STATUS.LOADING
-  ) {
+  if (status === FETCH_STATUS.LOADING) {
     return (
       <div style={{ textAlign: 'center' }}>
         <EuiLoadingSpinner size="l" />
@@ -133,14 +112,12 @@ function useTabs({
   containerIds,
   podNames,
   hostNames,
-  containersHostNames,
   start,
   end,
 }: {
   containerIds: string[];
   podNames: string[];
   hostNames: string[];
-  containersHostNames: string[];
   start: string;
   end: string;
 }) {
@@ -164,17 +141,14 @@ function useTabs({
         should: [
           {
             terms: {
-              'host.name':
-                containersHostNames.length > 0
-                  ? containersHostNames
-                  : hostNames,
+              'host.name': hostNames,
             },
           },
         ],
         minimum_should_match: 1,
       },
     }),
-    [containersHostNames, hostNames]
+    [hostNames]
   );
   const podsFilter = useMemo(
     () => ({
