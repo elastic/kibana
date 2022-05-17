@@ -32,7 +32,7 @@ export const useDataViewUpdates = (
     let stateUpdatesSubscription: Subscription;
 
     if (appState && visInstance) {
-      const syncDataView = async ({ dataView }: VisualizeAppState, setDirty = true) => {
+      const syncDataView = async ({ dataView }: VisualizeAppState) => {
         if (
           dataView &&
           visInstance.vis.data.indexPattern &&
