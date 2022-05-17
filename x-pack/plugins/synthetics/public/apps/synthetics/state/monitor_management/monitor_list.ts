@@ -6,17 +6,9 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-import { takeLeading } from 'redux-saga/effects';
 import { IHttpFetchError } from '@kbn/core/public';
 import { createAsyncAction, Nullable } from '../utils/actions';
-import {
-  FetchMonitorManagementListQueryArgs,
-  MonitorManagementListResult,
-  MonitorManagementListResultCodec,
-} from '../../../../../common/runtime_types';
-import { fetchEffectFactory } from '../utils/fetch_effect';
-import { apiService } from '../../../../utils/api_service';
-import { API_URLS } from '../../../../../common/constants';
+import { MonitorManagementListResult } from '../../../../../common/runtime_types';
 
 export const fetchMonitorListAction = createAsyncAction<void, MonitorManagementListResult>(
   'fetchMonitorListAction'
@@ -43,24 +35,3 @@ export const monitorListReducer = createReducer(
       });
   }
 );
-
-export const fetchMonitorManagementList = async (
-  params: FetchMonitorManagementListQueryArgs
-): Promise<MonitorManagementListResult> => {
-  return await apiService.get(
-    API_URLS.SYNTHETICS_MONITORS,
-    params,
-    MonitorManagementListResultCodec
-  );
-};
-
-export function* fetchMonitorListEffect() {
-  yield takeLeading(
-    String(fetchMonitorListAction.get),
-    fetchEffectFactory(
-      fetchMonitorManagementList,
-      fetchMonitorListAction.success,
-      fetchMonitorListAction.fail
-    )
-  );
-}

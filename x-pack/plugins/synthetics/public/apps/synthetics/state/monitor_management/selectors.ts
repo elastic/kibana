@@ -7,3 +7,6 @@
 import { SyntheticsAppState } from '../root_reducer';
 
 export const monitorListSelector = (state: SyntheticsAppState) => state.monitorList.data;
+
+export const serviceLocationsSelector = (state: SyntheticsAppState) =>
+  state.serviceLocations.locations;

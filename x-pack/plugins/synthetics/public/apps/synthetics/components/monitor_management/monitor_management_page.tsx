@@ -24,7 +24,7 @@ export const MonitorManagementPage: React.FC = () => {
   const { total } = useSelector(monitorListSelector);
 
   useEffect(() => {
-    dispatch(fetchMonitorListAction({}));
+    dispatch(fetchMonitorListAction.get());
   }, [dispatch]);
 
   if (total === 0) {

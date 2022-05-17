@@ -19,7 +19,7 @@ export const GettingStartedPage = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(fetchServiceLocationsAction({}));
+    dispatch(fetchServiceLocationsAction.get());
   }, [dispatch]);
 
   useBreadcrumbs([{ text: MONITORING_OVERVIEW_LABEL }]); // No extra breadcrumbs on overview

@@ -5,78 +5,41 @@
  * 2.0.
  */
 
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { takeLeading } from 'redux-saga/effects';
-import { SyntheticsAppState } from '../root_reducer';
-import { fetchEffectFactory } from '../utils/fetch_effect';
-import { apiService } from '../../../../utils/api_service';
-import { API_URLS } from '../../../../../common/constants';
-import {
-  ServiceLocations,
-  ServiceLocationsApiResponseCodec,
-  ThrottlingOptions,
-} from '../../../../../common/runtime_types';
+import { createReducer, PayloadAction } from '@reduxjs/toolkit';
+import { IHttpFetchError } from '@kbn/core/public';
+import { createAsyncAction, Nullable } from '../utils/actions';
+import { ServiceLocations, ThrottlingOptions } from '../../../../../common/runtime_types';
+
+export const fetchServiceLocationsAction = createAsyncAction<void, ServiceLocationsState>(
+  'fetchServiceLocationsAction'
+);
 
 export interface ServiceLocationsState {
   throttling: ThrottlingOptions | undefined;
   locations: ServiceLocations;
 }
 
-export const serviceLocationSlice = createSlice({
-  name: 'serviceLocations',
-  initialState: {
+export const serviceLocationReducer = createReducer(
+  {
     locations: [] as ServiceLocations,
     loading: false,
+    error: null as Nullable<IHttpFetchError>,
   },
-  reducers: {
-    fetchServiceLocationsAction: (state, action) => {
-      return {
-        ...state,
-        loading: true,
-      };
-    },
-    fetchServiceLocationsActionSuccess: (state, action: PayloadAction<ServiceLocationsState>) => {
-      return {
-        ...state,
-        loading: false,
-        locations: action.payload.locations,
-      };
-    },
-    fetchServiceLocationsActionFail: (state, action) => {
-      return {
-        ...state,
-        loading: false,
-        locations: action.payload,
-      };
-    },
-  },
-});
-
-export const {
-  fetchServiceLocationsAction,
-  fetchServiceLocationsActionSuccess,
-  fetchServiceLocationsActionFail,
-} = serviceLocationSlice.actions;
-
-export const serviceLocationsSelector = (state: SyntheticsAppState) =>
-  state.serviceLocations.locations;
-
-export const fetchServiceLocations = async (): Promise<ServiceLocationsState> => {
-  const { throttling, locations } = await apiService.get(
-    API_URLS.SERVICE_LOCATIONS,
-    undefined,
-    ServiceLocationsApiResponseCodec
-  );
-  return { throttling, locations };
-};
-
-export function* fetchServiceLocationsEffect() {
-  yield takeLeading(
-    fetchServiceLocationsAction,
-    fetchEffectFactory(
-      fetchServiceLocations,
-      fetchServiceLocationsActionSuccess,
-      fetchServiceLocationsActionFail
-    )
-  );
-}
+  (builder) => {
+    builder
+      .addCase(fetchServiceLocationsAction.get, (state, action) => {
+        state.loading = true;
+      })
+      .addCase(
+        fetchServiceLocationsAction.success,
+        (state, action: PayloadAction<ServiceLocationsState>) => {
+          state.loading = false;
+          state.locations = action.payload.locations;
+        }
+      )
+      .addCase(fetchServiceLocationsAction.fail, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+  }
+);
