@@ -34,13 +34,23 @@ import {
   ExpressionAstExpression,
 } from '@kbn/expressions-plugin/public';
 import type { RenderMode } from '@kbn/expressions-plugin';
+import { VisualizationMissedDataViewError } from '../components/visualization_missed_data_view_error';
 import VisualizationError from '../components/visualization_error';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import { Vis, SerializedVis } from '../vis';
-import { getExecutionContext, getExpressions, getTheme, getUiActions } from '../services';
+import {
+  getExecutionContext,
+  getExpressions,
+  getTheme,
+  getUiActions,
+  getApplication,
+} from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
-import { getSavedVisualization } from '../utils/saved_visualize_utils';
+import {
+  getSavedVisualization,
+  shouldShowMissedDataViewError,
+} from '../utils/saved_visualize_utils';
 import { VisSavedObject } from '../types';
 import { toExpressionAst } from './to_ast';
 
@@ -383,9 +393,22 @@ export class VisualizeEmbeddable
     this.subscriptions.push(this.handler.render$.subscribe(this.onContainerRender));
 
     this.subscriptions.push(
-      this.getOutput$().subscribe(
-        ({ error }) => error && render(<VisualizationError error={error} />, this.domNode)
-      )
+      this.getOutput$().subscribe(({ error }) => {
+        if (error) {
+          if (error.original && shouldShowMissedDataViewError(error.original)) {
+            render(
+              <VisualizationMissedDataViewError
+                renderMode={this.input.renderMode ?? 'preview'}
+                error={error.original}
+                application={getApplication()}
+              />,
+              this.domNode
+            );
+          } else {
+            render(<VisualizationError error={error} />, this.domNode);
+          }
+        }
+      })
     );
 
     await this.updateHandler();

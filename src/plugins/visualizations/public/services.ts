@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import type {
   ApplicationStart,
   Capabilities,
@@ -18,12 +19,12 @@ import type {
   ThemeServiceStart,
   ExecutionContextSetup,
 } from '@kbn/core/public';
-import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
-import { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TypesStart } from './vis_types';
 
@@ -34,6 +35,9 @@ export const [getTheme, setTheme] = createGetterSetter<ThemeServiceStart>('Theme
 export const [getCapabilities, setCapabilities] = createGetterSetter<Capabilities>('Capabilities');
 
 export const [getHttp, setHttp] = createGetterSetter<HttpStart>('Http');
+
+export const [getFieldsFormats, setFieldFormats] =
+  createGetterSetter<FieldFormatsStart>('Field Formats');
 
 export const [getApplication, setApplication] = createGetterSetter<ApplicationStart>('Application');
 
