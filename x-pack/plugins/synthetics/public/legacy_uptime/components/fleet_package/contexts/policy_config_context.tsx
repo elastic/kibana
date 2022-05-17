@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { useRouteMatch } from 'react-router-dom';
+import { MONITOR_ADD_ROUTE } from '../../../../../common/constants';
 import { DEFAULT_NAMESPACE_STRING } from '../../../../../common/constants/monitor_defaults';
 import {
   ScheduleUnit,
@@ -56,7 +58,7 @@ export interface IPolicyConfigContextProvider {
   throttling?: ThrottlingOptions;
 }
 
-export const initialValue = DataStream.HTTP;
+export const initialMonitorTypeValue = DataStream.HTTP;
 
 export const defaultContext: IPolicyConfigContext = {
   setMonitorType: (_monitorType: React.SetStateAction<DataStream>) => {
@@ -79,8 +81,8 @@ export const defaultContext: IPolicyConfigContext = {
   setNamespace: (_namespace: React.SetStateAction<string>) => {
     throw new Error('setNamespace was not initialized, set it when you invoke the context');
   },
-  monitorType: initialValue, // mutable
-  defaultMonitorType: initialValue, // immutable,
+  monitorType: initialMonitorTypeValue, // mutable
+  defaultMonitorType: initialMonitorTypeValue, // immutable,
   runsOnService: false,
   defaultIsTLSEnabled: false,
   defaultIsZipUrlTLSEnabled: false,
@@ -98,7 +100,7 @@ export const PolicyConfigContext = createContext(defaultContext);
 export function PolicyConfigContextProvider<ExtraFields = unknown>({
   children,
   throttling = DEFAULT_THROTTLING,
-  defaultMonitorType = initialValue,
+  defaultMonitorType = initialMonitorTypeValue,
   defaultIsTLSEnabled = false,
   defaultIsZipUrlTLSEnabled = false,
   defaultName = '',
@@ -115,6 +117,14 @@ export function PolicyConfigContextProvider<ExtraFields = unknown>({
   const [isTLSEnabled, setIsTLSEnabled] = useState<boolean>(defaultIsTLSEnabled);
   const [isZipUrlTLSEnabled, setIsZipUrlTLSEnabled] = useState<boolean>(defaultIsZipUrlTLSEnabled);
   const [namespace, setNamespace] = useState<string>(defaultNamespace);
+
+  const isAddMonitorRoute = useRouteMatch(MONITOR_ADD_ROUTE);
+
+  useEffect(() => {
+    if (isAddMonitorRoute) {
+      setMonitorType(DataStream.BROWSER);
+    }
+  }, [isAddMonitorRoute]);
 
   const value = useMemo(() => {
     return {
