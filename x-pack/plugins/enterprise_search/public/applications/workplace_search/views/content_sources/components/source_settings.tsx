@@ -72,7 +72,6 @@ export const SourceSettings: React.FC = () => {
     setStagedPrivateKey,
     updateContentSourceConfiguration,
   } = useActions(SourceLogic);
-  const { getSourceConfigData } = useActions(AddSourceLogic);
 
   const {
     contentSource: { name, id, serviceType, isOauth1, secret },
@@ -81,14 +80,22 @@ export const SourceSettings: React.FC = () => {
     isConfigurationUpdateButtonLoading,
   } = useValues(SourceLogic);
 
+  // Even though SourceLogic.values.contentSource.serviceType is retrieved async
+  // by SourceLogic, it will always be defined by the time this view is rendered
+  // because it is not displayed until SourceLogic has retrieved the content source and
+  // SourceLogic.values.dataLoading === false
+  const addSourceLogic = AddSourceLogic({ serviceType });
+  const { getSourceConfigData } = useActions(addSourceLogic);
+
   const {
     sourceConfigData: { configuredFields },
+    dataLoading,
   } = useValues(AddSourceLogic);
 
   const { isOrganization } = useValues(AppLogic);
 
   useEffect(() => {
-    getSourceConfigData(serviceType);
+    getSourceConfigData();
   }, []);
 
   const isGithubApp =
@@ -161,7 +168,11 @@ export const SourceSettings: React.FC = () => {
   );
 
   return (
-    <SourceLayout pageChrome={[NAV.SETTINGS]} pageViewTelemetry="source_settings">
+    <SourceLayout
+      pageChrome={[NAV.SETTINGS]}
+      pageViewTelemetry="source_settings"
+      isLoading={dataLoading}
+    >
       <ViewContentHeader title={SOURCE_SETTINGS_HEADING} />
       <ContentSection title={SOURCE_SETTINGS_TITLE} description={SOURCE_SETTINGS_DESCRIPTION}>
         <form onSubmit={submitNameChange}>

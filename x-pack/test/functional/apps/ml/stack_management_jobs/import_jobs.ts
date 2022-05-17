@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import path from 'path';
-
 import { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -15,7 +13,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const testDataListPositive = [
     {
-      filePath: path.join(__dirname, 'files_to_import', 'anomaly_detection_jobs_7.16.json'),
+      filePath: require.resolve('./files_to_import/anomaly_detection_jobs_7.16.json'),
       expected: {
         jobType: 'anomaly-detector' as JobType,
         jobIds: ['ad-test1', 'ad-test3'],
@@ -23,7 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
       },
     },
     {
-      filePath: path.join(__dirname, 'files_to_import', 'data_frame_analytics_jobs_7.16.json'),
+      filePath: require.resolve('./files_to_import/data_frame_analytics_jobs_7.16.json'),
       expected: {
         jobType: 'data-frame-analytics' as JobType,
         jobIds: ['dfa-test1'],
@@ -33,7 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
   ];
 
   describe('import jobs', function () {
-    this.tags(['mlqa']);
+    this.tags(['ml']);
     before(async () => {
       await ml.api.cleanMlIndices();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
@@ -107,7 +105,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.testExecution.logTestStep('selects job import');
         await ml.stackManagementJobs.openImportFlyout();
         await ml.stackManagementJobs.selectFileToImport(
-          path.join(__dirname, 'files_to_import', 'bad_data.json'),
+          require.resolve('./files_to_import/bad_data.json'),
           true
         );
       });

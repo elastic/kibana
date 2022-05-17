@@ -2470,6 +2470,31 @@ describe('migration visualization', () => {
     });
   });
 
+  it('should not apply search source migrations within visualization when searchSourceJSON is not an object', () => {
+    const visualizationDoc = {
+      attributes: {
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: '5',
+        },
+      },
+    } as SavedObjectUnsanitizedDoc;
+
+    const versionToTest = '1.2.4';
+    const visMigrations = getAllMigrations({
+      [versionToTest]: (state) => ({ ...state, migrated: true }),
+    });
+
+    expect(
+      visMigrations[versionToTest](visualizationDoc, {} as SavedObjectMigrationContext)
+    ).toEqual({
+      attributes: {
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: '5',
+        },
+      },
+    });
+  });
+
   describe('8.1.0 pie - labels and addLegend migration', () => {
     const getDoc = (addLegend: boolean, lastLevel: boolean = false) => ({
       attributes: {
@@ -2537,6 +2562,65 @@ describe('migration visualization', () => {
 
       expect(otherParams.legendDisplay).toBe('hide');
       expect(otherParams.addLegend).toBeUndefined();
+    });
+  });
+
+  describe('8.3.0 - preserves default legend size for existing visualizations', () => {
+    const getDoc = (type: string, legendSize: number | undefined) => ({
+      attributes: {
+        title: 'Some Vis with a Legend',
+        description: '',
+        visState: JSON.stringify({
+          type,
+          title: 'Pie vis',
+          params: {
+            legendSize,
+          },
+        }),
+      },
+    });
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['8.3.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    const autoLegendSize = 'auto';
+    const largeLegendSize = 'large';
+    const largeLegendSizePx = 180;
+
+    test.each([
+      ['pie', undefined, autoLegendSize],
+      ['area', undefined, autoLegendSize],
+      ['histogram', undefined, autoLegendSize],
+      ['horizontal_bar', undefined, autoLegendSize],
+      ['line', undefined, autoLegendSize],
+      ['heatmap', undefined, autoLegendSize],
+      ['pie', largeLegendSizePx, largeLegendSize],
+      ['area', largeLegendSizePx, largeLegendSize],
+      ['histogram', largeLegendSizePx, largeLegendSize],
+      ['horizontal_bar', largeLegendSizePx, largeLegendSize],
+      ['line', largeLegendSizePx, largeLegendSize],
+      ['heatmap', largeLegendSizePx, largeLegendSize],
+    ])(
+      'given a %s visualization with current legend size of %s -- sets legend size to %s',
+      (
+        visualizationType: string,
+        currentLegendSize: number | undefined,
+        expectedLegendSize: string
+      ) => {
+        const visState = JSON.parse(
+          migrate(getDoc(visualizationType, currentLegendSize)).attributes.visState
+        );
+
+        expect(visState.params.legendSize).toBe(expectedLegendSize);
+      }
+    );
+
+    test.each(['metric', 'gauge', 'table'])('leaves visualization without legend alone: %s', () => {
+      const visState = JSON.parse(migrate(getDoc('table', undefined)).attributes.visState);
+
+      expect(visState.params.legendSize).toBeUndefined();
     });
   });
 });

@@ -251,6 +251,16 @@ export default function (providerContext: FtrProviderContext) {
           resOsqueryPackAsset = err;
         }
         expect(resOsqueryPackAsset.response.data.statusCode).equal(404);
+        let resOsquerySavedQuery;
+        try {
+          resOsquerySavedQuery = await kibanaServer.savedObjects.get({
+            type: 'osquery-saved-query',
+            id: 'sample_osquery_saved_query',
+          });
+        } catch (err) {
+          resOsquerySavedQuery = err;
+        }
+        expect(resOsquerySavedQuery.response.data.statusCode).equal(404);
       });
       it('should have removed the saved object', async function () {
         let res;
@@ -443,6 +453,11 @@ const expectAssetsInstalled = ({
       id: 'sample_osquery_pack_asset',
     });
     expect(resOsqueryPackAsset.id).equal('sample_osquery_pack_asset');
+    const resOsquerySavedObject = await kibanaServer.savedObjects.get({
+      type: 'osquery-saved-query',
+      id: 'sample_osquery_saved_query',
+    });
+    expect(resOsquerySavedObject.id).equal('sample_osquery_saved_query');
     const resCloudSecurityPostureRuleTemplate = await kibanaServer.savedObjects.get({
       type: 'csp-rule-template',
       id: 'sample_csp_rule_template',
@@ -527,6 +542,10 @@ const expectAssetsInstalled = ({
           type: 'osquery-pack-asset',
         },
         {
+          id: 'sample_osquery_saved_query',
+          type: 'osquery-saved-query',
+        },
+        {
           id: 'sample_search',
           type: 'search',
         },
@@ -568,6 +587,10 @@ const expectAssetsInstalled = ({
         {
           id: 'metrics-all_assets.test_metrics-all_assets',
           type: 'data_stream_ilm_policy',
+        },
+        {
+          id: 'all_assets',
+          type: 'ilm_policy',
         },
         {
           id: 'logs-all_assets.test_logs',
@@ -681,6 +704,10 @@ const expectAssetsInstalled = ({
         },
         {
           id: '313ddb31-e70a-59e8-8287-310d4652a9b7',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: '24a74223-5fdb-52ca-9cb5-b2cdd2a42b07',
           type: 'epm-packages-assets',
         },
         {

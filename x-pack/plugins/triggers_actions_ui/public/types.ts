@@ -48,8 +48,10 @@ import {
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { TypeRegistry } from './application/type_registry';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
+import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
 import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
 import type { RuleTagBadgeProps } from './application/sections/rules_list/components/rule_tag_badge';
+import type { RuleEventLogListProps } from './application/sections/rule_details/components/rule_event_log_list';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
@@ -82,8 +84,10 @@ export type {
   ResolvedRule,
   SanitizedRule,
   RuleStatusDropdownProps,
+  RuleTagFilterProps,
   RuleStatusFilterProps,
   RuleTagBadgeProps,
+  RuleEventLogListProps,
 };
 export type { ActionType, AsApiContract };
 export {
@@ -372,6 +376,7 @@ export enum Percentiles {
 }
 
 export interface TriggersActionsUiConfig {
+  isUsingSecurity: boolean;
   minimumScheduleInterval?: {
     value: string;
     enforce: boolean;
