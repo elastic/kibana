@@ -597,6 +597,39 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(rule.timeline_title).to.eql(timelineTitle);
       });
 
+      it('should correctly remove timeline', async () => {
+        const ruleId = 'ruleId';
+        await createRule(supertest, log, getSimpleRule(ruleId));
+
+        const { body } = await postBulkAction()
+          .send({
+            query: '',
+            action: BulkAction.edit,
+            [BulkAction.edit]: [
+              {
+                type: BulkActionEditType.set_timeline,
+                value: {
+                  timeline_id: '',
+                  timeline_title: '',
+                },
+              },
+            ],
+          })
+          .expect(200);
+
+        expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+
+        // Check that the updated rule is returned with the response
+        expect(body.attributes.results.updated[0].timeline_id).to.be(undefined);
+        expect(body.attributes.results.updated[0].timeline_title).to.be(undefined);
+
+        // Check that the updates have been persisted
+        const { body: rule } = await fetchRule(ruleId).expect(200);
+
+        expect(rule.timeline_id).to.be(undefined);
+        expect(rule.timeline_title).to.be(undefined);
+      });
+
       it('should return error when trying to bulk edit immutable rule', async () => {
         await installPrePackagedRules(supertest, log);
         const { body: findBody } = await supertest
