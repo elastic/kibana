@@ -52,7 +52,6 @@ import {
   getLayersFormats,
   getLayersTitles,
   validateExtent,
-  getFormat,
 } from '../helpers';
 import {
   getFilteredLayers,
@@ -205,9 +204,7 @@ export function XYChart({
     : undefined;
 
   const xAxisFormatter = formatFactory(
-    dataLayers[0].xAccessor
-      ? getFormat(dataLayers[0].table.columns, dataLayers[0].xAccessor)
-      : undefined
+    xAxisColumn?.id ? fieldFormats[dataLayers[0].layerId].xAccessors[xAxisColumn?.id] : undefined
   );
 
   // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
@@ -417,9 +414,11 @@ export function XYChart({
     const xAccessor = layer.xAccessor
       ? getAccessorByDimension(layer.xAccessor, table.columns)
       : undefined;
+
+    const xFormat = xColumn ? fieldFormats[layer.layerId].xAccessors[xColumn.id] : undefined;
     const currentXFormatter =
       xAccessor && formattedDatatables[layer.layerId]?.formattedColumns[xAccessor] && xColumn
-        ? formatFactory(layer.xAccessor ? getFormat(table.columns, layer.xAccessor) : undefined)
+        ? formatFactory(xFormat)
         : xAxisFormatter;
 
     const rowIndex = table.rows.findIndex((row) => {
@@ -446,9 +445,10 @@ export function XYChart({
         ? getAccessorByDimension(layer.splitAccessor, table.columns)
         : undefined;
 
-      const splitFormatter = formatFactory(
-        layer.splitAccessor ? getFormat(table.columns, layer.splitAccessor) : undefined
-      );
+      const splitFormat = splitAccessor
+        ? fieldFormats[layer.layerId].splitSeriesAccessors[splitAccessor]
+        : undefined;
+      const splitFormatter = formatFactory(splitFormat);
 
       points.push({
         row: table.rows.findIndex((row) => {
@@ -550,6 +550,13 @@ export function XYChart({
     splitRowAccessor && splitTable
       ? getAccessorByDimension(splitRowAccessor, splitTable?.columns)
       : undefined;
+  const splitLayerFieldFormats = fieldFormats[dataLayers[0].layerId];
+  const splitFieldFormats = {
+    ...(splitColumnId
+      ? { [splitColumnId]: splitLayerFieldFormats.splitColumnAccessors[splitColumnId] }
+      : {}),
+    ...(splitRowId ? { [splitRowId]: splitLayerFieldFormats.splitRowAccessors[splitRowId] } : {}),
+  };
 
   return (
     <Chart ref={chartRef}>
@@ -651,6 +658,7 @@ export function XYChart({
           splitRowAccessor={splitRowAccessor}
           formatFactory={formatFactory}
           columns={splitTable.columns}
+          fieldFormats={splitFieldFormats}
         />
       )}
       {yAxesConfiguration.map((axis) => {

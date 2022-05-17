@@ -12,7 +12,6 @@ import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/e
 import {
   getAccessorByDimension,
   getColumnByAccessor,
-  getFormatByAccessor,
 } from '@kbn/visualizations-plugin/common/utils';
 import {
   CommonXYDataLayerConfig,
@@ -21,6 +20,7 @@ import {
   SeriesType,
 } from '../../common/types';
 import { GroupsConfiguration } from './axes_configuration';
+import { getFormat } from './format';
 import { isDataLayer, isReferenceLayer } from './visualization';
 
 interface CustomTitles {
@@ -104,7 +104,7 @@ const getAccessorWithFieldFormat = (
   }
 
   const accessor = getAccessorByDimension(dimension, columns);
-  return { [accessor]: getFormatByAccessor(accessor, columns) };
+  return { [accessor]: getFormat(columns, dimension) };
 };
 
 const getYAccessorWithFieldFormat = (
@@ -117,7 +117,7 @@ const getYAccessorWithFieldFormat = (
   }
 
   const accessor = getAccessorByDimension(dimension, columns);
-  let format = getFormatByAccessor(accessor, columns, { id: 'number' });
+  let format = getFormat(columns, dimension) ?? { id: 'number' };
   if (format?.id !== 'percent' && seriesType.includes('percentage')) {
     format = { id: 'percent', params: { pattern: '0.[00]%' } };
   }
@@ -129,10 +129,10 @@ export const getLayerFormats = (
   { xAccessor, accessors, splitAccessor, table, seriesType }: CommonXYDataLayerConfig,
   { splitColumnAccessor, splitRowAccessor }: SplitAccessors
 ): LayerFieldFormats => {
-  const yColumnIds = accessors.map((a) => a && getAccessorByDimension(a, table.columns));
+  const yAccessors: Array<string | ExpressionValueVisDimension> = accessors;
   return {
     xAccessors: getAccessorWithFieldFormat(xAccessor, table.columns),
-    yAccessors: yColumnIds.reduce(
+    yAccessors: yAccessors.reduce(
       (formatters, a) => ({
         ...formatters,
         ...getYAccessorWithFieldFormat(a, table.columns, seriesType),

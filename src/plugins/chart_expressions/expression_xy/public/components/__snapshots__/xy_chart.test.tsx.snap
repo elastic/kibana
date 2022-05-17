@@ -4357,6 +4357,19 @@ exports[`XYChart component split chart should render split chart if both, splitR
         },
       ]
     }
+    fieldFormats={
+      Object {
+        "b": Object {
+          "id": "number",
+          "params": Object {
+            "pattern": "000,0",
+          },
+        },
+        "c": Object {
+          "id": "string",
+        },
+      }
+    }
     formatFactory={
       [MockFunction] {
         "calls": Array [
@@ -5179,6 +5192,16 @@ exports[`XYChart component split chart should render split chart if splitColumnA
         },
       ]
     }
+    fieldFormats={
+      Object {
+        "b": Object {
+          "id": "number",
+          "params": Object {
+            "pattern": "000,0",
+          },
+        },
+      }
+    }
     formatFactory={
       [MockFunction] {
         "calls": Array [
@@ -5997,6 +6020,16 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
           "name": "ColD",
         },
       ]
+    }
+    fieldFormats={
+      Object {
+        "b": Object {
+          "id": "number",
+          "params": Object {
+            "pattern": "000,0",
+          },
+        },
+      }
     }
     formatFactory={
       [MockFunction] {
