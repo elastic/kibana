@@ -69,7 +69,7 @@ export function mapHitSource(
     attributes: SavedObjectAttributes;
     id: string;
     references: SavedObjectReference[];
-    updatedAt: string;
+    updatedAt?: string;
   }
 ) {
   const newAttributes: {
