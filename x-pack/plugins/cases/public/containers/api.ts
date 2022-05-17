@@ -6,7 +6,7 @@
  */
 
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
-import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
+import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
 import {
   Cases,
   FetchCasesProps,
