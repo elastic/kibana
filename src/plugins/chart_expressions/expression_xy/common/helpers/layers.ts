@@ -7,7 +7,8 @@
  */
 
 import { Datatable, PointSeriesColumnNames } from '@kbn/expressions-plugin/common';
-import { WithLayerId } from '../types';
+import { WithLayerId, ExtendedDataLayerConfig, XYExtendedLayerConfigResult } from '../types';
+import { LayerTypes } from '../constants';
 
 function isWithLayerId<T>(layer: T): layer is T & WithLayerId {
   return (layer as T & WithLayerId).layerId ? true : false;
@@ -25,6 +26,13 @@ export function appendLayerIds<T>(
       ...l,
       layerId: isWithLayerId(l) ? l.layerId : generateLayerId(keyword, index),
     }));
+}
+
+export function getDataLayers(layers: XYExtendedLayerConfigResult[]) {
+  return layers.filter<ExtendedDataLayerConfig>(
+    (layer): layer is ExtendedDataLayerConfig =>
+      layer.layerType === LayerTypes.DATA || !layer.layerType
+  );
 }
 
 export function getAccessors<T, U extends { splitAccessor?: T; xAccessor?: T; accessors: T[] }>(
