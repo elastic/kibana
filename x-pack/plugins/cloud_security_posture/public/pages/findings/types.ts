@@ -68,6 +68,7 @@ interface CspFindingResource {
   raw: object;
   id: string;
   type: string;
+  [other_keys: string]: unknown;
 }
 
 interface CspFindingHost {
