@@ -147,7 +147,7 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
     noteIds,
     status: timelineStatus,
   } = useDeepEqualSelector((state) => getTimelineNotes(state, timelineId));
-  const { browserFields, docValueFields, runtimeMappings } = useSourcererDataView(
+  const { browserFields, runtimeMappings } = useSourcererDataView(
     SourcererScopeName.timeline
   );
 
@@ -189,7 +189,6 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
       expandedDetail[TimelineTabs.notes]?.panelView ? (
         <DetailsPanel
           browserFields={browserFields}
-          docValueFields={docValueFields}
           handleOnPanelClosed={handleOnPanelClosed}
           runtimeMappings={runtimeMappings}
           tabType={TimelineTabs.notes}
@@ -198,7 +197,6 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
       ) : null,
     [
       browserFields,
-      docValueFields,
       expandedDetail,
       handleOnPanelClosed,
       runtimeMappings,

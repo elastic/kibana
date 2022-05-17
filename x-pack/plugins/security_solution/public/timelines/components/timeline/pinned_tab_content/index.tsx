@@ -119,7 +119,6 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
 }) => {
   const {
     browserFields,
-    docValueFields,
     dataViewId,
     loading: loadingSourcerer,
     runtimeMappings,
