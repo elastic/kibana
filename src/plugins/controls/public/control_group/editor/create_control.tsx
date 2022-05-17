@@ -15,13 +15,18 @@ import { pluginServices } from '../../services';
 import { ControlEditor } from './control_editor';
 import { ControlGroupStrings } from '../control_group_strings';
 import { ControlWidth, ControlInput, IEditableControlFactory, DataControlInput } from '../../types';
-import { DEFAULT_CONTROL_WIDTH } from '../../../common/control_group/control_group_constants';
+import {
+  DEFAULT_CONTROL_WIDTH,
+  DEFAULT_CONTROL_GROW,
+} from '../../../common/control_group/control_group_constants';
 import { setFlyoutRef } from '../embeddable/control_group_container';
 
 export type CreateControlButtonTypes = 'toolbar' | 'callout';
 export interface CreateControlButtonProps {
   defaultControlWidth?: ControlWidth;
+  defaultControlGrow?: boolean;
   updateDefaultWidth: (defaultControlWidth: ControlWidth) => void;
+  updateDefaultGrow: (defaultControlGrow: boolean) => void;
   addNewEmbeddable: (type: string, input: Omit<ControlInput, 'id'>) => void;
   setLastUsedDataViewId?: (newDataViewId: string) => void;
   getRelevantDataViewId?: () => string | undefined;
@@ -35,13 +40,15 @@ interface CreateControlResult {
 }
 
 export const CreateControlButton = ({
-  defaultControlWidth,
-  updateDefaultWidth,
-  addNewEmbeddable,
   buttonType,
+  defaultControlWidth,
+  defaultControlGrow,
+  addNewEmbeddable,
   closePopover,
-  setLastUsedDataViewId,
   getRelevantDataViewId,
+  setLastUsedDataViewId,
+  updateDefaultWidth,
+  updateDefaultGrow,
 }: CreateControlButtonProps) => {
   // Controls Services Context
   const { overlays, controls } = pluginServices.getServices();
@@ -96,8 +103,10 @@ export const CreateControlButton = ({
               getRelevantDataViewId={getRelevantDataViewId}
               isCreate={true}
               width={defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
+              grow={defaultControlGrow ?? DEFAULT_CONTROL_GROW}
               updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
               updateWidth={updateDefaultWidth}
+              updateGrow={updateDefaultGrow}
               onSave={(type) => onSave(flyoutInstance, type)}
               onCancel={() => onCancel(flyoutInstance)}
               onTypeEditorChange={(partialInput) =>

@@ -62,7 +62,7 @@ export const ControlGroupStrings = {
       }),
     getWidthInputTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.widthInputTitle', {
-        defaultMessage: 'Control size',
+        defaultMessage: 'Minimum width',
       }),
     getControlSettingsTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.controlSettingsTitle', {
@@ -84,6 +84,10 @@ export const ControlGroupStrings = {
       i18n.translate('controls.controlGroup.manageControl.selectDataViewMessage', {
         defaultMessage: 'Please select a data view',
       }),
+    getGrowSwitchTitle: () =>
+      i18n.translate('controls.controlGroup.manageControl.growSwitchTitle', {
+        defaultMessage: 'Expand width to fit available space',
+      }),
   },
   management: {
     getAddControlTitle: () =>
@@ -98,17 +102,9 @@ export const ControlGroupStrings = {
       i18n.translate('controls.controlGroup.management.flyoutTitle', {
         defaultMessage: 'Control settings',
       }),
-    getDefaultWidthTitle: () =>
-      i18n.translate('controls.controlGroup.management.defaultWidthTitle', {
-        defaultMessage: 'Default size',
-      }),
     getDeleteButtonTitle: () =>
       i18n.translate('controls.controlGroup.management.delete', {
         defaultMessage: 'Delete control',
-      }),
-    getSetAllWidthsToDefaultTitle: () =>
-      i18n.translate('controls.controlGroup.management.setAllWidths', {
-        defaultMessage: 'Set all sizes to default',
       }),
     getDeleteAllButtonTitle: () =>
       i18n.translate('controls.controlGroup.management.deleteAll', {

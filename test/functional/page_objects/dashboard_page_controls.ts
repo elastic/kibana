@@ -39,7 +39,14 @@ export class DashboardPageControls extends FtrService {
   public async enableControlsLab() {
     await this.header.clickStackManagement();
     await this.settings.clickKibanaSettings();
-    await this.settings.toggleAdvancedSettingCheckbox('labs:dashboard:dashboardControls');
+
+    const currentValue = await this.settings.getAdvancedSettingAriaCheckbox(
+      'labs:dashboard:dashboardControls'
+    );
+
+    if (currentValue !== 'true') {
+      await this.settings.toggleAdvancedSettingCheckbox('labs:dashboard:dashboardControls');
+    }
   }
 
   public async expectControlsEmpty() {
@@ -119,21 +126,6 @@ export class DashboardPageControls extends FtrService {
     await this.openControlGroupSettingsFlyout();
     await this.testSubjects.existOrFail('control-group-layout-options');
     await this.testSubjects.click(`control-editor-layout-${layout}`);
-    await this.testSubjects.click('control-group-editor-save');
-  }
-
-  public async updateControlsSize(width: ControlWidth, applyToAll: boolean = false) {
-    this.log.debug(
-      `Update default control size to ${width}`,
-      applyToAll ? ' for all controls' : ''
-    );
-    await this.openControlGroupSettingsFlyout();
-    await this.testSubjects.existOrFail('control-group-default-size-options');
-    await this.testSubjects.click(`control-editor-width-${width}`);
-    if (applyToAll) {
-      const checkbox = await this.find.byXPath('//label[@for="editControls_setAllSizesCheckbox"]');
-      await checkbox.click();
-    }
     await this.testSubjects.click('control-group-editor-save');
   }
 
@@ -244,14 +236,16 @@ export class DashboardPageControls extends FtrService {
     controlType,
     dataViewTitle,
     fieldName,
-    width,
+    grow,
     title,
+    width,
   }: {
     controlType: string;
     title?: string;
     fieldName: string;
     width?: ControlWidth;
     dataViewTitle?: string;
+    grow?: boolean;
   }) {
     this.log.debug(`Creating ${controlType} control ${title ?? fieldName}`);
     await this.openCreateControlFlyout();
@@ -262,6 +256,7 @@ export class DashboardPageControls extends FtrService {
 
     if (title) await this.controlEditorSetTitle(title);
     if (width) await this.controlEditorSetWidth(width);
+    if (grow !== undefined) await this.controlEditorSetGrow(grow);
 
     await this.controlEditorSave();
   }
@@ -381,6 +376,14 @@ export class DashboardPageControls extends FtrService {
   public async controlEditorSetWidth(width: ControlWidth) {
     this.log.debug(`Setting control width to ${width}`);
     await this.testSubjects.click(`control-editor-width-${width}`);
+  }
+
+  public async controlEditorSetGrow(grow: boolean) {
+    this.log.debug(`Setting control grow to ${grow}`);
+    const growSwitch = await this.testSubjects.find('control-editor-grow-switch');
+    if ((await growSwitch.getAttribute('aria-checked')) !== `'${grow}'`) {
+      await growSwitch.click();
+    }
   }
 
   public async controlEditorSave() {

@@ -32,6 +32,8 @@ import {
   EuiButtonEmpty,
   EuiSpacer,
   EuiIcon,
+  EuiToolTip,
+  EuiSwitch,
 } from '@elastic/eui';
 import { DataViewListItem, DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { IFieldSubTypeMulti } from '@kbn/es-query';
@@ -57,8 +59,10 @@ interface EditControlProps {
   title?: string;
   width: ControlWidth;
   onSave: (type?: string) => void;
+  grow: boolean;
   onCancel: () => void;
   removeControl?: () => void;
+  updateGrow?: (grow: boolean) => void;
   updateTitle: (title?: string) => void;
   updateWidth: (newWidth: ControlWidth) => void;
   getRelevantDataViewId?: () => string | undefined;
@@ -81,9 +85,11 @@ export const ControlEditor = ({
   isCreate,
   title,
   width,
+  grow,
   onSave,
   onCancel,
   removeControl,
+  updateGrow,
   updateTitle,
   updateWidth,
   onTypeEditorChange,
@@ -102,6 +108,7 @@ export const ControlEditor = ({
   const [defaultTitle, setDefaultTitle] = useState<string>();
   const [currentTitle, setCurrentTitle] = useState(title);
   const [currentWidth, setCurrentWidth] = useState(width);
+  const [currentGrow, setCurrentGrow] = useState(grow);
   const [controlEditorValid, setControlEditorValid] = useState(false);
   const [selectedField, setSelectedField] = useState<string | undefined>(
     embeddable ? embeddable.getInput().fieldName : undefined
@@ -246,7 +253,6 @@ export const ControlEditor = ({
               }}
             />
           </EuiFormRow>
-
           <EuiFormRow label={ControlGroupStrings.manageControl.getControlTypeTitle()}>
             <EuiFlexGroup alignItems="center" gutterSize="xs">
               <EuiFlexItem grow={false}>
@@ -282,12 +288,25 @@ export const ControlEditor = ({
               }}
             />
           </EuiFormRow>
+          {updateGrow ? (
+            <EuiFormRow>
+              <EuiSwitch
+                label={ControlGroupStrings.manageControl.getGrowSwitchTitle()}
+                color="primary"
+                checked={currentGrow}
+                onChange={() => {
+                  setCurrentGrow(!currentGrow);
+                  updateGrow(!currentGrow);
+                }}
+                data-test-subj="control-editor-grow-switch"
+              />
+            </EuiFormRow>
+          ) : null}
           {CustomSettings && (factory as IEditableControlFactory).controlEditorOptionsComponent && (
             <EuiFormRow label={ControlGroupStrings.manageControl.getControlSettingsTitle()}>
               <CustomSettings onChange={onTypeEditorChange} initialInput={embeddable?.getInput()} />
             </EuiFormRow>
           )}
-          <EuiSpacer size="l" />
           {removeControl && (
             <EuiButtonEmpty
               aria-label={`delete-${title}`}

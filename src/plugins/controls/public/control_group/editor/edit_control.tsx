@@ -45,7 +45,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
   >();
   const {
     containerActions: { untilEmbeddableLoaded, removeEmbeddable, replaceEmbeddable },
-    actions: { setControlWidth },
+    actions: { setControlWidth, setControlGrow },
     useEmbeddableSelector,
     useEmbeddableDispatch,
   } = reduxContainerContext;
@@ -130,6 +130,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
             <ControlEditor
               isCreate={false}
               width={panel.width}
+              grow={panel.grow}
               embeddable={embeddable}
               title={embeddable.getTitle()}
               onCancel={() => onCancel(flyoutInstance)}
@@ -138,6 +139,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
               updateWidth={(newWidth) =>
                 dispatch(setControlWidth({ width: newWidth, embeddableId }))
               }
+              updateGrow={(grow) => dispatch(setControlGrow({ grow, embeddableId }))}
               onTypeEditorChange={(partialInput) => {
                 inputToReturn = { ...inputToReturn, ...partialInput };
               }}

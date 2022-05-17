@@ -23,8 +23,8 @@ export interface Props {
   emptyPromptColor?: EuiEmptyPromptProps['color'];
 }
 
-const createDataViewText = i18n.translate('sharedUXComponents.noDataViewsPage.addDataViewText', {
-  defaultMessage: 'Create Data View',
+const createDataViewText = i18n.translate('sharedUXComponents.noDataViewsPrompt.addDataViewText', {
+  defaultMessage: 'Create data view',
 });
 
 // Using raw value because it is content dependent
@@ -50,39 +50,55 @@ export const NoDataViews = ({
     </EuiButton>
   );
 
+  const title = canCreateNewDataView ? (
+    <h2>
+      <FormattedMessage
+        id="sharedUXComponents.noDataViewsPrompt.youHaveData"
+        defaultMessage="You have data in Elasticsearch."
+      />
+      <br />
+      <FormattedMessage
+        id="sharedUXComponents.noDataViewsPrompt.nowCreate"
+        defaultMessage="Now, create a data view."
+      />
+    </h2>
+  ) : (
+    <h2>
+      <FormattedMessage
+        id="sharedUXComponents.noDataViewsPrompt.noPermission.title"
+        defaultMessage="You need permission to create data views"
+      />
+    </h2>
+  );
+
+  const body = canCreateNewDataView ? (
+    <p>
+      <FormattedMessage
+        id="sharedUXComponents.noDataViewsPrompt.dataViewExplanation"
+        defaultMessage="Data views identify the Elasticsearch data you want to explore. You can point data views to one or more data streams, indices, and index aliases, such as your log data from yesterday, or all indices that contain your log data."
+      />
+    </p>
+  ) : (
+    <p>
+      <FormattedMessage
+        id="sharedUXComponents.noDataViewsPrompt.noPermission.dataViewExplanation"
+        defaultMessage="Data views identify the Elasticsearch data that you want to explore. To create data views, ask your administrator for the required permissions."
+      />
+    </p>
+  );
+
   return (
     <EuiEmptyPrompt
       data-test-subj="noDataViewsPrompt"
       layout="horizontal"
       css={css`
         max-width: ${MAX_WIDTH}px !important; // Necessary to override EuiEmptyPrompt to fit content
+        flex-grow: 0;
       `}
       color={emptyPromptColor}
       icon={<DataViewIllustration />}
-      title={
-        <h2>
-          <FormattedMessage
-            id="sharedUXComponents.noDataViews.youHaveData"
-            defaultMessage="You have data in Elasticsearch."
-          />
-          <br />
-          <FormattedMessage
-            id="sharedUXComponents.noDataViews.nowCreate"
-            defaultMessage="Now, create a data view."
-          />
-        </h2>
-      }
-      body={
-        <p>
-          <FormattedMessage
-            id="sharedUXComponents.noDataViews.dataViewExplanation"
-            defaultMessage="Kibana requires a data view to identify which data streams,
-            indices, and index aliases you want to explore. A data view can point to a
-            specific index, for example, your log data from yesterday, or all indices
-            that contain your log data."
-          />
-        </p>
-      }
+      title={title}
+      body={body}
       actions={createNewButton}
       footer={dataViewsDocLink && <DocumentationLink href={dataViewsDocLink} />}
     />
