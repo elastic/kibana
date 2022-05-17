@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { appendLayerIds, getDataLayers, getAccessors } from './layers';
-export { isTimeChart } from './visualization';
-export { normalizeTable } from './table';
+export { DiscoverTourProvider } from './discover_tour_provider';
+export { useDiscoverTourContext } from './discover_tour_context';
+export { DISCOVER_TOUR_STEP_ANCHOR_IDS, DISCOVER_TOUR_STEP_ANCHORS } from './discover_tour_anchors';
