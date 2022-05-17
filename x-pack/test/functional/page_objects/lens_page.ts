@@ -1090,6 +1090,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await this.assertExactText('[data-test-subj="metric_value"]', count);
     },
 
+    async clickMetric() {
+      await testSubjects.click('metric_label');
+    },
+
     async setMetricDynamicColoring(coloringType: 'none' | 'labels' | 'background') {
       await testSubjects.click('lnsMetric_dynamicColoring_groups_' + coloringType);
     },
