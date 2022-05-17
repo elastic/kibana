@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { handleError } from '../../../../lib/errors';
-import { LegacyRequest, LegacyServer, MonitoringCore } from '../../../../types';
-import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
+import { LegacyRequest, MonitoringCore } from '../../../../types';
 import { fetchMonitoredClusters } from './monitored_clusters';
 
 export function health(server: MonitoringCore) {
