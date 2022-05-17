@@ -82,7 +82,6 @@ describe('ALL - Live Query', () => {
     cy.react('SavedQueriesDropdown').type('NOMAPPING{downArrow}{enter}');
     cy.getReact('SavedQueriesDropdown').getCurrentState().should('have.length', 1);
     clearInputQuery();
-    cy.wait(1000);
     inputQuery('select * from users');
     cy.wait(1000);
     submitQuery();
