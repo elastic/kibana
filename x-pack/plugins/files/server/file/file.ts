@@ -22,7 +22,7 @@ import { fileAttributesReducer, Action } from './file_attributes_reducer';
  * Public file class that wraps all functionality consumers will need at the
  * individual file level
  */
-export class File implements IFile {
+export class File<M = {}> implements IFile {
   constructor(
     private readonly fileService: InternalFileService,
     private readonly blobStorageService: BlobStorageService,
@@ -45,6 +45,17 @@ export class File implements IFile {
 
   private hasContent(): boolean {
     return Boolean(this.fileSO.attributes.status === 'READY' && this.fileSO.attributes.content_ref);
+  }
+
+  async update(
+    attrs: Partial<{ meta?: M | undefined; alt?: string | undefined; name: string }>
+  ): Promise<IFile> {
+    await this.updateFileState({
+      action: 'updateFile',
+      payload: { ...attrs, name: this.name },
+    });
+
+    return this;
   }
 
   // TODO: Use security audit logger to log file content upload
@@ -70,6 +81,14 @@ export class File implements IFile {
     }
   }
 
+  downloadContent(): Promise<Readable> {
+    if (!this.hasContent()) {
+      throw new Error('No content to download');
+    }
+    const { content_ref: id, size } = this.attributes;
+    return this.blobStorageService.download(id!, size);
+  }
+
   // TODO: Use security audit logger to log file deletion
   async delete(): Promise<void> {
     const { attributes, id } = this.fileSO;
@@ -89,6 +108,10 @@ export class File implements IFile {
 
   public get attributes(): FileSavedObjectAttributes {
     return this.fileSO.attributes;
+  }
+
+  public get name(): string {
+    return this.fileSO.attributes.name;
   }
 
   public get status(): FileStatus {

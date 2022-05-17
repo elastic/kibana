@@ -10,6 +10,7 @@ import type {
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
   SavedObject,
+  ISavedObjectsRepository,
 } from '@kbn/core/server';
 import { BlobStorageService } from './blob_storage_service';
 import { fileObjectType } from './saved_objects';
@@ -36,61 +37,54 @@ interface FindFileArgs {
  * @internal
  */
 export class InternalFileService {
+  private soClient: ISavedObjectsRepository;
   constructor(
     private readonly savedObjectsService: SavedObjectsServiceStart,
     private readonly blobStorageService: BlobStorageService,
     private readonly logger: Logger
-  ) {}
+  ) {
+    this.soClient = this.savedObjectsService.createInternalRepository([this.savedObjectType]);
+  }
 
   private readonly savedObjectType = fileObjectType.name;
 
   // TODO: Enforce that file kind exists based on registry
   // TODO: Use security audit logger to log file creation
-  public async createFile(args: CreateFileArgs): Promise<IFile> {
-    const fileSO = await this.savedObjectsService
-      .createInternalRepository()
-      .create<FileSavedObjectAttributes>(this.savedObjectType, {
-        ...createDefaultFileAttributes(),
-        ...args,
-        file_kind: args.fileKind,
-      });
+  public async createFile({ fileKind, ...rest }: CreateFileArgs): Promise<IFile> {
+    const fileSO = await this.soClient.create<FileSavedObjectAttributes>(this.savedObjectType, {
+      ...createDefaultFileAttributes(),
+      ...rest,
+      file_kind: fileKind,
+    });
 
     return this.from(fileSO);
   }
 
   public async find({ fileKind, id }: FindFileArgs): Promise<undefined | IFile> {
-    const result = await this.savedObjectsService
-      .createInternalRepository()
-      .find<FileSavedObjectAttributes>({
-        type: this.savedObjectType,
-        search: `_id=${id} AND file_kind=${fileKind}`,
-        searchFields: ['_id', 'attributes.file_kind'],
-      });
-
-    const so = result.saved_objects[0];
-    return so ? this.from(so) : undefined;
+    try {
+      const result = await this.soClient.get<FileSavedObjectAttributes>(this.savedObjectType, id);
+      return result.attributes.file_kind === fileKind ? this.from(result) : undefined;
+    } catch (e) {
+      this.logger.error(`Could not get file: ${e}`);
+      return undefined;
+    }
   }
 
   public async list({ fileKind }: ListFilesArgs): Promise<IFile[]> {
-    const result = await this.savedObjectsService
-      .createInternalRepository()
-      .find<FileSavedObjectAttributes>({
-        type: this.savedObjectType,
-        search: `file_kind=${fileKind}`,
-        searchFields: ['attributes.file_kind'],
-      });
+    const result = await this.soClient.find<FileSavedObjectAttributes>({
+      type: this.savedObjectType,
+      filter: `${this.savedObjectType}.attributes.file_kind: ${fileKind}`,
+    });
 
     return result.saved_objects.map(this.from.bind(this));
   }
 
   public async deleteFileSO(id: string): Promise<void> {
-    await this.savedObjectsService.createInternalRepository().delete(this.savedObjectType, id);
+    await this.soClient.delete(this.savedObjectType, id);
   }
 
   public async updateFileSO(id: string, attributes: FileSavedObjectAttributes) {
-    return await this.savedObjectsService
-      .createInternalRepository()
-      .update(this.savedObjectType, id, attributes);
+    return await this.soClient.update(this.savedObjectType, id, attributes);
   }
 
   public from<M>(fileSO: SavedObject<FileSavedObjectAttributes<M>>): IFile {

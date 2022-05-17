@@ -24,7 +24,7 @@ describe('Elasticsearch blob storage', () => {
   const sandbox = sinon.createSandbox();
 
   beforeAll(async () => {
-    const { startES, startKibana } = createTestServers({ adjustTimeout: () => 30000 });
+    const { startES, startKibana } = createTestServers({ adjustTimeout: jest.setTimeout });
     manageES = await startES();
     manageKbn = await startKibana();
     esClient = manageKbn.coreStart.elasticsearch.client.asInternalUser;

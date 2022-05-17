@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { FileSavedObjectAttributes } from '../../common';
+import { FileSavedObjectAttributes, UpdateableFileAttributes } from '../../common';
 
 export type Action =
-  | { action: 'create'; payload: FileSavedObjectAttributes }
   | {
       action: 'uploading';
       payload?: undefined;
     }
   | { action: 'uploaded'; payload: { content_ref: string; size: number } }
-  | { action: 'uploadError'; payload?: undefined };
+  | { action: 'uploadError'; payload?: undefined }
+  | { action: 'updateFile'; payload: UpdateableFileAttributes };
 
 export function createDefaultFileAttributes(): Pick<
   FileSavedObjectAttributes,
@@ -39,6 +39,13 @@ export function fileAttributesReducer(
       return { ...state, ...payload, status: 'READY' };
     case 'uploadError':
       return { ...state, status: 'ERROR', content_ref: undefined };
+    case 'updateFile':
+      const d = new Date();
+      return {
+        ...state,
+        ...payload,
+        updated_at: d.toISOString(),
+      };
     default:
       return state;
   }

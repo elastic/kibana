@@ -68,11 +68,15 @@ export type FileSavedObjectAttributes<Meta = {}> = {
 
 export type FileSavedObject<Meta = {}> = SavedObject<FileSavedObjectAttributes<Meta>>;
 
+export type UpdateableFileAttributes = Pick<FileSavedObjectAttributes, 'meta' | 'alt' | 'name'>;
+
 export interface File<Meta = {}> {
   status: FileStatus;
   id: string;
 
+  update(attr: Partial<UpdateableFileAttributes>): Promise<File>;
   uploadContent(content: Readable): Promise<void>;
+  downloadContent(): Promise<Readable>;
   getMetadata(): Omit<FileSavedObjectAttributes<Meta>, 'status' | 'content_ref'>;
   delete(): Promise<void>;
 }
