@@ -7,4 +7,4 @@
 
 export { FILE_SO_TYPE, PLUGIN_ID, PLUGIN_NAME } from './constants';
 
-export type { FileSavedObjectAttributes, FileStatus } from './types';
+export type { FileSavedObjectAttributes, FileStatus, File, FileSavedObject } from './types';

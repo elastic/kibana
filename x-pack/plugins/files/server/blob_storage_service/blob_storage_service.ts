@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { Readable } from 'stream';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { BlobStorage } from './types';
 import { ElasticsearchBlobStorage } from './adapters';
 
 export class BlobStorageService {
-  // @ts-ignore FIXME:
   private readonly adapters: { es: BlobStorage };
 
   constructor(private readonly esClient: ElasticsearchClient, private readonly logger: Logger) {
@@ -20,5 +20,16 @@ export class BlobStorageService {
         this.logger.get('elasticsearch-blob-storage')
       ),
     };
+  }
+  public async upload(content: Readable): Promise<{ id: string; size: number }> {
+    return this.adapters.es.upload(content);
+  }
+
+  public async delete(id: string): Promise<void> {
+    return this.adapters.es.delete(id);
+  }
+
+  public async download(id: string, size?: number): Promise<Readable> {
+    return this.adapters.es.download({ id, size });
   }
 }
