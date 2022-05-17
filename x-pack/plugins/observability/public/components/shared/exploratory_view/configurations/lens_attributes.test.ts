@@ -505,6 +505,7 @@ describe('Lens Attribute', () => {
       lnsAttr = new LensAttributes([layerConfig1]);
 
       lnsAttr.getBreakdownColumn({
+        layerConfig: layerConfig1,
         sourceField: USER_AGENT_NAME,
         layerId: 'layer0',
         indexPattern: mockDataView,
