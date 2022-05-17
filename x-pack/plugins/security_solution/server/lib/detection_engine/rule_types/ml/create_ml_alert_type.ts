@@ -12,7 +12,7 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 import { machineLearningRuleParams, MachineLearningRuleParams } from '../../schemas/rule_schemas';
 import { mlExecutor } from '../../signals/executors/ml';
 import { CreateRuleOptions, SecurityAlertType } from '../types';
-import { validateImmutable } from '../utils';
+import { validateImmutable, incrementVersion } from '../utils';
 
 export const createMlAlertType = (
   createOptions: CreateRuleOptions
@@ -38,7 +38,7 @@ export const createMlAlertType = (
 
           validateImmutable(mutatedRuleParams.immutable);
 
-          return mutatedRuleParams;
+          return incrementVersion(mutatedRuleParams);
         },
       },
     },

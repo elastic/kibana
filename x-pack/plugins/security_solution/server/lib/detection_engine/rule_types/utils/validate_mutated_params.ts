@@ -10,3 +10,15 @@ export const validateImmutable = (immutable: boolean) => {
     throw new Error("Elastic rule can't be edited");
   }
 };
+
+export const validateIndexPatterns = (indices: string[] | undefined) => {
+  if (indices?.length === 0) {
+    throw new Error("Index patterns can't be empty");
+  }
+};
+
+export const incrementVersion = <RuleParams extends { version: number }>(
+  ruleParams: RuleParams
+) => {
+  return { ...ruleParams, version: ruleParams.version + 1 };
+};

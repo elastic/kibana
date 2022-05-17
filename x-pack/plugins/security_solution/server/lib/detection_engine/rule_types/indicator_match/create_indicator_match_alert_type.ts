@@ -12,8 +12,7 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 import { threatRuleParams, ThreatRuleParams } from '../../schemas/rule_schemas';
 import { threatMatchExecutor } from '../../signals/executors/threat_match';
 import { CreateRuleOptions, SecurityAlertType } from '../types';
-import { validateImmutable } from '../utils';
-
+import { validateImmutable, validateIndexPatterns, incrementVersion } from '../utils';
 export const createIndicatorMatchAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<ThreatRuleParams, {}, {}, 'default'> => {
@@ -38,8 +37,9 @@ export const createIndicatorMatchAlertType = (
           const mutatedRuleParams = mutatedOject as ThreatRuleParams;
 
           validateImmutable(mutatedRuleParams.immutable);
+          validateIndexPatterns(mutatedRuleParams.index);
 
-          return mutatedRuleParams;
+          return incrementVersion(mutatedRuleParams);
         },
       },
     },

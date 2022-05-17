@@ -13,7 +13,7 @@ import { thresholdRuleParams, ThresholdRuleParams } from '../../schemas/rule_sch
 import { thresholdExecutor } from '../../signals/executors/threshold';
 import { ThresholdAlertState } from '../../signals/types';
 import { CreateRuleOptions, SecurityAlertType } from '../types';
-import { validateImmutable } from '../utils';
+import { validateImmutable, validateIndexPatterns, incrementVersion } from '../utils';
 
 export const createThresholdAlertType = (
   createOptions: CreateRuleOptions
@@ -38,8 +38,9 @@ export const createThresholdAlertType = (
           const mutatedRuleParams = mutatedOject as ThresholdRuleParams;
 
           validateImmutable(mutatedRuleParams.immutable);
+          validateIndexPatterns(mutatedRuleParams.index);
 
-          return mutatedRuleParams;
+          return incrementVersion(mutatedRuleParams);
         },
       },
     },

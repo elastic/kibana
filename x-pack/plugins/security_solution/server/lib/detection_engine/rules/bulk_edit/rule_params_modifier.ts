@@ -8,7 +8,7 @@
 import { RuleAlertType } from '../types';
 
 import {
-  BulkActionEditPayload,
+  BulkActionEditForRuleParams,
   BulkActionEditType,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 
@@ -24,7 +24,7 @@ export const deleteItemsFromArray = <T>(arr: T[], items: T[]): T[] => {
 
 const applyBulkActionEditToRuleParams = (
   existingRuleParams: RuleAlertType['params'],
-  action: BulkActionEditPayload
+  action: BulkActionEditForRuleParams
 ): RuleAlertType['params'] => {
   let ruleParams = { ...existingRuleParams };
 
@@ -71,9 +71,15 @@ const applyBulkActionEditToRuleParams = (
   return ruleParams;
 };
 
+/**
+ * takes list of bulkEdit actions and apply them to rule.params by mutating it
+ * @param existingRuleParams
+ * @param actions
+ * @returns mutated params
+ */
 export const ruleParamsModifier = (
   existingRuleParams: RuleAlertType['params'],
-  actions: BulkActionEditPayload[]
+  actions: BulkActionEditForRuleParams[]
 ) => {
   return actions.reduce(
     (acc, action) => ({ ...acc, ...applyBulkActionEditToRuleParams(acc, action) }),

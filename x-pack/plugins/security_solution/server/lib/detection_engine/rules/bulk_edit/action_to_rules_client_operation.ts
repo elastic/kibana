@@ -12,6 +12,11 @@ import {
   BulkActionEditType,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 
+/**
+ * converts bulk edit action to format of rulesClient.bulkEdit operation
+ * @param action BulkActionEditForRuleAttributes
+ * @returns rulesClient BulkEditOperation
+ */
 export const bulkEditActionToRulesClientOperation = (
   action: BulkActionEditForRuleAttributes
 ): BulkEditOperation => {

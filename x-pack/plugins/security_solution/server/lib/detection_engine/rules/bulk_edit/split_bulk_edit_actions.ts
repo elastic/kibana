@@ -13,10 +13,10 @@ import {
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 /**
- * Split bulk edit actions in 2 chinks: actions applied to params and
+ * Split bulk edit actions in 2 chunks: actions applied to params and
  * actions applied to attributes
- * @param actions BulkActionEditPayload
- * @returns lists of actions
+ * @param actions BulkActionEditPayload[]
+ * @returns lists of split actions
  */
 export const splitBulkEditActions = (actions: BulkActionEditPayload[]) => {
   const splitActions: {

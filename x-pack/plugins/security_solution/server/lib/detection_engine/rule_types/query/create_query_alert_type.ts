@@ -12,8 +12,7 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 import { queryRuleParams, QueryRuleParams } from '../../schemas/rule_schemas';
 import { queryExecutor } from '../../signals/executors/query';
 import { CreateRuleOptions, SecurityAlertType } from '../types';
-import { validateImmutable } from '../utils';
-
+import { validateImmutable, validateIndexPatterns, incrementVersion } from '../utils';
 export const createQueryAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<QueryRuleParams, {}, {}, 'default'> => {
@@ -37,13 +36,9 @@ export const createQueryAlertType = (
           const mutatedRuleParams = mutatedOject as QueryRuleParams;
 
           validateImmutable(mutatedRuleParams.immutable);
+          validateIndexPatterns(mutatedRuleParams.index);
 
-          // TODO: unify me
-          if (mutatedRuleParams.index?.length === 0) {
-            throw Error("Index pattern can't be empty");
-          }
-
-          return mutatedRuleParams;
+          return incrementVersion(mutatedRuleParams);
         },
       },
     },

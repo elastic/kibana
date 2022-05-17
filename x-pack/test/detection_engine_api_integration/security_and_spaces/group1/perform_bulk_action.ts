@@ -684,7 +684,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
         expect(body.attributes.errors[0]).to.eql({
-          message: "Mutated params invalid: Index pattern can't be empty",
+          message: "Mutated params invalid: Index patterns can't be empty",
           rules: [
             {
               id: rule.id,
@@ -692,6 +692,30 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ],
         });
+      });
+
+      it.only('should increment version on rule bulk edit', async () => {
+        const ruleId = 'ruleId';
+        const rule = await createRule(supertest, log, getSimpleRule(ruleId));
+        const { body } = await postBulkAction()
+          .send({
+            ids: [rule.id],
+            action: BulkAction.edit,
+            [BulkAction.edit]: [
+              {
+                type: BulkActionEditType.add_tags,
+                value: ['test'],
+              },
+            ],
+          })
+          .expect(200);
+
+        expect(body.attributes.results.updated[0].version).to.be(rule.version + 1);
+
+        // Check that the updates have been persisted
+        const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+
+        expect(updatedRule.version).to.be(rule.version + 1);
       });
     });
 

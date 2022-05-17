@@ -12,8 +12,7 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 import { eqlRuleParams, EqlRuleParams } from '../../schemas/rule_schemas';
 import { eqlExecutor } from '../../signals/executors/eql';
 import { CreateRuleOptions, SecurityAlertType } from '../types';
-import { validateImmutable } from '../utils';
-
+import { validateImmutable, validateIndexPatterns, incrementVersion } from '../utils';
 export const createEqlAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<EqlRuleParams, {}, {}, 'default'> => {
@@ -37,8 +36,9 @@ export const createEqlAlertType = (
           const mutatedRuleParams = mutatedOject as EqlRuleParams;
 
           validateImmutable(mutatedRuleParams.immutable);
+          validateIndexPatterns(mutatedRuleParams.index);
 
-          return mutatedRuleParams;
+          return incrementVersion(mutatedRuleParams);
         },
       },
     },
