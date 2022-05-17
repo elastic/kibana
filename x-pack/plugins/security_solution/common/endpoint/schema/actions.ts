@@ -42,3 +42,9 @@ export const ActionStatusRequestSchema = {
     ]),
   }),
 };
+
+export const ActionDetailsRequestSchema = {
+  params: schema.object({
+    action_id: schema.string(),
+  }),
+};

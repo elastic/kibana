@@ -17,7 +17,7 @@ export const createPercentileAggregation = (
       percentiles: {
         field,
         percents: [value],
-        keyed: false,
+        keyed: true,
       },
     },
   };

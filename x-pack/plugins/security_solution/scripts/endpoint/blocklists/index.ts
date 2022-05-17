@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { run, RunFn, createFailError } from '@kbn/dev-utils';
+import { run, RunFn } from '@kbn/dev-cli-runner';
+import { createFailError } from '@kbn/dev-cli-errors';
 import { KbnClient } from '@kbn/test';
 import { AxiosError } from 'axios';
 import pMap from 'p-map';
@@ -55,7 +56,7 @@ class BlocklistDataLoaderError extends Error {
   }
 }
 
-const handleThrowAxiosHttpError = (err: AxiosError): never => {
+const handleThrowAxiosHttpError = (err: AxiosError<{ message?: string }>): never => {
   let message = err.message;
 
   if (err.response) {

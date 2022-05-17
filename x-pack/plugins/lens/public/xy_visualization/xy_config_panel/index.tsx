@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position, ScaleType } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AxesSettingsConfig, AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
 import type { VisualizationToolbarProps, FramePublicAPI } from '../../types';
 import { State, XYState } from '../types';
 import { isHorizontalChart } from '../state_helpers';
@@ -294,6 +295,10 @@ export const XyToolbar = memo(function XyToolbar(
     props.frame.datasourceLayers
   ).truncateText;
 
+  const legendSize = state.legend.legendSize;
+
+  const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
+
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
@@ -398,16 +403,17 @@ export const XyToolbar = memo(function XyToolbar(
                 valuesInLegend: !state.valuesInLegend,
               });
             }}
-            legendSize={state.legend.legendSize}
-            onLegendSizeChange={(legendSize) => {
+            legendSize={legendSize}
+            onLegendSizeChange={(newLegendSize) => {
               setState({
                 ...state,
                 legend: {
                   ...state.legend,
-                  legendSize,
+                  legendSize: newLegendSize,
                 },
               });
             }}
+            showAutoLegendSizeOption={hadAutoLegendSize}
           />
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -449,6 +455,13 @@ export const XyToolbar = memo(function XyToolbar(
               hasBarOrAreaOnAxis={hasBarOrAreaOnLeftAxis}
               dataBounds={dataBounds.left}
               hasPercentageAxis={hasPercentageAxis(axisGroups, 'left', state)}
+              scale={state?.yLeftScale}
+              setScale={(scale) => {
+                setState({
+                  ...state,
+                  yLeftScale: scale,
+                });
+              }}
             />
           </TooltipWrapper>
 
@@ -510,6 +523,13 @@ export const XyToolbar = memo(function XyToolbar(
               setExtent={setRightExtent}
               hasBarOrAreaOnAxis={hasBarOrAreaOnRightAxis}
               dataBounds={dataBounds.right}
+              scale={state?.yRightScale}
+              setScale={(scale) => {
+                setState({
+                  ...state,
+                  yRightScale: scale,
+                });
+              }}
             />
           </TooltipWrapper>
         </EuiFlexGroup>
