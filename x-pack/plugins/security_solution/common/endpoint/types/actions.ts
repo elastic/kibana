@@ -200,8 +200,17 @@ export interface ActionDetails {
    * performed on the endpoint
    */
   command: string;
+  /**
+   * Will be set to true only if action is not yet completed and elapsed time has exceeded
+   * the request's expiration date
+   */
   isExpired: boolean;
+  /** Action has been completed */
   isCompleted: boolean;
+  /** If the action was successful */
+  wasSuccessful: boolean;
+  /** Any errors encountered if `wasSuccessful` is `false` */
+  errors: undefined | string[];
   /** The date when the initial action request was submitted */
   startedAt: string;
   /** The date when the action was completed (a response by the endpoint (not fleet) was received) */

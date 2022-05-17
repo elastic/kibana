@@ -112,6 +112,8 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       id: '123',
       isCompleted: true,
       isExpired: false,
+      wasSuccessful: true,
+      errors: undefined,
       logEntries: [
         {
           item: {
