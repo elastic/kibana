@@ -10,7 +10,6 @@ import { useParams, useHistory } from 'react-router-dom';
 import { SavedObject } from '@kbn/data-plugin/public';
 import { ISearchSource } from '@kbn/data-plugin/public';
 import {
-  DataView,
   DataViewAttributes,
   DataViewSavedObjectConflictError,
 } from '@kbn/data-views-plugin/public';
@@ -166,8 +165,7 @@ export function DiscoverMainRoute() {
 
   const onDataViewCreated = useCallback(
     async (dataView: unknown) => {
-      const dataViewId = (dataView as DataView).id;
-      if (dataViewId) {
+      if (dataView) {
         setShowNoDataPage(false);
         setError(undefined);
         await loadSavedSearch();
@@ -175,19 +173,6 @@ export function DiscoverMainRoute() {
     },
     [loadSavedSearch]
   );
-
-  const noDataPage = () => {
-    const analyticsServices = {
-      coreStart: core,
-      dataViews: data.dataViews,
-      dataViewEditor,
-    };
-    return (
-      <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
-        <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} />;
-      </AnalyticsNoDataPageKibanaProvider>
-    );
-  };
 
   useEffect(() => {
     loadSavedSearch();
@@ -202,7 +187,16 @@ export function DiscoverMainRoute() {
   }, [chrome, savedSearch]);
 
   if (showNoDataPage) {
-    return noDataPage();
+    const analyticsServices = {
+      coreStart: core,
+      dataViews: data.dataViews,
+      dataViewEditor,
+    };
+    return (
+      <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
+        <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} />;
+      </AnalyticsNoDataPageKibanaProvider>
+    );
   }
 
   if (error) {

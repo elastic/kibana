@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const button = await testSubjects.find('createDataViewButtonFlyout');
       button.click();
-      await retry.waitForWithTimeout('index pattern editor form to be visible', 15000, async () => {
+      await retry.waitForWithTimeout('data view editor form to be visible', 15000, async () => {
         return await (await find.byClassName('indexPatternEditor__form')).isDisplayed();
       });
 
