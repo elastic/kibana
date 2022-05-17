@@ -38,12 +38,14 @@ export function getMapsVisTypeAlias(visualizations: VisualizationsSetup) {
         docTypes: [MAP_SAVED_OBJECT_TYPE],
         searchFields: ['title^3'],
         toListItem(savedObject: SavedObject) {
-          const { id, type, attributes } = savedObject as MapSavedObject;
+          const { id, type, updatedAt, attributes } = savedObject as MapSavedObject;
           const { title, description } = attributes;
+
           return {
             id,
             title,
             description,
+            updatedAt,
             editUrl: getEditPath(id),
             editApp: APP_ID,
             icon: APP_ICON,
