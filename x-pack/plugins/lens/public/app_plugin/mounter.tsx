@@ -219,7 +219,7 @@ export async function mountApp(
 
   const EditorRenderer = React.memo(
     (props: { id?: string; history: History<unknown>; editByValue?: boolean }) => {
-      const [isEditorLoading, setIsEditorLoading] = useState(true);
+      const [editorState, setEditorState] = useState<'loading' | 'no_data' | 'data'>('loading');
       const redirectCallback = useCallback(
         (id?: string) => {
           redirectTo(props.history, id);
@@ -231,10 +231,10 @@ export async function mountApp(
           const hasUserDataView = await data.dataViews.hasData.hasUserDataView().catch(() => false);
           const hasEsData = await data.dataViews.hasData.hasESData().catch(() => true);
           if (!hasUserDataView || !hasEsData) {
-            props.history.push({ pathname: '/no_data', search: props.history.location.search });
+            setEditorState('no_data');
             return;
           }
-          setIsEditorLoading(false);
+          setEditorState('data');
         })();
       }, [props.history]);
       trackUiEvent('loaded');
@@ -249,8 +249,26 @@ export async function mountApp(
       lensStore.dispatch(setState(getPreloadedState(storeDeps) as LensAppState));
       lensStore.dispatch(loadInitial({ redirectCallback, initialInput, history: props.history }));
 
-      if (isEditorLoading) {
+      if (editorState === 'loading') {
         return <EuiLoadingSpinner />;
+      }
+
+      if (editorState === 'no_data') {
+        const analyticsServices = {
+          coreStart,
+          dataViews: data.dataViews,
+          dataViewEditor: startDependencies.dataViewEditor,
+        };
+        return (
+          <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
+            <AnalyticsNoDataPage
+              onDataViewCreated={() => {
+                setEditorState('data');
+              }}
+            />
+            ;
+          </AnalyticsNoDataPageKibanaProvider>
+        );
       }
 
       return (
@@ -316,27 +334,6 @@ export async function mountApp(
                   render={(routeProps) => <EditorRoute {...routeProps} editByValue />}
                 />
                 <Route exact path="/" component={EditorRoute} />
-                <Route
-                  path="/no_data"
-                  exact
-                  render={({ history }) => {
-                    const analyticsServices = {
-                      coreStart,
-                      dataViews: data.dataViews,
-                      dataViewEditor: startDependencies.dataViewEditor,
-                    };
-                    return (
-                      <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
-                        <AnalyticsNoDataPage
-                          onDataViewCreated={() => {
-                            redirectTo(history, undefined);
-                          }}
-                        />
-                        ;
-                      </AnalyticsNoDataPageKibanaProvider>
-                    );
-                  }}
-                />
                 <Route path="/" component={NotFound} />
               </Switch>
             </HashRouter>
