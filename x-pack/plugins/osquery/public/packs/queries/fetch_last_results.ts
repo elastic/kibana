@@ -59,13 +59,13 @@ export const useFetchLastResults = ({ data, packName, logsDataView }: ILastResul
 
   const getAggsByIds = (ids, timestampsActions) =>
     ids.reduce((acc, item) => {
-      const timestamp = find(timestampsActions, ['key', item]).timestamps.buckets[0].key_as_string;
+      const timestamp =
+        find(timestampsActions, ['key', item])?.timestamps.buckets[0].key_as_string ?? new Date();
 
       return {
         ...acc,
         [item]: {
-          query: {
-            // @ts-expect-error update types
+          filter: {
             bool: {
               filter: [
                 {
@@ -94,13 +94,11 @@ export const useFetchLastResults = ({ data, packName, logsDataView }: ILastResul
       const ids = data.reduce((acc, item) => [...acc, `pack_${packName}_${item.id}`], []);
       const lastResultsSearchSource = await kibanaData.search.searchSource.create({
         query: {
-          // @ts-expect-error update types
           terms: {
             action_id: ids,
           },
         },
         aggs: {
-          // @ts-expect-error update types
           actions: {
             terms: {
               field: 'action_id',
