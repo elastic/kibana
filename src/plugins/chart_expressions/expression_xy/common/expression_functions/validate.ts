@@ -7,14 +7,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { isValidInterval } from '@kbn/data-plugin/common';
 import { AxisExtentModes, ValueLabelModes } from '../constants';
 import {
   SeriesType,
   AxisExtentConfigResult,
   DataLayerConfigResult,
+  CommonXYDataLayerConfigResult,
   ValueLabelMode,
   CommonXYDataLayerConfig,
 } from '../types';
+import { isTimeChart } from '../helpers';
 
 const errors = {
   markSizeAccessorForNonLineOrAreaChartsError: () =>
@@ -50,6 +53,18 @@ const errors = {
     i18n.translate('expressionXY.reusable.function.xyVis.errors.dataBoundsForNotLineChartError', {
       defaultMessage: 'Only line charts can be fit to the data bounds',
     }),
+  isInvalidIntervalError: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.isInvalidIntervalError', {
+      defaultMessage:
+        'Provided x-axis interval is invalid. The interval should include quantity and unit names. Examples: 1d, 24h, 1w.',
+    }),
+  minTimeBarIntervalNotForTimeBarChartError: () =>
+    i18n.translate(
+      'expressionXY.reusable.function.xyVis.errors.minTimeBarIntervalNotForTimeBarChartError',
+      {
+        defaultMessage: '`minTimeBarInterval` argument is applicable only for time bar charts.',
+      }
+    ),
 };
 
 export const hasBarLayer = (layers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>) =>
@@ -127,5 +142,21 @@ export const validateMarkSizeForChartType = (
 export const validateMarkSizeRatioLimits = (markSizeRatio: number) => {
   if (markSizeRatio < 1 || markSizeRatio > 100) {
     throw new Error(errors.markSizeRatioLimitsError());
+  }
+};
+
+export const validateMinTimeBarInterval = (
+  dataLayers: CommonXYDataLayerConfigResult[],
+  hasBar: boolean,
+  minTimeBarInterval?: string
+) => {
+  if (minTimeBarInterval) {
+    if (!isValidInterval(minTimeBarInterval)) {
+      throw new Error(errors.isInvalidIntervalError());
+    }
+
+    if (!hasBar || !isTimeChart(dataLayers)) {
+      throw new Error(errors.minTimeBarIntervalNotForTimeBarChartError());
+    }
   }
 };

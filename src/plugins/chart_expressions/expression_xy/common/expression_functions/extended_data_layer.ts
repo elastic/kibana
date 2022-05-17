@@ -19,6 +19,19 @@ export const extendedDataLayerFunction: ExtendedDataLayerFn = {
   inputTypes: ['datatable'],
   args: {
     ...commonDataLayerArgs,
+    xAccessor: {
+      types: ['string'],
+      help: strings.getXAccessorHelp(),
+    },
+    splitAccessor: {
+      types: ['string'],
+      help: strings.getSplitAccessorHelp(),
+    },
+    accessors: {
+      types: ['string'],
+      help: strings.getAccessorsHelp(),
+      multi: true,
+    },
     table: {
       types: ['datatable'],
       help: strings.getTableHelp(),

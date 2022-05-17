@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import { NotificationsStart } from '@kbn/core/public';
 import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import {

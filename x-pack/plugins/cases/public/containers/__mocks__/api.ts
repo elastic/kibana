@@ -7,7 +7,7 @@
 
 import {
   ActionLicense,
-  AllCases,
+  Cases,
   BulkUpdateStatus,
   Case,
   CasesStatus,
@@ -29,7 +29,7 @@ import {
   respReporters,
   tags,
 } from '../mock';
-import { ResolvedCase } from '../../../common/ui/types';
+import { ResolvedCase, SeverityAll } from '../../../common/ui/types';
 import {
   CasePatchRequest,
   CasePostRequest,
@@ -71,6 +71,7 @@ export const getCaseUserActions = async (
 
 export const getCases = async ({
   filterOptions = {
+    severity: SeverityAll,
     search: '',
     reporters: [],
     status: CaseStatuses.open,
@@ -84,7 +85,7 @@ export const getCases = async ({
     sortOrder: 'desc',
   },
   signal,
-}: FetchCasesProps): Promise<AllCases> => Promise.resolve(allCases);
+}: FetchCasesProps): Promise<Cases> => Promise.resolve(allCases);
 
 export const postCase = async (newCase: CasePostRequest, signal: AbortSignal): Promise<Case> =>
   Promise.resolve(basicCasePost);
