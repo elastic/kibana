@@ -179,7 +179,8 @@
         {
           "label": "Toolchain",
           "items": [
-            { "id": "kibDevDocsOpsBabelPreset" }
+            { "id": "kibDevDocsOpsBabelPreset" },
+            { "id": "kibDevDocsOpsTypeSummarizer" }
           ]
         },
         {

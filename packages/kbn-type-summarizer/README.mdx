@@ -1,6 +1,13 @@
-# @kbn/type-summarizer
+---
+id: kibDevDocsOpsTypeSummarizer
+slug: /kibana-dev-docs/ops/type-summarizer
+title: "@kbn/type-summarizer (BETA)"
+description: A tool to summarize and produce a single .d.ts file from tsc output supporting sourcemaps
+date: 2022-05-17
+tags: ['kibana', 'dev', 'contributor', 'operations', 'type', 'summarizer', 'typescript', 'bundler', 'sourcemap']
+---
 
-Consume the .d.ts files for a package, produced by `tsc`, and generate a single `.d.ts` file of the public types along with a source map that points back to the original source.
+Consumes the .d.ts files for a package, produced by `tsc`, and generates a single `.d.ts` file of the public types along with a source map that points back to the original source.
 
 ## You mean like API Extractor?
 
@@ -14,4 +21,4 @@ The plan is to expand to other packages in the Kibana repo, adding support for l
 
 ## Something isn't working and I'm blocked!
 
-If there's a problem with the implmentation blocking another team at any point we can move the package back to using api-extractor by removing the package from the `TYPE_SUMMARIZER_PACKAGES` list at the top of [packages/kbn-type-summarizer/src/lib/bazel_cli_config.ts](./src/lib/bazel_cli_config.ts).
+If there's a problem with the implementation blocking another team at any point we can move the package back to using api-extractor by removing the package from the `TYPE_SUMMARIZER_PACKAGES` list at the top of [packages/kbn-type-summarizer/src/lib/bazel_cli_config.ts](./src/lib/bazel_cli_config.ts).
