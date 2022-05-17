@@ -6,10 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { Serializable } from '../serializable';
+import { Metricset } from '../apm/metricset';
 import { AgentConfigFields } from './agent_config_fields';
 
-export class AgentConfigMetrics extends Serializable<AgentConfigFields> {
+export class AgentConfigMetrics extends Metricset<AgentConfigFields> {
+  constructor(fields: AgentConfigFields) {
+    super({
+      'metricset.name': 'agent_config',
+      ...fields,
+    });
+  }
+
   timestamp(timestamp: number): this {
     super.timestamp(timestamp);
     this.fields['event.ingested'] = new Date(timestamp).getTime();

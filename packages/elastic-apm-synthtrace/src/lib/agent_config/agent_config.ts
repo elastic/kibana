@@ -14,9 +14,6 @@ export class AgentConfig extends Entity<AgentConfigFields> {
   metrics() {
     return new AgentConfigMetrics({
       ...this.fields,
-      'processor.event': 'metric',
-      'processor.name': 'metric',
-      'metricset.name': 'agent_config',
       agent_config_applied: 1,
     });
   }
