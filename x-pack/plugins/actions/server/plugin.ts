@@ -327,7 +327,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     defineRoutes({
       router: core.http.createRouter<ActionsRequestHandlerContext>(),
       licenseState: this.licenseState,
-      logger: this.logger,
       actionsConfigUtils,
       usageCounter: this.usageCounter,
     });
@@ -408,6 +407,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       );
 
       return new ActionsClient({
+        logger,
         unsecuredSavedObjectsClient,
         actionTypeRegistry: actionTypeRegistry!,
         defaultKibanaIndex: kibanaIndex!,
@@ -599,6 +599,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             includedHiddenTypes,
           });
           return new ActionsClient({
+            logger,
             unsecuredSavedObjectsClient,
             actionTypeRegistry: actionTypeRegistry!,
             defaultKibanaIndex,
