@@ -65,6 +65,8 @@ export const configSchema = schema.object({
 
 export type AlertingConfig = TypeOf<typeof configSchema>;
 export type RulesConfig = TypeOf<typeof rulesSchema>;
-export type AlertingRulesConfig = Pick<AlertingConfig['rules'], 'minimumScheduleInterval'>;
+export type AlertingRulesConfig = Pick<AlertingConfig['rules'], 'minimumScheduleInterval'> & {
+  isUsingSecurity: boolean;
+};
 export type ActionsConfig = RulesConfig['run']['actions'];
 export type ActionTypeConfig = Omit<ActionsConfig, 'connectorTypeOverrides'>;
