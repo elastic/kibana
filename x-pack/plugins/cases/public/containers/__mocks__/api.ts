@@ -38,7 +38,7 @@ import {
   CaseStatuses,
   SingleCaseMetricsResponse,
 } from '../../../common/api';
-import { ValidFeatureId } from '@kbn/rule-data-utils';
+import type { ValidFeatureId } from '@kbn/rule-data-utils';
 
 export const getCase = async (
   caseId: string,

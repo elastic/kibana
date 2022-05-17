@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-export const DefaultSort: estypes.SortCombinations[] = [
+export const DefaultSort: SortCombinations[] = [
   {
     '@timestamp': {
       order: 'asc',

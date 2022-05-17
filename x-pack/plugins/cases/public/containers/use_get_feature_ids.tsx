@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useState, useRef } from 'react';
-import { ValidFeatureId } from '@kbn/rule-data-utils';
+import type { ValidFeatureId } from '@kbn/rule-data-utils';
 
 import * as i18n from './translations';
 import { useToasts } from '../common/lib/kibana';

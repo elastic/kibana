@@ -21,7 +21,7 @@ import {
   EuiProgress,
   EuiLoadingContent,
 } from '@elastic/eui';
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
+import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { AlertsField } from '../../../../types';
 
 const SAMPLE_TITLE_LABEL = i18n.translate(
@@ -100,7 +100,8 @@ export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
               <EuiLoadingContent lines={1} />
             ) : (
               <EuiText size="s" data-test-subj="alertsFlyoutName">
-                {get(alert, AlertsField.name, [])[0]}
+                {/* any is required here to improve typescript performance */}
+                {get(alert as any, AlertsField.name, [])[0] as string}
               </EuiText>
             )}
           </EuiFlexItem>
@@ -113,7 +114,8 @@ export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
               <EuiLoadingContent lines={3} />
             ) : (
               <EuiText size="s" data-test-subj="alertsFlyoutReason">
-                {get(alert, AlertsField.reason, [])[0]}
+                {/* any is required here to improve typescript performance */}
+                {get(alert as any, AlertsField.reason, [])[0] as string}
               </EuiText>
             )}
           </EuiFlexItem>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ValidFeatureId } from '@kbn/rule-data-utils';
+import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { waitFor } from '@testing-library/dom';
 import React from 'react';

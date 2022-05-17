@@ -13,10 +13,13 @@ import {
   EuiDataGridSorting,
   EuiEmptyPrompt,
 } from '@elastic/eui';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ValidFeatureId } from '@kbn/rule-data-utils';
-import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
+import type { ValidFeatureId } from '@kbn/rule-data-utils';
+import type { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type {
+  QueryDslQueryContainer,
+  SortCombinations,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useFetchAlerts } from './hooks/use_fetch_alerts';
 import { AlertsTable } from './alerts_table';
 import { AlertsTableConfigurationRegistry, RenderCellValueProps } from '../../../types';
@@ -33,12 +36,12 @@ export interface AlertsTableStateProps {
   configurationId: string;
   id: string;
   featureIds: ValidFeatureId[];
-  query: Pick<estypes.QueryDslQueryContainer, 'bool' | 'ids'>;
+  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
 }
 
 interface AlertsTableStorage {
   columns: EuiDataGridColumn[];
-  sort: estypes.SortCombinations[];
+  sort: SortCombinations[];
 }
 
 const EmptyConfiguration = {
@@ -79,7 +82,7 @@ const AlertsTableState = ({
   });
 
   const [showCheckboxes] = useState(false);
-  const [sort, setSort] = useState<estypes.SortCombinations[]>(storageAlertsTable.current.sort);
+  const [sort, setSort] = useState<SortCombinations[]>(storageAlertsTable.current.sort);
   const [pagination, setPagination] = useState(DefaultPagination);
   const [columns, setColumns] = useState<EuiDataGridColumn[]>(storageAlertsTable.current.columns);
 
@@ -167,7 +170,8 @@ const AlertsTableState = ({
       pageSizeOptions: [1, 2, 5, 10, 20, 50, 100],
       leadingControlColumns: [],
       renderCellValue: ({ alert, field }: RenderCellValueProps) => {
-        const value = get(alert, field, [])[0];
+        // any is required here to improve typescript performance
+        const value = get(alert as any, field, [])[0] as string;
         return value ?? 'N/A';
       },
       showCheckboxes,

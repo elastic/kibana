@@ -22,11 +22,10 @@ import {
   RuleRegistrySearchRequestPagination,
 } from '@kbn/rule-registry-plugin/common';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
+import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { PLUGIN_ID } from '../../../../common/constants';
 import { AlertsTable } from '../alerts_table';
 import { useKibana } from '../../../../common/lib/kibana';
-import { RenderCellValueProps } from '../../../../types';
 
 const consumers = [
   AlertConsumers.APM,
@@ -157,8 +156,9 @@ const AlertsPage: React.FunctionComponent = () => {
     pageSize: defaultPagination.pageSize,
     pageSizeOptions: [1, 2, 5, 10, 20, 50, 100],
     leadingControlColumns: [],
-    renderCellValue: ({ alert, field }: RenderCellValueProps) => {
-      const value = get(alert, field, [])[0];
+    renderCellValue: ({ alert, field }: { alert: EcsFieldsResponse; field: string }) => {
+      // any is required here to improve typescript performance
+      const value = get(alert as any, field, [])[0] as string;
       return value ?? 'N/A';
     },
     showCheckboxes,
