@@ -12,8 +12,9 @@ import {
   validateAccessor,
 } from '@kbn/visualizations-plugin/common/utils';
 import type { Datatable } from '@kbn/expressions-plugin/common';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
 import { LayerTypes, XY_VIS_RENDERER, DATA_LAYER } from '../constants';
-import { appendLayerIds, getAccessors } from '../helpers';
+import { appendLayerIds, getAccessors, normalizeTable } from '../helpers';
 import { DataLayerConfigResult, XYLayerConfig, XyVisFn, XYArgs } from '../types';
 import { getLayerDimensions } from '../utils';
 import {
@@ -25,20 +26,23 @@ import {
   validateValueLabels,
 } from './validate';
 
-const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult => ({
-  type: DATA_LAYER,
-  seriesType: args.seriesType,
-  hide: args.hide,
-  columnToLabel: args.columnToLabel,
-  yScaleType: args.yScaleType,
-  xScaleType: args.xScaleType,
-  isHistogram: args.isHistogram,
-  palette: args.palette,
-  yConfig: args.yConfig,
-  layerType: LayerTypes.DATA,
-  table,
-  ...getAccessors(args, table),
-});
+const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult => {
+  const accessors = getAccessors<string | ExpressionValueVisDimension, XYArgs>(args, table);
+  const normalizedTable = normalizeTable(table, accessors.xAccessor);
+  return {
+    type: DATA_LAYER,
+    seriesType: args.seriesType,
+    hide: args.hide,
+    columnToLabel: args.columnToLabel,
+    xScaleType: args.xScaleType,
+    isHistogram: args.isHistogram,
+    palette: args.palette,
+    yConfig: args.yConfig,
+    layerType: LayerTypes.DATA,
+    table: normalizedTable,
+    ...accessors,
+  };
+};
 
 export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   validateAccessor(args.splitRowAccessor, data.columns);
@@ -54,7 +58,6 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
     hide,
     splitAccessor,
     columnToLabel,
-    yScaleType,
     xScaleType,
     isHistogram,
     yConfig,
@@ -63,6 +66,10 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   } = args;
 
   const dataLayers: DataLayerConfigResult[] = [createDataLayer(args, data)];
+
+  validateAccessor(dataLayers[0].xAccessor, data.columns);
+  validateAccessor(dataLayers[0].splitAccessor, data.columns);
+  dataLayers[0].accessors.forEach((accessor) => validateAccessor(accessor, data.columns));
 
   const layers: XYLayerConfig[] = [
     ...appendLayerIds(dataLayers, 'dataLayers'),
