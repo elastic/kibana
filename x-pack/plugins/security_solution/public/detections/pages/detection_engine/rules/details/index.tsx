@@ -470,14 +470,18 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [isExistingRule, ruleDetailTab, setRuleDetailTab, pageTabs]
   );
 
-  // TODO: Revisit this logic. I think we can remove the await data
-  const ruleIndices = useMemo(async () => {
-    if (rule?.data_view_id != null && rule?.data_view_id !== '') {
-      const dataView = await data.dataViews.get(rule?.data_view_id);
-      return dataView.title.split(',');
-    }
+  const [ruleIndices, setRuleIndices] = useState<string[]>(rule?.index ?? DEFAULT_INDEX_PATTERN);
 
-    return rule?.index ?? DEFAULT_INDEX_PATTERN;
+  // TODO: Revisit this logic. I think we can remove the await data
+  useEffect(() => {
+    const fetchDataViews = async () => {
+      if (rule?.data_view_id != null && rule?.data_view_id !== '') {
+        const dataView = await data.dataViews.get(rule?.data_view_id);
+        setRuleIndices(dataView.title.split(','));
+      }
+    };
+
+    fetchDataViews();
   }, [rule?.index, rule?.data_view_id, data]);
 
   const lastExecution = rule?.execution_summary?.last_execution;
