@@ -430,8 +430,8 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
             });
           });
 
-          after(async () => {
-            await synthtraceEsClient.clean();
+          after(() => {
+            synthtraceEsClient.clean();
           });
 
           it(`should have 'applied_by_agent=true' when getting a config from all configurations`, async () => {
