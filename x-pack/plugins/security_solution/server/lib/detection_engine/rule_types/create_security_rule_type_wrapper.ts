@@ -10,6 +10,8 @@ import { isEmpty } from 'lodash';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import agent from 'elastic-apm-node';
 
+import { DataViewAttributes, SavedObject } from '@kbn/data-views-plugin/common';
+
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
 import { buildRuleMessageFactory } from './factories/build_rule_message_factory';
 import {
@@ -36,6 +38,7 @@ import { scheduleThrottledNotificationActions } from '../notifications/schedule_
 import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
 import { extractReferences, injectReferences } from '../signals/saved_object_references';
 import { withSecuritySpan } from '../../../utils/with_security_span';
+import { hasDataViewInParams } from '../schemas/utils';
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
@@ -135,10 +138,24 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           // so that we can use it in create rules route, bulk, etc.
           try {
             if (!isMachineLearningParams(params)) {
-              const index = params.index;
+              let runtimeMappings = {};
+              let kibanaIndexPattern: SavedObject<DataViewAttributes> | null = null;
+              // hasDataViewInParams is a typeguard that asserts ruleParams are either
+              // threat match, threshold, eql, or query rule types
+              if (hasDataViewInParams(params) && params.dataViewId != null) {
+                kibanaIndexPattern = await services.savedObjectsClient.get<DataViewAttributes>(
+                  'index-pattern',
+                  params.dataViewId
+                );
+                if (kibanaIndexPattern?.attributes.runtimeFieldMap != null) {
+                  runtimeMappings = JSON.parse(kibanaIndexPattern.attributes.runtimeFieldMap);
+                  logger.debug(`runtime mappings ${runtimeMappings}`);
+                }
+              }
+              const index = kibanaIndexPattern?.attributes.title.split(',') ?? params.index;
               const hasTimestampOverride = !!timestampOverride;
 
-              const inputIndices = params.index ?? [];
+              const inputIndices = index ?? [];
 
               const privileges = await checkPrivilegesFromEsClient(esClient, inputIndices);
 
@@ -159,10 +176,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                         ? ['@timestamp', timestampOverride]
                         : ['@timestamp'],
                       include_unmapped: true,
+                      runtime_mappings: runtimeMappings,
                     },
                     { meta: true }
                   )
                 );
+
                 wroteWarningStatus = await hasTimestampFields({
                   timestampField: hasTimestampOverride ? timestampOverride : '@timestamp',
                   timestampFieldCapsResponse: timestampFieldCaps,
