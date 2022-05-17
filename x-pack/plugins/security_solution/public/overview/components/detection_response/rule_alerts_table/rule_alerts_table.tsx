@@ -31,7 +31,7 @@ import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
 import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
 import { FormattedCount } from '../../../../common/components/formatted_number';
-import { useNavigateToTimeline } from '../hooks';
+import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
 
 export interface RuleAlertsTableProps {
   signalIndexName: string | null;

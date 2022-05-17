@@ -19,13 +19,11 @@ export const SEVERITY_COLOR = {
   low: '#54B399',
 } as const;
 
-const ITEMS_PER_PAGE = 4;
-export const getPageCount = (itemCount: number) => Math.ceil(itemCount / ITEMS_PER_PAGE);
-
 export interface LastUpdatedAtProps {
   updatedAt: number;
   isUpdating: boolean;
 }
+
 export const LastUpdatedAt: React.FC<LastUpdatedAtProps> = ({ isUpdating, updatedAt }) => (
   <EuiFlexGroup>
     {isUpdating ? (

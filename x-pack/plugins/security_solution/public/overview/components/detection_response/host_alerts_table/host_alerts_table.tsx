@@ -25,7 +25,7 @@ import { HoverVisibilityContainer } from '../../../../common/components/hover_vi
 import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
 import { HostDetailsLink } from '../../../../common/components/links';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { useNavigateToTimeline } from '../hooks';
+import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
 import * as i18n from '../translations';
 import { LastUpdatedAt, SEVERITY_COLOR } from '../utils';
 import { HostAlertsItem, useHostAlertsItems } from './use_host_alerts_items';
