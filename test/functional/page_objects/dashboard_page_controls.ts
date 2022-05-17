@@ -29,7 +29,14 @@ export class DashboardPageControls extends FtrService {
   public async enableControlsLab() {
     await this.header.clickStackManagement();
     await this.settings.clickKibanaSettings();
-    await this.settings.toggleAdvancedSettingCheckbox('labs:dashboard:dashboardControls');
+
+    const currentValue = await this.settings.getAdvancedSettingAriaCheckbox(
+      'labs:dashboard:dashboardControls'
+    );
+
+    if (currentValue !== 'true') {
+      await this.settings.toggleAdvancedSettingCheckbox('labs:dashboard:dashboardControls');
+    }
   }
 
   public async expectControlsEmpty() {

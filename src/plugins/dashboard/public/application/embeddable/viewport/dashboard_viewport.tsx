@@ -117,7 +117,15 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
                 }}
               />
             ) : null}
-            <div className="dshDashboardViewport-controls" ref={this.controlsRoot} />
+
+            <div
+              className={
+                controlGroup && controlGroup.getPanelCount() > 0
+                  ? 'dshDashboardViewport-controls'
+                  : ''
+              }
+              ref={this.controlsRoot}
+            />
           </>
         ) : null}
         <div
