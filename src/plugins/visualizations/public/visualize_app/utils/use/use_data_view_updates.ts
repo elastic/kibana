@@ -47,7 +47,7 @@ export const useDataViewUpdates = (
         }
       };
 
-      syncDataView(appState.getState(), false);
+      syncDataView(appState.getState());
       stateUpdatesSubscription = appState.state$.subscribe(syncDataView);
     }
     return () => {
