@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { standaloneClusterFilter } from '../../../../../lib/standalone_clusters/standalone_cluster_query_filter';
-
 /**
  * returns a nested aggregation of the monitored products per cluster, standalone
  * included. each product aggregation retrieves the related metricsets and the
@@ -31,21 +29,19 @@ export const monitoredClustersQuery = () => {
     aggs: {
       clusters: {
         terms: {
-          field: 'cluster_uuid',
+          script: `
+            if (doc['cluster_uuid'].size() == 0 || doc['cluster_uuid'].empty) {
+              return 'standalone';
+            } else {
+              return doc['cluster_uuid'].value;
+            }
+          `,
         },
         aggs: {
           cluster: clusterAggregation,
           elasticsearch: esAggregation,
           beats: beatsAggregation,
           kibana: kibanaAggregation,
-          logstash: logstashAggregation,
-        },
-      },
-
-      standalone: {
-        filter: standaloneClusterFilter,
-        aggs: {
-          elasticsearch: esAggregation,
           logstash: logstashAggregation,
         },
       },
@@ -63,91 +59,14 @@ export const stableMetricsetsQuery = () => {
     aggs: {
       clusters: {
         terms: {
-          field: 'cluster_uuid',
+          script: `
+            if (doc['cluster_uuid'].size() == 0 || doc['cluster_uuid'].empty) {
+              return 'standalone';
+            } else {
+              return doc['cluster_uuid'].value;
+            }
+          `,
         },
-        aggs: {
-          elasticsearch: {
-            terms: {
-              field: 'node_stats.node_id',
-              size: 10000,
-            },
-            aggs: {
-              shard: lastSeenByIndex({
-                filter: {
-                  bool: {
-                    should: [
-                      {
-                        term: {
-                          type: 'shard',
-                        },
-                      },
-                      {
-                        term: {
-                          'metricset.name': 'shard',
-                        },
-                      },
-                    ],
-                  },
-                },
-              }),
-            },
-          },
-
-          logstash: {
-            terms: {
-              field: 'logstash.node.id',
-              size: 10000,
-            },
-            aggs: {
-              node: lastSeenByIndex({
-                filter: {
-                  bool: {
-                    should: [
-                      {
-                        term: {
-                          type: 'node',
-                        },
-                      },
-                      {
-                        term: {
-                          'metricset.name': 'node',
-                        },
-                      },
-                    ],
-                  },
-                },
-              }),
-            },
-          },
-        },
-      },
-
-      standalone: {
-        filter: {
-          bool: {
-            should: [
-              {
-                term: {
-                  cluster_uuid: {
-                    value: '',
-                  },
-                },
-              },
-              {
-                bool: {
-                  must_not: [
-                    {
-                      exists: {
-                        field: 'cluster_uuid',
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-
         aggs: {
           elasticsearch: {
             terms: {
