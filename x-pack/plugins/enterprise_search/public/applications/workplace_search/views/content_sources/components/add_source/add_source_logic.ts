@@ -57,9 +57,7 @@ export interface AddSourceActions {
   setAddSourceStep(addSourceCurrentStep: AddSourceSteps): AddSourceSteps;
   setSourceConfigData(sourceConfigData: SourceConfigData): SourceConfigData;
   setSourceConnectData(sourceConnectData: SourceConnectData): SourceConnectData;
-  setClientIdValue(clientIdValue: string): string;
-  setClientSecretValue(clientSecretValue: string): string;
-  setBaseUrlValue(baseUrlValue: string): string;
+  setConfiguredField(key: string, value: string): { key: string; value: string };
   setSourceLoginValue(loginValue: string): string;
   setSourcePasswordValue(passwordValue: string): string;
   setSourceSubdomainValue(subdomainValue: string): string;
@@ -91,6 +89,11 @@ export interface AddSourceActions {
   setFirstStep(): void;
 }
 
+export interface SourceConfigFormElement {
+  key: string;
+  label: string;
+}
+
 export interface SourceConfigData {
   serviceType: string;
   baseServiceType?: string;
@@ -101,16 +104,12 @@ export interface SourceConfigData {
   needsPermissions?: boolean;
   privateSourcesEnabled: boolean;
   configuredFields: {
-    publicKey?: string;
-    privateKey?: string;
-    consumerKey?: string;
-    baseUrl?: string;
-    clientId?: string;
-    clientSecret?: string;
-    externalConnectorUrl?: string;
-    externalConnectorApiKey?: string;
+    [key: string]: string;
   };
   accountContextOnly?: boolean;
+  isOauth?: boolean;
+  configurableFields?: SourceConfigFormElement[];
+  connectionRequiresRedirect?: boolean;
 }
 
 export interface SourceConnectData {
@@ -127,9 +126,6 @@ export interface AddSourceValues {
   dataLoading: boolean;
   sectionLoading: boolean;
   buttonLoading: boolean;
-  clientIdValue: string;
-  clientSecretValue: string;
-  baseUrlValue: string;
   loginValue: string;
   passwordValue: string;
   subdomainValue: string;
@@ -142,6 +138,7 @@ export interface AddSourceValues {
   preContentSourceId: string;
   oauthConfigCompleted: boolean;
   sourceData: SourceDataItem | null;
+  configuredFields: { [key: string]: string };
 }
 
 interface PreContentSourceResponse {
@@ -157,9 +154,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       setAddSourceStep: (addSourceCurrentStep: AddSourceSteps) => addSourceCurrentStep,
       setSourceConfigData: (sourceConfigData: SourceConfigData) => sourceConfigData,
       setSourceConnectData: (sourceConnectData: SourceConnectData) => sourceConnectData,
-      setClientIdValue: (clientIdValue: string) => clientIdValue,
-      setClientSecretValue: (clientSecretValue: string) => clientSecretValue,
-      setBaseUrlValue: (baseUrlValue: string) => baseUrlValue,
+      setConfiguredField: (key, value) => ({ key, value }),
       setSourceLoginValue: (loginValue: string) => loginValue,
       setSourcePasswordValue: (passwordValue: string) => passwordValue,
       setSourceSubdomainValue: (subdomainValue: string) => subdomainValue,
@@ -237,30 +232,6 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
           setPreContentSourceConfigData: () => false,
         },
       ],
-      clientIdValue: [
-        '',
-        {
-          setClientIdValue: (_, clientIdValue) => clientIdValue,
-          setSourceConfigData: (_, { configuredFields: { clientId } }) => clientId || '',
-          resetSourceState: () => '',
-        },
-      ],
-      clientSecretValue: [
-        '',
-        {
-          setClientSecretValue: (_, clientSecretValue) => clientSecretValue,
-          setSourceConfigData: (_, { configuredFields: { clientSecret } }) => clientSecret || '',
-          resetSourceState: () => '',
-        },
-      ],
-      baseUrlValue: [
-        '',
-        {
-          setBaseUrlValue: (_, baseUrlValue) => baseUrlValue,
-          setSourceConfigData: (_, { configuredFields: { baseUrl } }) => baseUrl || '',
-          resetSourceState: () => '',
-        },
-      ],
       loginValue: [
         '',
         {
@@ -321,6 +292,17 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         },
       ],
       sourceData: [getSourceData(props.serviceType) || null, {}],
+      configuredFields: [
+        {},
+        {
+          setSourceConfigData: (_, { configuredFields }) => configuredFields,
+          setConfiguredField: (configuredFields, { key, value }) => ({
+            ...configuredFields,
+            [key]: value,
+          }),
+          resetSourceState: () => ({}),
+        },
+      ],
     }),
     selectors: ({ selectors }) => ({
       selectedGithubOrganizations: [
@@ -404,14 +386,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       },
       saveSourceConfig: async ({ isUpdating, successCallback }) => {
         clearFlashMessages();
-        const {
-          sourceConfigData: { serviceType },
-          baseUrlValue,
-          clientIdValue,
-          clientSecretValue,
-          sourceConfigData,
-        } = values;
-
+        const { serviceType } = props;
         const { externalConnectorUrl, externalConnectorApiKey } = ExternalConnectorLogic.values;
         if (
           serviceType === 'external' &&
@@ -430,16 +405,11 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         const http = isUpdating ? HttpLogic.values.http.put : HttpLogic.values.http.post;
 
         const params = {
-          base_url: baseUrlValue || undefined,
-          client_id: clientIdValue || undefined,
-          client_secret: clientSecretValue || undefined,
-          service_type: serviceType,
-          private_key: sourceConfigData.configuredFields?.privateKey,
-          public_key: sourceConfigData.configuredFields?.publicKey,
-          consumer_key: sourceConfigData.configuredFields?.consumerKey,
-          external_connector_url: (serviceType === 'external' && externalConnectorUrl) || undefined,
+          ...values.configuredFields,
+          external_connector_url: serviceType === 'external' ? externalConnectorUrl : undefined,
           external_connector_api_key:
-            (serviceType === 'external' && externalConnectorApiKey) || undefined,
+            serviceType === 'external' ? externalConnectorApiKey : undefined,
+          service_type: serviceType,
         };
 
         try {
@@ -567,19 +537,10 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
 );
 
 const getFirstStep = (sourceConfigData: SourceConfigData, initialStep?: string): AddSourceSteps => {
-  const {
-    serviceType,
-    configured,
-    configuredFields: { clientId, clientSecret },
-  } = sourceConfigData;
+  const { configured } = sourceConfigData;
   if (initialStep === 'connect') return AddSourceSteps.ConnectInstanceStep;
   if (initialStep === 'configure') return AddSourceSteps.ConfigureOauthStep;
   if (initialStep === 'reauthenticate') return AddSourceSteps.ReauthenticateStep;
-  if (serviceType !== 'external' && configured) return AddSourceSteps.ConnectInstanceStep;
-
-  // TODO remove this once external/BYO connectors track `configured` properly
-  if (serviceType === 'external' && clientId && clientSecret)
-    return AddSourceSteps.ConnectInstanceStep;
-
+  if (configured) return AddSourceSteps.ConnectInstanceStep;
   return AddSourceSteps.SaveConfigStep;
 };

@@ -36,9 +36,10 @@ describe('SourcesRouter', () => {
   it('renders sources routes', () => {
     const wrapper = shallow(<SourcesRouter />);
 
+    expect(wrapper.find('[data-test-subj="ConnectorBYOIntroRoute"]')).toHaveLength(1);
     expect(wrapper.find('[data-test-subj="ConnectorIntroRoute"]')).toHaveLength(1);
     expect(wrapper.find('[data-test-subj="ConnectorChoiceRoute"]')).toHaveLength(1);
-    expect(wrapper.find('[data-test-subj="ExternalConnectorConfigRoute"]')).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="ExternalConnectorConfigRoute"]')).toHaveLength(2);
     expect(wrapper.find('[data-test-subj="AddCustomSourceRoute"]')).toHaveLength(2);
     expect(wrapper.find('[data-test-subj="AddSourceRoute"]')).toHaveLength(1);
   });

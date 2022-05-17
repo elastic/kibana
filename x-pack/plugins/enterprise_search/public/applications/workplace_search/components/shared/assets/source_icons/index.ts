@@ -9,6 +9,7 @@ import box from './box.svg';
 import confluence from './confluence.svg';
 import custom from './custom.svg';
 import dropbox from './dropbox.svg';
+import external from './external.svg';
 import github from './github.svg';
 import gmail from './gmail.svg';
 import googleDrive from './google_drive.svg';
@@ -34,8 +35,7 @@ export const images = {
   confluenceServer: confluence,
   custom,
   dropbox,
-  // TODO: For now external sources are all SharePoint. When this is no longer the case, this needs to be dynamic.
-  external: sharePoint,
+  external,
   github,
   githubEnterpriseServer: github,
   githubViaApp: github,
