@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './rtl_helpers.test';
+export * from './rtl_helpers';
