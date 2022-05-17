@@ -7,6 +7,7 @@
  */
 
 import { EuiThemeProvider } from '@elastic/eui';
+import createCache from '@emotion/cache';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
@@ -23,11 +24,20 @@ const defaultTheme: CoreTheme = {
   darkMode: false,
 };
 
+const emotionCache = createCache({
+  key: 'eui-styles',
+  container: document.querySelector(`meta[name="eui-styles-global"]`) as HTMLElement,
+});
+
 /**
  * Copied from the `kibana_react` plugin, to avoid cyclical dependency
  */
 export const KibanaThemeProvider: FC<KibanaThemeProviderProps> = ({ theme$, children }) => {
   const theme = useObservable(theme$, defaultTheme);
   const colorMode = useMemo(() => getColorMode(theme), [theme]);
-  return <EuiThemeProvider colorMode={colorMode}>{children}</EuiThemeProvider>;
+  return (
+    <EuiThemeProvider colorMode={colorMode} cache={emotionCache}>
+      {children}
+    </EuiThemeProvider>
+  );
 };
