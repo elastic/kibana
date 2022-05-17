@@ -382,7 +382,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
           paddingRight: '2px',
         }}
       >
-        <EuiFlexGroup gutterSize="xs" direction="column" data-test-subj="overflow-items">
+        <EuiFlexGroup gutterSize="s" direction="column" data-test-subj="overflow-items">
           {attrName != null ? moreItemsWithHoverActions : moreItems}
         </EuiFlexGroup>
       </div>
