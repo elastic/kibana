@@ -18,6 +18,10 @@ export const ControlGroupStrings = {
       defaultMessage: 'Controls',
     }),
   emptyState: {
+    getBadge: () =>
+      i18n.translate('controls.controlGroup.emptyState.badgeText', {
+        defaultMessage: 'New',
+      }),
     getCallToAction: () =>
       i18n.translate('controls.controlGroup.emptyState.callToAction', {
         defaultMessage: 'Controls let you filter and interact with your dashboard data',
