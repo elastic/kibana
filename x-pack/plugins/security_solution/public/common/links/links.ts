@@ -32,8 +32,6 @@ const createDeepLink = (link: LinkItem, linkProps?: UserPermissions): AppDeepLin
         }),
       }
     : {}),
-  ...(link.icon != null ? { euiIconType: link.icon } : {}),
-  ...(link.image != null ? { icon: link.image } : {}),
   ...(link.globalSearchKeywords != null ? { keywords: link.globalSearchKeywords } : {}),
   ...(link.globalNavEnabled != null
     ? { navLinkStatus: link.globalNavEnabled ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden }
@@ -47,8 +45,8 @@ const createNavLinkItem = (link: LinkItem, linkProps?: UserPermissions): NavLink
   path: link.path,
   title: link.title,
   ...(link.description != null ? { description: link.description } : {}),
-  ...(link.icon != null ? { icon: link.icon } : {}),
-  ...(link.image != null ? { image: link.image } : {}),
+  ...(link.landingIcon != null ? { icon: link.landingIcon } : {}),
+  ...(link.landingImage != null ? { image: link.landingImage } : {}),
   ...(link.links && link.links.length
     ? {
         links: reduceLinks<NavLinkItem>({

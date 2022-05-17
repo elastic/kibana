@@ -76,3 +76,10 @@ export type GetUrlForApp = (
 ) => string;
 
 export type NavigateToUrl = (url: string) => void;
+
+export interface NavigationCategory {
+  label: string;
+  linkIds: readonly SecurityPageName[];
+}
+
+export type NavigationCategories = Readonly<NavigationCategory[]>;
