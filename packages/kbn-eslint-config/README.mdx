@@ -8,27 +8,29 @@ tags: ['kibana', 'dev', 'contributor', 'operations', 'eslint', 'custom', 'config
 ---
 
 This package is used to group and provide the eslint configurations used by the Kibana team.
+It defines default plugins, env, parserOptions and rules for javascript, typescript, and react code bases. 
+Optionally it can also be used with jest as explained below.
 
 ## Usage
 
-To use this eslint config, just reference it in your `.eslintrc`:
+To use this eslint config, it needs to be referenced in the `.eslintrc` file:
 
 ```javascript
-{
+module.exports = {
   extends: [
     '@kbn/eslint-config'
   ]
 }
 ```
 
-## Optional jest config
+## Optional jest eslint config
 
-If the project uses the [jest test runner](https://facebook.github.io/jest/), 
+If [jest test runner](https://facebook.github.io/jest/) is used, 
 the `@kbn/eslint-config/jest` config can be extended as well to use 
 `eslint-plugin-jest` and add settings specific to it:
 
 ```javascript
-{
+module.exports = {
   extends: [
     '@kbn/eslint-config',
     '@kbn/eslint-config/jest'
