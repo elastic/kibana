@@ -39,6 +39,7 @@ describe('helpers', () => {
           name: '@timestamp',
           searchable: true,
           type: 'date',
+          esTypes: ['date'],
           initialWidth: 190,
         },
         {
@@ -53,6 +54,7 @@ describe('helpers', () => {
           name: 'source.ip',
           searchable: true,
           type: 'ip',
+          esTypes: ['ip'],
           initialWidth: 180,
         },
         {
@@ -68,6 +70,7 @@ describe('helpers', () => {
           name: 'destination.ip',
           searchable: true,
           type: 'ip',
+          esTypes: ['ip'],
           initialWidth: 180,
         },
       ];
