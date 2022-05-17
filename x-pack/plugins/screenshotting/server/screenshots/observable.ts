@@ -122,15 +122,6 @@ const getDefaultElementPosition = (dimensions: { height?: number; width?: number
   ];
 };
 
-/*
- * If Kibana is showing a non-HTML error message, the viewport might not be
- * provided by the browser.
- */
-const getDefaultViewPort = () => ({
-  ...DEFAULT_VIEWPORT,
-  zoom: 1,
-});
-
 export class ScreenshotObservableHandler {
   constructor(
     private readonly driver: HeadlessChromiumDriver,
@@ -177,12 +168,6 @@ export class ScreenshotObservableHandler {
 
     return defer(() => getNumberOfItems(driver, this.logger, waitTimeout, this.layout)).pipe(
       mergeMap(async (itemsCount) => {
-        // set the viewport to the dimensions from the job, to allow elements to flow into the expected layout
-        const viewport = this.layout.getViewport(itemsCount) || getDefaultViewPort();
-
-        // Set the viewport allowing time for the browser to handle reflow and redraw
-        // before checking for readiness of visualizations.
-        await driver.setViewport(viewport, this.logger);
         await waitForVisualizations(driver, this.logger, waitTimeout, itemsCount, this.layout);
       }),
       this.waitUntil(waitTimeout, 'wait for elements')
