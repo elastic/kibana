@@ -71,7 +71,8 @@ jest.mock('../../../../common/lib/kibana', () => {
 const mockSort: Sort[] = [
   {
     columnId: '@timestamp',
-    columnType: 'number',
+    columnType: 'date',
+    esTypes: ['date'],
     sortDirection: Direction.desc,
   },
 ];
