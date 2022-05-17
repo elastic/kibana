@@ -28,7 +28,6 @@ export const benchmarkScoreTransform: TransformPutTransformRequest = {
       field: 'event.ingested',
     },
   },
-
   pivot: {
     group_by: {
       '@timestamp': {
