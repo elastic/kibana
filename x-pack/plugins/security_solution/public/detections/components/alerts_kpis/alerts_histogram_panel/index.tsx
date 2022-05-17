@@ -186,7 +186,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
               ),
               field: selectedStackByOption,
               timelineId,
-              value: bucket.key,
+              value: bucket?.key_as_string ?? bucket.key,
             }))
           : NO_LEGEND_DATA,
       [
