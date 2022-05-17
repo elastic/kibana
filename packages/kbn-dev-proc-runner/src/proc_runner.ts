@@ -8,9 +8,9 @@
 
 import * as Rx from 'rxjs';
 import exitHook from 'exit-hook';
-
 import { ToolingLog } from '@kbn/tooling-log';
-import { createFailError } from '../run';
+import { createFailError } from '@kbn/dev-cli-errors';
+
 import { Proc, ProcOptions, startProc } from './proc';
 
 const SECOND = 1000;
