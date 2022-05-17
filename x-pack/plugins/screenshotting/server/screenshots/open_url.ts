@@ -7,7 +7,7 @@
 
 import type { Headers } from '@kbn/core/server';
 import type { Context, HeadlessChromiumDriver } from '../browsers';
-import { DEFAULT_PAGELOAD_SELECTOR } from './constants';
+import { CONTEXT_DEBUG, DEFAULT_PAGELOAD_SELECTOR } from './constants';
 import { Actions, EventLogger } from './event_logger';
 
 export const openUrl = async (
@@ -29,6 +29,27 @@ export const openUrl = async (
 
   try {
     await browser.open(url, { context, headers, waitForSelector, timeout }, kbnLogger);
+
+    // Debug logging for viewport size and resizing
+    await browser.evaluate(
+      {
+        fn() {
+          // eslint-disable-next-line no-console
+          console.log(
+            `Navigating URL with viewport size: width=${window.innerWidth} height=${window.innerHeight} scaleFactor:${window.devicePixelRatio}`
+          );
+          window.addEventListener('resize', () => {
+            // eslint-disable-next-line no-console
+            console.log(
+              `Detected a viewport resize: width=${window.innerWidth} height=${window.innerHeight} scaleFactor:${window.devicePixelRatio}`
+            );
+          });
+        },
+        args: [],
+      },
+      { context: CONTEXT_DEBUG },
+      kbnLogger
+    );
   } catch (err) {
     kbnLogger.error(err);
 
