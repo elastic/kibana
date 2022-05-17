@@ -153,7 +153,7 @@ export class ScreenshotObservableHandler {
   }
 
   private openUrl(index: number, urlOrUrlWithContext: UrlOrUrlWithContext) {
-    return defer(async () => {
+    return defer(() => {
       let url: string;
       let context: Context | undefined;
 
