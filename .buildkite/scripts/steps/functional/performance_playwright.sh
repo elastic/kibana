@@ -36,7 +36,10 @@ for i in "${journeys[@]}"; do
       --bail
 
     export TEST_PERFORMANCE_PHASE=TEST
-    export ELASTIC_APM_ACTIVE=true
+
+    if ! is_pr; then
+      export ELASTIC_APM_ACTIVE=true
+    fi
 
     checks-reporter-with-killswitch "Run Performance Tests with Playwright Config (Journey:${i},Phase: TEST)" \
       node scripts/functional_tests \
