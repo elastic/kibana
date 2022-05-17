@@ -28,7 +28,7 @@ export const convertPackQueriesToSO = (queries) =>
   );
 
 // @ts-expect-error update types
-export const convertSOQueriesToPack = (queries, removeMultiLines?: boolean) =>
+export const convertSOQueriesToPack = (queries, options?: { removeMultiLines?: boolean }) =>
   reduce(
     queries,
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -36,7 +36,7 @@ export const convertSOQueriesToPack = (queries, removeMultiLines?: boolean) =>
       const index = queryId ? queryId : key;
       acc[index] = {
         ...rest,
-        query: removeMultiLines ? removeMultilines(query) : query,
+        query: options?.removeMultiLines ? removeMultilines(query) : query,
         ecs_mapping: convertECSMappingToObject(ecs_mapping),
       };
 

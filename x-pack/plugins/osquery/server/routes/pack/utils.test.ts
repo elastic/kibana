@@ -46,7 +46,7 @@ describe('Pack utils', () => {
       expect(convertedQueries).toStrictEqual(getTestQueries({ ecs_mapping: {} }));
     });
     test('converts to pack with converting query to single line', () => {
-      const convertedQueries = convertSOQueriesToPack(getTestQueries(), true);
+      const convertedQueries = convertSOQueriesToPack(getTestQueries(), { removeMultiLines: true });
       expect(convertedQueries).toStrictEqual(oneLiner);
     });
     test('converts to object with pack names after query.id', () => {

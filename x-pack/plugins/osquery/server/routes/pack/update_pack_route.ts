@@ -282,7 +282,9 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     draft,
                     `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                     {
-                      queries: convertSOQueriesToPack(updatedPackSO.attributes.queries, true),
+                      queries: convertSOQueriesToPack(updatedPackSO.attributes.queries, {
+                        removeMultiLines: true,
+                      }),
                     }
                   );
 
