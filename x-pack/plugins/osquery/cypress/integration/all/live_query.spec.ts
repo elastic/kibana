@@ -9,7 +9,6 @@ import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
-  clearInputQuery,
   checkResults,
   inputQuery,
   selectAllAgents,
