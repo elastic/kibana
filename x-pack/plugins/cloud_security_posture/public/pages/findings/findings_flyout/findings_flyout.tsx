@@ -43,7 +43,6 @@ type FindingsTab = typeof tabs[number];
 
 interface FindingFlyoutProps {
   onClose(): void;
-
   findings: CspFinding;
 }
 
