@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { Alias } from './alias';
-export { Mapping, getTypes } from './mapping';
-export { DataStream } from './data_stream';
-export { LegacyTemplate } from './legacy_template';
-export { IndexTemplate } from './index_template';
-export { ComponentTemplate } from './component_template';
+import type { IndicesGetTemplateResponse } from '@elastic/elasticsearch/lib/api/types';
+import { BaseTemplate } from '../base_template';
+
+export class LegacyTemplate extends BaseTemplate<IndicesGetTemplateResponse> {
+  loadTemplates = (templates: IndicesGetTemplateResponse) => {
+    this.templates = Object.keys(templates).sort();
+  };
+}

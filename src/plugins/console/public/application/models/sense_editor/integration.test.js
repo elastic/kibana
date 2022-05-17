@@ -51,10 +51,8 @@ describe('Integration', () => {
 
       testToRun.cursor.lineNumber += lineOffset;
 
-      // mappings.clear();
-      // mappings.loadMappings(mapping);
       autocompleteInfo.clear();
-      autocompleteInfo.mapping.load(mapping);
+      autocompleteInfo.mapping.loadMappings(mapping);
       const json = {};
       json[test.name] = kbSchemes || {};
       const testApi = kb._test.loadApisFromJson(json);

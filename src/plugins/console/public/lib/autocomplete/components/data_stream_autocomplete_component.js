@@ -9,13 +9,9 @@
 import { ListComponent } from './list_component';
 import { getAutocompleteInfo } from '../../../services';
 
-function ListGenerator() {
-  return getAutocompleteInfo().dataStream.get();
-}
-
 export class DataStreamAutocompleteComponent extends ListComponent {
   constructor(name, parent, multiValued) {
-    super(name, ListGenerator, parent, multiValued);
+    super(name, getAutocompleteInfo().getFactoryFor('dataStreams'), parent, multiValued);
   }
 
   getContextKey() {

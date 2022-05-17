@@ -9,13 +9,9 @@
 import { getAutocompleteInfo } from '../../../../services';
 import { ListComponent } from '../list_component';
 
-function ListGenerator() {
-  return getAutocompleteInfo().legacyTemplate.get();
-}
-
 export class LegacyTemplateAutocompleteComponent extends ListComponent {
   constructor(name, parent) {
-    super(name, ListGenerator, parent, true, true);
+    super(name, getAutocompleteInfo().getFactoryFor('legacyTemplates'), parent, true, true);
   }
   getContextKey() {
     return 'template';

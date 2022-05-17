@@ -7,19 +7,10 @@
  */
 
 import type { ClusterGetComponentTemplateResponse } from '@elastic/elasticsearch/lib/api/types';
+import { BaseTemplate } from './base_template';
 
-export class ComponentTemplate {
-  constructor(private data: string[] = []) {}
-
-  get = (): string[] => {
-    return [...this.data];
-  };
-
-  load = (data: ClusterGetComponentTemplateResponse) => {
-    this.data = (data.component_templates ?? []).map(({ name }) => name).sort();
-  };
-
-  clear = () => {
-    this.data = [];
+export class ComponentTemplate extends BaseTemplate<ClusterGetComponentTemplateResponse> {
+  loadTemplates = (templates: ClusterGetComponentTemplateResponse) => {
+    this.templates = (templates.component_templates ?? []).map(({ name }) => name).sort();
   };
 }

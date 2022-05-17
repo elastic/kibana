@@ -14,13 +14,9 @@ function nonValidUsernameType(token) {
   return token[0] === '_';
 }
 
-function ListGenerator() {
-  return getAutocompleteInfo().alias.get();
-}
-
 export class UsernameAutocompleteComponent extends ListComponent {
   constructor(name, parent, multiValued) {
-    super(name, ListGenerator, parent, multiValued);
+    super(name, getAutocompleteInfo().getFactoryFor('indices'), parent, multiValued);
   }
   validateTokens(tokens) {
     if (!this.multiValued && tokens.length > 1) {

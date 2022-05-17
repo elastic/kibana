@@ -12,6 +12,7 @@ import { SemVer } from 'semver';
 import { EsLegacyConfigService, SpecDefinitionsService } from '../services';
 import { ESConfigForProxy } from '../types';
 import { ProxyConfigCollection } from '../lib';
+import { handleEsError } from '../shared_imports';
 
 import { registerEsConfigRoute } from './api/console/es_config';
 import { registerProxyRoute } from './api/console/proxy';
@@ -31,6 +32,9 @@ export interface RouteDependencies {
   services: {
     esLegacyConfigService: EsLegacyConfigService;
     specDefinitionService: SpecDefinitionsService;
+  };
+  lib: {
+    handleEsError: typeof handleEsError;
   };
   kibanaVersion: SemVer;
 }

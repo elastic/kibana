@@ -6,12 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { AutocompleteInfo } from './autocomplete';
-
-export class AutocompleteInfoMock extends AutocompleteInfo {
-  setup = jest.fn();
-  getFactoryFor = jest.fn();
-  retrieve = jest.fn();
-  clearSubscriptions = jest.fn();
-  clear = jest.fn();
-}
+export { handleEsError } from '@kbn/es-ui-shared-plugin/server';

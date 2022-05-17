@@ -8,14 +8,7 @@
 
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import type { HttpSetup } from '@kbn/core/public';
-import type {
-  ClusterGetComponentTemplateResponse,
-  IndicesGetAliasResponse,
-  IndicesGetDataStreamResponse,
-  IndicesGetIndexTemplateResponse,
-  IndicesGetMappingResponse,
-  IndicesGetTemplateResponse,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { MappingsApiResponse } from '../lib/autocomplete_entities/types';
 import { API_BASE_PATH } from '../../common/constants';
 import {
   Alias,
@@ -24,54 +17,55 @@ import {
   LegacyTemplate,
   IndexTemplate,
   ComponentTemplate,
-} from '../lib/mappings';
+} from '../lib/autocomplete_entities';
 import { DevToolsSettings, Settings } from './settings';
 
-interface MappingsApiResponse {
-  mappings: IndicesGetMappingResponse;
-  aliases: IndicesGetAliasResponse;
-  dataStreams: IndicesGetDataStreamResponse;
-  templates: {
-    legacyTemplates: IndicesGetTemplateResponse;
-    indexTemplates: IndicesGetIndexTemplateResponse;
-    componentTemplates: ClusterGetComponentTemplateResponse;
-  };
-}
-
 export class AutocompleteInfo {
-  public readonly alias: Alias;
-  public readonly mapping: Mapping;
-  public readonly dataStream: DataStream;
-  public readonly legacyTemplate: LegacyTemplate;
-  public readonly indexTemplate: IndexTemplate;
-  public readonly componentTemplate: ComponentTemplate;
+  public readonly alias = new Alias();
+  public readonly mapping = new Mapping();
+  public readonly dataStream = new DataStream();
+  public readonly legacyTemplate = new LegacyTemplate();
+  public readonly indexTemplate = new IndexTemplate();
+  public readonly componentTemplate = new ComponentTemplate();
   private http!: HttpSetup;
   private pollTimeoutId: ReturnType<typeof setTimeout> | undefined;
-
-  constructor() {
-    this.alias = new Alias();
-    this.mapping = new Mapping();
-    this.dataStream = new DataStream();
-    this.legacyTemplate = new LegacyTemplate();
-    this.indexTemplate = new IndexTemplate();
-    this.componentTemplate = new ComponentTemplate();
-  }
 
   public setup(http: HttpSetup) {
     this.http = http;
   }
 
+  public getFactoryFor(
+    type: string,
+    context: { indices: string[]; types: string[] } = { indices: [], types: [] }
+  ) {
+    switch (type) {
+      case 'indices':
+        const includeAliases = true;
+        const collaborator = this.mapping;
+        return () => this.alias.getIndices(includeAliases, collaborator);
+      case 'fields':
+        return this.mapping.getMappings(context.indices, context.types);
+      case 'indexTemplates':
+        return () => this.indexTemplate.getTemplates();
+      case 'componentTemplates':
+        return () => this.componentTemplate.getTemplates();
+      case 'legacyTemplates':
+        return () => this.legacyTemplate.getTemplates();
+      case 'dataStreams':
+        return () => this.dataStream.getDataStreams();
+      default:
+        throw new Error(`Unsupported type: ${type}`);
+    }
+  }
+
   public retrieve(settings: Settings, settingsToRetrieve: DevToolsSettings['autocomplete']) {
     this.clearSubscriptions();
     this.http
-      .get<MappingsApiResponse>(`${API_BASE_PATH}/mappings`, { query: { ...settingsToRetrieve } })
+      .get<MappingsApiResponse>(`${API_BASE_PATH}/autocomplete_entities`, {
+        query: { ...settingsToRetrieve },
+      })
       .then((data) => {
-        this.alias.load(data.aliases);
-        this.mapping.load(data.mappings);
-        this.dataStream.load(data.dataStreams);
-        this.legacyTemplate.load(data.templates.legacyTemplates);
-        this.indexTemplate.load(data.templates.indexTemplates);
-        this.componentTemplate.load(data.templates.componentTemplates);
+        this.load(data);
         // Schedule next request.
         this.pollTimeoutId = setTimeout(() => {
           // This looks strange/inefficient, but it ensures correct behavior because we don't want to send
@@ -89,13 +83,23 @@ export class AutocompleteInfo {
     }
   }
 
+  private load(data: MappingsApiResponse) {
+    const collaborator = this.mapping;
+    this.alias.loadAliases(data.aliases, collaborator);
+    this.mapping.loadMappings(data.mappings);
+    this.indexTemplate.loadTemplates(data.indexTemplates);
+    this.componentTemplate.loadTemplates(data.componentTemplates);
+    this.legacyTemplate.loadTemplates(data.legacyTemplates);
+    this.dataStream.loadDataStreams(data.dataStreams);
+  }
+
   public clear() {
-    this.alias.clear();
-    this.mapping.clear();
-    this.dataStream.clear();
-    this.legacyTemplate.clear();
-    this.indexTemplate.clear();
-    this.componentTemplate.clear();
+    this.alias.clearAliases();
+    this.mapping.clearMappings();
+    this.dataStream.clearDataStreams();
+    this.legacyTemplate.clearTemplates();
+    this.indexTemplate.clearTemplates();
+    this.componentTemplate.clearTemplates();
   }
 }
 

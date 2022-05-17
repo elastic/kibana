@@ -19,7 +19,7 @@ describe('Knowledge base', () => {
     kb.setActiveApi(kb._test.loadApisFromJson({}));
     autocompleteInfo = new AutocompleteInfo();
     setAutocompleteInfo(autocompleteInfo);
-    autocompleteInfo.mapping.clear();
+    autocompleteInfo.mapping.clearMappings();
   });
   afterEach(() => {
     kb.setActiveApi(kb._test.loadApisFromJson({}));
@@ -126,7 +126,7 @@ describe('Knowledge base', () => {
 
       kb.setActiveApi(testApi);
 
-      autocompleteInfo.mapping.load(MAPPING);
+      autocompleteInfo.mapping.loadMappings(MAPPING);
       testUrlContext(tokenPath, otherTokenValues, expectedContext);
     });
   }
@@ -169,7 +169,7 @@ describe('Knowledge base', () => {
       );
       kb.setActiveApi(testApi);
 
-      autocompleteInfo.mapping.load(MAPPING);
+      autocompleteInfo.mapping.loadMappings(MAPPING);
 
       testUrlContext(tokenPath, otherTokenValues, expectedContext);
     });

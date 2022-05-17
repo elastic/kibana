@@ -7,19 +7,10 @@
  */
 
 import type { IndicesGetIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/types';
+import { BaseTemplate } from './base_template';
 
-export class IndexTemplate {
-  constructor(private data: string[] = []) {}
-
-  get = (): string[] => {
-    return [...this.data];
-  };
-
-  load = (data: IndicesGetIndexTemplateResponse) => {
-    this.data = (data.index_templates ?? []).map(({ name }) => name).sort();
-  };
-
-  clear = () => {
-    this.data = [];
+export class IndexTemplate extends BaseTemplate<IndicesGetIndexTemplateResponse> {
+  loadTemplates = (templates: IndicesGetIndexTemplateResponse) => {
+    this.templates = (templates.index_templates ?? []).map(({ name }) => name).sort();
   };
 }

@@ -6,11 +6,6 @@
  * Side Public License, v 1.
  */
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type {
-  ClusterGetComponentTemplateResponse,
-  IndicesGetIndexTemplateResponse,
-  IndicesGetTemplateResponse,
-} from '@elastic/elasticsearch/lib/api/types';
 import { parse } from 'query-string';
 import type { RouteDependencies } from '../../..';
 import { API_BASE_PATH } from '../../../../../common/constants';
@@ -22,55 +17,46 @@ interface Settings {
   dataStreams: boolean;
 }
 
-async function retrieveSettings(
-  esClient: IScopedClusterClient,
-  settingsKey: keyof Settings,
-  settings: Settings
-) {
-  // Fetch autocomplete info if setting is set to true, and if user has made changes.
-  if (settings[settingsKey]) {
-    switch (settingsKey) {
-      case 'indices':
-        return esClient.asInternalUser.indices.getAlias();
-      case 'fields':
-        return esClient.asInternalUser.indices.getMapping();
-      case 'dataStreams':
-        return esClient.asInternalUser.indices.getDataStream();
-      case 'templates':
-        return Promise.all([
-          esClient.asInternalUser.indices.getTemplate(),
-          esClient.asInternalUser.indices.getIndexTemplate(),
-          esClient.asInternalUser.cluster.getComponentTemplate(),
-        ]);
-      default:
-        return Promise.resolve({});
-    }
-  } else {
-    // If the user doesn't want autocomplete suggestions, then clear any that exist
-    return Promise.resolve({});
-  }
-}
-
 async function getMappings(esClient: IScopedClusterClient, settings: Settings) {
-  return await retrieveSettings(esClient, 'fields', settings);
+  if (settings.fields) {
+    return esClient.asInternalUser.indices.getMapping();
+  }
+  // If the user doesn't want autocomplete suggestions, then clear any that exist.
+  return Promise.resolve({});
 }
 
 async function getAliases(esClient: IScopedClusterClient, settings: Settings) {
-  return await retrieveSettings(esClient, 'indices', settings);
+  if (settings.indices) {
+    return esClient.asInternalUser.indices.getAlias();
+  }
+  // If the user doesn't want autocomplete suggestions, then clear any that exist.
+  return Promise.resolve({});
 }
 
 async function getDataStreams(esClient: IScopedClusterClient, settings: Settings) {
-  return await retrieveSettings(esClient, 'dataStreams', settings);
+  if (settings.dataStreams) {
+    return esClient.asInternalUser.indices.getDataStream();
+  }
+  // If the user doesn't want autocomplete suggestions, then clear any that exist.
+  return Promise.resolve({});
 }
 
 async function getTemplates(esClient: IScopedClusterClient, settings: Settings) {
-  return await retrieveSettings(esClient, 'templates', settings);
+  if (settings.templates) {
+    return Promise.all([
+      esClient.asInternalUser.indices.getTemplate(),
+      esClient.asInternalUser.indices.getIndexTemplate(),
+      esClient.asInternalUser.cluster.getComponentTemplate(),
+    ]);
+  }
+  // If the user doesn't want autocomplete suggestions, then clear any that exist.
+  return Promise.resolve([]);
 }
 
-export function registerGetRoute({ router }: RouteDependencies) {
+export function registerGetRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     {
-      path: `${API_BASE_PATH}/mappings`,
+      path: `${API_BASE_PATH}/autocomplete_entities`,
       validate: false,
     },
     async (ctx, request, response) => {
@@ -81,29 +67,21 @@ export function registerGetRoute({ router }: RouteDependencies) {
         const mappings = await getMappings(esClient, settings);
         const aliases = await getAliases(esClient, settings);
         const dataStreams = await getDataStreams(esClient, settings);
-        const [legacyTemplates, indexTemplates, componentTemplates] = (await getTemplates(
-          esClient,
-          settings
-        )) as [
-          IndicesGetTemplateResponse,
-          IndicesGetIndexTemplateResponse,
-          ClusterGetComponentTemplateResponse
-        ];
+        const [legacyTemplates = {}, indexTemplates = {}, componentTemplates = {}] =
+          await getTemplates(esClient, settings);
 
         return response.ok({
           body: {
             mappings,
             aliases,
             dataStreams,
-            templates: {
-              legacyTemplates,
-              indexTemplates,
-              componentTemplates,
-            },
+            legacyTemplates,
+            indexTemplates,
+            componentTemplates,
           },
         });
       } catch (e) {
-        throw e;
+        return handleEsError({ error: e, response });
       }
     }
   );

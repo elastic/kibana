@@ -9,17 +9,17 @@
 import type { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/types';
 
 export class DataStream {
-  constructor(private data: string[] = []) {}
+  private dataStreams: string[] = [];
 
-  get = () => {
-    return [...this.data];
+  getDataStreams = (): string[] => {
+    return [...this.dataStreams];
   };
 
-  load = (data: IndicesGetDataStreamResponse) => {
-    this.data = (data.data_streams ?? []).map(({ name }) => name).sort();
+  loadDataStreams = (dataStreams: IndicesGetDataStreamResponse) => {
+    this.dataStreams = (dataStreams.data_streams ?? []).map(({ name }) => name).sort();
   };
 
-  clear = () => {
-    this.data = [];
+  clearDataStreams = () => {
+    this.dataStreams = [];
   };
 }

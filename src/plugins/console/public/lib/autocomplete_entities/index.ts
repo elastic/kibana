@@ -6,12 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { AutocompleteInfo } from './autocomplete';
-
-export class AutocompleteInfoMock extends AutocompleteInfo {
-  setup = jest.fn();
-  getFactoryFor = jest.fn();
-  retrieve = jest.fn();
-  clearSubscriptions = jest.fn();
-  clear = jest.fn();
-}
+export { Alias } from './alias';
+export { Mapping } from './mapping';
+export { DataStream } from './data_stream';
+export { LegacyTemplate } from './legacy';
+export { IndexTemplate } from './index_template';
+export { ComponentTemplate } from './component_template';
+export { getTypes } from './type';

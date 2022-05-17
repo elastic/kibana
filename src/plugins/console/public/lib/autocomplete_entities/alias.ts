@@ -7,14 +7,20 @@
  */
 
 import type { IndicesGetAliasResponse } from '@elastic/elasticsearch/lib/api/types';
-import { getAutocompleteInfo } from '../../services';
+import type { BaseMapping } from './mapping';
 
-export class Alias {
-  constructor(public perAliasIndexes: Record<string, string[]> = {}) {}
+interface BaseAlias {
+  getIndices(includeAliases: boolean, collaborator: BaseMapping): string[];
+  loadAliases(aliases: IndicesGetAliasResponse, collaborator: BaseMapping): void;
+  clearAliases(): void;
+}
 
-  get = (includeAliases: boolean): string[] => {
+export class Alias implements BaseAlias {
+  public perAliasIndexes: Record<string, string[]> = {};
+
+  getIndices = (includeAliases: boolean, collaborator: BaseMapping): string[] => {
     const ret: string[] = [];
-    const perIndexTypes = getAutocompleteInfo().mapping.perIndexTypes;
+    const perIndexTypes = collaborator.perIndexTypes;
     Object.keys(perIndexTypes).forEach((index) => {
       // ignore .ds* indices in the suggested indices list.
       if (!index.startsWith('.ds')) {
@@ -30,11 +36,14 @@ export class Alias {
     return ret;
   };
 
-  load = (aliases: IndicesGetAliasResponse) => {
+  loadAliases = (aliases: IndicesGetAliasResponse, collaborator: BaseMapping) => {
     this.perAliasIndexes = {};
+    const perIndexTypes = collaborator.perIndexTypes;
 
-    Object.entries(aliases).forEach(([index, omdexAliases]) => {
-      Object.keys(omdexAliases.aliases || {}).forEach((alias) => {
+    Object.entries(aliases).forEach(([index, indexAliases]) => {
+      // verify we have an index defined. useful when mapping loading is disabled
+      perIndexTypes[index] = perIndexTypes[index] || {};
+      Object.keys(indexAliases.aliases || {}).forEach((alias) => {
         if (alias === index) {
           return;
         } // alias which is identical to index means no index.
@@ -46,11 +55,11 @@ export class Alias {
         curAliases.push(index);
       });
     });
-
-    this.perAliasIndexes._all = this.get(false);
+    const includeAliases = false;
+    this.perAliasIndexes._all = this.getIndices(includeAliases, collaborator);
   };
 
-  clear = () => {
+  clearAliases = () => {
     this.perAliasIndexes = {};
   };
 }

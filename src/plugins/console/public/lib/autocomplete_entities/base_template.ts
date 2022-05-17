@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-export interface Field {
-  name: string;
-  type: string;
-}
+export abstract class BaseTemplate<T> {
+  protected templates: string[] = [];
 
-export interface FieldMapping {
-  enabled?: boolean;
-  path?: string;
-  properties?: Record<string, FieldMapping>;
-  type?: string;
-  index_name?: string;
-  fields?: FieldMapping[];
+  public abstract loadTemplates(templates: T): void;
+
+  public getTemplates = (): string[] => {
+    return [...this.templates];
+  };
+
+  public clearTemplates = () => {
+    this.templates = [];
+  };
 }

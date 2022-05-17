@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 import type { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
-import { getAutocompleteInfo } from '../../services';
+import { expandAliases } from './expand_aliases';
 import type { Field, FieldMapping } from './types';
 
 function getFieldNamesFromProperties(properties: Record<string, FieldMapping> = {}) {
@@ -68,75 +68,17 @@ function getFieldNamesFromFieldMapping(
   return [ret];
 }
 
-function expandAliases(indicesOrAliases: string | string[]) {
-  // takes a list of indices or aliases or a string which may be either and returns a list of indices
-  // returns a list for multiple values or a string for a single.
-  const perAliasIndexes = getAutocompleteInfo().alias.perAliasIndexes;
-  if (!indicesOrAliases) {
-    return indicesOrAliases;
-  }
-
-  if (typeof indicesOrAliases === 'string') {
-    indicesOrAliases = [indicesOrAliases];
-  }
-
-  indicesOrAliases = indicesOrAliases.flatMap((iOrA) => {
-    if (perAliasIndexes[iOrA]) {
-      return perAliasIndexes[iOrA];
-    }
-    return [iOrA];
-  });
-
-  let ret = ([] as string[]).concat.apply([], indicesOrAliases);
-  ret.sort();
-  ret = ret.reduce((result, value, index, array) => {
-    const last = array[index - 1];
-    if (last !== value) {
-      result.push(value);
-    }
-    return result;
-  }, [] as string[]);
-
-  return ret.length > 1 ? ret : ret[0];
+export interface BaseMapping {
+  perIndexTypes: Record<string, object>;
+  getMappings(indices: string | string[], types?: string | string[]): Field[];
+  loadMappings(mappings: IndicesGetMappingResponse): void;
+  clearMappings(): void;
 }
 
-export function getTypes(indices: string | string[]) {
-  let ret: string[] = [];
-  const perIndexTypes = getAutocompleteInfo().mapping.perIndexTypes;
-  indices = expandAliases(indices);
-  if (typeof indices === 'string') {
-    const typeDict = perIndexTypes[indices];
-    if (!typeDict) {
-      return [];
-    }
+export class Mapping implements BaseMapping {
+  public perIndexTypes: Record<string, object> = {};
 
-    // filter what we need
-    if (Array.isArray(typeDict)) {
-      typeDict.forEach((type) => {
-        ret.push(type);
-      });
-    } else if (typeof typeDict === 'object') {
-      Object.keys(typeDict).forEach((type) => {
-        ret.push(type);
-      });
-    }
-  } else {
-    // multi index mode.
-    Object.keys(perIndexTypes).forEach((index) => {
-      if (!indices || indices.includes(index)) {
-        ret.push(getTypes(index) as unknown as string);
-      }
-    });
-    ret = ([] as string[]).concat.apply([], ret);
-  }
-
-  return _.uniq(ret);
-}
-
-export class Mapping {
-  constructor(public perIndexTypes: Record<string, object> = {}) {}
-
-  get = (indices: string | string[], types?: string | string[]) => {
+  getMappings = (indices: string | string[], types?: string | string[]) => {
     // get fields for indices and types. Both can be a list, a string or null (meaning all).
     let ret: Field[] = [];
     indices = expandAliases(indices);
@@ -166,7 +108,7 @@ export class Mapping {
       // multi index mode.
       Object.keys(this.perIndexTypes).forEach((index) => {
         if (!indices || indices.length === 0 || indices.includes(index)) {
-          ret.push(this.get(index, types) as unknown as Field);
+          ret.push(this.getMappings(index, types) as unknown as Field);
         }
       });
 
@@ -178,7 +120,7 @@ export class Mapping {
     });
   };
 
-  load = (mappings: IndicesGetMappingResponse) => {
+  loadMappings = (mappings: IndicesGetMappingResponse) => {
     const maxMappingSize = Object.keys(mappings).length > 10 * 1024 * 1024;
     let mappingsResponse;
     if (maxMappingSize) {
@@ -216,7 +158,7 @@ export class Mapping {
     });
   };
 
-  clear = () => {
+  clearMappings = () => {
     this.perIndexTypes = {};
   };
 }
