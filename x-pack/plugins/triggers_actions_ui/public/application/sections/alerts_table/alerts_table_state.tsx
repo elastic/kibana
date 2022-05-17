@@ -167,7 +167,8 @@ const AlertsTableState = ({
       pageSizeOptions: [1, 2, 5, 10, 20, 50, 100],
       leadingControlColumns: [],
       renderCellValue: ({ alert, field }: RenderCellValueProps) => {
-        const value = get(alert, field, [])[0];
+        // any is required here to improve typescript performance
+        const value = get(alert as any, field, [])[0] as string;
         return value ?? 'N/A';
       },
       showCheckboxes,
