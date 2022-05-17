@@ -8,7 +8,14 @@
 import { isPlainObject, isEmpty } from 'lodash';
 import { Type } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, Method, AxiosError } from 'axios';
+import axios, {
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
+  Method,
+  AxiosError,
+  AxiosRequestHeaders,
+} from 'axios';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { getCustomAgents } from '../builtin_action_types/lib/get_custom_agents';
 import { SubAction } from './types';
@@ -79,7 +86,7 @@ export abstract class SubActionConnector<Config, Secrets> {
     }
   }
 
-  private getHeaders(headers: Record<string, string>) {
+  private getHeaders(headers?: AxiosRequestHeaders) {
     return { ...headers, 'Content-Type': 'application/json' };
   }
 
