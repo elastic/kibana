@@ -3,7 +3,6 @@
 exports[`Details Panel Component DetailsPanel: rendering it should not render the DetailsPanel if an expanded detail with a panelView, but not params have been set: 
         <DetailsPanel
           browserFields={Object {}}
-          docValueFields={Array []}
           handleOnPanelClosed={[MockFunction]}
           isFlyoutView={false}
           runtimeMappings={Object {}}
@@ -13,7 +12,6 @@ exports[`Details Panel Component DetailsPanel: rendering it should not render th
        1`] = `
 <DetailsPanel
   browserFields={Object {}}
-  docValueFields={Array []}
   handleOnPanelClosed={[MockFunction]}
   isFlyoutView={false}
   runtimeMappings={Object {}}
@@ -25,7 +23,6 @@ exports[`Details Panel Component DetailsPanel: rendering it should not render th
 exports[`Details Panel Component DetailsPanel: rendering it should not render the DetailsPanel if no expanded detail has been set in the reducer 1`] = `
 <DetailsPanel
   browserFields={Object {}}
-  docValueFields={Array []}
   handleOnPanelClosed={[MockFunction]}
   isFlyoutView={false}
   runtimeMappings={Object {}}
@@ -205,7 +202,6 @@ Array [
       />
       <EventDetailsPanelComponent
         browserFields={Object {}}
-        docValueFields={Array []}
         expandedEvent={
           Object {
             "eventId": "my-id",
@@ -495,7 +491,6 @@ Array [
     />
     <EventDetailsPanelComponent
       browserFields={Object {}}
-      docValueFields={Array []}
       expandedEvent={
         Object {
           "eventId": "my-id",
@@ -838,18 +833,6 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
       anomaliesData={null}
       contextID="test-query"
       data={Object {}}
-      docValueFields={
-        Array [
-          Object {
-            "field": "@timestamp",
-            "format": "date_time",
-          },
-          Object {
-            "field": "event.end",
-            "format": "date_time",
-          },
-        ]
-      }
       endDate="2020-07-08T08:20:18.966Z"
       hostName="woohoo!"
       id="hostsDetailsQuery"

@@ -39,7 +39,7 @@ export const useDetailPanel = ({
   timelineId,
   tabType,
 }: UseDetailPanelConfig): UseDetailPanelReturn => {
-  const { browserFields, docValueFields, selectedPatterns, runtimeMappings } =
+  const { browserFields, selectedPatterns, runtimeMappings } =
     useSourcererDataView(sourcererScope);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const dispatch = useDispatch();
@@ -107,7 +107,6 @@ export const useDetailPanel = ({
       shouldShowDetailsPanel ? (
         <DetailsPanelComponent
           browserFields={browserFields}
-          docValueFields={docValueFields}
           entityType={entityType}
           handleOnPanelClosed={handleOnDetailsPanelClosed}
           isFlyoutView={isFlyoutView}
@@ -118,7 +117,6 @@ export const useDetailPanel = ({
       ) : null,
     [
       browserFields,
-      docValueFields,
       entityType,
       handleOnDetailsPanelClosed,
       isFlyoutView,
