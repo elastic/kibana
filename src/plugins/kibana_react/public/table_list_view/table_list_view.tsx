@@ -22,7 +22,7 @@ import {
   SearchFilterConfig,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { ThemeServiceStart, HttpFetchError, ToastsStart, ApplicationStart } from '@kbn/core/public';
 import { debounce, keyBy, sortBy, uniq } from 'lodash';
 import React from 'react';
@@ -525,9 +525,13 @@ class TableListView<V extends { [key: string]: unknown }> extends React.Componen
         const updatedAt = moment(dateTime);
 
         if (updatedAt.diff(moment(), 'days') > -7) {
-          return updatedAt.fromNow();
+          return (
+            <FormattedRelative value={new Date(dateTime).getTime()}>
+              {(formattedDate: string) => <span>{formattedDate}</span>}
+            </FormattedRelative>
+          );
         }
-        return updatedAt.format('L @ LT');
+        return <span>{updatedAt.format('L @ LT')}</span>;
       };
 
       columns.push({
@@ -535,9 +539,7 @@ class TableListView<V extends { [key: string]: unknown }> extends React.Componen
         name: i18n.translate('kibana-react.tableListView.lastUpdatedColumnTitle', {
           defaultMessage: 'Last updated',
         }),
-        render: (field: string, record) => (
-          <span>{renderUpdatedAt(record.updatedAt as string)}</span>
-        ),
+        render: (field: string, record) => renderUpdatedAt(record.updatedAt as string),
         sortable: true,
       });
     }

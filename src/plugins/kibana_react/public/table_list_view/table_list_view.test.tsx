@@ -10,6 +10,7 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import { shallowWithIntl, registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { ToastsStart } from '@kbn/core/public';
 import React from 'react';
+import moment, { Moment } from 'moment';
 import { act } from 'react-dom/test-utils';
 import { themeServiceMock, applicationServiceMock } from '@kbn/core/public/mocks';
 import { TableListView, TableListViewProps } from './table_list_view';
@@ -101,6 +102,8 @@ describe('TableListView', () => {
   });
 
   describe('default columns', () => {
+    let testBed: TestBed;
+
     const tableColumns = [
       {
         field: 'columnTitle',
@@ -114,17 +117,20 @@ describe('TableListView', () => {
       },
     ];
 
+    const twoDaysAgo = new Date(new Date().setDate(new Date().getDate() - 2));
+    const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
+
     const hits = [
       {
         columnTitle: 'Item 1',
         description: 'Item 1 description',
-        updatedAt: new Date(new Date().setDate(new Date().getDate() - 2)),
+        updatedAt: twoDaysAgo,
       },
       {
         columnTitle: 'Item 2',
         description: 'Item 2 description',
         // This is the latest updated and should come first in the table
-        updatedAt: new Date(new Date().setDate(new Date().getDate() - 1)),
+        updatedAt: yesterday,
       },
     ];
 
@@ -140,8 +146,6 @@ describe('TableListView', () => {
     const setup = registerTestBed(TableListView, { defaultProps });
 
     test('should add a "Last updated" column if "updatedAt" is provided', async () => {
-      let testBed: TestBed;
-
       await act(async () => {
         testBed = await setup();
       });
@@ -152,23 +156,54 @@ describe('TableListView', () => {
       const { tableCellsValues } = table.getMetaData('itemsInMemTable');
 
       expect(tableCellsValues).toEqual([
-        ['Item 2', 'Item 2 description', 'a day ago'], // Comes first as it is the latest updated
+        ['Item 2', 'Item 2 description', 'yesterday'], // Comes first as it is the latest updated
         ['Item 1', 'Item 1 description', '2 days ago'],
       ]);
     });
 
-    test('should not add a "Last updated" column if no "updatedAt" is provided', async () => {
-      let testBed: TestBed;
+    test('should not display relative time for items updated more than 7 days ago', async () => {
+      const updatedAtValues: Moment[] = [];
+
+      const updatedHits = hits.map(({ columnTitle, description }, i) => {
+        const updatedAt = new Date(new Date().setDate(new Date().getDate() - (7 + i)));
+        updatedAtValues[i] = moment(updatedAt);
+
+        return {
+          columnTitle,
+          description,
+          updatedAt,
+        };
+      });
 
       await act(async () => {
         testBed = await setup({
           findItems: jest.fn(() =>
             Promise.resolve({
+              total: updatedHits.length,
+              hits: updatedHits,
+            })
+          ),
+        });
+      });
+
+      const { component, table } = testBed!;
+      component.update();
+
+      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+
+      expect(tableCellsValues).toEqual([
+        ['Item 1', 'Item 1 description', updatedAtValues[0].format('L @ LT')],
+        ['Item 2', 'Item 2 description', updatedAtValues[1].format('L @ LT')],
+      ]);
+    });
+
+    test('should not add a "Last updated" column if no "updatedAt" is provided', async () => {
+      await act(async () => {
+        testBed = await setup({
+          findItems: jest.fn(() =>
+            Promise.resolve({
               total: hits.length,
-              hits: hits.map((hit) => {
-                const { updatedAt, ...rest } = hit;
-                return rest;
-              }),
+              hits: hits.map(({ columnTitle, description }) => ({ columnTitle, description })),
             })
           ),
         });
