@@ -7,14 +7,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AxisExtentModes, ValueLabelModes, XScaleTypes } from '../constants';
+import { isValidInterval } from '@kbn/data-plugin/common';
+import { AxisExtentModes, ValueLabelModes } from '../constants';
 import {
   AxisExtentConfigResult,
   DataLayerConfigResult,
+  CommonXYDataLayerConfigResult,
   ValueLabelMode,
   CommonXYDataLayerConfig,
   ExtendedDataLayerConfigResult,
 } from '../types';
+import { isTimeChart } from '../helpers';
 
 const errors = {
   extendBoundsAreInvalidError: () =>
@@ -42,6 +45,18 @@ const errors = {
     i18n.translate('expressionXY.reusable.function.xyVis.errors.timeMarkerForNotTimeChartsError', {
       defaultMessage: 'Only time charts can have current time marker',
     }),
+  isInvalidIntervalError: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.isInvalidIntervalError', {
+      defaultMessage:
+        'Provided x-axis interval is invalid. The interval should include quantity and unit names. Examples: 1d, 24h, 1w.',
+    }),
+  minTimeBarIntervalNotForTimeBarChartError: () =>
+    i18n.translate(
+      'expressionXY.reusable.function.xyVis.errors.minTimeBarIntervalNotForTimeBarChartError',
+      {
+        defaultMessage: '`minTimeBarInterval` argument is applicable only for time bar charts.',
+      }
+    ),
 };
 
 export const hasBarLayer = (layers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>) =>
@@ -111,14 +126,23 @@ export const validateAddTimeMarker = (
   dataLayers: Array<DataLayerConfigResult | ExtendedDataLayerConfigResult>,
   addTimeMarker?: boolean
 ) => {
-  const isTimeViz = Boolean(
-    dataLayers.every(
-      (l) =>
-        l.table.columns.find((col) => col.id === l.xAccessor)?.meta.type === 'date' &&
-        (!l.xScaleType || l.xScaleType === XScaleTypes.TIME)
-    )
-  );
-  if (addTimeMarker && !isTimeViz) {
+  if (addTimeMarker && !isTimeChart(dataLayers)) {
     throw new Error(errors.timeMarkerForNotTimeChartsError());
+  }
+};
+
+export const validateMinTimeBarInterval = (
+  dataLayers: CommonXYDataLayerConfigResult[],
+  hasBar: boolean,
+  minTimeBarInterval?: string
+) => {
+  if (minTimeBarInterval) {
+    if (!isValidInterval(minTimeBarInterval)) {
+      throw new Error(errors.isInvalidIntervalError());
+    }
+
+    if (!hasBar || !isTimeChart(dataLayers)) {
+      throw new Error(errors.minTimeBarIntervalNotForTimeBarChartError());
+    }
   }
 };

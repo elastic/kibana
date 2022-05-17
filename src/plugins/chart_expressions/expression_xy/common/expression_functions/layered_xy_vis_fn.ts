@@ -6,23 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { XY_VIS_RENDERER, LayerTypes } from '../constants';
-import { appendLayerIds } from '../helpers';
-import { LayeredXyVisFn, ExtendedDataLayerConfig } from '../types';
+import { XY_VIS_RENDERER } from '../constants';
+import { LayeredXyVisFn } from '../types';
 import { logDatatables } from '../utils';
-import { validateAddTimeMarker } from './validate';
+import { validateAddTimeMarker, validateMinTimeBarInterval, hasBarLayer } from './validate';
+import { appendLayerIds, getDataLayers } from '../helpers';
 
 export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers) => {
   const layers = appendLayerIds(args.layers ?? [], 'layers');
 
   logDatatables(layers, handlers);
+
+  const dataLayers = getDataLayers(layers);
+  const hasBar = hasBarLayer(dataLayers);
   validateAddTimeMarker(
-    layers.filter<ExtendedDataLayerConfig>(
-      (layer): layer is ExtendedDataLayerConfig =>
-        layer.layerType === LayerTypes.DATA || !layer.layerType
-    ),
+    dataLayers
     args.addTimeMarker
   );
+  validateMinTimeBarInterval(dataLayers, hasBar, args.minTimeBarInterval);
 
   return {
     type: 'render',

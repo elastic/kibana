@@ -125,6 +125,10 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.addTimeMaker.help', {
       defaultMessage: 'Show time marker',
     }),
+  getMinTimeBarIntervalHelp: () =>
+    i18n.translate('expressionXY.xyVis.xAxisInterval.help', {
+      defaultMessage: 'Specifies the min interval for time bar chart',
+    }),
   getSplitColumnAccessorHelp: () =>
     i18n.translate('expressionXY.xyVis.splitColumnAccessor.help', {
       defaultMessage: 'Specifies split column of the xy chart',

@@ -133,4 +133,8 @@ export const commonXYArgs: CommonXYFn['args'] = {
     default: false,
     help: strings.getAddTimeMakerHelp(),
   },
+  minTimeBarInterval: {
+    types: ['string'],
+    help: strings.getMinTimeBarIntervalHelp(),
+  },
 };
