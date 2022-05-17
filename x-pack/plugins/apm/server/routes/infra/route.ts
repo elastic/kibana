@@ -9,7 +9,7 @@ import * as t from 'io-ts';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { rangeRt } from '../default_api_types';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { getServiceContainerMetadata } from './container_metadata/get_service_container_metadata';
+import { getServiceContainerMetadata } from './kubernetes_metadata/get_service_kubernetes_metadata';
 import { getMetricIndices } from '../../lib/helpers/get_metric_indices';
 
 // NOT USED ATM
@@ -34,7 +34,7 @@ const serviceContainerRoute = createApmServerRoute({
     });
 
     return withApmSpan(
-      'get_service_container_metadata',
+      'get_service_kubernetes_metadata',
       async () =>
         await getServiceContainerMetadata({
           esClient,

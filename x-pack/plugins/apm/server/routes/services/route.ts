@@ -54,7 +54,7 @@ import { getSortedAndFilteredServices } from './get_services/get_sorted_and_filt
 import { ServiceHealthStatus } from '../../../common/service_health_status';
 import { getServiceGroup } from '../service_groups/get_service_group';
 import { offsetRt } from '../../../common/offset_rt';
-import { getServiceContainerMetadata } from '../infra/container_metadata/get_service_container_metadata';
+import { getServiceKubernetesMetadata } from '../infra/kubernetes_metadata/get_service_kubernetes_metadata';
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
   params: t.type({
@@ -270,7 +270,7 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
         savedObjectsClient,
       });
 
-      const containerMetadata = await getServiceContainerMetadata({
+      const containerMetadata = await getServiceKubernetesMetadata({
         esClient,
         index,
         containerId: serviceMetadataDetails?.container?.id,
@@ -898,7 +898,7 @@ export const serviceInstancesMetadataDetails = createApmServerRoute({
         savedObjectsClient,
       });
 
-      const containerMetadata = await getServiceContainerMetadata({
+      const containerMetadata = await getServiceKubernetesMetadata({
         esClient,
         index,
         containerId: serviceInstanceMetadataDetails?.container?.id,

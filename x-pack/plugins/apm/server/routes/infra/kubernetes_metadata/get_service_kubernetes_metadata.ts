@@ -29,7 +29,7 @@ export interface KubernetesMetadataDetails {
 
 type ESResponse = SearchResponse;
 
-export const getServiceContainerMetadata = async ({
+export const getServiceKubernetesMetadata = async ({
   esClient,
   index,
   containerId,
