@@ -9,7 +9,7 @@
 import './app.scss';
 import React, { useEffect, useCallback, useState } from 'react';
 import { Route, Switch, useLocation } from 'react-router-dom';
-
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { syncQueryStateWithUrl } from '@kbn/data-plugin/public';
@@ -62,19 +62,26 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
     services: {
       data: { query, dataViews },
       core,
+      history,
       kbnUrlStateStorage,
       dataViewEditor,
     },
   } = useKibana<VisualizeServices>();
   const { pathname } = useLocation();
-  const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const onDataViewCreated = useCallback(async (dataView: unknown) => {
-    const dataViewId = (dataView as DataView).id;
-    if (dataViewId) {
-      setShowNoDataPage(false);
-    }
-  }, []);
+  const onDataViewCreated = useCallback(
+    async (dataView: unknown) => {
+      const dataViewId = (dataView as DataView).id;
+      if (dataViewId) {
+        history.push({
+          pathname: VisualizeConstants.LANDING_PAGE_PATH,
+          search: history.location.search,
+        });
+      }
+    },
+    [history]
+  );
 
   useEffect(() => {
     // syncs `_g` portion of url with query services
@@ -92,28 +99,25 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
       const hasUserDataView = await dataViews.hasData.hasUserDataView().catch(() => false);
       const hasEsData = await dataViews.hasData.hasESData().catch(() => true);
       if (!hasUserDataView || !hasEsData) {
-        setShowNoDataPage(true);
+        history.push({ pathname: VisualizeConstants.NO_DATA, search: history.location.search });
       }
 
       const defaultDataView = await dataViews.getDefaultDataView();
       if (!defaultDataView) {
-        setShowNoDataPage(true);
+        history.push({ pathname: VisualizeConstants.NO_DATA, search: history.location.search });
       }
+      setIsLoading(false);
     };
 
     // call the function
     checkESOrDataViewExist();
-  }, [dataViews]);
+  }, [dataViews, history, history.location]);
 
-  // Visualize app should return the noData component if there is no data view or data source
-  if (showNoDataPage) {
+  if (isLoading) {
     return (
-      <NoDataComponent
-        core={core}
-        dataViewEditor={dataViewEditor}
-        dataViews={dataViews}
-        onDataViewCreated={onDataViewCreated}
-      />
+      <div className="visAppLoadingWrapper">
+        <EuiLoadingSpinner size="xl" />
+      </div>
     );
   }
 
@@ -130,6 +134,14 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
         path={[VisualizeConstants.LANDING_PAGE_PATH, VisualizeConstants.WIZARD_STEP_1_PAGE_PATH]}
       >
         <VisualizeListing />
+      </Route>
+      <Route path={VisualizeConstants.NO_DATA} exact>
+        <NoDataComponent
+          core={core}
+          dataViewEditor={dataViewEditor}
+          dataViews={dataViews}
+          onDataViewCreated={onDataViewCreated}
+        />
       </Route>
       <VisualizeNoMatch />
     </Switch>

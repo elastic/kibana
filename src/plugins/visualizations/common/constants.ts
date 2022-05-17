@@ -25,6 +25,7 @@ export const VisualizeConstants = {
   EDIT_PATH: '/edit',
   EDIT_BY_VALUE_PATH: '/edit_by_value',
   APP_ID: 'visualize',
+  NO_DATA: '/no_data',
 };
 
 export enum LegendSize {
