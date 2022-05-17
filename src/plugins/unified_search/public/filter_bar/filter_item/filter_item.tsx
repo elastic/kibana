@@ -8,7 +8,7 @@
 
 import './filter_item.scss';
 
-import { EuiContextMenu, EuiPopover, EuiPopoverProps } from '@elastic/eui';
+import { EuiContextMenu, EuiContextMenuPanel, EuiPopover, EuiPopoverProps } from '@elastic/eui';
 import { InjectedIntl } from '@kbn/i18n-react';
 import {
   Filter,
@@ -67,7 +67,14 @@ export const FILTER_EDITOR_WIDTH = 800;
 export function FilterItem(props: FilterItemProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [indexPatternExists, setIndexPatternExists] = useState<boolean | undefined>(undefined);
+  const [renderedComponent, setRenderedComponent] = useState('menu');
   const { id, filter, indexPatterns, hiddenPanelOptions } = props;
+
+  useEffect(() => {
+    if (isPopoverOpen) {
+      setRenderedComponent('menu');
+    }
+  }, [isPopoverOpen]);
 
   useEffect(() => {
     const index = props.filter.meta.index;
@@ -194,8 +201,10 @@ export function FilterItem(props: FilterItemProps) {
           defaultMessage: 'Edit filter',
         }),
         icon: 'pencil',
-        panel: 1,
         'data-test-subj': 'editFilter',
+        onClick: () => {
+          setRenderedComponent('editFilter');
+        },
       },
       {
         name: negate
@@ -254,23 +263,6 @@ export function FilterItem(props: FilterItemProps) {
       {
         id: 0,
         items: mainPanelItems,
-      },
-      {
-        id: 1,
-        width: FILTER_EDITOR_WIDTH,
-        content: (
-          <div>
-            <FilterEditor
-              filter={filter}
-              indexPatterns={indexPatterns}
-              onSubmit={onSubmit}
-              onCancel={() => {
-                setIsPopoverOpen(false);
-              }}
-              timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
-            />
-          </div>
-        ),
       },
     ];
   }
@@ -401,7 +393,25 @@ export function FilterItem(props: FilterItemProps) {
 
   return (
     <EuiPopover anchorPosition="downLeft" {...popoverProps}>
-      <EuiContextMenu initialPanelId={0} panels={getPanels()} />
+      {renderedComponent === 'menu' ? (
+        <EuiContextMenu initialPanelId={0} panels={getPanels()} />
+      ) : (
+        <EuiContextMenuPanel
+          items={[
+            <div style={{ width: FILTER_EDITOR_WIDTH }}>
+              <FilterEditor
+                filter={filter}
+                indexPatterns={indexPatterns}
+                onSubmit={onSubmit}
+                onCancel={() => {
+                  setIsPopoverOpen(false);
+                }}
+                timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+              />
+            </div>,
+          ]}
+        />
+      )}
     </EuiPopover>
   );
 }
