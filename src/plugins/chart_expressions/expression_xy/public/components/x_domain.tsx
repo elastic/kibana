@@ -68,7 +68,6 @@ export const getXDomain = (
         .filter((v) => !isUndefined(v))
         .sort()
     );
-
     const [firstXValue] = xValues;
     const lastXValue = xValues[xValues.length - 1];
 

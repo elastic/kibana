@@ -7,3 +7,4 @@
  */
 
 export { appendLayerIds, getAccessors } from './layers';
+export { normalizeTable } from './table';
