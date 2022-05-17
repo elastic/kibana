@@ -39,6 +39,7 @@ export const mockState: SyntheticsAppState = {
       },
     ],
     loading: false,
+    error: null,
   },
   monitorList: {
     data: {
@@ -48,6 +49,7 @@ export const mockState: SyntheticsAppState = {
       page: 0,
       syncErrors: [],
     },
+    error: null,
     loading: false,
   },
 };
