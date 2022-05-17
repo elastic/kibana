@@ -30,6 +30,7 @@ import { NavigationCategories } from '../types';
 
 export interface SolutionNavPanelProps {
   onClose: () => void;
+  onOutsideClick: () => void;
   title: string;
   items: DefaultSideNavItem[];
   categories?: NavigationCategories;
@@ -53,6 +54,7 @@ export interface SolutionNavPanelItemProps {
  */
 const SolutionNavPanelComponent: React.FC<SolutionNavPanelProps> = ({
   onClose,
+  onOutsideClick,
   title,
   categories,
   items,
@@ -77,7 +79,7 @@ const SolutionNavPanelComponent: React.FC<SolutionNavPanelProps> = ({
       <EuiWindowEvent event="keydown" handler={onKeyDown} />
       <EuiPortal>
         <EuiFocusTrap autoFocus>
-          <EuiOutsideClickDetector onOutsideClick={() => onClose()}>
+          <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>
             <EuiPanelStyled
               className={panelClasses}
               hasShadow={!isTimelineVisible}

@@ -63,12 +63,12 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
     setActivePanelNavId(id);
   };
 
-  const closePanelNav = () => {
+  const onClosePanelNav = useCallback(() => {
     activePanelNavIdRef.current = null;
     setActivePanelNavId(null);
-  };
+  }, []);
 
-  const onClosePanelNav = useCallback(() => {
+  const onOutsidePanelClick = useCallback(() => {
     const currentPanelNavId = activePanelNavIdRef.current;
     setTimeout(() => {
       // This event is triggered on outside click.
@@ -76,10 +76,10 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
       // closes also if the active panel button has been clicked (toggle),
       // but it does not close if any some other panel open button has been clicked.
       if (activePanelNavIdRef.current === currentPanelNavId) {
-        closePanelNav();
+        onClosePanelNav();
       }
     });
-  }, []);
+  }, [onClosePanelNav]);
 
   const navItemsById = useMemo<NavItemsById>(
     () =>
@@ -104,12 +104,13 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
     return (
       <SolutionNavPanel
         onClose={onClosePanelNav}
+        onOutsideClick={onOutsidePanelClick}
         items={panelItems}
         title={title}
         categories={categories}
       />
     );
-  }, [activePanelNavId, navItemsById, onClosePanelNav]);
+  }, [activePanelNavId, navItemsById, onClosePanelNav, onOutsidePanelClick]);
 
   return (
     <>
