@@ -13,8 +13,8 @@ import {
   EuiDataGridSorting,
   EuiEmptyPrompt,
 } from '@elastic/eui';
-import { ValidFeatureId } from '@kbn/rule-data-utils';
-import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
+import type { ValidFeatureId } from '@kbn/rule-data-utils';
+import type { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type {
   QueryDslQueryContainer,

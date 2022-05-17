@@ -22,7 +22,7 @@ import {
   RuleRegistrySearchRequestPagination,
 } from '@kbn/rule-registry-plugin/common';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
+import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { PLUGIN_ID } from '../../../../common/constants';
 import { AlertsTable } from '../alerts_table';
 import { useKibana } from '../../../../common/lib/kibana';
