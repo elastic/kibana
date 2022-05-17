@@ -36,14 +36,18 @@ describe('Copy to clipboard button', () => {
     expect(warn).not.toHaveBeenCalled();
   });
 
-  it('should copy column values to clipboard on click', () => {
+  it('should copy column values to clipboard on click', async () => {
+    const originalClipboard = global.window.navigator.clipboard;
+    global.window.navigator.clipboard = {
+      ...(originalClipboard || { writeText: jest.fn() }),
+    };
+
     const { label, iconType, onClick } = buildCopyColumnValuesButton({
-      columnId: 'test-field-name',
+      columnId: 'extension',
       services: discoverServiceMock,
       getCellTextToCopy: discoverGridContextMock.getCellTextToCopy,
-      rowsNumber: 2,
+      rowsNumber: 3,
     });
-    execCommandMock.mockImplementationOnce(() => true);
 
     const wrapper = mountWithIntl(
       <EuiButton iconType={iconType} onClick={onClick}>
@@ -51,12 +55,12 @@ describe('Copy to clipboard button', () => {
       </EuiButton>
     );
 
-    wrapper.find(EuiButton).simulate('click');
+    await wrapper.find(EuiButton).simulate('click');
 
-    expect(execCommandMock).toHaveBeenCalledWith('copy');
-    expect(warn).not.toHaveBeenCalled();
+    // first row out of 3 rows does not have a value
+    expect(window.navigator.clipboard.writeText).toHaveBeenCalledWith('\njpg\ngif');
 
-    // TODO: add tests
+    window.navigator.clipboard = originalClipboard;
   });
 
   it('should not copy to clipboard on click', () => {
