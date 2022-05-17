@@ -12,9 +12,6 @@ import { EuiErrorBoundary, EuiLoadingContent } from '@elastic/eui';
 import type { ExplainLogRateSpikesProps } from './components/explain_log_rate_spikes';
 
 const ExplainLogRateSpikesLazy = React.lazy(() => import('./components/explain_log_rate_spikes'));
-const SingleEndpointStreamingDemoLazy = React.lazy(
-  () => import('./components/single_endpoint_streaming_demo')
-);
 
 const LazyWrapper: FC = ({ children }) => (
   <EuiErrorBoundary>
@@ -29,14 +26,5 @@ const LazyWrapper: FC = ({ children }) => (
 export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = (props) => (
   <LazyWrapper>
     <ExplainLogRateSpikesLazy {...props} />
-  </LazyWrapper>
-);
-
-/**
- * Lazy-wrapped SingleEndpointStreamingDemo React component
- */
-export const SingleEndpointStreamingDemo: FC = () => (
-  <LazyWrapper>
-    <SingleEndpointStreamingDemoLazy />
   </LazyWrapper>
 );

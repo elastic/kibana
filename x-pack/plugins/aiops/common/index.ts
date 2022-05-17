@@ -20,3 +20,5 @@ export const PLUGIN_NAME = 'AIOps';
  * "Explain log rate spikes UI" during development until the first release.
  */
 export const AIOPS_ENABLED = false;
+
+export { AiopsExampleStreamApiAction, API_ACTION_NAME } from './api/example_stream';

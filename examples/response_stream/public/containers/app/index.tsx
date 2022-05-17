@@ -7,8 +7,31 @@
  */
 
 import React from 'react';
+import { BrowserRouter as Router, Route, Redirect, Switch } from 'react-router-dom';
 import { EuiPage } from '@elastic/eui';
+import { useDeps } from '../../hooks/use_deps';
+import { Sidebar } from './sidebar';
+import { routes } from '../../routes';
 
 export const App: React.FC = () => {
-  return <EuiPage>HERE BE DRAGONS</EuiPage>;
+  const { appBasePath } = useDeps();
+
+  const routeElements: React.ReactElement[] = [];
+  for (const { items } of routes) {
+    for (const { id, component } of items) {
+      routeElements.push(<Route key={id} path={`/${id}`} render={(props) => component} />);
+    }
+  }
+
+  return (
+    <Router basename={appBasePath}>
+      <EuiPage>
+        <Sidebar />
+        <Switch>
+          {routeElements}
+          <Redirect to="/simple-string-stream" />
+        </Switch>
+      </EuiPage>
+    </Router>
+  );
 };

@@ -8,7 +8,7 @@
     "name": "ML UI",
     "githubTeam": "ml-ui"
   },
-  "requiredPlugins": ["developerExamples"],
+  "requiredPlugins": ["aiops", "developerExamples"],
   "optionalPlugins": [],
   "requiredBundles": ["kibanaReact"]
 }

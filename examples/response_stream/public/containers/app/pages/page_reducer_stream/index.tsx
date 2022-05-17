@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useEffect, useState, FC } from 'react';
@@ -10,7 +11,6 @@ import React, { useEffect, useState, FC } from 'react';
 import { Chart, Settings, Axis, BarSeries, Position, ScaleType } from '@elastic/charts';
 
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import {
   EuiBadge,
@@ -23,13 +23,19 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { useStreamFetchReducer } from '../../hooks/use_stream_fetch_reducer';
+import { useStreamFetchReducer } from '@kbn/aiops-plugin/public';
+
+import { Page } from '../../../../components/page';
+
+import { useDeps } from '../../../../hooks/use_deps';
 
 import { getStatusMessage } from './get_status_message';
 import { initialState, resetStream, streamReducer } from './stream_reducer';
 
-export const SingleEndpointStreamingDemo: FC = () => {
-  const { notifications } = useKibana();
+export const PageReducerStream: FC = () => {
+  const {
+    core: { notifications },
+  } = useDeps();
 
   const [simulateErrors, setSimulateErrors] = useState(false);
 
@@ -53,7 +59,7 @@ export const SingleEndpointStreamingDemo: FC = () => {
 
   useEffect(() => {
     if (errors.length > 0) {
-      notifications.toasts.danger({ body: errors[errors.length - 1] });
+      notifications.toasts.addDanger(errors[errors.length - 1]);
     }
   }, [errors, notifications.toasts]);
 
@@ -66,7 +72,18 @@ export const SingleEndpointStreamingDemo: FC = () => {
       });
 
   return (
-    <EuiText>
+    <Page title={'Reducer stream'}>
+      <EuiText>
+        <p>
+          This demonstrates a single endpoint with streaming support that sends Redux inspired
+          actions from server to client. The server and client share types of the data to be
+          received. The client uses a custom hook that receives stream chunks and passes them on to
+          `useReducer()` that acts on the Redux type actions it receives. The custom hook includes
+          code to buffer actions and is able to apply them in bulk so the DOM does not get hammered
+          with updates. Hit &quot;Start development&quot; to trigger the bar chart race!
+        </p>
+      </EuiText>
+      <br />
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButton type="primary" size="s" onClick={onClickHandler} aria-label={buttonLabel}>
@@ -119,17 +136,19 @@ export const SingleEndpointStreamingDemo: FC = () => {
           />
         </Chart>
       </div>
-      <p>{getStatusMessage(isRunning, isCancelled, data.progress)}</p>
-      <EuiCheckbox
-        id="aiopSimulateErrorsCheckbox"
-        label={i18n.translate('xpack.aiops.explainLogRateSpikes.simulateErrorsCheckboxLabel', {
-          defaultMessage:
-            'Simulate errors (gets applied to new streams only, not currently running ones).',
-        })}
-        checked={simulateErrors}
-        onChange={(e) => setSimulateErrors(!simulateErrors)}
-        compressed
-      />
-    </EuiText>
+      <EuiText>
+        <p>{getStatusMessage(isRunning, isCancelled, data.progress)}</p>
+        <EuiCheckbox
+          id="aiopSimulateErrorsCheckbox"
+          label={i18n.translate('xpack.aiops.explainLogRateSpikes.simulateErrorsCheckboxLabel', {
+            defaultMessage:
+              'Simulate errors (gets applied to new streams only, not currently running ones).',
+          })}
+          checked={simulateErrors}
+          onChange={(e) => setSimulateErrors(!simulateErrors)}
+          compressed
+        />
+      </EuiText>
+    </Page>
   );
 };
