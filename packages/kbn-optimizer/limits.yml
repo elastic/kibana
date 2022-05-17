@@ -93,7 +93,7 @@ pageLoadAssetSize:
   expressionShape: 34008
   interactiveSetup: 80000
   expressionTagcloud: 27505
-  securitySolution: 273763
+  securitySolution: 289364 # This is temporary: https://github.com/elastic/kibana/pull/132210 update-limits when feature flag removed and deprecated code cleaned
   customIntegrations: 28810
   expressionMetricVis: 23121
   expressionHeatmap: 27505
