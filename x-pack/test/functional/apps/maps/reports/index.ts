@@ -43,20 +43,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await reporting.deleteAllReports();
     });
 
-    it('PNG file matches the baseline image, using sample geo data', async function () {
-      await reporting.initEcommerce();
-
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.loadSavedDashboard('Ecommerce Map');
-      await PageObjects.reporting.openPngReportingPanel();
-      await PageObjects.reporting.clickGenerateReportButton();
-
-      const percentDiff = await measurePngDifference('geo_map_report');
-      expect(percentDiff).to.be.lessThan(0.09);
-
-      await reporting.teardownEcommerce();
-    });
-
     it('PNG file matches the baseline image, using embeddable example', async function () {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
