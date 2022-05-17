@@ -27,6 +27,7 @@ export {
   setCollectionEnabledRoute,
   setCollectionIntervalRoute,
 } from './elasticsearch_settings';
+// @ts-expect-error
 export { kibanaInstanceRoute, kibanaInstancesRoute, kibanaOverviewRoute } from './kibana';
 export { apmInstanceRoute, apmInstancesRoute, apmOverviewRoute } from './apm';
 export {
@@ -36,7 +37,8 @@ export {
   logstashNodesRoute,
   logstashOverviewRoute,
   logstashPipelineRoute,
-  logstashClusterPipelineIdsRoute,
+  logstashClusterPipelineIdsRoute, // @ts-expect-error
 } from './logstash';
+// @ts-expect-error
 export { entSearchOverviewRoute } from './enterprise_search';
 export * from './setup';
