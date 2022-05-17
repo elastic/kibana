@@ -1,6 +1,6 @@
 {
   "job_type": "anomaly_detector",
-  "description": "Looks for unusual powershell scripts that may indicate execution of malware, or persistence mechanisms.",
+  "description": "Security: Windows - Looks for unusual powershell scripts that may indicate execution of malware, or persistence mechanisms.",
   "groups": [
     "endpoint",
     "event-log",
@@ -13,7 +13,7 @@
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "Security: Windows - Detects high information content in powershell.file.script_block_text values.",
+        "detector_description": "Detects high information content in powershell.file.script_block_text values.",
         "function": "high_info_content",
         "field_name": "powershell.file.script_block_text"
       }
