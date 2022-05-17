@@ -27,7 +27,7 @@ import { ROLES } from '../../test';
 
 describe('ALL - Live Query', () => {
   before(() => {
-    runKbnArchiverScript(ArchiverMethod.LOAD, 'ecs_mapping_3');
+    runKbnArchiverScript(ArchiverMethod.LOAD, 'ecs_mapping_1');
   });
 
   beforeEach(() => {
@@ -36,7 +36,7 @@ describe('ALL - Live Query', () => {
   });
 
   after(() => {
-    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'ecs_mapping_3');
+    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'ecs_mapping_1');
   });
 
   it('should run query and enable ecs mapping', () => {
@@ -79,8 +79,7 @@ describe('ALL - Live Query', () => {
   it('should run customized saved query', () => {
     cy.contains('New live query').click();
     selectAllAgents();
-    cy.react('SavedQueriesDropdown').click();
-    cy.contains('MULTIPLE_MAPPINGS').click();
+    cy.react('SavedQueriesDropdown').type('NOMAPPING{downArrow}{enter}');
     cy.getReact('SavedQueriesDropdown').getCurrentState().should('have.length', 1);
     clearInputQuery();
     inputQuery('select * from users{enter}');
