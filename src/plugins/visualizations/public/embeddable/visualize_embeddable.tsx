@@ -34,6 +34,7 @@ import {
   ExpressionAstExpression,
 } from '@kbn/expressions-plugin/public';
 import type { RenderMode } from '@kbn/expressions-plugin';
+import VisualizationError from '../components/visualization_error';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import { Vis, SerializedVis } from '../vis';
 import { getExecutionContext, getExpressions, getTheme, getUiActions } from '../services';
@@ -380,6 +381,12 @@ export class VisualizeEmbeddable
 
     this.subscriptions.push(this.handler.loading$.subscribe(this.onContainerLoading));
     this.subscriptions.push(this.handler.render$.subscribe(this.onContainerRender));
+
+    this.subscriptions.push(
+      this.getOutput$().subscribe(
+        ({ error }) => error && render(<VisualizationError error={error} />, this.domNode)
+      )
+    );
 
     await this.updateHandler();
   }

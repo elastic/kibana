@@ -56,6 +56,7 @@ interface DefaultEditorConfig<TVisParams> {
     [key: string]: Array<{ text: string; value: string }> | Array<{ id: string; label: string }>;
   };
   enableAutoApply?: boolean;
+  enableDataViewChange?: boolean;
   defaultSize?: string;
   optionsTemplate?: DefaultEditorOptionsComponent<TVisParams>;
   optionTabs?: Array<{
