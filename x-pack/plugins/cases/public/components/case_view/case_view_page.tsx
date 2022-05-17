@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingLogo,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Case, UpdateKey } from '../../../common/ui';
 import { useCaseViewNavigation, useUrlParams } from '../../common/navigation';
@@ -28,6 +20,7 @@ import { useTimelineContext } from '../timeline_context/use_timeline_context';
 import { useCasesTitleBreadcrumbs } from '../use_breadcrumbs';
 import { WhitePageWrapperNoBorder } from '../wrappers';
 import { CaseViewActivity } from './components/case_view_activity';
+import { CaseViewAlerts } from './components/case_view_alerts';
 import { CaseViewMetrics } from './metrics';
 import { ACTIVITY_TAB, ALERTS_TAB } from './translations';
 import { CaseViewPageProps, CASE_VIEW_PAGE_TABS } from './types';
@@ -36,7 +29,7 @@ import { useOnUpdateField } from './use_on_update_field';
 // This hardcoded constant is left here intentionally
 // as a way to hide a wip functionality
 // that will be merge in the 8.3 release.
-const ENABLE_ALERTS_TAB = false;
+const ENABLE_ALERTS_TAB = true;
 
 export const CaseViewPage = React.memo<CaseViewPageProps>(
   ({
@@ -194,12 +187,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
               {
                 id: CASE_VIEW_PAGE_TABS.ALERTS,
                 name: ALERTS_TAB,
-                content: (
-                  <EuiEmptyPrompt
-                    icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
-                    title={<h2>{'Alerts table placeholder'}</h2>}
-                  />
-                ),
+                content: <CaseViewAlerts caseData={caseData} />,
               },
             ]
           : []),

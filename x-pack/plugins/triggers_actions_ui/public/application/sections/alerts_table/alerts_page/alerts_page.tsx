@@ -8,6 +8,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { get } from 'lodash';
 import {
   EuiDataGridControlColumn,
+  EuiDataGridSorting,
   EuiFlexItem,
   EuiFlexGroup,
   EuiSpacer,
@@ -21,10 +22,10 @@ import {
   RuleRegistrySearchRequestPagination,
 } from '@kbn/rule-registry-plugin/common';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
+import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { PLUGIN_ID } from '../../../../common/constants';
 import { AlertsTable } from '../alerts_table';
 import { useKibana } from '../../../../common/lib/kibana';
-import { AlertsData, RenderCellValueProps } from '../../../../types';
 
 const consumers = [
   AlertConsumers.APM,
@@ -36,6 +37,11 @@ const consumers = [
 const defaultPagination = {
   pageSize: 10,
   pageIndex: 0,
+};
+
+const emptyConfiguration = {
+  id: '',
+  columns: [],
 };
 
 const defaultSort: estypes.SortCombinations[] = [
@@ -52,19 +58,25 @@ const AlertsPage: React.FunctionComponent = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
   const [alertsCount, setAlertsCount] = useState(0);
-  const [alerts, setAlerts] = useState<AlertsData[]>([]);
+  const [alerts, setAlerts] = useState<EcsFieldsResponse[]>([]);
   const [sort, setSort] = useState<estypes.SortCombinations[]>(defaultSort);
   const [pagination, setPagination] = useState(defaultPagination);
+
+  const alertsTableConfigurationRegistry = useKibana().services.alertsTableConfigurationRegistry;
+  const hasAlertsTableConfiguration = alertsTableConfigurationRegistry.has(PLUGIN_ID);
+  const alertsTableConfiguration = hasAlertsTableConfiguration
+    ? alertsTableConfigurationRegistry.get(PLUGIN_ID)
+    : emptyConfiguration;
 
   const onPageChange = (_pagination: RuleRegistrySearchRequestPagination) => {
     setPagination(_pagination);
   };
-  const onSortChange = (_sort: Array<{ id: string; direction: 'asc' | 'desc' }>) => {
+  const onSortChange = (_sort: EuiDataGridSorting['columns']) => {
     setSort(
-      _sort.map(({ id, direction }) => {
+      _sort.map((sortItem) => {
         return {
-          [id]: {
-            order: direction,
+          [sortItem.id]: {
+            order: sortItem.direction,
           },
         };
       })
@@ -86,9 +98,9 @@ const AlertsPage: React.FunctionComponent = () => {
       })
       .subscribe({
         next: (res) => {
-          const alertsResponse = res.rawResponse.hits.hits.map(
-            (hit) => hit.fields as unknown as AlertsData
-          ) as AlertsData[];
+          const alertsResponse = res.rawResponse.hits.hits.map<EcsFieldsResponse>(
+            (hit) => hit.fields as EcsFieldsResponse
+          );
           setAlerts(alertsResponse);
           const total = !isNaN(res.rawResponse.hits.total as number)
             ? (res.rawResponse.hits.total as number)
@@ -131,11 +143,12 @@ const AlertsPage: React.FunctionComponent = () => {
       refresh: () => {
         asyncSearch();
       },
+      sort,
     };
   };
 
   const tableProps = {
-    configurationId: PLUGIN_ID,
+    columns: alertsTableConfiguration.columns,
     consumers,
     bulkActions: [],
     deletedEventIds: [],
@@ -143,8 +156,9 @@ const AlertsPage: React.FunctionComponent = () => {
     pageSize: defaultPagination.pageSize,
     pageSizeOptions: [1, 2, 5, 10, 20, 50, 100],
     leadingControlColumns: [],
-    renderCellValue: ({ alert, field }: RenderCellValueProps) => {
-      const value = get(alert, field, [])[0];
+    renderCellValue: ({ alert, field }: { alert: EcsFieldsResponse; field: string }) => {
+      // any is required here to improve typescript performance
+      const value = get(alert as any, field, [])[0] as string;
       return value ?? 'N/A';
     },
     showCheckboxes,

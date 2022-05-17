@@ -12,6 +12,16 @@ type PaginationProps = RuleRegistrySearchRequestPagination & {
   alertsCount: number;
 };
 
+export type UsePagination = (props: PaginationProps) => {
+  pagination: RuleRegistrySearchRequestPagination;
+  onChangePageSize: (pageSize: number) => void;
+  onChangePageIndex: (pageIndex: number) => void;
+  onPaginateFlyoutNext: () => void;
+  onPaginateFlyoutPrevious: () => void;
+  flyoutAlertIndex: number;
+  setFlyoutAlertIndex: (alertIndex: number) => void;
+};
+
 export function usePagination({ onPageChange, pageIndex, pageSize, alertsCount }: PaginationProps) {
   const [pagination, setPagination] = useState<RuleRegistrySearchRequestPagination>({
     pageIndex,
