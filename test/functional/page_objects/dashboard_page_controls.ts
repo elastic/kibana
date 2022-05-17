@@ -119,21 +119,6 @@ export class DashboardPageControls extends FtrService {
     await this.testSubjects.click('control-group-editor-save');
   }
 
-  public async updateControlsSize(width: ControlWidth, applyToAll: boolean = false) {
-    this.log.debug(
-      `Update default control size to ${width}`,
-      applyToAll ? ' for all controls' : ''
-    );
-    await this.openControlGroupSettingsFlyout();
-    await this.testSubjects.existOrFail('control-group-default-size-options');
-    await this.testSubjects.click(`control-editor-width-${width}`);
-    if (applyToAll) {
-      const checkbox = await this.find.byXPath('//label[@for="editControls_setAllSizesCheckbox"]');
-      await checkbox.click();
-    }
-    await this.testSubjects.click('control-group-editor-save');
-  }
-
   public async updateChainingSystem(chainingSystem: ControlGroupChainingSystem) {
     this.log.debug(`Update control group chaining system to ${chainingSystem}`);
     await this.openControlGroupSettingsFlyout();
@@ -241,14 +226,16 @@ export class DashboardPageControls extends FtrService {
     controlType,
     dataViewTitle,
     fieldName,
-    width,
+    grow,
     title,
+    width,
   }: {
     controlType: string;
     title?: string;
     fieldName: string;
     width?: ControlWidth;
     dataViewTitle?: string;
+    grow?: boolean;
   }) {
     this.log.debug(`Creating ${controlType} control ${title ?? fieldName}`);
     await this.openCreateControlFlyout(controlType);
@@ -257,6 +244,7 @@ export class DashboardPageControls extends FtrService {
     if (fieldName) await this.controlsEditorSetfield(fieldName);
     if (title) await this.controlEditorSetTitle(title);
     if (width) await this.controlEditorSetWidth(width);
+    if (grow !== undefined) await this.controlEditorSetGrow(grow);
 
     await this.controlEditorSave();
   }
@@ -376,6 +364,14 @@ export class DashboardPageControls extends FtrService {
   public async controlEditorSetWidth(width: ControlWidth) {
     this.log.debug(`Setting control width to ${width}`);
     await this.testSubjects.click(`control-editor-width-${width}`);
+  }
+
+  public async controlEditorSetGrow(grow: boolean) {
+    this.log.debug(`Setting control grow to ${grow}`);
+    const growSwitch = await this.testSubjects.find('control-editor-grow-switch');
+    if ((await growSwitch.getAttribute('aria-checked')) !== `'${grow}'`) {
+      await growSwitch.click();
+    }
   }
 
   public async controlEditorSave() {
