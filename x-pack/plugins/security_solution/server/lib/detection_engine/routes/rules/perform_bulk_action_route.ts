@@ -307,7 +307,7 @@ export const performBulkActionRoute = (
           });
 
           // migrate legacy rule actions
-          const { results } = await initPromisePool({
+          const migrationOutcome = await initPromisePool({
             concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
             items: rules,
             executor: async (rule) => {
@@ -326,7 +326,7 @@ export const performBulkActionRoute = (
           });
 
           return buildBulkResponse(response, {
-            updated: results.map(({ result }) => result),
+            updated: migrationOutcome.results.map(({ result }) => result),
             errors,
           });
         }
