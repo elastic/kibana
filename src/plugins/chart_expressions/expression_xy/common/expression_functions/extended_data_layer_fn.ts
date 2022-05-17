@@ -9,7 +9,7 @@
 import { validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { ExtendedDataLayerArgs, ExtendedDataLayerFn } from '../types';
 import { EXTENDED_DATA_LAYER, LayerTypes } from '../constants';
-import { getAccessors } from '../helpers';
+import { getAccessors, normalizeTable } from '../helpers';
 
 export const extendedDataLayerFn: ExtendedDataLayerFn['fn'] = async (data, args, context) => {
   const table = args.table ?? data;
@@ -19,11 +19,13 @@ export const extendedDataLayerFn: ExtendedDataLayerFn['fn'] = async (data, args,
   validateAccessor(accessors.splitAccessor, table.columns);
   accessors.accessors.forEach((accessor) => validateAccessor(accessor, table.columns));
 
+  const normalizedTable = normalizeTable(table, accessors.xAccessor);
+
   return {
     type: EXTENDED_DATA_LAYER,
     ...args,
     layerType: LayerTypes.DATA,
     ...accessors,
-    table,
+    table: normalizedTable,
   };
 };
