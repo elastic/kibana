@@ -252,7 +252,7 @@ export const performBulkActionRoute = (
       },
     },
     async (context, request, response) => {
-      const body = request.body;
+      const { body } = request;
       const siemResponse = buildSiemResponse(response);
 
       if (body?.ids && body.ids.length > RULES_TABLE_MAX_PAGE_SIZE) {
