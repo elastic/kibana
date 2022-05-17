@@ -17,7 +17,7 @@ import { handleEsError } from '../shared_imports';
 import { registerEsConfigRoute } from './api/console/es_config';
 import { registerProxyRoute } from './api/console/proxy';
 import { registerSpecDefinitionsRoute } from './api/console/spec_definitions';
-import { registerMappingsRoute } from './api/console/mappings';
+import { registerMappingsRoute } from './api/console/autocomplete_entities';
 
 export interface ProxyDependencies {
   readLegacyESConfig: () => Promise<ESConfigForProxy>;
