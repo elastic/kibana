@@ -9,6 +9,11 @@
 import Path from 'path';
 import { format } from 'url';
 import del from 'del';
+import Uuid from 'uuid';
+import globby from 'globby';
+import createArchiver from 'archiver';
+import Fs from 'fs';
+import { pipeline } from 'stream/promises';
 // @ts-expect-error in js
 import { Cluster } from '@kbn/es';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
@@ -285,6 +290,51 @@ export function createTestEsCluster<
       await Promise.all(nodeStopPromises.map(async (stop) => await stop()));
 
       log.info('[es] stopped');
+
+      await this.captureDebugFiles();
+    }
+
+    async captureDebugFiles() {
+      const debugFiles = await globby([`**/hs_err_pid*.log`, `**/replay_pid*.log`, `**/*.hprof`], {
+        cwd: config.installPath,
+        absolute: true,
+      });
+
+      if (!debugFiles.length) {
+        log.info('[es] no debug files found, assuming es did not write any');
+        return;
+      }
+
+      const uuid = Uuid.v4();
+      const debugPath = Path.resolve(KIBANA_ROOT, `data/es_debug_${uuid}.tar.gz`);
+      log.error(`[es] debug files found, archiving install to ${debugPath}`);
+      const archiver = createArchiver('tar', { gzip: true });
+      const promise = pipeline(archiver, Fs.createWriteStream(debugPath));
+
+      const archiveDirname = `es_debug_${uuid}`;
+      for (const name of Fs.readdirSync(config.installPath)) {
+        if (name === 'modules' || name === 'jdk') {
+          // drop these large and unnecessary directories
+          continue;
+        }
+
+        const src = Path.resolve(config.installPath, name);
+        const dest = Path.join(archiveDirname, name);
+        const stat = Fs.statSync(src);
+        if (stat.isDirectory()) {
+          archiver.directory(src, dest);
+        } else {
+          archiver.file(src, { name: dest });
+        }
+      }
+
+      archiver.finalize();
+      await promise;
+
+      // cleanup the captured debug files
+      for (const path of debugFiles) {
+        Fs.rmSync(path, { force: true });
+      }
     }
 
     async cleanup() {
