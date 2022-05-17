@@ -8,3 +8,4 @@
 
 export { appendLayerIds, getDataLayers, getAccessors } from './layers';
 export { isTimeChart } from './visualization';
+export { normalizeTable } from './table';
