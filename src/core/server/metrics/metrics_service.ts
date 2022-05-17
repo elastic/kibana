@@ -106,8 +106,6 @@ export class MetricsService
       schema: opsMetricsSchema,
     });
     metricsObservable.subscribe((metrics: OpsMetrics) => {
-      // did I add there for debugging and dev? Yes.
-      // is this needed for dev? Probably not
       const { message } = getEcsOpsMetricsLog(metrics);
       analyticsMetricsLogger.info(`reporting opsMetrics: ${message}`);
       analytics.reportEvent('core-ops_metrics', { ...metrics });

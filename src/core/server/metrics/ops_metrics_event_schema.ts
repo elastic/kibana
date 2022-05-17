@@ -26,15 +26,15 @@ export const opsMetricsSchema: RootSchema<OpsMetrics> = {
             properties: {
               total_in_bytes: {
                 type: 'byte',
-                _meta: { description: '/** total heap available */' },
+                _meta: { description: 'total heap available' },
               },
               used_in_bytes: {
                 type: 'byte',
-                _meta: { description: '/** used heap */' },
+                _meta: { description: 'used heap' },
               },
               size_limit: {
                 type: 'byte',
-                _meta: { description: '/** v8 heap size limit */' },
+                _meta: { description: 'v8 heap size limit' },
               },
             },
           },
@@ -56,50 +56,63 @@ export const opsMetricsSchema: RootSchema<OpsMetrics> = {
         properties: {
           fromTimestamp: {
             type: 'date',
-            _meta: { description: '' },
+            _meta: {
+              description:
+                'The first timestamp the interval timer kicked in for collecting data points.',
+            },
           },
           lastUpdatedAt: {
             type: 'date',
-            _meta: { description: '' },
+            _meta: {
+              description:
+                'Last timestamp the interval timer kicked in for collecting data points.',
+            },
           },
           min: {
             type: 'long',
-            _meta: { description: '' },
+            _meta: { description: 'The minimum recorded event loop delay.' },
           },
           max: {
             type: 'long',
-            _meta: { description: '' },
+            _meta: { description: 'The maximum recorded event loop delay.' },
           },
           mean: {
             type: 'long',
-            _meta: { description: '' },
+            _meta: { description: 'The mean of the recorded event loop delays.' },
           },
           exceeds: {
             type: 'long',
-            _meta: { description: '' },
+            _meta: {
+              description:
+                'The number of times the event loop delay exceeded the maximum 1 hour event loop delay threshold.',
+            },
           },
           stddev: {
             type: 'long',
-            _meta: { description: '' },
+            _meta: { description: 'The standard deviation of the recorded event loop delays.' },
           },
           percentiles: {
             properties: {
               '50': {
                 type: 'long',
-                _meta: { description: '50th percentile' },
+                _meta: { description: '50th percentile of delays of the collected data points.' },
               },
               '75': {
                 type: 'long',
-                _meta: { description: '75th percentile' },
+                _meta: { description: '75th percentile of delays of the collected data points.' },
               },
               '95': {
                 type: 'long',
-                _meta: { description: '95th percentile' },
+                _meta: { description: '95th percentile of delays of the collected data points.' },
               },
               '99': {
                 type: 'long',
-                _meta: { description: '99th percentile' },
+                _meta: { description: '99th percentile of delays of the collected data points.' },
               },
+            },
+            _meta: {
+              description: 'An object detailing the accumulated percentile distribution.',
+              optional: false,
             },
           },
         },
@@ -132,15 +145,15 @@ export const opsMetricsSchema: RootSchema<OpsMetrics> = {
               properties: {
                 total_in_bytes: {
                   type: 'byte',
-                  _meta: { description: '/** total heap available */' },
+                  _meta: { description: 'total heap available' },
                 },
                 used_in_bytes: {
                   type: 'byte',
-                  _meta: { description: '/** used heap */' },
+                  _meta: { description: 'used heap' },
                 },
                 size_limit: {
                   type: 'byte',
-                  _meta: { description: '/** v8 heap size limit */' },
+                  _meta: { description: 'v8 heap size limit' },
                 },
               },
             },
