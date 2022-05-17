@@ -48,6 +48,7 @@ export const createMetricVisTypeDefinition = (): VisTypeDefinition<VisParams> =>
     },
   },
   editorConfig: {
+    enableDataViewChange: true,
     optionsTemplate: MetricVisOptions,
     schemas: [
       {
