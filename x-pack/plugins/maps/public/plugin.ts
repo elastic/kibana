@@ -74,7 +74,7 @@ import { APP_ICON_SOLUTION, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/cons
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { setIsCloudEnabled, setMapAppConfig, setStartServices } from './kibana_services';
-import { MapInspectorView } from './inspector/map_inspector_view';
+import { MapInspectorView, VectorTileInspectorView } from './inspector';
 
 import { setupLensChoroplethChart } from './lens';
 
@@ -89,7 +89,7 @@ export interface MapsPluginSetupDependencies {
   share: SharePluginSetup;
   licensing: LicensingPluginSetup;
   usageCollection?: UsageCollectionSetup;
-  screenshotMode: ScreenshotModePluginSetup;
+  screenshotMode?: ScreenshotModePluginSetup;
 }
 
 export interface MapsPluginStartDependencies {
@@ -112,6 +112,7 @@ export interface MapsPluginStartDependencies {
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   mapsEms: MapsEmsPluginPublicStart;
+  screenshotMode?: ScreenshotModePluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
@@ -151,7 +152,7 @@ export class MapsPlugin
 
       // Override this when we know we are taking a screenshot (i.e. no user interaction)
       // to avoid a blank-canvas issue when rendering maps on a PDF
-      preserveDrawingBuffer: plugins.screenshotMode.isScreenshotMode()
+      preserveDrawingBuffer: plugins.screenshotMode?.isScreenshotMode()
         ? true
         : config.preserveDrawingBuffer,
     });
@@ -172,6 +173,7 @@ export class MapsPlugin
       })
     );
 
+    plugins.inspector.registerView(VectorTileInspectorView);
     plugins.inspector.registerView(MapInspectorView);
     if (plugins.home) {
       plugins.home.featureCatalogue.register(featureCatalogueEntry);
