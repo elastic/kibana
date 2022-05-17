@@ -12,9 +12,11 @@ import type { AppUnmount } from '@kbn/core/public';
 import { AppNavLinkStatus } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 
+import { UserAPIClient } from '../management';
 import { securityMock } from '../mocks';
 import { accountManagementApp } from './account_management_app';
 import * as AccountManagementPageImports from './account_management_page';
+import { UserProfileAPIClient } from './user_profile';
 
 const AccountManagementPageMock = jest
   .spyOn(AccountManagementPageImports, 'AccountManagementPage')
@@ -23,12 +25,13 @@ const AccountManagementPageMock = jest
 describe('accountManagementApp', () => {
   it('should register application', () => {
     const { authc } = securityMock.createSetup();
-    const { application, getStartServices } = coreMock.createSetup();
+    const { application, getStartServices, http } = coreMock.createSetup();
 
     accountManagementApp.create({
       application,
       getStartServices,
       authc,
+      apiClients: { userProfiles: new UserProfileAPIClient(http), users: new UserAPIClient(http) },
     });
 
     expect(application.register).toHaveBeenCalledTimes(1);
@@ -44,13 +47,14 @@ describe('accountManagementApp', () => {
 
   it('should render AccountManagementPage on mount', async () => {
     const { authc } = securityMock.createSetup();
-    const { application, getStartServices } = coreMock.createSetup();
+    const { application, getStartServices, http } = coreMock.createSetup();
     getStartServices.mockResolvedValue([coreMock.createStart(), {}, {}]);
 
     accountManagementApp.create({
       application,
       authc,
       getStartServices,
+      apiClients: { userProfiles: new UserProfileAPIClient(http), users: new UserAPIClient(http) },
     });
 
     const [[{ mount }]] = application.register.mock.calls;

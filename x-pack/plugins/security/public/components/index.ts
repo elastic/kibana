@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export { ApiClientsProvider, useApiClients, ApiClients } from './api_clients_provider';
+export { ApiClientsProvider, useApiClients } from './api_clients_provider';
+export type { ApiClients } from './api_clients_provider';
 export {
   AuthenticationProvider,
   useAuthentication,

@@ -432,7 +432,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                               }
                               size="xs"
                               flush="right"
-                              style={{ height: 18 }}
+                              style={{ height: euiTheme.base }}
                             >
                               <FormattedMessage
                                 id="xpack.security.accountManagement.userProfile.randomizeButton"

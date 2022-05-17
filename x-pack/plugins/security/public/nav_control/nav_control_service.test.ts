@@ -7,13 +7,16 @@
 
 import { BehaviorSubject } from 'rxjs';
 
+import type { httpServiceMock } from '@kbn/core/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { ILicense } from '@kbn/licensing-plugin/public';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { SecurityLicenseService } from '../../common/licensing';
+import { UserProfileAPIClient } from '../account_management';
 import { authenticationMock } from '../authentication/index.mock';
 import * as UseCurrentUserImports from '../components/use_current_user';
+import { UserAPIClient } from '../management';
 import { SecurityNavControlService } from './nav_control_service';
 
 const useUserProfileMock = jest.spyOn(UseCurrentUserImports, 'useUserProfile');
@@ -42,17 +45,23 @@ const validLicense = {
 
 const authc = authenticationMock.createStart();
 
+const mockApiClients = (http: ReturnType<typeof httpServiceMock.createStartContract>) => ({
+  userProfiles: new UserProfileAPIClient(http),
+  users: new UserAPIClient(http),
+});
+
 describe('SecurityNavControlService', () => {
   it('can render and cleanup the control via the mount() function', async () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
+    const coreStart = coreMock.createStart();
 
     const navControlService = new SecurityNavControlService();
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       logoutUrl: '/some/logout/url',
+      apiClients: mockApiClients(coreStart.http),
     });
 
-    const coreStart = coreMock.createStart();
     coreStart.chrome.navControls.registerRight = jest.fn();
 
     navControlService.start({ core: coreStart, authc });
@@ -111,14 +120,15 @@ describe('SecurityNavControlService', () => {
 
   it('should register the nav control once the license supports it', () => {
     const license$ = new BehaviorSubject<ILicense>({} as ILicense);
+    const coreStart = coreMock.createStart();
 
     const navControlService = new SecurityNavControlService();
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       logoutUrl: '/some/logout/url',
+      apiClients: mockApiClients(coreStart.http),
     });
 
-    const coreStart = coreMock.createStart();
     navControlService.start({ core: coreStart, authc });
 
     expect(coreStart.chrome.navControls.registerRight).not.toHaveBeenCalled();
@@ -130,14 +140,15 @@ describe('SecurityNavControlService', () => {
 
   it('should not register the nav control for anonymous paths', () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
+    const coreStart = coreMock.createStart();
 
     const navControlService = new SecurityNavControlService();
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       logoutUrl: '/some/logout/url',
+      apiClients: mockApiClients(coreStart.http),
     });
 
-    const coreStart = coreMock.createStart();
     coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(true);
     navControlService.start({ core: coreStart, authc });
 
@@ -146,14 +157,15 @@ describe('SecurityNavControlService', () => {
 
   it('should only register the nav control once', () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
+    const coreStart = coreMock.createStart();
 
     const navControlService = new SecurityNavControlService();
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       logoutUrl: '/some/logout/url',
+      apiClients: mockApiClients(coreStart.http),
     });
 
-    const coreStart = coreMock.createStart();
     navControlService.start({ core: coreStart, authc });
 
     expect(coreStart.chrome.navControls.registerRight).toHaveBeenCalledTimes(1);
@@ -167,14 +179,15 @@ describe('SecurityNavControlService', () => {
 
   it('should allow for re-registration if the service is restarted', () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
+    const coreStart = coreMock.createStart();
 
     const navControlService = new SecurityNavControlService();
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       logoutUrl: '/some/logout/url',
+      apiClients: mockApiClients(coreStart.http),
     });
 
-    const coreStart = coreMock.createStart();
     navControlService.start({ core: coreStart, authc });
 
     expect(coreStart.chrome.navControls.registerRight).toHaveBeenCalledTimes(1);
@@ -188,12 +201,14 @@ describe('SecurityNavControlService', () => {
   describe(`#start`, () => {
     let navControlService: SecurityNavControlService;
     beforeEach(() => {
+      const coreSetup = coreMock.createSetup();
       const license$ = new BehaviorSubject<ILicense>({} as ILicense);
 
       navControlService = new SecurityNavControlService();
       navControlService.setup({
         securityLicense: new SecurityLicenseService().setup({ license$ }).license,
         logoutUrl: '/some/logout/url',
+        apiClients: mockApiClients(coreSetup.http),
       });
     });
 
