@@ -71,7 +71,13 @@ export const getFindingsByResourceAggQuery = ({
             bucket_sort: {
               from,
               size,
-              sort: [{ 'failed_findings>_count': { order: 'desc' } }],
+              sort: [
+                {
+                  'failed_findings>_count': { order: 'desc' },
+                  _count: { order: 'desc' },
+                  _key: { order: 'asc' },
+                },
+              ],
             },
           },
         },
