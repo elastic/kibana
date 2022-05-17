@@ -49,31 +49,14 @@ export const latestFindingsMapping: MappingTypeMapping = {
     resource: {
       properties: {
         type: {
-          type: 'text',
-          fields: {
-            keyword: {
-              ignore_above: 256,
-              type: 'keyword',
-            },
-          },
+          type: 'keyword',
+          ignore_above: 256,
         },
         id: {
           type: 'text',
-          fields: {
-            keyword: {
-              ignore_above: 256,
-              type: 'keyword',
-            },
-          },
         },
         name: {
           type: 'text',
-          fields: {
-            keyword: {
-              ignore_above: 1024,
-              type: 'keyword',
-            },
-          },
         },
         sub_type: {
           type: 'text',
