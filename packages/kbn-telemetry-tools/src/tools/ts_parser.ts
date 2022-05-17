@@ -7,7 +7,7 @@
  */
 
 import * as ts from 'typescript';
-import { createFailError } from '@kbn/dev-utils';
+import { createFailError } from '@kbn/dev-cli-errors';
 import * as path from 'path';
 import { getProperty, getPropertyValue } from './utils';
 import { getDescriptor, Descriptor } from './serializer';
