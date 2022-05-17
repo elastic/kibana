@@ -19,7 +19,7 @@ export async function getConfigsAppliedToAgentsThroughFleet({
 
   const params = {
     index: indices.metric,
-    size: 200,
+    size: 0,
     body: {
       query: {
         bool: {
@@ -36,6 +36,7 @@ export async function getConfigsAppliedToAgentsThroughFleet({
         config_by_etag: {
           terms: {
             field: 'labels.etag',
+            size: 200,
           },
         },
       },
