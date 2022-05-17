@@ -66,6 +66,8 @@ const normalizeErrorResponse = (errors: BulkActionError[]): NormalizedRuleError[
     let message;
     let statusCode;
     let rule;
+    // transform different error types (PromisePoolError<string> | PromisePoolError<RuleAlertType> | BulkEditError)
+    // to one common used in NormalizedRuleError
     if ('rule' in errorObj) {
       rule = errorObj.rule;
       message = errorObj.message;
