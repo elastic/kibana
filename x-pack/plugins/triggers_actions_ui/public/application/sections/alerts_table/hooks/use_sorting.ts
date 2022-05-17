@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EuiDataGridSorting } from '@elastic/eui';
 import { useCallback, useState } from 'react';
 
 import { DefaultSort } from './constants';
 
-const formatGridColumns = (cols: estypes.SortCombinations[]): EuiDataGridSorting['columns'] => {
+const formatGridColumns = (cols: SortCombinations[]): EuiDataGridSorting['columns'] => {
   const colsSorting: EuiDataGridSorting['columns'] = [];
   cols.forEach((col) => {
     Object.entries(col).forEach(([field, oSort]) => {
@@ -23,7 +23,7 @@ const formatGridColumns = (cols: estypes.SortCombinations[]): EuiDataGridSorting
 
 export type UseSorting = (
   onSortChange: (sort: EuiDataGridSorting['columns']) => void,
-  defaultSort: estypes.SortCombinations[]
+  defaultSort: SortCombinations[]
 ) => {
   sortingColumns: EuiDataGridSorting['columns'];
   onSort: (newSort: EuiDataGridSorting['columns']) => void;
@@ -31,7 +31,7 @@ export type UseSorting = (
 
 export function useSorting(
   onSortChange: (sort: EuiDataGridSorting['columns']) => void,
-  defaultSort: estypes.SortCombinations[] = DefaultSort
+  defaultSort: SortCombinations[] = DefaultSort
 ) {
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>(
     formatGridColumns(defaultSort)
