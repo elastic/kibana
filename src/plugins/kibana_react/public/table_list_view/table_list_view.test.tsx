@@ -7,13 +7,23 @@
  */
 
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import { shallowWithIntl, registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { ToastsStart } from '@kbn/core/public';
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { themeServiceMock, applicationServiceMock } from '@kbn/core/public/mocks';
-import { TableListView } from './table_list_view';
+import { TableListView, TableListViewProps } from './table_list_view';
 
-const requiredProps = {
+jest.mock('lodash', () => {
+  const original = jest.requireActual('lodash');
+
+  return {
+    ...original,
+    debounce: (handler: () => void) => handler,
+  };
+});
+
+const requiredProps: TableListViewProps<Record<string, unknown>> = {
   entityName: 'test',
   entityNamePlural: 'tests',
   listingLimit: 5,
@@ -30,6 +40,14 @@ const requiredProps = {
 };
 
 describe('TableListView', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   test('render default empty prompt', async () => {
     const component = shallowWithIntl(<TableListView {...requiredProps} />);
 
@@ -80,5 +98,91 @@ describe('TableListView', () => {
     });
 
     expect(component).toMatchSnapshot();
+  });
+
+  describe('default columns', () => {
+    const tableColumns = [
+      {
+        field: 'columnTitle',
+        name: 'Title',
+        sortable: true,
+      },
+      {
+        field: 'description',
+        name: 'Description',
+        sortable: true,
+      },
+    ];
+
+    const hits = [
+      {
+        columnTitle: 'Item 1',
+        description: 'Item 1 description',
+        updatedAt: new Date(new Date().setDate(new Date().getDate() - 2)),
+      },
+      {
+        columnTitle: 'Item 2',
+        description: 'Item 2 description',
+        // This is the latest updated and should come first in the table
+        updatedAt: new Date(new Date().setDate(new Date().getDate() - 1)),
+      },
+    ];
+
+    const findItems = jest.fn(() => Promise.resolve({ total: hits.length, hits }));
+
+    const defaultProps: TableListViewProps<Record<string, unknown>> = {
+      ...requiredProps,
+      tableColumns,
+      findItems,
+      createItem: () => undefined,
+    };
+
+    const setup = registerTestBed(TableListView, { defaultProps });
+
+    test('should add a "Last updated" column if "updatedAt" is provided', async () => {
+      let testBed: TestBed;
+
+      await act(async () => {
+        testBed = await setup();
+      });
+
+      const { component, table } = testBed!;
+      component.update();
+
+      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+
+      expect(tableCellsValues).toEqual([
+        ['Item 2', 'Item 2 description', 'a day ago'], // Comes first as it is the latest updated
+        ['Item 1', 'Item 1 description', '2 days ago'],
+      ]);
+    });
+
+    test('should not add a "Last updated" column if no "updatedAt" is provided', async () => {
+      let testBed: TestBed;
+
+      await act(async () => {
+        testBed = await setup({
+          findItems: jest.fn(() =>
+            Promise.resolve({
+              total: hits.length,
+              hits: hits.map((hit) => {
+                const { updatedAt, ...rest } = hit;
+                return rest;
+              }),
+            })
+          ),
+        });
+      });
+
+      const { component, table } = testBed!;
+      component.update();
+
+      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+
+      expect(tableCellsValues).toEqual([
+        ['Item 1', 'Item 1 description'], // Sorted by title
+        ['Item 2', 'Item 2 description'],
+      ]);
+    });
   });
 });
