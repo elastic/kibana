@@ -7,14 +7,18 @@
 import { ValidFeatureId } from '@kbn/rule-data-utils';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Ecs } from '@kbn/core/server';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-plugin/common';
+import type {
+  QueryDslFieldAndFormat,
+  QueryDslQueryContainer,
+  SortCombinations,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export type RuleRegistrySearchRequest = IEsSearchRequest & {
   featureIds: ValidFeatureId[];
-  fields?: estypes.QueryDslFieldAndFormat[];
-  query?: Pick<estypes.QueryDslQueryContainer, 'bool' | 'ids'>;
-  sort?: estypes.SortCombinations[];
+  fields?: QueryDslFieldAndFormat[];
+  query?: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
+  sort?: SortCombinations[];
   pagination?: RuleRegistrySearchRequestPagination;
 };
 
