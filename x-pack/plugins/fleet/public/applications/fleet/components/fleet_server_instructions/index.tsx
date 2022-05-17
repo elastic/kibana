@@ -49,7 +49,7 @@ const useFleetServerTabs = () => {
     id: 'advanced',
     label: 'Advanced',
     content: <AdvancedTab />,
-    'data-test-subj': 'fleetServerFlyoutTab-advancedStart',
+    'data-test-subj': 'fleetServerFlyoutTab-advanced',
   };
 
   const currentTabContent =
