@@ -8,37 +8,48 @@
 
 import React from 'react';
 import type { LegendAction, XYChartSeriesIdentifier } from '@elastic/charts';
+import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import type { FilterEvent } from '../types';
-import type { LensMultiTable, DataLayerArgs } from '../../common';
+import type { CommonXYDataLayerConfig } from '../../common';
 import type { FormatFactory } from '../types';
 import { LegendActionPopover } from './legend_action_popover';
+import { DatatablesWithFormatInfo, getFormat } from '../helpers';
 
 export const getLegendAction = (
-  filteredLayers: DataLayerArgs[],
-  tables: LensMultiTable['tables'],
+  dataLayers: CommonXYDataLayerConfig[],
   onFilter: (data: FilterEvent['data']) => void,
   formatFactory: FormatFactory,
-  layersAlreadyFormatted: Record<string, boolean>
+  formattedDatatables: DatatablesWithFormatInfo
 ): LegendAction =>
   React.memo(({ series: [xySeries] }) => {
     const series = xySeries as XYChartSeriesIdentifier;
-    const layer = filteredLayers.find((l) =>
-      series.seriesKeys.some((key: string | number) => l.accessors.includes(key.toString()))
+    const layerIndex = dataLayers.findIndex((l) =>
+      series.seriesKeys.some((key: string | number) =>
+        l.accessors.some(
+          (accessor) => getAccessorByDimension(accessor, l.table.columns) === key.toString()
+        )
+      )
     );
 
+    if (layerIndex === -1) {
+      return null;
+    }
+
+    const layer = dataLayers[layerIndex];
     if (!layer || !layer.splitAccessor) {
       return null;
     }
 
     const splitLabel = series.seriesKeys[0] as string;
-    const accessor = layer.splitAccessor;
 
-    const table = tables[layer.layerId];
-    const splitColumn = table.columns.find(({ id }) => id === layer.splitAccessor);
-    const formatter = formatFactory(splitColumn && splitColumn.meta?.params);
+    const { table } = layer;
+    const accessor = getAccessorByDimension(layer.splitAccessor, table.columns);
+    const formatter = formatFactory(
+      accessor ? getFormat(table.columns, layer.splitAccessor) : undefined
+    );
 
     const rowIndex = table.rows.findIndex((row) => {
-      if (layersAlreadyFormatted[accessor]) {
+      if (formattedDatatables[layer.layerId]?.formattedColumns[accessor]) {
         // stringify the value to compare with the chart value
         return formatter.convert(row[accessor]) === splitLabel;
       }
@@ -63,7 +74,7 @@ export const getLegendAction = (
     return (
       <LegendActionPopover
         label={
-          !layersAlreadyFormatted[accessor] && formatter
+          !formattedDatatables[layer.layerId]?.formattedColumns[accessor] && formatter
             ? formatter.convert(splitLabel)
             : splitLabel
         }

@@ -48,3 +48,41 @@ test('should render popover when appLinks is not empty', () => {
   );
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
+
+test('should render popover with ordered appLinks', () => {
+  const appLinks = [
+    {
+      path: 'app/myAppPath',
+      label: 'myAppLabel[-1]',
+      icon: 'logoKibana',
+      order: -1, // to position it above Dashboard link
+    },
+    {
+      path: 'app/myAppPath',
+      label: 'myAppLabel',
+      icon: 'logoKibana',
+    },
+    {
+      path: 'app/myAppPath',
+      label: 'myAppLabel[5]',
+      icon: 'logoKibana',
+      order: 5,
+    },
+    {
+      path: 'app/myAppPath',
+      label: 'myAppLabel[3]',
+      icon: 'logoKibana',
+      order: 3,
+    },
+  ];
+
+  const component = shallow(
+    <SampleDataViewDataButton
+      id="ecommerce"
+      name="Sample eCommerce orders"
+      overviewDashboard="722b74f0-b882-11e8-a6d9-e546fe2bba5f"
+      appLinks={appLinks}
+    />
+  );
+  expect(component).toMatchSnapshot(); // eslint-disable-line
+});

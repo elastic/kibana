@@ -78,6 +78,7 @@ interface AlertsTableTGridProps {
   stateStorageKey: string;
   storage: IStorageWrapper;
   setRefetch: (ref: () => void) => void;
+  itemsPerPage?: number;
 }
 
 interface ObservabilityActionsProps extends ActionProps {
@@ -234,8 +235,29 @@ function ObservabilityActions({
             </EuiContextMenuItem>,
           ]
         : []),
+
+      ...[
+        <EuiContextMenuItem
+          key="viewAlertDetails"
+          data-test-subj="viewAlertDetails"
+          onClick={() => {
+            closeActionsPopover();
+            setFlyoutAlert(alert);
+          }}
+        >
+          {translations.alertsTable.viewAlertDetailsButtonText}
+        </EuiContextMenuItem>,
+      ],
     ];
-  }, [casePermissions?.crud, handleAddToExistingCaseClick, handleAddToNewCaseClick, linkToRule]);
+  }, [
+    casePermissions?.crud,
+    handleAddToExistingCaseClick,
+    handleAddToNewCaseClick,
+    linkToRule,
+    alert,
+    setFlyoutAlert,
+    closeActionsPopover,
+  ]);
 
   const actionsToolTip =
     actionsMenuItems.length <= 0
@@ -245,18 +267,6 @@ function ObservabilityActions({
   return (
     <>
       <EuiFlexGroup gutterSize="none" responsive={false}>
-        <EuiFlexItem>
-          <EuiToolTip content={translations.alertsTable.viewDetailsTextLabel}>
-            <EuiButtonIcon
-              size="s"
-              iconType="expand"
-              color="text"
-              onClick={() => setFlyoutAlert(alert)}
-              data-test-subj="openFlyoutButton"
-              aria-label={translations.alertsTable.viewDetailsTextLabel}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
         <EuiFlexItem>
           <EuiToolTip content={translations.alertsTable.viewInAppTextLabel}>
             <EuiButtonIcon
@@ -304,7 +314,16 @@ const FIELDS_WITHOUT_CELL_ACTIONS = [
 ];
 
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
-  const { indexNames, rangeFrom, rangeTo, kuery, setRefetch, stateStorageKey, storage } = props;
+  const {
+    indexNames,
+    rangeFrom,
+    rangeTo,
+    kuery,
+    setRefetch,
+    stateStorageKey,
+    storage,
+    itemsPerPage,
+  } = props;
 
   const {
     timelines,
@@ -400,6 +419,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       filters: [],
       hasAlertsCrudPermissions,
       indexNames,
+      itemsPerPage,
       itemsPerPageOptions: [10, 25, 50],
       loadingText: translations.alertsTable.loadingTextLabel,
       footerText: translations.alertsTable.footerTextLabel,
@@ -450,6 +470,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     deletedEventIds,
     onStateChange,
     tGridState,
+    itemsPerPage,
   ]);
 
   const handleFlyoutClose = () => setFlyoutAlert(undefined);

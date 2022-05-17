@@ -89,17 +89,16 @@ export const ruleRegistrySearchStrategyProvider = (
               );
               return accum;
             }
-
-            return [
-              ...accum,
-              ...ruleDataService
-                .findIndicesByFeature(featureId, Dataset.alerts)
-                .map((indexInfo) => {
-                  return featureId === 'siem'
-                    ? `${indexInfo.baseName}-${space?.id ?? ''}*`
-                    : `${indexInfo.baseName}*`;
-                }),
-            ];
+            const alertIndexInfo = ruleDataService.findIndexByFeature(featureId, Dataset.alerts);
+            if (alertIndexInfo) {
+              return [
+                ...accum,
+                featureId === 'siem'
+                  ? `${alertIndexInfo.baseName}-${space?.id ?? ''}*`
+                  : `${alertIndexInfo.baseName}*`,
+              ];
+            }
+            return accum;
           }, []);
 
           if (indices.length === 0) {

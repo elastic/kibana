@@ -92,15 +92,16 @@ describe('ServiceNow SIR service', () => {
   let service: ExternalServiceSIR;
 
   beforeEach(() => {
-    service = createExternalServiceSIR(
-      {
-        config: { apiUrl: 'https://example.com/' },
+    service = createExternalServiceSIR({
+      credentials: {
+        config: { apiUrl: 'https://example.com/', isOAuth: false },
         secrets: { username: 'admin', password: 'admin' },
       },
       logger,
       configurationUtilities,
-      snExternalServiceConfig['.servicenow-sir']
-    ) as ExternalServiceSIR;
+      serviceConfig: snExternalServiceConfig['.servicenow-sir'],
+      axiosInstance: axios,
+    }) as ExternalServiceSIR;
   });
 
   beforeEach(() => {

@@ -76,14 +76,14 @@ export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"' as const;
 export enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
+  blocklist = 'blocklist',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
-   * The 3 following Cases page names must match `CasesDeepLinkId` in x-pack/plugins/cases/public/common/navigation.ts
+   * All Cases page names must match `CasesDeepLinkId` in x-pack/plugins/cases/public/common/navigation/deep_links.ts
    */
-  blocklist = 'blocklist',
-  case = 'cases',
-  caseConfigure = 'cases_configure',
-  caseCreate = 'cases_create',
+  case = 'cases', // must match `CasesDeepLinkId.cases`
+  caseConfigure = 'cases_configure', // must match `CasesDeepLinkId.casesConfigure`
+  caseCreate = 'cases_create', // must match `CasesDeepLinkId.casesCreate`
   detections = 'detections',
   detectionAndResponse = 'detection_response',
   endpoints = 'endpoints',
@@ -119,8 +119,13 @@ export enum SecurityPageName {
   sessions = 'sessions',
   usersEvents = 'users-events',
   usersExternalAlerts = 'users-external_alerts',
+  threatHuntingLanding = 'threat-hunting',
+  dashboardsLanding = 'dashboards',
 }
 
+export const THREAT_HUNTING_PATH = '/threat_hunting' as const;
+export const DASHBOARDS_PATH = '/dashboards' as const;
+export const MANAGE_PATH = '/manage' as const;
 export const TIMELINES_PATH = '/timelines' as const;
 export const CASES_PATH = '/cases' as const;
 export const OVERVIEW_PATH = '/overview' as const;
@@ -146,6 +151,8 @@ export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}` as const;
 export const APP_LANDING_PATH = `${APP_PATH}${LANDING_PATH}` as const;
 export const APP_DETECTION_RESPONSE_PATH = `${APP_PATH}${DETECTION_RESPONSE_PATH}` as const;
 export const APP_MANAGEMENT_PATH = `${APP_PATH}${MANAGEMENT_PATH}` as const;
+export const APP_THREAT_HUNTING_PATH = `${APP_PATH}${THREAT_HUNTING_PATH}` as const;
+export const APP_DASHBOARDS_PATH = `${APP_PATH}${DASHBOARDS_PATH}` as const;
 
 export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;
 export const APP_RULES_PATH = `${APP_PATH}${RULES_PATH}` as const;
@@ -164,17 +171,25 @@ export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
   `${APP_PATH}${HOST_ISOLATION_EXCEPTIONS_PATH}` as const;
 export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
 
+// cloud logs to exclude from default index pattern
+export const EXCLUDE_ELASTIC_CLOUD_INDICES = ['-*elastic-cloud-logs-*'];
+
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events */
-export const DEFAULT_INDEX_PATTERN = [
+export const INCLUDE_INDEX_PATTERN = [
   'apm-*-transaction*',
-  'traces-apm*',
   'auditbeat-*',
   'endgame-*',
   'filebeat-*',
   'logs-*',
   'packetbeat-*',
+  'traces-apm*',
   'winlogbeat-*',
 ];
+/** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events, and the exclude index pattern */
+export const DEFAULT_INDEX_PATTERN = [...INCLUDE_INDEX_PATTERN, ...EXCLUDE_ELASTIC_CLOUD_INDICES];
+
+/** This Kibana Advanced Setting enables the grouped navigation in Security Solution */
+export const ENABLE_GROUPED_NAVIGATION = 'securitySolution:enableGroupedNav' as const;
 
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
 export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as const;

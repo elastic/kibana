@@ -38,6 +38,10 @@ export function createValueClickAction(
     type: ACTION_VALUE_CLICK,
     id: ACTION_VALUE_CLICK,
     shouldAutoExecute: async () => true,
+    isCompatible: async (context: ValueClickContext) => {
+      const filters = await createFiltersFromValueClickAction(context.data);
+      return filters.length > 0;
+    },
     execute: async (context: ValueClickActionContext) => {
       try {
         const filters: Filter[] = await createFiltersFromValueClickAction(context.data);

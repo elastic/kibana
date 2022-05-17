@@ -34,6 +34,7 @@ import {
   ExpressionAstExpression,
 } from '@kbn/expressions-plugin/public';
 import type { RenderMode } from '@kbn/expressions-plugin';
+import VisualizationError from '../components/visualization_error';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import { Vis, SerializedVis } from '../vis';
 import { getExecutionContext, getExpressions, getTheme, getUiActions } from '../services';
@@ -93,6 +94,7 @@ export class VisualizeEmbeddable
   private filters?: Filter[];
   private searchSessionId?: string;
   private syncColors?: boolean;
+  private syncTooltips?: boolean;
   private embeddableTitle?: string;
   private visCustomizations?: Pick<VisualizeInput, 'vis' | 'table'>;
   private subscriptions: Subscription[] = [];
@@ -135,6 +137,7 @@ export class VisualizeEmbeddable
     this.deps = deps;
     this.timefilter = timefilter;
     this.syncColors = this.input.syncColors;
+    this.syncTooltips = this.input.syncTooltips;
     this.searchSessionId = this.input.searchSessionId;
     this.query = this.input.query;
     this.embeddableTitle = this.getTitle();
@@ -257,6 +260,11 @@ export class VisualizeEmbeddable
       dirty = true;
     }
 
+    if (this.syncTooltips !== this.input.syncTooltips) {
+      this.syncTooltips = this.input.syncTooltips;
+      dirty = true;
+    }
+
     if (this.embeddableTitle !== this.getTitle()) {
       this.embeddableTitle = this.getTitle();
       dirty = true;
@@ -374,6 +382,12 @@ export class VisualizeEmbeddable
     this.subscriptions.push(this.handler.loading$.subscribe(this.onContainerLoading));
     this.subscriptions.push(this.handler.render$.subscribe(this.onContainerRender));
 
+    this.subscriptions.push(
+      this.getOutput$().subscribe(
+        ({ error }) => error && render(<VisualizationError error={error} />, this.domNode)
+      )
+    );
+
     await this.updateHandler();
   }
 
@@ -418,6 +432,7 @@ export class VisualizeEmbeddable
       },
       searchSessionId: this.input.searchSessionId,
       syncColors: this.input.syncColors,
+      syncTooltips: this.input.syncTooltips,
       uiState: this.vis.uiState,
       interactive: !this.input.disableTriggers,
       inspectorAdapters: this.inspectorAdapters,

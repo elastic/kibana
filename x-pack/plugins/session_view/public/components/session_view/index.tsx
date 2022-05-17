@@ -118,12 +118,34 @@ export const SessionView = ({
     hasPreviousPage,
   } = useFetchSessionViewProcessEvents(sessionEntityId, currentJumpToCursor);
 
-  const alertsQuery = useFetchSessionViewAlerts(sessionEntityId);
-  const { data: alerts, error: alertsError, isFetching: alertsFetching } = alertsQuery;
+  const {
+    data: alertsData,
+    fetchNextPage: fetchNextPageAlerts,
+    isFetching: isFetchingAlerts,
+    hasNextPage: hasNextPageAlerts,
+    error: alertsError,
+  } = useFetchSessionViewAlerts(sessionEntityId, investigatedAlertId);
 
-  const hasData = alerts && data && data.pages?.[0].events.length > 0;
+  const alerts = useMemo(() => {
+    let events: ProcessEvent[] = [];
+
+    if (alertsData) {
+      alertsData.pages.forEach((page) => {
+        events = events.concat(page.events);
+      });
+    }
+
+    return events;
+  }, [alertsData]);
+
+  const alertsCount = useMemo(() => {
+    return alertsData?.pages?.[0].total || 0;
+  }, [alertsData]);
+
   const hasError = error || alertsError;
-  const renderIsLoading = (isFetching || alertsFetching) && !(data && alerts);
+  const dataLoaded = data && data.pages?.length > (jumpToCursor ? 1 : 0);
+  const renderIsLoading = isFetching && !dataLoaded;
+  const hasData = dataLoaded && data.pages[0].events.length > 0;
   const { data: newUpdatedAlertsStatus } = useFetchAlertStatus(
     updatedAlertsStatus,
     fetchAlertStatus[0] ?? ''
@@ -200,15 +222,12 @@ export const SessionView = ({
   return (
     <>
       <div css={styles.sessionViewerComponent}>
-        <EuiPanel css={styles.toolBar} hasShadow={false} borderRadius="none">
+        <EuiPanel hasShadow={false} borderRadius="none" className="sessionViewerToolbar">
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiBetaBadge label={BETA} size="s" css={styles.betaBadge} />
             </EuiFlexItem>
-            <EuiFlexItem
-              data-test-subj="sessionView:sessionViewProcessEventsSearch"
-              css={styles.searchBar}
-            >
+            <EuiFlexItem data-test-subj="sessionView:sessionViewProcessEventsSearch">
               <SessionViewSearchBar
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}
@@ -279,7 +298,6 @@ export const SessionView = ({
                         key={sessionEntityId + currentJumpToCursor}
                         sessionEntityId={sessionEntityId}
                         data={data.pages}
-                        alerts={alerts}
                         searchQuery={searchQuery}
                         selectedProcess={selectedProcess}
                         onProcessSelected={onProcessSelected}
@@ -310,6 +328,10 @@ export const SessionView = ({
                 >
                   <SessionViewDetailPanel
                     alerts={alerts}
+                    alertsCount={alertsCount}
+                    isFetchingAlerts={isFetchingAlerts}
+                    hasNextPageAlerts={hasNextPageAlerts}
+                    fetchNextPageAlerts={fetchNextPageAlerts}
                     investigatedAlertId={investigatedAlertId}
                     selectedProcess={selectedProcess}
                     onJumpToEvent={onJumpToEvent}

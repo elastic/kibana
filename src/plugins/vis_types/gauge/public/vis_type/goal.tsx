@@ -69,6 +69,7 @@ export const getGoalVisTypeDefinition = (
     },
   },
   editorConfig: {
+    enableDataViewChange: true,
     optionsTemplate: getGaugeOptions(props),
     schemas: [
       {

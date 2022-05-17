@@ -60,7 +60,7 @@ describe('T1 Analyst - READ + runSavedQueries ', () => {
     cy.waitForReact(1000);
     cy.contains('New live query').should('not.be.disabled').click();
     selectAllAgents();
-    getSavedQueriesDropdown().click().type(`${SAVED_QUERY_ID}{downArrow} {enter}`);
+    getSavedQueriesDropdown().type(`${SAVED_QUERY_ID}{downArrow} {enter}`);
     cy.contains('select * from uptime');
     submitQuery();
     checkResults();

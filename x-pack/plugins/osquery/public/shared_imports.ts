@@ -23,6 +23,8 @@ export {
   Form,
   FormDataProvider,
   UseArray,
+  ArrayItem,
+  FormArrayField,
   UseField,
   UseMultiFields,
   useForm,

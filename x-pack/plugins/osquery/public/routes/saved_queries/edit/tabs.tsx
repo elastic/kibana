@@ -17,7 +17,7 @@ interface ResultTabsProps {
   agentIds?: string[];
   startDate?: string;
   endDate?: string;
-  hideFullscreen?: true;
+  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
 }
 
 const ResultTabsComponent: React.FC<ResultTabsProps> = ({
@@ -25,7 +25,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   agentIds,
   endDate,
   startDate,
-  hideFullscreen,
+  addToTimeline,
 }) => {
   const tabs = useMemo(
     () => [
@@ -40,7 +40,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
               agentIds={agentIds}
               startDate={startDate}
               endDate={endDate}
-              hideFullscreen={hideFullscreen}
+              addToTimeline={addToTimeline}
             />
           </>
         ),
@@ -60,7 +60,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
         ),
       },
     ],
-    [actionId, agentIds, endDate, startDate, hideFullscreen]
+    [actionId, agentIds, endDate, startDate, addToTimeline]
   );
 
   return (

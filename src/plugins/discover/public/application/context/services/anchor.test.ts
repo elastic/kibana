@@ -27,12 +27,12 @@ describe('context app', function () {
       searchSourceStub = createSearchSourceStub([{ _id: 'hit1' }] as unknown as EsHitRecordList);
     });
 
-    it('should use the `fetch` method of the SearchSource', function () {
+    it('should use the `fetch$` method of the SearchSource', function () {
       return fetchAnchor('id', indexPattern, searchSourceStub, [
         { '@timestamp': SortDirection.desc },
         { _doc: SortDirection.desc },
       ]).then(() => {
-        expect(searchSourceStub.fetch.calledOnce).toBe(true);
+        expect(searchSourceStub.fetch$.calledOnce).toBe(true);
       });
     });
 
@@ -142,7 +142,7 @@ describe('context app', function () {
     });
 
     it('should reject with an error when no hits were found', function () {
-      searchSourceStub._stubHits = [];
+      searchSourceStub = createSearchSourceStub([] as unknown as EsHitRecordList);
 
       return fetchAnchor('id', indexPattern, searchSourceStub, [
         { '@timestamp': SortDirection.desc },
@@ -158,7 +158,10 @@ describe('context app', function () {
     });
 
     it('should return the first hit after adding an anchor marker', function () {
-      searchSourceStub._stubHits = [{ property1: 'value1' }, { property2: 'value2' }];
+      searchSourceStub = createSearchSourceStub([
+        { property1: 'value1' },
+        { property2: 'value2' },
+      ] as unknown as EsHitRecordList);
 
       return fetchAnchor('id', indexPattern, searchSourceStub, [
         { '@timestamp': SortDirection.desc },

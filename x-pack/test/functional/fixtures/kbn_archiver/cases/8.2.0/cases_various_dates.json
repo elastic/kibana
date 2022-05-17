@@ -11,7 +11,7 @@
     "created_by": {
       "email": "",
       "full_name": "",
-      "username": "cnasikas"
+      "username": "elastic"
     },
     "description": "test",
     "external_service": null,
@@ -26,7 +26,7 @@
     "updated_by": {
       "email": "",
       "full_name": "",
-      "username": "cnasikas"
+      "username": "elastic"
     }
   },
   "coreMigrationVersion": "8.2.0",
@@ -53,7 +53,7 @@
     "created_by": {
       "email": "",
       "full_name": "",
-      "username": "cnasikas"
+      "username": "elastic"
     },
     "description": "test 2",
     "external_service": null,
@@ -68,7 +68,7 @@
     "updated_by": {
       "email": "",
       "full_name": "",
-      "username": "cnasikas"
+      "username": "elastic"
     }
   },
   "coreMigrationVersion": "8.2.0",
@@ -95,7 +95,7 @@
     "created_by": {
       "email": "",
       "full_name": "",
-      "username": "cnasikas"
+      "username": "elastic"
     },
     "description": "test 2",
     "external_service": null,
@@ -110,7 +110,7 @@
     "updated_by": {
       "email": "",
       "full_name": "",
-      "username": "cnasikas"
+      "username": "elastic"
     }
   },
   "coreMigrationVersion": "8.2.0",
