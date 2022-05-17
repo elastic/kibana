@@ -12,8 +12,10 @@ import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strat
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import {
-  AlertsField, AlertsTableConfigurationRegistry, AlertsTableFlyoutState,
-  AlertsTableFlyoutBaseProps } from '../../../types';
+  AlertsField,
+  AlertsTableConfigurationRegistry,
+  AlertsTableFlyoutBaseProps,
+} from '../../../types';
 import { PLUGIN_ID } from '../../../common/constants';
 import { TypeRegistry } from '../../type_registry';
 import AlertsTableState from './alerts_table_state';
@@ -60,7 +62,12 @@ const hasMock = jest.fn().mockImplementation((plugin: string) => {
 });
 const getMock = jest.fn().mockImplementation((plugin: string) => {
   if (plugin === PLUGIN_ID) {
-    return { columns, sort: DefaultSort, externalFlyout: { body: FlyoutBody }, internalFlyout: { body: FlyoutBody } };
+    return {
+      columns,
+      sort: DefaultSort,
+      externalFlyout: { body: FlyoutBody },
+      internalFlyout: { body: FlyoutBody },
+    };
   }
   return {};
 });
