@@ -6,8 +6,7 @@
  */
 
 import React, { memo } from 'react';
-// eslint-disable-next-line no-restricted-imports
-import Semver from 'semver';
+import semverLt from 'semver/functions/lt';
 
 interface Props {
   version?: string;
@@ -20,7 +19,7 @@ export const RuleAlertCount = memo((props: Props) => {
   if (version) {
     try {
       const intValue = parseInt(value, 10);
-      if (intValue === 0 && Semver.lt(version, '8.3.0')) {
+      if (intValue === 0 && semverLt(version, '8.3.0')) {
         return <>{'--'}</>;
       }
     } catch (err) {
