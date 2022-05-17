@@ -9,14 +9,14 @@
 import { search } from '@kbn/data-plugin/public';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { XYChartProps } from '../../common';
+import { isTimeChart } from '../../common/helpers';
 import { getFilteredLayers } from './layers';
-import { isDataLayer } from './visualization';
-import { isTimeChart } from './state';
+import { isDataLayer, getDataLayers } from './visualization';
 
 export function calculateMinInterval({ args: { layers, minTimeBarInterval } }: XYChartProps) {
   const filteredLayers = getFilteredLayers(layers);
   if (filteredLayers.length === 0) return;
-  const isTimeViz = isTimeChart(filteredLayers);
+  const isTimeViz = isTimeChart(getDataLayers(filteredLayers));
   const xColumn =
     isDataLayer(filteredLayers[0]) &&
     filteredLayers[0].xAccessor &&

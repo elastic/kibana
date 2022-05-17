@@ -13,6 +13,6 @@ export function isTimeChart(layers: CommonXYDataLayerConfigResult[]) {
   return layers.every<CommonXYDataLayerConfigResult>(
     (l): l is CommonXYDataLayerConfigResult =>
       l.table.columns.find((col) => col.id === l.xAccessor)?.meta.type === 'date' &&
-      l.xScaleType === XScaleTypes.TIME
+      (!l.xScaleType || l.xScaleType === XScaleTypes.TIME)
   );
 }

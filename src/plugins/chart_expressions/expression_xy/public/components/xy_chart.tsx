@@ -43,6 +43,7 @@ import {
 } from '@kbn/visualizations-plugin/common/constants';
 import type { FilterEvent, BrushEvent, FormatFactory } from '../types';
 import type { CommonXYDataLayerConfig, SeriesType, XYChartProps } from '../../common/types';
+import { isTimeChart } from '../../common/helpers';
 import {
   isHorizontalChart,
   getAnnotationsLayers,
@@ -56,7 +57,6 @@ import {
   getFilteredLayers,
   getReferenceLayers,
   isDataLayer,
-  isTimeChart,
   getAxesConfiguration,
   GroupsConfiguration,
   getLinesCausedPaddings,

@@ -7,7 +7,6 @@
  */
 
 import type { CommonXYLayerConfig, SeriesType, ExtendedYConfig, YConfig } from '../../common';
-import { XScaleTypes } from '../../common/constants';
 import { getDataLayers, isAnnotationsLayer, isDataLayer } from './visualization';
 
 export function isHorizontalSeries(seriesType: SeriesType) {
@@ -24,14 +23,6 @@ export function isStackedChart(seriesType: SeriesType) {
 
 export function isHorizontalChart(layers: CommonXYLayerConfig[]) {
   return getDataLayers(layers).every((l) => isHorizontalSeries(l.seriesType));
-}
-
-export function isTimeChart(layers: CommonXYLayerConfig[]) {
-  return getDataLayers(layers).every(
-    (l) =>
-      l.table.columns.find((col) => col.id === l.xAccessor)?.meta.type === 'date' &&
-      (!l.xScaleType || l.xScaleType === XScaleTypes.TIME)
-  );
 }
 
 export const getSeriesColor = (layer: CommonXYLayerConfig, accessor: string) => {
