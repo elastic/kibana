@@ -391,7 +391,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
 
   const isSingleSelection = useMemo(() => {
     const ecsKey = get(formData, item.path)?.key;
-    if (ecsKey?.length) {
+    if (ecsKey?.length && typeValue === 'value') {
       const ecsKeySchemaOption = find(ECSSchemaOptions, ['label', ecsKey]);
 
       return ecsKeySchemaOption?.value?.normalization !== 'array';

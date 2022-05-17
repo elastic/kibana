@@ -43,7 +43,8 @@ describe('ALL - Live Query', () => {
     const cmd = Cypress.platform === 'darwin' ? '{meta}{enter}' : '{ctrl}{enter}';
     cy.contains('New live query').click();
     selectAllAgents();
-    inputQuery('select * from uptime;');
+    inputQuery('select * from uptime; ');
+    cy.wait(500);
     // checking submit by clicking cmd+enter
     inputQuery(cmd);
     checkResults();
@@ -78,9 +79,9 @@ describe('ALL - Live Query', () => {
   it('should run customized saved query', () => {
     cy.contains('New live query').click();
     selectAllAgents();
-    cy.react('SavedQueriesDropdownComponent').click();
+    cy.react('SavedQueriesDropdown').click();
     cy.contains('MULTIPLE_MAPPINGS').click();
-    cy.getReact('SavedQueriesDropdownComponent').getCurrentState().should('have.length', 1);
+    cy.getReact('SavedQueriesDropdown').getCurrentState().should('have.length', 1);
     clearInputQuery();
     inputQuery('select * from users{enter}');
     submitQuery();

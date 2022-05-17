@@ -40,11 +40,22 @@ interface SavedQueriesDropdownProps {
   ) => void;
 }
 
+interface SelectedOption {
+  label: string;
+  value: {
+    savedQueryId: string;
+    id: string;
+    description: string;
+    query: string;
+    ecs_mapping: Record<string, unknown>;
+  }
+}
+
 const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
   disabled,
   onChange,
 }) => {
-  const [selectedOptions, setSelectedOptions] = useState([]);
+  const [selectedOptions, setSelectedOptions] = useState<SelectedOption[]>([]);
 
   const [{ savedQueryId }] = useFormData();
 
@@ -116,9 +127,7 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
 
   useEffect(() => {
     if (
-      selectedOptions.length &&
-      // @ts-expect-error update types
-      selectedOptions[0].value.savedQueryId !== savedQueryId
+      selectedOptions.length && selectedOptions[0].value.savedQueryId !== savedQueryId
     ) {
       setSelectedOptions([]);
     }
