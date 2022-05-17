@@ -13,14 +13,13 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { Filter, Query, DataViewBase } from '@kbn/es-query';
 
 import type {
+  LensPublicStart,
   LensSavedObjectAttributes,
   FieldBasedIndexPatternColumn,
   XYDataLayerConfig,
   IndexPatternPersistedState,
-  GenericIndexPatternColumn,
   IndexPatternLayer,
-  TermsIndexPatternColumn,
-  SeriesType,
+  XYLayerConfig,
 } from '@kbn/lens-plugin/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 
@@ -28,22 +27,29 @@ import type { JobCreatorType } from '../common/job_creator';
 import { createEmptyJob, createEmptyDatafeed } from '../common/job_creator/util/default_configs';
 import { stashJobForCloning } from '../common/job_creator/util/general';
 import { CREATED_BY_LABEL, DEFAULT_BUCKET_SPAN } from '../../../../../common/constants/new_job';
-import { createQueries, getDefaultQuery } from '../utils/new_job_utils';
-import { lensOperationToMlFunction } from './utils';
+import { ErrorType } from '../../../../../common/util/errors';
+import { createQueries } from '../utils/new_job_utils';
+import {
+  lensOperationToMlFunction,
+  getVisTypeFactory,
+  isCompatibleLayer,
+  hasIncompatibleProperties,
+  hasSourceField,
+  isTermsField,
+  isStringField,
+} from './utils';
 
-const COMPATIBLE_SERIES_TYPES: SeriesType[] = [
-  'line',
-  'bar',
-  'bar_stacked',
-  'bar_percentage_stacked',
-  'bar_horizontal',
-  'bar_horizontal_stacked',
-  'area',
-  'area_stacked',
-  'area_percentage_stacked',
-];
+type VisualizationType = Awaited<ReturnType<LensPublicStart['getXyVisTypes']>>[number];
 
-const COMPATIBLE_LAYER_TYPE: XYDataLayerConfig['layerType'] = 'data';
+export interface LayerResult {
+  id: string;
+  layerType: string;
+  label: string;
+  icon: VisualizationType['icon'];
+  compatible: boolean;
+  jobWizardType: CREATED_BY_LABEL | null;
+  error?: ErrorType;
+}
 
 export async function canCreateAndStashADJob(
   vis: LensSavedObjectAttributes,
@@ -53,7 +59,8 @@ export async function canCreateAndStashADJob(
   filters: Filter[],
   dataViewClient: DataViewsContract,
   kibanaConfig: IUiSettingsClient,
-  timeFilter: TimefilterContract
+  timeFilter: TimefilterContract,
+  layerIndex: number | undefined
 ) {
   try {
     const { jobConfig, datafeedConfig, createdBy } = await createADJobFromLensSavedObject(
@@ -61,7 +68,8 @@ export async function canCreateAndStashADJob(
       query,
       filters,
       dataViewClient,
-      kibanaConfig
+      kibanaConfig,
+      layerIndex
     );
 
     let start: number | undefined;
@@ -108,27 +116,48 @@ export async function canCreateAndStashADJob(
     console.error(error);
   }
 }
-
-export async function canCreateADJob(
+export async function getLayers(
   vis: LensSavedObjectAttributes,
-  query: Query | undefined,
-  filters: Filter[] | undefined,
   dataViewClient: DataViewsContract,
-  kibanaConfig: IUiSettingsClient
-) {
-  try {
-    const jobItems = await createADJobFromLensSavedObject(
-      vis,
-      query ?? getDefaultQuery(),
-      filters ?? [],
-      dataViewClient,
-      kibanaConfig
-    );
+  lens: LensPublicStart
+): Promise<LayerResult[]> {
+  const visualization = vis.state.visualization as { layers: XYLayerConfig[] };
+  const getVisType = await getVisTypeFactory(lens);
 
-    return !!jobItems;
-  } catch (error) {
-    return false;
-  }
+  const layers: LayerResult[] = await Promise.all(
+    visualization.layers.map(async (layer) => {
+      const { icon, label } = getVisType(layer);
+      try {
+        const { fields, splitField } = await extractFields(layer, vis, dataViewClient);
+        const detectors = createDetectors(fields, splitField);
+        const createdBy =
+          splitField || detectors.length > 1
+            ? CREATED_BY_LABEL.MULTI_METRIC
+            : CREATED_BY_LABEL.SINGLE_METRIC;
+
+        return {
+          id: layer.layerId,
+          layerType: layer.layerType,
+          label,
+          icon,
+          jobWizardType: createdBy,
+          compatible: true,
+        };
+      } catch (error) {
+        return {
+          id: layer.layerId,
+          layerType: layer.layerType,
+          label,
+          icon,
+          compatible: false,
+          jobWizardType: null,
+          error,
+        };
+      }
+    })
+  );
+
+  return layers;
 }
 
 async function createADJobFromLensSavedObject(
@@ -136,9 +165,21 @@ async function createADJobFromLensSavedObject(
   query: Query,
   filters: Filter[],
   dataViewClient: DataViewsContract,
-  kibanaConfig: IUiSettingsClient
+  kibanaConfig: IUiSettingsClient,
+  layerIndex?: number
 ) {
-  const { fields, timeField, splitField, dataView } = await extractFields(vis, dataViewClient);
+  const visualization = vis.state.visualization as { layers: XYDataLayerConfig[] };
+
+  const compatibleLayers = visualization.layers.filter(isCompatibleLayer);
+
+  const selectedLayer =
+    layerIndex !== undefined ? visualization.layers[layerIndex] : compatibleLayers[0];
+
+  const { fields, timeField, splitField, dataView } = await extractFields(
+    selectedLayer,
+    vis,
+    dataViewClient
+  );
 
   const jobConfig = createEmptyJob();
   const datafeedConfig = createEmptyDatafeed(dataView.title);
@@ -172,19 +213,18 @@ async function createADJobFromLensSavedObject(
   };
 }
 
-async function extractFields(vis: LensSavedObjectAttributes, dataViewClient: DataViewsContract) {
-  const visualization = vis.state.visualization as { layers: XYDataLayerConfig[] };
+async function extractFields(
+  layer: XYLayerConfig,
+  vis: LensSavedObjectAttributes,
+  dataViewClient: DataViewsContract
+) {
+  if (!isCompatibleLayer(layer)) {
+    throw new Error('Layer is incompatible. Only chart layers can be used.');
+  }
+
   const indexpattern = vis.state.datasourceStates.indexpattern as IndexPatternPersistedState;
-
-  const compatibleLayers = visualization.layers.filter(
-    ({ layerType, seriesType }) =>
-      layerType === COMPATIBLE_LAYER_TYPE && COMPATIBLE_SERIES_TYPES.includes(seriesType)
-  );
-
-  const [firstCompatibleLayer] = compatibleLayers;
-
   const compatibleIndexPatternLayer = Object.entries(indexpattern.layers).find(
-    ([id]) => firstCompatibleLayer.layerId === id
+    ([id]) => layer.layerId === id
   );
   if (compatibleIndexPatternLayer === undefined) {
     throw Error(
@@ -192,19 +232,17 @@ async function extractFields(vis: LensSavedObjectAttributes, dataViewClient: Dat
     );
   }
 
-  const [layerId, layer] = compatibleIndexPatternLayer;
+  const [layerId, columnsLayer] = compatibleIndexPatternLayer;
 
-  const columns = getColumns(layer);
+  const columns = getColumns(columnsLayer);
   const timeField = Object.values(columns).find(({ dataType }) => dataType === 'date');
   if (timeField === undefined) {
     throw Error('Cannot find a date field.');
   }
 
-  const fields = firstCompatibleLayer.accessors.map((a) => columns[a]);
+  const fields = layer.accessors.map((a) => columns[a]);
 
-  const splitField = firstCompatibleLayer.splitAccessor
-    ? columns[firstCompatibleLayer.splitAccessor]
-    : null;
+  const splitField = layer.splitAccessor ? columns[layer.splitAccessor] : null;
 
   if (
     splitField !== null &&
@@ -273,22 +311,6 @@ function getColumns(layer: Omit<IndexPatternLayer, 'indexPatternId'>) {
     throw Error('Columns contain settings which are incompatible with ML detectors');
   }
   return columns as Record<string, FieldBasedIndexPatternColumn>;
-}
-
-function hasSourceField(column: GenericIndexPatternColumn): column is FieldBasedIndexPatternColumn {
-  return 'sourceField' in column;
-}
-
-function isTermsField(column: GenericIndexPatternColumn): column is TermsIndexPatternColumn {
-  return column.operationType === 'terms' && 'params' in column;
-}
-
-function isStringField(column: GenericIndexPatternColumn) {
-  return column.dataType === 'string';
-}
-
-function hasIncompatibleProperties(column: GenericIndexPatternColumn) {
-  return 'timeShift' in column || 'filter' in column;
 }
 
 function combineQueriesAndFilters(

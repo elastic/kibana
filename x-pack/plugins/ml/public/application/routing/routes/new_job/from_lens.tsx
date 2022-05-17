@@ -22,12 +22,15 @@ export const fromLensRouteFactory = (): MlRoute => ({
 });
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
-  const { lensId, vis, from, to, query, filters }: Record<string, any> = parse(location.search, {
-    sort: false,
-  });
+  const { lensId, vis, from, to, query, filters, layerIndex }: Record<string, any> = parse(
+    location.search,
+    {
+      sort: false,
+    }
+  );
 
   const { context } = useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {
-    redirect: () => resolver(lensId, vis, from, to, query, filters),
+    redirect: () => resolver(lensId, vis, from, to, query, filters, layerIndex),
   });
   return <PageLoader context={context}>{<Redirect to="/jobs/new_job" />}</PageLoader>;
 };

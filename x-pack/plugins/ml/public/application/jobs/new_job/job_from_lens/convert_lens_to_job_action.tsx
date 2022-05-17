@@ -10,7 +10,11 @@ import type { Embeddable } from '@kbn/lens-plugin/public';
 import { getJobsItemsFromEmbeddable } from './utils';
 import { ML_PAGES, ML_APP_LOCATOR } from '../../../../../common/constants/locator';
 
-export async function convertLensToADJob(embeddable: Embeddable, share: SharePluginStart) {
+export async function convertLensToADJob(
+  embeddable: Embeddable,
+  share: SharePluginStart,
+  layerIndex?: number
+) {
   const { query, filters, to, from, vis } = getJobsItemsFromEmbeddable(embeddable);
   const locator = share.url.locators.get(ML_APP_LOCATOR);
 
@@ -22,6 +26,7 @@ export async function convertLensToADJob(embeddable: Embeddable, share: SharePlu
       to,
       query,
       filters,
+      layerIndex,
     },
   });
 

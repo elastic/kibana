@@ -5,7 +5,8 @@
  * 2.0.
  */
 
+export type { LayerResult } from './create_job';
 export { resolver } from './route_resolver';
-export { canCreateADJob } from './create_job';
+export { getLayers } from './create_job';
 export { convertLensToADJob } from './convert_lens_to_job_action';
-export { getJobsItemsFromEmbeddable } from './utils';
+export { getJobsItemsFromEmbeddable, isCompatibleVisualizationType } from './utils';

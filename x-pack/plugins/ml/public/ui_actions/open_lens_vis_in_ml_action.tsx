@@ -29,12 +29,26 @@ export function createLensVisToADJobAction(getStartServices: MlCoreSetup['getSta
       }
 
       try {
-        const [{ convertLensToADJob }, [, { share }]] = await Promise.all([
-          import('../application/jobs/new_job/job_from_lens'),
-          getStartServices(),
-        ]);
+        // const [{ convertLensToADJob }, [, { share }]] = await Promise.all([
+        //   import('../application/jobs/new_job/job_from_lens'),
+        //   getStartServices(),
+        // ]);
 
-        await convertLensToADJob(embeddable, share);
+        // await convertLensToADJob(embeddable, share);
+        // const [{ convertLensToADJob }, [coreStart]] = await Promise.all([
+        //   import('../application/jobs/new_job/job_from_lens'),
+        //   getStartServices(),
+        // ]);
+
+        // convertLensToADJob(embeddable, coreStart);
+
+        const [{ showLensVisToADJobFlyout }, [coreStart, { share, data, lens }]] =
+          await Promise.all([import('../embeddables/lens'), getStartServices()]);
+        // console.log('execute called');
+        if (lens === undefined) {
+          return;
+        }
+        await showLensVisToADJobFlyout(embeddable, coreStart, share, data, lens);
       } catch (e) {
         return Promise.reject();
       }
@@ -44,13 +58,12 @@ export function createLensVisToADJobAction(getStartServices: MlCoreSetup['getSta
         return false;
       }
 
-      const [{ getJobsItemsFromEmbeddable, canCreateADJob }, [coreStart, pluginsStart]] =
-        await Promise.all([
-          import('../application/jobs/new_job/job_from_lens'),
-          getStartServices(),
-        ]);
-      const { query, filters, vis } = getJobsItemsFromEmbeddable(context.embeddable);
-      return canCreateADJob(vis, query, filters, pluginsStart.data.dataViews, coreStart.uiSettings);
+      const [{ getJobsItemsFromEmbeddable, isCompatibleVisualizationType }] = await Promise.all([
+        import('../application/jobs/new_job/job_from_lens'),
+        getStartServices(),
+      ]);
+      const { vis } = getJobsItemsFromEmbeddable(context.embeddable);
+      return isCompatibleVisualizationType(vis);
     },
   });
 }

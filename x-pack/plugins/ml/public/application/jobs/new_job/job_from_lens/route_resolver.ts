@@ -24,7 +24,8 @@ export async function resolver(
   fromRisonStrong: string,
   toRisonStrong: string,
   queryRisonString: string,
-  filtersRisonString: string
+  filtersRisonString: string,
+  layerIndexRisonString: string
 ) {
   let vis: LensSavedObjectAttributes;
   if (lensSavedObjectId) {
@@ -60,6 +61,12 @@ export async function resolver(
   } catch (error) {
     to = '';
   }
+  let layerIndex: number | undefined;
+  try {
+    layerIndex = rison.decode(layerIndexRisonString) as number;
+  } catch (error) {
+    layerIndex = undefined;
+  }
 
   const dataViewClient = getDataViews();
   const kibanaConfig = getUiSettings();
@@ -73,7 +80,8 @@ export async function resolver(
     filters,
     dataViewClient,
     kibanaConfig,
-    timeFilter
+    timeFilter,
+    layerIndex
   );
 }
 

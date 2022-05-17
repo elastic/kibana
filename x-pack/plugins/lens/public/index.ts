@@ -108,6 +108,9 @@ export type { LensEmbeddableInput, LensSavedObjectAttributes, Embeddable } from 
 
 export { layerTypes } from '../common';
 
+export { LensIconChartBarAnnotations } from './assets/chart_bar_annotations';
+export { LensIconChartBarReferenceLine } from './assets/chart_bar_reference_line';
+
 export type { LensPublicStart, LensPublicSetup } from './plugin';
 
 export const plugin = () => new LensPlugin();

@@ -1,0 +1,19 @@
+// rough duplicates of lens styles
+// so our layer list looks similar
+
+.mlLensToJobFlyoutBody {
+  background-color: lightOrDarkTheme($euiColorLightestShade, $euiColorInk);
+}
+
+.mlLnsLayerPanel__layerHeader {
+  padding: $euiSize;
+  border-bottom: $euiBorderThin;
+}
+
+.mlLnsLayerPanel__settingsStaticHeader {
+  padding-left: $euiSizeXS;
+}
+
+.mlLnsLayerPanel__row {
+  padding: $euiSize;
+}
