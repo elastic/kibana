@@ -2,7 +2,8 @@
 [[pre-configured-connectors]]
 === Preconfigured connectors
 
-You can preconfigure a connector to have all the information it needs prior to startup by adding it to the `kibana.yml` file.
+You can preconfigure a connector to have all the information it needs prior to 
+startup by adding it to the `kibana.yml` file.
 
 Preconfigured connectors offer the following benefits:
 
@@ -18,7 +19,8 @@ NOTE: Preconfigured connectors cannot be used with cases.
 ==== Preconfigured connectors example
 
 This example shows a valid configuration for
-two out-of-the box connectors: <<slack-action-type, Slack>> and <<webhook-action-type, Webhook>>.
+two out-of-the box connectors: <<slack-action-type, Slack>> and 
+<<webhook-action-type, Webhook>>.
 
 ```js
   xpack.actions.preconfigured:
@@ -49,16 +51,18 @@ two out-of-the box connectors: <<slack-action-type, Slack>> and <<webhook-action
 
 [NOTE]
 ==============================================
-Sensitive properties, such as passwords, can also be stored in the <<creating-keystore, {kib} keystore>>.
+Sensitive properties, such as passwords, can also be stored in the 
+<<creating-keystore, {kib} keystore>>.
 ==============================================
 
 [float]
 [[build-in-preconfigured-connectors]]
 ==== Built-in preconfigured connectors
 
-{kib} provides one built-in preconfigured connector:
+{kib} provides the following built-in preconfigured connectors:
 
 * <<preconfigured-connector-alert-history, Alert history preconfigured {es} index connector>>
+* <<elasticcloud, `Elastic-Cloud-SMTP` preconfigured email connector>>
 
 [float]
 [[managing-pre-configured-connectors]]
