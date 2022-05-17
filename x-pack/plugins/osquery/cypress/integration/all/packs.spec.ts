@@ -164,7 +164,7 @@ describe('ALL - Packs', () => {
       cy.contains(/^No items found/).should('exist');
     });
 
-    it.only('enable changing saved queries and ecs_mappings', () => {
+    it('enable changing saved queries and ecs_mappings', () => {
       preparePack(PACK_NAME);
       cy.contains(/^Edit$/).click();
 

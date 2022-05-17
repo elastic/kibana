@@ -147,7 +147,8 @@ const SavedQueriesPageComponent = () => {
   }, []);
 
   const renderDescriptionColumn = useCallback((description?: string) => {
-    const content = description?.length > 80 ? `${description?.substring(0, 80)}...` : description;
+    const content =
+      description && description.length > 80 ? `${description?.substring(0, 80)}...` : description;
 
     return (
       <EuiToolTip content={<EuiFlexItem>{description}</EuiFlexItem>}>
