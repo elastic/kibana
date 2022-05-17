@@ -20,6 +20,5 @@ export const links: LinkItem = {
       defaultMessage: 'Alerts',
     }),
   ],
-  globalSearchEnabled: true,
   globalNavOrder: 9001,
 };

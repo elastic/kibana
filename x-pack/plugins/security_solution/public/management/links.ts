@@ -30,8 +30,8 @@ import {
   RULES,
   TRUSTED_APPLICATIONS,
 } from '../app/translations';
-import { LinkItem } from '../common/links/types';
 import { NavigationCategories } from '../common/components/navigation/types';
+import { LinkItem } from '../common/links/types';
 
 import { IconBlocklist } from './icons/blocklist';
 import { IconEndpoints } from './icons/endpoints';
@@ -41,7 +41,6 @@ import { IconExceptionLists } from './icons/exception_lists';
 import { IconHostIsolation } from './icons/host_isolation';
 import { IconSiemRules } from './icons/siem_rules';
 import { IconTrustedApplications } from './icons/trusted_applications';
-const FIX_ME_TEMPORARY_DESCRIPTION = 'Description here';
 
 export const links: LinkItem = {
   id: SecurityPageName.administration,
@@ -72,7 +71,6 @@ export const links: LinkItem = {
           defaultMessage: 'Rules',
         }),
       ],
-      globalSearchEnabled: true,
     },
     {
       id: SecurityPageName.exceptions,
@@ -88,12 +86,11 @@ export const links: LinkItem = {
           defaultMessage: 'Exception lists',
         }),
       ],
-      globalSearchEnabled: true,
     },
     {
       id: SecurityPageName.endpoints,
       description: i18n.translate('xpack.securitySolution.appLinks.endpointsDescription', {
-        defaultMessage: 'Hosts running endpoint security',
+        defaultMessage: 'Hosts running endpoint security.',
       }),
       landingIcon: IconEndpoints,
       globalNavEnabled: true,
@@ -107,7 +104,7 @@ export const links: LinkItem = {
       title: POLICIES,
       description: i18n.translate('xpack.securitySolution.appLinks.policiesDescription', {
         defaultMessage:
-          'Use policies to customize endpoint and cloud workload protections and other configurations',
+          'Use policies to customize endpoint and cloud workload protections and other configurations.',
       }),
       landingIcon: IconEndpointPolicies,
       path: POLICIES_PATH,
@@ -121,7 +118,7 @@ export const links: LinkItem = {
         'xpack.securitySolution.appLinks.trustedApplicationsDescription',
         {
           defaultMessage:
-            'Improve performance or alleviate conflicts with other applications running on your hosts',
+            'Improve performance or alleviate conflicts with other applications running on your hosts.',
         }
       ),
       landingIcon: IconTrustedApplications,
@@ -132,7 +129,7 @@ export const links: LinkItem = {
       id: SecurityPageName.eventFilters,
       title: EVENT_FILTERS,
       description: i18n.translate('xpack.securitySolution.appLinks.eventFiltersDescription', {
-        defaultMessage: 'Exclude unwanted applications from running on your hosts',
+        defaultMessage: 'Exclude high volume or unwanted events being written into Elasticsearch.',
       }),
       landingIcon: IconEventFilters,
       path: EVENT_FILTERS_PATH,
@@ -142,7 +139,7 @@ export const links: LinkItem = {
       id: SecurityPageName.hostIsolationExceptions,
       title: HOST_ISOLATION_EXCEPTIONS,
       description: i18n.translate('xpack.securitySolution.appLinks.hostIsolationDescription', {
-        defaultMessage: 'Allow isolated hosts to communicate with specific IPs',
+        defaultMessage: 'Allow isolated hosts to communicate with specific IPs.',
       }),
       landingIcon: IconHostIsolation,
       path: HOST_ISOLATION_EXCEPTIONS_PATH,
@@ -151,7 +148,9 @@ export const links: LinkItem = {
     {
       id: SecurityPageName.blocklist,
       title: BLOCKLIST,
-      description: FIX_ME_TEMPORARY_DESCRIPTION,
+      description: i18n.translate('xpack.securitySolution.appLinks.blocklistDescription', {
+        defaultMessage: 'Exclude unwanted applications from running on your hosts.',
+      }),
       landingIcon: IconBlocklist,
       path: BLOCKLIST_PATH,
       skipUrlState: true,

@@ -30,8 +30,8 @@ export interface LinkItem {
    */
   experimentalKey?: keyof ExperimentalFeatures;
   /**
-   * Capabilities strings to enable the link.
-   * Uses "or" conditional, only one capability needed to enable the link
+   * Capabilities strings (using object dot notation) to enable the link.
+   * Uses "or" conditional, only one enabled capability is needed to activate the link
    */
   capabilities?: string[];
   /**
@@ -43,9 +43,9 @@ export interface LinkItem {
    */
   globalNavOrder?: number;
   /**
-   * Enables link in the global search. Defaults to true.
+   * Disables link in the global search. Defaults to false.
    */
-  globalSearchEnabled?: boolean;
+  globalSearchDisabled?: boolean;
   /**
    * Keywords for the global search to search.
    */

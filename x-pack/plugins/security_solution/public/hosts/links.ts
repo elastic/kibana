@@ -15,8 +15,7 @@ export const links: LinkItem = {
   title: HOSTS,
   landingImage: hostsPageImg,
   description: i18n.translate('xpack.securitySolution.landing.threatHunting.hostsDescription', {
-    defaultMessage:
-      'A computer or other device that communicates with other hosts on a network. Hosts on a network include clients and servers -- that send or receive data, services or applications.',
+    defaultMessage: 'A comprehensive overview of all hosts and host-related security events.',
   }),
   path: HOSTS_PATH,
   globalNavEnabled: true,
@@ -25,7 +24,6 @@ export const links: LinkItem = {
       defaultMessage: 'Hosts',
     }),
   ],
-  globalSearchEnabled: true,
   globalNavOrder: 9002,
   links: [
     {

@@ -86,11 +86,11 @@ export interface NavigationCategory {
 export type NavigationCategories = Readonly<NavigationCategory[]>;
 export interface NavLinkItem {
   description?: string;
+  disabled?: boolean;
   icon?: IconType;
   id: SecurityPageName;
   links?: NavLinkItem[];
   image?: string;
   title: string;
   skipUrlState?: boolean;
-  disabled?: boolean;
 }

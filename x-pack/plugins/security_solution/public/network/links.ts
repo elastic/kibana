@@ -17,7 +17,7 @@ export const links: LinkItem = {
   landingImage: networkPageImg,
   description: i18n.translate('xpack.securitySolution.appLinks.network.description', {
     defaultMessage:
-      'The action or process of interacting with others to exchange information and develop professional or social contacts.',
+      'Provides key activity metrics in an interactive map as well as event tables that enable interaction with the Timeline.',
   }),
   path: NETWORK_PATH,
   globalNavEnabled: true,

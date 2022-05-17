@@ -16,7 +16,8 @@ export const links: LinkItem = {
   title: USERS,
   landingImage: userPageImg,
   description: i18n.translate('xpack.securitySolution.appLinks.users.description', {
-    defaultMessage: 'Sudo commands dashboard from the Logs System integration.',
+    defaultMessage:
+      'A comprehensive overview of user data that enables understanding of authentication and user behavior within your environment.',
   }),
   path: USERS_PATH,
   globalNavEnabled: true,
