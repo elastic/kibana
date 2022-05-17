@@ -694,7 +694,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it.only('should increment version on rule bulk edit', async () => {
+      it('should increment version on rule bulk edit', async () => {
         const ruleId = 'ruleId';
         const rule = await createRule(supertest, log, getSimpleRule(ruleId));
         const { body } = await postBulkAction()
