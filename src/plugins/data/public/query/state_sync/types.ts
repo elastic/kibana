@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { Filter } from '@kbn/es-query';
 import type { QueryState } from '../query_state';
+import { RefreshInterval, TimeRange } from '../../../common/types';
 
 type QueryStateChangePartial = {
   [P in keyof QueryState]?: boolean;
@@ -15,4 +17,13 @@ type QueryStateChangePartial = {
 export interface QueryStateChange extends QueryStateChangePartial {
   appFilters?: boolean; // specifies if app filters change
   globalFilters?: boolean; // specifies if global filters change
+}
+
+/**
+ * Part of {@link QueryState} serialized in the `_g` portion of Url
+ */
+export interface GlobalQueryStateFromUrl {
+  time?: TimeRange;
+  refreshInterval?: RefreshInterval;
+  filters?: Filter[];
 }
