@@ -83,6 +83,7 @@ describe('ALL - Live Query', () => {
     cy.getReact('SavedQueriesDropdown').getCurrentState().should('have.length', 1);
     clearInputQuery();
     inputQuery('select * from users{enter}');
+    cy.wait(1000);
     submitQuery();
     checkResults();
     navigateTo('/app/osquery');
