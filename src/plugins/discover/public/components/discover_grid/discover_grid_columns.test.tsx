@@ -9,17 +9,22 @@
 import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { getEuiGridColumns } from './discover_grid_columns';
 import { indexPatternWithTimefieldMock } from '../../__mocks__/index_pattern_with_timefield';
+import { discoverGridContextMock } from './__mocks__/grid_context';
+import { discoverServiceMock } from '../../__mocks__/services';
 
 describe('Discover grid columns', function () {
   it('returns eui grid columns without time column', async () => {
-    const actual = getEuiGridColumns(
-      ['extension', 'message'],
-      {},
-      indexPatternMock,
-      false,
-      false,
-      true
-    );
+    const actual = getEuiGridColumns({
+      columns: ['extension', 'message'],
+      settings: {},
+      indexPattern: indexPatternMock,
+      showTimeCol: false,
+      defaultColumns: false,
+      isSortEnabled: true,
+      getCellTextToCopy: discoverGridContextMock.getCellTextToCopy,
+      rowsNumber: 100,
+      services: discoverServiceMock,
+    });
     expect(actual).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -31,8 +36,21 @@ describe('Discover grid columns', function () {
                 },
                 "iconType": "copyClipboard",
                 "label": <FormattedMessage
-                  defaultMessage="Copy to clipboard"
-                  id="discover.grid.copyToClipBoardButton"
+                  defaultMessage="Copy name"
+                  id="discover.grid.copyColumnNameToClipBoardButton"
+                  values={Object {}}
+                />,
+                "onClick": [Function],
+                "size": "xs",
+              },
+              Object {
+                "iconProps": Object {
+                  "size": "m",
+                },
+                "iconType": "copyClipboard",
+                "label": <FormattedMessage
+                  defaultMessage="Copy column"
+                  id="discover.grid.copyColumnValuesToClipBoardButton"
                   values={Object {}}
                 />,
                 "onClick": [Function],
@@ -61,8 +79,21 @@ describe('Discover grid columns', function () {
                 },
                 "iconType": "copyClipboard",
                 "label": <FormattedMessage
-                  defaultMessage="Copy to clipboard"
-                  id="discover.grid.copyToClipBoardButton"
+                  defaultMessage="Copy name"
+                  id="discover.grid.copyColumnNameToClipBoardButton"
+                  values={Object {}}
+                />,
+                "onClick": [Function],
+                "size": "xs",
+              },
+              Object {
+                "iconProps": Object {
+                  "size": "m",
+                },
+                "iconType": "copyClipboard",
+                "label": <FormattedMessage
+                  defaultMessage="Copy column"
+                  id="discover.grid.copyColumnValuesToClipBoardButton"
                   values={Object {}}
                 />,
                 "onClick": [Function],
@@ -86,14 +117,17 @@ describe('Discover grid columns', function () {
     `);
   });
   it('returns eui grid columns without time column showing default columns', async () => {
-    const actual = getEuiGridColumns(
-      ['extension', 'message'],
-      {},
-      indexPatternWithTimefieldMock,
-      false,
-      true,
-      true
-    );
+    const actual = getEuiGridColumns({
+      columns: ['extension', 'message'],
+      settings: {},
+      indexPattern: indexPatternWithTimefieldMock,
+      showTimeCol: false,
+      defaultColumns: true,
+      isSortEnabled: true,
+      getCellTextToCopy: discoverGridContextMock.getCellTextToCopy,
+      rowsNumber: 100,
+      services: discoverServiceMock,
+    });
     expect(actual).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -105,8 +139,21 @@ describe('Discover grid columns', function () {
                 },
                 "iconType": "copyClipboard",
                 "label": <FormattedMessage
-                  defaultMessage="Copy to clipboard"
-                  id="discover.grid.copyToClipBoardButton"
+                  defaultMessage="Copy name"
+                  id="discover.grid.copyColumnNameToClipBoardButton"
+                  values={Object {}}
+                />,
+                "onClick": [Function],
+                "size": "xs",
+              },
+              Object {
+                "iconProps": Object {
+                  "size": "m",
+                },
+                "iconType": "copyClipboard",
+                "label": <FormattedMessage
+                  defaultMessage="Copy column"
+                  id="discover.grid.copyColumnValuesToClipBoardButton"
                   values={Object {}}
                 />,
                 "onClick": [Function],
@@ -135,8 +182,21 @@ describe('Discover grid columns', function () {
                 },
                 "iconType": "copyClipboard",
                 "label": <FormattedMessage
-                  defaultMessage="Copy to clipboard"
-                  id="discover.grid.copyToClipBoardButton"
+                  defaultMessage="Copy name"
+                  id="discover.grid.copyColumnNameToClipBoardButton"
+                  values={Object {}}
+                />,
+                "onClick": [Function],
+                "size": "xs",
+              },
+              Object {
+                "iconProps": Object {
+                  "size": "m",
+                },
+                "iconType": "copyClipboard",
+                "label": <FormattedMessage
+                  defaultMessage="Copy column"
+                  id="discover.grid.copyColumnValuesToClipBoardButton"
                   values={Object {}}
                 />,
                 "onClick": [Function],
@@ -157,14 +217,17 @@ describe('Discover grid columns', function () {
     `);
   });
   it('returns eui grid columns with time column', async () => {
-    const actual = getEuiGridColumns(
-      ['extension', 'message'],
-      {},
-      indexPatternWithTimefieldMock,
-      true,
-      false,
-      true
-    );
+    const actual = getEuiGridColumns({
+      columns: ['extension', 'message'],
+      settings: {},
+      indexPattern: indexPatternWithTimefieldMock,
+      showTimeCol: true,
+      defaultColumns: false,
+      isSortEnabled: true,
+      getCellTextToCopy: discoverGridContextMock.getCellTextToCopy,
+      rowsNumber: 100,
+      services: discoverServiceMock,
+    });
     expect(actual).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -176,8 +239,21 @@ describe('Discover grid columns', function () {
                 },
                 "iconType": "copyClipboard",
                 "label": <FormattedMessage
-                  defaultMessage="Copy to clipboard"
-                  id="discover.grid.copyToClipBoardButton"
+                  defaultMessage="Copy name"
+                  id="discover.grid.copyColumnNameToClipBoardButton"
+                  values={Object {}}
+                />,
+                "onClick": [Function],
+                "size": "xs",
+              },
+              Object {
+                "iconProps": Object {
+                  "size": "m",
+                },
+                "iconType": "copyClipboard",
+                "label": <FormattedMessage
+                  defaultMessage="Copy column"
+                  id="discover.grid.copyColumnValuesToClipBoardButton"
                   values={Object {}}
                 />,
                 "onClick": [Function],
@@ -220,8 +296,21 @@ describe('Discover grid columns', function () {
                 },
                 "iconType": "copyClipboard",
                 "label": <FormattedMessage
-                  defaultMessage="Copy to clipboard"
-                  id="discover.grid.copyToClipBoardButton"
+                  defaultMessage="Copy name"
+                  id="discover.grid.copyColumnNameToClipBoardButton"
+                  values={Object {}}
+                />,
+                "onClick": [Function],
+                "size": "xs",
+              },
+              Object {
+                "iconProps": Object {
+                  "size": "m",
+                },
+                "iconType": "copyClipboard",
+                "label": <FormattedMessage
+                  defaultMessage="Copy column"
+                  id="discover.grid.copyColumnValuesToClipBoardButton"
                   values={Object {}}
                 />,
                 "onClick": [Function],
@@ -253,8 +342,21 @@ describe('Discover grid columns', function () {
                 },
                 "iconType": "copyClipboard",
                 "label": <FormattedMessage
-                  defaultMessage="Copy to clipboard"
-                  id="discover.grid.copyToClipBoardButton"
+                  defaultMessage="Copy name"
+                  id="discover.grid.copyColumnNameToClipBoardButton"
+                  values={Object {}}
+                />,
+                "onClick": [Function],
+                "size": "xs",
+              },
+              Object {
+                "iconProps": Object {
+                  "size": "m",
+                },
+                "iconType": "copyClipboard",
+                "label": <FormattedMessage
+                  defaultMessage="Copy column"
+                  id="discover.grid.copyColumnValuesToClipBoardButton"
                   values={Object {}}
                 />,
                 "onClick": [Function],
