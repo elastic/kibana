@@ -891,8 +891,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.rollback',
       {
-        defaultMessage:
-          'Experimental',
+        defaultMessage: 'Experimental',
       }
     ),
     license: 'platinum',
