@@ -9,7 +9,6 @@
 import Path from 'path';
 
 import chalk from 'chalk';
-import 'core-js/features/string/repeat';
 import dedent from 'dedent';
 import { getLogLevelFlagsHelp } from '@kbn/tooling-log';
 
