@@ -74,7 +74,7 @@ export interface SavedObject<T = unknown> {
   /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
   version?: string;
   /** Timestamp of the last time this document had been updated.  */
-  updated_at?: string;
+  updatedAt?: string;
   error?: SavedObjectError;
   /** {@inheritdoc SavedObjectAttributes} */
   attributes: T;
