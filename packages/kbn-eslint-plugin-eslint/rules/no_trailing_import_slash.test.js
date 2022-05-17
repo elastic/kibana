@@ -49,7 +49,7 @@ ruleTester.run('@kbn/eslint/no_trailing_import_slash', rule, {
         {
           line: 1,
           message:
-            'Using a trailing slash in package import statements causes issues with webpack and is inconsistent with the rest of the respository.',
+            'Using a trailing slash in package import statements causes issues with webpack and is inconsistent with the rest of the repository.',
         },
       ],
       output: dedent`
@@ -64,7 +64,7 @@ ruleTester.run('@kbn/eslint/no_trailing_import_slash', rule, {
         {
           line: 1,
           message:
-            'Using a trailing slash in package import statements causes issues with webpack and is inconsistent with the rest of the respository.',
+            'Using a trailing slash in package import statements causes issues with webpack and is inconsistent with the rest of the repository.',
         },
       ],
       output: dedent`

@@ -1,4 +1,11 @@
-# @kbn/optimizer
+---
+id: kibDevDocsOpsOptimizer
+slug: /kibana-dev-docs/ops/optimizer
+title: "@kbn/optimizer"
+description: 'The tool which builds front-end bundles for plugins.'
+date: 2022-05-16
+tags: ['kibana', 'dev', 'contributor', 'operations', 'optimizer', 'webpack']
+---
 
 `@kbn/optimizer` is a package for building Kibana platform UI plugins (and hopefully more soon).
 
@@ -61,7 +68,7 @@ KBN_OPTIMIZER_THEMES=* yarn start
 
 ## API
 
-To run the optimizer from code, you can import the [`OptimizerConfig`][OptimizerConfig] class and [`runOptimizer`][Optimizer] function. Create an [`OptimizerConfig`][OptimizerConfig] instance by calling it's static `create()` method with some options, then pass it to the [`runOptimizer`][Optimizer] function. `runOptimizer()` returns an observable of update objects, which are summaries of the optimizer state plus an optional `event` property which describes the internal events occuring and may be of use. You can use the [`logOptimizerState()`][LogOptimizerState] helper to write the relevant bits of state to a tooling log or checkout it's implementation to see how the internal events like [`WorkerStdio`][ObserveWorker] and [`WorkerStarted`][ObserveWorker] are used.
+To run the optimizer from code, you can import the [`OptimizerConfig`][OptimizerConfig] class and [`runOptimizer`][runOptimizer] function. Create an [`OptimizerConfig`][OptimizerConfig] instance by calling it's static `create()` method with some options, then pass it to the [`runOptimizer`][runOptimizer] function. `runOptimizer()` returns an observable of update objects, which are summaries of the optimizer state plus an optional `event` property which describes the internal events occuring and may be of use. You can use the [`logOptimizerState()`][LogOptimizerState] helper to write the relevant bits of state to a tooling log or checkout it's implementation to see how the internal events like [`WorkerStdio`][ObserveWorker] and [`WorkerStarted`][ObserveWorker] are used.
 
 Example:
 ```ts
@@ -125,16 +132,15 @@ Workers have several error message they may emit which indicate unrecoverable er
 For an example of how to handle these states checkout the [`logOptimizerState()`][LogOptimizerState] helper.
 
 [PostCss]: https://postcss.org/
-[Cli]: src/cli.ts
-[Optimizer]: src/optimizer.ts
-[ObserveWorker]: src/observe_worker.ts
-[CompilerMsg]: src/common/compiler_messages.ts
-[WorkerMsg]: src/common/worker_messages.ts
-[Bundle]: src/common/bundle.ts
-[WebpackConfig]: src/worker/webpack.config.ts
-[BundleDefinition]: src/common/bundle_definition.ts
-[WorkerConfig]: src/common/worker_config.ts
-[OptimizerConfig]: src/optimizer_config.ts
-[LogOptimizerState]: src/log_optimizer_state.ts
-[AssignBundlesToWorkers]: src/assign_bundles_to_workers.ts
-[BuildTask]: ../../src/dev/build/tasks/build_kibana_platform_plugins.js
+[Cli]: https://github.com/elastic/kibana/blob/main/packages/kbn-optimizer/src/cli.ts
+[runOptimizer]: https://github.com/elastic/kibana/blob/main/packages/kbn-optimizer/src/run_optimizer.ts
+[ObserveWorker]: https://github.com/elastic/kibana/blob/main/packages/kbn-optimizer/src/optimizer/observe_worker.ts
+[CompilerMsg]: https://github.com/elastic/kibana/blob/main/packages/kbn-optimizer/src/common/compiler_messages.ts
+[WorkerMsg]: https://github.com/elastic/kibana/blob/main/packages/kbn-optimizer/src/common/worker_messages.ts
+[Bundle]: https://github.com/elastic/kibana/blob/main/packages/kbn-optimizer/src/common/bundle.ts
+[WebpackConfig]: https://github.com/elastic/kibana/blob/main/packages/kbn-optimizer/src/worker/webpack.config.ts
+[WorkerConfig]: https://github.com/elastic/kibana/blob/main/packages/kbn-optimizer/src/common/worker_config.ts
+[OptimizerConfig]: https://github.com/elastic/kibana/blob/main/packages/kbn-optimizer/src/optimizer/optimizer_config.ts
+[LogOptimizerState]: https://github.com/elastic/kibana/blob/main/packages/kbn-optimizer/src/log_optimizer_state.ts
+[AssignBundlesToWorkers]: https://github.com/elastic/kibana/blob/main/packages/kbn-optimizer/src/optimizer/assign_bundles_to_workers.ts
+[BuildTask]: https://github.com/elastic/kibana/blob/main/src/dev/build/tasks/build_kibana_platform_plugins.js
