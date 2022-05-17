@@ -41,6 +41,8 @@ export const Ja3Fingerprint = React.memo<{
     iconType="snowflake"
     isDraggable={isDraggable}
     value={value}
+    isAggregatable={true}
+    fieldType="keyword"
   >
     <Ja3FingerprintLabel data-test-subj="ja3-fingerprint-label">
       {i18n.JA3_FINGERPRINT_LABEL}
