@@ -64,6 +64,7 @@ import {
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
 import { initDataView, SourcererModel, KibanaDataView } from './common/store/sourcerer/model';
 import { SecurityDataView } from './common/containers/sourcerer/api';
+import { updateAllAppLinks } from './common/links';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   readonly kibanaVersion: string;
@@ -226,9 +227,23 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     /**
      * Register deepLinks and pass an appUpdater for each subPlugin, to change deepLinks as needed when licensing changes.
      */
+
+    /**
+     * TODO: Register the new deepLinks updater when the new links structure is enabled using generic AppLinks:
+     * `registerDeepLinksUpdater(this.appUpdater$);`
+     * It will trigger the this.appUpdater$ updates when needed, the `this.appUpdater$.next()` direct calls here will need to be removed
+     */
+
     if (licensing !== null) {
       this.licensingSubscription = licensing.subscribe((currentLicense) => {
         if (currentLicense.type !== undefined) {
+          updateAllAppLinks({
+            experimentalFeatures: this.experimentalFeatures,
+            license: currentLicense,
+            capabilities: core.application.capabilities,
+          });
+
+          // TODO: to be removed
           this.appUpdater$.next(() => ({
             navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
             deepLinks: getDeepLinks(
@@ -240,6 +255,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         }
       });
     } else {
+      updateAllAppLinks({
+        experimentalFeatures: this.experimentalFeatures,
+        capabilities: core.application.capabilities,
+      });
+
+      // TODO: to be removed
       this.appUpdater$.next(() => ({
         navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
         deepLinks: getDeepLinks(
