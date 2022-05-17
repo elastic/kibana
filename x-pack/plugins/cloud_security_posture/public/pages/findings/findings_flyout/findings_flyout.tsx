@@ -15,9 +15,14 @@ import {
   EuiFlyoutBody,
   EuiTabs,
   EuiTab,
-  EuiFlexGroup, PropsOf, EuiCodeBlock, EuiMarkdownFormat, EuiIcon,
+  EuiFlexGroup,
+  PropsOf,
+  EuiCodeBlock,
+  EuiMarkdownFormat,
+  EuiIcon,
 } from '@elastic/eui';
 import { assertNever } from '@kbn/std';
+import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
 import type { CspFinding } from '../types';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import * as TEXT from '../translations';
@@ -25,8 +30,7 @@ import { ResourceTab } from './resource_tab';
 import { JsonTab } from './json_tab';
 import { OverviewTab } from './overview_tab';
 import { RuleTab } from './rule_tab';
-import cisLogoIcon from "@kbn/cloud-security-posture-plugin/public/assets/icons/cis_logo.svg";
-import k8sLogoIcon from "@kbn/cloud-security-posture-plugin/public/assets/icons/k8s_logo.svg";
+import k8sLogoIcon from '../../../assets/icons/k8s_logo.svg';
 
 const tabs = [
   { title: TEXT.OVERVIEW, id: 'overview' },
@@ -39,6 +43,7 @@ type FindingsTab = typeof tabs[number];
 
 interface FindingFlyoutProps {
   onClose(): void;
+
   findings: CspFinding;
 }
 

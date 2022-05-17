@@ -8,7 +8,6 @@ import React, { useState } from 'react';
 import {
   EuiSpacer,
   EuiFlyout,
-  type EuiDescriptionListProps,
   EuiToolTip,
   EuiFlyoutHeader,
   EuiFlyoutBody,
@@ -20,18 +19,15 @@ import {
   EuiFlexGroup,
   EuiSwitch,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { getRuleList } from '../findings/findings_flyout/rule_tab';
+import { getRemediationList } from '../findings/findings_flyout/overview_tab';
 import type { RuleSavedObject } from './use_csp_rules';
 import * as TEXT from './translations';
 import * as TEST_SUBJECTS from './test_subjects';
-import { getRuleList } from '@kbn/cloud-security-posture-plugin/public/pages/findings/findings_flyout/rule_tab';
-import { getRemediationList } from '../findings/findings_flyout/overview_tab';
 
 interface RuleFlyoutProps {
   onClose(): void;
-
   toggleRule(rule: RuleSavedObject): void;
-
   rule: RuleSavedObject;
 }
 
