@@ -73,6 +73,7 @@ const findTestUtils = (
                 params: {},
                 created_by: 'elastic',
                 scheduled_task_id: match.scheduled_task_id,
+                snooze_schedule: match.snooze_schedule,
                 created_at: match.created_at,
                 updated_at: match.updated_at,
                 throttle: '1m',

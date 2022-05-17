@@ -50,8 +50,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   muted_alert_ids: mutedInstanceIds,
   mute_all: muteAll,
   ...(isSnoozedUntil !== undefined ? { is_snoozed_until: isSnoozedUntil } : {}),
-  // Remove this object spread boolean check after snooze props is added to the public API
-  ...(snoozeSchedule !== undefined ? { snooze_schedule: snoozeSchedule } : {}),
+  snooze_schedule: snoozeSchedule,
   scheduled_task_id: scheduledTaskId,
   execution_status: executionStatus && {
     ...omit(executionStatus, 'lastExecutionDate', 'lastDuration'),
