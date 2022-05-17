@@ -244,10 +244,16 @@ export const ERROR_MESSAGE_CASES = i18n.translate(
   }
 );
 
-export const HOST_TOOLTIP = i18n.translate('xpack.securitySolution.detectionResponse.tooltip', {
-  defaultMessage: 'Maximum of 100 hosts. Please consult Alerts page for further information.',
-});
+export const HOST_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionResponse.hostSectionTooltip',
+  {
+    defaultMessage: 'Maximum of 100 hosts. Please consult Alerts page for further information.',
+  }
+);
 
-export const USER_TOOLTIP = i18n.translate('xpack.securitySolution.detectionResponse.tooltip', {
-  defaultMessage: 'Maximum of 100 users. Please consult Alerts page for further information.',
-});
+export const USER_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionResponse.userSectionTooltip',
+  {
+    defaultMessage: 'Maximum of 100 users. Please consult Alerts page for further information.',
+  }
+);
