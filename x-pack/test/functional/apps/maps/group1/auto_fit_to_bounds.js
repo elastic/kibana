@@ -30,7 +30,7 @@ export default function ({ getPageObjects, getService }) {
         expect(hits).to.equal('6');
 
         const { lat, lon } = await PageObjects.maps.getView();
-        expect(Math.round(lat)).to.equal(41);
+        expect(Math.round(lat)).to.be.within(41, 43);
         expect(Math.round(lon)).to.equal(-99);
       });
     });
