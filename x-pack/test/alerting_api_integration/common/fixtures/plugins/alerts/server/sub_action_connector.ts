@@ -7,7 +7,8 @@
 
 // eslint-disable-next-line max-classes-per-file
 import { AxiosError } from 'axios';
-import { SubActionConnector, ServiceParams } from '@kbn/actions-plugin/server';
+import type { ServiceParams } from '@kbn/actions-plugin/server';
+import { SubActionConnector } from '@kbn/actions-plugin/server';
 import { schema, TypeOf } from '@kbn/config-schema';
 
 const TestConfigSchema = schema.object({ url: schema.string() });
