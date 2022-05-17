@@ -29,7 +29,7 @@ export const MethodConnector: React.FC = () => {
         }
       )}
       docsUrl="#"
-      type="Connector"
+      type="connector"
     >
       <EuiPanel
         color="subdued"

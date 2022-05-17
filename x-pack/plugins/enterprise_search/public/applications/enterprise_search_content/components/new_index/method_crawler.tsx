@@ -29,7 +29,7 @@ export const MethodCrawler: React.FC = () => {
         }
       )}
       docsUrl="#"
-      type="Web Crawler"
+      type="crawler"
     >
       <EuiPanel
         color="subdued"
