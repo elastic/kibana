@@ -96,6 +96,7 @@ export interface TGridStandaloneProps {
   }) => boolean;
   height?: number;
   indexNames: string[];
+  itemsPerPage?: number;
   itemsPerPageOptions: number[];
   query: Query;
   onRuleChange?: () => void;
@@ -130,6 +131,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   filterStatus,
   hasAlertsCrudPermissions,
   indexNames,
+  itemsPerPage,
   itemsPerPageOptions,
   onRuleChange,
   query,
@@ -201,10 +203,11 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
 
   const sortField = useMemo(
     () =>
-      sortStore.map(({ columnId, columnType, sortDirection }) => ({
+      sortStore.map(({ columnId, columnType, esTypes, sortDirection }) => ({
         field: columnId,
         type: columnType,
         direction: sortDirection as Direction,
+        esTypes: esTypes ?? [],
       })),
     [sortStore]
   );
@@ -294,7 +297,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
           end,
         },
         indexNames,
-        itemsPerPage: itemsPerPageStore,
+        itemsPerPage: itemsPerPage || itemsPerPageStore,
         itemsPerPageOptions,
         showCheckboxes,
       })

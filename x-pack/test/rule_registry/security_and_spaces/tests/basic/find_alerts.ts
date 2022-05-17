@@ -158,6 +158,93 @@ export default ({ getService }: FtrProviderContext) => {
       expect(found.body.hits.total.value).to.be.above(0);
     });
 
+    it(`${superUser.username} should allow a custom sort and return alerts which match query in ${SPACE1}/${SECURITY_SOLUTION_ALERT_INDEX}`, async () => {
+      const found = await supertestWithoutAuth
+        .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}/find`)
+        .auth(superUser.username, superUser.password)
+        .set('kbn-xsrf', 'true')
+        .send({
+          query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
+          sort: [
+            {
+              '@timestamp': 'desc', // the default in alerts_client.ts is timestamp ascending, so we are testing the reverse of that.
+            },
+          ],
+          index: SECURITY_SOLUTION_ALERT_INDEX,
+        });
+      expect(found.statusCode).to.eql(200);
+      expect(found.body.hits.total.value).to.be.above(0);
+
+      let lastSort = Infinity;
+
+      found.body.hits.hits.forEach((hit: any) => {
+        expect(hit.sort).to.be.above(0);
+
+        if (hit.sort > lastSort) {
+          throw new Error('sort by timestamp desc failed.');
+        }
+
+        lastSort = hit.sort;
+      });
+    });
+
+    it(`${superUser.username} should handle an invalid custom sort`, async () => {
+      const found = await supertestWithoutAuth
+        .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}/find`)
+        .auth(superUser.username, superUser.password)
+        .set('kbn-xsrf', 'true')
+        .send({
+          query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
+          sort: [
+            {
+              asdf: 'invalid',
+            },
+          ],
+          index: SECURITY_SOLUTION_ALERT_INDEX,
+        });
+      expect(found.statusCode).to.eql(404);
+    });
+
+    it(`${superUser.username} should allow a custom sort (using search_after) and return alerts which match query in ${SPACE1}/${SECURITY_SOLUTION_ALERT_INDEX}`, async () => {
+      const firstSearch = await supertestWithoutAuth
+        .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}/find`)
+        .auth(superUser.username, superUser.password)
+        .set('kbn-xsrf', 'true')
+        .send({
+          query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
+          sort: [
+            {
+              '@timestamp': 'desc', // the default in alerts_client.ts is timestamp ascending, so we are testing the reverse of that.
+            },
+          ],
+          index: SECURITY_SOLUTION_ALERT_INDEX,
+        });
+
+      // grab second to last event cursor
+      const hits = firstSearch.body.hits.hits;
+      const cursor = hits[hits.length - 2].sort[0];
+
+      const secondSearch = await supertestWithoutAuth
+        .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}/find`)
+        .auth(superUser.username, superUser.password)
+        .set('kbn-xsrf', 'true')
+        .send({
+          query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
+          sort: [
+            {
+              '@timestamp': 'desc', // the default in alerts_client.ts is timestamp ascending, so we are testing the reverse of that.
+            },
+          ],
+          search_after: [cursor],
+          index: SECURITY_SOLUTION_ALERT_INDEX,
+        });
+
+      expect(secondSearch.body.hits.hits.length).equal(1);
+
+      // there should only be one result, as we are searching after the second to last record of the first search
+      expect(secondSearch.body.hits.hits[0].sort).to.be.below(cursor); // below since we are paging backwards in time
+    });
+
     it(`${superUser.username} should allow cardinality aggs in ${SPACE1}/${SECURITY_SOLUTION_ALERT_INDEX}`, async () => {
       const found = await supertestWithoutAuth
         .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}/find`)

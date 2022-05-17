@@ -8,21 +8,27 @@
 import type { Headers } from '@kbn/core/server';
 import { defer, forkJoin, Observable, throwError } from 'rxjs';
 import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
-import { errors } from '../../common';
-import type { Context, HeadlessChromiumDriver } from '../browsers';
-import { DEFAULT_VIEWPORT, getChromiumDisconnectedError } from '../browsers';
+import { errors, LayoutTypes } from '../../common';
+import {
+  Context,
+  DEFAULT_VIEWPORT,
+  getChromiumDisconnectedError,
+  HeadlessChromiumDriver,
+} from '../browsers';
 import { ConfigType, durationToNumber as toNumber } from '../config';
-import type { Layout } from '../layouts';
+import type { PdfScreenshotOptions } from '../formats';
+import { Layout } from '../layouts';
 import { Actions, EventLogger } from './event_logger';
 import type { ElementsPositionAndAttribute } from './get_element_position_data';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getNumberOfItems } from './get_number_of_items';
+import { getPdf } from './get_pdf';
 import { getRenderErrors } from './get_render_errors';
-import type { Screenshot } from './get_screenshots';
 import { getScreenshots } from './get_screenshots';
 import { getTimeRange } from './get_time_range';
 import { injectCustomCss } from './inject_css';
 import { openUrl } from './open_url';
+import type { Screenshot } from './types';
 import { waitForRenderComplete } from './wait_for_render';
 import { waitForVisualizations } from './wait_for_visualizations';
 
@@ -107,15 +113,6 @@ const getDefaultElementPosition = (
   ];
 };
 
-/*
- * If Kibana is showing a non-HTML error message, the viewport might not be
- * provided by the browser.
- */
-const getDefaultViewPort = () => ({
-  ...DEFAULT_VIEWPORT,
-  zoom: 1,
-});
-
 export class ScreenshotObservableHandler {
   constructor(
     private readonly driver: HeadlessChromiumDriver,
@@ -171,15 +168,9 @@ export class ScreenshotObservableHandler {
     const waitTimeout = toNumber(this.config.capture.timeouts.waitForElements);
 
     return defer(() => getNumberOfItems(driver, this.eventLogger, waitTimeout, this.layout)).pipe(
-      mergeMap(async (itemsCount) => {
-        // set the viewport to the dimensions from the job, to allow elements to flow into the expected layout
-        const viewport = this.layout.getViewport(itemsCount) || getDefaultViewPort();
-
-        // Set the viewport allowing time for the browser to handle reflow and redraw
-        // before checking for readiness of visualizations.
-        await driver.setViewport(viewport, this.eventLogger.kbnLogger);
-        await waitForVisualizations(driver, this.eventLogger, waitTimeout, itemsCount, this.layout);
-      }),
+      mergeMap((itemsCount) =>
+        waitForVisualizations(driver, this.eventLogger, waitTimeout, itemsCount, this.layout)
+      ),
       this.waitUntil(waitTimeout, 'wait for elements')
     );
   }
@@ -237,6 +228,26 @@ export class ScreenshotObservableHandler {
     );
   }
 
+  /**
+   * Given a title and time range value look like:
+   *
+   * "[Logs] Web Traffic - Apr 14, 2022 @ 120742.318 to Apr 21, 2022 @ 120742.318"
+   *
+   * Otherwise closest thing to that or a blank string.
+   */
+  private getTitle(timeRange: null | string): string {
+    return `${(this.options as PdfScreenshotOptions).title ?? ''} ${
+      timeRange ? `- ${timeRange}` : ''
+    }`.trim();
+  }
+
+  private shouldCapturePdf(): boolean {
+    return (
+      this.layout.id === LayoutTypes.PRINT &&
+      (this.options as PdfScreenshotOptions).format === 'pdf'
+    );
+  }
+
   public getScreenshots() {
     return (withRenderComplete: Observable<PageSetupResults>) =>
       withRenderComplete.pipe(
@@ -244,10 +255,17 @@ export class ScreenshotObservableHandler {
           this.checkPageIsOpen(); // fail the report job if the browser has closed
           const elements =
             data.elementsPositionAndAttributes ??
-            getDefaultElementPosition(this.layout.getViewport(1));
+            getDefaultElementPosition(this.layout.getViewport());
           let screenshots: Screenshot[] = [];
           try {
-            screenshots = await getScreenshots(this.driver, this.eventLogger, elements);
+            screenshots = this.shouldCapturePdf()
+              ? await getPdf(
+                  this.driver,
+                  this.eventLogger,
+                  this.getTitle(data.timeRange),
+                  (this.options as PdfScreenshotOptions).logo
+                )
+              : await getScreenshots(this.driver, this.eventLogger, elements, this.layout);
           } catch (e) {
             throw new errors.FailedToCaptureScreenshot(e.message);
           }

@@ -33,6 +33,7 @@ import {
   EuiKeyPadMenuItem,
   EuiIcon,
   EuiToolTip,
+  EuiSwitch,
 } from '@elastic/eui';
 
 import { EmbeddableFactoryDefinition } from '@kbn/embeddable-plugin/public';
@@ -41,6 +42,7 @@ import {
   ControlEmbeddable,
   ControlInput,
   ControlWidth,
+  DataControlInput,
   IEditableControlFactory,
 } from '../../types';
 import { CONTROL_WIDTH_OPTIONS } from './editor_constants';
@@ -51,9 +53,11 @@ interface EditControlProps {
   isCreate: boolean;
   title?: string;
   width: ControlWidth;
+  grow: boolean;
   onSave: (type: string) => void;
   onCancel: () => void;
   removeControl?: () => void;
+  updateGrow?: (grow: boolean) => void;
   updateTitle: (title?: string) => void;
   updateWidth: (newWidth: ControlWidth) => void;
   getRelevantDataViewId?: () => string | undefined;
@@ -66,9 +70,11 @@ export const ControlEditor = ({
   isCreate,
   title,
   width,
+  grow,
   onSave,
   onCancel,
   removeControl,
+  updateGrow,
   updateTitle,
   updateWidth,
   onTypeEditorChange,
@@ -84,7 +90,13 @@ export const ControlEditor = ({
   const [defaultTitle, setDefaultTitle] = useState<string>();
   const [currentTitle, setCurrentTitle] = useState(title);
   const [currentWidth, setCurrentWidth] = useState(width);
+  const [currentGrow, setCurrentGrow] = useState(grow);
   const [controlEditorValid, setControlEditorValid] = useState(false);
+  const [selectedField, setSelectedField] = useState<string | undefined>(
+    embeddable
+      ? (embeddable.getInput() as DataControlInput).fieldName // CLEAN THIS ONCE OTHER PR GETS IN
+      : undefined
+  );
 
   const getControlTypeEditor = (type: string) => {
     const factory = getControlFactory(type);
@@ -96,6 +108,8 @@ export const ControlEditor = ({
         onChange={onTypeEditorChange}
         setValidState={setControlEditorValid}
         initialInput={embeddable?.getInput()}
+        selectedField={selectedField}
+        setSelectedField={setSelectedField}
         setDefaultTitle={(newDefaultTitle) => {
           if (!currentTitle || currentTitle === defaultTitle) {
             setCurrentTitle(newDefaultTitle);
@@ -107,8 +121,8 @@ export const ControlEditor = ({
     ) : null;
   };
 
-  const getTypeButtons = (controlTypes: string[]) => {
-    return controlTypes.map((type) => {
+  const getTypeButtons = () => {
+    return getControlTypes().map((type) => {
       const factory = getControlFactory(type);
       const icon = (factory as EmbeddableFactoryDefinition).getIconType?.();
       const tooltip = (factory as EmbeddableFactoryDefinition).getDescription?.();
@@ -120,6 +134,12 @@ export const ControlEditor = ({
           isSelected={selectedType === type}
           onClick={() => {
             setSelectedType(type);
+            if (!isCreate)
+              setSelectedField(
+                embeddable && type === embeddable.type
+                  ? (embeddable.getInput() as DataControlInput).fieldName
+                  : undefined
+              );
           }}
         >
           <EuiIcon type={!icon || icon === 'empty' ? 'controlsHorizontal' : icon} size="l" />
@@ -150,9 +170,7 @@ export const ControlEditor = ({
       <EuiFlyoutBody data-test-subj="control-editor-flyout">
         <EuiForm>
           <EuiFormRow label={ControlGroupStrings.manageControl.getControlTypeTitle()}>
-            <EuiKeyPadMenu>
-              {isCreate ? getTypeButtons(getControlTypes()) : getTypeButtons([selectedType])}
-            </EuiKeyPadMenu>
+            <EuiKeyPadMenu>{getTypeButtons()}</EuiKeyPadMenu>
           </EuiFormRow>
           {selectedType && (
             <>
@@ -180,6 +198,20 @@ export const ControlEditor = ({
                   }}
                 />
               </EuiFormRow>
+              {updateGrow ? (
+                <EuiFormRow>
+                  <EuiSwitch
+                    label={ControlGroupStrings.manageControl.getGrowSwitchTitle()}
+                    color="primary"
+                    checked={currentGrow}
+                    onChange={() => {
+                      setCurrentGrow(!currentGrow);
+                      updateGrow(!currentGrow);
+                    }}
+                    data-test-subj="control-editor-grow-switch"
+                  />
+                </EuiFormRow>
+              ) : null}
               <EuiSpacer size="l" />
               {removeControl && (
                 <EuiButtonEmpty

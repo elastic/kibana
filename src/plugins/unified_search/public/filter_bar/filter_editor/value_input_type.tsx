@@ -23,6 +23,7 @@ interface Props {
   controlOnly?: boolean;
   className?: string;
   fullWidth?: boolean;
+  isInvalid?: boolean;
 }
 
 class ValueInputTypeUI extends Component<Props> {
@@ -33,6 +34,7 @@ class ValueInputTypeUI extends Component<Props> {
     }
     return value;
   };
+
   public render() {
     const value = this.props.value;
     const type = this.props.field.type;
@@ -73,7 +75,7 @@ class ValueInputTypeUI extends Component<Props> {
             value={value}
             onChange={this.onChange}
             onBlur={this.onBlur}
-            isInvalid={!isEmpty(value) && !validateParams(value, this.props.field)}
+            isInvalid={this.props.isInvalid}
             controlOnly={this.props.controlOnly}
             className={this.props.className}
           />
