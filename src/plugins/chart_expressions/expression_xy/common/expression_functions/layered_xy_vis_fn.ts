@@ -19,10 +19,7 @@ export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers)
 
   const dataLayers = getDataLayers(layers);
   const hasBar = hasBarLayer(dataLayers);
-  validateAddTimeMarker(
-    dataLayers
-    args.addTimeMarker
-  );
+  validateAddTimeMarker(dataLayers, args.addTimeMarker);
   validateMinTimeBarInterval(dataLayers, hasBar, args.minTimeBarInterval);
 
   return {
