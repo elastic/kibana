@@ -7,6 +7,9 @@
 
 import { Logger } from '@kbn/core/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { DataViewAttributes } from '@kbn/data-views-plugin/common';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -61,6 +64,19 @@ export const threatMatchExecutor = async ({
       version,
       index: ruleParams.index,
     });
+
+    let runtimeMappings: estypes.MappingRuntimeFields = {};
+    if (ruleParams.dataViewId != null) {
+      const dataView = await services.savedObjectsClient.get<DataViewAttributes>(
+        'index-pattern',
+        ruleParams.dataViewId
+      );
+      if (dataView?.attributes.runtimeFieldMap != null) {
+        runtimeMappings = JSON.parse(dataView.attributes.runtimeFieldMap);
+        logger.debug(`runtime mappings ${runtimeMappings}`);
+      }
+    }
+
     return createThreatSignals({
       alertId: completeRule.alertId,
       buildRuleMessage,
@@ -89,6 +105,7 @@ export const threatMatchExecutor = async ({
       tuple,
       type: ruleParams.type,
       wrapHits,
+      runtimeMappings,
     });
   });
 };

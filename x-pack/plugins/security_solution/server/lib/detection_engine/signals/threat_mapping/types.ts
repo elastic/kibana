@@ -67,6 +67,7 @@ export interface CreateThreatSignalsOptions {
   tuple: RuleRangeTuple;
   type: Type;
   wrapHits: WrapHits;
+  runtimeMappings?: estypes.MappingRuntimeFields | null;
 }
 
 export interface CreateThreatSignalOptions {
@@ -190,6 +191,7 @@ export interface GetThreatListOptions {
   threatListConfig: ThreatListConfig;
   pitId: OpenPointInTimeResponse['id'];
   reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
+  runtimeMappings?: estypes.MappingRuntimeFields | null;
 }
 
 export interface ThreatListCountOptions {
@@ -199,6 +201,7 @@ export interface ThreatListCountOptions {
   language: ThreatLanguageOrUndefined;
   query: string;
   threatFilters: unknown[];
+  runtimeMappings?: estypes.MappingRuntimeFields | null;
 }
 
 export interface ThreatListDoc {
@@ -257,6 +260,7 @@ export interface EventsOptions {
   filters: unknown[];
   timestampOverride?: string;
   tuple: RuleRangeTuple;
+  runtimeMappings?: estypes.MappingRuntimeFields | null;
 }
 
 export interface EventDoc {

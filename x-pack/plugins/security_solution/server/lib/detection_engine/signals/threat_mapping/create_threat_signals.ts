@@ -51,6 +51,7 @@ export const createThreatSignals = async ({
   tuple,
   type,
   wrapHits,
+  runtimeMappings,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const params = completeRule.ruleParams;
   logger.debug(buildRuleMessage('Indicator matching rule starting'));
@@ -87,10 +88,10 @@ export const createThreatSignals = async ({
 
   logger.debug(`Total event count: ${eventCount}`);
 
-  if (eventCount === 0) {
-    logger.debug(buildRuleMessage('Indicator matching rule has completed'));
-    return results;
-  }
+  // if (eventCount === 0) {
+  //   logger.debug(buildRuleMessage('Indicator matching rule has completed'));
+  //   return results;
+  // }
 
   let threatPitId: OpenPointInTimeResponse['id'] = (
     await services.scopedClusterClient.asCurrentUser.openPointInTime({
@@ -195,6 +196,7 @@ export const createThreatSignals = async ({
           buildRuleMessage,
           perPage,
           tuple,
+          runtimeMappings,
         }),
 
       createSignal: (slicedChunk) =>

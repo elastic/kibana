@@ -6,7 +6,9 @@
  */
 
 import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { DataViewAttributes } from '@kbn/data-views-plugin/common';
 
 import { Logger } from '@kbn/core/server';
 
@@ -114,6 +116,18 @@ export const thresholdExecutor = async ({
       index: ruleParams.index,
     });
 
+    let runtimeMappings: estypes.MappingRuntimeFields = {};
+    if (ruleParams.dataViewId != null) {
+      const dataView = await services.savedObjectsClient.get<DataViewAttributes>(
+        'index-pattern',
+        ruleParams.dataViewId
+      );
+      if (dataView?.attributes.runtimeFieldMap != null) {
+        runtimeMappings = JSON.parse(dataView.attributes.runtimeFieldMap);
+        logger.debug(`runtime mappings ${runtimeMappings}`);
+      }
+    }
+
     // Eliminate dupes
     const bucketFilters = await getThresholdBucketFilters({
       signalHistory,
@@ -147,6 +161,7 @@ export const thresholdExecutor = async ({
       threshold: ruleParams.threshold,
       timestampOverride: ruleParams.timestampOverride,
       buildRuleMessage,
+      runtimeMappings,
     });
 
     // Build and index new alerts
