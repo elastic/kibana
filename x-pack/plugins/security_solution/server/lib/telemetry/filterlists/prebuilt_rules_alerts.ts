@@ -21,7 +21,6 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
   'kibana.alert.original_event.module': true,
   'kibana.alert.original_event.type': true,
   'kibana.alert.original_time': true,
-  'kibana.alert.reason': true,
   'kibana.alert.risk_score': true,
   'kibana.alert.rule.actions': true,
   'kibana.alert.rule.category': true,
