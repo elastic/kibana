@@ -16,6 +16,9 @@ import { useUiSetting$ } from '../../common/lib/kibana';
 const ProgressContainer = styled.div`
   margin-left: 8px;
   min-width: 100px;
+  @media only screen and (min-width: 1400px) {
+    min-width: 200px;
+  }
 `;
 
 const LoadingContent = styled(EuiLoadingContent)`
@@ -40,7 +43,12 @@ const StatValueComponent: React.FC<{
   }, [isLoading, isInitialLoading, setIsInitialLoading]);
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="none">
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="none"
+      responsive={false}
+      justifyContent="spaceBetween"
+    >
       <EuiFlexItem grow={false}>
         {!isInitialLoading && (
           <EuiText color={isGroupStat ? 'default' : 'subdued'} size={isGroupStat ? 'm' : 's'}>
@@ -48,7 +56,7 @@ const StatValueComponent: React.FC<{
           </EuiText>
         )}
       </EuiFlexItem>
-      <EuiFlexItem grow={true}>
+      <EuiFlexItem grow={false}>
         <ProgressContainer>
           {isLoading ? (
             <LoadingContent data-test-subj="stat-value-loading-spinner" lines={1} />
