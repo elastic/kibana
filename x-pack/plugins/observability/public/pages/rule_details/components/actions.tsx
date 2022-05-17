@@ -15,9 +15,11 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { intersectionBy } from 'lodash';
+import { suspendedComponentWithProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { ActionsProps } from '../types';
 import { useFetchRuleActions } from '../../../hooks/use_fetch_rule_actions';
 import { useKibana } from '../../../utils/kibana_react';
+
 export function Actions({ ruleActions, actionTypeRegistry }: ActionsProps) {
   const {
     http,
@@ -28,29 +30,29 @@ export function Actions({ ruleActions, actionTypeRegistry }: ActionsProps) {
 
   function getActionIconClass(actionGroupId?: string): IconType | undefined {
     const actionGroup = actionTypeRegistry.list().find((group) => group.id === actionGroupId);
-    return actionGroup?.iconClass;
+    return typeof actionGroup?.iconClass === 'string'
+      ? actionGroup?.iconClass
+      : suspendedComponentWithProps(actionGroup?.iconClass as React.ComponentType);
   }
   const actions = intersectionBy(allActions, ruleActions, 'actionTypeId');
   if (isLoadingActions) return <EuiLoadingSpinner size="s" />;
   return (
     <EuiFlexGroup direction="column">
-      {actions.map((actionType) => {
-        const actionTypeId = actionType.actionTypeId;
-        return (
-          <>
-            <EuiFlexGroup alignItems="flexStart">
-              <EuiFlexItem grow={false}>
-                <EuiIcon size="l" type={getActionIconClass(actionType.actionTypeId) ?? 'apps'} />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                {/* TODO: Get the user-typed connector name?  */}
-                <EuiText size="m">{actionTypeId}</EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
-          </>
-        );
-      })}
+      {actions.map(({ actionTypeId, name }) => (
+        <React.Fragment key={actionTypeId}>
+          <EuiFlexGroup alignItems="baseline">
+            <EuiFlexItem grow={false}>
+              <EuiIcon size="m" type={getActionIconClass(actionTypeId) ?? 'apps'} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText data-test-subj={`actionConnectorName-${name}`} size="s">
+                {name}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+        </React.Fragment>
+      ))}
       {errorActions && toasts.addDanger({ title: errorActions })}
     </EuiFlexGroup>
   );
