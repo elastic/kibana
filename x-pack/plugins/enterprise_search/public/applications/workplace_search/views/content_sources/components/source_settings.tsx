@@ -80,6 +80,10 @@ export const SourceSettings: React.FC = () => {
     isConfigurationUpdateButtonLoading,
   } = useValues(SourceLogic);
 
+  // Even though SourceLogic.values.contentSource.serviceType is retrieved async
+  // by SourceLogic, it will always be defined by the time this view is rendered
+  // because it is not displayed until SourceLogic has retrieved the content source and
+  // SourceLogic.values.dataLoading === false
   const addSourceLogic = AddSourceLogic({ serviceType });
   const { getSourceConfigData } = useActions(addSourceLogic);
 
