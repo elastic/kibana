@@ -38,6 +38,7 @@ import { eventMetadataRouteRepository } from '../event_metadata/route';
 import { suggestionsRouteRepository } from '../suggestions/route';
 import { agentKeysRouteRepository } from '../agent_keys/route';
 import { serviceContainerRouteRepository } from '../infra/route';
+import { spanLinksRouteRepository } from '../span_links/route';
 
 function getTypedGlobalApmServerRouteRepository() {
   const repository = {
@@ -69,6 +70,7 @@ function getTypedGlobalApmServerRouteRepository() {
     ...eventMetadataRouteRepository,
     ...agentKeysRouteRepository,
     ...serviceContainerRouteRepository,
+    ...spanLinksRouteRepository,
   };
 
   return repository;

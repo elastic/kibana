@@ -12,6 +12,7 @@ import type { PaletteOutput } from '@kbn/coloring';
 import { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
+import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
 import {
   AxisExtentModes,
   FillStyles,
@@ -94,13 +95,12 @@ export interface YConfig {
 }
 
 export interface DataLayerArgs {
-  accessors: string[];
+  accessors: Array<ExpressionValueVisDimension | string>;
   seriesType: SeriesType;
-  xAccessor?: string;
+  xAccessor?: string | ExpressionValueVisDimension;
   hide?: boolean;
-  splitAccessor?: string;
+  splitAccessor?: string | ExpressionValueVisDimension;
   columnToLabel?: string; // Actually a JSON key-value pair
-  yScaleType: YScaleType;
   xScaleType: XScaleType;
   isHistogram: boolean;
   palette: PaletteOutput;
@@ -119,7 +119,6 @@ export interface ExtendedDataLayerArgs {
   hide?: boolean;
   splitAccessor?: string;
   columnToLabel?: string; // Actually a JSON key-value pair
-  yScaleType: YScaleType;
   xScaleType: XScaleType;
   isHistogram: boolean;
   palette: PaletteOutput;
@@ -186,6 +185,8 @@ export interface XYArgs extends DataLayerArgs {
   yRightTitle: string;
   yLeftExtent: AxisExtentConfigResult;
   yRightExtent: AxisExtentConfigResult;
+  yLeftScale: YScaleType;
+  yRightScale: YScaleType;
   legend: LegendConfigResult;
   endValue?: EndValue;
   emphasizeFitting?: boolean;
@@ -202,6 +203,8 @@ export interface XYArgs extends DataLayerArgs {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
+  splitRowAccessor?: ExpressionValueVisDimension | string;
+  splitColumnAccessor?: ExpressionValueVisDimension | string;
 }
 
 export interface LayeredXYArgs {
@@ -210,6 +213,8 @@ export interface LayeredXYArgs {
   yRightTitle: string;
   yLeftExtent: AxisExtentConfigResult;
   yRightExtent: AxisExtentConfigResult;
+  yLeftScale: YScaleType;
+  yRightScale: YScaleType;
   legend: LegendConfigResult;
   endValue?: EndValue;
   emphasizeFitting?: boolean;
@@ -233,11 +238,13 @@ export interface XYProps {
   yRightTitle: string;
   yLeftExtent: AxisExtentConfigResult;
   yRightExtent: AxisExtentConfigResult;
+  yLeftScale: YScaleType;
+  yRightScale: YScaleType;
   legend: LegendConfigResult;
-  valueLabels: ValueLabelMode;
-  layers: CommonXYLayerConfig[];
   endValue?: EndValue;
   emphasizeFitting?: boolean;
+  valueLabels: ValueLabelMode;
+  layers: CommonXYLayerConfig[];
   fittingFunction?: FittingFunction;
   axisTitlesVisibilitySettings?: AxisTitlesVisibilityConfigResult;
   tickLabelsVisibilitySettings?: TickLabelsConfigResult;
@@ -248,6 +255,8 @@ export interface XYProps {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
+  splitRowAccessor?: ExpressionValueVisDimension | string;
+  splitColumnAccessor?: ExpressionValueVisDimension | string;
 }
 
 export interface AnnotationLayerArgs {
@@ -270,7 +279,7 @@ export type ExtendedAnnotationLayerConfigResult = ExtendedAnnotationLayerArgs & 
 };
 
 export interface ReferenceLineLayerArgs {
-  accessors: string[];
+  accessors: Array<ExpressionValueVisDimension | string>;
   columnToLabel?: string;
   yConfig?: ExtendedYConfigResult[];
 }
@@ -379,7 +388,7 @@ export type ExtendedDataLayerFn = ExpressionFunctionDefinition<
   typeof EXTENDED_DATA_LAYER,
   Datatable,
   ExtendedDataLayerArgs,
-  ExtendedDataLayerConfigResult
+  Promise<ExtendedDataLayerConfigResult>
 >;
 
 export type ReferenceLineLayerFn = ExpressionFunctionDefinition<
