@@ -72,7 +72,6 @@ export const SourceSettings: React.FC = () => {
     setStagedPrivateKey,
     updateContentSourceConfiguration,
   } = useActions(SourceLogic);
-  const { getSourceConfigData } = useActions(AddSourceLogic);
 
   const {
     contentSource: { name, id, serviceType, isOauth1, secret },
@@ -81,8 +80,12 @@ export const SourceSettings: React.FC = () => {
     isConfigurationUpdateButtonLoading,
   } = useValues(SourceLogic);
 
+  const addSourceLogic = AddSourceLogic({ serviceType });
+  const { getSourceConfigData } = useActions(addSourceLogic);
+
   const {
     sourceConfigData: { configuredFields },
+    dataLoading,
   } = useValues(AddSourceLogic);
 
   const { isOrganization } = useValues(AppLogic);
@@ -161,7 +164,11 @@ export const SourceSettings: React.FC = () => {
   );
 
   return (
-    <SourceLayout pageChrome={[NAV.SETTINGS]} pageViewTelemetry="source_settings">
+    <SourceLayout
+      pageChrome={[NAV.SETTINGS]}
+      pageViewTelemetry="source_settings"
+      isLoading={dataLoading}
+    >
       <ViewContentHeader title={SOURCE_SETTINGS_HEADING} />
       <ContentSection title={SOURCE_SETTINGS_TITLE} description={SOURCE_SETTINGS_DESCRIPTION}>
         <form onSubmit={submitNameChange}>
