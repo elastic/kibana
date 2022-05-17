@@ -41,7 +41,11 @@ import {
   postCancelActionHandlerBuilder,
 } from './actions_handlers';
 import { postAgentUnenrollHandler, postBulkAgentsUnenrollHandler } from './unenroll_handler';
-import { postAgentUpgradeHandler, postBulkAgentsUpgradeHandler } from './upgrade_handler';
+import {
+  getCurrentUpgradesHandler,
+  postAgentUpgradeHandler,
+  postBulkAgentsUpgradeHandler,
+} from './upgrade_handler';
 
 export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
   // Get one
@@ -197,6 +201,18 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     },
     postBulkAgentsUpgradeHandler
   );
+  // Current upgrades
+  router.get(
+    {
+      path: AGENT_API_ROUTES.CURRENT_UPGRADES_PATTERN,
+      validate: false,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    getCurrentUpgradesHandler
+  );
+
   // Bulk reassign
   router.post(
     {

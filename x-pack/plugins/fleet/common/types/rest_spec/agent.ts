@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Agent, AgentAction, NewAgentAction } from '../models';
+import type { Agent, AgentAction, CurrentUpgrade, NewAgentAction } from '../models';
 
 import type { ListResult, ListWithKuery } from './common';
 
@@ -173,4 +173,8 @@ export interface IncomingDataList {
 }
 export interface GetAgentIncomingDataResponse {
   items: IncomingDataList[];
+}
+
+export interface GetCurrentUpgradesResponse {
+  items: CurrentUpgrade[];
 }
