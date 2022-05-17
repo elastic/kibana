@@ -833,6 +833,18 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
       anomaliesData={null}
       contextID="test-query"
       data={Object {}}
+      docValueFields={
+        Array [
+          Object {
+            "field": "@timestamp",
+            "format": "date_time",
+          },
+          Object {
+            "field": "event.end",
+            "format": "date_time",
+          },
+        ]
+      }
       endDate="2020-07-08T08:20:18.966Z"
       hostName="woohoo!"
       id="hostsDetailsQuery"
