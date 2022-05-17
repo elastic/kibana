@@ -11,11 +11,13 @@ import {
   AGENT_NAME,
   CLOUD_PROVIDER,
   CLOUD_SERVICE_NAME,
-  CONTAINER_ID,
+  CONTAINER,
   KUBERNETES,
   SERVICE_NAME,
   POD_NAME,
   HOST_OS_PLATFORM,
+  CONTAINER_ID,
+  CONTAINER_IMAGE,
 } from '../../../common/elasticsearch_fieldnames';
 import { ContainerType } from '../../../common/service_metadata';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
@@ -40,6 +42,7 @@ export const should = [
   { exists: { field: CLOUD_PROVIDER } },
   { exists: { field: HOST_OS_PLATFORM } },
   { exists: { field: AGENT_NAME } },
+  { exists: { field: CONTAINER_IMAGE } },
 ];
 
 export async function getServiceMetadataIcons({
@@ -75,7 +78,7 @@ export async function getServiceMetadataIcons({
       _source: [
         KUBERNETES,
         CLOUD_PROVIDER,
-        CONTAINER_ID,
+        CONTAINER,
         AGENT_NAME,
         CLOUD_SERVICE_NAME,
       ],

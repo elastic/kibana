@@ -17,7 +17,7 @@ type ServiceDetailsReturnType =
 
 interface Props {
   container: ServiceDetailsReturnType['container'];
-  kubernetes: ServiceDetailsReturnType['kubernetes'];
+  kubernetes?: ServiceDetailsReturnType['kubernetes'];
 }
 
 export function ContainerDetails({ container, kubernetes }: Props) {
@@ -26,6 +26,36 @@ export function ContainerDetails({ container, kubernetes }: Props) {
   }
 
   const listItems: EuiDescriptionListProps['listItems'] = [];
+  if (container?.image?.name) {
+    listItems.push({
+      title: i18n.translate(
+        'xpack.apm.serviceIcons.serviceDetails.container.image.name',
+        { defaultMessage: 'Container name' }
+      ),
+      description: container.image.name,
+    });
+  }
+
+  if (kubernetes?.namespace?.name) {
+    listItems.push({
+      title: i18n.translate(
+        'xpack.apm.serviceIcons.serviceDetails.container.namespace',
+        { defaultMessage: 'Namespace' }
+      ),
+      description: kubernetes?.namespace.name,
+    });
+  }
+
+  if (kubernetes?.deployment?.name) {
+    listItems.push({
+      title: i18n.translate(
+        'xpack.apm.serviceIcons.serviceDetails.container.deployment.name',
+        { defaultMessage: 'Deployment name' }
+      ),
+      description: kubernetes.deployment.name,
+    });
+  }
+
   if (container.os) {
     listItems.push({
       title: i18n.translate(
@@ -35,28 +65,6 @@ export function ContainerDetails({ container, kubernetes }: Props) {
         }
       ),
       description: container.os,
-    });
-  }
-
-  if (container.isContainerized !== undefined) {
-    listItems.push({
-      title: i18n.translate(
-        'xpack.apm.serviceIcons.serviceDetails.container.containerizedLabel',
-        { defaultMessage: 'Containerized' }
-      ),
-      description: container.isContainerized
-        ? i18n.translate(
-            'xpack.apm.serviceIcons.serviceDetails.container.yesLabel',
-            {
-              defaultMessage: 'Yes',
-            }
-          )
-        : i18n.translate(
-            'xpack.apm.serviceIcons.serviceDetails.container.noLabel',
-            {
-              defaultMessage: 'No',
-            }
-          ),
     });
   }
 
@@ -70,53 +78,21 @@ export function ContainerDetails({ container, kubernetes }: Props) {
     });
   }
 
-  if (container.type) {
-    listItems.push({
-      title: i18n.translate(
-        'xpack.apm.serviceIcons.serviceDetails.container.orchestrationLabel',
-        { defaultMessage: 'Orchestration' }
-      ),
-      description: container.type,
-    });
-  }
-
-  if (kubernetes?.namespace) {
-    listItems.push({
-      title: i18n.translate(
-        'xpack.apm.serviceIcons.serviceDetails.container.namespace',
-        { defaultMessage: 'Namespace' }
-      ),
-      description: <EuiBadge color="hollow">{kubernetes.namespace}</EuiBadge>,
-    });
-  }
-  if (kubernetes?.deployment?.name) {
-    listItems.push({
-      title: i18n.translate(
-        'xpack.apm.serviceIcons.serviceDetails.container.deployment.name',
-        { defaultMessage: 'Deployment name' }
-      ),
-      description: (
-        <EuiBadge color="hollow">{kubernetes?.deployment?.name}</EuiBadge>
-      ),
-    });
-  }
-  if (kubernetes?.pod?.name) {
+  if (kubernetes?.labels) {
     listItems.push({
       title: i18n.translate(
         'xpack.apm.serviceIcons.serviceDetails.container.pod.name',
-        { defaultMessage: 'Pod name' }
+        { defaultMessage: 'Labels' }
       ),
-      description: <EuiBadge color="hollow">{kubernetes?.pod?.name}</EuiBadge>,
-    });
-  }
-
-  if (kubernetes?.container?.status?.phase) {
-    listItems.push({
-      title: i18n.translate(
-        'xpack.apm.serviceIcons.serviceDetails.container.phase',
-        { defaultMessage: 'Container status ' }
+      description: (
+        <ul>
+          {kubernetes.labels.map((label, index) => (
+            <li key={index}>
+              <EuiBadge color="hollow">{label}</EuiBadge>
+            </li>
+          ))}
+        </ul>
       ),
-      description: kubernetes.container.status.phase,
     });
   }
 

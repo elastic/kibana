@@ -14,7 +14,7 @@ import {
   CLOUD_REGION,
   CLOUD_MACHINE_TYPE,
   CLOUD_SERVICE_NAME,
-  CONTAINER_ID,
+  CONTAINER,
   HOST,
   KUBERNETES,
   SERVICE,
@@ -26,6 +26,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { ContainerType } from '../../../common/service_metadata';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
+import { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { Setup } from '../../lib/helpers/setup_request';
 import { should } from './get_service_metadata_icons';
@@ -51,7 +52,7 @@ export interface ServiceMetadataDetails {
   container?: {
     os?: string;
     id?: string;
-    isContainerized?: boolean;
+    image?: { name: string };
     totalNumberInstances?: number;
     type?: ContainerType;
   };
@@ -68,6 +69,7 @@ export interface ServiceMetadataDetails {
     projectName?: string;
     serviceName?: string;
   };
+  kubernetes?: Kubernetes;
 }
 
 export async function getServiceMetadataDetails({
@@ -100,7 +102,7 @@ export async function getServiceMetadataDetails({
     },
     body: {
       size: 1,
-      _source: [SERVICE, AGENT, HOST, CONTAINER_ID, KUBERNETES, CLOUD],
+      _source: [SERVICE, AGENT, HOST, CONTAINER, KUBERNETES, CLOUD],
       query: { bool: { filter, should } },
       aggs: {
         serviceVersions: {
@@ -184,7 +186,6 @@ export async function getServiceMetadataDetails({
       ? {
           os: host?.os?.platform,
           type: (!!kubernetes ? 'Kubernetes' : 'Docker') as ContainerType,
-          isContainerized: !!container?.id,
           id: container?.id,
           totalNumberInstances,
         }

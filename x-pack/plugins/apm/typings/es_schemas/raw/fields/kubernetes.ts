@@ -6,5 +6,14 @@
  */
 
 export interface Kubernetes {
+  container?: {
+    name: string;
+    id: string;
+    image: string;
+  };
   pod?: { uid: string; [key: string]: unknown };
+  namespace?: { name: string[] };
+  replicaset?: { name: string };
+  deployment?: { name: string };
+  labels?: string[];
 }
