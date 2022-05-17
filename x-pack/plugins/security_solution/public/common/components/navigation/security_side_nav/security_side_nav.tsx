@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
-import { EuiLink, EuiListGroupItem } from '@elastic/eui';
+import React, { useMemo, useCallback, MouseEventHandler } from 'react';
+import { EuiHorizontalRule, EuiLink, EuiListGroupItem } from '@elastic/eui';
 import { SecurityPageName } from '../../../../app/types';
 import { navigationCategories as managementCategories } from '../../../../management/links';
 import { getAncestorLinksInfo } from '../../../links';
@@ -23,6 +23,34 @@ const isFooterNavItem = (id: SecurityPageName) =>
 
 type FormatSideNavItems = (navItems: NavLinkItem) => SideNavItem;
 
+/**
+ * Renders the navigation item for "Get Started" custom link
+ */
+const GetStartedCustomLinkComponent: React.FC<{
+  isSelected: boolean;
+  title: string;
+  href: string;
+  onClick: MouseEventHandler;
+}> = ({ isSelected, title, href, onClick }) => (
+  // eslint-disable-next-line @elastic/eui/href-or-on-click
+  <EuiLink href={href} onClick={onClick} color={isSelected ? 'primary' : 'text'}>
+    <EuiListGroupItem
+      label={title.toUpperCase()}
+      size="xs"
+      color={isSelected ? 'primary' : 'text'}
+      iconType={EuiIconLaunch}
+      iconProps={{
+        color: isSelected ? 'primary' : 'text',
+      }}
+    />
+    <EuiHorizontalRule margin="xs" />
+  </EuiLink>
+);
+const GetStartedCustomLink = React.memo(GetStartedCustomLinkComponent);
+
+/**
+ * Returns a function to format generic `NavLinkItem` array to the `SideNavItem` type
+ */
 const useFormatSideNavItem = (): FormatSideNavItems => {
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps(); // adds href and onClick props
 
@@ -53,10 +81,12 @@ const useFormatSideNavItem = (): FormatSideNavItems => {
 
       const formatGetStartedItem = (navItem: NavLinkItem): CustomSideNavItem => ({
         id: navItem.id,
-        render: () => (
-          <EuiLink {...getSecuritySolutionLinkProps({ deepLinkId: SecurityPageName.landing })}>
-            <EuiListGroupItem label="GET STARTED" size="xs" color="text" iconType={EuiIconLaunch} />
-          </EuiLink>
+        render: (isSelected) => (
+          <GetStartedCustomLink
+            isSelected={isSelected}
+            title={navItem.title}
+            {...getSecuritySolutionLinkProps({ deepLinkId: SecurityPageName.landing })}
+          />
         ),
       });
 
@@ -74,6 +104,9 @@ const useFormatSideNavItem = (): FormatSideNavItems => {
   return formatSideNavItem;
 };
 
+/**
+ * Returns the formatted `items` and `footerItems` to be rendered in the navigation
+ */
 const useSideNavItems = () => {
   const appNavLinks = useAppNavLinks();
   const formatSideNavItem = useFormatSideNavItem();
@@ -108,11 +141,12 @@ const useSelectedId = (): SecurityPageName => {
   return selectedId;
 };
 
-const SecuritySideNavComponent: React.FC = () => {
+/**
+ * Main security navigation component.
+ * It takes the links to render from the generic application `links` configs.
+ */
+export const SecuritySideNav: React.FC = () => {
   const [items, footerItems] = useSideNavItems();
   const selectedId = useSelectedId();
   return <SolutionGroupedNav items={items} footerItems={footerItems} selectedId={selectedId} />;
 };
-SecuritySideNavComponent.displayName = 'SecuritySideNavComponent';
-
-export const SecuritySideNav = SecuritySideNavComponent;

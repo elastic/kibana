@@ -21,7 +21,7 @@ export interface DefaultSideNavItem {
 
 export interface CustomSideNavItem {
   id: string;
-  render: () => React.ReactNode;
+  render: (isSelected: boolean) => React.ReactNode;
 }
 
 export type SideNavItem = DefaultSideNavItem | CustomSideNavItem;

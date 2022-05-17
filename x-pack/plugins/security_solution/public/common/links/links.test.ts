@@ -159,7 +159,7 @@ describe('Security app links', () => {
           [
             {
               // this link should not be excluded, the test checks all conditions passed
-              // all its sub-links will be filtered for different reasons
+              // all its sub-links should be filtered for each criteria
               id: SecurityPageName.network,
               title: 'Network',
               path: '/network',

@@ -180,7 +180,7 @@ const SolutionNavItemComponent: React.FC<SolutionNavItemProps> = ({
   onOpenPanelNav,
 }) => {
   if (isCustomItem(item)) {
-    return <Fragment key={item.id}>{item.render()}</Fragment>;
+    return <Fragment key={item.id}>{item.render(isSelected)}</Fragment>;
   }
   const { id, href, label, onClick } = item;
 

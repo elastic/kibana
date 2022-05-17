@@ -121,13 +121,13 @@ const SolutionNavPanelCategories: React.FC<SolutionNavPanelCategoriesProps> = ({
   items,
   onClose,
 }) => {
-  const itemsById = new Map(items.map((item) => [item.id, item]));
+  const itemsMap = new Map(items.map((item) => [item.id, item]));
 
   return (
     <>
       {categories.map(({ label, linkIds }) => {
         const links = linkIds.reduce<DefaultSideNavItem[]>((acc, linkId) => {
-          const link = itemsById.get(linkId);
+          const link = itemsMap.get(linkId);
           if (link) {
             acc.push(link);
           }
@@ -151,31 +151,24 @@ const SolutionNavPanelCategories: React.FC<SolutionNavPanelCategoriesProps> = ({
 
 const SolutionNavPanelItems: React.FC<SolutionNavPanelItemsProps> = ({ items, onClose }) => (
   <>
-    {items.map((item) => (
-      <SolutionNavPanelItem key={item.id} item={item} onClose={onClose} />
+    {items.map(({ id, href, onClick, label, description }) => (
+      <Fragment key={id}>
+        <EuiDescriptionListTitle>
+          <a
+            data-test-subj={`groupedNavPanelLink-${id}`}
+            href={href}
+            onClick={(ev) => {
+              onClose();
+              if (onClick) {
+                onClick(ev);
+              }
+            }}
+          >
+            {label}
+          </a>
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>{description}</EuiDescriptionListDescription>
+      </Fragment>
     ))}
-  </>
-);
-
-const SolutionNavPanelItem: React.FC<SolutionNavPanelItemProps> = ({
-  item: { id, href, onClick, label, description },
-  onClose,
-}) => (
-  <>
-    <EuiDescriptionListTitle>
-      <a
-        data-test-subj={`groupedNavPanelLink-${id}`}
-        href={href}
-        onClick={(ev) => {
-          onClose();
-          if (onClick) {
-            onClick(ev);
-          }
-        }}
-      >
-        {label}
-      </a>
-    </EuiDescriptionListTitle>
-    <EuiDescriptionListDescription>{description}</EuiDescriptionListDescription>
   </>
 );
