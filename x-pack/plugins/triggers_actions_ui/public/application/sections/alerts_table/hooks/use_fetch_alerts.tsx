@@ -71,7 +71,7 @@ type AlertActions =
   | { type: 'request'; request: Omit<FetchAlertsArgs, 'skip'> };
 
 const initialAlertState: AlertStateReducer = {
-  loading: true,
+  loading: false,
   request: {
     featureIds: [],
     fields: [],
@@ -166,7 +166,6 @@ const useFetchAlerts = ({
   const fetchAlerts = useCallback(
     (request: AlertRequest | null) => {
       if (request == null || skip) {
-        dispatch({ type: 'loading', loading: false });
         return;
       }
 

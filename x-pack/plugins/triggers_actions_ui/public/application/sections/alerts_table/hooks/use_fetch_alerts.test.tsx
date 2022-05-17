@@ -7,7 +7,7 @@
 
 import sinon from 'sinon';
 import { of } from 'rxjs';
-import { renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 import { useFetchAlerts, FetchAlertsArgs } from './use_fetch_alerts';
 import { useKibana } from '../../../../common/lib/kibana';
 import { IKibanaSearchResponse } from '@kbn/data-plugin/public';
@@ -148,6 +148,7 @@ describe('useFetchAlerts', () => {
 
   it('call search with correct arguments', () => {
     renderHook(() => useFetchAlerts(args));
+    expect(dataSearchMock).toHaveBeenCalledTimes(1);
     expect(dataSearchMock).toHaveBeenCalledWith(
       {
         featureIds: args.featureIds,
@@ -166,6 +167,7 @@ describe('useFetchAlerts', () => {
 
   it('skips the fetch correctly', () => {
     const { result } = renderHook(() => useFetchAlerts({ ...args, skip: true }));
+
     expect(dataSearchMock).not.toHaveBeenCalled();
     expect(result.current).toEqual([
       false,
@@ -238,6 +240,26 @@ describe('useFetchAlerts', () => {
     expect(showErrorMock).toHaveBeenCalled();
   });
 
+  it('returns the correct response if there is no rawResponse', () => {
+    // @ts-expect-error
+    const obs$ = of<IKibanaSearchResponse>({ id: '1', isRunning: true, isPartial: false });
+    dataSearchMock.mockReturnValue(obs$);
+    const { result } = renderHook(() => useFetchAlerts(args));
+
+    expect(result.current).toEqual([
+      false,
+      {
+        alerts: [],
+        getInspectQuery: expect.anything(),
+        refetch: expect.anything(),
+        isInitializing: true,
+        totalAlerts: -1,
+        updatedAt: 0,
+      },
+    ]);
+    expect(showErrorMock).toHaveBeenCalled();
+  });
+
   it('returns the correct total alerts if the total alerts in the response is an object', () => {
     const obs$ = of<IKibanaSearchResponse>({
       ...searchResponse,
@@ -252,5 +274,99 @@ describe('useFetchAlerts', () => {
     const [_, alerts] = result.current;
 
     expect(alerts.totalAlerts).toEqual(2);
+  });
+
+  it('does not return an alert without fields', () => {
+    const obs$ = of<IKibanaSearchResponse>({
+      ...searchResponse,
+      rawResponse: {
+        ...searchResponse.rawResponse,
+        hits: {
+          ...searchResponse.rawResponse.hits,
+          hits: [
+            {
+              _index: '.internal.alerts-security.alerts-default-000001',
+              _id: '38dd308706a127696cc63b8f142e8e4d66f8f79bc7d491dd79a42ea4ead62dd1',
+              _score: 1,
+            },
+          ],
+        },
+      },
+    });
+
+    dataSearchMock.mockReturnValue(obs$);
+    const { result } = renderHook(() => useFetchAlerts(args));
+    const [_, alerts] = result.current;
+
+    expect(alerts.alerts).toEqual([]);
+  });
+
+  it('resets pagination on refetch correctly', async () => {
+    const { result } = renderHook(() =>
+      useFetchAlerts({
+        ...args,
+        pagination: {
+          pageIndex: 5,
+          pageSize: 10,
+        },
+      })
+    );
+    const [_, alerts] = result.current;
+    expect(dataSearchMock).toHaveBeenCalledWith(
+      {
+        featureIds: args.featureIds,
+        fields: args.fields,
+        pagination: {
+          pageIndex: 5,
+          pageSize: 10,
+        },
+        query: {
+          ids: {
+            values: ['alert-id-1'],
+          },
+        },
+        sort: args.sort,
+      },
+      { abortSignal: expect.anything(), strategy: 'privateRuleRegistryAlertsSearchStrategy' }
+    );
+
+    await act(async () => {
+      alerts.refetch();
+    });
+
+    expect(dataSearchMock).toHaveBeenCalledWith(
+      {
+        featureIds: args.featureIds,
+        fields: args.fields,
+        pagination: {
+          pageIndex: 0,
+          pageSize: 10,
+        },
+        query: {
+          ids: {
+            values: ['alert-id-1'],
+          },
+        },
+        sort: args.sort,
+      },
+      { abortSignal: expect.anything(), strategy: 'privateRuleRegistryAlertsSearchStrategy' }
+    );
+  });
+
+  it('does not fetch with no feature ids', () => {
+    const { result } = renderHook(() => useFetchAlerts({ ...args, featureIds: [] }));
+
+    expect(dataSearchMock).not.toHaveBeenCalled();
+    expect(result.current).toEqual([
+      false,
+      {
+        alerts: [],
+        getInspectQuery: expect.anything(),
+        refetch: expect.anything(),
+        isInitializing: true,
+        totalAlerts: -1,
+        updatedAt: 0,
+      },
+    ]);
   });
 });
