@@ -52,6 +52,25 @@ export function plugin(context: PluginInitializerContext) {
   return new Plugin(context);
 }
 
+export type { AggregationType, Comparator } from './common';
+
+export {
+  WhenExpression,
+  OfExpression,
+  ForLastExpression,
+  ThresholdExpression,
+  ValueExpression,
+  builtInComparators,
+  builtInGroupByTypes,
+  builtInAggregationTypes,
+  getFields,
+  firstFieldOption,
+  getIndexOptions,
+  getTimeFieldOptions,
+  GroupByExpression,
+  COMPARATORS,
+} from './common';
+
 export { Plugin };
 export * from './plugin';
 // TODO remove this import when we expose the Rules tables as a component
