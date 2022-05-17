@@ -11,7 +11,6 @@ export const AREA_CHART_VIS_NAME = 'Visualization漢字 AreaChart';
 export const LINE_CHART_VIS_NAME = 'Visualization漢字 LineChart';
 
 import expect from '@kbn/expect';
-import { getServiceName } from 'elastic-apm-node';
 import { FtrService } from '../ftr_provider_context';
 
 interface SaveDashboardOptions {
@@ -33,7 +32,6 @@ export class DashboardPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly browser = this.ctx.getService('browser');
   private readonly globalNav = this.ctx.getService('globalNav');
-  private readonly esArchiver = this.ctx.getService('esArchiver');
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly dashboardAddPanel = this.ctx.getService('dashboardAddPanel');
@@ -41,22 +39,24 @@ export class DashboardPageObject extends FtrService {
   private readonly listingTable = this.ctx.getService('listingTable');
   private readonly elasticChart = this.ctx.getService('elasticChart');
   private readonly common = this.ctx.getPageObject('common');
+  private readonly esArchiver = this.ctx.getService('esArchiver');
   private readonly header = this.ctx.getPageObject('header');
   private readonly visualize = this.ctx.getPageObject('visualize');
   private readonly discover = this.ctx.getPageObject('discover');
-  private readonly esNode = this.config.get('esTestCluster.ccs')
-    ? this.ctx.getService('remoteEsArchiver' as 'esArchiver')
-    : this.ctx.getService('esArchiver');
   private readonly logstashIndex = this.config.get('esTestCluster.ccs')
     ? 'ftr-remote:logstash-*'
     : 'logstash-*';
   private readonly kibanaIndex = this.config.get('esTestCluster.ccs')
-    ? 'test/functional/fixtures/es_archiver/dashboard/legacy/ccs'
+    ? 'test/functional/fixtures/kbn_archiver/ccs/dashboard/legacy/legacy.json'
     : 'test/functional/fixtures/es_archiver/dashboard/legacy';
 
   async initTests({ kibanaIndex = this.kibanaIndex, defaultIndex = this.logstashIndex } = {}) {
     this.log.debug('load kibana index with visualizations and log data');
-    await this.esNode.load(kibanaIndex);
+    if (this.config.get('esTestCluster.ccs')) {
+      await this.kibanaServer.importExport.load(kibanaIndex);
+    } else {
+      await this.esArchiver.loadIfNeeded(kibanaIndex);
+    }
     await this.kibanaServer.uiSettings.replace({ defaultIndex });
     await this.common.navigateToApp('dashboard');
   }
