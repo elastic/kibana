@@ -174,8 +174,8 @@ export const navigationCategories: NavigationCategories = [
       SecurityPageName.policies,
       SecurityPageName.trustedApps,
       SecurityPageName.eventFilters,
-      SecurityPageName.blocklist,
       SecurityPageName.hostIsolationExceptions,
+      SecurityPageName.blocklist,
     ],
   },
 ] as const;
