@@ -57,7 +57,6 @@ describe('#getDataLayers', () => {
         layerType: 'data',
         accessors: ['y'],
         seriesType: 'bar',
-        yScaleType: 'linear',
         xScaleType: 'time',
         isHistogram: false,
         table: { rows: [], columns: [], type: 'datatable' },

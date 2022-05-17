@@ -18,7 +18,6 @@ describe('#isTimeChart', () => {
         xAccessor: 'x',
         accessors: ['y'],
         seriesType: 'bar',
-        yScaleType: 'linear',
         xScaleType: 'time',
         isHistogram: false,
         table: {
