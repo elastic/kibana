@@ -27,3 +27,4 @@ export { updateRule } from './update';
 export { resolveRule } from './resolve_rule';
 export { snoozeRule } from './snooze';
 export { unsnoozeRule } from './unsnooze';
+export { explainRule } from './explain_rule';
