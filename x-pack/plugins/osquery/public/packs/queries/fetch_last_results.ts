@@ -12,6 +12,9 @@ import { DataView, SortDirection } from '@kbn/data-plugin/common';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 import { Reducer } from 'react';
+import { useQuery } from 'react-query';
+import { find } from 'lodash';
+import { useKibana } from '../../common/lib/kibana';
 import { PackSOFormData } from './use_pack_query_form';
 
 const getPackActionId = (actionId: string, packName: string) => `pack_${packName}_${actionId}`;
@@ -50,6 +53,123 @@ export interface ILastResultErrors {
   max_score: number | null;
   total: number;
 }
+
+export const useFetchLastResults = ({ data, packName, logsDataView }: ILastResultConfig) => {
+  const kibanaData = useKibana().services.data;
+
+  const getAggsByIds = (ids, timestampsActions) =>
+    ids.reduce((acc, item) => {
+      const timestamp = find(timestampsActions, ['key', item]).timestamps.buckets[0].key_as_string;
+
+      return {
+        ...acc,
+        [item]: {
+          query: {
+            // @ts-expect-error update types
+            bool: {
+              filter: [
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: moment(timestamp).subtract(60, 'seconds').format(),
+                      lte: moment(timestamp).format(),
+                    },
+                  },
+                },
+                {
+                  match_phrase: {
+                    action_id: item,
+                  },
+                },
+              ],
+            },
+          },
+        },
+      };
+    }, []);
+
+  return useQuery(
+    ['scheduledQueryLastResultsaLsdisst'],
+    async () => {
+      const ids = data.reduce((acc, item) => [...acc, `pack_${packName}_${item.id}`], []);
+      const lastResultsSearchSource = await kibanaData.search.searchSource.create({
+        query: {
+          // @ts-expect-error update types
+          terms: {
+            action_id: ids,
+          },
+        },
+        aggs: {
+          // @ts-expect-error update types
+          actions: {
+            terms: {
+              field: 'action_id',
+              // test: 'action_id',
+            },
+            aggs: {
+              timestamps: {
+                terms: {
+                  field: '@timestamp',
+                  order: { _key: 'desc' },
+                  size: 1,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      lastResultsSearchSource.setField('index', logsDataView);
+
+      const lastResultsResponse = await lastValueFrom(lastResultsSearchSource.fetch$());
+      console.log({ lastResultsResponse });
+
+      const timestampsActions = lastResultsResponse?.rawResponse?.aggregations?.actions.buckets;
+      const test = getAggsByIds(ids, timestampsActions);
+      console.log({ test });
+
+      try {
+        const aggsSearchSource = await kibanaData.search.searchSource.create({
+          size: 1,
+          aggs: test,
+        });
+        aggsSearchSource.setField('index', logsDataView);
+
+        console.log({ aggsSearchSource });
+        const aggsResponse = await aggsSearchSource.fetch$().toPromise();
+
+        console.log({ aggsResponse222: aggsResponse });
+      } catch (error) {
+        console.log({ error });
+
+        return null;
+      }
+
+      // aggsSearchSource.setField('index', logsDataView);
+      // // aggsSearchSource.setField('aggs', {
+      // //   unique_agents: { cardinality: { field: 'agent.id' } },
+      // // });
+      // const aggsResponse = await aggsSearchSource.fetch$().toPromise();
+
+      // console.log({ aggs1RESPONSE: aggsResponse });
+
+      return {
+        '@timestamp': lastResultsResponse.rawResponse?.hits?.hits[0]?.fields?.['@timestamp'],
+        // @ts-expect-error update types
+        uniqueAgentsCount: aggsResponse.rawResponse.aggregations?.unique_agents?.value,
+        // docCount: aggsResponse?.rawResponse?.hits?.total,
+      };
+
+      return null;
+    },
+    {
+      keepPreviousData: true,
+      enabled: !!(data.length && logsDataView),
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+    }
+  );
+};
 
 export const fetchLastResults = async ({
   kibanaData,
@@ -113,6 +233,7 @@ export const fetchLastResults = async ({
         unique_agents: { cardinality: { field: 'agent.id' } },
       });
       const aggsResponse = await aggsSearchSource.fetch$().toPromise();
+      console.log({ aggsResponse });
 
       return {
         ...acc,

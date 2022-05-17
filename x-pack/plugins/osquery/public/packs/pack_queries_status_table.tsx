@@ -37,8 +37,8 @@ import { PackSOFormData } from './queries/use_pack_query_form';
 import {
   ILastResult,
   fetchLastResults,
-  fetchLastResultsErrors,
   lastResultsReducer,
+  useFetchLastResults,
 } from './queries/fetch_last_results';
 import { useKibana } from '../common/lib/kibana';
 import { ScheduledQueryErrorsTable } from './scheduled_query_errors_table';
@@ -594,17 +594,22 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     fetchLogsDataView();
   }, [dataViews]);
 
+  const { data: lastResultsData } = useFetchLastResults({
+    data,
+    packName,
+    logsDataView,
+  });
   useEffect(() => {
     (async () => {
       setLastResultsState({ type: 'setLastResults', payload: { loading: true } });
       try {
-        const [lastResults, errorResults] = await Promise.all([
+        const [lastResults] = await Promise.all([
           fetchLastResults({ kibanaData, data, packName, logsDataView }),
-          fetchLastResultsErrors({ kibanaData, data, packName, logsDataView }),
+          // fetchLastResultsErrors({ kibanaData, data, packName, logsDataView }),
         ]);
         setLastResultsState({
           type: 'setLastResults',
-          payload: { lastResults, errorResults, loading: false },
+          payload: { lastResults, loading: false },
         });
       } catch (e) {
         setLastResultsState({ type: 'setLastResults', payload: { loading: false } });
@@ -612,12 +617,13 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     })();
   }, [data, kibanaData, logsDataView, packName]);
 
-  const renderQueryColumn = useCallback((query: string, item) => {
-    const singleLine = removeMultilines(query);
-    const content = singleLine.length > 55 ? `${singleLine.substring(0, 55)}...` : singleLine;
+  const renderQueryColumn = useCallback((query?: string, item?) => {
+    const singleLine = query && removeMultilines(query);
+    const content =
+      singleLine && singleLine.length > 55 ? `${singleLine?.substring(0, 55)}...` : singleLine;
 
     return (
-      <EuiToolTip title={item.id} content={<EuiFlexItem>{query}</EuiFlexItem>}>
+      <EuiToolTip title={item?.id} content={<EuiFlexItem>{query}</EuiFlexItem>}>
         <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
           {content}
         </EuiCodeBlock>
