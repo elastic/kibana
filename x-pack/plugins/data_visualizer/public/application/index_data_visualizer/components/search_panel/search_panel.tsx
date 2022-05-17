@@ -120,7 +120,6 @@ export const SearchPanel: FC<Props> = ({
   return (
     <EuiFlexGroup
       gutterSize="s"
-      alignItems="flexStart"
       data-test-subj="dataVisualizerSearchPanel"
       className={'dvSearchPanel__container'}
       responsive={false}

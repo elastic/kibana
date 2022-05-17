@@ -112,6 +112,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
 
   return (
     <EuiConfirmModal
+      data-test-subj="agentUpgradeModal"
       title={
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>

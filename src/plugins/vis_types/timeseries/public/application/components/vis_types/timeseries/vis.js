@@ -162,6 +162,7 @@ class TimeseriesVisualization extends Component {
       onBrush,
       onFilterClick,
       syncColors,
+      syncTooltips,
       palettesService,
       fieldFormatMap,
       getConfig,
@@ -272,6 +273,7 @@ class TimeseriesVisualization extends Component {
             xAxisFormatter={this.xAxisFormatter(interval)}
             annotations={this.prepareAnnotations()}
             syncColors={syncColors}
+            syncTooltips={syncTooltips}
             palettesService={palettesService}
             interval={interval}
             useLegacyTimeAxis={getConfig(LEGACY_TIME_AXIS, false)}
