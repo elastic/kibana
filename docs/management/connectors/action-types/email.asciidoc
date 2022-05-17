@@ -229,7 +229,7 @@ is considered `false`.  Typically, `port: 465` uses `secure: true`, and
 ==== Sending email from Elastic Cloud
 
 Use the preconfigured email connector (`Elastic-Cloud-SMTP`) to send emails from 
-Elastic Cloud. This is the default option when you select the email connector type.
+Elastic Cloud.
 
 [float]
 [[gmail]]
