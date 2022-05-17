@@ -8,16 +8,11 @@
 
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiDataGridColumn,
-  EuiIconTip,
-  EuiListGroupItemProps,
-  EuiScreenReaderOnly,
-} from '@elastic/eui';
+import { EuiDataGridColumn, EuiIconTip, EuiScreenReaderOnly } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ExpandButton } from './discover_grid_expand_button';
 import { DiscoverGridSettings } from './types';
-import { ElasticSearchHit, HitsFlattened } from '../../types';
+import { GetCellTextToCopy } from '../../types';
 import { buildCellActions } from './discover_grid_cell_actions';
 import { getSchemaByKbnType } from './discover_grid_schema';
 import { SelectButton } from './discover_grid_document_selection';
@@ -64,18 +59,18 @@ export function buildEuiGridColumn({
   indexPattern,
   defaultColumns,
   isSortEnabled,
-  rows,
-  rowsFlattened,
   services,
+  getCellTextToCopy,
+  rowsNumber,
 }: {
   columnName: string;
   columnWidth: number | undefined;
   indexPattern: DataView;
   defaultColumns: boolean;
   isSortEnabled: boolean;
-  rows: ElasticSearchHit[];
-  rowsFlattened: HitsFlattened;
   services: DiscoverServices;
+  getCellTextToCopy: GetCellTextToCopy;
+  rowsNumber: number;
 }) {
   const indexPatternField = indexPattern.getFieldByName(columnName);
   const column: EuiDataGridColumn = {
@@ -101,9 +96,16 @@ export function buildEuiGridColumn({
       showMoveLeft: !defaultColumns,
       showMoveRight: !defaultColumns,
       additional: [
-        buildCopyColumnNameButton(columnName, services),
-        buildCopyColumnValuesButton(columnName, rows, rowsFlattened, indexPattern, services),
-      ].filter((item) => !!item) as EuiListGroupItemProps[],
+        ...(columnName === '__source'
+          ? []
+          : [buildCopyColumnNameButton({ columnId: columnName, services })]),
+        buildCopyColumnValuesButton({
+          columnId: columnName,
+          services,
+          getCellTextToCopy,
+          rowsNumber,
+        }),
+      ],
     },
     cellActions: indexPatternField ? buildCellActions(indexPatternField) : [],
   };
@@ -141,54 +143,43 @@ export function buildEuiGridColumn({
 
 export function getEuiGridColumns({
   columns,
-  rows,
-  rowsFlattened,
+  rowsNumber,
   settings,
   indexPattern,
   showTimeCol,
   defaultColumns,
   isSortEnabled,
   services,
+  getCellTextToCopy,
 }: {
   columns: string[];
-  rows: ElasticSearchHit[];
-  rowsFlattened: HitsFlattened;
+  rowsNumber: number;
   settings: DiscoverGridSettings | undefined;
   indexPattern: DataView;
   showTimeCol: boolean;
   defaultColumns: boolean;
   isSortEnabled: boolean;
   services: DiscoverServices;
+  getCellTextToCopy: GetCellTextToCopy;
 }) {
   const timeFieldName = indexPattern.timeFieldName;
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
 
+  let visibleColumns = columns;
   if (showTimeCol && indexPattern.timeFieldName && !columns.find((col) => col === timeFieldName)) {
-    const usedColumns = [indexPattern.timeFieldName, ...columns];
-    return usedColumns.map((column) =>
-      buildEuiGridColumn({
-        columnName: column,
-        columnWidth: getColWidth(column),
-        indexPattern,
-        defaultColumns,
-        isSortEnabled,
-        rows,
-        rowsFlattened,
-        services,
-      })
-    );
+    visibleColumns = [indexPattern.timeFieldName, ...columns];
   }
 
-  return columns.map((column) =>
+  return visibleColumns.map((column) =>
     buildEuiGridColumn({
       columnName: column,
       columnWidth: getColWidth(column),
       indexPattern,
       defaultColumns,
       isSortEnabled,
-      rows,
-      rowsFlattened,
       services,
+      getCellTextToCopy,
+      rowsNumber,
     })
   );
 }

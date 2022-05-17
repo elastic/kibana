@@ -10,26 +10,24 @@ import { copyToClipboard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { formatFieldValue } from './format_value';
-import { ElasticSearchHit, HitsFlattened } from '../types';
+import { ElasticSearchHit, HitsFlattened, GetCellTextToCopy } from '../types';
 import { DiscoverServices } from '../build_services';
 
-interface CopyParams {
-  rowIndex: number;
-  rows: ElasticSearchHit[];
-  rowsFlattened: HitsFlattened;
-  columnId: string;
-  dataView: DataView;
-  services: DiscoverServices;
-}
-
-const getValueAsTextToCopy = ({
+export const getCellValueAsTextToCopy = ({
   rowIndex,
   rows,
   rowsFlattened,
   columnId,
   dataView,
   services,
-}: CopyParams): string => {
+}: {
+  rowIndex: number;
+  rows: ElasticSearchHit[];
+  rowsFlattened: HitsFlattened;
+  columnId: string;
+  dataView: DataView;
+  services: DiscoverServices;
+}): string => {
   const { fieldFormats } = services;
   const rowFlattened = rowsFlattened[rowIndex];
   const field = dataView.fields.getByName(columnId);
@@ -42,22 +40,18 @@ const getValueAsTextToCopy = ({
 
 export const copyValueToClipboard = ({
   rowIndex,
-  rows,
-  rowsFlattened,
   columnId,
-  dataView,
   services,
-}: CopyParams) => {
+  getCellTextToCopy,
+}: {
+  rowIndex: number;
+  columnId: string;
+  services: DiscoverServices;
+  getCellTextToCopy: GetCellTextToCopy;
+}) => {
   const { toastNotifications } = services;
 
-  const valueFormatted = getValueAsTextToCopy({
-    rowIndex,
-    rows,
-    rowsFlattened,
-    columnId,
-    dataView,
-    services,
-  });
+  const valueFormatted = getCellTextToCopy(rowIndex, columnId);
 
   copyToClipboard(valueFormatted);
 
@@ -69,23 +63,20 @@ export const copyValueToClipboard = ({
 };
 
 export const copyColumnValuesToClipboard = async ({
-  rows,
-  rowsFlattened,
   columnId,
-  dataView,
   services,
-}: Omit<CopyParams, 'rowIndex'>) => {
+  getCellTextToCopy,
+  rowsNumber,
+}: {
+  columnId: string;
+  services: DiscoverServices;
+  getCellTextToCopy: GetCellTextToCopy;
+  rowsNumber: number;
+}) => {
   const { toastNotifications } = services;
 
-  const valuesFormatted = rowsFlattened.map((row, rowIndex) =>
-    getValueAsTextToCopy({
-      rowIndex,
-      rows,
-      rowsFlattened,
-      columnId,
-      dataView,
-      services,
-    })
+  const valuesFormatted = [...Array(rowsNumber)].map((_, rowIndex) =>
+    getCellTextToCopy(rowIndex, columnId)
   );
 
   const textToCopy = valuesFormatted.join('\n');
@@ -110,7 +101,10 @@ export const copyColumnValuesToClipboard = async ({
 export const copyColumnNameToClipboard = ({
   columnId,
   services,
-}: Pick<CopyParams, 'columnId' | 'services'>) => {
+}: {
+  columnId: string;
+  services: DiscoverServices;
+}) => {
   const { toastNotifications } = services;
 
   copyToClipboard(columnId);

@@ -9,13 +9,12 @@
 import React from 'react';
 import { EuiListGroupItemProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { ElasticSearchHit, HitsFlattened } from '../../types';
 import {
   copyColumnValuesToClipboard,
   copyColumnNameToClipboard,
 } from '../../utils/copy_to_clipboard';
 import { DiscoverServices } from '../../build_services';
+import { GetCellTextToCopy } from '../../types';
 
 function buildCopyColumnButton({
   label,
@@ -35,13 +34,13 @@ function buildCopyColumnButton({
   return copyToClipBoardButton;
 }
 
-export function buildCopyColumnNameButton(
-  columnName: string,
-  services: DiscoverServices
-): EuiListGroupItemProps | null {
-  if (columnName === '_source') {
-    return null;
-  }
+export function buildCopyColumnNameButton({
+  columnId,
+  services,
+}: {
+  columnId: string;
+  services: DiscoverServices;
+}): EuiListGroupItemProps {
   return buildCopyColumnButton({
     label: (
       <FormattedMessage
@@ -49,20 +48,21 @@ export function buildCopyColumnNameButton(
         defaultMessage="Copy name"
       />
     ),
-    onCopy: () => copyColumnNameToClipboard({ columnId: columnName, services }),
+    onCopy: () => copyColumnNameToClipboard({ columnId, services }),
   });
 }
 
-export function buildCopyColumnValuesButton(
-  columnName: string,
-  rows: ElasticSearchHit[],
-  rowsFlattened: HitsFlattened,
-  dataView: DataView | undefined,
-  services: DiscoverServices
-): EuiListGroupItemProps | null {
-  if (!dataView) {
-    return null;
-  }
+export function buildCopyColumnValuesButton({
+  columnId,
+  services,
+  getCellTextToCopy,
+  rowsNumber,
+}: {
+  columnId: string;
+  services: DiscoverServices;
+  getCellTextToCopy: GetCellTextToCopy;
+  rowsNumber: number;
+}): EuiListGroupItemProps {
   return buildCopyColumnButton({
     label: (
       <FormattedMessage
@@ -72,11 +72,10 @@ export function buildCopyColumnValuesButton(
     ),
     onCopy: () =>
       copyColumnValuesToClipboard({
-        columnId: columnName,
-        rows,
-        rowsFlattened,
-        dataView,
+        columnId,
         services,
+        getCellTextToCopy,
+        rowsNumber,
       }),
   });
 }

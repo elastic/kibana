@@ -51,6 +51,7 @@ import { getFieldsToShow } from '../../utils/get_fields_to_show';
 import { ElasticSearchHit } from '../../types';
 import { useRowHeightsOptions } from '../../utils/use_row_heights_options';
 import { useDiscoverServices } from '../../utils/use_discover_services';
+import { getCellValueAsTextToCopy } from '../../utils/copy_to_clipboard';
 
 interface SortObj {
   id: string;
@@ -237,6 +238,20 @@ export const DiscoverGrid = ({
     });
   }, [displayedRows, indexPattern]);
 
+  const getCellTextToCopy = useCallback(
+    (rowIndex: number, columnId: string) => {
+      return getCellValueAsTextToCopy({
+        rowIndex,
+        rows: displayedRows,
+        rowsFlattened: displayedRowsFlattened,
+        dataView: indexPattern,
+        columnId,
+        services,
+      });
+    },
+    [displayedRows, displayedRowsFlattened, indexPattern, services]
+  );
+
   /**
    * Pagination
    */
@@ -321,25 +336,25 @@ export const DiscoverGrid = ({
     () =>
       getEuiGridColumns({
         columns: displayedColumns,
-        rows: displayedRows,
-        rowsFlattened: displayedRowsFlattened,
+        rowsNumber: displayedRows.length,
         settings,
         indexPattern,
         showTimeCol,
         defaultColumns,
         isSortEnabled,
         services,
+        getCellTextToCopy,
       }),
     [
       displayedColumns,
       displayedRows,
-      displayedRowsFlattened,
       indexPattern,
       showTimeCol,
       settings,
       defaultColumns,
       isSortEnabled,
       services,
+      getCellTextToCopy,
     ]
   );
 
@@ -465,6 +480,7 @@ export const DiscoverGrid = ({
             setIsFilterActive(false);
           }
         },
+        getCellTextToCopy,
       }}
     >
       <span

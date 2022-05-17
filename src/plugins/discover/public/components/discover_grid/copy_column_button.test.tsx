@@ -10,13 +10,18 @@ import React from 'react';
 import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './copy_column_button';
 import { EuiButton } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { discoverServiceMock } from '../../__mocks__/services';
+import { discoverGridContextMock } from './__mocks__/grid_context';
 
 const execCommandMock = (global.document.execCommand = jest.fn());
 const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
 
 describe('Copy to clipboard button', () => {
   it('should copy a column name to clipboard on click', () => {
-    const { label, iconType, onClick } = buildCopyColumnNameButton('test-field-name');
+    const { label, iconType, onClick } = buildCopyColumnNameButton({
+      columnId: 'test-field-name',
+      services: discoverServiceMock,
+    });
     execCommandMock.mockImplementationOnce(() => true);
 
     const wrapper = mountWithIntl(
@@ -32,7 +37,12 @@ describe('Copy to clipboard button', () => {
   });
 
   it('should copy column values to clipboard on click', () => {
-    const { label, iconType, onClick } = buildCopyColumnValuesButton('test-field-name');
+    const { label, iconType, onClick } = buildCopyColumnValuesButton({
+      columnId: 'test-field-name',
+      services: discoverServiceMock,
+      getCellTextToCopy: discoverGridContextMock.getCellTextToCopy,
+      rowsNumber: 2,
+    });
     execCommandMock.mockImplementationOnce(() => true);
 
     const wrapper = mountWithIntl(
@@ -45,10 +55,15 @@ describe('Copy to clipboard button', () => {
 
     expect(execCommandMock).toHaveBeenCalledWith('copy');
     expect(warn).not.toHaveBeenCalled();
+
+    // TODO: add tests
   });
 
   it('should not copy to clipboard on click', () => {
-    const { label, iconType, onClick } = buildCopyColumnNameButton('test-field-name');
+    const { label, iconType, onClick } = buildCopyColumnNameButton({
+      columnId: 'test-field-name',
+      services: discoverServiceMock,
+    });
     execCommandMock.mockImplementationOnce(() => false);
 
     const wrapper = mountWithIntl(
