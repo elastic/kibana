@@ -522,6 +522,10 @@ class TableListView<V extends { [key: string]: unknown }> extends React.Componen
     // Add "Last update" column
     if (this.state.hasUpdatedAtMetadata) {
       const renderUpdatedAt = (dateTime: string) => {
+        if (!dateTime) {
+          return <span />;
+        }
+
         const updatedAt = moment(dateTime);
 
         if (updatedAt.diff(moment(), 'days') > -7) {

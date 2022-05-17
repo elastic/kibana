@@ -160,7 +160,7 @@ exports[`TableListView render list view 1`] = `
       Object {
         "sort": Object {
           "direction": "asc",
-          "field": "columnTitle",
+          "field": "",
         },
       }
     }

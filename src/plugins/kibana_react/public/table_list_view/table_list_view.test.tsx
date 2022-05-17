@@ -106,7 +106,7 @@ describe('TableListView', () => {
 
     const tableColumns = [
       {
-        field: 'columnTitle',
+        field: 'title',
         name: 'Title',
         sortable: true,
       },
@@ -122,12 +122,12 @@ describe('TableListView', () => {
 
     const hits = [
       {
-        columnTitle: 'Item 1',
+        title: 'Item 1',
         description: 'Item 1 description',
         updatedAt: twoDaysAgo,
       },
       {
-        columnTitle: 'Item 2',
+        title: 'Item 2',
         description: 'Item 2 description',
         // This is the latest updated and should come first in the table
         updatedAt: yesterday,
@@ -164,12 +164,12 @@ describe('TableListView', () => {
     test('should not display relative time for items updated more than 7 days ago', async () => {
       const updatedAtValues: Moment[] = [];
 
-      const updatedHits = hits.map(({ columnTitle, description }, i) => {
+      const updatedHits = hits.map(({ title, description }, i) => {
         const updatedAt = new Date(new Date().setDate(new Date().getDate() - (7 + i)));
         updatedAtValues[i] = moment(updatedAt);
 
         return {
-          columnTitle,
+          title,
           description,
           updatedAt,
         };
@@ -192,6 +192,7 @@ describe('TableListView', () => {
       const { tableCellsValues } = table.getMetaData('itemsInMemTable');
 
       expect(tableCellsValues).toEqual([
+        // Renders the datetime with this format: "05/10/2022 @ 2:34 PM"
         ['Item 1', 'Item 1 description', updatedAtValues[0].format('L @ LT')],
         ['Item 2', 'Item 2 description', updatedAtValues[1].format('L @ LT')],
       ]);
@@ -203,7 +204,7 @@ describe('TableListView', () => {
           findItems: jest.fn(() =>
             Promise.resolve({
               total: hits.length,
-              hits: hits.map(({ columnTitle, description }) => ({ columnTitle, description })),
+              hits: hits.map(({ title, description }) => ({ title, description })),
             })
           ),
         });
@@ -217,6 +218,30 @@ describe('TableListView', () => {
       expect(tableCellsValues).toEqual([
         ['Item 1', 'Item 1 description'], // Sorted by title
         ['Item 2', 'Item 2 description'],
+      ]);
+    });
+
+    test('should not display anything if there is no updatedAt metadata for an item', async () => {
+      await act(async () => {
+        testBed = await setup({
+          findItems: jest.fn(() =>
+            Promise.resolve({
+              total: hits.length + 1,
+              hits: [...hits, { title: 'Item 3', description: 'Item 3 description' }],
+            })
+          ),
+        });
+      });
+
+      const { component, table } = testBed!;
+      component.update();
+
+      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+
+      expect(tableCellsValues).toEqual([
+        ['Item 2', 'Item 2 description', 'yesterday'],
+        ['Item 1', 'Item 1 description', '2 days ago'],
+        ['Item 3', 'Item 3 description', ''], // Empty column as no updatedAt provided
       ]);
     });
   });
