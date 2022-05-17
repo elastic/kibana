@@ -116,7 +116,7 @@ class TableListView<V extends { [key: string]: unknown }> extends React.Componen
       filter: props.initialFilter,
       selectedIds: [],
       tableSort: {
-        field: 'columnTitle',
+        field: '',
         direction: 'asc',
       },
     };
