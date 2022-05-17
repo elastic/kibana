@@ -187,10 +187,7 @@ describe('rule_add', () => {
 
     wrapper.find('[data-test-subj="my-rule-type-SelectOption"]').first().simulate('click');
 
-    const target = {} as unknown as HTMLInputElement;
-    (wrapper.find('[data-test-subj="ruleNameInput"]').first().prop('inputRef') as Function)(target);
-    expect(target.value).toBe('');
-
+    expect(wrapper.find('input#ruleName').props().value).toBe('');
     expect(wrapper.find('[data-test-subj="tagsComboBox"]').first().text()).toBe('');
 
     expect(wrapper.find('.euiSelect').first().props().value).toBe('m');
@@ -214,19 +211,9 @@ describe('rule_add', () => {
       },
       onClose
     );
-    const ruleNameInputTarget = {} as unknown as HTMLInputElement;
-    const intervalInputTarget = {} as unknown as HTMLInputElement;
 
-    (wrapper.find('[data-test-subj="ruleNameInput"]').first().prop('inputRef') as Function)(
-      ruleNameInputTarget
-    );
-    expect(ruleNameInputTarget.value).toBe('Simple status rule');
-
-    (wrapper.find('[data-test-subj="intervalInput"]').first().prop('inputRef') as Function)(
-      intervalInputTarget
-    );
-    expect(intervalInputTarget.value).toBe('1');
-
+    expect(wrapper.find('input#ruleName').props().value).toBe('Simple status rule');
+    expect(wrapper.find('[data-test-subj="intervalInput"]').first().props().value).toEqual(1);
     expect(wrapper.find('[data-test-subj="tagsComboBox"]').first().text()).toBe('uptimelogs');
     expect(wrapper.find('[data-test-subj="intervalInputUnit"]').first().props().value).toBe('h');
   });
@@ -234,13 +221,8 @@ describe('rule_add', () => {
   it('renders rule add flyout with DEFAULT_RULE_INTERVAL if no initialValues specified and no minimumScheduleInterval', async () => {
     (triggersActionsUiConfig as jest.Mock).mockResolvedValue({});
     await setup();
-    const intervalInputTarget = {} as unknown as HTMLInputElement;
 
-    (wrapper.find('[data-test-subj="intervalInput"]').first().prop('inputRef') as Function)(
-      intervalInputTarget
-    );
-    expect(intervalInputTarget.value).toBe('1');
-
+    expect(wrapper.find('[data-test-subj="intervalInput"]').first().props().value).toEqual(1);
     expect(wrapper.find('[data-test-subj="intervalInputUnit"]').first().props().value).toBe('m');
   });
 
@@ -249,13 +231,8 @@ describe('rule_add', () => {
       minimumScheduleInterval: { value: '5m', enforce: false },
     });
     await setup();
-    const intervalInputTarget = {} as unknown as HTMLInputElement;
 
-    (wrapper.find('[data-test-subj="intervalInput"]').first().prop('inputRef') as Function)(
-      intervalInputTarget
-    );
-    expect(intervalInputTarget.value).toBe('5');
-
+    expect(wrapper.find('[data-test-subj="intervalInput"]').first().props().value).toEqual(5);
     expect(wrapper.find('[data-test-subj="intervalInputUnit"]').first().props().value).toBe('m');
   });
 
@@ -296,7 +273,6 @@ describe('rule_add', () => {
       minimumScheduleInterval: { value: '1m', enforce: false },
     });
     await setup({ ruleTypeId: 'my-rule-type' }, jest.fn(), '3h');
-    const intervalInputTarget = {} as unknown as HTMLInputElement;
 
     // Wait for handlers to fire
     await act(async () => {
@@ -308,11 +284,10 @@ describe('rule_add', () => {
       .find('[data-test-subj="intervalInputUnit"]')
       .first()
       .getElement().props.value;
+    const intervalInput = wrapper.find('[data-test-subj="intervalInput"]').first().getElement()
+      .props.value;
     expect(intervalInputUnit).toBe('h');
-    (wrapper.find('[data-test-subj="intervalInput"]').first().prop('inputRef') as Function)(
-      intervalInputTarget
-    );
-    expect(intervalInputTarget.value).toBe('3');
+    expect(intervalInput).toBe(3);
   });
 });
 

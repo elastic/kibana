@@ -35,7 +35,7 @@ import {
   EuiToolTip,
   EuiCallOut,
 } from '@elastic/eui';
-import { debounce, capitalize } from 'lodash';
+import { capitalize } from 'lodash';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import {
   formatDuration,
@@ -82,11 +82,6 @@ const ENTER_KEY = 13;
 function getProducerFeatureName(producer: string, kibanaFeatures: KibanaFeature[]) {
   return kibanaFeatures.find((featureItem) => featureItem.id === producer)?.name;
 }
-
-const withDebounce = debounce((execute: () => void) => execute(), 0, {
-  leading: false,
-  trailing: true,
-});
 
 interface RuleFormProps<MetaData = Record<string, any>> {
   rule: InitialRule;
@@ -332,18 +327,6 @@ export const RuleForm = ({
     },
     []
   );
-
-  const initRuleNameInputRef = (target: HTMLInputElement | null) => {
-    if (target !== null && !target.value) {
-      target.value = rule.name || '';
-    }
-  };
-
-  const initRuleIntervalInputRef = (target: HTMLInputElement | null) => {
-    if (target !== null && !target.value) {
-      target.value = (ruleInterval && `${ruleInterval}`) || '';
-    }
-  };
 
   const RuleParamsExpressionComponent = ruleTypeModel ? ruleTypeModel.ruleParamsExpression : null;
 
@@ -668,15 +651,14 @@ export const RuleForm = ({
             error={errors.name}
           >
             <EuiFieldText
-              inputRef={initRuleNameInputRef}
               fullWidth
               autoFocus={true}
               isInvalid={errors.name.length > 0 && rule.name !== undefined}
               name="name"
               data-test-subj="ruleNameInput"
+              value={rule.name || ''}
               onChange={(e) => {
-                const value = e.target.value;
-                withDebounce(() => setRuleProperty('name', value));
+                setRuleProperty('name', e.target.value);
               }}
               onBlur={() => {
                 if (!rule.name) {
@@ -735,19 +717,17 @@ export const RuleForm = ({
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
                 <EuiFieldNumber
-                  inputRef={initRuleIntervalInputRef}
                   fullWidth
                   min={1}
                   isInvalid={errors['schedule.interval'].length > 0}
+                  value={ruleInterval || ''}
                   name="interval"
                   data-test-subj="intervalInput"
                   onChange={(e) => {
                     const value = e.target.value;
                     const interval = value !== '' ? parseInt(value, 10) : undefined;
-                    withDebounce(() => {
-                      setRuleInterval(interval);
-                      setScheduleProperty('interval', `${value}${ruleIntervalUnit}`);
-                    });
+                    setRuleInterval(interval);
+                    setScheduleProperty('interval', `${value}${ruleIntervalUnit}`);
                   }}
                 />
               </EuiFlexItem>

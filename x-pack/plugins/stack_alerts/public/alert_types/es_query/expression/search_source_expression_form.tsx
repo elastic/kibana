@@ -103,6 +103,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   const onSelectDataView = useCallback(
     ([selected]: DataViewOption[]) =>
       // type casting is safe, since id was set to ComboBox value
+      selected &&
       data.dataViews
         .get(selected.value!)
         .then((newDataView) => dispatch({ type: 'index', payload: newDataView })),

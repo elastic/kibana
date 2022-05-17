@@ -351,13 +351,8 @@ describe('rule_form', () => {
       await setup();
       const ruleNameField = wrapper.find('[data-test-subj="ruleNameInput"]');
 
-      const target = {} as unknown as HTMLInputElement;
-      (wrapper.find('[data-test-subj="ruleNameInput"]').first().prop('inputRef') as Function)(
-        target
-      );
-
       expect(ruleNameField.exists()).toBeTruthy();
-      expect(target.value).toBe('test');
+      expect(ruleNameField.first().prop('value')).toBe('test');
     });
 
     it('renders registered selected rule type', async () => {
@@ -615,12 +610,8 @@ describe('rule_form', () => {
       await setup();
       const ruleNameField = wrapper.find('[data-test-subj="ruleNameInput"]');
 
-      const target = {} as unknown as HTMLInputElement;
-      (wrapper.find('[data-test-subj="ruleNameInput"]').first().prop('inputRef') as Function)(
-        target
-      );
       expect(ruleNameField.exists()).toBeTruthy();
-      expect(target.value).toBe('test');
+      expect(ruleNameField.first().prop('value')).toBe('test');
     });
 
     it('renders registered selected rule type', async () => {
