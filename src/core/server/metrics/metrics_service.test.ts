@@ -201,7 +201,7 @@ describe('MetricsService', () => {
       `);
     });
 
-    it('reports ops metrics as an event to analytics at every interval', async () => {
+    it('registers and reports ops metrics as an event to analytics at every interval', async () => {
       const firstMetrics = {
         process: {
           memory: { heap: { used_in_bytes: 100 } },
@@ -245,50 +245,6 @@ describe('MetricsService', () => {
 
       expect(analyticsMock.registerEventType).toHaveBeenCalledTimes(1);
       expect(analyticsMock.reportEvent).toHaveBeenCalledTimes(2);
-    });
-
-    it('logs reporting ops metrics as an event to analytics at every interval', async () => {
-      const firstMetrics = {
-        process: {
-          memory: { heap: { used_in_bytes: 100 } },
-          uptime_in_millis: 1500,
-          event_loop_delay: 50,
-        },
-        os: {
-          load: {
-            '1m': 10,
-            '5m': 20,
-            '15m': 30,
-          },
-        },
-      };
-      const secondMetrics = {
-        process: {
-          memory: { heap: { used_in_bytes: 200 } },
-          uptime_in_millis: 3000,
-          event_loop_delay: 100,
-        },
-        os: {
-          load: {
-            '1m': 20,
-            '5m': 30,
-            '15m': 40,
-          },
-        },
-      };
-
-      const analyticsMetricsLogger = logger.get('metrics', 'metrics_analytics');
-      createOpsMetrics(firstMetrics);
-      createOpsMetrics(secondMetrics);
-
-      await metricsService.setup({ http: httpMock, analytics: analyticsMock });
-      const { getOpsMetrics$ } = await metricsService.start();
-
-      await createNextEmission(getOpsMetrics$);
-
-      const analyticsMetricsLogs = loggingSystemMock.collect(analyticsMetricsLogger).info;
-      expect(analyticsMetricsLogs.length).toEqual(2);
-      expect(analyticsMetricsLogs[0]).not.toEqual(analyticsMetricsLogs[1]);
     });
   });
 

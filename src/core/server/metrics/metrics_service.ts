@@ -29,7 +29,6 @@ export class MetricsService
 {
   private readonly logger: Logger;
   private readonly opsMetricsLogger: Logger;
-  private readonly analyticsMetricsLogger: Logger;
   private metricsCollector?: OpsMetricsCollector;
   private collectInterval?: NodeJS.Timeout;
   private metrics$ = new ReplaySubject<OpsMetrics>(1);
@@ -38,7 +37,6 @@ export class MetricsService
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('metrics');
     this.opsMetricsLogger = coreContext.logger.get('metrics', 'ops');
-    this.analyticsMetricsLogger = coreContext.logger.get('metrics', 'metrics_analytics');
   }
 
   public async setup({
@@ -62,7 +60,7 @@ export class MetricsService
 
     const metricsObservable = this.metrics$.asObservable();
 
-    this.setupOpsMetricsEventType(analytics, metricsObservable, this.analyticsMetricsLogger);
+    this.setupOpsMetricsEventType(analytics, metricsObservable);
 
     metricsObservable.subscribe();
 
@@ -98,17 +96,14 @@ export class MetricsService
 
   private setupOpsMetricsEventType(
     analytics: AnalyticsServiceSetup,
-    metricsObservable: Observable<OpsMetrics>,
-    analyticsMetricsLogger: Logger
+    metricsObservable: Observable<OpsMetrics>
   ) {
     analytics.registerEventType<OpsMetrics>({
       eventType: 'core-ops_metrics',
       schema: opsMetricsSchema,
     });
     metricsObservable.subscribe((metrics: OpsMetrics) => {
-      const { message } = getEcsOpsMetricsLog(metrics);
-      analyticsMetricsLogger.info(`reporting opsMetrics: ${message}`);
-      analytics.reportEvent('core-ops_metrics', { ...metrics });
+      analytics.reportEvent('core-ops_metrics', { ...getEcsOpsMetricsLog(metrics) });
     });
   }
 }
