@@ -38,16 +38,12 @@ const updateStoredCalloutState = (newState: boolean, storage: Storage) => {
 export const DocumentExplorerUpdateCallout = () => {
   const { storage, capabilities } = useDiscoverServices();
   const [calloutClosed, setCalloutClosed] = useState(getStoredCalloutState(storage));
-  const onStartTour = useDiscoverTourContext().onStartTour;
+  const { onStartTour } = useDiscoverTourContext();
 
   const onCloseCallout = useCallback(() => {
     updateStoredCalloutState(true, storage);
     setCalloutClosed(true);
   }, [storage]);
-
-  const onTakeTour = useCallback(() => {
-    onStartTour();
-  }, [onStartTour]);
 
   if (calloutClosed || !capabilities.advancedSettings.save) {
     return null;
@@ -74,7 +70,7 @@ export const DocumentExplorerUpdateCallout = () => {
         gutterSize="s"
       >
         <EuiFlexItem grow={false}>
-          <EuiButton size="s" onClick={onTakeTour} data-test-subj="discoverTakeTourButton">
+          <EuiButton size="s" onClick={onStartTour} data-test-subj="discoverTakeTourButton">
             <FormattedMessage
               id="discover.docExplorerUpdateCallout.takeTourButtonLabel"
               defaultMessage="Take the tour"
