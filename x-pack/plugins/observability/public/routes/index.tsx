@@ -17,6 +17,7 @@ import { OverviewPage } from '../pages/overview';
 import { jsonRt } from './json_rt';
 import { ObservabilityExploratoryView } from '../components/shared/exploratory_view/obsv_exploratory_view';
 import { RulesPage } from '../pages/rules';
+import { RuleDetailsPage } from '../pages/rule_details';
 import { AlertingPages } from '../config';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
@@ -105,6 +106,13 @@ export const routes = {
           <RulesPage />
         </TrackApplicationView>
       );
+    },
+    params: {},
+    exact: true,
+  },
+  '/alerts/rules/:ruleId': {
+    handler: () => {
+      return <RuleDetailsPage />;
     },
     params: {},
     exact: true,
