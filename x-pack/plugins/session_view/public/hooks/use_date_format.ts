@@ -7,4 +7,6 @@
 
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 
-export const useDateFormat = (): string => useUiSetting<string>('dateFormat');
+const DEFAULT_DATE_FORMAT = 'dateFormat';
+
+export const useDateFormat = (): string => useUiSetting<string>(DEFAULT_DATE_FORMAT);
