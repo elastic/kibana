@@ -18,7 +18,7 @@ export interface Props {
 
 export const KibanaNoDataPage = ({ onDataViewCreated, noDataConfig }: Props) => {
   const { hasESData, hasUserDataView } = useData();
-  const [hasFinishedLoading, setHasFinishedLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [dataExists, setDataExists] = useState(false);
   const [hasUserDataViews, setHasUserDataViews] = useState(false);
 
@@ -26,18 +26,19 @@ export const KibanaNoDataPage = ({ onDataViewCreated, noDataConfig }: Props) => 
     const checkData = async () => {
       setDataExists(await hasESData());
       setHasUserDataViews(await hasUserDataView());
-      setHasFinishedLoading(true);
+      setIsLoading(false);
     };
     // TODO: add error handling
     // https://github.com/elastic/kibana/issues/130913
     checkData().catch(() => {
-      setHasFinishedLoading(true);
+      setIsLoading(false);
     });
   }, [hasESData, hasUserDataView]);
 
-  if (!hasFinishedLoading) {
+  if (isLoading) {
     return <EuiLoadingSpinner size="xl" />;
   }
+
   if (!dataExists) {
     return <NoDataConfigPage noDataConfig={noDataConfig} />;
   }
