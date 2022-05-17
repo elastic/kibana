@@ -42,7 +42,7 @@ export const bulkEditRules = ({
   const { attributesActions, paramsActions } = splitBulkEditActions(actions);
 
   return rulesClient.bulkEdit({
-    ...(ids ? { ids } : {}),
+    ...(ids ? { ids } : { filter: enrichFilterWithRuleTypeMapping(filter) }),
     operations: attributesActions.map(bulkEditActionToRulesClientOperation),
     paramsModifier: async (ruleParams: RuleAlertType['params']) => {
       if (mlAuthz) {
@@ -51,6 +51,5 @@ export const bulkEditRules = ({
 
       return ruleParamsModifier(ruleParams, paramsActions);
     },
-    ...(!ids ? { filter: enrichFilterWithRuleTypeMapping(filter) } : {}),
   });
 };

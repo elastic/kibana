@@ -18,7 +18,10 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { performBulkActionRoute } from './perform_bulk_action_route';
-import { getPerformBulkActionSchemaMock } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
+import {
+  getPerformBulkActionEditSchemaMock,
+  getPerformBulkActionSchemaMock,
+} from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { readRules } from '../../rules/read_rules';
 import { legacyMigrate } from '../../rules/utils';
@@ -396,6 +399,28 @@ describe('perform_bulk_action', () => {
       expect(response.status).toEqual(400);
       expect(response.body.message).toEqual(
         'Both query and ids are sent. Define either ids or query in request payload.'
+      );
+    });
+
+    it('rejects payloads if ids is empty', async () => {
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: { ...getPerformBulkActionSchemaMock(), ids: [] },
+      });
+      const result = server.validate(request);
+      expect(result.badRequest).toHaveBeenCalledWith('Invalid value "[]" supplied to "ids"');
+    });
+
+    it('rejects payloads if property "edit" actions is empty', async () => {
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: { ...getPerformBulkActionEditSchemaMock(), edit: [] },
+      });
+      const result = server.validate(request);
+      expect(result.badRequest).toHaveBeenCalledWith(
+        expect.stringContaining('Invalid value "[]" supplied to "edit"')
       );
     });
   });
