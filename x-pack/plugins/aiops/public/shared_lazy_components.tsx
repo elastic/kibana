@@ -24,6 +24,7 @@ const LazyWrapper: FC = ({ children }) => (
 
 /**
  * Lazy-wrapped ExplainLogRateSpikes React component
+ * @param {ExplainLogRateSpikesProps}  props - properties specifying the data on which to run the analysis.
  */
 export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = (props) => (
   <LazyWrapper>

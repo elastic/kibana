@@ -19,6 +19,7 @@ import { initialState, streamReducer } from './stream_reducer';
  * ExplainLogRateSpikes props require a data view.
  */
 export interface ExplainLogRateSpikesProps {
+  /** The data view to analyze. */
   dataView: DataView;
 }
 
