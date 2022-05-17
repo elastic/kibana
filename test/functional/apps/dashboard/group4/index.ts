@@ -22,8 +22,12 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   }
 
   describe('dashboard app - group 4', function () {
-    before(loadLogstash);
-    after(unloadLogstash);
+    before(async () => {
+      await loadLogstash();
+    });
+    after(async () => {
+      await unloadLogstash();
+    });
 
     loadTestFile(require.resolve('./dashboard_save'));
     loadTestFile(require.resolve('./dashboard_time'));

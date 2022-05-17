@@ -25,14 +25,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('no data in visualize', function () {
-    before(async function () {
+    it('should show the integrations component if there is no data', async () => {
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.unload('test/functional/fixtures/es_archiver/long_window_logstash');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await PageObjects.common.navigateToApp('visualize');
-    });
-
-    it('should show the integrations component if there is no data', async () => {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       const addIntegrations = await testSubjects.find('kbnOverviewAddIntegrations');
