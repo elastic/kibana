@@ -17,18 +17,20 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import {
   PUBLIC_KEY_LABEL,
   CONSUMER_KEY_LABEL,
-  BASE_URL_LABEL,
-  CLIENT_ID_LABEL,
-  CLIENT_SECRET_LABEL,
   EXTERNAL_CONNECTOR_API_KEY_LABEL,
   EXTERNAL_CONNECTOR_URL_LABEL,
   COPIED_TOOLTIP,
   COPY_TOOLTIP,
 } from '../../../constants';
-import { SourceConfigData } from '../../../views/content_sources/components/add_source/add_source_logic';
+import {
+  SourceConfigData,
+  SourceConfigFormElement,
+} from '../../../views/content_sources/components/add_source/add_source_logic';
 import { ApiKey } from '../api_key';
 import { CredentialItem } from '../credential_item';
 
@@ -41,25 +43,22 @@ export const SourceConfigFields: React.FC<SourceConfigFieldsProps> = ({
   isOauth1,
   sourceConfigData,
 }) => {
-  const { configuredFields } = sourceConfigData;
+  const { configuredFields, configurableFields = [], serviceType } = sourceConfigData;
 
   // TODO use configurableFields instead of static field names
   const {
     public_key: publicKey,
     consumer_key: consumerKey,
-    client_id: clientId,
-    client_secret: clientSecret,
-    base_url: baseUrl,
     external_connector_api_key: externalConnectorApiKey,
     external_connector_url: externalConnectorUrl,
   } = configuredFields;
 
   const credentialItem = (label: string, item?: string) =>
     item && (
-      <>
+      <div key={label}>
         <EuiSpacer size="s" />
         <CredentialItem label={label} value={item} testSubj={label} hideCopy />
-      </>
+      </div>
     );
 
   const keyElement = (
@@ -79,12 +78,43 @@ export const SourceConfigFields: React.FC<SourceConfigFieldsProps> = ({
     </>
   );
 
+  const formFields: SourceConfigFormElement[] =
+    serviceType === 'external'
+      ? configurableFields
+      : [
+          {
+            key: 'client_id',
+            label: i18n.translate(
+              'xpack.enterpriseSearch.workplaceSearch.sourceConfigFields.clientIDLabel',
+              {
+                defaultMessage: 'Client ID',
+              }
+            ),
+          },
+          {
+            key: 'client_secret',
+            label: i18n.translate(
+              'xpack.enterpriseSearch.workplaceSearch.sourceConfigFields.clientSecretLabel',
+              {
+                defaultMessage: 'Client Secret',
+              }
+            ),
+          },
+          {
+            key: 'base_url',
+            label: i18n.translate(
+              'xpack.enterpriseSearch.workplaceSearch.sourceConfigFields.baseUrlLabel',
+              {
+                defaultMessage: 'Base URL',
+              }
+            ),
+          },
+        ];
+
   return (
     <>
       {isOauth1 && keyElement}
-      {!isOauth1 && credentialItem(CLIENT_ID_LABEL, clientId)}
-      {!isOauth1 && credentialItem(CLIENT_SECRET_LABEL, clientSecret)}
-      {credentialItem(BASE_URL_LABEL, baseUrl)}
+      {formFields.map(({ key, label }) => credentialItem(label, configuredFields[key]))}
       {credentialItem(EXTERNAL_CONNECTOR_API_KEY_LABEL, externalConnectorApiKey)}
       {externalConnectorUrl && (
         <>

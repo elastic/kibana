@@ -17,7 +17,7 @@ import { CredentialItem } from '../credential_item';
 import { SourceConfigFields } from './source_config_fields';
 
 describe('SourceConfigFields', () => {
-  it('renders with all items, hiding API Keys', () => {
+  it('renders with all items, hiding API Keys when auth is false', () => {
     const wrapper = shallow(
       <SourceConfigFields isOauth1={false} sourceConfigData={sourceConfigData} />
     );
@@ -31,6 +31,24 @@ describe('SourceConfigFields', () => {
     const wrapper = shallow(<SourceConfigFields isOauth1 sourceConfigData={sourceConfigData} />);
 
     expect(wrapper.find(ApiKey)).toHaveLength(2);
+  });
+
+  it('shows configurable fields for external connectors', () => {
+    const wrapper = shallow(
+      <SourceConfigFields
+        isOauth1={false}
+        sourceConfigData={{
+          ...sourceConfigData,
+          serviceType: 'external',
+          configurableFields: [{ key: 'third_party_url', label: 'Third Party URL' }],
+          configuredFields: { third_party_url: 'https://www.elastic.co' },
+        }}
+      />
+    );
+
+    expect(wrapper.find(CredentialItem)).toHaveLength(1);
+    expect(wrapper.find(CredentialItem).prop('label')).toEqual('Third Party URL');
+    expect(wrapper.find(CredentialItem).prop('value')).toEqual('https://www.elastic.co');
   });
 
   it('handles select all button click', () => {
