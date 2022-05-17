@@ -17,13 +17,10 @@ import {
   EuiProgress,
   EuiFlyoutFooter,
 } from '@elastic/eui';
-import {
-  AlertsData,
-  AlertsTableConfigurationRegistry,
-  AlertsTableFlyoutState,
-} from '../../../../types';
-const AlertsFlyoutHeader = lazy(() => import('./alerts_flyout_header'));
+import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
+import { AlertsTableConfigurationRegistry, AlertsTableFlyoutState, } from '../../../../types';
 
+const AlertsFlyoutHeader = lazy(() => import('./alerts_flyout_header'));
 const PAGINATION_LABEL = i18n.translate(
   'xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.paginationLabel',
   {
@@ -32,7 +29,7 @@ const PAGINATION_LABEL = i18n.translate(
 );
 
 interface AlertsFlyoutProps {
-  alert: AlertsData;
+  alert: EcsFieldsResponse;
   alertsTableConfiguration: AlertsTableConfigurationRegistry;
   flyoutIndex: number;
   alertsCount: number;
