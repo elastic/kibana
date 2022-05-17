@@ -52,7 +52,7 @@ export const DetailPanelAlertListItem = ({
     return null;
   }
 
-  const timestampRaw = event['@timestamp'];
+  const timestamp = formatDate(event['@timestamp'], dateFormat);
   const rule = event.kibana?.alert?.rule;
   const uuid = rule?.uuid || '';
   const name = rule?.name || '';
@@ -60,8 +60,6 @@ export const DetailPanelAlertListItem = ({
   const { args } = event.process ?? {};
 
   const forceState = !isInvestigated ? 'open' : undefined;
-
-  const timestamp = formatDate(timestampRaw, dateFormat);
 
   return minimal ? (
     <div data-test-subj={ALERT_LIST_ITEM_TEST_ID} css={styles.firstAlertPad}>
