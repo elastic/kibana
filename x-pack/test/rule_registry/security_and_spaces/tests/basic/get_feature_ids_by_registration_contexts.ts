@@ -33,7 +33,6 @@ export default ({ getService }: FtrProviderContext) => {
       .auth(user.username, user.password)
       .set('kbn-xsrf', 'true')
       .expect(expectedStatusCode);
-    console.log(resp.body);
     return resp.body as string[];
   };
 
