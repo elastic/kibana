@@ -33,7 +33,6 @@
     "time_format": "epoch_ms"
   },
   "custom_settings": {
-      "custom_settings": {
     "job_tags": {
       "euid": "4010",
       "maturity": "release",

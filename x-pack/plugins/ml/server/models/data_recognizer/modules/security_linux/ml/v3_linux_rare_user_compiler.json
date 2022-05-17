@@ -32,7 +32,6 @@
       "time_field": "@timestamp"
     },
     "custom_settings": {
-        "custom_settings": {
     "job_tags": {
       "euid": "4018",
       "maturity": "release",
