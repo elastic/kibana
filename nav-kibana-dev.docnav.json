@@ -201,7 +201,8 @@
         {
           "label": "Utilities",
           "items": [
-            { "id": "kibDevDocsToolingLog" }
+            { "id": "kibDevDocsToolingLog" },
+            { "id": "kibDevDocsOpsJestSerializers"}
           ]
         }
       ]
