@@ -48,7 +48,7 @@ interface SelectedOption {
     description: string;
     query: string;
     ecs_mapping: Record<string, unknown>;
-  }
+  };
 }
 
 const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
@@ -126,9 +126,7 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
   }, [savedQueryId, queryOptions]);
 
   useEffect(() => {
-    if (
-      selectedOptions.length && selectedOptions[0].value.savedQueryId !== savedQueryId
-    ) {
+    if (selectedOptions.length && selectedOptions[0].value.savedQueryId !== savedQueryId) {
       setSelectedOptions([]);
     }
   }, [savedQueryId, selectedOptions]);
