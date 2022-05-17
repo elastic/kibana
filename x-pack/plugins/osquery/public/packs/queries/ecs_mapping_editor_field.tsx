@@ -398,7 +398,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
     }
 
     return true;
-  }, [formData, item.path]);
+  }, [typeValue, formData, item.path]);
 
   const onTypeChange = useCallback(
     (newType) => {
