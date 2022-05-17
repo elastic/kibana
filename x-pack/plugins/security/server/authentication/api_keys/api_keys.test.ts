@@ -11,6 +11,7 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 
+import { ALL_SPACES_ID } from '../../../common/constants';
 import type { SecurityLicense } from '../../../common/licensing';
 import { licenseMock } from '../../../common/licensing/index.mock';
 import { APIKeys } from './api_keys';
@@ -394,6 +395,136 @@ describe('API Keys', () => {
       expect(mockClusterClient.asInternalUser.security.invalidateApiKey).toHaveBeenCalledWith({
         body: {
           ids: ['123'],
+        },
+      });
+    });
+  });
+
+  describe('with kibana privileges', () => {
+    it('creates api key with application privileges', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+
+      mockScopedClusterClient.asCurrentUser.security.createApiKey.mockResponseOnce({
+        id: '123',
+        name: 'key-name',
+        // @ts-expect-error @elastic/elsticsearch CreateApiKeyResponse.expiration: number
+        expiration: '1d',
+        api_key: 'abc123',
+      });
+      const result = await apiKeys.create(httpServerMock.createKibanaRequest(), {
+        name: 'key-name',
+        kibana_role_descriptors: {
+          synthetics_writer: {
+            elasticsearch: { cluster: ['manage'], indices: [], run_as: [] },
+            kibana: [
+              {
+                base: [],
+                spaces: [ALL_SPACES_ID],
+                feature: {
+                  uptime: ['all'],
+                },
+              },
+            ],
+          },
+        },
+        expiration: '1d',
+      });
+      expect(result).toEqual({
+        api_key: 'abc123',
+        expiration: '1d',
+        id: '123',
+        name: 'key-name',
+      });
+      expect(mockScopedClusterClient.asCurrentUser.security.createApiKey).toHaveBeenCalledWith({
+        body: {
+          name: 'key-name',
+          role_descriptors: {
+            synthetics_writer: {
+              applications: [
+                {
+                  application: 'kibana-.kibana',
+                  privileges: ['feature_uptime.all'],
+                  resources: ['*'],
+                },
+              ],
+              cluster: ['manage'],
+              indices: [],
+              run_as: [],
+            },
+          },
+          expiration: '1d',
+        },
+      });
+    });
+
+    it('creates api key with application privileges as internal user', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+
+      mockClusterClient.asInternalUser.security.grantApiKey.mockResponseOnce({
+        id: '123',
+        name: 'key-name',
+        api_key: 'abc123',
+        // @ts-expect-error invalid definition
+        expires: '1d',
+      });
+      const result = await apiKeys.grantAsInternalUser(
+        httpServerMock.createKibanaRequest({
+          headers: {
+            authorization: `Basic ${encodeToBase64('foo:bar')}`,
+          },
+        }),
+        {
+          name: 'key-name',
+          kibana_role_descriptors: {
+            synthetics_writer: {
+              elasticsearch: {
+                cluster: ['manage'],
+                indices: [],
+                run_as: [],
+              },
+              kibana: [
+                {
+                  base: [],
+                  spaces: [ALL_SPACES_ID],
+                  feature: {
+                    uptime: ['all'],
+                  },
+                },
+              ],
+            },
+          },
+          expiration: '1d',
+        }
+      );
+      expect(result).toEqual({
+        api_key: 'abc123',
+        expires: '1d',
+        id: '123',
+        name: 'key-name',
+      });
+      expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
+        body: {
+          api_key: {
+            name: 'key-name',
+            role_descriptors: {
+              synthetics_writer: {
+                applications: [
+                  {
+                    application: 'kibana-.kibana',
+                    privileges: ['feature_uptime.all'],
+                    resources: ['*'],
+                  },
+                ],
+                cluster: ['manage'],
+                indices: [],
+                run_as: [],
+              },
+            },
+            expiration: '1d',
+          },
+          grant_type: 'password',
+          password: 'bar',
+          username: 'foo',
         },
       });
     });

@@ -11,6 +11,56 @@ import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
+const stringArray = schema.arrayOf(schema.string());
+
+const RoleIndexPrivilegeSchema = schema.object({
+  names: stringArray,
+  privileges: stringArray,
+  field_security: schema.maybe(
+    schema.object({
+      grant: schema.maybe(stringArray),
+      except: schema.maybe(stringArray),
+    })
+  ),
+  query: schema.maybe(schema.string()),
+});
+
+const bodySchema = schema.object({
+  name: schema.string(),
+  expiration: schema.maybe(schema.string()),
+  role_descriptors: schema.recordOf(schema.string(), schema.object({}, { unknowns: 'allow' }), {
+    defaultValue: {},
+  }),
+  metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+});
+
+const bodySchemaWithKibanaPrivileges = schema.object({
+  name: schema.string(),
+  expiration: schema.maybe(schema.string()),
+  kibana_role_descriptors: schema.recordOf(
+    schema.string(),
+    schema.object({
+      elasticsearch: schema.object(
+        {
+          cluster: stringArray,
+          indices: schema.arrayOf(RoleIndexPrivilegeSchema),
+          run_as: schema.arrayOf(schema.string()),
+        },
+        { unknowns: 'allow' }
+      ),
+      kibana: schema.arrayOf(
+        schema.object({
+          spaces: schema.arrayOf(schema.string()),
+          base: schema.arrayOf(schema.string()),
+          feature: schema.object({}, { unknowns: 'allow' }),
+          _reserved: schema.maybe(schema.arrayOf(schema.string())),
+        })
+      ),
+    })
+  ),
+  metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+});
+
 export function defineCreateApiKeyRoutes({
   router,
   getAuthenticationService,
@@ -19,18 +69,7 @@ export function defineCreateApiKeyRoutes({
     {
       path: '/internal/security/api_key',
       validate: {
-        body: schema.object({
-          name: schema.string(),
-          expiration: schema.maybe(schema.string()),
-          role_descriptors: schema.recordOf(
-            schema.string(),
-            schema.object({}, { unknowns: 'allow' }),
-            {
-              defaultValue: {},
-            }
-          ),
-          metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-        }),
+        body: schema.oneOf([bodySchema, bodySchemaWithKibanaPrivileges]),
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {

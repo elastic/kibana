@@ -6,8 +6,11 @@
  */
 
 import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type { OneOf } from '@kbn/utility-types';
 
+import type { Role } from '../../../common';
 import type { SecurityLicense } from '../../../common/licensing';
+import { transformPrivilegesToElasticsearchPrivileges } from '../../role_transform_utils/kbn_privileges_to_es_priviliges';
 import {
   BasicHTTPAuthorizationHeaderCredentials,
   HTTPAuthorizationHeader,
@@ -23,15 +26,21 @@ export interface ConstructorOptions {
   license: SecurityLicense;
 }
 
+interface BaseCreateAPIKeyParams {
+  name: string;
+  expiration?: string;
+  metadata?: Record<string, any>;
+  role_descriptors: Record<string, any>;
+  kibana_role_descriptors?: Record<string, Pick<Role, 'elasticsearch' | 'kibana'>>;
+}
+
 /**
  * Represents the params for creating an API key
  */
-export interface CreateAPIKeyParams {
-  name: string;
-  role_descriptors: Record<string, any>;
-  expiration?: string;
-  metadata?: Record<string, any>;
-}
+export type CreateAPIKeyParams = OneOf<
+  BaseCreateAPIKeyParams,
+  'role_descriptors' | 'kibana_role_descriptors'
+>;
 
 type GrantAPIKeyParams =
   | {
@@ -171,30 +180,33 @@ export class APIKeys {
    * Returns newly created API key or `null` if API keys are disabled.
    *
    * @param request Request instance.
-   * @param params The params to create an API key
+   * @param createParams The params to create an API key
    */
   async create(
     request: KibanaRequest,
-    params: CreateAPIKeyParams
+    createParams: CreateAPIKeyParams
   ): Promise<CreateAPIKeyResult | null> {
     if (!this.license.isEnabled()) {
       return null;
     }
+
+    const { expiration, metadata, name } = createParams;
+
+    const roleDescriptors = this.parseRoleDescriptorsWithKibanaPrivileges(createParams);
 
     this.logger.debug('Trying to create an API key');
 
     // User needs `manage_api_key` privilege to use this API
     let result: CreateAPIKeyResult;
     try {
-      result = await this.clusterClient
-        .asScoped(request)
-        .asCurrentUser.security.createApiKey({ body: params });
+      result = await this.clusterClient.asScoped(request).asCurrentUser.security.createApiKey({
+        body: { role_descriptors: roleDescriptors, name, metadata, expiration },
+      });
       this.logger.debug('API key was created successfully');
     } catch (e) {
       this.logger.error(`Failed to create API key: ${e.message}`);
       throw e;
     }
-
     return result;
   }
 
@@ -215,7 +227,14 @@ export class APIKeys {
         `Unable to grant an API Key, request does not contain an authorization header`
       );
     }
-    const params = this.getGrantParams(createParams, authorizationHeader);
+    const { expiration, metadata, name } = createParams;
+
+    const roleDescriptors = this.parseRoleDescriptorsWithKibanaPrivileges(createParams);
+
+    const params = this.getGrantParams(
+      { expiration, metadata, name, role_descriptors: roleDescriptors },
+      authorizationHeader
+    );
 
     // User needs `manage_api_key` or `grant_api_key` privilege to use this API
     let result: GrantAPIKeyResult;
@@ -328,5 +347,33 @@ export class APIKeys {
     }
 
     throw new Error(`Unsupported scheme "${authorizationHeader.scheme}" for granting API Key`);
+  }
+
+  private parseRoleDescriptorsWithKibanaPrivileges(createParams: CreateAPIKeyParams) {
+    let roleDescriptors = createParams.role_descriptors;
+
+    if (roleDescriptors) {
+      return roleDescriptors;
+    }
+
+    roleDescriptors = {};
+    const { kibana_role_descriptors: kibanaRoleDescriptors } = createParams;
+
+    if (kibanaRoleDescriptors) {
+      Object.entries(kibanaRoleDescriptors).forEach(([roleKey, roleDescriptor]) => {
+        const applications = transformPrivilegesToElasticsearchPrivileges(
+          'kibana-.kibana',
+          roleDescriptor.kibana
+        );
+        if (applications.length > 0 && roleDescriptors) {
+          roleDescriptors[roleKey] = {
+            ...roleDescriptor.elasticsearch,
+            applications,
+          };
+        }
+      });
+    }
+
+    return roleDescriptors!;
   }
 }

@@ -13,8 +13,7 @@ import type { KibanaFeature } from '@kbn/features-plugin/common';
 
 import type { ElasticsearchRole } from '.';
 import { ALL_SPACES_ID, GLOBAL_RESOURCE } from '../../../../../common/constants';
-import { PrivilegeSerializer } from '../../../../authorization/privilege_serializer';
-import { ResourceSerializer } from '../../../../authorization/resource_serializer';
+import { transformPrivilegesToElasticsearchPrivileges } from '../../../../role_transform_utils/kbn_privileges_to_es_priviliges';
 
 /**
  * Elasticsearch specific portion of the role definition.
@@ -103,7 +102,9 @@ const spacesSchema = schema.oneOf(
 
 const FEATURE_NAME_VALUE_REGEX = /^[a-zA-Z0-9_-]+$/;
 
-type PutPayloadSchemaType = TypeOf<ReturnType<typeof getPutPayloadSchema>>;
+export type PutPayloadSchemaType = TypeOf<ReturnType<typeof getPutPayloadSchema>>;
+export type KibanaPrivileges = PutPayloadSchemaType['kibana'];
+
 export function getPutPayloadSchema(
   getBasePrivilegeNames: () => { global: string[]; space: string[] }
 ) {
@@ -253,55 +254,6 @@ export const transformPutPayloadToElasticsearchRole = (
       ...otherApplications,
     ],
   } as Omit<ElasticsearchRole, 'name'>;
-};
-
-const transformPrivilegesToElasticsearchPrivileges = (
-  application: string,
-  kibanaPrivileges: PutPayloadSchemaType['kibana'] = []
-) => {
-  return kibanaPrivileges.map(({ base, feature, spaces }) => {
-    if (spaces.length === 1 && spaces[0] === GLOBAL_RESOURCE) {
-      return {
-        privileges: [
-          ...(base
-            ? base.map((privilege) => PrivilegeSerializer.serializeGlobalBasePrivilege(privilege))
-            : []),
-          ...(feature
-            ? Object.entries(feature)
-                .map(([featureName, featurePrivileges]) =>
-                  featurePrivileges.map((privilege) =>
-                    PrivilegeSerializer.serializeFeaturePrivilege(featureName, privilege)
-                  )
-                )
-                .flat()
-            : []),
-        ],
-        application,
-        resources: [GLOBAL_RESOURCE],
-      };
-    }
-
-    return {
-      privileges: [
-        ...(base
-          ? base.map((privilege) => PrivilegeSerializer.serializeSpaceBasePrivilege(privilege))
-          : []),
-        ...(feature
-          ? Object.entries(feature)
-              .map(([featureName, featurePrivileges]) =>
-                featurePrivileges.map((privilege) =>
-                  PrivilegeSerializer.serializeFeaturePrivilege(featureName, privilege)
-                )
-              )
-              .flat()
-          : []),
-      ],
-      application,
-      resources: (spaces as string[]).map((resource) =>
-        ResourceSerializer.serializeSpaceResource(resource)
-      ),
-    };
-  });
 };
 
 export const validateKibanaPrivileges = (

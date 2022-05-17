@@ -11,6 +11,7 @@ import type {
 import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import {
   getSyntheticsServiceAPIKey,
   deleteSyntheticsServiceApiKey,
@@ -22,7 +23,7 @@ import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 
 export const serviceApiKeyPrivileges = {
   cluster: ['monitor', 'read_ilm', 'read_pipeline'] as SecurityClusterPrivilege[],
-  index: [
+  indices: [
     {
       names: ['synthetics-*'],
       privileges: [
@@ -32,6 +33,7 @@ export const serviceApiKeyPrivileges = {
       ] as SecurityIndexPrivilege[],
     },
   ],
+  run_as: [],
 };
 
 export const getAPIKeyForSyntheticsService = async ({
@@ -84,8 +86,19 @@ export const generateAndSaveServiceAPIKey = async ({
 
   const apiKeyResult = await security.authc.apiKeys?.create(request, {
     name: 'synthetics-api-key',
-    role_descriptors: {
-      synthetics_writer: serviceApiKeyPrivileges,
+    kibana_role_descriptors: {
+      uptime_save: {
+        elasticsearch: serviceApiKeyPrivileges,
+        kibana: [
+          {
+            base: [],
+            spaces: [ALL_SPACES_ID],
+            feature: {
+              uptime: ['all'],
+            },
+          },
+        ],
+      },
     },
     metadata: {
       description:
@@ -137,7 +150,7 @@ export const getSyntheticsEnablement = async ({
           'manage_own_api_key',
           ...serviceApiKeyPrivileges.cluster,
         ],
-        index: serviceApiKeyPrivileges.index,
+        index: serviceApiKeyPrivileges.indices,
       },
     }),
     security.authc.apiKeys.areAPIKeysEnabled(),
