@@ -471,12 +471,36 @@ describe('Task Runner', () => {
     [false, null, false],
     [false, undefined, false],
     // Stringify the snooze schedules for better failure reporting
-    [false, JSON.stringify([{ startTime: DATE_9999, duration: 100000000 }]), false],
-    [false, JSON.stringify([{ startTime: DATE_1970, duration: 100000000 }]), true],
+    [
+      false,
+      JSON.stringify([
+        { rRule: { dtstart: DATE_9999, tzid: 'UTC', count: 1 }, duration: 100000000 },
+      ]),
+      false,
+    ],
+    [
+      false,
+      JSON.stringify([
+        { rRule: { dtstart: DATE_1970, tzid: 'UTC', count: 1 }, duration: 100000000 },
+      ]),
+      true,
+    ],
     [true, null, true],
     [true, undefined, true],
-    [true, JSON.stringify([{ startTime: DATE_9999, duration: 100000000 }]), true],
-    [true, JSON.stringify([{ startTime: DATE_1970, duration: 100000000 }]), true],
+    [
+      true,
+      JSON.stringify([
+        { rRule: { dtstart: DATE_9999, tzid: 'UTC', count: 1 }, duration: 100000000 },
+      ]),
+      true,
+    ],
+    [
+      true,
+      JSON.stringify([
+        { rRule: { dtstart: DATE_1970, tzid: 'UTC', count: 1 }, duration: 100000000 },
+      ]),
+      true,
+    ],
   ];
 
   test.each(snoozeTestParams)(

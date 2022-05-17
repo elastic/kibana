@@ -376,6 +376,7 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "tags": Array [
           "foo",
         ],
@@ -1644,6 +1645,7 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "tags": Array [
           "foo",
         ],
@@ -1777,6 +1779,7 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "tags": Array [
           "foo",
         ],
@@ -1910,6 +1913,7 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "tags": Array [
           "foo",
         ],
@@ -2075,6 +2079,7 @@ describe('create()', () => {
           "interval": "10s",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "tags": Array [
           "foo",
         ],
