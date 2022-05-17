@@ -177,13 +177,19 @@
           ]
         },
         {
+          "label": "Toolchain",
+          "items": [
+            { "id": "kibDevDocsOpsBabelPreset" }
+          ]
+        },
+        {
           "label": "Build tooling",
           "items": [
             { "id": "kibDevDocsOpsOptimizer" }
           ]
         },
         {
-          "label": "Linting/Validation",
+          "label": "Linting & Validation",
           "items": [
             { "id": "kibDevDocsOpsEslintConfig" },
             { "id": "kibDevDocsOpsEslintPluginEslint" },
