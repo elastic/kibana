@@ -1,0 +1,91 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+
+import { sendGetCurrentUpgrades, sendPostCancelAction, useStartServices } from '../../../../hooks';
+
+import type { CurrentUpgrade } from '../../../../types';
+
+const POLL_INTERVAL = 30 * 1000;
+
+export function useCurrentUpgrades() {
+  const [currentUpgrades, setCurrentUpgrades] = useState<CurrentUpgrade[]>([]);
+  const currentTimeoutRef = useRef<NodeJS.Timeout>();
+  const isCancelledRef = useRef<boolean>(false);
+  const { notifications } = useStartServices();
+
+  const refreshUpgrades = useCallback(async () => {
+    try {
+      const res = await sendGetCurrentUpgrades();
+      if (isCancelledRef.current) {
+        return;
+      }
+      if (res.error) {
+        throw res.error;
+      }
+
+      if (!res.data) {
+        throw new Error('No data');
+      }
+
+      setCurrentUpgrades(res.data.items);
+    } catch (err) {
+      notifications.toasts.addError(err, {
+        title: i18n.translate('xpack.fleet.currentUpgrade.fetchRequestError', {
+          defaultMessage: 'An error happened while fetching current upgrades',
+        }),
+      });
+    }
+  }, [notifications.toasts]);
+
+  const abortUpgrade = useCallback(
+    async (actionId: string) => {
+      try {
+        await sendPostCancelAction(actionId);
+        await refreshUpgrades();
+      } catch (err) {
+        notifications.toasts.addError(err, {
+          title: i18n.translate('xpack.fleet.currentUpgrade.abortRequestError', {
+            defaultMessage: 'An error happened while aborting upgrade',
+          }),
+        });
+      }
+    },
+    [refreshUpgrades, notifications.toasts]
+  );
+
+  // Poll for upgrades
+  useEffect(() => {
+    isCancelledRef.current = false;
+
+    async function pollData() {
+      await refreshUpgrades();
+      if (isCancelledRef.current) {
+        return;
+      }
+      currentTimeoutRef.current = setTimeout(() => pollData(), POLL_INTERVAL);
+    }
+
+    pollData();
+
+    return () => {
+      isCancelledRef.current = true;
+
+      if (currentTimeoutRef.current) {
+        clearTimeout(currentTimeoutRef.current);
+      }
+    };
+  }, [refreshUpgrades]);
+
+  return {
+    currentUpgrades,
+    refreshUpgrades,
+    abortUpgrade,
+  };
+}
