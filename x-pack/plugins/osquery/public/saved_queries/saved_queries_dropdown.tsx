@@ -109,10 +109,10 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
       const savedQueryOption = find(['value.savedQueryId', savedQueryId], queryOptions);
 
       if (savedQueryOption) {
-        handleSavedQueryChange([savedQueryOption]);
+        setSelectedOptions([savedQueryOption]);
       }
     }
-  }, [savedQueryId, handleSavedQueryChange, queryOptions]);
+  }, [savedQueryId, queryOptions]);
 
   useEffect(() => {
     if (
@@ -151,5 +151,7 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
     </EuiFormRow>
   );
 };
+
+SavedQueriesDropdownComponent.displayName = 'SavedQueriesDropdown';
 
 export const SavedQueriesDropdown = React.memo(SavedQueriesDropdownComponent);

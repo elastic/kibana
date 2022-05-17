@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
+  clearInputQuery,
   checkResults,
   inputQuery,
   selectAllAgents,
@@ -24,17 +26,24 @@ import { getAdvancedButton } from '../../screens/integrations';
 import { ROLES } from '../../test';
 
 describe('ALL - Live Query', () => {
+  before(() => {
+    runKbnArchiverScript(ArchiverMethod.LOAD, 'ecs_mapping_3');
+  });
+
   beforeEach(() => {
     login(ROLES.soc_manager);
     navigateTo('/app/osquery');
+  });
+
+  after(() => {
+    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'ecs_mapping_3');
   });
 
   it('should run query and enable ecs mapping', () => {
     const cmd = Cypress.platform === 'darwin' ? '{meta}{enter}' : '{ctrl}{enter}';
     cy.contains('New live query').click();
     selectAllAgents();
-    inputQuery('select * from uptime; ');
-    cy.wait(500);
+    inputQuery('select * from uptime;');
     // checking submit by clicking cmd+enter
     inputQuery(cmd);
     checkResults();
@@ -64,5 +73,24 @@ describe('ALL - Live Query', () => {
     })
       .react('EuiIconTip', { props: { type: 'indexMapping' } })
       .should('exist');
+  });
+
+  it('should run customized saved query', () => {
+    cy.contains('New live query').click();
+    selectAllAgents();
+    cy.react('SavedQueriesDropdownComponent').click();
+    cy.contains('MULTIPLE_MAPPINGS').click();
+    cy.getReact('SavedQueriesDropdownComponent').getCurrentState().should('have.length', 1);
+    clearInputQuery();
+    inputQuery('select * from users{enter}');
+    submitQuery();
+    checkResults();
+    navigateTo('/app/osquery');
+    cy.react('EuiButtonIcon', { props: { iconType: 'play' } })
+      .eq(0)
+      .should('be.visible')
+      .click();
+
+    cy.react('ReactAce', { props: { value: 'select * from users' } }).should('exist');
   });
 });
