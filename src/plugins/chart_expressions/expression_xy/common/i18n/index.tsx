@@ -49,6 +49,14 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.yRightExtent.help', {
       defaultMessage: 'Y right axis extents',
     }),
+  getYLeftScaleTypeHelp: () =>
+    i18n.translate('expressionXY.xyVis.yLeftScaleType.help', {
+      defaultMessage: 'The scale type of the left y axis',
+    }),
+  getYRightScaleTypeHelp: () =>
+    i18n.translate('expressionXY.xyVis.yRightScaleType.help', {
+      defaultMessage: 'The scale type of the right y axis',
+    }),
   getLegendHelp: () =>
     i18n.translate('expressionXY.xyVis.legend.help', {
       defaultMessage: 'Configure the chart legend.',
@@ -152,10 +160,6 @@ export const strings = {
   getIsHistogramHelp: () =>
     i18n.translate('expressionXY.dataLayer.isHistogram.help', {
       defaultMessage: 'Whether to layout the chart as a histogram',
-    }),
-  getYScaleTypeHelp: () =>
-    i18n.translate('expressionXY.dataLayer.yScaleType.help', {
-      defaultMessage: 'The scale type of the y axes',
     }),
   getSplitAccessorHelp: () =>
     i18n.translate('expressionXY.dataLayer.splitAccessor.help', {

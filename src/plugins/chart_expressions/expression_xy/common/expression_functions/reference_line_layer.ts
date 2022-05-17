@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { LayerTypes, REFERENCE_LINE_LAYER } from '../constants';
 import { ReferenceLineLayerFn } from '../types';
 import { strings } from '../i18n';
@@ -17,13 +18,23 @@ export const referenceLineLayerFunction: ReferenceLineLayerFn = {
   type: REFERENCE_LINE_LAYER,
   help: strings.getRLHelp(),
   inputTypes: ['datatable'],
-  args: { ...commonReferenceLineLayerArgs },
+  args: {
+    ...commonReferenceLineLayerArgs,
+    accessors: {
+      types: ['string', 'vis_dimension'],
+      help: strings.getRLAccessorsHelp(),
+      multi: true,
+    },
+  },
   fn(table, args) {
+    const accessors = args.accessors ?? [];
+    accessors.forEach((accessor) => validateAccessor(accessor, table.columns));
+
     return {
       type: REFERENCE_LINE_LAYER,
       ...args,
-      accessors: args.accessors ?? [],
       layerType: LayerTypes.REFERENCELINE,
+      accessors,
       table,
     };
   },

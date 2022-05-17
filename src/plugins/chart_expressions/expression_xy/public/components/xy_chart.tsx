@@ -33,7 +33,14 @@ import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { ChartsPluginSetup, ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
-import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
+import {
+  getAccessorByDimension,
+  getColumnByAccessor,
+} from '@kbn/visualizations-plugin/common/utils';
+import {
+  DEFAULT_LEGEND_SIZE,
+  LegendSizeToPixels,
+} from '@kbn/visualizations-plugin/common/constants';
 import type { FilterEvent, BrushEvent, FormatFactory } from '../types';
 import type { CommonXYDataLayerConfig, SeriesType, XYChartProps } from '../../common/types';
 import {
@@ -45,6 +52,7 @@ import {
   getLayersFormats,
   getLayersTitles,
   validateExtent,
+  getFormat,
 } from '../helpers';
 import {
   getFilteredLayers,
@@ -154,6 +162,8 @@ export function XYChart({
     yLeftExtent,
     yRightExtent,
     valuesInLegend,
+    yLeftScale,
+    yRightScale,
     splitColumnAccessor,
     splitRowAccessor,
   } = args;
@@ -181,7 +191,8 @@ export function XYChart({
     () => getLayersFormats(dataLayers, { splitColumnAccessor, splitRowAccessor }),
     [dataLayers, splitColumnAccessor, splitRowAccessor]
   );
-  if (filteredLayers.length === 0) {
+
+  if (dataLayers.length === 0) {
     const icon: IconType = getIconForSeriesType(
       getDataLayers(layers)?.[0]?.seriesType || SeriesTypes.BAR
     );
@@ -189,9 +200,15 @@ export function XYChart({
   }
 
   // use formatting hint of first x axis column to format ticks
-  const xAxisColumn = dataLayers[0]?.table.columns.find(({ id }) => id === dataLayers[0].xAccessor);
+  const xAxisColumn = dataLayers[0].xAccessor
+    ? getColumnByAccessor(dataLayers[0].xAccessor, dataLayers[0]?.table.columns)
+    : undefined;
 
-  const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.meta?.params);
+  const xAxisFormatter = formatFactory(
+    dataLayers[0].xAccessor
+      ? getFormat(dataLayers[0].table.columns, dataLayers[0].xAccessor)
+      : undefined
+  );
 
   // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
   const safeXAccessorLabelRenderer = (value: unknown): string =>
@@ -209,7 +226,9 @@ export function XYChart({
     dataLayers,
     shouldRotate,
     formatFactory,
-    fieldFormats
+    fieldFormats,
+    yLeftScale,
+    yRightScale
   );
 
   const xTitle = args.xTitle || (xAxisColumn && xAxisColumn.name);
@@ -265,12 +284,14 @@ export function XYChart({
   const annotationsLayers = getAnnotationsLayers(layers);
   const firstTable = dataLayers[0]?.table;
 
-  const xColumnId = firstTable.columns.find((col) => col.id === dataLayers[0]?.xAccessor)?.id;
+  const columnId = dataLayers[0]?.xAccessor
+    ? getColumnByAccessor(dataLayers[0]?.xAccessor, firstTable.columns)?.id
+    : null;
 
   const groupedLineAnnotations = getAnnotationsGroupedByInterval(
     annotationsLayers,
     minInterval,
-    xColumnId ? firstTable.rows[0]?.[xColumnId] : undefined,
+    columnId ? firstTable.rows[0]?.[columnId] : undefined,
     xAxisFormatter
   );
   const rangeAnnotations = getRangeAnnotations(annotationsLayers);
@@ -378,7 +399,11 @@ export function XYChart({
     const xyGeometry = geometry as GeometryValue;
 
     const layerIndex = dataLayers.findIndex((l) =>
-      xySeries.seriesKeys.some((key: string | number) => l.accessors.includes(key.toString()))
+      xySeries.seriesKeys.some((key: string | number) =>
+        l.accessors.some(
+          (accessor) => getAccessorByDimension(accessor, l.table.columns) === key.toString()
+        )
+      )
     );
 
     if (layerIndex === -1) {
@@ -388,48 +413,53 @@ export function XYChart({
     const layer = dataLayers[layerIndex];
     const { table } = layer;
 
-    const xColumn = table.columns.find((col) => col.id === layer.xAccessor);
+    const xColumn = layer.xAccessor && getColumnByAccessor(layer.xAccessor, table.columns);
+    const xAccessor = layer.xAccessor
+      ? getAccessorByDimension(layer.xAccessor, table.columns)
+      : undefined;
     const currentXFormatter =
-      layer.xAccessor &&
-      formattedDatatables[layer.layerId]?.formattedColumns[layer.xAccessor] &&
-      xColumn
-        ? formatFactory(xColumn.meta.params)
+      xAccessor && formattedDatatables[layer.layerId]?.formattedColumns[xAccessor] && xColumn
+        ? formatFactory(layer.xAccessor ? getFormat(table.columns, layer.xAccessor) : undefined)
         : xAxisFormatter;
 
     const rowIndex = table.rows.findIndex((row) => {
-      if (layer.xAccessor) {
-        if (formattedDatatables[layer.layerId]?.formattedColumns[layer.xAccessor]) {
+      if (xAccessor) {
+        if (formattedDatatables[layer.layerId]?.formattedColumns[xAccessor]) {
           // stringify the value to compare with the chart value
-          return currentXFormatter.convert(row[layer.xAccessor]) === xyGeometry.x;
+          return currentXFormatter.convert(row[xAccessor]) === xyGeometry.x;
         }
-        return row[layer.xAccessor] === xyGeometry.x;
+        return row[xAccessor] === xyGeometry.x;
       }
     });
 
     const points = [
       {
         row: rowIndex,
-        column: table.columns.findIndex((col) => col.id === layer.xAccessor),
-        value: layer.xAccessor ? table.rows[rowIndex][layer.xAccessor] : xyGeometry.x,
+        column: table.columns.findIndex((col) => col.id === xAccessor),
+        value: xAccessor ? table.rows[rowIndex][xAccessor] : xyGeometry.x,
       },
     ];
 
     if (xySeries.seriesKeys.length > 1) {
       const pointValue = xySeries.seriesKeys[0];
+      const splitAccessor = layer.splitAccessor
+        ? getAccessorByDimension(layer.splitAccessor, table.columns)
+        : undefined;
 
-      const splitColumn = table.columns.find(({ id }) => id === layer.splitAccessor);
-      const splitFormatter = formatFactory(splitColumn && splitColumn.meta?.params);
+      const splitFormatter = formatFactory(
+        layer.splitAccessor ? getFormat(table.columns, layer.splitAccessor) : undefined
+      );
 
       points.push({
         row: table.rows.findIndex((row) => {
-          if (layer.splitAccessor) {
-            if (formattedDatatables[layer.layerId]?.formattedColumns[layer.splitAccessor]) {
-              return splitFormatter.convert(row[layer.splitAccessor]) === pointValue;
+          if (splitAccessor) {
+            if (formattedDatatables[layer.layerId]?.formattedColumns[splitAccessor]) {
+              return splitFormatter.convert(row[splitAccessor]) === pointValue;
             }
-            return row[layer.splitAccessor] === pointValue;
+            return row[splitAccessor] === pointValue;
           }
         }),
-        column: table.columns.findIndex((col) => col.id === layer.splitAccessor),
+        column: table.columns.findIndex((col) => col.id === splitAccessor),
         value: pointValue,
       });
     }
@@ -449,8 +479,9 @@ export function XYChart({
     }
 
     const { table } = dataLayers[0];
-
-    const xAxisColumnIndex = table.columns.findIndex((el) => el.id === dataLayers[0].xAccessor);
+    const xAccessor =
+      dataLayers[0].xAccessor && getAccessorByDimension(dataLayers[0].xAccessor, table.columns);
+    const xAxisColumnIndex = table.columns.findIndex((el) => el.id === xAccessor);
 
     const context: BrushEvent['data'] = { range: [min, max], table, column: xAxisColumnIndex };
     onSelectRange(context);
@@ -534,7 +565,7 @@ export function XYChart({
             : legend.isVisible
         }
         legendPosition={legend?.isInside ? legendInsideParams : legend.position}
-        legendSize={legend.legendSize}
+        legendSize={LegendSizeToPixels[legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
         theme={{
           ...chartTheme,
           barSeriesStyle: {

@@ -62,18 +62,22 @@ export function getFilteredLayers(layers: CommonXYLayerConfig[]) {
   return layers.filter<CommonXYReferenceLineLayerConfig | CommonXYDataLayerConfig>(
     (layer): layer is CommonXYReferenceLineLayerConfig | CommonXYDataLayerConfig => {
       let table: Datatable | undefined;
-      let accessors: string[] = [];
+      let accessors: Array<ExpressionValueVisDimension | string> = [];
       let xAccessor: undefined | string | number;
       let splitAccessor: undefined | string | number;
-
-      if (isDataLayer(layer)) {
-        xAccessor = layer.xAccessor;
-        splitAccessor = layer.splitAccessor;
-      }
 
       if (isDataLayer(layer) || isReferenceLayer(layer)) {
         table = layer.table;
         accessors = layer.accessors;
+      }
+
+      if (isDataLayer(layer)) {
+        xAccessor =
+          layer.xAccessor && table && getAccessorByDimension(layer.xAccessor, table.columns);
+        splitAccessor =
+          layer.splitAccessor &&
+          table &&
+          getAccessorByDimension(layer.splitAccessor, table.columns);
       }
 
       return !(
@@ -113,7 +117,7 @@ const getYAccessorWithFieldFormat = (
   }
 
   const accessor = getAccessorByDimension(dimension, columns);
-  let format = getFormatByAccessor(accessor, columns);
+  let format = getFormatByAccessor(accessor, columns, { id: 'number' });
   if (format?.id !== 'percent' && seriesType.includes('percentage')) {
     format = { id: 'percent', params: { pattern: '0.[00]%' } };
   }
@@ -124,19 +128,22 @@ const getYAccessorWithFieldFormat = (
 export const getLayerFormats = (
   { xAccessor, accessors, splitAccessor, table, seriesType }: CommonXYDataLayerConfig,
   { splitColumnAccessor, splitRowAccessor }: SplitAccessors
-): LayerFieldFormats => ({
-  xAccessors: getAccessorWithFieldFormat(xAccessor, table.columns),
-  yAccessors: accessors.reduce(
-    (formatters, a) => ({
-      ...formatters,
-      ...getYAccessorWithFieldFormat(a, table.columns, seriesType),
-    }),
-    {}
-  ),
-  splitSeriesAccessors: getAccessorWithFieldFormat(splitAccessor, table.columns),
-  splitColumnAccessors: getAccessorWithFieldFormat(splitColumnAccessor, table.columns),
-  splitRowAccessors: getAccessorWithFieldFormat(splitRowAccessor, table.columns),
-});
+): LayerFieldFormats => {
+  const yColumnIds = accessors.map((a) => a && getAccessorByDimension(a, table.columns));
+  return {
+    xAccessors: getAccessorWithFieldFormat(xAccessor, table.columns),
+    yAccessors: yColumnIds.reduce(
+      (formatters, a) => ({
+        ...formatters,
+        ...getYAccessorWithFieldFormat(a, table.columns, seriesType),
+      }),
+      {}
+    ),
+    splitSeriesAccessors: getAccessorWithFieldFormat(splitAccessor, table.columns),
+    splitColumnAccessors: getAccessorWithFieldFormat(splitColumnAccessor, table.columns),
+    splitRowAccessors: getAccessorWithFieldFormat(splitRowAccessor, table.columns),
+  };
+};
 
 export const getLayersFormats = (
   layers: CommonXYDataLayerConfig[],
@@ -196,9 +203,12 @@ export const getLayerTitles = (
     ),
   });
 
+  const xColumnId = xAccessor && getAccessorByDimension(xAccessor, table.columns);
+  const yColumnIds = accessors.map((a) => a && getAccessorByDimension(a, table.columns));
+
   return {
-    xTitles: xTitle && xAccessor ? { [xAccessor]: xTitle } : mapTitle(xAccessor),
-    yTitles: accessors.reduce(
+    xTitles: xTitle && xColumnId ? { [xColumnId]: xTitle } : mapTitle(xColumnId),
+    yTitles: yColumnIds.reduce(
       (titles, yAccessor) => ({ ...titles, ...(yAccessor ? getYTitle(yAccessor) : {}) }),
       {}
     ),

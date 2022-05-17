@@ -5,6 +5,8 @@ properties:
     type: string
   source_uri:
     type: string
+  rollout_duration_seconds:
+    type: number
   agents:
     oneOf:
       - type: array

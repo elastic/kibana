@@ -7,6 +7,7 @@
  */
 
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import { FormatFactory } from '../types';
 import {
   AxisExtentConfig,
@@ -14,6 +15,7 @@ import {
   CommonXYReferenceLineLayerConfig,
   ExtendedYConfig,
   YConfig,
+  YScaleType,
 } from '../../common';
 import { LayersFieldFormats } from './layers';
 
@@ -31,6 +33,7 @@ export type GroupsConfiguration = Array<{
   position: 'left' | 'right' | 'bottom' | 'top';
   formatter?: IFieldFormat;
   series: Series[];
+  scale?: YScaleType;
 }>;
 
 export function isFormatterCompatible(
@@ -57,12 +60,14 @@ export function groupAxesByType(
   };
 
   layers.forEach((layer) => {
-    const { layerId } = layer;
+    const { layerId, table } = layer;
     layer.accessors.forEach((accessor) => {
       const yConfig: Array<YConfig | ExtendedYConfig> | undefined = layer.yConfig;
-      const mode = yConfig?.find(({ forAccessor }) => forAccessor === accessor)?.axisMode || 'auto';
-      const fieldFormat = fieldFormats[layerId].yAccessors[accessor]!;
-      series[mode].push({ layer: layer.layerId, accessor, fieldFormat });
+      const yAccessor = getAccessorByDimension(accessor, table.columns);
+      const mode =
+        yConfig?.find(({ forAccessor }) => forAccessor === yAccessor)?.axisMode || 'auto';
+      const fieldFormat = fieldFormats[layerId].yAccessors[yAccessor]!;
+      series[mode].push({ layer: layer.layerId, accessor: yAccessor, fieldFormat });
     });
   });
 
@@ -98,7 +103,9 @@ export function getAxesConfiguration(
   layers: CommonXYDataLayerConfig[],
   shouldRotate: boolean,
   formatFactory: FormatFactory | undefined,
-  fieldFormats: LayersFieldFormats
+  fieldFormats: LayersFieldFormats,
+  yLeftScale?: YScaleType,
+  yRightScale?: YScaleType
 ): GroupsConfiguration {
   const series = groupAxesByType(layers, fieldFormats);
 
@@ -110,6 +117,7 @@ export function getAxesConfiguration(
       position: shouldRotate ? 'bottom' : 'left',
       formatter: formatFactory?.(series.left[0].fieldFormat),
       series: series.left.map(({ fieldFormat, ...currentSeries }) => currentSeries),
+      scale: yLeftScale,
     });
   }
 
@@ -119,6 +127,7 @@ export function getAxesConfiguration(
       position: shouldRotate ? 'top' : 'right',
       formatter: formatFactory?.(series.right[0].fieldFormat),
       series: series.right.map(({ fieldFormat, ...currentSeries }) => currentSeries),
+      scale: yRightScale,
     });
   }
 

@@ -10,6 +10,7 @@ import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/chart
 import { $Values } from '@kbn/utility-types';
 import type { PaletteOutput } from '@kbn/coloring';
 import { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 
@@ -19,7 +20,6 @@ import {
   FittingFunctions,
   IconPositions,
   LayerTypes,
-  MULTITABLE,
   LineStyles,
   SeriesTypes,
   ValueLabelModes,
@@ -96,13 +96,12 @@ export interface YConfig {
 }
 
 export interface DataLayerArgs {
-  accessors: string[];
+  accessors: Array<ExpressionValueVisDimension | string>;
   seriesType: SeriesType;
-  xAccessor?: string;
+  xAccessor?: string | ExpressionValueVisDimension;
   hide?: boolean;
-  splitAccessor?: string;
+  splitAccessor?: string | ExpressionValueVisDimension;
   columnToLabel?: string; // Actually a JSON key-value pair
-  yScaleType: YScaleType;
   xScaleType: XScaleType;
   isHistogram: boolean;
   palette: PaletteOutput;
@@ -121,7 +120,6 @@ export interface ExtendedDataLayerArgs {
   hide?: boolean;
   splitAccessor?: string;
   columnToLabel?: string; // Actually a JSON key-value pair
-  yScaleType: YScaleType;
   xScaleType: XScaleType;
   isHistogram: boolean;
   palette: PaletteOutput;
@@ -172,7 +170,7 @@ export interface LegendConfig {
    * Exact legend width (vertical) or height (horizontal)
    * Limited to max of 70% of the chart container dimension Vertical legends limited to min of 30% of computed width
    */
-  legendSize?: number;
+  legendSize?: LegendSize;
 }
 
 export interface LabelsOrientationConfig {
@@ -182,17 +180,18 @@ export interface LabelsOrientationConfig {
 }
 
 // Arguments to XY chart expression, with computed properties
-export interface XYArgs {
+export interface XYArgs extends DataLayerArgs {
   xTitle: string;
   yTitle: string;
   yRightTitle: string;
   yLeftExtent: AxisExtentConfigResult;
   yRightExtent: AxisExtentConfigResult;
+  yLeftScale: YScaleType;
+  yRightScale: YScaleType;
   legend: LegendConfigResult;
   endValue?: EndValue;
   emphasizeFitting?: boolean;
   valueLabels: ValueLabelMode;
-  dataLayers: DataLayerConfigResult[];
   referenceLineLayers: ReferenceLineLayerConfigResult[];
   annotationLayers: AnnotationLayerConfigResult[];
   fittingFunction?: FittingFunction;
@@ -216,6 +215,8 @@ export interface LayeredXYArgs {
   yRightTitle: string;
   yLeftExtent: AxisExtentConfigResult;
   yRightExtent: AxisExtentConfigResult;
+  yLeftScale: YScaleType;
+  yRightScale: YScaleType;
   legend: LegendConfigResult;
   endValue?: EndValue;
   emphasizeFitting?: boolean;
@@ -240,6 +241,8 @@ export interface XYProps {
   yRightTitle: string;
   yLeftExtent: AxisExtentConfigResult;
   yRightExtent: AxisExtentConfigResult;
+  yLeftScale: YScaleType;
+  yRightScale: YScaleType;
   legend: LegendConfigResult;
   endValue?: EndValue;
   emphasizeFitting?: boolean;
@@ -280,7 +283,7 @@ export type ExtendedAnnotationLayerConfigResult = ExtendedAnnotationLayerArgs & 
 };
 
 export interface ReferenceLineLayerArgs {
-  accessors: string[];
+  accessors: Array<ExpressionValueVisDimension | string>;
   columnToLabel?: string;
   yConfig?: ExtendedYConfigResult[];
 }
@@ -304,15 +307,6 @@ export type XYExtendedLayerConfigResult =
   | ExtendedDataLayerConfigResult
   | ExtendedReferenceLineLayerConfigResult
   | ExtendedAnnotationLayerConfigResult;
-
-export interface LensMultiTable {
-  type: typeof MULTITABLE;
-  tables: Record<string, Datatable>;
-  dateRange?: {
-    fromDate: Date;
-    toDate: Date;
-  };
-}
 
 export type ReferenceLineLayerConfigResult = ReferenceLineLayerArgs & {
   type: typeof REFERENCE_LINE_LAYER;
@@ -394,17 +388,11 @@ export type LayeredXyVisFn = ExpressionFunctionDefinition<
   Promise<XYRender>
 >;
 
-export type DataLayerFn = ExpressionFunctionDefinition<
-  typeof DATA_LAYER,
-  Datatable,
-  DataLayerArgs,
-  DataLayerConfigResult
->;
 export type ExtendedDataLayerFn = ExpressionFunctionDefinition<
   typeof EXTENDED_DATA_LAYER,
   Datatable,
   ExtendedDataLayerArgs,
-  ExtendedDataLayerConfigResult
+  Promise<ExtendedDataLayerConfigResult>
 >;
 
 export type ReferenceLineLayerFn = ExpressionFunctionDefinition<

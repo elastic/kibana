@@ -190,7 +190,7 @@ function parseUsersData(rawAggregation: AlertCountersBySeverityAggregation): Use
     return [
       ...accumalatedAlertsByUser,
       {
-        userName: currentUser.key,
+        userName: currentUser.key || '—',
         totalAlerts: currentUser.doc_count,
         low: currentUser.low.doc_count,
         medium: currentUser.medium.doc_count,

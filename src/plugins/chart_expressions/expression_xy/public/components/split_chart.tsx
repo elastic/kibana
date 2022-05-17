@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { GroupBy, SmallMultiples } from '@elastic/charts';
+import { GroupBy, SmallMultiples, Predicate } from '@elastic/charts';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { Datatable } from '@kbn/expressions-plugin/public';
@@ -52,7 +52,7 @@ export const SplitChart = ({
         <GroupBy
           id={SPLIT_COLUMN}
           by={(spec, datum) => getData(datum, splitColumnAccessor)}
-          sort={'alphaAsc'}
+          sort={Predicate.DataIndex}
           format={(value) => format(value, splitColumnAccessor)}
         />
       )}
@@ -60,7 +60,7 @@ export const SplitChart = ({
         <GroupBy
           id={SPLIT_ROW}
           by={(spec, datum) => getData(datum, splitRowAccessor)}
-          sort={'alphaAsc'}
+          sort={Predicate.DataIndex}
           format={(value) => format(value, splitRowAccessor)}
         />
       )}
