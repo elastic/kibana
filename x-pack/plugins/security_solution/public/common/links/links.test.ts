@@ -114,9 +114,8 @@ const hostsLinkInfo = {
   path: '/hosts',
   title: 'Hosts',
   landingImage: 'test-file-stub',
-  description: 'A comprehensive overview of all hosts and host-related security events.',  
+  description: 'A comprehensive overview of all hosts and host-related security events.',
 };
-
 
 describe('security app link helpers', () => {
   beforeEach(() => {
