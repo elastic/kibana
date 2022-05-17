@@ -771,7 +771,6 @@ exports[`XYChart component it renders area 1`] = `
           "type": "dataLayer",
           "xAccessor": "c",
           "xScaleType": "ordinal",
-          "yScaleType": "linear",
         },
       ]
     }
@@ -812,6 +811,7 @@ exports[`XYChart component it renders area 1`] = `
           },
           "groupId": "left",
           "position": "left",
+          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
@@ -1320,7 +1320,6 @@ exports[`XYChart component it renders bar 1`] = `
           "type": "dataLayer",
           "xAccessor": "c",
           "xScaleType": "ordinal",
-          "yScaleType": "linear",
         },
       ]
     }
@@ -1361,6 +1360,7 @@ exports[`XYChart component it renders bar 1`] = `
           },
           "groupId": "left",
           "position": "left",
+          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
@@ -1869,7 +1869,6 @@ exports[`XYChart component it renders horizontal bar 1`] = `
           "type": "dataLayer",
           "xAccessor": "c",
           "xScaleType": "ordinal",
-          "yScaleType": "linear",
         },
       ]
     }
@@ -1910,6 +1909,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
           },
           "groupId": "left",
           "position": "bottom",
+          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
@@ -2418,7 +2418,6 @@ exports[`XYChart component it renders line 1`] = `
           "type": "dataLayer",
           "xAccessor": "c",
           "xScaleType": "ordinal",
-          "yScaleType": "linear",
         },
       ]
     }
@@ -2459,6 +2458,7 @@ exports[`XYChart component it renders line 1`] = `
           },
           "groupId": "left",
           "position": "left",
+          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
@@ -2967,7 +2967,6 @@ exports[`XYChart component it renders stacked area 1`] = `
           "type": "dataLayer",
           "xAccessor": "c",
           "xScaleType": "ordinal",
-          "yScaleType": "linear",
         },
       ]
     }
@@ -3008,6 +3007,7 @@ exports[`XYChart component it renders stacked area 1`] = `
           },
           "groupId": "left",
           "position": "left",
+          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
@@ -3516,7 +3516,6 @@ exports[`XYChart component it renders stacked bar 1`] = `
           "type": "dataLayer",
           "xAccessor": "c",
           "xScaleType": "ordinal",
-          "yScaleType": "linear",
         },
       ]
     }
@@ -3557,6 +3556,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
           },
           "groupId": "left",
           "position": "left",
+          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
@@ -4065,7 +4065,6 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
           "type": "dataLayer",
           "xAccessor": "c",
           "xScaleType": "ordinal",
-          "yScaleType": "linear",
         },
       ]
     }
@@ -4106,6 +4105,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
           },
           "groupId": "left",
           "position": "bottom",
+          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
@@ -4869,7 +4869,6 @@ exports[`XYChart component split chart should render split chart if both, splitR
           "type": "dataLayer",
           "xAccessor": "c",
           "xScaleType": "ordinal",
-          "yScaleType": "linear",
         },
       ]
     }
@@ -4910,6 +4909,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
           },
           "groupId": "left",
           "position": "left",
+          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
@@ -5672,7 +5672,6 @@ exports[`XYChart component split chart should render split chart if splitColumnA
           "type": "dataLayer",
           "xAccessor": "c",
           "xScaleType": "ordinal",
-          "yScaleType": "linear",
         },
       ]
     }
@@ -5713,6 +5712,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
           },
           "groupId": "left",
           "position": "left",
+          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
@@ -6475,7 +6475,6 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
           "type": "dataLayer",
           "xAccessor": "c",
           "xScaleType": "ordinal",
-          "yScaleType": "linear",
         },
       ]
     }
@@ -6516,6 +6515,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
           },
           "groupId": "left",
           "position": "left",
+          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
