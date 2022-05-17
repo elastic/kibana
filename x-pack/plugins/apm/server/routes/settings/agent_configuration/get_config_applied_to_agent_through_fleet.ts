@@ -26,7 +26,7 @@ export async function getConfigsAppliedToAgentsThroughFleet({
           filter: [
             ...termQuery(METRICSET_NAME, 'agent_config'),
             ...rangeQuery(
-              datemath.parse('now-15m')!.valueOf(),
+              datemath.parse('now-1m')!.valueOf(),
               datemath.parse('now')!.valueOf()
             ),
           ],
