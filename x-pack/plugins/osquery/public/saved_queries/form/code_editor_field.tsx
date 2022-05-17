@@ -36,7 +36,7 @@ const CodeEditorFieldComponent: React.FC<CodeEditorFieldProps> = ({ euiFieldProp
       error={error}
       fullWidth
     >
-      {euiFieldProps?.disabled ? (
+      {euiFieldProps?.isDisabled ? (
         <StyledEuiCodeBlock
           language="sql"
           fontSize="m"

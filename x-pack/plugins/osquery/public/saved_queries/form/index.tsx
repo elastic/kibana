@@ -85,7 +85,7 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
       <EuiSpacer size="xl" />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <ECSMappingEditorField />
+          <ECSMappingEditorField euiFieldProps={euiFieldProps} />
         </EuiFlexItem>
       </EuiFlexGroup>
       {!viewMode && hasPlayground && (
@@ -124,7 +124,11 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
           <CommonUseField path="version" euiFieldProps={versionEuiFieldProps} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <CommonUseField path="platform" component={PlatformCheckBoxGroupField} />
+          <CommonUseField
+            path="platform"
+            component={PlatformCheckBoxGroupField}
+            euiFieldProps={euiFieldProps}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       {playgroundVisible && (
