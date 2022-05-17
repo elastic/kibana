@@ -17,7 +17,7 @@ import type {
   RuleRegistrySearchRequest,
   RuleRegistrySearchResponse,
 } from '@kbn/rule-registry-plugin/common/search_strategy';
-import {
+import type {
   QueryDslFieldAndFormat,
   QueryDslQueryContainer,
   SortCombinations,
