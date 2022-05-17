@@ -295,7 +295,6 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
         >
           <HeaderSection
             id={uniqueQueryId}
-            height={!toggleStatus ? 30 : undefined}
             title={titleText}
             titleSize={titleSize}
             toggleStatus={toggleStatus}
