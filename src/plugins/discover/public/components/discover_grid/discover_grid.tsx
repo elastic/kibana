@@ -48,7 +48,7 @@ import {
 import { DiscoverGridDocumentToolbarBtn, getDocId } from './discover_grid_document_selection';
 import { SortPairArr } from '../doc_table/lib/get_sort';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
-import { ElasticSearchHit } from '../../types';
+import { ElasticSearchHit, GetCellTextToCopy } from '../../types';
 import { useRowHeightsOptions } from '../../utils/use_row_heights_options';
 import { useDiscoverServices } from '../../utils/use_discover_services';
 import { getCellValueAsTextToCopy } from '../../utils/copy_to_clipboard';
@@ -238,8 +238,8 @@ export const DiscoverGrid = ({
     });
   }, [displayedRows, indexPattern]);
 
-  const getCellTextToCopy = useCallback(
-    (rowIndex: number, columnId: string) => {
+  const getCellTextToCopy: GetCellTextToCopy = useCallback(
+    (rowIndex, columnId, options) => {
       return getCellValueAsTextToCopy({
         rowIndex,
         rows: displayedRows,
@@ -247,6 +247,7 @@ export const DiscoverGrid = ({
         dataView: indexPattern,
         columnId,
         services,
+        options,
       });
     },
     [displayedRows, displayedRowsFlattened, indexPattern, services]

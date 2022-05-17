@@ -12,4 +12,8 @@ export type ElasticSearchHit<T = unknown> = estypes.SearchHit<T>;
 
 export type HitsFlattened = Array<Record<string, unknown>>;
 
-export type GetCellTextToCopy = (rowIndex: number, columnId: string) => string;
+export type GetCellTextToCopy = (
+  rowIndex: number,
+  columnId: string,
+  options: { allowMultiline: boolean }
+) => string;

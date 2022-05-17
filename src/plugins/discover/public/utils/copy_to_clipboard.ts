@@ -20,6 +20,7 @@ export const getCellValueAsTextToCopy = ({
   columnId,
   dataView,
   services,
+  options,
 }: {
   rowIndex: number;
   rows: ElasticSearchHit[];
@@ -27,6 +28,9 @@ export const getCellValueAsTextToCopy = ({
   columnId: string;
   dataView: DataView;
   services: DiscoverServices;
+  options: {
+    allowMultiline: boolean;
+  };
 }): string => {
   const { fieldFormats } = services;
   const rowFlattened = rowsFlattened[rowIndex];
@@ -34,7 +38,9 @@ export const getCellValueAsTextToCopy = ({
   const value = rowFlattened[columnId];
 
   return field?.type === '_source'
-    ? JSON.stringify(rowFlattened, null, 2)
+    ? options.allowMultiline
+      ? JSON.stringify(rowFlattened, null, 2)
+      : JSON.stringify(rowFlattened)
     : formatFieldValue(value, rows[rowIndex], fieldFormats, dataView, field, 'text');
 };
 
@@ -51,7 +57,7 @@ export const copyValueToClipboard = ({
 }) => {
   const { toastNotifications } = services;
 
-  const valueFormatted = getCellTextToCopy(rowIndex, columnId);
+  const valueFormatted = getCellTextToCopy(rowIndex, columnId, { allowMultiline: true });
 
   copyToClipboard(valueFormatted);
 
@@ -75,9 +81,9 @@ export const copyColumnValuesToClipboard = async ({
 }) => {
   const { toastNotifications } = services;
 
-  const valuesFormatted = [...Array(rowsNumber)].map((_, rowIndex) =>
-    getCellTextToCopy(rowIndex, columnId)
-  );
+  const valuesFormatted = [...Array(rowsNumber)].map((_, rowIndex) => {
+    return getCellTextToCopy(rowIndex, columnId, { allowMultiline: false });
+  });
 
   const textToCopy = valuesFormatted.join('\n');
 

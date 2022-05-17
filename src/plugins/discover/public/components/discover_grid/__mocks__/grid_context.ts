@@ -25,7 +25,7 @@ export const discoverGridContextMock: GridContext = {
   isDarkMode: false,
   selectedDocs: [],
   setSelectedDocs: jest.fn(),
-  getCellTextToCopy: (rowIndex, columnId) =>
+  getCellTextToCopy: (rowIndex, columnId, options) =>
     getCellValueAsTextToCopy({
       rowIndex,
       columnId,
@@ -33,5 +33,6 @@ export const discoverGridContextMock: GridContext = {
       rows: esHits,
       rowsFlattened: esHitsFlattened,
       dataView: indexPatternMock,
+      options,
     }),
 };
