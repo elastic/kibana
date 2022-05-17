@@ -68,12 +68,16 @@ Sensitive properties, such as passwords, can also be stored in the
 [[managing-pre-configured-connectors]]
 ==== View preconfigured connectors
 
-When you open the main menu, click *Stack Management > Rules and Connectors*. Preconfigured connectors appear on the <<connector-management, *Connectors* tab>>, regardless of which space you are in. They are tagged as “preconfigured”, and you cannot delete them.
+When you open the main menu, click *Stack Management > Rules and Connectors*. 
+Preconfigured connectors appear on the 
+<<connector-management, *Connectors* tab>>, regardless of which space you are 
+in. They are tagged as “preconfigured”, and you cannot delete them.
 
 [role="screenshot"]
 image::images/pre-configured-connectors-managing.png[Connectors managing tab with pre-configured]
 
-Clicking a preconfigured connector shows the description, but not the configuration. A message indicates that this is a preconfigured connector.
+Clicking a preconfigured connector shows the description, but not the 
+configuration. A message indicates that this is a preconfigured connector.
 
 [role="screenshot"]
 image::images/pre-configured-connectors-view-screen.png[Pre-configured connector view details]
