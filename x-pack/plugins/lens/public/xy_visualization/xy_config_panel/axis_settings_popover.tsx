@@ -14,10 +14,11 @@ import {
   htmlIdGenerator,
   EuiFieldNumber,
   EuiFormControlLayoutDelimited,
+  EuiSelect,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import { AxesSettingsConfig, AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
+import { AxesSettingsConfig, AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
 import { ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
 import { XYLayerConfig } from '../types';
 import { ToolbarPopover, useDebouncedValue, AxisTitleSettings } from '../../shared_components';
@@ -93,6 +94,14 @@ export interface AxisSettingsPopoverProps {
    * Flag whether endzones are visible
    */
   endzonesVisible?: boolean;
+  /**
+   * Set scale
+   */
+  setScale?: (scale: YScaleType) => void;
+  /**
+   * Current scale
+   */
+  scale?: YScaleType;
   /**
    *  axis extent
    */
@@ -216,6 +225,8 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   hasPercentageAxis,
   dataBounds,
   useMultilayerTimeAxis,
+  scale,
+  setScale,
 }) => {
   const isHorizontal = layers?.length ? isHorizontalChart(layers) : false;
   const config = popoverConfig(axis, isHorizontal);
@@ -348,6 +359,46 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
             onChange={() => setEndzoneVisibility(!Boolean(endzonesVisible))}
             checked={Boolean(endzonesVisible)}
             showLabel={false}
+          />
+        </EuiFormRow>
+      )}
+      {setScale && (
+        <EuiFormRow
+          display="columnCompressed"
+          label={i18n.translate('xpack.lens.xyChart.setScale', {
+            defaultMessage: 'Axis scale',
+          })}
+          fullWidth
+        >
+          <EuiSelect
+            compressed
+            fullWidth
+            data-test-subj={`lnsshowEndzones`}
+            aria-label={i18n.translate('xpack.lens.xyChart.setScale', {
+              defaultMessage: 'Axis scale',
+            })}
+            options={[
+              {
+                text: i18n.translate('xpack.lens.xyChart.scaleLinear', {
+                  defaultMessage: 'Linear',
+                }),
+                value: 'linear',
+              },
+              {
+                text: i18n.translate('xpack.lens.xyChart.scaleLog', {
+                  defaultMessage: 'Logarithmic',
+                }),
+                value: 'log',
+              },
+              {
+                text: i18n.translate('xpack.lens.xyChart.scaleSquare', {
+                  defaultMessage: 'Square root',
+                }),
+                value: 'sqrt',
+              },
+            ]}
+            onChange={(e) => setScale(e.target.value as YScaleType)}
+            value={scale}
           />
         </EuiFormRow>
       )}
