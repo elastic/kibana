@@ -21,6 +21,7 @@ import {
   EuiPageTemplate,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { Form, FormikProvider, useFormik, useFormikContext } from 'formik';
@@ -40,6 +41,7 @@ import {
   getUserAvatarColor,
   getUserAvatarInitials,
 } from '../../../common/model';
+import { useApiClients } from '../../components';
 import { Breadcrumb } from '../../components/breadcrumb';
 import {
   FormChangesProvider,
@@ -49,11 +51,9 @@ import {
 import { FormField } from '../../components/form_field';
 import { FormLabel } from '../../components/form_label';
 import { FormRow, OptionalText } from '../../components/form_row';
-import { UserAPIClient } from '../../management/users';
 import { ChangePasswordFlyout } from '../../management/users/edit_user/change_password_flyout';
 import { isUserReserved } from '../../management/users/user_utils';
 import { UserAvatar } from './user_avatar';
-import { UserProfileAPIClient } from './user_profile_api_client';
 import { createImageHandler, getRandomColor, IMAGE_FILE_TYPES, VALID_HEX_COLOR } from './utils';
 
 export interface UserProfileProps {
@@ -79,6 +79,7 @@ export interface UserProfileFormValues {
 }
 
 export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data }) => {
+  const { euiTheme } = useEuiTheme();
   const { services } = useKibana<CoreStart>();
   const formik = useUserProfileForm({ user, data });
   const formChanges = useFormChanges();
@@ -101,7 +102,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
       helpText: (
         <FormattedMessage
           id="xpack.security.accountManagement.userProfile.usernameHelpText"
-          defaultMessage="Username can't be changed once created."
+          defaultMessage="User name cannot be changed after account creation."
         />
       ),
       testSubj: 'username',
@@ -121,7 +122,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
         helpText: (
           <FormattedMessage
             id="xpack.security.accountManagement.userProfile.fullNameHelpText"
-            defaultMessage="Contact an administrator to change your full name."
+            defaultMessage="Please contact an administrator to change your full name."
           />
         ),
         testSubj: 'full_name',
@@ -140,7 +141,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
         helpText: (
           <FormattedMessage
             id="xpack.security.accountManagement.userProfile.emailHelpText"
-            defaultMessage="Contact an administrator to change your email address."
+            defaultMessage="Please contact an administrator to change your email address."
           />
         ),
         testSubj: 'email',
@@ -165,7 +166,12 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
           ) : null}
 
           <EuiPageTemplate
+            style={{ backgroundColor: euiTheme.colors.emptyShade }}
+            pageContentBodyProps={{ style: { paddingLeft: 0, paddingRight: 0 } }}
+            className="eui-fullHeight"
             pageHeader={{
+              style: { paddingLeft: 0, paddingRight: 0 },
+              bottomBorder: true,
               pageTitle: (
                 <FormattedMessage
                   id="xpack.security.accountManagement.userProfile.title"
@@ -196,7 +202,8 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
               )),
             }}
             bottomBar={formChanges.count > 0 ? <SaveChangesBottomBar /> : null}
-            restrictWidth={900}
+            bottomBarProps={{ paddingSize: 'm' }}
+            restrictWidth={1000}
           >
             <Form aria-labelledby={titleId}>
               {canChangeDetails ? (
@@ -213,7 +220,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                   description={
                     <FormattedMessage
                       id="xpack.security.accountManagement.userProfile.detailsGroupDescription"
-                      defaultMessage="Provide basic information about yourself."
+                      defaultMessage="Provide some basic information about yourself."
                     />
                   }
                 >
@@ -251,6 +258,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
 
               <EuiDescribedFormGroup
                 fullWidth
+                fieldFlexItemProps={{ style: { alignSelf: 'flex-start' } }}
                 title={
                   <h2>
                     <FormattedMessage
@@ -262,11 +270,11 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                 description={
                   <FormattedMessage
                     id="xpack.security.accountManagement.userProfile.avatarGroupDescription"
-                    defaultMessage="Pick a color or photo to represent yourself."
+                    defaultMessage="Provide your initials or upload an image to represent yourself."
                   />
                 }
               >
-                <EuiFlexGroup responsive={false} alignItems="center">
+                <EuiFlexGroup responsive={false}>
                   <EuiFlexItem grow={false}>
                     {formik.values.avatarType === 'image' && !formik.values.data.avatar.imageUrl ? (
                       <UserAvatar size="xl" />
@@ -303,9 +311,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                       <EuiButtonGroup
                         legend={i18n.translate(
                           'xpack.security.accountManagement.userProfile.avatarTypeGroupDescription',
-                          {
-                            defaultMessage: 'Avatar type',
-                          }
+                          { defaultMessage: 'Avatar type' }
                         )}
                         buttonSize="m"
                         idSelected={formik.values.avatarType}
@@ -318,7 +324,6 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                                 defaultMessage="Initials"
                               />
                             ),
-                            iconType: 'lettering',
                           },
                           {
                             id: 'image',
@@ -367,9 +372,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                       validate={{
                         required: i18n.translate(
                           'xpack.security.accountManagement.userProfile.imageUrlRequiredError',
-                          {
-                            defaultMessage: 'Upload an image.',
-                          }
+                          { defaultMessage: 'Upload an image.' }
                         ),
                       }}
                       accept={IMAGE_FILE_TYPES.join(',')}
@@ -378,7 +381,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                     />
                   </FormRow>
                 ) : (
-                  <EuiFlexGroup responsive={false} alignItems="center">
+                  <EuiFlexGroup responsive={false}>
                     <EuiFlexItem grow={false} style={{ width: 64 }}>
                       <FormRow
                         label={
@@ -393,20 +396,17 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                       >
                         <FormField
                           name="data.avatar.initials"
+                          maxLength={2}
                           validate={{
                             required: i18n.translate(
                               'xpack.security.accountManagement.userProfile.initialsRequiredError',
-                              {
-                                defaultMessage: 'Enter initials.',
-                              }
+                              { defaultMessage: 'Add initials' }
                             ),
                             maxLength: {
                               value: 2,
                               message: i18n.translate(
                                 'xpack.security.accountManagement.userProfile.initialsMaxLengthError',
-                                {
-                                  defaultMessage: 'Enter no more than 2 characters.',
-                                }
+                                { defaultMessage: 'Enter no more than 2 characters.' }
                               ),
                             },
                           }}
@@ -450,17 +450,13 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                           validate={{
                             required: i18n.translate(
                               'xpack.security.accountManagement.userProfile.colorRequiredError',
-                              {
-                                defaultMessage: 'Select a color.',
-                              }
+                              { defaultMessage: 'Select a color.' }
                             ),
                             pattern: {
                               value: VALID_HEX_COLOR,
                               message: i18n.translate(
                                 'xpack.security.accountManagement.userProfile.colorPatternError',
-                                {
-                                  defaultMessage: 'Enter a valid HEX color code.',
-                                }
+                                { defaultMessage: 'Enter a valid HEX color code.' }
                               ),
                             },
                           }}
@@ -526,6 +522,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
 
 export function useUserProfileForm({ user, data }: UserProfileProps) {
   const { services } = useKibana<CoreStart>();
+  const { userProfiles, users } = useApiClients();
 
   const [initialValues, resetInitialValues] = useState<UserProfileFormValues>({
     user: {
@@ -547,7 +544,7 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
       try {
         const canChangeDetails = canUserChangeDetails(user, services.application.capabilities);
         const promises = [
-          new UserProfileAPIClient(services.http).update(
+          userProfiles.update(
             values.avatarType === 'image'
               ? values.data
               : { ...values.data, avatar: { ...values.data.avatar, imageUrl: null } }
@@ -555,7 +552,7 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
         ];
         if (canChangeDetails) {
           promises.push(
-            new UserAPIClient(services.http).saveUser({
+            users.saveUser({
               username: user.username,
               roles: user.roles,
               enabled: user.enabled,
@@ -581,6 +578,8 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
     },
     initialValues,
     enableReinitialize: true,
+    validateOnBlur: false,
+    validateOnChange: true,
   });
 
   const customAvatarInitials = useRef(
@@ -615,7 +614,7 @@ export const SaveChangesBottomBar: FunctionComponent = () => {
   const { count } = useFormChangesContext();
 
   return (
-    <EuiFlexGroup alignItems="center">
+    <EuiFlexGroup alignItems="center" style={{ width: '100%' }}>
       <EuiFlexItem>
         <EuiFlexGroup responsive={false} gutterSize="xs">
           <EuiFlexItem grow={false}>
@@ -631,7 +630,7 @@ export const SaveChangesBottomBar: FunctionComponent = () => {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={formik.handleReset} color="ghost" iconType="cross">
+        <EuiButtonEmpty onClick={formik.handleReset} color="ghost">
           <FormattedMessage
             id="xpack.security.accountManagement.userProfile.discardChangesButton"
             defaultMessage="Discard"

@@ -10,11 +10,11 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import { getUserDisplayName } from '../../common/model';
+import { useCurrentUser, useUserProfile } from '../components';
 import { Breadcrumb } from '../components/breadcrumb';
-import { useCurrentUser, useUserProfile } from '../components/use_current_user';
 import type { UserProfileProps } from './user_profile';
 import { UserProfile } from './user_profile';
 
@@ -33,10 +33,13 @@ export const AccountManagementPage: FunctionComponent = () => {
     return null;
   }
 
-  const displayName = getUserDisplayName(userProfile.value.user);
-
   return (
-    <Breadcrumb text={displayName} href={services.http.basePath.prepend('/security/account')}>
+    <Breadcrumb
+      text={i18n.translate('xpack.security.accountManagement.userSettingsBreadcrumbRootLabel', {
+        defaultMessage: 'User settings',
+      })}
+      href={services.http.basePath.prepend('/security/account')}
+    >
       <UserProfile user={currentUser.value} data={userProfile.value.data} />
     </Breadcrumb>
   );

@@ -11,8 +11,10 @@ import React from 'react';
 
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 
+import { UserProfileAPIClient } from '..';
 import type { UserData } from '../../../common';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
+import { UserAPIClient } from '../../management';
 import { securityMock } from '../../mocks';
 import { Providers } from '../account_management_app';
 import { useUserProfileForm } from './user_profile';
@@ -24,7 +26,16 @@ let history = scopedHistoryMock.create();
 const authc = securityMock.createSetup().authc;
 
 const wrapper: FunctionComponent = ({ children }) => (
-  <Providers services={coreStart} theme$={theme$} history={history} authc={authc}>
+  <Providers
+    services={coreStart}
+    theme$={theme$}
+    history={history}
+    authc={authc}
+    apiClients={{
+      userProfiles: new UserProfileAPIClient(coreStart.http),
+      users: new UserAPIClient(coreStart.http),
+    }}
+  >
     {children}
   </Providers>
 );
@@ -43,7 +54,7 @@ describe('useUserProfileForm', () => {
     };
     coreStart.http.delete.mockReset();
     coreStart.http.get.mockReset();
-    coreStart.http.post.mockReset();
+    coreStart.http.post.mockReset().mockResolvedValue(undefined);
     coreStart.notifications.toasts.addDanger.mockReset();
     coreStart.notifications.toasts.addSuccess.mockReset();
   });

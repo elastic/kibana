@@ -255,7 +255,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
             !isNewUser && !isReservedUser
               ? i18n.translate(
                   'xpack.security.management.users.userForm.changingUserNameAfterCreationDescription',
-                  { defaultMessage: `Username can't be changed once created.` }
+                  { defaultMessage: 'User name cannot be changed after account creation.' }
                 )
               : undefined
           }

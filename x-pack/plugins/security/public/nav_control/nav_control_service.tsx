@@ -19,13 +19,15 @@ import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-pl
 
 import type { SecurityLicense } from '../../common/licensing';
 import type { AuthenticationServiceSetup } from '../authentication';
-import { AuthenticationProvider } from '../components/use_current_user';
+import type { ApiClients } from '../components';
+import { ApiClientsProvider, AuthenticationProvider } from '../components';
 import type { UserMenuLink } from './nav_control_component';
 import { SecurityNavControl } from './nav_control_component';
 
 interface SetupDeps {
   securityLicense: SecurityLicense;
   logoutUrl: string;
+  apiClients: ApiClients;
 }
 
 interface StartDeps {
@@ -48,6 +50,7 @@ export interface SecurityNavControlServiceStart {
 export class SecurityNavControlService {
   private securityLicense!: SecurityLicense;
   private logoutUrl!: string;
+  private apiClients!: ApiClients;
 
   private navControlRegistered!: boolean;
 
@@ -56,9 +59,10 @@ export class SecurityNavControlService {
   private readonly stop$ = new ReplaySubject<void>(1);
   private userMenuLinks$ = new BehaviorSubject<UserMenuLink[]>([]);
 
-  public setup({ securityLicense, logoutUrl }: SetupDeps) {
+  public setup({ securityLicense, logoutUrl, apiClients }: SetupDeps) {
     this.securityLicense = securityLicense;
     this.logoutUrl = logoutUrl;
+    this.apiClients = apiClients;
   }
 
   public start({ core, authc }: StartDeps): SecurityNavControlServiceStart {
@@ -117,7 +121,7 @@ export class SecurityNavControlService {
       order: 2000,
       mount: (element: HTMLElement) => {
         ReactDOM.render(
-          <Providers services={core} authc={authc} theme$={theme$}>
+          <Providers services={core} authc={authc} theme$={theme$} apiClients={this.apiClients}>
             <SecurityNavControl
               editProfileUrl={core.http.basePath.prepend('/security/account')}
               logoutUrl={this.logoutUrl}
@@ -142,6 +146,7 @@ export class SecurityNavControlService {
 export interface ProvidersProps {
   authc: AuthenticationServiceSetup;
   services: CoreStart;
+  apiClients: ApiClients;
   theme$: Observable<CoreTheme>;
 }
 
@@ -149,13 +154,16 @@ export const Providers: FunctionComponent<ProvidersProps> = ({
   authc,
   services,
   theme$,
+  apiClients,
   children,
 }) => (
   <KibanaContextProvider services={services}>
     <AuthenticationProvider authc={authc}>
-      <I18nProvider>
-        <KibanaThemeProvider theme$={theme$}>{children}</KibanaThemeProvider>
-      </I18nProvider>
+      <ApiClientsProvider {...apiClients}>
+        <I18nProvider>
+          <KibanaThemeProvider theme$={theme$}>{children}</KibanaThemeProvider>
+        </I18nProvider>
+      </ApiClientsProvider>
     </AuthenticationProvider>
   </KibanaContextProvider>
 );

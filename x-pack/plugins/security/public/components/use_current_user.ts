@@ -7,12 +7,10 @@
 
 import constate from 'constate';
 import useAsync from 'react-use/lib/useAsync';
+import useObservable from 'react-use/lib/useObservable';
 
-import type { CoreStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-
+import { useApiClients } from '.';
 import type { UserData } from '../../common';
-import { UserProfileAPIClient } from '../account_management';
 import type { AuthenticationServiceSetup } from '../authentication';
 
 export interface AuthenticationProviderProps {
@@ -31,6 +29,7 @@ export function useCurrentUser() {
 }
 
 export function useUserProfile<T extends UserData>(dataPath?: string) {
-  const { services } = useKibana<CoreStart>();
-  return useAsync(() => new UserProfileAPIClient(services.http).get<T>(dataPath), [services.http]);
+  const { userProfiles } = useApiClients();
+  const dataUpdateState = useObservable(userProfiles.dataUpdates$);
+  return useAsync(() => userProfiles.get<T>(dataPath), [userProfiles, dataUpdateState]);
 }

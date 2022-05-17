@@ -24,7 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { UserAvatar as IUserAvatar } from '../../common';
 import { getUserDisplayName, isUserAnonymous } from '../../common/model';
 import { UserAvatar } from '../account_management';
-import { useCurrentUser, useUserProfile } from '../components/use_current_user';
+import { useCurrentUser, useUserProfile } from '../components';
 
 export interface UserMenuLink {
   label: string;

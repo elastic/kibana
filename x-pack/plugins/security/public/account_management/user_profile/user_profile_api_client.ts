@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
+
 import type { HttpStart } from '@kbn/core/public';
 
 import type { AuthenticatedUserProfile, UserData } from '../../../common';
@@ -12,6 +15,13 @@ import type { AuthenticatedUserProfile, UserData } from '../../../common';
 const USER_PROFILE_URL = '/internal/security/user_profile';
 
 export class UserProfileAPIClient {
+  private readonly internalDataUpdates$: Subject<UserData> = new Subject();
+
+  /**
+   * Emits event whenever user profile is changed by the user.
+   */
+  public readonly dataUpdates$: Observable<UserData> = this.internalDataUpdates$.asObservable();
+
   constructor(private readonly http: HttpStart) {}
 
   /**
@@ -29,8 +39,8 @@ export class UserProfileAPIClient {
    * @param data Application data to be written (merged with existing data).
    */
   public update<T extends UserData>(data: T) {
-    return this.http.post(`${USER_PROFILE_URL}/_data`, {
-      body: JSON.stringify(data),
+    return this.http.post(`${USER_PROFILE_URL}/_data`, { body: JSON.stringify(data) }).then(() => {
+      this.internalDataUpdates$.next(data);
     });
   }
 }

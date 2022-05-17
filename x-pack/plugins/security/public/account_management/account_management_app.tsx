@@ -25,19 +25,21 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 import type { AuthenticationServiceSetup } from '../authentication';
+import type { ApiClients } from '../components';
+import { ApiClientsProvider, AuthenticationProvider } from '../components';
 import type { BreadcrumbsChangeHandler } from '../components/breadcrumb';
 import { BreadcrumbsProvider } from '../components/breadcrumb';
-import { AuthenticationProvider } from '../components/use_current_user';
 
 interface CreateDeps {
   application: ApplicationSetup;
   authc: AuthenticationServiceSetup;
+  apiClients: ApiClients;
   getStartServices: StartServicesAccessor;
 }
 
 export const accountManagementApp = Object.freeze({
   id: 'security_account',
-  create({ application, authc, getStartServices }: CreateDeps) {
+  create({ application, authc, getStartServices, apiClients }: CreateDeps) {
     application.register({
       id: this.id,
       title: i18n.translate('xpack.security.account.breadcrumb', {
@@ -52,7 +54,13 @@ export const accountManagementApp = Object.freeze({
         ]);
 
         render(
-          <Providers services={coreStart} theme$={theme$} history={history} authc={authc}>
+          <Providers
+            services={coreStart}
+            theme$={theme$}
+            history={history}
+            authc={authc}
+            apiClients={apiClients}
+          >
             <AccountManagementPage />
           </Providers>,
           element
@@ -69,6 +77,7 @@ export interface ProvidersProps {
   theme$: Observable<CoreTheme>;
   history: History;
   authc: AuthenticationServiceSetup;
+  apiClients: ApiClients;
   onChange?: BreadcrumbsChangeHandler;
 }
 
@@ -77,18 +86,21 @@ export const Providers: FunctionComponent<ProvidersProps> = ({
   theme$,
   history,
   authc,
+  apiClients,
   onChange,
   children,
 }) => (
   <KibanaContextProvider services={services}>
     <AuthenticationProvider authc={authc}>
-      <I18nProvider>
-        <KibanaThemeProvider theme$={theme$}>
-          <Router history={history}>
-            <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
-          </Router>
-        </KibanaThemeProvider>
-      </I18nProvider>
+      <ApiClientsProvider {...apiClients}>
+        <I18nProvider>
+          <KibanaThemeProvider theme$={theme$}>
+            <Router history={history}>
+              <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
+            </Router>
+          </KibanaThemeProvider>
+        </I18nProvider>
+      </ApiClientsProvider>
     </AuthenticationProvider>
   </KibanaContextProvider>
 );

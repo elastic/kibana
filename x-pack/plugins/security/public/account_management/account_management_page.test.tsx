@@ -12,9 +12,11 @@ import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/
 
 import type { UserData } from '../../common';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
+import { UserAPIClient } from '../management';
 import { securityMock } from '../mocks';
 import { Providers } from './account_management_app';
 import { AccountManagementPage } from './account_management_page';
+import { UserProfileAPIClient } from './user_profile';
 import * as UserProfileImports from './user_profile/user_profile';
 
 const UserProfileMock = jest.spyOn(UserProfileImports, 'UserProfile');
@@ -51,7 +53,16 @@ describe('<AccountManagementPage>', () => {
     coreStart.http.get.mockResolvedValue({ user, data });
 
     const { findByRole } = render(
-      <Providers services={coreStart} theme$={theme$} history={history} authc={authc}>
+      <Providers
+        services={coreStart}
+        theme$={theme$}
+        history={history}
+        authc={authc}
+        apiClients={{
+          userProfiles: new UserProfileAPIClient(coreStart.http),
+          users: new UserAPIClient(coreStart.http),
+        }}
+      >
         <AccountManagementPage />
       </Providers>
     );
@@ -60,7 +71,7 @@ describe('<AccountManagementPage>', () => {
 
     expect(UserProfileMock).toHaveBeenCalledWith({ user, data }, expect.anything());
     expect(coreStart.chrome.setBreadcrumbs).toHaveBeenLastCalledWith([
-      { href: '/security/account', text: 'full name' },
+      { href: '/security/account', text: 'User settings' },
       { href: undefined, text: 'Profile' },
     ]);
   });

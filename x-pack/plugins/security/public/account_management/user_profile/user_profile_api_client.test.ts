@@ -9,14 +9,14 @@ import { coreMock } from '@kbn/core/public/mocks';
 
 import { UserProfileAPIClient } from './user_profile_api_client';
 
-const coreStart = coreMock.createStart();
-const apiClient = new UserProfileAPIClient(coreStart.http);
-
 describe('UserProfileAPIClient', () => {
+  let coreStart: ReturnType<typeof coreMock.createStart>;
+  let apiClient: UserProfileAPIClient;
   beforeEach(() => {
-    coreStart.http.delete.mockReset();
-    coreStart.http.get.mockReset();
-    coreStart.http.post.mockReset();
+    coreStart = coreMock.createStart();
+    coreStart.http.post.mockResolvedValue(undefined);
+
+    apiClient = new UserProfileAPIClient(coreStart.http);
   });
 
   it('should get user profile without retrieving any user data', async () => {

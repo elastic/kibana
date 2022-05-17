@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
-import React, { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 
 export interface FormChangesProps {
   /**
@@ -73,11 +72,3 @@ export function useFormChangesContext() {
 
   return value;
 }
-
-/**
- * Component that allows tracking changes within a form.
- */
-export const FormChanges: FunctionComponent = ({ children }) => {
-  const value = useFormChanges();
-  return <FormChangesProvider value={value}>{children}</FormChangesProvider>;
-};
