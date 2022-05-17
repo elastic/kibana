@@ -76,7 +76,7 @@ describe('CasesTable', () => {
     mockUseCaseItemsReturn({ isLoading: false });
     const { getByText } = renderComponent();
 
-    expect(getByText('Updated now')).toBeInTheDocument();
+    expect(getByText(/Updated/)).toBeInTheDocument();
   });
 
   it('should render the table columns', () => {

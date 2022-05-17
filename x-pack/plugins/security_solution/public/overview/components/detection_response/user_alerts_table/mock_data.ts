@@ -9,6 +9,9 @@ import { buildVulnerableUserAggregationQuery } from './use_user_alerts_items';
 
 export const mockVulnerableUsersBySeverityResult = {
   aggregations: {
+    user_count: {
+      value: 4,
+    },
     usersBySeverity: {
       buckets: [
         {
@@ -119,6 +122,7 @@ export const mockQuery = () => ({
   query: buildVulnerableUserAggregationQuery({
     from: '2020-07-07T08:20:18.966Z',
     to: '2020-07-08T08:20:18.966Z',
+    currentPage: 0,
   }),
   indexName: 'signal-alerts',
   skip: false,

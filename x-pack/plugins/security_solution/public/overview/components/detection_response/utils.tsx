@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
-import { FormattedRelative } from '@kbn/i18n-react';
+
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { FormattedRelative } from '@kbn/i18n-react';
+
 import * as i18n from './translations';
 
 export const SEVERITY_COLOR = {
@@ -16,6 +18,9 @@ export const SEVERITY_COLOR = {
   medium: '#D6BF57',
   low: '#54B399',
 } as const;
+
+const ITEMS_PER_PAGE = 4;
+export const getPageCount = (itemCount: number) => Math.ceil(itemCount / ITEMS_PER_PAGE);
 
 export interface LastUpdatedAtProps {
   updatedAt: number;

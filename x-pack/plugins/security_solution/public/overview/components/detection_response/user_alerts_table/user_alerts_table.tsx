@@ -5,39 +5,38 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
-  EuiButton,
   EuiEmptyPrompt,
   EuiHealth,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
+  EuiTablePagination,
 } from '@elastic/eui';
 
-import { SecurityPageName } from '../../../../app/types';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
 import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
 import { UserDetailsLink } from '../../../../common/components/links';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { useNavigation, NavigateTo, GetAppUrl } from '../../../../common/lib/kibana';
+import { useNavigateToTimeline } from '../hooks';
 import * as i18n from '../translations';
 import { LastUpdatedAt, SEVERITY_COLOR } from '../utils';
 import { UserAlertsItem, useUserAlertsItems } from './use_user_alerts_items';
 
-export interface UserAlertsTableProps {
+interface UserAlertsTableProps {
   signalIndexName: string | null;
 }
 
-type GetTableColumns = (params: {
-  getAppUrl: GetAppUrl;
-  navigateTo: NavigateTo;
-}) => Array<EuiBasicTableColumn<UserAlertsItem>>;
+type GetTableColumns = (
+  handleClick: (params: { userName: string; severity?: string }) => void
+) => Array<EuiBasicTableColumn<UserAlertsItem>>;
 
 const DETECTION_RESPONSE_USER_SEVERITY_QUERY_ID = 'vulnerableUsersBySeverityQuery';
 
@@ -47,23 +46,19 @@ const StyledEuiPanel = styled(EuiPanel)`
 `;
 
 export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableProps) => {
-  const { getAppUrl, navigateTo } = useNavigation();
+  const { navigateToVulnerableUser } = useNavigateToTimeline();
   const { toggleStatus, setToggleStatus } = useQueryToggle(
     DETECTION_RESPONSE_USER_SEVERITY_QUERY_ID
   );
-  const { items, isLoading, updatedAt } = useUserAlertsItems({
+  const { items, isLoading, updatedAt, pagination } = useUserAlertsItems({
     skip: !toggleStatus,
     queryId: DETECTION_RESPONSE_USER_SEVERITY_QUERY_ID,
     signalIndexName,
   });
 
-  const navigateToAlerts = useCallback(() => {
-    navigateTo({ deepLinkId: SecurityPageName.users });
-  }, [navigateTo]);
-
   const columns = useMemo(
-    () => getTableColumns({ getAppUrl, navigateTo }),
-    [getAppUrl, navigateTo]
+    () => getTableColumns(navigateToVulnerableUser),
+    [navigateToVulnerableUser]
   );
 
   return (
@@ -76,8 +71,8 @@ export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableP
           toggleStatus={toggleStatus}
           toggleQuery={setToggleStatus}
           subtitle={<LastUpdatedAt updatedAt={updatedAt} isUpdating={isLoading} />}
+          tooltip={i18n.USER_TOOLTIP}
         />
-
         {toggleStatus && (
           <>
             <EuiBasicTable
@@ -90,9 +85,16 @@ export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableP
               }
             />
             <EuiSpacer size="m" />
-            <EuiButton data-test-subj="severityUserAlertsButton" onClick={navigateToAlerts}>
-              {i18n.VIEW_ALL_USER_ALERTS}
-            </EuiButton>
+            {pagination.pageCount > 1 && (
+              <EuiTablePagination
+                data-test-subj="userTablePaginator"
+                activePage={pagination.currentPage}
+                itemsPerPage={4}
+                pageCount={pagination.pageCount}
+                onChangePage={pagination.setPage}
+                showPerPageOptions={false}
+              />
+            )}
           </>
         )}
       </StyledEuiPanel>
@@ -102,7 +104,7 @@ export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableP
 
 UserAlertsTable.displayName = 'UserAlertsTable';
 
-const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo }) => [
+const getTableColumns: GetTableColumns = (handleClick) => [
   {
     field: 'userName',
     name: i18n.USER_ALERTS_USERNAME_COLUMN,
@@ -115,41 +117,53 @@ const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo }) => [
     field: 'totalAlerts',
     name: i18n.ALERTS_TEXT,
     'data-test-subj': 'userSeverityAlertsTable-totalAlerts',
-    render: (totalAlerts: number) => <FormattedCount count={totalAlerts} />,
+    render: (totalAlerts: number, { userName }) => (
+      <EuiLink onClick={() => handleClick({ userName })}>
+        <FormattedCount count={totalAlerts} />
+      </EuiLink>
+    ),
   },
   {
     field: 'critical',
     name: i18n.STATUS_CRITICAL_LABEL,
-    render: (count: number) => (
+    render: (count: number, { userName }) => (
       <EuiHealth data-test-subj="userSeverityAlertsTable-critical" color={SEVERITY_COLOR.critical}>
-        <FormattedCount count={count} />
+        <EuiLink onClick={() => handleClick({ userName, severity: 'critical' })}>
+          <FormattedCount count={count} />
+        </EuiLink>
       </EuiHealth>
     ),
   },
   {
     field: 'high',
     name: i18n.STATUS_HIGH_LABEL,
-    render: (count: number) => (
+    render: (count: number, { userName }) => (
       <EuiHealth data-test-subj="userSeverityAlertsTable-high" color={SEVERITY_COLOR.high}>
-        <FormattedCount count={count} />
+        <EuiLink onClick={() => handleClick({ userName, severity: 'high' })}>
+          <FormattedCount count={count} />
+        </EuiLink>
       </EuiHealth>
     ),
   },
   {
     field: 'medium',
     name: i18n.STATUS_MEDIUM_LABEL,
-    render: (count: number) => (
+    render: (count: number, { userName }) => (
       <EuiHealth data-test-subj="userSeverityAlertsTable-medium" color={SEVERITY_COLOR.medium}>
-        {count}
+        <EuiLink onClick={() => handleClick({ userName, severity: 'medium' })}>
+          <FormattedCount count={count} />
+        </EuiLink>
       </EuiHealth>
     ),
   },
   {
     field: 'low',
     name: i18n.STATUS_LOW_LABEL,
-    render: (count: number) => (
+    render: (count: number, { userName }) => (
       <EuiHealth data-test-subj="userSeverityAlertsTable-low" color={SEVERITY_COLOR.low}>
-        <FormattedCount count={count} />
+        <EuiLink onClick={() => handleClick({ userName, severity: 'low' })}>
+          <FormattedCount count={count} />
+        </EuiLink>
       </EuiHealth>
     ),
   },

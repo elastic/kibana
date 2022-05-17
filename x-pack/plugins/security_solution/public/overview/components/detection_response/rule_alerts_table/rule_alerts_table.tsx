@@ -31,6 +31,7 @@ import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
 import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
 import { FormattedCount } from '../../../../common/components/formatted_number';
+import { useNavigateToTimeline } from '../hooks';
 
 export interface RuleAlertsTableProps {
   signalIndexName: string | null;
@@ -39,12 +40,13 @@ export interface RuleAlertsTableProps {
 export type GetTableColumns = (params: {
   getAppUrl: GetAppUrl;
   navigateTo: NavigateTo;
+  navigateToRule: (ruleName: string) => void;
 }) => Array<EuiBasicTableColumn<RuleAlertsItem>>;
 
 const DETECTION_RESPONSE_RULE_ALERTS_QUERY_ID =
   'detection-response-rule-alerts-severity-table' as const;
 
-export const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo }) => [
+export const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo, navigateToRule }) => [
   {
     field: 'name',
     name: i18n.RULE_ALERTS_COLUMN_RULE_NAME,
@@ -79,7 +81,11 @@ export const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo }) => [
     field: 'alert_count',
     name: i18n.RULE_ALERTS_COLUMN_ALERT_COUNT,
     'data-test-subj': 'severityRuleAlertsTable-alertCount',
-    render: (alertCount: number) => <FormattedCount count={alertCount} />,
+    render: (alertCount: number, { name }) => (
+      <EuiLink onClick={() => navigateToRule(name)}>
+        <FormattedCount count={alertCount} />
+      </EuiLink>
+    ),
   },
   {
     field: 'severity',
@@ -100,13 +106,15 @@ export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexNa
     skip: !toggleStatus,
   });
 
+  const { navigateToRule } = useNavigateToTimeline();
+
   const navigateToAlerts = useCallback(() => {
     navigateTo({ deepLinkId: SecurityPageName.alerts });
   }, [navigateTo]);
 
   const columns = useMemo(
-    () => getTableColumns({ getAppUrl, navigateTo }),
-    [getAppUrl, navigateTo]
+    () => getTableColumns({ getAppUrl, navigateTo, navigateToRule }),
+    [getAppUrl, navigateTo, navigateToRule]
   );
 
   return (
