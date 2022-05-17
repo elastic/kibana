@@ -20,7 +20,7 @@ import {
 import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { mapAndFlattenFilters, SavedQuery, TimeHistory } from '@kbn/data-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { DataViewOption, EsQueryAlertParams, SearchType } from '../types';
+import { EsQueryAlertParams, SearchType } from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { DataViewSelectPopover } from '../../components/data_view_select_popover';
 import { useTriggersAndActionsUiDeps } from '../util';
@@ -101,11 +101,9 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   const dataViews = useMemo(() => [dataView], [dataView]);
 
   const onSelectDataView = useCallback(
-    ([selected]: DataViewOption[]) =>
-      // type casting is safe, since id was set to ComboBox value
-      selected &&
+    (newDataViewId) =>
       data.dataViews
-        .get(selected.value!)
+        .get(newDataViewId)
         .then((newDataView) => dispatch({ type: 'index', payload: newDataView })),
     [data.dataViews]
   );
@@ -114,37 +112,53 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
     dispatch({ type: 'filter', payload: mapAndFlattenFilters(newFilters) });
   }, []);
 
-  const onChangeQuery = ({ query: newQuery }: { query?: Query }) => {
-    withDebounce(() => dispatch({ type: 'query', payload: newQuery || { ...query, query: '' } }));
-  };
+  const onChangeQuery = useCallback(
+    ({ query: newQuery }: { query?: Query }) => {
+      withDebounce(() => dispatch({ type: 'query', payload: newQuery || { ...query, query: '' } }));
+    },
+    [query]
+  );
 
-  const onSavedQueryUpdated = (newSavedQuery: SavedQuery) => {
+  const onSavedQueryUpdated = useCallback((newSavedQuery: SavedQuery) => {
     setSavedQuery(newSavedQuery);
     const newFilters = newSavedQuery.attributes.filters;
     if (newFilters) {
       dispatch({ type: 'filter', payload: newFilters });
     }
-  };
+  }, []);
 
   const onClearSavedQuery = () => {
     setSavedQuery(undefined);
     dispatch({ type: 'query', payload: { ...query, query: '' } });
   };
 
-  const onChangeWindowUnit = (selectedWindowUnit: string) =>
-    setParam('timeWindowUnit', selectedWindowUnit);
+  const onChangeWindowUnit = useCallback(
+    (selectedWindowUnit: string) => setParam('timeWindowUnit', selectedWindowUnit),
+    [setParam]
+  );
 
-  const onChangeWindowSize = (selectedWindowSize?: number) =>
-    selectedWindowSize && dispatch({ type: 'timeWindowSize', payload: selectedWindowSize });
+  const onChangeWindowSize = useCallback(
+    (selectedWindowSize?: number) =>
+      selectedWindowSize && dispatch({ type: 'timeWindowSize', payload: selectedWindowSize }),
+    []
+  );
 
-  const onChangeSelectedThresholdComparator = (selectedThresholdComparator?: string) =>
-    setParam('thresholdComparator', selectedThresholdComparator);
+  const onChangeSelectedThresholdComparator = useCallback(
+    (selectedThresholdComparator?: string) =>
+      setParam('thresholdComparator', selectedThresholdComparator),
+    [setParam]
+  );
 
-  const onChangeSelectedThreshold = (selectedThresholds?: number[]) =>
-    selectedThresholds && dispatch({ type: 'threshold', payload: selectedThresholds });
+  const onChangeSelectedThreshold = useCallback(
+    (selectedThresholds?: number[]) =>
+      selectedThresholds && dispatch({ type: 'threshold', payload: selectedThresholds }),
+    []
+  );
 
-  const onChangeSizeValue = (updatedValue: number) =>
-    dispatch({ type: 'size', payload: updatedValue });
+  const onChangeSizeValue = useCallback(
+    (updatedValue: number) => dispatch({ type: 'size', payload: updatedValue }),
+    []
+  );
 
   return (
     <Fragment>
@@ -158,8 +172,10 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       </EuiTitle>
 
       <EuiSpacer size="s" />
+
       <DataViewSelectPopover
-        selectedDataViewTitle={dataView.title}
+        initialDataViewTitle={dataView.title}
+        initialDataViewId={dataView.id}
         onSelectDataView={onSelectDataView}
       />
 

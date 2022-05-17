@@ -5,45 +5,44 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButtonIcon,
-  EuiComboBox,
-  EuiExpression,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiPopover,
-  EuiPopoverTitle,
-} from '@elastic/eui';
+import { EuiExpression, EuiPopover } from '@elastic/eui';
+import { DataViewsList } from '@kbn/unified-search-plugin/public';
+import { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { useTriggersAndActionsUiDeps } from '../es_query/util';
-import { DataViewOption } from '../es_query/types';
 
 interface DataViewSelectPopoverProps {
-  selectedDataViewTitle: string;
-  onSelectDataView: (options: DataViewOption[]) => void;
+  onSelectDataView: (newDataViewId: string) => void;
+  initialDataViewTitle: string;
+  initialDataViewId?: string;
 }
 
 export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopoverProps> = ({
-  selectedDataViewTitle,
   onSelectDataView,
+  initialDataViewTitle,
+  initialDataViewId,
 }) => {
   const { data } = useTriggersAndActionsUiDeps();
-
+  const [dataViewItems, setDataViewsItems] = useState<DataViewListItem[]>();
   const [dataViewPopoverOpen, setDataViewPopoverOpen] = useState(false);
-  const [dataViewOptions, setDataViewOptions] = useState<DataViewOption[]>();
-  const selectedOption = useMemo(() => ({ label: selectedDataViewTitle }), [selectedDataViewTitle]);
+
+  const [selectedDataViewId, setSelectedDataViewId] = useState(initialDataViewId);
+  const [selectedTitle, setSelectedTitle] = useState<string>(initialDataViewTitle);
 
   useEffect(() => {
     const initDataViews = async () => {
-      const dataViewItems = await data.dataViews.getIdsWithTitle();
-      setDataViewOptions(dataViewItems.map(({ id, title }) => ({ label: title, value: id })));
+      const fetchedDataViewItems = await data.dataViews.getIdsWithTitle();
+      setDataViewsItems(fetchedDataViewItems);
     };
     initDataViews();
   }, [data.dataViews]);
 
   const closeDataViewPopover = useCallback(() => setDataViewPopoverOpen(false), []);
+
+  if (!dataViewItems) {
+    return null;
+  }
 
   return (
     <EuiPopover
@@ -55,12 +54,12 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
           description={i18n.translate('xpack.stackAlerts.components.ui.alertParams.dataViewLabel', {
             defaultMessage: 'data view',
           })}
-          value={selectedDataViewTitle}
+          value={selectedTitle}
           isActive={dataViewPopoverOpen}
           onClick={() => {
             setDataViewPopoverOpen(true);
           }}
-          isInvalid={!selectedDataViewTitle}
+          isInvalid={!selectedTitle}
         />
       }
       isOpen={dataViewPopoverOpen}
@@ -71,37 +70,20 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
       display="block"
     >
       <div style={{ width: '450px' }} data-test-subj="chooseDataViewPopoverContent">
-        <EuiPopoverTitle>
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem>
-              {i18n.translate('xpack.stackAlerts.components.ui.alertParams.dataViewPopoverTitle', {
-                defaultMessage: 'Data view',
-              })}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                data-test-subj="closeDataViewPopover"
-                iconType="cross"
-                color="danger"
-                aria-label={i18n.translate(
-                  'xpack.stackAlerts.components.ui.alertParams.closeDataViewPopoverLabel',
-                  { defaultMessage: 'Close' }
-                )}
-                onClick={closeDataViewPopover}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPopoverTitle>
-        <EuiFormRow id="indexSelectSearchBox" fullWidth>
-          <EuiComboBox
-            aria-label="Accessible screen reader label"
-            placeholder="Select a single option"
-            singleSelection={{ asPlainText: true }}
-            options={dataViewOptions}
-            selectedOptions={[selectedOption]}
-            onChange={onSelectDataView}
-          />
-        </EuiFormRow>
+        <DataViewsList
+          dataViewsList={dataViewItems}
+          onChangeDataView={(newId) => {
+            setSelectedDataViewId(newId);
+            const newTitle = dataViewItems?.find(({ id }) => id === newId)?.title;
+            if (newTitle) {
+              setSelectedTitle(newTitle);
+            }
+
+            onSelectDataView(newId);
+            closeDataViewPopover();
+          }}
+          currentDataViewId={selectedDataViewId}
+        />
       </div>
     </EuiPopover>
   );

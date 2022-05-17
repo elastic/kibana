@@ -12,7 +12,11 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { act } from 'react-dom/test-utils';
 
-const props = { selectedDataViewTitle: 'ecommerce', onSelectDataView: () => {} };
+const props = {
+  onSelectDataView: () => {},
+  initialDataViewTitle: 'kibana_sample_data_logs',
+  initialDataViewId: 'mock-data-logs-id',
+};
 
 const dataViewOptions = [
   {
