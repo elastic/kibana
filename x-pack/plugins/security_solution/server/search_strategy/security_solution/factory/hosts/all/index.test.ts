@@ -87,7 +87,7 @@ describe('allHosts search strategy', () => {
           hits: [
             // @ts-expect-error incomplete type
             {
-              fields: {
+              _source: {
                 risk,
                 host: {
                   name: hostName,
@@ -138,7 +138,7 @@ describe('allHosts search strategy', () => {
           hits: [
             // @ts-expect-error incomplete type
             {
-              fields: {
+              _source: {
                 risk,
                 host: {
                   name: hostName,
