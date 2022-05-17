@@ -26,7 +26,6 @@ export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData
 
     return createMonitorAPI({
       monitor: {
-        ...monitorData,
         ...DEFAULT_FIELDS.browser,
         'source.inline.script': `step('Go to ${urls}', async () => {
                                     await page.goto('${urls}');
