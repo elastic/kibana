@@ -67,8 +67,11 @@ export function migrateFilter(filter: Filter, indexPattern?: DataViewBase) {
     filter.query = {};
   } else {
     // handle the case where .query already exists and filter has other top level keys on there
-    const { meta, query, $state } = filter;
-    filter = { meta, query, $state };
+    Object.keys(filter).forEach((key) => {
+      if (!['meta', 'query', '$state'].includes(key)) {
+        delete filter[key as keyof Filter];
+      }
+    });
   }
 
   // @ts-ignore
