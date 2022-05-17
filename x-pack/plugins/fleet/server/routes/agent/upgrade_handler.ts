@@ -12,7 +12,11 @@ import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/
 import semverCoerce from 'semver/functions/coerce';
 import semverGt from 'semver/functions/gt';
 
-import type { PostAgentUpgradeResponse, PostBulkAgentUpgradeResponse } from '../../../common/types';
+import type {
+  PostAgentUpgradeResponse,
+  PostBulkAgentUpgradeResponse,
+  GetCurrentUpgradesResponse,
+} from '../../../common/types';
 import type { PostAgentUpgradeRequestSchema, PostBulkAgentUpgradeRequestSchema } from '../../types';
 import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services';
@@ -129,6 +133,19 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
       return acc;
     }, {});
 
+    return response.ok({ body });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const getCurrentUpgradesHandler: RequestHandler = async (context, request, response) => {
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+
+  try {
+    const upgrades = await AgentService.getCurrentBulkUpgrades(esClient);
+    const body: GetCurrentUpgradesResponse = { items: upgrades };
     return response.ok({ body });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
