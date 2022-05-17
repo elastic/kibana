@@ -548,7 +548,7 @@ export class Embeddable
   private readonly hasCompatibleActions = async (
     event: ExpressionRendererEvent
   ): Promise<boolean> => {
-    if (isLensTableRowContextMenuClickEvent(event)) {
+    if (isLensTableRowContextMenuClickEvent(event) || isLensFilterEvent(event)) {
       const { getTriggerCompatibleActions } = this.deps;
       if (!getTriggerCompatibleActions) {
         return false;
