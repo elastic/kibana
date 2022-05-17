@@ -101,7 +101,22 @@ describe('When using isolate action from response actions console', () => {
     });
   });
 
-  it.todo('should show error if isolate failed to complete successfully');
+  it('should show error if isolate failed to complete successfully', async () => {
+    const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
+      path: '/api/endpoint/action/1.2.3',
+    });
+    pendingDetailResponse.data.wasSuccessful = false;
+    pendingDetailResponse.data.errors = ['error one', 'error two'];
+    apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
+    await render();
+    enterConsoleCommand(renderResult, 'isolate');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('isolateErrorCallout').textContent).toMatch(
+        /error one \| error two/
+      );
+    });
+  });
 
   describe('and when console is closed (not terminated) and then reopened', () => {
     beforeEach(() => {
