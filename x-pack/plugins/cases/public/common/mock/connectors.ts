@@ -54,6 +54,7 @@ export const connectorsMock: ActionConnector[] = [
       usesTableApi: true,
     },
     isPreconfigured: false,
+    isDeprecated: true,
   },
 ];
 
