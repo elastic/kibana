@@ -209,17 +209,17 @@ describe('getExecutionLogAggregation', () => {
                   },
                   numActiveAlerts: {
                     max: {
-                      field: 'kibana.alert.rule.execution.metrics.number_of_active_alerts',
+                      field: 'kibana.alert.rule.execution.metrics.alert_counts.active',
                     },
                   },
                   numRecoveredAlerts: {
                     max: {
-                      field: 'kibana.alert.rule.execution.metrics.number_of_recovered_alerts',
+                      field: 'kibana.alert.rule.execution.metrics.alert_counts.recovered',
                     },
                   },
                   numNewAlerts: {
                     max: {
-                      field: 'kibana.alert.rule.execution.metrics.number_of_new_alerts',
+                      field: 'kibana.alert.rule.execution.metrics.alert_counts.new',
                     },
                   },
                   executionDuration: { max: { field: 'event.duration' } },

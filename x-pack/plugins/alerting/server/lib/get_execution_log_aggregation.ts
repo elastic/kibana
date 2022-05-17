@@ -29,10 +29,10 @@ const NUMBER_OF_TRIGGERED_ACTIONS_FIELD =
   'kibana.alert.rule.execution.metrics.number_of_triggered_actions';
 const NUMBER_OF_GENERATED_ACTIONS_FIELD =
   'kibana.alert.rule.execution.metrics.number_of_generated_actions';
-const NUMBER_OF_ACTIVE_ALERTS_FIELD = 'kibana.alert.rule.execution.metrics.number_of_active_alerts';
-const NUMBER_OF_NEW_ALERTS_FIELD = 'kibana.alert.rule.execution.metrics.number_of_new_alerts';
+const NUMBER_OF_ACTIVE_ALERTS_FIELD = 'kibana.alert.rule.execution.metrics.alert_counts.active';
+const NUMBER_OF_NEW_ALERTS_FIELD = 'kibana.alert.rule.execution.metrics.alert_counts.new';
 const NUMBER_OF_RECOVERED_ALERTS_FIELD =
-  'kibana.alert.rule.execution.metrics.number_of_recovered_alerts';
+  'kibana.alert.rule.execution.metrics.alert_counts.recovered';
 const EXECUTION_UUID_FIELD = 'kibana.alert.rule.execution.uuid';
 
 const Millis2Nanos = 1000 * 1000;
