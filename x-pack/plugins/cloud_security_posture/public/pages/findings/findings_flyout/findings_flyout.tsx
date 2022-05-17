@@ -6,7 +6,6 @@
  */
 import React, { useState } from 'react';
 import {
-  EuiCodeBlock,
   EuiFlexItem,
   EuiSpacer,
   EuiTextColor,
@@ -16,9 +15,7 @@ import {
   EuiFlyoutBody,
   EuiTabs,
   EuiTab,
-  EuiFlexGroup,
-  type PropsOf,
-  EuiMarkdownFormat,
+  EuiFlexGroup, PropsOf, EuiCodeBlock, EuiMarkdownFormat, EuiIcon,
 } from '@elastic/eui';
 import { assertNever } from '@kbn/std';
 import type { CspFinding } from '../types';
@@ -28,6 +25,8 @@ import { ResourceTab } from './resource_tab';
 import { JsonTab } from './json_tab';
 import { OverviewTab } from './overview_tab';
 import { RuleTab } from './rule_tab';
+import cisLogoIcon from "@kbn/cloud-security-posture-plugin/public/assets/icons/cis_logo.svg";
+import k8sLogoIcon from "@kbn/cloud-security-posture-plugin/public/assets/icons/k8s_logo.svg";
 
 const tabs = [
   { title: TEXT.OVERVIEW, id: 'overview' },
@@ -35,6 +34,13 @@ const tabs = [
   { title: TEXT.RESOURCE, id: 'resource' },
   { title: TEXT.JSON, id: 'json' },
 ] as const;
+
+type FindingsTab = typeof tabs[number];
+
+interface FindingFlyoutProps {
+  onClose(): void;
+  findings: CspFinding;
+}
 
 export const CodeBlock: React.FC<PropsOf<typeof EuiCodeBlock>> = (props) => (
   <EuiCodeBlock isCopyable paddingSize="s" overflowHeight={300} {...props} />
@@ -44,12 +50,16 @@ export const Markdown: React.FC<PropsOf<typeof EuiMarkdownFormat>> = (props) => 
   <EuiMarkdownFormat textSize="s" {...props} />
 );
 
-type FindingsTab = typeof tabs[number];
-
-interface FindingFlyoutProps {
-  onClose(): void;
-  findings: CspFinding;
-}
+export const CisKubernetesIcons = () => (
+  <EuiFlexGroup gutterSize="s">
+    <EuiFlexItem grow={false}>
+      <EuiIcon type={cisLogoIcon} size="xxl" />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiIcon type={k8sLogoIcon} size="xxl" />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab }) => {
   switch (tab.id) {
