@@ -21,7 +21,7 @@ import type { CurrentUpgrade } from '../../../../types';
 
 export interface CurrentBulkUpgradeCalloutProps {
   currentUpgrade: CurrentUpgrade;
-  abortUpgrade: (actionId: string) => Promise<void>;
+  abortUpgrade: (currentUpgrade: CurrentUpgrade) => Promise<void>;
 }
 
 export const CurrentBulkUpgradeCallout: React.FunctionComponent<CurrentBulkUpgradeCalloutProps> = ({
@@ -33,7 +33,7 @@ export const CurrentBulkUpgradeCallout: React.FunctionComponent<CurrentBulkUpgra
   const onClickAbortUpgrade = useCallback(async () => {
     try {
       setIsAborting(true);
-      await abortUpgrade(currentUpgrade.actionId);
+      await abortUpgrade(currentUpgrade);
     } finally {
       setIsAborting(false);
     }

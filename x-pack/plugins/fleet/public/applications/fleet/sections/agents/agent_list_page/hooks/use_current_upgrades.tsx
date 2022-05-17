@@ -18,7 +18,7 @@ export function useCurrentUpgrades() {
   const [currentUpgrades, setCurrentUpgrades] = useState<CurrentUpgrade[]>([]);
   const currentTimeoutRef = useRef<NodeJS.Timeout>();
   const isCancelledRef = useRef<boolean>(false);
-  const { notifications } = useStartServices();
+  const { notifications, overlays } = useStartServices();
 
   const refreshUpgrades = useCallback(async () => {
     try {
@@ -45,9 +45,26 @@ export function useCurrentUpgrades() {
   }, [notifications.toasts]);
 
   const abortUpgrade = useCallback(
-    async (actionId: string) => {
+    async (currentUpgrade: CurrentUpgrade) => {
       try {
-        await sendPostCancelAction(actionId);
+        const confirmRes = await overlays.openConfirm(
+          i18n.translate('xpack.fleet.currentUpgrade.confirmDescription', {
+            defaultMessage: 'This action will abort upgrade of {nbAgents} agents',
+            values: {
+              nbAgents: currentUpgrade.nbAgents - currentUpgrade.nbAgentsAck,
+            },
+          }),
+          {
+            title: i18n.translate('xpack.fleet.currentUpgrade.confirmTitle', {
+              defaultMessage: 'Abort upgrade?',
+            }),
+          }
+        );
+
+        if (!confirmRes) {
+          return;
+        }
+        await sendPostCancelAction(currentUpgrade.actionId);
         await refreshUpgrades();
       } catch (err) {
         notifications.toasts.addError(err, {
@@ -57,7 +74,7 @@ export function useCurrentUpgrades() {
         });
       }
     },
-    [refreshUpgrades, notifications.toasts]
+    [refreshUpgrades, notifications.toasts, overlays]
   );
 
   // Poll for upgrades
