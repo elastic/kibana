@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiBetaBadge, EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
+import { EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { SpanLinks } from '.';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { SpanLinksCount } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
+import { TechnicalPreviewBadge } from '../technical_preview_badge';
 
 interface Props {
   spanLinksCount: SpanLinksCount;
@@ -31,22 +32,7 @@ export function getSpanLinksTabContent({
   return {
     id: 'span_links',
     'data-test-subj': 'spanLinksTab',
-    prepend: (
-      <EuiBetaBadge
-        label={i18n.translate(
-          'xpack.apm.propertiesTable.spanLinks.beta.label',
-          { defaultMessage: 'Technical preview' }
-        )}
-        tooltipContent={i18n.translate(
-          'xpack.apm.propertiesTable.spanLinks.beta.content',
-          {
-            defaultMessage:
-              'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-          }
-        )}
-        iconType="beaker"
-      />
-    ),
+    prepend: <TechnicalPreviewBadge icon="beaker" />,
     name: (
       <>
         {i18n.translate('xpack.apm.propertiesTable.tabs.spanLinks', {
