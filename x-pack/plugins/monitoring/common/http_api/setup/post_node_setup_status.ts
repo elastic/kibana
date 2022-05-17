@@ -6,9 +6,14 @@
  */
 
 import * as rt from 'io-ts';
-import { ccsRT, timeRangeRT } from '../shared';
+import {
+  booleanFromStringRT,
+  ccsRT,
+  createLiteralValueFromUndefinedRT,
+  timeRangeRT,
+} from '../shared';
 
-export const postNodeSetupStatusRequestParamsRT = rt.partial({
+export const postNodeSetupStatusRequestParamsRT = rt.type({
   nodeUuid: rt.string,
 });
 
@@ -21,7 +26,7 @@ export const postNodeSetupStatusRequestQueryRT = rt.partial({
   // which will vary from environment to environment making it difficult
   // to write tests against. Therefore, this flag exists and should only be used
   // in our testing environment.
-  skipLiveData: rt.boolean,
+  skipLiveData: rt.union([booleanFromStringRT, createLiteralValueFromUndefinedRT(false)]),
 });
 
 export const postNodeSetupStatusRequestPayloadRT = rt.partial({
