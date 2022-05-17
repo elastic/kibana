@@ -11,8 +11,8 @@ import { HostPolicyResponse } from '../../../../common/endpoint/types';
 import { PreferenceFormattedDateFromPrimitive } from '../../../common/components/formatted_date';
 import { useHttp } from '../../../common/lib/kibana';
 import { useGetEndpointPolicyResponse } from '../../hooks/endpoint/use_get_endpoint_policy_response';
-import { getFailedOrWarningActionCountFromPolicyResponse } from '../../pages/endpoint_hosts/store/selectors';
 import { PolicyResponse } from './policy_response';
+import { getFailedOrWarningActionCountFromPolicyResponse } from '../../pages/endpoint_hosts/store/utils';
 
 export const PolicyResponseWrapper = memo<{
   endpointId: string;

@@ -13,12 +13,9 @@ import { decode } from 'rison-node';
 import { Query } from '@kbn/es-query';
 import {
   Immutable,
-  HostPolicyResponseActionStatus,
   HostStatus,
   ActivityLog,
   HostMetadata,
-  HostPolicyResponse,
-  ImmutableObject,
 } from '../../../../../common/endpoint/types';
 import { EndpointState, EndpointIndexUIQueryParams } from '../types';
 import { extractListPaginationParams } from '../../../common/routing';
@@ -98,30 +95,6 @@ export const endpointPackageVersion = createSelector(endpointPackageInfo, (info)
 export const patterns = (state: Immutable<EndpointState>) => state.patterns;
 
 export const patternsError = (state: Immutable<EndpointState>) => state.patternsError;
-
-export const getFailedOrWarningActionCountFromPolicyResponse = (
-  applied: ImmutableObject<HostPolicyResponse['Endpoint']['policy']['applied']> | undefined
-): Map<string, number> => {
-  const failureOrWarningByConfigType = new Map<string, number>();
-  if (applied?.response?.configurations !== undefined && applied?.actions !== undefined) {
-    Object.entries(applied.response.configurations).map(([key, val]) => {
-      let count = 0;
-      for (const action of val.concerned_actions) {
-        const actionStatus = applied.actions.find(
-          (policyActions) => policyActions.name === action
-        )?.status;
-        if (
-          actionStatus === HostPolicyResponseActionStatus.failure ||
-          actionStatus === HostPolicyResponseActionStatus.warning
-        ) {
-          count += 1;
-        }
-      }
-      return failureOrWarningByConfigType.set(key, count);
-    });
-  }
-  return failureOrWarningByConfigType;
-};
 
 export const isOnEndpointPage = (state: Immutable<EndpointState>) => {
   return (
