@@ -49,14 +49,27 @@ export class FileServiceFactory {
     );
   }
 
-  asScoped(req: KibanaRequest): InternalFileService {
+  /**
+   * Get a file service instance that is scoped to the current user request.
+   */
+  public asScoped(req: KibanaRequest): InternalFileService {
     return this.createFileService(req);
   }
 
-  asInternal(): InternalFileService {
+  /**
+   * Get a file service instance that is scoped to the internal user.
+   *
+   * @note
+   * Do not use this to drive interactions with files that are initiated by a
+   * user.
+   */
+  public asInternal(): InternalFileService {
     return this.createFileService();
   }
 
+  /**
+   * This function can only called during Kibana's setup phase
+   */
   public static setup(savedObjectsSetup: SavedObjectsServiceSetup): void {
     savedObjectsSetup.registerType<FileSavedObjectAttributes<{}>>(fileObjectType);
   }

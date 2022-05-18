@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import { Readable, pipeline as _pipeline } from 'stream';
-import { promisify } from 'util';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { pipeline as _pipeline, Readable } from 'stream';
+import { promisify } from 'util';
 import type { BlobStorage } from '../../types';
+import { getReadableContentStream, getWritableContentStream } from './content_stream';
 import { mappings } from './mappings';
-import { getWritableContentStream, getReadableContentStream } from './content_stream';
 
 const pipeline = promisify(_pipeline);
 
 /**
- * @internal
- *
  * Export this value for convenience to be used in tests. Do not use outside of
  * this adapter.
+ * @internal
  */
 export const BLOB_STORAGE_SYSTEM_INDEX_NAME = '.kibana_blob_storage';
 
@@ -47,6 +46,7 @@ export class ElasticsearchBlobStorage implements BlobStorage {
         body: {
           settings: {
             number_of_shards: 1,
+            // TODO: Find out whether this is an appropriate setting
             auto_expand_replicas: '0-1',
           },
           mappings,
@@ -61,7 +61,7 @@ export class ElasticsearchBlobStorage implements BlobStorage {
     }
   }
 
-  async upload(src: Readable): Promise<{ id: string; size: number }> {
+  public async upload(src: Readable): Promise<{ id: string; size: number }> {
     try {
       await this.createIndexIfNotExists();
     } catch (e) {
@@ -90,7 +90,7 @@ export class ElasticsearchBlobStorage implements BlobStorage {
     }
   }
 
-  async download({ id, size }: { id: string; size?: number }): Promise<Readable> {
+  public async download({ id, size }: { id: string; size?: number }): Promise<Readable> {
     return getReadableContentStream({
       id,
       client: this.esClient,
@@ -103,7 +103,7 @@ export class ElasticsearchBlobStorage implements BlobStorage {
     });
   }
 
-  async delete(id: string): Promise<void> {
+  public async delete(id: string): Promise<void> {
     try {
       const dest = getWritableContentStream({
         id,

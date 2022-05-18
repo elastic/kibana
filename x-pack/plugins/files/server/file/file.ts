@@ -53,7 +53,7 @@ export class File<M = unknown> implements IFile {
     );
   }
 
-  async update(attrs: UpdatableFileAttributes): Promise<IFile> {
+  public async update(attrs: UpdatableFileAttributes): Promise<IFile> {
     await this.updateFileState({
       action: 'updateFile',
       payload: attrs,
@@ -61,7 +61,7 @@ export class File<M = unknown> implements IFile {
     return this;
   }
 
-  async uploadContent(content: Readable): Promise<void> {
+  public async uploadContent(content: Readable): Promise<void> {
     if (!this.canUpload()) {
       this.logger.error('File content already uploaded.');
       throw new Error('File content already uploaded');
@@ -83,7 +83,7 @@ export class File<M = unknown> implements IFile {
     }
   }
 
-  downloadContent(): Promise<Readable> {
+  public downloadContent(): Promise<Readable> {
     const { content_ref: id, size } = this.attributes;
     if (!id) {
       throw new Error('No content to download');
@@ -91,7 +91,7 @@ export class File<M = unknown> implements IFile {
     return this.blobStorageService.download(id, size);
   }
 
-  async delete(): Promise<void> {
+  public async delete(): Promise<void> {
     const { attributes, id } = this.fileSO;
     if (attributes.content_ref) {
       await this.blobStorageService.delete(attributes.content_ref);
