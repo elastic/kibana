@@ -18,7 +18,7 @@ export type { IPolicyConfigContextProvider } from './policy_config_context';
 export {
   PolicyConfigContext,
   PolicyConfigContextProvider,
-  initialValue as defaultPolicyConfig,
+  initialMonitorTypeValue as defaultPolicyConfig,
   defaultContext as defaultPolicyConfigValues,
   usePolicyConfigContext,
 } from './policy_config_context';
