@@ -405,16 +405,20 @@ export class EmsVectorTileLayer extends AbstractLayer {
 
   _setLanguage(mbMap: MbMap, mbLayer: LayerSpecification, mbLayerId: string) {
     const locale = this.getLocale();
-    let textProperty;
     if (locale === null || locale === DEFAULT_EMS_LOCALE) {
-      if (mbLayer.type === 'symbol') {
-        textProperty = mbLayer.layout?.['text-field'];
+      if (mbLayer.type !== 'symbol') return;
+
+      const textProperty = mbLayer.layout?.['text-field'];
+      if (mbLayer.layout && textProperty) {
+        mbMap.setLayoutProperty(mbLayerId, 'text-field', textProperty);
       }
-    } else if (locale === AUTOSELECT_EMS_LOCALE) {
-      textProperty = TMSService.transformLanguageProperty(mbLayer, i18n.getLocale());
-    } else {
-      textProperty = TMSService.transformLanguageProperty(mbLayer, locale);
+      return;
     }
+
+    const textProperty =
+      locale === AUTOSELECT_EMS_LOCALE
+        ? TMSService.transformLanguageProperty(mbLayer, i18n.getLocale())
+        : TMSService.transformLanguageProperty(mbLayer, locale);
     if (textProperty !== undefined) {
       mbMap.setLayoutProperty(mbLayerId, 'text-field', textProperty);
     }
