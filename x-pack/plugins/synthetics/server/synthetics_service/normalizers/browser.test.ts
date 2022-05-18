@@ -136,6 +136,9 @@ describe('browser normalizers', () => {
           params: '',
           type: 'browser',
           project_id: projectId,
+          namespace: 'test-space',
+          original_space: 'test-space',
+          custom_heartbeat_id: 'test-id-3-test-project-id-test-space',
         },
         {
           ...DEFAULT_FIELDS[DataStream.BROWSER],
@@ -182,6 +185,9 @@ describe('browser normalizers', () => {
           'throttling.upload_speed': '15',
           type: 'browser',
           project_id: projectId,
+          namespace: 'test-space',
+          original_space: 'test-space',
+          custom_heartbeat_id: 'test-id-3-test-project-id-test-space',
         },
         {
           ...DEFAULT_FIELDS[DataStream.BROWSER],
@@ -228,6 +234,9 @@ describe('browser normalizers', () => {
           'throttling.upload_speed': '15',
           type: 'browser',
           project_id: projectId,
+          namespace: 'test-space',
+          original_space: 'test-space',
+          custom_heartbeat_id: 'test-id-3-test-project-id-test-space',
         },
       ]);
     });
