@@ -100,7 +100,7 @@ export interface LinkItem {
    */
   sideNavDisabled?: boolean;
   /**
-   * Disabled the state query string in the URL. Defaults to false.
+   * Disables the state query string in the URL. Defaults to false.
    */
   skipUrlState?: boolean;
   /**

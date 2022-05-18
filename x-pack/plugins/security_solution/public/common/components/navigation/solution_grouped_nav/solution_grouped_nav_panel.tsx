@@ -26,17 +26,17 @@ import classNames from 'classnames';
 import { EuiPanelStyled } from './solution_grouped_nav_panel.styles';
 import { useShowTimeline } from '../../../utils/timeline/use_show_timeline';
 import type { DefaultSideNavItem } from './types';
-import { NavigationCategories } from '../types';
+import type { LinkCategories } from '../../../links/types';
 
 export interface SolutionNavPanelProps {
   onClose: () => void;
   onOutsideClick: () => void;
   title: string;
   items: DefaultSideNavItem[];
-  categories?: NavigationCategories;
+  categories?: LinkCategories;
 }
 export interface SolutionNavPanelCategoriesProps {
-  categories: NavigationCategories;
+  categories: LinkCategories;
   items: DefaultSideNavItem[];
   onClose: () => void;
 }

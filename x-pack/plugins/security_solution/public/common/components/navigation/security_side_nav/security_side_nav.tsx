@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useCallback, useEffect } from 'react';
-import { EuiHorizontalRule, EuiListGroupItem } from '@elastic/eui';
+import { EuiHorizontalRule, EuiListGroupItem, EuiLoadingSpinner } from '@elastic/eui';
 import { SecurityPageName } from '../../../../app/types';
 import { excludeAppLink, getAncestorLinksInfo } from '../../../links';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
@@ -146,6 +146,10 @@ export const SecuritySideNav: React.FC = () => {
       excludeAppLink(SecurityPageName.hostIsolationExceptions);
     }
   }, [canSeeHostIsolationExceptions]);
+
+  if (items.length === 0 && footerItems.length === 0) {
+    return <EuiLoadingSpinner size="m" data-test-subj="sideNavLoader" />;
+  }
 
   return <SolutionGroupedNav items={items} footerItems={footerItems} selectedId={selectedId} />;
 };

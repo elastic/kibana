@@ -19,7 +19,7 @@ import { SolutionNavPanel } from './solution_grouped_nav_panel';
 import { EuiListGroupItemStyled } from './solution_grouped_nav.styles';
 import { DefaultSideNavItem, SideNavItem, isCustomItem, isDefaultItem } from './types';
 import { EuiIconSpaces } from './icons/spaces';
-import { NavigationCategories } from '../types';
+import type { LinkCategories } from '../../../links';
 
 export interface SolutionGroupedNavProps {
   items: SideNavItem[];
@@ -45,7 +45,7 @@ export interface SolutionNavItemProps {
 type ActivePanelNav = string | null;
 type NavItemsById = Record<
   string,
-  { title: string; panelItems: DefaultSideNavItem[]; categories?: NavigationCategories }
+  { title: string; panelItems: DefaultSideNavItem[]; categories?: LinkCategories }
 >;
 
 export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
@@ -74,7 +74,7 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
       // This event is triggered on outside click.
       // Closing the side nav at the end of event loop to make sure it
       // closes also if the active panel button has been clicked (toggle),
-      // but it does not close if any some other panel open button has been clicked.
+      // but it does not close if any any other panel open button has been clicked.
       if (activePanelNavIdRef.current === currentPanelNavId) {
         onClosePanelNav();
       }

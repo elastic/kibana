@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { NavigationCategories } from '../types';
 import type { SecurityPageName } from '../../../../app/types';
+import type { LinkCategories } from '../../../links/types';
 
 export interface DefaultSideNavItem {
   id: SecurityPageName;
@@ -16,7 +16,7 @@ export interface DefaultSideNavItem {
   onClick?: React.MouseEventHandler;
   description?: string;
   items?: DefaultSideNavItem[];
-  categories?: NavigationCategories;
+  categories?: LinkCategories;
 }
 
 export interface CustomSideNavItem {

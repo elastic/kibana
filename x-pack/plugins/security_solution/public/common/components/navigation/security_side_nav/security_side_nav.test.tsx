@@ -85,6 +85,13 @@ describe('SecuritySideNav', () => {
     });
   });
 
+  it('should render the loader if items are still empty', () => {
+    mockUseAppNavLinks.mockReturnValueOnce([]);
+    const result = renderNav();
+    expect(result.getByTestId('sideNavLoader')).toBeInTheDocument();
+    expect(mockSolutionGroupedNav).not.toHaveBeenCalled();
+  });
+
   it('should render with selected id', () => {
     mockUseRouteSpy.mockReturnValueOnce([{ pageName: SecurityPageName.administration }]);
     renderNav();
