@@ -21,7 +21,6 @@ export const latestFindingsMapping: MappingTypeMapping = {
         },
       },
     },
-
     agent: {
       properties: {
         id: {
@@ -49,7 +48,17 @@ export const latestFindingsMapping: MappingTypeMapping = {
     },
     resource: {
       properties: {
-        filename: {
+        type: {
+          type: 'keyword',
+          ignore_above: 256,
+        },
+        id: {
+          type: 'text',
+        },
+        name: {
+          type: 'text',
+        },
+        sub_type: {
           type: 'text',
           fields: {
             keyword: {
@@ -58,18 +67,14 @@ export const latestFindingsMapping: MappingTypeMapping = {
             },
           },
         },
-        type: {
-          type: 'text',
-          fields: {
-            keyword: {
-              ignore_above: 1024,
-              type: 'keyword',
-            },
-          },
+        raw: {
+          type: 'object',
+          enabled: false,
         },
       },
     },
     resource_id: {
+      // deprecated - the new field is resource.id
       type: 'text',
       fields: {
         keyword: {
