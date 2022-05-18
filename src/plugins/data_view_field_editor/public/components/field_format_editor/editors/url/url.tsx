@@ -18,14 +18,14 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { context as contextType } from '@kbn/kibana-react-plugin/public';
+import { UrlFormat } from '@kbn/field-formats-plugin/common';
 import { DefaultFormatEditor } from '../default/default';
 
 import { FormatEditorSamples } from '../../samples';
 import { formatId } from './constants';
 
-import { context as contextType } from '../../../../../../kibana_react/public';
 import { FormatEditorProps } from '../types';
-import { UrlFormat } from '../../../../../../field_formats/common';
 
 interface OnChangeParam {
   type: string;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { registerUpgradeAssistantUsageCollector } from './usage_collector';
-import { IClusterClient } from 'src/core/server';
+import { IClusterClient } from '@kbn/core/server';
 
 /**
  * Since these route callbacks are so thin, these serve simply as integration tests
@@ -25,16 +25,14 @@ describe('Upgrade Assistant Usage Collector', () => {
   beforeEach(() => {
     clusterClient = elasticsearchServiceMock.createClusterClient();
     (clusterClient.asInternalUser.cluster.getSettings as jest.Mock).mockResolvedValue({
-      body: {
-        persistent: {},
-        transient: {
-          logger: {
-            deprecation: 'WARN',
-          },
-          cluster: {
-            deprecation_indexing: {
-              enabled: 'true',
-            },
+      persistent: {},
+      transient: {
+        logger: {
+          deprecation: 'WARN',
+        },
+        cluster: {
+          deprecation_indexing: {
+            enabled: 'true',
           },
         },
       },

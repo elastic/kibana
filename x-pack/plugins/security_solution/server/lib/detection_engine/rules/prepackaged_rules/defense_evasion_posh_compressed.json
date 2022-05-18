@@ -2,9 +2,9 @@
   "author": [
     "Elastic"
   ],
-  "description": "Identifies the use of .Net functionality for decompression and base64 decoding combined in PowerShell scripts, which Malware and security tools heavily use to deobfuscate payloads and load them directly in memory to bypass defenses.",
+  "description": "Identifies the use of .NET functionality for decompression and base64 decoding combined in PowerShell scripts, which malware and security tools heavily use to deobfuscate payloads and load them directly in memory to bypass defenses.",
   "false_positives": [
-    "Legitimate PowerShell Scripts which makes use of compression and encoding"
+    "Legitimate PowerShell Scripts which makes use of compression and encoding."
   ],
   "from": "now-9m",
   "index": [
@@ -14,7 +14,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "PowerShell Suspicious Payload Encoded and Compressed",
-  "query": "event.category:process and \n  powershell.file.script_block_text : (\n    (System.IO.Compression.DeflateStream or System.IO.Compression.GzipStream or IO.Compression.DeflateStream or IO.Compression.GzipStream) and\n    FromBase64String\n  )\n",
+  "query": "event.category:process and \n  powershell.file.script_block_text : (\n    (\n      \"System.IO.Compression.DeflateStream\" or\n      \"System.IO.Compression.GzipStream\" or\n      \"IO.Compression.DeflateStream\" or\n      \"IO.Compression.GzipStream\"\n    ) and\n    FromBase64String\n  )\n",
   "risk_score": 47,
   "rule_id": "81fe9dc6-a2d7-4192-a2d8-eed98afc766a",
   "severity": "medium",
@@ -71,5 +71,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 3
 }

@@ -1,0 +1,55 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies Linux binary find abuse to break out from restricted environments by spawning an interactive system shell. The vi/vim is the standard text editor in Linux distribution and the activity of spawning a shell is not a standard use of this binary by a user or system administrator and could potentially indicate malicious actor attempting to improve the capabilities or stability of their access.\"",
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Linux Restricted Shell Breakout via the vi command",
+  "query": "process where event.type == \"start\" and process.parent.name in (\"vi\", \"vim\") and process.parent.args == \"-c\" and process.parent.args in (\":!/bin/bash\", \":!/bin/sh\", \":!bash\", \":!sh\") and process.name in (\"bash\", \"sh\")\n",
+  "references": [
+    "https://gtfobins.github.io/gtfobins/vi/"
+  ],
+  "risk_score": 47,
+  "rule_id": "89583d1b-3c2e-4606-8b74-0a9fd2248e88",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Execution",
+    "GTFOBins"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "reference": "https://attack.mitre.org/techniques/T1059/",
+          "subtechnique": [
+            {
+              "id": "T1059.004",
+              "name": "Unix Shell",
+              "reference": "https://attack.mitre.org/techniques/T1059/004/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

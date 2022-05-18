@@ -11,22 +11,27 @@ import { Store, Action } from 'redux';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import { QueryClient, QueryClientProvider } from 'react-query';
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
-import { AppLeaveHandler, AppMountParameters } from '../../../../../src/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
 
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { ManageUserInfo } from '../detections/components/user_info';
-import { DEFAULT_DARK_MODE, APP_NAME } from '../../common/constants';
+import { DEFAULT_DARK_MODE, APP_NAME, APP_ID } from '../../common/constants';
 import { ErrorToastDispatcher } from '../common/components/error_toast_dispatcher';
 import { MlCapabilitiesProvider } from '../common/components/ml/permissions/ml_capabilities_provider';
 import { GlobalToaster, ManageGlobalToaster } from '../common/components/toasters';
-import { KibanaContextProvider, useKibana, useUiSetting$ } from '../common/lib/kibana';
+import {
+  KibanaContextProvider,
+  useGetUserCasesPermissions,
+  useKibana,
+  useUiSetting$,
+} from '../common/lib/kibana';
 import { State } from '../common/store';
 
 import { StartServices } from '../types';
 import { PageRouter } from './routes';
-import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 import { UserPrivilegesProvider } from '../common/components/user_privileges/user_privileges_context';
+import { ReactQueryClientProvider } from '../common/containers/query_client/query_client_provider';
 
 interface StartAppComponent {
   children: React.ReactNode;
@@ -36,8 +41,6 @@ interface StartAppComponent {
   store: Store<State, Action>;
   theme$: AppMountParameters['theme$'];
 }
-
-const queryClient = new QueryClient();
 
 const StartAppComponent: FC<StartAppComponent> = ({
   children,
@@ -50,9 +53,11 @@ const StartAppComponent: FC<StartAppComponent> = ({
   const {
     i18n,
     application: { capabilities },
+    cases,
   } = useKibana().services;
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
-
+  const casesPermissions = useGetUserCasesPermissions();
+  const CasesContext = cases.ui.getCasesContext();
   return (
     <EuiErrorBoundary>
       <i18n.Context>
@@ -63,15 +68,20 @@ const StartAppComponent: FC<StartAppComponent> = ({
                 <MlCapabilitiesProvider>
                   <UserPrivilegesProvider kibanaCapabilities={capabilities}>
                     <ManageUserInfo>
-                      <QueryClientProvider client={queryClient}>
-                        <PageRouter
-                          history={history}
-                          onAppLeave={onAppLeave}
-                          setHeaderActionMenu={setHeaderActionMenu}
+                      <ReactQueryClientProvider>
+                        <CasesContext
+                          owner={[APP_ID]}
+                          userCanCrud={casesPermissions?.crud ?? false}
                         >
-                          {children}
-                        </PageRouter>
-                      </QueryClientProvider>
+                          <PageRouter
+                            history={history}
+                            onAppLeave={onAppLeave}
+                            setHeaderActionMenu={setHeaderActionMenu}
+                          >
+                            {children}
+                          </PageRouter>
+                        </CasesContext>
+                      </ReactQueryClientProvider>
                     </ManageUserInfo>
                   </UserPrivilegesProvider>
                 </MlCapabilitiesProvider>

@@ -12,14 +12,15 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { DataView } from '@kbn/data-views-plugin/public';
+
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import {
   clearEventsLoading,
   clearEventsDeleted,
   setTimelineUpdatedAt,
 } from '../store/t_grid/actions';
-
-import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import { isCompleteResponse, isErrorResponse } from '../../../../../src/plugins/data/common';
 import {
   Direction,
   TimelineFactoryQueryTypes,
@@ -73,6 +74,7 @@ type TimelineResponse<T extends KueryFilterQueryKind> = TimelineEventsAllStrateg
 export interface UseTimelineEventsProps {
   alertConsumers?: AlertConsumers[];
   data?: DataPublicPluginStart;
+  dataViewId: string | null;
   docValueFields?: DocValueFields[];
   endDate: string;
   entityType: EntityType;
@@ -108,15 +110,17 @@ const getInspectResponse = <T extends TimelineFactoryQueryTypes>(
 const ID = 'timelineEventsQuery';
 export const initSortDefault = [
   {
+    direction: Direction.desc,
+    esTypes: ['date'],
     field: '@timestamp',
-    direction: Direction.asc,
-    type: 'number',
+    type: 'date',
   },
 ];
 
 const NO_CONSUMERS: AlertConsumers[] = [];
 export const useTimelineEvents = ({
   alertConsumers = NO_CONSUMERS,
+  dataViewId,
   docValueFields,
   endDate,
   entityType,
@@ -191,7 +195,7 @@ export const useTimelineEvents = ({
     loadPage: wrappedLoadPage,
     updatedAt: 0,
   });
-  const { addError, addWarning } = useAppToasts();
+  const { addWarning } = useAppToasts();
 
   const timelineSearch = useCallback(
     (request: TimelineRequest<typeof language> | null) => {
@@ -213,6 +217,8 @@ export const useTimelineEvents = ({
                     ? 'timelineEqlSearchStrategy'
                     : 'timelineSearchStrategy',
                 abortSignal: abortCtrl.current.signal,
+                // we only need the id to throw better errors
+                indexPattern: { id: dataViewId } as unknown as DataView,
               }
             )
             .subscribe({
@@ -242,9 +248,7 @@ export const useTimelineEvents = ({
               },
               error: (msg) => {
                 setLoading(false);
-                addError(msg, {
-                  title: i18n.FAIL_TIMELINE_EVENTS,
-                });
+                data.search.showError(msg);
                 searchSubscription$.current.unsubscribe();
               },
             });
@@ -256,7 +260,7 @@ export const useTimelineEvents = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [skip, data, entityType, setUpdated, addWarning, addError]
+    [skip, data, entityType, dataViewId, setUpdated, addWarning]
   );
 
   useEffect(() => {

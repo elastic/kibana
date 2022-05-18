@@ -10,8 +10,13 @@ import chalk from 'chalk';
 import type { Subscription } from 'rxjs';
 
 import type { TypeOf } from '@kbn/config-schema';
+import type {
+  CorePreboot,
+  Logger,
+  PluginInitializerContext,
+  PrebootPlugin,
+} from '@kbn/core/server';
 import { getDataPath } from '@kbn/utils';
-import type { CorePreboot, Logger, PluginInitializerContext, PrebootPlugin } from 'src/core/server';
 
 import { ElasticsearchConnectionStatus } from '../common';
 import type { ConfigSchema, ConfigType } from './config';

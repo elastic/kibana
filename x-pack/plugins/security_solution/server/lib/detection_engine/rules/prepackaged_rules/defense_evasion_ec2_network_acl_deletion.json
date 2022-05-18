@@ -4,7 +4,7 @@
   ],
   "description": "Identifies the deletion of an Amazon Elastic Compute Cloud (EC2) network access control list (ACL) or one of its ingress/egress entries.",
   "false_positives": [
-    "Network ACL's may be deleted by a network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Network ACL deletions from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+    "Network ACL's may be deleted by a network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Network ACL deletions by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
   ],
   "from": "now-60m",
   "index": [
@@ -60,5 +60,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 6
+  "version": 7
 }

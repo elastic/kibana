@@ -108,6 +108,16 @@ export class Typeahead extends Component {
     }
   };
 
+  onBlur = () => {
+    const { isSuggestionsVisible, index, value } = this.state;
+    if (isSuggestionsVisible && this.props.suggestions[index]) {
+      this.selectSuggestion(this.props.suggestions[index]);
+    } else {
+      this.setState({ isSuggestionsVisible: false });
+      this.props.onSubmit(value);
+    }
+  };
+
   selectSuggestion = (suggestion) => {
     const nextInputValue =
       this.state.value.substr(0, suggestion.start) +
@@ -184,6 +194,7 @@ export class Typeahead extends Component {
             onKeyUp={this.onKeyUp}
             onChange={this.onChangeInputValue}
             onClick={this.onClickInput}
+            onBlur={this.onBlur}
             autoComplete="off"
             spellCheck={false}
             prepend={prepend}

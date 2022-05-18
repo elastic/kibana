@@ -36,9 +36,9 @@ export function handleResponse(clusterUuid: string, response: ElasticsearchRespo
 export function getApmsForClusters(req: LegacyRequest, clusters: Cluster[], ccs?: string) {
   const start = req.payload.timeRange.min;
   const end = req.payload.timeRange.max;
-  const config = req.server.config();
-  const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
-  const cgroup = config.get('monitoring.ui.container.apm.enabled');
+  const config = req.server.config;
+  const maxBucketSize = config.ui.max_bucket_size;
+  const cgroup = config.ui.container.apm.enabled;
 
   const indexPatterns = getLegacyIndexPattern({
     moduleType: 'beats',
@@ -82,7 +82,7 @@ export function getApmsForClusters(req: LegacyRequest, clusters: Cluster[], ccs?
       return {
         ...formattedResponse,
         config: {
-          container: config.get('monitoring.ui.container.apm.enabled'),
+          container: cgroup,
         },
         stats: {
           ...formattedResponse.stats,

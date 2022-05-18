@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import type { AdvancedSettingsSetup } from 'src/plugins/advanced_settings/public';
-import type { HomePublicPluginSetup } from 'src/plugins/home/public';
-import type { ManagementSetup, ManagementStart } from 'src/plugins/management/public';
+import type { AdvancedSettingsSetup } from '@kbn/advanced-settings-plugin/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 
-import type { FeaturesPluginStart } from '../../features/public';
 import { AdvancedSettingsService } from './advanced_settings';
 import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_entry';
 import { ManagementService } from './management';

@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { EuiDelayRender, EuiLoadingSpinner } from '@elastic/eui';
-import { OverlayStart, OverlayRef, ThemeServiceStart } from 'src/core/public';
-import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
+import { OverlayStart, OverlayRef, ThemeServiceStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { Tag, TagAttributes } from '../../../common/types';
 import { ITagInternalClient } from '../../services';
 

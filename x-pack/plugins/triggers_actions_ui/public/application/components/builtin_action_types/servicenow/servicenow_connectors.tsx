@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
+import { snExternalServiceConfig } from '@kbn/actions-plugin/common';
 import { ActionConnectorFieldsProps } from '../../../../types';
 
 import * as i18n from './translations';
@@ -21,38 +22,25 @@ import { InstallationCallout } from './installation_callout';
 import { UpdateConnector } from './update_connector';
 import { updateActionConnector } from '../../../lib/action_connector_api';
 import { Credentials } from './credentials';
-import { checkConnectorIsDeprecated } from '../../../../common/connectors_selection';
 
 // eslint-disable-next-line import/no-default-export
 export { ServiceNowConnectorFields as default };
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { snExternalServiceConfig } from '../../../../../../actions/server/builtin_action_types/servicenow/config';
-
 const ServiceNowConnectorFields: React.FC<
   ActionConnectorFieldsProps<ServiceNowActionConnector>
-> = ({
-  action,
-  editActionSecrets,
-  editActionConfig,
-  errors,
-  consumer,
-  readOnly,
-  setCallbacks,
-  isEdit,
-}) => {
+> = ({ action, editActionSecrets, editActionConfig, errors, readOnly, setCallbacks }) => {
   const {
     http,
     notifications: { toasts },
   } = useKibana().services;
-  const { apiUrl, usesTableApi } = action.config;
-  const { username, password } = action.secrets;
-  const requiresNewApplication = !checkConnectorIsDeprecated(action);
+  const { config, secrets } = action;
+  const requiresNewApplication = !action.isDeprecated;
 
   const [showUpdateConnector, setShowUpdateConnector] = useState(false);
 
   const { fetchAppInfo, isLoading } = useGetAppInfo({
     actionTypeId: action.actionTypeId,
+    http,
   });
 
   const [showApplicationRequiredCallout, setShowApplicationRequiredCallout] =
@@ -100,8 +88,8 @@ const ServiceNowConnectorFields: React.FC<
         http,
         connector: {
           name: action.name,
-          config: { apiUrl, usesTableApi: false },
-          secrets: { username, password },
+          config: { ...config, usesTableApi: false },
+          secrets: { ...secrets },
         },
         id: action.id,
       });
@@ -121,17 +109,7 @@ const ServiceNowConnectorFields: React.FC<
        * We silent the errors as a callout will show and inform the user
        */
     }
-  }, [
-    getApplicationInfo,
-    http,
-    action.name,
-    action.id,
-    apiUrl,
-    username,
-    password,
-    editActionConfig,
-    toasts,
-  ]);
+  }, [getApplicationInfo, http, action.name, action.id, secrets, config, editActionConfig, toasts]);
 
   /**
    * Defaults the usesTableApi attribute to false
@@ -140,7 +118,7 @@ const ServiceNowConnectorFields: React.FC<
    * the connector.
    */
   useEffect(() => {
-    if (usesTableApi == null) {
+    if (config.usesTableApi == null) {
       editActionConfig('usesTableApi', false);
     }
   });

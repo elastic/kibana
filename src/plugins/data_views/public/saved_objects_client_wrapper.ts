@@ -7,7 +7,7 @@
  */
 
 import { omit } from 'lodash';
-import { SavedObjectsClient, SimpleSavedObject } from 'src/core/public';
+import { SavedObjectsClient, SimpleSavedObject } from '@kbn/core/public';
 import {
   SavedObjectsClientCommon,
   SavedObjectsClientCommonFindArgs,
@@ -54,6 +54,6 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
     return simpleSavedObjectToSavedObject(response);
   }
   delete(type: string, id: string) {
-    return this.savedObjectClient.delete(type, id);
+    return this.savedObjectClient.delete(type, id, { force: true });
   }
 }

@@ -12,7 +12,7 @@ import type { MlClient } from '../../../../lib/ml_client';
 
 export function topCategoriesProvider(mlClient: MlClient) {
   async function getTotalCategories(jobId: string): Promise<number> {
-    const { body } = await mlClient.anomalySearch<estypes.SearchResponse<any>>(
+    const body = await mlClient.anomalySearch<estypes.SearchResponse<any>>(
       {
         size: 0,
         body: {
@@ -40,7 +40,7 @@ export function topCategoriesProvider(mlClient: MlClient) {
   }
 
   async function getTopCategoryCounts(jobId: string, numberOfCategories: number) {
-    const { body } = await mlClient.anomalySearch<estypes.SearchResponse<any>>(
+    const body = await mlClient.anomalySearch<estypes.SearchResponse<any>>(
       {
         size: 0,
         body: {
@@ -105,7 +105,7 @@ export function topCategoriesProvider(mlClient: MlClient) {
             field: 'category_id',
           },
         };
-    const { body } = await mlClient.anomalySearch<any>(
+    const body = await mlClient.anomalySearch<any>(
       {
         size,
         body: {

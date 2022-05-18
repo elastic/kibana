@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LicenseType } from '../../licensing/common/types';
+import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { RepositoryType } from './types';
 
 const basicLicense: LicenseType = 'basic';
@@ -35,12 +35,15 @@ export enum REPOSITORY_TYPES {
 }
 
 // Deliberately do not include `source` as a default repository since we treat it as a flag
-export const DEFAULT_REPOSITORY_TYPES: RepositoryType[] = [
+export const ON_PREM_REPOSITORY_TYPES: RepositoryType[] = [
+  REPOSITORY_TYPES.fs,
+  REPOSITORY_TYPES.url,
+];
+
+export const MODULE_REPOSITORY_TYPES: RepositoryType[] = [
   REPOSITORY_TYPES.azure,
   REPOSITORY_TYPES.gcs,
   REPOSITORY_TYPES.s3,
-  REPOSITORY_TYPES.fs,
-  REPOSITORY_TYPES.url,
 ];
 
 export const PLUGIN_REPOSITORY_TYPES: RepositoryType[] = [REPOSITORY_TYPES.hdfs];
@@ -62,3 +65,5 @@ export const TIME_UNITS: { [key: string]: 'd' | 'h' | 'm' | 's' } = {
   MINUTE: 'm',
   SECOND: 's',
 };
+
+export const FEATURE_STATES_NONE_OPTION = 'none';

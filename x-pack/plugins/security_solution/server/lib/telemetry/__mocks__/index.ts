@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ConcreteTaskInstance, TaskStatus } from '../../../../../task_manager/server';
+import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { TelemetryEventsSender } from '../sender';
 import { TelemetryReceiver } from '../receiver';
 import { SecurityTelemetryTaskConfig } from '../task';
-import { PackagePolicy } from '../../../../../fleet/common/types/models/package_policy';
+import { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
 
 export const createMockTelemetryEventsSender = (
   enableTelemetry?: boolean
@@ -44,6 +44,7 @@ export const createMockTelemetryReceiver = (
     fetchTrustedApplications: jest.fn(),
     fetchEndpointList: jest.fn(),
     fetchDetectionRules: jest.fn().mockReturnValue({ body: null }),
+    fetchEndpointMetadata: jest.fn(),
   } as unknown as jest.Mocked<TelemetryReceiver>;
 };
 

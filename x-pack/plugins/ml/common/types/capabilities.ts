@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'kibana/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { KibanaRequest } from '@kbn/core/server';
 import { PLUGIN_ID } from '../constants/app';
-import { ML_SAVED_OBJECT_TYPE } from './saved_objects';
+import {
+  ML_JOB_SAVED_OBJECT_TYPE,
+  ML_MODULE_SAVED_OBJECT_TYPE,
+  ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
+} from './saved_objects';
 import { ML_ALERT_TYPES } from '../constants/alerts';
 
 export const apmUserMlCapabilities = {
@@ -32,6 +37,8 @@ export const userMlCapabilities = {
   canDeleteAnnotation: false,
   // Alerts
   canUseMlAlerts: false,
+  // Trained models
+  canGetTrainedModels: false,
 };
 
 export const adminMlCapabilities = {
@@ -65,6 +72,10 @@ export const adminMlCapabilities = {
   canUseMlAlerts: false,
   // Model management
   canViewMlNodes: false,
+  // Trained models
+  canCreateTrainedModels: false,
+  canDeleteTrainedModels: false,
+  canStartStopTrainedModels: false,
 };
 
 export type UserMlCapabilities = typeof userMlCapabilities;
@@ -88,13 +99,15 @@ export function getPluginPrivileges() {
   const userMlCapabilitiesKeys = Object.keys(userMlCapabilities);
   const adminMlCapabilitiesKeys = Object.keys(adminMlCapabilities);
   const allMlCapabilitiesKeys = [...adminMlCapabilitiesKeys, ...userMlCapabilitiesKeys];
-  // TODO: include ML in base privileges for the `8.0` release: https://github.com/elastic/kibana/issues/71422
+
   const savedObjects = [
     'index-pattern',
     'dashboard',
     'search',
     'visualization',
-    ML_SAVED_OBJECT_TYPE,
+    ML_JOB_SAVED_OBJECT_TYPE,
+    ML_MODULE_SAVED_OBJECT_TYPE,
+    ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
   ];
   const privilege = {
     app: [PLUGIN_ID, 'kibana'],
@@ -149,7 +162,7 @@ export function getPluginPrivileges() {
       catalogue: [],
       savedObject: {
         all: [],
-        read: [ML_SAVED_OBJECT_TYPE],
+        read: [ML_JOB_SAVED_OBJECT_TYPE],
       },
       api: apmUserMlCapabilitiesKeys.map((k) => `ml:${k}`),
       ui: apmUserMlCapabilitiesKeys,

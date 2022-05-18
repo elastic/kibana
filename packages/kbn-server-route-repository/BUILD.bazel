@@ -4,7 +4,6 @@ load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types",
 
 PKG_BASE_NAME = "kbn-server-route-repository"
 PKG_REQUIRE_NAME = "@kbn/server-route-repository"
-TYPES_PKG_REQUIRE_NAME = "@types/kbn__server-route-repository"
 
 SOURCE_FILES = glob(
   [
@@ -53,6 +52,17 @@ jsts_transpiler(
   build_pkg_name = package_name(),
 )
 
+jsts_transpiler(
+  name = "target_web",
+  srcs = [
+    "src/web_index.ts",
+    "src/format_request.ts",
+    "src/parse_endpoint.ts",
+  ],
+  build_pkg_name = package_name(),
+  web = True,
+)
+
 ts_config(
   name = "tsconfig",
   src = "tsconfig.json",
@@ -68,10 +78,8 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  source_map = True,
   root_dir = "src",
   tsconfig = ":tsconfig",
 )
@@ -79,7 +87,7 @@ ts_project(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node"],
+  deps = RUNTIME_DEPS + [":target_node", ":target_web"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
@@ -103,7 +111,7 @@ pkg_npm_types(
   name = "npm_module_types",
   srcs = SRCS,
   deps = [":tsc_types"],
-  package_name = TYPES_PKG_REQUIRE_NAME,
+  package_name = PKG_REQUIRE_NAME,
   tsconfig = ":tsconfig",
   visibility = ["//visibility:public"],
 )

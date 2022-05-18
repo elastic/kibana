@@ -56,9 +56,12 @@ export class Job {
   public content_type?: TaskRunResult['content_type'];
   public csv_contains_formulas?: TaskRunResult['csv_contains_formulas'];
   public max_size_reached?: TaskRunResult['max_size_reached'];
+  public metrics?: ReportSource['metrics'];
   public warnings?: TaskRunResult['warnings'];
 
   public locatorParams?: BaseParamsV2['locatorParams'];
+
+  public error_code?: ReportOutput['error_code'];
 
   constructor(report: ReportApiJSON) {
     this.id = report.id;
@@ -89,7 +92,9 @@ export class Job {
     this.csv_contains_formulas = report.output?.csv_contains_formulas;
     this.max_size_reached = report.output?.max_size_reached;
     this.warnings = report.output?.warnings;
+    this.error_code = report.output?.error_code;
     this.locatorParams = (report.payload as BaseParamsV2).locatorParams;
+    this.metrics = report.metrics;
   }
 
   getStatusMessage() {

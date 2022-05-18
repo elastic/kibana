@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect, useMemo } from 'react';
-
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../../common/constants';
 import { anomaliesTableData } from '../api/anomalies_table_data';
 import { InfluencerInput, Anomalies, CriteriaFields } from '../types';
@@ -23,6 +23,7 @@ interface Args {
   threshold?: number;
   skip?: boolean;
   criteriaFields?: CriteriaFields[];
+  filterQuery?: estypes.QueryDslQueryContainer;
 }
 
 type Return = [boolean, Anomalies | null];
@@ -55,6 +56,7 @@ export const useAnomaliesTableData = ({
   endDate,
   threshold = -1,
   skip = false,
+  filterQuery,
 }: Args): Return => {
   const [tableData, setTableData] = useState<Anomalies | null>(null);
   const { isMlUser, jobs } = useInstalledSecurityJobs();
@@ -78,12 +80,15 @@ export const useAnomaliesTableData = ({
       earliestMs: number,
       latestMs: number
     ) {
-      if (isMlUser && !skip && jobIds.length > 0) {
+      if (skip) {
+        setLoading(false);
+      } else if (isMlUser && !skip && jobIds.length > 0) {
         try {
           const data = await anomaliesTableData(
             {
               jobIds,
               criteriaFields: criteriaFieldsInput,
+              influencersFilterQuery: filterQuery,
               aggregationInterval: 'auto',
               threshold: getThreshold(anomalyScore, threshold),
               earliestMs,

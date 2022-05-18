@@ -6,20 +6,15 @@
  */
 
 import moment from 'moment';
-// @ts-ignore
 import { checkParam } from '../error_missing_required';
-// @ts-ignore
 import { createTimeFilter } from '../create_query';
-// @ts-ignore
-import { detectReason } from './detect_reason';
-// @ts-ignore
+import { detectReason, FilebeatIndexCheckOpts } from './detect_reason';
 import { formatUTCTimestampForTimezone } from '../format_timezone';
-// @ts-ignore
 import { getTimezone } from '../get_timezone';
-// @ts-ignore
 import { detectReasonFromException } from './detect_reason_from_exception';
 import { LegacyRequest } from '../../types';
 import { FilebeatResponse } from '../../../common/types/filebeat';
+import { MonitoringConfig } from '../../config';
 
 interface Log {
   timestamp?: string | number;
@@ -35,7 +30,7 @@ async function handleResponse(
   response: FilebeatResponse,
   req: LegacyRequest,
   filebeatIndexPattern: string,
-  opts: { clusterUuid: string; nodeUuid: string; indexUuid: string; start: number; end: number }
+  opts: FilebeatIndexCheckOpts
 ) {
   const result: { enabled: boolean; logs: Log[]; reason?: any } = {
     enabled: false,
@@ -69,16 +64,10 @@ async function handleResponse(
 }
 
 export async function getLogs(
-  config: { get: (key: string) => any },
+  config: MonitoringConfig,
   req: LegacyRequest,
   filebeatIndexPattern: string,
-  {
-    clusterUuid,
-    nodeUuid,
-    indexUuid,
-    start,
-    end,
-  }: { clusterUuid: string; nodeUuid: string; indexUuid: string; start: number; end: number }
+  { clusterUuid, nodeUuid, indexUuid, start, end }: FilebeatIndexCheckOpts
 ) {
   checkParam(filebeatIndexPattern, 'filebeatIndexPattern in logs/getLogs');
 
@@ -99,7 +88,7 @@ export async function getLogs(
 
   const params = {
     index: filebeatIndexPattern,
-    size: Math.min(50, config.get('monitoring.ui.elasticsearch.logFetchCount')),
+    size: Math.min(50, config.ui.elasticsearch.logFetchCount),
     filter_path: [
       'hits.hits._source.message',
       'hits.hits._source.log.level',

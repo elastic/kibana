@@ -14,19 +14,16 @@ import {
   EuiLoadingContent,
   EuiProgress,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { partition } from 'lodash/fp';
 
 import { AllRulesTabs } from './rules_table_toolbar';
-import { HeaderSection } from '../../../../../common/components/header_section';
 import { Loader } from '../../../../../common/components/loader';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
 import { useValueChanged } from '../../../../../common/hooks/use_value_changed';
-import { useKibana } from '../../../../../common/lib/kibana';
 import { PrePackagedRulesPrompt } from '../../../../components/rules/pre_packaged_rules/load_empty_prompt';
 import {
   CreatePreBuiltRules,
-  FilterOptions,
   Rule,
   RulesSortingFields,
 } from '../../../../containers/detection_engine/rules';
@@ -85,7 +82,6 @@ export const RulesTables = React.memo<RulesTableProps>(
     rulesNotUpdated,
     selectedTab,
   }) => {
-    const { timelines } = useKibana().services;
     const tableRef = useRef<EuiBasicTable>(null);
     const rulesTableContext = useRulesTableContext();
 
@@ -96,11 +92,9 @@ export const RulesTables = React.memo<RulesTableProps>(
         isActionInProgress,
         isAllSelected,
         isFetched,
-        isFetching,
         isLoading,
         isRefetching,
         isRefreshOn,
-        lastUpdated,
         loadingRuleIds,
         loadingRulesAction,
         pagination,
@@ -109,7 +103,6 @@ export const RulesTables = React.memo<RulesTableProps>(
       },
       actions: {
         reFetchRules,
-        setFilterOptions,
         setIsAllSelected,
         setIsRefreshOn,
         setPage,
@@ -125,7 +118,12 @@ export const RulesTables = React.memo<RulesTableProps>(
       rulesNotUpdated
     );
 
-    const [isLoadingTags, tags, reFetchTags] = useTags();
+    const [, allTags, reFetchTags] = useTags();
+
+    useEffect(() => {
+      reFetchTags();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [rulesCustomInstalled, rulesInstalled]);
 
     const [isDeleteConfirmationVisible, showDeleteConfirmation, hideDeleteConfirmation] =
       useBoolState();
@@ -181,16 +179,6 @@ export const RulesTables = React.memo<RulesTableProps>(
         pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
       }),
       [pagination]
-    );
-
-    const onFilterChangedCallback = useCallback(
-      (newFilter: Partial<FilterOptions>) => {
-        setFilterOptions((currentFilter) => ({ ...currentFilter, ...newFilter }));
-        setPage(1);
-        setSelectedRuleIds([]);
-        setIsAllSelected(false);
-      },
-      [setFilterOptions, setIsAllSelected, setPage, setSelectedRuleIds]
     );
 
     const tableOnChangeCallback = useCallback(
@@ -286,9 +274,11 @@ export const RulesTables = React.memo<RulesTableProps>(
           }
         : { 'data-test-subj': 'monitoring-table', columns: monitoringColumns };
 
+    const shouldShowLinearProgress = isFetched && isRefetching;
+    const shouldShowLoadingOverlay = (!isFetched && isRefetching) || isActionInProgress;
     return (
       <>
-        {isFetched && isRefetching && (
+        {shouldShowLinearProgress && (
           <EuiProgress
             data-test-subj="loadingRulesInfoProgress"
             size="xs"
@@ -296,30 +286,16 @@ export const RulesTables = React.memo<RulesTableProps>(
             color="accent"
           />
         )}
-        {((!isFetched && isRefetching) || isActionInProgress) && (
+        {shouldShowLoadingOverlay && (
           <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
         )}
-        <HeaderSection
-          split
-          growLeftSplit={false}
-          title={i18n.ALL_RULES}
-          subtitle={timelines.getLastUpdated({
-            showUpdating: loading || isFetching,
-            updatedAt: lastUpdated,
-          })}
-        >
-          {shouldShowRulesTable && (
-            <RulesTableFilters
-              onFilterChanged={onFilterChangedCallback}
-              rulesCustomInstalled={rulesCustomInstalled}
-              rulesInstalled={rulesInstalled}
-              currentFilterTags={filterOptions.tags}
-              isLoadingTags={isLoadingTags}
-              tags={tags}
-              reFetchTags={reFetchTags}
-            />
-          )}
-        </HeaderSection>
+        {shouldShowRulesTable && (
+          <RulesTableFilters
+            rulesCustomInstalled={rulesCustomInstalled}
+            rulesInstalled={rulesInstalled}
+            allTags={allTags}
+          />
+        )}
         {shouldShowPrepackagedRulesPrompt && (
           <PrePackagedRulesPrompt
             createPrePackagedRules={handleCreatePrePackagedRules}
@@ -362,7 +338,7 @@ export const RulesTables = React.memo<RulesTableProps>(
             editAction={bulkEditActionType}
             onClose={handleBulkEditFormCancel}
             onConfirm={handleBulkEditFormConfirm}
-            tags={tags}
+            tags={allTags}
           />
         )}
         {shouldShowRulesTable && (
@@ -390,7 +366,7 @@ export const RulesTables = React.memo<RulesTableProps>(
               onChange={tableOnChangeCallback}
               pagination={paginationMemo}
               ref={tableRef}
-              selection={euiBasicTableSelectionProps}
+              selection={hasPermissions ? euiBasicTableSelectionProps : undefined}
               sorting={{
                 sort: {
                   // EuiBasicTable has incorrect `sort.field` types which accept only `keyof Item` and reject fields in dot notation

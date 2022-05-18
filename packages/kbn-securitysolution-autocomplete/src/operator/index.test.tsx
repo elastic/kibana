@@ -129,6 +129,9 @@ describe('operator', () => {
       {
         label: 'is not in list',
       },
+      {
+        label: 'matches',
+      },
     ]);
   });
 
@@ -193,6 +196,30 @@ describe('operator', () => {
       { label: 'is not' },
       { label: 'exists' },
       { label: 'does not exist' },
+    ]);
+  });
+
+  test('it only displays subset of operators if field name is "file.path.text"', () => {
+    const wrapper = mount(
+      <OperatorComponent
+        isClearable={false}
+        isDisabled={false}
+        isLoading={false}
+        onChange={jest.fn()}
+        operator={isOperator}
+        placeholder="Placeholder text"
+        selectedField={getField('file.path.text')}
+      />
+    );
+
+    expect(
+      wrapper.find(`[data-test-subj="operatorAutocompleteComboBox"]`).at(0).prop('options')
+    ).toEqual([
+      { label: 'is' },
+      { label: 'is not' },
+      { label: 'is one of' },
+      { label: 'is not one of' },
+      { label: 'matches' },
     ]);
   });
 

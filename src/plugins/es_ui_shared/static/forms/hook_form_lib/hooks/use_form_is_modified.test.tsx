@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { registerTestBed } from '../shared_imports';
@@ -36,8 +36,10 @@ describe('useFormIsModified()', () => {
     const [isNameVisible, setIsNameVisible] = useState(true);
     const [isLastNameVisible, setIsLastNameVisible] = useState(true);
 
-    // Call our jest.spy() with the latest hook value
-    onIsModifiedChange(isModified);
+    useEffect(() => {
+      // Call our jest.spy() with the latest hook value
+      onIsModifiedChange(isModified);
+    }, [onIsModifiedChange, isModified]);
 
     return (
       <Form form={form}>

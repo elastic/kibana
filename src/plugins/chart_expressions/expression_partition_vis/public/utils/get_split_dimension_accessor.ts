@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 import { AccessorFn } from '@elastic/charts';
-import { getColumnByAccessor } from './accessor';
-import { DatatableColumn } from '../../../../expressions/public';
-import { FieldFormat, FormatFactory } from '../../../../field_formats/common';
-import { ExpressionValueVisDimension } from '../../../../visualizations/common';
+import { DatatableColumn } from '@kbn/expressions-plugin/public';
+import { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { getFormatter } from './formatters';
 
 export const getSplitDimensionAccessor = (
   columns: DatatableColumn[],
-  splitDimension: ExpressionValueVisDimension,
+  splitDimension: ExpressionValueVisDimension | string,
   formatters: Record<string, FieldFormat | undefined>,
   defaultFormatFactory: FormatFactory
 ): AccessorFn => {
-  const splitChartColumn = getColumnByAccessor(splitDimension.accessor, columns);
+  const splitChartColumn = getColumnByAccessor(splitDimension, columns)!;
   const accessor = splitChartColumn.id;
   const formatter = getFormatter(splitChartColumn, formatters, defaultFormatFactory);
 

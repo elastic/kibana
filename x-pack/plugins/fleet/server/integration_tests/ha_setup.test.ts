@@ -9,8 +9,8 @@ import Path from 'path';
 
 import { range } from 'lodash';
 
-import type { ISavedObjectsRepository } from 'src/core/server';
-import * as kbnTestServer from 'src/core/test_helpers/kbn_server';
+import type { ISavedObjectsRepository } from '@kbn/core/server';
+import * as kbnTestServer from '@kbn/core/test_helpers/kbn_server';
 
 import type {
   AgentPolicySOAttributes,
@@ -19,7 +19,7 @@ import type {
   PackagePolicySOAttributes,
 } from '../types';
 
-import { useDockerRegistry } from './docker_registry_helper';
+import { useDockerRegistry } from './helpers';
 
 const logFilePath = Path.join(__dirname, 'logs.log');
 

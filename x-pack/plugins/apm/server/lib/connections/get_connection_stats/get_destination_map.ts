@@ -7,6 +7,7 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import objectHash from 'object-hash';
+import { rangeQuery } from '@kbn/observability-plugin/server';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../common/environment_filter_values';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
@@ -23,7 +24,6 @@ import {
   SPAN_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { rangeQuery } from '../../../../../observability/server';
 import { Setup } from '../../helpers/setup_request';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { Node, NodeType } from '../../../../common/connections';

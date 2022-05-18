@@ -30,7 +30,7 @@ export const registerCreateRoute = ({
       },
     },
     async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const pipeline = req.body as Pipeline;
 
       // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -38,7 +38,7 @@ export const registerCreateRoute = ({
 
       try {
         // Check that a pipeline with the same name doesn't already exist
-        const { body: pipelineByName } = await clusterClient.asCurrentUser.ingest.getPipeline({
+        const pipelineByName = await clusterClient.asCurrentUser.ingest.getPipeline({
           id: name,
         });
 
@@ -59,7 +59,7 @@ export const registerCreateRoute = ({
       }
 
       try {
-        const { body: response } = await clusterClient.asCurrentUser.ingest.putPipeline({
+        const response = await clusterClient.asCurrentUser.ingest.putPipeline({
           id: name,
           body: {
             description,

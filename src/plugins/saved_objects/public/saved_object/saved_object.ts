@@ -29,8 +29,6 @@ export function createSavedObjectClass(
    * provides additional functionality besides loading/saving/deleting/etc.
    *
    * It is overloaded and configured to provide type-aware functionality.
-   * To just retrieve the attributes of saved objects, it is recommended to use SavedObjectLoader
-   * which returns instances of SimpleSavedObject which don't introduce additional type-specific complexity.
    * @param {*} config
    */
   class SavedObjectClass {

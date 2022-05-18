@@ -6,23 +6,22 @@
  */
 
 import expect from '@kbn/expect';
-import { convertToKibanaClient } from '@kbn/test';
-import {
-  Comparator,
-  InventoryMetricConditions,
-} from '../../../../plugins/infra/common/alerting/metrics';
+import { Comparator, InventoryMetricConditions } from '@kbn/infra-plugin/common/alerting/metrics';
 import {
   InventoryItemType,
   SnapshotMetricType,
-} from '../../../../plugins/infra/common/inventory_models/types';
-import { evaluateCondition } from '../../../../plugins/infra/server/lib/alerting/inventory_metric_threshold/evaluate_condition';
-import { InfraSource } from '../../../../plugins/infra/server/lib/sources';
+} from '@kbn/infra-plugin/common/inventory_models/types';
+import { evaluateCondition } from '@kbn/infra-plugin/server/lib/alerting/inventory_metric_threshold/evaluate_condition';
+import { InfraSource } from '@kbn/infra-plugin/server/lib/sources';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
+import { createFakeLogger } from './create_fake_logger';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
+  const log = getService('log');
+  const logger = createFakeLogger(log);
 
   const baseCondition: InventoryMetricConditions = {
     metric: 'cpu',
@@ -77,7 +76,8 @@ export default function ({ getService }: FtrProviderContext) {
     source,
     logQueryFields: void 0,
     compositeSize: 10000,
-    startTime: DATES['8.0.0'].hosts_only.max,
+    executionTimestamp: new Date(DATES['8.0.0'].hosts_only.max),
+    logger,
   };
 
   describe('Inventory Threshold Rule Executor', () => {
@@ -87,7 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should work FOR LAST 1 minute', async () => {
         const results = await evaluateCondition({
           ...baseOptions,
-          esClient: convertToKibanaClient(esClient),
+          esClient,
         });
         expect(results).to.eql({
           'host-0': {
@@ -97,24 +97,11 @@ export default function ({ getService }: FtrProviderContext) {
             sourceId: 'default',
             threshold: [100],
             comparator: '>',
-            shouldFire: [true],
-            shouldWarn: [false],
-            isNoData: [false],
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
             isError: false,
             currentValue: 1.109,
-          },
-          'host-1': {
-            metric: 'cpu',
-            timeSize: 1,
-            timeUnit: 'm',
-            sourceId: 'default',
-            threshold: [100],
-            comparator: '>',
-            shouldFire: [false],
-            shouldWarn: [false],
-            isNoData: [false],
-            isError: false,
-            currentValue: 0.7703333333333333,
           },
         });
       });
@@ -122,7 +109,7 @@ export default function ({ getService }: FtrProviderContext) {
         const options = {
           ...baseOptions,
           condition: { ...baseCondition, timeSize: 5 },
-          esClient: convertToKibanaClient(esClient),
+          esClient,
         };
         const results = await evaluateCondition(options);
         expect(results).to.eql({
@@ -133,24 +120,11 @@ export default function ({ getService }: FtrProviderContext) {
             sourceId: 'default',
             threshold: [100],
             comparator: '>',
-            shouldFire: [true],
-            shouldWarn: [false],
-            isNoData: [false],
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
             isError: false,
             currentValue: 1.0376666666666665,
-          },
-          'host-1': {
-            metric: 'cpu',
-            timeSize: 5,
-            timeUnit: 'm',
-            sourceId: 'default',
-            threshold: [100],
-            comparator: '>',
-            shouldFire: [false],
-            shouldWarn: [false],
-            isNoData: [false],
-            isError: false,
-            currentValue: 0.9192,
           },
         });
       });
@@ -167,7 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
             metric: 'rx',
             threshold: [1],
           },
-          esClient: convertToKibanaClient(esClient),
+          esClient,
         });
         expect(results).to.eql({
           'host-0': {
@@ -177,9 +151,9 @@ export default function ({ getService }: FtrProviderContext) {
             sourceId: 'default',
             threshold: [1],
             comparator: '>',
-            shouldFire: [true],
-            shouldWarn: [false],
-            isNoData: [false],
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
             isError: false,
             currentValue: 1666.6666666666667,
           },
@@ -190,9 +164,9 @@ export default function ({ getService }: FtrProviderContext) {
             sourceId: 'default',
             threshold: [1],
             comparator: '>',
-            shouldFire: [true],
-            shouldWarn: [false],
-            isNoData: [false],
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
             isError: false,
             currentValue: 2000,
           },
@@ -207,7 +181,7 @@ export default function ({ getService }: FtrProviderContext) {
             threshold: [1],
             timeSize: 5,
           },
-          esClient: convertToKibanaClient(esClient),
+          esClient,
         };
         const results = await evaluateCondition(options);
         expect(results).to.eql({
@@ -218,9 +192,9 @@ export default function ({ getService }: FtrProviderContext) {
             sourceId: 'default',
             threshold: [1],
             comparator: '>',
-            shouldFire: [true],
-            shouldWarn: [false],
-            isNoData: [false],
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
             isError: false,
             currentValue: 2266.6666666666665,
           },
@@ -231,11 +205,137 @@ export default function ({ getService }: FtrProviderContext) {
             sourceId: 'default',
             threshold: [1],
             comparator: '>',
-            shouldFire: [true],
-            shouldWarn: [false],
-            isNoData: [false],
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
             isError: false,
             currentValue: 2266.6666666666665,
+          },
+        });
+      });
+    });
+
+    describe('Custom rate metric per host', () => {
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
+      it('should work FOR LAST 1 minute', async () => {
+        const results = await evaluateCondition({
+          ...baseOptions,
+          condition: {
+            ...baseCondition,
+            metric: 'custom',
+            customMetric: {
+              type: 'custom',
+              id: 'alert-custom-metric',
+              aggregation: 'rate',
+              field: 'system.network.in.bytes',
+              label: 'RX',
+            },
+            threshold: [1],
+          },
+          esClient,
+        });
+        expect(results).to.eql({
+          'host-0': {
+            metric: 'custom',
+            timeSize: 1,
+            timeUnit: 'm',
+            sourceId: 'default',
+            threshold: [1],
+            comparator: '>',
+            customMetric: {
+              type: 'custom',
+              id: 'alert-custom-metric',
+              aggregation: 'rate',
+              field: 'system.network.in.bytes',
+              label: 'RX',
+            },
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
+            isError: false,
+            currentValue: 833.3333333333334,
+          },
+          'host-1': {
+            metric: 'custom',
+            timeSize: 1,
+            timeUnit: 'm',
+            sourceId: 'default',
+            threshold: [1],
+            comparator: '>',
+            customMetric: {
+              type: 'custom',
+              id: 'alert-custom-metric',
+              aggregation: 'rate',
+              field: 'system.network.in.bytes',
+              label: 'RX',
+            },
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
+            isError: false,
+            currentValue: 1000,
+          },
+        });
+      });
+      it('should work FOR LAST 5 minute', async () => {
+        const results = await evaluateCondition({
+          ...baseOptions,
+          condition: {
+            ...baseCondition,
+            metric: 'custom',
+            customMetric: {
+              type: 'custom',
+              id: 'alert-custom-metric',
+              aggregation: 'rate',
+              field: 'system.network.in.bytes',
+              label: 'RX',
+            },
+            threshold: [1],
+            timeSize: 5,
+          },
+          esClient,
+        });
+        expect(results).to.eql({
+          'host-0': {
+            metric: 'custom',
+            timeSize: 5,
+            timeUnit: 'm',
+            sourceId: 'default',
+            threshold: [1],
+            comparator: '>',
+            customMetric: {
+              type: 'custom',
+              id: 'alert-custom-metric',
+              aggregation: 'rate',
+              field: 'system.network.in.bytes',
+              label: 'RX',
+            },
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
+            isError: false,
+            currentValue: 1133.3333333333333,
+          },
+          'host-1': {
+            metric: 'custom',
+            timeSize: 5,
+            timeUnit: 'm',
+            sourceId: 'default',
+            threshold: [1],
+            comparator: '>',
+            customMetric: {
+              type: 'custom',
+              id: 'alert-custom-metric',
+              aggregation: 'rate',
+              field: 'system.network.in.bytes',
+              label: 'RX',
+            },
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
+            isError: false,
+            currentValue: 1133.3333333333333,
           },
         });
       });
@@ -251,9 +351,9 @@ export default function ({ getService }: FtrProviderContext) {
           condition: {
             ...baseCondition,
             metric: 'logRate',
-            threshold: [1],
+            threshold: [0.1],
           },
-          esClient: convertToKibanaClient(esClient),
+          esClient,
         });
         expect(results).to.eql({
           'host-0': {
@@ -261,11 +361,11 @@ export default function ({ getService }: FtrProviderContext) {
             timeSize: 1,
             timeUnit: 'm',
             sourceId: 'default',
-            threshold: [1],
+            threshold: [0.1],
             comparator: '>',
-            shouldFire: [false],
-            shouldWarn: [false],
-            isNoData: [false],
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
             isError: false,
             currentValue: 0.3,
           },
@@ -274,11 +374,11 @@ export default function ({ getService }: FtrProviderContext) {
             timeSize: 1,
             timeUnit: 'm',
             sourceId: 'default',
-            threshold: [1],
+            threshold: [0.1],
             comparator: '>',
-            shouldFire: [false],
-            shouldWarn: [false],
-            isNoData: [false],
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
             isError: false,
             currentValue: 0.3,
           },
@@ -291,10 +391,10 @@ export default function ({ getService }: FtrProviderContext) {
           condition: {
             ...baseCondition,
             metric: 'logRate' as SnapshotMetricType,
-            threshold: [1],
+            threshold: [0.1],
             timeSize: 5,
           },
-          esClient: convertToKibanaClient(esClient),
+          esClient,
         };
         const results = await evaluateCondition(options);
         expect(results).to.eql({
@@ -303,11 +403,11 @@ export default function ({ getService }: FtrProviderContext) {
             timeSize: 5,
             timeUnit: 'm',
             sourceId: 'default',
-            threshold: [1],
+            threshold: [0.1],
             comparator: '>',
-            shouldFire: [false],
-            shouldWarn: [false],
-            isNoData: [false],
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
             isError: false,
             currentValue: 0.3,
           },
@@ -316,11 +416,11 @@ export default function ({ getService }: FtrProviderContext) {
             timeSize: 5,
             timeUnit: 'm',
             sourceId: 'default',
-            threshold: [1],
+            threshold: [0.1],
             comparator: '>',
-            shouldFire: [false],
-            shouldWarn: [false],
-            isNoData: [false],
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
             isError: false,
             currentValue: 0.3,
           },
@@ -334,14 +434,14 @@ export default function ({ getService }: FtrProviderContext) {
       it('should work FOR LAST 1 minute', async () => {
         const results = await evaluateCondition({
           ...baseOptions,
-          startTime: DATES['8.0.0'].pods_only.max,
+          executionTimestamp: new Date(DATES['8.0.0'].pods_only.max),
           nodeType: 'pod' as InventoryItemType,
           condition: {
             ...baseCondition,
             metric: 'rx',
             threshold: [1],
           },
-          esClient: convertToKibanaClient(esClient),
+          esClient,
         });
         expect(results).to.eql({
           '7d6d7955-f853-42b1-8613-11f52d0d2725': {
@@ -351,9 +451,9 @@ export default function ({ getService }: FtrProviderContext) {
             sourceId: 'default',
             threshold: [1],
             comparator: '>',
-            shouldFire: [true],
-            shouldWarn: [false],
-            isNoData: [false],
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
             isError: false,
             currentValue: 43332.833333333336,
           },
@@ -364,9 +464,9 @@ export default function ({ getService }: FtrProviderContext) {
             sourceId: 'default',
             threshold: [1],
             comparator: '>',
-            shouldFire: [true],
-            shouldWarn: [false],
-            isNoData: [false],
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
             isError: false,
             currentValue: 42783.833333333336,
           },
@@ -375,7 +475,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should work FOR LAST 5 minute', async () => {
         const results = await evaluateCondition({
           ...baseOptions,
-          startTime: DATES['8.0.0'].pods_only.max,
+          executionTimestamp: new Date(DATES['8.0.0'].pods_only.max),
           logQueryFields: { indexPattern: 'metricbeat-*' },
           nodeType: 'pod',
           condition: {
@@ -384,7 +484,7 @@ export default function ({ getService }: FtrProviderContext) {
             threshold: [1],
             timeSize: 5,
           },
-          esClient: convertToKibanaClient(esClient),
+          esClient,
         });
         expect(results).to.eql({
           '7d6d7955-f853-42b1-8613-11f52d0d2725': {
@@ -394,9 +494,9 @@ export default function ({ getService }: FtrProviderContext) {
             sourceId: 'default',
             threshold: [1],
             comparator: '>',
-            shouldFire: [true],
-            shouldWarn: [false],
-            isNoData: [false],
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
             isError: false,
             currentValue: 50197.666666666664,
           },
@@ -407,9 +507,9 @@ export default function ({ getService }: FtrProviderContext) {
             sourceId: 'default',
             threshold: [1],
             comparator: '>',
-            shouldFire: [true],
-            shouldWarn: [false],
-            isNoData: [false],
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
             isError: false,
             currentValue: 50622.066666666666,
           },

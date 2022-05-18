@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { CorrelationsParams } from '../../../../common/correlations/types';
@@ -52,20 +52,20 @@ export const fetchTransactionDurationFractions = async (
     getTransactionDurationRangesRequest(params, ranges)
   );
 
-  if ((resp.body.hits.total as estypes.SearchTotalHits).value === 0) {
+  if ((resp.hits.total as estypes.SearchTotalHits).value === 0) {
     return {
       fractions: [],
       totalDocCount: 0,
     };
   }
 
-  if (resp.body.aggregations === undefined) {
+  if (resp.aggregations === undefined) {
     throw new Error(
       'fetchTransactionDurationFractions failed, did not return aggregations.'
     );
   }
 
-  const buckets = resp.body.aggregations.latency_ranges?.buckets;
+  const buckets = resp.aggregations.latency_ranges?.buckets;
 
   const totalDocCount = buckets.reduce((acc, bucket) => {
     return acc + bucket.doc_count;

@@ -6,11 +6,9 @@
  */
 
 import { get } from 'lodash';
-import { ElasticsearchClient } from 'src/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MonitoringConfig } from '../../../config';
-// @ts-ignore
-import { prefixIndexPattern } from '../../../../common/ccs_utils';
 import { StackProductUsage } from '../types';
 
 interface ESResponse {
@@ -95,7 +93,7 @@ export async function fetchStackProductUsage(
     },
   };
 
-  const { body: responseBody } = await callCluster.search(params);
+  const responseBody = await callCluster.search(params);
   const response = responseBody as estypes.SearchResponse<ESResponse>;
   const uuidBuckets = get(response, 'aggregations.uuids.buckets', []) as UuidBucket[];
   const count = uuidBuckets.length;

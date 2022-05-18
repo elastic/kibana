@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { KibanaRequest, Logger, RequestHandlerContext } from 'kibana/server';
-import { ExceptionListClient } from '../../../lists/server';
-import { PluginStartContract as AlertsStartContract } from '../../../alerting/server';
+import { KibanaRequest, Logger, RequestHandlerContext } from '@kbn/core/server';
+import { ExceptionListClient } from '@kbn/lists-plugin/server';
+import { PluginStartContract as AlertsStartContract } from '@kbn/alerting-plugin/server';
 import {
   PostPackagePolicyCreateCallback,
   PostPackagePolicyDeleteCallback,
   PutPackagePolicyUpdateCallback,
-} from '../../../fleet/server';
+} from '@kbn/fleet-plugin/server';
 
-import { NewPackagePolicy, UpdatePackagePolicy } from '../../../fleet/common';
+import { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 
 import { NewPolicyData, PolicyConfig } from '../../common/endpoint/types';
 import { LicenseService } from '../../common/license';
@@ -25,6 +25,9 @@ import { createPolicyArtifactManifest } from './handlers/create_policy_artifact_
 import { createDefaultPolicy } from './handlers/create_default_policy';
 import { validatePolicyAgainstLicense } from './handlers/validate_policy_against_license';
 import { removePolicyFromArtifacts } from './handlers/remove_policy_from_artifacts';
+import { FeatureUsageService } from '../endpoint/services/feature_usage/service';
+import { EndpointMetadataService } from '../endpoint/services/metadata';
+import { notifyProtectionFeatureUsage } from './notify_protection_feature_usage';
 
 const isEndpointPackagePolicy = <T extends { package?: { name: string } }>(
   packagePolicy: T
@@ -105,7 +108,9 @@ export const getPackagePolicyCreateCallback = (
 
 export const getPackagePolicyUpdateCallback = (
   logger: Logger,
-  licenseService: LicenseService
+  licenseService: LicenseService,
+  featureUsageService: FeatureUsageService,
+  endpointMetadataService: EndpointMetadataService
 ): PutPackagePolicyUpdateCallback => {
   return async (
     newPackagePolicy: NewPackagePolicy
@@ -124,6 +129,8 @@ export const getPackagePolicyUpdateCallback = (
       licenseService,
       logger
     );
+
+    notifyProtectionFeatureUsage(newPackagePolicy, featureUsageService, endpointMetadataService);
 
     return newPackagePolicy;
   };

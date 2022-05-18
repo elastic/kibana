@@ -6,9 +6,9 @@
  */
 
 import { useEffect } from 'react';
-import { HttpFetchOptions, HttpStart } from 'kibana/public';
+import { HttpFetchOptions, HttpStart } from '@kbn/core/public';
+import { epmRouteService, BulkInstallPackagesResponse } from '@kbn/fleet-plugin/common';
 import { useKibana } from '../lib/kibana';
-import { epmRouteService, BulkInstallPackagesResponse } from '../../../../fleet/common';
 import { useUserPrivileges } from '../components/user_privileges';
 
 /**

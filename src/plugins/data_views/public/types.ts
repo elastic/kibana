@@ -6,10 +6,60 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionsSetup } from 'src/plugins/expressions/public';
-import { FieldFormatsSetup, FieldFormatsStart } from 'src/plugins/field_formats/public';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { DataViewsService } from './data_views';
+import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { DataViewsServicePublicMethods } from './data_views';
+import { HasDataService } from '../common';
+
+export enum IndicesResponseItemIndexAttrs {
+  OPEN = 'open',
+  CLOSED = 'closed',
+  HIDDEN = 'hidden',
+  FROZEN = 'frozen',
+}
+
+export interface IndicesResponseModified {
+  name: string;
+  item: {
+    name: string;
+    backing_indices?: string[];
+    timestamp_field?: string;
+    indices?: string[];
+    aliases?: string[];
+    attributes?: IndicesResponseItemIndexAttrs[];
+    data_stream?: string;
+  };
+}
+
+export interface IndicesResponseItem {
+  name: string;
+}
+
+export interface IndicesResponseItemAlias extends IndicesResponseItem {
+  indices: string[];
+}
+
+export interface IndicesResponseItemDataStream extends IndicesResponseItem {
+  backing_indices: string[];
+  timestamp_field: string;
+}
+
+export interface IndicesResponseItemIndex extends IndicesResponseItem {
+  aliases?: string[];
+  attributes?: IndicesResponseItemIndexAttrs[];
+  data_stream?: string;
+}
+
+export interface IndicesResponse {
+  indices?: IndicesResponseItemIndex[];
+  aliases?: IndicesResponseItemAlias[];
+  data_streams?: IndicesResponseItemDataStream[];
+}
+
+export interface HasDataViewsResponse {
+  hasDataView: boolean;
+  hasUserDataView: boolean;
+}
 
 export interface DataViewsPublicSetupDependencies {
   expressions: ExpressionsSetup;
@@ -26,13 +76,14 @@ export interface DataViewsPublicStartDependencies {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataViewsPublicPluginSetup {}
 
-export interface DataViewsServicePublic extends DataViewsService {
+export interface DataViewsServicePublic extends DataViewsServicePublicMethods {
   getCanSaveSync: () => boolean;
+  hasData: HasDataService;
 }
 
-export type DataViewsContract = PublicMethodsOf<DataViewsServicePublic>;
+export type DataViewsContract = DataViewsServicePublic;
 
 /**
  * Data views plugin public Start contract
  */
-export type DataViewsPublicPluginStart = PublicMethodsOf<DataViewsServicePublic>;
+export type DataViewsPublicPluginStart = DataViewsServicePublic;

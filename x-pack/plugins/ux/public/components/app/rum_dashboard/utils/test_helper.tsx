@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { render as testLibRender } from '@testing-library/react';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { of } from 'rxjs';
 import { createMemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
 import { MemoryHistory } from 'history';
-import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
-import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { UrlParamsProvider } from '../../../../context/url_params_context/url_params_context';
 
 export const core = {

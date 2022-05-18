@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'src/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { StackProductUsage } from '../types';
@@ -85,7 +85,7 @@ export async function fetchESUsage(
     },
   };
 
-  const { body: response } = await callCluster.search(params);
+  const response = await callCluster.search(params);
   const esResponse = response as estypes.SearchResponse<ClusterStats>;
   if (esResponse.hits.hits.length === 0) {
     return {

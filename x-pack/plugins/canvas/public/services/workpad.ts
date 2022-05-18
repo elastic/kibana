@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsResolveResponse } from 'src/core/public';
+import { SavedObjectsResolveResponse } from '@kbn/core/public';
 import { CanvasWorkpad, CanvasTemplate } from '../../types';
 import { CanvasRenderedWorkpad } from '../../shareable_runtime/types';
 
@@ -24,6 +24,7 @@ export interface ResolveWorkpadResponse {
   workpad: CanvasWorkpad;
   outcome: SavedObjectsResolveResponse['outcome'];
   aliasId?: SavedObjectsResolveResponse['alias_target_id'];
+  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
 }
 
 export interface CanvasWorkpadService {

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ToolingLog } from '@kbn/dev-utils';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { FunctionalTestRunner, readConfigFile, EsVersion } from '../../functional_test_runner';
 import { CliError } from './run_cli';
 
@@ -27,6 +27,7 @@ export interface CreateFtrOptions {
   };
   updateSnapshots?: boolean;
   esVersion: EsVersion;
+  dryRun?: boolean;
 }
 
 export interface CreateFtrParams {
@@ -45,6 +46,7 @@ async function createFtr({
     suiteTags,
     updateSnapshots,
     esVersion,
+    dryRun,
   },
 }: CreateFtrParams) {
   const config = await readConfigFile(log, esVersion, configPath);
@@ -58,6 +60,7 @@ async function createFtr({
         mochaOpts: {
           bail: !!bail,
           grep,
+          dryRun: !!dryRun,
         },
         kbnTestServer: {
           installDir,
@@ -78,8 +81,8 @@ async function createFtr({
   };
 }
 
-export async function assertNoneExcluded({ configPath, options }: CreateFtrParams) {
-  const { config, ftr } = await createFtr({ configPath, options });
+export async function assertNoneExcluded(params: CreateFtrParams) {
+  const { config, ftr } = await createFtr(params);
 
   if (config.get('testRunner')) {
     // tests with custom test runners are not included in this check
@@ -87,23 +90,26 @@ export async function assertNoneExcluded({ configPath, options }: CreateFtrParam
   }
 
   const stats = await ftr.getTestStats();
+  if (!stats) {
+    throw new Error('unable to get test stats');
+  }
   if (stats.testsExcludedByTag.length > 0) {
     throw new CliError(`
-      ${stats.testsExcludedByTag.length} tests in the ${configPath} config
+      ${stats.testsExcludedByTag.length} tests in the ${params.configPath} config
       are excluded when filtering by the tags run on CI. Make sure that all suites are
       tagged with one of the following tags:
 
-      ${JSON.stringify(options.suiteTags)}
+      ${JSON.stringify(params.options.suiteTags)}
 
       - ${stats.testsExcludedByTag.join('\n      - ')}
     `);
   }
 }
 
-export async function runFtr({ configPath, options }: CreateFtrParams) {
-  const { ftr } = await createFtr({ configPath, options });
+export async function runFtr(params: CreateFtrParams, signal?: AbortSignal) {
+  const { ftr } = await createFtr(params);
 
-  const failureCount = await ftr.run();
+  const failureCount = await ftr.run(signal);
   if (failureCount > 0) {
     throw new CliError(
       `${failureCount} functional test ${failureCount === 1 ? 'failure' : 'failures'}`
@@ -111,13 +117,16 @@ export async function runFtr({ configPath, options }: CreateFtrParams) {
   }
 }
 
-export async function hasTests({ configPath, options }: CreateFtrParams) {
-  const { ftr, config } = await createFtr({ configPath, options });
+export async function hasTests(params: CreateFtrParams) {
+  const { ftr, config } = await createFtr(params);
 
   if (config.get('testRunner')) {
     // configs with custom test runners are assumed to always have tests
     return true;
   }
   const stats = await ftr.getTestStats();
-  return stats.testCount > 0;
+  if (!stats) {
+    throw new Error('unable to get test stats');
+  }
+  return stats.nonSkippedTestCount > 0;
 }

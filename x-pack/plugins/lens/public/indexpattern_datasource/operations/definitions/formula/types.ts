@@ -10,7 +10,7 @@ import {
   TinymathFunction,
   TinymathNamedArgument,
   TinymathVariable,
-} from 'packages/kbn-tinymath';
+} from '@kbn/tinymath';
 
 export type GroupedNodes = {
   [Key in TinymathNamedArgument['type']]: TinymathNamedArgument[];

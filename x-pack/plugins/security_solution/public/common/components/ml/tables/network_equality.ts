@@ -6,12 +6,11 @@
  */
 
 import { AnomaliesNetworkTableProps } from '../types';
+import { anomaliesTableDefaultEquality } from './default_equality';
 
 export const networkEquality = (
   prevProps: AnomaliesNetworkTableProps,
   nextProps: AnomaliesNetworkTableProps
 ): boolean =>
-  prevProps.startDate === nextProps.startDate &&
-  prevProps.endDate === nextProps.endDate &&
-  prevProps.skip === nextProps.skip &&
+  anomaliesTableDefaultEquality(prevProps, nextProps) &&
   prevProps.flowTarget === nextProps.flowTarget;

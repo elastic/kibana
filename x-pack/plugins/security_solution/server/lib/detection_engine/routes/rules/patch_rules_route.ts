@@ -17,7 +17,7 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
-import { throwHttpError } from '../../../machine_learning/validation';
+import { throwAuthzError } from '../../../machine_learning/validation';
 import { patchRules } from '../../rules/patch_rules';
 import { buildSiemResponse } from '../utils';
 
@@ -27,11 +27,7 @@ import { readRules } from '../../rules/read_rules';
 import { legacyMigrate } from '../../rules/utils';
 import { PartialFilter } from '../../types';
 
-export const patchRulesRoute = (
-  router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml'],
-  isRuleRegistryEnabled: boolean
-) => {
+export const patchRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
   router.patch(
     {
       path: DETECTION_ENGINE_RULES_URL,
@@ -106,30 +102,29 @@ export const patchRulesRoute = (
         const actions: RuleAlertAction[] = actionsRest as RuleAlertAction[];
         const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
 
-        const rulesClient = context.alerting.getRulesClient();
-        const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
-        const savedObjectsClient = context.core.savedObjects.client;
+        const rulesClient = (await context.alerting).getRulesClient();
+        const ruleExecutionLog = (await context.securitySolution).getRuleExecutionLog();
+        const savedObjectsClient = (await context.core).savedObjects.client;
 
         const mlAuthz = buildMlAuthz({
-          license: context.licensing.license,
+          license: (await context.licensing).license,
           ml,
           request,
           savedObjectsClient,
         });
         if (type) {
           // reject an unauthorized "promotion" to ML
-          throwHttpError(await mlAuthz.validateRuleType(type));
+          throwAuthzError(await mlAuthz.validateRuleType(type));
         }
 
         const existingRule = await readRules({
-          isRuleRegistryEnabled,
           rulesClient,
           ruleId,
           id,
         });
         if (existingRule?.params.type) {
           // reject an unauthorized modification of an ML rule
-          throwHttpError(await mlAuthz.validateRuleType(existingRule?.params.type));
+          throwAuthzError(await mlAuthz.validateRuleType(existingRule?.params.type));
         }
 
         const migratedRule = await legacyMigrate({
@@ -192,11 +187,7 @@ export const patchRulesRoute = (
         if (rule != null && rule.enabled != null && rule.name != null) {
           const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
 
-          const [validated, errors] = transformValidate(
-            rule,
-            ruleExecutionSummary,
-            isRuleRegistryEnabled
-          );
+          const [validated, errors] = transformValidate(rule, ruleExecutionSummary);
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {

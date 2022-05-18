@@ -4,14 +4,9 @@ exports[`excludes project if single \`exclude\` filter is specified 1`] = `
 Object {
   "graph": Object {
     "bar": Array [],
-    "baz": Array [
-      "bar",
-    ],
+    "baz": Array [],
     "kibana": Array [],
-    "quux": Array [
-      "bar",
-      "baz",
-    ],
+    "quux": Array [],
     "with-additional-projects": Array [],
   },
   "projects": Array [
@@ -42,12 +37,8 @@ Object {
 exports[`includes only projects specified in multiple \`include\` filters 1`] = `
 Object {
   "graph": Object {
-    "bar": Array [
-      "foo",
-    ],
-    "baz": Array [
-      "bar",
-    ],
+    "bar": Array [],
+    "baz": Array [],
     "foo": Array [],
   },
   "projects": Array [
@@ -72,20 +63,13 @@ Object {
 exports[`passes all found projects to the command if no filter is specified 1`] = `
 Object {
   "graph": Object {
-    "bar": Array [
-      "foo",
-    ],
-    "baz": Array [
-      "bar",
-    ],
+    "bar": Array [],
+    "baz": Array [],
     "foo": Array [],
     "kibana": Array [
       "foo",
     ],
-    "quux": Array [
-      "bar",
-      "baz",
-    ],
+    "quux": Array [],
     "with-additional-projects": Array [],
   },
   "projects": Array [

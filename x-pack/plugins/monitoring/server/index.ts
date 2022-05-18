@@ -6,7 +6,7 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext, PluginConfigDescriptor } from '../../../../src/core/server';
+import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
 import { MonitoringPlugin } from './plugin';
 import { configSchema } from './config';
 import { deprecations } from './deprecations';
@@ -20,7 +20,15 @@ export const config: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {
   schema: configSchema,
   deprecations,
   exposeToBrowser: {
-    ui: true,
+    ui: {
+      enabled: true,
+      min_interval_seconds: true,
+      show_license_expiration: true,
+      container: true,
+      ccs: {
+        enabled: true,
+      },
+    },
     kibana: true,
   },
 };

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   DeletePackagePoliciesRequest,
@@ -13,7 +12,8 @@ import {
   GetFullAgentPolicyResponse,
   GetPackagesResponse,
   GetAgentPoliciesResponse,
-} from '../../../../plugins/fleet/common';
+} from '@kbn/fleet-plugin/common';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 const INGEST_API_ROOT = '/api/fleet';
 const INGEST_API_AGENT_POLICIES = `${INGEST_API_ROOT}/agent_policies`;
@@ -50,6 +50,7 @@ export function SyntheticsPackageProvider({ getService }: FtrProviderContext) {
         apiRequest = retry.try(() => {
           return supertest
             .get(INGEST_API_EPM_PACKAGES)
+            .query({ experimental: true })
             .set('kbn-xsrf', 'xxx')
             .expect(200)
             .catch((error) => {

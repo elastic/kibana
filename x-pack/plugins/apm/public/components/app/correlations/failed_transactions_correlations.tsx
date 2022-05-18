@@ -26,9 +26,12 @@ import type { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 
 import { i18n } from '@kbn/i18n';
 
-import { useUiTracker } from '../../../../../observability/public';
+import { useUiTracker } from '@kbn/observability-plugin/public';
 
-import { asPercent } from '../../../../common/utils/formatters';
+import {
+  asPercent,
+  asPreciseDecimal,
+} from '../../../../common/utils/formatters';
 import { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
 import { FieldStats } from '../../../../common/correlations/field_stats_types';
 
@@ -36,8 +39,6 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
-
-import { ImpactBar } from '../../shared/impact_bar';
 import { push } from '../../shared/links/url_helpers';
 
 import { CorrelationsTable } from './correlations_table';
@@ -229,21 +230,33 @@ export function FailedTransactionsCorrelations({
         width: '116px',
         field: 'normalizedScore',
         name: (
-          <>
-            {i18n.translate(
-              'xpack.apm.correlations.failedTransactions.correlationsTable.scoreLabel',
+          <EuiToolTip
+            content={i18n.translate(
+              'xpack.apm.correlations.failedTransactions.correlationsTable.scoreTooltip',
               {
-                defaultMessage: 'Score',
+                defaultMessage:
+                  'The score [0-1] of an attribute; the greater the score, the more an attribute contributes to failed transactions.',
               }
             )}
-          </>
+          >
+            <>
+              {i18n.translate(
+                'xpack.apm.correlations.failedTransactions.correlationsTable.scoreLabel',
+                {
+                  defaultMessage: 'Score',
+                }
+              )}
+              <EuiIcon
+                size="s"
+                color="subdued"
+                type="questionInCircle"
+                className="eui-alignTop"
+              />
+            </>
+          </EuiToolTip>
         ),
         render: (_, { normalizedScore }) => {
-          return (
-            <>
-              <ImpactBar size="m" value={normalizedScore * 100} />
-            </>
-          );
+          return <div>{asPreciseDecimal(normalizedScore, 2)}</div>;
         },
         sortable: true,
       },
@@ -260,8 +273,11 @@ export function FailedTransactionsCorrelations({
             )}
           </>
         ),
-        render: (_, { pValue }) => {
-          const label = getFailedTransactionsCorrelationImpactLabel(pValue);
+        render: (_, { pValue, isFallbackResult }) => {
+          const label = getFailedTransactionsCorrelationImpactLabel(
+            pValue,
+            isFallbackResult
+          );
           return label ? (
             <EuiBadge color={label.color}>{label.impact}</EuiBadge>
           ) : null;
@@ -377,18 +393,30 @@ export function FailedTransactionsCorrelations({
     sort: { field: sortField, direction: sortDirection },
   };
 
-  const correlationTerms = useMemo(
-    () =>
-      orderBy(
-        response.failedTransactionsCorrelations,
-        // The smaller the p value the higher the impact
-        // So we want to sort by the normalized score here
-        // which goes from 0 -> 1
-        sortField === 'pValue' ? 'normalizedScore' : sortField,
-        sortDirection
-      ),
-    [response.failedTransactionsCorrelations, sortField, sortDirection]
-  );
+  const correlationTerms = useMemo(() => {
+    if (
+      progress.loaded === 1 &&
+      response?.failedTransactionsCorrelations?.length === 0 &&
+      response.fallbackResult !== undefined
+    ) {
+      return [{ ...response.fallbackResult, isFallbackResult: true }];
+    }
+
+    return orderBy(
+      response.failedTransactionsCorrelations,
+      // The smaller the p value the higher the impact
+      // So we want to sort by the normalized score here
+      // which goes from 0 -> 1
+      sortField === 'pValue' ? 'normalizedScore' : sortField,
+      sortDirection
+    );
+  }, [
+    response.failedTransactionsCorrelations,
+    response.fallbackResult,
+    progress.loaded,
+    sortField,
+    sortDirection,
+  ]);
 
   const [pinnedSignificantTerm, setPinnedSignificantTerm] =
     useState<FailedTransactionsCorrelation | null>(null);

@@ -15,7 +15,7 @@ import { map, mergeScan } from 'rxjs/operators';
 import { difference, partition, groupBy, mapValues, countBy, pick, isPlainObject } from 'lodash';
 import { some, none } from 'fp-ts/lib/Option';
 
-import { Logger } from '../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 
 import { asOk, asErr, Result } from '../lib/result_type';
 import { ConcreteTaskInstance, TaskStatus } from '../task';
@@ -57,6 +57,7 @@ import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 export interface TaskClaimingOpts {
   logger: Logger;
   definitions: TaskTypeDictionary;
+  unusedTypes: string[];
   taskStore: TaskStore;
   maxAttempts: number;
   excludedTaskTypes: string[];
@@ -121,6 +122,7 @@ export class TaskClaiming {
   private readonly taskClaimingBatchesByType: TaskClaimingBatches;
   private readonly taskMaxAttempts: Record<string, number>;
   private readonly excludedTaskTypes: string[];
+  private readonly unusedTypes: string[];
 
   /**
    * Constructs a new TaskStore.
@@ -137,6 +139,7 @@ export class TaskClaiming {
     this.taskClaimingBatchesByType = this.partitionIntoClaimingBatches(this.definitions);
     this.taskMaxAttempts = Object.fromEntries(this.normalizeMaxAttempts(this.definitions));
     this.excludedTaskTypes = opts.excludedTaskTypes;
+    this.unusedTypes = opts.unusedTypes;
 
     this.events$ = new Subject<TaskClaim>();
   }
@@ -225,7 +228,7 @@ export class TaskClaiming {
             return of(accumulatedResult);
           }
           return from(
-            this.executClaimAvailableTasks({
+            this.executeClaimAvailableTasks({
               claimOwnershipUntil,
               claimTasksById: claimTasksById.splice(0, capacity),
               size: capacity,
@@ -249,7 +252,7 @@ export class TaskClaiming {
     );
   }
 
-  private executClaimAvailableTasks = async ({
+  private executeClaimAvailableTasks = async ({
     claimOwnershipUntil,
     claimTasksById = [],
     size,
@@ -403,16 +406,17 @@ export class TaskClaiming {
         : queryForScheduledTasks,
       filterDownBy(InactiveTasks)
     );
-    const script = updateFieldsAndMarkAsFailed(
-      {
+    const script = updateFieldsAndMarkAsFailed({
+      fieldUpdates: {
         ownerId: this.taskStore.taskManagerId,
         retryAt: claimOwnershipUntil,
       },
-      claimTasksById || [],
-      taskTypesToClaim,
-      taskTypesToSkip,
-      pick(this.taskMaxAttempts, taskTypesToClaim)
-    );
+      claimTasksById: claimTasksById || [],
+      claimableTaskTypes: taskTypesToClaim,
+      skippedTaskTypes: taskTypesToSkip,
+      unusedTaskTypes: this.unusedTypes,
+      taskMaxAttempts: pick(this.taskMaxAttempts, taskTypesToClaim),
+    });
 
     const apmTrans = apm.startTransaction(
       TASK_MANAGER_MARK_AS_CLAIMED,

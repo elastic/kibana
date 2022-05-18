@@ -1,0 +1,225 @@
+{
+  "id": "@kbn/shared-ux-storybook",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-storybook",
+        "id": "def-common.applicationServiceFactory",
+        "type": "Function",
+        "tags": [],
+        "label": "applicationServiceFactory",
+        "description": [
+          "\nA factory function for creating for creating a storybook implementation of `SharedUXApplicationService`."
+        ],
+        "signature": [
+          "() => { navigateToUrl: () => Promise<void>; currentAppId$: ",
+          "BehaviorSubject",
+          "<string>; }"
+        ],
+        "path": "packages/kbn-shared-ux-storybook/src/services/application.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-storybook",
+        "id": "def-common.docLinksServiceFactory",
+        "type": "Function",
+        "tags": [],
+        "label": "docLinksServiceFactory",
+        "description": [
+          "\nA factory function for creating a Storybook implementation of `SharedUxDocLinksService`."
+        ],
+        "signature": [
+          "() => { dataViewsDocLink: string; }"
+        ],
+        "path": "packages/kbn-shared-ux-storybook/src/services/doc_links.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-storybook",
+        "id": "def-common.editorsServiceFactory",
+        "type": "Function",
+        "tags": [],
+        "label": "editorsServiceFactory",
+        "description": [
+          "\nA factory function for creating a Storybook implementation of `SharedUxEditorsService`."
+        ],
+        "signature": [
+          "() => { openDataViewEditor: (options: DataViewEditorOptions) => () => void; }"
+        ],
+        "path": "packages/kbn-shared-ux-storybook/src/services/editors.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-storybook",
+        "id": "def-common.httpServiceFactory",
+        "type": "Function",
+        "tags": [],
+        "label": "httpServiceFactory",
+        "description": [
+          "\nA factory function for creating a Storybook-based implementation of `SharedUXHttpService`."
+        ],
+        "signature": [
+          "() => { addBasePath: (url: string) => string; }"
+        ],
+        "path": "packages/kbn-shared-ux-storybook/src/services/http.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-storybook",
+        "id": "def-common.platformServiceFactory",
+        "type": "Function",
+        "tags": [],
+        "label": "platformServiceFactory",
+        "description": [
+          "\nA factory function for creating a Storybook implementation of `SharedUxPlatformService`."
+        ],
+        "signature": [
+          "() => { setIsFullscreen: ",
+          "HandlerFunction",
+          "; }"
+        ],
+        "path": "packages/kbn-shared-ux-storybook/src/services/platform.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-storybook",
+        "id": "def-common.servicesDecorator",
+        "type": "Function",
+        "tags": [],
+        "label": "servicesDecorator",
+        "description": [
+          "\nA Storybook decorator that provides the Shared UX `ServicesProvider` with Storybook-specific\nimplementations to stories."
+        ],
+        "signature": [
+          "(storyFn: ",
+          "PartialStoryFn",
+          "<",
+          "StoryFnReactReturnType",
+          ">) => JSX.Element"
+        ],
+        "path": "packages/kbn-shared-ux-storybook/src/decorators.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-storybook",
+            "id": "def-common.servicesDecorator.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "storyFn",
+            "description": [],
+            "signature": [
+              "PartialStoryFn",
+              "<",
+              "StoryFnReactReturnType",
+              ">"
+            ],
+            "path": "packages/kbn-shared-ux-storybook/src/decorators.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-storybook",
+        "id": "def-common.servicesFactory",
+        "type": "Function",
+        "tags": [],
+        "label": "servicesFactory",
+        "description": [
+          "\nA factory function for creating a Storybook implementation of `SharedUxServices`."
+        ],
+        "signature": [
+          "(params: {}) => { application: ",
+          "SharedUxApplicationService",
+          "; docLinks: ",
+          "SharedUxDocLinksService",
+          "; editors: ",
+          "SharedUxEditorsService",
+          "; http: ",
+          "SharedUxHttpService",
+          "; permissions: ",
+          "SharedUxUserPermissionsService",
+          "; platform: ",
+          "SharedUxPlatformService",
+          "; }"
+        ],
+        "path": "packages/kbn-shared-ux-storybook/src/services/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-storybook",
+            "id": "def-common.servicesFactory.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "{}"
+            ],
+            "path": "packages/kbn-shared-ux-storybook/src/services/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-storybook",
+        "id": "def-common.userPermissionsServiceFactory",
+        "type": "Function",
+        "tags": [],
+        "label": "userPermissionsServiceFactory",
+        "description": [
+          "\nA factory function for creating a Storybook implementation of `SharedUxUserPermissionsService`."
+        ],
+        "signature": [
+          "() => { canCreateNewDataView: true; canAccessFleet: true; }"
+        ],
+        "path": "packages/kbn-shared-ux-storybook/src/services/permissions.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

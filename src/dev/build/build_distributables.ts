@@ -6,13 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { Config, createRunner, Task, GlobalTask } from './lib';
 import * as Tasks from './tasks';
 
 export interface BuildOptions {
   isRelease: boolean;
+  dockerContextUseLocalArtifact: boolean | null;
+  dockerCrossCompile: boolean;
   dockerPush: boolean;
   dockerTagQualifier: string | null;
   downloadFreshNode: boolean;
@@ -30,7 +32,7 @@ export interface BuildOptions {
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
   createExamplePlugins: boolean;
-  useSnapshotEpr: boolean;
+  eprRegistry: 'production' | 'snapshot';
 }
 
 export async function buildDistributables(log: ToolingLog, options: BuildOptions): Promise<void> {
@@ -72,16 +74,17 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await run(Tasks.CreateEmptyDirsAndFiles);
     await run(Tasks.CreateReadme);
     await run(Tasks.BuildBazelPackages);
-    await run(Tasks.BuildPackages);
+    await run(Tasks.BuildXpack);
     await run(Tasks.BuildKibanaPlatformPlugins);
     await run(Tasks.TranspileBabel);
     await run(Tasks.CreatePackageJson);
     await run(Tasks.InstallDependencies);
     await run(Tasks.GeneratePackagesOptimizedAssets);
-    await run(Tasks.CleanPackages);
+    await run(Tasks.DeleteBazelPackagesFromBuildRoot);
     await run(Tasks.CreateNoticeFile);
     await run(Tasks.UpdateLicenseFile);
     await run(Tasks.RemovePackageJsonDeps);
+    await run(Tasks.CleanPackageManagerRelatedFiles);
     await run(Tasks.CleanTypescript);
     await run(Tasks.CleanExtraFilesFromModules);
     await run(Tasks.CleanEmptyFolders);

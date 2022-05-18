@@ -65,12 +65,14 @@ export const timelineDefaults: SubsetTimelineModel &
   savedObjectId: null,
   selectAll: false,
   selectedEventIds: {},
+  sessionViewConfig: null,
   show: false,
   showCheckboxes: false,
   sort: [
     {
       columnId: '@timestamp',
-      columnType: 'number',
+      columnType: 'date',
+      esTypes: ['date'],
       sortDirection: 'desc',
     },
   ],

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { reloadIndices } from '../actions';
+import { reloadIndices } from '.';
 import { notificationService } from '../../services/notification';
 import { httpService } from '../../services/http';
 

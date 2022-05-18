@@ -30,6 +30,7 @@ export type EnrichedFieldInfoWithValues = EnrichedFieldInfo & { values: string[]
 
 export interface EventSummaryField {
   id: string;
+  legacyId?: string;
   label?: string;
   linkField?: string;
   fieldType?: string;

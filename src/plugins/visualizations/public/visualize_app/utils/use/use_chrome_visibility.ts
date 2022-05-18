@@ -7,7 +7,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { ChromeStart } from 'kibana/public';
+import { ChromeStart } from '@kbn/core/public';
 
 export const useChromeVisibility = (chrome: ChromeStart) => {
   const [isVisible, setIsVisible] = useState<boolean>();

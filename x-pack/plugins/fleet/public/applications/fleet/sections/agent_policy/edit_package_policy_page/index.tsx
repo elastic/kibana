@@ -47,7 +47,7 @@ import {
   useBreadcrumbs as useIntegrationsBreadcrumbs,
   useGetOnePackagePolicy,
 } from '../../../../integrations/hooks';
-import { Loading, Error, ExtensionWrapper } from '../../../components';
+import { Loading, Error, ExtensionWrapper, EuiButtonWithTooltip } from '../../../components';
 import { ConfirmDeployAgentPolicyModal } from '../components';
 import { CreatePackagePolicyPageLayout } from '../create_package_policy_page/components';
 import type { PackagePolicyValidationResults } from '../create_package_policy_page/services';
@@ -63,8 +63,7 @@ import type {
   UpgradePackagePolicyDryRunResponse,
 } from '../../../../../../common/types/rest_spec';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
-import { pkgKeyFromPackageInfo, storedPackagePoliciesToAgentInputs } from '../../../services';
-import { EuiButtonWithTooltip } from '../../../../integrations/sections/epm/screens/detail';
+import { pkgKeyFromPackageInfo } from '../../../services';
 
 import { fixApmDurationVars, hasUpgradeAvailable } from './utils';
 
@@ -347,6 +346,8 @@ export const EditPackagePolicyForm = memo<{
         : false;
       if (!hasValidationErrors) {
         setFormState('VALID');
+      } else {
+        setFormState('INVALID');
       }
     },
     [packagePolicy, updatePackagePolicyValidation]
@@ -692,13 +693,17 @@ const Breadcrumb = memo<{
 }>(({ agentPolicyName, from, packagePolicyName, pkgkey, pkgTitle, policyId }) => {
   let breadcrumb = <PoliciesBreadcrumb policyName={agentPolicyName} policyId={policyId} />;
 
-  if (
-    from === 'package' ||
-    from === 'package-edit' ||
-    from === 'upgrade-from-integrations-policy-list'
-  ) {
+  if (from === 'package' || from === 'package-edit') {
     breadcrumb = (
       <IntegrationsBreadcrumb pkgkey={pkgkey} pkgTitle={pkgTitle} policyName={packagePolicyName} />
+    );
+  } else if (from === 'upgrade-from-integrations-policy-list') {
+    breadcrumb = (
+      <IntegrationsUpgradeBreadcrumb
+        pkgkey={pkgkey}
+        pkgTitle={pkgTitle}
+        policyName={packagePolicyName}
+      />
     );
   } else if (from === 'upgrade-from-fleet-policy-list') {
     breadcrumb = <UpgradeBreadcrumb policyName={agentPolicyName} policyId={policyId} />;
@@ -724,6 +729,15 @@ const PoliciesBreadcrumb: React.FunctionComponent<{
   return null;
 };
 
+const IntegrationsUpgradeBreadcrumb = memo<{
+  pkgTitle: string;
+  policyName: string;
+  pkgkey: string;
+}>(({ pkgTitle, policyName, pkgkey }) => {
+  useIntegrationsBreadcrumbs('integration_policy_upgrade', { policyName, pkgTitle, pkgkey });
+  return null;
+});
+
 const UpgradeBreadcrumb: React.FunctionComponent<{
   policyName: string;
   policyId: string;
@@ -731,6 +745,12 @@ const UpgradeBreadcrumb: React.FunctionComponent<{
   useBreadcrumbs('upgrade_package_policy', { policyName, policyId });
   return null;
 };
+
+const FlyoutBody = styled(EuiFlyoutBody)`
+  .euiFlyoutBody__overflowContent {
+    padding: 0;
+  }
+`;
 
 const UpgradeStatusCallout: React.FunctionComponent<{
   dryRunData: UpgradePackagePolicyDryRunResponse;
@@ -744,12 +764,6 @@ const UpgradeStatusCallout: React.FunctionComponent<{
   const isReadyForUpgrade = !dryRunData[0].hasErrors;
 
   const [currentPackagePolicy, proposedUpgradePackagePolicy] = dryRunData[0].diff || [];
-
-  const FlyoutBody = styled(EuiFlyoutBody)`
-    .euiFlyoutBody__overflowContent {
-      padding: 0;
-    }
-  `;
 
   return (
     <>
@@ -769,11 +783,7 @@ const UpgradeStatusCallout: React.FunctionComponent<{
             </EuiFlyoutHeader>
             <FlyoutBody>
               <EuiCodeBlock isCopyable fontSize="m" whiteSpace="pre">
-                {JSON.stringify(
-                  storedPackagePoliciesToAgentInputs([currentPackagePolicy]),
-                  null,
-                  2
-                )}
+                {JSON.stringify(dryRunData[0].agent_diff?.[0] || [], null, 2)}
               </EuiCodeBlock>
             </FlyoutBody>
           </EuiFlyout>

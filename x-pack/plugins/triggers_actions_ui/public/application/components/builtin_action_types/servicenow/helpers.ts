@@ -9,10 +9,7 @@ import { lazy, ComponentType } from 'react';
 import { EuiSelectOption } from '@elastic/eui';
 import { AppInfo, Choice, RESTApiError } from './types';
 import { ActionConnector, IErrorObject } from '../../../../types';
-import {
-  deprecatedMessage,
-  checkConnectorIsDeprecated,
-} from '../../../../common/connectors_selection';
+import { deprecatedMessage } from '../../../../common/connectors_selection';
 
 export const DEFAULT_CORRELATION_ID = '{{rule.id}}:{{alert.id}}';
 
@@ -25,12 +22,12 @@ export const isRESTApiError = (res: AppInfo | RESTApiError): res is RESTApiError
 export const isFieldInvalid = (
   field: string | undefined | null,
   error: string | IErrorObject | string[]
-): boolean => error !== undefined && error.length > 0 && field != null;
+): boolean => error !== undefined && error.length > 0 && field !== undefined;
 
 export const getConnectorDescriptiveTitle = (connector: ActionConnector) => {
   let title = connector.name;
 
-  if (checkConnectorIsDeprecated(connector)) {
+  if (connector.isDeprecated) {
     title += ` ${deprecatedMessage}`;
   }
 
@@ -40,7 +37,7 @@ export const getConnectorDescriptiveTitle = (connector: ActionConnector) => {
 export const getSelectedConnectorIcon = (
   actionConnector: ActionConnector
 ): React.LazyExoticComponent<ComponentType<{ actionConnector: ActionConnector }>> | undefined => {
-  if (checkConnectorIsDeprecated(actionConnector)) {
+  if (actionConnector.isDeprecated) {
     return lazy(() => import('./servicenow_selection_row'));
   }
 };

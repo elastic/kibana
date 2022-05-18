@@ -9,8 +9,8 @@
 import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { ScriptedFieldsTable } from '../scripted_fields_table';
-import { DataView } from '../../../../../../plugins/data_views/public';
+import { ScriptedFieldsTable } from '.';
+import { DataView } from '@kbn/data-views-plugin/public';
 
 jest.mock('@elastic/eui', () => ({
   EuiTitle: 'eui-title',
@@ -68,8 +68,10 @@ describe('ScriptedFieldsTable', () => {
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
+        userEditPermission={false}
+        scriptedFieldLanguageFilter={[]}
       />
-    ).dive();
+    );
 
     // Allow the componentWillMount code to execute
     // https://github.com/airbnb/enzyme/issues/450
@@ -86,8 +88,10 @@ describe('ScriptedFieldsTable', () => {
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
+        userEditPermission={false}
+        scriptedFieldLanguageFilter={[]}
       />
-    ).dive();
+    );
 
     // Allow the componentWillMount code to execute
     // https://github.com/airbnb/enzyme/issues/450
@@ -117,15 +121,17 @@ describe('ScriptedFieldsTable', () => {
         painlessDocLink={'painlessDoc'}
         helpers={helpers}
         saveIndexPattern={async () => {}}
+        userEditPermission={false}
+        scriptedFieldLanguageFilter={[]}
       />
-    ).dive();
+    );
 
     // Allow the componentWillMount code to execute
     // https://github.com/airbnb/enzyme/issues/450
     await component.update(); // Fire `componentWillMount()`
     await component.update(); // Force update the component post async actions
 
-    component.setProps({ scriptedFieldLanguageFilter: 'painless' });
+    component.setProps({ scriptedFieldLanguageFilter: ['painless'] });
     component.update();
 
     expect(component).toMatchSnapshot();
@@ -142,8 +148,10 @@ describe('ScriptedFieldsTable', () => {
         painlessDocLink={'painlessDoc'}
         helpers={helpers}
         saveIndexPattern={async () => {}}
+        userEditPermission={false}
+        scriptedFieldLanguageFilter={[]}
       />
-    ).dive();
+    );
 
     // Allow the componentWillMount code to execute
     // https://github.com/airbnb/enzyme/issues/450
@@ -162,8 +170,10 @@ describe('ScriptedFieldsTable', () => {
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
+        userEditPermission={false}
+        scriptedFieldLanguageFilter={[]}
       />
-    ).dive();
+    );
 
     await component.update(); // Fire `componentWillMount()`
     // @ts-expect-error lang is not valid
@@ -189,8 +199,10 @@ describe('ScriptedFieldsTable', () => {
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
+        userEditPermission={false}
+        scriptedFieldLanguageFilter={[]}
       />
-    ).dive();
+    );
 
     await component.update(); // Fire `componentWillMount()`
     // @ts-expect-error

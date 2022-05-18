@@ -10,16 +10,17 @@ import './data_panel_wrapper.scss';
 import React, { useMemo, memo, useContext, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { NativeRenderer } from '../../native_renderer';
 import { DragContext, DragDropIdentifier } from '../../drag_drop';
 import { StateSetter, DatasourceDataPanelProps, DatasourceMap } from '../../types';
-import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 import {
   switchDatasource,
   useLensDispatch,
   updateDatasourceState,
   useLensSelector,
   setState,
+  applyChanges,
   selectExecutionContext,
   selectActiveDatasourceId,
   selectDatasourceStates,
@@ -45,8 +46,8 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     : true;
 
   const dispatchLens = useLensDispatch();
-  const setDatasourceState: StateSetter<unknown> = useMemo(() => {
-    return (updater) => {
+  const setDatasourceState: StateSetter<unknown, { applyImmediately?: boolean }> = useMemo(() => {
+    return (updater: unknown | ((prevState: unknown) => unknown), options) => {
       dispatchLens(
         updateDatasourceState({
           updater,
@@ -54,6 +55,9 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
           clearStagedPreview: true,
         })
       );
+      if (options?.applyImmediately) {
+        dispatchLens(applyChanges());
+      }
     };
   }, [activeDatasourceId, dispatchLens]);
 

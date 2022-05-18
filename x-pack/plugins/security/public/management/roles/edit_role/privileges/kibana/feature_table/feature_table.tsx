@@ -24,9 +24,9 @@ import {
 import type { ReactElement } from 'react';
 import React, { Component } from 'react';
 
+import type { AppCategory } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { AppCategory } from 'src/core/public';
 
 import type { Role } from '../../../../../../../common/model';
 import type { KibanaPrivileges, SecuredFeature } from '../../../../model';

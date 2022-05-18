@@ -17,20 +17,26 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
 import { ControlGroupInput } from '../types';
 import { pluginServices } from '../../services';
 import { EditControlButton } from '../editor/edit_control';
 import { ControlGroupStrings } from '../control_group_strings';
 import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
-import { useReduxContainerContext } from '../../../../presentation_util/public';
 
 export interface ControlFrameProps {
   customPrepend?: JSX.Element;
   enableActions?: boolean;
   embeddableId: string;
+  embeddableType: string;
 }
 
-export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: ControlFrameProps) => {
+export const ControlFrame = ({
+  customPrepend,
+  enableActions,
+  embeddableId,
+  embeddableType,
+}: ControlFrameProps) => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
   const {
     useEmbeddableSelector,
@@ -42,7 +48,7 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
   const { overlays } = pluginServices.getHooks();
   const { openConfirm } = overlays.useService();
 
-  const embeddable = useChildEmbeddable({ untilEmbeddableLoaded, embeddableId });
+  const embeddable = useChildEmbeddable({ untilEmbeddableLoaded, embeddableId, embeddableType });
 
   const [title, setTitle] = useState<string>();
 
@@ -98,15 +104,19 @@ export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: Con
 
   const form = (
     <EuiFormControlLayout
-      className={'controlFrame__formControlLayout'}
+      className={classNames('controlFrame__formControlLayout', {
+        'controlFrameFormControlLayout--twoLine': controlStyle === 'twoLine',
+      })}
       fullWidth
       prepend={
         <>
           {(embeddable && customPrepend) ?? null}
           {usingTwoLineLayout ? undefined : (
-            <EuiFormLabel className="controlFrame__formControlLayoutLabel" htmlFor={embeddableId}>
-              {title}
-            </EuiFormLabel>
+            <EuiToolTip anchorClassName="controlFrame__labelToolTip" content={title}>
+              <EuiFormLabel className="controlFrame__formControlLayoutLabel" htmlFor={embeddableId}>
+                {title}
+              </EuiFormLabel>
+            </EuiToolTip>
           )}
         </>
       }

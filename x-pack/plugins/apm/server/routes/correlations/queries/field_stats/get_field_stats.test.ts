@@ -10,7 +10,7 @@ import { getNumericFieldStatsRequest } from './get_numeric_field_stats';
 import { getKeywordFieldStatsRequest } from './get_keyword_field_stats';
 import { getBooleanFieldStatsRequest } from './get_boolean_field_stats';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { fetchFieldsStats } from './get_fields_stats';
 
 const params = {
@@ -99,31 +99,23 @@ describe('field_stats', () => {
   describe('fetchFieldsStats', () => {
     it('returns field candidates and total hits', async () => {
       const fieldsCaps = {
-        body: {
-          fields: {
-            myIpFieldName: { ip: {} },
-            myKeywordFieldName: { keyword: {} },
-            myMultiFieldName: { keyword: {}, text: {} },
-            myHistogramFieldName: { histogram: {} },
-            myNumericFieldName: { number: {} },
-          },
+        fields: {
+          myIpFieldName: { ip: {} },
+          myKeywordFieldName: { keyword: {} },
+          myMultiFieldName: { keyword: {}, text: {} },
+          myHistogramFieldName: { histogram: {} },
+          myNumericFieldName: { number: {} },
         },
       };
       const esClientFieldCapsMock = jest.fn(() => fieldsCaps);
 
-      const fieldsToSample = Object.keys(fieldsCaps.body.fields);
+      const fieldsToSample = Object.keys(fieldsCaps.fields);
 
       const esClientSearchMock = jest.fn(
-        (
-          req: estypes.SearchRequest
-        ): {
-          body: estypes.SearchResponse;
-        } => {
+        (req: estypes.SearchRequest): estypes.SearchResponse => {
           return {
-            body: {
-              aggregations: { sample: {} },
-            } as unknown as estypes.SearchResponse,
-          };
+            aggregations: { sample: {} },
+          } as unknown as estypes.SearchResponse;
         }
       );
 

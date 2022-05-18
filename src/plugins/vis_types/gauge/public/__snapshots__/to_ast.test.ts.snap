@@ -1,0 +1,66 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`gauge vis toExpressionAst function with minimal params 1`] = `
+Object {
+  "chain": Array [
+    Object {
+      "arguments": Object {
+        "aggs": Array [],
+        "index": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "id": Array [
+                    "123",
+                  ],
+                },
+                "function": "indexPatternLoad",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "metricsAtAllLevels": Array [
+          false,
+        ],
+        "partialRows": Array [
+          false,
+        ],
+      },
+      "function": "esaggs",
+      "type": "function",
+    },
+    Object {
+      "arguments": Object {
+        "centralMajorMode": Array [
+          "custom",
+        ],
+        "colorMode": Array [
+          "palette",
+        ],
+        "labelMajorMode": Array [
+          "none",
+        ],
+        "labelMinor": Array [
+          "some custom sublabel",
+        ],
+        "metric": Array [],
+        "respectRanges": Array [
+          true,
+        ],
+        "shape": Array [
+          "circle",
+        ],
+        "ticksPosition": Array [
+          "hidden",
+        ],
+      },
+      "function": "gauge",
+      "type": "function",
+    },
+  ],
+  "type": "expression",
+}
+`;

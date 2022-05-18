@@ -644,7 +644,6 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
     <div
       data-test-subj="lnsDragDropContainer"
       className={classNames('lnsDragDrop__container', {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'lnsDragDrop__container-active': isInZone || activeDropTarget?.id === value.id,
       })}
       onDragEnter={dragEnter}
@@ -667,7 +666,6 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
             direction="column"
             data-test-subj="lnsDragDropExtraDrops"
             className={classNames('lnsDragDrop__extraDrops', {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               'lnsDragDrop__extraDrops-visible': isInZone || activeDropTarget?.id === value.id,
             })}
           >

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { PluginSetupContract } from '../../../../../alerting/server';
+import { PluginSetupContract } from '@kbn/alerting-plugin/server';
 import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
 import {
   LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
@@ -71,6 +71,21 @@ const denominatorConditionsActionVariableDescription = i18n.translate(
   }
 );
 
+const alertReasonMessageActionVariableDescription = i18n.translate(
+  'xpack.infra.logs.alerting.threshold.alertReasonMessageActionVariableDescription',
+  {
+    defaultMessage: 'A concise description of the reason for the alert',
+  }
+);
+
+const viewInAppUrlActionVariableDescription = i18n.translate(
+  'xpack.infra.logs.alerting.threshold.viewInAppUrlActionVariableDescription',
+  {
+    defaultMessage:
+      'Link to the view or feature within Elastic that can be used to investigate the alert and its context further',
+  }
+);
+
 export async function registerLogThresholdRuleType(
   alertingPlugin: PluginSetupContract,
   libs: InfraBackendLibs
@@ -96,6 +111,7 @@ export async function registerLogThresholdRuleType(
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor: createLogThresholdExecutor(libs),
+    doesSetRecoveryContext: true,
     actionVariables: {
       context: [
         { name: 'timestamp', description: timestampActionVariableDescription },
@@ -104,11 +120,16 @@ export async function registerLogThresholdRuleType(
         { name: 'group', description: groupByActionVariableDescription },
         // Ratio alerts
         { name: 'isRatio', description: isRatioActionVariableDescription },
+        { name: 'reason', description: alertReasonMessageActionVariableDescription },
         { name: 'ratio', description: ratioActionVariableDescription },
         { name: 'numeratorConditions', description: numeratorConditionsActionVariableDescription },
         {
           name: 'denominatorConditions',
           description: denominatorConditionsActionVariableDescription,
+        },
+        {
+          name: 'viewInAppUrl',
+          description: viewInAppUrlActionVariableDescription,
         },
       ],
     },

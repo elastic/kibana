@@ -7,11 +7,11 @@
  */
 
 import React, { Suspense } from 'react';
-import { getTableViewDescription } from '../index';
+import { getTableViewDescription } from '..';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { TablesAdapter } from '../../../../../expressions/common';
+import { TablesAdapter } from '@kbn/expressions-plugin/common';
 
-jest.mock('../../../../../share/public', () => ({
+jest.mock('@kbn/share-plugin/public', () => ({
   downloadMultipleAs: jest.fn(),
 }));
 jest.mock('../../../../common', () => ({
@@ -63,7 +63,7 @@ describe('Inspector Data View', () => {
       adapters.tables.logDatatable({ columns: [{ id: '1' }], rows: [{ '1': 123 }] });
       // After the loader has resolved we'll still need one update, to "flush" the state changes
       component.update();
-      expect(component).toMatchSnapshot();
+      expect(component.render()).toMatchSnapshot();
     });
 
     it('should render single table without selector', async () => {
@@ -80,7 +80,7 @@ describe('Inspector Data View', () => {
       component.update();
       expect(component.find('[data-test-subj="inspectorDataViewSelectorLabel"]')).toHaveLength(0);
 
-      expect(component).toMatchSnapshot();
+      expect(component.render()).toMatchSnapshot();
     });
 
     it('should support multiple datatables', async () => {
@@ -104,7 +104,7 @@ describe('Inspector Data View', () => {
       component.update();
       expect(component.find('[data-test-subj="inspectorDataViewSelectorLabel"]')).toHaveLength(1);
 
-      expect(component).toMatchSnapshot();
+      expect(component.render()).toMatchSnapshot();
     });
   });
 });

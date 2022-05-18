@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { AlertTypeParams, SanitizedAlert } from '../../../../../alerting/common';
+import { RuleTypeParams, SanitizedRule } from '@kbn/alerting-plugin/common';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyReadNotificationParams, legacyIsAlertType } from './legacy_types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyFindNotifications } from './legacy_find_notifications';
-import { INTERNAL_RULE_ALERT_ID_KEY } from '../../../../common/constants';
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -19,7 +18,7 @@ export const legacyReadNotifications = async ({
   rulesClient,
   id,
   ruleAlertId,
-}: LegacyReadNotificationParams): Promise<SanitizedAlert<AlertTypeParams> | null> => {
+}: LegacyReadNotificationParams): Promise<SanitizedRule<RuleTypeParams> | null> => {
   if (id != null) {
     try {
       const notification = await rulesClient.get({ id });
@@ -39,7 +38,7 @@ export const legacyReadNotifications = async ({
   } else if (ruleAlertId != null) {
     const notificationFromFind = await legacyFindNotifications({
       rulesClient,
-      filter: `alert.attributes.tags: "${INTERNAL_RULE_ALERT_ID_KEY}:${ruleAlertId}"`,
+      filter: `alert.attributes.params.ruleAlertId: "${ruleAlertId}"`,
       page: 1,
     });
     if (

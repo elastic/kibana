@@ -17,6 +17,7 @@ export interface VisualizeFieldContext {
   fieldName: string;
   indexPatternId: string;
   contextualFields?: string[];
+  originatingApp?: string;
 }
 
 export const ACTION_VISUALIZE_FIELD = 'ACTION_VISUALIZE_FIELD';

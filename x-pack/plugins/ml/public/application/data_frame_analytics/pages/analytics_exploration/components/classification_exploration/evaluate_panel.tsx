@@ -14,7 +14,6 @@ import {
   EuiButtonEmpty,
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
-  EuiDataGridPopoverContents,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -114,7 +113,6 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
   const [columns, setColumns] = useState<ConfusionMatrixColumn[]>([]);
   const [columnsData, setColumnsData] = useState<ConfusionMatrixColumnData[]>([]);
   const [showFullColumns, setShowFullColumns] = useState<boolean>(false);
-  const [popoverContents, setPopoverContents] = useState<EuiDataGridPopoverContents>({});
   const [dataSubsetTitle, setDataSubsetTitle] = useState<SUBSET_TITLE>(SUBSET_TITLE.ENTIRE);
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState<string[]>(() =>
@@ -151,26 +149,6 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
       setVisibleColumns(() => derivedColumns.map(({ id }: { id: string }) => id));
       setColumns(derivedColumns);
       setColumnsData(columnData);
-      setPopoverContents({
-        numeric: ({
-          cellContentsElement,
-          children,
-        }: {
-          cellContentsElement: any;
-          children: any;
-        }) => {
-          const rowIndex = children?.props?.rowIndex;
-          const colId = children?.props?.columnId;
-          const gridItem = columnData[rowIndex];
-
-          if (gridItem !== undefined && colId !== ACTUAL_CLASS_ID) {
-            const count = gridItem.predicted_classes_count[colId];
-            return `${count} / ${gridItem.actual_class_doc_count} * 100 = ${cellContentsElement.textContent}`;
-          }
-
-          return cellContentsElement.textContent;
-        },
-      });
     }
   }, [confusionMatrixData]);
 
@@ -189,11 +167,9 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
     rowIndex,
     columnId,
     setCellProps,
-  }: {
-    rowIndex: number;
-    columnId: string;
-    setCellProps: EuiDataGridCellValueElementProps['setCellProps'];
-  }) => {
+    schema,
+    isDetails,
+  }: EuiDataGridCellValueElementProps) => {
     const cellValue =
       columnId === ACTUAL_CLASS_ID
         ? columnsData[rowIndex][columnId]
@@ -207,6 +183,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
       accuracyNumber = Math.round(accuracyNumber * 100) / 100;
       accuracy = `${Math.round(accuracyNumber * 100)}%`;
     }
+
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
       if (columnId !== ACTUAL_CLASS_ID) {
@@ -217,7 +194,19 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
         });
       }
     }, [rowIndex, columnId, setCellProps]);
-    return <span>{columnId === ACTUAL_CLASS_ID ? cellValue : accuracy}</span>;
+
+    let cellContent = columnId === ACTUAL_CLASS_ID ? cellValue : accuracy;
+
+    // Custom popover content for numeric schemas
+    if (isDetails && schema === 'numeric') {
+      const gridItem = columnsData[rowIndex];
+      if (gridItem !== undefined && columnId !== ACTUAL_CLASS_ID) {
+        const count = gridItem.predicted_classes_count[columnId];
+        cellContent = `${count} / ${gridItem.actual_class_doc_count} * 100 = ${cellContent}`;
+      }
+    }
+
+    return <span>{cellContent}</span>;
   };
 
   const docLink = docLinks.links.ml.classificationEvaluation;
@@ -351,7 +340,6 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
                                 showFullScreenSelector: false,
                                 showSortSelector: false,
                               }}
-                              popoverContents={popoverContents}
                               gridStyle={{
                                 border: 'all',
                                 fontSize: 's',

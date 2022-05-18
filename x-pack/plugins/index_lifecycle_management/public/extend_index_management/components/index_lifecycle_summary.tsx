@@ -10,7 +10,6 @@ import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiButtonEmpty,
   EuiCallOut,
   EuiCodeBlock,
   EuiFlexGroup,
@@ -25,7 +24,7 @@ import {
   EuiPopoverTitle,
 } from '@elastic/eui';
 
-import { ApplicationStart } from 'kibana/public';
+import { ApplicationStart } from '@kbn/core/public';
 import { getPolicyEditPath } from '../../application/services/navigation';
 import { Index, IndexLifecyclePolicy } from '../../../common/types';
 
@@ -108,31 +107,6 @@ export class IndexLifecycleSummary extends Component<Props, State> {
   closePhaseExecutionPopover = () => {
     this.setState({ showPhaseExecutionPopover: false });
   };
-  renderStackPopoverButton(ilm: IndexLifecyclePolicy) {
-    if (!ilm.step_info!.stack_trace) {
-      return null;
-    }
-    const button = (
-      <EuiButtonEmpty onClick={this.toggleStackPopover}>
-        <FormattedMessage
-          defaultMessage="Stack trace"
-          id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.stackTraceButton"
-        />
-      </EuiButtonEmpty>
-    );
-    return (
-      <EuiPopover
-        id="stackPopover"
-        button={button}
-        isOpen={this.state.showStackPopover}
-        closePopover={this.closeStackPopover}
-      >
-        <div style={{ maxHeight: '400px', width: '900px', overflowY: 'scroll' }}>
-          <pre>{ilm.step_info!.stack_trace}</pre>
-        </div>
-      </EuiPopover>
-    );
-  }
   renderPhaseExecutionPopoverButton(ilm: IndexLifecyclePolicy) {
     const button = (
       <EuiLink onClick={this.togglePhaseExecutionPopover}>
@@ -257,12 +231,10 @@ export class IndexLifecycleSummary extends Component<Props, State> {
               iconType="cross"
             >
               {ilm.step_info.type}: {ilm.step_info.reason}
-              <EuiSpacer size="s" />
-              {this.renderStackPopoverButton(ilm)}
             </EuiCallOut>
           </>
         ) : null}
-        {ilm.step_info && ilm.step_info!.message && !ilm.step_info!.stack_trace ? (
+        {ilm.step_info && ilm.step_info!.message ? (
           <>
             <EuiSpacer size="s" />
             <EuiCallOut

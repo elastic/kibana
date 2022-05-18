@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import boom from '@hapi/boom';
 import { get } from 'lodash';
+import { PipelineNotFoundError } from '../errors';
 import { getPipelineStateDocument } from './get_pipeline_state_document';
 import { getPipelineStatsAggregation } from './get_pipeline_stats_aggregation';
 import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
@@ -15,6 +15,7 @@ import {
   ElasticsearchSource,
   ElasticsearchSourceLogstashPipelineVertex,
 } from '../../../common/types/es';
+import { MonitoringConfig } from '../../config';
 
 export function _vertexStats(
   vertex: ElasticsearchSourceLogstashPipelineVertex,
@@ -120,13 +121,13 @@ export function _enrichStateWithStatsAggregation(
 
 export async function getPipeline(
   req: LegacyRequest,
-  config: { get: (key: string) => string | undefined },
+  config: MonitoringConfig,
   clusterUuid: string,
   pipelineId: string,
   version: PipelineVersion
 ) {
   // Determine metrics' timeseries interval based on version's timespan
-  const minIntervalSeconds = Math.max(Number(config.get('monitoring.ui.min_interval_seconds')), 30);
+  const minIntervalSeconds = Math.max(config.ui.min_interval_seconds, 30);
   const timeseriesInterval = calculateTimeseriesInterval(
     Number(version.firstSeen),
     Number(version.lastSeen),
@@ -150,9 +151,7 @@ export async function getPipeline(
   ]);
 
   if (stateDocument === null || !statsAggregation) {
-    return boom.notFound(
-      `Pipeline [${pipelineId} @ ${version.hash}] not found in the selected time range for cluster [${clusterUuid}].`
-    );
+    throw new PipelineNotFoundError(pipelineId, version.hash, clusterUuid);
   }
 
   return _enrichStateWithStatsAggregation(stateDocument, statsAggregation, timeseriesInterval);

@@ -18,9 +18,9 @@ import {
 import type { FunctionComponent } from 'react';
 import React from 'react';
 
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { IHttpFetchError, ResponseErrorBody } from 'kibana/public';
 
 import { VERIFICATION_CODE_LENGTH } from '../common';
 import { getCommandLineSnippet } from './get_command_line_snippet';

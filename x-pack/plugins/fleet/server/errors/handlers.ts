@@ -12,13 +12,14 @@ import type {
   IKibanaResponse,
   KibanaResponseFactory,
   RequestHandlerContext,
-} from 'src/core/server';
-import type { KibanaRequest } from 'src/core/server';
+} from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 
 import { appContextService } from '../services';
 
 import {
   AgentNotFoundError,
+  AgentActionNotFoundError,
   AgentPolicyNameExistsError,
   ConcurrentInstallOperationError,
   IngestManagerError,
@@ -27,7 +28,7 @@ import {
   RegistryConnectionError,
   RegistryError,
   RegistryResponseError,
-} from './index';
+} from '.';
 
 type IngestErrorHandler = (
   params: IngestErrorHandlerParams
@@ -63,6 +64,9 @@ const getHTTPResponseCode = (error: IngestManagerError): number => {
     return 409; // Conflict
   }
   if (error instanceof AgentNotFoundError) {
+    return 404;
+  }
+  if (error instanceof AgentActionNotFoundError) {
     return 404;
   }
   return 400; // Bad Request

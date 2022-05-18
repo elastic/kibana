@@ -7,14 +7,19 @@
 
 import { FeatureCollection, Feature, Geometry } from 'geojson';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { htmlIdGenerator } from '@elastic/eui';
+import { FIELD_ORIGIN, STYLE_TYPE } from '@kbn/maps-plugin/common';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
-import { ESSearchResponse } from '../../../../../src/core/types/elasticsearch';
+import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import { VectorSourceRequestMeta } from '@kbn/maps-plugin/common';
+import { LAYER_TYPE } from '@kbn/maps-plugin/common';
+import { SEVERITY_COLOR_RAMP } from '../../common';
 import { formatHumanReadableDateTimeSeconds } from '../../common/util/date_utils';
 import type { MlApiServices } from '../application/services/ml_api_service';
 import { MLAnomalyDoc } from '../../common/types/anomalies';
-import { VectorSourceRequestMeta } from '../../../maps/common';
 import { SEARCH_QUERY_LANGUAGE } from '../../common/constants/search';
 import { getIndexPattern } from '../application/explorer/reducers/explorer_reducer/get_index_pattern';
+import { AnomalySource } from './anomaly_source';
 
 export const ML_ANOMALY_LAYERS = {
   TYPICAL: 'typical',
@@ -22,16 +27,86 @@ export const ML_ANOMALY_LAYERS = {
   TYPICAL_TO_ACTUAL: 'typical to actual',
 } as const;
 
+export const CUSTOM_COLOR_RAMP = {
+  type: STYLE_TYPE.DYNAMIC,
+  options: {
+    customColorRamp: SEVERITY_COLOR_RAMP,
+    field: {
+      name: 'record_score',
+      origin: FIELD_ORIGIN.SOURCE,
+    },
+    useCustomColorRamp: true,
+  },
+};
+
+export const ACTUAL_STYLE = {
+  type: 'VECTOR',
+  properties: {
+    fillColor: CUSTOM_COLOR_RAMP,
+    lineColor: CUSTOM_COLOR_RAMP,
+  },
+  isTimeAware: false,
+};
+
+export const TYPICAL_STYLE = {
+  type: 'VECTOR',
+  properties: {
+    fillColor: {
+      type: 'STATIC',
+      options: {
+        color: '#98A2B2',
+      },
+    },
+    lineColor: {
+      type: 'STATIC',
+      options: {
+        color: '#fff',
+      },
+    },
+    lineWidth: {
+      type: 'STATIC',
+      options: {
+        size: 2,
+      },
+    },
+    iconSize: {
+      type: 'STATIC',
+      options: {
+        size: 6,
+      },
+    },
+  },
+};
+
 export type MlAnomalyLayersType = typeof ML_ANOMALY_LAYERS[keyof typeof ML_ANOMALY_LAYERS];
 
 // Must reverse coordinates here. Map expects [lon, lat] - anomalies are stored as [lat, lon] for lat_lon jobs
-function getCoordinates(actualCoordinateStr: string, round: boolean = false): number[] {
-  const convertWithRounding = (point: string) => Math.round(Number(point) * 100) / 100;
-  const convert = (point: string) => Number(point);
-  return actualCoordinateStr
+function getCoordinates(latLonString: string): number[] {
+  return latLonString
     .split(',')
-    .map(round ? convertWithRounding : convert)
+    .map((coordinate: string) => Number(coordinate))
     .reverse();
+}
+
+export function getInitialAnomaliesLayers(jobId: string) {
+  const initialLayers = [];
+  for (const layer in ML_ANOMALY_LAYERS) {
+    if (ML_ANOMALY_LAYERS.hasOwnProperty(layer)) {
+      initialLayers.push({
+        id: htmlIdGenerator()(),
+        type: LAYER_TYPE.GEOJSON_VECTOR,
+        sourceDescriptor: AnomalySource.createDescriptor({
+          jobId,
+          typicalActual: ML_ANOMALY_LAYERS[layer as keyof typeof ML_ANOMALY_LAYERS],
+        }),
+        style:
+          ML_ANOMALY_LAYERS[layer as keyof typeof ML_ANOMALY_LAYERS] === ML_ANOMALY_LAYERS.TYPICAL
+            ? TYPICAL_STYLE
+            : ACTUAL_STYLE,
+      });
+    }
+  }
+  return initialLayers;
 }
 
 export async function getResultsForJobId(
@@ -108,21 +183,10 @@ export async function getResultsForJobId(
   const features: Feature[] =
     resp?.hits.hits.map(({ _source }) => {
       const geoResults = _source.geo_results;
-      const actualCoordStr = geoResults && geoResults.actual_point;
-      const typicalCoordStr = geoResults && geoResults.typical_point;
-      let typical: number[] = [];
-      let typicalDisplay: number[] = [];
-      let actual: number[] = [];
-      let actualDisplay: number[] = [];
-
-      if (actualCoordStr !== undefined) {
-        actual = getCoordinates(actualCoordStr);
-        actualDisplay = getCoordinates(actualCoordStr, true);
-      }
-      if (typicalCoordStr !== undefined) {
-        typical = getCoordinates(typicalCoordStr);
-        typicalDisplay = getCoordinates(typicalCoordStr, true);
-      }
+      const actual =
+        geoResults && geoResults.actual_point ? getCoordinates(geoResults.actual_point) : [0, 0];
+      const typical =
+        geoResults && geoResults.typical_point ? getCoordinates(geoResults.typical_point) : [0, 0];
 
       let geometry: Geometry;
       if (locationType === ML_ANOMALY_LAYERS.TYPICAL || locationType === ML_ANOMALY_LAYERS.ACTUAL) {
@@ -136,24 +200,40 @@ export async function getResultsForJobId(
           coordinates: [typical, actual],
         };
       }
+
+      const splitFields = {
+        ...(_source.partition_field_name
+          ? { [_source.partition_field_name]: _source.partition_field_value }
+          : {}),
+        ...(_source.by_field_name ? { [_source.by_field_name]: _source.by_field_value } : {}),
+        ...(_source.over_field_name ? { [_source.over_field_name]: _source.over_field_value } : {}),
+      };
+
+      const splitFieldKeys = Object.keys(splitFields);
+      const influencers = _source.influencers
+        ? _source.influencers.filter(
+            ({ influencer_field_name: name, influencer_field_values: values }) => {
+              // remove influencers without values and influencers on partition fields
+              return values.length && !splitFieldKeys.includes(name);
+            }
+          )
+        : [];
+
       return {
         type: 'Feature',
         geometry,
         properties: {
           actual,
-          actualDisplay,
           typical,
-          typicalDisplay,
           fieldName: _source.field_name,
           functionDescription: _source.function_description,
           timestamp: formatHumanReadableDateTimeSeconds(_source.timestamp),
           record_score: Math.floor(_source.record_score),
-          ...(_source.partition_field_name
-            ? { [_source.partition_field_name]: _source.partition_field_value }
-            : {}),
-          ...(_source.by_field_name ? { [_source.by_field_name]: _source.by_field_value } : {}),
-          ...(_source.over_field_name
-            ? { [_source.over_field_name]: _source.over_field_value }
+          ...(Object.keys(splitFields).length > 0 ? splitFields : {}),
+          ...(influencers.length
+            ? {
+                influencers,
+              }
             : {}),
         },
       };

@@ -27,6 +27,13 @@ import { withApmSpan } from '../../utils/with_apm_span';
 
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
+import { LatencyCorrelation } from '../../../common/correlations/latency_correlations/types';
+import {
+  FieldStats,
+  TopValuesStats,
+} from '../../../common/correlations/field_stats_types';
+import { FieldValuePair } from '../../../common/correlations/types';
+import { FailedTransactionsCorrelation } from '../../../common/correlations/failed_transactions_correlations/types';
 
 const INVALID_LICENSE = i18n.translate('xpack.apm.correlations.license.text', {
   defaultMessage:
@@ -50,16 +57,18 @@ const fieldCandidatesRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<{ fieldCandidates: string[] }> => {
     const { context } = resources;
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+    const { license } = await context.licensing;
+    if (!isActivePlatinumLicense(license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
 
     const { indices } = await setupRequest(resources);
-    const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
+    const esClient = (await resources.context.core).elasticsearch.client
+      .asCurrentUser;
 
     return withApmSpan(
       'get_correlations_field_candidates',
-      async () =>
+      async (): Promise<{ fieldCandidates: string[] }> =>
         await fetchTransactionDurationFieldCandidates(esClient, {
           ...resources.params.query,
           index: indices.transaction,
@@ -95,18 +104,20 @@ const fieldStatsRoute = createApmServerRoute({
     errors: any[];
   }> => {
     const { context } = resources;
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+    const { license } = await context.licensing;
+    if (!isActivePlatinumLicense(license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
 
     const { indices } = await setupRequest(resources);
-    const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
+    const esClient = (await resources.context.core).elasticsearch.client
+      .asCurrentUser;
 
     const { fieldsToSample, ...params } = resources.params.body;
 
     return withApmSpan(
       'get_correlations_field_stats',
-      async () =>
+      async (): Promise<{ stats: FieldStats[]; errors: any[] }> =>
         await fetchFieldsStats(
           esClient,
           {
@@ -144,18 +155,20 @@ const fieldValueStatsRoute = createApmServerRoute({
     import('./../../../common/correlations/field_stats_types').TopValuesStats
   > => {
     const { context } = resources;
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+    const { license } = await context.licensing;
+    if (!isActivePlatinumLicense(license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
 
     const { indices } = await setupRequest(resources);
-    const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
+    const esClient = (await resources.context.core).elasticsearch.client
+      .asCurrentUser;
 
     const { fieldName, fieldValue, ...params } = resources.params.query;
 
     return withApmSpan(
       'get_correlations_field_value_stats',
-      async () =>
+      async (): Promise<TopValuesStats> =>
         await fetchFieldValueFieldStats(
           esClient,
           {
@@ -195,18 +208,20 @@ const fieldValuePairsRoute = createApmServerRoute({
     errors: any[];
   }> => {
     const { context } = resources;
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+    const { license } = await context.licensing;
+    if (!isActivePlatinumLicense(license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
 
     const { indices } = await setupRequest(resources);
-    const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
+    const esClient = (await resources.context.core).elasticsearch.client
+      .asCurrentUser;
 
     const { fieldCandidates, ...params } = resources.params.body;
 
     return withApmSpan(
       'get_correlations_field_value_pairs',
-      async () =>
+      async (): Promise<{ errors: any[]; fieldValuePairs: FieldValuePair[] }> =>
         await fetchTransactionDurationFieldValuePairs(
           esClient,
           {
@@ -250,14 +265,17 @@ const significantCorrelationsRoute = createApmServerRoute({
     >;
     ccsWarning: boolean;
     totalDocCount: number;
+    fallbackResult?: import('./../../../common/correlations/latency_correlations/types').LatencyCorrelation;
   }> => {
     const { context } = resources;
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+    const { license } = await context.licensing;
+    if (!isActivePlatinumLicense(license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
 
     const { indices } = await setupRequest(resources);
-    const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
+    const esClient = (await resources.context.core).elasticsearch.client
+      .asCurrentUser;
 
     const { fieldValuePairs, ...params } = resources.params.body;
 
@@ -268,7 +286,11 @@ const significantCorrelationsRoute = createApmServerRoute({
 
     return withApmSpan(
       'get_significant_correlations',
-      async () =>
+      async (): Promise<{
+        latencyCorrelations: LatencyCorrelation[];
+        ccsWarning: boolean;
+        totalDocCount: number;
+      }> =>
         await fetchSignificantCorrelations(
           esClient,
           paramsWithIndex,
@@ -303,14 +325,17 @@ const pValuesRoute = createApmServerRoute({
       import('./../../../common/correlations/failed_transactions_correlations/types').FailedTransactionsCorrelation
     >;
     ccsWarning: boolean;
+    fallbackResult?: import('./../../../common/correlations/failed_transactions_correlations/types').FailedTransactionsCorrelation;
   }> => {
     const { context } = resources;
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+    const { license } = await context.licensing;
+    if (!isActivePlatinumLicense(license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
 
     const { indices } = await setupRequest(resources);
-    const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
+    const esClient = (await resources.context.core).elasticsearch.client
+      .asCurrentUser;
 
     const { fieldCandidates, ...params } = resources.params.body;
 
@@ -321,7 +346,10 @@ const pValuesRoute = createApmServerRoute({
 
     return withApmSpan(
       'get_p_values',
-      async () => await fetchPValues(esClient, paramsWithIndex, fieldCandidates)
+      async (): Promise<{
+        failedTransactionsCorrelations: FailedTransactionsCorrelation[];
+        ccsWarning: boolean;
+      }> => await fetchPValues(esClient, paramsWithIndex, fieldCandidates)
     );
   },
 });

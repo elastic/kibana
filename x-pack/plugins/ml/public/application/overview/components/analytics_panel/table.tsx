@@ -97,7 +97,7 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
     initialPageSize: pageSize,
     totalItemCount: items.length,
     pageSizeOptions: [10, 20, 50],
-    hidePerPageOptions: false,
+    showPerPageOptions: true,
   };
 
   const sorting = {

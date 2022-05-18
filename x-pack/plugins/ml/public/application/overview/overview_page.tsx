@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useState } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { checkPermission } from '../capabilities/check_capabilities';
@@ -19,8 +19,6 @@ import { UpgradeWarning } from '../components/upgrade';
 import { HelpMenu } from '../components/help_menu';
 import { useMlKibana, useTimefilter } from '../contexts/kibana';
 import { NodesList } from '../trained_models/nodes_overview';
-import { useUrlState } from '../util/url_state';
-import { useRefresh } from '../routing/use_refresh';
 import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 import { MlPageHeader } from '../components/page_header';
 
@@ -28,44 +26,12 @@ export const OverviewPage: FC = () => {
   const canViewMlNodes = checkPermission('canViewMlNodes');
 
   const disableCreateAnomalyDetectionJob = !checkPermission('canCreateJob') || !mlNodesAvailable();
-  const disableCreateAnalyticsButton =
-    !mlNodesAvailable() ||
-    !checkPermission('canCreateDataFrameAnalytics') ||
-    !checkPermission('canStartStopDataFrameAnalytics');
   const {
     services: { docLinks },
   } = useMlKibana();
   const helpLink = docLinks.links.ml.guide;
 
-  const [globalState, setGlobalState] = useUrlState('_g');
-  const [lastRefresh, setLastRefresh] = useState(0);
-
   const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
-  const refresh = useRefresh();
-
-  useEffect(() => {
-    if (refresh !== undefined && lastRefresh !== refresh.lastRefresh) {
-      setLastRefresh(refresh?.lastRefresh);
-
-      if (refresh.timeRange !== undefined) {
-        const { start, end } = refresh.timeRange;
-        setGlobalState('time', {
-          from: start,
-          to: end,
-          ...(start === 'now' || end === 'now' ? { ts: Date.now() } : {}),
-        });
-      }
-    }
-  }, [refresh?.lastRefresh, lastRefresh, setLastRefresh, setGlobalState]);
-
-  useEffect(() => {
-    if (globalState?.time !== undefined) {
-      timefilter.setTime({
-        from: globalState.time.from,
-        to: globalState.time.to,
-      });
-    }
-  }, [globalState?.time?.from, globalState?.time?.to, globalState?.time?.ts]);
 
   const [adLazyJobCount, setAdLazyJobCount] = useState(0);
   const [dfaLazyJobCount, setDfaLazyJobCount] = useState(0);
@@ -102,7 +68,6 @@ export const OverviewPage: FC = () => {
 
       <OverviewContent
         createAnomalyDetectionJobDisabled={disableCreateAnomalyDetectionJob}
-        createAnalyticsJobDisabled={disableCreateAnalyticsButton}
         setAdLazyJobCount={setAdLazyJobCount}
         setDfaLazyJobCount={setDfaLazyJobCount}
       />

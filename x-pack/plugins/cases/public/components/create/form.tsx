@@ -27,13 +27,15 @@ import { ActionConnector } from '../../../common/api';
 import { Case } from '../../containers/types';
 import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../timeline_context';
 import { InsertTimeline } from '../insert_timeline';
-import { UsePostComment } from '../../containers/use_post_comment';
+import { UseCreateAttachments } from '../../containers/use_create_attachments';
 import { SubmitCaseButton } from './submit_button';
 import { FormContext } from './form_context';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { CreateCaseOwnerSelector } from './owner_selector';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
+import { CaseAttachments } from '../../types';
+import { Severity } from './severity';
 
 interface ContainerProps {
   big?: boolean;
@@ -60,8 +62,12 @@ export interface CreateCaseFormFieldsProps {
 export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsProps>, 'withSteps'> {
   onCancel: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
-  afterCaseCreated?: (theCase: Case, postComment: UsePostComment['postComment']) => Promise<void>;
+  afterCaseCreated?: (
+    theCase: Case,
+    createAttachments: UseCreateAttachments['createAttachments']
+  ) => Promise<void>;
   timelineIntegration?: CasesTimelineIntegration;
+  attachments?: CaseAttachments;
 }
 
 const empty: ActionConnector[] = [];
@@ -83,6 +89,9 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
             <Container>
               <Tags isLoading={isSubmitting} />
             </Container>
+            <Container>
+              <Severity isLoading={isSubmitting} />
+            </Container>
             {canShowCaseSolutionSelection && (
               <Container big>
                 <CreateCaseOwnerSelector
@@ -94,6 +103,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
             <Container big>
               <Description isLoading={isSubmitting} />
             </Container>
+            <Container />
           </>
         ),
       }),
@@ -157,9 +167,20 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
 CreateCaseFormFields.displayName = 'CreateCaseFormFields';
 
 export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
-  ({ withSteps = true, afterCaseCreated, onCancel, onSuccess, timelineIntegration }) => (
+  ({
+    withSteps = true,
+    afterCaseCreated,
+    onCancel,
+    onSuccess,
+    timelineIntegration,
+    attachments,
+  }) => (
     <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
-      <FormContext afterCaseCreated={afterCaseCreated} onSuccess={onSuccess}>
+      <FormContext
+        afterCaseCreated={afterCaseCreated}
+        onSuccess={onSuccess}
+        attachments={attachments}
+      >
         <CreateCaseFormFields
           connectors={empty}
           isLoadingConnectors={false}

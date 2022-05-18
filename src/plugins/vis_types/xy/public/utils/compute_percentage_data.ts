@@ -7,7 +7,7 @@
  */
 import type { Accessor, AccessorFn } from '@elastic/charts';
 import { computeRatioByGroups } from '@elastic/charts';
-import type { DatatableRow } from '../../../../expressions/public';
+import type { DatatableRow } from '@kbn/expressions-plugin/public';
 
 export const computePercentageData = (
   rows: DatatableRow[],

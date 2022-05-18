@@ -99,6 +99,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
   isInspect={false}
   loadPage={[MockFunction]}
   loading={false}
+  setQuerySkip={[MockFunction]}
   showMorePagesIndicator={true}
   totalCount={524}
   type="details"
@@ -204,6 +205,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
   isInspect={false}
   loadPage={[MockFunction]}
   loading={false}
+  setQuerySkip={[MockFunction]}
   showMorePagesIndicator={true}
   totalCount={524}
   type="page"

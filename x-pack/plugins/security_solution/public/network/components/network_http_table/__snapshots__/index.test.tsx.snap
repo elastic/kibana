@@ -95,6 +95,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
   isInspect={false}
   loadPage={[MockFunction]}
   loading={false}
+  setQuerySkip={[MockFunction]}
   showMorePagesIndicator={false}
   totalCount={4}
   type="page"

@@ -6,14 +6,23 @@
 
 Create {kib} rules.
 
-WARNING: This API supports <<token-api-authentication>> only.
-
 [[create-rule-api-request]]
 ==== Request
 
 `POST <kibana host>:<port>/api/alerting/rule/<id>`
 
 `POST <kibana host>:<port>/s/<space_id>/api/alerting/rule/<id>`
+
+==== {api-description-title}
+
+[WARNING]
+====
+* This API supports only
+<<token-api-authentication,token-based authentication>>.
+* When you create a rule, it identifies which roles you have at that point in time.
+Thereafter, when the rule performs queries, it uses those security privileges.
+If a user with different privileges updates the rule, its behavior might change.
+====
 
 [[create-rule-api-path-params]]
 ==== Path parameters

@@ -67,7 +67,7 @@ export const useGetLimitedPackages = () => {
   });
 };
 
-export const useGetPackageInfoByKey = (pkgName: string, pkgVersion: string) => {
+export const useGetPackageInfoByKey = (pkgName: string, pkgVersion?: string) => {
   return useRequest<GetInfoResponse>({
     path: epmRouteService.getInfoPath(pkgName, pkgVersion),
     method: 'get',
@@ -81,7 +81,7 @@ export const useGetPackageStats = (pkgName: string) => {
   });
 };
 
-export const sendGetPackageInfoByKey = (pkgName: string, pkgVersion: string) => {
+export const sendGetPackageInfoByKey = (pkgName: string, pkgVersion?: string) => {
   return sendRequest<GetInfoResponse>({
     path: epmRouteService.getInfoPath(pkgName, pkgVersion),
     method: 'get',

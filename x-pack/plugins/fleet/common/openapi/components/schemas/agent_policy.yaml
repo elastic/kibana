@@ -22,6 +22,10 @@ allOf:
         format: date-time
       updated_by:
         type: string
+      data_output_id:
+        type: string
+      monitoring_output_id:
+        type: string
       revision:
         type: number
       agents:

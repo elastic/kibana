@@ -11,9 +11,15 @@ import { agentPolicyStatuses, dataTypes } from '../../../common';
 
 import { PackagePolicySchema, NamespaceSchema } from './package_policy';
 
+function validateNonEmptyString(val: string) {
+  if (val.trim() === '') {
+    return 'Invalid empty string';
+  }
+}
+
 export const AgentPolicyBaseSchema = {
   id: schema.maybe(schema.string()),
-  name: schema.string({ minLength: 1 }),
+  name: schema.string({ minLength: 1, validate: validateNonEmptyString }),
   namespace: NamespaceSchema,
   description: schema.maybe(schema.string()),
   is_managed: schema.maybe(schema.boolean()),
@@ -26,6 +32,8 @@ export const AgentPolicyBaseSchema = {
       schema.oneOf([schema.literal(dataTypes.Logs), schema.literal(dataTypes.Metrics)])
     )
   ),
+  data_output_id: schema.maybe(schema.nullable(schema.string())),
+  monitoring_output_id: schema.maybe(schema.nullable(schema.string())),
 };
 
 export const NewAgentPolicySchema = schema.object({

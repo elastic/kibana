@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiPanel, EuiScreenReaderOnly } from '@elastic/eui';
 import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
 
-import { getNotesContainerClassName } from '../../../../../../timelines/public';
+import { getNotesContainerClassName } from '@kbn/timelines-plugin/public';
 import { AddNote } from '../add_note';
 import { AssociateNote } from '../helpers';
 import { NotePreviews, NotePreviewsContainer } from '../../open_timeline/note_previews';

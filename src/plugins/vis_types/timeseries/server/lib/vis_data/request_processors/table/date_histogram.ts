@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { search, UI_SETTINGS } from '@kbn/data-plugin/server';
 import { overwrite, getBucketSize, isLastValueTimerangeMode, getTimerange } from '../../helpers';
 import { calculateAggRoot } from './calculate_agg_root';
-import { search, UI_SETTINGS } from '../../../../../../../../plugins/data/server';
 
 import type { TableRequestProcessorsFunction, TableSearchRequestMeta } from './types';
 
@@ -24,7 +24,8 @@ export const dateHistogram: TableRequestProcessorsFunction =
 
     const meta: TableSearchRequestMeta = {
       timeField,
-      index: panel.use_kibana_indexes ? seriesIndex.indexPattern?.id : undefined,
+      dataViewId: panel.use_kibana_indexes ? seriesIndex.indexPattern?.id : undefined,
+      indexPatternString: seriesIndex.indexPatternString,
       panelId: panel.id,
     };
 

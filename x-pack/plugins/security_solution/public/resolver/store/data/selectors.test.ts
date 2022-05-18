@@ -16,7 +16,7 @@ import {
   mockTreeWith1AncestorAnd2ChildrenAndAllNodesHave2GraphableEvents,
   mockTreeWithNoProcessEvents,
 } from '../../mocks/resolver_tree';
-import { endpointSourceSchema } from './../../mocks/tree_schema';
+import { endpointSourceSchema } from '../../mocks/tree_schema';
 import * as nodeModel from '../../../../common/endpoint/models/node';
 import { mockTreeFetcherParameters } from '../../mocks/tree_fetcher_parameters';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';

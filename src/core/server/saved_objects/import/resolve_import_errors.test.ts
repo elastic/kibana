@@ -14,6 +14,7 @@ import {
   mockRegenerateIds,
   mockValidateReferences,
   mockCheckConflicts,
+  mockCheckOriginConflicts,
   mockGetImportStateMapForRetries,
   mockSplitOverwrites,
   mockCreateSavedObjects,
@@ -56,7 +57,12 @@ describe('#importSavedObjectsFromStream', () => {
       errors: [],
       filteredObjects: [],
       importStateMap: new Map(),
-      pendingOverwrites: new Set(), // not used by resolveImportErrors, but is a required return type
+      pendingOverwrites: new Set(),
+    });
+    mockCheckOriginConflicts.mockResolvedValue({
+      errors: [],
+      importStateMap: new Map(),
+      pendingOverwrites: new Set(),
     });
     mockGetImportStateMapForRetries.mockReturnValue(new Map());
     mockSplitOverwrites.mockReturnValue({
@@ -132,7 +138,6 @@ describe('#importSavedObjectsFromStream', () => {
     return {
       type: 'foo-type',
       id: uuidv4(),
-      title: 'some-title',
       meta: { title },
       error: { type: 'conflict' },
     };
@@ -304,6 +309,32 @@ describe('#importSavedObjectsFromStream', () => {
       expect(mockCheckConflicts).toHaveBeenCalledWith(checkConflictsParams);
     });
 
+    test('checks origin conflicts', async () => {
+      const retries = [createRetry()];
+      const options = setupOptions({ retries });
+      const filteredObjects = [createObject()];
+      const importStateMap = new Map();
+      const pendingOverwrites = new Set<string>();
+      mockCheckConflicts.mockResolvedValue({
+        errors: [],
+        filteredObjects,
+        importStateMap,
+        pendingOverwrites,
+      });
+
+      await resolveSavedObjectsImportErrors(options);
+      const checkOriginConflictsParams = {
+        objects: filteredObjects,
+        savedObjectsClient,
+        typeRegistry,
+        namespace,
+        importStateMap,
+        pendingOverwrites,
+        retries,
+      };
+      expect(mockCheckOriginConflicts).toHaveBeenCalledWith(checkOriginConflictsParams);
+    });
+
     test('gets import ID map for retries', async () => {
       const retries = [createRetry()];
       const createNewCopies = Symbol() as unknown as boolean;
@@ -313,7 +344,7 @@ describe('#importSavedObjectsFromStream', () => {
         errors: [],
         filteredObjects,
         importStateMap: new Map(),
-        pendingOverwrites: new Set(), // not used by resolveImportErrors, but is a required return type
+        pendingOverwrites: new Set(),
       });
 
       await resolveSavedObjectsImportErrors(options);
@@ -357,28 +388,49 @@ describe('#importSavedObjectsFromStream', () => {
 
       test('creates saved objects', async () => {
         const options = setupOptions();
-        const errors = [createError(), createError(), createError()];
+        const errors = [createError(), createError(), createError(), createError()];
         mockCollectSavedObjects.mockResolvedValue({
           errors: [errors[0]],
           collectedObjects: [], // doesn't matter
-          importStateMap: new Map(), // doesn't matter
+          importStateMap: new Map([
+            ['a', {}],
+            ['b', {}],
+            ['c', {}],
+            ['d', { isOnlyReference: true }],
+          ]),
+        });
+        mockCheckReferenceOrigins.mockResolvedValue({
+          importStateMap: new Map([['d', { isOnlyReference: true, destinationId: 'newId-d' }]]),
         });
         mockValidateReferences.mockResolvedValue([errors[1]]);
         mockCheckConflicts.mockResolvedValue({
           errors: [errors[2]],
           filteredObjects: [],
-          importStateMap: new Map([['foo', { destinationId: 'someId' }]]),
-          pendingOverwrites: new Set(), // not used by resolveImportErrors, but is a required return type
+          importStateMap: new Map([
+            ['b', { destinationId: 'newId-b2' }],
+            ['c', { destinationId: 'newId-c2' }],
+          ]),
+          pendingOverwrites: new Set(),
+        });
+        mockCheckOriginConflicts.mockResolvedValue({
+          errors: [errors[3]],
+          importStateMap: new Map([['c', { destinationId: 'newId-c3' }]]),
+          pendingOverwrites: new Set(),
         });
         mockGetImportStateMapForRetries.mockReturnValue(
           new Map([
-            ['foo', { destinationId: 'newId' }],
-            ['bar', { destinationId: 'anotherNewId' }],
+            ['a', { destinationId: 'newId-a1' }],
+            ['b', { destinationId: 'newId-b1' }],
+            ['c', { destinationId: 'newId-c1' }],
           ])
         );
+
+        // assert that the importStateMap is correctly composed of the results from the four modules
         const importStateMap = new Map([
-          ['foo', { destinationId: 'someId' }],
-          ['bar', { destinationId: 'anotherNewId' }],
+          ['a', { destinationId: 'newId-a1' }],
+          ['b', { destinationId: 'newId-b2' }],
+          ['c', { destinationId: 'newId-c3' }],
+          ['d', { isOnlyReference: true, destinationId: 'newId-d' }],
         ]);
         const objectsToOverwrite = [createObject()];
         const objectsToNotOverwrite = [createObject()];
@@ -421,6 +473,19 @@ describe('#importSavedObjectsFromStream', () => {
         expect(mockRegenerateIds).toHaveBeenCalledWith(collectedObjects);
       });
 
+      test('does not check origin conflicts', async () => {
+        const options = setupOptions({ createNewCopies: true });
+        const collectedObjects = [createObject()];
+        mockCollectSavedObjects.mockResolvedValue({
+          errors: [],
+          collectedObjects,
+          importStateMap: new Map(), // doesn't matter
+        });
+
+        await resolveSavedObjectsImportErrors(options);
+        expect(mockCheckOriginConflicts).not.toHaveBeenCalled();
+      });
+
       test('creates saved objects', async () => {
         const options = setupOptions({ createNewCopies: true });
         const errors = [createError(), createError(), createError()];
@@ -428,42 +493,42 @@ describe('#importSavedObjectsFromStream', () => {
           errors: [errors[0]],
           collectedObjects: [], // doesn't matter
           importStateMap: new Map([
-            ['foo', {}],
-            ['bar', {}],
-            ['baz', {}],
-            ['qux', { isOnlyReference: true }],
+            ['a', {}],
+            ['b', {}],
+            ['c', {}],
+            ['d', { isOnlyReference: true }],
           ]),
         });
         mockCheckReferenceOrigins.mockResolvedValue({
-          importStateMap: new Map([['qux', { isOnlyReference: true, destinationId: 'newId1' }]]),
+          importStateMap: new Map([['d', { isOnlyReference: true, destinationId: 'newId-d' }]]),
         });
         mockValidateReferences.mockResolvedValue([errors[1]]);
         mockRegenerateIds.mockReturnValue(
           new Map([
-            ['foo', { destinationId: 'randomId1' }],
-            ['bar', { destinationId: 'randomId2' }],
-            ['baz', { destinationId: 'randomId3' }],
+            ['a', { destinationId: 'randomId-a' }],
+            ['b', { destinationId: 'randomId-b' }],
+            ['c', { destinationId: 'randomId-c' }],
           ])
         );
         mockCheckConflicts.mockResolvedValue({
           errors: [errors[2]],
           filteredObjects: [],
-          importStateMap: new Map([['bar', { destinationId: 'someId' }]]),
-          pendingOverwrites: new Set(), // not used by resolveImportErrors, but is a required return type
+          importStateMap: new Map([['c', { destinationId: 'newId-c2' }]]),
+          pendingOverwrites: new Set(),
         });
         mockGetImportStateMapForRetries.mockReturnValue(
           new Map([
-            ['bar', { destinationId: 'newId2' }], // this is overridden by the checkConflicts result
-            ['baz', { destinationId: 'newId3' }],
+            ['b', { destinationId: 'newId-b1' }],
+            ['c', { destinationId: 'newId-c1' }],
           ])
         );
 
         // assert that the importStateMap is correctly composed of the results from the five modules
         const importStateMap = new Map([
-          ['foo', { destinationId: 'randomId1' }],
-          ['bar', { destinationId: 'someId' }],
-          ['baz', { destinationId: 'newId3' }],
-          ['qux', { isOnlyReference: true, destinationId: 'newId1' }],
+          ['a', { destinationId: 'randomId-a' }],
+          ['b', { destinationId: 'newId-b1' }],
+          ['c', { destinationId: 'newId-c2' }],
+          ['d', { isOnlyReference: true, destinationId: 'newId-d' }],
         ]);
         const objectsToOverwrite = [createObject()];
         const objectsToNotOverwrite = [createObject()];

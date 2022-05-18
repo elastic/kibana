@@ -28,4 +28,12 @@ export interface SpaceListProps {
    * the active space.
    */
   behaviorContext?: 'within-space' | 'outside-space';
+  /**
+   * Click handler for spaces list, specifically excluding expand and contract buttons.
+   */
+  listOnClick?: () => void;
+  /**
+   * Style for the cursor when mousing over space avatars.
+   */
+  cursorStyle?: string;
 }

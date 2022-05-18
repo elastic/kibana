@@ -8,13 +8,13 @@
 import { Either, isLeft, left, right } from 'fp-ts/lib/Either';
 import { ValidFeatureId } from '@kbn/rule-data-utils';
 
-import { ElasticsearchClient, Logger } from 'kibana/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { INDEX_PREFIX } from '../config';
 import { IRuleDataClient, RuleDataClient, WaitResult } from '../rule_data_client';
 import { IndexInfo } from './index_info';
 import { Dataset, IndexOptions } from './index_options';
-import { ResourceInstaller } from './resource_installer';
+import { IResourceInstaller, ResourceInstaller } from './resource_installer';
 import { joinWithDash } from './utils';
 
 /**
@@ -71,7 +71,13 @@ export interface IRuleDataService {
    * Looks up the index information associated with the given Kibana "feature".
    * Note: features are used in RBAC.
    */
-  findIndicesByFeature(featureId: ValidFeatureId, dataset?: Dataset): IndexInfo[];
+  findIndexByFeature(featureId: ValidFeatureId, dataset: Dataset): IndexInfo | null;
+
+  /**
+   * Looks up Kibana "feature" associated with the given registration context.
+   * Note: features are used in RBAC.
+   */
+  findFeatureIdsByRegistrationContexts(registrationContexts: string[]): string[];
 }
 
 // TODO: This is a leftover. Remove its usage from the "observability" plugin and delete it.
@@ -89,13 +95,15 @@ interface ConstructorOptions {
 export class RuleDataService implements IRuleDataService {
   private readonly indicesByBaseName: Map<string, IndexInfo>;
   private readonly indicesByFeatureId: Map<string, IndexInfo[]>;
-  private readonly resourceInstaller: ResourceInstaller;
+  private readonly registrationContextByFeatureId: Map<string, string>;
+  private readonly resourceInstaller: IResourceInstaller;
   private installCommonResources: Promise<Either<Error, 'ok'>>;
   private isInitialized: boolean;
 
   constructor(private readonly options: ConstructorOptions) {
     this.indicesByBaseName = new Map();
     this.indicesByFeatureId = new Map();
+    this.registrationContextByFeatureId = new Map();
     this.resourceInstaller = new ResourceInstaller({
       getResourceName: (name) => this.getResourceName(name),
       getClusterClient: options.getClusterClient,
@@ -162,6 +170,8 @@ export class RuleDataService implements IRuleDataService {
     this.indicesByFeatureId.set(indexOptions.feature, [...indicesAssociatedWithFeature, indexInfo]);
     this.indicesByBaseName.set(indexInfo.baseName, indexInfo);
 
+    this.registrationContextByFeatureId.set(registrationContext, indexOptions.feature);
+
     const waitUntilClusterClientAvailable = async (): Promise<WaitResult> => {
       try {
         const clusterClient = await this.options.getClusterClient();
@@ -214,8 +224,24 @@ export class RuleDataService implements IRuleDataService {
     return this.indicesByBaseName.get(baseName) ?? null;
   }
 
-  public findIndicesByFeature(featureId: ValidFeatureId, dataset?: Dataset): IndexInfo[] {
+  public findFeatureIdsByRegistrationContexts(registrationContexts: string[]): string[] {
+    const featureIds: string[] = [];
+    registrationContexts.forEach((rc) => {
+      const featureId = this.registrationContextByFeatureId.get(rc);
+      if (featureId) {
+        featureIds.push(featureId);
+      }
+    });
+    return featureIds;
+  }
+
+  public findIndexByFeature(featureId: ValidFeatureId, dataset: Dataset): IndexInfo | null {
     const foundIndices = this.indicesByFeatureId.get(featureId) ?? [];
-    return dataset ? foundIndices.filter((i) => i.indexOptions.dataset === dataset) : foundIndices;
+    if (dataset && foundIndices.length > 0) {
+      return foundIndices.filter((i) => i.indexOptions.dataset === dataset)[0];
+    } else if (foundIndices.length > 0) {
+      return foundIndices[0];
+    }
+    return null;
   }
 }

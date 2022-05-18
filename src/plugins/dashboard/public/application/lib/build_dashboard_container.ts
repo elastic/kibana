@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
-import type { KibanaExecutionContext } from 'src/core/public';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { DashboardContainer, DASHBOARD_CONTAINER_TYPE } from '../embeddable';
 import {
@@ -31,7 +30,7 @@ import {
 } from '../../services/embeddable';
 
 type BuildDashboardContainerProps = DashboardBuildContext & {
-  data: DashboardAppServices['data']; // the whole data service is required here because it is required by getUrlGeneratorState
+  data: DashboardAppServices['data']; // the whole data service is required here because it is required by getLocatorParams
   savedDashboard: DashboardSavedObject;
   initialDashboardState: DashboardState;
   incomingEmbeddable?: EmbeddablePackageState;
@@ -122,7 +121,9 @@ export const buildDashboardContainer = async ({
         gridData: originalPanelState.gridData,
         type: incomingEmbeddable.type,
         explicitInput: {
-          ...originalPanelState.explicitInput,
+          ...(incomingEmbeddable.type === originalPanelState.type && {
+            ...originalPanelState.explicitInput,
+          }),
           ...incomingEmbeddable.input,
           id: incomingEmbeddable.embeddableId,
         },

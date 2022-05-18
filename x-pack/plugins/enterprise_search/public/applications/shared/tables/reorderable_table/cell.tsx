@@ -11,14 +11,12 @@ import { EuiFlexItem } from '@elastic/eui';
 
 import { DraggableUXStyles } from './types';
 
-type CellProps<Item> = DraggableUXStyles;
-
-export const Cell = <Item extends object>({
+export const Cell = ({
   children,
   alignItems,
   flexBasis,
   flexGrow,
-}: CellProps<Item> & { children?: React.ReactNode }) => {
+}: DraggableUXStyles & { children?: React.ReactNode }) => {
   return (
     <EuiFlexItem
       style={{

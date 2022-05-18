@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Suspicious DLL Loaded for Persistence or Privilege Escalation",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "library where dll.name :\n  (\n  \"wlbsctrl.dll\",\n  \"wbemcomn.dll\",\n  \"WptsExtensions.dll\",\n  \"Tsmsisrv.dll\",\n  \"TSVIPSrv.dll\",\n  \"Msfte.dll\",\n  \"wow64log.dll\",\n  \"WindowsCoreDeviceInfo.dll\",\n  \"Ualapi.dll\",\n  \"wlanhlp.dll\",\n  \"phoneinfo.dll\",\n  \"EdgeGdi.dll\",\n  \"cdpsgshims.dll\",\n  \"windowsperformancerecordercontrol.dll\",\n  \"diagtrack_win.dll\"\n  ) and \nnot (dll.code_signature.subject_name : (\"Microsoft Windows\", \"Microsoft Corporation\") and dll.code_signature.status : \"trusted\")\n",
   "references": [
     "https://itm4n.github.io/windows-dll-hijacking-clarified/",
@@ -80,5 +81,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

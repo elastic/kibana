@@ -34,6 +34,12 @@ export const PostNewAgentActionRequestSchema = {
   }),
 };
 
+export const PostCancelActionRequestSchema = {
+  params: schema.object({
+    actionId: schema.string(),
+  }),
+};
+
 export const PostAgentUnenrollRequestSchema = {
   params: schema.object({
     agentId: schema.string(),
@@ -71,6 +77,7 @@ export const PostBulkAgentUpgradeRequestSchema = {
     source_uri: schema.maybe(schema.string()),
     version: schema.string(),
     force: schema.maybe(schema.boolean()),
+    rollout_duration_seconds: schema.maybe(schema.number({ min: 600 })),
   }),
 };
 
@@ -109,5 +116,11 @@ export const GetAgentStatusRequestSchema = {
   query: schema.object({
     policyId: schema.maybe(schema.string()),
     kuery: schema.maybe(schema.string()),
+  }),
+};
+
+export const GetAgentDataRequestSchema = {
+  query: schema.object({
+    agentsIds: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
   }),
 };

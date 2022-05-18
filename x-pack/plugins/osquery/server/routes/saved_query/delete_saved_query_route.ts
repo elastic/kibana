@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { IRouter } from '@kbn/core/server';
 import { PLUGIN_ID } from '../../../common';
-import { IRouter } from '../../../../../../src/core/server';
 import { savedQuerySavedObjectType } from '../../../common/types';
 
 export const deleteSavedQueryRoute = (router: IRouter) => {
@@ -22,7 +22,8 @@ export const deleteSavedQueryRoute = (router: IRouter) => {
       options: { tags: [`access:${PLUGIN_ID}-writeSavedQueries`] },
     },
     async (context, request, response) => {
-      const savedObjectsClient = context.core.savedObjects.client;
+      const coreContext = await context.core;
+      const savedObjectsClient = coreContext.savedObjects.client;
 
       await savedObjectsClient.delete(savedQuerySavedObjectType, request.params.id, {
         refresh: 'wait_for',

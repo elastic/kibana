@@ -7,9 +7,9 @@
 
 jest.mock('./browsers/install');
 
-import type { CoreSetup, CoreStart, PluginInitializerContext } from 'kibana/server';
-import { coreMock } from 'src/core/server/mocks';
-import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
+import type { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import { install } from './browsers/install';
 import { ScreenshottingPlugin } from './plugin';
 

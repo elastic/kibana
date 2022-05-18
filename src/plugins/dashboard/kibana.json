@@ -8,6 +8,7 @@
   "version": "kibana",
   "requiredPlugins": [
     "data",
+    "dataViews",
     "embeddable",
     "controls",
     "inspector",
@@ -29,5 +30,5 @@
   ],
   "server": true,
   "ui": true,
-  "requiredBundles": ["home", "kibanaReact", "kibanaUtils", "presentationUtil"]
+  "requiredBundles": ["kibanaReact", "kibanaUtils", "presentationUtil"]
 }

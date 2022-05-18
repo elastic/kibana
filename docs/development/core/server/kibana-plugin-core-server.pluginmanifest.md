@@ -22,6 +22,7 @@ Should never be used in code outside of Core but is exported for documentation p
 |  --- | --- | --- |
 |  [configPath](./kibana-plugin-core-server.pluginmanifest.configpath.md) | ConfigPath | Root  used by the plugin, defaults to "id" in snake\_case format. |
 |  [description?](./kibana-plugin-core-server.pluginmanifest.description.md) | string | <i>(Optional)</i> TODO: make required once all plugins specify this. A brief description of what this plugin does and any capabilities it provides. |
+|  [enabledOnAnonymousPages?](./kibana-plugin-core-server.pluginmanifest.enabledonanonymouspages.md) | boolean | <i>(Optional)</i> Specifies whether this plugin - and its required dependencies - will be enabled for anonymous pages (login page, status page when configured, etc.) Default is false. |
 |  [extraPublicDirs?](./kibana-plugin-core-server.pluginmanifest.extrapublicdirs.md) | string\[\] | <i>(Optional)</i> Specifies directory names that can be imported by other ui-plugins built using the same instance of the @<!-- -->kbn/optimizer. A temporary measure we plan to replace with better mechanisms for sharing static code between plugins |
 |  [id](./kibana-plugin-core-server.pluginmanifest.id.md) | PluginName | Identifier of the plugin. Must be a string in camelCase. Part of a plugin public contract. Other plugins leverage it to access plugin API, navigate to the plugin, etc. |
 |  [kibanaVersion](./kibana-plugin-core-server.pluginmanifest.kibanaversion.md) | string | The version of Kibana the plugin is compatible with, defaults to "version". |

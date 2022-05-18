@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { getRenderCellValueFn } from './get_render_cell_value';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
-import { flattenHit } from 'src/plugins/data/common';
+import { flattenHit } from '@kbn/data-plugin/public';
 import { ElasticSearchHit } from '../../types';
 
 jest.mock('../../utils/use_discover_services', () => {
@@ -84,6 +84,7 @@ describe('Discover grid cell rendering', function () {
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
+        colIndex={0}
         columnId="bytes"
         isDetails={false}
         isExpanded={false}
@@ -91,7 +92,9 @@ describe('Discover grid cell rendering', function () {
         setCellProps={jest.fn()}
       />
     );
-    expect(component.html()).toMatchInlineSnapshot(`"<span>100</span>"`);
+    expect(component.html()).toMatchInlineSnapshot(
+      `"<span class=\\"dscDiscoverGrid__cellValue\\">100</span>"`
+    );
   });
 
   it('renders bytes column correctly using _source when details is true', () => {
@@ -106,6 +109,7 @@ describe('Discover grid cell rendering', function () {
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
+        colIndex={0}
         columnId="bytes"
         isDetails={true}
         isExpanded={false}
@@ -113,7 +117,9 @@ describe('Discover grid cell rendering', function () {
         setCellProps={jest.fn()}
       />
     );
-    expect(component.html()).toMatchInlineSnapshot(`"<span>100</span>"`);
+    expect(component.html()).toMatchInlineSnapshot(
+      `"<span class=\\"dscDiscoverGrid__cellPopoverValue\\">100</span>"`
+    );
   });
 
   it('renders bytes column correctly using fields when details is true', () => {
@@ -128,6 +134,7 @@ describe('Discover grid cell rendering', function () {
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
+        colIndex={0}
         columnId="bytes"
         isDetails={true}
         isExpanded={false}
@@ -135,7 +142,9 @@ describe('Discover grid cell rendering', function () {
         setCellProps={jest.fn()}
       />
     );
-    expect(component.html()).toMatchInlineSnapshot(`"<span>100</span>"`);
+    expect(component.html()).toMatchInlineSnapshot(
+      `"<span class=\\"dscDiscoverGrid__cellPopoverValue\\">100</span>"`
+    );
   });
 
   it('renders _source column correctly', () => {
@@ -150,6 +159,7 @@ describe('Discover grid cell rendering', function () {
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
+        colIndex={0}
         columnId="_source"
         isDetails={false}
         isExpanded={false}
@@ -159,7 +169,7 @@ describe('Discover grid cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiDescriptionList
-        className="dscDiscoverGrid__descriptionList"
+        className="dscDiscoverGrid__descriptionList dscDiscoverGrid__cellValue"
         compressed={true}
         type="inline"
       >
@@ -223,6 +233,7 @@ describe('Discover grid cell rendering', function () {
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
+        colIndex={0}
         columnId="_source"
         isDetails={true}
         isExpanded={false}
@@ -265,6 +276,7 @@ describe('Discover grid cell rendering', function () {
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
+        colIndex={0}
         columnId="_source"
         isDetails={false}
         isExpanded={false}
@@ -274,7 +286,7 @@ describe('Discover grid cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiDescriptionList
-        className="dscDiscoverGrid__descriptionList"
+        className="dscDiscoverGrid__descriptionList dscDiscoverGrid__cellValue"
         compressed={true}
         type="inline"
       >
@@ -343,6 +355,7 @@ describe('Discover grid cell rendering', function () {
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
+        colIndex={0}
         columnId="_source"
         isDetails={false}
         isExpanded={false}
@@ -352,7 +365,7 @@ describe('Discover grid cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiDescriptionList
-        className="dscDiscoverGrid__descriptionList"
+        className="dscDiscoverGrid__descriptionList dscDiscoverGrid__cellValue"
         compressed={true}
         type="inline"
       >
@@ -420,6 +433,7 @@ describe('Discover grid cell rendering', function () {
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
+        colIndex={0}
         columnId="_source"
         isDetails={true}
         isExpanded={false}
@@ -467,6 +481,7 @@ describe('Discover grid cell rendering', function () {
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
+        colIndex={0}
         columnId="object"
         isDetails={false}
         isExpanded={false}
@@ -476,7 +491,7 @@ describe('Discover grid cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiDescriptionList
-        className="dscDiscoverGrid__descriptionList"
+        className="dscDiscoverGrid__descriptionList dscDiscoverGrid__cellValue"
         compressed={true}
         type="inline"
       >
@@ -508,6 +523,7 @@ describe('Discover grid cell rendering', function () {
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
+        colIndex={0}
         columnId="object"
         isDetails={false}
         isExpanded={false}
@@ -517,7 +533,7 @@ describe('Discover grid cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiDescriptionList
-        className="dscDiscoverGrid__descriptionList"
+        className="dscDiscoverGrid__descriptionList dscDiscoverGrid__cellValue"
         compressed={true}
         type="inline"
       >
@@ -548,6 +564,7 @@ describe('Discover grid cell rendering', function () {
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
+        colIndex={0}
         columnId="object"
         isDetails={true}
         isExpanded={false}
@@ -582,6 +599,7 @@ describe('Discover grid cell rendering', function () {
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
+        colIndex={0}
         columnId="object.value"
         isDetails={false}
         isExpanded={false}
@@ -591,6 +609,7 @@ describe('Discover grid cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <span
+        className="dscDiscoverGrid__cellValue"
         dangerouslySetInnerHTML={
           Object {
             "__html": Array [
@@ -614,6 +633,7 @@ describe('Discover grid cell rendering', function () {
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={1}
+        colIndex={1}
         columnId="bytes"
         isDetails={false}
         isExpanded={false}
@@ -621,7 +641,9 @@ describe('Discover grid cell rendering', function () {
         setCellProps={jest.fn()}
       />
     );
-    expect(component.html()).toMatchInlineSnapshot(`"<span>-</span>"`);
+    expect(component.html()).toMatchInlineSnapshot(
+      `"<span class=\\"dscDiscoverGrid__cellValue\\">-</span>"`
+    );
   });
 
   it('renders correctly when invalid column is given', () => {
@@ -636,6 +658,7 @@ describe('Discover grid cell rendering', function () {
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
+        colIndex={0}
         columnId="bytes-invalid"
         isDetails={false}
         isExpanded={false}
@@ -643,7 +666,9 @@ describe('Discover grid cell rendering', function () {
         setCellProps={jest.fn()}
       />
     );
-    expect(component.html()).toMatchInlineSnapshot(`"<span>-</span>"`);
+    expect(component.html()).toMatchInlineSnapshot(
+      `"<span class=\\"dscDiscoverGrid__cellValue\\">-</span>"`
+    );
   });
 
   it('renders unmapped fields correctly', () => {
@@ -671,6 +696,7 @@ describe('Discover grid cell rendering', function () {
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
+        colIndex={0}
         columnId="unmapped"
         isDetails={false}
         isExpanded={false}
@@ -680,6 +706,7 @@ describe('Discover grid cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <span
+        className="dscDiscoverGrid__cellValue"
         dangerouslySetInnerHTML={
           Object {
             "__html": Array [
@@ -693,6 +720,7 @@ describe('Discover grid cell rendering', function () {
     const componentWithDetails = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
+        colIndex={0}
         columnId="unmapped"
         isDetails={true}
         isExpanded={false}
@@ -702,6 +730,7 @@ describe('Discover grid cell rendering', function () {
     );
     expect(componentWithDetails).toMatchInlineSnapshot(`
       <span
+        className="dscDiscoverGrid__cellPopoverValue"
         dangerouslySetInnerHTML={
           Object {
             "__html": Array [

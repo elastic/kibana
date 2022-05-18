@@ -8,10 +8,10 @@
 
 import { of, Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { Execution, ExecutionResult } from './execution';
 import { ExpressionValueError } from '../expression_types/specs';
 import { ExpressionAstExpression } from '../ast';
-import { Adapters } from '../../../inspector/common/adapters';
 
 /**
  * `ExecutionContract` is a wrapper around `Execution` class. It provides the
@@ -19,8 +19,8 @@ import { Adapters } from '../../../inspector/common/adapters';
  */
 export class ExecutionContract<Input = unknown, Output = unknown, InspectorAdapters = unknown> {
   public get isPending(): boolean {
-    const state = this.execution.state.get().state;
-    const finished = state === 'error' || state === 'result';
+    const { state, result } = this.execution.state.get();
+    const finished = state === 'error' || (state === 'result' && !result?.partial);
     return !finished;
   }
 

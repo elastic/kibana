@@ -42,7 +42,7 @@ function renderSpaceAvatar(space: Space) {
   // not announcing space name here because the title of the EuiCard that the SpaceAvatar lives in is already
   // announcing it. See https://github.com/elastic/kibana/issues/27748
   return (
-    <Suspense fallback={<EuiLoadingSpinner />}>
+    <Suspense fallback={<EuiLoadingSpinner size="xxl" />}>
       <LazySpaceAvatar space={space} size={'l'} announceSpaceName={false} />
     </Suspense>
   );

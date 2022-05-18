@@ -6,13 +6,13 @@
  */
 
 import * as Rx from 'rxjs';
-import { setupServer } from 'src/core/server/test_utils';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { setupServer } from '@kbn/core/server/test_utils';
 import supertest from 'supertest';
-import { ReportingCore } from '../../../';
-import type { ScreenshottingStart } from '../../../../../screenshotting/server';
+import { ReportingCore } from '../../..';
+import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import {
   createMockConfigSchema,
-  createMockLevelLogger,
   createMockPluginSetup,
   createMockReportingCore,
 } from '../../../test_helpers';
@@ -27,7 +27,7 @@ const fontNotFoundMessage = 'Could not find the default font';
 describe('POST /diagnose/browser', () => {
   jest.setTimeout(6000);
   const reportingSymbol = Symbol('reporting');
-  const mockLogger = createMockLevelLogger();
+  const mockLogger = loggingSystemMock.createLogger();
 
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];

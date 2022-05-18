@@ -21,7 +21,13 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
 
   return (
-    <EuiFlexGroup style={{ width: '100%' }} direction="column" gutterSize="xs" responsive={false}>
+    <EuiFlexGroup
+      style={{ width: '100%' }}
+      direction="column"
+      gutterSize="xs"
+      responsive={false}
+      data-test-subj="embeddedSavedSearchDocTable"
+    >
       {props.totalHitCount !== 0 && (
         <EuiFlexItem grow={false} style={{ alignSelf: 'flex-end' }}>
           <TotalDocuments totalHitCount={props.totalHitCount} />

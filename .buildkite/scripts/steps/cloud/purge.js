@@ -26,7 +26,7 @@ for (const deployment of prDeployments) {
     const lastCommit = pullRequest.commits.slice(-1)[0];
     const lastCommitTimestamp = new Date(lastCommit.committedDate).getTime() / 1000;
 
-    if (pullRequest.state !== 'open') {
+    if (pullRequest.state !== 'OPEN') {
       console.log(`Pull Request #${prNumber} is no longer open, will delete associated deployment`);
       deploymentsToPurge.push(deployment);
     } else if (!pullRequest.labels.filter((label) => label.name === 'ci:deploy-cloud')) {
@@ -50,6 +50,9 @@ for (const deployment of deploymentsToPurge) {
   console.log(`Scheduling deployment for deletion: ${deployment.name} / ${deployment.id}`);
   try {
     execSync(`ecctl deployment shutdown --force '${deployment.id}'`, { stdio: 'inherit' });
+    execSync(`vault delete secret/kibana-issues/dev/cloud-deploy/${deployment.name}`, {
+      stdio: 'inherit',
+    });
   } catch (ex) {
     console.error(ex.toString());
   }

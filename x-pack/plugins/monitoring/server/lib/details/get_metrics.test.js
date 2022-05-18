@@ -8,9 +8,9 @@
 import { getMetrics } from './get_metrics';
 import sinon from 'sinon';
 
-import nonDerivMetricsBuckets from './__fixtures__/non_deriv_metrics_buckets';
-import derivMetricsBuckets from './__fixtures__/deriv_metrics_buckets';
-import aggMetricsBuckets from './__fixtures__/agg_metrics_buckets';
+import nonDerivMetricsBuckets from './__fixtures__/non_deriv_metrics_buckets.json';
+import derivMetricsBuckets from './__fixtures__/deriv_metrics_buckets.json';
+import aggMetricsBuckets from './__fixtures__/agg_metrics_buckets.json';
 
 // max / min window that accepts the above buckets/results
 const min = 1498968000000; // 2017-07-02T04:00:00.000Z
@@ -29,17 +29,9 @@ jest.mock('../../static_globals', () => ({
 }));
 
 function getMockReq(metricsBuckets = []) {
-  const config = {
-    get: sinon.stub(),
-  };
-
-  config.get.withArgs('monitoring.ui.min_interval_seconds').returns(10);
-
   return {
     server: {
-      config() {
-        return config;
-      },
+      config: { ui: { min_interval_seconds: 10 } },
       plugins: {
         elasticsearch: {
           getCluster: sinon

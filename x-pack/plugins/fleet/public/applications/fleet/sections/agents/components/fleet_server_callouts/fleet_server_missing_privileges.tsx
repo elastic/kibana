@@ -22,7 +22,7 @@ export const FleetServerMissingPrivileges = () => {
       <EuiEmptyPrompt
         iconType="securityApp"
         title={
-          <h2>
+          <h2 data-test-subj="fleetServerMissingPrivilegesTitle">
             <FormattedMessage
               id="xpack.fleet.fleetServerSetupPermissionDeniedErrorTitle"
               defaultMessage="Permission denied"
@@ -30,7 +30,7 @@ export const FleetServerMissingPrivileges = () => {
           </h2>
         }
         body={
-          <p>
+          <p data-test-subj="fleetServerMissingPrivilegesMessage">
             <FormattedMessage
               id="xpack.fleet.fleetServerSetupPermissionDeniedErrorMessage"
               defaultMessage="Fleet Server needs to be set up. This requires the {roleName} cluster privilege. Contact your administrator."

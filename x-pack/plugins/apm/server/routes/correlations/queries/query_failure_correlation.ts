@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { CorrelationsParams } from '../../../../common/correlations/types';
 import { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
@@ -80,13 +80,13 @@ export const fetchFailedTransactionsCorrelationPValues = async (
     getFailureCorrelationRequest(params, fieldName)
   );
 
-  if (resp.body.aggregations === undefined) {
+  if (resp.aggregations === undefined) {
     throw new Error(
       'fetchErrorCorrelation failed, did not return aggregations.'
     );
   }
 
-  const overallResult = resp.body.aggregations.failure_p_value;
+  const overallResult = resp.aggregations.failure_p_value;
 
   // Using for of to sequentially augment the results with histogram data.
   const result: FailedTransactionsCorrelation[] = [];

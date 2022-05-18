@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { InternalRouteDeps } from '.';
 import { wrapError } from '../../../lib/errors';
 import { createLicensedRouteHandler } from '../../lib';
-import type { InternalRouteDeps } from './';
 
 export function initGetActiveSpaceApi(deps: InternalRouteDeps) {
   const { internalRouter, getSpacesService } = deps;

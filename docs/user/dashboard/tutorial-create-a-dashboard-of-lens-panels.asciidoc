@@ -68,7 +68,7 @@ The only number function that you can use with *clientip* is *Unique count*, als
 . Open the *Visualization type* dropdown, then select *Metric*.
 +
 [role="screenshot"]
-image::images/lens_visualizationTypeDropdown_7.16.png[Visualization type dropdown]
+image::images/lens_visualizationTypeDropdown_8.0.png[Visualization type dropdown]
 
 . From the *Available fields* list, drag *clientip* to the workspace or layer pane.
 +

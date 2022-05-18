@@ -6,7 +6,7 @@
  */
 
 import { saveApmIndices } from './save_apm_indices';
-import { SavedObjectsClientContract } from '../../../../../../../src/core/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 
 describe('saveApmIndices', () => {
   it('should trim and strip empty settings', async () => {
@@ -26,7 +26,10 @@ describe('saveApmIndices', () => {
     await saveApmIndices(savedObjectsClient, apmIndices);
     expect(savedObjectsClient.create).toHaveBeenCalledWith(
       expect.any(String),
-      { settingA: 'aa', settingF: 'ff', settingG: 'gg' },
+      {
+        apmIndices: { settingA: 'aa', settingF: 'ff', settingG: 'gg' },
+        isSpaceAware: true,
+      },
       expect.any(Object)
     );
   });

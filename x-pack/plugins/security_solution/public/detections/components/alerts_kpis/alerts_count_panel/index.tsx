@@ -6,7 +6,7 @@
  */
 
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import React, { memo, useMemo, useState, useEffect } from 'react';
+import React, { memo, useMemo, useState, useEffect, useCallback } from 'react';
 import uuid from 'uuid';
 
 import type { Filter, Query } from '@kbn/es-query';
@@ -24,6 +24,7 @@ import type { AlertsCountAggregation } from './types';
 import { DEFAULT_STACK_BY_FIELD } from '../common/config';
 import { KpiPanel, StackByComboBox } from '../common/components';
 import { useInspectButton } from '../common/hooks';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
 export const DETECTIONS_ALERTS_COUNT_ID = 'detections-alerts-count';
 
@@ -42,11 +43,6 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     const uniqueQueryId = useMemo(() => `${DETECTIONS_ALERTS_COUNT_ID}-${uuid.v4()}`, []);
     const [selectedStackByOption, setSelectedStackByOption] = useState(DEFAULT_STACK_BY_FIELD);
 
-    // TODO: Once we are past experimental phase this code should be removed
-    // const fetchMethod = useIsExperimentalFeatureEnabled('ruleRegistryEnabled')
-    //   ? fetchQueryRuleRegistryAlerts
-    //   : fetchQueryAlerts;
-
     // Disabling the fecth method in useQueryAlerts since it is defaulted to the old one
     // const fetchMethod = fetchQueryRuleRegistryAlerts;
 
@@ -64,6 +60,20 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
       }
     }, [query, filters]);
 
+    const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTIONS_ALERTS_COUNT_ID);
+    const [querySkip, setQuerySkip] = useState(!toggleStatus);
+    useEffect(() => {
+      setQuerySkip(!toggleStatus);
+    }, [toggleStatus]);
+    const toggleQuery = useCallback(
+      (status: boolean) => {
+        setToggleStatus(status);
+        // toggle on = skipQuery false
+        setQuerySkip(!status);
+      },
+      [setQuerySkip, setToggleStatus]
+    );
+
     const {
       loading: isLoadingAlerts,
       data: alertsData,
@@ -80,6 +90,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
         runtimeMappings
       ),
       indexName: signalIndexName,
+      skip: querySkip,
     });
 
     useEffect(() => {
@@ -99,21 +110,25 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     });
 
     return (
-      <InspectButtonContainer>
-        <KpiPanel hasBorder data-test-subj="alertsCountPanel">
+      <InspectButtonContainer show={toggleStatus}>
+        <KpiPanel $toggleStatus={toggleStatus} hasBorder data-test-subj="alertsCountPanel">
           <HeaderSection
             id={uniqueQueryId}
             title={i18n.COUNT_TABLE_TITLE}
             titleSize="s"
             hideSubtitle
+            toggleStatus={toggleStatus}
+            toggleQuery={toggleQuery}
           >
             <StackByComboBox selected={selectedStackByOption} onSelect={setSelectedStackByOption} />
           </HeaderSection>
-          <AlertsCount
-            data={alertsData}
-            loading={isLoadingAlerts}
-            selectedStackByOption={selectedStackByOption}
-          />
+          {toggleStatus && (
+            <AlertsCount
+              data={alertsData}
+              loading={isLoadingAlerts}
+              selectedStackByOption={selectedStackByOption}
+            />
+          )}
         </KpiPanel>
       </InspectButtonContainer>
     );

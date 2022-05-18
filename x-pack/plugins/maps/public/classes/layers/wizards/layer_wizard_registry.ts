@@ -12,6 +12,7 @@ import type { LayerDescriptor } from '../../../../common/descriptor_types';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 
 export type LayerWizard = {
+  id: string;
   title: string;
   categories: LAYER_WIZARD_CATEGORY[];
   /*
@@ -89,4 +90,8 @@ export async function getLayerWizards(): Promise<LayerWizardWithMeta[]> {
     .sort((wizard1: LayerWizardWithMeta, wizard2: LayerWizardWithMeta) => {
       return wizard1.order - wizard2.order;
     });
+}
+
+export function getWizardById(wizardId: string) {
+  return registry.find((wizard) => wizard.id === wizardId);
 }

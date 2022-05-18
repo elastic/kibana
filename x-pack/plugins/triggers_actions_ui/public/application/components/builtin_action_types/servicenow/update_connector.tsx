@@ -9,27 +9,26 @@ import React, { memo } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCallOut,
   EuiFlyout,
-  EuiFlyoutHeader,
-  EuiTitle,
   EuiFlyoutBody,
   EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiSteps,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ActionConnectorFieldsProps } from '../../../../../public/types';
+import { snExternalServiceConfig } from '@kbn/actions-plugin/common';
+import { ActionConnectorFieldsProps } from '../../../../types';
 import { ServiceNowActionConnector } from './types';
 import { CredentialsApiUrl } from './credentials_api_url';
 import { isFieldInvalid } from './helpers';
 import { ApplicationRequiredCallout } from './application_required_callout';
 import { SNStoreLink } from './sn_store_button';
-import { CredentialsAuth } from './credentials_auth';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { snExternalServiceConfig } from '../../../../../../actions/server/builtin_action_types/servicenow/config';
+import { CredentialsAuth, OAuth } from './auth_types';
 
 const title = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.updateFormTitle',
@@ -103,16 +102,36 @@ const UpdateConnectorComponent: React.FC<Props> = ({
   onCancel,
   onConfirm,
 }) => {
-  const { apiUrl } = action.config;
-  const { username, password } = action.secrets;
+  const { apiUrl, isOAuth, jwtKeyId, userIdentifierValue, clientId } = action.config;
+  const { username, password, privateKeyPassword, privateKey, clientSecret } = action.secrets;
 
-  const hasErrorsOrEmptyFields =
-    apiUrl === undefined ||
-    username === undefined ||
-    password === undefined ||
-    isFieldInvalid(apiUrl, errors.apiUrl) ||
-    isFieldInvalid(username, errors.username) ||
-    isFieldInvalid(password, errors.password);
+  let hasErrorsOrEmptyFields;
+
+  hasErrorsOrEmptyFields = apiUrl === undefined || isFieldInvalid(apiUrl, errors.apiUrl);
+
+  if (isOAuth) {
+    hasErrorsOrEmptyFields =
+      hasErrorsOrEmptyFields ||
+      jwtKeyId === undefined ||
+      userIdentifierValue === undefined ||
+      clientId === undefined ||
+      privateKeyPassword === undefined ||
+      privateKey === undefined ||
+      clientSecret === undefined ||
+      isFieldInvalid(jwtKeyId, errors.apiUrl) ||
+      isFieldInvalid(userIdentifierValue, errors.userIdentifierValue) ||
+      isFieldInvalid(clientId, errors.clientId) ||
+      isFieldInvalid(privateKeyPassword, errors.privateKeyPassword) ||
+      isFieldInvalid(privateKey, errors.privateKey) ||
+      isFieldInvalid(clientSecret, errors.clientSecret);
+  } else {
+    hasErrorsOrEmptyFields =
+      hasErrorsOrEmptyFields ||
+      username === undefined ||
+      password === undefined ||
+      isFieldInvalid(username, errors.username) ||
+      isFieldInvalid(password, errors.password);
+  }
 
   return (
     <EuiFlyout ownFocus onClose={onCancel} data-test-subj="updateConnectorForm">
@@ -165,7 +184,16 @@ const UpdateConnectorComponent: React.FC<Props> = ({
               },
               {
                 title: step3CredentialsTitle,
-                children: (
+                children: isOAuth ? (
+                  <OAuth
+                    action={action}
+                    errors={errors}
+                    readOnly={readOnly}
+                    isLoading={isLoading}
+                    editActionSecrets={editActionSecrets}
+                    editActionConfig={editActionConfig}
+                  />
+                ) : (
                   <CredentialsAuth
                     action={action}
                     errors={errors}

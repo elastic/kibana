@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup } from 'kibana/server';
-import {
-  PluginSetupContract as AlertingSetup,
-  RuleType,
-} from '../../../../../../plugins/alerting/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../plugins/features/server';
+import { Plugin, CoreSetup } from '@kbn/core/server';
+import { PluginSetupContract as AlertingSetup, RuleType } from '@kbn/alerting-plugin/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 // this plugin's dependendencies
 export interface AlertingExampleDeps {
@@ -54,8 +51,8 @@ export const alwaysFiringAlertType: RuleType<
     const { services, state, params } = alertExecutorOptions;
 
     (params.instances || []).forEach((instance: { id: string; state: any }) => {
-      services
-        .alertInstanceFactory(instance.id)
+      services.alertFactory
+        .create(instance.id)
         .replaceState({ instanceStateValue: true, ...(instance.state || {}) })
         .scheduleActions('default');
     });

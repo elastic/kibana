@@ -11,11 +11,7 @@ import { flagSupportedClusters } from './flag_supported_clusters';
 const mockReq = (log, queryResult = {}) => {
   return {
     server: {
-      config() {
-        return {
-          get: sinon.stub().withArgs('server.uuid').returns('kibana-1234'),
-        };
-      },
+      instanceUuid: 'kibana-1234',
       plugins: {
         elasticsearch: {
           getCluster() {

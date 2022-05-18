@@ -9,140 +9,12 @@ tags: ['kibana', 'onboarding', 'dev', 'architecture']
 
 ## General
 
-First things first, be sure to review our <DocLink id="kibDevPrinciples" text="development principles"/> and check out all the available
-platform <DocLink id="kibBuildingBlocks" text="building blocks"/> that can simplify plugin development.
+Be sure to follow our <DocLink id="kibDevPrinciples" text="development principles"/>
+and <DocLink id="kibStandards" text="standards and guidelines"/>.
+ 
+## Documentation
 
-## Developer documentation
-
-### High-level documentation
-
-#### Structure
-
-Refer to [divio documentation](https://documentation.divio.com/) for guidance on where and how to structure our high-level documentation.
-
-<DocLink id="kibDevDocsWelcome" text="Getting started" /> and
-<DocLink id="kibPlatformIntro" text="Key concepts" /> sections are both _explanation_ oriented,
-<DocLink id="kibDevTutorialDebugging" text="Tutorials" /> covers both _tutorials_ and _How to_, and the <DocLink
-  id="kibDevDocsApiWelcome"
-  text="API documentation"
-/> section covers _reference_ material.
-
-#### Location
-
-If the information spans multiple plugins, consider adding it to the [dev_docs](https://github.com/elastic/kibana/tree/main/dev_docs) folder. If it is plugin specific, consider adding it inside the plugin folder. Write it in an mdx file if you would like it to show up in our new (beta) documentation system.
-
-<DocCallOut title="internal only">
-
-To add docs into the new docs system, create an `.mdx` file that
-contains <DocLink id="docsSyntax" section="frontmatter" text="frontmatter"/>. Read about the syntax <DocLink id="docsSyntax" text="here"/>. An extra step is needed to add a menu item. <DocLink id="docsSetup" text="These instructions" /> will walk you through how to set the docs system
-up locally and edit the nav menu.
-
-</DocCallOut>
-
-#### Keep content fresh
-
-A fresh pair of eyes are invaluable. Recruit new hires to read, review and update documentation. Leads should also periodically review documentation to ensure it stays up to date. File issues any time you notice documentation is outdated.
-
-#### Consider your target audience
-
-Documentation in the Kibana Developer Guide is targeted towards developers building Kibana plugins. Keep implementation details about internal plugin code out of these docs.
-
-#### High to low level
-
-When a developer first lands in our docs, think about their journey. Introduce basic concepts before diving into details. The left navigation should be set up so documents on top are higher level than documents near the bottom.
-
-#### Think outside-in
-
-It's easy to forget what it felt like to first write code in Kibana, but do your best to frame these docs "outside-in". Don't use esoteric, internal language unless a definition is documented and linked. The fresh eyes of a new hire can be a great asset.
-
-### API documentation
-
-We automatically generate <DocLink id="kibDevDocsApiWelcome" text="API documentation"/>. The following guidelines will help ensure your <DocLink id="kibPlatformIntro" section="public-plugin-api" text="public APIs" /> are useful.
-
-#### Code comments
-
-Every publicly exposed function, class, interface, type, parameter and property should have a comment using JSDoc style comments.
-
-- Use `@param` tags for every function parameter.
-- Use `@returns` tags for return types.
-- Use `@throws` when appropriate.
-- Use `@beta` or `@deprecated` when appropriate.
-- Use `@removeBy {version}` on `@deprecated` APIs. The version should be the last version the API will work in. For example, `@removeBy 7.15` means the API will be removed in 7.16. This lets us avoid mid-release cycle coordination. The API can be removed as soon as the 7.15 branch is cut.
-- Use `@internal` to indicate this API item is intended for internal use only, which will also remove it from the docs.
-
-#### Interfaces vs inlined types
-
-Prefer types and interfaces over complex inline objects. For example, prefer:
-
-```ts
-/**
-* The SearchSpec interface contains settings for creating a new SearchService, like
-* username and password.
-*/
-export interface SearchSpec {
- /**
-  * Stores the username. Duh,
-  */
- username: string;
- /**
-  * Stores the password. I hope it's encrypted!
-  */
- password: string;
-}
-
- /**
-  * Retrieve search services
-  * @param searchSpec Configuration information for initializing the search service.
-  * @returns the id of the search service
-  */
-export getSearchService: (searchSpec: SearchSpec) => string;
-```
-
-over:
-
-```ts
-/**
-  * Retrieve search services
-  * @param searchSpec Configuration information for initializing the search service.
-  * @returns the id of the search service
-  */
-export getSearchService: (searchSpec: { username: string; password: string }) => string;
-```
-
-In the former, there will be a link to the `SearchSpec` interface with documentation for the `username` and `password` properties. In the latter the object will render inline, without comments:
-
-![prefer interfaces documentation](../assets/dev_docs_nested_object.png)
-
-#### Export every type used in a public API
-
-When a publicly exported API items references a private type, this results in a broken link in our docs system. The private type is, by proxy, part of your public API, and as such, should be exported.
-
-Do:
-
-```ts
-export interface AnInterface { bar: string };
-export type foo: string | AnInterface;
-```
-
-Don't:
-
-```ts
-interface AnInterface { bar: string };
-export type foo: string | AnInterface;
-```
-
-#### Avoid “Pick”
-
-`Pick` not only ends up being unhelpful in our documentation system, but it's also of limited help in your IDE. For that reason, avoid `Pick` and other similarly complex types on your public API items. Using these semantics internally is fine.
-
-![pick api documentation](../assets/api_doc_pick.png)
-
-### Example plugins
-
-Running Kibana with `yarn start --run-examples` will include all [example plugins](https://github.com/elastic/kibana/tree/main/examples). These are tested examples of platform services in use. We strongly encourage anyone providing a platform level service or <DocLink id="kibBuildingBlocks" text="building block"/> to include a tutorial that links to a tested example plugin. This is better than relying on copied code snippets, which can quickly get out of date.
-
-You can also visit these [examples plugins hosted online](https://demo.kibana.dev/8.0/app/home). Note that because anonymous access is enabled, some
-of the demos are currently not working. 
+Documentation best practices can be found <DocLink id="kibDocumentation" text="here"/>.
 
 ## Performance
 
@@ -182,11 +54,27 @@ We use es-lint rules when possible, but please review our [styleguide](https://g
 
 Es-lint overrides on a per-plugin level are discouraged.
 
-## Plugin best practices
+## Using the SavedObjectClient
+
+The <DocLink id="kibCoreSavedObjectsPluginApi" section="def-public.SavedObjectsClient" text="SavedObjectClient" /> should always be used for reading and writing saved objects that you manage. For saved objects managed by other plugins, their plugin APIs should be used instead.
+
+Good:
+```
+const dataView = dataViewStartContract.get(dataViewId);
+```
+
+Bad:
+```
+const dataView = savedObjectsClient.get(dataViewId) as DataView;
+```
+
+## Resusable react components
+
+Use [EUI](https://elastic.github.io/eui) for all your basic UI components to create a consistent UI experience. We also have generic UI components offered from the <DocLink id="kibKibanaReactPluginApi" text="kibana_react" /> plugin and the <DocLink id="kibSharedUXPluginApi" text="shared_ux" /> plugin.
+
+## Don't export code that doesn't need to be public
 
 Don't export <DocLink id="kibPlatformIntro" section="public-plugin-api" text="public APIs"/> without reason. Make your public APIs as small as possible. You will have to maintain them, and consider backward compatibility when making changes.
-
-Add `README.md` to all your plugins and services and include contact information.
 
 ## Re-inventing the wheel
 
@@ -247,6 +135,77 @@ When experimenting with code, it's completely fine to create a separate GitHub r
 There are some exceptions where a separate repo makes sense. However, they are exceptions to the rule. A separate repo has proven beneficial when there's a dedicated team collaborating on a package which has multiple consumers, for example [EUI](https://github.com/elastic/eui).
 
 It may be tempting to get caught up in the dream of writing the next package which is published to npm and downloaded millions of times a week. Knowing the quality of developers that are working on Kibana, this is a real possibility. However, knowing which packages will see mass adoption is impossible to predict. Instead of jumping directly to writing code in a separate repo and accepting all of the complications that come along with it, prefer keeping code inside the Kibana repo. A [Kibana package](https://github.com/elastic/kibana/tree/main/packages) can be used to publish a package to npm, while still keeping the code inside the Kibana repo. Move code to an external repo only when there is a good reason, for example to enable external contributions.
+
+## Licensing
+
+<DocCallOut title="Internal only">
+
+Has there been a discussion about which license this feature should be available under? Open up a license issue in [https://github.com/elastic/dev](https://github.com/elastic/dev) if you are unsure.
+
+</DocCallOut>
+
+## Testing scenarios
+
+Every PR submitted should be accompanied by tests. Read through the <DocLink id="kibDevTutorialTestingPlugins" text="testing plugins tutorial" /> for how to test.
+
+### Browser coverage
+
+Refer to the list of browsers and OS Kibana supports https://www.elastic.co/support/matrix
+
+Does the feature work efficiently on the below listed browsers
+  - chrome
+  - Firefox
+  - Safari
+  - IE11
+
+### Upgrade Scenarios
+  - Migration scenarios- Does the feature affect old indices, saved objects ?
+  - Has the feature been tested with Kibana aliases
+  - Read/Write privileges of the indices before and after the upgrade?
+
+### Test coverage
+  - Does the feature have sufficient unit test coverage? (does it handle storeinSessions?)
+  - Does the feature have sufficient Functional UI  test coverage?
+  - Does the feature have sufficient Rest API coverage test coverage?
+  - Does the feature have sufficient Integration test coverage?
+
+### Environment configurations
+
+- Kibana should be fully [cross cluster search](https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-cross-cluster-search.html) compatible (aside from admin UIs which only work on the local cluster).
+- How does your plugin behave when optional dependencies are disabled?
+- How does your app behave under anonymous access, or with security disabled?
+- Make sure to test your PR in a cloud environment. Read about the <DocLink id="kibDevTutorialCI" section="labels" text="ci:deploy cloud" /> label which makes this very easy.
+
+
+## Backward compatibility
+
+Any time you change state that is part of a Saved Object you will have to write a <DocLink id="kibDevDocsSavedObjectsIntro" section="migrations-and-backward-compatibility" text="migration" />.
+
+Never store state from another plugin in your Saved Objects or URLs unless it implements the <DocLink id="kibDevDocsPersistableStateIntro" text="persistable state interface"/>. Remember to check for migrations when deserializing that state.
+
+If you expose state and you wish to allow other plugins to persist you must ensure it implements the <DocLink id="kibDevDocsPersistableStateIntro" text="persistable state interface"/>. This is very common for `by value` entities, like visualizations that exist on a dashboard but are not part of the visualization library. If you make a breaking change to this state you must remember to register a migration for it.
+
+Saved objects exported from past Kibana versions should always continue to work. Bookmarked URLs should also always work. Check out <DocLink id="kibDevKeyConceptsNavigation" section="specifying-state" text="URL Locators" /> to learn about migrating state in URLs.
+
+## Avoid these common mistakes
+
+### Treating Kibana's filesystem as durable storage
+
+Plugins should rarely, if ever, access Kibana's filesystem directly. Kibana instances are commonly ephemeral and anything written to the filesystem will potentially
+not be there on restart.
+
+### Storing state in server memory
+
+There are generally multiple instances of Kibana all hosted behind a round-robin load-balancer. As a result, storing state in server memory is risky as there is no
+guarantee that a single end-user's HTTP requests will be served by the same Kibana instance.
+
+### Using WebSockets
+
+Kibana has a number of platform services that don't work with WebSockets, for example authentication and authorization. If your use-case would benefit substantially
+from websockets, talk to the Kibana Core team about adding support. Do not hack around this limitation, everytime that someone has, it's created so many problems
+it's been eventually removed.
+
+
 
 ## Security best practices
 

@@ -7,16 +7,16 @@
 
 import { pick } from 'lodash';
 import { getRuleRoute } from './get_rule';
-import { httpServiceMock } from 'src/core/server/mocks';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
-import { SanitizedAlert } from '../types';
+import { SanitizedRule } from '../types';
 import { AsApiContract } from './lib';
 
 const rulesClient = rulesClientMock.create();
-jest.mock('../lib/license_api_access.ts', () => ({
+jest.mock('../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
@@ -25,7 +25,7 @@ beforeEach(() => {
 });
 
 describe('getRuleRoute', () => {
-  const mockedAlert: SanitizedAlert<{
+  const mockedAlert: SanitizedRule<{
     bar: boolean;
   }> = {
     id: '1',
@@ -63,7 +63,7 @@ describe('getRuleRoute', () => {
     },
   };
 
-  const getResult: AsApiContract<SanitizedAlert<{ bar: boolean }>> = {
+  const getResult: AsApiContract<SanitizedRule<{ bar: boolean }>> = {
     ...pick(mockedAlert, 'consumer', 'name', 'schedule', 'tags', 'params', 'throttle', 'enabled'),
     rule_type_id: mockedAlert.alertTypeId,
     notify_when: mockedAlert.notifyWhen,

@@ -374,11 +374,13 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async getTopNLabel() {
+    await this.visChart.waitForVisualizationRenderingStabilized();
     const topNLabel = await this.find.byCssSelector('.tvbVisTopN__label');
     return await topNLabel.getVisibleText();
   }
 
   public async getTopNCount() {
+    await this.visChart.waitForVisualizationRenderingStabilized();
     const gaugeCount = await this.find.byCssSelector('.tvbVisTopN__value');
     return await gaugeCount.getVisibleText();
   }
@@ -450,19 +452,27 @@ export class VisualBuilderPageObject extends FtrService {
     return await tableView.getVisibleText();
   }
 
+  private async switchTab(visType: string, tab: string) {
+    const testSubj = `${visType}Editor${tab}Btn`;
+    await this.retry.try(async () => {
+      await this.testSubjects.click(testSubj);
+      await this.header.waitUntilLoadingHasFinished();
+      if (!(await (await this.testSubjects.find(testSubj)).elementHasClass('euiTab-isSelected'))) {
+        throw new Error('tab not active');
+      }
+    });
+  }
+
   public async clickPanelOptions(tabName: string) {
-    await this.testSubjects.click(`${tabName}EditorPanelOptionsBtn`);
-    await this.header.waitUntilLoadingHasFinished();
+    await this.switchTab(tabName, 'PanelOptions');
   }
 
   public async clickDataTab(tabName: string) {
-    await this.testSubjects.click(`${tabName}EditorDataBtn`);
-    await this.header.waitUntilLoadingHasFinished();
+    await this.switchTab(tabName, 'Data');
   }
 
   public async clickAnnotationsTab() {
-    await this.testSubjects.click('timeSeriesEditorAnnotationsBtn');
-    await this.header.waitUntilLoadingHasFinished();
+    await this.switchTab('timeSeries', 'Annotations');
   }
 
   public async clickAnnotationsAddDataSourceButton() {
@@ -774,9 +784,22 @@ export class VisualBuilderPageObject extends FtrService {
     await this.setMetricsGroupBy('terms');
     await this.common.sleep(1000);
     const byField = await this.testSubjects.find('groupByField');
-    await this.comboBox.setElement(byField, field);
+    await this.retry.try(async () => {
+      await this.comboBox.setElement(byField, field);
+    });
 
     await this.setMetricsGroupByFiltering(filtering.include, filtering.exclude);
+  }
+
+  public async setAnotherGroupByTermsField(field: string) {
+    const fieldSelectAddButtons = await this.testSubjects.findAll('fieldSelectItemAddBtn');
+    await fieldSelectAddButtons[fieldSelectAddButtons.length - 1].click();
+    await this.common.sleep(2000);
+    const byFields = await this.testSubjects.findAll('fieldSelectItem');
+    const selectedByField = byFields[byFields.length - 1];
+    await this.retry.try(async () => {
+      await this.comboBox.setElement(selectedByField, field);
+    });
   }
 
   public async setMetricsGroupByFiltering(include?: string, exclude?: string) {
@@ -794,9 +817,7 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async checkSelectedMetricsGroupByValue(value: string) {
-    const groupBy = await this.find.byCssSelector(
-      '.tvbAggRow--split [data-test-subj="comboBoxInput"]'
-    );
+    const groupBy = await this.testSubjects.find('groupBySelect');
     return await this.comboBox.isOptionSelected(groupBy, value);
   }
 
@@ -815,9 +836,14 @@ export class VisualBuilderPageObject extends FtrService {
     await filterLabelInput[nth].type(label);
   }
 
-  public async setChartType(type: string, nth: number = 0) {
+  public async setChartType(type: 'Bar' | 'Line', nth: number = 0) {
     const seriesChartTypeComboBoxes = await this.testSubjects.findAll('seriesChartTypeComboBox');
     return await this.comboBox.setElement(seriesChartTypeComboBoxes[nth], type);
+  }
+
+  public async setStackedType(stackedType: string, nth: number = 0) {
+    const seriesChartTypeComboBoxes = await this.testSubjects.findAll('seriesStackedComboBox');
+    return await this.comboBox.setElement(seriesChartTypeComboBoxes[nth], stackedType);
   }
 
   public async setSeriesFilter(query: string) {
@@ -867,6 +893,7 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async getChartDebugState(chartData?: DebugState) {
+    await this.header.waitUntilLoadingHasFinished();
     return chartData ?? (await this.elasticChart.getChartDebugData())!;
   }
 
@@ -884,7 +911,6 @@ export class VisualBuilderPageObject extends FtrService {
     chartData?: DebugState,
     itemType: 'areas' | 'bars' | 'annotations' = 'areas'
   ) {
-    await this.header.waitUntilLoadingHasFinished();
     return (await this.getChartDebugState(chartData))?.[itemType];
   }
 

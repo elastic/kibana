@@ -12,27 +12,17 @@
  * in Elasticsearch.
  */
 
-import React, { Fragment } from 'react';
-import {
-  EuiLink,
-  EuiTextColor,
-  EuiTitle,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPortal,
-} from '@elastic/eui';
+import React from 'react';
+import { EuiTitle, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPortal } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getServices } from '../kibana_services';
-import { TelemetryPluginStart } from '../../../../telemetry/public';
 
 import { SampleDataCard } from './sample_data';
+
 interface Props {
   urlBasePath: string;
   onSkip: () => void;
-  telemetry?: TelemetryPluginStart;
 }
 
 /**
@@ -47,7 +37,7 @@ export class Welcome extends React.Component<Props> {
     }
   };
 
-  private redirecToAddData() {
+  private redirectToAddData() {
     this.services.application.navigateToApp('integrations', { path: '/browse' });
   }
 
@@ -58,68 +48,23 @@ export class Welcome extends React.Component<Props> {
 
   private onSampleDataConfirm = () => {
     this.services.trackUiMetric(METRIC_TYPE.CLICK, 'sampleDataConfirm');
-    this.redirecToAddData();
+    this.redirectToAddData();
   };
 
   componentDidMount() {
-    const { telemetry } = this.props;
+    const { welcomeService } = this.services;
     this.services.trackUiMetric(METRIC_TYPE.LOADED, 'welcomeScreenMount');
-    if (telemetry?.telemetryService.userCanChangeSettings) {
-      telemetry.telemetryNotifications.setOptedInNoticeSeen();
-    }
     document.addEventListener('keydown', this.hideOnEsc);
+    welcomeService.onRendered();
   }
 
   componentWillUnmount() {
     document.removeEventListener('keydown', this.hideOnEsc);
   }
 
-  private renderTelemetryEnabledOrDisabledText = () => {
-    const { telemetry } = this.props;
-    if (
-      !telemetry ||
-      !telemetry.telemetryService.userCanChangeSettings ||
-      !telemetry.telemetryService.getCanChangeOptInStatus()
-    ) {
-      return null;
-    }
-
-    const isOptedIn = telemetry.telemetryService.getIsOptedIn();
-    if (isOptedIn) {
-      return (
-        <Fragment>
-          <FormattedMessage
-            id="home.dataManagementDisableCollection"
-            defaultMessage=" To stop collection, "
-          />
-          <EuiLink href={this.services.addBasePath('management/kibana/settings')}>
-            <FormattedMessage
-              id="home.dataManagementDisableCollectionLink"
-              defaultMessage="disable usage data here."
-            />
-          </EuiLink>
-        </Fragment>
-      );
-    } else {
-      return (
-        <Fragment>
-          <FormattedMessage
-            id="home.dataManagementEnableCollection"
-            defaultMessage=" To start collection, "
-          />
-          <EuiLink href={this.services.addBasePath('management/kibana/settings')}>
-            <FormattedMessage
-              id="home.dataManagementEnableCollectionLink"
-              defaultMessage="enable usage data here."
-            />
-          </EuiLink>
-        </Fragment>
-      );
-    }
-  };
-
   render() {
-    const { urlBasePath, telemetry } = this.props;
+    const { urlBasePath } = this.props;
+    const { welcomeService } = this.services;
     return (
       <EuiPortal>
         <div className="homWelcome" data-test-subj="homeWelcomeInterstitial">
@@ -146,28 +91,7 @@ export class Welcome extends React.Component<Props> {
                   onDecline={this.onSampleDataDecline}
                 />
                 <EuiSpacer size="s" />
-                {!!telemetry && (
-                  <Fragment>
-                    <EuiTextColor className="euiText--small" color="subdued">
-                      <FormattedMessage
-                        id="home.dataManagementDisclaimerPrivacy"
-                        defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our "
-                      />
-                      <EuiLink
-                        href={telemetry.telemetryConstants.getPrivacyStatementUrl()}
-                        target="_blank"
-                        rel="noopener"
-                      >
-                        <FormattedMessage
-                          id="home.dataManagementDisclaimerPrivacyLink"
-                          defaultMessage="Privacy Statement."
-                        />
-                      </EuiLink>
-                      {this.renderTelemetryEnabledOrDisabledText()}
-                    </EuiTextColor>
-                    <EuiSpacer size="xs" />
-                  </Fragment>
-                )}
+                {welcomeService.renderTelemetryNotice()}
               </EuiFlexItem>
             </EuiFlexGroup>
           </div>

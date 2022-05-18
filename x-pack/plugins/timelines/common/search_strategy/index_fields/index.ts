@@ -11,7 +11,8 @@ import type {
   IEsSearchRequest,
   IEsSearchResponse,
   FieldSpec,
-} from '../../../../../../src/plugins/data/common';
+  RuntimeField,
+} from '@kbn/data-plugin/common';
 import type { DocValueFields, Maybe } from '../common';
 
 export type BeatFieldsFactoryQueryType = 'beatFields';
@@ -69,8 +70,10 @@ export interface BrowserField {
   name: string;
   searchable: boolean;
   type: string;
+  esTypes?: string[];
   subType?: IFieldSubType;
   readFromDocValues: boolean;
+  runtimeField?: RuntimeField;
 }
 
 export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;

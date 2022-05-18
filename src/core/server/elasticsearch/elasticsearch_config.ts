@@ -11,7 +11,7 @@ import { readPkcs12Keystore, readPkcs12Truststore } from '@kbn/crypto';
 import { i18n } from '@kbn/i18n';
 import { Duration } from 'moment';
 import { readFileSync } from 'fs';
-import { ConfigDeprecationProvider } from 'src/core/server';
+import { ConfigDeprecationProvider } from '..';
 import { ServiceConfigDescriptor } from '../internal_types';
 import { getReservedHeaders } from './default_headers';
 
@@ -36,6 +36,7 @@ export const configSchema = schema.object({
   hosts: schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1 })], {
     defaultValue: 'http://localhost:9200',
   }),
+  maxSockets: schema.number({ defaultValue: Infinity, min: 1 }),
   compression: schema.boolean({ defaultValue: false }),
   username: schema.maybe(
     schema.string({
@@ -299,6 +300,11 @@ export class ElasticsearchConfig {
   public readonly apiVersion: string;
 
   /**
+   * The maximum number of sockets that can be used for communications with elasticsearch.
+   */
+  public readonly maxSockets: number;
+
+  /**
    * Whether to use compression for communications with elasticsearch.
    */
   public readonly compression: boolean;
@@ -405,6 +411,7 @@ export class ElasticsearchConfig {
     this.password = rawConfig.password;
     this.serviceAccountToken = rawConfig.serviceAccountToken;
     this.customHeaders = rawConfig.customHeaders;
+    this.maxSockets = rawConfig.maxSockets;
     this.compression = rawConfig.compression;
     this.skipStartupConnectionCheck = rawConfig.skipStartupConnectionCheck;
 

@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Suspicious Process from Conhost",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  process.parent.name : \"conhost.exe\" and\n  not process.executable : (\"?:\\\\Windows\\\\splwow64.exe\", \"?:\\\\Windows\\\\System32\\\\WerFault.exe\", \"?:\\\\Windows\\\\System32\\\\conhost.exe\")\n",
   "references": [
     "https://modexp.wordpress.com/2018/09/12/process-injection-user-data/",
@@ -46,5 +47,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 5
 }

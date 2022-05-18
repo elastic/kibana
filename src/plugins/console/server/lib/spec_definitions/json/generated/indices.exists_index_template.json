@@ -9,7 +9,7 @@
       "HEAD"
     ],
     "patterns": [
-      "_index_template/{name}"
+      "_index_template/{index_template}"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-templates.html"
   }

@@ -23,7 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import type { Observable } from 'rxjs';
-import type { CoreTheme } from 'kibana/public';
+import type { CoreTheme } from '@kbn/core/public';
 
 import type { PackageInfo, UpgradePackagePolicyDryRunResponse } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
@@ -48,8 +48,8 @@ import { UpdateButton } from './update_button';
 import { UninstallButton } from './uninstall_button';
 
 const SettingsTitleCell = styled.td`
-  padding-right: ${(props) => props.theme.eui.spacerSizes.xl};
-  padding-bottom: ${(props) => props.theme.eui.spacerSizes.m};
+  padding-right: ${(props) => props.theme.eui.euiSizeXL};
+  padding-bottom: ${(props) => props.theme.eui.euiSizeM};
 `;
 
 const NoteLabel = () => (

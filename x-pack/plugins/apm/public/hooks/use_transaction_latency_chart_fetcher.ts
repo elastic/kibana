@@ -10,7 +10,6 @@ import { useFetcher } from './use_fetcher';
 import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 import { getLatencyChartSelector } from '../selectors/latency_chart_selectors';
-import { getTimeRangeComparison } from '../components/shared/time_comparison/get_time_range_comparison';
 import { useTimeRange } from './use_time_range';
 import { useApmParams } from './use_apm_params';
 
@@ -23,26 +22,14 @@ export function useTransactionLatencyChartsFetcher({
 }) {
   const { transactionType, serviceName } = useApmServiceContext();
   const {
-    urlParams: {
-      transactionName,
-      latencyAggregationType,
-      comparisonType,
-      comparisonEnabled,
-    },
+    urlParams: { transactionName, latencyAggregationType },
   } = useLegacyUrlParams();
 
   const {
-    query: { rangeFrom, rangeTo },
+    query: { rangeFrom, rangeTo, offset, comparisonEnabled },
   } = useApmParams('/services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonType,
-    comparisonEnabled,
-  });
 
   const { data, error, status } = useFetcher(
     (callApmApi) => {
@@ -66,8 +53,7 @@ export function useTransactionLatencyChartsFetcher({
                 transactionType,
                 transactionName,
                 latencyAggregationType,
-                comparisonStart,
-                comparisonEnd,
+                offset: comparisonEnabled ? offset : undefined,
               },
             },
           }
@@ -83,8 +69,8 @@ export function useTransactionLatencyChartsFetcher({
       transactionName,
       transactionType,
       latencyAggregationType,
-      comparisonStart,
-      comparisonEnd,
+      offset,
+      comparisonEnabled,
     ]
   );
 

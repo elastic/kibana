@@ -47,16 +47,16 @@ export function Series({ item, isExpanded, toggleExpanded }: Props) {
     seriesId: id,
   };
 
-  const [isExapndedOnce, setIsExapndedOnce] = useState(false);
+  const [isExpandedOnce, setIsExpandedOnce] = useState(false);
 
   useEffect(() => {
     if (isExpanded) {
-      setIsExapndedOnce(true);
+      setIsExpandedOnce(true);
     }
   }, [isExpanded]);
 
   return (
-    <EuiPanel hasBorder={true} data-test-subj={`exploratoryViewSeriesPanel${0}`}>
+    <EuiPanel hasBorder={true} data-test-subj={`exploratoryViewSeriesPanel${0}`} paddingSize="s">
       <StyledAccordion
         id={`exploratoryViewSeriesAccordion${id}`}
         forceState={isExpanded ? 'open' : 'closed'}
@@ -99,7 +99,7 @@ export function Series({ item, isExpanded, toggleExpanded }: Props) {
       >
         <EuiSpacer size="s" />
         <EuiPanel color="subdued">
-          {isExapndedOnce && <ExpandedSeriesRow {...seriesProps} />}
+          {isExpandedOnce && <ExpandedSeriesRow {...seriesProps} />}
         </EuiPanel>
       </StyledAccordion>
     </EuiPanel>

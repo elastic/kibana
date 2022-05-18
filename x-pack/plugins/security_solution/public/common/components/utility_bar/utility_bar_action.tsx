@@ -35,10 +35,16 @@ const Popover = React.memo<UtilityBarActionProps>(
     ownFocus,
     dataTestSubj,
     popoverPanelPaddingSize,
+    onClick,
   }) => {
     const [popoverState, setPopoverState] = useState(false);
 
     const closePopover = useCallback(() => setPopoverState(false), [setPopoverState]);
+
+    const handleLinkIconClick = useCallback(() => {
+      onClick?.();
+      setPopoverState(!popoverState);
+    }, [popoverState, onClick]);
 
     return (
       <EuiPopover
@@ -51,13 +57,13 @@ const Popover = React.memo<UtilityBarActionProps>(
             iconSide={iconSide}
             iconSize={iconSize}
             iconType={iconType}
-            onClick={() => setPopoverState(!popoverState)}
             disabled={disabled}
+            onClick={handleLinkIconClick}
           >
             {children}
           </LinkIcon>
         }
-        closePopover={() => setPopoverState(false)}
+        closePopover={closePopover}
         isOpen={popoverState}
         repositionOnScroll
       >
@@ -95,8 +101,14 @@ export const UtilityBarAction = React.memo<UtilityBarActionProps>(
   }) => {
     if (inProgress) {
       return (
-        <BarAction data-test-subj={dataTestSubj}>
-          <LoadingButtonEmpty size="xs" className="eui-alignTop" isLoading iconSide="right">
+        <BarAction>
+          <LoadingButtonEmpty
+            data-test-subj={`${dataTestSubj}-progress`}
+            size="xs"
+            className="eui-alignTop"
+            isLoading
+            iconSide="right"
+          >
             {children}
           </LoadingButtonEmpty>
         </BarAction>
@@ -116,6 +128,7 @@ export const UtilityBarAction = React.memo<UtilityBarActionProps>(
             ownFocus={ownFocus}
             popoverPanelPaddingSize={popoverPanelPaddingSize}
             popoverContent={popoverContent}
+            onClick={onClick}
           >
             {children}
           </Popover>

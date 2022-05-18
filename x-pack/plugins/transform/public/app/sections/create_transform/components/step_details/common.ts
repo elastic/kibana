@@ -5,16 +5,22 @@
  * 2.0.
  */
 
+import {
+  DEFAULT_CONTINUOUS_MODE_DELAY,
+  DEFAULT_TRANSFORM_FREQUENCY,
+  DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND,
+  DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
+} from '../../../../../../common/constants';
 import type { TransformConfigUnion, TransformId } from '../../../../../../common/types/transform';
 
 export type EsIndexName = string;
 export type EsIngestPipelineName = string;
-export type IndexPatternTitle = string;
+export type DataViewTitle = string;
 
 export interface StepDetailsExposedState {
   continuousModeDateField: string;
   continuousModeDelay: string;
-  createIndexPattern: boolean;
+  createDataView: boolean;
   destinationIndex: EsIndexName;
   destinationIngestPipeline: EsIngestPipelineName;
   isContinuousModeEnabled: boolean;
@@ -26,34 +32,31 @@ export interface StepDetailsExposedState {
   transformDescription: string;
   transformFrequency: string;
   transformSettingsMaxPageSearchSize: number;
-  transformSettingsDocsPerSecond?: number;
+  transformSettingsDocsPerSecond: number | null;
   valid: boolean;
-  indexPatternTimeField?: string | undefined;
+  dataViewTimeField?: string | undefined;
   _meta?: Record<string, unknown>;
 }
-
-const defaultContinuousModeDelay = '60s';
-const defaultTransformFrequency = '1m';
-const defaultTransformSettingsMaxPageSearchSize = 500;
 
 export function getDefaultStepDetailsState(): StepDetailsExposedState {
   return {
     continuousModeDateField: '',
-    continuousModeDelay: defaultContinuousModeDelay,
-    createIndexPattern: true,
+    continuousModeDelay: DEFAULT_CONTINUOUS_MODE_DELAY,
+    createDataView: true,
     isContinuousModeEnabled: false,
     isRetentionPolicyEnabled: false,
     retentionPolicyDateField: '',
     retentionPolicyMaxAge: '',
     transformId: '',
     transformDescription: '',
-    transformFrequency: defaultTransformFrequency,
-    transformSettingsMaxPageSearchSize: defaultTransformSettingsMaxPageSearchSize,
+    transformFrequency: DEFAULT_TRANSFORM_FREQUENCY,
+    transformSettingsMaxPageSearchSize: DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
+    transformSettingsDocsPerSecond: DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND,
     destinationIndex: '',
     destinationIngestPipeline: '',
     touched: false,
     valid: false,
-    indexPatternTimeField: undefined,
+    dataViewTimeField: undefined,
   };
 }
 
@@ -67,7 +70,7 @@ export function applyTransformConfigToDetailsState(
     const continuousModeTime = transformConfig.sync?.time;
     if (continuousModeTime !== undefined) {
       state.continuousModeDateField = continuousModeTime.field;
-      state.continuousModeDelay = continuousModeTime?.delay ?? defaultContinuousModeDelay;
+      state.continuousModeDelay = continuousModeTime?.delay ?? DEFAULT_CONTINUOUS_MODE_DELAY;
       state.isContinuousModeEnabled = true;
     }
 
@@ -101,6 +104,8 @@ export function applyTransformConfigToDetailsState(
       }
       if (typeof transformConfig.settings?.docs_per_second === 'number') {
         state.transformSettingsDocsPerSecond = transformConfig.settings.docs_per_second;
+      } else {
+        state.transformSettingsDocsPerSecond = null;
       }
     }
 

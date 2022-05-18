@@ -9,7 +9,7 @@ import React, { Component, Fragment } from 'react';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ApplicationStart } from 'kibana/public';
+import { ApplicationStart } from '@kbn/core/public';
 
 import {
   EuiLink,

@@ -5,47 +5,18 @@
  * 2.0.
  */
 
-import { AGENTS_TAB, AGENT_POLICIES_TAB, ENROLLMENT_TOKENS_TAB } from '../screens/fleet';
+import {
+  AGENTS_TAB,
+  ADD_AGENT_BUTTON_TOP,
+  AGENT_FLYOUT_CLOSE_BUTTON,
+  STANDALONE_TAB,
+  AGENT_POLICY_CODE_BLOCK,
+} from '../screens/fleet';
 import { cleanupAgentPolicies, unenrollAgent } from '../tasks/cleanup';
+import { verifyPolicy, verifyAgentPackage, navigateToTab } from '../tasks/fleet';
 import { FLEET, navigateTo } from '../tasks/navigation';
 
 describe('Fleet startup', () => {
-  function navigateToTab(tab: string) {
-    cy.getBySel(tab).click();
-    cy.get('.euiBasicTable-loading').should('not.exist');
-  }
-
-  function navigateToAgentPolicy(name: string) {
-    cy.get('.euiLink').contains(name).click();
-    cy.get('.euiLoadingSpinner').should('not.exist');
-  }
-
-  function navigateToEnrollmentTokens() {
-    cy.getBySel(ENROLLMENT_TOKENS_TAB).click();
-    cy.get('.euiBasicTable-loading').should('not.exist');
-    cy.get('.euiButtonIcon--danger'); // wait for trash icon
-  }
-
-  function verifyPolicy(name: string, integrations: string[]) {
-    navigateToTab(AGENT_POLICIES_TAB);
-
-    navigateToAgentPolicy(name);
-    integrations.forEach((integration) => {
-      cy.get('.euiLink').contains(integration);
-    });
-
-    cy.get('.euiButtonEmpty').contains('View all agent policies').click();
-
-    navigateToEnrollmentTokens();
-
-    cy.get('.euiTableCellContent').contains(name);
-  }
-
-  function verifyAgentPackage() {
-    cy.visit('/app/integrations/installed');
-    cy.getBySel('integration-card:epr:elastic_agent');
-  }
-
   // skipping Fleet Server enroll, to enable, comment out runner.ts line 23
   describe.skip('Fleet Server', () => {
     it('should display Add agent button and Healthy agent once Fleet Agent page loaded', () => {
@@ -77,8 +48,8 @@ describe('Fleet startup', () => {
     });
 
     it('should create agent policy', () => {
-      cy.getBySel('addAgentBtnTop').click();
-      cy.getBySel('standaloneTab').click();
+      cy.getBySel(ADD_AGENT_BUTTON_TOP).click();
+      cy.getBySel(STANDALONE_TAB).click();
 
       cy.intercept('POST', '/api/fleet/agent_policies?sys_monitoring=true').as('createAgentPolicy');
 
@@ -90,14 +61,13 @@ describe('Fleet startup', () => {
         cy.log('Create agent policy took: ' + (Date.now() - startTime) / 1000 + ' s');
         agentPolicyId = xhr.response.body.item.id;
 
-        cy.getBySel('agentPolicyCreateStatusCallOut').contains('Agent policy created');
-
         // verify create button changed to dropdown
         cy.getBySel('agentPolicyDropdown');
-        // verify agent.yml code block has new policy id
-        cy.get('.euiCodeBlock__code').contains(`id: ${agentPolicyId}`);
 
-        cy.getBySel('euiFlyoutCloseButton').click();
+        // verify agent.yml code block has new policy id
+        cy.getBySel(AGENT_POLICY_CODE_BLOCK).contains(`id: ${agentPolicyId}`);
+
+        cy.getBySel(AGENT_FLYOUT_CLOSE_BUTTON).click();
 
         // verify policy is created and has system package
         verifyPolicy('Agent policy 1', ['System']);
@@ -107,18 +77,28 @@ describe('Fleet startup', () => {
     });
 
     it('should create Fleet Server policy', () => {
+      cy.getBySel('fleetServerFlyoutTab-advanced').click();
       cy.getBySel('createFleetServerPolicyBtn').click();
-      cy.getBySel('agentPolicyCreateStatusCallOut').contains('Agent policy created');
+
+      // Wait until the success callout is shown before navigating away
+      cy.getBySel('agentPolicyCreateStatusCallOut')
+        .should('exist')
+        .and('have.class', 'euiCallOut--success');
 
       // verify policy is created and has fleet server and system package
       verifyPolicy('Fleet Server policy 1', ['Fleet Server', 'System']);
 
       navigateToTab(AGENTS_TAB);
+      cy.getBySel('fleetServerFlyoutTab-advanced').click();
+
       // verify create button changed to dropdown
       cy.getBySel('agentPolicyDropdown');
 
       // verify fleet server enroll command contains created policy id
-      cy.getBySel('fleetServerHostInput').type('http://localhost:8220');
+      cy.getBySel('fleetServerHostInput')
+        .getBySel('comboBoxSearchInput')
+        .type('https://localhost:8220');
+
       cy.getBySel('fleetServerAddHostBtn').click();
       cy.getBySel('fleetServerGenerateServiceTokenBtn').click();
       cy.get('.euiCodeBlock__code').contains('--fleet-server-policy=fleet-server-policy');

@@ -50,18 +50,24 @@ export interface IExecutionContextContainer {
 }
 
 function stringify(ctx: KibanaExecutionContext): string {
-  const stringifiedCtx = `${ctx.type}:${ctx.name}:${encodeURIComponent(ctx.id)}`;
-  return ctx.parent ? `${stringify(ctx.parent)};${stringifiedCtx}` : stringifiedCtx;
+  const encodeURIComponentIfNotEmpty = (val?: string) => encodeURIComponent(val || '');
+  const stringifiedCtx = `${encodeURIComponentIfNotEmpty(ctx.type)}:${encodeURIComponentIfNotEmpty(
+    ctx.name
+  )}:${encodeURIComponentIfNotEmpty(ctx.id)}`;
+  return ctx.child ? `${stringifiedCtx};${stringify(ctx.child)}` : stringifiedCtx;
 }
 
 export class ExecutionContextContainer implements IExecutionContextContainer {
   readonly #context: Readonly<KibanaExecutionContext>;
+
   constructor(context: KibanaExecutionContext, parent?: IExecutionContextContainer) {
-    this.#context = { parent: parent?.toJSON(), ...context };
+    this.#context = parent ? { ...parent.toJSON(), child: context } : context;
   }
+
   toString(): string {
     return enforceMaxLength(stringify(this.#context));
   }
+
   toJSON() {
     return this.#context;
   }

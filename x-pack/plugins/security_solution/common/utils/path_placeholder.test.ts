@@ -6,7 +6,11 @@
  */
 
 import { getPlaceholderTextByOSType, getPlaceholderText } from './path_placeholder';
-import { ConditionEntryField, OperatingSystem, TrustedAppEntryTypes } from '../endpoint/types';
+import {
+  ConditionEntryField,
+  OperatingSystem,
+  TrustedAppEntryTypes,
+} from '@kbn/securitysolution-utils';
 
 const trustedAppEntry = {
   os: OperatingSystem.LINUX,

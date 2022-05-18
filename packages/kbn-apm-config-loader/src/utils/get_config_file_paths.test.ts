@@ -23,6 +23,10 @@ describe('getConfigurationFilePaths', () => {
   });
 
   it('fallbacks to `getConfigPath` value', () => {
-    expect(getConfigurationFilePaths([])).toEqual([getConfigPath()]);
+    const path = getConfigPath();
+    expect(getConfigurationFilePaths([])).toEqual([
+      path,
+      path.replace('kibana.yml', 'kibana.dev.yml'),
+    ]);
   });
 });

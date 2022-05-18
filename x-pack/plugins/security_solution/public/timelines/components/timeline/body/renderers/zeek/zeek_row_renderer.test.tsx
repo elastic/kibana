@@ -10,7 +10,6 @@ import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
-import { mockBrowserFields } from '../../../../../../common/containers/source/mock';
 import { Ecs } from '../../../../../../../common/ecs';
 import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
 import '../../../../../../common/mock/match_media';
@@ -41,7 +40,6 @@ describe('zeek_row_renderer', () => {
 
   test('renders correctly against snapshot', () => {
     const children = zeekRowRenderer.renderRow({
-      browserFields: mockBrowserFields,
       data: nonZeek,
       isDraggable: true,
       timelineId: 'test',
@@ -61,7 +59,6 @@ describe('zeek_row_renderer', () => {
 
   test('should render a zeek row', () => {
     const children = zeekRowRenderer.renderRow({
-      browserFields: mockBrowserFields,
       data: zeek,
       isDraggable: true,
       timelineId: 'test',
@@ -71,7 +68,12 @@ describe('zeek_row_renderer', () => {
         <span>{children}</span>
       </TestProviders>
     );
-    expect(removeExternalLinkText(wrapper.text())).toContain(
+
+    const extractEuiIconText = removeExternalLinkText(wrapper.text()).replaceAll(
+      'External link',
+      ''
+    );
+    expect(extractEuiIconText).toContain(
       'C8DRTq362Fios6hw16connectionREJSrConnection attempt rejectedtcpSource185.176.26.101:44059Destination207.154.238.205:11568'
     );
   });

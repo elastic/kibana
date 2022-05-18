@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'src/core/server';
-import { LicensingPluginStart } from '../../../licensing/server';
+import { IScopedClusterClient } from '@kbn/core/server';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
 export async function canStartTrial(client: IScopedClusterClient) {
   try {
-    const { body: response } = await client.asCurrentUser.license.getTrialStatus();
+    const response = await client.asCurrentUser.license.getTrialStatus();
     return response.eligible_to_start_trial;
   } catch (error) {
     return error.body;
@@ -24,7 +24,7 @@ interface StartTrialArg {
 
 export async function startTrial({ client, licensing }: StartTrialArg) {
   try {
-    const { body: response } = await client.asCurrentUser.license.postStartTrial({
+    const response = await client.asCurrentUser.license.postStartTrial({
       acknowledge: true,
     });
     const { trial_was_started: trialWasStarted } = response;

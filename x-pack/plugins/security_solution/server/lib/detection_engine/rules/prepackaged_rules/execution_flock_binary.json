@@ -1,0 +1,55 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies Linux binary flock abuse to break out from restricted environments by spawning an interactive system shell.The flock utility allows us to manage advisory file locks in shell scripts or on the command line and the activity of spawing a shell is not a standard use of this binary by a user or system administrator. It indicates a potentially malicious actor attempting to improve the capabilities or stability of their access.",
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Linux Restricted Shell Breakout via flock Shell evasion",
+  "query": "process where event.type == \"start\" and process.parent.name == \"flock\" and process.parent.args == \"-u\" and process.parent.args == \"/\" and process.parent.args in (\"/bin/sh\", \"/bin/bash\", \"/bin/dash\", \"sh\", \"bash\", \"dash\") and process.name in (\"bash\", \"dash\", \"sh\")\n",
+  "references": [
+    "https://gtfobins.github.io/gtfobins/flock/"
+  ],
+  "risk_score": 47,
+  "rule_id": "f52362cd-baf1-4b6d-84be-064efc826461",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Execution",
+    "GTFOBins"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "reference": "https://attack.mitre.org/techniques/T1059/",
+          "subtechnique": [
+            {
+              "id": "T1059.004",
+              "name": "Unix Shell",
+              "reference": "https://attack.mitre.org/techniques/T1059/004/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

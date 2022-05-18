@@ -5,27 +5,37 @@
  * 2.0.
  */
 
-import { of, NEVER } from 'rxjs';
-import { createMockLayout } from '../layouts/mock';
-import type { getScreenshots, ScreenshotResult } from '.';
+import { of } from 'rxjs';
+import type { Screenshots } from '.';
 
-export function createMockScreenshots(): jest.Mocked<{ getScreenshots: typeof getScreenshots }> {
+export function createMockScreenshots(): jest.Mocked<Screenshots> {
   return {
-    getScreenshots: jest.fn((driverFactory, logger, options) =>
-      of({
-        layout: createMockLayout(),
-        metrics$: NEVER,
-        results: options.urls.map(() => ({
-          timeRange: null,
-          screenshots: [
-            {
-              data: Buffer.from('screenshot'),
-              description: null,
-              title: null,
+    getScreenshots: jest.fn(({ format, urls }) => {
+      switch (format) {
+        case 'pdf':
+          return of({
+            metrics: {
+              pages: 1,
             },
-          ],
-        })),
-      } as ScreenshotResult)
-    ),
-  };
+            data: Buffer.from('screenshot'),
+            errors: [],
+            renderErrors: [],
+          });
+
+        default:
+          return of({
+            results: urls.map(() => ({
+              timeRange: null,
+              screenshots: [
+                {
+                  data: Buffer.from('screenshot'),
+                  description: null,
+                  title: null,
+                },
+              ],
+            })),
+          });
+      }
+    }),
+  } as unknown as jest.Mocked<Screenshots>;
 }

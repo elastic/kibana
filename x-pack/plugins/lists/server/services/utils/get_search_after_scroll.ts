@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type {
   Filter,
   SortFieldOrUndefined,
@@ -43,7 +43,7 @@ export const getSearchAfterScroll = async <T>({
   const query = getQueryFilter({ filter });
   let newSearchAfter = searchAfter;
   for (let i = 0; i < hops; ++i) {
-    const { body: response } = await esClient.search<TieBreaker<T>>({
+    const response = await esClient.search<TieBreaker<T>>({
       body: {
         _source: getSourceWithTieBreaker({ sortField }),
         query,

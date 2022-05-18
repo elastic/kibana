@@ -9,7 +9,7 @@ import { Observable, timer, merge, throwError, EMPTY } from 'rxjs';
 import { map, takeUntil, catchError } from 'rxjs/operators';
 import { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { KibanaRequest, CoreStart, IBasePath } from 'src/core/server';
+import { KibanaRequest, CoreStart, IBasePath } from '@kbn/core/server';
 import {
   GlobalSearchProviderResult,
   GlobalSearchBatchedResults,

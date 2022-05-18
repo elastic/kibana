@@ -13,10 +13,12 @@ import { SYSTEM_INDICES_MIGRATION_POLL_INTERVAL_MS } from '../../../../common/co
 
 describe('Overview - Migrate system indices - Step completion', () => {
   let testBed: OverviewTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-
-  afterAll(() => {
-    server.restore();
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
+  beforeEach(async () => {
+    const mockEnvironment = setupEnvironment();
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    httpSetup = mockEnvironment.httpSetup;
   });
 
   test(`It's complete when no upgrade is needed`, async () => {
@@ -25,7 +27,7 @@ describe('Overview - Migrate system indices - Step completion', () => {
     });
 
     await act(async () => {
-      testBed = await setupOverviewPage();
+      testBed = await setupOverviewPage(httpSetup);
     });
 
     const { exists, component } = testBed;
@@ -41,7 +43,7 @@ describe('Overview - Migrate system indices - Step completion', () => {
     });
 
     await act(async () => {
-      testBed = await setupOverviewPage();
+      testBed = await setupOverviewPage(httpSetup);
     });
 
     const { exists, component } = testBed;
@@ -60,7 +62,7 @@ describe('Overview - Migrate system indices - Step completion', () => {
         migration_status: 'IN_PROGRESS',
       });
 
-      testBed = await setupOverviewPage();
+      testBed = await setupOverviewPage(httpSetup);
     });
 
     afterEach(() => {

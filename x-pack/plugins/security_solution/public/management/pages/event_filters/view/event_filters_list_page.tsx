@@ -64,7 +64,7 @@ type EventListPaginatedContent = PaginatedContentProps<
 
 const AdministrationListPage = styled(_AdministrationListPage)`
   .event-filter-container > * {
-    margin-bottom: ${({ theme }) => theme.eui.spacerSizes.l};
+    margin-bottom: ${({ theme }) => theme.eui.euiSizeL};
 
     &:last-child {
       margin-bottom: 0;
@@ -121,6 +121,7 @@ export const EventFiltersListPage = memo(() => {
 
   // load the list of policies
   const policiesRequest = useGetEndpointSpecificPolicies({
+    perPage: 1000,
     onError: (err) => {
       toasts.addDanger(getLoadPoliciesError(err));
     },

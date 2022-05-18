@@ -40,6 +40,8 @@ include::core/http-service.asciidoc[leveloffset=+1]
 
 include::core/logging-service.asciidoc[leveloffset=+1]
 
+include::core/logging-configuration-migration.asciidoc[leveloffset=+1]
+
 include::core/saved-objects-service.asciidoc[leveloffset=+1]
 
 include::core/uisettings-service.asciidoc[leveloffset=+1]

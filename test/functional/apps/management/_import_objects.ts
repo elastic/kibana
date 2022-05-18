@@ -207,6 +207,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const isSavedObjectImported = objects.includes('saved object imported with index pattern');
         expect(isSavedObjectImported).to.be(true);
       });
+
+      it('should not allow import without a file added', async function () {
+        const importActionDisabled = await PageObjects.savedObjects.importDisabled();
+        expect(importActionDisabled).to.eql('true');
+      });
     });
   });
 }

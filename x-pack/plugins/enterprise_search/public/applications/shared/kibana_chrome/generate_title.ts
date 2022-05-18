@@ -6,7 +6,7 @@
  */
 
 import {
-  ENTERPRISE_SEARCH_PLUGIN,
+  ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   APP_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
@@ -30,7 +30,7 @@ export const generateTitle = (pages: Title) => pages.join(' - ');
  */
 
 export const enterpriseSearchTitle = (page: Title = []) =>
-  generateTitle([...page, ENTERPRISE_SEARCH_PLUGIN.NAME]);
+  generateTitle([...page, ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME]);
 
 export const appSearchTitle = (page: Title = []) =>
   generateTitle([...page, APP_SEARCH_PLUGIN.NAME]);

@@ -7,11 +7,12 @@
  */
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { MarkdownSimple, toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { SortDirection } from '@kbn/data-plugin/public';
 import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../../common';
 import { fetchAnchor } from '../services/anchor';
 import { fetchSurroundingDocs, SurrDocType } from '../services/context';
-import { MarkdownSimple, toMountPoint, wrapWithTheme } from '../../../../../kibana_react/public';
-import { DataView, SortDirection } from '../../../../../data/common';
 import {
   ContextFetchState,
   FailureReason,

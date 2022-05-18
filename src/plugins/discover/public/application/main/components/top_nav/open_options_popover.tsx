@@ -8,7 +8,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { CoreTheme, I18nStart } from 'kibana/public';
+import { CoreTheme, I18nStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -23,10 +23,10 @@ import {
 } from '@elastic/eui';
 import './open_options_popover.scss';
 import { Observable } from 'rxjs';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DiscoverServices } from '../../../../build_services';
 import { DOC_TABLE_LEGACY } from '../../../../../common';
-import { KibanaContextProvider, KibanaThemeProvider } from '../../../../../../kibana_react/public';
 
 const container = document.createElement('div');
 let isOpen = false;

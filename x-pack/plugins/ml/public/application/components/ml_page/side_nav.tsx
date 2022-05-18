@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { EuiSideNavItemType } from '@elastic/eui';
 import { useCallback, useMemo } from 'react';
+import { AIOPS_ENABLED } from '@kbn/aiops-plugin/common';
 import type { MlLocatorParams } from '../../../../common/types/locator';
 import { useUrlState } from '../../util/url_state';
 import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
@@ -45,7 +46,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
           },
         }
       : undefined;
-  }, [globalState]);
+  }, [globalState?.refreshInterval]);
 
   const redirectToTab = useCallback(
     async (defaultPathId: MlLocatorParams['page']) => {
@@ -64,7 +65,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
   const tabsDefinition: Tab[] = useMemo((): Tab[] => {
     const disableLinks = mlFeaturesDisabled;
 
-    return [
+    const mlTabs: Tab[] = [
       {
         id: 'main_section',
         name: '',
@@ -111,6 +112,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             }),
             pathId: ML_PAGES.SINGLE_METRIC_VIEWER,
             disabled: disableLinks,
+            testSubj: 'mlMainTab singleMetricViewer',
           },
           {
             id: 'settings',
@@ -139,6 +141,24 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             }),
             disabled: disableLinks,
             testSubj: 'mlMainTab dataFrameAnalytics',
+          },
+          {
+            id: 'data_frame_analytics_results_explorer',
+            pathId: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
+            name: i18n.translate('xpack.ml.navMenu.dataFrameAnalytics.resultsExplorerText', {
+              defaultMessage: 'Results Explorer',
+            }),
+            disabled: disableLinks,
+            testSubj: 'mlMainTab dataFrameAnalyticsResultsExplorer',
+          },
+          {
+            id: 'data_frame_analytics_job_map',
+            pathId: ML_PAGES.DATA_FRAME_ANALYTICS_MAP,
+            name: i18n.translate('xpack.ml.navMenu.dataFrameAnalytics.analyticsMapText', {
+              defaultMessage: 'Analytics Map',
+            }),
+            disabled: disableLinks,
+            testSubj: 'mlMainTab dataFrameAnalyticsMap',
           },
         ],
       },
@@ -185,7 +205,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
               defaultMessage: 'File',
             }),
             disabled: false,
-            testSubj: 'mlMainTab dataVisualizer fileDatavisualizer',
+            testSubj: 'mlMainTab fileDataVisualizer',
           },
           {
             id: 'data_view_datavisualizer',
@@ -194,11 +214,33 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
               defaultMessage: 'Data View',
             }),
             disabled: false,
-            testSubj: 'mlMainTab dataVisualizer dataViewDatavisualizer',
+            testSubj: 'mlMainTab indexDataVisualizer',
           },
         ],
       },
     ];
+
+    if (AIOPS_ENABLED) {
+      mlTabs.push({
+        id: 'aiops_section',
+        name: i18n.translate('xpack.ml.navMenu.aiopsTabLinkText', {
+          defaultMessage: 'AIOps',
+        }),
+        items: [
+          {
+            id: 'explainlogratespikes',
+            pathId: ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES,
+            name: i18n.translate('xpack.ml.navMenu.explainLogRateSpikesLinkText', {
+              defaultMessage: 'Explain log rate spikes',
+            }),
+            disabled: disableLinks,
+            testSubj: 'mlMainTab explainLogRateSpikes',
+          },
+        ],
+      });
+    }
+
+    return mlTabs;
   }, [mlFeaturesDisabled, canViewMlNodes]);
 
   const getTabItem: (tab: Tab) => EuiSideNavItemType<unknown> = useCallback(
@@ -222,7 +264,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
         forceOpen: true,
       };
     },
-    [activeRoute?.path]
+    [activeRoute?.path, redirectToTab]
   );
 
   return useMemo(() => tabsDefinition.map(getTabItem), [tabsDefinition, getTabItem]);

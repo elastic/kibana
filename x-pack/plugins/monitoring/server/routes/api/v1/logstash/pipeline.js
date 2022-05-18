@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { notFound } from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
-import { handleError } from '../../../../lib/errors';
+import { handleError, PipelineNotFoundError } from '../../../../lib/errors';
 import { getPipelineVersions } from '../../../../lib/logstash/get_pipeline_versions';
 import { getPipeline } from '../../../../lib/logstash/get_pipeline';
 import { getPipelineVertex } from '../../../../lib/logstash/get_pipeline_vertex';
@@ -38,14 +39,14 @@ export function logstashPipelineRoute(server) {
           pipelineId: schema.string(),
           pipelineHash: schema.maybe(schema.string()),
         }),
-        payload: schema.object({
+        body: schema.object({
           ccs: schema.maybe(schema.string()),
           detailVertexId: schema.maybe(schema.string()),
         }),
       },
     },
     handler: async (req) => {
-      const config = server.config();
+      const config = server.config;
       const clusterUuid = req.params.clusterUuid;
       const detailVertexId = req.payload.detailVertexId;
 
@@ -66,6 +67,7 @@ export function logstashPipelineRoute(server) {
       }
       const version = getPipelineVersion(versions, pipelineHash);
 
+      // noinspection ES6MissingAwait
       const promises = [getPipeline(req, config, clusterUuid, pipelineId, version)];
       if (detailVertexId) {
         promises.push(
@@ -81,6 +83,10 @@ export function logstashPipelineRoute(server) {
           vertex,
         };
       } catch (err) {
+        if (err instanceof PipelineNotFoundError) {
+          req.getLogger().error(err.message);
+          throw notFound(err.message);
+        }
         return handleError(err, req);
       }
     },

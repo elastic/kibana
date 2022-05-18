@@ -9,6 +9,7 @@ import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset
 import { Setup } from '../../../lib/helpers/setup_request';
 import { BUCKET_TARGET_COUNT } from '../../transactions/constants';
 import { getBuckets } from './get_buckets';
+import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 
 function getBucketSize({ start, end }: { start: number; end: number }) {
   return Math.floor((end - start) / BUCKET_TARGET_COUNT);
@@ -22,8 +23,7 @@ export async function getErrorDistribution({
   setup,
   start,
   end,
-  comparisonStart,
-  comparisonEnd,
+  offset,
 }: {
   environment: string;
   kuery: string;
@@ -32,10 +32,19 @@ export async function getErrorDistribution({
   setup: Setup;
   start: number;
   end: number;
-  comparisonStart?: number;
-  comparisonEnd?: number;
+  offset?: string;
 }) {
-  const bucketSize = getBucketSize({ start, end });
+  const { startWithOffset, endWithOffset } = getOffsetInMs({
+    start,
+    end,
+    offset,
+  });
+
+  const bucketSize = getBucketSize({
+    start: startWithOffset,
+    end: endWithOffset,
+  });
+
   const commonProps = {
     environment,
     kuery,
@@ -46,17 +55,17 @@ export async function getErrorDistribution({
   };
   const currentPeriodPromise = getBuckets({
     ...commonProps,
-    start,
-    end,
+    start: startWithOffset,
+    end: endWithOffset,
   });
-  const previousPeriodPromise =
-    comparisonStart && comparisonEnd
-      ? getBuckets({
-          ...commonProps,
-          start: comparisonStart,
-          end: comparisonEnd,
-        })
-      : { buckets: [], bucketSize: null };
+
+  const previousPeriodPromise = offset
+    ? getBuckets({
+        ...commonProps,
+        start: startWithOffset,
+        end: endWithOffset,
+      })
+    : { buckets: [], bucketSize: null };
 
   const [currentPeriod, previousPeriod] = await Promise.all([
     currentPeriodPromise,

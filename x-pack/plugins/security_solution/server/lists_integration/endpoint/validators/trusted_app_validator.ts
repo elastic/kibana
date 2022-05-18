@@ -8,21 +8,18 @@
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { BaseValidator } from './base_validator';
-import { ExceptionItemLikeOptions } from '../types';
+import { OperatingSystem, TrustedAppEntryTypes } from '@kbn/securitysolution-utils';
 import {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
-} from '../../../../../lists/server';
-import {
-  ConditionEntry,
-  OperatingSystem,
-  TrustedAppEntryTypes,
-} from '../../../../common/endpoint/types';
+} from '@kbn/lists-plugin/server';
+import { BaseValidator } from './base_validator';
+import { ExceptionItemLikeOptions } from '../types';
+import { TrustedAppConditionEntry as ConditionEntry } from '../../../../common/endpoint/types';
 import {
   getDuplicateFields,
   isValidHash,
-} from '../../../../common/endpoint/service/trusted_apps/validations';
+} from '../../../../common/endpoint/service/artifacts/validations';
 import { EndpointArtifactExceptionValidationError } from './errors';
 
 const ProcessHashField = schema.oneOf([
@@ -233,7 +230,7 @@ export class TrustedAppValidator extends BaseValidator {
 
     await this.validateByPolicyItem(updatedItem);
 
-    return updatedItem as UpdateExceptionListItemOptions;
+    return _updatedItem;
   }
 
   private async validateTrustedAppData(item: ExceptionItemLikeOptions): Promise<void> {

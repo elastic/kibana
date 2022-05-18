@@ -50,9 +50,7 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
             const expected = mapValues(
               uiCapabilities.value!.catalogue,
               (enabled, catalogueId) =>
-                catalogueId !== 'monitoring' &&
-                catalogueId !== 'osquery' &&
-                !esFeatureExceptions.includes(catalogueId)
+                catalogueId !== 'monitoring' && !esFeatureExceptions.includes(catalogueId)
             );
             expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
@@ -65,10 +63,10 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
             const exceptions = [
               'monitoring',
               'enterpriseSearch',
+              'enterpriseSearchContent',
               'appSearch',
               'workplaceSearch',
               'spaces',
-              'osquery',
               ...esFeatureExceptions,
             ];
             const expected = mapValues(
@@ -89,10 +87,10 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
               'ml_file_data_visualizer',
               'monitoring',
               'enterpriseSearch',
+              'enterpriseSearchContent',
               'appSearch',
               'workplaceSearch',
               'spaces',
-              'osquery',
               ...esFeatureExceptions,
             ];
             const expected = mapValues(

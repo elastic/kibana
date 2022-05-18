@@ -76,8 +76,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       const docCell = await dataGrid.getCellElement(0, 3);
       await docCell.click();
-      const expandCellContentButton = await docCell.findByClassName(
-        'euiDataGridRowCell__expandButtonIcon'
+      const expandCellContentButton = await docCell.findByTestSubject(
+        'euiDataGridCellExpandButton'
       );
       await expandCellContentButton.click();
       let expandDocId = '';
@@ -125,8 +125,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       const docCell = await dataGrid.getCellElement(0, 3);
       await docCell.click();
-      const expandCellContentButton = await docCell.findByClassName(
-        'euiDataGridRowCell__expandButtonIcon'
+      const expandCellContentButton = await docCell.findByTestSubject(
+        'euiDataGridCellExpandButton'
       );
       await expandCellContentButton.click();
 

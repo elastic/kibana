@@ -84,6 +84,26 @@ describe('isUserDataIndex', () => {
     expect(isUserDataIndex(fleetAssetIndex)).toBe(false);
   });
 
+  test('ent search logs not data index', () => {
+    const fleetAssetIndex: MatchedItem = {
+      name: 'logs-enterprise_search.api-default',
+      tags: [
+        {
+          key: 'data_stream',
+          name: 'Data stream',
+          color: 'primary',
+        },
+      ],
+      item: {
+        name: 'logs-enterprise_search.api-default',
+        backing_indices: ['.ds-logs-enterprise_search.api-default-2022.03.07-000001'],
+        timestamp_field: '@timestamp',
+      },
+    };
+
+    expect(isUserDataIndex(fleetAssetIndex)).toBe(false);
+  });
+
   test('metrics-endpoint.metadata_current_default is not data index', () => {
     const fleetAssetIndex: MatchedItem = {
       name: 'metrics-endpoint.metadata_current_default',

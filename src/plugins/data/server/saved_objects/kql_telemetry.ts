@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsType } from 'kibana/server';
+import { SavedObjectsType } from '@kbn/core/server';
 
 export const kqlTelemetry: SavedObjectsType = {
   name: 'kql-telemetry',

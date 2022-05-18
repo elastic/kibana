@@ -9,6 +9,8 @@
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
 export const AREA_CHART_VIS_NAME = 'Visualization漢字 AreaChart';
 export const LINE_CHART_VIS_NAME = 'Visualization漢字 LineChart';
+
+import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
 interface SaveDashboardOptions {
@@ -24,12 +26,12 @@ interface SaveDashboardOptions {
 }
 
 export class DashboardPageObject extends FtrService {
+  private readonly config = this.ctx.getService('config');
   private readonly log = this.ctx.getService('log');
   private readonly find = this.ctx.getService('find');
   private readonly retry = this.ctx.getService('retry');
   private readonly browser = this.ctx.getService('browser');
   private readonly globalNav = this.ctx.getService('globalNav');
-  private readonly esArchiver = this.ctx.getService('esArchiver');
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly dashboardAddPanel = this.ctx.getService('dashboardAddPanel');
@@ -37,18 +39,33 @@ export class DashboardPageObject extends FtrService {
   private readonly listingTable = this.ctx.getService('listingTable');
   private readonly elasticChart = this.ctx.getService('elasticChart');
   private readonly common = this.ctx.getPageObject('common');
+  private readonly esArchiver = this.ctx.getService('esArchiver');
   private readonly header = this.ctx.getPageObject('header');
   private readonly visualize = this.ctx.getPageObject('visualize');
   private readonly discover = this.ctx.getPageObject('discover');
+  private readonly logstashIndex = this.config.get('esTestCluster.ccs')
+    ? 'ftr-remote:logstash-*'
+    : 'logstash-*';
+  private readonly kibanaIndex = this.config.get('esTestCluster.ccs')
+    ? 'test/functional/fixtures/kbn_archiver/ccs/dashboard/legacy/legacy.json'
+    : 'test/functional/fixtures/es_archiver/dashboard/legacy';
 
-  async initTests({
-    kibanaIndex = 'test/functional/fixtures/es_archiver/dashboard/legacy',
-    defaultIndex = 'logstash-*',
-  } = {}) {
+  async initTests({ kibanaIndex = this.kibanaIndex, defaultIndex = this.logstashIndex } = {}) {
     this.log.debug('load kibana index with visualizations and log data');
-    await this.esArchiver.load(kibanaIndex);
+    if (this.config.get('esTestCluster.ccs')) {
+      await this.kibanaServer.importExport.load(kibanaIndex);
+    } else {
+      await this.esArchiver.loadIfNeeded(kibanaIndex);
+    }
     await this.kibanaServer.uiSettings.replace({ defaultIndex });
     await this.common.navigateToApp('dashboard');
+  }
+
+  public async expectAppStateRemovedFromURL() {
+    this.retry.try(async () => {
+      const url = await this.browser.getCurrentUrl();
+      expect(url.indexOf('_a')).to.be(-1);
+    });
   }
 
   public async preserveCrossAppState() {
@@ -134,10 +151,10 @@ export class DashboardPageObject extends FtrService {
     await this.testSubjects.click(`edit-unsaved-${title.split(' ').join('-')}`);
   }
 
-  public async clickUnsavedChangesDiscard(title: string, confirmDiscard = true) {
-    this.log.debug(`Click Unsaved Changes Discard for `, title);
-    await this.testSubjects.existOrFail(`discard-unsaved-${title.split(' ').join('-')}`);
-    await this.testSubjects.click(`discard-unsaved-${title.split(' ').join('-')}`);
+  public async clickUnsavedChangesDiscard(testSubject: string, confirmDiscard = true) {
+    this.log.debug(`Click Unsaved Changes Discard for `, testSubject);
+    await this.testSubjects.existOrFail(testSubject);
+    await this.testSubjects.click(testSubject);
     if (confirmDiscard) {
       await this.common.clickConfirmOnModal();
     } else {
@@ -289,6 +306,24 @@ export class DashboardPageObject extends FtrService {
       this.log.debug('clickQuickSave');
       await this.testSubjects.click('dashboardQuickSaveMenuItem');
     });
+  }
+
+  public async clearUnsavedChanges() {
+    this.log.debug('clearUnsavedChanges');
+    let switchMode = false;
+    if (await this.getIsInViewMode()) {
+      await this.switchToEditMode();
+      switchMode = true;
+    }
+    await this.retry.try(async () => {
+      // avoid flaky test by surrounding in retry
+      await this.testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+      await this.clickQuickSave();
+      await this.testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+    });
+    if (switchMode) {
+      await this.clickCancelOutOfEditMode();
+    }
   }
 
   public async clickNewDashboard(continueEditing = false) {
@@ -639,6 +674,11 @@ export class DashboardPageObject extends FtrService {
     const count = await this.getSharedItemsCount();
     // eslint-disable-next-line radix
     await this.renderable.waitForRender(parseInt(count));
+  }
+
+  public async verifyNoRenderErrors() {
+    const errorEmbeddables = await this.testSubjects.findAll('embeddableStackError');
+    expect(errorEmbeddables.length).to.be(0);
   }
 
   public async getSharedContainerData() {

@@ -104,13 +104,13 @@ export function handleResponse(response: ElasticsearchResponse, start: number, e
 export async function getApms(req: LegacyRequest, apmIndexPattern: string, clusterUuid: string) {
   checkParam(apmIndexPattern, 'apmIndexPattern in getBeats');
 
-  const config = req.server.config();
+  const config = req.server.config;
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
 
   const params = {
     index: apmIndexPattern,
-    size: config.get('monitoring.ui.max_bucket_size'), // FIXME
+    size: config.ui.max_bucket_size,
     ignore_unavailable: true,
     filter_path: [
       // only filter path can filter for inner_hits

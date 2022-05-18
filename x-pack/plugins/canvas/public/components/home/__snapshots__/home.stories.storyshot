@@ -59,7 +59,9 @@ exports[`Storyshots Home Home Page 1`] = `
                       color="inherit"
                       data-euiicon-type="plusInCircleFilled"
                       size="m"
-                    />
+                    >
+                      
+                    </span>
                     <span
                       className="euiButton__text"
                     >
@@ -75,7 +77,7 @@ exports[`Storyshots Home Home Page 1`] = `
           className="euiPageHeaderContent__bottom"
         >
           <div
-            className="euiSpacer euiSpacer--l"
+            className="euiSpacer euiSpacer--l css-jz428s-euiSpacer-l"
           />
           <div
             className="euiTabs euiTabs--large euiTabs--condensed"

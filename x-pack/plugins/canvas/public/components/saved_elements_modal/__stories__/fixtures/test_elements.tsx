@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getElasticLogo } from '../../../../../../../../src/plugins/presentation_util/public';
+import { getElasticLogo } from '@kbn/presentation-util-plugin/public';
 
 export const getTestCustomElements = async () => {
   const { elasticLogo } = await getElasticLogo();

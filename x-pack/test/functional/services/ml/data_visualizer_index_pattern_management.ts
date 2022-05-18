@@ -20,10 +20,10 @@ export function MachineLearningDataVisualizerIndexPatternManagementProvider(
 
   return {
     async assertIndexPatternManagementButtonExists() {
-      await testSubjects.existOrFail('dataVisualizerIndexPatternManagementButton');
+      await testSubjects.existOrFail('dataVisualizerDataViewanagementButton');
     },
     async assertIndexPatternManagementMenuExists() {
-      await testSubjects.existOrFail('dataVisualizerIndexPatternManagementMenu');
+      await testSubjects.existOrFail('dataVisualizerDataViewManagementMenu');
     },
     async assertIndexPatternFieldEditorExists() {
       await testSubjects.existOrFail('indexPatternFieldEditorForm');
@@ -35,14 +35,14 @@ export function MachineLearningDataVisualizerIndexPatternManagementProvider(
 
     async clickIndexPatternManagementButton() {
       await retry.tryForTime(5000, async () => {
-        await testSubjects.clickWhenNotDisabled('dataVisualizerIndexPatternManagementButton');
+        await testSubjects.clickWhenNotDisabled('dataVisualizerDataViewManagementButton');
         await this.assertIndexPatternManagementMenuExists();
       });
     },
     async clickAddIndexPatternFieldAction() {
       await retry.tryForTime(5000, async () => {
         await this.assertIndexPatternManagementMenuExists();
-        await testSubjects.clickWhenNotDisabled('dataVisualizerAddIndexPatternFieldAction');
+        await testSubjects.clickWhenNotDisabled('dataVisualizerAddDataViewFieldAction');
         await this.assertIndexPatternFieldEditorExists();
       });
     },
@@ -50,7 +50,7 @@ export function MachineLearningDataVisualizerIndexPatternManagementProvider(
     async clickManageIndexPatternAction() {
       await retry.tryForTime(5000, async () => {
         await this.assertIndexPatternManagementMenuExists();
-        await testSubjects.clickWhenNotDisabled('dataVisualizerManageIndexPatternAction');
+        await testSubjects.clickWhenNotDisabled('dataVisualizerManageDataViewAction');
         await testSubjects.existOrFail('editIndexPattern');
       });
     },

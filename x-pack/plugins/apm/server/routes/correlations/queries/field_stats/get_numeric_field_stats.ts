@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   NumericFieldStats,
@@ -82,7 +82,7 @@ export const fetchNumericFieldStats = async (
     field.fieldName,
     termFilters
   );
-  const { body } = await esClient.search<unknown, StatsAggs>(request);
+  const body = await esClient.search<unknown, StatsAggs>(request);
 
   const aggregations = body.aggregations;
   const docCount = aggregations?.sampled_field_stats?.doc_count ?? 0;

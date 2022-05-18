@@ -20,13 +20,3 @@ export const formatAuthenticationsHistogramData = (
         y: count.doc_count,
       }))
     : null;
-
-export const formatAuthenticationsHistogramDataEntities = (
-  data: Array<HostsKpiHistogram<HostsKpiAuthenticationsHistogramCount>>
-): HostsKpiHistogramData[] | null =>
-  data && data.length > 0
-    ? data.map<HostsKpiHistogramData>(({ key, count }) => ({
-        x: key,
-        y: count.value,
-      }))
-    : null;

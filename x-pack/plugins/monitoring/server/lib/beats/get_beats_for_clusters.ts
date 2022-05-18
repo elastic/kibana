@@ -35,8 +35,8 @@ export function handleResponse(clusterUuid: string, response: ElasticsearchRespo
 export function getBeatsForClusters(req: LegacyRequest, clusters: Cluster[], ccs: string) {
   const start = req.payload.timeRange.min;
   const end = req.payload.timeRange.max;
-  const config = req.server.config();
-  const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
+  const config = req.server.config;
+  const maxBucketSize = config.ui.max_bucket_size;
   const indexPatterns = getLegacyIndexPattern({
     moduleType: 'beats',
     ccs,
@@ -57,7 +57,7 @@ export function getBeatsForClusters(req: LegacyRequest, clusters: Cluster[], ccs
             clusterUuid,
             metric: BeatsClusterMetric.getMetricFields(), // override default of BeatMetric.getMetricFields
           }),
-          aggs: beatsUuidsAgg(maxBucketSize!),
+          aggs: beatsUuidsAgg(maxBucketSize),
         },
       };
 

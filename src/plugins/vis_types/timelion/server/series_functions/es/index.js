@@ -12,6 +12,12 @@ import Datasource from '../../lib/classes/datasource';
 import buildRequest from './lib/build_request';
 import toSeriesList from './lib/agg_response_to_series_list';
 
+function getRequestAbortedSignal(aborted$) {
+  const controller = new AbortController();
+  aborted$.subscribe(() => controller.abort());
+  return controller.signal;
+}
+
 export default new Datasource('es', {
   hideFitArg: true,
   args: [
@@ -98,7 +104,7 @@ export default new Datasource('es', {
       fit: 'nearest',
     });
     const indexPatternsService = tlConfig.getIndexPatternsService();
-    const indexPatternSpec = (await indexPatternsService.find(config.index)).find(
+    const indexPatternSpec = (await indexPatternsService.find(config.index, 1)).find(
       (index) => index.title === config.index
     );
 
@@ -107,13 +113,18 @@ export default new Datasource('es', {
 
     const body = buildRequest(config, tlConfig, scriptFields, runtimeFields, esShardTimeout);
 
-    const resp = await tlConfig.context.search
+    // User may abort the request without waiting for the results
+    // we need to handle this scenario by aborting underlying server requests
+    const abortSignal = getRequestAbortedSignal(tlConfig.request.events.aborted$);
+
+    const searchContext = await tlConfig.context.search;
+    const resp = await searchContext
       .search(
         body,
         {
           ...tlConfig.request?.body.searchSession,
         },
-        tlConfig.context
+        { ...tlConfig.context, abortSignal }
       )
       .toPromise();
 

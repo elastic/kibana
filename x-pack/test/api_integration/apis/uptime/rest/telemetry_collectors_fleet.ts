@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { API_URLS } from '../../../../../plugins/uptime/common/constants';
 import { makeChecksWithStatus } from './helper/make_checks';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -81,7 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
         'up',
         undefined,
         undefined,
-        true
+        testDataStreamName
       );
 
       await makeChecksWithStatus(
@@ -100,7 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
         'down',
         undefined,
         undefined,
-        true
+        testDataStreamName
       );
 
       await makeChecksWithStatus(
@@ -118,7 +118,7 @@ export default function ({ getService }: FtrProviderContext) {
         'down',
         undefined,
         undefined,
-        true
+        testDataStreamName
       );
 
       await makeChecksWithStatus(
@@ -137,7 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
         'down',
         undefined,
         undefined,
-        true
+        testDataStreamName
       );
 
       await makeChecksWithStatus(
@@ -150,7 +150,7 @@ export default function ({ getService }: FtrProviderContext) {
         'down',
         undefined,
         undefined,
-        true
+        testDataStreamName
       );
       await client.indices.refresh();
     });

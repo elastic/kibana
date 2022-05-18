@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectReference } from '../../../../core/public';
+import { SavedObjectReference } from '@kbn/core/public';
 import { injectTagReferences } from './inject_tag_references';
 import { InternalTagDecoratedSavedObject } from './types';
 

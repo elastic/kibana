@@ -7,8 +7,8 @@
 
 import _ from 'lodash';
 
-import type { FeatureKibanaPrivileges, KibanaFeature } from '../';
-import type { LicenseType } from '../../../licensing/server';
+import type { LicenseType } from '@kbn/licensing-plugin/server';
+import type { FeatureKibanaPrivileges, KibanaFeature } from '..';
 import { subFeaturePrivilegeIterator } from './sub_feature_privilege_iterator';
 
 /**

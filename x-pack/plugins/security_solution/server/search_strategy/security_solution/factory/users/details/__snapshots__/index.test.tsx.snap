@@ -1,0 +1,373 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`userDetails search strategy parse should parse data correctly 1`] = `
+Object {
+  "inspect": Object {
+    "dsl": Array [
+      "{
+  \\"allow_no_indices\\": true,
+  \\"index\\": [
+    \\"test_indices*\\"
+  ],
+  \\"ignore_unavailable\\": true,
+  \\"track_total_hits\\": false,
+  \\"body\\": {
+    \\"aggregations\\": {
+      \\"first_seen\\": {
+        \\"min\\": {
+          \\"field\\": \\"@timestamp\\"
+        }
+      },
+      \\"last_seen\\": {
+        \\"max\\": {
+          \\"field\\": \\"@timestamp\\"
+        }
+      },
+      \\"user_id\\": {
+        \\"terms\\": {
+          \\"field\\": \\"user.id\\",
+          \\"size\\": 10,
+          \\"order\\": {
+            \\"timestamp\\": \\"desc\\"
+          }
+        },
+        \\"aggs\\": {
+          \\"timestamp\\": {
+            \\"max\\": {
+              \\"field\\": \\"@timestamp\\"
+            }
+          }
+        }
+      },
+      \\"user_domain\\": {
+        \\"terms\\": {
+          \\"field\\": \\"user.domain\\",
+          \\"size\\": 10,
+          \\"order\\": {
+            \\"timestamp\\": \\"desc\\"
+          }
+        },
+        \\"aggs\\": {
+          \\"timestamp\\": {
+            \\"max\\": {
+              \\"field\\": \\"@timestamp\\"
+            }
+          }
+        }
+      },
+      \\"user_name\\": {
+        \\"terms\\": {
+          \\"field\\": \\"user.name\\",
+          \\"size\\": 10,
+          \\"order\\": {
+            \\"timestamp\\": \\"desc\\"
+          }
+        },
+        \\"aggs\\": {
+          \\"timestamp\\": {
+            \\"max\\": {
+              \\"field\\": \\"@timestamp\\"
+            }
+          }
+        }
+      },
+      \\"host_os_name\\": {
+        \\"terms\\": {
+          \\"field\\": \\"host.os.name\\",
+          \\"size\\": 10,
+          \\"order\\": {
+            \\"timestamp\\": \\"desc\\"
+          }
+        },
+        \\"aggs\\": {
+          \\"timestamp\\": {
+            \\"max\\": {
+              \\"field\\": \\"@timestamp\\"
+            }
+          }
+        }
+      },
+      \\"host_ip\\": {
+        \\"terms\\": {
+          \\"script\\": {
+            \\"source\\": \\"doc['host.ip']\\",
+            \\"lang\\": \\"painless\\"
+          },
+          \\"size\\": 10,
+          \\"order\\": {
+            \\"timestamp\\": \\"desc\\"
+          }
+        },
+        \\"aggs\\": {
+          \\"timestamp\\": {
+            \\"max\\": {
+              \\"field\\": \\"@timestamp\\"
+            }
+          }
+        }
+      },
+      \\"host_os_family\\": {
+        \\"terms\\": {
+          \\"field\\": \\"host.os.family\\",
+          \\"size\\": 10,
+          \\"order\\": {
+            \\"timestamp\\": \\"desc\\"
+          }
+        },
+        \\"aggs\\": {
+          \\"timestamp\\": {
+            \\"max\\": {
+              \\"field\\": \\"@timestamp\\"
+            }
+          }
+        }
+      }
+    },
+    \\"query\\": {
+      \\"bool\\": {
+        \\"filter\\": [
+          {
+            \\"term\\": {
+              \\"user.name\\": \\"bastion00.siem.estc.dev\\"
+            }
+          },
+          {
+            \\"range\\": {
+              \\"@timestamp\\": {
+                \\"format\\": \\"strict_date_optional_time\\",
+                \\"gte\\": \\"2020-09-02T15:17:13.678Z\\",
+                \\"lte\\": \\"2020-09-03T15:17:13.678Z\\"
+              }
+            }
+          }
+        ]
+      }
+    },
+    \\"size\\": 0
+  }
+}",
+    ],
+  },
+  "isPartial": false,
+  "isRunning": false,
+  "loaded": 2,
+  "rawResponse": Object {
+    "_shards": Object {
+      "failed": 0,
+      "skipped": 1,
+      "successful": 2,
+      "total": 2,
+    },
+    "aggregations": Object {
+      "first_seen": Object {
+        "value": 1644837532000,
+        "value_as_string": "2022-02-14T11:18:52.000Z",
+      },
+      "host_ip": Object {
+        "buckets": Array [
+          Object {
+            "doc_count": 133,
+            "key": "11.245.5.152",
+            "timestamp": Object {
+              "value": 1644837532000,
+              "value_as_string": "2022-02-14T11:18:52.000Z",
+            },
+          },
+          Object {
+            "doc_count": 133,
+            "key": "149.175.90.37",
+            "timestamp": Object {
+              "value": 1644837532000,
+              "value_as_string": "2022-02-14T11:18:52.000Z",
+            },
+          },
+          Object {
+            "doc_count": 133,
+            "key": "16.3.124.77",
+            "timestamp": Object {
+              "value": 1644837532000,
+              "value_as_string": "2022-02-14T11:18:52.000Z",
+            },
+          },
+          Object {
+            "doc_count": 133,
+            "key": "161.120.111.159",
+            "timestamp": Object {
+              "value": 1644837532000,
+              "value_as_string": "2022-02-14T11:18:52.000Z",
+            },
+          },
+          Object {
+            "doc_count": 133,
+            "key": "179.124.88.33",
+            "timestamp": Object {
+              "value": 1644837532000,
+              "value_as_string": "2022-02-14T11:18:52.000Z",
+            },
+          },
+          Object {
+            "doc_count": 133,
+            "key": "203.248.113.63",
+            "timestamp": Object {
+              "value": 1644837532000,
+              "value_as_string": "2022-02-14T11:18:52.000Z",
+            },
+          },
+          Object {
+            "doc_count": 133,
+            "key": "205.6.104.210",
+            "timestamp": Object {
+              "value": 1644837532000,
+              "value_as_string": "2022-02-14T11:18:52.000Z",
+            },
+          },
+          Object {
+            "doc_count": 133,
+            "key": "209.233.30.0",
+            "timestamp": Object {
+              "value": 1644837532000,
+              "value_as_string": "2022-02-14T11:18:52.000Z",
+            },
+          },
+          Object {
+            "doc_count": 133,
+            "key": "238.165.244.247",
+            "timestamp": Object {
+              "value": 1644837532000,
+              "value_as_string": "2022-02-14T11:18:52.000Z",
+            },
+          },
+          Object {
+            "doc_count": 133,
+            "key": "29.73.212.149",
+            "timestamp": Object {
+              "value": 1644837532000,
+              "value_as_string": "2022-02-14T11:18:52.000Z",
+            },
+          },
+        ],
+        "doc_count_error_upper_bound": 0,
+        "sum_other_doc_count": 665,
+      },
+      "host_os_family": Object {
+        "buckets": Array [
+          Object {
+            "doc_count": 1995,
+            "key": "Windows",
+            "timestamp": Object {
+              "value": 1644837532000,
+              "value_as_string": "2022-02-14T11:18:52.000Z",
+            },
+          },
+        ],
+        "doc_count_error_upper_bound": 0,
+        "sum_other_doc_count": 0,
+      },
+      "host_os_name": Object {
+        "buckets": Array [
+          Object {
+            "doc_count": 1995,
+            "key": "Windows",
+            "timestamp": Object {
+              "value": 1644837532000,
+              "value_as_string": "2022-02-14T11:18:52.000Z",
+            },
+          },
+        ],
+        "doc_count_error_upper_bound": 0,
+        "sum_other_doc_count": 0,
+      },
+      "last_seen": Object {
+        "value": 1644837532000,
+        "value_as_string": "2022-02-14T11:18:52.000Z",
+      },
+      "user_domain": Object {
+        "buckets": Array [
+          Object {
+            "doc_count": 1905,
+            "key": "NT AUTHORITY",
+            "timestamp": Object {
+              "value": 1644837532000,
+              "value_as_string": "2022-02-14T11:18:52.000Z",
+            },
+          },
+        ],
+        "doc_count_error_upper_bound": 0,
+        "sum_other_doc_count": 0,
+      },
+      "user_id": Object {
+        "buckets": Array [
+          Object {
+            "doc_count": 1995,
+            "key": "S-1-5-18",
+            "timestamp": Object {
+              "value": 1644837532000,
+              "value_as_string": "2022-02-14T11:18:52.000Z",
+            },
+          },
+        ],
+        "doc_count_error_upper_bound": 0,
+        "sum_other_doc_count": 0,
+      },
+      "user_name": Object {
+        "buckets": Array [
+          Object {
+            "doc_count": 1995,
+            "key": "SYSTEM",
+            "timestamp": Object {
+              "value": 1644837532000,
+              "value_as_string": "2022-02-14T11:18:52.000Z",
+            },
+          },
+        ],
+        "doc_count_error_upper_bound": 0,
+        "sum_other_doc_count": 0,
+      },
+    },
+    "hits": Object {
+      "hits": Array [],
+      "max_score": null,
+    },
+    "timed_out": false,
+    "took": 1,
+  },
+  "total": 2,
+  "userDetails": Object {
+    "firstSeen": "2022-02-14T11:18:52.000Z",
+    "host": Object {
+      "ip": Array [
+        "11.245.5.152",
+        "149.175.90.37",
+        "16.3.124.77",
+        "161.120.111.159",
+        "179.124.88.33",
+        "203.248.113.63",
+        "205.6.104.210",
+        "209.233.30.0",
+        "238.165.244.247",
+        "29.73.212.149",
+      ],
+      "os": Object {
+        "family": Array [
+          "Windows",
+        ],
+        "name": Array [
+          "Windows",
+        ],
+      },
+    },
+    "lastSeen": "2022-02-14T11:18:52.000Z",
+    "user": Object {
+      "domain": Array [
+        "NT AUTHORITY",
+      ],
+      "id": Array [
+        "S-1-5-18",
+      ],
+      "name": Array [
+        "SYSTEM",
+      ],
+    },
+  },
+}
+`;

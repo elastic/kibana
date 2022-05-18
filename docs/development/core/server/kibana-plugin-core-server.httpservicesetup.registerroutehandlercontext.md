@@ -9,7 +9,7 @@ Register a context provider for a route handler.
 <b>Signature:</b>
 
 ```typescript
-registerRouteHandlerContext: <Context extends RequestHandlerContext, ContextName extends keyof Context>(contextName: ContextName, provider: RequestHandlerContextProvider<Context, ContextName>) => RequestHandlerContextContainer;
+registerRouteHandlerContext: <Context extends RequestHandlerContext, ContextName extends keyof Omit<Context, 'resolve'>>(contextName: ContextName, provider: RequestHandlerContextProvider<Context, ContextName>) => RequestHandlerContextContainer;
 ```
 
 ## Example

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 import { MlServerPlugin } from './plugin';
 export type { MlPluginSetup, MlPluginStart } from './plugin';
 export type {
@@ -14,6 +14,8 @@ export type {
   AnomalyResultType as MlAnomalyResultType,
   DatafeedStats as MlDatafeedStats,
   Job as MlJob,
+  MlSummaryJob,
+  SummaryJobState as MlSummaryJobState,
 } from './shared';
 export {
   UnknownMLCapabilitiesError,

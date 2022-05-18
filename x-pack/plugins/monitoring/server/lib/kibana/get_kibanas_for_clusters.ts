@@ -26,7 +26,7 @@ import { Globals } from '../../static_globals';
  *  - combined health
  */
 export function getKibanasForClusters(req: LegacyRequest, clusters: Cluster[], ccs: string) {
-  const config = req.server.config();
+  const config = req.server.config;
   const start = req.payload.timeRange.min;
   const end = req.payload.timeRange.max;
 
@@ -62,7 +62,7 @@ export function getKibanasForClusters(req: LegacyRequest, clusters: Cluster[], c
             kibana_uuids: {
               terms: {
                 field: 'kibana_stats.kibana.uuid',
-                size: config.get('monitoring.ui.max_bucket_size'),
+                size: config.ui.max_bucket_size,
               },
               aggs: {
                 latest_report: {

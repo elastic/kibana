@@ -7,8 +7,7 @@
 
 import Boom from '@hapi/boom';
 
-import type { KibanaRequest, SavedObjectsClientContract } from 'src/core/server';
-
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import type {
   GetAllSpacesOptions,
   GetAllSpacesPurpose,
@@ -16,7 +15,8 @@ import type {
   ISpacesClient,
   LegacyUrlAliasTarget,
   Space,
-} from '../../../spaces/server';
+} from '@kbn/spaces-plugin/server';
+
 import { ALL_SPACES_ID } from '../../common/constants';
 import type { AuditLogger } from '../audit';
 import { SavedObjectAction, savedObjectEvent, SpaceAuditAction, spaceAuditEvent } from '../audit';

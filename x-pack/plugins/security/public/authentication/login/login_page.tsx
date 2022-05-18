@@ -21,17 +21,17 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { BehaviorSubject } from 'rxjs';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   AppMountParameters,
   CoreStart,
   FatalErrorsStart,
   HttpStart,
   NotificationsStart,
-} from 'src/core/public';
+} from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
-import { KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
   LOGOUT_REASON_QUERY_STRING_PARAMETER,

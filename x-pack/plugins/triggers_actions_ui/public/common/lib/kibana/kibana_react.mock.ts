@@ -6,16 +6,18 @@
  */
 
 import React from 'react';
-import { chartPluginMock } from '../../../../../../../src/plugins/charts/public/mocks';
-import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
-import {
-  coreMock,
-  scopedHistoryMock,
-  themeServiceMock,
-} from '../../../../../../../src/core/public/mocks';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { TriggersAndActionsUiServices } from '../../../application/app';
-import { RuleTypeRegistryContract, ActionTypeRegistryContract } from '../../../types';
+import {
+  RuleTypeRegistryContract,
+  ActionTypeRegistryContract,
+  AlertsTableConfigurationRegistryContract,
+} from '../../../types';
 
 export const createStartServicesMock = (): TriggersAndActionsUiServices => {
   const core = coreMock.createStart();
@@ -37,12 +39,20 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
     history: scopedHistoryMock.create(),
     setBreadcrumbs: jest.fn(),
     data: dataPluginMock.createStartContract(),
+    dataViews: dataViewPluginMocks.createStartContract(),
+    unifiedSearch: unifiedSearchPluginMock.createStartContract(),
     actionTypeRegistry: {
       has: jest.fn(),
       register: jest.fn(),
       get: jest.fn(),
       list: jest.fn(),
     } as ActionTypeRegistryContract,
+    alertsTableConfigurationRegistry: {
+      has: jest.fn(),
+      register: jest.fn(),
+      get: jest.fn(),
+      list: jest.fn(),
+    } as AlertsTableConfigurationRegistryContract,
     charts: chartPluginMock.createStartContract(),
     isCloud: false,
     kibanaFeatures: [],

@@ -16,7 +16,7 @@ import { DroppableWrapper } from '../../../../common/components/drag_and_drop/dr
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../common/mock';
 import { DefaultCellRenderer } from './default_cell_renderer';
-import { BrowserFields } from '../../../../../../timelines/common/search_strategy';
+import { BrowserFields } from '@kbn/timelines-plugin/common/search_strategy';
 import { Ecs } from '../../../../../common/ecs';
 
 jest.mock('../../../../common/lib/kibana');
@@ -34,6 +34,7 @@ describe('DefaultCellRenderer', () => {
   const isExpanded = true;
   const linkValues = ['foo', 'bar', '@baz'];
   const rowIndex = 3;
+  const colIndex = 0;
   const setCellProps = jest.fn();
   const timelineId = 'test';
   const ecsData = {} as Ecs;
@@ -66,6 +67,7 @@ describe('DefaultCellRenderer', () => {
               isExpanded={isExpanded}
               linkValues={linkValues}
               rowIndex={rowIndex}
+              colIndex={colIndex}
               setCellProps={setCellProps}
               timelineId={timelineId}
             />
@@ -100,6 +102,7 @@ describe('DefaultCellRenderer', () => {
               isExpanded={isExpanded}
               linkValues={linkValues}
               rowIndex={rowIndex}
+              colIndex={colIndex}
               setCellProps={setCellProps}
               timelineId={timelineId}
               truncate={truncate}
@@ -111,7 +114,6 @@ describe('DefaultCellRenderer', () => {
 
     expect(mockImplementation.renderColumn).toBeCalledWith({
       asPlainText: false,
-      browserFields,
       columnName: header.id,
       ecsData,
       eventId,
@@ -148,6 +150,7 @@ describe('DefaultCellRenderer', () => {
               isExpanded={isExpanded}
               linkValues={linkValues}
               rowIndex={rowIndex}
+              colIndex={colIndex}
               setCellProps={setCellProps}
               timelineId={timelineId}
             />
@@ -196,6 +199,7 @@ describe('host link rendering', () => {
               isTimeline={isTimeline}
               linkValues={[]}
               rowIndex={3}
+              colIndex={0}
               setCellProps={jest.fn()}
               timelineId={'timeline-1-query'}
             />
@@ -229,6 +233,7 @@ describe('host link rendering', () => {
               isTimeline={isTimeline}
               linkValues={[]}
               rowIndex={3}
+              colIndex={0}
               setCellProps={jest.fn()}
               timelineId={'timeline-1-query'}
             />
@@ -263,6 +268,7 @@ describe('host link rendering', () => {
               isTimeline={isTimeline}
               linkValues={[]}
               rowIndex={3}
+              colIndex={0}
               setCellProps={jest.fn()}
               timelineId={'timeline-1-query'}
             />

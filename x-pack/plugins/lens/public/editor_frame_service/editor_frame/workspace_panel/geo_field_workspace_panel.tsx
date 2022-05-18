@@ -9,13 +9,11 @@ import React from 'react';
 import { EuiPageContentBody, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import {
-  UiActionsStart,
-  VISUALIZE_GEO_FIELD_TRIGGER,
-} from '../../../../../../../src/plugins/ui_actions/public';
+import { UiActionsStart, VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { getVisualizeGeoFieldMessage } from '../../../utils';
 import { DragDrop } from '../../../drag_drop';
 import { GlobeIllustration } from '../../../assets/globe_illustration';
+import { APP_ID } from '../../../../common/constants';
 import './geo_field_workspace_panel.scss';
 
 interface Props {
@@ -41,6 +39,7 @@ export function GeoFieldWorkspacePanel(props: Props) {
     props.uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER).exec({
       indexPatternId: props.indexPatternId,
       fieldName: props.fieldName,
+      originatingApp: APP_ID,
     });
   }
 
@@ -50,7 +49,7 @@ export function GeoFieldWorkspacePanel(props: Props) {
         <h2>
           <strong>{getVisualizeGeoFieldMessage(props.fieldType)}</strong>
         </h2>
-        <GlobeIllustration aria-hidden={true} className="lnsWorkspacePanel__dropIllustration" />
+        <GlobeIllustration aria-hidden={true} className="lnsWorkspacePanel__promptIllustration" />
         <DragDrop
           className="lnsVisualizeGeoFieldWorkspacePanel__dragDrop"
           dataTestSubj="lnsGeoFieldWorkspace"

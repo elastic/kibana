@@ -1,0 +1,64 @@
+[[upgrade-migrations-rolling-back]]
+=== Roll back to a previous version of {kib}
+
+If you've followed <<preventing-migration-failures, preparing for migration>>
+and <<resolve-migrations-failures, resolving migration failures>>, and
+{kib} is still unable to successfully upgrade, rollback {kib} until
+you're able to identify and fix the root cause.
+
+WARNING: Before you roll back {kib}, ensure that the version you want to roll back to is compatible with
+your {es} cluster. If the version you want to roll back to is not compatible, you must also rollback {es}.
+Any changes made after an upgrade are lost when you roll back to a previous version.
+
+To roll back after a failed upgrade migration, you must also rollback the saved object indices to be compatible with the previous {kib} version.
+
+[float]
+==== Roll back by restoring a backup snapshot
+
+. Before proceeding, {ref}/snapshots-take-snapshot.html[take a snapshot] that contains the `kibana` feature state.
+   By default, snapshots include the `kibana` feature state.
+. To make sure no {kib} instances are performing an upgrade migration, shut down all {kib} instances.
+. To delete all saved object indices, enter:
++
+[source,sh]
+--------------------------------------------
+DELETE /.kibana*
+--------------------------------------------
+
+. {ref}/snapshots-restore-snapshot.html[Restore] the `kibana` feature state from the snapshot.
+. Start all {kib} instances on the older version you want to rollback to.
+
+[float]
+==== (Not recommended) Roll back without a backup snapshot
+
+. To make sure no {kib} instances are performing an upgrade migration, shut down all {kib} instances.
+. {ref}/snapshots-take-snapshot.html[Take a snapshot] that includes the `kibana` feature state. By default, snapshots include the `kibana` feature state.
+. Delete the version-specific indices created by the failed upgrade migration.
++
+For example, to rollback from a failed upgrade
+to v7.12.0, enter:
++
+[source,sh]
+--------------------------------------------
+DELETE /.kibana_7.12.0_*,.kibana_task_manager_7.12.0_*
+--------------------------------------------
+
+. Inspect the output of `GET /_cat/aliases`.
++
+If the `.kibana` or `.kibana_task_manager` aliases are missing, you must create them manually.
+Find the latest index from the output of `GET /_cat/indices` and create the missing alias to point to the latest index.
+For example, if the `.kibana` alias is missing, and the latest index is `.kibana_3`, create a new alias using:
++
+[source,sh]
+--------------------------------------------
+POST /.kibana_3/_aliases/.kibana
+--------------------------------------------
+
+. To remove the write block from the roll back indices, enter:
++
+[source,sh]
+--------------------------------------------
+PPUT /.kibana,.kibana_task_manager/_settings {"index.blocks.write": false}
+--------------------------------------------
+
+. Start {kib} on the older version you want to roll back to.

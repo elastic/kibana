@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { KibanaRequest, RequestHandlerContext } from '../../../../../../src/core/server';
-import { AuthenticatedUser } from '../../../../security/common/model';
+import { KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
+import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 
 export const internalFrameworkRequest = Symbol('internalFrameworkRequest');
 

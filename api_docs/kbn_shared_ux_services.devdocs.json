@@ -1,0 +1,1311 @@
+{
+  "id": "@kbn/shared-ux-services",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-services",
+        "id": "def-common.mockServicesFactory",
+        "type": "Function",
+        "tags": [],
+        "label": "mockServicesFactory",
+        "description": [
+          "\nA factory function for creating a Jest-based implementation of `SharedUxServices`."
+        ],
+        "signature": [
+          "() => { application: ",
+          {
+            "pluginId": "@kbn/shared-ux-services",
+            "scope": "common",
+            "docId": "kibKbnSharedUxServicesPluginApi",
+            "section": "def-common.SharedUxApplicationService",
+            "text": "SharedUxApplicationService"
+          },
+          "; docLinks: ",
+          {
+            "pluginId": "@kbn/shared-ux-services",
+            "scope": "common",
+            "docId": "kibKbnSharedUxServicesPluginApi",
+            "section": "def-common.SharedUxDocLinksService",
+            "text": "SharedUxDocLinksService"
+          },
+          "; editors: ",
+          {
+            "pluginId": "@kbn/shared-ux-services",
+            "scope": "common",
+            "docId": "kibKbnSharedUxServicesPluginApi",
+            "section": "def-common.SharedUxEditorsService",
+            "text": "SharedUxEditorsService"
+          },
+          "; http: ",
+          {
+            "pluginId": "@kbn/shared-ux-services",
+            "scope": "common",
+            "docId": "kibKbnSharedUxServicesPluginApi",
+            "section": "def-common.SharedUxHttpService",
+            "text": "SharedUxHttpService"
+          },
+          "; permissions: ",
+          {
+            "pluginId": "@kbn/shared-ux-services",
+            "scope": "common",
+            "docId": "kibKbnSharedUxServicesPluginApi",
+            "section": "def-common.SharedUxUserPermissionsService",
+            "text": "SharedUxUserPermissionsService"
+          },
+          "; platform: ",
+          {
+            "pluginId": "@kbn/shared-ux-services",
+            "scope": "common",
+            "docId": "kibKbnSharedUxServicesPluginApi",
+            "section": "def-common.SharedUxPlatformService",
+            "text": "SharedUxPlatformService"
+          },
+          "; }"
+        ],
+        "path": "packages/kbn-shared-ux-services/src/services/mock/index.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-services",
+        "id": "def-common.SharedUxServicesProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "SharedUxServicesProvider",
+        "description": [
+          "\nThe `React.Context` Provider component for the `SharedUxServices` context.  Any\nplugin or environment that consumes SharedUX components needs to wrap their React\ntree with this provider.\n\nWithin a plugin, you can use use the Shared UX plugin and retrieve a fully-configured\ncontext from the `start` contract."
+        ],
+        "signature": [
+          "({ children, ...services }: React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/shared-ux-services",
+            "scope": "common",
+            "docId": "kibKbnSharedUxServicesPluginApi",
+            "section": "def-common.SharedUxServices",
+            "text": "SharedUxServices"
+          },
+          ">) => JSX.Element"
+        ],
+        "path": "packages/kbn-shared-ux-services/src/context.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.SharedUxServicesProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ children, ...services }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "@kbn/shared-ux-services",
+                "scope": "common",
+                "docId": "kibKbnSharedUxServicesPluginApi",
+                "section": "def-common.SharedUxServices",
+                "text": "SharedUxServices"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-shared-ux-services/src/context.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-services",
+        "id": "def-common.stubServicesFactory",
+        "type": "Function",
+        "tags": [],
+        "label": "stubServicesFactory",
+        "description": [
+          "\nA factory function for creating simple stubbed implementations of all `SharedUxServices`."
+        ],
+        "signature": [
+          "() => { application: ",
+          {
+            "pluginId": "@kbn/shared-ux-services",
+            "scope": "common",
+            "docId": "kibKbnSharedUxServicesPluginApi",
+            "section": "def-common.SharedUxApplicationService",
+            "text": "SharedUxApplicationService"
+          },
+          "; docLinks: ",
+          {
+            "pluginId": "@kbn/shared-ux-services",
+            "scope": "common",
+            "docId": "kibKbnSharedUxServicesPluginApi",
+            "section": "def-common.SharedUxDocLinksService",
+            "text": "SharedUxDocLinksService"
+          },
+          "; editors: ",
+          {
+            "pluginId": "@kbn/shared-ux-services",
+            "scope": "common",
+            "docId": "kibKbnSharedUxServicesPluginApi",
+            "section": "def-common.SharedUxEditorsService",
+            "text": "SharedUxEditorsService"
+          },
+          "; http: ",
+          {
+            "pluginId": "@kbn/shared-ux-services",
+            "scope": "common",
+            "docId": "kibKbnSharedUxServicesPluginApi",
+            "section": "def-common.SharedUxHttpService",
+            "text": "SharedUxHttpService"
+          },
+          "; permissions: ",
+          {
+            "pluginId": "@kbn/shared-ux-services",
+            "scope": "common",
+            "docId": "kibKbnSharedUxServicesPluginApi",
+            "section": "def-common.SharedUxUserPermissionsService",
+            "text": "SharedUxUserPermissionsService"
+          },
+          "; platform: ",
+          {
+            "pluginId": "@kbn/shared-ux-services",
+            "scope": "common",
+            "docId": "kibKbnSharedUxServicesPluginApi",
+            "section": "def-common.SharedUxPlatformService",
+            "text": "SharedUxPlatformService"
+          },
+          "; }"
+        ],
+        "path": "packages/kbn-shared-ux-services/src/services/stub/index.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-services",
+        "id": "def-common.useApplication",
+        "type": "Function",
+        "tags": [],
+        "label": "useApplication",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/shared-ux-services",
+            "scope": "common",
+            "docId": "kibKbnSharedUxServicesPluginApi",
+            "section": "def-common.SharedUxApplicationService",
+            "text": "SharedUxApplicationService"
+          }
+        ],
+        "path": "packages/kbn-shared-ux-services/src/context.tsx",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-services",
+        "id": "def-common.useDocLinks",
+        "type": "Function",
+        "tags": [],
+        "label": "useDocLinks",
+        "description": [
+          "\nReact hook for accessing the pre-wired `SharedUxDocLinksService`."
+        ],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/shared-ux-services",
+            "scope": "common",
+            "docId": "kibKbnSharedUxServicesPluginApi",
+            "section": "def-common.SharedUxDocLinksService",
+            "text": "SharedUxDocLinksService"
+          }
+        ],
+        "path": "packages/kbn-shared-ux-services/src/context.tsx",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-services",
+        "id": "def-common.useEditors",
+        "type": "Function",
+        "tags": [],
+        "label": "useEditors",
+        "description": [
+          "\nReact hook for accessing the pre-wired `SharedUxEditorsService`."
+        ],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/shared-ux-services",
+            "scope": "common",
+            "docId": "kibKbnSharedUxServicesPluginApi",
+            "section": "def-common.SharedUxEditorsService",
+            "text": "SharedUxEditorsService"
+          }
+        ],
+        "path": "packages/kbn-shared-ux-services/src/context.tsx",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-services",
+        "id": "def-common.useHttp",
+        "type": "Function",
+        "tags": [],
+        "label": "useHttp",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/shared-ux-services",
+            "scope": "common",
+            "docId": "kibKbnSharedUxServicesPluginApi",
+            "section": "def-common.SharedUxHttpService",
+            "text": "SharedUxHttpService"
+          }
+        ],
+        "path": "packages/kbn-shared-ux-services/src/context.tsx",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-services",
+        "id": "def-common.usePermissions",
+        "type": "Function",
+        "tags": [],
+        "label": "usePermissions",
+        "description": [
+          "\nReact hook for accessing the pre-wired `SharedUxPermissionsService`."
+        ],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/shared-ux-services",
+            "scope": "common",
+            "docId": "kibKbnSharedUxServicesPluginApi",
+            "section": "def-common.SharedUxUserPermissionsService",
+            "text": "SharedUxUserPermissionsService"
+          }
+        ],
+        "path": "packages/kbn-shared-ux-services/src/context.tsx",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-services",
+        "id": "def-common.usePlatformService",
+        "type": "Function",
+        "tags": [],
+        "label": "usePlatformService",
+        "description": [
+          "\nReact hook for accessing the pre-wired `SharedUxPlatformService`."
+        ],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/shared-ux-services",
+            "scope": "common",
+            "docId": "kibKbnSharedUxServicesPluginApi",
+            "section": "def-common.SharedUxPlatformService",
+            "text": "SharedUxPlatformService"
+          }
+        ],
+        "path": "packages/kbn-shared-ux-services/src/context.tsx",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-services",
+        "id": "def-common.useSharedUxServices",
+        "type": "Function",
+        "tags": [],
+        "label": "useSharedUxServices",
+        "description": [
+          "\nReact hook for accessing pre-wired `SharedUxServices`."
+        ],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/shared-ux-services",
+            "scope": "common",
+            "docId": "kibKbnSharedUxServicesPluginApi",
+            "section": "def-common.SharedUxServices",
+            "text": "SharedUxServices"
+          }
+        ],
+        "path": "packages/kbn-shared-ux-services/src/context.tsx",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/shared-ux-services",
+        "id": "def-common.SharedUxApplicationService",
+        "type": "Interface",
+        "tags": [],
+        "label": "SharedUxApplicationService",
+        "description": [],
+        "path": "packages/kbn-shared-ux-services/src/services/application.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.SharedUxApplicationService.navigateToUrl",
+            "type": "Function",
+            "tags": [],
+            "label": "navigateToUrl",
+            "description": [],
+            "signature": [
+              "(url: string) => Promise<void>"
+            ],
+            "path": "packages/kbn-shared-ux-services/src/services/application.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-services",
+                "id": "def-common.SharedUxApplicationService.navigateToUrl.$1",
+                "type": "string",
+                "tags": [],
+                "label": "url",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-shared-ux-services/src/services/application.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.SharedUxApplicationService.currentAppId$",
+            "type": "Object",
+            "tags": [],
+            "label": "currentAppId$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<string | undefined>"
+            ],
+            "path": "packages/kbn-shared-ux-services/src/services/application.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-services",
+        "id": "def-common.SharedUxDocLinksService",
+        "type": "Interface",
+        "tags": [],
+        "label": "SharedUxDocLinksService",
+        "description": [
+          "\nA service providing links to documentation about various features in Kibana."
+        ],
+        "path": "packages/kbn-shared-ux-services/src/services/doc_links.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.SharedUxDocLinksService.dataViewsDocLink",
+            "type": "string",
+            "tags": [],
+            "label": "dataViewsDocLink",
+            "description": [
+              "A link to information about Data Views in Kibana"
+            ],
+            "path": "packages/kbn-shared-ux-services/src/services/doc_links.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-services",
+        "id": "def-common.SharedUxEditorsService",
+        "type": "Interface",
+        "tags": [],
+        "label": "SharedUxEditorsService",
+        "description": [
+          "\nA service providing methods to invoke and interact with various editors provided\nin Kibana."
+        ],
+        "path": "packages/kbn-shared-ux-services/src/services/editors.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.SharedUxEditorsService.openDataViewEditor",
+            "type": "Function",
+            "tags": [],
+            "label": "openDataViewEditor",
+            "description": [
+              "A method to open the Data View Editor flow."
+            ],
+            "signature": [
+              "(options: DataViewEditorOptions) => () => void"
+            ],
+            "path": "packages/kbn-shared-ux-services/src/services/editors.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-services",
+                "id": "def-common.SharedUxEditorsService.openDataViewEditor.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "DataViewEditorOptions"
+                ],
+                "path": "packages/kbn-shared-ux-services/src/services/editors.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-services",
+        "id": "def-common.SharedUxHttpService",
+        "type": "Interface",
+        "tags": [],
+        "label": "SharedUxHttpService",
+        "description": [],
+        "path": "packages/kbn-shared-ux-services/src/services/http.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.SharedUxHttpService.addBasePath",
+            "type": "Function",
+            "tags": [],
+            "label": "addBasePath",
+            "description": [],
+            "signature": [
+              "(url: string) => string"
+            ],
+            "path": "packages/kbn-shared-ux-services/src/services/http.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-services",
+                "id": "def-common.SharedUxHttpService.addBasePath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "url",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-shared-ux-services/src/services/http.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-services",
+        "id": "def-common.SharedUxPlatformService",
+        "type": "Interface",
+        "tags": [],
+        "label": "SharedUxPlatformService",
+        "description": [
+          "\nA service providing methods to interact with the platform in which this code is\nrunning, (almost always Kibana).\n\nRather than provide the entire `CoreStart` contract to components, we provide simplified\nabstractions around a use case specific to Shared UX.  This way, we know exactly how the\n`CoreStart` and other plugins are used.  This makes mocking and refactoring easier when\n upstream dependencies change."
+        ],
+        "path": "packages/kbn-shared-ux-services/src/services/platform.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.SharedUxPlatformService.setIsFullscreen",
+            "type": "Function",
+            "tags": [],
+            "label": "setIsFullscreen",
+            "description": [
+              "\nSets the fullscreen state of the chrome."
+            ],
+            "signature": [
+              "(isFullscreen: boolean) => void"
+            ],
+            "path": "packages/kbn-shared-ux-services/src/services/platform.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-services",
+                "id": "def-common.SharedUxPlatformService.setIsFullscreen.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "isFullscreen",
+                "description": [
+                  "True if the chrome should be fullscreen, false otherwise."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "packages/kbn-shared-ux-services/src/services/platform.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-services",
+        "id": "def-common.SharedUxServices",
+        "type": "Interface",
+        "tags": [],
+        "label": "SharedUxServices",
+        "description": [
+          "\nA collection of services utilized by SharedUX.  This serves as a thin\nabstraction layer between services provided by Kibana and other plugins\nwhile allowing this plugin to be developed independently of those contracts.\n\nIt also allows us to \"swap out\" differenct implementations of these services\nfor different environments, (e.g. Jest, Storybook, etc.)"
+        ],
+        "path": "packages/kbn-shared-ux-services/src/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.SharedUxServices.application",
+            "type": "Object",
+            "tags": [],
+            "label": "application",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/shared-ux-services",
+                "scope": "common",
+                "docId": "kibKbnSharedUxServicesPluginApi",
+                "section": "def-common.SharedUxApplicationService",
+                "text": "SharedUxApplicationService"
+              }
+            ],
+            "path": "packages/kbn-shared-ux-services/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.SharedUxServices.docLinks",
+            "type": "Object",
+            "tags": [],
+            "label": "docLinks",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/shared-ux-services",
+                "scope": "common",
+                "docId": "kibKbnSharedUxServicesPluginApi",
+                "section": "def-common.SharedUxDocLinksService",
+                "text": "SharedUxDocLinksService"
+              }
+            ],
+            "path": "packages/kbn-shared-ux-services/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.SharedUxServices.editors",
+            "type": "Object",
+            "tags": [],
+            "label": "editors",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/shared-ux-services",
+                "scope": "common",
+                "docId": "kibKbnSharedUxServicesPluginApi",
+                "section": "def-common.SharedUxEditorsService",
+                "text": "SharedUxEditorsService"
+              }
+            ],
+            "path": "packages/kbn-shared-ux-services/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.SharedUxServices.http",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/shared-ux-services",
+                "scope": "common",
+                "docId": "kibKbnSharedUxServicesPluginApi",
+                "section": "def-common.SharedUxHttpService",
+                "text": "SharedUxHttpService"
+              }
+            ],
+            "path": "packages/kbn-shared-ux-services/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.SharedUxServices.permissions",
+            "type": "Object",
+            "tags": [],
+            "label": "permissions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/shared-ux-services",
+                "scope": "common",
+                "docId": "kibKbnSharedUxServicesPluginApi",
+                "section": "def-common.SharedUxUserPermissionsService",
+                "text": "SharedUxUserPermissionsService"
+              }
+            ],
+            "path": "packages/kbn-shared-ux-services/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.SharedUxServices.platform",
+            "type": "Object",
+            "tags": [],
+            "label": "platform",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/shared-ux-services",
+                "scope": "common",
+                "docId": "kibKbnSharedUxServicesPluginApi",
+                "section": "def-common.SharedUxPlatformService",
+                "text": "SharedUxPlatformService"
+              }
+            ],
+            "path": "packages/kbn-shared-ux-services/src/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-services",
+        "id": "def-common.SharedUxUserPermissionsService",
+        "type": "Interface",
+        "tags": [],
+        "label": "SharedUxUserPermissionsService",
+        "description": [
+          "\nA service providing permissions information, typically for the current user."
+        ],
+        "path": "packages/kbn-shared-ux-services/src/services/permissions.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.SharedUxUserPermissionsService.canCreateNewDataView",
+            "type": "boolean",
+            "tags": [],
+            "label": "canCreateNewDataView",
+            "description": [
+              "True if the user has permission to create a new Data View, false otherwise."
+            ],
+            "path": "packages/kbn-shared-ux-services/src/services/permissions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.SharedUxUserPermissionsService.canAccessFleet",
+            "type": "boolean",
+            "tags": [],
+            "label": "canAccessFleet",
+            "description": [],
+            "path": "packages/kbn-shared-ux-services/src/services/permissions.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/shared-ux-services",
+        "id": "def-common.ServiceFactory",
+        "type": "Type",
+        "tags": [],
+        "label": "ServiceFactory",
+        "description": [
+          "\nA factory function for creating one or more services.\n\nThe `S` generic determines the shape of the API being produced.\nThe `Parameters` generic determines what parameters are expected to\ncreate the service."
+        ],
+        "signature": [
+          "(params: Parameters) => S"
+        ],
+        "path": "packages/kbn-shared-ux-services/src/types.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.ServiceFactory.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "Parameters"
+            ],
+            "path": "packages/kbn-shared-ux-services/src/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-services",
+        "id": "def-common.SharedUxServicesContext",
+        "type": "Type",
+        "tags": [],
+        "label": "SharedUxServicesContext",
+        "description": [
+          "\nA type representing a component that provides the `SharedUxServices` through a\nReact Context."
+        ],
+        "signature": [
+          "React.FunctionComponent<{}>"
+        ],
+        "path": "packages/kbn-shared-ux-services/src/types.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.SharedUxServicesContext.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P & { children?: React.ReactNode; }"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.SharedUxServicesContext.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/shared-ux-services",
+        "id": "def-common.mockServiceFactories",
+        "type": "Object",
+        "tags": [],
+        "label": "mockServiceFactories",
+        "description": [
+          "\nA collection of mock Service Factories."
+        ],
+        "path": "packages/kbn-shared-ux-services/src/services/mock/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.mockServiceFactories.applicationServiceFactory",
+            "type": "Function",
+            "tags": [],
+            "label": "applicationServiceFactory",
+            "description": [],
+            "signature": [
+              "(params: void) => ",
+              {
+                "pluginId": "@kbn/shared-ux-services",
+                "scope": "common",
+                "docId": "kibKbnSharedUxServicesPluginApi",
+                "section": "def-common.SharedUxApplicationService",
+                "text": "SharedUxApplicationService"
+              }
+            ],
+            "path": "packages/kbn-shared-ux-services/src/services/mock/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-services",
+                "id": "def-common.mockServiceFactories.applicationServiceFactory.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "Parameters"
+                ],
+                "path": "packages/kbn-shared-ux-services/src/types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.mockServiceFactories.docLinksServiceFactory",
+            "type": "Function",
+            "tags": [],
+            "label": "docLinksServiceFactory",
+            "description": [],
+            "signature": [
+              "(params: void) => ",
+              {
+                "pluginId": "@kbn/shared-ux-services",
+                "scope": "common",
+                "docId": "kibKbnSharedUxServicesPluginApi",
+                "section": "def-common.SharedUxDocLinksService",
+                "text": "SharedUxDocLinksService"
+              }
+            ],
+            "path": "packages/kbn-shared-ux-services/src/services/mock/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-services",
+                "id": "def-common.mockServiceFactories.docLinksServiceFactory.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "Parameters"
+                ],
+                "path": "packages/kbn-shared-ux-services/src/types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.mockServiceFactories.editorsServiceFactory",
+            "type": "Function",
+            "tags": [],
+            "label": "editorsServiceFactory",
+            "description": [],
+            "signature": [
+              "(params: void) => ",
+              {
+                "pluginId": "@kbn/shared-ux-services",
+                "scope": "common",
+                "docId": "kibKbnSharedUxServicesPluginApi",
+                "section": "def-common.SharedUxEditorsService",
+                "text": "SharedUxEditorsService"
+              }
+            ],
+            "path": "packages/kbn-shared-ux-services/src/services/mock/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-services",
+                "id": "def-common.mockServiceFactories.editorsServiceFactory.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "Parameters"
+                ],
+                "path": "packages/kbn-shared-ux-services/src/types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.mockServiceFactories.httpServiceFactory",
+            "type": "Function",
+            "tags": [],
+            "label": "httpServiceFactory",
+            "description": [],
+            "signature": [
+              "(params: void) => ",
+              {
+                "pluginId": "@kbn/shared-ux-services",
+                "scope": "common",
+                "docId": "kibKbnSharedUxServicesPluginApi",
+                "section": "def-common.SharedUxHttpService",
+                "text": "SharedUxHttpService"
+              }
+            ],
+            "path": "packages/kbn-shared-ux-services/src/services/mock/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-services",
+                "id": "def-common.mockServiceFactories.httpServiceFactory.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "Parameters"
+                ],
+                "path": "packages/kbn-shared-ux-services/src/types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.mockServiceFactories.platformServiceFactory",
+            "type": "Function",
+            "tags": [],
+            "label": "platformServiceFactory",
+            "description": [],
+            "signature": [
+              "(params: void) => ",
+              {
+                "pluginId": "@kbn/shared-ux-services",
+                "scope": "common",
+                "docId": "kibKbnSharedUxServicesPluginApi",
+                "section": "def-common.SharedUxPlatformService",
+                "text": "SharedUxPlatformService"
+              }
+            ],
+            "path": "packages/kbn-shared-ux-services/src/services/mock/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-services",
+                "id": "def-common.mockServiceFactories.platformServiceFactory.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "Parameters"
+                ],
+                "path": "packages/kbn-shared-ux-services/src/types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.mockServiceFactories.userPermissionsServiceFactory",
+            "type": "Function",
+            "tags": [],
+            "label": "userPermissionsServiceFactory",
+            "description": [],
+            "signature": [
+              "(params: void) => ",
+              {
+                "pluginId": "@kbn/shared-ux-services",
+                "scope": "common",
+                "docId": "kibKbnSharedUxServicesPluginApi",
+                "section": "def-common.SharedUxUserPermissionsService",
+                "text": "SharedUxUserPermissionsService"
+              }
+            ],
+            "path": "packages/kbn-shared-ux-services/src/services/mock/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-services",
+                "id": "def-common.mockServiceFactories.userPermissionsServiceFactory.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "Parameters"
+                ],
+                "path": "packages/kbn-shared-ux-services/src/types.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-services",
+        "id": "def-common.stubServiceFactories",
+        "type": "Object",
+        "tags": [],
+        "label": "stubServiceFactories",
+        "description": [
+          "\nA collection of stubbed service factories."
+        ],
+        "path": "packages/kbn-shared-ux-services/src/services/stub/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.stubServiceFactories.applicationServiceFactory",
+            "type": "Function",
+            "tags": [],
+            "label": "applicationServiceFactory",
+            "description": [],
+            "signature": [
+              "(params: void) => ",
+              {
+                "pluginId": "@kbn/shared-ux-services",
+                "scope": "common",
+                "docId": "kibKbnSharedUxServicesPluginApi",
+                "section": "def-common.SharedUxApplicationService",
+                "text": "SharedUxApplicationService"
+              }
+            ],
+            "path": "packages/kbn-shared-ux-services/src/services/stub/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-services",
+                "id": "def-common.stubServiceFactories.applicationServiceFactory.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "Parameters"
+                ],
+                "path": "packages/kbn-shared-ux-services/src/types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.stubServiceFactories.docLinksServiceFactory",
+            "type": "Function",
+            "tags": [],
+            "label": "docLinksServiceFactory",
+            "description": [],
+            "signature": [
+              "(params: void) => ",
+              {
+                "pluginId": "@kbn/shared-ux-services",
+                "scope": "common",
+                "docId": "kibKbnSharedUxServicesPluginApi",
+                "section": "def-common.SharedUxDocLinksService",
+                "text": "SharedUxDocLinksService"
+              }
+            ],
+            "path": "packages/kbn-shared-ux-services/src/services/stub/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-services",
+                "id": "def-common.stubServiceFactories.docLinksServiceFactory.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "Parameters"
+                ],
+                "path": "packages/kbn-shared-ux-services/src/types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.stubServiceFactories.editorsServiceFactory",
+            "type": "Function",
+            "tags": [],
+            "label": "editorsServiceFactory",
+            "description": [],
+            "signature": [
+              "(params: void) => ",
+              {
+                "pluginId": "@kbn/shared-ux-services",
+                "scope": "common",
+                "docId": "kibKbnSharedUxServicesPluginApi",
+                "section": "def-common.SharedUxEditorsService",
+                "text": "SharedUxEditorsService"
+              }
+            ],
+            "path": "packages/kbn-shared-ux-services/src/services/stub/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-services",
+                "id": "def-common.stubServiceFactories.editorsServiceFactory.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "Parameters"
+                ],
+                "path": "packages/kbn-shared-ux-services/src/types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.stubServiceFactories.httpServiceFactory",
+            "type": "Function",
+            "tags": [],
+            "label": "httpServiceFactory",
+            "description": [],
+            "signature": [
+              "(params: void) => ",
+              {
+                "pluginId": "@kbn/shared-ux-services",
+                "scope": "common",
+                "docId": "kibKbnSharedUxServicesPluginApi",
+                "section": "def-common.SharedUxHttpService",
+                "text": "SharedUxHttpService"
+              }
+            ],
+            "path": "packages/kbn-shared-ux-services/src/services/stub/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-services",
+                "id": "def-common.stubServiceFactories.httpServiceFactory.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "Parameters"
+                ],
+                "path": "packages/kbn-shared-ux-services/src/types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.stubServiceFactories.platformServiceFactory",
+            "type": "Function",
+            "tags": [],
+            "label": "platformServiceFactory",
+            "description": [],
+            "signature": [
+              "(params: void) => ",
+              {
+                "pluginId": "@kbn/shared-ux-services",
+                "scope": "common",
+                "docId": "kibKbnSharedUxServicesPluginApi",
+                "section": "def-common.SharedUxPlatformService",
+                "text": "SharedUxPlatformService"
+              }
+            ],
+            "path": "packages/kbn-shared-ux-services/src/services/stub/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-services",
+                "id": "def-common.stubServiceFactories.platformServiceFactory.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "Parameters"
+                ],
+                "path": "packages/kbn-shared-ux-services/src/types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.stubServiceFactories.userPermissionsServiceFactory",
+            "type": "Function",
+            "tags": [],
+            "label": "userPermissionsServiceFactory",
+            "description": [],
+            "signature": [
+              "(params: void) => ",
+              {
+                "pluginId": "@kbn/shared-ux-services",
+                "scope": "common",
+                "docId": "kibKbnSharedUxServicesPluginApi",
+                "section": "def-common.SharedUxUserPermissionsService",
+                "text": "SharedUxUserPermissionsService"
+              }
+            ],
+            "path": "packages/kbn-shared-ux-services/src/services/stub/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-services",
+                "id": "def-common.stubServiceFactories.userPermissionsServiceFactory.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "Parameters"
+                ],
+                "path": "packages/kbn-shared-ux-services/src/types.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

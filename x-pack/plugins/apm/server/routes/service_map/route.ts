@@ -16,7 +16,9 @@ import { getServiceMap } from './get_service_map';
 import { getServiceMapBackendNodeInfo } from './get_service_map_backend_node_info';
 import { getServiceMapServiceNodeInfo } from './get_service_map_service_node_info';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { environmentRt, offsetRt, rangeRt } from '../default_api_types';
+import { environmentRt, rangeRt } from '../default_api_types';
+import { getServiceGroup } from '../service_groups/get_service_group';
+import { offsetRt } from '../../../common/offset_rt';
 
 const serviceMapRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-map',
@@ -24,6 +26,7 @@ const serviceMapRoute = createApmServerRoute({
     query: t.intersection([
       t.partial({
         serviceName: t.string,
+        serviceGroup: t.string,
       }),
       environmentRt,
       rangeRt,
@@ -85,19 +88,42 @@ const serviceMapRoute = createApmServerRoute({
     if (!config.serviceMapEnabled) {
       throw Boom.notFound();
     }
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+
+    const licensingContext = await context.licensing;
+    if (!isActivePlatinumLicense(licensingContext.license)) {
       throw Boom.forbidden(invalidLicenseMessage);
     }
 
     notifyFeatureUsage({
-      licensingPlugin: context.licensing,
+      licensingPlugin: licensingContext,
       featureName: 'serviceMaps',
     });
 
-    const setup = await setupRequest(resources);
     const {
-      query: { serviceName, environment, start, end },
+      query: {
+        serviceName,
+        serviceGroup: serviceGroupId,
+        environment,
+        start,
+        end,
+      },
     } = params;
+
+    const savedObjectsClient = (await context.core).savedObjects.client;
+    const [setup, serviceGroup] = await Promise.all([
+      setupRequest(resources),
+      serviceGroupId
+        ? getServiceGroup({
+            savedObjectsClient,
+            serviceGroupId,
+          })
+        : Promise.resolve(null),
+    ]);
+
+    const serviceNames = [
+      ...(serviceName ? [serviceName] : []),
+      ...(serviceGroup?.serviceNames ?? []),
+    ];
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       apmEventClient: setup.apmEventClient,
@@ -108,7 +134,7 @@ const serviceMapRoute = createApmServerRoute({
     });
     return getServiceMap({
       setup,
-      serviceName,
+      serviceNames,
       environment,
       searchAggregatedTransactions,
       logger,
@@ -140,7 +166,9 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
     if (!config.serviceMapEnabled) {
       throw Boom.notFound();
     }
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+
+    const licensingContext = await context.licensing;
+    if (!isActivePlatinumLicense(licensingContext.license)) {
       throw Boom.forbidden(invalidLicenseMessage);
     }
     const setup = await setupRequest(resources);
@@ -202,7 +230,8 @@ const serviceMapBackendNodeRoute = createApmServerRoute({
     if (!config.serviceMapEnabled) {
       throw Boom.notFound();
     }
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+    const licensingContext = await context.licensing;
+    if (!isActivePlatinumLicense(licensingContext.license)) {
       throw Boom.forbidden(invalidLicenseMessage);
     }
     const setup = await setupRequest(resources);

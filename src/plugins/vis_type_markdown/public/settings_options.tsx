@@ -10,8 +10,8 @@ import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
-import { SwitchOption, RangeOption } from '../../vis_default_editor/public';
+import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import { SwitchOption, RangeOption } from '@kbn/vis-default-editor-plugin/public';
 import { MarkdownVisParams } from './types';
 
 function SettingsOptions({ stateParams, setValue }: VisEditorOptionsProps<MarkdownVisParams>) {

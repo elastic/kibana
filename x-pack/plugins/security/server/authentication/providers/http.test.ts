@@ -7,8 +7,8 @@
 
 import { errors } from '@elastic/elasticsearch';
 
-import type { ScopeableRequest } from 'src/core/server';
-import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
+import type { ScopeableRequest } from '@kbn/core/server';
+import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
@@ -123,9 +123,7 @@ describe('HTTPAuthenticationProvider', () => {
         const request = httpServerMock.createKibanaRequest({ headers: { authorization: header } });
 
         const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-        mockScopedClusterClient.asCurrentUser.security.authenticate.mockResolvedValue(
-          securityMock.createApiResponse({ body: user })
-        );
+        mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
         mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
         mockOptions.client.asScoped.mockClear();
 

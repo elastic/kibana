@@ -9,11 +9,11 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { buildSearchBody, useEsDocSearch } from './use_es_doc_search';
 import { Observable } from 'rxjs';
-import { DataView } from 'src/plugins/data/common';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { DocProps } from '../application/doc/components/doc';
 import { ElasticRequestState } from '../application/doc/types';
 import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '../../common';
-import { KibanaContextProvider } from '../../../kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 
 const mockSearchResult = new Observable();

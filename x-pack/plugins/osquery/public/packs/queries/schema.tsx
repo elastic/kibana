@@ -71,8 +71,7 @@ export const createFormSchema = (ids: Set<string>) => ({
     validations: [],
   },
   ecs_mapping: {
-    defaultValue: {},
+    defaultValue: [],
     type: FIELD_TYPES.JSON,
-    validations: [],
   },
 });

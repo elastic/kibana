@@ -14,9 +14,13 @@ import {
   EuiCode,
   EuiCodeBlock,
   EuiAccordion,
+  EuiLink,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+
+import { docLinks } from '../doc_links';
 
 interface Props {
   productName: string;
@@ -94,6 +98,29 @@ export const SetupInstructions: React.FC<Props> = ({ productName }) => (
                   </p>
                 </EuiText>
               </EuiAccordion>
+              <EuiSpacer />
+              <EuiText>
+                <p>
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.troubleshooting.setup.description"
+                    defaultMessage="For help with other common setup issues, read our {link} guide."
+                    values={{
+                      link: (
+                        <EuiLink
+                          href={docLinks.enterpriseSearchTroubleshootSetup}
+                          target="_blank"
+                          external
+                        >
+                          {i18n.translate(
+                            'xpack.enterpriseSearch.troubleshooting.setup.documentationLinkLabel',
+                            { defaultMessage: 'Troubleshoot Enterprise Search setup' }
+                          )}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </p>
+              </EuiText>
             </>
           ),
         },

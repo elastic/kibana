@@ -20,12 +20,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { isPolicyOutOfDate } from '../../utils';
 import { HostInfo, HostMetadata, HostStatus } from '../../../../../../common/endpoint/types';
 import { useEndpointSelector } from '../hooks';
-import { policyResponseStatus, uiQueryParams } from '../../store/selectors';
+import { nonExistingPolicies, policyResponseStatus, uiQueryParams } from '../../store/selectors';
 import { POLICY_STATUS_TO_BADGE_COLOR } from '../host_constants';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { getEndpointDetailsPath } from '../../../../common/routing';
-import { EndpointPolicyLink } from '../components/endpoint_policy_link';
+import { EndpointPolicyLink } from '../../../../components/endpoint_policy_link';
 import { OutOfDate } from '../components/out_of_date';
 import { EndpointAgentStatus } from '../components/endpoint_agent_status';
 
@@ -63,6 +63,8 @@ export const EndpointDetailsContent = memo(
     const policyStatus = useEndpointSelector(
       policyResponseStatus
     ) as keyof typeof POLICY_STATUS_TO_BADGE_COLOR;
+
+    const missingPolicies = useEndpointSelector(nonExistingPolicies);
 
     const policyResponseRoutePath = useMemo(() => {
       // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -131,6 +133,7 @@ export const EndpointDetailsContent = memo(
                 policyId={details.Endpoint.policy.applied.id}
                 data-test-subj="policyDetailsValue"
                 className={'policyLineText'}
+                missingPolicies={missingPolicies}
               >
                 {details.Endpoint.policy.applied.name}
               </EndpointPolicyLink>
@@ -211,7 +214,7 @@ export const EndpointDetailsContent = memo(
           ),
         },
       ];
-    }, [details, hostStatus, policyStatus, policyStatusClickHandler, policyInfo]);
+    }, [details, hostStatus, policyStatus, policyStatusClickHandler, policyInfo, missingPolicies]);
 
     return (
       <EndpointDetailsContentStyled>

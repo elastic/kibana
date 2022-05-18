@@ -131,8 +131,8 @@ export default function ({ getService }: FtrProviderContext) {
           slug,
         });
 
-        expect(response1.status === 200).to.be(true);
-        expect(response2.status >= 400).to.be(true);
+        expect(response1.status).to.be(200);
+        expect(response2.status).to.be(409);
       });
     });
   });

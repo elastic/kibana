@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ESSearchRequest } from '../../../../src/core/types/elasticsearch';
+import type { ESSearchRequest } from '@kbn/core/types/elasticsearch';
 
 interface BuildSortedEventsQueryOpts {
   aggs?: Record<string, estypes.AggregationsAggregationContainer>;

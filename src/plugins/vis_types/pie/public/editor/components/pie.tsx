@@ -19,27 +19,28 @@ import {
   EuiFlexGroup,
   EuiButtonGroup,
 } from '@elastic/eui';
+import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
+import type { PaletteRegistry } from '@kbn/coloring';
 import {
   BasicOptions,
   SwitchOption,
   SelectOption,
   PalettePicker,
   LongLegendOptions,
-} from '../../../../../vis_default_editor/public';
-import { VisEditorOptionsProps } from '../../../../../visualizations/public';
-import { TruncateLabelsOption } from './truncate_labels';
-import { PaletteRegistry } from '../../../../../charts/public';
-import { DEFAULT_PERCENT_DECIMALS } from '../../../common';
-import { PieTypeProps } from '../../types';
+  LegendSizeSettings,
+} from '@kbn/vis-default-editor-plugin/public';
+import { LegendSize, VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import {
   PartitionVisParams,
   LabelPositions,
   ValueFormats,
   LegendDisplay,
-} from '../../../../../chart_expressions/expression_partition_vis/common';
+} from '@kbn/expression-partition-vis-plugin/common';
+import { TruncateLabelsOption } from './truncate_labels';
+import { DEFAULT_PERCENT_DECIMALS } from '../../../common';
+import { PieTypeProps } from '../../types';
 
 import { emptySizeRatioOptions, getLabelPositions, getValuesFormats } from '../collections';
 import { getLegendPositions } from '../positions';
@@ -96,14 +97,17 @@ const PieOptions = (props: PieOptionsProps) => {
   const hasSplitChart = Boolean(aggs?.aggs?.find((agg) => agg.schema === 'split' && agg.enabled));
   const segments = aggs?.aggs?.filter((agg) => agg.schema === 'segment' && agg.enabled) ?? [];
 
+  const legendSize = stateParams.legendSize;
+  const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
+
   const getLegendDisplay = useCallback(
     (isVisible: boolean) => (isVisible ? LegendDisplay.SHOW : LegendDisplay.HIDE),
     []
   );
 
   useEffect(() => {
-    setLegendVisibility(legendUiStateValue);
-  }, [legendUiStateValue]);
+    setLegendVisibility(legendUiStateValue ?? stateParams.legendDisplay === LegendDisplay.SHOW);
+  }, [legendUiStateValue, stateParams.legendDisplay]);
 
   useEffect(() => {
     const fetchPalettes = async () => {
@@ -120,6 +124,8 @@ const PieOptions = (props: PieOptionsProps) => {
     },
     [setValue]
   );
+
+  const handleLegendSizeChange = useCallback((size) => setValue('legendSize', size), [setValue]);
 
   const handleLegendDisplayChange = useCallback(
     (name: keyof PartitionVisParams, show: boolean) => {
@@ -229,6 +235,15 @@ const PieOptions = (props: PieOptionsProps) => {
               truncateLegend={stateParams.truncateLegend ?? true}
               maxLegendLines={stateParams.maxLegendLines ?? 1}
               setValue={setValue}
+            />
+            <LegendSizeSettings
+              legendSize={legendSize}
+              onLegendSizeChange={handleLegendSizeChange}
+              isVerticalLegend={
+                stateParams.legendPosition === Position.Left ||
+                stateParams.legendPosition === Position.Right
+              }
+              showAutoOption={hadAutoLegendSize}
             />
           </>
         )}

@@ -11,5 +11,10 @@ export default async function ({ readConfigFile }) {
 
   return {
     testFiles: [...config1.get('testFiles'), 'config.2'],
+    servers: {
+      elasticsearch: {
+        port: 1234,
+      },
+    },
   };
 }

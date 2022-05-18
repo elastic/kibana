@@ -8,7 +8,7 @@
 
 import React, { forwardRef, useCallback, useMemo } from 'react';
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
-import type { DataView, DataViewField } from 'src/plugins/data/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TableHeader } from './components/table_header/table_header';
 import { SHOW_MULTIFIELDS } from '../../../common';
@@ -164,12 +164,13 @@ export const DocTableWrapper = forwardRef(
             indexPattern={indexPattern}
             row={current}
             useNewFieldsApi={useNewFieldsApi}
-            onAddColumn={onAddColumn}
             fieldsToShow={fieldsToShow}
+            onAddColumn={onAddColumn}
+            onRemoveColumn={onRemoveColumn}
           />
         ));
       },
-      [columns, onFilter, indexPattern, useNewFieldsApi, onAddColumn, fieldsToShow]
+      [columns, onFilter, indexPattern, useNewFieldsApi, fieldsToShow, onAddColumn, onRemoveColumn]
     );
 
     return (

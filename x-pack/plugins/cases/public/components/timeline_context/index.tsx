@@ -42,7 +42,6 @@ export interface CasesTimelineIntegration {
     ) => UseInsertTimelineReturn;
   };
   ui?: {
-    renderInvestigateInTimelineActionComponent?: (alertIds: string[]) => JSX.Element;
     renderTimelineDetailsPanel?: () => JSX.Element;
   };
 }

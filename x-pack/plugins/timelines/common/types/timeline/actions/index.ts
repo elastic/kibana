@@ -7,11 +7,12 @@
 import { ComponentType, JSXElementConstructor } from 'react';
 import { EuiDataGridControlColumn, EuiDataGridCellValueElementProps } from '@elastic/eui';
 
-import { CreateFieldComponentType, OnRowSelected, SortColumnTimeline, TimelineTabs } from '..';
+import { OnRowSelected, SortColumnTimeline, TimelineTabs } from '..';
 import { BrowserFields } from '../../../search_strategy/index_fields';
 import { ColumnHeaderOptions } from '../columns';
-import { TimelineNonEcsData } from '../../../search_strategy';
+import { TimelineItem, TimelineNonEcsData } from '../../../search_strategy';
 import { Ecs } from '../../../ecs';
+import { FieldBrowserOptions } from '../../fields_browser';
 
 export interface ActionProps {
   action?: RowCellRender;
@@ -52,22 +53,37 @@ export type OnUpdateAlertStatusSuccess = (
 ) => void;
 export type OnUpdateAlertStatusError = (status: AlertStatus, error: Error) => void;
 
-export interface StatusBulkActionsProps {
+export interface CustomBulkAction {
+  key: string;
+  label: string;
+  disableOnQuery?: boolean;
+  disabledLabel?: string;
+  onClick: (items?: TimelineItem[]) => void;
+  ['data-test-subj']?: string;
+}
+
+export type CustomBulkActionProp = Omit<CustomBulkAction, 'onClick'> & {
+  onClick: (eventIds: string[]) => void;
+};
+
+export interface BulkActionsProps {
   eventIds: string[];
   currentStatus?: AlertStatus;
   query?: string;
   indexName: string;
   setEventsLoading: SetEventsLoading;
   setEventsDeleted: SetEventsDeleted;
+  showAlertStatusActions?: boolean;
   onUpdateSuccess?: OnUpdateAlertStatusSuccess;
   onUpdateFailure?: OnUpdateAlertStatusError;
+  customBulkActions?: CustomBulkActionProp[];
   timelineId?: string;
 }
 export interface HeaderActionProps {
   width: number;
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
-  createFieldComponent?: CreateFieldComponentType;
+  fieldBrowserOptions?: FieldBrowserOptions;
   isEventViewer?: boolean;
   isSelectAllChecked: boolean;
   onSelectAll: ({ isSelected }: { isSelected: boolean }) => void;
@@ -116,6 +132,7 @@ export interface BulkActionsObjectProp {
   alertStatusActions?: boolean;
   onAlertStatusActionSuccess?: OnUpdateAlertStatusSuccess;
   onAlertStatusActionFailure?: OnUpdateAlertStatusError;
+  customBulkActions?: CustomBulkAction[];
 }
 export type BulkActionsProp = boolean | BulkActionsObjectProp;
 

@@ -12,8 +12,8 @@ import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks
 import { i18n } from '@kbn/i18n';
 import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
+import { TimeRange } from '@kbn/data-plugin/common';
 import { epochToKbnDateFormat, getInterval, getTicks } from './time_utils';
-import { TimeRange } from '../../../../../../src/plugins/data/common';
 import { getTimeFilter } from '../../kibana_services';
 import { Timeslice } from '../../../common/descriptor_types';
 

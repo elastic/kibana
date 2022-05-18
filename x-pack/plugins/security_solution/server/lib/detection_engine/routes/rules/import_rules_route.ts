@@ -10,7 +10,7 @@ import { extname } from 'path';
 import { schema } from '@kbn/config-schema';
 import { createPromiseFromStreams } from '@kbn/utils';
 
-import { transformError, getIndexExists } from '@kbn/securitysolution-es-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { ImportQuerySchemaDecoded, importQuerySchema } from '@kbn/securitysolution-io-ts-types';
 
@@ -45,14 +45,14 @@ import {
 } from './utils/import_rules_utils';
 import { getReferencedExceptionLists } from './utils/gather_referenced_exceptions';
 import { importRuleExceptions } from './utils/import_rule_exceptions';
+import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request';
 
 const CHUNK_PARSED_OBJECT_SIZE = 50;
 
 export const importRulesRoute = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
-  ml: SetupPlugins['ml'],
-  isRuleRegistryEnabled: boolean
+  ml: SetupPlugins['ml']
 ) => {
   router.post(
     {
@@ -75,18 +75,25 @@ export const importRulesRoute = (
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const rulesClient = context.alerting.getRulesClient();
-        const actionsClient = context.actions.getActionsClient();
-        const esClient = context.core.elasticsearch.client;
-        const actionSOClient = context.core.savedObjects.getClient({
+        const ctx = await context.resolve([
+          'core',
+          'securitySolution',
+          'alerting',
+          'actions',
+          'lists',
+          'licensing',
+        ]);
+
+        const rulesClient = ctx.alerting.getRulesClient();
+        const actionsClient = ctx.actions.getActionsClient();
+        const actionSOClient = ctx.core.savedObjects.getClient({
           includedHiddenTypes: ['action'],
         });
-        const savedObjectsClient = context.core.savedObjects.client;
-        const siemClient = context.securitySolution.getAppClient();
-        const exceptionsClient = context.lists?.getExceptionListClient();
+        const savedObjectsClient = ctx.core.savedObjects.client;
+        const exceptionsClient = ctx.lists?.getExceptionListClient();
 
         const mlAuthz = buildMlAuthz({
-          license: context.licensing.license,
+          license: ctx.licensing.license,
           ml,
           request,
           savedObjectsClient,
@@ -101,14 +108,6 @@ export const importRulesRoute = (
           });
         }
 
-        const signalsIndex = siemClient.getSignalsIndex();
-        const indexExists = await getIndexExists(esClient.asCurrentUser, signalsIndex);
-        if (!isRuleRegistryEnabled && !indexExists) {
-          return siemResponse.error({
-            statusCode: 400,
-            body: `To create a rule, the index must exist first. Index ${signalsIndex} does not exist`,
-          });
-        }
         const objectLimit = config.maxRuleImportExportSize;
 
         // parse file to separate out exceptions from rules
@@ -138,30 +137,39 @@ export const importRulesRoute = (
           actionSOClient
         );
 
-        const [nonExistentActionErrors, uniqueParsedObjects] = await getInvalidConnectors(
-          migratedParsedObjectsWithoutDuplicateErrors,
-          actionsClient
+        let parsedRules;
+        let actionErrors: BulkError[] = [];
+        const actualRules = rules.filter(
+          (rule): rule is ImportRulesSchemaDecoded => !(rule instanceof Error)
         );
 
+        if (actualRules.some((rule) => rule.actions.length > 0)) {
+          const [nonExistentActionErrors, uniqueParsedObjects] = await getInvalidConnectors(
+            migratedParsedObjectsWithoutDuplicateErrors,
+            actionsClient
+          );
+          parsedRules = uniqueParsedObjects;
+          actionErrors = nonExistentActionErrors;
+        } else {
+          parsedRules = migratedParsedObjectsWithoutDuplicateErrors;
+        }
         // gather all exception lists that the imported rules reference
         const foundReferencedExceptionLists = await getReferencedExceptionLists({
-          rules: uniqueParsedObjects,
+          rules: parsedRules,
           savedObjectsClient,
         });
 
-        const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, uniqueParsedObjects);
+        const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, parsedRules);
 
         const importRuleResponse: ImportRuleResponse[] = await importRulesHelper({
           ruleChunks: chunkParseObjects,
-          rulesResponseAcc: [...nonExistentActionErrors, ...duplicateIdErrors],
+          rulesResponseAcc: [...actionErrors, ...duplicateIdErrors],
           mlAuthz,
           overwriteRules: request.query.overwrite,
           rulesClient,
           savedObjectsClient,
           exceptionsClient,
-          isRuleRegistryEnabled,
-          spaceId: context.securitySolution.getSpaceId(),
-          signalsIndex,
+          spaceId: ctx.securitySolution.getSpaceId(),
           existingLists: foundReferencedExceptionLists,
         });
 
@@ -176,6 +184,7 @@ export const importRulesRoute = (
         const importRules: ImportRulesResponseSchema = {
           success: errorsResp.length === 0,
           success_count: successes.length,
+          rules_count: rules.length,
           errors: errorsResp,
           exceptions_errors: exceptionsErrors,
           exceptions_success: exceptionsSuccess,

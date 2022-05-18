@@ -104,7 +104,10 @@ export const item: GetInfoResponse['item'] = {
       index_pattern: [],
       lens: [],
       ml_module: [],
+      osquery_pack_asset: [],
+      osquery_saved_query: [],
       security_rule: [],
+      csp_rule_template: [],
       tag: [],
     },
     elasticsearch: {

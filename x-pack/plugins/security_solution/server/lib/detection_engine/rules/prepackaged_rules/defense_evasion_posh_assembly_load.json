@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "This rule detects the use of Reflection.Assembly to load PEs and DLLs in memory in Powershell Scripts. Attackers use this method to load executables and DLLs without writing to the disk, bypassing security solutions.",
+  "description": "Detects the use of Reflection.Assembly to load PEs and DLLs in memory in PowerShell scripts. Attackers use this method to load executables and DLLs without writing to the disk, bypassing security solutions.",
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
@@ -78,5 +78,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }

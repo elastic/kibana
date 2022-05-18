@@ -9,15 +9,16 @@ import React, { Component } from 'react';
 import { EuiCallOut, EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { IndexPattern, IndexPatternsContract } from 'src/plugins/data/public';
-import { HttpSetup } from 'kibana/public';
+import { DataViewsContract } from '@kbn/data-plugin/public';
+import { HttpSetup } from '@kbn/core/public';
+import { DataView } from '@kbn/data-plugin/common';
 
 interface Props {
-  onChange: (indexPattern: IndexPattern) => void;
+  onChange: (indexPattern: DataView) => void;
   value: string | undefined;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   IndexPatternSelectComponent: any;
-  indexPatternService: IndexPatternsContract | undefined;
+  indexPatternService: DataViewsContract | undefined;
   http: HttpSetup;
   includedGeoTypes: string[];
 }

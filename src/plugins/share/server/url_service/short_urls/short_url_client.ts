@@ -7,7 +7,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { SavedObjectReference } from 'kibana/server';
+import { SavedObjectReference } from '@kbn/core/server';
 import { generateSlug } from 'random-word-slugs';
 import { ShortUrlRecord } from '.';
 import type {
@@ -18,6 +18,7 @@ import type {
   ShortUrlData,
   LocatorData,
 } from '../../../common/url_service';
+import { UrlServiceError } from '../error';
 import type { ShortUrlStorage } from './types';
 import { validateSlug } from './util';
 
@@ -74,7 +75,7 @@ export class ServerShortUrlClient implements IShortUrlClient {
     if (slug) {
       const isSlugTaken = await storage.exists(slug);
       if (isSlugTaken) {
-        throw new Error(`Slug "${slug}" already exists.`);
+        throw new UrlServiceError(`Slug "${slug}" already exists.`, 'SLUG_EXISTS');
       }
     }
 

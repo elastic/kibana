@@ -7,7 +7,7 @@
 
 import { uniq } from 'lodash';
 
-import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import { GLOBAL_RESOURCE } from '../../common/constants';
 import { checkPrivilegesWithRequestFactory } from './check_privileges';
@@ -24,9 +24,7 @@ const savedObjectTypes = ['foo-type', 'bar-type'];
 
 const createMockClusterClient = (response: any) => {
   const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-  mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
-    body: response,
-  } as any);
+  mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResponse(response as any);
 
   const mockClusterClient = elasticsearchServiceMock.createClusterClient();
   mockClusterClient.asScoped.mockReturnValue(mockScopedClusterClient);

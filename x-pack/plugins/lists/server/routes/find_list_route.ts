@@ -29,7 +29,7 @@ export const findListRoute = (router: ListsPluginRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const lists = getListClient(context);
+        const lists = await getListClient(context);
         const {
           cursor,
           filter: filterOrUndefined,

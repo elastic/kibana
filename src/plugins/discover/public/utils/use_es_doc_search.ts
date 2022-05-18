@@ -8,7 +8,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { DataView } from '../../../data/common';
+import { firstValueFrom } from 'rxjs';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { DocProps } from '../application/doc/components/doc';
 import { ElasticRequestState } from '../application/doc/types';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../common';
@@ -74,14 +75,14 @@ export function useEsDocSearch({
 
   const requestData = useCallback(async () => {
     try {
-      const { rawResponse } = await data.search
-        .search({
+      const { rawResponse } = await firstValueFrom(
+        data.search.search({
           params: {
             index,
             body: buildSearchBody(id, indexPattern, useNewFieldsApi, requestSource)?.body,
           },
         })
-        .toPromise();
+      );
 
       const hits = rawResponse.hits;
 

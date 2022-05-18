@@ -20,10 +20,11 @@ export const createCustomRule = (rule: CustomRule, ruleId = 'rule_testing', inte
       severity: rule.severity.toLocaleLowerCase(),
       type: 'query',
       from: 'now-50000h',
-      index: ['exceptions-*'],
+      index: rule.index,
       query: rule.customQuery,
       language: 'kuery',
       enabled: false,
+      exceptions_list: rule.exceptionLists ?? [],
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
     failOnStatusCode: false,
@@ -58,6 +59,8 @@ export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'r
       rule_id: ruleId,
       risk_score: parseInt(rule.riskScore, 10),
       description: rule.description,
+      // Default interval is 1m, our tests config overwrite this to 1s
+      // See https://github.com/elastic/kibana/pull/125396 for details
       interval: '10s',
       name: rule.name,
       severity: rule.severity.toLocaleLowerCase(),
@@ -90,7 +93,7 @@ export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'r
     failOnStatusCode: false,
   });
 
-export const createCustomRuleActivated = (
+export const createCustomRuleEnabled = (
   rule: CustomRule,
   ruleId = '1',
   interval = '100m',

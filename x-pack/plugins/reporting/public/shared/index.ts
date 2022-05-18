@@ -6,3 +6,4 @@
  */
 
 export { getSharedComponents } from './get_shared_components';
+export type { ApplicationProps } from './get_shared_components';

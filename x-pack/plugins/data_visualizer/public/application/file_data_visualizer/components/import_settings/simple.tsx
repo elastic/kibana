@@ -20,8 +20,8 @@ interface Props {
   index: string;
   initialized: boolean;
   onIndexChange(): void;
-  createIndexPattern: boolean;
-  onCreateIndexPatternChange(): void;
+  createDataView: boolean;
+  onCreateDataViewChange(): void;
   indexNameError: string;
   combinedFields: CombinedField[];
   canCreateDataView: boolean;
@@ -31,8 +31,8 @@ export const SimpleSettings: FC<Props> = ({
   index,
   initialized,
   onIndexChange,
-  createIndexPattern,
-  onCreateIndexPatternChange,
+  createDataView,
+  onCreateDataViewChange,
   indexNameError,
   combinedFields,
   canCreateDataView,
@@ -74,17 +74,17 @@ export const SimpleSettings: FC<Props> = ({
 
       <CreateDataViewToolTip showTooltip={canCreateDataView === false}>
         <EuiCheckbox
-          id="createIndexPattern"
+          id="createDataView"
           label={
             <FormattedMessage
               id="xpack.dataVisualizer.file.simpleImportSettings.createDataViewLabel"
               defaultMessage="Create data view"
             />
           }
-          checked={createIndexPattern === true}
+          checked={createDataView === true}
           disabled={initialized === true || canCreateDataView === false}
-          onChange={onCreateIndexPatternChange}
-          data-test-subj="dataVisualizerFileCreateIndexPatternCheckbox"
+          onChange={onCreateDataViewChange}
+          data-test-subj="dataVisualizerFileCreateDataViewCheckbox"
         />
       </CreateDataViewToolTip>
 

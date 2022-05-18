@@ -81,7 +81,9 @@ export const counterRateOperation: OperationDefinition<
   },
   buildColumn: ({ referenceIds, previousColumn, layer, indexPattern }, columnParams) => {
     const metric = layer.columns[referenceIds[0]];
-    const timeScale = previousColumn?.timeScale || DEFAULT_TIME_SCALE;
+    const counterRateColumnParams = columnParams as CounterRateIndexPatternColumn;
+    const timeScale =
+      previousColumn?.timeScale || counterRateColumnParams?.timeScale || DEFAULT_TIME_SCALE;
     return {
       label: ofName(
         metric && 'sourceField' in metric

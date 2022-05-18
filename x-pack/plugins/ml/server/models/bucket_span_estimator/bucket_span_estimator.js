@@ -277,7 +277,7 @@ export function estimateBucketSpanFactory(client) {
           },
           ...(indicesOptions ?? {}),
         })
-        .then(({ body }) => {
+        .then((body) => {
           const value = get(body, ['aggregations', 'field_count', 'value'], 0);
           resolve(value);
         })
@@ -317,7 +317,7 @@ export function estimateBucketSpanFactory(client) {
               },
               ...(indicesOptions ?? {}),
             })
-            .then(({ body }) => {
+            .then((body) => {
               // eslint-disable-next-line camelcase
               if (body.aggregations?.fields_bucket_counts?.buckets !== undefined) {
                 const buckets = body.aggregations.fields_bucket_counts.buckets;
@@ -365,7 +365,7 @@ export function estimateBucketSpanFactory(client) {
           include_defaults: true,
           filter_path: '*.*max_buckets',
         })
-        .then(({ body }) => {
+        .then((body) => {
           if (typeof body !== 'object') {
             reject('Unable to retrieve cluster settings');
           }

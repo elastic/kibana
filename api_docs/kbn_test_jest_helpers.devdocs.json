@@ -1,0 +1,2209 @@
+{
+  "id": "@kbn/test-jest-helpers",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.StubBrowserStorage",
+        "type": "Class",
+        "tags": [],
+        "label": "StubBrowserStorage",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/test-jest-helpers",
+            "scope": "server",
+            "docId": "kibKbnTestJestHelpersPluginApi",
+            "section": "def-server.StubBrowserStorage",
+            "text": "StubBrowserStorage"
+          },
+          " implements Storage"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.StubBrowserStorage.length",
+            "type": "number",
+            "tags": [],
+            "label": "length",
+            "description": [],
+            "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.StubBrowserStorage.key",
+            "type": "Function",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "signature": [
+              "(i: number) => string"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-jest-helpers",
+                "id": "def-server.StubBrowserStorage.key.$1",
+                "type": "number",
+                "tags": [],
+                "label": "i",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.StubBrowserStorage.getItem",
+            "type": "Function",
+            "tags": [],
+            "label": "getItem",
+            "description": [],
+            "signature": [
+              "(key: string) => string | null"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-jest-helpers",
+                "id": "def-server.StubBrowserStorage.getItem.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.StubBrowserStorage.setItem",
+            "type": "Function",
+            "tags": [],
+            "label": "setItem",
+            "description": [],
+            "signature": [
+              "(key: string, value: string) => void"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-jest-helpers",
+                "id": "def-server.StubBrowserStorage.setItem.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/test-jest-helpers",
+                "id": "def-server.StubBrowserStorage.setItem.$2",
+                "type": "string",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.StubBrowserStorage.removeItem",
+            "type": "Function",
+            "tags": [],
+            "label": "removeItem",
+            "description": [],
+            "signature": [
+              "(key: string) => void"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-jest-helpers",
+                "id": "def-server.StubBrowserStorage.removeItem.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.StubBrowserStorage.clear",
+            "type": "Function",
+            "tags": [],
+            "label": "clear",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.StubBrowserStorage.setStubbedSizeLimit",
+            "type": "Function",
+            "tags": [],
+            "label": "setStubbedSizeLimit",
+            "description": [],
+            "signature": [
+              "(sizeLimit: number) => void"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-jest-helpers",
+                "id": "def-server.StubBrowserStorage.setStubbedSizeLimit.$1",
+                "type": "number",
+                "tags": [],
+                "label": "sizeLimit",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.StubBrowserStorage.getStubbedSizeLimit",
+            "type": "Function",
+            "tags": [],
+            "label": "getStubbedSizeLimit",
+            "description": [],
+            "signature": [
+              "() => number"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.StubBrowserStorage.getStubbedSize",
+            "type": "Function",
+            "tags": [],
+            "label": "getStubbedSize",
+            "description": [],
+            "signature": [
+              "() => number"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.delay",
+        "type": "Function",
+        "tags": [],
+        "label": "delay",
+        "description": [],
+        "signature": [
+          "(time?: number) => Promise<unknown>"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.delay.$1",
+            "type": "number",
+            "tags": [],
+            "label": "time",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.expectToBeAccessible",
+        "type": "Function",
+        "tags": [],
+        "label": "expectToBeAccessible",
+        "description": [
+          "\nFunction to test if a component doesn't have a11y violations from axe automated testing"
+        ],
+        "signature": [
+          "(component: ",
+          "ReactWrapper",
+          ") => Promise<void>"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/axe_helpers.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.expectToBeAccessible.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "component",
+            "description": [],
+            "signature": [
+              "ReactWrapper"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/axe_helpers.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.findTestSubject",
+        "type": "Function",
+        "tags": [],
+        "label": "findTestSubject",
+        "description": [
+          "\nFind node which matches a specific test subject selector. Returns ReactWrappers around DOM element,\nhttps://github.com/airbnb/enzyme/tree/master/docs/api/ReactWrapper.\nCommon use cases include calling simulate or getDOMNode on the returned ReactWrapper.\n\nThe ~= matcher looks for the value in space-separated list, allowing support for multiple data-test-subj\nvalues on a single element. See https://www.w3.org/TR/selectors-3/#attribute-selectors for more\ninfo on the other possible matchers.\n"
+        ],
+        "signature": [
+          "<T = string>(reactWrapper: ",
+          "ReactWrapper",
+          "<{}, {}, React.Component<{}, {}, any>>, testSubjectSelector: T, matcher?: Matcher) => ",
+          "ReactWrapper",
+          "<",
+          "HTMLAttributes",
+          ", {}, React.Component<{}, {}, any>>"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/find_test_subject.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.findTestSubject.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "reactWrapper",
+            "description": [
+              "The React wrapper to search in"
+            ],
+            "signature": [
+              "ReactWrapper",
+              "<{}, {}, React.Component<{}, {}, any>>"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/find_test_subject.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.findTestSubject.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "testSubjectSelector",
+            "description": [
+              "The data test subject selector"
+            ],
+            "signature": [
+              "T"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/find_test_subject.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.findTestSubject.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "matcher",
+            "description": [
+              "optional matcher"
+            ],
+            "signature": [
+              "Matcher"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/find_test_subject.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.getA11yViolations",
+        "type": "Function",
+        "tags": [],
+        "label": "getA11yViolations",
+        "description": [
+          "\nReturns a11y violations as found by axe testing"
+        ],
+        "signature": [
+          "(component: ",
+          "ReactWrapper",
+          ") => Promise<",
+          "Result",
+          "[]>"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/axe_helpers.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.getA11yViolations.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "component",
+            "description": [],
+            "signature": [
+              "ReactWrapper"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/axe_helpers.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.getRandomNumber",
+        "type": "Function",
+        "tags": [],
+        "label": "getRandomNumber",
+        "description": [],
+        "signature": [
+          "(range?: { min: number; max: number; }) => number"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/random.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.getRandomNumber.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "range",
+            "description": [],
+            "path": "packages/kbn-test-jest-helpers/src/random.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-jest-helpers",
+                "id": "def-server.getRandomNumber.$1.min",
+                "type": "number",
+                "tags": [],
+                "label": "min",
+                "description": [],
+                "path": "packages/kbn-test-jest-helpers/src/random.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@kbn/test-jest-helpers",
+                "id": "def-server.getRandomNumber.$1.max",
+                "type": "number",
+                "tags": [],
+                "label": "max",
+                "description": [],
+                "path": "packages/kbn-test-jest-helpers/src/random.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.getRandomString",
+        "type": "Function",
+        "tags": [],
+        "label": "getRandomString",
+        "description": [],
+        "signature": [
+          "(options?: {}) => string"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/random.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.getRandomString.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "{}"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/random.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.mountHook",
+        "type": "Function",
+        "tags": [
+          "return"
+        ],
+        "label": "mountHook",
+        "description": [
+          "\nAllows for execution of hooks inside of a test component which records the\nreturned values.\n"
+        ],
+        "signature": [
+          "<Args extends {}, HookValue extends unknown>(body: (args: Args) => HookValue, WrapperComponent?: React.ComponentType<{}> | undefined, initialArgs?: Args) => ReactHookWrapper<Args, HookValue>"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.mountHook.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "body",
+            "description": [
+              "A function that calls the hook and returns data derived from it"
+            ],
+            "signature": [
+              "(args: Args) => HookValue"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.mountHook.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "WrapperComponent",
+            "description": [
+              "A component that, if provided, will be wrapped\naround the test component. This can be useful to provide context values."
+            ],
+            "signature": [
+              "React.ComponentType<{}> | undefined"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "deprecated": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.mountHook.$3",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "initialArgs",
+            "description": [],
+            "signature": [
+              "Args"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "An object providing access to the hook state and\nfunctions to interact with it."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.mountWithI18nProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "mountWithI18nProvider",
+        "description": [],
+        "signature": [
+          "(child: React.ReactElement<T, string | React.JSXElementConstructor<any>>) => ",
+          "ReactWrapper",
+          "<",
+          "HTMLAttributes",
+          ", any, React.Component<{}, {}, any>>"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.mountWithI18nProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "child",
+            "description": [],
+            "signature": [
+              "React.ReactElement<T, string | React.JSXElementConstructor<any>>"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.mountWithIntl",
+        "type": "Function",
+        "tags": [
+          "return"
+        ],
+        "label": "mountWithIntl",
+        "description": [
+          "\n Creates the wrapper instance using mount with provided intl object into context\n"
+        ],
+        "signature": [
+          "(node: React.ReactElement<T, string | React.JSXElementConstructor<any>>, {\n    context,\n    childContextTypes,\n    ...props\n  }: { attachTo?: HTMLElement | undefined; context?: any; childContextTypes?: ",
+          "ValidationMap",
+          "<any> | undefined; }) => ",
+          "ReactWrapper",
+          "<T & { intl: ReactIntl.InjectedIntl; }, Readonly<{}>, React.Component<{}, {}, any>>"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.mountWithIntl.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "node",
+            "description": [
+              "The React element or cheerio wrapper"
+            ],
+            "signature": [
+              "React.ReactElement<T, string | React.JSXElementConstructor<any>>"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.mountWithIntl.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n    context,\n    childContextTypes,\n    ...props\n  }",
+            "description": [],
+            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-jest-helpers",
+                "id": "def-server.mountWithIntl.$2.attachTo",
+                "type": "Object",
+                "tags": [],
+                "label": "attachTo",
+                "description": [],
+                "signature": [
+                  "HTMLElement | undefined"
+                ],
+                "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@kbn/test-jest-helpers",
+                "id": "def-server.mountWithIntl.$2.context",
+                "type": "Any",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@kbn/test-jest-helpers",
+                "id": "def-server.mountWithIntl.$2.childContextTypes",
+                "type": "Object",
+                "tags": [],
+                "label": "childContextTypes",
+                "description": [],
+                "signature": [
+                  "ValidationMap",
+                  "<any> | undefined"
+                ],
+                "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [
+          "The wrapper instance around the rendered output with intl object in context"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.nextTick",
+        "type": "Function",
+        "tags": [],
+        "label": "nextTick",
+        "description": [],
+        "signature": [
+          "() => Promise<unknown>"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/index.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.nodeWithIntlProp",
+        "type": "Function",
+        "tags": [],
+        "label": "nodeWithIntlProp",
+        "description": [
+          "\nWhen using @kbn/i18n `injectI18n` on components, props.intl is required."
+        ],
+        "signature": [
+          "(node: React.ReactElement<T, string | React.JSXElementConstructor<any>>) => React.ReactElement<T & { intl: ReactIntl.InjectedIntl; }, string | React.JSXElementConstructor<any>>"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.nodeWithIntlProp.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              "React.ReactElement<T, string | React.JSXElementConstructor<any>>"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.registerTestBed",
+        "type": "Function",
+        "tags": [],
+        "label": "registerTestBed",
+        "description": [
+          "\nRegister a new Testbed to test a React Component.\n"
+        ],
+        "signature": [
+          "(Component: ",
+          "ComponentType",
+          "<any>, config: ",
+          {
+            "pluginId": "@kbn/test-jest-helpers",
+            "scope": "server",
+            "docId": "kibKbnTestJestHelpersPluginApi",
+            "section": "def-server.AsyncTestBedConfig",
+            "text": "AsyncTestBedConfig"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/test-jest-helpers",
+            "scope": "server",
+            "docId": "kibKbnTestJestHelpersPluginApi",
+            "section": "def-server.AsyncSetupFunc",
+            "text": "AsyncSetupFunc"
+          },
+          "<T>"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.registerTestBed.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "Component",
+            "description": [
+              "The component under test"
+            ],
+            "signature": [
+              "ComponentType",
+              "<any>"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.registerTestBed.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [
+              "An optional configuration object for the Testbed"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/test-jest-helpers",
+                "scope": "server",
+                "docId": "kibKbnTestJestHelpersPluginApi",
+                "section": "def-server.AsyncTestBedConfig",
+                "text": "AsyncTestBedConfig"
+              }
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.registerTestBed",
+        "type": "Function",
+        "tags": [],
+        "label": "registerTestBed",
+        "description": [],
+        "signature": [
+          "(Component: ",
+          "ComponentType",
+          "<any>, config: ",
+          {
+            "pluginId": "@kbn/test-jest-helpers",
+            "scope": "server",
+            "docId": "kibKbnTestJestHelpersPluginApi",
+            "section": "def-server.TestBedConfig",
+            "text": "TestBedConfig"
+          },
+          " | undefined) => ",
+          {
+            "pluginId": "@kbn/test-jest-helpers",
+            "scope": "server",
+            "docId": "kibKbnTestJestHelpersPluginApi",
+            "section": "def-server.SyncSetupFunc",
+            "text": "SyncSetupFunc"
+          },
+          "<T>"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.registerTestBed.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "Component",
+            "description": [],
+            "signature": [
+              "ComponentType",
+              "<any>"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.registerTestBed.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/test-jest-helpers",
+                "scope": "server",
+                "docId": "kibKbnTestJestHelpersPluginApi",
+                "section": "def-server.TestBedConfig",
+                "text": "TestBedConfig"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.registerTestBed",
+        "type": "Function",
+        "tags": [],
+        "label": "registerTestBed",
+        "description": [],
+        "signature": [
+          "(Component: ",
+          "ComponentType",
+          "<any>, config: ",
+          {
+            "pluginId": "@kbn/test-jest-helpers",
+            "scope": "server",
+            "docId": "kibKbnTestJestHelpersPluginApi",
+            "section": "def-server.AsyncTestBedConfig",
+            "text": "AsyncTestBedConfig"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/test-jest-helpers",
+            "scope": "server",
+            "docId": "kibKbnTestJestHelpersPluginApi",
+            "section": "def-server.TestBedConfig",
+            "text": "TestBedConfig"
+          },
+          " | undefined) => ",
+          {
+            "pluginId": "@kbn/test-jest-helpers",
+            "scope": "server",
+            "docId": "kibKbnTestJestHelpersPluginApi",
+            "section": "def-server.SetupFunc",
+            "text": "SetupFunc"
+          },
+          "<T>"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.registerTestBed.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "Component",
+            "description": [],
+            "signature": [
+              "ComponentType",
+              "<any>"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.registerTestBed.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/test-jest-helpers",
+                "scope": "server",
+                "docId": "kibKbnTestJestHelpersPluginApi",
+                "section": "def-server.AsyncTestBedConfig",
+                "text": "AsyncTestBedConfig"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/test-jest-helpers",
+                "scope": "server",
+                "docId": "kibKbnTestJestHelpersPluginApi",
+                "section": "def-server.TestBedConfig",
+                "text": "TestBedConfig"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.renderWithIntl",
+        "type": "Function",
+        "tags": [
+          "return"
+        ],
+        "label": "renderWithIntl",
+        "description": [
+          "\n Creates the wrapper instance using render with provided intl object into context\n"
+        ],
+        "signature": [
+          "(node: React.ReactElement<T, string | React.JSXElementConstructor<any>>, {\n    context,\n    childContextTypes,\n    ...props\n  }: { context?: any; childContextTypes?: ",
+          "ValidationMap",
+          "<any> | undefined; }) => any"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.renderWithIntl.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "node",
+            "description": [
+              "The React element or cheerio wrapper"
+            ],
+            "signature": [
+              "React.ReactElement<T, string | React.JSXElementConstructor<any>>"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.renderWithIntl.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n    context,\n    childContextTypes,\n    ...props\n  }",
+            "description": [],
+            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-jest-helpers",
+                "id": "def-server.renderWithIntl.$2.context",
+                "type": "Any",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@kbn/test-jest-helpers",
+                "id": "def-server.renderWithIntl.$2.childContextTypes",
+                "type": "Object",
+                "tags": [],
+                "label": "childContextTypes",
+                "description": [],
+                "signature": [
+                  "ValidationMap",
+                  "<any> | undefined"
+                ],
+                "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [
+          "The wrapper instance around the rendered output with intl object in context"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.setHTMLElementClientSizes",
+        "type": "Function",
+        "tags": [],
+        "label": "setHTMLElementClientSizes",
+        "description": [],
+        "signature": [
+          "(width: number, height: number) => { mockRestore: () => void; }"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.setHTMLElementClientSizes.$1",
+            "type": "number",
+            "tags": [],
+            "label": "width",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.setHTMLElementClientSizes.$2",
+            "type": "number",
+            "tags": [],
+            "label": "height",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.setHTMLElementOffset",
+        "type": "Function",
+        "tags": [],
+        "label": "setHTMLElementOffset",
+        "description": [],
+        "signature": [
+          "(width: number, height: number) => { mockRestore: () => void; }"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.setHTMLElementOffset.$1",
+            "type": "number",
+            "tags": [],
+            "label": "width",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.setHTMLElementOffset.$2",
+            "type": "number",
+            "tags": [],
+            "label": "height",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.setSVGElementGetBBox",
+        "type": "Function",
+        "tags": [],
+        "label": "setSVGElementGetBBox",
+        "description": [],
+        "signature": [
+          "(width: number, height: number, x?: number, y?: number) => { mockRestore: () => void; }"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.setSVGElementGetBBox.$1",
+            "type": "number",
+            "tags": [],
+            "label": "width",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.setSVGElementGetBBox.$2",
+            "type": "number",
+            "tags": [],
+            "label": "height",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.setSVGElementGetBBox.$3",
+            "type": "number",
+            "tags": [],
+            "label": "x",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.setSVGElementGetBBox.$4",
+            "type": "number",
+            "tags": [],
+            "label": "y",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.setSVGElementGetComputedTextLength",
+        "type": "Function",
+        "tags": [],
+        "label": "setSVGElementGetComputedTextLength",
+        "description": [],
+        "signature": [
+          "(width: number) => { mockRestore: () => void; }"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.setSVGElementGetComputedTextLength.$1",
+            "type": "number",
+            "tags": [],
+            "label": "width",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.shallowWithI18nProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "shallowWithI18nProvider",
+        "description": [],
+        "signature": [
+          "(child: React.ReactElement<T, string | React.JSXElementConstructor<any>>) => ",
+          "ShallowWrapper",
+          "<Readonly<{}> & Readonly<{ children?: React.ReactNode; }>, Readonly<{}>, React.Component<{}, {}, any>>"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.shallowWithI18nProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "child",
+            "description": [],
+            "signature": [
+              "React.ReactElement<T, string | React.JSXElementConstructor<any>>"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.shallowWithIntl",
+        "type": "Function",
+        "tags": [
+          "return"
+        ],
+        "label": "shallowWithIntl",
+        "description": [
+          "\n Creates the wrapper instance using shallow with provided intl object into context\n"
+        ],
+        "signature": [
+          "(node: React.ReactElement<T, string | React.JSXElementConstructor<any>>, {\n    context,\n    childContextTypes,\n    ...props\n  }: { context?: any; childContextTypes?: ",
+          "ValidationMap",
+          "<any> | undefined; }) => ",
+          "ShallowWrapper",
+          "<T & { intl: ReactIntl.InjectedIntl; }, Readonly<{}>, React.Component<{}, {}, any>>"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.shallowWithIntl.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "node",
+            "description": [
+              "The React element or cheerio wrapper"
+            ],
+            "signature": [
+              "React.ReactElement<T, string | React.JSXElementConstructor<any>>"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.shallowWithIntl.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n    context,\n    childContextTypes,\n    ...props\n  }",
+            "description": [],
+            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-jest-helpers",
+                "id": "def-server.shallowWithIntl.$2.context",
+                "type": "Any",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@kbn/test-jest-helpers",
+                "id": "def-server.shallowWithIntl.$2.childContextTypes",
+                "type": "Object",
+                "tags": [],
+                "label": "childContextTypes",
+                "description": [],
+                "signature": [
+                  "ValidationMap",
+                  "<any> | undefined"
+                ],
+                "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [
+          "The wrapper instance around the rendered output with intl object in context"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.stubWebWorker",
+        "type": "Function",
+        "tags": [],
+        "label": "stubWebWorker",
+        "description": [],
+        "signature": [
+          "() => void"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/stub_web_worker.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.WithMemoryRouter",
+        "type": "Function",
+        "tags": [],
+        "label": "WithMemoryRouter",
+        "description": [],
+        "signature": [
+          "(initialEntries?: ",
+          "LocationDescriptor",
+          "<unknown>[], initialIndex?: number) => (WrappedComponent: React.ComponentType<{}>) => (props: any) => JSX.Element"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.WithMemoryRouter.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "initialEntries",
+            "description": [],
+            "signature": [
+              "LocationDescriptor",
+              "<unknown>[]"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.WithMemoryRouter.$2",
+            "type": "number",
+            "tags": [],
+            "label": "initialIndex",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.WithRoute",
+        "type": "Function",
+        "tags": [],
+        "label": "WithRoute",
+        "description": [],
+        "signature": [
+          "(componentRoutePath?: ",
+          "LocationDescriptor",
+          "<unknown> | ",
+          "LocationDescriptor",
+          "<unknown>[], onRouter?: (router: any) => void) => (WrappedComponent: React.ComponentType<{}>) => (props: any) => JSX.Element"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.WithRoute.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "componentRoutePath",
+            "description": [],
+            "signature": [
+              "LocationDescriptor",
+              "<unknown> | ",
+              "LocationDescriptor",
+              "<unknown>[]"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.WithRoute.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "onRouter",
+            "description": [],
+            "signature": [
+              "(router: any) => void"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.WithStore",
+        "type": "Function",
+        "tags": [],
+        "label": "WithStore",
+        "description": [],
+        "signature": [
+          "(store: any) => (WrappedComponent: React.ComponentType<{}>) => (props: any) => JSX.Element"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/redux_helpers.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.WithStore.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "store",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/redux_helpers.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.AsyncTestBedConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "AsyncTestBedConfig",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/test-jest-helpers",
+            "scope": "server",
+            "docId": "kibKbnTestJestHelpersPluginApi",
+            "section": "def-server.AsyncTestBedConfig",
+            "text": "AsyncTestBedConfig"
+          },
+          " extends ",
+          "BaseTestBedConfig"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.AsyncTestBedConfig.doMountAsync",
+            "type": "boolean",
+            "tags": [],
+            "label": "doMountAsync",
+            "description": [],
+            "signature": [
+              "true"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.EuiTableMetaData",
+        "type": "Interface",
+        "tags": [],
+        "label": "EuiTableMetaData",
+        "description": [],
+        "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.EuiTableMetaData.rows",
+            "type": "Array",
+            "tags": [],
+            "label": "rows",
+            "description": [
+              "Array of rows of the table. Each row exposes its reactWrapper and its columns"
+            ],
+            "signature": [
+              "{ reactWrapper: ",
+              "ReactWrapper",
+              "; columns: { reactWrapper: ",
+              "ReactWrapper",
+              "; value: string; }[]; }[]"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.EuiTableMetaData.tableCellsValues",
+            "type": "Array",
+            "tags": [],
+            "label": "tableCellsValues",
+            "description": [
+              "A 2 dimensional array of rows & columns containing\nthe text content of each cell of the table"
+            ],
+            "signature": [
+              "string[][]"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.TestBed",
+        "type": "Interface",
+        "tags": [],
+        "label": "TestBed",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/test-jest-helpers",
+            "scope": "server",
+            "docId": "kibKbnTestJestHelpersPluginApi",
+            "section": "def-server.TestBed",
+            "text": "TestBed"
+          },
+          "<T>"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.TestBed.component",
+            "type": "Object",
+            "tags": [],
+            "label": "component",
+            "description": [
+              "The component under test"
+            ],
+            "signature": [
+              "ReactWrapper",
+              "<any, {}, React.Component<{}, {}, any>>"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.TestBed.exists",
+            "type": "Function",
+            "tags": [],
+            "label": "exists",
+            "description": [
+              "\nPass it a `data-test-subj` and it will return true if it exists or false if it does not exist.\n"
+            ],
+            "signature": [
+              "(testSubject: T, count?: number | undefined) => boolean"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-jest-helpers",
+                "id": "def-server.TestBed.exists.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "testSubject",
+                "description": [
+                  "The data test subject to look for (can be a nested path. e.g. \"detailPanel.mySection\")."
+                ],
+                "signature": [
+                  "T"
+                ],
+                "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/test-jest-helpers",
+                "id": "def-server.TestBed.exists.$2",
+                "type": "number",
+                "tags": [],
+                "label": "count",
+                "description": [
+                  "The number of times the subject needs to appear in order to return \"true\""
+                ],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.TestBed.find",
+            "type": "Function",
+            "tags": [],
+            "label": "find",
+            "description": [
+              "\nPass it a `data-test-subj` and it will return an Enzyme reactWrapper of the node.\nYou can target a nested test subject by separating it with a dot ('.');\n"
+            ],
+            "signature": [
+              "(testSubject: T, reactWrapper?: ",
+              "ReactWrapper",
+              " | undefined) => ",
+              "ReactWrapper"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-jest-helpers",
+                "id": "def-server.TestBed.find.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "testSubject",
+                "description": [
+                  "The data test subject to look for"
+                ],
+                "signature": [
+                  "T"
+                ],
+                "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/test-jest-helpers",
+                "id": "def-server.TestBed.find.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "reactWrapper",
+                "description": [],
+                "signature": [
+                  "ReactWrapper",
+                  " | undefined"
+                ],
+                "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.TestBed.setProps",
+            "type": "Function",
+            "tags": [],
+            "label": "setProps",
+            "description": [
+              "\nUpdate the props of the mounted component\n"
+            ],
+            "signature": [
+              "(updatedProps: any) => void"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-jest-helpers",
+                "id": "def-server.TestBed.setProps.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "updatedProps",
+                "description": [
+                  "The updated prop object"
+                ],
+                "signature": [
+                  "any"
+                ],
+                "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.TestBed.form",
+            "type": "Object",
+            "tags": [],
+            "label": "form",
+            "description": [],
+            "signature": [
+              "{ setInputValue: (input: T | ",
+              "ReactWrapper",
+              ", value: string) => void; setSelectValue: (select: T | ",
+              "ReactWrapper",
+              ", value: string, doUpdateComponent?: boolean | undefined) => void; selectCheckBox: (checkboxTestSubject: T, isChecked?: boolean | undefined) => void; toggleEuiSwitch: (switchTestSubject: T) => void; setComboBoxValue: (comboBoxTestSubject: T, value: string) => void; getErrorsMessages: (wrapper?: T | ",
+              "ReactWrapper",
+              " | undefined) => string[]; }"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.TestBed.table",
+            "type": "Object",
+            "tags": [],
+            "label": "table",
+            "description": [],
+            "signature": [
+              "{ getMetaData: (tableTestSubject: T) => ",
+              {
+                "pluginId": "@kbn/test-jest-helpers",
+                "scope": "server",
+                "docId": "kibKbnTestJestHelpersPluginApi",
+                "section": "def-server.EuiTableMetaData",
+                "text": "EuiTableMetaData"
+              },
+              "; }"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.TestBed.router",
+            "type": "Object",
+            "tags": [],
+            "label": "router",
+            "description": [],
+            "signature": [
+              "{ navigateTo: (url: string) => void; }"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.TestBedConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "TestBedConfig",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/test-jest-helpers",
+            "scope": "server",
+            "docId": "kibKbnTestJestHelpersPluginApi",
+            "section": "def-server.TestBedConfig",
+            "text": "TestBedConfig"
+          },
+          " extends ",
+          "BaseTestBedConfig"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.TestBedConfig.doMountAsync",
+            "type": "boolean",
+            "tags": [],
+            "label": "doMountAsync",
+            "description": [],
+            "signature": [
+              "false | undefined"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.AsyncSetupFunc",
+        "type": "Type",
+        "tags": [],
+        "label": "AsyncSetupFunc",
+        "description": [],
+        "signature": [
+          "(props?: any) => Promise<",
+          {
+            "pluginId": "@kbn/test-jest-helpers",
+            "scope": "server",
+            "docId": "kibKbnTestJestHelpersPluginApi",
+            "section": "def-server.TestBed",
+            "text": "TestBed"
+          },
+          "<T>>"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.AsyncSetupFunc.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.SetupFunc",
+        "type": "Type",
+        "tags": [],
+        "label": "SetupFunc",
+        "description": [],
+        "signature": [
+          "(props?: any) => ",
+          {
+            "pluginId": "@kbn/test-jest-helpers",
+            "scope": "server",
+            "docId": "kibKbnTestJestHelpersPluginApi",
+            "section": "def-server.TestBed",
+            "text": "TestBed"
+          },
+          "<T> | Promise<",
+          {
+            "pluginId": "@kbn/test-jest-helpers",
+            "scope": "server",
+            "docId": "kibKbnTestJestHelpersPluginApi",
+            "section": "def-server.TestBed",
+            "text": "TestBed"
+          },
+          "<T>>"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.SetupFunc.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.SyncSetupFunc",
+        "type": "Type",
+        "tags": [],
+        "label": "SyncSetupFunc",
+        "description": [],
+        "signature": [
+          "(props?: any) => ",
+          {
+            "pluginId": "@kbn/test-jest-helpers",
+            "scope": "server",
+            "docId": "kibKbnTestJestHelpersPluginApi",
+            "section": "def-server.TestBed",
+            "text": "TestBed"
+          },
+          "<T>"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.SyncSetupFunc.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.reactRouterMock",
+        "type": "Object",
+        "tags": [],
+        "label": "reactRouterMock",
+        "description": [],
+        "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.reactRouterMock.history",
+            "type": "Object",
+            "tags": [],
+            "label": "history",
+            "description": [],
+            "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-jest-helpers",
+                "id": "def-server.reactRouterMock.history.push",
+                "type": "Function",
+                "tags": [],
+                "label": "push",
+                "description": [],
+                "signature": [
+                  "() => void"
+                ],
+                "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+                "deprecated": false,
+                "children": [],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/test-jest-helpers",
+                "id": "def-server.reactRouterMock.history.createHref",
+                "type": "Function",
+                "tags": [],
+                "label": "createHref",
+                "description": [],
+                "signature": [
+                  "(location: ",
+                  "LocationDescriptorObject",
+                  "<unknown>) => string"
+                ],
+                "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/test-jest-helpers",
+                    "id": "def-server.reactRouterMock.history.createHref.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "location",
+                    "description": [],
+                    "signature": [
+                      "LocationDescriptorObject",
+                      "<unknown>"
+                    ],
+                    "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+                    "deprecated": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/test-jest-helpers",
+                "id": "def-server.reactRouterMock.history.location",
+                "type": "Object",
+                "tags": [],
+                "label": "location",
+                "description": [],
+                "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/test-jest-helpers",
+                    "id": "def-server.reactRouterMock.history.location.pathname",
+                    "type": "string",
+                    "tags": [],
+                    "label": "pathname",
+                    "description": [],
+                    "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/test-jest-helpers",
+                    "id": "def-server.reactRouterMock.history.location.search",
+                    "type": "string",
+                    "tags": [],
+                    "label": "search",
+                    "description": [],
+                    "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/test-jest-helpers",
+                    "id": "def-server.reactRouterMock.history.location.state",
+                    "type": "string",
+                    "tags": [],
+                    "label": "state",
+                    "description": [],
+                    "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/test-jest-helpers",
+                    "id": "def-server.reactRouterMock.history.location.hash",
+                    "type": "string",
+                    "tags": [],
+                    "label": "hash",
+                    "description": [],
+                    "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+                    "deprecated": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.reactRouterMock.route",
+            "type": "Object",
+            "tags": [],
+            "label": "route",
+            "description": [],
+            "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-jest-helpers",
+                "id": "def-server.reactRouterMock.route.location",
+                "type": "Object",
+                "tags": [],
+                "label": "location",
+                "description": [],
+                "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/test-jest-helpers",
+                    "id": "def-server.reactRouterMock.route.location.pathname",
+                    "type": "string",
+                    "tags": [],
+                    "label": "pathname",
+                    "description": [],
+                    "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/test-jest-helpers",
+                    "id": "def-server.reactRouterMock.route.location.search",
+                    "type": "string",
+                    "tags": [],
+                    "label": "search",
+                    "description": [],
+                    "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/test-jest-helpers",
+                    "id": "def-server.reactRouterMock.route.location.state",
+                    "type": "string",
+                    "tags": [],
+                    "label": "state",
+                    "description": [],
+                    "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/test-jest-helpers",
+                    "id": "def-server.reactRouterMock.route.location.hash",
+                    "type": "string",
+                    "tags": [],
+                    "label": "hash",
+                    "description": [],
+                    "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+                    "deprecated": false
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

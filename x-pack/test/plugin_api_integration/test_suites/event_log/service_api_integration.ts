@@ -8,7 +8,7 @@
 import _ from 'lodash';
 import uuid from 'uuid';
 import expect from '@kbn/expect';
-import { IEvent } from '../../../../plugins/event_log/server';
+import { IEvent } from '@kbn/event-log-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -259,7 +259,7 @@ export default function ({ getService }: FtrProviderContext) {
   async function fetchEvents(savedObjectType: string, savedObjectId: string) {
     log.debug(`Fetching events of Saved Object ${savedObjectId}`);
     return await supertest
-      .get(`/api/event_log/${savedObjectType}/${savedObjectId}/_find`)
+      .get(`/internal/event_log/${savedObjectType}/${savedObjectId}/_find`)
       .set('kbn-xsrf', 'foo')
       .expect(200);
   }

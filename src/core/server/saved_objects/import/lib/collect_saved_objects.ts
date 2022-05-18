@@ -49,7 +49,6 @@ export async function collectSavedObjects({
       errors.push({
         id: obj.id,
         type: obj.type,
-        title,
         meta: { title },
         error: {
           type: 'unsupported_type',

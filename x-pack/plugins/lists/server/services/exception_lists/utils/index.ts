@@ -6,7 +6,11 @@
  */
 
 import uuid from 'uuid';
-import { SavedObject, SavedObjectsFindResponse, SavedObjectsUpdateResponse } from 'kibana/server';
+import {
+  SavedObject,
+  SavedObjectsFindResponse,
+  SavedObjectsUpdateResponse,
+} from '@kbn/core/server';
 import {
   CommentsArray,
   CreateComment,
@@ -247,6 +251,7 @@ export const transformSavedObjectsToFoundExceptionListItem = ({
     ),
     page: savedObjectsFindResponse.page,
     per_page: savedObjectsFindResponse.per_page,
+    pit: savedObjectsFindResponse.pit_id,
     total: savedObjectsFindResponse.total,
   };
 };
@@ -262,6 +267,7 @@ export const transformSavedObjectsToFoundExceptionList = ({
     ),
     page: savedObjectsFindResponse.page,
     per_page: savedObjectsFindResponse.per_page,
+    pit: savedObjectsFindResponse.pit_id,
     total: savedObjectsFindResponse.total,
   };
 };

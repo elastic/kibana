@@ -6,20 +6,11 @@
  */
 
 import { IndexField } from '../../../../common/search_strategy/index_fields';
-import { getBrowserFields } from '.';
-import { useDataView } from './use_data_view';
+import { getBrowserFields, getAllBrowserFields } from '.';
+import { IndexFieldSearch, useDataView } from './use_data_view';
 import { mockBrowserFields, mocksSource } from './mock';
-import { SourcererScopeName } from '../../store/sourcerer/model';
-import { createStore, State } from '../../store';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-} from '../../mock';
+import { mockGlobalState, TestProviders } from '../../mock';
 import { act, renderHook } from '@testing-library/react-hooks';
-import { Provider } from 'react-redux';
-import React from 'react';
 import { useKibana } from '../../lib/kibana';
 
 const mockDispatch = jest.fn();
@@ -34,6 +25,11 @@ jest.mock('react-redux', () => {
 jest.mock('../../lib/kibana');
 
 describe('source/index.tsx', () => {
+  describe('getAllBrowserFields', () => {
+    test('it returns an array of all fields in the BrowserFields argument', () => {
+      expect(getAllBrowserFields(mockBrowserFields)).toMatchSnapshot();
+    });
+  });
   describe('getBrowserFields', () => {
     test('it returns an empty object given an empty array', () => {
       const fields = getBrowserFields('title 1', []);
@@ -52,44 +48,15 @@ describe('source/index.tsx', () => {
       expect(fields).toEqual(mockBrowserFields);
     });
   });
+
   describe('useDataView hook', () => {
-    const sourcererState = mockGlobalState.sourcerer;
-    const state: State = {
-      ...mockGlobalState,
-      sourcerer: {
-        ...sourcererState,
-        kibanaDataViews: [
-          ...sourcererState.kibanaDataViews,
-          {
-            ...sourcererState.defaultDataView,
-            id: 'something-random',
-            title: 'something,random',
-            patternList: ['something', 'random'],
-          },
-        ],
-        sourcererScopes: {
-          ...sourcererState.sourcererScopes,
-          [SourcererScopeName.default]: {
-            ...sourcererState.sourcererScopes[SourcererScopeName.default],
-          },
-          [SourcererScopeName.detections]: {
-            ...sourcererState.sourcererScopes[SourcererScopeName.detections],
-          },
-          [SourcererScopeName.timeline]: {
-            ...sourcererState.sourcererScopes[SourcererScopeName.timeline],
-          },
-        },
-      },
-    };
     const mockSearchResponse = {
       ...mocksSource,
-      indicesExist: ['auditbeat-*', sourcererState.signalIndexName],
+      indicesExist: ['auditbeat-*', mockGlobalState.sourcerer.signalIndexName],
       isRestore: false,
       rawResponse: {},
       runtimeMappings: {},
     };
-    const { storage } = createSecuritySolutionStorageMock();
-    const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -116,15 +83,14 @@ describe('source/index.tsx', () => {
     });
     it('sets field data for data view', async () => {
       await act(async () => {
-        const { rerender, waitForNextUpdate, result } = renderHook<
+        const { waitForNextUpdate, result } = renderHook<
           string,
-          { indexFieldsSearch: (id: string) => Promise<void> }
+          { indexFieldsSearch: IndexFieldSearch }
         >(() => useDataView(), {
-          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+          wrapper: TestProviders,
         });
         await waitForNextUpdate();
-        rerender();
-        await result.current.indexFieldsSearch('neato');
+        await result.current.indexFieldsSearch({ dataViewId: 'neato' });
       });
       expect(mockDispatch.mock.calls[0][0]).toEqual({
         type: 'x-pack/security_solution/local/sourcerer/SET_DATA_VIEW_LOADING',
@@ -134,7 +100,76 @@ describe('source/index.tsx', () => {
       expect(sourceType).toEqual('x-pack/security_solution/local/sourcerer/SET_DATA_VIEW');
       expect(payload.id).toEqual('neato');
       expect(Object.keys(payload.browserFields)).toHaveLength(12);
+      expect(Object.keys(payload.indexFields)).toHaveLength(mocksSource.indexFields.length);
       expect(payload.docValueFields).toEqual([{ field: '@timestamp' }]);
+    });
+
+    it('should reuse the result for dataView info when cleanCache not passed', async () => {
+      let indexFieldsSearch: IndexFieldSearch;
+      await act(async () => {
+        const { waitForNextUpdate, result } = renderHook<
+          string,
+          { indexFieldsSearch: IndexFieldSearch }
+        >(() => useDataView(), {
+          wrapper: TestProviders,
+        });
+        await waitForNextUpdate();
+        indexFieldsSearch = result.current.indexFieldsSearch;
+      });
+
+      await indexFieldsSearch!({ dataViewId: 'neato' });
+      const {
+        payload: { browserFields, indexFields, docValueFields },
+      } = mockDispatch.mock.calls[1][0];
+
+      mockDispatch.mockClear();
+
+      await indexFieldsSearch!({ dataViewId: 'neato' });
+      const {
+        payload: {
+          browserFields: newBrowserFields,
+          indexFields: newIndexFields,
+          docValueFields: newDocValueFields,
+        },
+      } = mockDispatch.mock.calls[1][0];
+
+      expect(browserFields).toBe(newBrowserFields);
+      expect(indexFields).toBe(newIndexFields);
+      expect(docValueFields).toBe(newDocValueFields);
+    });
+
+    it('should not reuse the result for dataView info when cleanCache passed', async () => {
+      let indexFieldsSearch: IndexFieldSearch;
+      await act(async () => {
+        const { waitForNextUpdate, result } = renderHook<
+          string,
+          { indexFieldsSearch: IndexFieldSearch }
+        >(() => useDataView(), {
+          wrapper: TestProviders,
+        });
+        await waitForNextUpdate();
+        indexFieldsSearch = result.current.indexFieldsSearch;
+      });
+
+      await indexFieldsSearch!({ dataViewId: 'neato' });
+      const {
+        payload: { browserFields, indexFields, docValueFields },
+      } = mockDispatch.mock.calls[1][0];
+
+      mockDispatch.mockClear();
+
+      await indexFieldsSearch!({ dataViewId: 'neato', cleanCache: true });
+      const {
+        payload: {
+          browserFields: newBrowserFields,
+          indexFields: newIndexFields,
+          docValueFields: newDocValueFields,
+        },
+      } = mockDispatch.mock.calls[1][0];
+
+      expect(browserFields).not.toBe(newBrowserFields);
+      expect(indexFields).not.toBe(newIndexFields);
+      expect(docValueFields).not.toBe(newDocValueFields);
     });
   });
 });

@@ -14,8 +14,8 @@ import type {
   IUiSettingsClient,
   ChromeStart,
   ChromeBreadcrumb,
-} from 'kibana/public';
-import type { DataViewsContract } from 'src/plugins/data_views/public';
+} from '@kbn/core/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 
 import { EuiLoadingContent } from '@elastic/eui';
 import { MlContext, MlContextValue } from '../contexts/ml';
@@ -48,6 +48,7 @@ export interface MlRoute {
   enableDatePicker?: boolean;
   'data-test-subj'?: string;
   actionMenu?: React.ReactNode;
+  disabled?: boolean;
 }
 
 export interface PageProps {

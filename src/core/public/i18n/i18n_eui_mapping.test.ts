@@ -17,6 +17,7 @@ import { getEuiContextMapping } from './i18n_eui_mapping';
 const VALUES_REGEXP = /\{\w+\}/;
 
 describe('@elastic/eui i18n tokens', () => {
+  const i18nTranslateActual = jest.requireActual('@kbn/i18n').i18n.translate;
   const i18nTranslateMock = jest
     .fn()
     .mockImplementation((id, { defaultMessage }) => defaultMessage);
@@ -74,10 +75,9 @@ describe('@elastic/eui i18n tokens', () => {
       });
 
       test('defaultMessage is in sync with defString', () => {
-        // Certain complex tokens (e.g. ones that have a function as a defaultMessage)
-        // need custom i18n handling, and can't be checked for basic defString equality
-        const tokensToSkip = ['euiColumnSorting.buttonActive'];
-        if (tokensToSkip.includes(token)) return;
+        const isDefFunction = defString.includes('}) =>');
+        const isPluralizationDefFunction =
+          defString.includes(' === 1 ?') || defString.includes(' > 1 ?');
 
         // Clean up typical errors from the `@elastic/eui` extraction token tool
         const normalizedDefString = defString
@@ -90,7 +90,38 @@ describe('@elastic/eui i18n tokens', () => {
           .replace(/\s{2,}/g, ' ')
           .trim();
 
-        expect(i18nTranslateCall[1].defaultMessage).toBe(normalizedDefString);
+        if (!isDefFunction) {
+          expect(i18nTranslateCall[1].defaultMessage).toBe(normalizedDefString);
+        } else {
+          // Certain EUI defStrings are actually functions (that currently primarily handle
+          // pluralization). To check EUI's pluralization against Kibana's pluralization, we
+          // need to eval the defString and then actually i18n.translate & compare the 2 outputs
+          const defFunction = eval(defString); // eslint-disable-line no-eval
+          const defFunctionArg = normalizedDefString.split('({ ')[1].split('})')[0]; // TODO: All EUI pluralization fns currently only pass 1 arg. If this changes in the future and 2 args are passed, we'll need to do some extra splitting by ','
+
+          if (isPluralizationDefFunction) {
+            const singularValue = { [defFunctionArg]: 1 };
+            expect(
+              i18nTranslateActual(token, {
+                defaultMessage: i18nTranslateCall[1].defaultMessage,
+                values: singularValue,
+              })
+            ).toEqual(defFunction(singularValue));
+
+            const pluralValue = { [defFunctionArg]: 2 };
+            expect(
+              i18nTranslateActual(token, {
+                defaultMessage: i18nTranslateCall[1].defaultMessage,
+                values: pluralValue,
+              })
+            ).toEqual(defFunction(pluralValue));
+          } else {
+            throw new Error(
+              `We currently only have logic written for EUI pluralization def functions.
+              This is a new type of def function that will need custom logic written for it.`
+            );
+          }
+        }
       });
 
       test('values should match', () => {

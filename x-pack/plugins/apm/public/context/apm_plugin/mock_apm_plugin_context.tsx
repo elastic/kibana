@@ -10,15 +10,16 @@ import { RouterProvider } from '@kbn/typed-react-router-config';
 import { useHistory } from 'react-router-dom';
 import { createMemoryHistory, History } from 'history';
 import { merge } from 'lodash';
-import { coreMock } from '../../../../../../src/core/public/mocks';
-import { UrlService } from '../../../../../../src/plugins/share/common/url_service';
-import { createObservabilityRuleTypeRegistryMock } from '../../../../observability/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { UrlService } from '@kbn/share-plugin/common/url_service';
+import { createObservabilityRuleTypeRegistryMock } from '@kbn/observability-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
+import { enableComparisonByDefault } from '@kbn/observability-plugin/public';
 import { ApmPluginContext, ApmPluginContextValue } from './apm_plugin_context';
 import { ConfigSchema } from '../..';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
 import { apmRouter } from '../../components/routing/apm_route_config';
-import { MlLocatorDefinition } from '../../../../ml/public';
 
 const coreStart = coreMock.createStart({ basePath: '/basepath' });
 
@@ -52,6 +53,7 @@ const mockCore = merge({}, coreStart, {
           pause: false,
           value: 100000,
         },
+        [enableComparisonByDefault]: true,
       };
       return uiSettings[key];
     },

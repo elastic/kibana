@@ -21,7 +21,7 @@ describe('bulkOverwriteTransformedDocuments', () => {
 
   it('resolves with `right:bulk_index_succeeded` if no error is encountered', async () => {
     const client = elasticsearchClientMock.createInternalClient(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      Promise.resolve({
         items: [
           {
             index: {
@@ -52,7 +52,7 @@ describe('bulkOverwriteTransformedDocuments', () => {
 
   it('resolves with `right:bulk_index_succeeded` if version conflict errors are encountered', async () => {
     const client = elasticsearchClientMock.createInternalClient(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      Promise.resolve({
         items: [
           {
             index: {
@@ -113,7 +113,7 @@ describe('bulkOverwriteTransformedDocuments', () => {
 
   it('resolves with `left:target_index_had_write_block` if all errors are write block exceptions', async () => {
     const client = elasticsearchClientMock.createInternalClient(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      Promise.resolve({
         items: [
           {
             index: {
@@ -158,7 +158,7 @@ describe('bulkOverwriteTransformedDocuments', () => {
     });
 
     const client = elasticsearchClientMock.createInternalClient(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      Promise.resolve({
         items: [
           {
             index: {

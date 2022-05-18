@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { KibanaRequest, Logger } from 'src/core/server';
-import { ExceptionListClient } from '../../../lists/server';
+import { KibanaRequest, Logger } from '@kbn/core/server';
+import { ExceptionListClient } from '@kbn/lists-plugin/server';
 import {
   CasesClient,
   PluginStartContract as CasesPluginStartContract,
-} from '../../../cases/server';
-import { SecurityPluginStart } from '../../../security/server';
+} from '@kbn/cases-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   AgentService,
   FleetStartContract,
   AgentPolicyServiceInterface,
   PackagePolicyServiceInterface,
-} from '../../../fleet/server';
-import { PluginStartContract as AlertsPluginStartContract } from '../../../alerting/server';
+} from '@kbn/fleet-plugin/server';
+import { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
+import type { ListsServerExtensionRegistrar } from '@kbn/lists-plugin/server';
 import {
   getPackagePolicyCreateCallback,
   getPackagePolicyUpdateCallback,
@@ -39,10 +40,10 @@ import {
   EndpointInternalFleetServicesInterface,
   EndpointScopedFleetServicesInterface,
 } from './services/fleet/endpoint_fleet_services_factory';
-import type { ListsServerExtensionRegistrar } from '../../../lists/server';
 import { registerListsPluginEndpointExtensionPoints } from '../lists_integration';
 import { EndpointAuthz } from '../../common/endpoint/types/authz';
 import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
+import { FeatureUsageService } from './services/feature_usage/service';
 
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
@@ -67,6 +68,7 @@ export type EndpointAppContextServiceStartContract = Partial<
   licenseService: LicenseService;
   exceptionListsClient: ExceptionListClient | undefined;
   cases: CasesPluginStartContract | undefined;
+  featureUsageService: FeatureUsageService;
 };
 
 /**
@@ -92,27 +94,47 @@ export class EndpointAppContextService {
     this.security = dependencies.security;
     this.fleetServicesFactory = dependencies.endpointFleetServicesFactory;
 
-    if (dependencies.registerIngestCallback && dependencies.manifestManager) {
-      dependencies.registerIngestCallback(
+    if (
+      dependencies.registerIngestCallback &&
+      dependencies.manifestManager &&
+      dependencies.packagePolicyService
+    ) {
+      const {
+        registerIngestCallback,
+        logger,
+        manifestManager,
+        alerting,
+        licenseService,
+        exceptionListsClient,
+        featureUsageService,
+        endpointMetadataService,
+      } = dependencies;
+
+      registerIngestCallback(
         'packagePolicyCreate',
         getPackagePolicyCreateCallback(
-          dependencies.logger,
-          dependencies.manifestManager,
+          logger,
+          manifestManager,
           this.setupDependencies.securitySolutionRequestContextFactory,
-          dependencies.alerting,
-          dependencies.licenseService,
-          dependencies.exceptionListsClient
+          alerting,
+          licenseService,
+          exceptionListsClient
         )
       );
 
-      dependencies.registerIngestCallback(
+      registerIngestCallback(
         'packagePolicyUpdate',
-        getPackagePolicyUpdateCallback(dependencies.logger, dependencies.licenseService)
+        getPackagePolicyUpdateCallback(
+          logger,
+          licenseService,
+          featureUsageService,
+          endpointMetadataService
+        )
       );
 
-      dependencies.registerIngestCallback(
+      registerIngestCallback(
         'postPackagePolicyDelete',
-        getPackagePolicyDeleteCallback(dependencies.exceptionListsClient)
+        getPackagePolicyDeleteCallback(exceptionListsClient)
       );
     }
 
@@ -208,5 +230,12 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotStartedError();
     }
     return this.startDependencies.exceptionListsClient;
+  }
+
+  public getFeatureUsageService(): FeatureUsageService {
+    if (this.startDependencies == null) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+    return this.startDependencies.featureUsageService;
   }
 }

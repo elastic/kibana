@@ -6,11 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { APMConfig } from '../..';
 import {
   INSTRUCTION_VARIANT,
   InstructionsSchema,
-} from '../../../../../../src/plugins/home/server';
+} from '@kbn/home-plugin/server';
+import { APMConfig } from '../..';
 import {
   createDjangoAgentInstructions,
   createDotNetAgentInstructions,
@@ -128,7 +128,6 @@ export function onPremInstructions({
                       'processor.event': ['error', 'transaction', 'metric'],
                     },
                   },
-                  { range: { 'observer.version_major': { gte: 7 } } },
                 ],
               },
             },

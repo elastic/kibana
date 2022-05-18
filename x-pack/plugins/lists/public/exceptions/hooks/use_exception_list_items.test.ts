@@ -17,8 +17,8 @@ import {
   transformInput,
   useExceptionListItems,
 } from '@kbn/securitysolution-list-hooks';
+import { coreMock } from '@kbn/core/public/mocks';
 
-import { coreMock } from '../../../../../../src/core/public/mocks';
 import { getFoundExceptionListItemSchemaMock } from '../../../common/schemas/response/found_exception_list_item_schema.mock';
 
 jest.mock('uuid', () => ({

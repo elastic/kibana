@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { deepFreeze } from '@kbn/std';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   Headers,
   HttpServiceSetup,
   IClusterClient,
   KibanaRequest,
   Logger,
-} from 'src/core/server';
+} from '@kbn/core/server';
+import { deepFreeze } from '@kbn/std';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { AuthenticatedUser } from '../../../common/model';
 import type { AuthenticationInfo } from '../../elasticsearch';
@@ -119,11 +119,9 @@ export abstract class BaseAuthenticationProvider {
   protected async getUser(request: KibanaRequest, authHeaders: Headers = {}) {
     return this.authenticationInfoToAuthenticatedUser(
       // @ts-expect-error Metadata is defined as Record<string, any>
-      (
-        await this.options.client
-          .asScoped({ headers: { ...request.headers, ...authHeaders } })
-          .asCurrentUser.security.authenticate()
-      ).body
+      await this.options.client
+        .asScoped({ headers: { ...request.headers, ...authHeaders } })
+        .asCurrentUser.security.authenticate()
     );
   }
 

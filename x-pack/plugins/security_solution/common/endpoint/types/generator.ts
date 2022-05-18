@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataStream } from './index';
+import { DataStream } from '.';
 
 /**
  * The configuration options for generating an event.
@@ -14,6 +14,7 @@ export interface EventOptions {
   timestamp?: number;
   entityID?: string;
   parentEntityID?: string;
+  sessionEntryLeader?: string;
   eventType?: string | string[];
   eventCategory?: string | string[];
   processName?: string;

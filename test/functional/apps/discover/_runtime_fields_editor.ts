@@ -29,9 +29,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await fieldEditor.enableValue();
     await fieldEditor.typeScript("emit('abc')");
     await fieldEditor.save();
+    await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
-  describe('discover integration with runtime fields editor', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/123372
+  describe.skip('discover integration with runtime fields editor', function describeIndexTests() {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
@@ -60,32 +62,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('allows creation of a new field', async function () {
-      await createRuntimeField('runtimefield');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      const field = '_runtimefield';
+      await createRuntimeField(field);
       await retry.waitForWithTimeout('fieldNames to include runtimefield', 5000, async () => {
         const fieldNames = await PageObjects.discover.getAllFieldNames();
-        return fieldNames.includes('runtimefield');
+        return fieldNames.includes(field);
       });
     });
 
     it('allows editing of a newly created field', async function () {
-      await PageObjects.discover.editField('runtimefield');
-      await fieldEditor.setName('runtimefield edited');
+      const field = '_runtimefield-before-edit';
+      await createRuntimeField(field);
+      const newFieldName = '_runtimefield-after-edit';
+      await PageObjects.discover.editField(field);
+      await fieldEditor.setName(newFieldName, true);
       await fieldEditor.save();
       await fieldEditor.confirmSave();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await retry.waitForWithTimeout('fieldNames to include edits', 5000, async () => {
         const fieldNames = await PageObjects.discover.getAllFieldNames();
-        return fieldNames.includes('runtimefield edited');
+        return fieldNames.includes(newFieldName);
       });
     });
 
     it('allows creation of a new field and use it in a saved search', async function () {
-      await createRuntimeField('discover runtimefield');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.clickFieldListItemAdd('discover runtimefield');
-      expect(await PageObjects.discover.getDocHeader()).to.have.string('discover runtimefield');
+      const fieldName = '_runtimefield-saved-search';
+      await createRuntimeField(fieldName);
+      await PageObjects.discover.clickFieldListItemAdd(fieldName);
+      expect(await PageObjects.discover.getDocHeader()).to.have.string(fieldName);
       expect(await PageObjects.discover.saveSearch('Saved Search with runtimefield'));
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -94,24 +99,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.discover.loadSavedSearch('Saved Search with runtimefield');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.discover.getDocHeader()).to.have.string('discover runtimefield');
+      expect(await PageObjects.discover.getDocHeader()).to.have.string(fieldName);
     });
 
     it('deletes a runtime field', async function () {
-      await createRuntimeField('delete');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
-      await PageObjects.discover.removeField('delete');
+      const fieldName = '_runtimefield-to-delete';
+      await createRuntimeField(fieldName);
+      await PageObjects.discover.removeField(fieldName);
       await fieldEditor.confirmDelete();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitForWithTimeout('fieldNames to include edits', 5000, async () => {
         const fieldNames = await PageObjects.discover.getAllFieldNames();
-        return !fieldNames.includes('delete');
+        return !fieldNames.includes(fieldName);
       });
     });
 
     it('doc view includes runtime fields', async function () {
       // navigate to doc view
+      const fieldName = '_runtimefield-doc-view';
+      await createRuntimeField(fieldName);
       const table = await PageObjects.discover.getDocTable();
       const useLegacyTable = await PageObjects.discover.useLegacyTable();
       await table.clickRowToggle();
@@ -135,10 +141,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             // Maybe loading has not completed
             throw new Error('test subject doc-hit is not yet displayed');
           }
-          const runtimeFieldsRow = await testSubjects.exists(
-            'tableDocViewRow-discover runtimefield'
-          );
-
+          const runtimeFieldsRow = await testSubjects.exists(`tableDocViewRow-${fieldName}-value`);
           return hasDocHit && runtimeFieldsRow;
         }
       );

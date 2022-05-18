@@ -11,6 +11,7 @@ export interface FieldValuePair {
   // but for example `http.response.status_code` which is part of
   // of the list of predefined field candidates is of type long/number.
   fieldValue: string | number;
+  isFallbackResult?: boolean;
 }
 
 export interface HistogramItem {

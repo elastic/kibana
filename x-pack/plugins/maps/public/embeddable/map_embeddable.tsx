@@ -15,7 +15,7 @@ import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { type Filter, compareFilters } from '@kbn/es-query';
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   Embeddable,
   IContainer,
@@ -23,14 +23,10 @@ import {
   genericEmbeddableInputIsEqual,
   VALUE_CLICK_TRIGGER,
   omitGenericEmbeddableInput,
-} from '../../../../../src/plugins/embeddable/public';
-import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
-import {
-  ACTION_GLOBAL_APPLY_FILTER,
-  APPLY_FILTER_TRIGGER,
-  TimeRange,
-  Query,
-} from '../../../../../src/plugins/data/public';
+} from '@kbn/embeddable-plugin/public';
+import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { APPLY_FILTER_TRIGGER, TimeRange, Query } from '@kbn/data-plugin/public';
+import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { createExtentFilter } from '../../common/elasticsearch_util';
 import {
   replaceLayerList,
@@ -38,6 +34,7 @@ import {
   setQuery,
   disableScrollZoom,
   setReadOnly,
+  updateLayerById,
 } from '../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
@@ -195,7 +192,7 @@ export class MapEmbeddable
       ? this._savedMap.getAttributes().title
       : '';
     const input = this.getInput();
-    const title = input.hidePanelTitles ? '' : input.title || savedMapTitle;
+    const title = input.hidePanelTitles ? '' : input.title ?? savedMapTitle;
     const savedObjectId = 'savedObjectId' in input ? input.savedObjectId : undefined;
     this.updateOutput({
       ...this.getOutput(),
@@ -417,6 +414,10 @@ export class MapEmbeddable
         indexPatterns,
       });
     });
+  }
+
+  updateLayerById(layerDescriptor: LayerDescriptor) {
+    this._savedMap.getStore().dispatch<any>(updateLayerById(layerDescriptor));
   }
 
   private async _getIndexPatterns() {

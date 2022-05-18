@@ -15,7 +15,8 @@ import {
   ContainerInput,
   ContainerOutput,
   EmbeddableStart,
-} from '../../../../src/plugins/embeddable/public';
+  EmbeddableChildPanel,
+} from '@kbn/embeddable-plugin/public';
 
 interface Props {
   embeddable: IContainer;
@@ -31,7 +32,6 @@ function renderList(
 ) {
   let number = 0;
   const list = Object.values(panels).map((panel) => {
-    const child = embeddable.getChild(panel.explicitInput.id);
     number++;
     return (
       <EuiPanel key={number.toString()}>
@@ -42,7 +42,11 @@ function renderList(
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
-            <embeddableServices.EmbeddablePanel embeddable={child} />
+            <EmbeddableChildPanel
+              PanelComponent={embeddableServices.EmbeddablePanel}
+              embeddableId={panel.explicitInput.id}
+              container={embeddable}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

@@ -17,7 +17,7 @@ import { rerender } from '../../../test_helpers';
 import { EnginesTable } from './components/tables/engines_table';
 import { MetaEnginesTable } from './components/tables/meta_engines_table';
 
-import { EnginesOverview } from './';
+import { EnginesOverview } from '.';
 
 describe('EnginesOverview', () => {
   const values = {
@@ -153,19 +153,6 @@ describe('EnginesOverview', () => {
 
         expect(wrapper.find('[data-test-subj="appSearchMetaEngines"]').prop('action')).toBeFalsy();
       });
-    });
-  });
-
-  describe('when an account does not have a platinum license', () => {
-    it('renders a license call to action in place of the meta engines table', () => {
-      setMockValues({
-        ...valuesWithEngines,
-        hasPlatinumLicense: false,
-      });
-      const wrapper = shallow(<EnginesOverview />);
-
-      expect(wrapper.find('[data-test-subj="metaEnginesLicenseCTA"]')).toHaveLength(1);
-      expect(wrapper.find('[data-test-subj="appSearchMetaEngines"]')).toHaveLength(0);
     });
   });
 

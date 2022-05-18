@@ -7,8 +7,6 @@
 
 import { get } from 'lodash';
 // @ts-ignore
-import { checkParam } from '../../error_missing_required';
-// @ts-ignore
 import { createQuery } from '../../create_query';
 // @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
@@ -18,8 +16,8 @@ import { getNewIndexPatterns } from '../../cluster/get_index_patterns';
 import { Globals } from '../../../static_globals';
 
 async function getShardCountPerNode(req: LegacyRequest, cluster: ElasticsearchModifiedSource) {
-  const config = req.server.config();
-  const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
+  const config = req.server.config;
+  const maxBucketSize = config.ui.max_bucket_size;
   const metric = ElasticsearchMetric.getMetricFields();
 
   const filters = [];

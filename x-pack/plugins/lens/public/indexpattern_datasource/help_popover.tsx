@@ -12,6 +12,8 @@ import {
   EuiLinkButtonProps,
   EuiPopover,
   EuiPopoverProps,
+  EuiWrappingPopover,
+  EuiWrappingPopoverProps,
   EuiPopoverTitle,
   EuiText,
 } from '@elastic/eui';
@@ -73,5 +75,45 @@ export const HelpPopover = ({
         {children}
       </EuiText>
     </EuiPopover>
+  );
+};
+
+export const WrappingHelpPopover = ({
+  anchorPosition,
+  button,
+  children,
+  closePopover,
+  isOpen,
+  title,
+}: {
+  anchorPosition?: EuiWrappingPopoverProps['anchorPosition'];
+  button: EuiWrappingPopoverProps['button'];
+  children: ReactNode;
+  closePopover: EuiWrappingPopoverProps['closePopover'];
+  isOpen: EuiWrappingPopoverProps['isOpen'];
+  title?: string;
+}) => {
+  useEffect(() => {
+    if (isOpen) {
+      trackUiEvent('open_help_popover');
+    }
+  }, [isOpen]);
+  return (
+    <EuiWrappingPopover
+      anchorPosition={anchorPosition}
+      button={button}
+      className="lnsHelpPopover"
+      closePopover={closePopover}
+      isOpen={isOpen}
+      ownFocus
+      panelClassName="lnsHelpPopover__panel"
+      panelPaddingSize="none"
+    >
+      {title && <EuiPopoverTitle paddingSize="m">{title}</EuiPopoverTitle>}
+
+      <EuiText className="lnsHelpPopover__content" size="s">
+        {children}
+      </EuiText>
+    </EuiWrappingPopover>
   );
 };

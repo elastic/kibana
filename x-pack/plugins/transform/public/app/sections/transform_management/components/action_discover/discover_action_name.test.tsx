@@ -17,7 +17,7 @@ import { isDiscoverActionDisabled, DiscoverActionName } from './discover_action_
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
 
 jest.mock('../../../../../shared_imports');
-jest.mock('../../../../../app/app_dependencies');
+jest.mock('../../../../app_dependencies');
 
 // @ts-expect-error mock data is too loosely typed
 const item: TransformListRow = transformListRow;
@@ -52,7 +52,7 @@ describe('Transform: Transform List Actions <StopAction />', () => {
     // prepare
     render(
       <IntlProvider locale="en">
-        <DiscoverActionName items={[item]} indexPatternExists={true} />
+        <DiscoverActionName items={[item]} dataViewExists={true} />
       </IntlProvider>
     );
 
@@ -72,7 +72,7 @@ describe('Transform: Transform List Actions <StopAction />', () => {
     itemCopy.stats.checkpointing.last.checkpoint = 0;
     render(
       <IntlProvider locale="en">
-        <DiscoverActionName items={[itemCopy]} indexPatternExists={false} />
+        <DiscoverActionName items={[itemCopy]} dataViewExists={false} />
       </IntlProvider>
     );
 

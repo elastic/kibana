@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { getUrlPrefix, TaskManagerDoc, ObjectRemover, getTestAlertData } from '../../../common/lib';
+import { getUrlPrefix, TaskManagerDoc, ObjectRemover, getTestRuleData } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 const MIGRATED_RULE_ID = '74f3e6d7-b7bb-477d-ac28-92ee22728e6e';
@@ -47,7 +47,7 @@ export default function createScheduledTaskIdTests({ getService }: FtrProviderCo
       await supertest
         .post(`${getUrlPrefix(``)}/api/alerting/rule/${MIGRATED_TASK_ID}`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
+        .send(getTestRuleData())
         .expect(409);
     });
 
@@ -87,6 +87,7 @@ export default function createScheduledTaskIdTests({ getService }: FtrProviderCo
       expect(JSON.parse(taskRecordNew.task.params)).to.eql({
         alertId: MIGRATED_RULE_ID,
         spaceId: 'default',
+        consumer: 'alerts',
       });
     });
 
@@ -94,7 +95,7 @@ export default function createScheduledTaskIdTests({ getService }: FtrProviderCo
       const response = await supertestWithoutAuth
         .post(`${getUrlPrefix(``)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData());
+        .send(getTestRuleData());
 
       expect(response.status).to.eql(200);
       objectRemover.add('default', response.body.id, 'rule', 'alerting');
@@ -106,6 +107,7 @@ export default function createScheduledTaskIdTests({ getService }: FtrProviderCo
       expect(JSON.parse(taskRecord.task.params)).to.eql({
         alertId: response.body.id,
         spaceId: 'default',
+        consumer: 'alertsFixture',
       });
     });
   });

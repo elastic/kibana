@@ -7,13 +7,13 @@
  */
 
 import React, { useMemo } from 'react';
-import type { DataView } from 'src/plugins/data/common';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { TableHeaderColumn } from './table_header_column';
 import { SortOrder, getDisplayedColumns } from './helpers';
 import { getDefaultSort } from '../../lib/get_default_sort';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
-import { FORMATS_UI_SETTINGS } from '../../../../../../field_formats/common';
 
 interface Props {
   columns: string[];
@@ -54,7 +54,9 @@ export function TableHeader({
             customLabel={indexPattern.getFieldByName(col.name)?.customLabel}
             isTimeColumn={indexPattern.timeFieldName === col.name}
             sortOrder={
-              sortOrder.length ? sortOrder : getDefaultSort(indexPattern, defaultSortOrder)
+              sortOrder.length
+                ? sortOrder
+                : getDefaultSort(indexPattern, defaultSortOrder, hideTimeColumn)
             }
             onMoveColumn={onMoveColumn}
             onRemoveColumn={onRemoveColumn}

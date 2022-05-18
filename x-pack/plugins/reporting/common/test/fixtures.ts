@@ -84,7 +84,7 @@ export const mockJobs: ReportApiJSON[] = [
       content_type: 'application/pdf',
       size: 49468,
       warnings: [
-        'An error occurred when trying to read the page for visualization panel info. You may need to increase \'xpack.reporting.capture.timeouts.waitForElements\'. TimeoutError: waiting for selector "[data-shared-item],[data-shared-items-count]" failed: timeout 30000ms exceeded',
+        'An error occurred when trying to read the page for visualization panel info. You may need to increase \'xpack.screenshotting.capture.timeouts.waitForElements\'. TimeoutError: waiting for selector "[data-shared-item],[data-shared-items-count]" failed: timeout 30000ms exceeded',
       ],
     },
     payload: {

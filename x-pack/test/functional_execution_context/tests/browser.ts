@@ -12,7 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'home']);
   const retry = getService('retry');
 
-  // Failing: See https://github.com/elastic/kibana/issues/112102
+  // FLAKY: https://github.com/elastic/kibana/issues/125743
   describe.skip('Browser apps', () => {
     before(async () => {
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
@@ -98,18 +98,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             description: 'execution context propagates to Kibana logs',
             predicate: (record) =>
               isExecutionContextLog(record?.message, {
-                parent: {
-                  type: 'application',
-                  name: 'dashboard',
-                  id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
-                  description: '[Flights] Global Flight Dashboard',
-                  url: '/view/7adfa750-4c81-11e8-b3d7-01146121b73d',
+                type: 'application',
+                name: 'dashboard',
+                id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
+                description: '[Flights] Global Flight Dashboard',
+                url: '/view/7adfa750-4c81-11e8-b3d7-01146121b73d',
+                child: {
+                  type: 'lens',
+                  name: 'lnsXY',
+                  id: '086ac2e9-dd16-4b45-92b8-1e43ff7e3f65',
+                  description: '[Flights] Flight count',
+                  url: '/app/lens#/edit_by_value',
                 },
-                type: 'lens',
-                name: 'lnsXY',
-                id: '086ac2e9-dd16-4b45-92b8-1e43ff7e3f65',
-                description: '[Flights] Flight count',
-                url: '/app/lens#/edit_by_value',
               }),
             retry,
           });
@@ -131,18 +131,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             description: 'execution context propagates to Kibana logs',
             predicate: (record) =>
               isExecutionContextLog(record?.message, {
-                parent: {
-                  type: 'application',
-                  name: 'dashboard',
-                  id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
-                  description: '[Flights] Global Flight Dashboard',
-                  url: '/view/7adfa750-4c81-11e8-b3d7-01146121b73d',
+                type: 'application',
+                name: 'dashboard',
+                id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
+                description: '[Flights] Global Flight Dashboard',
+                url: '/view/7adfa750-4c81-11e8-b3d7-01146121b73d',
+                child: {
+                  type: 'lens',
+                  name: 'lnsMetric',
+                  id: '2e33ade5-96e5-40b4-b460-493e5d4fa834',
+                  description: '',
+                  url: '/app/lens#/edit_by_value',
                 },
-                type: 'lens',
-                name: 'lnsMetric',
-                id: '2e33ade5-96e5-40b4-b460-493e5d4fa834',
-                description: '',
-                url: '/app/lens#/edit_by_value',
               }),
             retry,
           });
@@ -164,18 +164,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             description: 'execution context propagates to Kibana logs',
             predicate: (record) =>
               isExecutionContextLog(record?.message, {
-                parent: {
-                  type: 'application',
-                  name: 'dashboard',
-                  id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
-                  description: '[Flights] Global Flight Dashboard',
-                  url: '/view/7adfa750-4c81-11e8-b3d7-01146121b73d',
+                type: 'application',
+                name: 'dashboard',
+                id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
+                description: '[Flights] Global Flight Dashboard',
+                url: '/view/7adfa750-4c81-11e8-b3d7-01146121b73d',
+                child: {
+                  type: 'lens',
+                  name: 'lnsDatatable',
+                  id: 'fb86b32f-fb7a-45cf-9511-f366fef51bbd',
+                  description: 'Cities by delay, cancellation',
+                  url: '/app/lens#/edit_by_value',
                 },
-                type: 'lens',
-                name: 'lnsDatatable',
-                id: 'fb86b32f-fb7a-45cf-9511-f366fef51bbd',
-                description: 'Cities by delay, cancellation',
-                url: '/app/lens#/edit_by_value',
               }),
             retry,
           });
@@ -196,18 +196,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             description: 'execution context propagates to Kibana logs',
             predicate: (record) =>
               isExecutionContextLog(record?.message, {
-                parent: {
-                  type: 'application',
-                  name: 'dashboard',
-                  id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
-                  description: '[Flights] Global Flight Dashboard',
-                  url: '/view/7adfa750-4c81-11e8-b3d7-01146121b73d',
+                type: 'application',
+                name: 'dashboard',
+                id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
+                description: '[Flights] Global Flight Dashboard',
+                url: '/view/7adfa750-4c81-11e8-b3d7-01146121b73d',
+                child: {
+                  type: 'lens',
+                  name: 'lnsPie',
+                  id: '5d53db36-2d5a-4adc-af7b-cec4c1a294e0',
+                  description: '[Flights] Delay Type',
+                  url: '/app/lens#/edit_by_value',
                 },
-                type: 'lens',
-                name: 'lnsPie',
-                id: '5d53db36-2d5a-4adc-af7b-cec4c1a294e0',
-                description: '[Flights] Delay Type',
-                url: '/app/lens#/edit_by_value',
               }),
             retry,
           });
@@ -229,18 +229,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           description: 'execution context propagates to Kibana logs',
           predicate: (record) =>
             isExecutionContextLog(record?.message, {
-              parent: {
-                type: 'application',
-                name: 'dashboard',
-                id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
-                description: '[Flights] Global Flight Dashboard',
-                url: '/view/7adfa750-4c81-11e8-b3d7-01146121b73d',
+              type: 'application',
+              name: 'dashboard',
+              id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
+              description: '[Flights] Global Flight Dashboard',
+              url: '/view/7adfa750-4c81-11e8-b3d7-01146121b73d',
+              child: {
+                type: 'search',
+                name: 'discover',
+                id: '571aaf70-4c88-11e8-b3d7-01146121b73d',
+                description: '[Flights] Flight Log',
+                url: '/app/discover#/view/571aaf70-4c88-11e8-b3d7-01146121b73d',
               },
-              type: 'search',
-              name: 'discover',
-              id: '571aaf70-4c88-11e8-b3d7-01146121b73d',
-              description: '[Flights] Flight Log',
-              url: '/app/discover#/view/571aaf70-4c88-11e8-b3d7-01146121b73d',
             }),
           retry,
         });
@@ -252,7 +252,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           predicate: (record) =>
             Boolean(
               record.http?.request?.id?.includes(
-                'kibana:application:dashboard:7adfa750-4c81-11e8-b3d7-01146121b73d;visualization:TSVB:bcb63b50-4c89-11e8-b3d7-01146121b73d'
+                'kibana:application:dashboard:7adfa750-4c81-11e8-b3d7-01146121b73d;visualization:metrics:bcb63b50-4c89-11e8-b3d7-01146121b73d'
               )
             ),
           retry,
@@ -262,30 +262,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           description: 'execution context propagates to Kibana logs',
           predicate: (record) =>
             isExecutionContextLog(record?.message, {
-              parent: {
-                type: 'application',
-                name: 'dashboard',
-                id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
-                description: '[Flights] Global Flight Dashboard',
-                url: '/view/7adfa750-4c81-11e8-b3d7-01146121b73d',
+              type: 'application',
+              name: 'dashboard',
+              id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
+              description: '[Flights] Global Flight Dashboard',
+              url: '/view/7adfa750-4c81-11e8-b3d7-01146121b73d',
+              child: {
+                type: 'visualization',
+                name: 'metrics',
+                id: 'bcb63b50-4c89-11e8-b3d7-01146121b73d',
+                description: '[Flights] Delays & Cancellations',
+                url: '/app/visualize#/edit/bcb63b50-4c89-11e8-b3d7-01146121b73d',
               },
-              type: 'visualization',
-              name: 'TSVB',
-              id: 'bcb63b50-4c89-11e8-b3d7-01146121b73d',
-              description: '[Flights] Delays & Cancellations',
-              url: '/app/visualize#/edit/bcb63b50-4c89-11e8-b3d7-01146121b73d',
             }),
           retry,
         });
       });
 
+      // application:dashboard:7adfa750-4c81-11e8-b3d7-01146121b73d;visualization:vega:ed78a660-53a0-11e8-acbd-0be0ad9d822b
       it('propagates context for Vega visualizations', async () => {
         await assertLogContains({
           description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
           predicate: (record) =>
             Boolean(
               record.http?.request?.id?.includes(
-                'kibana:application:dashboard:7adfa750-4c81-11e8-b3d7-01146121b73d;visualization:Vega:ed78a660-53a0-11e8-acbd-0be0ad9d822b'
+                'kibana:application:dashboard:7adfa750-4c81-11e8-b3d7-01146121b73d;visualization:vega:ed78a660-53a0-11e8-acbd-0be0ad9d822b'
               )
             ),
           retry,
@@ -295,18 +296,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           description: 'execution context propagates to Kibana logs',
           predicate: (record) =>
             isExecutionContextLog(record?.message, {
-              parent: {
-                type: 'application',
-                name: 'dashboard',
-                id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
-                description: '[Flights] Global Flight Dashboard',
-                url: '/view/7adfa750-4c81-11e8-b3d7-01146121b73d',
+              type: 'application',
+              name: 'dashboard',
+              id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
+              description: '[Flights] Global Flight Dashboard',
+              url: '/view/7adfa750-4c81-11e8-b3d7-01146121b73d',
+              child: {
+                type: 'visualization',
+                name: 'vega',
+                id: 'ed78a660-53a0-11e8-acbd-0be0ad9d822b',
+                description: '[Flights] Airport Connections (Hover Over Airport)',
+                url: '/app/visualize#/edit/ed78a660-53a0-11e8-acbd-0be0ad9d822b',
               },
-              type: 'visualization',
-              name: 'Vega',
-              id: 'ed78a660-53a0-11e8-acbd-0be0ad9d822b',
-              description: '[Flights] Airport Connections (Hover Over Airport)',
-              url: '/app/visualize#/edit/ed78a660-53a0-11e8-acbd-0be0ad9d822b',
             }),
           retry,
         });
@@ -318,7 +319,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           predicate: (record) =>
             Boolean(
               record.http?.request?.id?.includes(
-                'kibana:application:dashboard:7adfa750-4c81-11e8-b3d7-01146121b73d;visualization:Tag cloud:293b5a30-4c8f-11e8-b3d7-01146121b73d'
+                'kibana:application:dashboard:7adfa750-4c81-11e8-b3d7-01146121b73d;visualization:tagcloud:293b5a30-4c8f-11e8-b3d7-01146121b73d'
               )
             ),
           retry,
@@ -328,18 +329,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           description: 'execution context propagates to Kibana logs',
           predicate: (record) =>
             isExecutionContextLog(record?.message, {
-              parent: {
-                type: 'application',
-                name: 'dashboard',
-                id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
-                description: '[Flights] Global Flight Dashboard',
-                url: '/view/7adfa750-4c81-11e8-b3d7-01146121b73d',
+              type: 'application',
+              name: 'dashboard',
+              id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
+              description: '[Flights] Global Flight Dashboard',
+              url: '/view/7adfa750-4c81-11e8-b3d7-01146121b73d',
+              child: {
+                type: 'visualization',
+                name: 'tagcloud',
+                id: '293b5a30-4c8f-11e8-b3d7-01146121b73d',
+                description: '[Flights] Destination Weather',
+                url: '/app/visualize#/edit/293b5a30-4c8f-11e8-b3d7-01146121b73d',
               },
-              type: 'visualization',
-              name: 'Tag cloud',
-              id: '293b5a30-4c8f-11e8-b3d7-01146121b73d',
-              description: '[Flights] Destination Weather',
-              url: '/app/visualize#/edit/293b5a30-4c8f-11e8-b3d7-01146121b73d',
             }),
           retry,
         });
@@ -351,7 +352,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           predicate: (record) =>
             Boolean(
               record.http?.request?.id?.includes(
-                'kibana:application:dashboard:7adfa750-4c81-11e8-b3d7-01146121b73d;visualization:Vertical bar:9886b410-4c8b-11e8-b3d7-01146121b73d'
+                'kibana:application:dashboard:7adfa750-4c81-11e8-b3d7-01146121b73d;visualization:histogram:9886b410-4c8b-11e8-b3d7-01146121b73d'
               )
             ),
           retry,
@@ -361,18 +362,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           description: 'execution context propagates to Kibana logs',
           predicate: (record) =>
             isExecutionContextLog(record?.message, {
-              parent: {
-                type: 'application',
-                name: 'dashboard',
-                id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
-                description: '[Flights] Global Flight Dashboard',
-                url: '/view/7adfa750-4c81-11e8-b3d7-01146121b73d',
+              type: 'application',
+              name: 'dashboard',
+              id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
+              description: '[Flights] Global Flight Dashboard',
+              url: '/view/7adfa750-4c81-11e8-b3d7-01146121b73d',
+              child: {
+                type: 'visualization',
+                name: 'histogram',
+                id: '9886b410-4c8b-11e8-b3d7-01146121b73d',
+                description: '[Flights] Delay Buckets',
+                url: '/app/visualize#/edit/9886b410-4c8b-11e8-b3d7-01146121b73d',
               },
-              type: 'visualization',
-              name: 'Vertical bar',
-              id: '9886b410-4c8b-11e8-b3d7-01146121b73d',
-              description: '[Flights] Delay Buckets',
-              url: '/app/visualize#/edit/9886b410-4c8b-11e8-b3d7-01146121b73d',
             }),
           retry,
         });

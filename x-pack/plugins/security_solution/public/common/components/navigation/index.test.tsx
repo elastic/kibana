@@ -9,7 +9,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import { CONSTANTS } from '../url_state/constants';
-import { TabNavigationComponent } from './';
+import { TabNavigationComponent } from '.';
 import { navTabs } from '../../../app/home/home_navigations';
 import { HostsTableType } from '../../../hosts/store/model';
 import { RouteSpyState } from '../../utils/route/types';

@@ -21,11 +21,11 @@ import {
   ReplaySubject,
 } from 'rxjs';
 import { catchError, finalize, map, pluck, shareReplay, switchMap, tap } from 'rxjs/operators';
+import { now, AbortError } from '@kbn/kibana-utils-plugin/common';
+import { Adapters } from '@kbn/inspector-plugin/common';
 import { Executor } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
-import { now, AbortError } from '../../../kibana_utils/common';
-import { Adapters } from '../../../inspector/common';
 import { isExpressionValueError, ExpressionValueError } from '../expression_types/specs/error';
 import {
   ExpressionAstArgument,
@@ -38,7 +38,7 @@ import {
 } from '../ast';
 import { ExecutionContext, DefaultInspectorAdapters } from './types';
 import { getType, Datatable } from '../expression_types';
-import { ExpressionFunction } from '../expression_functions';
+import type { ExpressionFunction, ExpressionFunctionParameter } from '../expression_functions';
 import { getByAlias } from '../util/get_by_alias';
 import { ExecutionContract } from './execution_contract';
 import { ExpressionExecutionParams } from '../service';
@@ -224,6 +224,7 @@ export class Execution<
         inspectorAdapters.tables[name] = datatable;
       },
       isSyncColorsEnabled: () => execution.params.syncColors!,
+      isSyncTooltipsEnabled: () => execution.params.syncTooltips!,
       ...execution.executor.context,
       getExecutionContext: () => execution.params.executionContext,
     };
@@ -281,8 +282,8 @@ export class Execution<
       this.context.inspectorAdapters.requests?.reset();
     }
 
-    if (isObservable<Input>(input)) {
-      input.subscribe(this.input$);
+    if (isObservable(input)) {
+      (input as Observable<Input>).subscribe(this.input$);
     } else if (isPromise(input)) {
       from(input).subscribe(this.input$);
     } else {
@@ -300,7 +301,11 @@ export class Execution<
       ...(chainArr.map((link) =>
         switchMap((currentInput) => {
           const { function: fnName, arguments: fnArgs } = link;
-          const fn = getByAlias(this.state.get().functions, fnName);
+          const fn = getByAlias(
+            this.state.get().functions,
+            fnName,
+            this.execution.params.namespace
+          );
 
           if (!fn) {
             throw createError({
@@ -442,6 +447,16 @@ export class Execution<
     throw new Error(`Can not cast '${fromTypeName}' to any of '${toTypeNames.join(', ')}'`);
   }
 
+  validate<Type = unknown>(value: Type, argDef: ExpressionFunctionParameter<Type>): void {
+    if (argDef.strict && argDef.options?.length && !argDef.options.includes(value)) {
+      throw new Error(
+        `Value '${value}' is not among the allowed options for argument '${
+          argDef.name
+        }': '${argDef.options.join("', '")}'`
+      );
+    }
+  }
+
   // Processes the multi-valued AST argument values into arguments that can be passed to the function
   resolveArgs<Fn extends ExpressionFunction>(
     fnDef: Fn,
@@ -466,7 +481,7 @@ export class Execution<
       );
 
       // Check for missing required arguments.
-      for (const { aliases, default: argDefault, name, required } of Object.values(argDefs)) {
+      for (const { default: argDefault, name, required } of Object.values(argDefs)) {
         if (!(name in dealiasedArgAsts) && typeof argDefault !== 'undefined') {
           dealiasedArgAsts[name] = [parse(argDefault as string, 'argument')];
         }
@@ -475,13 +490,7 @@ export class Execution<
           continue;
         }
 
-        if (!aliases?.length) {
-          throw new Error(`${fnDef.name} requires an argument`);
-        }
-
-        // use an alias if _ is the missing arg
-        const errorArg = name === '_' ? aliases[0] : name;
-        throw new Error(`${fnDef.name} requires an "${errorArg}" argument`);
+        throw new Error(`${fnDef.name} requires the "${name}" argument`);
       }
 
       // Create the functions to resolve the argument ASTs into values
@@ -498,7 +507,8 @@ export class Execution<
                   }
 
                   return this.cast(output, argDefs[argName].types);
-                })
+                }),
+                tap((value) => this.validate(value, argDefs[argName]))
               )
         )
       );

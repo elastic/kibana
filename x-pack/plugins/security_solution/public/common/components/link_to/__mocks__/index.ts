@@ -8,7 +8,7 @@
 import { SecurityPageName } from '../../../../app/types';
 
 export { getDetectionEngineUrl } from '../redirect_to_detection_engine';
-export { getAppOverviewUrl } from '../redirect_to_overview';
+export { getAppLandingUrl } from '../redirect_to_landing';
 export { getHostDetailsUrl, getHostsUrl } from '../redirect_to_hosts';
 export { getNetworkUrl, getNetworkDetailsUrl } from '../redirect_to_network';
 export { getTimelineTabsUrl, getTimelineUrl } from '../redirect_to_timelines';
@@ -23,3 +23,8 @@ export const useFormatUrl = (page: SecurityPageName) => ({
   formatUrl: (path: string) => path,
   search: '',
 });
+
+export const useGetSecuritySolutionUrl =
+  () =>
+  ({ path }: { path: string }) =>
+    path;

@@ -8,7 +8,6 @@
 import React from 'react';
 
 import { useValues } from 'kea';
-import moment from 'moment';
 
 import { EuiButton, EuiCallOut, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
@@ -37,16 +36,11 @@ export const SourceLayout: React.FC<PageTemplateProps> = ({
   const { contentSource, dataLoading, diagnosticDownloadButtonVisible } = useValues(SourceLogic);
   const { isOrganization } = useValues(AppLogic);
 
-  const { name, createdAt, serviceType, isFederatedSource, supportedByLicense } = contentSource;
+  const { name, supportedByLicense } = contentSource;
 
   const pageHeader = (
     <>
-      <SourceInfoCard
-        sourceName={name}
-        sourceType={serviceType}
-        dateCreated={moment(createdAt).format('MMMM D, YYYY')}
-        isFederatedSource={isFederatedSource}
-      />
+      <SourceInfoCard contentSource={contentSource} />
       <EuiHorizontalRule />
     </>
   );

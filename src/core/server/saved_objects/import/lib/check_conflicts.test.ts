@@ -7,7 +7,7 @@
  */
 
 import { savedObjectsClientMock } from '../../../mocks';
-import { SavedObjectReference, SavedObjectsImportRetry } from 'kibana/public';
+import { SavedObjectReference, SavedObjectsImportRetry } from '../../../../public';
 import { SavedObjectsClientContract, SavedObject } from '../../types';
 import { SavedObjectsErrorHelpers } from '../../service';
 import { checkConflicts } from './check_conflicts';
@@ -108,13 +108,11 @@ describe('#checkConflicts', () => {
       errors: [
         {
           ...obj2Error,
-          title: obj2.attributes.title,
           meta: { title: obj2.attributes.title },
           error: { type: 'conflict' },
         },
         {
           ...obj4Error,
-          title: obj4.attributes.title,
           meta: { title: obj4.attributes.title },
           error: { ...obj4Error.error, type: 'unknown' },
         },
@@ -136,7 +134,6 @@ describe('#checkConflicts', () => {
         errors: [
           {
             ...obj4Error,
-            title: obj4.attributes.title,
             meta: { title: obj4.attributes.title },
             error: { ...obj4Error.error, type: 'unknown' },
           },
@@ -174,13 +171,11 @@ describe('#checkConflicts', () => {
       errors: [
         {
           ...obj2Error,
-          title: obj2.attributes.title,
           meta: { title: obj2.attributes.title },
           error: { type: 'conflict', destinationId: 'some-object-id' },
         },
         {
           ...obj4Error,
-          title: obj4.attributes.title,
           meta: { title: obj4.attributes.title },
           error: { ...obj4Error.error, type: 'unknown' },
         },

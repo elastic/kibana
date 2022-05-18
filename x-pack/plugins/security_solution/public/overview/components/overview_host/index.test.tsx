@@ -21,9 +21,12 @@ import {
 import { OverviewHost } from '.';
 import { createStore, State } from '../../../common/store';
 import { useHostOverview } from '../../containers/overview_host';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
+import { render } from '@testing-library/react';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/components/link_to');
+jest.mock('../../../common/containers/query_toggle');
 
 const startDate = '2020-01-20T20:49:57.080Z';
 const endDate = '2020-01-21T20:49:57.080Z';
@@ -32,6 +35,7 @@ const testProps = {
   indexNames: [],
   setQuery: jest.fn(),
   startDate,
+  filterQuery: '',
 };
 const MOCKED_RESPONSE = {
   overviewHost: {
@@ -56,7 +60,7 @@ const MOCKED_RESPONSE = {
 
 jest.mock('../../containers/overview_host');
 const useHostOverviewMock = useHostOverview as jest.Mock;
-useHostOverviewMock.mockReturnValue([false, MOCKED_RESPONSE]);
+const mockUseQueryToggle = useQueryToggle as jest.Mock;
 
 describe('OverviewHost', () => {
   const state: State = mockGlobalState;
@@ -65,7 +69,10 @@ describe('OverviewHost', () => {
   let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
     const myState = cloneDeep(state);
+    useHostOverviewMock.mockReturnValue([false, MOCKED_RESPONSE]);
     store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
@@ -102,5 +109,25 @@ describe('OverviewHost', () => {
     expect(wrapper.find('[data-test-subj="header-panel-subtitle"]').first().text()).toEqual(
       'Showing: 16 events'
     );
+  });
+
+  test('toggleStatus=true, do not skip', () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <OverviewHost {...testProps} />
+      </TestProviders>
+    );
+    expect(useHostOverviewMock.mock.calls[0][0].skip).toEqual(false);
+    expect(queryByTestId('overview-hosts-stats')).toBeInTheDocument();
+  });
+  test('toggleStatus=false, skip', () => {
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: jest.fn() });
+    const { queryByTestId } = render(
+      <TestProviders>
+        <OverviewHost {...testProps} />
+      </TestProviders>
+    );
+    expect(useHostOverviewMock.mock.calls[0][0].skip).toEqual(true);
+    expect(queryByTestId('overview-hosts-stats')).not.toBeInTheDocument();
   });
 });

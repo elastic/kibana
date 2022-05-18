@@ -9,9 +9,9 @@
 import { History } from 'history';
 import React, { useEffect, useMemo } from 'react';
 
+import { useKibana, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { useDashboardSelector } from './state';
 import { useDashboardAppState } from './hooks';
-import { useKibana } from '../../../kibana_react/public';
 import {
   getDashboardBreadcrumb,
   getDashboardTitle,
@@ -35,8 +35,16 @@ export function DashboardApp({
   redirectTo,
   history,
 }: DashboardAppProps) {
-  const { core, chrome, embeddable, onAppLeave, uiSettings, data, spacesService } =
-    useKibana<DashboardAppServices>().services;
+  const {
+    core,
+    chrome,
+    embeddable,
+    onAppLeave,
+    uiSettings,
+    data,
+    spacesService,
+    screenshotModeService,
+  } = useKibana<DashboardAppServices>().services;
 
   const kbnUrlStateStorage = useMemo(
     () =>
@@ -47,6 +55,12 @@ export function DashboardApp({
       }),
     [core.notifications.toasts, history, uiSettings]
   );
+
+  useExecutionContext(core.executionContext, {
+    type: 'application',
+    page: 'app',
+    id: savedDashboardId || 'new',
+  });
 
   const dashboardState = useDashboardSelector((state) => state.dashboardStateReducer);
   const dashboardAppState = useDashboardAppState({
@@ -113,13 +127,12 @@ export function DashboardApp({
     <>
       {isCompleteDashboardAppState(dashboardAppState) && (
         <>
-          {!printMode && (
-            <DashboardTopNav
-              redirectTo={redirectTo}
-              embedSettings={embedSettings}
-              dashboardAppState={dashboardAppState}
-            />
-          )}
+          <DashboardTopNav
+            printMode={printMode}
+            redirectTo={redirectTo}
+            embedSettings={embedSettings}
+            dashboardAppState={dashboardAppState}
+          />
 
           {dashboardAppState.savedDashboard.outcome === 'conflict' &&
           dashboardAppState.savedDashboard.id &&
@@ -132,7 +145,13 @@ export function DashboardApp({
                 )}${history.location.search}`,
               })
             : null}
-          <div className="dashboardViewport">
+          <div
+            className={`dashboardViewport ${
+              screenshotModeService && screenshotModeService.isScreenshotMode()
+                ? 'dashboardViewport--screenshotMode'
+                : ''
+            }`}
+          >
             <EmbeddableRenderer embeddable={dashboardAppState.dashboardContainer} />
           </div>
         </>

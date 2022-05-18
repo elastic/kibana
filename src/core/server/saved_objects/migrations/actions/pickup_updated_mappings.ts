@@ -14,6 +14,7 @@ import {
   RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
 import { BATCH_SIZE } from './constants';
+
 export interface UpdateByQueryResponse {
   taskId: string;
 }
@@ -52,7 +53,7 @@ export const pickupUpdatedMappings =
         // Create a task and return task id instead of blocking until complete
         wait_for_completion: false,
       })
-      .then(({ body: { task: taskId } }) => {
+      .then(({ task: taskId }) => {
         return Either.right({ taskId: String(taskId!) });
       })
       .catch(catchRetryableEsClientErrors);

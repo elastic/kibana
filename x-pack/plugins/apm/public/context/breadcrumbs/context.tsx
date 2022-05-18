@@ -9,10 +9,10 @@ import {
   RouteMatch,
   useMatchRoutes,
 } from '@kbn/typed-react-router-config';
-import { ChromeBreadcrumb } from 'kibana/public';
+import { ChromeBreadcrumb } from '@kbn/core/public';
 import { compact, isEqual } from 'lodash';
 import React, { createContext, useMemo, useState } from 'react';
-import { useBreadcrumbs } from '../../../../observability/public';
+import { useBreadcrumbs } from '@kbn/observability-plugin/public';
 
 export interface Breadcrumb {
   title: string;

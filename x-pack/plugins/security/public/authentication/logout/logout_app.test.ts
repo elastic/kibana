@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { AppMount } from 'src/core/public';
-import { coreMock, scopedHistoryMock, themeServiceMock } from 'src/core/public/mocks';
+import type { AppMount } from '@kbn/core/public';
+import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 
 import { logoutApp } from './logout_app';
 

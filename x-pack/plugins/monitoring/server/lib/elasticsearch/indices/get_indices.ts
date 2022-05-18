@@ -8,8 +8,6 @@
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
-import { checkParam } from '../../error_missing_required';
-// @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
 // @ts-ignore
 import { createQuery } from '../../create_query';
@@ -186,12 +184,12 @@ export function getIndices(
   const { min: start, max: end } = req.payload.timeRange;
 
   const clusterUuid = req.params.clusterUuid;
-  const config = req.server.config();
+  const config = req.server.config;
   const params = buildGetIndicesQuery(req, clusterUuid, {
     start,
     end,
     showSystemIndices,
-    size: parseInt(config.get('monitoring.ui.max_bucket_size') || '', 10),
+    size: config.ui.max_bucket_size,
   });
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

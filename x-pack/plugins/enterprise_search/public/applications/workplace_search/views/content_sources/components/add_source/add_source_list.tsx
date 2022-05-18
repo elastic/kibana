@@ -90,12 +90,9 @@ export const AddSourceList: React.FC = () => {
   const filterConfiguredSources = (source: SourceDataItem) =>
     filterSources(source, configuredSources);
 
-  const visibleAvailableSources = availableSources.filter(
-    filterAvailableSources
-  ) as SourceDataItem[];
-  const visibleConfiguredSources = configuredSources.filter(
-    filterConfiguredSources
-  ) as SourceDataItem[];
+  const visibleAvailableSources = availableSources.filter(filterAvailableSources);
+
+  const visibleConfiguredSources = configuredSources.filter(filterConfiguredSources);
 
   const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
 

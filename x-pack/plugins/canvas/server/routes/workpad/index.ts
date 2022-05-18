@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RouteInitializerDeps } from '../';
+import { RouteInitializerDeps } from '..';
 import { initializeFindWorkpadsRoute } from './find';
 import { initializeGetWorkpadRoute } from './get';
 import { initializeCreateWorkpadRoute } from './create';

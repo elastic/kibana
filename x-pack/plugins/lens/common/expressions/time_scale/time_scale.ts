@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ExecutionContext } from '../../../../../../src/plugins/expressions/common';
+import type { ExecutionContext } from '@kbn/expressions-plugin/common';
 import type { TimeScaleExpressionFunction } from './types';
 
 export const getTimeScale = (

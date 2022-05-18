@@ -3,8 +3,9 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["management", "data", "urlForwarding", "dataViewFieldEditor", "dataViewEditor", "dataViews", "fieldFormats"],
+  "requiredPlugins": ["management", "data", "urlForwarding", "dataViewFieldEditor", "dataViewEditor", "dataViews", "fieldFormats", "unifiedSearch"],
   "requiredBundles": ["kibanaReact", "kibanaUtils"],
+  "optionalPlugins": ["spaces"],
   "owner": {
     "name": "App Services",
     "githubTeam": "kibana-app-services"

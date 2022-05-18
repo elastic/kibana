@@ -145,7 +145,7 @@ export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
     pageSize,
     totalItemCount,
     pageSizeOptions: [10, 20, 50],
-    hidePerPageOptions: false,
+    showPerPageOptions: true,
   };
 
   return (

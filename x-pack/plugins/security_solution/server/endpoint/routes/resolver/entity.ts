@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { RequestHandler } from 'kibana/server';
+import { RequestHandler } from '@kbn/core/server';
 import { TypeOf } from '@kbn/config-schema';
 import { validateEntities } from '../../../../common/endpoint/schema/resolver';
 import { ResolverEntityIndex, ResolverSchema } from '../../../../common/endpoint/types';
@@ -87,7 +87,8 @@ export function handleEntities(): RequestHandler<unknown, TypeOf<typeof validate
       query: { _id, indices },
     } = request;
 
-    const queryResponse = await context.core.elasticsearch.client.asCurrentUser.search({
+    const esClient = (await context.core).elasticsearch.client;
+    const queryResponse = await esClient.asCurrentUser.search({
       ignore_unavailable: true,
       index: indices,
       body: {
@@ -109,7 +110,7 @@ export function handleEntities(): RequestHandler<unknown, TypeOf<typeof validate
     });
 
     const responseBody: ResolverEntityIndex = [];
-    for (const hit of queryResponse.body.hits.hits) {
+    for (const hit of queryResponse.hits.hits) {
       for (const supportedSchema of supportedSchemas) {
         let foundSchema = true;
         // check that the constraint and id fields are defined and that the id field is not an empty string

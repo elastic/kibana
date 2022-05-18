@@ -16,7 +16,7 @@ xpack.encryptedSavedObjects:
 
 [IMPORTANT]
 ============================================================================
-If you don't specify an encryption key, {kib} automatically generates a random key at startup. Every time you restart {kib}, it uses a new ephemeral encryption key and is unable to decrypt saved objects encrypted with another key. To prevent data loss, {kib} might disable features that rely on this encryption until you explicitly set an encryption key.
+If you don't specify an encryption key, {kib} might disable features that rely on encrypted saved objects.
 ============================================================================
 
 [[encryption-key-rotation]]

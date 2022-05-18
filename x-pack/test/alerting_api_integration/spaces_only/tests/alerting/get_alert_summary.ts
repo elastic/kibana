@@ -12,7 +12,7 @@ import { Spaces } from '../../scenarios';
 import {
   getUrlPrefix,
   ObjectRemover,
-  getTestAlertData,
+  getTestRuleData,
   AlertUtils,
   getEventLog,
 } from '../../../common/lib';
@@ -44,7 +44,7 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
+        .send(getTestRuleData())
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
@@ -83,7 +83,7 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
+        .send(getTestRuleData())
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
@@ -122,7 +122,7 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
+        .send(getTestRuleData())
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
@@ -142,7 +142,7 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
+        .send(getTestRuleData())
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
@@ -165,7 +165,7 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
+        .send(getTestRuleData())
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
@@ -189,7 +189,7 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData({ rule_type_id: 'test.throw' }))
+        .send(getTestRuleData({ rule_type_id: 'test.throw' }))
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
@@ -216,7 +216,7 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             rule_type_id: 'test.patternFiring',
             params: { pattern },
             schedule: { interval: '1s' },
@@ -271,7 +271,7 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
           .send(
-            getTestAlertData({
+            getTestRuleData({
               rule_type_id: 'test.patternFiring',
               params: { pattern },
               schedule: { interval: '1s' },
