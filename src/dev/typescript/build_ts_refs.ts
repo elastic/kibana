@@ -8,7 +8,7 @@
 
 import Path from 'path';
 
-import { ProcRunner } from '@kbn/dev-utils';
+import { ProcRunner } from '@kbn/dev-proc-runner';
 import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/utils';
 

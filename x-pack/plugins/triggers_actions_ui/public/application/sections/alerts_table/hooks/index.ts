@@ -4,5 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+export type { UsePagination } from './use_pagination';
 export { usePagination } from './use_pagination';
+export type { UseSorting } from './use_sorting';
 export { useSorting } from './use_sorting';
+export type { UseFetchAlerts } from './use_fetch_alerts';
+export { useFetchAlerts } from './use_fetch_alerts';
+export { DefaultSort } from './constants';

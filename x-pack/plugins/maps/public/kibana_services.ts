@@ -67,6 +67,9 @@ export const getSpacesApi = () => pluginsStart.spaces;
 export const getTheme = () => coreStart.theme;
 export const getUsageCollection = () => pluginsStart.usageCollection;
 export const getApplication = () => coreStart.application;
+export const isScreenshotMode = () => {
+  return pluginsStart.screenshotMode ? pluginsStart.screenshotMode.isScreenshotMode() : false;
+};
 
 // xpack.maps.* kibana.yml settings from this plugin
 let mapAppConfig: MapsConfigType;
