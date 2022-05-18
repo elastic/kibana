@@ -6,6 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
+
 import { CommentType } from '../../../common/api';
 import type { Comment } from '../../containers/types';
 import { SUPPORTED_ACTION_TYPES } from './constants';
@@ -23,5 +24,5 @@ export const getManualAlertIdsWithNoRuleId = (comments: Comment[]): string[] => 
     }
     return alertIds;
   }, new Set<string>());
-  return [...dedupeAlerts];
+  return Array.from(dedupeAlerts);
 };
