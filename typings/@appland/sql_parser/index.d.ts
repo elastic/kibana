@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-declare module 'js-sql-parser';
+declare module '@appland/sql-parser';
