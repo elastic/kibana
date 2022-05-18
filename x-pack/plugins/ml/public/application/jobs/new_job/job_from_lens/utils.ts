@@ -17,11 +17,7 @@ import type {
   SeriesType,
   XYLayerConfig,
 } from '@kbn/lens-plugin/public';
-import {
-  layerTypes,
-  LensIconChartBarAnnotations,
-  LensIconChartBarReferenceLine,
-} from '@kbn/lens-plugin/public';
+import { layerTypes } from '@kbn/lens-plugin/public';
 
 export const COMPATIBLE_SERIES_TYPES: SeriesType[] = [
   'line',
@@ -116,18 +112,21 @@ export async function getVisTypeFactory(lens: LensPublicStart) {
           icon: type?.icon ?? '',
         };
       case layerTypes.ANNOTATIONS:
+        // Annotation and Reference line layers are not displayed.
+        // but for consistency leave the labels in, in case we decide
+        // to display these layers in the future
         return {
           label: i18n.translate('xpack.ml.newJob.fromLens.createJob.VisType.annotations', {
             defaultMessage: 'Annotations',
           }),
-          icon: LensIconChartBarAnnotations,
+          icon: '',
         };
       case layerTypes.REFERENCELINE:
         return {
           label: i18n.translate('xpack.ml.newJob.fromLens.createJob.VisType.referenceLine', {
             defaultMessage: 'Reference line',
           }),
-          icon: LensIconChartBarReferenceLine,
+          icon: '',
         };
       default:
         return {
@@ -139,8 +138,12 @@ export async function getVisTypeFactory(lens: LensPublicStart) {
   };
 }
 
-export async function isCompatibleVisualizationType(vis: LensSavedObjectAttributes) {
-  return vis.visualizationType === COMPATIBLE_VISUALIZATION;
+export async function isCompatibleVisualizationType(savedObject: LensSavedObjectAttributes) {
+  const visualization = savedObject.state.visualization as { layers: XYLayerConfig[] };
+  return (
+    savedObject.visualizationType === COMPATIBLE_VISUALIZATION &&
+    visualization.layers.some((l) => l.layerType === layerTypes.DATA)
+  );
 }
 
 export function isCompatibleLayer(layer: XYLayerConfig): layer is XYDataLayerConfig {

@@ -21,6 +21,7 @@ import type {
   IndexPatternLayer,
   XYLayerConfig,
 } from '@kbn/lens-plugin/public';
+import { layerTypes } from '@kbn/lens-plugin/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 
 import { i18n } from '@kbn/i18n';
@@ -45,7 +46,7 @@ type VisualizationType = Awaited<ReturnType<LensPublicStart['getXyVisTypes']>>[n
 
 export interface LayerResult {
   id: string;
-  layerType: string;
+  layerType: typeof layerTypes[keyof typeof layerTypes];
   label: string;
   icon: VisualizationType['icon'];
   compatible: boolean;
@@ -131,36 +132,38 @@ export async function getLayers(
   const getVisType = await getVisTypeFactory(lens);
 
   const layers: LayerResult[] = await Promise.all(
-    visualization.layers.map(async (layer) => {
-      const { icon, label } = getVisType(layer);
-      try {
-        const { fields, splitField } = await extractFields(layer, vis, dataViewClient);
-        const detectors = createDetectors(fields, splitField);
-        const createdBy =
-          splitField || detectors.length > 1
-            ? CREATED_BY_LABEL.MULTI_METRIC
-            : CREATED_BY_LABEL.SINGLE_METRIC;
+    visualization.layers
+      .filter(({ layerType }) => layerType === layerTypes.DATA) // remove non chart layers
+      .map(async (layer) => {
+        const { icon, label } = getVisType(layer);
+        try {
+          const { fields, splitField } = await extractFields(layer, vis, dataViewClient);
+          const detectors = createDetectors(fields, splitField);
+          const createdBy =
+            splitField || detectors.length > 1
+              ? CREATED_BY_LABEL.MULTI_METRIC
+              : CREATED_BY_LABEL.SINGLE_METRIC;
 
-        return {
-          id: layer.layerId,
-          layerType: layer.layerType,
-          label,
-          icon,
-          jobWizardType: createdBy,
-          compatible: true,
-        };
-      } catch (error) {
-        return {
-          id: layer.layerId,
-          layerType: layer.layerType,
-          label,
-          icon,
-          compatible: false,
-          jobWizardType: null,
-          error,
-        };
-      }
-    })
+          return {
+            id: layer.layerId,
+            layerType: layer.layerType,
+            label,
+            icon,
+            jobWizardType: createdBy,
+            compatible: true,
+          };
+        } catch (error) {
+          return {
+            id: layer.layerId,
+            layerType: layer.layerType,
+            label,
+            icon,
+            compatible: false,
+            jobWizardType: null,
+            error,
+          };
+        }
+      })
   );
 
   return layers;
