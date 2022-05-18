@@ -22,7 +22,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'visualize',
     'discover',
     'timePicker',
-    'common',
   ]);
   const dashboardName = 'Dashboard Panel Controls Test';
 

@@ -13,6 +13,7 @@ export class HomePageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
   private readonly common = this.ctx.getPageObject('common');
+  private readonly dashboard = this.ctx.getPageObject('dashboard');
   private readonly log = this.ctx.getService('log');
 
   async clickSynopsis(title: string) {
@@ -85,6 +86,7 @@ export class HomePageObject extends FtrService {
 
   async launchSampleDashboard(id: string) {
     await this.launchSampleDataSet(id);
+    await this.dashboard.forceSkipTour();
     await this.find.clickByLinkText('Dashboard');
   }
 
