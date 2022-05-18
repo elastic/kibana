@@ -14,6 +14,9 @@ const isFunction = (v: unknown): v is Function => {
   return typeof v === 'function';
 };
 
+const getConnectorErrorMsg = (actionId: string, connector: { id: string; name: string }) =>
+  `Connector id: ${actionId}. Connector name: ${connector.name}. Connector type: ${connector.id}`;
+
 export const buildExecutor = <Config, Secrets>({
   configurationUtilities,
   connector,
@@ -45,19 +48,28 @@ export const buildExecutor = <Config, Secrets>({
     const action = subActions.get(subAction);
 
     if (!action) {
-      throw new Error('Sub action not registered');
+      throw new Error(
+        `Sub action "${subAction}" is not registered. ${getConnectorErrorMsg(actionId, connector)}`
+      );
     }
 
     const method = action.method;
 
     if (!service[method]) {
-      throw new Error('Not valid method for registered sub action');
+      throw new Error(
+        `Method "${method}" does not exists in service. Sub action: "${subAction}". ${getConnectorErrorMsg(
+          actionId,
+          connector
+        )}`
+      );
     }
 
     const func = service[method];
 
     if (!isFunction(func)) {
-      throw new Error('Method must be a valid function');
+      throw new Error(
+        `Method "${method}" must be a function. ${getConnectorErrorMsg(actionId, connector)}`
+      );
     }
 
     if (action.schema) {

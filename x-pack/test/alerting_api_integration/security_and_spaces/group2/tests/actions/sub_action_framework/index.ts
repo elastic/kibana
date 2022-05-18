@@ -246,7 +246,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           message: 'an error occurred while running the action',
           retry: false,
           connector_id: res.body.id,
-          service_message: 'Sub action not registered',
+          service_message: `Sub action \"notRegistered\" is not registered. Connector id: ${res.body.id}. Connector name: Test: Sub action connector. Connector type: .test-sub-action-connector`,
         });
       });
 
@@ -266,11 +266,31 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           message: 'an error occurred while running the action',
           retry: false,
           connector_id: res.body.id,
-          service_message: 'Not valid method for registered sub action',
+          service_message: `Method \"notAFunction\" does not exists in service. Sub action: \"notAFunction\". Connector id: ${res.body.id}. Connector name: Test: Sub action connector. Connector type: .test-sub-action-connector`,
         });
       });
 
-      it('should return an error if the registered method is not a function', async () => {
+      it('should return an error if the registered method does not exists', async () => {
+        const res = await createSubActionConnector({ supertest });
+        objectRemover.add('default', res.body.id, 'action', 'actions');
+
+        const execRes = await executeSubAction({
+          supertest,
+          connectorId: res.body.id as string,
+          subAction: 'notExist',
+          subActionParams: { foo: 'foo' },
+        });
+
+        expect(execRes.body).to.eql({
+          status: 'error',
+          message: 'an error occurred while running the action',
+          retry: false,
+          connector_id: res.body.id,
+          service_message: `Method \"notExist\" does not exists in service. Sub action: \"notExist\". Connector id: ${res.body.id}. Connector name: Test: Sub action connector. Connector type: .test-sub-action-connector`,
+        });
+      });
+
+      it('should return an error if there are no sub actions registered', async () => {
         const res = await createSubActionConnector({
           supertest,
           connectorTypeId: '.test-sub-action-connector-without-sub-actions',

@@ -144,12 +144,30 @@ describe('Executor', () => {
     await expect(async () =>
       executor({
         actionId,
+        params: { subAction: 'not-exist', subActionParams: {} },
+        config,
+        secrets,
+        services,
+      })
+    ).rejects.toThrowError(
+      'Sub action "not-exist" is not registered. Connector id: test-action-id. Connector name: Test. Connector type: .test'
+    );
+  });
+
+  it('throws if the method does not exists', async () => {
+    const executor = createExecutor(TestExecutor);
+
+    await expect(async () =>
+      executor({
+        actionId,
         params,
         config,
         secrets,
         services,
       })
-    ).rejects.toThrowError('Not valid method for registered sub action');
+    ).rejects.toThrowError(
+      'Method "not-exist" does not exists in service. Sub action: "testUrl". Connector id: test-action-id. Connector name: Test. Connector type: .test'
+    );
   });
 
   it('throws if the registered method is not a function', async () => {
@@ -163,7 +181,9 @@ describe('Executor', () => {
         secrets,
         services,
       })
-    ).rejects.toThrowError('Method must be a valid function');
+    ).rejects.toThrowError(
+      'Method "notAFunction" must be a function. Connector id: test-action-id. Connector name: Test. Connector type: .test'
+    );
   });
 
   it('throws if the sub actions params are not valid', async () => {
