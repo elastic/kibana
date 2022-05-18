@@ -37,8 +37,16 @@ export function DashboardApp({
   redirectTo,
   history,
 }: DashboardAppProps) {
-  const { core, chrome, embeddable, onAppLeave, uiSettings, data, spacesService } =
-    useKibana<DashboardAppServices>().services;
+  const {
+    core,
+    chrome,
+    embeddable,
+    onAppLeave,
+    uiSettings,
+    data,
+    spacesService,
+    screenshotModeService,
+  } = useKibana<DashboardAppServices>().services;
 
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
 
@@ -144,7 +152,13 @@ export function DashboardApp({
                 )}${history.location.search}`,
               })
             : null}
-          <div className="dashboardViewport">
+          <div
+            className={`dashboardViewport ${
+              screenshotModeService && screenshotModeService.isScreenshotMode()
+                ? 'dashboardViewport--screenshotMode'
+                : ''
+            }`}
+          >
             <EmbeddableRenderer embeddable={dashboardAppState.dashboardContainer} />
           </div>
         </>
