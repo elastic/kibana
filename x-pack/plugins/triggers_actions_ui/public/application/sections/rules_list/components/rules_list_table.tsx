@@ -52,7 +52,6 @@ import { RuleDurationFormat } from './rule_duration_format';
 import { checkRuleTypeEnabled } from '../../../lib/check_rule_type_enabled';
 import { getFormattedSuccessRatio } from '../../../lib/monitoring_utils';
 import { hasAllPrivilege } from '../../../lib/capabilities';
-import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { RuleTagBadge } from './rule_tag_badge';
 import { RuleStatusDropdown } from './rule_status_dropdown';
 import { RulesListNotifyBadge } from './rules_list_notify_badge';
@@ -177,8 +176,6 @@ export const RulesListTable = (props: RulesListTableProps) => {
   const [tagPopoverOpenIndex, setTagPopoverOpenIndex] = useState<number>(-1);
   const [currentlyOpenNotify, setCurrentlyOpenNotify] = useState<string>();
 
-  const isRulesListNotifyEnabled = getIsExperimentalFeatureEnabled('rulesListNotify');
-
   const selectedPercentile = useMemo(() => {
     const selectedOption = percentileOptions.find((option) => option.checked === 'on');
     if (selectedOption) {
@@ -225,6 +222,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
   const renderRuleStatusDropdown = (ruleEnabled: boolean | undefined, rule: RuleTableItem) => {
     return (
       <RuleStatusDropdown
+        hideSnoozeOption
         disableRule={async () => await onDisableRule(rule)}
         enableRule={async () => await onEnableRule(rule)}
         snoozeRule={async (snoozeEndTime: string | -1, interval: string | null) => {
@@ -284,35 +282,6 @@ export const RulesListTable = (props: RulesListTableProps) => {
         )}
       </EuiFlexGroup>
     );
-  };
-
-  const getRulesListNotifyColumn = () => {
-    if (isRulesListNotifyEnabled) {
-      return [
-        {
-          name: 'Notify',
-          width: '16%',
-          'data-test-subj': 'rulesTableCell-rulesListNotify',
-          render: (rule: RuleTableItem) => {
-            return (
-              <RulesListNotifyBadge
-                rule={rule}
-                isOpen={currentlyOpenNotify === rule.id}
-                onClick={() => setCurrentlyOpenNotify(rule.id)}
-                onClose={() => setCurrentlyOpenNotify('')}
-                onRuleChanged={onRuleChanged}
-                snoozeRule={async (snoozeEndTime: string | -1, interval: string | null) => {
-                  await onSnoozeRule(rule, snoozeEndTime);
-                }}
-                unsnoozeRule={async () => await onUnsnoozeRule(rule)}
-              />
-            );
-          },
-        },
-      ];
-    }
-
-    return [];
   };
 
   const getRulesTableColumns = (): Array<
@@ -425,7 +394,26 @@ export const RulesListTable = (props: RulesListTableProps) => {
           }
         },
       },
-      ...getRulesListNotifyColumn(),
+      {
+        name: 'Notify',
+        width: '16%',
+        'data-test-subj': 'rulesTableCell-rulesListNotify',
+        render: (rule: RuleTableItem) => {
+          return (
+            <RulesListNotifyBadge
+              rule={rule}
+              isOpen={currentlyOpenNotify === rule.id}
+              onClick={() => setCurrentlyOpenNotify(rule.id)}
+              onClose={() => setCurrentlyOpenNotify('')}
+              onRuleChanged={onRuleChanged}
+              snoozeRule={async (snoozeEndTime: string | -1, interval: string | null) => {
+                await onSnoozeRule(rule, snoozeEndTime);
+              }}
+              unsnoozeRule={async () => await onUnsnoozeRule(rule)}
+            />
+          );
+        },
+      },
       {
         field: 'schedule.interval',
         width: '6%',

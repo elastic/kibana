@@ -48,6 +48,7 @@ export interface ComponentOpts {
   isEditable: boolean;
   previousSnoozeInterval?: string | null;
   direction?: 'column' | 'row';
+  hideSnoozeOption?: boolean;
 }
 
 const COMMON_SNOOZE_TIMES: Array<[number, SnoozeUnit]> = [
@@ -83,6 +84,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   unsnoozeRule,
   isEditable,
   previousSnoozeInterval: propsPreviousSnoozeInterval,
+  hideSnoozeOption = false,
   direction = 'column',
 }: ComponentOpts) => {
   const [isEnabled, setIsEnabled] = useState<boolean>(rule.enabled);
@@ -217,6 +219,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
               isSnoozed={isSnoozed}
               snoozeEndTime={rule.snoozeEndTime}
               previousSnoozeInterval={previousSnoozeInterval}
+              hideSnoozeOption={hideSnoozeOption}
             />
           </EuiPopover>
         ) : (
@@ -238,6 +241,7 @@ interface RuleStatusMenuProps {
   isSnoozed: boolean;
   snoozeEndTime?: Date | null;
   previousSnoozeInterval: string | null;
+  hideSnoozeOption?: boolean;
 }
 
 const RuleStatusMenu: React.FunctionComponent<RuleStatusMenuProps> = ({
@@ -248,6 +252,7 @@ const RuleStatusMenu: React.FunctionComponent<RuleStatusMenuProps> = ({
   isSnoozed,
   snoozeEndTime,
   previousSnoozeInterval,
+  hideSnoozeOption = false,
 }) => {
   const enableRule = useCallback(() => {
     if (isSnoozed) {
@@ -283,6 +288,44 @@ const RuleStatusMenu: React.FunctionComponent<RuleStatusMenuProps> = ({
     );
   }
 
+  const getSnoozeMenuItem = () => {
+    if (!hideSnoozeOption) {
+      return [
+        {
+          name: snoozeButtonTitle,
+          icon: isEnabled && isSnoozed ? 'check' : 'empty',
+          panel: 1,
+          disabled: !isEnabled,
+          'data-test-subj': 'statusDropdownSnoozeItem',
+        },
+      ];
+    }
+    return [];
+  };
+
+  const getSnoozePanel = () => {
+    if (!hideSnoozeOption) {
+      return [
+        {
+          id: 1,
+          width: 360,
+          title: SNOOZE,
+          content: (
+            <EuiPanel paddingSize="none">
+              <SnoozePanel
+                applySnooze={onApplySnooze}
+                interval={futureTimeToInterval(snoozeEndTime)}
+                showCancel={isSnoozed}
+                previousSnoozeInterval={previousSnoozeInterval}
+              />
+            </EuiPanel>
+          ),
+        },
+      ];
+    }
+    return [];
+  };
+
   const panels = [
     {
       id: 0,
@@ -298,30 +341,10 @@ const RuleStatusMenu: React.FunctionComponent<RuleStatusMenuProps> = ({
           icon: !isEnabled ? 'check' : 'empty',
           onClick: disableRule,
         },
-        {
-          name: snoozeButtonTitle,
-          icon: isEnabled && isSnoozed ? 'check' : 'empty',
-          panel: 1,
-          disabled: !isEnabled,
-          'data-test-subj': 'statusDropdownSnoozeItem',
-        },
+        ...getSnoozeMenuItem(),
       ],
     },
-    {
-      id: 1,
-      width: 360,
-      title: SNOOZE,
-      content: (
-        <EuiPanel paddingSize="none">
-          <SnoozePanel
-            applySnooze={onApplySnooze}
-            interval={futureTimeToInterval(snoozeEndTime)}
-            showCancel={isSnoozed}
-            previousSnoozeInterval={previousSnoozeInterval}
-          />
-        </EuiPanel>
-      ),
-    },
+    ...getSnoozePanel(),
   ];
 
   return <EuiContextMenu data-test-subj="ruleStatusMenu" initialPanelId={0} panels={panels} />;
