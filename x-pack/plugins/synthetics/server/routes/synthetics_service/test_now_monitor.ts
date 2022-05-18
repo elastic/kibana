@@ -51,7 +51,7 @@ export const testNowMonitorRoute: UMRestApiRouteFactory = () => ({
     const errors = await syntheticsService.triggerConfigs(request, [
       {
         ...normalizeSecrets(monitorWithSecrets).attributes,
-        id: monitorId,
+        id: monitorWithSecrets[CUSTOM_HEARTBEAT_ID] || monitorId,
         fields_under_root: true,
         fields: { config_id: monitorId, test_run_id: testRunId },
       },

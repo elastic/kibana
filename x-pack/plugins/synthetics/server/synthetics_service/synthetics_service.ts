@@ -403,11 +403,12 @@ export class SyntheticsService {
       const pushBrowserMonitorId = attributes[ConfigKey.IS_PUSH_MONITOR]
         ? attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
         : undefined;
+      const id = attributes[ConfigKey.IS_PUSH_MONITOR] ? pushBrowserMonitorId : monitor.id;
       return {
         ...normalizeSecrets(monitor).attributes,
-        id: pushBrowserMonitorId || monitor.id,
+        id, // heartbeat id
         fields_under_root: true,
-        fields: { config_id: monitor.id },
+        fields: { config_id: monitor.id }, // monitor saved object id
       };
     });
   }
