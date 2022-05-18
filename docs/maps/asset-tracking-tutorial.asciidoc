@@ -163,7 +163,7 @@ PUT _index_template/tri_met_tracks
               "type": "keyword"
             },
             "tripID": {
-              "type": "integer"
+              "type": "keyword"
             },
             "delay": {
               "type": "integer"
