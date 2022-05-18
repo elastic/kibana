@@ -56,18 +56,28 @@ class StubBroadcastChannel implements BroadcastChannel {
   }
 }
 
+/**
+ * Returns all BroadcastChannel instances.
+ * @returns BroadcastChannel[]
+ */
 function getBroadcastChannelInstances() {
   return [...channelCache];
 }
 
-function clearBroadcastChannelCache() {
+/**
+ * Removes all BroadcastChannel instances.
+ */
+function clearBroadcastChannelInstances() {
   channelCache.splice(0, channelCache.length);
 }
 
+/**
+ * Stubs the global window.BroadcastChannel for use in jest tests.
+ */
 function stubBroadcastChannel() {
   if (!window.BroadcastChannel) {
     window.BroadcastChannel = StubBroadcastChannel;
   }
 }
 
-export { stubBroadcastChannel, getBroadcastChannelInstances, clearBroadcastChannelCache };
+export { stubBroadcastChannel, getBroadcastChannelInstances, clearBroadcastChannelInstances };

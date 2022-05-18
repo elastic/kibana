@@ -8,7 +8,7 @@
 import type { ToastInputFields } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
-  clearBroadcastChannelCache,
+  clearBroadcastChannelInstances,
   getBroadcastChannelInstances,
   stubBroadcastChannel,
 } from '@kbn/test-jest-helpers';
@@ -57,7 +57,7 @@ describe('SessionTimeout', () => {
   afterEach(async () => {
     jest.clearAllMocks();
     jest.clearAllTimers();
-    clearBroadcastChannelCache();
+    clearBroadcastChannelInstances();
   });
 
   test(`does not initialize when starting an anonymous path`, async () => {
