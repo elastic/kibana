@@ -9,12 +9,17 @@ import type {
   Logger,
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
-  SavedObject,
   ISavedObjectsRepository,
 } from '@kbn/core/server';
+
 import { BlobStorageService } from './blob_storage_service';
 import { fileObjectType } from './saved_objects';
-import { FileSavedObjectAttributes, File as IFile } from '../common';
+import {
+  FileSavedObjectAttributes,
+  File as IFile,
+  FileSavedObject,
+  UpdatableFileAttributes,
+} from '../common';
 import { File, createDefaultFileAttributes } from './file';
 
 interface CreateFileArgs<Meta = {}> {
@@ -22,6 +27,17 @@ interface CreateFileArgs<Meta = {}> {
   fileKind: string;
   alt?: string;
   meta?: Meta;
+}
+
+interface UpdateFileArgs {
+  id: string;
+  fileKind: string;
+  attributes: UpdatableFileAttributes;
+}
+
+interface DeleteFileArgs {
+  id: string;
+  fileKind: string;
 }
 
 interface ListFilesArgs {
@@ -50,23 +66,39 @@ export class InternalFileService {
 
   // TODO: Enforce that file kind exists based on registry
   // TODO: Use security audit logger to log file creation
-  public async createFile({ fileKind, ...rest }: CreateFileArgs): Promise<IFile> {
+  public async createFile({ fileKind, name, alt, meta }: CreateFileArgs): Promise<IFile> {
     const fileSO = await this.soClient.create<FileSavedObjectAttributes>(this.savedObjectType, {
       ...createDefaultFileAttributes(),
-      ...rest,
       file_kind: fileKind,
+      name,
+      alt,
+      meta,
     });
 
-    return this.from(fileSO);
+    return this.toFile(fileSO);
   }
 
-  public async find({ fileKind, id }: FindFileArgs): Promise<undefined | IFile> {
+  public async updateFile({ attributes, fileKind, id }: UpdateFileArgs): Promise<void> {
+    const file = await this.find({ fileKind, id });
+    await file.update(attributes);
+  }
+
+  public async deleteFile({ id, fileKind }: DeleteFileArgs): Promise<void> {
+    const file = await this.find({ id, fileKind });
+    await file.delete();
+  }
+
+  public async find({ fileKind, id }: FindFileArgs): Promise<IFile> {
     try {
       const result = await this.soClient.get<FileSavedObjectAttributes>(this.savedObjectType, id);
-      return result.attributes.file_kind === fileKind ? this.from(result) : undefined;
+      const actualFileKind = result.attributes.file_kind;
+      if (actualFileKind !== fileKind) {
+        throw new Error(`Unexpected file kind "${actualFileKind}", expected "${fileKind}".`);
+      }
+      return this.toFile(result);
     } catch (e) {
-      this.logger.error(`Could not get file: ${e}`);
-      return undefined;
+      this.logger.error(`Could not retrieve file: ${e}`);
+      throw e;
     }
   }
 
@@ -76,22 +108,26 @@ export class InternalFileService {
       filter: `${this.savedObjectType}.attributes.file_kind: ${fileKind}`,
     });
 
-    return result.saved_objects.map(this.from.bind(this));
+    return result.saved_objects.map(this.toFile.bind(this));
   }
 
-  public async deleteFileSO(id: string): Promise<void> {
-    await this.soClient.delete(this.savedObjectType, id);
-  }
-
-  public async updateFileSO(id: string, attributes: FileSavedObjectAttributes) {
-    return await this.soClient.update(this.savedObjectType, id, attributes);
-  }
-
-  public from<M>(fileSO: SavedObject<FileSavedObjectAttributes<M>>): IFile {
+  public toFile(fileSO: FileSavedObject): IFile {
     return new File(this, this.blobStorageService, fileSO, this.logger.get(`file-${fileSO.id}`));
   }
 
+  public async deleteSO(id: string): Promise<void> {
+    await this.soClient.delete(this.savedObjectType, id);
+  }
+
+  public async updateSO(
+    id: string,
+    attributes: FileSavedObjectAttributes
+  ): Promise<FileSavedObject> {
+    const updateResponse = await this.soClient.update(this.savedObjectType, id, attributes);
+    return updateResponse as FileSavedObject;
+  }
+
   public static setup(savedObjectsSetup: SavedObjectsServiceSetup): void {
-    savedObjectsSetup.registerType(fileObjectType);
+    savedObjectsSetup.registerType<FileSavedObjectAttributes<{}>>(fileObjectType);
   }
 }

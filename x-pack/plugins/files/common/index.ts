@@ -12,5 +12,5 @@ export type {
   FileStatus,
   File,
   FileSavedObject,
-  UpdateableFileAttributes,
+  UpdatableFileAttributes,
 } from './types';

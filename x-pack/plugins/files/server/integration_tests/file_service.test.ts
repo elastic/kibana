@@ -29,13 +29,6 @@ describe('FileService', () => {
   let coreSetup: Awaited<ReturnType<typeof kbnRoot.setup>>;
   let coreStart: CoreStart;
 
-  let disposables: File[] = [];
-  const createFile: typeof fileService.createFile = async (args) => {
-    const file = await fileService.createFile(args);
-    disposables.push(file);
-    return file;
-  };
-
   beforeAll(async () => {
     const { startES } = createTestServers({ adjustTimeout: jest.setTimeout });
     manageES = await startES();
@@ -61,6 +54,12 @@ describe('FileService', () => {
     );
   });
 
+  let disposables: File[] = [];
+  const createDisposableFile: typeof fileService.createFile = async (args) => {
+    const file = await fileService.createFile(args);
+    disposables.push(file);
+    return file;
+  };
   afterEach(async () => {
     await Promise.all(disposables.map((file) => file.delete()));
     const results = await fileService.list({ fileKind });
@@ -68,22 +67,18 @@ describe('FileService', () => {
     disposables = [];
   });
 
-  it('creates file metadata', async () => {
-    const file = await createFile({ fileKind, name: 'test' });
-    expect(file.getMetadata()).toEqual(
-      expect.objectContaining({
-        created_at: expect.any(String),
-        updated_at: expect.any(String),
-        name: 'test',
-        file_kind: 'test',
-      })
-    );
+  it('creates file metadata awaiting upload', async () => {
+    const file = await createDisposableFile({ fileKind, name: 'test' });
+    expect(file.name).toEqual('test');
+    expect(file.fileKind).toEqual(fileKind);
     expect(file.status).toBe('AWAITING_UPLOAD' as FileStatus);
   });
 
   it('uploads file content', async () => {
-    const file = await createFile({ fileKind, name: 'test' });
+    const file = await createDisposableFile({ fileKind, name: 'test' });
+    expect(file.status).toBe('AWAITING_UPLOAD' as FileStatus);
     await file.uploadContent(Readable.from(['upload this']));
+    expect(file.status).toBe('READY' as FileStatus);
     const rs = await file.downloadContent();
     const chunks: string[] = [];
     for await (const chunk of rs) {
@@ -93,17 +88,17 @@ describe('FileService', () => {
   });
 
   it('retrieves a file', async () => {
-    const { id } = await createFile({ fileKind, name: 'test' });
+    const { id } = await createDisposableFile({ fileKind, name: 'test' });
     const myFile = await fileService.find({ id, fileKind });
     expect(myFile?.id).toMatch(id);
   });
 
   it('lists files', async () => {
     await Promise.all([
-      createFile({ fileKind, name: 'test-1' }),
-      createFile({ fileKind, name: 'test-2' }),
-      createFile({ fileKind, name: 'test-3' }),
-      createFile({ fileKind, name: 'test-3' /* Also test file with same name */ }),
+      createDisposableFile({ fileKind, name: 'test-1' }),
+      createDisposableFile({ fileKind, name: 'test-2' }),
+      createDisposableFile({ fileKind, name: 'test-3' }),
+      createDisposableFile({ fileKind, name: 'test-3' /* Also test file with same name */ }),
     ]);
     const result = await fileService.list({ fileKind });
     expect(result.length).toBe(4);
@@ -112,5 +107,20 @@ describe('FileService', () => {
   it('deletes files', async () => {
     const file = await fileService.createFile({ fileKind, name: 'test' });
     await file.delete();
+  });
+
+  it('updates files', async () => {
+    const file = await createDisposableFile({ fileKind, name: 'test' });
+    const updatableFields = { name: 'new name', alt: 'my alt text', meta: { some: 'data' } };
+    const updatedFile1 = await file.update(updatableFields);
+    // Fetch the file anew to be doubly sure
+    expect(updatedFile1.meta).toEqual(expect.objectContaining(updatableFields.meta));
+    expect(updatedFile1.name).toBe(updatableFields.name);
+    expect(updatedFile1.alt).toBe(updatableFields.alt);
+
+    const updatedFile2 = await fileService.find({ fileKind, id: file.id });
+    expect(updatedFile2.meta).toEqual(expect.objectContaining(updatableFields.meta));
+    expect(updatedFile2.name).toBe(updatableFields.name);
+    expect(updatedFile2.alt).toBe(updatableFields.alt);
   });
 });

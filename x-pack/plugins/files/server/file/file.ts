@@ -6,53 +6,52 @@
  */
 
 import { Logger } from '@kbn/core/server';
-import { omit } from 'lodash';
 import { Readable } from 'stream';
 import {
   File as IFile,
   FileSavedObject,
   FileSavedObjectAttributes,
   FileStatus,
+  UpdatableFileAttributes,
 } from '../../common';
 import { BlobStorageService } from '../blob_storage_service';
-import { InternalFileService } from '../file_service';
 import { fileAttributesReducer, Action } from './file_attributes_reducer';
+
+interface InternalSavedObjectsClient {
+  deleteSO(id: string): Promise<void>;
+  updateSO(id: string, attr: FileSavedObjectAttributes): Promise<FileSavedObject>;
+}
 
 /**
  * Public file class that wraps all functionality consumers will need at the
  * individual file level
  */
-export class File<M = {}> implements IFile {
+export class File<M = unknown> implements IFile {
   constructor(
-    private readonly fileService: InternalFileService,
+    private readonly soClient: InternalSavedObjectsClient,
     private readonly blobStorageService: BlobStorageService,
     private fileSO: FileSavedObject,
     private readonly logger: Logger
   ) {}
 
   private async updateFileState(action: Action) {
-    const nextAttr = fileAttributesReducer(this.attributes, action);
-    const nextFileSO = await this.fileService.updateFileSO(this.id, nextAttr);
-    this.fileSO = {
-      ...nextFileSO,
-      references: nextFileSO.references ?? [],
-      attributes: {
-        ...this.fileSO,
-        ...nextAttr,
-      },
-    };
+    this.fileSO = await this.soClient.updateSO(
+      this.id,
+      fileAttributesReducer(this.attributes, action)
+    );
   }
 
-  private hasContent(): boolean {
-    return Boolean(this.fileSO.attributes.status === 'READY' && this.fileSO.attributes.content_ref);
+  private canUpload(): boolean {
+    return (
+      this.fileSO.attributes.status === 'AWAITING_UPLOAD' ||
+      this.fileSO.attributes.status === 'UPLOAD_ERROR'
+    );
   }
 
-  async update(
-    attrs: Partial<{ meta?: M | undefined; alt?: string | undefined; name: string }>
-  ): Promise<IFile> {
+  async update(attrs: UpdatableFileAttributes): Promise<IFile> {
     await this.updateFileState({
       action: 'updateFile',
-      payload: { ...attrs, name: this.name },
+      payload: attrs,
     });
 
     return this;
@@ -60,7 +59,7 @@ export class File<M = {}> implements IFile {
 
   // TODO: Use security audit logger to log file content upload
   async uploadContent(content: Readable): Promise<void> {
-    if (this.hasContent()) {
+    if (!this.canUpload()) {
       this.logger.error('File content already uploaded.');
       throw new Error('File content already uploaded');
     }
@@ -75,6 +74,7 @@ export class File<M = {}> implements IFile {
         action: 'uploaded',
         payload: { content_ref: contentRef, size },
       });
+      this.logger.debug(`File uploaded. New file ID: "${contentRef}".`);
     } catch (e) {
       await this.updateFileState({ action: 'uploadError' });
       throw e;
@@ -82,11 +82,11 @@ export class File<M = {}> implements IFile {
   }
 
   downloadContent(): Promise<Readable> {
-    if (!this.hasContent()) {
+    const { content_ref: id, size } = this.attributes;
+    if (!id) {
       throw new Error('No content to download');
     }
-    const { content_ref: id, size } = this.attributes;
-    return this.blobStorageService.download(id!, size);
+    return this.blobStorageService.download(id, size);
   }
 
   // TODO: Use security audit logger to log file deletion
@@ -95,26 +95,34 @@ export class File<M = {}> implements IFile {
     if (attributes.content_ref) {
       await this.blobStorageService.delete(attributes.content_ref);
     }
-    await this.fileService.deleteFileSO(id);
+    await this.soClient.deleteSO(id);
   }
 
-  public getMetadata(): Omit<FileSavedObjectAttributes<{}>, 'status' | 'content_ref'> {
-    return omit({ ...this.fileSO.attributes }, ['status', 'content_ref']);
+  private get attributes(): FileSavedObjectAttributes {
+    return this.fileSO.attributes;
   }
 
   public get id(): string {
     return this.fileSO.id;
   }
 
-  public get attributes(): FileSavedObjectAttributes {
-    return this.fileSO.attributes;
+  public get fileKind(): string {
+    return this.attributes.file_kind;
   }
 
   public get name(): string {
-    return this.fileSO.attributes.name;
+    return this.attributes.name;
   }
 
   public get status(): FileStatus {
-    return this.fileSO.attributes.status;
+    return this.attributes.status;
+  }
+
+  public get meta(): M {
+    return this.attributes.meta as M;
+  }
+
+  public get alt(): undefined | string {
+    return this.attributes.alt;
   }
 }

@@ -9,10 +9,10 @@
 import type { SavedObject } from '@kbn/core/server';
 import { Readable } from 'stream';
 
-export type FileStatus = 'AWAITING_UPLOAD' | 'UPLOADING' | 'READY' | 'ERROR';
+export type FileStatus = 'AWAITING_UPLOAD' | 'UPLOADING' | 'READY' | 'UPLOAD_ERROR';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type FileSavedObjectAttributes<Meta = {}> = {
+export type FileSavedObjectAttributes<Meta = unknown> = {
   created_at: string;
 
   updated_at: string;
@@ -66,17 +66,23 @@ export type FileSavedObjectAttributes<Meta = {}> = {
   meta?: Meta;
 };
 
-export type FileSavedObject<Meta = {}> = SavedObject<FileSavedObjectAttributes<Meta>>;
+export type FileSavedObject<Meta = unknown> = SavedObject<FileSavedObjectAttributes<Meta>>;
 
-export type UpdateableFileAttributes = Pick<FileSavedObjectAttributes, 'meta' | 'alt' | 'name'>;
+export type UpdatableFileAttributes = Pick<FileSavedObjectAttributes, 'meta' | 'alt' | 'name'>;
 
-export interface File<Meta = {}> {
-  status: FileStatus;
+export interface File<Meta = unknown> {
   id: string;
+  fileKind: string;
+  name: string;
+  status: FileStatus;
+  /**
+   * User provided metadata
+   */
+  meta: Meta;
+  alt: undefined | string;
 
-  update(attr: Partial<UpdateableFileAttributes>): Promise<File>;
+  update(attr: Partial<UpdatableFileAttributes>): Promise<File>;
   uploadContent(content: Readable): Promise<void>;
   downloadContent(): Promise<Readable>;
-  getMetadata(): Omit<FileSavedObjectAttributes<Meta>, 'status' | 'content_ref'>;
   delete(): Promise<void>;
 }
