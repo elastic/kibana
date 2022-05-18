@@ -230,7 +230,6 @@ describe('axes_configuration', () => {
     splitAccessor: 'd',
     columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
     xScaleType: 'ordinal',
-    yScaleType: 'linear',
     isHistogram: false,
     palette: { type: 'palette', name: 'default' },
     table: tables.first,

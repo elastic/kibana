@@ -7,7 +7,7 @@
  */
 
 import Listr from 'listr';
-import { run } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-cli-runner';
 
 import {
   createTaskContext,
