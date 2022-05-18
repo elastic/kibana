@@ -169,7 +169,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
             }
           ),
           message: i18n.translate(
-            'xpack.security.deprecations.anonymousApiKeyOrElasticsearchAnonUserMesage',
+            'xpack.security.deprecations.anonymousApiKeyOrElasticsearchAnonUserMessage',
             {
               values: {
                 credType: isApiKey ? `${credTypeApiKey}` : `'${credTypeElasticsearchAnonUser}'`,
