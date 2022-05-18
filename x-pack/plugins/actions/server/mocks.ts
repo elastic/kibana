@@ -26,6 +26,8 @@ const createSetupMock = () => {
     registerType: jest.fn(),
     registerSubActionConnectorType: jest.fn(),
     isPreconfiguredConnector: jest.fn(),
+    getSubActionConnectorClass: jest.fn(),
+    getCaseConnectorClass: jest.fn(),
   };
   return mock;
 };
