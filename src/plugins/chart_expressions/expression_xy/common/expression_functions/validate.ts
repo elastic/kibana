@@ -20,7 +20,7 @@ import {
 } from '../types';
 import { isTimeChart } from '../helpers';
 
-const errors = {
+export const errors = {
   markSizeAccessorForNonLineOrAreaChartsError: () =>
     i18n.translate(
       'expressionXY.reusable.function.dataLayer.errors.markSizeAccessorForNonLineOrAreaChartsError',
@@ -32,6 +32,10 @@ const errors = {
   markSizeRatioLimitsError: () =>
     i18n.translate('expressionXY.reusable.function.xyVis.errors.markSizeLimitsError', {
       defaultMessage: 'Mark size ratio must be greater or equal to 1 and less or equal to 100',
+    }),
+  markSizeRatioWithoutAccessor: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.markSizeRatioWithoutAccessor', {
+      defaultMessage: 'Mark size ratio can be applied only with `markSizeAccessor`',
     }),
   extendBoundsAreInvalidError: () =>
     i18n.translate('expressionXY.reusable.function.xyVis.errors.extendBoundsAreInvalidError', {
@@ -143,6 +147,15 @@ export const validateMarkSizeForChartType = (
 export const validateMarkSizeRatioLimits = (markSizeRatio: number) => {
   if (markSizeRatio < 1 || markSizeRatio > 100) {
     throw new Error(errors.markSizeRatioLimitsError());
+  }
+};
+
+export const validateMarkSizeRatioWithAccessor = (
+  markSizeRatio: number | undefined,
+  markSizeAccessor: ExpressionValueVisDimension | string | undefined
+) => {
+  if (markSizeRatio !== undefined && !markSizeAccessor) {
+    throw new Error(errors.markSizeRatioWithoutAccessor());
   }
 };
 

@@ -131,7 +131,6 @@ export const commonXYArgs: CommonXYFn['args'] = {
   markSizeRatio: {
     types: ['number'],
     help: strings.getMarkSizeRatioHelp(),
-    default: 1,
   },
   minTimeBarInterval: {
     types: ['string'],

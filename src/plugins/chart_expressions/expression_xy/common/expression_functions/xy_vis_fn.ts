@@ -27,6 +27,7 @@ import {
   validateValueLabels,
   validateMinTimeBarInterval,
   validateMarkSizeForChartType,
+  validateMarkSizeRatioWithAccessor,
 } from './validate';
 
 const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult => {
@@ -112,6 +113,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   const hasNotHistogramBars = !hasHistogramBarLayer(dataLayers);
 
   validateValueLabels(args.valueLabels, hasBar, hasNotHistogramBars);
+  validateMarkSizeRatioWithAccessor(args.markSizeRatio, args.markSizeAccessor);
   validateMarkSizeRatioLimits(args.markSizeRatio);
 
   return {
@@ -121,6 +123,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
       args: {
         ...restArgs,
         layers,
+        markSizeRatio: args.markSizeAccessor && !args.markSizeRatio ? 10 : args.markSizeRatio,
         ariaLabel:
           args.ariaLabel ??
           (handlers.variables?.embeddableTitle as string) ??
