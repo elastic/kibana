@@ -48,7 +48,7 @@ const createEditorStateReducer =
       }
 
       case EditorStateActionTypes.DISCARD_CHANGES: {
-        return initEditorState(action.payload);
+        return initEditorState(action.payload.vis);
       }
 
       case EditorStateActionTypes.CHANGE_AGG_TYPE: {

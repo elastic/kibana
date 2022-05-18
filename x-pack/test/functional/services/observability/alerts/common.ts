@@ -23,7 +23,7 @@ const ALERTS_TABLE_CONTAINER_SELECTOR = 'events-viewer-panel';
 const VIEW_RULE_DETAILS_SELECTOR = 'viewRuleDetails';
 const VIEW_RULE_DETAILS_FLYOUT_SELECTOR = 'viewRuleDetailsFlyout';
 
-const ACTION_COLUMN_INDEX = 0;
+const ACTION_COLUMN_INDEX = 1;
 
 type WorkflowStatus = 'open' | 'acknowledged' | 'closed';
 

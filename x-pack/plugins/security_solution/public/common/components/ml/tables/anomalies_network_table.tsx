@@ -79,7 +79,6 @@ const AnomaliesNetworkTableComponent: React.FC<AnomaliesNetworkTableProps> = ({
           subtitle={`${i18n.SHOWING}: ${pagination.totalItemCount.toLocaleString()} ${i18n.UNIT(
             pagination.totalItemCount
           )}`}
-          height={!toggleStatus ? 40 : undefined}
           title={i18n.ANOMALIES}
           tooltip={i18n.TOOLTIP}
           toggleQuery={toggleQuery}
