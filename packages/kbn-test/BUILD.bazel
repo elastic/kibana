@@ -86,12 +86,14 @@ TYPES_DEPS = [
   "@npm//elastic-apm-node",
   "@npm//del",
   "@npm//form-data",
+  "@npm//globby",
   "@npm//jest",
   "@npm//jest-cli",
   "@npm//jest-snapshot",
   "@npm//redux",
   "@npm//rxjs",
   "@npm//xmlbuilder",
+  "@npm//@types/archiver",
   "@npm//@types/chance",
   "@npm//@types/enzyme",
   "@npm//@types/he",
@@ -107,6 +109,7 @@ TYPES_DEPS = [
   "@npm//@types/react-redux",
   "@npm//@types/react-router-dom",
   "@npm//@types/semver",
+  "@npm//@types/uuid",
   "@npm//@types/xml2js",
 ]
 

@@ -121,11 +121,18 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
       dispatch(
         timelineActions.updateSort({
           id: timelineId,
-          sort: cols.map(({ id, direction }) => ({
-            columnId: id,
-            columnType: columnHeaders.find((ch) => ch.id === id)?.type ?? 'text',
-            sortDirection: direction as SortDirection,
-          })),
+          sort: cols.map(({ id, direction }) => {
+            const columnHeader = columnHeaders.find((ch) => ch.id === id);
+            const columnType = columnHeader?.type ?? '';
+            const esTypes = columnHeader?.esTypes ?? [];
+
+            return {
+              columnId: id,
+              columnType,
+              esTypes,
+              sortDirection: direction as SortDirection,
+            };
+          }),
         })
       ),
     [columnHeaders, dispatch, timelineId]
