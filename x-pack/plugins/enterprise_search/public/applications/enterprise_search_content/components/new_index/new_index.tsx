@@ -12,7 +12,9 @@
  *   Kibana intgegrations page
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
+import { useActions } from 'kea';
 
 import {
   EuiCheckableCard,
@@ -29,6 +31,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 import { baseBreadcrumbs } from '../search_indices';
+import { SearchIndicesLogic } from '../search_indices/search_indices_logic';
 
 import { SearchIndexEmptyState } from './empty_state';
 import { MethodApi } from './method_api';
@@ -53,6 +56,11 @@ interface ButtonGroupOption {
 export const NewIndex: React.FC = () => {
   const [selectedMethod, setSelectedMethod] = useState({ id: '', label: '' });
   const [methodIsSelected, setMethodIsSelected] = useState(false);
+
+  const { loadSearchEngines } = useActions(SearchIndicesLogic);
+  useEffect(() => {
+    loadSearchEngines();
+  }, []);
 
   const buttonGroupOptions = [
     {

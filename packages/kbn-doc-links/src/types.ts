@@ -310,6 +310,7 @@ export interface DocLinks {
     guide: string;
     importGeospatialPrivileges: string;
     gdalTutorial: string;
+    termJoinsExample: string;
   }>;
   readonly monitoring: Record<string, string>;
   readonly reporting: Readonly<{
@@ -407,5 +408,6 @@ export interface DocLinks {
     readonly resolveMigrationFailures: string;
     readonly repeatedTimeoutRequests: string;
     readonly routingAllocationDisabled: string;
+    readonly clusterShardLimitExceeded: string;
   };
 }

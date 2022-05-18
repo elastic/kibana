@@ -8,14 +8,16 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { SecurityPageName } from '../../app/types';
+import { NavLinkItem } from '../../common/links/types';
 import { TestProviders } from '../../common/mock';
-import { LandingLinksIcons, NavItem } from './landing_links_icons';
+import { LandingLinksIcons } from './landing_links_icons';
 
-const DEFAULT_NAV_ITEM: NavItem = {
+const DEFAULT_NAV_ITEM: NavLinkItem = {
   id: SecurityPageName.overview,
-  label: 'TEST LABEL',
+  title: 'TEST LABEL',
   description: 'TEST DESCRIPTION',
   icon: 'myTestIcon',
+  path: '',
 };
 
 const mockNavigateTo = jest.fn();
@@ -40,28 +42,28 @@ jest.mock('../../common/components/link_to', () => {
 
 describe('LandingLinksIcons', () => {
   it('renders', () => {
-    const label = 'test label';
+    const title = 'test label';
 
     const { queryByText } = render(
       <TestProviders>
-        <LandingLinksIcons items={[{ ...DEFAULT_NAV_ITEM, label }]} />
+        <LandingLinksIcons items={[{ ...DEFAULT_NAV_ITEM, title }]} />
       </TestProviders>
     );
 
-    expect(queryByText(label)).toBeInTheDocument();
+    expect(queryByText(title)).toBeInTheDocument();
   });
 
   it('renders navigation link', () => {
     const id = SecurityPageName.administration;
-    const label = 'myTestLable';
+    const title = 'myTestLable';
 
     const { getByText } = render(
       <TestProviders>
-        <LandingLinksIcons items={[{ ...DEFAULT_NAV_ITEM, id, label }]} />
+        <LandingLinksIcons items={[{ ...DEFAULT_NAV_ITEM, id, title }]} />
       </TestProviders>
     );
 
-    getByText(label).click();
+    getByText(title).click();
 
     expect(mockNavigateTo).toHaveBeenCalledWith({ url: '/administration' });
   });

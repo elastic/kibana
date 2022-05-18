@@ -40,6 +40,7 @@ import { createBatches } from './create_batches';
 import type { MigrationLog } from '../types';
 
 export const FATAL_REASON_REQUEST_ENTITY_TOO_LARGE = `While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.maxBatchSizeBytes' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option.`;
+const CLUSTER_SHARD_LIMIT_EXCEEDED_REASON = `[cluster_shard_limit_exceeded] Upgrading Kibana requires adding a small number of new shards. Ensure that Kibana is able to add 10 more shards by increasing the cluster.max_shards_per_node setting, or removing indices to clear up resources.`;
 
 export const model = (currentState: State, resW: ResponseType<AllActionStates>): State => {
   // The action response `resW` is weakly typed, the type includes all action
@@ -232,6 +233,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // continue to timeout and eventually lead to a failed migration.
         const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
         return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
+      } else if (isLeftTypeof(left, 'cluster_shard_limit_exceeded')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `${CLUSTER_SHARD_LIMIT_EXCEEDED_REASON} See ${stateP.migrationDocLinks.clusterShardLimitExceeded}`,
+        };
       } else {
         return throwBadResponse(stateP, left);
       }
@@ -466,6 +473,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // continue to timeout and eventually lead to a failed migration.
         const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
         return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
+      } else if (isLeftTypeof(left, 'cluster_shard_limit_exceeded')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `${CLUSTER_SHARD_LIMIT_EXCEEDED_REASON} See ${stateP.migrationDocLinks.clusterShardLimitExceeded}`,
+        };
       } else {
         return throwBadResponse(stateP, left);
       }
@@ -701,6 +714,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // continue to timeout and eventually lead to a failed migration.
         const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
         return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
+      } else if (isLeftTypeof(left, 'cluster_shard_limit_exceeded')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `${CLUSTER_SHARD_LIMIT_EXCEEDED_REASON} See ${stateP.migrationDocLinks.clusterShardLimitExceeded}`,
+        };
       } else {
         throwBadResponse(stateP, left);
       }
@@ -956,6 +975,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // continue to timeout and eventually lead to a failed migration.
         const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
         return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
+      } else if (isLeftTypeof(left, 'cluster_shard_limit_exceeded')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `${CLUSTER_SHARD_LIMIT_EXCEEDED_REASON} See ${stateP.migrationDocLinks.clusterShardLimitExceeded}`,
+        };
       } else {
         return throwBadResponse(stateP, left);
       }

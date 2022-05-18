@@ -103,6 +103,7 @@ describe('migrations v2 model', () => {
       resolveMigrationFailures: 'resolveMigrationFailures',
       repeatedTimeoutRequests: 'repeatedTimeoutRequests',
       routingAllocationDisabled: 'routingAllocationDisabled',
+      clusterShardLimitExceeded: 'clusterShardLimitExceeded',
     },
   };
 
@@ -604,6 +605,16 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
+      test('LEGACY_CREATE_REINDEX_TARGET -> FATAL if action fails with cluster_shard_limit_exceeded', () => {
+        const res: ResponseType<'LEGACY_CREATE_REINDEX_TARGET'> = Either.left({
+          type: 'cluster_shard_limit_exceeded',
+        });
+        const newState = model(legacyCreateReindexTargetState, res);
+        expect(newState.controlState).toEqual('FATAL');
+        expect((newState as FatalState).reason).toMatchInlineSnapshot(
+          `"[cluster_shard_limit_exceeded] Upgrading Kibana requires adding a small number of new shards. Ensure that Kibana is able to add 10 more shards by increasing the cluster.max_shards_per_node setting, or removing indices to clear up resources. See clusterShardLimitExceeded"`
+        );
+      });
     });
 
     describe('LEGACY_REINDEX', () => {
@@ -1067,6 +1078,16 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
+      test('CREATE_REINDEX_TEMP -> FATAL if action fails with cluster_shard_limit_exceeded', () => {
+        const res: ResponseType<'CREATE_REINDEX_TEMP'> = Either.left({
+          type: 'cluster_shard_limit_exceeded',
+        });
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('FATAL');
+        expect((newState as FatalState).reason).toMatchInlineSnapshot(
+          `"[cluster_shard_limit_exceeded] Upgrading Kibana requires adding a small number of new shards. Ensure that Kibana is able to add 10 more shards by increasing the cluster.max_shards_per_node setting, or removing indices to clear up resources. See clusterShardLimitExceeded"`
+        );
+      });
     });
 
     describe('REINDEX_SOURCE_TO_TEMP_OPEN_PIT', () => {
@@ -1395,7 +1416,7 @@ describe('migrations v2 model', () => {
           }
         `);
       });
-      it('CREATE_NEW_TARGET -> MARK_VERSION_INDEX_READY resets the retry count and delay', () => {
+      it('CLONE_TEMP_TO_TARGET -> MARK_VERSION_INDEX_READY resets the retry count and delay', () => {
         const res: ResponseType<'CLONE_TEMP_TO_TARGET'> = Either.right({
           acknowledged: true,
           shardsAcknowledged: true,
@@ -1409,6 +1430,16 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toBe('REFRESH_TARGET');
         expect(newState.retryCount).toBe(0);
         expect(newState.retryDelay).toBe(0);
+      });
+      test('CLONE_TEMP_TO_TARGET -> FATAL if action fails with cluster_shard_limit_exceeded', () => {
+        const res: ResponseType<'CLONE_TEMP_TO_TARGET'> = Either.left({
+          type: 'cluster_shard_limit_exceeded',
+        });
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('FATAL');
+        expect((newState as FatalState).reason).toMatchInlineSnapshot(
+          `"[cluster_shard_limit_exceeded] Upgrading Kibana requires adding a small number of new shards. Ensure that Kibana is able to add 10 more shards by increasing the cluster.max_shards_per_node setting, or removing indices to clear up resources. See clusterShardLimitExceeded"`
+        );
       });
     });
 
@@ -1918,6 +1949,16 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('MARK_VERSION_INDEX_READY');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
+      });
+      test('CREATE_NEW_TARGET -> FATAL if action fails with cluster_shard_limit_exceeded', () => {
+        const res: ResponseType<'CREATE_NEW_TARGET'> = Either.left({
+          type: 'cluster_shard_limit_exceeded',
+        });
+        const newState = model(createNewTargetState, res);
+        expect(newState.controlState).toEqual('FATAL');
+        expect((newState as FatalState).reason).toMatchInlineSnapshot(
+          `"[cluster_shard_limit_exceeded] Upgrading Kibana requires adding a small number of new shards. Ensure that Kibana is able to add 10 more shards by increasing the cluster.max_shards_per_node setting, or removing indices to clear up resources. See clusterShardLimitExceeded"`
+        );
       });
     });
 
