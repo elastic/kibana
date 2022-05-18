@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
+import type { ValidFeatureId } from '@kbn/rule-data-utils';
+import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
 import {
   Cases,
   FetchCasesProps,
   ResolvedCase,
+  SeverityAll,
   SortFieldCase,
   StatusAll,
 } from '../../common/ui/types';
@@ -149,6 +151,7 @@ export const getCaseUserActions = async (
 export const getCases = async ({
   filterOptions = {
     search: '',
+    severity: SeverityAll,
     reporters: [],
     status: StatusAll,
     tags: [],
@@ -163,9 +166,10 @@ export const getCases = async ({
   signal,
 }: FetchCasesProps): Promise<Cases> => {
   const query = {
+    ...(filterOptions.status !== StatusAll ? { status: filterOptions.status } : {}),
+    ...(filterOptions.severity !== SeverityAll ? { severity: filterOptions.severity } : {}),
     reporters: filterOptions.reporters.map((r) => r.username ?? '').filter((r) => r !== ''),
     tags: filterOptions.tags,
-    status: filterOptions.status,
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
     ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
     ...queryParams,
@@ -173,7 +177,7 @@ export const getCases = async ({
 
   const response = await KibanaServices.get().http.fetch<CasesFindResponse>(`${CASES_URL}/_find`, {
     method: 'GET',
-    query: query.status === StatusAll ? omit(query, ['status']) : query,
+    query,
     signal,
   });
 
@@ -330,4 +334,17 @@ export const createAttachments = async (
     }
   );
   return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
+};
+
+export const getFeatureIds = async (
+  query: { registrationContext: string[] },
+  signal: AbortSignal
+): Promise<ValidFeatureId[]> => {
+  return KibanaServices.get().http.fetch<ValidFeatureId[]>(
+    `${BASE_RAC_ALERTS_API_PATH}/_feature_ids`,
+    {
+      signal,
+      query,
+    }
+  );
 };

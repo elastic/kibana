@@ -205,6 +205,7 @@ the case identifier, version, and creation time. For example:
   },
   "owner": "securitySolution",
   "description": "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants. Operation bubblegum is active. Repeat - operation bubblegum is now active",
+  "duration": null,
   "closed_at": null,
   "closed_by": null,
   "created_at": "2022-05-13T09:16:17.416Z",

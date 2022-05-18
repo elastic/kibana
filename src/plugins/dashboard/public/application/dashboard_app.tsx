@@ -35,8 +35,16 @@ export function DashboardApp({
   redirectTo,
   history,
 }: DashboardAppProps) {
-  const { core, chrome, embeddable, onAppLeave, uiSettings, data, spacesService } =
-    useKibana<DashboardAppServices>().services;
+  const {
+    core,
+    chrome,
+    embeddable,
+    onAppLeave,
+    uiSettings,
+    data,
+    spacesService,
+    screenshotModeService,
+  } = useKibana<DashboardAppServices>().services;
 
   const kbnUrlStateStorage = useMemo(
     () =>
@@ -119,13 +127,12 @@ export function DashboardApp({
     <>
       {isCompleteDashboardAppState(dashboardAppState) && (
         <>
-          {!printMode && (
-            <DashboardTopNav
-              redirectTo={redirectTo}
-              embedSettings={embedSettings}
-              dashboardAppState={dashboardAppState}
-            />
-          )}
+          <DashboardTopNav
+            printMode={printMode}
+            redirectTo={redirectTo}
+            embedSettings={embedSettings}
+            dashboardAppState={dashboardAppState}
+          />
 
           {dashboardAppState.savedDashboard.outcome === 'conflict' &&
           dashboardAppState.savedDashboard.id &&
@@ -138,7 +145,13 @@ export function DashboardApp({
                 )}${history.location.search}`,
               })
             : null}
-          <div className="dashboardViewport">
+          <div
+            className={`dashboardViewport ${
+              screenshotModeService && screenshotModeService.isScreenshotMode()
+                ? 'dashboardViewport--screenshotMode'
+                : ''
+            }`}
+          >
             <EmbeddableRenderer embeddable={dashboardAppState.dashboardContainer} />
           </div>
         </>
