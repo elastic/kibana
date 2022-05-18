@@ -57,14 +57,14 @@ const getTransformedHits = (
     isPlainObject(bucket.key);
 
   return buckets.map((bucket, i) => ({
-    // In case of `terms` aggregation, `bucket.key` will be an empty string. Note that `Object.keys('')` is `[]`,
+    // In case of `terms` aggregation, `bucket.key` will be an empty string. Note that `Object.values('')` is `[]`,
     // so the below logic works in either case (whether `terms` or `composite`).
     _index: inputIndex,
     _id: calculateThresholdSignalUuid(
       ruleId,
       startedAt,
       threshold.field,
-      Object.keys(bucket.key).sort().join(',')
+      Object.values(bucket.key).sort().join(',')
     ),
     _source: {
       [TIMESTAMP]: (bucket.max_timestamp as AggregationsMaxAggregate).value_as_string,
@@ -84,10 +84,14 @@ const getTransformedHits = (
               value: bucket.key[term],
             }))
           : [],
-        cardinality: {
-          field: threshold.cardinality ? threshold.cardinality[0]?.field : undefined,
-          value: (bucket.cardinality_count as AggregationsCardinalityAggregate)?.value,
-        },
+        cardinality: threshold.cardinality?.length
+          ? [
+              {
+                field: threshold.cardinality[0].field,
+                value: (bucket.cardinality_count as AggregationsCardinalityAggregate).value,
+              },
+            ]
+          : undefined,
         count: bucket.doc_count,
         from:
           new Date((bucket.min_timestamp as AggregationsMinAggregate).value_as_string as string) ??

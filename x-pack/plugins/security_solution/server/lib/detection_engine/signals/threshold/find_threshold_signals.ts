@@ -8,6 +8,7 @@
 import {
   AggregateName,
   AggregationsCompositeAggregate,
+  AggregationsMultiBucketAggregateBase,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import {
@@ -32,7 +33,12 @@ import {
   mergeReturns,
   mergeSearchResults,
 } from '../utils';
-import { ThresholdAggregate, ThresholdAggregationContainer } from './types';
+import {
+  ThresholdAggregate,
+  ThresholdAggregateContainer,
+  ThresholdAggregationContainer,
+  ThresholdBucket,
+} from './types';
 
 interface FindThresholdSignalsParams {
   from: string;
@@ -54,7 +60,7 @@ const shouldFilterByCardinality = (
 const hasThresholdFields = (threshold: ThresholdNormalized) => !!threshold.field.length;
 
 const isCompositeAggregate = (
-  aggregate: ThresholdAggregate | undefined
+  aggregate: AggregationsMultiBucketAggregateBase | undefined
 ): aggregate is AggregationsCompositeAggregate => aggregate != null && 'after_key' in aggregate;
 
 export const findThresholdSignals = async ({
@@ -69,7 +75,7 @@ export const findThresholdSignals = async ({
   buildRuleMessage,
   timestampOverride,
 }: FindThresholdSignalsParams): Promise<{
-  searchResult: SignalSearchResponse<Record<AggregateName, ThresholdAggregate>>;
+  searchResult: SignalSearchResponse<ThresholdAggregateContainer>;
   searchDuration: string;
   searchErrors: string[];
 }> => {
@@ -114,8 +120,7 @@ export const findThresholdSignals = async ({
 
   let sortKeys;
   let result = createSearchAfterReturnType<Record<AggregateName, ThresholdAggregate>>();
-  let mergedSearchResults =
-    createSearchResultReturnType<Record<AggregateName, ThresholdAggregate>>();
+  let mergedSearchResults = createSearchResultReturnType<ThresholdAggregateContainer>();
 
   do {
     // Generate a composite aggregation considering each threshold grouping field provided, appending leaf
@@ -153,23 +158,23 @@ export const findThresholdSignals = async ({
           },
     };
 
-    const { searchResult, searchDuration, searchErrors } = await singleSearchAfter<
-      Record<string, ThresholdAggregate>
-    >({
-      aggregations,
-      searchAfterSortId: undefined,
-      timestampOverride,
-      index: inputIndexPattern,
-      from,
-      to,
-      services,
-      logger,
-      // @ts-expect-error refactor to pass type explicitly instead of unknown
-      filter,
-      pageSize: 0,
-      sortOrder: 'desc',
-      buildRuleMessage,
-    });
+    const { searchResult, searchDuration, searchErrors } =
+      await singleSearchAfter<ThresholdAggregateContainer>({
+        aggregations,
+        searchAfterSortId: undefined,
+        timestampOverride,
+        index: inputIndexPattern,
+        from,
+        to,
+        services,
+        logger,
+        // @ts-expect-error refactor to pass type explicitly instead of unknown
+        filter,
+        pageSize: 0,
+        sortOrder: 'desc',
+        buildRuleMessage,
+      });
+
     const thresholdTerms = searchResult.aggregations?.thresholdTerms;
     const prevThresholdTerms = mergedSearchResults.aggregations?.thresholdTerms;
 
@@ -177,8 +182,13 @@ export const findThresholdSignals = async ({
     mergedSearchResults = mergeSearchResults([mergedSearchResults, searchResult]);
 
     if (prevThresholdTerms) {
-      const prevBuckets = prevThresholdTerms?.buckets ?? [];
-      const nextBuckets = thresholdTerms?.buckets ?? [];
+      const prevBuckets = Array.isArray(prevThresholdTerms.buckets)
+        ? prevThresholdTerms.buckets
+        : []; // TODO: convert object keys to array?
+      const nextBuckets = Array.isArray(thresholdTerms?.buckets)
+        ? thresholdTerms?.buckets ?? []
+        : []; // TODO: convert object keys to array?
+
       mergedSearchResults.aggregations = {
         thresholdTerms: {
           buckets: [...prevBuckets, ...nextBuckets],
@@ -193,23 +203,20 @@ export const findThresholdSignals = async ({
         searchResult: mergedSearchResults,
         timestampOverride,
       }),
-      createSearchAfterReturnType({
+      createSearchAfterReturnType<ThresholdAggregateContainer>({
         searchAfterTimes: [searchDuration],
         errors: searchErrors,
       }),
     ]);
   } while (sortKeys); // we have to iterate over everything in order to sort
 
-  // TODO: sort by max_timestamp? sort by cardinality?
-
   // and then truncate to `maxSignals`
   if ((mergedSearchResults.hits.total ?? 0) > maxSignals) {
     mergedSearchResults.aggregations = {
       thresholdTerms: {
-        buckets: (mergedSearchResults.aggregations?.thresholdTerms.buckets ?? []).slice(
-          0,
-          maxSignals
-        ),
+        buckets: (
+          (mergedSearchResults.aggregations?.thresholdTerms.buckets as ThresholdBucket[]) ?? []
+        ).slice(0, maxSignals),
       },
     };
     mergedSearchResults.hits.total = maxSignals;

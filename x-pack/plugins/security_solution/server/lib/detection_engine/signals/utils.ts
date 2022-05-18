@@ -606,11 +606,13 @@ export const createErrorsFromShard = ({ errors }: { errors: ShardError[] }): str
  * @param searchResult The result to try and parse out the timestamp.
  * @param timestampOverride The timestamp override to use its values if we have it.
  */
-export const lastValidDate = ({
+export const lastValidDate = <
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+>({
   searchResult,
   timestampOverride,
 }: {
-  searchResult: SignalSearchResponse;
+  searchResult: SignalSearchResponse<TAggregations>;
   timestampOverride: TimestampOverrideOrUndefined;
 }): Date | undefined => {
   if (searchResult.hits.hits.length === 0) {
@@ -666,11 +668,13 @@ export const getValidDateFromDoc = ({
   }
 };
 
-export const createSearchAfterReturnTypeFromResponse = ({
+export const createSearchAfterReturnTypeFromResponse = <
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+>({
   searchResult,
   timestampOverride,
 }: {
-  searchResult: SignalSearchResponse;
+  searchResult: SignalSearchResponse<TAggregations>;
   timestampOverride: TimestampOverrideOrUndefined;
 }): SearchAfterAndBulkCreateReturnType => {
   return createSearchAfterReturnType({

@@ -7,16 +7,30 @@
 
 import {
   AggregationsAggregationContainer,
-  AggregationsCompositeAggregate,
   AggregationsCompositeAggregation,
   AggregationsCompositeBucket,
-  AggregationsStringTermsAggregate,
+  AggregationsMultiBucketAggregateBase,
   AggregationsStringTermsBucket,
   AggregationsTermsAggregation,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-export type ThresholdAggregate = AggregationsStringTermsAggregate | AggregationsCompositeAggregate;
 export type ThresholdBucket = AggregationsStringTermsBucket | AggregationsCompositeBucket;
+// export type ThresholdBucket = AggregationsMultiBucketAggregateBase;
+
+// export type ThresholdAggregate = AggregationsCompositeAggregate | AggregationsStringTermsAggregate;
+export type ThresholdAggregate = AggregationsMultiBucketAggregateBase<ThresholdBucket>;
+/*
+export type ThresholdAggregate<TBucket extends ThresholdBucket | unknown = unknown> =
+  AggregationsMultiBucketAggregateBase<TBucket>;
+*/
+
+export interface ThresholdAggregateContainer {
+  // <
+  // TAggregate extends ThresholdAggregate | unknown = unknown
+  // TAggregate extends AggregationsMultiBucketAggregateBase<ThresholdBucket>
+  // > {
+  thresholdTerms: ThresholdAggregate;
+}
 
 export type ThresholdAggregationContainer = Record<
   string,
