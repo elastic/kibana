@@ -800,7 +800,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         width: '12%',
       },
       {
-        name: i18n.translate('xpack.osquery.pack.queriesTable.cocsResultsColumnTitle', {
+        name: i18n.translate('xpack.osquery.pack.queriesTable.docsResultsColumnTitle', {
           defaultMessage: 'Docs',
         }),
         render: renderDocsColumn,
