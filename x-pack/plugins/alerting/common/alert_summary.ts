@@ -6,7 +6,7 @@
  */
 
 export type RuleStatusValues = 'OK' | 'Active' | 'Error';
-export type AlertStatusValues = 'OK' | 'Active';
+export type AlertStatusValues = 'OK' | 'Active' | 'Dropped';
 
 export interface ExecutionDuration {
   average: number;

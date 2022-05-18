@@ -95,6 +95,13 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
         status.activeStartDate = undefined;
         status.actionGroupId = undefined;
         status.actionSubgroup = undefined;
+        break;
+      case EVENT_LOG_ACTIONS.droppedInstance:
+        status.status = 'Dropped';
+        status.activeStartDate = undefined;
+        status.actionGroupId = undefined;
+        status.actionSubgroup = undefined;
+        break;
     }
   }
 

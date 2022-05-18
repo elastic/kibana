@@ -281,6 +281,11 @@ const INACTIVE_LABEL = i18n.translate(
   { defaultMessage: 'Recovered' }
 );
 
+const DROPPED_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleDetails.rulesList.status.dropped',
+  { defaultMessage: 'Dropped' }
+);
+
 function getActionGroupName(ruleType: RuleType, actionGroupId?: string): string | undefined {
   actionGroupId = actionGroupId || ruleType.defaultActionGroupId;
   const actionGroup = ruleType?.actionGroups?.find(
@@ -303,7 +308,9 @@ export function alertToListItem(
           actionGroup: getActionGroupName(ruleType, alert?.actionGroupId),
           healthColor: 'primary',
         }
-      : { label: INACTIVE_LABEL, healthColor: 'subdued' };
+      : alert?.status === 'OK'
+      ? { label: INACTIVE_LABEL, healthColor: 'subdued' }
+      : { label: DROPPED_LABEL, healthColor: 'subdued' };
   const start = alert?.activeStartDate ? new Date(alert.activeStartDate) : undefined;
   const duration = start ? durationEpoch - start.valueOf() : 0;
   const sortPriority = getSortPriorityByStatus(alert?.status);
