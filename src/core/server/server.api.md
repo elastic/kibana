@@ -2939,6 +2939,7 @@ export interface SavedObjectsUpdateObjectsSpacesResponseObject {
 export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedObjectsBaseOptions {
     references?: SavedObjectReference[];
     refresh?: MutatingOperationRefreshSetting;
+    retryOnConflict?: number;
     upsert?: Attributes;
     version?: string;
 }
