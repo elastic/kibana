@@ -20,6 +20,13 @@ export interface LinksPermissions {
   license?: ILicense;
 }
 
+export interface LinkCategory {
+  label: string;
+  linkIds: readonly SecurityPageName[];
+}
+
+export type LinkCategories = Readonly<LinkCategory[]>;
+
 export interface LinkItem {
   /**
    * The description of the link content
@@ -34,6 +41,10 @@ export interface LinkItem {
    * Uses "or" conditional, only one enabled capability is needed to activate the link
    */
   capabilities?: string[];
+  /**
+   * Categories to display in the navigation
+   */
+  categories?: LinkCategories;
   /**
    * Enables link in the global navigation. Defaults to false.
    */
@@ -89,9 +100,9 @@ export interface LinkItem {
    */
   sideNavDisabled?: boolean;
   /**
-   * Enables link in the side navigation. Defaults to false.
+   * Disabled the state query string in the URL. Defaults to false.
    */
-  skipUrlState?: boolean; // defaults to false
+  skipUrlState?: boolean;
   /**
    * Title of the link
    */
@@ -102,4 +113,4 @@ export type AppLinkItems = Readonly<LinkItem[]>;
 
 export type LinkInfo = Omit<LinkItem, 'links'>;
 export type NormalizedLink = LinkInfo & { parentId?: SecurityPageName };
-export type NormalizedLinks = Record<SecurityPageName, NormalizedLink>;
+export type NormalizedLinks = Partial<Record<SecurityPageName, NormalizedLink>>;

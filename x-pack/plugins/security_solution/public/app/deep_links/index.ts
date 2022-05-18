@@ -63,7 +63,6 @@ import {
 } from '../../../common/constants';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 import { subscribeAppLinks } from '../../common/links';
-import { getAllAppLinks } from '../../common/links/app_links';
 import { AppLinkItems } from '../../common/links/types';
 
 const FEATURE = {
@@ -553,9 +552,6 @@ export function isPremiumLicense(licenseType?: LicenseType): boolean {
  * The code below manages the new implementation using the unified appLinks.
  */
 
-// Returns all deep links without filtering, for the initial application register
-export const getAllDeepLinks = (): AppDeepLink[] => formatDeepLinks(getAllAppLinks());
-
 const formatDeepLinks = (appLinks: AppLinkItems): AppDeepLink[] =>
   appLinks.map((appLink) => ({
     id: appLink.id,
@@ -572,6 +568,9 @@ const formatDeepLinks = (appLinks: AppLinkItems): AppDeepLink[] =>
       : {}),
   }));
 
+/**
+ * Registers any change in appLinks to be updated in app deepLinks
+ */
 export const registerDeepLinksUpdater = (appUpdater$: Subject<AppUpdater>) => {
   subscribeAppLinks((appLinks) => {
     appUpdater$.next(() => ({

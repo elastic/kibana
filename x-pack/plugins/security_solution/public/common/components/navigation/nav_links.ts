@@ -25,6 +25,7 @@ const formatNavLinkItems = (appLinks: AppLinkItems): NavLinkItem[] =>
   appLinks.map((link) => ({
     id: link.id,
     title: link.title,
+    ...(link.categories != null ? { categories: link.categories } : {}),
     ...(link.description != null ? { description: link.description } : {}),
     ...(link.sideNavDisabled === true ? { disabled: true } : {}),
     ...(link.landingIcon != null ? { icon: link.landingIcon } : {}),

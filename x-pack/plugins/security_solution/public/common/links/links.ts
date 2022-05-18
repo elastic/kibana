@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { Capabilities } from '@kbn/core/public';
+import type { Capabilities } from '@kbn/core/public';
 import { get } from 'lodash';
 import { useEffect, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { SecurityPageName } from '../../../common/constants';
-import { getAllAppLinks } from './app_links';
-import {
+import type {
   AppLinkItems,
   LinkInfo,
   LinkItem,
@@ -22,13 +21,31 @@ import {
 
 /**
  * App links updater, it keeps the value of the app links in sync with all application.
- * It can be updated using `updateAppLinks` or `updateAllAppLinks`.
+ * It can be updated using `updateAppLinks` or `excludeAppLink`
  * Read it using `subscribeAppLinks` or `useAppLinks` hook.
  */
-const appLinksUpdater$ = new BehaviorSubject<AppLinkItems>(getAllAppLinks());
+const appLinksUpdater$ = new BehaviorSubject<{
+  links: AppLinkItems;
+  normalizedLinks: NormalizedLinks;
+}>({
+  links: [], // stores the appLinkItems recursive hierarchy
+  normalizedLinks: {}, // stores a flatten normalized object for direct id access
+});
 
+const getAppLinksValue = () => appLinksUpdater$.getValue().links;
+const getNormalizedLinksValue = () => appLinksUpdater$.getValue().normalizedLinks;
+
+/**
+ * Subscribes to the updater to get the app links updates
+ */
+export const subscribeAppLinks = (onChange: (links: AppLinkItems) => void) =>
+  appLinksUpdater$.subscribe(({ links }) => onChange(links));
+
+/**
+ * Hook to get the app links updated value
+ */
 export const useAppLinks = (): AppLinkItems => {
-  const [appLinks, setAppLinks] = useState(appLinksUpdater$.getValue());
+  const [appLinks, setAppLinks] = useState(getAppLinksValue);
 
   useEffect(() => {
     const linksSubscription = subscribeAppLinks((newAppLinks) => {
@@ -40,19 +57,121 @@ export const useAppLinks = (): AppLinkItems => {
   return appLinks;
 };
 
-export const subscribeAppLinks = (onChange: (appItems: AppLinkItems) => void) =>
-  appLinksUpdater$.subscribe(onChange);
-
+/**
+ * Updates the app links applying the filter by permissions
+ */
 export const updateAppLinks = (
   appLinksToUpdate: AppLinkItems,
   linksPermissions: LinksPermissions
 ) => {
-  appLinksUpdater$.next(Object.freeze(getFilteredAppLinks(appLinksToUpdate, linksPermissions)));
+  const filteredAppLinks = getFilteredAppLinks(appLinksToUpdate, linksPermissions);
+  appLinksUpdater$.next({
+    links: Object.freeze(filteredAppLinks),
+    normalizedLinks: Object.freeze(getNormalizedLinks(filteredAppLinks)),
+  });
 };
 
-export const updateAllAppLinks = (linksPermissions: LinksPermissions) => {
-  updateAppLinks(getAllAppLinks(), linksPermissions);
+/**
+ * Excludes a link by id from the current app links
+ * @deprecated this function will not be needed when async link filtering is migrated to the main getAppLinks functions
+ */
+export const excludeAppLink = (linkId: SecurityPageName) => {
+  const { links, normalizedLinks } = appLinksUpdater$.getValue();
+  if (!normalizedLinks[linkId]) {
+    return;
+  }
+
+  let found = false;
+  const excludeRec = (currentLinks: AppLinkItems): LinkItem[] =>
+    currentLinks.reduce<LinkItem[]>((acc, link) => {
+      if (!found) {
+        if (link.id === linkId) {
+          found = true;
+          return acc;
+        }
+        if (link.links) {
+          const excludedLinks = excludeRec(link.links);
+          if (excludedLinks.length > 0) {
+            acc.push({ ...link, links: excludedLinks });
+            return acc;
+          }
+        }
+      }
+      acc.push(link);
+      return acc;
+    }, []);
+
+  const excludedLinks = excludeRec(links);
+
+  appLinksUpdater$.next({
+    links: Object.freeze(excludedLinks),
+    normalizedLinks: Object.freeze(getNormalizedLinks(excludedLinks)),
+  });
 };
+
+/**
+ * Returns the `LinkInfo` from a link id parameter
+ */
+export const getLinkInfo = (id: SecurityPageName): LinkInfo | undefined => {
+  const normalizedLink = getNormalizedLink(id);
+  if (!normalizedLink) {
+    return undefined;
+  }
+  // discards the parentId and creates the linkInfo copy.
+  const { parentId, ...linkInfo } = normalizedLink;
+  return linkInfo;
+};
+
+/**
+ * Returns the `LinkInfo` of all the ancestors to the parameter id link, also included.
+ */
+export const getAncestorLinksInfo = (id: SecurityPageName): LinkInfo[] => {
+  const ancestors: LinkInfo[] = [];
+  let currentId: SecurityPageName | undefined = id;
+  while (currentId) {
+    const normalizedLink = getNormalizedLink(currentId);
+    if (normalizedLink) {
+      const { parentId, ...linkInfo } = normalizedLink;
+      ancestors.push(linkInfo);
+      currentId = parentId;
+    } else {
+      currentId = undefined;
+    }
+  }
+  return ancestors.reverse();
+};
+
+/**
+ * Returns `true` if the links needs to carry the application state in the url.
+ * Defaults to `true` if the `skipUrlState` property of the `LinkItem` is `undefined`.
+ */
+export const needsUrlState = (id: SecurityPageName): boolean => {
+  return !getNormalizedLink(id)?.skipUrlState;
+};
+
+// Internal functions
+
+/**
+ * Creates the `NormalizedLinks` structure from a `LinkItem` array
+ */
+const getNormalizedLinks = (
+  currentLinks: AppLinkItems,
+  parentId?: SecurityPageName
+): NormalizedLinks => {
+  return currentLinks.reduce<NormalizedLinks>((normalized, { links, ...currentLink }) => {
+    normalized[currentLink.id] = {
+      ...currentLink,
+      parentId,
+    };
+    if (links && links.length > 0) {
+      Object.assign(normalized, getNormalizedLinks(links, currentLink.id));
+    }
+    return normalized;
+  }, {});
+};
+
+const getNormalizedLink = (id: SecurityPageName): Readonly<NormalizedLink> | undefined =>
+  getNormalizedLinksValue()[id];
 
 const getFilteredAppLinks = (
   appLinkToFilter: AppLinkItems,
@@ -101,72 +220,4 @@ const isLinkAllowed = (
     return false;
   }
   return true;
-};
-
-/**
- * Recursive function to create the `NormalizedLinks` structure from a `LinkItem` array parameter
- */
-const getNormalizedLinks = (
-  currentLinks: Readonly<LinkItem[]>,
-  parentId?: SecurityPageName
-): NormalizedLinks => {
-  const result = currentLinks.reduce<Partial<NormalizedLinks>>(
-    (normalized, { links, ...currentLink }) => {
-      normalized[currentLink.id] = {
-        ...currentLink,
-        parentId,
-      };
-      if (links && links.length > 0) {
-        Object.assign(normalized, getNormalizedLinks(links, currentLink.id));
-      }
-      return normalized;
-    },
-    {}
-  );
-  return result as NormalizedLinks;
-};
-
-/**
- * Normalized indexed version of the global `links` array, referencing the parent by id, instead of having nested links children
- */
-const normalizedLinks: Readonly<NormalizedLinks> = Object.freeze(
-  getNormalizedLinks(getAllAppLinks())
-);
-
-/**
- * Returns the `NormalizedLink` from a link id parameter.
- * The object reference is frozen to make sure it is not mutated by the caller.
- */
-const getNormalizedLink = (id: SecurityPageName): Readonly<NormalizedLink> =>
-  Object.freeze(normalizedLinks[id]);
-
-/**
- * Returns the `LinkInfo` from a link id parameter
- */
-export const getLinkInfo = (id: SecurityPageName): LinkInfo => {
-  // discards the parentId and creates the linkInfo copy.
-  const { parentId, ...linkInfo } = getNormalizedLink(id);
-  return linkInfo;
-};
-
-/**
- * Returns the `LinkInfo` of all the ancestors to the parameter id link, also included.
- */
-export const getAncestorLinksInfo = (id: SecurityPageName): LinkInfo[] => {
-  const ancestors: LinkInfo[] = [];
-  let currentId: SecurityPageName | undefined = id;
-  while (currentId) {
-    const { parentId, ...linkInfo } = getNormalizedLink(currentId);
-    ancestors.push(linkInfo);
-    currentId = parentId;
-  }
-  return ancestors.reverse();
-};
-
-/**
- * Returns `true` if the links needs to carry the application state in the url.
- * Defaults to `true` if the `skipUrlState` property of the `LinkItem` is `undefined`.
- */
-export const needsUrlState = (id: SecurityPageName): boolean => {
-  return !getNormalizedLink(id).skipUrlState;
 };

@@ -6,5 +6,4 @@
  */
 
 export * from './links';
-export * from './app_links';
 export * from './types';

@@ -45,9 +45,11 @@ import {
   DETECTION_ENGINE_INDEX_URL,
   SERVER_APP_ID,
   SOURCERER_API_URL,
+  ENABLE_GROUPED_NAVIGATION,
 } from '../common/constants';
 
-import { getDeepLinks } from './app/deep_links';
+import { getDeepLinks, registerDeepLinksUpdater } from './app/deep_links';
+import { updateAppLinks } from './common/links';
 import { getSubPluginRoutesByCapabilities, manageOldSiemRoutes } from './helpers';
 import { SecurityAppStore } from './common/store/store';
 import { licenseService } from './common/hooks/use_license';
@@ -64,7 +66,6 @@ import {
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
 import { initDataView, SourcererModel, KibanaDataView } from './common/store/sourcerer/model';
 import { SecurityDataView } from './common/containers/sourcerer/api';
-import { updateAllAppLinks } from './common/links';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   readonly kibanaVersion: string;
@@ -141,7 +142,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       searchable: true,
       updater$: this.appUpdater$,
       euiIconType: APP_ICON_SOLUTION,
-      deepLinks: getDeepLinks(this.experimentalFeatures),
       mount: async (params: AppMountParameters) => {
         // required to show the alert table inside cases
         const { alertsTableConfigurationRegistry } = plugins.triggersActionsUi;
@@ -191,7 +191,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     };
   }
 
-  public start(core: CoreStart, plugins: StartPlugins) {
+  public async start(core: CoreStart, plugins: StartPlugins) {
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion });
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
     if (plugins.fleet) {
@@ -224,51 +224,58 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     licenseService.start(plugins.licensing.license$);
     const licensing = licenseService.getLicenseInformation$();
 
+    const newNavEnabled = core.uiSettings.get(ENABLE_GROUPED_NAVIGATION, false);
+
     /**
      * Register deepLinks and pass an appUpdater for each subPlugin, to change deepLinks as needed when licensing changes.
      */
 
-    /**
-     * TODO: Register the new deepLinks updater when the new links structure is enabled using generic AppLinks:
-     * `registerDeepLinksUpdater(this.appUpdater$);`
-     * It will trigger the this.appUpdater$ updates when needed, the `this.appUpdater$.next()` direct calls here will need to be removed
-     */
+    const { getAppLinks } = await this.lazyApplicationLinks();
+    const appLinks = await getAppLinks(core, plugins);
+
+    if (newNavEnabled) {
+      registerDeepLinksUpdater(this.appUpdater$);
+    }
 
     if (licensing !== null) {
       this.licensingSubscription = licensing.subscribe((currentLicense) => {
         if (currentLicense.type !== undefined) {
-          updateAllAppLinks({
+          updateAppLinks(appLinks, {
             experimentalFeatures: this.experimentalFeatures,
             license: currentLicense,
             capabilities: core.application.capabilities,
           });
 
-          // TODO: to be removed
-          this.appUpdater$.next(() => ({
-            navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
-            deepLinks: getDeepLinks(
-              this.experimentalFeatures,
-              currentLicense.type,
-              core.application.capabilities
-            ),
-          }));
+          if (!newNavEnabled) {
+            // TODO: remove block when nav flag no longer needed
+            this.appUpdater$.next(() => ({
+              navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
+              deepLinks: getDeepLinks(
+                this.experimentalFeatures,
+                currentLicense.type,
+                core.application.capabilities
+              ),
+            }));
+          }
         }
       });
     } else {
-      updateAllAppLinks({
+      updateAppLinks(appLinks, {
         experimentalFeatures: this.experimentalFeatures,
         capabilities: core.application.capabilities,
       });
 
-      // TODO: to be removed
-      this.appUpdater$.next(() => ({
-        navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
-        deepLinks: getDeepLinks(
-          this.experimentalFeatures,
-          undefined,
-          core.application.capabilities
-        ),
-      }));
+      if (!newNavEnabled) {
+        // TODO: remove block when nav flag no longer needed
+        this.appUpdater$.next(() => ({
+          navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
+          deepLinks: getDeepLinks(
+            this.experimentalFeatures,
+            undefined,
+            core.application.capabilities
+          ),
+        }));
+      }
     }
 
     return {};
@@ -317,8 +324,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      * See https://webpack.js.org/api/module-methods/#magic-comments
      */
     return import(
-      /* webpackChunkName: "lazy_sub_plugins" */
+      /* webpackChunkName: "lazy_register_alerts_table_configuration" */
       './common/lib/triggers_actions_ui/register_alerts_table_configuration'
+    );
+  }
+
+  private lazyApplicationLinks() {
+    /**
+     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+     * See https://webpack.js.org/api/module-methods/#magic-comments
+     */
+    return import(
+      /* webpackChunkName: "lazy_app_links" */
+      './common/links/app_links'
     );
   }
 

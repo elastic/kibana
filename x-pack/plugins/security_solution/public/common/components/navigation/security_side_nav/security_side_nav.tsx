@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, MouseEventHandler } from 'react';
-import { EuiHorizontalRule, EuiLink, EuiListGroupItem } from '@elastic/eui';
+import React, { useMemo, useCallback, useEffect } from 'react';
+import { EuiHorizontalRule, EuiListGroupItem } from '@elastic/eui';
 import { SecurityPageName } from '../../../../app/types';
-import { navigationCategories as managementCategories } from '../../../../management/links';
-import { getAncestorLinksInfo } from '../../../links';
+import { excludeAppLink, getAncestorLinksInfo } from '../../../links';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
-import { useGetSecuritySolutionLinkProps } from '../../links';
+import { SecuritySolutionLinkAnchor, useGetSecuritySolutionLinkProps } from '../../links';
 import { useAppNavLinks } from '../nav_links';
 import { SolutionGroupedNav } from '../solution_grouped_nav';
 import { CustomSideNavItem, DefaultSideNavItem, SideNavItem } from '../solution_grouped_nav/types';
 import { NavLinkItem } from '../types';
 import { EuiIconLaunch } from './icons/launch';
+import { useCanSeeHostIsolationExceptionsMenu } from '../../../../management/pages/host_isolation_exceptions/view/hooks';
 
 const isFooterNavItem = (id: SecurityPageName) =>
   id === SecurityPageName.landing || id === SecurityPageName.administration;
@@ -29,11 +29,11 @@ type FormatSideNavItems = (navItems: NavLinkItem) => SideNavItem;
 const GetStartedCustomLinkComponent: React.FC<{
   isSelected: boolean;
   title: string;
-  href: string;
-  onClick: MouseEventHandler;
-}> = ({ isSelected, title, href, onClick }) => (
-  // eslint-disable-next-line @elastic/eui/href-or-on-click
-  <EuiLink href={href} onClick={onClick} color={isSelected ? 'primary' : 'text'}>
+}> = ({ isSelected, title }) => (
+  <SecuritySolutionLinkAnchor
+    deepLinkId={SecurityPageName.landing}
+    color={isSelected ? 'primary' : 'text'}
+  >
     <EuiListGroupItem
       label={title.toUpperCase()}
       size="xs"
@@ -44,7 +44,7 @@ const GetStartedCustomLinkComponent: React.FC<{
       }}
     />
     <EuiHorizontalRule margin="xs" />
-  </EuiLink>
+  </SecuritySolutionLinkAnchor>
 );
 const GetStartedCustomLink = React.memo(GetStartedCustomLinkComponent);
 
@@ -60,6 +60,9 @@ const useFormatSideNavItem = (): FormatSideNavItems => {
         id: navItem.id,
         label: navItem.title,
         ...getSecuritySolutionLinkProps({ deepLinkId: navItem.id }),
+        ...(navItem.categories && navItem.categories.length > 0
+          ? { categories: navItem.categories }
+          : {}),
         ...(navItem.links && navItem.links.length > 0
           ? {
               items: navItem.links
@@ -74,25 +77,13 @@ const useFormatSideNavItem = (): FormatSideNavItems => {
           : {}),
       });
 
-      const formatManagementItem = (navItem: NavLinkItem): DefaultSideNavItem => ({
-        ...formatDefaultItem(navItem),
-        categories: managementCategories,
-      });
-
       const formatGetStartedItem = (navItem: NavLinkItem): CustomSideNavItem => ({
         id: navItem.id,
         render: (isSelected) => (
-          <GetStartedCustomLink
-            isSelected={isSelected}
-            title={navItem.title}
-            {...getSecuritySolutionLinkProps({ deepLinkId: SecurityPageName.landing })}
-          />
+          <GetStartedCustomLink isSelected={isSelected} title={navItem.title} />
         ),
       });
 
-      if (navLinkItem.id === SecurityPageName.administration) {
-        return formatManagementItem(navLinkItem);
-      }
       if (navLinkItem.id === SecurityPageName.landing) {
         return formatGetStartedItem(navLinkItem);
       }
@@ -132,7 +123,6 @@ const useSideNavItems = () => {
 
 const useSelectedId = (): SecurityPageName => {
   const [{ pageName }] = useRouteSpy();
-
   const selectedId = useMemo(() => {
     const [rootLinkInfo] = getAncestorLinksInfo(pageName as SecurityPageName);
     return rootLinkInfo?.id ?? '';
@@ -148,5 +138,14 @@ const useSelectedId = (): SecurityPageName => {
 export const SecuritySideNav: React.FC = () => {
   const [items, footerItems] = useSideNavItems();
   const selectedId = useSelectedId();
+
+  // TODO: move this exclusion logic to getManagementLinkItems
+  const canSeeHostIsolationExceptions = useCanSeeHostIsolationExceptionsMenu();
+  useEffect(() => {
+    if (!canSeeHostIsolationExceptions) {
+      excludeAppLink(SecurityPageName.hostIsolationExceptions);
+    }
+  }, [canSeeHostIsolationExceptions]);
+
   return <SolutionGroupedNav items={items} footerItems={footerItems} selectedId={selectedId} />;
 };

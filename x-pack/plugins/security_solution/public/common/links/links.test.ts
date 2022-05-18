@@ -16,33 +16,30 @@ import {
   getAncestorLinksInfo,
   getLinkInfo,
   needsUrlState,
-  updateAllAppLinks,
   updateAppLinks,
+  excludeAppLink,
 } from './links';
 
-jest.mock('./app_links', () => ({
-  getAllAppLinks: () => [
-    {
-      id: 'hosts',
-      title: 'Hosts',
-      path: '/hosts',
-      links: [
-        {
-          id: 'hosts-authentications',
-          title: 'Authentications',
-          path: `/hosts/authentications`,
-          experimentalKey: 'nonExistingKey',
-        },
-        {
-          id: 'hosts-events',
-          title: 'Events',
-          path: `/hosts/events`,
-          skipUrlState: true,
-        },
-      ],
-    },
-  ],
-}));
+const defaultAppLinks: AppLinkItems = [
+  {
+    id: SecurityPageName.hosts,
+    title: 'Hosts',
+    path: '/hosts',
+    links: [
+      {
+        id: SecurityPageName.hostsAuthentications,
+        title: 'Authentications',
+        path: `/hosts/authentications`,
+      },
+      {
+        id: SecurityPageName.hostsEvents,
+        title: 'Events',
+        path: `/hosts/events`,
+        skipUrlState: true,
+      },
+    ],
+  },
+];
 
 const mockExperimentalDefaults = mockGlobalState.app.enableExperimental;
 
@@ -63,111 +60,39 @@ const renderUseAppLinks = () =>
 describe('Security app links', () => {
   beforeEach(() => {
     mockLicense.hasAtLeast = licensePremiumMock;
+
+    updateAppLinks(defaultAppLinks, {
+      capabilities: mockCapabilities,
+      experimentalFeatures: mockExperimentalDefaults,
+      license: mockLicense,
+    });
   });
 
   describe('useAppLinks', () => {
     it('should return initial appLinks', () => {
       const { result } = renderUseAppLinks();
-      expect(result.current).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "id": "hosts",
-            "links": Array [
-              Object {
-                "experimentalKey": "nonExistingKey",
-                "id": "hosts-authentications",
-                "path": "/hosts/authentications",
-                "title": "Authentications",
-              },
-              Object {
-                "id": "hosts-events",
-                "path": "/hosts/events",
-                "skipUrlState": true,
-                "title": "Events",
-              },
-            ],
-            "path": "/hosts",
-            "title": "Hosts",
-          },
-        ]
-      `);
-    });
-
-    it('should update all appLinks with filtering', async () => {
-      const { result, waitForNextUpdate } = renderUseAppLinks();
-      await act(async () => {
-        updateAllAppLinks({
-          capabilities: mockCapabilities,
-          experimentalFeatures: mockExperimentalDefaults,
-          license: mockLicense,
-        });
-        await waitForNextUpdate();
-      });
-      expect(result.current).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "id": "hosts",
-            "links": Array [
-              Object {
-                "id": "hosts-events",
-                "path": "/hosts/events",
-                "skipUrlState": true,
-                "title": "Events",
-              },
-            ],
-            "path": "/hosts",
-            "title": "Hosts",
-          },
-        ]
-      `);
-    });
-
-    it('should manually update appLinks with filtering', async () => {
-      const { result, waitForNextUpdate } = renderUseAppLinks();
-      await act(async () => {
-        updateAppLinks(
-          [
-            {
-              id: SecurityPageName.network,
-              title: 'Network',
-              path: '/network',
-            },
-          ],
-          {
-            capabilities: mockCapabilities,
-            experimentalFeatures: mockExperimentalDefaults,
-            license: mockLicense,
-          }
-        );
-        await waitForNextUpdate();
-      });
-      expect(result.current).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "id": "network",
-            "path": "/network",
-            "title": "Network",
-          },
-        ]
-      `);
+      expect(result.current).toStrictEqual(defaultAppLinks);
     });
 
     it('should filter not allowed links', async () => {
       const { result, waitForNextUpdate } = renderUseAppLinks();
+      // this link should not be excluded, the test checks all conditions are passed
+      const networkLinkItem = {
+        id: SecurityPageName.network,
+        title: 'Network',
+        path: '/network',
+        capabilities: [`${CASES_FEATURE_ID}.read_cases`, `${SERVER_APP_ID}.show`],
+        experimentalKey: 'flagEnabled' as unknown as keyof typeof mockExperimentalDefaults,
+        hideWhenExperimentalKey: 'flagDisabled' as unknown as keyof typeof mockExperimentalDefaults,
+        licenseType: 'basic' as const,
+      };
+
       await act(async () => {
         updateAppLinks(
           [
             {
-              // this link should not be excluded, the test checks all conditions passed
-              // all its sub-links should be filtered for each criteria
-              id: SecurityPageName.network,
-              title: 'Network',
-              path: '/network',
-              capabilities: [`${CASES_FEATURE_ID}.read_cases`, `${SERVER_APP_ID}.show`],
-              experimentalKey: 'flagEnabled' as unknown as keyof typeof mockExperimentalDefaults,
-              hideWhenExperimentalKey:
-                'flagDisabled' as unknown as keyof typeof mockExperimentalDefaults,
-              licenseType: 'basic',
+              ...networkLinkItem,
+              // all its links should be filtered for all different criteria
               links: [
                 {
                   id: SecurityPageName.networkExternalAlerts,
@@ -201,6 +126,7 @@ describe('Security app links', () => {
               ],
             },
             {
+              // should be excluded by license with all its links
               id: SecurityPageName.hosts,
               title: 'Hosts',
               path: '/hosts',
@@ -228,68 +154,74 @@ describe('Security app links', () => {
         );
         await waitForNextUpdate();
       });
-      expect(result.current).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "capabilities": Array [
-              "securitySolutionCases.read_cases",
-              "siem.show",
-            ],
-            "experimentalKey": "flagEnabled",
-            "hideWhenExperimentalKey": "flagDisabled",
-            "id": "network",
-            "licenseType": "basic",
-            "path": "/network",
-            "title": "Network",
-          },
-        ]
-      `);
+
+      expect(result.current).toStrictEqual([networkLinkItem]);
+    });
+  });
+
+  describe('excludeAppLink', () => {
+    it('should exclude link from app links', async () => {
+      const { result, waitForNextUpdate } = renderUseAppLinks();
+      await act(async () => {
+        excludeAppLink(SecurityPageName.hostsEvents);
+        await waitForNextUpdate();
+      });
+      expect(result.current).toStrictEqual([
+        {
+          id: SecurityPageName.hosts,
+          title: 'Hosts',
+          path: '/hosts',
+          links: [
+            {
+              id: SecurityPageName.hostsAuthentications,
+              title: 'Authentications',
+              path: `/hosts/authentications`,
+            },
+          ],
+        },
+      ]);
     });
   });
 
   describe('getAncestorLinksInfo', () => {
-    it('finds ancestors flattened links', () => {
+    it('should find ancestors flattened links', () => {
       const hierarchy = getAncestorLinksInfo(SecurityPageName.hostsEvents);
-      expect(hierarchy).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "id": "hosts",
-            "path": "/hosts",
-            "title": "Hosts",
-          },
-          Object {
-            "id": "hosts-events",
-            "path": "/hosts/events",
-            "skipUrlState": true,
-            "title": "Events",
-          },
-        ]
-      `);
+      expect(hierarchy).toStrictEqual([
+        {
+          id: SecurityPageName.hosts,
+          path: '/hosts',
+          title: 'Hosts',
+        },
+        {
+          id: SecurityPageName.hostsEvents,
+          path: '/hosts/events',
+          skipUrlState: true,
+          title: 'Events',
+        },
+      ]);
     });
   });
 
   describe('needsUrlState', () => {
-    it('returns true when url state exists for page', () => {
+    it('should return true when url state exists for page', () => {
       const needsUrl = needsUrlState(SecurityPageName.hosts);
       expect(needsUrl).toEqual(true);
     });
-    it('returns false when url state does not exist for page', () => {
+    it('should return false when url state does not exist for page', () => {
       const needsUrl = needsUrlState(SecurityPageName.hostsEvents);
       expect(needsUrl).toEqual(false);
     });
   });
 
   describe('getLinkInfo', () => {
-    it('gets information for an individual link', () => {
+    it('should get information for an individual link', () => {
       const linkInfo = getLinkInfo(SecurityPageName.hostsEvents);
-      expect(linkInfo).toMatchInlineSnapshot(`
-        Object {
-          "id": "hosts-events",
-          "path": "/hosts/events",
-          "skipUrlState": true,
-          "title": "Events",
-        }
-      `);
+      expect(linkInfo).toStrictEqual({
+        id: SecurityPageName.hostsEvents,
+        path: '/hosts/events',
+        skipUrlState: true,
+        title: 'Events',
+      });
     });
   });
 });

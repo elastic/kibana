@@ -11,22 +11,13 @@ import { SecurityPageName } from '../../../../app/types';
 import { TestProviders } from '../../../mock';
 import { SecuritySideNav } from './security_side_nav';
 import { SolutionGroupedNavProps } from '../solution_grouped_nav/solution_grouped_nav';
-import { navigationCategories as managementCategories } from '../../../../management/links';
 import { NavLinkItem } from '../types';
 
-const mockSolutionGroupedNav = jest.fn((_: SolutionGroupedNavProps) => <></>);
-jest.mock('../solution_grouped_nav', () => ({
-  SolutionGroupedNav: (props: SolutionGroupedNavProps) => mockSolutionGroupedNav(props),
-}));
-const mockUseRouteSpy = [{ pageName: SecurityPageName.alerts }];
-jest.mock('../../../utils/route/use_route_spy', () => ({
-  useRouteSpy: () => mockUseRouteSpy,
-}));
-
-const manageNavLink = {
+const manageNavLink: NavLinkItem = {
   id: SecurityPageName.administration,
   title: 'manage',
   description: 'manage description',
+  categories: [{ label: 'test category', linkIds: [SecurityPageName.endpoints] }],
   links: [
     {
       id: SecurityPageName.endpoints,
@@ -35,17 +26,31 @@ const manageNavLink = {
     },
   ],
 };
-const alertsNavLink = {
+const alertsNavLink: NavLinkItem = {
   id: SecurityPageName.alerts,
   title: 'alerts',
   description: 'alerts description',
 };
 
-const mockUseAppNavLinks = jest.fn((): NavLinkItem[] => [alertsNavLink]);
+const mockSolutionGroupedNav = jest.fn((_: SolutionGroupedNavProps) => <></>);
+jest.mock('../solution_grouped_nav', () => ({
+  SolutionGroupedNav: (props: SolutionGroupedNavProps) => mockSolutionGroupedNav(props),
+}));
+const mockUseRouteSpy = jest.fn(() => [{ pageName: SecurityPageName.alerts }]);
+jest.mock('../../../utils/route/use_route_spy', () => ({
+  useRouteSpy: () => mockUseRouteSpy(),
+}));
+jest.mock('../../../../management/pages/host_isolation_exceptions/view/hooks', () => ({
+  useCanSeeHostIsolationExceptionsMenu: () => true,
+}));
+jest.mock('../../../links', () => ({
+  getAncestorLinksInfo: (id: string) => [{ id }],
+}));
+
+const mockUseAppNavLinks = jest.fn((): NavLinkItem[] => [alertsNavLink, manageNavLink]);
 jest.mock('../nav_links', () => ({
   useAppNavLinks: () => mockUseAppNavLinks(),
 }));
-
 jest.mock('../../links', () => ({
   useGetSecuritySolutionLinkProps:
     () =>
@@ -80,6 +85,16 @@ describe('SecuritySideNav', () => {
     });
   });
 
+  it('should render with selected id', () => {
+    mockUseRouteSpy.mockReturnValueOnce([{ pageName: SecurityPageName.administration }]);
+    renderNav();
+    expect(mockSolutionGroupedNav).toHaveBeenCalledWith(
+      expect.objectContaining({
+        selectedId: SecurityPageName.administration,
+      })
+    );
+  });
+
   it('should render footer items', () => {
     mockUseAppNavLinks.mockReturnValueOnce([manageNavLink]);
     renderNav();
@@ -92,7 +107,7 @@ describe('SecuritySideNav', () => {
             id: SecurityPageName.administration,
             label: 'manage',
             href: '/administration',
-            categories: managementCategories,
+            categories: manageNavLink.categories,
             items: [
               {
                 id: SecurityPageName.endpoints,
@@ -106,6 +121,7 @@ describe('SecuritySideNav', () => {
       })
     );
   });
+
   it('should not render disabled items', () => {
     mockUseAppNavLinks.mockReturnValueOnce([
       { ...alertsNavLink, disabled: true },
@@ -131,7 +147,7 @@ describe('SecuritySideNav', () => {
             id: SecurityPageName.administration,
             label: 'manage',
             href: '/administration',
-            categories: managementCategories,
+            categories: manageNavLink.categories,
             items: [],
           },
         ],
