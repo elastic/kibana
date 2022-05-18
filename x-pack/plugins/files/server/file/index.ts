@@ -6,8 +6,6 @@
  */
 
 export { File } from './file';
-export {
-  Action,
-  createDefaultFileAttributes,
-  fileAttributesReducer,
-} from './file_attributes_reducer';
+
+export { createDefaultFileAttributes, fileAttributesReducer } from './file_attributes_reducer';
+export type { Action } from './file_attributes_reducer';
