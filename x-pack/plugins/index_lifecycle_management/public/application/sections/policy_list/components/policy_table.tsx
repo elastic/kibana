@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiButtonEmpty,
   EuiLink,
@@ -25,6 +25,7 @@ import { useHistory } from 'react-router-dom';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useStateWithLocalStorage } from '../../../lib/settings_local_storage';
 import { PolicyFromES } from '../../../../../common/types';
 import { useKibana } from '../../../../shared_imports';
 import { getIndicesListPath, getPolicyEditPath } from '../../../services/navigation';
@@ -72,12 +73,17 @@ interface Props {
   policies: PolicyFromES[];
 }
 
+const SHOW_MANAGED_POLICIES_BY_DEFAULT = 'ILM_SHOW_MANAGED_POLICIES_BY_DEFAULT';
+
 export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
   const history = useHistory();
   const {
     services: { getUrlForApp },
   } = useKibana();
-  const [managedPoliciesVisible, setManagedPoliciesVisible] = useState<boolean>(false);
+  const [managedPoliciesVisible, setManagedPoliciesVisible] = useStateWithLocalStorage<boolean>(
+    SHOW_MANAGED_POLICIES_BY_DEFAULT,
+    false
+  );
   const { setListAction } = usePolicyListContext();
   const searchOptions = useMemo(
     () => ({
@@ -99,7 +105,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
         </EuiFlexItem>
       ),
     }),
-    [managedPoliciesVisible]
+    [managedPoliciesVisible, setManagedPoliciesVisible]
   );
 
   const filteredPolicies = useMemo(() => {

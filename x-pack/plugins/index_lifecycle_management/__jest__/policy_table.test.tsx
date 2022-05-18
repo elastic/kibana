@@ -138,6 +138,7 @@ const TestComponent = ({ testPolicies }: { testPolicies: PolicyFromES[] }) => {
 describe('policy table', () => {
   beforeEach(() => {
     component = <TestComponent testPolicies={policies} />;
+    window.localStorage.removeItem('ILM_SHOW_MANAGED_POLICIES_BY_DEFAULT');
   });
 
   test('shows empty state when there are no policies', () => {
