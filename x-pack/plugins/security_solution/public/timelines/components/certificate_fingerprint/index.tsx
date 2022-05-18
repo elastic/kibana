@@ -57,6 +57,8 @@ export const CertificateFingerprint = React.memo<{
         </EuiText>
       }
       value={value}
+      isAggregatable={true}
+      fieldType="keyword"
     >
       <FingerprintLabel data-test-subj="fingerprint-label">
         {certificateType === 'client' ? i18n.CLIENT_CERT : i18n.SERVER_CERT}
