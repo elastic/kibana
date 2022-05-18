@@ -36,8 +36,8 @@ export function UXSection({ bucketSize }: Props) {
     {
       name: 'Page load distribution',
       time: {
-        from: 'now-7d/d',
-        to: 'now',
+        from: relativeStart,
+        to: relativeEnd,
       },
       reportDefinitions: {
         'service.name': ['ALL_VALUES'],
