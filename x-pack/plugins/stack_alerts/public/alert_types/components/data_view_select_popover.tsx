@@ -7,7 +7,15 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiExpression, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiExpression,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiPopover,
+  EuiPopoverTitle,
+} from '@elastic/eui';
 import { DataViewsList } from '@kbn/unified-search-plugin/public';
 import { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { useTriggersAndActionsUiDeps } from '../es_query/util';
@@ -70,20 +78,43 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
       display="block"
     >
       <div style={{ width: '450px' }} data-test-subj="chooseDataViewPopoverContent">
-        <DataViewsList
-          dataViewsList={dataViewItems}
-          onChangeDataView={(newId) => {
-            setSelectedDataViewId(newId);
-            const newTitle = dataViewItems?.find(({ id }) => id === newId)?.title;
-            if (newTitle) {
-              setSelectedTitle(newTitle);
-            }
+        <EuiPopoverTitle>
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem>
+              {i18n.translate('xpack.stackAlerts.components.ui.alertParams.dataViewPopoverTitle', {
+                defaultMessage: 'Data view',
+              })}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                data-test-subj="closeDataViewPopover"
+                iconType="cross"
+                color="danger"
+                aria-label={i18n.translate(
+                  'xpack.stackAlerts.components.ui.alertParams.closeDataViewPopoverLabel',
+                  { defaultMessage: 'Close' }
+                )}
+                onClick={closeDataViewPopover}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPopoverTitle>
+        <EuiFormRow id="indexSelectSearchBox" fullWidth>
+          <DataViewsList
+            dataViewsList={dataViewItems}
+            onChangeDataView={(newId) => {
+              setSelectedDataViewId(newId);
+              const newTitle = dataViewItems?.find(({ id }) => id === newId)?.title;
+              if (newTitle) {
+                setSelectedTitle(newTitle);
+              }
 
-            onSelectDataView(newId);
-            closeDataViewPopover();
-          }}
-          currentDataViewId={selectedDataViewId}
-        />
+              onSelectDataView(newId);
+              closeDataViewPopover();
+            }}
+            currentDataViewId={selectedDataViewId}
+          />
+        </EuiFormRow>
       </div>
     </EuiPopover>
   );

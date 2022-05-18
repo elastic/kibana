@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { validateTimeWindowUnits } from '@kbn/triggers-actions-ui-plugin/server';
 import { RuleTypeState } from '@kbn/alerting-plugin/server';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { Comparator } from '../../../common/comparator_types';
 import { ComparatorFnNames } from '../lib';
 import { getComparatorSchemaType } from '../lib/comparator';
@@ -20,6 +21,12 @@ export type EsQueryAlertParams = TypeOf<typeof EsQueryAlertParamsSchema>;
 export interface EsQueryAlertState extends RuleTypeState {
   latestTimestamp: string | undefined;
 }
+
+export type EsQueryAlertParamsExtractedParams = Omit<EsQueryAlertParams, 'searchConfiguration'> & {
+  searchConfiguration: SerializedSearchSourceFields & {
+    indexRefName: string;
+  };
+};
 
 const EsQueryAlertParamsSchemaProperties = {
   size: schema.number({ min: 0, max: ES_QUERY_MAX_HITS_PER_EXECUTION }),

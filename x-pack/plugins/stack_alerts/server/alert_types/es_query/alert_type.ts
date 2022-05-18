@@ -7,10 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Logger } from '@kbn/core/server';
+import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
 import { RuleType } from '../../types';
 import { ActionContext } from './action_context';
 import {
   EsQueryAlertParams,
+  EsQueryAlertParamsExtractedParams,
   EsQueryAlertParamsSchema,
   EsQueryAlertState,
 } from './alert_type_params';
@@ -24,7 +26,7 @@ export function getAlertType(
   core: CoreSetup
 ): RuleType<
   EsQueryAlertParams,
-  never, // Only use if defining useSavedObjectReferences hook
+  EsQueryAlertParamsExtractedParams, // Only use if defining useSavedObjectReferences hook
   EsQueryAlertState,
   {},
   ActionContext,
@@ -158,6 +160,19 @@ export function getAlertType(
         { name: 'esQuery', description: actionVariableContextQueryLabel },
         { name: 'index', description: actionVariableContextIndexLabel },
       ],
+    },
+    useSavedObjectReferences: {
+      extractReferences: (params) => {
+        const [searchConfiguration, references] = extractReferences(params.searchConfiguration);
+        const newParams = { ...params, searchConfiguration } as EsQueryAlertParamsExtractedParams;
+        return { params: newParams, references };
+      },
+      injectReferences: (params, references) => {
+        return {
+          ...params,
+          searchConfiguration: injectReferences(params.searchConfiguration, references),
+        } as EsQueryAlertParams;
+      },
     },
     minimumLicenseRequired: 'basic',
     isExportable: true,

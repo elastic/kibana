@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
-import { debounce } from 'lodash';
+import deepEqual from 'fast-deep-equal';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -54,18 +54,11 @@ interface SearchSourceExpressionFormProps {
   setParam: (paramField: string, paramValue: unknown) => void;
 }
 
+type LangMode = 'lucene' | 'text' | undefined;
+
 const isSearchSourceParam = (action: LocalStateAction): action is SearchSourceParamsAction => {
   return action.type === 'filter' || action.type === 'index' || action.type === 'query';
 };
-
-/**
- * Improve user input experience, temporal solution.
- * Should be further fixed properly.
- */
-const withDebounce = debounce((execute: () => void) => execute(), 0, {
-  leading: false,
-  trailing: true,
-});
 
 export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProps) => {
   const { data } = useTriggersAndActionsUiDeps();
@@ -84,8 +77,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
           searchSource.setParent(undefined).setField(action.type, action.payload);
           setParam('searchConfiguration', searchSource.getSerializedFields());
         } else {
-          // debounce applied only to input params
-          withDebounce(() => setParam(action.type, action.payload));
+          setParam(action.type, action.payload);
         }
         return { ...currentState, [action.type]: action.payload };
       },
@@ -114,10 +106,19 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
 
   const onChangeQuery = useCallback(
     ({ query: newQuery }: { query?: Query }) => {
-      withDebounce(() => dispatch({ type: 'query', payload: newQuery || { ...query, query: '' } }));
+      if (!deepEqual(newQuery, query)) {
+        dispatch({ type: 'query', payload: newQuery || { ...query, query: '' } });
+      }
     },
     [query]
   );
+
+  // needs to change language mode only
+  const onQueryBarSubmit = ({ query: newQuery }: { query?: Query }) => {
+    if (newQuery?.language !== query.language) {
+      dispatch({ type: 'query', payload: { ...query, language: newQuery?.language } as Query });
+    }
+  };
 
   const onSavedQueryUpdated = useCallback((newSavedQuery: SavedQuery) => {
     setSavedQuery(newSavedQuery);
@@ -182,6 +183,8 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       <EuiSpacer size="s" />
 
       <SearchBar
+        onQuerySubmit={onQueryBarSubmit}
+        onQueryChange={onChangeQuery}
         suggestionsSize="s"
         displayStyle="inPage"
         placeholder={i18n.translate('xpack.stackAlerts.searchSource.ui.searchQuery', {
@@ -189,7 +192,6 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         })}
         query={query}
         indexPatterns={dataViews}
-        onQueryChange={onChangeQuery}
         savedQuery={savedQuery}
         filters={filters}
         onFiltersUpdated={onUpdateFilters}
