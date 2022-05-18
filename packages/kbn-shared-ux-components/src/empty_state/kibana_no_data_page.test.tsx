@@ -9,7 +9,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingElastic } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { SharedUxServicesProvider, mockServicesFactory } from '@kbn/shared-ux-services';
 
@@ -89,7 +89,7 @@ describe('Kibana No Data Page', () => {
     await act(() => new Promise(setImmediate));
     component.update();
 
-    expect(component.find(EuiLoadingSpinner).length).toBe(1);
+    expect(component.find(EuiLoadingElastic).length).toBe(1);
     expect(component.find(NoDataViews).length).toBe(0);
     expect(component.find(NoDataConfigPage).length).toBe(0);
   });

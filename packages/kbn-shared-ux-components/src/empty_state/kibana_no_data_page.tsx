@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useEffect, useState } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingElastic } from '@elastic/eui';
 import { useData } from '@kbn/shared-ux-services';
 import { NoDataConfigPage, NoDataPageProps } from '../page_template';
 import { NoDataViews } from './no_data_views';
@@ -36,7 +36,7 @@ export const KibanaNoDataPage = ({ onDataViewCreated, noDataConfig }: Props) => 
   }, [hasESData, hasUserDataView]);
 
   if (isLoading) {
-    return <EuiLoadingSpinner size="xl" />;
+    return <EuiLoadingElastic css={{ alignSelf: 'center', justifySelf: 'center' }} size="xxl" />;
   }
 
   if (!dataExists) {
