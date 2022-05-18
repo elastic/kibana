@@ -18,7 +18,10 @@ const DraggableLegendContainer = styled.div<{ height: number }>`
   height: ${({ height }) => `${height}px`};
   overflow: auto;
   scrollbar-width: thin;
-  width: 165px;
+  width: 100%;
+  @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.m}) {
+    width: 165px;
+  }
 
   &::-webkit-scrollbar {
     height: ${({ theme }) => theme.eui.euiScrollBar};
