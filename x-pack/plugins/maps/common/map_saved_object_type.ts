@@ -6,7 +6,6 @@
  */
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
-import type { SimpleSavedObject } from '@kbn/core/public';
 
 export type MapSavedObjectAttributes = {
   title: string;
@@ -15,5 +14,3 @@ export type MapSavedObjectAttributes = {
   layerListJSON?: string;
   uiStateJSON?: string;
 };
-
-export type MapSavedObject = SimpleSavedObject<MapSavedObjectAttributes>;
