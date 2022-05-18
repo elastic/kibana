@@ -524,7 +524,7 @@ export class SavedObjectsRepository {
         }
         savedObjectNamespaces =
           initialNamespaces || getSavedObjectNamespaces(namespace, existingDocument);
-        versionProperties = getExpectedVersionProperties(version, existingDocument);
+        versionProperties = getExpectedVersionProperties(version);
       } else {
         if (this._registry.isSingleNamespace(object.type)) {
           savedObjectNamespace = initialNamespaces
@@ -762,7 +762,7 @@ export class SavedObjectsRepository {
       {
         id: rawId,
         index: this.getIndexForType(type),
-        ...getExpectedVersionProperties(undefined, preflightResult?.rawDocSource),
+        ...getExpectedVersionProperties(undefined),
         refresh,
       },
       { ignore: [404], meta: true }
@@ -1617,7 +1617,7 @@ export class SavedObjectsRepository {
             SavedObjectsUtils.namespaceIdToString(actualResult!._source.namespace),
           ];
           // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
-          versionProperties = getExpectedVersionProperties(version, actualResult!);
+          versionProperties = getExpectedVersionProperties(version);
         } else {
           if (this._registry.isSingleNamespace(type)) {
             // if `objectNamespace` is undefined, fall back to `options.namespace`

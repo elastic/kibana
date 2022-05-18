@@ -1688,20 +1688,6 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it(`defaults to the version of the existing document for multi-namespace types`, async () => {
-        // only multi-namespace documents are obtained using a pre-flight mget request
-        const objects = [
-          { ...obj1, type: MULTI_NAMESPACE_ISOLATED_TYPE },
-          { ...obj2, type: MULTI_NAMESPACE_ISOLATED_TYPE },
-        ];
-        await bulkUpdateSuccess(objects);
-        const overrides = {
-          if_seq_no: mockVersionProps._seq_no,
-          if_primary_term: mockVersionProps._primary_term,
-        };
-        expectClientCallArgsAction(objects, { method: 'update', overrides });
-      });
-
       it(`defaults to no version for types that are not multi-namespace`, async () => {
         const objects = [obj1, { ...obj2, type: NAMESPACE_AGNOSTIC_TYPE }];
         await bulkUpdateSuccess(objects);
@@ -1759,12 +1745,6 @@ describe('SavedObjectsRepository', () => {
 
       it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
         const getId = (type: string, id: string) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
-        const overrides = {
-          // bulkUpdate uses a preflight `get` request for multi-namespace saved objects, and specifies that version on `update`
-          // we aren't testing for this here, but we need to include Jest assertions so this test doesn't fail
-          if_primary_term: expect.any(Number),
-          if_seq_no: expect.any(Number),
-        };
         const _obj1 = { ...obj1, type: NAMESPACE_AGNOSTIC_TYPE };
         const _obj2 = { ...obj2, type: MULTI_NAMESPACE_ISOLATED_TYPE };
 
@@ -1772,7 +1752,7 @@ describe('SavedObjectsRepository', () => {
         expectClientCallArgsAction([_obj1], { method: 'update', getId });
         client.bulk.mockClear();
         await bulkUpdateSuccess([_obj2], { namespace });
-        expectClientCallArgsAction([_obj2], { method: 'update', getId, overrides });
+        expectClientCallArgsAction([_obj2], { method: 'update', getId });
 
         jest.clearAllMocks();
         // test again with object namespace string that supersedes the operation's namespace ID
@@ -1780,7 +1760,7 @@ describe('SavedObjectsRepository', () => {
         expectClientCallArgsAction([_obj1], { method: 'update', getId });
         client.bulk.mockClear();
         await bulkUpdateSuccess([{ ..._obj2, namespace }]);
-        expectClientCallArgsAction([_obj2], { method: 'update', getId, overrides });
+        expectClientCallArgsAction([_obj2], { method: 'update', getId });
       });
     });
 
@@ -2723,14 +2703,14 @@ describe('SavedObjectsRepository', () => {
         expect(client.delete).toHaveBeenCalledTimes(1);
       });
 
-      it(`includes the version of the existing document when using a multi-namespace type`, async () => {
+      it(`does not includes the version of the existing document when using a multi-namespace type`, async () => {
         await deleteSuccess(MULTI_NAMESPACE_ISOLATED_TYPE, id);
         const versionProperties = {
           if_seq_no: mockVersionProps._seq_no,
           if_primary_term: mockVersionProps._primary_term,
         };
         expect(client.delete).toHaveBeenCalledWith(
-          expect.objectContaining(versionProperties),
+          expect.not.objectContaining(versionProperties),
           expect.anything()
         );
       });
