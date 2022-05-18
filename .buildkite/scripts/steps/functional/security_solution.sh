@@ -14,4 +14,4 @@ checks-reporter-with-killswitch "Security Solution Cypress Tests (Chrome) $CLI_N
  node scripts/functional_tests \
    --debug --bail \
    --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-   --config x-pack/test/security_solution_cypress/cli_config.ts
+   --config x-pack/test/security_solution_cypress/cli_config_parallel.ts
