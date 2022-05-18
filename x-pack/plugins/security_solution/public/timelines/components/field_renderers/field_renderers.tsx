@@ -376,9 +376,9 @@ export const MoreContainer = React.memo<MoreContainerProps>(
     return (
       <div
         data-test-subj="more-container"
+        className="eui-yScroll"
         style={{
           maxHeight: moreMaxHeight,
-          overflow: 'auto',
           paddingRight: '2px',
         }}
       >

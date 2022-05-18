@@ -97,7 +97,7 @@ type RenderFunctionProp = (
   state: DraggableStateSnapshot
 ) => React.ReactNode;
 
-interface Props {
+export interface DraggableWrapperComponentProps {
   dataProvider: DataProvider;
   hideTopN?: boolean;
   isDraggable?: boolean;
@@ -128,7 +128,7 @@ export const getStyle = (
   };
 };
 
-const DraggableOnWrapperComponent: React.FC<Props> = ({
+const DraggableOnWrapperComponent: React.FC<DraggableWrapperComponentProps> = ({
   dataProvider,
   hideTopN = false,
   onFilterAdded,
@@ -313,7 +313,7 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
   );
 };
 
-const DraggableWrapperComponent: React.FC<Props> = ({
+const DraggableWrapperComponent: React.FC<DraggableWrapperComponentProps> = ({
   dataProvider,
   hideTopN = false,
   isDraggable = false,
