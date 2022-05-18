@@ -8,27 +8,28 @@
 /**
  * TODO:
  * - Need to add documentation URLs (search for `#`s)
- * - Need get dynamic Enterprise Search API URL
- * - Port over existing API view from App Search to the panel below.
- * - move the endpoint state to a logic file
- * - Replace `onNameChange` logic with that from App Search
  * - Need to implement the logic for the attaching search engines functionality
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 
-import { EuiCode, EuiLink, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { useValues } from 'kea';
+
+import { EuiCodeBlock, EuiLink, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { getEnterpriseSearchUrl } from '../../../shared/enterprise_search_url/external_url';
+
+import { DOCUMENTS_API_JSON_EXAMPLE } from './constants';
+import { NewSearchIndexLogic } from './new_search_index_logic';
 import { NewSearchIndexTemplate } from './new_search_index_template';
 
 export const MethodApi: React.FC = () => {
-  const [endpoint, setEndpoint] = useState('');
+  const { name } = useValues(NewSearchIndexLogic);
+  const apiKey = 1212312313; // TODO change this
 
-  const onNameChange = (value: string) => {
-    setEndpoint(value.split(' ').join('-').toLowerCase());
-  };
+  const searchIndexApiUrl = getEnterpriseSearchUrl('/api/ent/v1/search_indices/');
 
   return (
     <NewSearchIndexTemplate
@@ -36,18 +37,8 @@ export const MethodApi: React.FC = () => {
         <EuiText size="s">
           <FormattedMessage
             id="xpack.enterpriseSearch.content.newIndex.methodApi.description"
-            defaultMessage="The {documentsAPILink} can be used to add new documents to your engine, update documents, retrieve documents by id, and delete documents. There are a variety of {clientLibrariesLink} to help you get started."
+            defaultMessage="Your API endpoint can be used to add new documents to your index, update documents, retrieve documents by ID, and delete documents. There are a variety of {clientLibrariesLink} to help you get started."
             values={{
-              documentsAPILink: (
-                <EuiLink href="#" target="_blank">
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.methodApi.description.documentsAPILink',
-                    {
-                      defaultMessage: 'documents API',
-                    }
-                  )}
-                </EuiLink>
-              ),
               clientLibrariesLink: (
                 <EuiLink href="#" target="_blank">
                   {i18n.translate(
@@ -63,8 +54,7 @@ export const MethodApi: React.FC = () => {
         </EuiText>
       }
       docsUrl="#"
-      type="API Endpoint"
-      onNameChange={(value: string) => onNameChange(value)}
+      type="api"
     >
       <EuiPanel hasBorder>
         <EuiTitle size="xs">
@@ -74,14 +64,19 @@ export const MethodApi: React.FC = () => {
             })}
           </h3>
         </EuiTitle>
-        {endpoint && (
+        {name && (
           <>
             <EuiSpacer size="m" />
-            <EuiCode>https://my-es-url.aws.com/23782837/es/{endpoint}</EuiCode>
+            <EuiCodeBlock language="bash" fontSize="m" isCopyable>
+              {`\
+curl -X POST '${searchIndexApiUrl}${name}/document' \\
+  -H 'Content-Type: application/json' \\
+  -H 'Authorization: Bearer ${apiKey}' \\
+  -d '${JSON.stringify(DOCUMENTS_API_JSON_EXAMPLE, null, 2)}'
+`}
+            </EuiCodeBlock>
           </>
         )}
-        <EuiSpacer size="l" />
-        <p>The existing API instructions should render here.</p>
       </EuiPanel>
     </NewSearchIndexTemplate>
   );

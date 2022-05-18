@@ -51,18 +51,15 @@ describe('ESGeoGridSource', () => {
       };
     },
   };
-  const geogridSource = new ESGeoGridSource(
-    {
-      id: 'foobar',
-      indexPatternId: 'fooIp',
-      geoField: geoFieldName,
-      metrics: [],
-      resolution: GRID_RESOLUTION.COARSE,
-      type: SOURCE_TYPES.ES_GEO_GRID,
-      requestType: RENDER_AS.POINT,
-    },
-    {}
-  );
+  const geogridSource = new ESGeoGridSource({
+    id: 'foobar',
+    indexPatternId: 'fooIp',
+    geoField: geoFieldName,
+    metrics: [],
+    resolution: GRID_RESOLUTION.COARSE,
+    type: SOURCE_TYPES.ES_GEO_GRID,
+    requestType: RENDER_AS.POINT,
+  });
   geogridSource._runEsQuery = async (args: unknown) => {
     return {
       took: 71,
@@ -187,7 +184,8 @@ describe('ESGeoGridSource', () => {
         'foobarLayer',
         vectorSourceRequestMeta,
         () => {},
-        () => true
+        () => true,
+        {}
       );
 
       expect(meta && meta.areResultsTrimmed).toEqual(false);
@@ -279,25 +277,7 @@ describe('ESGeoGridSource', () => {
     });
 
     it('Should not return valid precision for super-fine resolution', () => {
-      const superFineSource = new ESGeoGridSource(
-        {
-          id: 'foobar',
-          indexPatternId: 'fooIp',
-          geoField: geoFieldName,
-          metrics: [],
-          resolution: GRID_RESOLUTION.SUPER_FINE,
-          type: SOURCE_TYPES.ES_GEO_GRID,
-          requestType: RENDER_AS.HEATMAP,
-        },
-        {}
-      );
-      expect(superFineSource.getGeoGridPrecision(10)).toBe(NaN);
-    });
-  });
-
-  describe('IMvtVectorSource', () => {
-    const mvtGeogridSource = new ESGeoGridSource(
-      {
+      const superFineSource = new ESGeoGridSource({
         id: 'foobar',
         indexPatternId: 'fooIp',
         geoField: geoFieldName,
@@ -305,9 +285,21 @@ describe('ESGeoGridSource', () => {
         resolution: GRID_RESOLUTION.SUPER_FINE,
         type: SOURCE_TYPES.ES_GEO_GRID,
         requestType: RENDER_AS.HEATMAP,
-      },
-      {}
-    );
+      });
+      expect(superFineSource.getGeoGridPrecision(10)).toBe(NaN);
+    });
+  });
+
+  describe('IMvtVectorSource', () => {
+    const mvtGeogridSource = new ESGeoGridSource({
+      id: 'foobar',
+      indexPatternId: 'fooIp',
+      geoField: geoFieldName,
+      metrics: [],
+      resolution: GRID_RESOLUTION.SUPER_FINE,
+      type: SOURCE_TYPES.ES_GEO_GRID,
+      requestType: RENDER_AS.HEATMAP,
+    });
 
     it('getTileSourceLayer', () => {
       expect(mvtGeogridSource.getTileSourceLayer()).toBe('aggs');
