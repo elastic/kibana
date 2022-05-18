@@ -160,9 +160,7 @@ export function registerJobsMonitoringRuleType({
 
         executionResult.forEach(({ name: alertInstanceName, context }) => {
           const alertInstance = services.alertFactory.create(alertInstanceName);
-          if (alertInstance) {
-            alertInstance.scheduleActions(ANOMALY_DETECTION_JOB_REALTIME_ISSUE, context);
-          }
+          alertInstance.scheduleActions(ANOMALY_DETECTION_JOB_REALTIME_ISSUE, context);
         });
       }
     },

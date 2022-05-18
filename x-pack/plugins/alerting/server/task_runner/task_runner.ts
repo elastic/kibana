@@ -22,6 +22,7 @@ import {
   ErrorWithReason,
   executionStatusFromError,
   executionStatusFromState,
+  getReasonFromError,
   getRecoveredAlerts,
   ruleExecutionStatusToRaw,
   validateRuleTypeParams,
@@ -113,6 +114,7 @@ export class TaskRunner<
   private usageCounter?: UsageCounter;
   private searchAbortController: AbortController;
   private cancelled: boolean;
+  private maxAlerts: number;
 
   constructor(
     ruleType: NormalizedRuleType<
@@ -140,6 +142,9 @@ export class TaskRunner<
     this.executionId = uuid.v4();
     this.inMemoryMetrics = inMemoryMetrics;
     this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
+    this.maxAlerts =
+      this.context.rulesConfigMap[ruleType.id]?.alerts.max ||
+      this.context.rulesConfigMap.default.alerts.max;
   }
 
   private async getDecryptedAttributes(
@@ -361,6 +366,7 @@ export class TaskRunner<
       abortController: this.searchAbortController,
     });
 
+    let hasReachedMaxAlerts: boolean = false;
     let updatedRuleTypeState: void | Record<string, unknown>;
     try {
       const ctx = {
@@ -392,9 +398,7 @@ export class TaskRunner<
             >({
               alerts,
               logger: this.logger,
-              maxAlerts:
-                this.context.rulesConfigMap[this.ruleType.id]?.alerts.max ||
-                this.context.rulesConfigMap.default.alerts.max,
+              maxAlerts: this.maxAlerts,
               canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
             }),
             shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
@@ -430,12 +434,16 @@ export class TaskRunner<
         })
       );
     } catch (err) {
-      this.alertingEventLogger.setExecutionFailed(
-        `rule execution failure: ${ruleLabel}`,
-        err.message
-      );
+      if (getReasonFromError(err) === RuleExecutionStatusErrorReasons.MaxAlerts) {
+        hasReachedMaxAlerts = true;
+      } else {
+        this.alertingEventLogger.setExecutionFailed(
+          `rule execution failure: ${ruleLabel}`,
+          err.message
+        );
 
-      throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, err);
+        throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, err);
+      }
     }
 
     this.alertingEventLogger.setExecutionSucceeded(`rule executed: ${ruleLabel}`);
@@ -447,7 +455,7 @@ export class TaskRunner<
     ruleRunMetricsStore.setTotalSearchDurationMs(searchMetrics.totalSearchDurationMs);
     ruleRunMetricsStore.setEsSearchDurationMs(searchMetrics.esSearchDurationMs);
 
-    // Cleanup alerts that are no longer scheduling actions to avoid over populating the alertInstances object
+    // These are the active alerts this run cycle
     const alertsWithScheduledActions = pickBy(
       alerts,
       (alert: Alert<InstanceState, InstanceContext>) => alert.hasScheduledActions()

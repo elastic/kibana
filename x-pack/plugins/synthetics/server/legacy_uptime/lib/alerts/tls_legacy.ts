@@ -152,15 +152,13 @@ export const tlsLegacyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_s
           'd'
         )
         .valueOf();
-      const alertInstance: TLSAlertInstance | null = alertFactory.create(TLS_LEGACY.id);
-      if (alertInstance) {
-        const summary = getCertSummary(certs, absoluteExpirationThreshold, absoluteAgeThreshold);
-        alertInstance.replaceState({
-          ...updateState(state, foundCerts),
-          ...summary,
-        });
-        alertInstance.scheduleActions(TLS_LEGACY.id);
-      }
+      const alertInstance: TLSAlertInstance = alertFactory.create(TLS_LEGACY.id);
+      const summary = getCertSummary(certs, absoluteExpirationThreshold, absoluteAgeThreshold);
+      alertInstance.replaceState({
+        ...updateState(state, foundCerts),
+        ...summary,
+      });
+      alertInstance.scheduleActions(TLS_LEGACY.id);
     }
 
     return updateState(state, foundCerts);

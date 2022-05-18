@@ -76,7 +76,7 @@ export interface RuleExecutorServices<
   uiSettingsClient: IUiSettingsClient;
   scopedClusterClient: IScopedClusterClient;
   alertFactory: {
-    create: (id: string) => PublicAlert<InstanceState, InstanceContext, ActionGroupIds> | null;
+    create: (id: string) => PublicAlert<InstanceState, InstanceContext, ActionGroupIds>;
     done: () => AlertFactoryDoneUtils<InstanceState, InstanceContext, ActionGroupIds>;
   };
   shouldWriteAlerts: () => boolean;

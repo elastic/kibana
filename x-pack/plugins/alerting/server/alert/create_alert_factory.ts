@@ -6,9 +6,13 @@
  */
 
 import { Logger } from '@kbn/core/server';
-import { AlertInstanceContext, AlertInstanceState } from '../types';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  RuleExecutionStatusErrorReasons,
+} from '../types';
 import { Alert } from './alert';
-import { getRecoveredAlerts } from '../lib';
+import { ErrorWithReason, getRecoveredAlerts } from '../lib';
 
 export interface AlertFactoryDoneUtils<
   InstanceState extends AlertInstanceState,
@@ -47,23 +51,24 @@ export function createAlertFactory<
 
   let isDone = false;
   return {
-    create: (id: string): Alert<InstanceState, InstanceContext, ActionGroupIds> | null => {
+    create: (id: string): Alert<InstanceState, InstanceContext, ActionGroupIds> => {
       if (isDone) {
         throw new Error(`Can't create new alerts after calling done() in AlertsFactory.`);
       }
 
       if (numAlertsCreated++ >= maxAlerts) {
-        logger.warn(
-          `Rule run generated ${numAlertsCreated} which is greater than the allowed max of ${maxAlerts}. This alert will be discarded.`
+        logger.warn(`Rule run generated greater than ${maxAlerts} alerts.`);
+        throw new ErrorWithReason(
+          RuleExecutionStatusErrorReasons.MaxAlerts,
+          new Error(`Rule generated greater than ${maxAlerts} alerts`)
         );
-        return null;
-      } else {
-        if (!alerts[id]) {
-          alerts[id] = new Alert<InstanceState, InstanceContext, ActionGroupIds>(id);
-        }
-
-        return alerts[id];
       }
+
+      if (!alerts[id]) {
+        alerts[id] = new Alert<InstanceState, InstanceContext, ActionGroupIds>(id);
+      }
+
+      return alerts[id];
     },
     done: (): AlertFactoryDoneUtils<InstanceState, InstanceContext, ActionGroupIds> => {
       isDone = true;

@@ -92,6 +92,9 @@ exports.EcsCustomPropertyMappings = {
                           recovered: {
                             type: 'long',
                           },
+                          dropped: {
+                            type: 'long',
+                          },
                         },
                       },
                       number_of_searches: {

@@ -85,18 +85,16 @@ export const createMetricAnomalyExecutor =
       } = first(data as MappedAnomalyHit[])!;
       const alert = services.alertFactory.create(`${nodeType}-${metric}`);
 
-      if (alert) {
-        alert.scheduleActions(FIRED_ACTIONS_ID, {
-          alertState: stateToAlertMessage[AlertStates.ALERT],
-          timestamp: moment(anomalyStartTime).toISOString(),
-          anomalyScore,
-          actual,
-          typical,
-          metric: metricNameMap[metric],
-          summary: generateSummaryMessage(actual, typical),
-          influencers: influencers.join(', '),
-        });
-      }
+      alert.scheduleActions(FIRED_ACTIONS_ID, {
+        alertState: stateToAlertMessage[AlertStates.ALERT],
+        timestamp: moment(anomalyStartTime).toISOString(),
+        anomalyScore,
+        actual,
+        typical,
+        metric: metricNameMap[metric],
+        summary: generateSummaryMessage(actual, typical),
+        influencers: influencers.join(', '),
+      });
     }
   };
 

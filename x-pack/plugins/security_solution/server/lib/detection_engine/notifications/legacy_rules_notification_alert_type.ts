@@ -120,15 +120,13 @@ export const legacyRulesNotificationAlertType = ({
 
     if (signalsCount !== 0) {
       const alertInstance = services.alertFactory.create(alertId);
-      if (alertInstance) {
-        scheduleNotificationActions({
-          alertInstance,
-          signalsCount,
-          resultsLink,
-          ruleParams,
-          signals,
-        });
-      }
+      scheduleNotificationActions({
+        alertInstance,
+        signalsCount,
+        resultsLink,
+        ruleParams,
+        signals,
+      });
     }
   },
 });

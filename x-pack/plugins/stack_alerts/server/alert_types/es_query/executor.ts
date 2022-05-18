@@ -83,12 +83,10 @@ export async function executor(
 
     const actionContext = addMessages(options, baseContext, params);
     const alertInstance = alertFactory.create(ConditionMetAlertInstanceId);
-    if (alertInstance) {
-      alertInstance
-        // store the params we would need to recreate the query that led to this alert instance
-        .replaceState({ latestTimestamp, dateStart, dateEnd })
-        .scheduleActions(ActionGroupId, actionContext);
-    }
+    alertInstance
+      // store the params we would need to recreate the query that led to this alert instance
+      .replaceState({ latestTimestamp, dateStart, dateEnd })
+      .scheduleActions(ActionGroupId, actionContext);
 
     // update the timestamp based on the current search results
     const firstValidTimefieldSort = getValidTimefieldSort(

@@ -36,6 +36,7 @@ export enum RuleExecutionStatusErrorReasons {
   Read = 'read',
   Decrypt = 'decrypt',
   Execute = 'execute',
+  MaxAlerts = 'maxAlerts',
   Unknown = 'unknown',
   License = 'license',
   Timeout = 'timeout',
@@ -44,6 +45,7 @@ export enum RuleExecutionStatusErrorReasons {
 
 export enum RuleExecutionStatusWarningReasons {
   MAX_EXECUTABLE_ACTIONS = 'maxExecutableActions',
+  MAX_ALERTS = 'maxAlerts',
 }
 
 export interface RuleExecutionStatus {

@@ -309,6 +309,9 @@
                                                         },
                                                         "recovered": {
                                                             "type": "long"
+                                                        },
+                                                        "dropped": {
+                                                            "type": "long"
                                                         }
                                                     }
                                                 },

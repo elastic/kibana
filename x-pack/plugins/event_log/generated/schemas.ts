@@ -136,6 +136,7 @@ export const EventSchema = schema.maybe(
                             active: ecsStringOrNumber(),
                             new: ecsStringOrNumber(),
                             recovered: ecsStringOrNumber(),
+                            dropped: ecsStringOrNumber(),
                           })
                         ),
                         number_of_searches: ecsStringOrNumber(),
