@@ -241,7 +241,7 @@ describe('TableListView', () => {
       expect(tableCellsValues).toEqual([
         ['Item 2', 'Item 2 description', 'yesterday'],
         ['Item 1', 'Item 1 description', '2 days ago'],
-        ['Item 3', 'Item 3 description', ''], // Empty column as no updatedAt provided
+        ['Item 3', 'Item 3 description', '-'], // Empty column as no updatedAt provided
       ]);
     });
   });

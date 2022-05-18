@@ -520,7 +520,15 @@ class TableListView<V extends {}> extends React.Component<
     if (this.state.hasUpdatedAtMetadata) {
       const renderUpdatedAt = (dateTime?: string) => {
         if (!dateTime) {
-          return <span />;
+          return (
+            <EuiToolTip
+              content={i18n.translate('kibana-react.tableListView.updatedDateUnknownLabel', {
+                defaultMessage: 'Updated date unknown',
+              })}
+            >
+              <span>-</span>
+            </EuiToolTip>
+          );
         }
         const updatedAt = moment(dateTime);
 
