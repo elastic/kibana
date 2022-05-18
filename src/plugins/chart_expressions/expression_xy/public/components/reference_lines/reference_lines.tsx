@@ -50,7 +50,7 @@ export const computeChartMargins = (
   return result;
 };
 
-export interface ReferenceLineAnnotationsProps {
+export interface ReferenceLinesProps {
   layers: CommonXYReferenceLineLayerConfig[];
   formatters: Record<'left' | 'right' | 'bottom', FieldFormat | undefined>;
   axesMap: Record<'left' | 'right', boolean>;
@@ -58,7 +58,7 @@ export interface ReferenceLineAnnotationsProps {
   paddingMap: Partial<Record<Position, number>>;
 }
 
-export const ReferenceLineAnnotations = ({ layers, ...rest }: ReferenceLineAnnotationsProps) => {
+export const ReferenceLines = ({ layers, ...rest }: ReferenceLinesProps) => {
   return (
     <>
       {layers.flatMap((layer) => {

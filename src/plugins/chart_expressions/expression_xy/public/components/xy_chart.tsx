@@ -69,7 +69,7 @@ import {
 } from '../helpers';
 import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './legend_action';
-import { ReferenceLineAnnotations, computeChartMargins } from './reference_lines';
+import { ReferenceLines, computeChartMargins } from './reference_lines';
 import { visualizationDefinitions } from '../definitions';
 import { CommonXYLayerConfig } from '../../common/types';
 import { SplitChart } from './split_chart';
@@ -680,7 +680,7 @@ export function XYChart({
         />
       )}
       {referenceLineLayers.length ? (
-        <ReferenceLineAnnotations
+        <ReferenceLines
           layers={referenceLineLayers}
           formatters={{
             left: yAxesMap.left?.formatter,

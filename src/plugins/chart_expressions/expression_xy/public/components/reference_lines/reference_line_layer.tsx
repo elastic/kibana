@@ -6,22 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, Fragment } from 'react';
+import React, { FC } from 'react';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { groupBy } from 'lodash';
-import { euiLightVars } from '@kbn/ui-theme';
-import { AnnotationDomainType, LineAnnotation, Position, RectAnnotation } from '@elastic/charts';
-import { DatatableRow } from '@kbn/expressions-plugin/common';
-import { ExtendedYConfigResult, ReferenceLineLayerConfig } from '../../../common/types';
-import {
-  getBaseIconPlacement,
-  getBottomRect,
-  getGroupId,
-  getHorizontalRect,
-  getLineAnnotationProps,
-  getSharedStyle,
-} from './utils';
-import { LINES_MARKER_SIZE } from '../../helpers';
+import { Position } from '@elastic/charts';
+import { ReferenceLineLayerConfig } from '../../../common/types';
+import { getGroupId } from './utils';
+import { ReferenceLineAnnotations } from './reference_line_annotations';
 
 interface ReferenceLineLayerProps {
   layer: ReferenceLineLayerConfig;
@@ -30,34 +21,6 @@ interface ReferenceLineLayerProps {
   axesMap: Record<'left' | 'right', boolean>;
   isHorizontal: boolean;
 }
-
-const getRectDataValue = (
-  yConfig: ExtendedYConfigResult,
-  columnToLabelMap: Record<string, string>,
-  row: DatatableRow,
-  formatter: FieldFormat | undefined,
-  yConfigsWithSameDirection: ExtendedYConfigResult[]
-) => {
-  const isFillAbove = yConfig.fill === 'above';
-  const indexFromSameType = yConfigsWithSameDirection.findIndex(
-    ({ forAccessor }) => forAccessor === yConfig.forAccessor
-  );
-
-  const shouldCheckNextReferenceLine = indexFromSameType < yConfigsWithSameDirection.length - 1;
-
-  const nextValue = shouldCheckNextReferenceLine
-    ? row[yConfigsWithSameDirection[indexFromSameType + 1].forAccessor]
-    : undefined;
-
-  const headerLabel = columnToLabelMap[yConfig.forAccessor];
-  const currentValue = row[yConfig.forAccessor];
-
-  if (yConfig.axisMode === 'bottom') {
-    return getBottomRect(headerLabel, isFillAbove, formatter, currentValue, nextValue);
-  }
-
-  return getHorizontalRect(headerLabel, isFillAbove, formatter, currentValue, nextValue);
-};
 
 export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
   layer,
@@ -83,6 +46,7 @@ export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
   if (groupedByDirection.below) {
     groupedByDirection.below.reverse();
   }
+
   const referenceLineElements = yConfigByValue.flatMap((yConfig) => {
     const { axisMode } = yConfig;
 
@@ -90,94 +54,37 @@ export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
     const groupId = getGroupId(axisMode);
 
     const formatter = formatters[groupId || 'bottom'];
-
-    const defaultColor = euiLightVars.euiColorDarkShade;
-
-    // get the position for vertical chart
-    const markerPositionVertical = getBaseIconPlacement(
-      yConfig.iconPosition,
-      axesMap,
-      yConfig.axisMode
-    );
-    // the padding map is built for vertical chart
-    const hasReducedPadding = paddingMap[markerPositionVertical] === LINES_MARKER_SIZE;
-
-    const props = getLineAnnotationProps(
-      yConfig,
-      {
-        markerLabel: columnToLabelMap[yConfig.forAccessor],
-        markerBodyLabel:
-          yConfig.textVisibility && !hasReducedPadding
-            ? columnToLabelMap[yConfig.forAccessor]
-            : undefined,
-      },
-      axesMap,
-      paddingMap,
-      groupId,
-      isHorizontal
+    const name = columnToLabelMap[yConfig.forAccessor];
+    const value = row[yConfig.forAccessor];
+    const yConfigsWithSameDirection = groupedByDirection[yConfig.fill!];
+    const indexFromSameType = yConfigsWithSameDirection.findIndex(
+      ({ forAccessor }) => forAccessor === yConfig.forAccessor
     );
 
-    const sharedStyle = getSharedStyle(yConfig);
+    const shouldCheckNextReferenceLine = indexFromSameType < yConfigsWithSameDirection.length - 1;
 
-    const dataValuesSample = {
-      dataValue: row[yConfig.forAccessor],
-      header: columnToLabelMap[yConfig.forAccessor],
-      details: formatter?.convert(row[yConfig.forAccessor]) || row[yConfig.forAccessor],
-    };
+    const nextValue = shouldCheckNextReferenceLine
+      ? row[yConfigsWithSameDirection[indexFromSameType + 1].forAccessor]
+      : undefined;
 
-    const dataValues = new Array(table.rows.length).fill(dataValuesSample);
+    const { forAccessor, type, ...restAnnotationConfig } = yConfig;
+    const id = `${layer.layerId}-${yConfig.forAccessor}`;
 
-    const line = (
-      <LineAnnotation
-        {...props}
-        id={`${layer.layerId}-${yConfig.forAccessor}-line`}
-        key={`${layer.layerId}-${yConfig.forAccessor}-line`}
-        dataValues={dataValues}
-        domainType={
-          yConfig.axisMode === 'bottom'
-            ? AnnotationDomainType.XDomain
-            : AnnotationDomainType.YDomain
-        }
-        style={{
-          line: {
-            ...sharedStyle,
-            opacity: 1,
-          },
-        }}
-      />
-    );
-
-    let rect;
-    if (yConfig.fill && yConfig.fill !== 'none') {
-      const rectDataValuesSample = getRectDataValue(
-        yConfig,
-        columnToLabelMap,
-        row,
-        formatter,
-        groupedByDirection[yConfig.fill]
-      );
-
-      const rectDataValues = new Array(table.rows.length).fill(rectDataValuesSample);
-
-      rect = (
-        <RectAnnotation
-          {...props}
-          id={`${layer.layerId}-${yConfig.forAccessor}-rect`}
-          key={`${layer.layerId}-${yConfig.forAccessor}-rect`}
-          dataValues={rectDataValues}
-          style={{
-            ...sharedStyle,
-            fill: yConfig.color || defaultColor,
-            opacity: 0.1,
-          }}
-        />
-      );
-    }
     return (
-      <Fragment key={`${layer.layerId}-${yConfig.forAccessor}`}>
-        {line}
-        {rect}
-      </Fragment>
+      <ReferenceLineAnnotations
+        key={id}
+        config={{
+          id,
+          value,
+          nextValue,
+          name,
+          ...restAnnotationConfig,
+        }}
+        paddingMap={paddingMap}
+        axesMap={axesMap}
+        formatter={formatter}
+        isHorizontal={isHorizontal}
+      />
     );
   });
 

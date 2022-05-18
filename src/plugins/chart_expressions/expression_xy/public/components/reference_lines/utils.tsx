@@ -10,18 +10,14 @@ import React from 'react';
 import { Position } from '@elastic/charts';
 import { euiLightVars } from '@kbn/ui-theme';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
-import {
-  ExtendedYConfigResult,
-  IconPosition,
-  ReferenceLineYConfig,
-  YAxisMode,
-} from '../../../common/types';
+import { IconPosition, YAxisMode } from '../../../common/types';
 import {
   LINES_MARKER_SIZE,
   mapVerticalToHorizontalPlacement,
   Marker,
   MarkerBody,
 } from '../../helpers';
+import { ReferenceLineAnnotationConfig } from './reference_line_annotations';
 
 // if there's just one axis, put it on the other one
 // otherwise use the same axis
@@ -55,19 +51,19 @@ export function getBaseIconPlacement(
   return Position.Top;
 }
 
-export const getSharedStyle = (yConfig: ReferenceLineYConfig | ExtendedYConfigResult) => ({
-  strokeWidth: yConfig.lineWidth || 1,
-  stroke: yConfig.color || euiLightVars.euiColorDarkShade,
+export const getSharedStyle = (config: ReferenceLineAnnotationConfig) => ({
+  strokeWidth: config.lineWidth || 1,
+  stroke: config.color || euiLightVars.euiColorDarkShade,
   dash:
-    yConfig.lineStyle === 'dashed'
-      ? [(yConfig.lineWidth || 1) * 3, yConfig.lineWidth || 1]
-      : yConfig.lineStyle === 'dotted'
-      ? [yConfig.lineWidth || 1, yConfig.lineWidth || 1]
+    config.lineStyle === 'dashed'
+      ? [(config.lineWidth || 1) * 3, config.lineWidth || 1]
+      : config.lineStyle === 'dotted'
+      ? [config.lineWidth || 1, config.lineWidth || 1]
       : undefined,
 });
 
 export const getLineAnnotationProps = (
-  yConfig: ReferenceLineYConfig | ExtendedYConfigResult,
+  config: ReferenceLineAnnotationConfig,
   labels: { markerLabel?: string; markerBodyLabel?: string },
   axesMap: Record<'left' | 'right', boolean>,
   paddingMap: Partial<Record<Position, number>>,
@@ -76,9 +72,9 @@ export const getLineAnnotationProps = (
 ) => {
   // get the position for vertical chart
   const markerPositionVertical = getBaseIconPlacement(
-    yConfig.iconPosition,
+    config.iconPosition,
     axesMap,
-    yConfig.axisMode
+    config.axisMode
   );
   // the padding map is built for vertical chart
   const hasReducedPadding = paddingMap[markerPositionVertical] === LINES_MARKER_SIZE;
@@ -87,7 +83,7 @@ export const getLineAnnotationProps = (
     groupId,
     marker: (
       <Marker
-        config={yConfig}
+        config={config}
         label={labels.markerLabel}
         isHorizontal={isHorizontal}
         hasReducedPadding={hasReducedPadding}
@@ -97,8 +93,8 @@ export const getLineAnnotationProps = (
       <MarkerBody
         label={labels.markerBodyLabel}
         isHorizontal={
-          (!isHorizontal && yConfig.axisMode === 'bottom') ||
-          (isHorizontal && yConfig.axisMode !== 'bottom')
+          (!isHorizontal && config.axisMode === 'bottom') ||
+          (isHorizontal && config.axisMode !== 'bottom')
         }
       />
     ),
@@ -126,7 +122,7 @@ export const getBottomRect = (
     y1: undefined,
   },
   header: headerLabel,
-  details: formatter?.convert(currentValue) || currentValue,
+  details: formatter?.convert(currentValue) || currentValue.toString(),
 });
 
 export const getHorizontalRect = (
@@ -143,5 +139,5 @@ export const getHorizontalRect = (
     y1: isFillAbove ? nextValue : currentValue,
   },
   header: headerLabel,
-  details: formatter?.convert(currentValue) || currentValue,
+  details: formatter?.convert(currentValue) || currentValue.toString(),
 });
