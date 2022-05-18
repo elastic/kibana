@@ -42,7 +42,7 @@ describe('use cases add to new case flyout hook', () => {
 
   it('should throw if called outside of a cases context', () => {
     const { result } = renderHook(() => {
-      useCasesAddToNewCaseFlyout({});
+      useCasesAddToNewCaseFlyout();
     });
     expect(result.error?.message).toContain(
       'useCasesContext must be used within a CasesProvider and have a defined value'
@@ -52,7 +52,7 @@ describe('use cases add to new case flyout hook', () => {
   it('should dispatch the open action when invoked without attachments', () => {
     const { result } = renderHook(
       () => {
-        return useCasesAddToNewCaseFlyout({});
+        return useCasesAddToNewCaseFlyout();
       },
       { wrapper }
     );
@@ -70,25 +70,7 @@ describe('use cases add to new case flyout hook', () => {
   it('should dispatch the open action when invoked with attachments', () => {
     const { result } = renderHook(
       () => {
-        return useCasesAddToNewCaseFlyout({});
-      },
-      { wrapper }
-    );
-    result.current.open({ attachments: [alertComment] });
-    expect(dispatch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT,
-        payload: expect.objectContaining({
-          attachments: [alertComment],
-        }),
-      })
-    );
-  });
-
-  it('should dispatch the open action when invoked, with custom attachments', () => {
-    const { result } = renderHook(
-      () => {
-        return useCasesAddToNewCaseFlyout({});
+        return useCasesAddToNewCaseFlyout();
       },
       { wrapper }
     );
@@ -106,7 +88,7 @@ describe('use cases add to new case flyout hook', () => {
   it('should dispatch the close action when invoked', () => {
     const { result } = renderHook(
       () => {
-        return useCasesAddToNewCaseFlyout({});
+        return useCasesAddToNewCaseFlyout();
       },
       { wrapper }
     );
