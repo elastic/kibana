@@ -2809,4 +2809,50 @@ describe('XYChart component', () => {
       expect(smallMultiples.prop('splitHorizontally')).toEqual(SPLIT_ROW);
     });
   });
+
+  describe('detailed tooltip', () => {
+    it('should render custom detailed tooltip', () => {
+      const { args } = sampleArgs();
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            layers: [{ ...(args.layers[0] as DataLayerConfig), seriesType: 'bar' }],
+            detailedTooltip: true,
+          }}
+        />
+      );
+      const settings = component.find(Settings);
+      const tooltip = settings.prop('tooltip');
+      expect(tooltip).toEqual(
+        expect.objectContaining({
+          headerFormatter: undefined,
+          customTooltip: expect.any(Function),
+        })
+      );
+    });
+
+    it('should render default tooltip, if detailed tooltip is hidden', () => {
+      const { args } = sampleArgs();
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            layers: [{ ...(args.layers[0] as DataLayerConfig), seriesType: 'bar' }],
+            detailedTooltip: false,
+          }}
+        />
+      );
+      const settings = component.find(Settings);
+      const tooltip = settings.prop('tooltip');
+      expect(tooltip).toEqual(
+        expect.objectContaining({
+          headerFormatter: expect.any(Function),
+          customTooltip: undefined,
+        })
+      );
+    });
+  });
 });
