@@ -12,6 +12,7 @@ import { Case } from '../../../../common';
 import { useKibana } from '../../../common/lib/kibana';
 import { getManualAlertIds, getRegistrationContextFromAlerts } from './helpers';
 import { useGetFeatureIds } from '../../../containers/use_get_feature_ids';
+import { CaseViewAlertsEmpty } from './case_view_alerts_empty';
 
 interface CaseViewAlertsProps {
   caseData: Case;
@@ -42,6 +43,10 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
     featureIds: alertFeatureIds,
     query: alertIdsQuery,
   };
+
+  if (alertIdsQuery.ids.values.length === 0) {
+    return <CaseViewAlertsEmpty />;
+  }
 
   return isLoadingAlertFeatureIds ? (
     <EuiFlexGroup>
