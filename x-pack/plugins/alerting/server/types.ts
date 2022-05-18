@@ -40,10 +40,11 @@ import {
   SanitizedRuleConfig,
   RuleMonitoring,
   MappedParams,
+  RuleSnooze,
 } from '../common';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
-
+export type { RuleTypeParams };
 /**
  * @public
  */
@@ -123,6 +124,7 @@ export type ExecutorType<
 
 export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
   validate: (object: unknown) => Params;
+  validateMutatedParams?: (mutatedOject: unknown, origObject?: unknown) => Params;
 }
 
 export interface RuleType<
@@ -248,7 +250,8 @@ export interface RawRule extends SavedObjectAttributes {
   meta?: RuleMeta;
   executionStatus: RawRuleExecutionStatus;
   monitoring?: RuleMonitoring;
-  snoozeEndTime?: string | null; // Remove ? when this parameter is made available in the public API
+  snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
+  isSnoozedUntil?: string | null;
 }
 
 export interface AlertingPlugin {

@@ -6,10 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { Dimension, prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
-import { LayerTypes, XY_VIS_RENDERER } from '../constants';
-import { appendLayerIds } from '../helpers';
-import { XYLayerConfig, XyVisFn } from '../types';
+import {
+  Dimension,
+  prepareLogTable,
+  validateAccessor,
+} from '@kbn/visualizations-plugin/common/utils';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
+import { LayerTypes, XY_VIS_RENDERER, DATA_LAYER } from '../constants';
+import { appendLayerIds, getAccessors, normalizeTable } from '../helpers';
+import { DataLayerConfigResult, XYLayerConfig, XyVisFn, XYArgs } from '../types';
 import { getLayerDimensions } from '../utils';
 import {
   hasAreaLayer,
@@ -18,10 +24,54 @@ import {
   validateExtent,
   validateFillOpacity,
   validateValueLabels,
+  validateMinTimeBarInterval,
 } from './validate';
 
+const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult => {
+  const accessors = getAccessors<string | ExpressionValueVisDimension, XYArgs>(args, table);
+  const normalizedTable = normalizeTable(table, accessors.xAccessor);
+  return {
+    type: DATA_LAYER,
+    seriesType: args.seriesType,
+    hide: args.hide,
+    columnToLabel: args.columnToLabel,
+    xScaleType: args.xScaleType,
+    isHistogram: args.isHistogram,
+    palette: args.palette,
+    yConfig: args.yConfig,
+    layerType: LayerTypes.DATA,
+    table: normalizedTable,
+    ...accessors,
+  };
+};
+
 export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
-  const { dataLayers = [], referenceLineLayers = [], annotationLayers = [], ...restArgs } = args;
+  validateAccessor(args.splitRowAccessor, data.columns);
+  validateAccessor(args.splitColumnAccessor, data.columns);
+
+  const {
+    referenceLineLayers = [],
+    annotationLayers = [],
+    // data_layer args
+    seriesType,
+    accessors,
+    xAccessor,
+    hide,
+    splitAccessor,
+    columnToLabel,
+    xScaleType,
+    isHistogram,
+    yConfig,
+    palette,
+    ...restArgs
+  } = args;
+
+  const dataLayers: DataLayerConfigResult[] = [createDataLayer(args, data)];
+
+  validateAccessor(dataLayers[0].xAccessor, data.columns);
+  validateAccessor(dataLayers[0].splitAccessor, data.columns);
+  dataLayers[0].accessors.forEach((accessor) => validateAccessor(accessor, data.columns));
+
   const layers: XYLayerConfig[] = [
     ...appendLayerIds(dataLayers, 'dataLayers'),
     ...appendLayerIds(referenceLineLayers, 'referenceLineLayers'),
@@ -29,6 +79,9 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   ];
 
   if (handlers.inspectorAdapters.tables) {
+    handlers.inspectorAdapters.tables.reset();
+    handlers.inspectorAdapters.tables.allowCsvExport = true;
+
     const layerDimensions = layers.reduce<Dimension[]>((dimensions, layer) => {
       if (layer.layerType === LayerTypes.ANNOTATIONS) {
         return dimensions;
@@ -47,6 +100,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   validateExtent(args.yLeftExtent, hasBar || hasArea, dataLayers);
   validateExtent(args.yRightExtent, hasBar || hasArea, dataLayers);
   validateFillOpacity(args.fillOpacity, hasArea);
+  validateMinTimeBarInterval(dataLayers, hasBar, args.minTimeBarInterval);
 
   const hasNotHistogramBars = !hasHistogramBarLayer(dataLayers);
 
