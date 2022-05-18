@@ -136,7 +136,11 @@ function getFieldsByRuleType(ruleType?: string): EventSummaryField[] {
     case 'threshold':
       return [
         { id: THRESHOLD_COUNT, label: ALERTS_HEADERS_THRESHOLD_COUNT },
-        { id: THRESHOLD_TERMS_FIELD, label: ALERTS_HEADERS_THRESHOLD_TERMS },
+        {
+          id: THRESHOLD_TERMS_FIELD,
+          overrideField: THRESHOLD_TERMS_VALUE,
+          label: ALERTS_HEADERS_THRESHOLD_TERMS,
+        },
         {
           id: THRESHOLD_CARDINALITY_FIELD,
           label: ALERTS_HEADERS_THRESHOLD_CARDINALITY,
