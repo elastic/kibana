@@ -118,6 +118,7 @@ export const tinymathFunctions: Record<
       optional?: boolean;
       defaultValue?: string | number;
       type?: string;
+      alternativeWhenMissing?: string;
     }>;
     // Help is in Markdown format
     help: string;
@@ -273,10 +274,12 @@ Example: Round up price to the next dollar
       {
         name: i18n.translate('xpack.lens.formula.min', { defaultMessage: 'min' }),
         type: getTypeI18n('number'),
+        alternativeWhenMissing: 'pick_max',
       },
       {
         name: i18n.translate('xpack.lens.formula.max', { defaultMessage: 'max' }),
         type: getTypeI18n('number'),
+        alternativeWhenMissing: 'pick_min',
       },
     ],
     help: i18n.translate('xpack.lens.formula.clampFunction.markdown', {
@@ -480,6 +483,20 @@ Example: Calculate area based on side length
 \`square(last_value(length))\`
     `,
     }),
+  },
+  pick_max: {
+    positionalArguments: [
+      { name: 'left', type: getTypeI18n('number') },
+      { name: 'right', type: getTypeI18n('number') },
+    ],
+    help: '',
+  },
+  pick_min: {
+    positionalArguments: [
+      { name: 'left', type: getTypeI18n('number') },
+      { name: 'right', type: getTypeI18n('number') },
+    ],
+    help: '',
   },
 };
 

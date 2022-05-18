@@ -89,5 +89,5 @@ function astToString(ast: TinymathAST | string): string | number {
     }
     return `${ast.name}=${ast.value}`;
   }
-  return `${ast.name}(${ast.args.map(astToString).join(',')})`;
+  return `${ast.name.replace('pick_', '')}(${ast.args.map(astToString).join(',')})`;
 }
