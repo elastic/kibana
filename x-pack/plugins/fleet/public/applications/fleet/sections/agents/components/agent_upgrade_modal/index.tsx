@@ -7,34 +7,48 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiConfirmModal, EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiConfirmModal, EuiComboBox, EuiFormRow, EuiSpacer, EuiToolTip, EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { Agent } from '../../../../types';
 import {
   sendPostAgentUpgrade,
   sendPostBulkAgentUpgrade,
   useStartServices,
 } from '../../../../hooks';
+import { FALLBACK_VERSIONS, MAINTAINANCE_WINDOWS } from './constants';
 
 interface Props {
   onClose: () => void;
   agents: Agent[] | string;
   agentCount: number;
-  version: string;
 }
 
 export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
   onClose,
   agents,
   agentCount,
-  version,
 }) => {
   const { notifications } = useStartServices();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const fallbackVersions: Array<EuiComboBoxOptionOption<string>> = FALLBACK_VERSIONS.map((option) => ({
+    label: option,
+    value: option,
+  }));
+  const maintainanceOptions: Array<EuiComboBoxOptionOption<string>> = MAINTAINANCE_WINDOWS.map((option) => ({
+    label: option,
+    value: option,
+  }));
+  const [selectedVersion, setSelectedVersion] = useState([fallbackVersions[0]]);
+  const [selectedMantainanceWindow, setSelectedMantainanceWindow] = useState([maintainanceOptions[0]]);
   const isSingleAgent = Array.isArray(agents) && agents.length === 1;
   const isAllAgents = agents === '';
+
+  const getVersion = (selectedVersion: EuiComboBoxOptionOption<string>[]) => selectedVersion[0].value as string;
+
   async function onSubmit() {
+    const version = getVersion(selectedVersion);
     try {
       setIsSubmitting(true);
       const { data, error } = isSingleAgent
@@ -114,39 +128,20 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
     <EuiConfirmModal
       data-test-subj="agentUpgradeModal"
       title={
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            {isSingleAgent ? (
-              <FormattedMessage
-                id="xpack.fleet.upgradeAgents.upgradeSingleTitle"
-                defaultMessage="Upgrade agent to latest version"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.fleet.upgradeAgents.upgradeMultipleTitle"
-                defaultMessage="Upgrade {count, plural, one {agent} other {{count} agents} =true {all selected agents}} to latest version"
-                values={{ count: isAllAgents || agentCount }}
-              />
-            )}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBetaBadge
-              iconType="beaker"
-              label={
-                <FormattedMessage
-                  id="xpack.fleet.upgradeAgents.experimentalLabel"
-                  defaultMessage="Experimental"
-                />
-              }
-              tooltipContent={
-                <FormattedMessage
-                  id="xpack.fleet.upgradeAgents.experimentalLabelTooltip"
-                  defaultMessage="Upgrade agent might change or be removed in a future release and is not subject to the support SLA."
-                />
-              }
+        <>
+          {isSingleAgent ? (
+            <FormattedMessage
+              id="xpack.fleet.upgradeAgents.upgradeSingleTitle"
+              defaultMessage="Upgrade agent to latest version"
             />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          ) : (
+            <FormattedMessage
+              id="xpack.fleet.upgradeAgents.upgradeMultipleTitle"
+              defaultMessage="Upgrade {count, plural, one {agent} other {{count} agents} =true {all selected agents}} to latest version"
+              values={{ count: isAllAgents || agentCount }}
+            />
+          )}
+        </>
       }
       onCancel={onClose}
       onConfirm={onSubmit}
@@ -172,24 +167,82 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
         )
       }
     >
-      <p>
+     <p>
         {isSingleAgent ? (
           <FormattedMessage
             id="xpack.fleet.upgradeAgents.upgradeSingleDescription"
             defaultMessage="This action will upgrade the agent running on '{hostName}' to version {version}. This action can not be undone. Are you sure you wish to continue?"
             values={{
               hostName: ((agents[0] as Agent).local_metadata.host as any).hostname,
-              version,
+              version: getVersion(selectedVersion),
             }}
           />
         ) : (
           <FormattedMessage
             id="xpack.fleet.upgradeAgents.upgradeMultipleDescription"
             defaultMessage="This action will upgrade multiple agents to version {version}. This action can not be undone. Are you sure you wish to continue?"
-            values={{ version }}
+            values={{ version: getVersion(selectedVersion) }}
           />
         )}
       </p>
+      <EuiSpacer size="m" />
+      <EuiFormRow
+        label= {i18n.translate(
+          'xpack.fleet.upgradeAgents.chooseVersionLabel',
+          {
+            defaultMessage: 'Upgrade version',
+          }
+        )}
+        fullWidth
+      >
+        <EuiComboBox
+          fullWidth
+          singleSelection={{ asPlainText: true }}
+          options={fallbackVersions}
+          selectedOptions={selectedVersion}
+          onChange={(selectedVersion: Array<EuiComboBoxOptionOption<string>>) => {
+            setSelectedVersion(selectedVersion);
+          }}
+        />
+      </EuiFormRow>
+      <EuiSpacer size="m" />
+      <EuiFormRow
+        label= {
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              {i18n.translate(
+                'xpack.fleet.upgradeAgents.maintainanceAvailableLabel',
+                {
+                  defaultMessage: 'Maintainance window available',
+                }
+              )}
+            </EuiFlexItem>
+            <EuiSpacer size="xs" />
+            <EuiFlexItem grow={false}>
+              <EuiToolTip position="top" content={i18n.translate(
+                'xpack.fleet.upgradeAgents.maintainanceAvailableTooltip',
+                {
+                  defaultMessage: 'Defines the duration of time available to perform the upgrade. The agent upgrades are spread uniformly across this duration in order to avoid exhausting network resources.',
+                }
+              )}>
+                <EuiIcon type="iInCircle" title="TooltipIcon" />
+              </EuiToolTip>
+            </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+        fullWidth
+      >
+        <EuiComboBox
+          fullWidth
+          singleSelection={{ asPlainText: true }}
+          options={maintainanceOptions}
+          selectedOptions={selectedMantainanceWindow}
+          onChange={(selectedMantainanceWindow: Array<EuiComboBoxOptionOption<string>>) => {
+            setSelectedMantainanceWindow(selectedMantainanceWindow);
+          }}
+        />
+      </EuiFormRow>
+
     </EuiConfirmModal>
   );
 };
