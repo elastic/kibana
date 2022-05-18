@@ -29,22 +29,8 @@ export function createLensVisToADJobAction(getStartServices: MlCoreSetup['getSta
       }
 
       try {
-        // const [{ convertLensToADJob }, [, { share }]] = await Promise.all([
-        //   import('../application/jobs/new_job/job_from_lens'),
-        //   getStartServices(),
-        // ]);
-
-        // await convertLensToADJob(embeddable, share);
-        // const [{ convertLensToADJob }, [coreStart]] = await Promise.all([
-        //   import('../application/jobs/new_job/job_from_lens'),
-        //   getStartServices(),
-        // ]);
-
-        // convertLensToADJob(embeddable, coreStart);
-
         const [{ showLensVisToADJobFlyout }, [coreStart, { share, data, lens }]] =
           await Promise.all([import('../embeddables/lens'), getStartServices()]);
-        // console.log('execute called');
         if (lens === undefined) {
           return;
         }
