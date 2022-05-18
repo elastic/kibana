@@ -14,6 +14,7 @@ import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import { PhraseSuggestorUI, PhraseSuggestorProps } from './phrase_suggestor';
 import { ValueInputType } from './value_input_type';
+import { getFieldValidityAndErrorMessage } from '../../utils/helpers';
 
 interface Props extends PhraseSuggestorProps {
   value?: string;
@@ -24,6 +25,11 @@ interface Props extends PhraseSuggestorProps {
 
 class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
   public render() {
+    const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(
+      this.props.field,
+      this.props.value
+    );
+
     return (
       <EuiFormRow
         fullWidth={this.props.fullWidth}
@@ -31,6 +37,8 @@ class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
           id: 'unifiedSearch.filter.filterEditor.valueInputLabel',
           defaultMessage: 'Value',
         })}
+        isInvalid={isInvalid}
+        error={errorMessage}
       >
         {this.isSuggestingValues() ? (
           this.renderWithSuggestions()
@@ -44,6 +52,7 @@ class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
             value={this.props.value}
             onChange={this.props.onChange}
             field={this.props.field}
+            isInvalid={isInvalid}
           />
         )}
       </EuiFormRow>

@@ -39,7 +39,7 @@ export function ServiceGroupsCard({
   const { tourEnabled, dismissTour } = useServiceGroupsTour('serviceGroupCard');
 
   const cardProps: EuiCardProps = {
-    style: { width: 286, height: 186 },
+    style: { width: 286 },
     icon: (
       <EuiAvatar
         name={serviceGroup.groupName}
@@ -87,23 +87,29 @@ export function ServiceGroupsCard({
   if (withTour) {
     return (
       <EuiFlexItem key={serviceGroup.groupName}>
-        <ServiceGroupsTour
-          tourEnabled={tourEnabled}
-          dismissTour={dismissTour}
-          title={i18n.translate(
-            'xpack.apm.serviceGroups.tour.serviceGroups.title',
-            { defaultMessage: 'All services group' }
-          )}
-          content={i18n.translate(
-            'xpack.apm.serviceGroups.tour.serviceGroups.content',
-            {
-              defaultMessage:
-                "Now that you've created a service group, your All services inventory has moved here. This group cannot be edited or removed.",
-            }
-          )}
-        >
-          <EuiCard layout="vertical" {...cardProps} />
-        </ServiceGroupsTour>
+        <EuiCard
+          layout="vertical"
+          {...cardProps}
+          description={
+            <ServiceGroupsTour
+              tourEnabled={tourEnabled}
+              dismissTour={dismissTour}
+              title={i18n.translate(
+                'xpack.apm.serviceGroups.tour.serviceGroups.title',
+                { defaultMessage: 'All services group' }
+              )}
+              content={i18n.translate(
+                'xpack.apm.serviceGroups.tour.serviceGroups.content',
+                {
+                  defaultMessage:
+                    "Now that you've created a service group, your All services inventory has moved here. This group cannot be edited or removed.",
+                }
+              )}
+            >
+              <>{cardProps.description}</>
+            </ServiceGroupsTour>
+          }
+        />
       </EuiFlexItem>
     );
   }
