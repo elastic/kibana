@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { useStatusBulkActionItems } from '@kbn/timelines-plugin/public';
+import { useBulkActionItems } from '@kbn/timelines-plugin/public';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { timelineActions } from '../../../../timelines/store/timeline';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
@@ -54,7 +54,7 @@ export const useAlertsActions = ({
     [dispatch, timelineId]
   );
 
-  const actionItems = useStatusBulkActionItems({
+  const actionItems = useBulkActionItems({
     eventIds: [eventId],
     currentStatus: alertStatus,
     indexName,
