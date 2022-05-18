@@ -52,14 +52,15 @@ const testPolicy = {
   },
 };
 
-const isLinkedWithIndices = (i: number) => i > 0 && i % 2 === 0;
+const isUsedByAnIndex = (i: number) => i % 2 === 0;
 const isDesignatedManagedPolicy = (i: number) => i > 0 && i % 3 === 0;
+
 const policies: PolicyFromES[] = [testPolicy];
 for (let i = 1; i < 105; i++) {
   policies.push({
     version: i,
     modifiedDate: moment().subtract(i, 'days').toISOString(),
-    indices: i % 2 === 0 ? [`index${i}`] : [],
+    indices: isUsedByAnIndex(i) ? [`index${i}`] : [],
     indexTemplates: i % 2 === 0 ? [`indexTemplate${i}`] : [],
     name: `testy${i}`,
     policy: {
@@ -106,7 +107,7 @@ const getPolicies = (rendered: ReactWrapper) => {
       version,
       name,
       isManagedPolicy: isDesignatedManagedPolicy(version),
-      isLinkedWithIndices: isLinkedWithIndices(version),
+      isUsedByAnIndex: isUsedByAnIndex(version),
     };
   });
   return visiblePolicies;
@@ -235,7 +236,11 @@ describe('policy table', () => {
   });
   test('delete policy button is enabled when there are no linked indices', () => {
     const rendered = mountWithIntl(component);
-    const policyRow = findTestSubject(rendered, `policyTableRow-testy1`);
+    const visiblePolicies = getPolicies(rendered);
+    const usedPolicy = visiblePolicies.find((p) => !p.isUsedByAnIndex);
+    expect(usedPolicy).toBeDefined();
+
+    const policyRow = findTestSubject(rendered, `policyTableRow-${usedPolicy!.name}`);
     const deleteButton = findTestSubject(policyRow, 'deletePolicy');
     expect(deleteButton.props().disabled).toBeFalsy();
   });
@@ -266,7 +271,7 @@ describe('policy table', () => {
     rendered.update();
 
     const visiblePolicies = getPolicies(rendered);
-    const managedPolicy = visiblePolicies.find((p) => p.isManagedPolicy && !p.isLinkedWithIndices);
+    const managedPolicy = visiblePolicies.find((p) => p.isManagedPolicy && !p.isUsedByAnIndex);
     expect(managedPolicy).toBeDefined();
 
     const policyRow = findTestSubject(rendered, `policyTableRow-${managedPolicy!.name}`);
