@@ -80,9 +80,7 @@ import { ViewSelection } from '../event_rendered_view/selector';
 import { EventRenderedView } from '../event_rendered_view';
 import { REMOVE_COLUMN } from './column_headers/translations';
 
-const StatefulAlertBulkActions = lazy(
-  () => import('../toolbar/bulk_actions/alert_status_bulk_actions')
-);
+const StatefulAlertBulkActions = lazy(() => import('../toolbar/bulk_actions/alert_bulk_actions'));
 
 interface OwnProps {
   activePage: number;
