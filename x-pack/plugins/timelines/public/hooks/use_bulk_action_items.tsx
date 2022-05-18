@@ -9,7 +9,7 @@ import React, { useMemo, useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { FILTER_CLOSED, FILTER_ACKNOWLEDGED, FILTER_OPEN } from '../../common/constants';
 import * as i18n from '../components/t_grid/translations';
-import type { AlertStatus, StatusBulkActionsProps } from '../../common/types/timeline';
+import type { AlertStatus, BulkActionsProps } from '../../common/types/timeline';
 import { useUpdateAlertsStatus } from '../container/use_update_alerts';
 import { useAppToasts } from './use_app_toasts';
 import { STANDALONE_ID } from '../components/t_grid/standalone';
@@ -18,17 +18,19 @@ export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
   return { bool: { filter: { terms: { _id: eventIds } } } };
 };
 
-export const useStatusBulkActionItems = ({
+export const useBulkActionItems = ({
   eventIds,
   currentStatus,
   query,
   indexName,
   setEventsLoading,
+  showAlertStatusActions = true,
   setEventsDeleted,
   onUpdateSuccess,
   onUpdateFailure,
+  customBulkActions,
   timelineId,
-}: StatusBulkActionsProps) => {
+}: BulkActionsProps) => {
   const { updateAlertStatus } = useUpdateAlertsStatus(timelineId !== STANDALONE_ID);
   const { addSuccess, addError, addWarning } = useAppToasts();
 
@@ -122,42 +124,63 @@ export const useStatusBulkActionItems = ({
   );
 
   const items = useMemo(() => {
-    const actionItems = [];
-    if (currentStatus !== FILTER_OPEN) {
-      actionItems.push(
-        <EuiContextMenuItem
-          key="open"
-          data-test-subj="open-alert-status"
-          onClick={() => onClickUpdate(FILTER_OPEN)}
-        >
-          {i18n.BULK_ACTION_OPEN_SELECTED}
-        </EuiContextMenuItem>
-      );
+    const actionItems: JSX.Element[] = [];
+    if (showAlertStatusActions) {
+      if (currentStatus !== FILTER_OPEN) {
+        actionItems.push(
+          <EuiContextMenuItem
+            key="open"
+            data-test-subj="open-alert-status"
+            onClick={() => onClickUpdate(FILTER_OPEN)}
+          >
+            {i18n.BULK_ACTION_OPEN_SELECTED}
+          </EuiContextMenuItem>
+        );
+      }
+      if (currentStatus !== FILTER_ACKNOWLEDGED) {
+        actionItems.push(
+          <EuiContextMenuItem
+            key="acknowledge"
+            data-test-subj="acknowledged-alert-status"
+            onClick={() => onClickUpdate(FILTER_ACKNOWLEDGED)}
+          >
+            {i18n.BULK_ACTION_ACKNOWLEDGED_SELECTED}
+          </EuiContextMenuItem>
+        );
+      }
+      if (currentStatus !== FILTER_CLOSED) {
+        actionItems.push(
+          <EuiContextMenuItem
+            key="close"
+            data-test-subj="close-alert-status"
+            onClick={() => onClickUpdate(FILTER_CLOSED)}
+          >
+            {i18n.BULK_ACTION_CLOSE_SELECTED}
+          </EuiContextMenuItem>
+        );
+      }
     }
-    if (currentStatus !== FILTER_ACKNOWLEDGED) {
-      actionItems.push(
-        <EuiContextMenuItem
-          key="acknowledge"
-          data-test-subj="acknowledged-alert-status"
-          onClick={() => onClickUpdate(FILTER_ACKNOWLEDGED)}
-        >
-          {i18n.BULK_ACTION_ACKNOWLEDGED_SELECTED}
-        </EuiContextMenuItem>
-      );
-    }
-    if (currentStatus !== FILTER_CLOSED) {
-      actionItems.push(
-        <EuiContextMenuItem
-          key="close"
-          data-test-subj="close-alert-status"
-          onClick={() => onClickUpdate(FILTER_CLOSED)}
-        >
-          {i18n.BULK_ACTION_CLOSE_SELECTED}
-        </EuiContextMenuItem>
-      );
-    }
-    return actionItems;
-  }, [currentStatus, onClickUpdate]);
+
+    const additionalItems = customBulkActions
+      ? customBulkActions.reduce<JSX.Element[]>((acc, action) => {
+          const isDisabled = !!(query && action.disableOnQuery);
+          acc.push(
+            <EuiContextMenuItem
+              key={action.key}
+              disabled={isDisabled}
+              data-test-subj={action['data-test-subj']}
+              toolTipContent={isDisabled ? action.disabledLabel : null}
+              onClick={() => action.onClick(eventIds)}
+            >
+              {action.label}
+            </EuiContextMenuItem>
+          );
+          return acc;
+        }, [])
+      : [];
+
+    return [...actionItems, ...additionalItems];
+  }, [currentStatus, customBulkActions, eventIds, onClickUpdate, query, showAlertStatusActions]);
 
   return items;
 };

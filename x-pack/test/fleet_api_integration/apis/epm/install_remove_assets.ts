@@ -57,7 +57,8 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('uninstalls all assets when uninstalling a package', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/132333
+    describe.skip('uninstalls all assets when uninstalling a package', async () => {
       before(async () => {
         if (!server.enabled) return;
         // these tests ensure that uninstall works properly so make sure that the package gets installed and uninstalled
