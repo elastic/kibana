@@ -21531,8 +21531,6 @@
     "xpack.observability.cases.caseView.goToDocumentationButton": "ドキュメンテーションを表示",
     "xpack.observability.defaultApmServiceEnvironment": "デフォルトのサービス環境",
     "xpack.observability.defaultApmServiceEnvironmentDescription": "APMアプリのデフォルト環境を設定します。空にすると、すべての環境からのデータがデフォルトで表示されます。",
-    "xpack.observability.detectionEngine.alerts.actions.addToCase": "既存のケースに追加",
-    "xpack.observability.detectionEngine.alerts.actions.addToNewCase": "新しいケースに追加",
     "xpack.observability.emptySection.apps.alert.description": "オブザーバビリティで複雑な条件を検出し、それらの条件が満たされたときにアクションをトリガーします。",
     "xpack.observability.emptySection.apps.alert.link": "ルールを作成",
     "xpack.observability.emptySection.apps.alert.title": "アラートが見つかりません。",
