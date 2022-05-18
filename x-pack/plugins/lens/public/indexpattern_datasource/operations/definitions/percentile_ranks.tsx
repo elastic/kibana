@@ -28,9 +28,6 @@ import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 export interface PercentileRanksIndexPatternColumn
   extends FieldBasedIndexPatternColumnMultipleValues {
   operationType: 'percentile_ranks';
-  params: {
-    value: number;
-  };
 }
 
 function ofName(name: string, value: number, timeShift: string | undefined) {

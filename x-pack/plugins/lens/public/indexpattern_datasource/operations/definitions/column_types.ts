@@ -39,7 +39,7 @@ export interface FieldBasedIndexPatternColumn extends BaseIndexPatternColumn {
 }
 
 export interface FieldBasedIndexPatternColumnMultipleValues extends FieldBasedIndexPatternColumn {
-  params?: {
+  params: {
     value: number;
   };
 }
@@ -51,7 +51,6 @@ export interface ReferenceBasedIndexPatternColumn extends FormattedIndexPatternC
 export type GenericIndexPatternColumn =
   | BaseIndexPatternColumn
   | FieldBasedIndexPatternColumn
-  | FieldBasedIndexPatternColumnMultipleValues
   | ReferenceBasedIndexPatternColumn;
 
 // Used to store the temporary invalid state

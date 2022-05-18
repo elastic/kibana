@@ -24,7 +24,10 @@ import { GenericIndexPatternColumn } from './indexpattern';
 import { operationDefinitionMap } from './operations';
 import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
 import { DateHistogramIndexPatternColumn, RangeIndexPatternColumn } from './operations/definitions';
-import { FormattedIndexPatternColumn } from './operations/definitions/column_types';
+import {
+  FormattedIndexPatternColumn,
+  FieldBasedIndexPatternColumnMultipleValues,
+} from './operations/definitions/column_types';
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
 
 type OriginalColumn = { id: string } & GenericIndexPatternColumn;
@@ -178,7 +181,8 @@ function getExpressionForLayer(
         column.params &&
         'value' in column.params
       ) {
-        esAggsId += `.${column.params.value}`;
+        const params = column.params as FieldBasedIndexPatternColumnMultipleValues['params'];
+        esAggsId += `.${params.value}`;
       }
 
       return {

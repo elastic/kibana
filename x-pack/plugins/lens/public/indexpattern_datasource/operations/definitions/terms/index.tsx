@@ -24,7 +24,10 @@ import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { insertOrReplaceColumn, updateColumnParam, updateDefaultLabels } from '../../layer_helpers';
 import type { DataType } from '../../../../types';
 import { OperationDefinition } from '..';
-import { FieldBasedIndexPatternColumn } from '../column_types';
+import {
+  FieldBasedIndexPatternColumn,
+  FieldBasedIndexPatternColumnMultipleValues,
+} from '../column_types';
 import { ValuesInput } from './values_input';
 import { getInvalidFieldMessage } from '../helpers';
 import { FieldInputs, getInputFieldErrorMessage, MAX_MULTI_FIELDS_SIZE } from './field_inputs';
@@ -248,7 +251,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         orderColumn.params &&
         'value' in orderColumn.params
       ) {
-        orderBy = `${orderBy}.${orderColumn.params?.value}`;
+        const params = orderColumn.params as FieldBasedIndexPatternColumnMultipleValues['params'];
+        orderBy = `${orderBy}.${params?.value}`;
       }
     }
 
