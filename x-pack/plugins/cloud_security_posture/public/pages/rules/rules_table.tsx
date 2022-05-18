@@ -128,8 +128,8 @@ const getColumns = ({
     ),
   },
   {
-    field: 'section', // TODO: what field is this?
-    name: TEXT.SECTION,
+    field: 'attributes.section',
+    name: TEXT.CIS_SECTION,
     width: '15%',
   },
   {

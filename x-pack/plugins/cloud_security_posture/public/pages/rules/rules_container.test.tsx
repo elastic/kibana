@@ -60,6 +60,10 @@ const getRuleMock = ({
       package_policy_id: packagePolicyId,
       policy_id: policyId,
       enabled,
+      benchmark: {
+        name: chance.word(),
+        version: chance.sentence(),
+      },
     },
   } as RuleSavedObject);
 
