@@ -51,6 +51,7 @@ import type { createVisEmbeddableFromObject } from '../embeddable';
 import type { VisEditorsRegistry } from '../vis_editors_registry';
 
 export interface VisualizeAppState {
+  dataView?: string;
   filters: Filter[];
   uiState: SerializableRecord;
   vis: SavedVisState;
@@ -72,6 +73,7 @@ export interface VisualizeAppStateTransitions {
   ) => ({ query, parentFilters }: { query?: Query; parentFilters?: Filter[] }) => VisualizeAppState;
   updateVisState: (state: VisualizeAppState) => (vis: SavedVisState) => VisualizeAppState;
   updateSavedQuery: (state: VisualizeAppState) => (savedQueryId?: string) => VisualizeAppState;
+  updateDataView: (state: VisualizeAppState) => (dataViewId?: string) => VisualizeAppState;
 }
 
 export type VisualizeAppStateContainer = ReduxLikeStateContainer<
