@@ -103,7 +103,7 @@ export class MetricsService
       schema: opsMetricsSchema,
     });
     metricsObservable.subscribe((metrics: OpsMetrics) => {
-      analytics.reportEvent('core-ops_metrics', { metrics });
+      analytics.reportEvent('core-ops_metrics', { ...metrics });
     });
   }
 }
