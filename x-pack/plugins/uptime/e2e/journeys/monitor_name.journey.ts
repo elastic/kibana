@@ -21,12 +21,12 @@ journey(`MonitorName`, async ({ page, params }: { page: Page; params: any }) => 
   const uptime = monitorManagementPageProvider({ page, kibanaUrl: params.kibanaUrl });
 
   const createBasicMonitor = async () => {
-    await uptime.createBasicMonitorDetails({
+    await uptime.createBasicHTTPMonitorDetails({
       name,
       locations: ['US Central'],
       apmServiceName: 'synthetics',
+      url: 'https://www.google.com',
     });
-    await uptime.fillByTestSubj('syntheticsUrlField', 'https://www.google.com');
   };
 
   before(async () => {
@@ -52,12 +52,12 @@ journey(`MonitorName`, async ({ page, params }: { page: Page; params: any }) => 
 
   step(`shows error if name already exists`, async () => {
     await uptime.navigateToAddMonitor();
-    await uptime.createBasicMonitorDetails({
+    await uptime.createBasicHTTPMonitorDetails({
       name,
       locations: ['US Central'],
       apmServiceName: 'synthetics',
+      url: 'https://www.google.com',
     });
-    await uptime.fillByTestSubj('syntheticsUrlField', 'https://www.google.com');
 
     await uptime.assertText({ text: 'Monitor name already exists.' });
 

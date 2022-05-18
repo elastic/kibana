@@ -68,6 +68,7 @@ const configuration = {
   [DataStream.BROWSER]: {
     monitorConfig: {
       ...basicMonitorDetails,
+      schedule: '10',
       name: browserName,
       inlineScript: 'step("test step", () => {})',
       locations: [basicMonitorDetails.location],
@@ -75,6 +76,7 @@ const configuration = {
     },
     monitorDetails: {
       ...basicMonitorDetails,
+      schedule: '10',
       name: browserName,
     },
   },
