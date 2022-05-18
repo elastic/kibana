@@ -34,6 +34,8 @@ export const appLinks: Readonly<LinkItem[]> = Object.freeze([
       }),
     ],
     links: [hostsLinks, networkLinks, usersLinks, kubernetesLinks],
+    skipUrlState: true,
+    hideTimeline: true,
   },
   timelinesLinks,
   getCasesLinkItems(),

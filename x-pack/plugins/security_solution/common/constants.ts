@@ -108,6 +108,7 @@ export enum SecurityPageName {
   overview = 'overview',
   policies = 'policy',
   rules = 'rules',
+  rulesCreate = 'rules-create',
   timelines = 'timelines',
   timelinesTemplates = 'timelines-templates',
   trustedApps = 'trusted_apps',
@@ -120,7 +121,7 @@ export enum SecurityPageName {
   usersEvents = 'users-events',
   usersExternalAlerts = 'users-external_alerts',
   kubernetes = 'kubernetes',
-  threatHuntingLanding = 'threat-hunting',
+  threatHuntingLanding = 'threat_hunting',
   dashboardsLanding = 'dashboards',
 }
 
@@ -135,6 +136,7 @@ export const DETECTION_RESPONSE_PATH = '/detection_response' as const;
 export const DETECTIONS_PATH = '/detections' as const;
 export const ALERTS_PATH = '/alerts' as const;
 export const RULES_PATH = '/rules' as const;
+export const RULES_CREATE_PATH = `${RULES_PATH}/create` as const;
 export const EXCEPTIONS_PATH = '/exceptions' as const;
 export const HOSTS_PATH = '/hosts' as const;
 export const USERS_PATH = '/users' as const;
