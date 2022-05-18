@@ -33,6 +33,7 @@ import {
   EuiKeyPadMenuItem,
   EuiIcon,
   EuiToolTip,
+  EuiSwitch,
 } from '@elastic/eui';
 
 import { EmbeddableFactoryDefinition } from '@kbn/embeddable-plugin/public';
@@ -52,9 +53,11 @@ interface EditControlProps {
   isCreate: boolean;
   title?: string;
   width: ControlWidth;
+  grow: boolean;
   onSave: (type: string) => void;
   onCancel: () => void;
   removeControl?: () => void;
+  updateGrow?: (grow: boolean) => void;
   updateTitle: (title?: string) => void;
   updateWidth: (newWidth: ControlWidth) => void;
   getRelevantDataViewId?: () => string | undefined;
@@ -67,9 +70,11 @@ export const ControlEditor = ({
   isCreate,
   title,
   width,
+  grow,
   onSave,
   onCancel,
   removeControl,
+  updateGrow,
   updateTitle,
   updateWidth,
   onTypeEditorChange,
@@ -85,6 +90,7 @@ export const ControlEditor = ({
   const [defaultTitle, setDefaultTitle] = useState<string>();
   const [currentTitle, setCurrentTitle] = useState(title);
   const [currentWidth, setCurrentWidth] = useState(width);
+  const [currentGrow, setCurrentGrow] = useState(grow);
   const [controlEditorValid, setControlEditorValid] = useState(false);
   const [selectedField, setSelectedField] = useState<string | undefined>(
     embeddable
@@ -192,6 +198,20 @@ export const ControlEditor = ({
                   }}
                 />
               </EuiFormRow>
+              {updateGrow ? (
+                <EuiFormRow>
+                  <EuiSwitch
+                    label={ControlGroupStrings.manageControl.getGrowSwitchTitle()}
+                    color="primary"
+                    checked={currentGrow}
+                    onChange={() => {
+                      setCurrentGrow(!currentGrow);
+                      updateGrow(!currentGrow);
+                    }}
+                    data-test-subj="control-editor-grow-switch"
+                  />
+                </EuiFormRow>
+              ) : null}
               <EuiSpacer size="l" />
               {removeControl && (
                 <EuiButtonEmpty
