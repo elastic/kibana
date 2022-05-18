@@ -34,16 +34,11 @@ import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '@kbn/lens-plugin/common/co
 import { FilterStateStore, DataView } from '@kbn/data-plugin/common';
 import { isEmpty } from 'lodash';
 import { PackSOFormData } from './queries/use_pack_query_form';
-import {
-  ILastResult,
-  fetchLastResults,
-  lastResultsReducer,
-  useFetchLastResults,
-} from './queries/fetch_last_results';
+import { ILastResult } from './queries/fetch_last_results';
 import { useKibana } from '../common/lib/kibana';
 import { ScheduledQueryErrorsTable } from './scheduled_query_errors_table';
-import { usePackQueryLastResults } from './use_pack_query_last_results';
 import { removeMultilines } from '../../common/utils/build_query/remove_multilines';
+import { usePackQueryLastResults } from './use_pack_query_last_results';
 
 const VIEW_IN_DISCOVER = i18n.translate(
   'xpack.osquery.pack.queriesTable.viewDiscoverResultsActionAriaLabel',
@@ -417,7 +412,7 @@ const ScheduledQueryLastResults: React.FC<{ lastResult: ILastResult }> = ({ last
 );
 
 const DocsColumnResults: React.FC<{ lastResult: ILastResult }> = ({ lastResult }) => {
-  if (!lastResult) {
+  if (!lastResult?.docCount) {
     return <>{'-'}</>;
   }
 
@@ -431,7 +426,7 @@ const DocsColumnResults: React.FC<{ lastResult: ILastResult }> = ({ lastResult }
 };
 
 const AgentsColumnResults: React.FC<{ lastResult: ILastResult }> = ({ lastResult }) => {
-  if (!lastResult) {
+  if (!lastResult?.uniqueAgentsCount) {
     return <>{'-'}</>;
   }
 
@@ -484,30 +479,24 @@ interface PackViewInActionProps {
     id: string;
     interval: number;
   };
-  logsDataView: DataView | undefined;
-  packName: string;
+  actionId: string;
   agentIds?: string[];
+  lastResult: ILastResult;
 }
 
 const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({
   item,
-  logsDataView,
-  packName,
+  actionId,
   agentIds,
+  lastResult,
 }) => {
-  const { id, interval } = item;
-  const actionId = getPackActionId(id, packName);
-  const { data: lastResultsData } = usePackQueryLastResults({
-    actionId,
-    interval,
-    logsDataView,
-  });
+  const { interval } = item;
 
-  const startDate = lastResultsData?.['@timestamp']
-    ? moment(lastResultsData?.['@timestamp'][0]).subtract(interval, 'seconds').toISOString()
+  const startDate = lastResult?.['@timestamp']
+    ? moment(lastResult?.['@timestamp']).subtract(interval, 'seconds').toISOString()
     : `now-${interval}s`;
-  const endDate = lastResultsData?.['@timestamp']
-    ? moment(lastResultsData?.['@timestamp'][0]).toISOString()
+  const endDate = lastResult?.['@timestamp']
+    ? moment(lastResult?.['@timestamp']).toISOString()
     : 'now';
 
   return (
@@ -517,7 +506,7 @@ const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({
       buttonType={ViewResultsActionButtonType.icon}
       startDate={startDate}
       endDate={endDate}
-      mode={lastResultsData?.['@timestamp'][0] ? 'absolute' : 'relative'}
+      mode={lastResult?.['@timestamp'] ? 'absolute' : 'relative'}
     />
   );
 };
@@ -526,23 +515,17 @@ const PackViewInDiscoverAction = React.memo(PackViewInDiscoverActionComponent);
 
 const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({
   item,
-  logsDataView,
-  packName,
+  actionId,
   agentIds,
+  lastResult,
 }) => {
-  const { id, interval } = item;
-  const actionId = getPackActionId(id, packName);
-  const { data: lastResultsData } = usePackQueryLastResults({
-    actionId,
-    interval,
-    logsDataView,
-  });
+  const { interval } = item;
 
-  const startDate = lastResultsData?.['@timestamp']
-    ? moment(lastResultsData?.['@timestamp'][0]).subtract(interval, 'seconds').toISOString()
+  const startDate = lastResult?.['@timestamp']
+    ? moment(lastResult?.['@timestamp']).subtract(interval, 'seconds').toISOString()
     : `now-${interval}s`;
-  const endDate = lastResultsData?.['@timestamp']
-    ? moment(lastResultsData?.['@timestamp'][0]).toISOString()
+  const endDate = lastResult?.['@timestamp']
+    ? moment(lastResult?.['@timestamp']).toISOString()
     : 'now';
 
   return (
@@ -552,7 +535,7 @@ const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({
       buttonType={ViewResultsActionButtonType.icon}
       startDate={startDate}
       endDate={endDate}
-      mode={lastResultsData?.['@timestamp'][0] ? 'absolute' : 'relative'}
+      mode={lastResult?.['@timestamp'] ? 'absolute' : 'relative'}
     />
   );
 };
@@ -578,12 +561,6 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   const { dataViews } = kibanaData;
   const [logsDataView, setLogsDataView] = useState<DataView | undefined>(undefined);
 
-  const [lastResultsState, setLastResultsState] = React.useReducer(lastResultsReducer, {
-    loading: false,
-    lastResults: null,
-    errorResults: null,
-  });
-
   useEffect(() => {
     const fetchLogsDataView = async () => {
       const dataView = await dataViews.find('logs-*');
@@ -594,28 +571,16 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     fetchLogsDataView();
   }, [dataViews]);
 
-  const { data: lastResultsData } = useFetchLastResults({
+  const queryResult = usePackQueryLastResults({
     data,
     packName,
     logsDataView,
   });
-  useEffect(() => {
-    (async () => {
-      setLastResultsState({ type: 'setLastResults', payload: { loading: true } });
-      try {
-        const [lastResults] = await Promise.all([
-          fetchLastResults({ kibanaData, data, packName, logsDataView }),
-          // fetchLastResultsErrors({ kibanaData, data, packName, logsDataView }),
-        ]);
-        setLastResultsState({
-          type: 'setLastResults',
-          payload: { lastResults, loading: false },
-        });
-      } catch (e) {
-        setLastResultsState({ type: 'setLastResults', payload: { loading: false } });
-      }
-    })();
-  }, [data, kibanaData, logsDataView, packName]);
+  const {
+    data: lastResultsData,
+    isLoading: lastResultsLoading,
+    error: lastResultsError,
+  } = queryResult;
 
   const renderQueryColumn = useCallback((query?: string, item?) => {
     const singleLine = query && removeMultilines(query);
@@ -653,54 +618,63 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 
   const renderLastResultsColumn = useCallback(
     (item) => {
-      if (lastResultsState.loading) {
+      if (lastResultsLoading) {
         return <EuiLoadingSpinner />;
       }
 
-      if (lastResultsState.lastResults == null) {
+      if (lastResultsData == null) {
         return <>{'-'}</>;
       }
 
-      return <ScheduledQueryLastResults lastResult={lastResultsState.lastResults[item.id]} />;
+      const actionId = getPackActionId(item.id, packName);
+      const lastResult = lastResultsData[actionId];
+
+      return <ScheduledQueryLastResults lastResult={lastResult} />;
     },
-    [lastResultsState.lastResults, lastResultsState.loading]
+    [lastResultsData, lastResultsLoading, packName]
   );
 
   const renderDocsColumn = useCallback(
     (item) => {
-      if (lastResultsState.loading) {
+      if (lastResultsLoading) {
         return <EuiLoadingSpinner />;
       }
 
-      if (lastResultsState.lastResults == null) {
+      if (!lastResultsData) {
         return <>{'-'}</>;
       }
 
-      return <DocsColumnResults lastResult={lastResultsState.lastResults[item.id]} />;
+      const actionId = getPackActionId(item.id, packName);
+      const lastResult = lastResultsData[actionId];
+
+      return <DocsColumnResults lastResult={lastResult} />;
     },
-    [lastResultsState.lastResults, lastResultsState.loading]
+    [lastResultsLoading, lastResultsData, packName]
   );
   const renderAgentsColumn = useCallback(
     (item) => {
-      if (lastResultsState.loading) {
+      if (lastResultsLoading) {
         return <EuiLoadingSpinner />;
       }
 
-      if (lastResultsState.lastResults == null) {
+      if (!lastResultsData) {
         return <>{'-'}</>;
       }
 
-      return <AgentsColumnResults lastResult={lastResultsState.lastResults[item.id]} />;
+      const actionId = getPackActionId(item.id, packName);
+      const lastResult = lastResultsData[actionId];
+
+      return <AgentsColumnResults lastResult={lastResult} />;
     },
-    [lastResultsState.lastResults, lastResultsState.loading]
+    [lastResultsData, lastResultsLoading, packName]
   );
   const renderErrorsColumn = useCallback(
     (item) => {
-      if (lastResultsState.loading) {
+      if (lastResultsLoading) {
         return <EuiLoadingSpinner />;
       }
 
-      if (isEmpty(lastResultsState.lastResults) || lastResultsState.errorResults == null) {
+      if (isEmpty(lastResultsData) || lastResultsError == null) {
         return <>{'-'}</>;
       }
 
@@ -708,37 +682,55 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         <ErrorsColumnResults
           id={item.id}
           interval={item.interval}
-          data={lastResultsState.errorResults[item.id]}
+          // data={lastResultsError[item.id]}
           toggleErrors={toggleErrors}
           expanded={!!itemIdToExpandedRowMap[item.id]}
         />
       );
     },
-    [itemIdToExpandedRowMap, lastResultsState, toggleErrors]
+    [itemIdToExpandedRowMap, lastResultsData, lastResultsError, lastResultsLoading, toggleErrors]
   );
 
   const renderDiscoverResultsAction = useCallback(
-    (item) => (
-      <PackViewInDiscoverAction
-        item={item}
-        agentIds={agentIds}
-        logsDataView={logsDataView}
-        packName={packName}
-      />
-    ),
-    [agentIds, logsDataView, packName]
+    (item) => {
+      if (!lastResultsData) {
+        return <></>;
+      }
+
+      const actionId = getPackActionId(item.id, packName);
+      const lastResult = lastResultsData[actionId];
+
+      return (
+        <PackViewInDiscoverAction
+          item={item}
+          actionId={actionId}
+          agentIds={agentIds}
+          lastResult={lastResult}
+        />
+      );
+    },
+    [agentIds, lastResultsData, packName]
   );
 
   const renderLensResultsAction = useCallback(
-    (item) => (
-      <PackViewInLensAction
-        item={item}
-        agentIds={agentIds}
-        logsDataView={logsDataView}
-        packName={packName}
-      />
-    ),
-    [agentIds, logsDataView, packName]
+    (item) => {
+      if (!lastResultsData) {
+        return <></>;
+      }
+
+      const actionId = getPackActionId(item.id, packName);
+      const lastResult = lastResultsData[actionId];
+
+      return (
+        <PackViewInLensAction
+          item={item}
+          agentIds={agentIds}
+          actionId={actionId}
+          lastResult={lastResult}
+        />
+      );
+    },
+    [agentIds, lastResultsData, packName]
   );
 
   const getItemId = useCallback((item: PackSOFormData) => get('id', item), []);
@@ -809,11 +801,11 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
       },
     ],
     [
+      renderErrorsColumn,
       renderQueryColumn,
       renderLastResultsColumn,
       renderDocsColumn,
       renderAgentsColumn,
-      renderErrorsColumn,
       renderDiscoverResultsAction,
       renderLensResultsAction,
     ]
