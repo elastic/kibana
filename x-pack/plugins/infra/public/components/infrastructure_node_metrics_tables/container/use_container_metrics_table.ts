@@ -118,7 +118,8 @@ function calculateMetricAverages(rows: MetricsExplorerRow[]) {
   let averageMemoryUsageMegabytes = null;
   if (averageMemoryUsageMegabytesValues.length !== 0) {
     const averageInBytes = averageOfValues(averageMemoryUsageMegabytesValues);
-    averageMemoryUsageMegabytes = Math.floor(averageInBytes / 1000000);
+    const bytesPerMegabyte = 1000000;
+    averageMemoryUsageMegabytes = Math.floor(averageInBytes / bytesPerMegabyte);
   }
 
   return {
@@ -136,15 +137,15 @@ function collectMetricValues(rows: MetricsExplorerRow[]) {
   rows.forEach((row) => {
     const { uptime, averageCpuUsagePercent, averageMemoryUsageMegabytes } = unpackMetrics(row);
 
-    if (uptime) {
+    if (uptime !== null) {
       uptimeValues.push(uptime);
     }
 
-    if (averageCpuUsagePercent) {
+    if (averageCpuUsagePercent !== null) {
       averageCpuUsagePercentValues.push(averageCpuUsagePercent);
     }
 
-    if (averageMemoryUsageMegabytes) {
+    if (averageMemoryUsageMegabytes !== null) {
       averageMemoryUsageMegabytesValues.push(averageMemoryUsageMegabytes);
     }
   });

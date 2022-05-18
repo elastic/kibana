@@ -120,7 +120,8 @@ function calculateMetricAverages(rows: MetricsExplorerRow[]) {
   let totalMemoryMegabytes = null;
   if (totalMemoryMegabytesValues.length !== 0) {
     const averageInBytes = averageOfValues(totalMemoryMegabytesValues);
-    totalMemoryMegabytes = Math.floor(averageInBytes / 1000000);
+    const bytesPerMegabyte = 1000000;
+    totalMemoryMegabytes = Math.floor(averageInBytes / bytesPerMegabyte);
   }
 
   let averageMemoryUsagePercent = null;
@@ -146,19 +147,19 @@ function collectMetricValues(rows: MetricsExplorerRow[]) {
     const { cpuCount, averageCpuUsagePercent, totalMemoryMegabytes, averageMemoryUsagePercent } =
       unpackMetrics(row);
 
-    if (cpuCount) {
+    if (cpuCount !== null) {
       cpuCountValues.push(cpuCount);
     }
 
-    if (averageCpuUsagePercent) {
+    if (averageCpuUsagePercent !== null) {
       averageCpuUsagePercentValues.push(averageCpuUsagePercent);
     }
 
-    if (totalMemoryMegabytes) {
+    if (totalMemoryMegabytes !== null) {
       totalMemoryMegabytesValues.push(totalMemoryMegabytes);
     }
 
-    if (averageMemoryUsagePercent) {
+    if (averageMemoryUsagePercent !== null) {
       averageMemoryUsagePercentValues.push(averageMemoryUsagePercent);
     }
   });
