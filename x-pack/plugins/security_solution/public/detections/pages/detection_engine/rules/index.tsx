@@ -10,10 +10,7 @@ import React, { useCallback, useMemo } from 'react';
 
 import { usePrePackagedRules, importRules } from '../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
-import {
-  getDetectionEngineUrl,
-  getCreateRuleUrl,
-} from '../../../../common/components/link_to/redirect_to_detection_engine';
+import { getDetectionEngineUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 
@@ -30,8 +27,7 @@ import {
 } from './helpers';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../app/types';
-import { LinkButton } from '../../../../common/components/links';
-import { useFormatUrl } from '../../../../common/components/link_to';
+import { SecuritySolutionLinkButton } from '../../../../common/components/links';
 import { NeedAdminForUpdateRulesCallOut } from '../../../components/callouts/need_admin_for_update_callout';
 import { MlJobCompatibilityCallout } from '../../../components/callouts/ml_job_compatibility_callout';
 import { MissingPrivilegesCallOut } from '../../../components/callouts/missing_privileges_callout';
@@ -96,7 +92,6 @@ const RulesPageComponent: React.FC = () => {
     timelinesNotInstalled,
     timelinesNotUpdated
   );
-  const { formatUrl } = useFormatUrl(SecurityPageName.rules);
 
   const handleCreatePrePackagedRules = useCallback(async () => {
     if (createPrePackagedRules != null) {
@@ -112,14 +107,6 @@ const RulesPageComponent: React.FC = () => {
       return Promise.resolve();
     }
   }, [refetchPrePackagedRulesStatus]);
-
-  const goToNewRule = useCallback(
-    (ev) => {
-      ev.preventDefault();
-      navigateToApp(APP_UI_ID, { deepLinkId: SecurityPageName.rules, path: getCreateRuleUrl() });
-    },
-    [navigateToApp]
-  );
 
   const loadPrebuiltRulesAndTemplatesButton = useMemo(
     () =>
@@ -212,16 +199,15 @@ const RulesPageComponent: React.FC = () => {
                 </EuiButton>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <LinkButton
+                <SecuritySolutionLinkButton
                   data-test-subj="create-new-rule"
                   fill
-                  onClick={goToNewRule}
-                  href={formatUrl(getCreateRuleUrl())}
                   iconType="plusInCircle"
                   isDisabled={!userHasPermissions(canUserCRUD) || loading}
+                  deepLinkId={SecurityPageName.rulesCreate}
                 >
                   {i18n.ADD_NEW_RULE}
-                </LinkButton>
+                </SecuritySolutionLinkButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </HeaderPage>

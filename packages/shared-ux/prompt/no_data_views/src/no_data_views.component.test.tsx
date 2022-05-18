@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { EuiButton, EuiPanel } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { NoDataViewsPrompt } from './no_data_views.component';
 import { DocumentationLink } from './documentation_link';
 
@@ -21,7 +21,7 @@ describe('<NoDataViewsPromptComponent />', () => {
         dataViewsDocLink={'dummy'}
       />
     );
-    expect(component.find(EuiPanel).length).toBe(1);
+    expect(component.find(EuiEmptyPrompt).length).toBe(1);
     expect(component.find(EuiButton).length).toBe(1);
     expect(component.find(DocumentationLink).length).toBe(1);
   });
