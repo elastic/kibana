@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core/public';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 import { get } from 'lodash';
-// import { RedirectAppLinksProvider } from '@kbn/shared-ux-link-redirect_app';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import {
   SavedObjectRelation,
@@ -29,7 +29,7 @@ import {
 } from '@kbn/saved-objects-management-plugin/public';
 
 import { EuiToolTip, EuiIcon, SearchFilterConfig } from '@elastic/eui';
-// import { IPM_APP_ID } from '../../../plugin';
+import { IPM_APP_ID } from '../../../plugin';
 
 const canGoInApp = (
   savedObject: SavedObjectRelation,
@@ -56,6 +56,7 @@ export const RelationshipsTable = ({
   getAllowedTypes: SavedObjectsManagementPluginStart['getAllowedTypes'];
   getRelationships: SavedObjectsManagementPluginStart['getRelationships'];
 }) => {
+  // todo move data access higher
   const [relationships, setRelationships] = useState<SavedObjectRelation[]>([]);
   const [allowedTypes, setAllowedTypes] = useState<SavedObjectManagementTypeInfo[]>([]);
   const [query, setQuery] = useState('');
@@ -85,6 +86,7 @@ export const RelationshipsTable = ({
   const columns = [
     {
       field: 'type',
+      // todo move translations
       name: i18n.translate('indexPatternManagement.objectsTable.relationships.columnTypeName', {
         defaultMessage: 'Type',
       }),
@@ -175,16 +177,16 @@ export const RelationshipsTable = ({
   };
 
   return (
-    /* <RedirectAppLinksProvider currentAppId={IPM_APP_ID} navigateToUrl={navigateToUrl}> */
-    <EuiInMemoryTable<SavedObjectRelation>
-      items={relationships}
-      columns={columns}
-      pagination={true}
-      search={search}
-      rowProps={() => ({
-        'data-test-subj': `relationshipsTableRow`,
-      })}
-    />
-    /* </RedirectAppLinksProvider> */
+    <RedirectAppLinks currentAppId={IPM_APP_ID} navigateToUrl={navigateToUrl}>
+      <EuiInMemoryTable<SavedObjectRelation>
+        items={relationships}
+        columns={columns}
+        pagination={true}
+        search={search}
+        rowProps={() => ({
+          'data-test-subj': `relationshipsTableRow`,
+        })}
+      />
+    </RedirectAppLinks>
   );
 };
