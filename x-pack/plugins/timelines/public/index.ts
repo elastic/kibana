@@ -75,7 +75,7 @@ export {
 
 export { getActionsColumnWidth } from './components/t_grid/body/column_headers/helpers';
 export { DEFAULT_ACTION_BUTTON_WIDTH } from './components/t_grid/body/constants';
-export { useStatusBulkActionItems } from './hooks/use_status_bulk_action_items';
+export { useBulkActionItems } from './hooks/use_bulk_action_items';
 export { getPageRowIndex } from '../common/utils/pagination';
 
 // This exports static code and TypeScript types,
