@@ -108,7 +108,7 @@ export async function getVisTypeFactory(lens: LensPublicStart) {
       case layerTypes.DATA:
         const type = visTypes.find((t) => t.id === layer.seriesType);
         return {
-          label: type?.label ?? layer.layerType,
+          label: type?.fullLabel ?? layer.layerType,
           icon: type?.icon ?? '',
         };
       case layerTypes.ANNOTATIONS:
