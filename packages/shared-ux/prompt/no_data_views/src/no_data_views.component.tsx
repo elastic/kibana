@@ -53,19 +53,19 @@ export const NoDataViewsPrompt = ({
   const title = canCreateNewDataView ? (
     <h2>
       <FormattedMessage
-        id="sharedUXComponents.noDataViewsPrompt.youHaveData"
+        id="sharedUXPackages.noDataViewsPrompt.youHaveData"
         defaultMessage="You have data in Elasticsearch."
       />
       <br />
       <FormattedMessage
-        id="sharedUXComponents.noDataViewsPrompt.nowCreate"
+        id="sharedUXPackages.noDataViewsPrompt.nowCreate"
         defaultMessage="Now, create a data view."
       />
     </h2>
   ) : (
     <h2>
       <FormattedMessage
-        id="sharedUXComponents.noDataViewsPrompt.noPermission.title"
+        id="sharedUXPackages.noDataViewsPrompt.noPermission.title"
         defaultMessage="You need permission to create data views"
       />
     </h2>
@@ -74,14 +74,14 @@ export const NoDataViewsPrompt = ({
   const body = canCreateNewDataView ? (
     <p>
       <FormattedMessage
-        id="sharedUXComponents.noDataViewsPrompt.dataViewExplanation"
+        id="sharedUXPackages.noDataViewsPrompt.dataViewExplanation"
         defaultMessage="Data views identify the Elasticsearch data you want to explore. You can point data views to one or more data streams, indices, and index aliases, such as your log data from yesterday, or all indices that contain your log data."
       />
     </p>
   ) : (
     <p>
       <FormattedMessage
-        id="sharedUXComponents.noDataViewsPrompt.noPermission.dataViewExplanation"
+        id="sharedUXPackages.noDataViewsPrompt.noPermission.dataViewExplanation"
         defaultMessage="Data views identify the Elasticsearch data that you want to explore. To create data views, ask your administrator for the required permissions."
       />
     </p>

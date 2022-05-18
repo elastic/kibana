@@ -20,7 +20,7 @@ export function DocumentationLink({ href }: Props) {
       <EuiTitle size="xxs">
         <dt className="eui-displayInline">
           <FormattedMessage
-            id="sharedUXPackages.noDataViews.learnMore"
+            id="sharedUXPackages.noDataViewsPrompt.learnMore"
             defaultMessage="Want to learn more?"
           />
         </dt>
@@ -29,7 +29,7 @@ export function DocumentationLink({ href }: Props) {
       <dd className="eui-displayInline">
         <EuiLink href={href} target="_blank" external>
           <FormattedMessage
-            id="sharedUXPackages.noDataViews.readDocumentation"
+            id="sharedUXPackages.noDataViewsPrompt.readDocumentation"
             defaultMessage="Read the docs"
           />
         </EuiLink>
