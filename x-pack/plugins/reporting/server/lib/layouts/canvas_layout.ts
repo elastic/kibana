@@ -38,10 +38,14 @@ export class CanvasLayout extends Layout implements LayoutInstance {
 
   constructor(size: Size) {
     super(LayoutTypes.CANVAS);
-    this.height = size.height;
-    this.width = size.width;
-    this.scaledHeight = size.height * ZOOM;
-    this.scaledWidth = size.width * ZOOM;
+
+    const height = Math.round(size.height);
+    const width = Math.round(size.width);
+
+    this.height = height;
+    this.width = height;
+    this.scaledHeight = height * ZOOM;
+    this.scaledWidth = width * ZOOM;
   }
 
   public getPdfPageOrientation() {

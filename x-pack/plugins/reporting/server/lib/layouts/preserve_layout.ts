@@ -24,10 +24,14 @@ export class PreserveLayout extends Layout implements LayoutInstance {
 
   constructor(size: Size, selectors?: Partial<LayoutSelectorDictionary>) {
     super(LAYOUT_TYPES.PRESERVE_LAYOUT);
-    this.height = size.height;
-    this.width = size.width;
-    this.scaledHeight = size.height * ZOOM;
-    this.scaledWidth = size.width * ZOOM;
+
+    const height = Math.round(size.height);
+    const width = Math.round(size.width);
+
+    this.height = height;
+    this.width = height;
+    this.scaledHeight = height * ZOOM;
+    this.scaledWidth = width * ZOOM;
 
     this.selectors = {
       ...getDefaultLayoutSelectors(),
