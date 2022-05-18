@@ -11,8 +11,7 @@ export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
   const security = getService('security');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/129467
-  describe.skip('auto fit map to bounds', () => {
+  describe('auto fit map to bounds', () => {
     describe('initial location', () => {
       before(async () => {
         await security.testUser.setRoles(['global_maps_all', 'test_logstash_reader']);
