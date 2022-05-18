@@ -136,7 +136,7 @@ PUT _index_template/tri_met_tracks
               "type": "text"
             },
             "lastLocID": {
-              "type": "integer"
+              "type": "keyword"
             },
             "nextLocID": {
               "type": "keyword"
