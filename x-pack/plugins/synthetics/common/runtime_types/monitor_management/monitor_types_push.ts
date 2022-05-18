@@ -28,6 +28,7 @@ export const PushBrowserMonitorCodec = t.intersection([
       match: t.string,
     }),
     params: t.record(t.string, t.unknown),
+    enabled: t.boolean,
   }),
 ]);
 
