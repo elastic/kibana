@@ -40,7 +40,7 @@ import type { ObservabilityRuleTypeRegistry } from '../../../../rules/create_obs
 import { parseAlert } from '../parse_alert';
 import { AlertStatusIndicator } from '../../../../components/shared/alert_status_indicator';
 import { ExperimentalBadge } from '../../../../components/shared/experimental_badge';
-import { translations, paths } from '../../../../config';
+import { translations } from '../../../../config';
 
 type AlertsFlyoutProps = {
   alert?: TopAlert;
@@ -77,8 +77,7 @@ export function AlertsFlyout({
   }
 
   const ruleId = alertData.fields['kibana.alert.rule.uuid'] ?? null;
-  const linkToRule = ruleId && prepend ? prepend(paths.management.ruleDetails(ruleId)) : null;
-
+  const linkToRule = ruleId && prepend ? prepend(`/app/observability/alerts/rules/${ruleId}`) : null;
   const overviewListItems = [
     {
       title: translations.alertsFlyout.statusLabel,
