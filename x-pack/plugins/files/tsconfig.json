@@ -9,5 +9,6 @@
   "include": ["common/**/*", "public/**/*", "server/**/*"],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
+    { "path": "../security/tsconfig.json" },
   ]
 }
