@@ -39,7 +39,7 @@ export interface FieldBasedIndexPatternColumn extends BaseIndexPatternColumn {
 }
 
 export interface FieldBasedIndexPatternColumnMultipleValues extends FieldBasedIndexPatternColumn {
-  params: {
+  params?: {
     value: number;
   };
 }
