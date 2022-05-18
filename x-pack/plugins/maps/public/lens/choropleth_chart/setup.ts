@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { FileLayer } from '@elastic/ems-client';
 import type { ExpressionsSetup } from 'src/plugins/expressions/public';
 import type { CoreSetup, CoreStart } from 'src/core/public';
 import type { LensPublicSetup } from '../../../../lens/public';
-import type { FileLayer } from '@elastic/ems-client';
 import type { MapsPluginStartDependencies } from '../../plugin';
 import { getExpressionFunction } from './expression_function';
 import { getExpressionRenderer } from './expression_renderer';
