@@ -33,10 +33,16 @@ import {
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { IndexPatternManagmentContext } from '../../../types';
 import { createEditIndexPatternPageStateContainer } from '../edit_index_pattern_state_container';
-import { TAB_INDEXED_FIELDS, TAB_SCRIPTED_FIELDS, TAB_SOURCE_FILTERS } from '../constants';
+import {
+  TAB_INDEXED_FIELDS,
+  TAB_SCRIPTED_FIELDS,
+  TAB_SOURCE_FILTERS,
+  TAB_RELATIONSHIPS,
+} from '../constants';
 import { SourceFiltersTable } from '../source_filters_table';
 import { IndexedFieldsTable } from '../indexed_fields_table';
 import { ScriptedFieldsTable } from '../scripted_fields_table';
+import { RelationshipsTable } from '../relationships_table';
 import { getTabs, getPath, convertToEuiFilterOptions } from './utils';
 import { getFieldInfo } from '../../utils';
 
@@ -132,8 +138,16 @@ export function Tabs({
   location,
   refreshFields,
 }: TabsProps) {
-  const { uiSettings, docLinks, dataViewFieldEditor, overlays, theme, dataViews } =
-    useKibana<IndexPatternManagmentContext>().services;
+  const {
+    uiSettings,
+    docLinks,
+    dataViewFieldEditor,
+    overlays,
+    theme,
+    dataViews,
+    http,
+    application,
+  } = useKibana<IndexPatternManagmentContext>().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
   const [syncingStateFunc, setSyncingStateFunc] = useState<any>({
     getCurrentTab: () => TAB_INDEXED_FIELDS,
@@ -492,6 +506,17 @@ export function Tabs({
               />
             </Fragment>
           );
+        case TAB_RELATIONSHIPS:
+          return (
+            <Fragment>
+              <EuiSpacer size="m" />
+              <RelationshipsTable
+                http={http}
+                id={indexPattern.id!}
+                capabilities={application.capabilities}
+              />
+            </Fragment>
+          );
       }
     },
     [
@@ -513,6 +538,8 @@ export function Tabs({
       overlays,
       theme,
       dataViews,
+      http,
+      application,
     ]
   );
 

@@ -4,7 +4,7 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["management", "data", "urlForwarding", "dataViewFieldEditor", "dataViewEditor", "dataViews", "fieldFormats", "unifiedSearch"],
-  "requiredBundles": ["kibanaReact", "kibanaUtils"],
+  "requiredBundles": ["kibanaReact", "kibanaUtils", "savedObjectsManagement"],
   "optionalPlugins": ["spaces"],
   "owner": {
     "name": "App Services",
