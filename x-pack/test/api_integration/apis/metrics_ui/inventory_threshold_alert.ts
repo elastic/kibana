@@ -6,8 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import type { Logger, LogMeta } from '@kbn/core/server';
-import sinon from 'sinon';
 import { Comparator, InventoryMetricConditions } from '@kbn/infra-plugin/common/alerting/metrics';
 import {
   InventoryItemType,
@@ -17,25 +15,13 @@ import { evaluateCondition } from '@kbn/infra-plugin/server/lib/alerting/invento
 import { InfraSource } from '@kbn/infra-plugin/server/lib/sources';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
+import { createFakeLogger } from './create_fake_logger';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
   const log = getService('log');
-
-  const fakeLogger = <Meta extends LogMeta = LogMeta>(msg: string, meta?: Meta) =>
-    meta ? log.debug(msg, meta) : log.debug(msg);
-
-  const logger = {
-    trace: fakeLogger,
-    debug: fakeLogger,
-    info: fakeLogger,
-    warn: fakeLogger,
-    error: fakeLogger,
-    fatal: fakeLogger,
-    log: sinon.stub(),
-    get: sinon.stub(),
-  } as Logger;
+  const logger = createFakeLogger(log);
 
   const baseCondition: InventoryMetricConditions = {
     metric: 'cpu',

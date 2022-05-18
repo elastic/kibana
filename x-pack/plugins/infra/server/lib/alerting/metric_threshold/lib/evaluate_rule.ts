@@ -7,6 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import moment from 'moment';
+import type { Logger } from '@kbn/logging';
 import { MetricExpressionParams } from '../../../../../common/alerting/metrics';
 import { InfraSource } from '../../../../../common/source_configuration/source_configuration';
 import { getIntervalInSeconds } from '../../../../utils/get_interval_in_seconds';
@@ -36,6 +37,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
   config: InfraSource['configuration'],
   compositeSize: number,
   alertOnGroupDisappear: boolean,
+  logger: Logger,
   lastPeriodEnd?: number,
   timeframe?: { start?: number; end: number },
   missingGroups: string[] = []
@@ -63,6 +65,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         compositeSize,
         alertOnGroupDisappear,
         calculatedTimerange,
+        logger,
         lastPeriodEnd
       );
 
