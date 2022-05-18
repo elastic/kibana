@@ -36,12 +36,15 @@ export const ComplianceDashboard = () => {
   const getDashboardDataQuery = useComplianceDashboardDataApi();
   useCspBreadcrumbs([allNavigationItems.dashboard]);
 
+  if (getDashboardDataQuery.data?.status === 'inapplicable') {
+    return <CspPageTemplate noDataConfig={getNoDataConfig(getDashboardDataQuery.refetch)} />;
+  }
+
   return (
     <CspPageTemplate
       pageHeader={{ pageTitle: CLOUD_POSTURE }}
       restrictWidth={1600}
       query={getDashboardDataQuery}
-      noDataConfig={getNoDataConfig(getDashboardDataQuery.refetch)}
     >
       {getDashboardDataQuery.data && (
         <>

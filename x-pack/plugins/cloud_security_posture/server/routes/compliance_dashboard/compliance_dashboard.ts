@@ -8,7 +8,7 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
-import type { ComplianceDashboardData } from '../../../common/types';
+import type { ComplianceDashboard, ComplianceDashboardData } from '../../../common/types';
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS, STATS_ROUTE_PATH } from '../../../common/constants';
 import { CspAppContext } from '../../plugin';
 import { getGroupedFindingsEvaluation } from './get_grouped_findings_evaluation';
@@ -34,16 +34,23 @@ const getClustersTrends = (clustersWithoutTrends: ClusterWithoutTrend[], trends:
 const getSummaryTrend = (trends: Trends) =>
   trends.map(({ timestamp, summary }) => ({ timestamp, ...summary }));
 
-const hasLatestFindings = async (esClient: ElasticsearchClient) => {
-  const queryResult = await esClient.search({
-    index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
-    query: {
-      match_all: {},
-    },
-    size: 1,
-  });
+const getLatestFindingsStatus = async (
+  esClient: ElasticsearchClient
+): Promise<ComplianceDashboard['status']> => {
+  try {
+    const queryResult = await esClient.search({
+      index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+      query: {
+        match_all: {},
+      },
+      size: 1,
+    });
+    const hasLatestFinding = !!queryResult.hits.hits.length;
 
-  return !!queryResult.hits.hits.length;
+    return hasLatestFinding ? 'applicable' : 'inapplicable';
+  } catch (e) {
+    return 'inapplicable';
+  }
 };
 
 export const defineGetComplianceDashboardRoute = (
@@ -58,9 +65,14 @@ export const defineGetComplianceDashboardRoute = (
     async (context, _, response) => {
       try {
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-        if (!(await hasLatestFindings(esClient))) {
+        const latestFindingsIndexStatus = await getLatestFindingsStatus(esClient);
+
+        // early return in case the latest-findings index is not applicable for querying
+        if (latestFindingsIndexStatus === 'inapplicable') {
           return response.ok({
-            body: undefined,
+            body: {
+              status: latestFindingsIndexStatus,
+            },
           });
         }
 
@@ -92,6 +104,7 @@ export const defineGetComplianceDashboardRoute = (
         const trend = getSummaryTrend(trends);
 
         const body: ComplianceDashboardData = {
+          status: latestFindingsIndexStatus,
           stats,
           groupedFindingsEvaluation,
           clusters,
