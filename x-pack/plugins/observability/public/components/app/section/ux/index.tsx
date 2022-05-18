@@ -12,8 +12,10 @@ import { getDataHandler } from '../../../../data_handler';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
+import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import CoreVitals from '../../../shared/core_web_vitals';
 import { BucketSize } from '../../../../pages/overview';
+import { getExploratoryViewEmbeddable } from '../../../shared/exploratory_view/embeddable';
 
 interface Props {
   bucketSize: BucketSize;
@@ -21,10 +23,29 @@ interface Props {
 
 export function UXSection({ bucketSize }: Props) {
   const { forceUpdate, hasDataMap } = useHasData();
+  const { core, plugins } = usePluginContext();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
     useDatePickerContext();
   const uxHasDataResponse = hasDataMap.ux;
   const serviceName = uxHasDataResponse?.serviceName as string;
+
+  const ExploratoryViewEmbeddable = getExploratoryViewEmbeddable(core, plugins);
+
+  const seriesList = [
+    {
+      name: 'Page load distribution',
+      time: {
+        from: 'now-7d/d',
+        to: 'now',
+      },
+      reportDefinitions: {
+        'service.name': ['ALL_VALUES'],
+      },
+      breakdown: 'service.name',
+      dataType: 'ux',
+      selectedMetricField: 'transaction.duration.us',
+    },
+  ];
 
   const { data, status } = useFetcher(
     () => {
@@ -72,6 +93,13 @@ export function UXSection({ bucketSize }: Props) {
       }}
       hasError={status === FETCH_STATUS.FAILURE}
     >
+      <ExploratoryViewEmbeddable
+        attributes={seriesList}
+        reportType="data-distribution"
+        title={'Page load distribution'}
+        withActions={['save', 'explore']}
+      />
+
       <CoreVitals
         data={coreWebVitals}
         loading={isLoading}
