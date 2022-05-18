@@ -9,9 +9,9 @@ import React from 'react';
 import moment from 'moment';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { EcsEventOutcome } from '@kbn/core/server';
+import { formatRuleAlertCount } from '../../../../common/lib/format_rule_alert_count';
 import { RuleEventLogListStatus } from './rule_event_log_list_status';
 import { RuleDurationFormat } from '../../rules_list/components/rule_duration_format';
-import { RuleAlertCount } from './rule_alert_count';
 import {
   RULE_EXECUTION_LOG_COLUMN_IDS,
   RULE_EXECUTION_LOG_DURATION_COLUMNS,
@@ -45,7 +45,7 @@ export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRenderer
   }
 
   if (RULE_EXECUTION_LOG_ALERT_COUNT_COLUMNS.includes(columnId)) {
-    return <RuleAlertCount value={value} version={version} />;
+    return <>{formatRuleAlertCount(value, version)}</>;
   }
 
   if (RULE_EXECUTION_LOG_DURATION_COLUMNS.includes(columnId)) {
