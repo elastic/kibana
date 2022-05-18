@@ -144,8 +144,8 @@ export const validateMarkSizeForChartType = (
   }
 };
 
-export const validateMarkSizeRatioLimits = (markSizeRatio: number) => {
-  if (markSizeRatio < 1 || markSizeRatio > 100) {
+export const validateMarkSizeRatioLimits = (markSizeRatio?: number) => {
+  if (markSizeRatio !== undefined && (markSizeRatio < 1 || markSizeRatio > 100)) {
     throw new Error(errors.markSizeRatioLimitsError());
   }
 };
