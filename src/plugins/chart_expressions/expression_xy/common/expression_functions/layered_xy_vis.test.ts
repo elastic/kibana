@@ -56,4 +56,21 @@ describe('layeredXyVis', () => {
       )
     ).rejects.toThrowErrorMatchingSnapshot();
   });
+
+  test('it should throw error if markSizeRatio is specified if no markSizeAccessor is present', async () => {
+    const { data, args } = sampleArgs();
+    const { layers, ...rest } = args;
+
+    expect(
+      layeredXyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          markSizeRatio: 10,
+          layers: [sampleExtendedLayer],
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
 });

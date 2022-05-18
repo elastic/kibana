@@ -58,7 +58,7 @@ describe('xyVis', () => {
         data,
         {
           ...rest,
-          ...sampleLayer,
+          ...{ ...sampleLayer, markSizeAccessor: 'b' },
           markSizeRatio: 0,
           referenceLineLayers: [],
           annotationLayers: [],
@@ -72,7 +72,7 @@ describe('xyVis', () => {
         data,
         {
           ...rest,
-          ...sampleLayer,
+          ...{ ...sampleLayer, markSizeAccessor: 'b' },
           markSizeRatio: 101,
           referenceLineLayers: [],
           annotationLayers: [],
@@ -155,6 +155,26 @@ describe('xyVis', () => {
           referenceLineLayers: [],
           annotationLayers: [],
           splitColumnAccessor,
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  test('it should throw error if markSizeRatio is specified while markSizeAccessor is not', async () => {
+    const { data, args } = sampleArgs();
+    const { layers, ...rest } = args;
+    const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
+
+    expect(
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          referenceLineLayers: [],
+          annotationLayers: [],
+          markSizeRatio: 5,
         },
         createMockExecutionContext()
       )
