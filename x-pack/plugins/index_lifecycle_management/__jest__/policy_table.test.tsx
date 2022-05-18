@@ -238,10 +238,10 @@ describe('policy table', () => {
   test('delete policy button is enabled when there are no linked indices', () => {
     const rendered = mountWithIntl(component);
     const visiblePolicies = getPolicies(rendered);
-    const usedPolicy = visiblePolicies.find((p) => !p.isUsedByAnIndex);
-    expect(usedPolicy).toBeDefined();
+    const unusedPolicy = visiblePolicies.find((p) => !p.isUsedByAnIndex);
+    expect(unusedPolicy).toBeDefined();
 
-    const policyRow = findTestSubject(rendered, `policyTableRow-${usedPolicy!.name}`);
+    const policyRow = findTestSubject(rendered, `policyTableRow-${unusedPolicy!.name}`);
     const deleteButton = findTestSubject(policyRow, 'deletePolicy');
     expect(deleteButton.props().disabled).toBeFalsy();
   });
