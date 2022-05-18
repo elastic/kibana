@@ -76,6 +76,7 @@ import { buildEsQuery, Filter } from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import { normalizeSortRequest } from './normalize_sort_request';
 
 import { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
@@ -105,6 +106,7 @@ import {
   UI_SETTINGS,
 } from '../..';
 import { extractReferences } from './extract_references';
+import { ExpressionFunctionKibanaContext, filtersToAst, queryToAst } from '../expressions';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
@@ -921,5 +923,21 @@ export class SearchSource {
     }
 
     return [filterField];
+  }
+
+  toExpressionAst() {
+    const searchRequest = this.mergeProps();
+    const { query } = searchRequest;
+    let { filters } = searchRequest;
+    if (typeof filters === 'function') {
+      filters = filters();
+    }
+
+    return buildExpression([
+      buildExpressionFunction<ExpressionFunctionKibanaContext>('kibana_context', {
+        q: query?.map(queryToAst),
+        filters: filters && filtersToAst(filters),
+      }),
+    ]).toAst();
   }
 }

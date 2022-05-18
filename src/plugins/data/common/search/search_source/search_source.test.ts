@@ -8,6 +8,7 @@
 
 import { lastValueFrom, of, throwError } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { buildExpression, ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import { SearchSource, SearchSourceDependencies, SortDirection } from '.';
 import { AggConfigs, AggTypesRegistryStart } from '../..';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
@@ -1307,6 +1308,77 @@ describe('SearchSource', () => {
         expect(fetchSub.error).toHaveBeenCalledTimes(1);
         expect(typesRegistry.get('avg').postFlightRequest).toHaveBeenCalledTimes(1);
       });
+    });
+  });
+
+  describe('#toExpressionAst()', () => {
+    function toString(ast: ExpressionAstExpression) {
+      return buildExpression(ast).toString();
+    }
+
+    test('should generate the `kibana_context` function', () => {
+      const ast = searchSource.toExpressionAst();
+
+      expect(toString(ast)).toMatchInlineSnapshot(`"kibana_context"`);
+    });
+
+    test('should generate query argument', () => {
+      searchSource.setField('query', { language: 'kuery', query: 'something' });
+
+      expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(
+        `"kibana_context q={kql q=\\"something\\"}"`
+      );
+    });
+
+    test('should generate filters argument', () => {
+      const filter1 = {
+        query: { query_string: { query: 'query1' } },
+        meta: {},
+      };
+      const filter2 = {
+        query: { query_string: { query: 'query2' } },
+        meta: {},
+      };
+      searchSource.setField('filter', [filter1, filter2]);
+
+      expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
+        "kibana_context filters={kibanaFilter query=\\"{\\\\\\"query_string\\\\\\":{\\\\\\"query\\\\\\":\\\\\\"query1\\\\\\"}}\\"}
+          filters={kibanaFilter query=\\"{\\\\\\"query_string\\\\\\":{\\\\\\"query\\\\\\":\\\\\\"query2\\\\\\"}}\\"}"
+      `);
+    });
+
+    test('should resolve filters if set as a function', () => {
+      const filter = {
+        query: { query_string: { query: 'query' } },
+        meta: {},
+      };
+      searchSource.setField('filter', () => filter);
+
+      expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(
+        `"kibana_context filters={kibanaFilter query=\\"{\\\\\\"query_string\\\\\\":{\\\\\\"query\\\\\\":\\\\\\"query\\\\\\"}}\\"}"`
+      );
+    });
+
+    test('should merge properties from parent search sources', () => {
+      const filter1 = {
+        query: { query_string: { query: 'query1' } },
+        meta: {},
+      };
+      const filter2 = {
+        query: { query_string: { query: 'query2' } },
+        meta: {},
+      };
+      searchSource.setField('query', { language: 'kuery', query: 'something1' });
+      searchSource.setField('filter', filter1);
+
+      const childSearchSource = searchSource.createChild();
+      childSearchSource.setField('query', { language: 'kuery', query: 'something2' });
+      childSearchSource.setField('filter', filter2);
+
+      expect(toString(childSearchSource.toExpressionAst())).toMatchInlineSnapshot(`
+        "kibana_context q={kql q=\\"something2\\"} q={kql q=\\"something1\\"} filters={kibanaFilter query=\\"{\\\\\\"query_string\\\\\\":{\\\\\\"query\\\\\\":\\\\\\"query2\\\\\\"}}\\"}
+          filters={kibanaFilter query=\\"{\\\\\\"query_string\\\\\\":{\\\\\\"query\\\\\\":\\\\\\"query1\\\\\\"}}\\"}"
+      `);
     });
   });
 });
