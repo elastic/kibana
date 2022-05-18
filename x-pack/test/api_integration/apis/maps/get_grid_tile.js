@@ -174,7 +174,7 @@ export default function ({ getService }) {
       expect(layer.length).to.be(2);
 
       const labelFeature = findFeature(layer, (feature) => {
-        return feature.properties['_mvt_label_position'] === true;
+        return feature.properties._mvt_label_position === true;
       });
       expect(labelFeature).not.to.be(undefined);
       expect(labelFeature.type).to.be(1);
@@ -184,7 +184,7 @@ export default function ({ getService }) {
         _count: 1,
         _key: '85264a33fffffff',
         'avg_of_bytes.value': 9252,
-        '_mvt_label_position': true,
+        _mvt_label_position: true,
       });
       expect(labelFeature.loadGeometry()).to.eql([[{ x: 93, y: 667 }]]);
     });

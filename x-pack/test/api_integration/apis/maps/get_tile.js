@@ -111,7 +111,10 @@ export default function ({ getService }) {
       // Verify ES document
 
       const feature = findFeature(layer, (feature) => {
-        return feature.properties._id === 'AU_x3_BsGFA8no6Qjjug' && feature.properties['_mvt_label_position'] === true;
+        return (
+          feature.properties._id === 'AU_x3_BsGFA8no6Qjjug' &&
+          feature.properties._mvt_label_position === true
+        );
       });
       expect(feature).not.to.be(undefined);
       expect(feature.type).to.be(1);
@@ -123,7 +126,7 @@ export default function ({ getService }) {
         _index: 'logstash-2015.09.20',
         bytes: 9252,
         'machine.os.raw': 'ios',
-        '_mvt_label_position': true,
+        _mvt_label_position: true,
       });
       expect(feature.loadGeometry()).to.eql([[{ x: 44, y: 2382 }]]);
     });
