@@ -13,7 +13,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use
 import { PolicyResponseWrapper } from '../../../../components/policy_response';
 
 const Container = styled.div`
-  padding: 15px;
+  padding: ${({ theme }) => theme.eui.paddingSizes.m};
 `;
 
 /**
