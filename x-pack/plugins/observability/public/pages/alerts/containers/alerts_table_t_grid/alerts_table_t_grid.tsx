@@ -69,6 +69,7 @@ import { translations, paths } from '../../../../config';
 import { addDisplayNames } from './add_display_names';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from './translations';
 import { ObservabilityAppServices } from '../../../../application/types';
+import { useBulkAddToCaseActions } from '../../../../hooks/use_alert_bulk_case_actions';
 
 interface AlertsTableTGridProps {
   indexNames: string[];
@@ -400,6 +401,14 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     [tGridState]
   );
 
+  const addToCaseBulkActions = useBulkAddToCaseActions();
+  const bulkActions = useMemo(
+    () => ({
+      alertStatusActions: false,
+      customBulkActions: addToCaseBulkActions,
+    }),
+    [addToCaseBulkActions]
+  );
   const tGridProps = useMemo(() => {
     const type: TGridType = 'standalone';
     const sortDirection: SortDirection = 'desc';
@@ -430,7 +439,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       runtimeMappings: {},
       start: rangeFrom,
       setRefetch,
-      showCheckboxes: false,
+      bulkActions,
       sort: tGridState?.sort ?? [
         {
           columnId: '@timestamp',
@@ -456,17 +465,19 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     };
   }, [
     casePermissions,
+    tGridState?.columns,
+    tGridState?.sort,
+    deletedEventIds,
     rangeTo,
     hasAlertsCrudPermissions,
     indexNames,
+    itemsPerPage,
+    onStateChange,
     kuery,
     rangeFrom,
     setRefetch,
+    bulkActions,
     leadingControlColumns,
-    deletedEventIds,
-    onStateChange,
-    tGridState,
-    itemsPerPage,
   ]);
 
   const handleFlyoutClose = () => setFlyoutAlert(undefined);
