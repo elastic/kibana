@@ -199,7 +199,8 @@
             { "id": "kibDevDocsToolingLog" },
             { "id": "kibDevDocsOpsJestSerializers" },
             { "id": "kibDevDocsOpsExpect" },
-            { "id": "kibDevDocsOpsAmbientStorybookTypes" }
+            { "id": "kibDevDocsOpsAmbientStorybookTypes" },
+            { "id": "kibDevDocsOpsAmbientUiTypes" }
           ]
         }
       ]
