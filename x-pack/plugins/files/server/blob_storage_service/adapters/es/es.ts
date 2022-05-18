@@ -23,6 +23,10 @@ const pipeline = promisify(_pipeline);
  */
 export const BLOB_STORAGE_SYSTEM_INDEX_NAME = '.kibana_blob_storage';
 
+interface UploadOptions {
+  chunkSize?: string;
+}
+
 export class ElasticsearchBlobStorage implements BlobStorage {
   constructor(
     private readonly esClient: ElasticsearchClient,
@@ -71,7 +75,10 @@ export class ElasticsearchBlobStorage implements BlobStorage {
     }
   }
 
-  public async upload(src: Readable): Promise<{ id: string; size: number }> {
+  public async upload(
+    src: Readable,
+    options?: UploadOptions
+  ): Promise<{ id: string; size: number }> {
     await this.createIndexIfNotExists();
 
     try {
@@ -82,6 +89,7 @@ export class ElasticsearchBlobStorage implements BlobStorage {
         logger: this.logger.get('content-stream-upload'),
         parameters: {
           encoding: 'base64',
+          maxChunkSize: options?.chunkSize,
         },
       });
       await pipeline(src, dest);

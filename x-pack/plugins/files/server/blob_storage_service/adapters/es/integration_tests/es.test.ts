@@ -79,21 +79,57 @@ describe('Elasticsearch blob storage', () => {
       chunks.push(chunk);
     }
     expect(chunks.join('')).toBe('upload this');
+    // Called twice because we did not know where the file contents end
     expect((esClient.get as sinon.SinonSpy).calledTwice).toBe(true);
   });
 
+  it('uploads and downloads a file of many chunks', async () => {
+    const fileString = 'upload this'.repeat(10);
+    const { id } = await esBlobStorage.upload(Readable.from([fileString]), {
+      chunkSize: '1028B',
+    });
+    expect(await getAllDocCount()).toMatchObject({ count: 37 });
+    const rs = await esBlobStorage.download({ id });
+    const chunks: string[] = [];
+    for await (const chunk of rs) {
+      chunks.push(chunk);
+    }
+    expect(chunks.join('')).toBe(fileString);
+  });
+
+  const getAllDocCount = async () => {
+    await esClient.indices.refresh({ index: BLOB_STORAGE_SYSTEM_INDEX_NAME });
+    return esClient.count({
+      index: BLOB_STORAGE_SYSTEM_INDEX_NAME,
+      query: { match_all: {} },
+    });
+  };
+
   it('uploads and removes file content', async () => {
     const { id } = await esBlobStorage.upload(Readable.from(['upload this']));
-    const getAllDocCount = async () => {
-      await esClient.indices.refresh({ index: BLOB_STORAGE_SYSTEM_INDEX_NAME });
-      return esClient.count({
-        index: BLOB_STORAGE_SYSTEM_INDEX_NAME,
-        query: { match_all: {} },
-      });
-    };
-
     expect(await getAllDocCount()).toMatchObject({ count: 1 });
     await esBlobStorage.delete(id);
     expect(await getAllDocCount()).toMatchObject({ count: 0 });
+  });
+
+  it('chunks files and then deletes all chunks when cleaning up', async () => {
+    const fileString = 'upload this'.repeat(10);
+    const { id } = await esBlobStorage.upload(Readable.from([fileString]), {
+      chunkSize: '1028B',
+    });
+    const fileString2 = 'another file'.repeat(10);
+    const { id: id2 } = await esBlobStorage.upload(Readable.from([fileString2]), {
+      chunkSize: '1028B',
+    });
+    expect(await getAllDocCount()).toMatchObject({ count: 77 });
+    await esBlobStorage.delete(id);
+    expect(await getAllDocCount()).toMatchObject({ count: 40 });
+    // Now we check that the other file is still intact
+    const rs = await esBlobStorage.download({ id: id2 });
+    const chunks: string[] = [];
+    for await (const chunk of rs) {
+      chunks.push(chunk);
+    }
+    expect(chunks.join('')).toBe(fileString2);
   });
 });
