@@ -329,7 +329,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     xAccessor: xColumnId || 'unifiedX',
     yAccessors: [accessor],
     data: rows,
-    xScaleType: xColumnId ? layer.xScaleType || defaultXScaleType : 'ordinal',
+    xScaleType: xColumnId ? layer.xScaleType ?? defaultXScaleType : 'ordinal',
     yScaleType:
       formatter?.id === 'bytes' && yAxis?.scale === ScaleType.Linear
         ? ScaleType.LinearBinary
