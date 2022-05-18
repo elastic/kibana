@@ -12,6 +12,7 @@ import {
   NoDataViewsPromptProvider,
   NoDataViewsPromptServices,
 } from '@kbn/shared-ux-prompt-no-data-views';
+import { EuiLoadingElastic } from '@elastic/eui';
 import { NoDataConfigPage, NoDataPageProps } from '../page_template';
 
 export interface Props {
@@ -26,6 +27,7 @@ export const KibanaNoDataPage = ({ onDataViewCreated, noDataConfig }: Props) => 
   const { openDataViewEditor } = useEditors();
 
   const { hasESData, hasUserDataView } = useData();
+  const [isLoading, setIsLoading] = useState(true);
   const [dataExists, setDataExists] = useState(false);
   const [hasUserDataViews, setHasUserDataViews] = useState(false);
 
@@ -33,11 +35,18 @@ export const KibanaNoDataPage = ({ onDataViewCreated, noDataConfig }: Props) => 
     const checkData = async () => {
       setDataExists(await hasESData());
       setHasUserDataViews(await hasUserDataView());
+      setIsLoading(false);
     };
     // TODO: add error handling
     // https://github.com/elastic/kibana/issues/130913
-    checkData().catch(() => {});
+    checkData().catch(() => {
+      setIsLoading(false);
+    });
   }, [hasESData, hasUserDataView]);
+
+  if (isLoading) {
+    return <EuiLoadingElastic css={{ margin: 'auto' }} size="xxl" />;
+  }
 
   if (!dataExists) {
     return <NoDataConfigPage noDataConfig={noDataConfig} />;
