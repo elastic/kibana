@@ -85,7 +85,7 @@ export const copyColumnValuesToClipboard = async ({
     return getCellTextToCopy(rowIndex, columnId, { allowMultiline: false });
   });
 
-  const textToCopy = valuesFormatted.join('\n');
+  const textToCopy = `${columnId}\n${valuesFormatted.join('\n')}`;
 
   let copiedWithoutBrowserStyles = false;
   try {
