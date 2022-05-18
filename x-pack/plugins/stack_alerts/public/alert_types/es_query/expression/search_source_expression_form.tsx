@@ -118,7 +118,8 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
     }
   };
 
-  const onSavedQueryUpdated = useCallback((newSavedQuery: SavedQuery) => {
+  // Saved query
+  const onSavedQuery = useCallback((newSavedQuery: SavedQuery) => {
     setSavedQuery(newSavedQuery);
     const newFilters = newSavedQuery.attributes.filters;
     if (newFilters) {
@@ -131,6 +132,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
     dispatch({ type: 'query', payload: { ...query, query: '' } });
   };
 
+  // window size
   const onChangeWindowUnit = useCallback(
     (selectedWindowUnit: string) => setParam('timeWindowUnit', selectedWindowUnit),
     [setParam]
@@ -142,6 +144,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
     []
   );
 
+  // threshold
   const onChangeSelectedThresholdComparator = useCallback(
     (selectedThresholdComparator?: string) =>
       setParam('thresholdComparator', selectedThresholdComparator),
@@ -194,7 +197,8 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         filters={filters}
         onFiltersUpdated={onUpdateFilters}
         onClearSavedQuery={onClearSavedQuery}
-        onSavedQueryUpdated={onSavedQueryUpdated}
+        onSavedQueryUpdated={onSavedQuery}
+        onSaved={onSavedQuery}
         showSaveQuery={true}
         showQueryBar={true}
         showQueryInput={true}

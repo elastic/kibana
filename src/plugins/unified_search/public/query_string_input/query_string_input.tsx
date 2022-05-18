@@ -721,13 +721,6 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
       this.props.prepend || simpleLanguageSwitcher ? (
         <FilterButtonGroup attached items={[this.props.prepend, simpleLanguageSwitcher]} />
       ) : undefined;
-    // eslint-disable-next-line no-console
-    console.log(
-      'isSuggestionsVisible',
-      isSuggestionsVisible,
-      'this.state.suggestions',
-      this.state.suggestions
-    );
 
     const containerClassName = classNames('kbnQueryBar__wrap', this.props.className);
     const inputClassName = classNames('kbnQueryBar__textarea', {
