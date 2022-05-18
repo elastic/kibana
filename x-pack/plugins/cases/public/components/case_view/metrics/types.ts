@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { CaseMetrics, CaseMetricsFeature } from '../../../../common/ui';
+import { SingleCaseMetrics, SingleCaseMetricsFeature } from '../../../../common/ui';
 
 export interface CaseViewMetricsProps {
-  metrics: CaseMetrics | null;
-  features: CaseMetricsFeature[];
+  metrics: SingleCaseMetrics | null;
+  features: SingleCaseMetricsFeature[];
   isLoading: boolean;
 }

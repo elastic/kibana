@@ -15,6 +15,7 @@ export const defaultHandlers: RendererHandlers = {
   getFilter: () => 'filter',
   getRenderMode: () => 'view',
   isSyncColorsEnabled: () => false,
+  isSyncTooltipsEnabled: () => false,
   isInteractive: () => true,
   onComplete: (fn) => undefined,
   onEmbeddableDestroyed: action('onEmbeddableDestroyed'),

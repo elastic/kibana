@@ -13,7 +13,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { PackageInfo } from '@kbn/fleet-plugin/common/types';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { QueryClient } from 'react-query';
+import { SecuritySolutionQueryClient } from '../../../../../common/containers/query_client/query_client_provider';
 import {
   AppContextTestRender,
   createAppRootMockRenderer,
@@ -85,7 +85,7 @@ export const createFleetContextRendererMock = (): AppContextTestRender => {
     additionalMiddleware: [mockedContext.middlewareSpy.actionSpyMiddleware],
   });
 
-  const queryClient = new QueryClient();
+  const queryClient = new SecuritySolutionQueryClient();
 
   const Wrapper: RenderOptions['wrapper'] = ({ children }) => {
     const services = useMemo(() => {
@@ -181,6 +181,7 @@ export const generateFleetPackageInfo = (): PackageInfo => {
         security_rule: [],
         tag: [],
         osquery_pack_asset: [],
+        osquery_saved_query: [],
       },
       elasticsearch: {
         ingest_pipeline: [],

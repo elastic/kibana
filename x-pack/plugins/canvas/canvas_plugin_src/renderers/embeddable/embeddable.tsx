@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import ReactDOM from 'react-dom';
 import { CoreStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -32,9 +33,28 @@ const embeddablesRegistry: {
 
 const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
   const I18nContext = core.i18n.Context;
+  const EmbeddableRenderer: FC<{ embeddable: IEmbeddable }> = ({ embeddable }) => {
+    const currentAppId = useObservable(core.application.currentAppId$, undefined);
 
-  const embeddableContainerContext: EmbeddableContainerContext = {
-    getCurrentPath: () => window.location.hash,
+    if (!currentAppId) {
+      return null;
+    }
+
+    const embeddableContainerContext: EmbeddableContainerContext = {
+      getCurrentPath: () => {
+        const urlToApp = core.application.getUrlForApp(currentAppId);
+        const inAppPath = window.location.pathname.replace(urlToApp, '');
+
+        return inAppPath + window.location.search + window.location.hash;
+      },
+    };
+
+    return (
+      <plugins.embeddable.EmbeddablePanel
+        embeddable={embeddable}
+        containerContext={embeddableContainerContext}
+      />
+    );
   };
 
   return (embeddableObject: IEmbeddable) => {
@@ -45,10 +65,7 @@ const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
       >
         <I18nContext>
           <KibanaThemeProvider theme$={core.theme.theme$}>
-            <plugins.embeddable.EmbeddablePanel
-              embeddable={embeddableObject}
-              containerContext={embeddableContainerContext}
-            />
+            <EmbeddableRenderer embeddable={embeddableObject} />
           </KibanaThemeProvider>
         </I18nContext>
       </div>

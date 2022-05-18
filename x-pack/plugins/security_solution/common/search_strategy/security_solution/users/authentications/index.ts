@@ -59,7 +59,7 @@ export interface LastSourceHost {
 }
 
 export interface AuthenticationHit extends Hit {
-  _source: {
+  fields: {
     '@timestamp': string;
     lastSuccess?: LastSourceHost;
     lastFailure?: LastSourceHost;
