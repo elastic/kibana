@@ -9,23 +9,18 @@ import React, { useState, Fragment, useEffect, useCallback } from 'react';
 import { firstValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
 import { XJsonMode } from '@kbn/ace';
 import 'brace/theme/github';
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
   EuiSpacer,
   EuiFormRow,
-  EuiText,
   EuiTitle,
   EuiLink,
   EuiIconTip,
 } from '@elastic/eui';
 import { DocLinksStart, HttpSetup } from '@kbn/core/public';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { XJson, EuiCodeEditor } from '@kbn/es-ui-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -42,10 +37,8 @@ import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_q
 import { EsQueryAlertParams, SearchType } from '../types';
 import { IndexSelectPopover } from '../../components/index_select_popover';
 import { DEFAULT_VALUES } from '../constants';
-
-function totalHitsToNumber(total: estypes.SearchHitsMetadata['total']): number {
-  return typeof total === 'number' ? total : total?.value ?? 0;
-}
+import { TestQueryRow } from './test_query_row';
+import { totalHitsToNumber } from './use_test_query';
 
 const { useXJsonMode } = XJson;
 const xJsonMode = new XJsonMode();
@@ -108,8 +101,6 @@ export const EsQueryExpression = ({
     }>
   >([]);
   const { convertToJson, setXJson, xJson } = useXJsonMode(DEFAULT_VALUES.QUERY);
-  const [testQueryResult, setTestQueryResult] = useState<string | null>(null);
-  const [testQueryError, setTestQueryError] = useState<string | null>(null);
 
   const setDefaultExpressionValues = async () => {
     setRuleProperty('params', currentAlertParams);
@@ -139,48 +130,29 @@ export const EsQueryExpression = ({
     );
   };
 
-  const onTestQuery = async () => {
-    if (!hasValidationErrors()) {
-      setTestQueryError(null);
-      setTestQueryResult(null);
-      try {
-        const window = `${timeWindowSize}${timeWindowUnit}`;
-        const timeWindow = parseDuration(window);
-        const parsedQuery = JSON.parse(esQuery);
-        const now = Date.now();
-        const { rawResponse } = await firstValueFrom(
-          data.search.search({
-            params: buildSortedEventsQuery({
-              index,
-              from: new Date(now - timeWindow).toISOString(),
-              to: new Date(now).toISOString(),
-              filter: parsedQuery.query,
-              size: 0,
-              searchAfterSortId: undefined,
-              timeField: timeField ? timeField : '',
-              track_total_hits: true,
-            }),
-          })
-        );
+  const onTestQuery = useCallback(async () => {
+    const window = `${timeWindowSize}${timeWindowUnit}`;
+    const timeWindow = parseDuration(window);
+    const parsedQuery = JSON.parse(esQuery);
+    const now = Date.now();
+    const { rawResponse } = await firstValueFrom(
+      data.search.search({
+        params: buildSortedEventsQuery({
+          index,
+          from: new Date(now - timeWindow).toISOString(),
+          to: new Date(now).toISOString(),
+          filter: parsedQuery.query,
+          size: 0,
+          searchAfterSortId: undefined,
+          timeField: timeField ? timeField : '',
+          track_total_hits: true,
+        }),
+      })
+    );
 
-        const hits = rawResponse.hits;
-        setTestQueryResult(
-          i18n.translate('xpack.stackAlerts.esQuery.ui.numQueryMatchesText', {
-            defaultMessage: 'Query matched {count} documents in the last {window}.',
-            values: { count: totalHitsToNumber(hits.total), window },
-          })
-        );
-      } catch (err) {
-        const message = err?.body?.attributes?.error?.root_cause[0]?.reason || err?.body?.message;
-        setTestQueryError(
-          i18n.translate('xpack.stackAlerts.esQuery.ui.queryError', {
-            defaultMessage: 'Error testing query: {message}',
-            values: { message: message ? `${err.message}: ${message}` : err.message },
-          })
-        );
-      }
-    }
-  };
+    const hits = rawResponse.hits;
+    return { number: totalHitsToNumber(hits.total), timeWindow: window };
+  }, [data.search, esQuery, index, timeField, timeWindowSize, timeWindowUnit]);
 
   return (
     <Fragment>
@@ -280,36 +252,7 @@ export const EsQueryExpression = ({
           }}
         />
       </EuiFormRow>
-      <EuiFormRow>
-        <EuiButtonEmpty
-          data-test-subj="testQuery"
-          color={'primary'}
-          iconSide={'left'}
-          flush={'left'}
-          iconType={'play'}
-          disabled={hasValidationErrors()}
-          onClick={onTestQuery}
-        >
-          <FormattedMessage
-            id="xpack.stackAlerts.esQuery.ui.testQuery"
-            defaultMessage="Test query"
-          />
-        </EuiButtonEmpty>
-      </EuiFormRow>
-      {testQueryResult && (
-        <EuiFormRow>
-          <EuiText data-test-subj="testQuerySuccess" color="subdued" size="s">
-            <p>{testQueryResult}</p>
-          </EuiText>
-        </EuiFormRow>
-      )}
-      {testQueryError && (
-        <EuiFormRow>
-          <EuiText data-test-subj="testQueryError" color="danger" size="s">
-            <p>{testQueryError}</p>
-          </EuiText>
-        </EuiFormRow>
-      )}
+      <TestQueryRow fetch={onTestQuery} hasValidationErrors={hasValidationErrors()} />
       <EuiSpacer />
       <EuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
         <EuiFlexItem grow={false}>

@@ -6,11 +6,13 @@
  */
 
 import React, { Fragment, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import { Filter } from '@kbn/es-query';
+import { firstValueFrom } from 'rxjs';
 import { debounce } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonEmpty, EuiFormRow, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Filter, DataView, Query, ISearchSource, getTime } from '@kbn/data-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { DataView, Query, ISearchSource, getTime } from '@kbn/data-plugin/common';
 import {
   ForLastExpression,
   IErrorObject,
@@ -18,18 +20,14 @@ import {
   ValueExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
-import { firstValueFrom } from 'rxjs';
 import { mapAndFlattenFilters, SavedQuery, TimeHistory } from '@kbn/data-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EsQueryAlertParams, SearchType } from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { DataViewSelectPopover } from '../../components/data_view_select_popover';
 import { useTriggersAndActionsUiDeps } from '../util';
-
-function totalHitsToNumber(total: estypes.SearchHitsMetadata['total']): number {
-  return typeof total === 'number' ? total : total?.value ?? 0;
-}
+import { totalHitsToNumber } from './use_test_query';
+import { TestQueryRow } from './test_query_row';
 
 interface LocalState {
   index: DataView;
@@ -78,8 +76,6 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   const { searchSource, ruleParams, errors, initialSavedQuery, setParam } = props;
   const { thresholdComparator, timeWindowUnit } = ruleParams;
   const [savedQuery, setSavedQuery] = useState<SavedQuery>();
-  const [testQueryResult, setTestQueryResult] = useState<string | null>(null);
-  const [testQueryError, setTestQueryError] = useState<string | null>(null);
 
   const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
 
@@ -167,39 +163,17 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
     (updatedValue: number) => dispatch({ type: 'size', payload: updatedValue }),
     []
   );
-
-  const onTestQuery = async () => {
-    setTestQueryError(null);
-    setTestQueryResult(null);
-    try {
-      const window = `${timeWindowSize}${timeWindowUnit}`;
-      const testSearchSource = searchSource.createCopy();
-      const timeFilter = getTime(searchSource.getField('index')!, {
-        from: `now-${window}`,
-        to: 'now',
-      });
-
-      testSearchSource.setField('filter', timeFilter);
-
-      const { rawResponse } = await firstValueFrom(testSearchSource.fetch$());
-
-      const hits = rawResponse.hits;
-      setTestQueryResult(
-        i18n.translate('xpack.stackAlerts.esQuery.ui.numQueryMatchesText', {
-          defaultMessage: 'Query matched {count} documents in the last {window}.',
-          values: { count: totalHitsToNumber(hits.total), window },
-        })
-      );
-    } catch (err) {
-      const message = err?.body?.attributes?.error?.root_cause[0]?.reason || err?.body?.message;
-      setTestQueryError(
-        i18n.translate('xpack.stackAlerts.esQuery.ui.queryError', {
-          defaultMessage: 'Error testing query: {message}',
-          values: { message: message ? `${err.message}: ${message}` : err.message },
-        })
-      );
-    }
-  };
+  const onTestFetch = useCallback(async () => {
+    const timeWindow = `${timeWindowSize}${timeWindowUnit}`;
+    const testSearchSource = searchSource.createCopy();
+    const timeFilter = getTime(searchSource.getField('index')!, {
+      from: `now-${timeWindow}`,
+      to: 'now',
+    });
+    testSearchSource.setField('filter', timeFilter);
+    const { rawResponse } = await firstValueFrom(testSearchSource.fetch$());
+    return { number: totalHitsToNumber(rawResponse.hits.total), timeWindow };
+  }, [searchSource, timeWindowSize, timeWindowUnit]);
 
   return (
     <Fragment>
@@ -301,35 +275,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         onChangeSelectedValue={onChangeSizeValue}
       />
       <EuiSpacer size="s" />
-      <EuiFormRow>
-        <EuiButtonEmpty
-          data-test-subj="testQuery"
-          color={'primary'}
-          iconSide={'left'}
-          flush={'left'}
-          iconType={'play'}
-          onClick={onTestQuery}
-        >
-          <FormattedMessage
-            id="xpack.stackAlerts.esQuery.ui.testQuery"
-            defaultMessage="Test query"
-          />
-        </EuiButtonEmpty>
-      </EuiFormRow>
-      {testQueryResult && (
-        <EuiFormRow>
-          <EuiText data-test-subj="testQuerySuccess" color="subdued" size="s">
-            <p>{testQueryResult}</p>
-          </EuiText>
-        </EuiFormRow>
-      )}
-      {testQueryError && (
-        <EuiFormRow>
-          <EuiText data-test-subj="testQueryError" color="danger" size="s">
-            <p>{testQueryError}</p>
-          </EuiText>
-        </EuiFormRow>
-      )}
+      <TestQueryRow fetch={onTestFetch} hasValidationErrors={false} />
       <EuiSpacer />
     </Fragment>
   );
