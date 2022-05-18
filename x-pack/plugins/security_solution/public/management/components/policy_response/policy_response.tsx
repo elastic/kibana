@@ -128,7 +128,7 @@ const ResponseActions = memo(
 
 ResponseActions.displayName = 'ResponseActions';
 
-export interface PolicyResponseProps {
+interface PolicyResponseProps {
   responseConfig: Immutable<HostPolicyResponseConfiguration>;
   responseActions: Immutable<HostPolicyResponseAppliedAction[]>;
   responseAttentionCount: Map<string, number>;
