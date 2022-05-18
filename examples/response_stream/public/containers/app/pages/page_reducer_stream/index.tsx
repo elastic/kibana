@@ -23,7 +23,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { useStreamFetchReducer } from '@kbn/aiops-plugin/public';
+import { useFetchStream } from '@kbn/aiops-plugin/public';
 
 import { ApiReducerStream } from '../../../../../common/api';
 import {
@@ -46,11 +46,10 @@ export const PageReducerStream: FC = () => {
   const [simulateErrors, setSimulateErrors] = useState(false);
 
   const { dispatch, start, cancel, data, isCancelled, isRunning } =
-    useStreamFetchReducer<ApiReducerStream>(
+    useFetchStream<ApiReducerStream>(
       '/internal/response_stream/reducer_stream',
-      reducerStreamReducer,
-      initialState,
-      { simulateErrors }
+      { simulateErrors },
+      { reducer: reducerStreamReducer, initialState }
     );
 
   const { errors, progress, entities } = data;

@@ -18,6 +18,6 @@ export const API_ENDPOINT = {
 export interface ApiExplainLogRateSpikes {
   endpoint: typeof API_ENDPOINT.EXPLAIN_LOG_RATE_SPIKES;
   reducer: typeof streamReducer;
-  options: AiopsExplainLogRateSpikesSchema;
+  body: AiopsExplainLogRateSpikesSchema;
   actions: AiopsExplainLogRateSpikesApiAction;
 }

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { simpleStringReducer } from './reducer';
 export {
   simpleStringStreamRequestBodySchema,
   SimpleStringStreamRequestBodySchema,

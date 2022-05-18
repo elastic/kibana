@@ -12,18 +12,15 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 
-import { useStreamFetchReducer } from '@kbn/aiops-plugin/public';
+import { useFetchStream } from '@kbn/aiops-plugin/public';
 
 import { ApiSimpleStringStream } from '../../../../../common/api';
-import { simpleStringReducer } from '../../../../../common/api/simple_string_stream/reducer';
 
 import { Page } from '../../../../components/page';
 
 export const PageSimpleStringStream: FC = () => {
-  const { dispatch, start, cancel, data, isRunning } = useStreamFetchReducer<ApiSimpleStringStream>(
+  const { dispatch, start, cancel, data, isRunning } = useFetchStream<ApiSimpleStringStream>(
     '/internal/response_stream/simple_string_stream',
-    simpleStringReducer,
-    '',
     { timeout: 500 }
   );
 
@@ -31,6 +28,7 @@ export const PageSimpleStringStream: FC = () => {
     if (isRunning) {
       cancel();
     } else {
+      // Passing in undefined will reset `data` to an empty string.
       dispatch(undefined);
       start();
     }

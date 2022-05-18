@@ -7,12 +7,12 @@
 
 import type { ReducerAction } from 'react';
 
-import type { UseStreamFetcherParams } from './use_stream_fetch_reducer';
+import type { UseFetchStreamParamsDefault } from './use_fetch_stream';
 
-export async function* streamFetch<I extends UseStreamFetcherParams>(
+export async function* fetchStream<I extends UseFetchStreamParamsDefault>(
   endpoint: I['endpoint'],
   abortCtrl: React.MutableRefObject<AbortController>,
-  options: I['options'],
+  body: I['body'],
   basePath = '',
   ndjson = true
 ): AsyncGenerator<ReducerAction<I['reducer']> | Array<ReducerAction<I['reducer']>>> {
@@ -25,7 +25,7 @@ export async function* streamFetch<I extends UseStreamFetcherParams>(
       'Content-Type': 'application/json',
       'kbn-xsrf': 'stream',
     },
-    ...(Object.keys(options).length > 0 ? { body: JSON.stringify(options) } : {}),
+    ...(Object.keys(body).length > 0 ? { body: JSON.stringify(body) } : {}),
   });
 
   if (stream.body !== null) {
