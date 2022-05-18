@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { AppDataType } from '../../../shared/exploratory_view/types';
 import { SectionContainer } from '..';
 import { getDataHandler } from '../../../../data_handler';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -43,7 +43,7 @@ export function UXSection({ bucketSize }: Props) {
         'service.name': ['ALL_VALUES'],
       },
       breakdown: 'service.name',
-      dataType: 'ux',
+      dataType: 'ux' as AppDataType,
       selectedMetricField: 'transaction.duration.us',
     },
   ];
