@@ -110,7 +110,7 @@ describe('ALL - Packs', () => {
         `pack_${PACK_NAME}_${SAVED_QUERY_ID}`
       );
     });
-    it('by clicking in Lens button', () => {
+    it.skip('by clicking in Lens button', () => {
       let lensUrl = '';
       cy.window().then((win) => {
         cy.stub(win, 'open')
@@ -160,8 +160,8 @@ describe('ALL - Packs', () => {
         .contains(/^Save and deploy changes$/)
         .click();
       cy.contains(`${PACK_NAME}`).click();
-      cy.contains(`${PACK_NAME} details`);
-      cy.contains(/^No items found/);
+      cy.contains(`${PACK_NAME} details`).should('exist');
+      cy.contains(/^No items found/).should('exist');
     });
 
     it('enable changing saved queries and ecs_mappings', () => {
@@ -171,12 +171,13 @@ describe('ALL - Packs', () => {
       findAndClickButton('Add query');
 
       getSavedQueriesDropdown().type('Multiple {downArrow} {enter}');
-      cy.contains('Custom key/value pairs');
-      cy.contains('Days of uptime');
-      cy.contains('List of keywords used to tag each');
-      cy.contains('Seconds of uptime');
-      cy.contains('Client network address.');
-      cy.contains('Total uptime seconds');
+      cy.contains('Custom key/value pairs').should('exist');
+      cy.contains('Days of uptime').should('exist');
+      cy.contains('List of keywords used to tag each').should('exist');
+      cy.contains('Seconds of uptime').should('exist');
+      cy.contains('Client network address.').should('exist');
+      cy.contains('Total uptime seconds').should('exist');
+      cy.getBySel('ECSMappingEditorForm').should('have.length', 4);
 
       getSavedQueriesDropdown().type('NOMAPPING {downArrow} {enter}');
       cy.contains('Custom key/value pairs').should('not.exist');
@@ -185,17 +186,19 @@ describe('ALL - Packs', () => {
       cy.contains('Seconds of uptime').should('not.exist');
       cy.contains('Client network address.').should('not.exist');
       cy.contains('Total uptime seconds').should('not.exist');
+      cy.getBySel('ECSMappingEditorForm').should('have.length', 1);
 
       getSavedQueriesDropdown().type('ONE_MAPPING {downArrow} {enter}');
-      cy.contains('Name of the continent');
-      cy.contains('Seconds of uptime');
+      cy.contains('Name of the continent').should('exist');
+      cy.contains('Seconds of uptime').should('exist');
+      cy.getBySel('ECSMappingEditorForm').should('have.length', 2);
 
       findAndClickButton('Save');
       cy.react('CustomItemAction', {
         props: { index: 0, item: { id: 'ONE_MAPPING_CHANGED' } },
       }).click();
-      cy.contains('Name of the continent');
-      cy.contains('Seconds of uptime');
+      cy.contains('Name of the continent').should('exist');
+      cy.contains('Seconds of uptime').should('exist');
     });
 
     it('to click delete button', () => {
@@ -231,7 +234,7 @@ describe('ALL - Packs', () => {
 
       cy.getBySel('toastCloseButton').click();
       cy.contains(REMOVING_PACK).click();
-      cy.contains(`${REMOVING_PACK} details`);
+      cy.contains(`${REMOVING_PACK} details`).should('exist');
       findAndClickButton('Edit');
       cy.react('EuiComboBoxInput', { props: { value: AGENT_NAME } }).should('exist');
 
@@ -246,7 +249,7 @@ describe('ALL - Packs', () => {
       closeModalIfVisible();
       navigateTo('app/osquery/packs');
       cy.contains(REMOVING_PACK).click();
-      cy.contains(`${REMOVING_PACK} details`);
+      cy.contains(`${REMOVING_PACK} details`).should('exist');
       cy.wait(1000);
       findAndClickButton('Edit');
       cy.react('EuiComboBoxInput', { props: { value: '' } }).should('exist');

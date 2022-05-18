@@ -20,6 +20,9 @@ export const selectAllAgents = () => {
   cy.contains('1 agent selected.');
 };
 
+export const clearInputQuery = () =>
+  cy.get(LIVE_QUERY_EDITOR).click().type(`{selectall}{backspace}`);
+
 export const inputQuery = (query: string) => cy.get(LIVE_QUERY_EDITOR).type(query);
 
 export const submitQuery = () => cy.contains('Submit').click();
