@@ -13354,7 +13354,6 @@
     "xpack.fleet.serverError.enrollmentKeyDuplicate": "称作 {providedKeyName} 的注册密钥对于代理策略 {agentPolicyId} 已存在",
     "xpack.fleet.serverError.returnedIncorrectKey": "find enrollmentKeyById 返回错误的密钥",
     "xpack.fleet.serverError.unableToCreateEnrollmentKey": "无法创建注册 api 密钥",
-    "xpack.fleet.serverPlugin.integrationsPrivilegesTooltip": "访问所有集成需要所有工作区。",
     "xpack.fleet.serverPlugin.privilegesTooltip": "访问 Fleet 需要所有工作区。",
     "xpack.fleet.settings.confirmModal.cancelButtonText": "取消",
     "xpack.fleet.settings.confirmModal.confirmButtonText": "保存并部署",
