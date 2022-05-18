@@ -6,6 +6,7 @@
  */
 
 import { EuiIconProps } from '@elastic/eui';
+import { ExecutorSubActionPushParams } from '@kbn/actions-plugin/server/builtin_action_types/cases_webhook/types';
 import { UserConfiguredActionConnector } from '../../../types';
 
 export interface EmailActionParams {
@@ -73,8 +74,8 @@ export interface WebhookActionParams {
 }
 
 export interface CasesWebhookActionParams {
-  summary: string;
-  description: string;
+  subAction: string;
+  subActionParams: ExecutorSubActionPushParams;
 }
 
 export interface EmailConfig {

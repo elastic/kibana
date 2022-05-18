@@ -88,19 +88,26 @@ export function getActionType(): ActionTypeModel<
     },
     validateParams: async (
       actionParams: CasesWebhookActionParams
-    ): Promise<GenericValidationResult<CasesWebhookActionParams>> => {
+    ): Promise<GenericValidationResult<unknown>> => {
       const translations = await import('./translations');
       const errors = {
-        summary: new Array<string>(),
-        description: new Array<string>(),
+        'subActionParams.incident.summary': new Array<string>(),
+        'subActionParams.incident.description': new Array<string>(),
       };
       const validationResult = { errors };
-      validationResult.errors = errors;
-      if (!actionParams.summary?.length) {
-        errors.summary.push(translations.BODY_REQUIRED);
+      if (
+        actionParams.subActionParams &&
+        actionParams.subActionParams.incident &&
+        !actionParams.subActionParams.incident.summary?.length
+      ) {
+        errors['subActionParams.incident.summary'].push(translations.BODY_REQUIRED);
       }
-      if (!actionParams.description?.length) {
-        errors.description.push(translations.BODY_REQUIRED);
+      if (
+        actionParams.subActionParams &&
+        actionParams.subActionParams.incident &&
+        !actionParams.subActionParams.incident.description?.length
+      ) {
+        errors['subActionParams.incident.description'].push(translations.BODY_REQUIRED);
       }
       return validationResult;
     },

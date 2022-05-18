@@ -23,11 +23,6 @@ import * as i18n from './translations';
 import { request, getErrorMessage, throwIfResponseIsNotValid } from '../lib/axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 
-const VERSION = '2';
-const BASE_URL = `rest/api/${VERSION}`;
-
-const VIEW_INCIDENT_URL = `browse`;
-
 export const createExternalService = (
   actionId: string,
   { config, secrets }: ExternalServiceCredentials,
@@ -36,27 +31,16 @@ export const createExternalService = (
 ): ExternalService => {
   const { url, incident } = config as CasesWebhookPublicConfigurationType;
   const { password, user } = secrets as CasesWebhookSecretConfigurationType;
-  console.log('eh eh eh', {
-    bool: !url || !password || !user,
-    config,
-    url,
-    password,
-    user,
-  });
   if (!url || !password || !user) {
     throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
   }
 
   const incidentUrl = url.endsWith('/') ? url.slice(0, -1) : url;
-  // const incidentUrl = `${urlWithoutTrailingSlash}/${BASE_URL}/issue`;
 
   const axiosInstance = axios.create({
     auth: { username: user, password },
   });
-  //
-  const getIncidentViewURL = (key: string) => {
-    return `https://siem-kibana.atlassian.net/browse/${key}`;
-  };
+
   const createErrorMessage = (errorResponse: ResponseError | null | undefined): string => {
     if (errorResponse == null) {
       return 'unknown: errorResponse was null';
@@ -153,22 +137,14 @@ export const createExternalService = (
     str = str.replace('$DESC', desc);
     return JSON.parse(str);
   };
-  // Action Executor Result w/ internationalisation
-  function successResult(actionId: string, data: unknown): ActionTypeExecutorResult<unknown> {
-    return { status: 'ok', data, actionId };
-  }
+
   const createIncident = async ({
     summary,
     description,
   }: CreateIncidentParams): Promise<unknown> => {
     const data = replaceSumDesc(summary, description);
-    console.log('cases webhook args!!', {
-      axios: axiosInstance,
-      url: `${incidentUrl}`,
-      logger,
-      method: 'post',
+    console.log('cases webhook data!!', {
       data,
-      configurationUtilities,
     });
     try {
       const result: Result<AxiosResponse, AxiosError> = await promiseResult(
@@ -527,3 +503,7 @@ export const createExternalService = (
     // getIssue,
   };
 };
+// Action Executor Result w/ internationalisation
+function successResult(actionId: string, data: unknown): ActionTypeExecutorResult<unknown> {
+  return { status: 'ok', data, actionId };
+}

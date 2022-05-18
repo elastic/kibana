@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow } from '@elastic/eui';
 import { ActionParamsProps } from '../../../../types';
@@ -20,27 +20,45 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
   messageVariables,
   errors,
 }) => {
-  const { summary, description } = actionParams;
-  const incident = useMemo(
-    () => ({
-      summary,
-      description,
-    }),
-    [summary, description]
+  const { incident } = useMemo(
+    () =>
+      actionParams.subActionParams ??
+      ({
+        incident: {},
+        comments: [],
+      } as unknown as CasesWebhookActionParams['subActionParams']),
+    [actionParams.subActionParams]
   );
   const editSubActionProperty = useCallback(
     (key: string, value: any) => {
-      if (key === 'summary') {
-        editAction('summary', value, index);
-      }
-      if (key === 'description') {
-        editAction('description', value, index);
-      }
-      // console.log('edit action', { ...incident, [key]: value }, index);
-      // return editAction('subActionParams', { ...incident, [key]: value }, index);
+      return editAction(
+        'subActionParams',
+        {
+          incident: { ...incident, [key]: value },
+          comments: [],
+        },
+        index
+      );
     },
-    [editAction, index]
+    [editAction, incident, index]
   );
+  useEffect(() => {
+    if (!actionParams.subAction) {
+      editAction('subAction', 'pushToService', index);
+    }
+    if (!actionParams.subActionParams) {
+      editAction(
+        'subActionParams',
+        {
+          incident: {},
+          comments: [],
+        },
+        index
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actionParams]);
+
   return (
     <>
       <EuiFormRow

@@ -223,14 +223,7 @@ export const createExternalService = (
       issueType,
     });
     console.log('jira args', {
-      axios: axiosInstance,
-      url: `${incidentUrl}`,
-      logger,
-      method: 'post',
-      data: {
-        fields,
-      },
-      configurationUtilities,
+      fields,
     });
     try {
       const res = await request({

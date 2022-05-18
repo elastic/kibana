@@ -73,11 +73,7 @@ const SecretsSchema = schema.object(secretSchemaProps, {
 });
 
 // params definition
-export type ActionParamsType = TypeOf<typeof ParamsSchema>;
-const ParamsSchema = schema.object({
-  summary: schema.string(),
-  description: schema.string(),
-});
+export type ActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
 
 export const ActionTypeId = '.cases-webhook';
 // action type definition
@@ -149,27 +145,32 @@ export async function executor(
   }: { logger: Logger; configurationUtilities: ActionsConfigurationUtilities },
   execOptions: CasesWebhookActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<unknown>> {
-  const actionId = execOptions.actionId;
-  const { summary, description } = execOptions.params;
-
-  console.log('call createExternalService');
-  const externalService = createExternalService(
-    actionId,
-    {
-      config: execOptions.config,
-      secrets: execOptions.secrets,
-    },
-    logger,
-    configurationUtilities
-  );
-
-  console.log('call createIncident');
-  const result = await externalService.createIncident({
-    summary,
-    description,
-  });
-  console.log('result', result);
-  return result;
+  try {
+    const actionId = execOptions.actionId;
+    const { subAction, subActionParams } = execOptions.params;
+    const externalService = createExternalService(
+      actionId,
+      {
+        config: execOptions.config,
+        secrets: execOptions.secrets,
+      },
+      logger,
+      configurationUtilities
+    );
+    if (subAction === 'pushToService') {
+      const { summary, description } = subActionParams.incident;
+      const result = await externalService.createIncident({
+        summary,
+        description: description || '',
+      });
+      console.log('result', result);
+      return result; // successResult(actionId, result);
+    }
+    return errorResultRequestFailed(actionId, 'wow what a massive fail');
+  } catch (err) {
+    console.log('err', err);
+    return err;
+  }
 
   // if (isOk(result)) {
   //   // const {

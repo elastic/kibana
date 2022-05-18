@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ExecutorSubActionPushParamsSchema } from '../jira/schema';
 
 export const ExternalIncidentServiceConfiguration = {
   url: schema.string(),
@@ -25,6 +24,30 @@ export const ExternalIncidentServiceSecretConfiguration = {
 export const ExternalIncidentServiceSecretConfigurationSchema = schema.object(
   ExternalIncidentServiceSecretConfiguration
 );
+
+export const ExecutorSubActionPushParamsSchema = schema.object({
+  incident: schema.object({
+    summary: schema.string(),
+    description: schema.nullable(schema.string()),
+    labels: schema.nullable(
+      schema.arrayOf(
+        schema.string({
+          validate: (label) =>
+            // Matches any space, tab or newline character.
+            label.match(/\s/g) ? `The label ${label} cannot contain spaces` : undefined,
+        })
+      )
+    ),
+  }),
+  comments: schema.nullable(
+    schema.arrayOf(
+      schema.object({
+        comment: schema.string(),
+        commentId: schema.string(),
+      })
+    )
+  ),
+});
 
 export const ExecutorParamsSchema = schema.oneOf([
   schema.object({

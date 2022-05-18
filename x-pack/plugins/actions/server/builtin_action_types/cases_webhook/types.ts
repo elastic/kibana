@@ -6,9 +6,10 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { ExecutorParamsSchema } from '../jira/schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import {
+  ExecutorParamsSchema,
+  ExecutorSubActionPushParamsSchema,
   ExternalIncidentServiceConfigurationSchema,
   ExternalIncidentServiceSecretConfigurationSchema,
 } from './schema';
@@ -36,6 +37,7 @@ export interface ExternalServiceIncidentResponse {
 }
 
 export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
+export type ExecutorSubActionPushParams = TypeOf<typeof ExecutorSubActionPushParamsSchema>;
 
 export interface ExternalService {
   createIncident: (params: CreateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
