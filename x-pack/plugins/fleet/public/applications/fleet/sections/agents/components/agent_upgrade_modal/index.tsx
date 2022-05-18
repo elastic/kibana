@@ -202,8 +202,8 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
           singleSelection={{ asPlainText: true }}
           options={fallbackVersions}
           selectedOptions={selectedVersion}
-          onChange={(selectedVersion: Array<EuiComboBoxOptionOption<string>>) => {
-            setSelectedVersion(selectedVersion);
+          onChange={(selected: Array<EuiComboBoxOptionOption<string>>) => {
+            setSelectedVersion(selected);
           }}
         />
       </EuiFormRow>
@@ -240,8 +240,8 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
             singleSelection={{ asPlainText: true }}
             options={maintainanceOptions}
             selectedOptions={selectedMantainanceWindow}
-            onChange={(selectedMantainanceWindow: Array<EuiComboBoxOptionOption<string>>) => {
-              setSelectedMantainanceWindow(selectedMantainanceWindow);
+            onChange={(selected: Array<EuiComboBoxOptionOption<string>>) => {
+              setSelectedMantainanceWindow(selected);
             }}
           />
         </EuiFormRow>
