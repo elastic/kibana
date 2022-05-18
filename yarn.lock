@@ -41,6 +41,11 @@
     call-me-maybe "^1.0.1"
     z-schema "^5.0.1"
 
+"@appland/sql-parser@^1.5.1":
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/@appland/sql-parser/-/sql-parser-1.5.1.tgz#331d644364899858ba7aa6e884e2492596990626"
+  integrity sha512-R2FBHUOdzdBPUCCiL6WvXT9Fu+Xaj89exa1g+wMlatIe5z6vqitzLkY5a9zGDL3IByTiwbR0jiYuvFMfhp1Q+Q==
+
 "@babel/cli@^7.17.6":
   version "7.17.6"
   resolved "https://registry.yarnpkg.com/@babel/cli/-/cli-7.17.6.tgz#169e5935f1795f0b62ded5a2accafeedfe5c5363"
@@ -1389,29 +1394,29 @@
   dependencies:
     tslib "^2.0.0"
 
-"@elastic/apm-rum-core@^5.15.0":
-  version "5.15.0"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.15.0.tgz#f1067078080be1b7167c72ae6d155b0ed5cdf6c6"
-  integrity sha512-T5/1hZPskmU6N3Xo2CRNi5tX2ht8R5nLmh5t0I1v8RxkwbQms47AR1f0ZVvXN7W2FCDPadyQXC3f9do3k5A6OA==
+"@elastic/apm-rum-core@^5.16.0":
+  version "5.16.0"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.16.0.tgz#c3f6aaaee005717f10578877a3d1c7e6894eb63f"
+  integrity sha512-5aCwlKdmitM5Jk8wR7WcCtJzejIlSaUUHOGWANvq79GDtcCIjE/yD44pft8UAYQpiI28WXCLAFvJvIQiUzl/nw==
   dependencies:
     error-stack-parser "^1.3.5"
     opentracing "^0.14.3"
     promise-polyfill "^8.1.3"
 
-"@elastic/apm-rum-react@^1.4.0":
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-react/-/apm-rum-react-1.4.0.tgz#f36453e54d2ebdedb0d6d0c4f6cc76e16304b118"
-  integrity sha512-YIBuEJN6fkiB1M/o84PF4lQheAjrd3PQCm6t8pP4dKuWN1cWZnSsojnuGacx2bJn1kWWZxVDQ7wTjPJutkIy2A==
+"@elastic/apm-rum-react@^1.4.1":
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-react/-/apm-rum-react-1.4.1.tgz#d46913f1c3aa7f5e54d1898b644ffd7e0b75129a"
+  integrity sha512-bRyqVxe9QY40imv5u0p7q4WaXUDMs2gHewPuADC2LGiX8piNfpRXA7jj3KPD4P/045dlDsmvVjV0AELLyNipuQ==
   dependencies:
-    "@elastic/apm-rum" "^5.11.0"
+    "@elastic/apm-rum" "^5.11.1"
     hoist-non-react-statics "^3.3.0"
 
-"@elastic/apm-rum@^5.11.0":
-  version "5.11.0"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-5.11.0.tgz#97dbc426d0ec27b46e78a649f73d9e4a198ae258"
-  integrity sha512-+98NLG4NDa7o1DCtkhXeGmKW5riDPHSpgy2UxzLK4j02ZPBOccOUjIw5F8yZAUsrPUpQmk39x13IJl0mFyzjyA==
+"@elastic/apm-rum@^5.11.1":
+  version "5.11.1"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-5.11.1.tgz#ecbef3935ded2e9da338e6a749ab03b26e40c222"
+  integrity sha512-d6IxNvCxufb6JvVEH6TI7stwabJSIIBJsZVnRNaromZAgVOc5woI8mB35AH5glEPUb95KuL9CkCObHlqGpAt5w==
   dependencies:
-    "@elastic/apm-rum-core" "^5.15.0"
+    "@elastic/apm-rum-core" "^5.16.0"
 
 "@elastic/apm-synthtrace@link:bazel-bin/packages/elastic-apm-synthtrace":
   version "0.0.0"
@@ -1491,10 +1496,6 @@
     lru-cache "^6.0.0"
     semver "^7.3.2"
     topojson-client "^3.1.0"
-
-"@elastic/eslint-config-kibana@link:bazel-bin/packages/elastic-eslint-config-kibana":
-  version "0.0.0"
-  uid ""
 
 "@elastic/eslint-plugin-eui@0.0.2":
   version "0.0.2"
@@ -2986,6 +2987,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/dev-cli-errors@link:bazel-bin/packages/kbn-dev-cli-errors":
+  version "0.0.0"
+  uid ""
+
+"@kbn/dev-cli-runner@link:bazel-bin/packages/kbn-dev-cli-runner":
+  version "0.0.0"
+  uid ""
+
+"@kbn/dev-proc-runner@link:bazel-bin/packages/kbn-dev-proc-runner":
+  version "0.0.0"
+  uid ""
+
 "@kbn/dev-utils@link:bazel-bin/packages/kbn-dev-utils":
   version "0.0.0"
   uid ""
@@ -3007,6 +3020,10 @@
   uid ""
 
 "@kbn/es@link:bazel-bin/packages/kbn-es":
+  version "0.0.0"
+  uid ""
+
+"@kbn/eslint-config@link:bazel-bin/packages/kbn-eslint-config":
   version "0.0.0"
   uid ""
 
@@ -6196,6 +6213,18 @@
   uid ""
 
 "@types/kbn__datemath@link:bazel-bin/packages/kbn-datemath/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__dev-cli-errors@link:bazel-bin/packages/kbn-dev-cli-errors/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__dev-cli-runner@link:bazel-bin/packages/kbn-dev-cli-runner/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__dev-proc-runner@link:bazel-bin/packages/kbn-dev-proc-runner/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -11025,10 +11054,10 @@ core-js@^2.4.0, core-js@^2.5.0, core-js@^2.6.9:
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.6.9.tgz#6b4b214620c834152e179323727fc19741b084f2"
   integrity sha512-HOpZf6eXmnl7la+cUdMnLvUxKNqLUzJvgIziQ0DiF3JwSImNphIqdGqzj6hIKyX04MmV0poclQ7+wjWvxQyR2A==
 
-core-js@^3.0.4, core-js@^3.22.4, core-js@^3.6.5, core-js@^3.8.2, core-js@^3.8.3:
-  version "3.22.4"
-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.22.4.tgz#f4b3f108d45736935aa028444a69397e40d8c531"
-  integrity sha512-1uLykR+iOfYja+6Jn/57743gc9n73EWiOnSJJ4ba3B4fOEYDBv25MagmEZBxTp5cWq4b/KPx/l77zgsp28ju4w==
+core-js@^3.0.4, core-js@^3.22.5, core-js@^3.6.5, core-js@^3.8.2, core-js@^3.8.3:
+  version "3.22.5"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.22.5.tgz#a5f5a58e663d5c0ebb4e680cd7be37536fb2a9cf"
+  integrity sha512-VP/xYuvJ0MJWRAobcmQ8F2H6Bsn+s7zqAAjFaHGBMc5AQm7zaelhD1LGduFn2EehEcQcU+br6t+fwbpQ5d1ZWA==
 
 core-util-is@1.0.2, core-util-is@^1.0.2, core-util-is@~1.0.0:
   version "1.0.2"
@@ -18342,11 +18371,6 @@ js-sha3@0.8.0:
   version "0.8.0"
   resolved "https://registry.yarnpkg.com/js-sha3/-/js-sha3-0.8.0.tgz#b9b7a5da73afad7dedd0f8c463954cbde6818840"
   integrity sha512-gF1cRrHhIzNfToc802P800N8PpXS+evLLXfsVpowqmAFR9uwbi89WvXg2QspOmXL8QL86J4T1EpFu+yUkwJY3Q==
-
-js-sql-parser@^1.4.1:
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/js-sql-parser/-/js-sql-parser-1.4.1.tgz#775516b3187dd5872ecec04bef8ed4a430242fda"
-  integrity sha512-J8zi3+/yK4FWSnVvLOjS2HIGfJhR6v7ApwIF8gZ/SpaO/tFIDlsgugD6ZMn6flXiuMsCjJxvhE0+xBgbdzvDDw==
 
 js-string-escape@^1.0.1:
   version "1.0.1"
