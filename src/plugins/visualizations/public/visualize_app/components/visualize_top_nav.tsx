@@ -305,12 +305,13 @@ const TopNav = ({
       showQueryInput={showQueryInput}
       showSaveQuery={Boolean(services.visualizeCapabilities.saveQuery)}
       dataViewPickerComponentProps={
-        shouldShowDataViewPicker
+        shouldShowDataViewPicker && vis.data.indexPattern
           ? {
-              currentDataViewId: vis.data.indexPattern!.id,
+              currentDataViewId: vis.data.indexPattern.id,
               trigger: {
-                label: vis.data.indexPattern!.title,
+                label: vis.data.indexPattern.title,
               },
+              isMissingCurrent: vis.data.indexPattern.type === 'fallback',
               onChangeDataView,
               showNewMenuTour: false,
             }

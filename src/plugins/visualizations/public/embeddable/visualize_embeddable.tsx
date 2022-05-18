@@ -13,37 +13,38 @@ import React from 'react';
 import { render } from 'react-dom';
 import { EuiLoadingChart } from '@elastic/eui';
 import { Filter, onlyDisabledFiltersChanged } from '@kbn/es-query';
-import type { SavedObjectAttributes, KibanaExecutionContext } from '@kbn/core/public';
+import type { KibanaExecutionContext, SavedObjectAttributes } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { TimeRange, Query, TimefilterContract } from '@kbn/data-plugin/public';
+import { Query, TimefilterContract, TimeRange } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
+  Adapters,
+  AttributeService,
+  Embeddable,
   EmbeddableInput,
   EmbeddableOutput,
-  Embeddable,
   IContainer,
-  Adapters,
-  SavedObjectEmbeddableInput,
   ReferenceOrValueEmbeddable,
-  AttributeService,
+  SavedObjectEmbeddableInput,
+  ViewMode,
 } from '@kbn/embeddable-plugin/public';
 import {
-  IExpressionLoaderParams,
+  ExpressionAstExpression,
   ExpressionLoader,
   ExpressionRenderError,
-  ExpressionAstExpression,
+  IExpressionLoaderParams,
 } from '@kbn/expressions-plugin/public';
 import type { RenderMode } from '@kbn/expressions-plugin';
 import { VisualizationMissedDataViewError } from '../components/visualization_missed_data_view_error';
 import VisualizationError from '../components/visualization_error';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
-import { Vis, SerializedVis } from '../vis';
+import { SerializedVis, Vis } from '../vis';
 import {
+  getApplication,
   getExecutionContext,
   getExpressions,
   getTheme,
   getUiActions,
-  getApplication,
 } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
@@ -398,7 +399,8 @@ export class VisualizeEmbeddable
           if (error.original && shouldShowMissedDataViewError(error.original)) {
             render(
               <VisualizationMissedDataViewError
-                renderMode={this.input.renderMode ?? 'preview'}
+                viewMode={this.input.viewMode ?? ViewMode.VIEW}
+                renderMode={this.input.renderMode ?? 'view'}
                 error={error.original}
                 application={getApplication()}
               />,

@@ -14,7 +14,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
-  const browser = getService('browser');
 
   /**
    * Common test suite for testing exception scenarious within dashboard

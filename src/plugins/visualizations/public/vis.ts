@@ -153,8 +153,11 @@ export class Vis<TVisParams = VisParams> {
       if (!this.data.indexPattern && aggs.length) {
         this.data.indexPattern = new DataView({
           spec: {
-            id: state.data.searchSource?.index ?? '-',
-            title: '',
+            id: state.data.searchSource?.index,
+            type: 'fallback',
+            title: i18n.translate('visualizations.noDataView.text', {
+              defaultMessage: 'Data view not found',
+            }),
           },
           fieldFormats: getFieldsFormats(),
         });

@@ -12,17 +12,20 @@ import React from 'react';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { ApplicationStart } from '@kbn/core/public';
 import type { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
+import type { ViewMode } from '@kbn/embeddable-plugin/common';
 import type { RenderMode } from '@kbn/expressions-plugin';
 
 interface VisualizationMissedDataViewErrorProps {
   error: SavedObjectNotFound;
   application: ApplicationStart;
+  viewMode: ViewMode;
   renderMode: RenderMode;
 }
 
 export const VisualizationMissedDataViewError = ({
   error,
   application,
+  viewMode,
   renderMode,
 }: VisualizationMissedDataViewErrorProps) => {
   const { management: isManagementEnabled } = application.capabilities.navLinks;
@@ -56,11 +59,11 @@ export const VisualizationMissedDataViewError = ({
             {i18n.translate('visualizations.missedDataView.errorMessage', {
               defaultMessage: `Could not find the data view: {id}`,
               values: {
-                id: error.savedObjectId ?? '-',
+                id: error.savedObjectId,
               },
             })}
           </p>
-          {renderMode !== 'edit' && isEditVisEnabled ? (
+          {viewMode === 'edit' && renderMode !== 'edit' && isEditVisEnabled ? (
             <p>
               {i18n.translate('visualizations.missedDataView.editInVisualizeEditor', {
                 defaultMessage: `Edit in Visualize editor to fix the error`,
