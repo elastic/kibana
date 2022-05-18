@@ -132,4 +132,8 @@ export const commonXYArgs: CommonXYFn['args'] = {
     types: ['boolean'],
     help: strings.getDetailedTooltipHelp(),
   },
+  minTimeBarInterval: {
+    types: ['string'],
+    help: strings.getMinTimeBarIntervalHelp(),
+  },
 };

@@ -204,6 +204,7 @@ export interface XYArgs extends DataLayerArgs {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
+  minTimeBarInterval?: string;
   splitRowAccessor?: ExpressionValueVisDimension | string;
   splitColumnAccessor?: ExpressionValueVisDimension | string;
   detailedTooltip?: boolean;
@@ -233,6 +234,7 @@ export interface LayeredXYArgs {
   valuesInLegend?: boolean;
   ariaLabel?: string;
   detailedTooltip?: boolean;
+  minTimeBarInterval?: string;
 }
 
 export interface XYProps {
@@ -258,6 +260,7 @@ export interface XYProps {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
+  minTimeBarInterval?: string;
   splitRowAccessor?: ExpressionValueVisDimension | string;
   splitColumnAccessor?: ExpressionValueVisDimension | string;
   detailedTooltip?: boolean;
