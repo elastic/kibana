@@ -24,7 +24,7 @@ export const ShowAlertTableLink = () => {
         aria-label={SHOW_ALERT_TABLE_TOOLTIP}
         data-test-subj={`comment-action-show-alerts-${detailName}`}
         onClick={handleShowAlertsTable}
-        iconType="arrowRight"
+        iconType="inspect"
         id={`${detailName}-show-alerts`}
       />
     </EuiToolTip>
