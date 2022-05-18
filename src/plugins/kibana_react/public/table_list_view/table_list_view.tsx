@@ -526,11 +526,19 @@ class TableListView<V extends {}> extends React.Component<
         if (updatedAt.diff(moment(), 'days') > -7) {
           return (
             <FormattedRelative value={new Date(dateTime).getTime()}>
-              {(formattedDate: string) => <span>{formattedDate}</span>}
+              {(formattedDate: string) => (
+                <EuiToolTip content={updatedAt.format('LL LT')}>
+                  <span>{formattedDate}</span>
+                </EuiToolTip>
+              )}
             </FormattedRelative>
           );
         }
-        return <span>{updatedAt.format('L @ LT')}</span>;
+        return (
+          <EuiToolTip content={updatedAt.format('LL LT')}>
+            <span>{updatedAt.format('LL')}</span>
+          </EuiToolTip>
+        );
       };
 
       columns.push({
@@ -541,6 +549,7 @@ class TableListView<V extends {}> extends React.Component<
         render: (field: string, record: { updatedAt?: string }) =>
           renderUpdatedAt(record.updatedAt),
         sortable: true,
+        width: '150px',
       });
     }
 
