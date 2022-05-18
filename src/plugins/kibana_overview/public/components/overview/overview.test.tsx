@@ -204,6 +204,6 @@ describe('Overview', () => {
 
     await updateComponent(component);
 
-    expect(component).toMatchSnapshot();
+    expect(component.render()).toMatchSnapshot();
   });
 });
