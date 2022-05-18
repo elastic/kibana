@@ -193,8 +193,8 @@ describe('TableListView', () => {
 
       expect(tableCellsValues).toEqual([
         // Renders the datetime with this format: "05/10/2022 @ 2:34 PM"
-        ['Item 1', 'Item 1 description', updatedAtValues[0].format('L @ LT')],
-        ['Item 2', 'Item 2 description', updatedAtValues[1].format('L @ LT')],
+        ['Item 1', 'Item 1 description', updatedAtValues[0].format('LL')],
+        ['Item 2', 'Item 2 description', updatedAtValues[1].format('LL')],
       ]);
     });
 
