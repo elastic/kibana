@@ -94,6 +94,7 @@ export const NO_DATA_CONFIG_TEXT = {
     defaultMessage: 'Try Again',
   }),
   DESCRIPTION: i18n.translate('xpack.csp.complianceDashboard.noDataConfig.actionDescription', {
-    defaultMessage: 'There are no Findings yet',
+    defaultMessage:
+      "The cloud posture dashboard can't be presented since there are no findings. This can happen due to the agent not being installed yet, or since data is still being processed.",
   }),
 };
