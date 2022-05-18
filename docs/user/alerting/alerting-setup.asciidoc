@@ -105,6 +105,6 @@ image::images/update-api-key.png[A screenshot of a rule with the action menu ope
 ==============================================
 If a rule requires certain privileges, such as index privileges, to run, and a 
 user without those privileges updates the rule, the rule will no longer 
-function. Conversely, if a user with greater or administrator privileges updates 
+function. Conversely, if a user with greater or administrator privileges modifies
 the rule, it will begin running with increased privileges.
 ==============================================
