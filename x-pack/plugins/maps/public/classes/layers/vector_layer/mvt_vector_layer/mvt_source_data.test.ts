@@ -345,9 +345,6 @@ describe('syncMvtSourceData', () => {
 
   test('Should add layer to vector tile inspector when source is synced', async () => {
     const syncContext = new MockSyncContext({ dataFilters: {} });
-    const mockVectorTileAdapter = {
-      addLayer: sinon.spy(),
-    };
 
     await syncMvtSourceData({
       hasLabels: false,
@@ -369,12 +366,9 @@ describe('syncMvtSourceData', () => {
         isESSource: () => {
           return true;
         },
-        getInspectorAdapters: () => {
-          return { vectorTiles: mockVectorTileAdapter };
-        },
       },
       syncContext,
     });
-    sinon.assert.calledOnce(mockVectorTileAdapter.addLayer);
+    sinon.assert.calledOnce(syncContext.inspectorAdapters.vectorTiles.addLayer);
   });
 });
