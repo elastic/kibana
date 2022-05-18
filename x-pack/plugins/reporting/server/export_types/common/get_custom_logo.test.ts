@@ -5,17 +5,14 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ReportingCore } from '../..';
-import {
-  createMockConfigSchema,
-  createMockLevelLogger,
-  createMockReportingCore,
-} from '../../test_helpers';
+import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import { getCustomLogo } from './get_custom_logo';
 
 let mockReportingPlugin: ReportingCore;
 
-const logger = createMockLevelLogger();
+const logger = loggingSystemMock.createLogger();
 
 beforeEach(async () => {
   mockReportingPlugin = await createMockReportingCore(createMockConfigSchema());

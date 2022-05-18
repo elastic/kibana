@@ -189,4 +189,6 @@ export interface IEmbeddable<
    * Used to diff explicit embeddable input
    */
   getExplicitInputIsEqual(lastInput: Partial<I>): Promise<boolean>;
+
+  refreshInputFromParent(): void;
 }

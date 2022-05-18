@@ -44,9 +44,34 @@ test('throws error when suffix is missing', () => {
   );
 });
 
+test('formats single second', () => {
+  const result = formatDuration('1s');
+  expect(result).toEqual('1 sec');
+});
+
+test('formats single second with full unit', () => {
+  const result = formatDuration('1s', true);
+  expect(result).toEqual('1 second');
+});
+
 test('formats seconds', () => {
   const result = formatDuration('10s');
   expect(result).toEqual('10 sec');
+});
+
+test('formats seconds with full unit', () => {
+  const result = formatDuration('10s', true);
+  expect(result).toEqual('10 seconds');
+});
+
+test('formats single minute', () => {
+  const result = formatDuration('1m');
+  expect(result).toEqual('1 min');
+});
+
+test('formats single minute with full unit', () => {
+  const result = formatDuration('1m', true);
+  expect(result).toEqual('1 minute');
 });
 
 test('formats minutes', () => {
@@ -54,14 +79,49 @@ test('formats minutes', () => {
   expect(result).toEqual('10 min');
 });
 
+test('formats minutes with full unit', () => {
+  const result = formatDuration('10m', true);
+  expect(result).toEqual('10 minutes');
+});
+
+test('formats single hour', () => {
+  const result = formatDuration('1h');
+  expect(result).toEqual('1 hr');
+});
+
+test('formats single hour with full unit', () => {
+  const result = formatDuration('1h', true);
+  expect(result).toEqual('1 hour');
+});
+
 test('formats hours', () => {
   const result = formatDuration('10h');
   expect(result).toEqual('10 hr');
 });
 
+test('formats hours with full unit', () => {
+  const result = formatDuration('10h', true);
+  expect(result).toEqual('10 hours');
+});
+
+test('formats single day', () => {
+  const result = formatDuration('1d');
+  expect(result).toEqual('1 day');
+});
+
+test('formats single day with full unit', () => {
+  const result = formatDuration('1d', true);
+  expect(result).toEqual('1 day');
+});
+
 test('formats days', () => {
   const result = formatDuration('10d');
-  expect(result).toEqual('10 day');
+  expect(result).toEqual('10 days');
+});
+
+test('formats days with full unit', () => {
+  const result = formatDuration('10d', true);
+  expect(result).toEqual('10 days');
 });
 
 test('format throws error when the format is invalid', () => {

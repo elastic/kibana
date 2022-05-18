@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { DataView, DataViewField } from 'src/plugins/data_views/common';
+import { DataView, DataViewField } from '../../../common';
 import { SERVICE_KEY_LEGACY, SERVICE_KEY_TYPE, SERVICE_KEY } from '../../constants';
 
 interface ResponseFormatterArgs {
   serviceKey: SERVICE_KEY_TYPE;
-  field: DataViewField;
+  fields: DataViewField[];
   dataView: DataView;
 }
 
-export const responseFormatter = ({ serviceKey, field, dataView }: ResponseFormatterArgs) => {
+export const responseFormatter = ({ serviceKey, fields, dataView }: ResponseFormatterArgs) => {
   const response = {
     body: {
-      fields: [field.toSpec()],
+      fields: fields.map((field) => field.toSpec()),
       [SERVICE_KEY]: dataView.toSpec(),
     },
   };
@@ -26,7 +26,7 @@ export const responseFormatter = ({ serviceKey, field, dataView }: ResponseForma
   const legacyResponse = {
     body: {
       [SERVICE_KEY_LEGACY]: dataView.toSpec(),
-      field: field.toSpec(),
+      field: fields[0].toSpec(),
     },
   };
 

@@ -6,6 +6,7 @@
  */
 
 import { useEffect } from 'react';
+import { omit } from 'lodash/fp';
 import { usePrimaryNavigation } from './use_primary_navigation';
 import { useKibana } from '../../../lib/kibana';
 import { useSetBreadcrumbs } from '../breadcrumbs';
@@ -31,13 +32,11 @@ export const useSecuritySolutionNavigation = () => {
 
   const { detailName, flowTarget, pageName, pathName, search, state, tabName } = routeProps;
 
-  let enabledNavTabs: GenericNavRecord = navTabs as unknown as GenericNavRecord;
-
-  const usersEnabled = useIsExperimentalFeatureEnabled('usersEnabled');
-  if (!usersEnabled) {
-    const { users, ...rest } = enabledNavTabs;
-    enabledNavTabs = rest;
-  }
+  const disabledNavTabs = [
+    ...(!useIsExperimentalFeatureEnabled('usersEnabled') ? ['users'] : []),
+    ...(!useIsExperimentalFeatureEnabled('detectionResponseEnabled') ? ['detection_response'] : []),
+  ];
+  const enabledNavTabs: GenericNavRecord = omit(disabledNavTabs, navTabs);
 
   const setBreadcrumbs = useSetBreadcrumbs();
 

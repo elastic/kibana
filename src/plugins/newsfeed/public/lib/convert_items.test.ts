@@ -34,31 +34,35 @@ const createNewsfeedItem = (parts: Partial<NewsfeedItem> = {}): NewsfeedItem => 
 });
 
 describe('localizeItem', () => {
-  const item = createApiItem({
-    languages: ['en', 'fr'],
-    title: {
-      en: 'en title',
-      fr: 'fr title',
-    },
-    description: {
-      en: 'en desc',
-      fr: 'fr desc',
-    },
-    link_text: {
-      en: 'en link text',
-      fr: 'fr link text',
-    },
-    link_url: {
-      en: 'en link url',
-      fr: 'fr link url',
-    },
-    badge: {
-      en: 'en badge',
-      fr: 'fr badge',
-    },
-    publish_on: new Date('2014-10-31T04:23:47Z'),
-    expire_on: new Date('2049-10-31T04:23:47Z'),
-    hash: 'hash',
+  let item: ApiItem;
+
+  beforeEach(() => {
+    item = createApiItem({
+      languages: ['en', 'fr'],
+      title: {
+        en: 'en title',
+        fr: 'fr title',
+      },
+      description: {
+        en: 'en desc',
+        fr: 'fr desc',
+      },
+      link_text: {
+        en: 'en link text',
+        fr: 'fr link text',
+      },
+      link_url: {
+        en: 'en link url',
+        fr: 'fr link url',
+      },
+      badge: {
+        en: 'en badge',
+        fr: 'fr badge',
+      },
+      publish_on: new Date('2014-10-31T04:23:47Z'),
+      expire_on: new Date('2049-10-31T04:23:47Z'),
+      hash: 'hash',
+    });
   });
 
   it('converts api items to newsfeed items using the specified language', () => {
@@ -74,6 +78,39 @@ describe('localizeItem', () => {
 
   it('fallbacks to `en` is the language is not present', () => {
     expect(localizeItem(item, 'de')).toMatchObject({
+      title: 'en title',
+      description: 'en desc',
+      linkText: 'en link text',
+      linkUrl: 'en link url',
+      badge: 'en badge',
+      hash: 'hash',
+    });
+  });
+
+  it('uses the fallback language when `languages` is `null`', () => {
+    item = createApiItem({
+      languages: null,
+      title: {
+        en: 'en title',
+      },
+      description: {
+        en: 'en desc',
+      },
+      link_text: {
+        en: 'en link text',
+      },
+      link_url: {
+        en: 'en link url',
+      },
+      badge: {
+        en: 'en badge',
+      },
+      publish_on: new Date('2014-10-31T04:23:47Z'),
+      expire_on: new Date('2049-10-31T04:23:47Z'),
+      hash: 'hash',
+    });
+
+    expect(localizeItem(item, 'fr')).toMatchObject({
       title: 'en title',
       description: 'en desc',
       linkText: 'en link text',

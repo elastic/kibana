@@ -9,10 +9,10 @@ import React from 'react';
 import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import type { PaletteRegistry } from 'src/plugins/charts/public';
-import { ThemeServiceStart } from 'kibana/public';
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
-import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
+import type { PaletteRegistry } from '@kbn/coloring';
+import { ThemeServiceStart } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type {
   Visualization,
   OperationMetadata,
@@ -241,9 +241,11 @@ export const getPieVisualization = ({
     return state?.layers.find(({ layerId: id }) => id === layerId)?.layerType;
   },
 
-  toExpression: (state, layers, attributes) =>
-    toExpression(state, layers, paletteService, attributes),
-  toPreviewExpression: (state, layers) => toPreviewExpression(state, layers, paletteService),
+  toExpression: (state, layers, attributes, datasourceExpressionsByLayers) =>
+    toExpression(state, layers, paletteService, attributes, datasourceExpressionsByLayers),
+
+  toPreviewExpression: (state, layers, datasourceExpressionsByLayers) =>
+    toPreviewExpression(state, layers, paletteService, datasourceExpressionsByLayers),
 
   renderToolbar(domElement, props) {
     render(

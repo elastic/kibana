@@ -10,11 +10,11 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { DocViewerLegacyTable } from './table';
-import { DataView } from '../../../../../../../data/common';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { DocViewRenderProps } from '../../../doc_views_types';
 import { ElasticSearchHit } from '../../../../../types';
-import { KibanaContextProvider } from '../../../../../../../kibana_react/public';
-import { DiscoverServices } from 'src/plugins/discover/public/build_services';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { DiscoverServices } from '../../../../../build_services';
 
 const services = {
   uiSettings: {

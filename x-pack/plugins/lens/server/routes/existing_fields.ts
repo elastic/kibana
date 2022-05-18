@@ -9,12 +9,12 @@ import Boom from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
-import { RequestHandlerContext, ElasticsearchClient } from 'src/core/server';
-import { CoreSetup, Logger } from 'src/core/server';
-import { RuntimeField } from 'src/plugins/data/common';
-import { DataViewsService, DataView, FieldSpec } from 'src/plugins/data_views/common';
+import { RequestHandlerContext, ElasticsearchClient } from '@kbn/core/server';
+import { CoreSetup, Logger } from '@kbn/core/server';
+import { RuntimeField } from '@kbn/data-plugin/common';
+import { DataViewsService, DataView, FieldSpec } from '@kbn/data-views-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-plugin/server';
 import { BASE_API_URL } from '../../common';
-import { UI_SETTINGS } from '../../../../../src/plugins/data/server';
 import { FIELD_EXISTENCE_SETTING } from '../ui_settings';
 import { PluginStartContract } from '../plugin';
 
@@ -136,7 +136,8 @@ async function fetchFieldExistence({
     });
   }
 
-  const metaFields: string[] = await context.core.uiSettings.client.get(UI_SETTINGS.META_FIELDS);
+  const uiSettingsClient = (await context.core).uiSettings.client;
+  const metaFields: string[] = await uiSettingsClient.get(UI_SETTINGS.META_FIELDS);
   const dataView = await dataViewsService.get(indexPatternId);
   const allFields = buildFieldList(dataView, metaFields);
   const existingFieldList = await dataViewsService.getFieldsForIndexPattern(dataView, {
@@ -169,18 +170,22 @@ async function legacyFetchFieldExistenceSampling({
   timeFieldName?: string;
   includeFrozen: boolean;
 }) {
-  const metaFields: string[] = await context.core.uiSettings.client.get(UI_SETTINGS.META_FIELDS);
+  const coreContext = await context.core;
+  const metaFields: string[] = await coreContext.uiSettings.client.get(UI_SETTINGS.META_FIELDS);
   const indexPattern = await dataViewsService.get(indexPatternId);
 
   const fields = buildFieldList(indexPattern, metaFields);
+  const runtimeMappings = indexPattern.getRuntimeMappings();
+
   const docs = await fetchIndexPatternStats({
     fromDate,
     toDate,
     dslQuery,
-    client: context.core.elasticsearch.client.asCurrentUser,
+    client: coreContext.elasticsearch.client.asCurrentUser,
     index: indexPattern.title,
     timeFieldName: timeFieldName || indexPattern.timeFieldName,
     fields,
+    runtimeMappings,
     includeFrozen,
   });
 
@@ -216,6 +221,7 @@ async function fetchIndexPatternStats({
   fromDate,
   toDate,
   fields,
+  runtimeMappings,
   includeFrozen,
 }: {
   client: ElasticsearchClient;
@@ -225,12 +231,12 @@ async function fetchIndexPatternStats({
   fromDate?: string;
   toDate?: string;
   fields: Field[];
+  runtimeMappings: estypes.MappingRuntimeFields;
   includeFrozen: boolean;
 }) {
   const query = toQuery(timeFieldName, fromDate, toDate, dslQuery);
 
   const scriptedFields = fields.filter((f) => f.isScript);
-  const runtimeFields = fields.filter((f) => f.runtimeField);
   const result = await client.search(
     {
       index,
@@ -242,11 +248,7 @@ async function fetchIndexPatternStats({
         sort: timeFieldName && fromDate && toDate ? [{ [timeFieldName]: 'desc' }] : [],
         fields: ['*'],
         _source: false,
-        runtime_mappings: runtimeFields.reduce((acc, field) => {
-          if (!field.runtimeField) return acc;
-          acc[field.name] = field.runtimeField;
-          return acc;
-        }, {} as Record<string, estypes.MappingRuntimeField>),
+        runtime_mappings: runtimeMappings,
         script_fields: scriptedFields.reduce((acc, field) => {
           acc[field.name] = {
             script: {

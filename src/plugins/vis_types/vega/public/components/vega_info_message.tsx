@@ -8,13 +8,13 @@
 
 import React, { useMemo } from 'react';
 import { parse } from 'hjson';
+import type { Vis } from '@kbn/visualizations-plugin/public';
 import { ExperimentalMapLayerInfo, shouldShowMapLayerInfo } from './experimental_map_vis_info';
 import {
   DeprecatedHistogramIntervalInfo,
   shouldShowDeprecatedHistogramIntervalInfo,
 } from './deprecated_interval_info';
 
-import type { Vis } from '../../../../visualizations/public';
 import type { VegaSpec } from '../data_model/types';
 
 const parseSpec = (spec: string) => {

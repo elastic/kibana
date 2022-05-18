@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow } from '@elastic/eui';
-import type { IndexPatternField } from 'src/plugins/data/public';
+import type { IndexPatternField } from '@kbn/data-plugin/public';
 import { SingleFieldSelect } from './single_field_select';
 
 interface Props {

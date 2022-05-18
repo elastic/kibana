@@ -29,12 +29,12 @@ export const transformStateSchema = schema.oneOf([
   schema.literal(TRANSFORM_STATE.WAITING),
 ]);
 
-export const indexPatternTitleSchema = schema.object({
+export const dataViewTitleSchema = schema.object({
   /** Title of the data view for which to return stats. */
-  indexPatternTitle: schema.string(),
+  dataViewTitle: schema.string(),
 });
 
-export type IndexPatternTitleSchema = TypeOf<typeof indexPatternTitleSchema>;
+export type DataViewTitleSchema = TypeOf<typeof dataViewTitleSchema>;
 
 export const transformIdParamSchema = schema.object({
   transformId: schema.string(),

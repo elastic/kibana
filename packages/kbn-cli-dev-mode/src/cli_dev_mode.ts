@@ -22,7 +22,7 @@ import {
   takeUntil,
 } from 'rxjs/operators';
 import { CliArgs } from '@kbn/config';
-import { CiStatsReporter } from '@kbn/dev-utils';
+import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { REPO_ROOT } from '@kbn/utils';
 
 import { Log, CliLog } from './log';

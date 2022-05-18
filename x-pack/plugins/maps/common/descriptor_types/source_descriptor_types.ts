@@ -8,8 +8,9 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { FeatureCollection } from 'geojson';
-import { Query } from 'src/plugins/data/public';
-import { SortDirection } from 'src/plugins/data/common/search';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { Query } from '@kbn/data-plugin/public';
+import { SortDirection } from '@kbn/data-plugin/common/search';
 import {
   AGG_TYPE,
   GRID_RESOLUTION,
@@ -158,6 +159,7 @@ export type TiledSingleLayerVectorSourceDescriptor = AbstractSourceDescriptor &
 
 export type InlineFieldDescriptor = {
   name: string;
+  label?: string;
   type: 'string' | 'number';
 };
 

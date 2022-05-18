@@ -13,6 +13,7 @@ import {
 
 const ruleExecutionLogForRoutesMock = {
   create: (): jest.Mocked<IRuleExecutionLogForRoutes> => ({
+    getAggregateExecutionEvents: jest.fn(),
     getExecutionSummariesBulk: jest.fn(),
     getExecutionSummary: jest.fn(),
     clearExecutionSummary: jest.fn(),

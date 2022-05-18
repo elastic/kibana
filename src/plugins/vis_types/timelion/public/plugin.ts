@@ -14,19 +14,26 @@ import type {
   IUiSettingsClient,
   HttpSetup,
   ThemeServiceStart,
-} from 'kibana/public';
-import type { Plugin as ExpressionsPlugin } from 'src/plugins/expressions/public';
+} from '@kbn/core/public';
+import type { Plugin as ExpressionsPlugin } from '@kbn/expressions-plugin/public';
 import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   TimefilterContract,
-} from 'src/plugins/data/public';
-import type { VisualizationsSetup } from 'src/plugins/visualizations/public';
-import type { ChartsPluginSetup, ChartsPluginStart } from 'src/plugins/charts/public';
+} from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
 
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getTimelionVisualizationConfig } from './timelion_vis_fn';
 import { getTimelionVisDefinition } from './timelion_vis_type';
-import { setIndexPatterns, setDataSearch, setCharts } from './helpers/plugin_services';
+import {
+  setIndexPatterns,
+  setDataSearch,
+  setCharts,
+  setFieldFormats,
+} from './helpers/plugin_services';
 
 import { getArgValueSuggestions } from './helpers/arg_value_suggestions';
 import { getTimelionVisRenderer } from './timelion_vis_renderer';
@@ -52,7 +59,9 @@ export interface TimelionVisSetupDependencies {
 /** @internal */
 export interface TimelionVisStartDependencies {
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   charts: ChartsPluginStart;
+  fieldFormats: FieldFormatsStart;
 }
 
 /** @public */
@@ -88,10 +97,14 @@ export class TimelionVisPlugin
     visualizations.createBaseVisualization(getTimelionVisDefinition(dependencies));
   }
 
-  public start(core: CoreStart, { data, charts }: TimelionVisStartDependencies) {
-    setIndexPatterns(data.indexPatterns);
+  public start(
+    core: CoreStart,
+    { data, charts, dataViews, fieldFormats }: TimelionVisStartDependencies
+  ) {
+    setIndexPatterns(dataViews);
     setDataSearch(data.search);
     setCharts(charts);
+    setFieldFormats(fieldFormats);
 
     return {
       getArgValueSuggestions,

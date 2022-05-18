@@ -24,6 +24,8 @@ export interface TopNavMenuData {
   isLoading?: boolean;
   iconType?: string;
   iconSide?: EuiButtonProps['iconSide'];
+  target?: string;
+  href?: string;
 }
 
 export interface RegisteredTopNavMenuData extends TopNavMenuData {

@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { getVisSchemas, VisToExpressionAst, SchemaConfig } from '../../../visualizations/public';
-import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
-import { PaletteOutput } from '../../../charts/common';
+import type { PaletteOutput } from '@kbn/coloring';
+import { getVisSchemas, VisToExpressionAst, SchemaConfig } from '@kbn/visualizations-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import {
   PIE_VIS_EXPRESSION_NAME,
   PARTITION_LABELS_FUNCTION,
   PieVisExpressionFunctionDefinition,
   PartitionVisParams,
   LabelsParams,
-} from '../../../chart_expressions/expression_partition_vis/common';
+} from '@kbn/expression-partition-vis-plugin/common';
 import { getEsaggsFn } from './to_ast_esaggs';
 
 const prepareDimension = (params: SchemaConfig) => {
@@ -62,13 +62,14 @@ export const toExpressionAst: VisToExpressionAst<PartitionVisParams> = async (vi
     addTooltip: vis.params.addTooltip,
     legendDisplay: vis.params.legendDisplay,
     legendPosition: vis.params.legendPosition,
-    nestedLegend: vis.params?.nestedLegend ?? false,
+    nestedLegend: vis.params.nestedLegend ?? false,
     truncateLegend: vis.params.truncateLegend,
     maxLegendLines: vis.params.maxLegendLines,
-    distinctColors: vis.params?.distinctColors,
+    legendSize: vis.params.legendSize,
+    distinctColors: vis.params.distinctColors,
     isDonut: vis.params.isDonut ?? false,
     emptySizeRatio: vis.params.emptySizeRatio,
-    palette: preparePalette(vis.params?.palette),
+    palette: preparePalette(vis.params.palette),
     labels: prepareLabels(vis.params.labels),
     metric: schemas.metric.map(prepareDimension),
     buckets: schemas.segment?.map(prepareDimension),

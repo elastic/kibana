@@ -134,6 +134,20 @@ case if={lte 50} then="green"`,
       help: 'This sets the color of the progress indicator and the color of the label to `"green"` if the value is less than or equal to `0.5`, `"orange"` if the value is greater than `0.5` and less than or equal to `0.75`, and `"red"` if `none` of the case conditions are met.',
     },
   },
+  clog: {
+    syntax: `clog`,
+    usage: {
+      expression: `kibana
+| demodata
+| clog
+| filterrows fn={getCell "age" | gt 70}
+| clog
+| pointseries x="time" y="mean(price)"
+| plot defaultStyle={seriesStyle lines=1 fill=1}
+| render`,
+      help: 'This prints the `datatable` objects in the browser console before and after the `filterrows` function.',
+    },
+  },
   columns: {
     syntax: `columns include="@timestamp, projects, cost"
 columns exclude="username, country, age"`,
@@ -197,6 +211,23 @@ containerStyle backgroundImage={asset id=asset-f40d2292-cf9e-4f2c-8c6f-a504a25e9
 | markdown "Last updated: " {context}
 | render`,
       help: 'Using the `context` function allows us to pass the output, or _context_, of the previous function as a value to an argument in the next function. Here we get the formatted date string from the previous function and pass it as `content` for the markdown element.',
+    },
+  },
+  createTable: {
+    syntax: `createTable id="a" id="b"    
+createTable id="a" name="A" id="b" name="B" rowCount=5`,
+    usage: {
+      expression: `var_set
+name="logs" value={essql "select count(*) as a from kibana_sample_data_logs"}
+name="commerce" value={essql "select count(*) as b from kibana_sample_data_ecommerce"}
+| createTable ids="totalA" ids="totalB"
+| staticColumn name="totalA" value={var "logs" | getCell "a"}
+| alterColumn column="totalA" type="number"
+| staticColumn name="totalB" value={var "commerce" | getCell "b"}
+| alterColumn column="totalB" type="number"
+| mathColumn id="percent" name="percent" expression="totalA / totalB"
+| render`,
+      help: 'This creates a table based on the results of two `essql` queries, joined into one table.',
     },
   },
   csv: {

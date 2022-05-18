@@ -1,0 +1,177 @@
+{
+  "id": "@kbn/shared-ux-utility",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-utility",
+        "id": "def-common.Fallback",
+        "type": "Function",
+        "tags": [],
+        "label": "Fallback",
+        "description": [
+          "\nA simple implementation of `React.Suspense.fallback` that renders a loading spinner."
+        ],
+        "signature": [
+          "() => JSX.Element"
+        ],
+        "path": "packages/kbn-shared-ux-utility/src/fallback.tsx",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-utility",
+        "id": "def-common.getClosestLink",
+        "type": "Function",
+        "tags": [],
+        "label": "getClosestLink",
+        "description": [
+          "\nReturns the closest anchor (`<a>`) element in the element parents (self included) up\nto the given container (excluded), or undefined if none is found."
+        ],
+        "signature": [
+          "(element: HTMLElement | null | undefined, container?: HTMLElement | undefined) => HTMLAnchorElement | undefined"
+        ],
+        "path": "packages/kbn-shared-ux-utility/src/utils.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-utility",
+            "id": "def-common.getClosestLink.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "element",
+            "description": [],
+            "signature": [
+              "HTMLElement | null | undefined"
+            ],
+            "path": "packages/kbn-shared-ux-utility/src/utils.ts",
+            "deprecated": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-utility",
+            "id": "def-common.getClosestLink.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "container",
+            "description": [],
+            "signature": [
+              "HTMLElement | undefined"
+            ],
+            "path": "packages/kbn-shared-ux-utility/src/utils.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-utility",
+        "id": "def-common.hasActiveModifierKey",
+        "type": "Function",
+        "tags": [],
+        "label": "hasActiveModifierKey",
+        "description": [
+          "\nReturns true if any modifier key is active on the event, false otherwise."
+        ],
+        "signature": [
+          "(event: React.MouseEvent<Element, MouseEvent>) => boolean"
+        ],
+        "path": "packages/kbn-shared-ux-utility/src/utils.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-utility",
+            "id": "def-common.hasActiveModifierKey.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "event",
+            "description": [],
+            "signature": [
+              "React.MouseEvent<Element, MouseEvent>"
+            ],
+            "path": "packages/kbn-shared-ux-utility/src/utils.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-utility",
+        "id": "def-common.withSuspense",
+        "type": "Function",
+        "tags": [],
+        "label": "withSuspense",
+        "description": [
+          "\nA HOC which supplies React.Suspense with a fallback component, and a `EuiErrorBoundary` to contain errors."
+        ],
+        "signature": [
+          "<P extends {}, R = {}>(Component: React.ComponentType<P>, fallback?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | null) => React.ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<R>>"
+        ],
+        "path": "packages/kbn-shared-ux-utility/src/with_suspense.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-utility",
+            "id": "def-common.withSuspense.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "Component",
+            "description": [
+              "A component deferred by `React.lazy`"
+            ],
+            "signature": [
+              "React.ComponentType<P>"
+            ],
+            "path": "packages/kbn-shared-ux-utility/src/with_suspense.tsx",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-utility",
+            "id": "def-common.withSuspense.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fallback",
+            "description": [
+              "A fallback component to render while things load; default is `Fallback` from SharedUX."
+            ],
+            "signature": [
+              "React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
+            ],
+            "path": "packages/kbn-shared-ux-utility/src/with_suspense.tsx",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

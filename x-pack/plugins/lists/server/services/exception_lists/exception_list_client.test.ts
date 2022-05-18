@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core/server/mocks';
+
 import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
 import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';
 import {
@@ -12,7 +14,6 @@ import {
   createExtensionPointStorageMock,
 } from '../extension_points/extension_point_storage.mock';
 import type { ExtensionPointCallbackDataArgument } from '../extension_points';
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
 
 import {
   getCreateExceptionListItemOptionsMock,

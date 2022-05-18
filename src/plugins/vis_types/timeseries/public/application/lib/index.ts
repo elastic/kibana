@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-// @ts-ignore
-export { validateInterval } from './validate_interval';
 export { getTimezone } from './get_timezone';

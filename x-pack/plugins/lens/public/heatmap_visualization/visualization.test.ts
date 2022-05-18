@@ -20,10 +20,10 @@ import {
 } from './constants';
 import { Position } from '@elastic/charts';
 import type { HeatmapVisualizationState } from './types';
-import type { DatasourcePublicAPI, Operation } from '../types';
-import { chartPluginMock } from 'src/plugins/charts/public/mocks';
+import type { DatasourceLayers, OperationDescriptor } from '../types';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { layerTypes } from '../../common';
-import { themeServiceMock } from '../../../../../src/core/public/mocks';
+import { themeServiceMock } from '@kbn/core/public/mocks';
 
 function exampleState(): HeatmapVisualizationState {
   return {
@@ -99,7 +99,7 @@ describe('heatmap', () => {
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
         label: 'MyOperation',
-      } as Operation);
+      } as OperationDescriptor);
 
       frame.datasourceLayers = {
         first: mockDatasource.publicAPIMock,
@@ -355,7 +355,7 @@ describe('heatmap', () => {
   });
 
   describe('#toExpression', () => {
-    let datasourceLayers: Record<string, DatasourcePublicAPI>;
+    let datasourceLayers: DatasourceLayers;
 
     beforeEach(() => {
       const mockDatasource = createMockDatasource('testDatasource');
@@ -363,7 +363,7 @@ describe('heatmap', () => {
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
         label: 'MyOperation',
-      } as Operation);
+      } as OperationDescriptor);
 
       datasourceLayers = {
         first: mockDatasource.publicAPIMock,
@@ -418,6 +418,7 @@ describe('heatmap', () => {
                       arguments: {
                         isVisible: [true],
                         position: [Position.Right],
+                        legendSize: [],
                       },
                     },
                   ],
@@ -475,7 +476,7 @@ describe('heatmap', () => {
   });
 
   describe('#toPreviewExpression', () => {
-    let datasourceLayers: Record<string, DatasourcePublicAPI>;
+    let datasourceLayers: DatasourceLayers;
 
     beforeEach(() => {
       const mockDatasource = createMockDatasource('testDatasource');
@@ -483,7 +484,7 @@ describe('heatmap', () => {
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
         label: 'MyOperation',
-      } as Operation);
+      } as OperationDescriptor);
 
       datasourceLayers = {
         first: mockDatasource.publicAPIMock,
@@ -612,7 +613,7 @@ describe('heatmap', () => {
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
         label: 'MyOperation',
-      } as Operation);
+      } as OperationDescriptor);
 
       frame.datasourceLayers = {
         first: mockDatasource.publicAPIMock,

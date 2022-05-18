@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Suspicious PDF Reader Child Process",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  process.parent.name : (\"AcroRd32.exe\",\n                         \"Acrobat.exe\",\n                         \"FoxitPhantomPDF.exe\",\n                         \"FoxitReader.exe\") and\n  process.name : (\"arp.exe\", \"dsquery.exe\", \"dsget.exe\", \"gpresult.exe\", \"hostname.exe\", \"ipconfig.exe\", \"nbtstat.exe\",\n                  \"net.exe\", \"net1.exe\", \"netsh.exe\", \"netstat.exe\", \"nltest.exe\", \"ping.exe\", \"qprocess.exe\",\n                  \"quser.exe\", \"qwinsta.exe\", \"reg.exe\", \"sc.exe\", \"systeminfo.exe\", \"tasklist.exe\", \"tracert.exe\",\n                  \"whoami.exe\", \"bginfo.exe\", \"cdb.exe\", \"cmstp.exe\", \"csi.exe\", \"dnx.exe\", \"fsi.exe\", \"ieexec.exe\",\n                  \"iexpress.exe\", \"installutil.exe\", \"Microsoft.Workflow.Compiler.exe\", \"msbuild.exe\", \"mshta.exe\",\n                  \"msxsl.exe\", \"odbcconf.exe\", \"rcsi.exe\", \"regsvr32.exe\", \"xwizard.exe\", \"atbroker.exe\",\n                  \"forfiles.exe\", \"schtasks.exe\", \"regasm.exe\", \"regsvcs.exe\", \"cmd.exe\", \"cscript.exe\",\n                  \"powershell.exe\", \"pwsh.exe\", \"wmic.exe\", \"wscript.exe\", \"bitsadmin.exe\", \"certutil.exe\", \"ftp.exe\")\n",
   "risk_score": 21,
   "rule_id": "53a26770-9cbd-40c5-8b57-61d01a325e14",
@@ -42,5 +43,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 7
+  "version": 8
 }

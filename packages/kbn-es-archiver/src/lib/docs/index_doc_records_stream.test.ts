@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog, createRecursiveSerializer } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import { createRecursiveSerializer } from '@kbn/jest-serializers';
 
 import { createListStream, createPromiseFromStreams } from '@kbn/utils';
 

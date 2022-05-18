@@ -6,15 +6,15 @@
  */
 
 import { useUpdateArtifact } from './use_update_artifact';
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 import {
   getFakeListId,
   getFakeListDefinition,
   getFakeHttpService,
   renderMutation,
-} from './test_utils';
-import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+} from '../test_utils';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { act } from '@testing-library/react-hooks';
 
 describe('Update artifact hook', () => {

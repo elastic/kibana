@@ -17,6 +17,7 @@ import { Location, History } from 'history';
 import { act } from 'react-dom/test-utils';
 import { LensEmbeddableInput } from '../embeddable';
 import { loadInitial } from './lens_slice';
+import { Filter } from '@kbn/es-query';
 
 const history = {
   location: {
@@ -214,9 +215,16 @@ describe('Initializing the store', () => {
     });
 
     it('loads a document and uses query and filters if initial input is provided', async () => {
-      const { store, deps } = await makeLensStore({ preloadedState });
+      const { store, deps } = makeLensStore({ preloadedState });
+
+      const mockFilters = 'some filters from the filter manager' as unknown as Filter[];
+
+      jest
+        .spyOn(deps.lensServices.data.query.filterManager, 'getFilters')
+        .mockReturnValue(mockFilters);
+
       await act(async () => {
-        await store.dispatch(loadInitial(defaultProps));
+        store.dispatch(loadInitial(defaultProps));
       });
 
       expect(deps.lensServices.attributeService.unwrapAttributes).toHaveBeenCalledWith({
@@ -233,6 +241,7 @@ describe('Initializing the store', () => {
           query: 'kuery',
           isLoading: false,
           activeDatasourceId: 'testDatasource',
+          filters: mockFilters,
         }),
       });
     });
@@ -290,6 +299,7 @@ describe('Initializing the store', () => {
           sharingSavedObjectProps: {
             outcome: 'aliasMatch',
             aliasTargetId: 'id2',
+            aliasPurpose: 'savedObjectConversion',
           },
         },
       });
@@ -301,10 +311,11 @@ describe('Initializing the store', () => {
       expect(deps.lensServices.attributeService.unwrapAttributes).toHaveBeenCalledWith({
         savedObjectId: defaultSavedObjectId,
       });
-      expect(deps.lensServices.spaces.ui.redirectLegacyUrl).toHaveBeenCalledWith(
-        '#/edit/id2?search',
-        'Lens visualization'
-      );
+      expect(deps.lensServices.spaces.ui.redirectLegacyUrl).toHaveBeenCalledWith({
+        path: '#/edit/id2?search',
+        aliasPurpose: 'savedObjectConversion',
+        objectNoun: 'Lens visualization',
+      });
     });
 
     it('adds to the recently accessed list on load', async () => {

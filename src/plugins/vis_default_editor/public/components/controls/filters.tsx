@@ -12,9 +12,9 @@ import { htmlIdGenerator, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useMount from 'react-use/lib/useMount';
 
-import { Query, DataPublicPluginStart } from '../../../../data/public';
-import { IUiSettingsClient } from '../../../../../core/public';
-import { useKibana } from '../../../../kibana_react/public';
+import { Query, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FilterRow } from './filter';
 import { AggParamEditorProps } from '../agg_param_props';
 

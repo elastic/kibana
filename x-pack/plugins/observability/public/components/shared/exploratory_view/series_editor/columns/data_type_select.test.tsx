@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
-import { mockAppIndexPattern, mockUxSeries, render } from '../../rtl_helpers';
+import { mockAppDataView, mockUxSeries, render } from '../../rtl_helpers';
 import { DataTypesSelect } from './data_type_select';
 import { DataTypes } from '../../configurations/constants';
 import { DataTypesLabels } from '../../obsv_exploratory_view';
@@ -15,7 +15,7 @@ import { DataTypesLabels } from '../../obsv_exploratory_view';
 describe('DataTypeSelect', function () {
   const seriesId = 0;
 
-  mockAppIndexPattern();
+  mockAppDataView();
 
   it('should render properly', function () {
     render(<DataTypesSelect seriesId={seriesId} series={mockUxSeries} />);

@@ -10,11 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { uniqueId } from 'lodash';
 import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { DataView } from '../../../../../../../src/plugins/data/common';
-import {
-  esKuery,
-  QuerySuggestion,
-} from '../../../../../../../src/plugins/data/public';
+import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
+import { DataView } from '@kbn/data-plugin/common';
+import { esKuery } from '@kbn/data-plugin/public';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -39,13 +37,17 @@ export function KueryBar(props: {
   placeholder?: string;
   boolFilter?: QueryDslQueryContainer[];
   prepend?: React.ReactNode | string;
+  onSubmit?: (value: string) => void;
+  onChange?: (value: string) => void;
+  value?: string;
 }) {
   const { path, query } = useApmParams('/*');
 
   const serviceName = 'serviceName' in path ? path.serviceName : undefined;
   const groupId = 'groupId' in path ? path.groupId : undefined;
   const environment = 'environment' in query ? query.environment : undefined;
-  const kuery = 'kuery' in query ? query.kuery : undefined;
+  const _kuery = 'kuery' in query ? query.kuery : undefined;
+  const kuery = props.value || _kuery;
 
   const history = useHistory();
   const [state, setState] = useState<State>({
@@ -54,7 +56,7 @@ export function KueryBar(props: {
   });
   const { urlParams } = useLegacyUrlParams();
   const location = useLocation();
-  const { data } = useApmPluginContext().plugins;
+  const { unifiedSearch } = useApmPluginContext().plugins;
 
   let currentRequestCheck;
 
@@ -88,6 +90,9 @@ export function KueryBar(props: {
     });
 
   async function onChange(inputValue: string, selectionStart: number) {
+    if (typeof props.onChange === 'function') {
+      props.onChange(inputValue);
+    }
     if (dataView == null) {
       return;
     }
@@ -99,7 +104,7 @@ export function KueryBar(props: {
 
     try {
       const suggestions = (
-        (await data.autocomplete.getQuerySuggestions({
+        (await unifiedSearch.autocomplete.getQuerySuggestions({
           language: 'kuery',
           indexPatterns: [dataView],
           boolFilter:
@@ -137,6 +142,11 @@ export function KueryBar(props: {
     try {
       const res = convertKueryToEsQuery(inputValue, dataView as DataView);
       if (!res) {
+        return;
+      }
+
+      if (typeof props.onSubmit === 'function') {
+        props.onSubmit(inputValue.trim());
         return;
       }
 

@@ -21,11 +21,11 @@ import {
 } from '@elastic/eui';
 
 import styled from 'styled-components';
+import { useMlHref, ML_PAGES } from '@kbn/ml-plugin/public';
 import { useBasePath, useKibana } from '../../../lib/kibana';
 import * as i18n from './translations';
 import { JobSwitch } from './job_switch';
 import { SecurityJob } from '../types';
-import { useMlHref, ML_PAGES } from '../../../../../../ml/public';
 
 const JobNameWrapper = styled.div`
   margin: 5px 0;
@@ -129,7 +129,7 @@ export const JobsTableComponent = ({ isLoading, jobs, onJobStateChange }: JobTab
   const pageSize = 5;
 
   const pagination = {
-    hidePerPageOptions: true,
+    showPerPageOptions: false,
     pageIndex,
     pageSize,
     totalItemCount: jobs.length,

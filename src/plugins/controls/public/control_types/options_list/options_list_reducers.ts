@@ -24,6 +24,20 @@ export const optionsListReducers = {
       state.selectedOptions = newSelections;
     }
   },
+  deselectOptions: (
+    state: WritableDraft<OptionsListEmbeddableInput>,
+    action: PayloadAction<string[]>
+  ) => {
+    for (const optionToDeselect of action.payload) {
+      if (!state.selectedOptions) return;
+      const itemIndex = state.selectedOptions.indexOf(optionToDeselect);
+      if (itemIndex !== -1) {
+        const newSelections = [...state.selectedOptions];
+        newSelections.splice(itemIndex, 1);
+        state.selectedOptions = newSelections;
+      }
+    }
+  },
   selectOption: (
     state: WritableDraft<OptionsListEmbeddableInput>,
     action: PayloadAction<string>
@@ -38,6 +52,6 @@ export const optionsListReducers = {
     state.selectedOptions = [action.payload];
   },
   clearSelections: (state: WritableDraft<OptionsListEmbeddableInput>) => {
-    state.selectedOptions = [];
+    if (state.selectedOptions) state.selectedOptions = [];
   },
 };

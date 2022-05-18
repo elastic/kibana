@@ -11,7 +11,7 @@ import { cloneDeep } from 'lodash';
 import * as Rx from 'rxjs';
 import { merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs/operators';
-import { RenderCompleteDispatcher } from '../../../../kibana_utils/public';
+import { RenderCompleteDispatcher } from '@kbn/kibana-utils-plugin/public';
 import { Adapters } from '../types';
 import { IContainer } from '../containers';
 import { EmbeddableOutput, IEmbeddable } from './i_embeddable';
@@ -87,6 +87,15 @@ export abstract class Embeddable<
         },
         () => {}
       );
+  }
+
+  public refreshInputFromParent() {
+    if (!this.parent) return;
+    // Make sure this panel hasn't been removed immediately after it was added, but before it finished loading.
+    if (!this.parent.getInput().panels[this.id]) return;
+
+    const newInput = this.parent.getInputForChild<TEmbeddableInput>(this.id);
+    this.onResetInput(newInput);
   }
 
   public getIsContainer(): this is IContainer {

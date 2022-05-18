@@ -28,7 +28,7 @@ import {
   SavedObjectsFindOptions,
   SavedObjectsUpdateObjectsSpacesObject,
   SavedObjectsUpdateObjectsSpacesOptions,
-} from 'kibana/server';
+} from '../..';
 
 describe('', () => {
   let mockRepository: ReturnType<typeof savedObjectsRepositoryMock.create>;

@@ -9,8 +9,8 @@ import { ListClient } from '../../services/lists/list_client';
 import { ErrorWithStatusCode } from '../../error_with_status_code';
 import type { ListsRequestHandlerContext } from '../../types';
 
-export const getListClient = (context: ListsRequestHandlerContext): ListClient => {
-  const lists = context.lists?.getListClient();
+export const getListClient = async (context: ListsRequestHandlerContext): Promise<ListClient> => {
+  const lists = (await context.lists)?.getListClient();
   if (lists == null) {
     throw new ErrorWithStatusCode('Lists is not found as a plugin', 404);
   } else {

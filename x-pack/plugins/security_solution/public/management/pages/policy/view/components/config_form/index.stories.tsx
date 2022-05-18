@@ -11,7 +11,7 @@ import { addDecorator, storiesOf } from '@storybook/react';
 import { euiLightVars } from '@kbn/ui-theme';
 import { EuiCheckbox, EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
 
-import { OperatingSystem } from '../../../../../../../common/endpoint/types';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
 
 import { ConfigForm } from '.';
 

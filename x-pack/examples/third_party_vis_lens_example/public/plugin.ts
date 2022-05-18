@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ExpressionsSetup } from 'src/plugins/expressions/public';
-import { FieldFormatsStart } from 'src/plugins/field_formats/public';
-import { Plugin, CoreSetup, AppNavLinkStatus } from '../../../../src/core/public';
-import { DataViewsPublicPluginStart, DataView } from '../../../../src/plugins/data_views/public';
-import { LensPublicSetup, LensPublicStart } from '../../../plugins/lens/public';
-import { DeveloperExamplesSetup } from '../../../../examples/developer_examples/public';
-import { TypedLensByValueInput, PersistedIndexPatternLayer } from '../../../plugins/lens/public';
+import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { Plugin, CoreSetup, AppNavLinkStatus } from '@kbn/core/public';
+import { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
+import { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import { TypedLensByValueInput, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
 import { getRotatingNumberRenderer, rotatingNumberFunction } from './expression';
 import { getRotatingNumberVisualization } from './visualization';
 import { RotatingNumberState } from '../common/types';

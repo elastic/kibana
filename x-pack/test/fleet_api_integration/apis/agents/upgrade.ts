@@ -7,10 +7,10 @@
 
 import expect from '@kbn/expect';
 import semver from 'semver';
+import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupFleetAndAgents } from './services';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { AGENTS_INDEX } from '../../../../plugins/fleet/common';
 import { testUsers } from '../test_users';
 
 const makeSnapshotVersion = (version: string) => {
@@ -323,6 +323,57 @@ export default function (providerContext: FtrProviderContext) {
         ]);
         expect(typeof agent1data.body.item.upgrade_started_at).to.be('string');
         expect(typeof agent2data.body.item.upgrade_started_at).to.be('undefined');
+      });
+
+      it('should create a .fleet-actions document with the agents, version, and upgrade window', async () => {
+        const kibanaVersion = await kibanaServer.version.get();
+        await es.update({
+          id: 'agent1',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+            },
+          },
+        });
+        await es.update({
+          id: 'agent2',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+            },
+          },
+        });
+        await supertest
+          .post(`/api/fleet/agents/bulk_upgrade`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            version: kibanaVersion,
+            agents: ['agent1', 'agent2'],
+            rollout_duration_seconds: 6000,
+          })
+          .expect(200);
+
+        const actionsRes = await es.search({
+          index: '.fleet-actions',
+          body: {
+            sort: [{ '@timestamp': { order: 'desc' } }],
+          },
+        });
+
+        const action: any = actionsRes.hits.hits[0]._source;
+
+        expect(action).to.have.keys(
+          'agents',
+          'expiration',
+          'start_time',
+          'minimum_execution_duration'
+        );
+        expect(action.agents).contain('agent1');
+        expect(action.agents).contain('agent2');
       });
 
       it('should allow to upgrade multiple upgradeable agents by kuery', async () => {

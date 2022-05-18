@@ -5,8 +5,6 @@
     "declarationMap": true,
     "emitDeclarationOnly": true,
     "outDir": "./target_types",
-    "sourceMap": true,
-    "sourceRoot": "../../../../packages/kbn-ace/src",
     "stripInternal": true,
     "types": ["node"]
   },

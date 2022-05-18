@@ -24,6 +24,7 @@
     { "path": "../navigation/tsconfig.json" },
     { "path": "../saved_objects_tagging_oss/tsconfig.json" },
     { "path": "../saved_objects/tsconfig.json" },
+    { "path": "../screenshot_mode/tsconfig.json" },
     { "path": "../ui_actions/tsconfig.json" },
     { "path": "../charts/tsconfig.json" },
     { "path": "../discover/tsconfig.json" },

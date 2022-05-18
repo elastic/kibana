@@ -9,11 +9,42 @@ import { getESAssetMetadata } from '../services/epm/elasticsearch/meta';
 
 const meta = getESAssetMetadata();
 
+export const PACKAGE_TEMPLATE_SUFFIX = '@package';
+
+export const USER_SETTINGS_TEMPLATE_SUFFIX = '@custom';
+
 export const FLEET_FINAL_PIPELINE_ID = '.fleet_final_pipeline-1';
 
-export const FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME = '.fleet_component_template-1';
+export const FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME = '.fleet_globals-1';
 
-export const FLEET_GLOBAL_COMPONENT_TEMPLATE_CONTENT = {
+export const FLEET_GLOBALS_COMPONENT_TEMPLATE_CONTENT = {
+  _meta: meta,
+  template: {
+    settings: {},
+    mappings: {
+      _meta: meta,
+      // All the dynamic field mappings
+      dynamic_templates: [
+        // This makes sure all mappings are keywords by default
+        {
+          strings_as_keyword: {
+            mapping: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+            match_mapping_type: 'string',
+          },
+        },
+      ],
+      // As we define fields ahead, we don't need any automatic field detection
+      // This makes sure all the fields are mapped to keyword by default to prevent mapping conflicts
+      date_detection: false,
+    },
+  },
+};
+export const FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME = '.fleet_agent_id_verification-1';
+
+export const FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_CONTENT = {
   _meta: meta,
   template: {
     settings: {
@@ -39,6 +70,14 @@ export const FLEET_GLOBAL_COMPONENT_TEMPLATE_CONTENT = {
     },
   },
 };
+
+export const FLEET_COMPONENT_TEMPLATES = [
+  { name: FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME, body: FLEET_GLOBALS_COMPONENT_TEMPLATE_CONTENT },
+  {
+    name: FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
+    body: FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_CONTENT,
+  },
+];
 
 export const FLEET_FINAL_PIPELINE_VERSION = 2;
 

@@ -7,7 +7,7 @@
  */
 
 import { chain } from 'lodash';
-import { Datatable } from 'src/plugins/expressions';
+import { Datatable } from '@kbn/expressions-plugin';
 import { getFormatService } from '../services';
 import { FormattedColumn, FormattedColumns, TableVisConfig, TableContext } from '../types';
 import { AggTypes } from '../../common';

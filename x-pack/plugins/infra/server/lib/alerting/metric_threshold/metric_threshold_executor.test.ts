@@ -8,16 +8,16 @@
 import {
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
-} from '../../../../../alerting/server';
+} from '@kbn/alerting-plugin/server';
 // import { RecoveredActionGroup } from '../../../../../alerting/common';
 import {
   AlertInstanceMock,
-  AlertServicesMock,
+  RuleExecutorServicesMock,
   alertsMock,
-} from '../../../../../alerting/server/mocks';
-import { LifecycleAlertServices } from '../../../../../rule_registry/server';
-import { ruleRegistryMocks } from '../../../../../rule_registry/server/mocks';
-import { createLifecycleRuleExecutorMock } from '../../../../../rule_registry/server/utils/create_lifecycle_rule_executor_mock';
+} from '@kbn/alerting-plugin/server/mocks';
+import { LifecycleAlertServices } from '@kbn/rule-registry-plugin/server';
+import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
+import { createLifecycleRuleExecutorMock } from '@kbn/rule-registry-plugin/server/utils/create_lifecycle_rule_executor_mock';
 import {
   Aggregators,
   Comparator,
@@ -777,8 +777,9 @@ const mockLibs: any = {
 
 const executor = createMetricThresholdExecutor(mockLibs);
 
-const alertsServices = alertsMock.createAlertServices();
-const services: AlertServicesMock & LifecycleAlertServices<AlertState, AlertContext, string> = {
+const alertsServices = alertsMock.createRuleExecutorServices();
+const services: RuleExecutorServicesMock &
+  LifecycleAlertServices<AlertState, AlertContext, string> = {
   ...alertsServices,
   ...ruleRegistryMocks.createLifecycleAlertServices(alertsServices),
 };

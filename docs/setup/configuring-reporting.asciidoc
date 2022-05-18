@@ -6,7 +6,16 @@
 <titleabbrev>Configure reporting</titleabbrev>
 ++++
 
-To enable users to manually and automatically generate reports, install the reporting packages, grant users access to the {report-features}, and secure the reporting endpoints.
+For security, you grant users access to the {report-features} and secure the reporting endpoints
+with TLS/SSL encryption. Additionally, you can install graphical packages into the operating system
+to enable the {kib} server to have screenshotting capabilities.
+
+* <<install-reporting-packages>>
+* <<grant-user-access>>
+* <<reporting-roles-user-api>>
+* <<grant-user-access-basic>>
+* <<grant-user-access-external-provider>>
+* <<securing-reporting>>
 
 [float]
 [[install-reporting-packages]]
@@ -30,8 +39,9 @@ If you are using Ubuntu/Debian systems, install the following packages:
 
 * `fonts-liberation`
 * `libfontconfig1`
+* `libnss3`
 
-If the system is missing dependencies, *Reporting* fails in a non-deterministic way. {kib} runs a self-test at server startup, and
+If the system is missing dependencies, a screenshot report job may fail in a non-deterministic way. {kib} runs a self-test at server startup, and
 if it encounters errors, logs them in the Console. The error message does not include
 information about why Chromium failed to run. The most common error message is `Error: connect ECONNREFUSED`, which indicates
 that {kib} could not connect to the Chromium process.
@@ -52,7 +62,7 @@ xpack.reporting.roles.enabled: false
 +
 NOTE: If you use the default settings, you can still create a custom role that grants reporting privileges. The default role is `reporting_user`. This behavior is being deprecated and does not allow application-level access controls for {report-features}, and does not allow API keys or authentication tokens to authorize report generation. Refer to <<reporting-advanced-settings, reporting security settings>> for information and caveats about the deprecated access control features.
 
-. Create the reporting role. 
+. Create the reporting role.
 
 .. Open the main menu, then click *Stack Management*.
 
@@ -76,14 +86,13 @@ For more information, refer to {ref}/security-privileges.html[Security privilege
 
 .. Click *Customize*, then click *Analytics*.
 
-.. Next each application listed, click *All* or click *Read*. You will need to enable the *Customize sub-feature
-privileges* checkbox to grant reporting privileges if you select *Read*.
+.. For each application, select *All*, or to customize the privileges, select *Read* and *Customize sub-feature privileges*.
 +
-If you’ve followed the example above, you should end up on a screen defining your customized privileges that looks like this:
+NOTE: If you have a Basic license, sub-feature privileges are unavailable. For details, check out <<grant-user-access-basic>>.
 [role="screenshot"]
-image::user/reporting/images/kibana-privileges-with-reporting.png["Kibana privileges with Reporting options"]
+image::user/reporting/images/kibana-privileges-with-reporting.png["Kibana privileges with Reporting options, Gold or higher license"]
 +
-NOTE: If *Reporting* options for application features are not available, contact your administrator, or <<reporting-advanced-settings,check that xpack.reporting.roles.enabled is set to false in kibana.yml>>. 
+NOTE: If the *Reporting* options for application features are unavailable, and the cluster license is higher than Basic, contact your administrator, or <<reporting-advanced-settings,check that `xpack.reporting.roles.enabled` is set to `false` in kibana.yml>>.
 
 .. Click *Add {kib} privilege*.
 
@@ -93,7 +102,7 @@ NOTE: If *Reporting* options for application features are not available, contact
 
 .. Open the main menu, then click *Stack Management*.
 
-.. Click *Users*, then click the user you want to assign the reporting role to. 
+.. Click *Users*, then click the user you want to assign the reporting role to.
 
 .. From the *Roles* dropdown, select *custom_reporting_user*.
 
@@ -104,29 +113,43 @@ Granting the privilege to generate reports also grants the user the privilege to
 [float]
 [[reporting-roles-user-api]]
 ==== Grant access with the role API
-With <<grant-user-access, {kib} application privileges>> enabled in Reporting, you can also use the {ref}/security-api-put-role.html[role API] to grant access to the {report-features}. Grant custom reporting roles to users in combination with other roles that grant read access to the data in {es}, and at least read access in the applications where users can generate reports.
+With <<grant-user-access, {kib} application privileges>> enabled in Reporting, you can also use the {ref}/security-api-put-role.html[role API] to grant access to the {report-features}, using *All* privileges, or sub-feature privileges.
 
-[source, sh]
+NOTE: If you have a Basic license, sub-feature privileges are unavailable. For details, check out the API command to grant *All* privileges in <<grant-user-access-basic>>.
+
+Grant users custom Reporting roles, other roles that grant read access to the data in {es}, and at least read access in the applications where users can generate reports.
+
+[source, json]
 ---------------------------------------------------------------
-POST /_security/role/custom_reporting_user
+PUT localhost:5601/api/security/role/custom_reporting_user
 {
-  metadata: {},
-  elasticsearch: { cluster: [], indices: [], run_as: [] },
-  kibana: [
+  "elasticsearch": { "cluster": [], "indices": [], "run_as": [] },
+  "kibana": [
     {
-      base: [],
-      feature: {
-        dashboard: [
-          'generate_report', <1>
-          'download_csv_report' <2>
+      "base": [],
+      "feature": {
+        "dashboard": [
+          "minimal_read",
+          "generate_report", <1>
+          "download_csv_report" <2>
         ],
-        discover: ['generate_report'], <3>
-        canvas: ['generate_report'], <4>
-        visualize: ['generate_report'], <5>
+        "discover": [
+          "minimal_read",
+          "generate_report" <3>
+        ],
+        "canvas": [
+          "minimal_read",
+          "generate_report" <4>
+        ],
+        "visualize": [
+          "minimal_read",
+          "generate_report" <5>
+        ]
       },
-      spaces: ['*'],
+      "spaces": [ "*" ]
     }
-  ]
+  ],
+  "metadata": {} // optional
 }
 ---------------------------------------------------------------
 // CONSOLE
@@ -138,6 +161,41 @@ POST /_security/role/custom_reporting_user
 <5> Grants access to generate PNG and PDF reports in *Visualize Library*.
 
 [float]
+[[grant-user-access-basic]]
+=== Grant users access with a Basic license
+
+With a Basic license, you can grant users access with custom roles to {report-features} with <<kibana-privileges, {kib} application privileges>>. However, with a Basic license, sub-feature privileges are unavailable. <<grant-user-access,Create a role>>, then select *All* privileges for the applications where users can create reports.
+
+[role="screenshot"]
+image::user/reporting/images/kibana-privileges-with-reporting-basic.png["Kibana privileges with Reporting options, Basic license"]
+
+With a Basic license, sub-feature application privileges are unavailable, but you can use the {ref}/security-api-put-role.html[role API] to grant access to CSV {report-features}:
+
+[source, sh]
+---------------------------------------------------------------
+PUT localhost:5601/api/security/role/custom_reporting_user
+{
+  "elasticsearch": { "cluster": [], "indices": [], "run_as": [] },
+  "kibana": [
+    {
+      "base": [],
+      "feature": {
+        "dashboard": [ "all" ], <1>
+        "discover": [ "all" ], <2>
+      },
+      "spaces": [ "*" ]
+    }
+  ],
+  "metadata": {} // optional
+}
+---------------------------------------------------------------
+// CONSOLE
+
+<1> Grants access to generate CSV reports from saved searches in *Discover*.
+<2> Grants access to download CSV reports from saved search panels in *Dashboard*.
+
+[float]
+[[grant-user-access-external-provider]]
 ==== Grant access using an external provider
 
 If you are using an external identity provider, such as LDAP or Active Directory, you can assign roles to individual users or groups of users. Role mappings are configured in {ref}/mapping-roles.html[`config/role_mapping.yml`].

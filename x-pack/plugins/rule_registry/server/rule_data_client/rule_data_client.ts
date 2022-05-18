@@ -9,21 +9,21 @@ import { errors } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Either, isLeft } from 'fp-ts/lib/Either';
 
-import { ElasticsearchClient } from 'kibana/server';
-import { Logger } from 'kibana/server';
-import { IndexPatternsFetcher } from '../../../../../src/plugins/data/server';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
+import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 
 import {
   RuleDataWriteDisabledError,
   RuleDataWriterInitializationError,
 } from '../rule_data_plugin_service/errors';
 import { IndexInfo } from '../rule_data_plugin_service/index_info';
-import { ResourceInstaller } from '../rule_data_plugin_service/resource_installer';
+import { IResourceInstaller } from '../rule_data_plugin_service/resource_installer';
 import { IRuleDataClient, IRuleDataReader, IRuleDataWriter } from './types';
 
-interface ConstructorOptions {
+export interface RuleDataClientConstructorOptions {
   indexInfo: IndexInfo;
-  resourceInstaller: ResourceInstaller;
+  resourceInstaller: IResourceInstaller;
   isWriteEnabled: boolean;
   isWriterCacheEnabled: boolean;
   waitUntilReadyForReading: Promise<WaitResult>;
@@ -40,7 +40,7 @@ export class RuleDataClient implements IRuleDataClient {
   // Writers cached by namespace
   private writerCache: Map<string, IRuleDataWriter>;
 
-  constructor(private readonly options: ConstructorOptions) {
+  constructor(private readonly options: RuleDataClientConstructorOptions) {
     this.writeEnabled = this.options.isWriteEnabled;
     this.writerCacheEnabled = this.options.isWriterCacheEnabled;
     this.writerCache = new Map();
@@ -181,43 +181,46 @@ export class RuleDataClient implements IRuleDataClient {
       }
     };
 
-    const prepareForWritingResult = prepareForWriting();
+    const prepareForWritingResult = prepareForWriting().catch((error) => {
+      if (error instanceof RuleDataWriterInitializationError) {
+        this.options.logger.error(error);
+        this.options.logger.error(
+          `The writer for the Rule Data Client for the ${indexInfo.indexOptions.registrationContext} registration context was not initialized properly, bulk() cannot continue, and writing will be disabled.`
+        );
+        turnOffWrite();
+      } else if (error instanceof RuleDataWriteDisabledError) {
+        this.options.logger.debug(`Writing is disabled, bulk() will not write any data.`);
+      }
+      return undefined;
+    });
 
     return {
       bulk: async (request: estypes.BulkRequest) => {
-        return prepareForWritingResult
-          .then((clusterClient) => {
+        try {
+          const clusterClient = await prepareForWritingResult;
+          if (clusterClient) {
             const requestWithDefaultParameters = {
               ...request,
               require_alias: true,
               index: alias,
             };
 
-            return clusterClient
-              .bulk(requestWithDefaultParameters, { meta: true })
-              .then((response) => {
-                if (response.body.errors) {
-                  const error = new errors.ResponseError(response);
-                  this.options.logger.error(error);
-                }
-                return response;
-              });
-          })
-          .catch((error) => {
-            if (error instanceof RuleDataWriterInitializationError) {
-              this.options.logger.error(error);
-              this.options.logger.error(
-                `The writer for the Rule Data Client for the ${indexInfo.indexOptions.registrationContext} registration context was not initialized properly, bulk() cannot continue, and writing will be disabled.`
-              );
-              turnOffWrite();
-            } else if (error instanceof RuleDataWriteDisabledError) {
-              this.options.logger.debug(`Writing is disabled, bulk() will not write any data.`);
-            } else {
+            const response = await clusterClient.bulk(requestWithDefaultParameters, { meta: true });
+
+            if (response.body.errors) {
+              const error = new errors.ResponseError(response);
               this.options.logger.error(error);
             }
+            return response;
+          } else {
+            this.options.logger.debug(`Writing is disabled, bulk() will not write any data.`);
+          }
+          return undefined;
+        } catch (error) {
+          this.options.logger.error(error);
 
-            return undefined;
-          });
+          return undefined;
+        }
       },
     };
   }

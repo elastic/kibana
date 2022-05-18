@@ -6,10 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { METRIC_TYPES, Query } from '../../../../data/common';
+import { Query, METRIC_TYPES, KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
 import { PANEL_TYPES, TOOLTIP_MODES, TSVB_METRIC_TYPES } from '../enums';
-import { IndexPatternValue, Annotation } from './index';
-import { ColorRules, BackgroundColorRules, BarColorRules, GaugeColorRules } from './color_rules';
+import type { IndexPatternValue, Annotation } from '.';
+import type {
+  ColorRules,
+  BackgroundColorRules,
+  BarColorRules,
+  GaugeColorRules,
+} from './color_rules';
 
 interface MetricVariable {
   field?: string;
@@ -109,7 +114,7 @@ export interface Series {
   steps: number;
   terms_direction?: string;
   terms_exclude?: string;
-  terms_field?: string;
+  terms_field?: string | Array<string | null>;
   terms_include?: string;
   terms_order_by?: string;
   terms_size?: string;
@@ -155,10 +160,10 @@ export interface Panel {
   markdown_scrollbars: number;
   markdown_vertical_align?: string;
   max_bars: number;
-  pivot_id?: string;
+  pivot_id?: string | Array<string | null>;
   pivot_label?: string;
   pivot_rows?: string;
-  pivot_type?: string;
+  pivot_type?: KBN_FIELD_TYPES | Array<KBN_FIELD_TYPES | null>;
   series: Series[];
   show_grid: number;
   show_legend: number;

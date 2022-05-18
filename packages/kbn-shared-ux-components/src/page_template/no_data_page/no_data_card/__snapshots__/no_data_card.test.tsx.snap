@@ -1,0 +1,211 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NoDataCard props button 1`] = `
+<div
+  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--centerAligned css-1hu4pg0-EuiCard"
+>
+  <div
+    class="euiCard__content"
+  >
+    <span
+      class="euiTitle euiTitle--small euiCard__title"
+      id="generated-idTitle"
+    >
+      Card title
+    </span>
+    <div
+      class="euiText euiText--small euiCard__description"
+      id="generated-idDescription"
+    >
+      <p>
+        Description
+      </p>
+    </div>
+  </div>
+  <div
+    class="euiCard__footer"
+  >
+    <button
+      class="euiButton euiButton--primary euiButton--fill"
+      type="button"
+    >
+      <span
+        class="euiButtonContent euiButton__content"
+      >
+        <span
+          class="euiButton__text"
+        >
+          Button
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`NoDataCard props extends EuiCardProps 1`] = `
+<div
+  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--centerAligned custom_class css-1hu4pg0-EuiCard"
+>
+  <div
+    class="euiCard__content"
+  >
+    <span
+      class="euiTitle euiTitle--small euiCard__title"
+      id="generated-idTitle"
+    >
+      Card title
+    </span>
+    <div
+      class="euiText euiText--small euiCard__description"
+      id="generated-idDescription"
+    >
+      <p>
+        Description
+      </p>
+    </div>
+  </div>
+  <div
+    class="euiCard__footer"
+  >
+    <button
+      class="euiButton euiButton--primary euiButton--fill"
+      type="button"
+    >
+      <span
+        class="euiButtonContent euiButton__content"
+      >
+        <span
+          class="euiButton__text"
+        >
+          Button
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`NoDataCard props href 1`] = `
+<div
+  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--isClickable css-1hu4pg0-EuiCard"
+>
+  <div
+    class="euiCard__content"
+  >
+    <span
+      class="euiTitle euiTitle--small euiCard__title"
+      id="generated-idTitle"
+    >
+      <a
+        aria-describedby="generated-idDescription"
+        class="euiCard__titleAnchor"
+        href="#"
+        rel="noreferrer"
+      >
+        Card title
+      </a>
+    </span>
+    <div
+      class="euiText euiText--small euiCard__description"
+      id="generated-idDescription"
+    >
+      <p>
+        Description
+      </p>
+    </div>
+  </div>
+  <div
+    class="euiCard__footer"
+  >
+    <button
+      class="euiButton euiButton--primary euiButton--fill"
+      type="button"
+    >
+      <span
+        class="euiButtonContent euiButton__content"
+      >
+        <span
+          class="euiButton__text"
+        >
+          Button
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`NoDataCard props isDisabled 1`] = `
+<div
+  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiCard euiCard--centerAligned euiCard-isDisabled css-1hu4pg0-EuiCard"
+>
+  <div
+    class="euiCard__content"
+  >
+    <span
+      class="euiTitle euiTitle--small euiCard__title"
+      id="generated-idTitle"
+    >
+      <button
+        aria-describedby=" generated-idDescription"
+        class="euiCard__titleButton"
+        disabled=""
+      >
+        Card title
+      </button>
+    </span>
+    <div
+      class="euiText euiText--small euiCard__description"
+      id="generated-idDescription"
+    >
+      <p>
+        Description
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`NoDataCard renders 1`] = `
+<div
+  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--centerAligned css-1hu4pg0-EuiCard"
+>
+  <div
+    class="euiCard__content"
+  >
+    <span
+      class="euiTitle euiTitle--small euiCard__title"
+      id="generated-idTitle"
+    >
+      Card title
+    </span>
+    <div
+      class="euiText euiText--small euiCard__description"
+      id="generated-idDescription"
+    >
+      <p>
+        Description
+      </p>
+    </div>
+  </div>
+  <div
+    class="euiCard__footer"
+  >
+    <button
+      class="euiButton euiButton--primary euiButton--fill"
+      type="button"
+    >
+      <span
+        class="euiButtonContent euiButton__content"
+      >
+        <span
+          class="euiButton__text"
+        >
+          Card title
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;

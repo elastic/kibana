@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { mockAppIndexPattern, mockIndexPattern } from '../../rtl_helpers';
+import { mockAppDataView, mockDataView } from '../../rtl_helpers';
 import { LensAttributes } from '../lens_attributes';
 import { METRIC_SYSTEM_MEMORY_USAGE, SERVICE_NAME } from '../constants/elasticsearch_fieldnames';
 import { obsvReportConfigMap } from '../../obsv_exploratory_view';
 import { testMobileKPIAttr } from '../test_data/mobile_test_attribute';
 import { getLayerConfigs } from '../../hooks/use_lens_attributes';
-import { IndexPatternState } from '../../hooks/use_app_index_pattern';
+import { DataViewState } from '../../hooks/use_app_data_view';
 
 describe('Mobile kpi config test', function () {
-  mockAppIndexPattern();
+  mockAppDataView();
 
   let lnsAttr: LensAttributes;
 
@@ -31,7 +31,7 @@ describe('Mobile kpi config test', function () {
     ],
     'kpi-over-time',
     {} as any,
-    { mobile: mockIndexPattern } as IndexPatternState,
+    { mobile: mockDataView } as DataViewState,
     obsvReportConfigMap
   );
 

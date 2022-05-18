@@ -35,7 +35,7 @@ export const getAlertingSectionBreadcrumb = (type: string): { text: string; href
   }
 };
 
-export const getAlertDetailsBreadcrumb = (
+export const getRuleDetailsBreadcrumb = (
   id: string,
   name: string
 ): { text: string; href: string } => {

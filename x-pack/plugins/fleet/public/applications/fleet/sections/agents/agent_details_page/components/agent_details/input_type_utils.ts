@@ -11,6 +11,10 @@ import {
   STATE_DATASET_FIELD,
   AGENT_DATASET_FILEBEAT,
   AGENT_DATASET_METRICBEAT,
+  AGENT_DATASET_APM_SERVER,
+  AGENT_DATASET_ENDPOINT_SECURITY,
+  AGENT_DATASET_OSQUERYBEAT,
+  AGENT_DATASET_HEARTBEAT,
 } from '../agent_logs/constants';
 
 export function displayInputType(inputType: string): string {
@@ -39,6 +43,18 @@ export function getLogsQueryByInputType(inputType: string) {
   }
   if (inputType.match(/\/metrics$/)) {
     return `(${STATE_DATASET_FIELD}:!(${AGENT_DATASET_METRICBEAT}))`;
+  }
+  if (inputType === 'osquery') {
+    return `(${STATE_DATASET_FIELD}:!(${AGENT_DATASET_OSQUERYBEAT}))`;
+  }
+  if (inputType.match(/^synthetics\//)) {
+    return `(${STATE_DATASET_FIELD}:!(${AGENT_DATASET_HEARTBEAT}))`;
+  }
+  if (inputType === 'apm') {
+    return `(${STATE_DATASET_FIELD}:!(${AGENT_DATASET_APM_SERVER}))`;
+  }
+  if (inputType === 'endpoint') {
+    return `(${STATE_DATASET_FIELD}:!(${AGENT_DATASET_ENDPOINT_SECURITY}))`;
   }
 
   return '';

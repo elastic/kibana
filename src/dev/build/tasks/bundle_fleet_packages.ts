@@ -11,7 +11,7 @@ import JSON5 from 'json5';
 import { readCliArgs } from '../args';
 import { Task, read, downloadToDisk } from '../lib';
 
-const BUNDLED_PACKAGES_DIR = 'x-pack/plugins/fleet/server/bundled_packages';
+const BUNDLED_PACKAGES_DIR = 'x-pack/plugins/fleet/target/bundled_packages';
 
 interface FleetPackage {
   name: string;

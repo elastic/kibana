@@ -20,7 +20,8 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
 } from '@elastic/eui';
-import { flattenHit, DataView } from '../../../../data/common';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { flattenHit } from '@kbn/data-plugin/public';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';

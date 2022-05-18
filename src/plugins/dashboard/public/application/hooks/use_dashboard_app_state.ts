@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import { History } from 'history';
 import { debounceTime, switchMap } from 'rxjs/operators';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -159,10 +158,11 @@ export const useDashboardAppState = ({
           savedDashboard.id,
           savedDashboard.aliasId
         );
+        const aliasPurpose = savedDashboard.aliasPurpose;
         if (screenshotModeService?.isScreenshotMode()) {
           scopedHistory().replace(path);
         } else {
-          await spacesService?.ui.redirectLegacyUrl(path);
+          await spacesService?.ui.redirectLegacyUrl({ path, aliasPurpose });
         }
         // Return so we don't run any more of the hook and let it rerun after the redirect that just happened
         return;
@@ -182,8 +182,7 @@ export const useDashboardAppState = ({
         savedDashboard,
       });
 
-      // Backwards compatible way of detecting that we are taking a screenshot
-      const legacyPrintLayoutDetected =
+      const printLayoutDetected =
         screenshotModeService?.isScreenshotMode() &&
         screenshotModeService.getScreenshotContext('layout') === 'print';
 
@@ -193,8 +192,7 @@ export const useDashboardAppState = ({
         ...initialDashboardStateFromUrl,
         ...forwardedAppState,
 
-        // if we are in legacy print mode, dashboard needs to be in print viewMode
-        ...(legacyPrintLayoutDetected ? { viewMode: ViewMode.PRINT } : {}),
+        ...(printLayoutDetected ? { viewMode: ViewMode.PRINT } : {}),
 
         // if there is an incoming embeddable, dashboard always needs to be in edit mode to receive it.
         ...(incomingEmbeddable ? { viewMode: ViewMode.EDIT } : {}),
@@ -220,11 +218,7 @@ export const useDashboardAppState = ({
         savedDashboard,
         data,
         executionContext: {
-          type: 'application',
-          name: 'dashboard',
-          id: savedDashboard.id ?? 'unsaved_dashboard',
           description: savedDashboard.title,
-          url: history.location.pathname,
         },
       });
       if (canceled || !dashboardContainer) {
@@ -238,8 +232,12 @@ export const useDashboardAppState = ({
       const dataViewsSubscription = syncDashboardDataViews({
         dashboardContainer,
         dataViews: dashboardBuildContext.dataViews,
-        onUpdateDataViews: (newDataViews: DataView[]) =>
-          setDashboardAppState((s) => ({ ...s, dataViews: newDataViews })),
+        onUpdateDataViews: (newDataViews: DataView[]) => {
+          if (newDataViews.length > 0 && newDataViews[0].id) {
+            dashboardContainer.controlGroup?.setRelevantDataViewId(newDataViews[0].id);
+          }
+          setDashboardAppState((s) => ({ ...s, dataViews: newDataViews }));
+        },
       });
 
       /**
@@ -309,7 +307,7 @@ export const useDashboardAppState = ({
        * the last saved state on save.
        */
       setLastSavedState(savedDashboardState);
-      dashboardBuildContext.$checkForUnsavedChanges.next();
+      dashboardBuildContext.$checkForUnsavedChanges.next(undefined);
       const updateLastSavedState = () => {
         setLastSavedState(
           savedObjectToDashboardState({

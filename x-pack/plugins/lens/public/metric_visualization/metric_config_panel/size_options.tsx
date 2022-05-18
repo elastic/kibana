@@ -8,12 +8,14 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiSuperSelect } from '@elastic/eui';
-import { MetricState } from '../../../common/expressions';
+import type { MetricState } from '../../../common/types';
 
 export interface TitlePositionProps {
   state: MetricState;
   setState: (newState: MetricState) => void;
 }
+
+export const DEFAULT_TITLE_SIZE = 'm';
 
 const titleSizes = [
   {
@@ -55,7 +57,9 @@ const titleSizes = [
 ];
 
 export const SizeOptions: React.FC<TitlePositionProps> = ({ state, setState }) => {
-  const currSizeIndex = titleSizes.findIndex((size) => size.id === (state.size || 'xl'));
+  const currSizeIndex = titleSizes.findIndex(
+    (size) => size.id === (state.size || DEFAULT_TITLE_SIZE)
+  );
 
   const changeSize = (change: number) => {
     setState({ ...state, size: titleSizes[currSizeIndex + change].id });
@@ -86,7 +90,7 @@ export const SizeOptions: React.FC<TitlePositionProps> = ({ state, setState }) =
           inputDisplay: position.label,
         };
       })}
-      valueOfSelected={state.size ?? 'xl'}
+      valueOfSelected={state.size ?? DEFAULT_TITLE_SIZE}
       onChange={(value) => {
         setState({ ...state, size: value });
       }}

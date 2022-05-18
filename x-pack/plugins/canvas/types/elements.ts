@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExpressionAstExpression } from 'src/plugins/expressions';
+import { ExpressionAstExpression } from '@kbn/expressions-plugin';
 import { CanvasElement } from '.';
 
 export interface ElementSpec {

@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import type { CoreSetup } from 'kibana/public';
-import { createStartServicesGetter, Storage } from '../../../../../src/plugins/kibana_utils/public';
-import type { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
-import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
-import type { IndexPatternFieldEditorStart } from '../../../../../src/plugins/data_view_field_editor/public';
-import type {
-  DataPublicPluginSetup,
-  DataPublicPluginStart,
-} from '../../../../../src/plugins/data/public';
+import type { CoreSetup } from '@kbn/core/public';
+import { createStartServicesGetter, Storage } from '@kbn/kibana-utils-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { FieldFormatsStart, FieldFormatsSetup } from '@kbn/field-formats-plugin/public';
 import type { EditorFrameSetup } from '../types';
-import type { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
-import type {
-  FieldFormatsStart,
-  FieldFormatsSetup,
-} from '../../../../../src/plugins/field_formats/public';
 
 export type { PersistedIndexPatternLayer, IndexPattern, FormulaPublicApi } from './types';
 
@@ -33,8 +29,10 @@ export interface IndexPatternDatasourceSetupPlugins {
 
 export interface IndexPatternDatasourceStartPlugins {
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
+  dataViews: DataViewsPublicPluginStart;
   uiActions: UiActionsStart;
 }
 
@@ -62,14 +60,18 @@ export class IndexPatternDatasource {
         fieldFormatsSetup.register([suffixFormatter]);
       }
 
-      const [coreStart, { dataViewFieldEditor, uiActions, data, fieldFormats }] =
-        await core.getStartServices();
+      const [
+        coreStart,
+        { dataViewFieldEditor, uiActions, data, fieldFormats, dataViews, unifiedSearch },
+      ] = await core.getStartServices();
 
       return getIndexPatternDatasource({
         core: coreStart,
         fieldFormats,
         storage: new Storage(localStorage),
         data,
+        unifiedSearch,
+        dataViews,
         charts,
         dataViewFieldEditor,
         uiActions,

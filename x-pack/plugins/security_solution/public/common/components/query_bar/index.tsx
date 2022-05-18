@@ -14,10 +14,11 @@ import {
   TimeHistory,
   TimeRange,
   SavedQuery,
-  SearchBar,
   SavedQueryTimeFilter,
-} from '../../../../../../../src/plugins/data/public';
-import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
+} from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { SearchBar, SearchBarProps } from '@kbn/unified-search-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 export interface QueryBarComponentProps {
   dataTestSubj?: string;
@@ -35,6 +36,7 @@ export interface QueryBarComponentProps {
   refreshInterval?: number;
   savedQuery?: SavedQuery;
   onSavedQuery: (savedQuery: SavedQuery | undefined) => void;
+  displayStyle?: SearchBarProps['displayStyle'];
 }
 
 export const QueryBar = memo<QueryBarComponentProps>(
@@ -54,6 +56,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
     savedQuery,
     onSavedQuery,
     dataTestSubj,
+    displayStyle,
   }) => {
     const onQuerySubmit = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
@@ -101,16 +104,15 @@ export const QueryBar = memo<QueryBarComponentProps>(
       [filterManager]
     );
 
-    const CustomButton = <>{null}</>;
     const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
 
     return (
       <SearchBar
-        customSubmitButton={CustomButton}
+        showSubmitButton={false}
         dateRangeFrom={dateRangeFrom}
         dateRangeTo={dateRangeTo}
         filters={filters}
-        indexPatterns={indexPatterns}
+        indexPatterns={indexPatterns as DataView[]}
         isLoading={isLoading}
         isRefreshPaused={isRefreshPaused}
         query={filterQuery}
@@ -130,6 +132,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
         timeHistory={new TimeHistory(new Storage(localStorage))}
         dataTestSubj={dataTestSubj}
         savedQuery={savedQuery}
+        displayStyle={displayStyle}
       />
     );
   }

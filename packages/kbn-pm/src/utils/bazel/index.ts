@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * from './yarn_integrity';
 export * from './get_cache_folders';
 export * from './install_tools';
-export * from './run';
+export * from './yarn_integrity';

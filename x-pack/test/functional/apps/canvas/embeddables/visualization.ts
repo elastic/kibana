@@ -11,17 +11,24 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['canvas', 'common', 'header', 'visualize']);
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const archives = {
-    es: 'test/functional/fixtures/es_archiver/dashboard/current/kibana',
-  };
 
   describe('visualization in canvas', function () {
     before(async () => {
-      await esArchiver.load(archives.es);
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+      );
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/canvas/lens'
+      );
+      await kibanaServer.importExport.unload(
+        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana_unload'
+      );
+
       // open canvas home
       await PageObjects.common.navigateToApp('canvas');
       // create new workpad
@@ -30,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload(archives.es);
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('by-reference', () => {

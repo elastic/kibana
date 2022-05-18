@@ -17,7 +17,7 @@ import {
   DEFAULT_APP_CATEGORIES,
   AppStatus,
   AppNavLinkStatus,
-} from '../../../../src/core/public';
+} from '@kbn/core/public';
 import {
   KibanaOverviewPluginSetup,
   KibanaOverviewPluginStart,

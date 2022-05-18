@@ -52,9 +52,7 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
     const hidePanel = expandedPanelId !== undefined && expandedPanelId !== id;
     const classes = classNames({
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'dshDashboardGrid__item--expanded': expandPanel,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'dshDashboardGrid__item--hidden': hidePanel,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       printViewport__vis: container.getInput().viewMode === ViewMode.PRINT,

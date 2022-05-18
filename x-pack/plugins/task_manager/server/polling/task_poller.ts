@@ -14,7 +14,7 @@ import { mapTo, filter, scan, concatMap, tap, catchError, switchMap } from 'rxjs
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, none, map as mapOptional, getOrElse } from 'fp-ts/lib/Option';
-import { Logger } from '../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import { pullFromSet } from '../lib/pull_from_set';
 import {
   Result,

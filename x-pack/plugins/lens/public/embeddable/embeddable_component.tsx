@@ -6,11 +6,12 @@
  */
 
 import React, { FC, useEffect } from 'react';
-import type { CoreStart, ThemeServiceStart } from 'kibana/public';
-import type { Action, UiActionsStart } from 'src/plugins/ui_actions/public';
-import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+import type { CoreStart, ThemeServiceStart } from '@kbn/core/public';
+import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import { EuiLoadingChart } from '@elastic/eui';
 import {
+  EmbeddableFactory,
   EmbeddableInput,
   EmbeddableOutput,
   EmbeddablePanel,
@@ -18,13 +19,12 @@ import {
   EmbeddableStart,
   IEmbeddable,
   useEmbeddableFactory,
-} from '../../../../../src/plugins/embeddable/public';
+} from '@kbn/embeddable-plugin/public';
 import type { LensByReferenceInput, LensByValueInput } from './embeddable';
 import type { Document } from '../persistence';
 import type { IndexPatternPersistedState } from '../indexpattern_datasource/types';
 import type { XYState } from '../xy_visualization/types';
-import type { MetricState } from '../../common/expressions';
-import type { PieVisualizationState } from '../../common';
+import type { PieVisualizationState, MetricState } from '../../common';
 import type { DatatableVisualizationState } from '../datatable_visualization/visualization';
 import type { HeatmapVisualizationState } from '../heatmap_visualization/types';
 import type { GaugeVisualizationState } from '../visualizations/gauge/constants';
@@ -69,41 +69,48 @@ interface PluginsStartDependencies {
 }
 
 export function getEmbeddableComponent(core: CoreStart, plugins: PluginsStartDependencies) {
+  const { embeddable: embeddableStart, uiActions, inspector } = plugins;
+  const factory = embeddableStart.getEmbeddableFactory('lens')!;
+  const theme = core.theme;
   return (props: EmbeddableComponentProps) => {
-    const { embeddable: embeddableStart, uiActions, inspector } = plugins;
-    const factory = embeddableStart.getEmbeddableFactory('lens')!;
     const input = { ...props };
-    const [embeddable, loading, error] = useEmbeddableFactory({ factory, input });
     const hasActions =
-      Boolean(props.withDefaultActions) || (props.extraActions && props.extraActions?.length > 0);
+      Boolean(input.withDefaultActions) || (input.extraActions && input.extraActions?.length > 0);
 
-    const theme = core.theme;
-
-    if (loading) {
-      return <EuiLoadingChart />;
-    }
-
-    if (embeddable && hasActions) {
+    if (hasActions) {
       return (
         <EmbeddablePanelWrapper
-          embeddable={embeddable as IEmbeddable<EmbeddableInput, EmbeddableOutput>}
+          factory={factory}
           uiActions={uiActions}
           inspector={inspector}
           actionPredicate={() => hasActions}
           input={input}
           theme={theme}
-          extraActions={props.extraActions}
-          withDefaultActions={props.withDefaultActions}
+          extraActions={input.extraActions}
+          withDefaultActions={input.withDefaultActions}
         />
       );
     }
-
-    return <EmbeddableRoot embeddable={embeddable} loading={loading} error={error} input={input} />;
+    return <EmbeddableRootWrapper factory={factory} input={input} />;
   };
 }
 
+function EmbeddableRootWrapper({
+  factory,
+  input,
+}: {
+  factory: EmbeddableFactory<EmbeddableInput, EmbeddableOutput>;
+  input: EmbeddableComponentProps;
+}) {
+  const [embeddable, loading, error] = useEmbeddableFactory({ factory, input });
+  if (loading) {
+    return <EuiLoadingChart />;
+  }
+  return <EmbeddableRoot embeddable={embeddable} loading={loading} error={error} input={input} />;
+}
+
 interface EmbeddablePanelWrapperProps {
-  embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
+  factory: EmbeddableFactory<EmbeddableInput, EmbeddableOutput>;
   uiActions: PluginsStartDependencies['uiActions'];
   inspector: PluginsStartDependencies['inspector'];
   actionPredicate: (id: string) => boolean;
@@ -114,7 +121,7 @@ interface EmbeddablePanelWrapperProps {
 }
 
 const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
-  embeddable,
+  factory,
   uiActions,
   actionPredicate,
   inspector,
@@ -123,9 +130,16 @@ const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
   extraActions,
   withDefaultActions,
 }) => {
+  const [embeddable, loading] = useEmbeddableFactory({ factory, input });
   useEffect(() => {
-    embeddable.updateInput(input);
+    if (embeddable) {
+      embeddable.updateInput(input);
+    }
   }, [embeddable, input]);
+
+  if (loading || !embeddable) {
+    return <EuiLoadingChart />;
+  }
 
   return (
     <EmbeddablePanel

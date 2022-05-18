@@ -15,7 +15,8 @@ import { resolveCase } from './api';
 interface CaseState {
   data: Case | null;
   resolveOutcome: ResolvedCase['outcome'] | null;
-  resolveAliasId?: string;
+  resolveAliasId?: ResolvedCase['aliasTargetId'];
+  resolveAliasPurpose?: ResolvedCase['aliasPurpose'];
   isLoading: boolean;
   isError: boolean;
 }
@@ -45,6 +46,7 @@ const dataFetchReducer = (state: CaseState, action: Action): CaseState => {
         data: action.payload.case,
         resolveOutcome: action.payload.outcome,
         resolveAliasId: action.payload.aliasTargetId,
+        resolveAliasPurpose: action.payload.aliasPurpose,
       };
     case 'FETCH_FAILURE':
       return {

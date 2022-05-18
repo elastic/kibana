@@ -33,7 +33,7 @@ const ACTIVE_STATUSES = [
   CrawlerStatus.Canceling,
 ];
 
-interface CrawlRequestOverrides {
+export interface CrawlRequestOverrides {
   domain_allowlist?: string[];
   max_crawl_depth?: number;
   seed_urls?: string[];

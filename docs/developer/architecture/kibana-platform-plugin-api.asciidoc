@@ -221,7 +221,7 @@ These are the contracts exposed by the core services for each lifecycle:
 [cols=",,",options="header",]
 |===
 |lifecycle |server contract|browser contract
-|_contructor_
+|_constructor_
 |{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.plugininitializercontext.md[PluginInitializerContext]
 |{kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.plugininitializercontext.md[PluginInitializerContext]
 

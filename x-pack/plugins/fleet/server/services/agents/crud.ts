@@ -7,13 +7,13 @@
 
 import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
+import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 import type { AgentSOAttributes, Agent, BulkActionResult, ListWithKuery } from '../../types';
-import { appContextService, agentPolicyService } from '../../services';
+import { appContextService, agentPolicyService } from '..';
 import type { FleetServerAgent } from '../../../common';
 import { isAgentUpgradeable, SO_SEARCH_LIMIT } from '../../../common';
 import { AGENTS_PREFIX, AGENTS_INDEX } from '../../constants';
@@ -128,6 +128,7 @@ export async function getAgentsByKuery(
       from,
       size,
       track_total_hits: true,
+      rest_total_hits_as_int: true,
       ignore_unavailable: true,
       body: {
         ...body,
@@ -137,7 +138,7 @@ export async function getAgentsByKuery(
   const res = await queryAgents((page - 1) * perPage, perPage);
 
   let agents = res.hits.hits.map(searchHitToAgent);
-  let total = (res.hits.total as estypes.SearchTotalHits).value;
+  let total = res.hits.total as number;
   // filtering for a range on the version string will not work,
   // nor does filtering on a flattened field (local_metadata), so filter here
   if (showUpgradeable) {
@@ -202,11 +203,13 @@ export async function countInactiveAgents(
     index: AGENTS_INDEX,
     size: 0,
     track_total_hits: true,
+    rest_total_hits_as_int: true,
+    filter_path: 'hits.total',
     ignore_unavailable: true,
     body,
   });
-  // @ts-expect-error value is number | TotalHits
-  return res.body.hits.total.value;
+
+  return (res.hits.total as number) || 0;
 }
 
 export async function getAgentById(esClient: ElasticsearchClient, agentId: string) {

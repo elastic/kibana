@@ -17,7 +17,7 @@ describe('getSeries', () => {
         field: 'day_of_week_i',
       },
     ] as Metric[];
-    const config = getSeries(metric);
+    const config = getSeries(metric, 1);
     expect(config).toStrictEqual([
       {
         agg: 'average',
@@ -44,7 +44,7 @@ describe('getSeries', () => {
         },
       },
     ] as Metric[];
-    const config = getSeries(metric);
+    const config = getSeries(metric, 1);
     expect(config).toStrictEqual([
       {
         agg: 'formula',
@@ -71,7 +71,7 @@ describe('getSeries', () => {
         field: '123456',
       },
     ] as Metric[];
-    const config = getSeries(metric);
+    const config = getSeries(metric, 1);
     expect(config).toStrictEqual([
       {
         agg: 'formula',
@@ -97,7 +97,7 @@ describe('getSeries', () => {
         field: '123456',
       },
     ] as Metric[];
-    const config = getSeries(metric);
+    const config = getSeries(metric, 1);
     expect(config).toStrictEqual([
       {
         agg: 'formula',
@@ -122,7 +122,7 @@ describe('getSeries', () => {
         field: '123456',
       },
     ] as Metric[];
-    const config = getSeries(metric);
+    const config = getSeries(metric, 1);
     expect(config).toStrictEqual([
       {
         agg: 'cumulative_sum',
@@ -147,7 +147,7 @@ describe('getSeries', () => {
         field: '123456',
       },
     ] as Metric[];
-    const config = getSeries(metric);
+    const config = getSeries(metric, 1);
     expect(config).toStrictEqual([
       {
         agg: 'formula',
@@ -174,7 +174,7 @@ describe('getSeries', () => {
         unit: '1m',
       },
     ] as Metric[];
-    const config = getSeries(metric);
+    const config = getSeries(metric, 1);
     expect(config).toStrictEqual([
       {
         agg: 'differences',
@@ -202,7 +202,7 @@ describe('getSeries', () => {
         window: 6,
       },
     ] as Metric[];
-    const config = getSeries(metric);
+    const config = getSeries(metric, 1);
     expect(config).toStrictEqual([
       {
         agg: 'moving_average',
@@ -246,7 +246,7 @@ describe('getSeries', () => {
         window: 6,
       },
     ] as Metric[];
-    const config = getSeries(metric);
+    const config = getSeries(metric, 1);
     expect(config).toStrictEqual([
       {
         agg: 'formula',
@@ -293,7 +293,7 @@ describe('getSeries', () => {
         ],
       },
     ] as Metric[];
-    const config = getSeries(metric);
+    const config = getSeries(metric, 1);
     expect(config).toStrictEqual([
       {
         agg: 'percentile',
@@ -335,7 +335,7 @@ describe('getSeries', () => {
         order_by: 'timestamp',
       },
     ] as Metric[];
-    const config = getSeries(metric);
+    const config = getSeries(metric, 1);
     expect(config).toStrictEqual([
       {
         agg: 'last_value',
@@ -357,8 +357,41 @@ describe('getSeries', () => {
         size: 2,
       },
     ] as Metric[];
-    const config = getSeries(metric);
+    const config = getSeries(metric, 1);
     expect(config).toBeNull();
+  });
+
+  test('should return null for a static aggregation with 1 layer', () => {
+    const metric = [
+      {
+        id: '12345',
+        type: 'static',
+        value: '10',
+      },
+    ] as Metric[];
+    const config = getSeries(metric, 1);
+    expect(config).toBeNull();
+  });
+
+  test('should return the correct config for a static aggregation with 2 layers', () => {
+    const metric = [
+      {
+        id: '12345',
+        type: 'static',
+        value: '10',
+      },
+    ] as Metric[];
+    const config = getSeries(metric, 2);
+    expect(config).toStrictEqual([
+      {
+        agg: 'static_value',
+        fieldName: 'document',
+        isFullReference: true,
+        params: {
+          value: '10',
+        },
+      },
+    ]);
   });
 
   test('should return the correct formula for the math aggregation with percentiles as variables', () => {
@@ -415,7 +448,7 @@ describe('getSeries', () => {
         ],
       },
     ] as Metric[];
-    const config = getSeries(metric);
+    const config = getSeries(metric, 1);
     expect(config).toStrictEqual([
       {
         agg: 'formula',

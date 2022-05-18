@@ -9,11 +9,11 @@ import { chunk } from 'lodash';
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 import type {
   LatencyCorrelation,
   LatencyCorrelationsResponse,
-} from '../../../../plugins/apm/common/correlations/latency_correlations/types';
+} from '@kbn/apm-plugin/common/correlations/latency_correlations/types';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // These tests go through the full sequence of queries required
 // to get the final results for a latency correlation analysis.
@@ -254,7 +254,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(correlation?.fieldValue).to.be('success');
         expect(correlation?.correlation).to.be(0.6275246559191225);
         expect(correlation?.ksTest).to.be(4.806503252860024e-13);
-        expect(correlation?.histogram.length).to.be(101);
+        expect(correlation?.histogram?.length).to.be(101);
 
         const fieldStats = finalRawResponse?.fieldStats?.[0];
         expect(typeof fieldStats).to.be('object');

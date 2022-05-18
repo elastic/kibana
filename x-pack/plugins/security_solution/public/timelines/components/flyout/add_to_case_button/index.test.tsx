@@ -47,7 +47,7 @@ describe('AddToCaseButton', () => {
 
   it('navigates to the correct path without id', async () => {
     const here = jest.fn();
-    useKibanaMock().services.cases.getAllCasesSelectorModal = here.mockImplementation(
+    useKibanaMock().services.cases.ui.getAllCasesSelectorModal = here.mockImplementation(
       ({ onRowClick }) => {
         onRowClick();
         return <></>;
@@ -69,7 +69,7 @@ describe('AddToCaseButton', () => {
   });
 
   it('navigates to the correct path with id', async () => {
-    useKibanaMock().services.cases.getAllCasesSelectorModal = jest
+    useKibanaMock().services.cases.ui.getAllCasesSelectorModal = jest
       .fn()
       .mockImplementation(({ onRowClick }) => {
         onRowClick({ id: 'case-id' });

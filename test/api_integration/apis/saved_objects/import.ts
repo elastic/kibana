@@ -9,14 +9,13 @@
 import expect from '@kbn/expect';
 import { join } from 'path';
 import dedent from 'dedent';
-import type { SavedObjectsImportFailure } from 'src/core/server';
+import type { SavedObjectsImportFailure } from '@kbn/core/server';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const createConflictError = (
   object: Omit<SavedObjectsImportFailure, 'error'>
 ): SavedObjectsImportFailure => ({
   ...object,
-  title: object.meta.title,
   error: { type: 'conflict' },
 });
 
@@ -123,7 +122,6 @@ export default function ({ getService }: FtrProviderContext) {
                 {
                   id: '1',
                   type: 'wigwags',
-                  title: 'my title',
                   meta: { title: 'my title' },
                   error: { type: 'unsupported_type' },
                 },
@@ -221,7 +219,6 @@ export default function ({ getService }: FtrProviderContext) {
                 {
                   type: 'visualization',
                   id: '1',
-                  title: 'My visualization',
                   meta: { title: 'My visualization', icon: 'visualizeApp' },
                   error: {
                     type: 'missing_references',

@@ -6,28 +6,22 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
 import './page_template.scss';
 
-import React, { FunctionComponent, useState } from 'react';
-import classNames from 'classnames';
+import React, { FunctionComponent } from 'react';
+import { EuiPageTemplateProps } from '@elastic/eui';
+import { KibanaPageTemplateSolutionNavProps } from './solution_nav';
 
 import {
-  EuiEmptyPrompt,
-  EuiPageTemplate,
-  EuiPageTemplateProps,
-  useIsWithinBreakpoints,
-} from '@elastic/eui';
-
-import {
-  KibanaPageTemplateSolutionNav,
-  KibanaPageTemplateSolutionNavProps,
-} from './solution_nav/solution_nav';
-
-import { NoDataPage, NoDataPageProps, NO_DATA_PAGE_TEMPLATE_PROPS } from './no_data_page';
+  NoDataPageProps,
+  NoDataConfigPage,
+  NoDataConfigPageWithSolutionNavBar,
+} from './no_data_page';
+import { KibanaPageTemplateInner, KibanaPageTemplateWithSolutionNav } from './page_template_inner';
 
 /**
  * A thin wrapper around EuiPageTemplate with a few Kibana specific additions
+ * @deprecated Use `KibanaPageTemplateProps` from `kbn-shared-ux-components`.
  */
 export type KibanaPageTemplateProps = EuiPageTemplateProps & {
   /**
@@ -48,122 +42,57 @@ export type KibanaPageTemplateProps = EuiPageTemplateProps & {
   noDataConfig?: NoDataPageProps;
 };
 
+/** @deprecated Use `KibanaPageTemplate` from `kbn-shared-ux-components`. */
 export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   template,
   className,
-  pageHeader,
   children,
-  isEmptyState,
-  restrictWidth = true,
-  pageSideBar,
-  pageSideBarProps,
   solutionNav,
   noDataConfig,
   ...rest
 }) => {
   /**
-   * Only default to open in large+ breakpoints
-   */
-  const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
-  const isLargerBreakpoint = useIsWithinBreakpoints(['l', 'xl']);
-
-  /**
-   * Create the solution nav component
-   */
-  const [isSideNavOpenOnDesktop, setisSideNavOpenOnDesktop] = useState(
-    JSON.parse(String(localStorage.getItem('solutionNavIsCollapsed'))) ? false : true
-  );
-  const toggleOpenOnDesktop = () => {
-    setisSideNavOpenOnDesktop(!isSideNavOpenOnDesktop);
-    // Have to store it as the opposite of the default we want
-    localStorage.setItem('solutionNavIsCollapsed', JSON.stringify(isSideNavOpenOnDesktop));
-  };
-  let sideBarClasses = 'kbnPageTemplate__pageSideBar';
-  if (solutionNav) {
-    // Only apply shrinking classes if collapsibility is available through `solutionNav`
-    sideBarClasses = classNames(sideBarClasses, {
-      'kbnPageTemplate__pageSideBar--shrink':
-        isMediumBreakpoint || (isLargerBreakpoint && !isSideNavOpenOnDesktop),
-    });
-
-    pageSideBar = (
-      <KibanaPageTemplateSolutionNav
-        isOpenOnDesktop={isSideNavOpenOnDesktop}
-        onCollapse={toggleOpenOnDesktop}
-        {...solutionNav}
-      />
-    );
-  }
-
-  /**
-   * An easy way to create the right content for empty pages
-   */
-  const emptyStateDefaultTemplate = pageSideBar ? 'centeredContent' : 'centeredBody';
-  if (isEmptyState && pageHeader && !children) {
-    template = template ?? emptyStateDefaultTemplate;
-    const { iconType, pageTitle, description, rightSideItems } = pageHeader;
-    pageHeader = undefined;
-    children = (
-      <EuiEmptyPrompt
-        iconType={iconType}
-        iconColor={''} // This is likely a solution or app logo, so keep it multi-color
-        title={pageTitle ? <h1>{pageTitle}</h1> : undefined}
-        body={description ? <p>{description}</p> : undefined}
-        actions={rightSideItems}
-      />
-    );
-  } else if (isEmptyState && pageHeader && children) {
-    template = template ?? 'centeredContent';
-  } else if (isEmptyState && !pageHeader) {
-    template = template ?? emptyStateDefaultTemplate;
-  }
-
-  // Set the template before the classes
-  template = noDataConfig ? NO_DATA_PAGE_TEMPLATE_PROPS.template : template;
-
-  const classes = classNames(
-    'kbnPageTemplate',
-    { [`kbnPageTemplate--${template}`]: template },
-    className
-  );
-
-  /**
    * If passing the custom template of `noDataConfig`
    */
+  if (noDataConfig && solutionNav) {
+    return (
+      <NoDataConfigPageWithSolutionNavBar
+        data-test-subj={rest['data-test-subj']}
+        className={className}
+        noDataConfig={noDataConfig}
+        solutionNav={solutionNav}
+      />
+    );
+  }
+
   if (noDataConfig) {
     return (
-      <EuiPageTemplate
+      <NoDataConfigPage
         data-test-subj={rest['data-test-subj']}
+        className={className}
+        noDataConfig={noDataConfig}
+      />
+    );
+  }
+
+  if (solutionNav) {
+    return (
+      <KibanaPageTemplateWithSolutionNav
         template={template}
-        className={classes}
-        pageSideBar={pageSideBar}
-        pageSideBarProps={{
-          paddingSize: solutionNav ? 'none' : 'l',
-          ...pageSideBarProps,
-          className: classNames(sideBarClasses, pageSideBarProps?.className),
-        }}
-        {...NO_DATA_PAGE_TEMPLATE_PROPS}
-      >
-        <NoDataPage {...noDataConfig} />
-      </EuiPageTemplate>
+        className={className}
+        solutionNav={solutionNav}
+        children={children}
+        {...rest}
+      />
     );
   }
 
   return (
-    <EuiPageTemplate
+    <KibanaPageTemplateInner
       template={template}
-      className={classes}
-      restrictWidth={restrictWidth}
-      pageHeader={pageHeader}
-      pageSideBar={pageSideBar}
-      pageSideBarProps={{
-        paddingSize: solutionNav ? 'none' : 'l',
-        ...pageSideBarProps,
-        className: classNames(sideBarClasses, pageSideBarProps?.className),
-      }}
+      className={className}
+      children={children}
       {...rest}
-    >
-      {children}
-    </EuiPageTemplate>
+    />
   );
 };

@@ -28,6 +28,17 @@ export interface ContainerInput<PanelExplicitInput = {}> extends EmbeddableInput
   };
 }
 
+export interface EmbeddableContainerSettings {
+  /**
+   * If true, the container will wait for each embeddable to load after creation before loading the next embeddable.
+   */
+  initializeSequentially?: boolean;
+  /**
+   * Initialise children in the order specified. If an ID does not match it will be skipped and if a child is not included it will be initialized in the default order after the list of provided IDs.
+   */
+  childIdInitializeOrder?: string[];
+}
+
 export interface IContainer<
   Inherited extends {} = {},
   I extends ContainerInput<Inherited> = ContainerInput<Inherited>,

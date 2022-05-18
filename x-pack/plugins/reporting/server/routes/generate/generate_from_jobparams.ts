@@ -7,16 +7,16 @@
 
 import { schema } from '@kbn/config-schema';
 import rison from 'rison-node';
-import { ReportingCore } from '../..';
+import type { Logger } from '@kbn/core/server';
+import type { ReportingCore } from '../..';
 import { API_BASE_URL } from '../../../common/constants';
-import { LevelLogger } from '../../lib';
-import { BaseParams } from '../../types';
+import type { BaseParams } from '../../types';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
 import { RequestHandler } from '../lib/request_handler';
 
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
-export function registerJobGenerationRoutes(reporting: ReportingCore, logger: LevelLogger) {
+export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Logger) {
   const setupDeps = reporting.getPluginSetupDeps();
   const { router } = setupDeps;
 

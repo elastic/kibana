@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IKibanaResponse } from 'src/core/server';
+import type { IKibanaResponse } from '@kbn/core/server';
 
 import type {
   DeletePackageResponse,
@@ -242,7 +242,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         response
       );
       if (resp.payload?.items) {
-        return response.ok({ body: { response: resp.payload.items } });
+        return response.ok({ body: { ...resp.payload, response: resp.payload.items } });
       }
       return resp;
     }

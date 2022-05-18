@@ -7,7 +7,6 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { asPercent } from '../../../../common/utils/formatters';
-import { useComparison } from '../../../hooks/use_comparison';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
@@ -17,6 +16,7 @@ import {
   ChartType,
   getTimeSeriesColor,
 } from '../../shared/charts/helper/get_timeseries_color';
+import { getComparisonChartTheme } from '../../shared/time_comparison/get_comparison_chart_theme';
 
 function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
@@ -28,12 +28,20 @@ export function BackendFailedTransactionRateChart({
   height: number;
 }) {
   const {
-    query: { backendName, kuery, environment, rangeFrom, rangeTo },
+    query: {
+      backendName,
+      kuery,
+      environment,
+      rangeFrom,
+      rangeTo,
+      offset,
+      comparisonEnabled,
+    },
   } = useApmParams('/backends/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { offset, comparisonChartTheme } = useComparison();
+  const comparisonChartTheme = getComparisonChartTheme();
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -47,14 +55,14 @@ export function BackendFailedTransactionRateChart({
             backendName,
             start,
             end,
-            offset,
+            offset: comparisonEnabled ? offset : undefined,
             kuery,
             environment,
           },
         },
       });
     },
-    [backendName, start, end, offset, kuery, environment]
+    [backendName, start, end, offset, kuery, environment, comparisonEnabled]
   );
 
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(

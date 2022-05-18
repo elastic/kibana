@@ -10,7 +10,7 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { Breakpoints } from '../../../../hooks/use_breakpoints';
-import { getServiceColumns } from './';
+import { getServiceColumns } from '.';
 import * as stories from './service_list.stories';
 import * as timeSeriesColor from '../../../shared/charts/helper/get_timeseries_color';
 
@@ -21,6 +21,8 @@ const query = {
   rangeTo: 'now',
   environment: ENVIRONMENT_ALL.value,
   kuery: '',
+  serviceGroup: '',
+  comparisonEnabled: false,
 };
 
 const service: any = {
@@ -68,6 +70,7 @@ describe('ServiceList', () => {
     describe('when small', () => {
       it('shows environment, transaction type and sparklines', () => {
         const renderedColumns = getServiceColumns({
+          comparisonDataLoading: false,
           showHealthStatusColumn: true,
           query,
           showTransactionTypeColumn: true,
@@ -95,6 +98,7 @@ describe('ServiceList', () => {
             color="green"
             comparisonSeriesColor="black"
             hideSeries={false}
+            isLoading={false}
             valueLabel="0 ms"
           />
         `);
@@ -104,6 +108,7 @@ describe('ServiceList', () => {
     describe('when Large', () => {
       it('hides environment, transaction type and sparklines', () => {
         const renderedColumns = getServiceColumns({
+          comparisonDataLoading: false,
           showHealthStatusColumn: true,
           query,
           showTransactionTypeColumn: true,
@@ -121,6 +126,7 @@ describe('ServiceList', () => {
             color="green"
             comparisonSeriesColor="black"
             hideSeries={true}
+            isLoading={false}
             valueLabel="0 ms"
           />
         `);
@@ -129,6 +135,7 @@ describe('ServiceList', () => {
       describe('when XL', () => {
         it('hides transaction type', () => {
           const renderedColumns = getServiceColumns({
+            comparisonDataLoading: false,
             showHealthStatusColumn: true,
             query,
             showTransactionTypeColumn: true,
@@ -155,6 +162,7 @@ describe('ServiceList', () => {
               color="green"
               comparisonSeriesColor="black"
               hideSeries={false}
+              isLoading={false}
               valueLabel="0 ms"
             />
           `);
@@ -164,6 +172,7 @@ describe('ServiceList', () => {
       describe('when XXL', () => {
         it('hides transaction type', () => {
           const renderedColumns = getServiceColumns({
+            comparisonDataLoading: false,
             showHealthStatusColumn: true,
             query,
             showTransactionTypeColumn: true,
@@ -191,6 +200,7 @@ describe('ServiceList', () => {
               color="green"
               comparisonSeriesColor="black"
               hideSeries={false}
+              isLoading={false}
               valueLabel="0 ms"
             />
           `);
@@ -202,6 +212,7 @@ describe('ServiceList', () => {
   describe('without ML data', () => {
     it('hides healthStatus column', () => {
       const renderedColumns = getServiceColumns({
+        comparisonDataLoading: false,
         showHealthStatusColumn: false,
         query,
         showTransactionTypeColumn: true,
@@ -218,6 +229,7 @@ describe('ServiceList', () => {
   describe('with ML data', () => {
     it('shows healthStatus column', () => {
       const renderedColumns = getServiceColumns({
+        comparisonDataLoading: false,
         showHealthStatusColumn: true,
         query,
         showTransactionTypeColumn: true,

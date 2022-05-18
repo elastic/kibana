@@ -13,6 +13,7 @@ import { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
 
 const metricAggFilter: string[] = [
   '!top_hits',
+  '!top_metrics',
   '!percentiles',
   '!percentile_ranks',
   '!median',

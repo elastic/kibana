@@ -16,7 +16,6 @@
 
 //TODO add these overrides to EUI so that search behaves the same globally (eui/issues/4363)
 .kbnSearchBar {
-  width: 400px;
   max-width: 100%;
   will-change: width;
 }
@@ -24,6 +23,12 @@
 @include euiBreakpoint('xs', 's') {
   .kbnSearchOption__tagsList {
     display: none;
+  }
+}
+
+@include euiBreakpoint('m', 'l', 'xl') {
+  .kbnSearchBar {
+    width: 400px;
   }
 }
 

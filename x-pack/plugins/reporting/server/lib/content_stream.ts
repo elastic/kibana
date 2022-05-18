@@ -5,14 +5,13 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Duplex } from 'stream';
+import { ByteSizeValue } from '@kbn/config-schema';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { defaults, get } from 'lodash';
 import Puid from 'puid';
-import { ByteSizeValue } from '@kbn/config-schema';
-import type { ElasticsearchClient } from 'src/core/server';
-import { ReportingCore } from '..';
-import { ReportSource } from '../../common/types';
-import { LevelLogger } from './level_logger';
+import { Duplex } from 'stream';
+import type { ReportingCore } from '..';
+import type { ReportSource } from '../../common/types';
 
 /**
  * @note The Elasticsearch `http.max_content_length` is including the whole POST body.
@@ -87,7 +86,7 @@ export class ContentStream extends Duplex {
 
   constructor(
     private client: ElasticsearchClient,
-    private logger: LevelLogger,
+    private logger: Logger,
     private document: ContentStreamDocument,
     { encoding = 'base64' }: ContentStreamParameters = {}
   ) {
@@ -348,7 +347,7 @@ export async function getContentStream(
 
   return new ContentStream(
     client,
-    logger.clone(['content_stream', document.id]),
+    logger.get('content_stream').get(document.id),
     document,
     parameters
   );

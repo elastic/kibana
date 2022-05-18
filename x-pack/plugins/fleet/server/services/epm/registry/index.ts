@@ -8,6 +8,7 @@
 import { URL } from 'url';
 
 import mime from 'mime-types';
+import semverGte from 'semver/functions/gte';
 
 import type { Response } from 'node-fetch';
 
@@ -35,6 +36,8 @@ import { appContextService } from '../..';
 import { PackageNotFoundError, PackageCacheError, RegistryResponseError } from '../../../errors';
 
 import { getBundledPackageByName } from '../packages/bundled_packages';
+
+import { withPackageSpan } from '../packages/utils';
 
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { getRegistryUrl } from './registry_url';
@@ -74,71 +77,83 @@ async function _fetchFindLatestPackage(
   packageName: string,
   options?: FetchFindLatestPackageOptions
 ) {
-  const { ignoreConstraints = false } = options ?? {};
+  return withPackageSpan(`Find latest package ${packageName}`, async () => {
+    const logger = appContextService.getLogger();
+    const { ignoreConstraints = false } = options ?? {};
 
-  const registryUrl = getRegistryUrl();
-  const url = new URL(`${registryUrl}/search?package=${packageName}&experimental=true`);
+    const bundledPackage = await getBundledPackageByName(packageName);
 
-  if (!ignoreConstraints) {
-    setKibanaVersion(url);
-  }
+    const registryUrl = getRegistryUrl();
+    const url = new URL(`${registryUrl}/search?package=${packageName}&experimental=true`);
 
-  const res = await fetchUrl(url.toString(), 1);
-  const searchResults: RegistryPackage[] = JSON.parse(res);
+    if (!ignoreConstraints) {
+      setKibanaVersion(url);
+    }
 
-  return searchResults;
+    try {
+      const res = await fetchUrl(url.toString(), 1);
+      const searchResults: RegistryPackage[] = JSON.parse(res);
+
+      const latestPackageFromRegistry = searchResults[0] ?? null;
+
+      if (bundledPackage && semverGte(bundledPackage.version, latestPackageFromRegistry.version)) {
+        return bundledPackage;
+      }
+
+      return latestPackageFromRegistry;
+    } catch (error) {
+      logger.error(
+        `Failed to fetch latest version of ${packageName} from registry: ${error.message}`
+      );
+
+      // Fall back to the bundled version of the package if it exists
+      if (bundledPackage) {
+        return bundledPackage;
+      }
+
+      // Otherwise, return null and allow callers to determine whether they'll consider this an error or not
+      return null;
+    }
+  });
 }
 
 export async function fetchFindLatestPackageOrThrow(
   packageName: string,
   options?: FetchFindLatestPackageOptions
 ) {
-  try {
-    const searchResults = await _fetchFindLatestPackage(packageName, options);
+  const latestPackage = await _fetchFindLatestPackage(packageName, options);
 
-    if (!searchResults.length) {
-      throw new PackageNotFoundError(`[${packageName}] package not found in registry`);
-    }
-
-    return searchResults[0];
-  } catch (error) {
-    const bundledPackage = await getBundledPackageByName(packageName);
-
-    if (!bundledPackage) {
-      throw error;
-    }
-
-    return bundledPackage;
+  if (!latestPackage) {
+    throw new PackageNotFoundError(`[${packageName}] package not found in registry`);
   }
+
+  return latestPackage;
 }
 
 export async function fetchFindLatestPackageOrUndefined(
   packageName: string,
   options?: FetchFindLatestPackageOptions
 ) {
+  const logger = appContextService.getLogger();
+
   try {
-    const searchResults = await _fetchFindLatestPackage(packageName, options);
+    const latestPackage = await _fetchFindLatestPackage(packageName, options);
 
-    if (!searchResults.length) {
+    if (!latestPackage) {
       return undefined;
     }
-
-    return searchResults[0];
+    return latestPackage;
   } catch (error) {
-    const bundledPackage = await getBundledPackageByName(packageName);
-
-    if (!bundledPackage) {
-      return undefined;
-    }
-
-    return bundledPackage;
+    logger.warn(`Error fetching latest package for ${packageName}: ${error.message}`);
+    return undefined;
   }
 }
 
 export async function fetchInfo(pkgName: string, pkgVersion: string): Promise<RegistryPackage> {
   const registryUrl = getRegistryUrl();
   try {
-    const res = await fetchUrl(`${registryUrl}/package/${pkgName}/${pkgVersion}`).then(JSON.parse);
+    // Trailing slash avoids 301 redirect / extra hop
+    const res = await fetchUrl(`${registryUrl}/package/${pkgName}/${pkgVersion}/`).then(JSON.parse);
 
     return res;
   } catch (err) {
@@ -197,12 +212,14 @@ export async function fetchCategories(
 }
 
 export async function getInfo(name: string, version: string) {
-  let packageInfo = getPackageInfo({ name, version });
-  if (!packageInfo) {
-    packageInfo = await fetchInfo(name, version);
-    setPackageInfo({ name, version, packageInfo });
-  }
-  return packageInfo as RegistryPackage;
+  return withPackageSpan('Fetch package info', async () => {
+    let packageInfo = getPackageInfo({ name, version });
+    if (!packageInfo) {
+      packageInfo = await fetchInfo(name, version);
+      setPackageInfo({ name, version, packageInfo });
+    }
+    return packageInfo as RegistryPackage;
+  });
 }
 
 export async function getRegistryPackage(
@@ -212,14 +229,19 @@ export async function getRegistryPackage(
   const installSource = 'registry';
   let paths = getArchiveFilelist({ name, version });
   if (!paths || paths.length === 0) {
-    const { archiveBuffer, archivePath } = await fetchArchiveBuffer(name, version);
-    paths = await unpackBufferToCache({
-      name,
-      version,
-      installSource,
-      archiveBuffer,
-      contentType: ensureContentType(archivePath),
-    });
+    const { archiveBuffer, archivePath } = await withPackageSpan(
+      'Fetch package archive from registry',
+      () => fetchArchiveBuffer(name, version)
+    );
+    paths = await withPackageSpan('Unpack archive', () =>
+      unpackBufferToCache({
+        name,
+        version,
+        installSource,
+        archiveBuffer,
+        contentType: ensureContentType(archivePath),
+      })
+    );
   }
 
   const packageInfo = await getInfo(name, version);
@@ -251,7 +273,7 @@ export async function ensureCachedArchiveInfo(
   }
 }
 
-async function fetchArchiveBuffer(
+export async function fetchArchiveBuffer(
   pkgName: string,
   pkgVersion: string
 ): Promise<{ archiveBuffer: Buffer; archivePath: string }> {

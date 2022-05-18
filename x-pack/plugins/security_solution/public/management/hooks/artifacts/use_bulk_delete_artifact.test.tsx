@@ -6,15 +6,15 @@
  */
 
 import { useBulkDeleteArtifact } from './use_bulk_delete_artifact';
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 import {
   getFakeListId,
   getFakeListDefinition,
   getFakeHttpService,
   renderMutation,
-} from './test_utils';
-import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+} from '../test_utils';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { act } from '@testing-library/react-hooks';
 
 describe('Bulk delete artifact hook', () => {
@@ -51,19 +51,21 @@ describe('Bulk delete artifact hook', () => {
     expect(fakeHttpServices.delete).toHaveBeenCalledTimes(0);
 
     await act(async () => {
-      const res = await result.mutateAsync(['fakeId-1', 'fakeId-2']);
+      const res = await result.mutateAsync([{ id: 'fakeId-1' }, { itemId: 'fakeId-2' }]);
       expect(res).toEqual([exceptionItem1, exceptionItem2]);
       expect(onSuccessMock).toHaveBeenCalledTimes(1);
       expect(fakeHttpServices.delete).toHaveBeenCalledTimes(2);
       expect(fakeHttpServices.delete).toHaveBeenNthCalledWith(1, '/api/exception_lists/items', {
         query: {
           id: 'fakeId-1',
+          item_id: undefined,
           namespace_type: 'agnostic',
         },
       });
       expect(fakeHttpServices.delete).toHaveBeenNthCalledWith(2, '/api/exception_lists/items', {
         query: {
-          id: 'fakeId-2',
+          id: undefined,
+          item_id: 'fakeId-2',
           namespace_type: 'agnostic',
         },
       });
@@ -90,7 +92,7 @@ describe('Bulk delete artifact hook', () => {
 
     await act(async () => {
       try {
-        await result.mutateAsync(['fakeId-1', 'fakeId-2']);
+        await result.mutateAsync([{ id: 'fakeId-1' }, { id: 'fakeId-2' }]);
       } catch (err) {
         expect(err).toBe(error);
         expect(fakeHttpServices.delete).toHaveBeenCalledTimes(2);

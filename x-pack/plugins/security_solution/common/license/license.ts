@@ -6,7 +6,7 @@
  */
 
 import { Observable, Subscription } from 'rxjs';
-import { ILicense, LicenseType } from '../../../licensing/common/types';
+import { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
 
 // Generic license service class that works with the license observable
 // Both server and client plugins instancates a singleton version of this class

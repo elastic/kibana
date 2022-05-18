@@ -6,7 +6,7 @@
  */
 
 import { has, isEmpty } from 'lodash/fp';
-import { Unit } from '@elastic/datemath';
+import { Unit } from '@kbn/datemath';
 import moment from 'moment';
 import deepmerge from 'deepmerge';
 

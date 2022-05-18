@@ -6,8 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { DataPublicPluginStart } from '../../../data/public';
+import { Observable } from 'rxjs';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { ControlInput } from '../types';
 
 export interface ControlsDataService {
-  autocomplete: DataPublicPluginStart['autocomplete'];
+  fetchFieldRange: (
+    dataView: DataView,
+    fieldName: string,
+    input: ControlInput
+  ) => Promise<{ min: number; max: number }>;
+  fetchFieldRange$: (
+    dataView: DataView,
+    fieldName: string,
+    input: ControlInput
+  ) => Observable<{ min?: number; max?: number }>;
+  getDataView: DataPublicPluginStart['dataViews']['get'];
+  getDataView$: (id: string) => Observable<DataView>;
+  query: DataPublicPluginStart['query'];
+  searchSource: DataPublicPluginStart['search']['searchSource'];
+  timefilter: DataPublicPluginStart['query']['timefilter']['timefilter'];
 }

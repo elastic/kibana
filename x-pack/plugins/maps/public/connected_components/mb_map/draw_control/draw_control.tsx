@@ -20,15 +20,6 @@ import { DRAW_SHAPE } from '../../../../common/constants';
 import { DrawCircle, DRAW_CIRCLE_RADIUS_LABEL_STYLE } from './draw_circle';
 import { DrawTooltip } from './draw_tooltip';
 
-const mbModeEquivalencies = new Map<string, DRAW_SHAPE>([
-  ['simple_select', DRAW_SHAPE.SIMPLE_SELECT],
-  ['draw_rectangle', DRAW_SHAPE.BOUNDS],
-  ['draw_circle', DRAW_SHAPE.DISTANCE],
-  ['draw_polygon', DRAW_SHAPE.POLYGON],
-  ['draw_line_string', DRAW_SHAPE.LINE],
-  ['draw_point', DRAW_SHAPE.POINT],
-]);
-
 const DRAW_RECTANGLE = 'draw_rectangle';
 const DRAW_CIRCLE = 'draw_circle';
 const mbDrawModes = MapboxDraw.modes;
@@ -41,11 +32,11 @@ export interface Props {
   onClick?: (event: MapMouseEvent, drawControl?: MapboxDraw) => void;
   mbMap: MbMap;
   enable: boolean;
-  updateEditShape: (shapeToDraw: DRAW_SHAPE) => void;
 }
 
 export class DrawControl extends Component<Props> {
   private _isMounted = false;
+  private _isMapRemoved = false;
   private _mbDrawControlAdded = false;
   private _mbDrawControl = new MapboxDraw({
     displayControlsDefault: false,
@@ -59,13 +50,19 @@ export class DrawControl extends Component<Props> {
 
   componentDidMount() {
     this._isMounted = true;
+    this.props.mbMap.on('remove', this._setIsMapRemoved);
     this._syncDrawControl();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
+    this.props.mbMap.off('remove', this._setIsMapRemoved);
     this._removeDrawControl();
   }
+
+  _setIsMapRemoved = () => {
+    this._isMapRemoved = true;
+  };
 
   _onDraw = (event: { features: Feature[] }) => {
     this.props.onDraw(event, this._mbDrawControl);
@@ -91,21 +88,13 @@ export class DrawControl extends Component<Props> {
     }
   }, 0);
 
-  _onModeChange = ({ mode }: { mode: string }) => {
-    if (mbModeEquivalencies.has(mode)) {
-      this.props.updateEditShape(mbModeEquivalencies.get(mode)!);
-    }
-  };
-
   _removeDrawControl() {
     // Do not remove draw control after mbMap.remove is called, causes execeptions and mbMap.remove cleans up all map resources.
-    const isMapRemoved = !this.props.mbMap.loaded();
-    if (!this._mbDrawControlAdded || isMapRemoved) {
+    if (!this._mbDrawControlAdded || this._isMapRemoved) {
       return;
     }
 
     this.props.mbMap.getCanvas().style.cursor = '';
-    this.props.mbMap.off('draw.modechange', this._onModeChange);
     this.props.mbMap.off('draw.create', this._onDraw);
     if (this.props.onClick) {
       this.props.mbMap.off('click', this._onClick);
@@ -118,7 +107,6 @@ export class DrawControl extends Component<Props> {
     if (!this._mbDrawControlAdded) {
       this.props.mbMap.addControl(this._mbDrawControl);
       this._mbDrawControlAdded = true;
-      this.props.mbMap.on('draw.modechange', this._onModeChange);
       this.props.mbMap.on('draw.create', this._onDraw);
 
       if (this.props.onClick) {
@@ -144,7 +132,13 @@ export class DrawControl extends Component<Props> {
       this._mbDrawControl.changeMode(DRAW_POINT);
     } else if (this.props.drawShape === DRAW_SHAPE.DELETE) {
       this._mbDrawControl.changeMode(SIMPLE_SELECT);
-    } else {
+    } else if (this.props.drawShape === DRAW_SHAPE.WAIT) {
+      this.props.mbMap.getCanvas().style.cursor = 'wait';
+      this._mbDrawControl.changeMode(SIMPLE_SELECT);
+    } else if (
+      (drawMode !== SIMPLE_SELECT && !this.props.drawShape) ||
+      this.props.drawShape === DRAW_SHAPE.SIMPLE_SELECT
+    ) {
       this._mbDrawControl.changeMode(SIMPLE_SELECT);
     }
   }

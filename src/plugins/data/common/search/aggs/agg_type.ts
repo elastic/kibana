@@ -9,12 +9,13 @@
 import { constant, noop, identity } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { ISearchSource } from 'src/plugins/data/public';
-import { DatatableColumnType } from 'src/plugins/expressions/common';
-import type { RequestAdapter } from 'src/plugins/inspector/common';
-import type { SerializedFieldFormat } from 'src/plugins/field_formats/common';
+import { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ISearchSource } from '../../../public';
 import { initParams } from './agg_params';
 import { AggConfig } from './agg_config';
 import { IAggConfigs } from './agg_configs';

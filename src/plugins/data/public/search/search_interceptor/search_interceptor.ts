@@ -22,14 +22,20 @@ import {
 } from 'rxjs/operators';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import {
-  CoreSetup,
+  ApplicationStart,
   CoreStart,
+  DocLinksStart,
+  HttpSetup,
   IHttpFetchError,
+  IUiSettingsClient,
   ThemeServiceSetup,
   ToastsSetup,
-} from 'kibana/public';
+  ExecutionContextSetup,
+} from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '../../../../bfetch/public';
+import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '@kbn/bfetch-plugin/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { AbortError, KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   IAsyncSearchOptions,
@@ -51,8 +57,6 @@ import {
   TimeoutErrorMode,
   SearchSessionIncompleteWarning,
 } from '../errors';
-import { toMountPoint } from '../../../../kibana_react/public';
-import { AbortError, KibanaServerError } from '../../../../kibana_utils/public';
 import { ISessionService, SearchSessionState } from '../session';
 import { SearchResponseCache } from './search_response_cache';
 import { createRequestHash } from './utils';
@@ -60,8 +64,9 @@ import { SearchAbortController } from './search_abort_controller';
 
 export interface SearchInterceptorDeps {
   bfetch: BfetchPublicSetup;
-  http: CoreSetup['http'];
-  uiSettings: CoreSetup['uiSettings'];
+  http: HttpSetup;
+  executionContext: ExecutionContextSetup;
+  uiSettings: IUiSettingsClient;
   startServices: Promise<[CoreStart, any, unknown]>;
   toasts: ToastsSetup;
   usageCollector?: SearchUsageCollector;
@@ -90,8 +95,8 @@ export class SearchInterceptor {
   /**
    * @internal
    */
-  private application!: CoreStart['application'];
-  private docLinks!: CoreStart['docLinks'];
+  private application!: ApplicationStart;
+  private docLinks!: DocLinksStart;
   private batchedFetch!: BatchedFunc<
     { request: IKibanaSearchRequest; options: ISearchOptionsSerializable },
     IKibanaSearchResponse
@@ -297,10 +302,14 @@ export class SearchInterceptor {
           }
         }) as Promise<IKibanaSearchResponse>;
     } else {
+      const { executionContext, ...rest } = options || {};
       return this.batchedFetch(
         {
           request,
-          options: this.getSerializableOptions(options),
+          options: this.getSerializableOptions({
+            ...rest,
+            executionContext: this.deps.executionContext.withGlobalContext(executionContext),
+          }),
         },
         abortSignal
       );

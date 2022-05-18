@@ -7,10 +7,10 @@
 
 import expect from '@kbn/expect';
 
+import { DataStream } from '@kbn/index-management-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 // @ts-ignore
 import { API_BASE_PATH } from './constants';
-import { DataStream } from '../../../../../plugins/index_management/common';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

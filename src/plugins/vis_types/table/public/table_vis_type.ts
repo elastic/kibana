@@ -8,8 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { AggGroupNames } from '../../../data/public';
-import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '../../../visualizations/public';
+import { AggGroupNames } from '@kbn/data-plugin/public';
+import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 import { TableVisParams, VIS_TYPE_TABLE } from '../common';
 import { TableOptions } from './components/table_vis_options_lazy';
 import { toExpressionAst } from './to_ast';

@@ -5,65 +5,21 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from 'src/core/server';
+import { SavedObjectReference } from '@kbn/core/server';
 import {
   InfraSavedSourceConfiguration,
   InfraSourceConfiguration,
 } from '../../../common/source_configuration/source_configuration';
+import {
+  SavedObjectAttributesWithReferences,
+  extractSavedObjectReferences as genericExtractSavedObjectReferences,
+  resolveSavedObjectReferences as genericResolveSavedObjectReferences,
+} from '../../saved_objects/references';
 import { SavedObjectReferenceResolutionError } from './errors';
 
 export const logIndexPatternReferenceName = 'log_index_pattern_0';
 export const inventoryDefaultViewReferenceName = 'inventory-saved-view-0';
 export const metricsExplorerDefaultViewReferenceName = 'metrics-explorer-saved-view-0';
-
-interface SavedObjectAttributesWithReferences<SavedObjectAttributes> {
-  attributes: SavedObjectAttributes;
-  references: SavedObjectReference[];
-}
-
-/**
- * Rewrites a source configuration such that well-known saved object references
- * are extracted in the `references` array and replaced by the appropriate
- * name. This is the inverse operation to `resolveSavedObjectReferences`.
- */
-export const extractSavedObjectReferences = (
-  sourceConfiguration: InfraSourceConfiguration
-): SavedObjectAttributesWithReferences<InfraSourceConfiguration> =>
-  [
-    extractLogIndicesSavedObjectReferences,
-    extractInventorySavedViewReferences,
-    extractMetricsExplorerSavedViewReferences,
-  ].reduce<SavedObjectAttributesWithReferences<InfraSourceConfiguration>>(
-    ({ attributes: accumulatedAttributes, references: accumulatedReferences }, extract) => {
-      const { attributes, references } = extract(accumulatedAttributes);
-      return {
-        attributes,
-        references: [...accumulatedReferences, ...references],
-      };
-    },
-    {
-      attributes: sourceConfiguration,
-      references: [],
-    }
-  );
-
-/**
- * Rewrites a source configuration such that well-known saved object references
- * are resolved from the `references` argument and replaced by the real saved
- * object ids. This is the inverse operation to `extractSavedObjectReferences`.
- */
-export const resolveSavedObjectReferences = (
-  attributes: InfraSavedSourceConfiguration,
-  references: SavedObjectReference[]
-): InfraSavedSourceConfiguration =>
-  [
-    resolveLogIndicesSavedObjectReferences,
-    resolveInventoryViewSavedObjectReferences,
-    resolveMetricsExplorerSavedObjectReferences,
-  ].reduce<InfraSavedSourceConfiguration>(
-    (accumulatedAttributes, resolve) => resolve(accumulatedAttributes, references),
-    attributes
-  );
 
 const extractLogIndicesSavedObjectReferences = (
   sourceConfiguration: InfraSourceConfiguration
@@ -227,3 +183,25 @@ const resolveMetricsExplorerSavedObjectReferences = (
     return attributes;
   }
 };
+
+/**
+ * Rewrites a source configuration such that well-known saved object references
+ * are extracted in the `references` array and replaced by the appropriate
+ * name. This is the inverse operation to `resolveSavedObjectReferences`.
+ */
+export const extractSavedObjectReferences = genericExtractSavedObjectReferences([
+  extractLogIndicesSavedObjectReferences,
+  extractInventorySavedViewReferences,
+  extractMetricsExplorerSavedViewReferences,
+]);
+
+/**
+ * Rewrites a source configuration such that well-known saved object references
+ * are resolved from the `references` argument and replaced by the real saved
+ * object ids. This is the inverse operation to `extractSavedObjectReferences`.
+ */
+export const resolveSavedObjectReferences = genericResolveSavedObjectReferences([
+  resolveLogIndicesSavedObjectReferences,
+  resolveInventoryViewSavedObjectReferences,
+  resolveMetricsExplorerSavedObjectReferences,
+]);

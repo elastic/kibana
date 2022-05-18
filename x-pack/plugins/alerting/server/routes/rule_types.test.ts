@@ -6,7 +6,7 @@
  */
 
 import { ruleTypesRoute } from './rule_types';
-import { httpServiceMock } from 'src/core/server/mocks';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
@@ -17,7 +17,7 @@ import { AsApiContract } from './lib';
 
 const rulesClient = rulesClientMock.create();
 
-jest.mock('../lib/license_api_access.ts', () => ({
+jest.mock('../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
@@ -58,7 +58,6 @@ describe('ruleTypesRoute', () => {
         },
         producer: 'test',
         enabledInLicense: true,
-        minimumScheduleInterval: '1m',
         defaultScheduleInterval: '10m',
         doesSetRecoveryContext: false,
       } as RegistryAlertTypeWithAuth,
@@ -77,7 +76,6 @@ describe('ruleTypesRoute', () => {
         default_schedule_interval: '10m',
         does_set_recovery_context: false,
         minimum_license_required: 'basic',
-        minimum_schedule_interval: '1m',
         is_exportable: true,
         rule_task_timeout: '10m',
         recovery_action_group: RecoveredActionGroup,
@@ -116,7 +114,6 @@ describe('ruleTypesRoute', () => {
             "id": "1",
             "is_exportable": true,
             "minimum_license_required": "basic",
-            "minimum_schedule_interval": "1m",
             "name": "name",
             "producer": "test",
             "recovery_action_group": Object {

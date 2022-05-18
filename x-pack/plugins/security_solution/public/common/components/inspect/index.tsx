@@ -6,17 +6,14 @@
  */
 
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
-import { omit } from 'lodash/fp';
-import React, { useMemo, useCallback } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import React from 'react';
 
-import { inputsSelectors, State } from '../../store';
 import { InputsModelId } from '../../store/inputs/constants';
-import { inputsActions } from '../../store/inputs';
 
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 
 import { ModalInspectQuery } from './modal';
+import { useInspect } from './use_inspect';
 import * as i18n from './translations';
 
 export const BUTTON_CLASS = 'inspectButtonComponent';
@@ -35,84 +32,45 @@ export const InspectButtonContainer: React.FC<InspectButtonContainerProps> = ({
   </HoverVisibilityContainer>
 );
 
-interface OwnProps {
+interface InspectButtonProps {
   compact?: boolean;
-  queryId: string;
   inputId?: InputsModelId;
   inspectIndex?: number;
   isDisabled?: boolean;
-  onCloseInspect?: () => void;
-  title: string | React.ReactElement | React.ReactNode;
   multiple?: boolean;
+  onCloseInspect?: () => void;
+  queryId: string;
+  title: string | React.ReactElement | React.ReactNode;
 }
-
-type InspectButtonProps = OwnProps & PropsFromRedux;
 
 const InspectButtonComponent: React.FC<InspectButtonProps> = ({
   compact = false,
   inputId = 'global',
-  inspect,
   inspectIndex = 0,
   isDisabled,
-  isInspected,
-  loading,
   multiple = false, // If multiple = true we ignore the inspectIndex and pass all requests and responses to the inspect modal
   onCloseInspect,
   queryId = '',
-  selectedInspectIndex,
-  setIsInspected,
   title = '',
 }) => {
-  const handleClick = useCallback(() => {
-    setIsInspected({
-      id: queryId,
-      inputId,
-      isInspected: true,
-      selectedInspectIndex: inspectIndex,
-    });
-  }, [setIsInspected, queryId, inputId, inspectIndex]);
-
-  const handleCloseModal = useCallback(() => {
-    if (onCloseInspect != null) {
-      onCloseInspect();
-    }
-    setIsInspected({
-      id: queryId,
-      inputId,
-      isInspected: false,
-      selectedInspectIndex: inspectIndex,
-    });
-  }, [onCloseInspect, setIsInspected, queryId, inputId, inspectIndex]);
-
-  let request: string | null = null;
-  let additionalRequests: string[] | null = null;
-  if (inspect != null && inspect.dsl.length > 0) {
-    if (multiple) {
-      [request, ...additionalRequests] = inspect.dsl;
-    } else {
-      request = inspect.dsl[inspectIndex];
-    }
-  }
-
-  let response: string | null = null;
-  let additionalResponses: string[] | null = null;
-  if (inspect != null && inspect.response.length > 0) {
-    if (multiple) {
-      [response, ...additionalResponses] = inspect.response;
-    } else {
-      response = inspect.response[inspectIndex];
-    }
-  }
-
-  const isShowingModal = useMemo(
-    () => !loading && selectedInspectIndex === inspectIndex && isInspected,
-    [inspectIndex, isInspected, loading, selectedInspectIndex]
-  );
-
-  const isButtonDisabled = useMemo(
-    () => loading || isDisabled || request == null || response == null,
-    [isDisabled, loading, request, response]
-  );
+  const {
+    additionalRequests,
+    additionalResponses,
+    handleClick,
+    handleCloseModal,
+    isButtonDisabled,
+    isShowingModal,
+    loading,
+    request,
+    response,
+  } = useInspect({
+    inputId,
+    inspectIndex,
+    isDisabled,
+    multiple,
+    onCloseInspect,
+    queryId,
+  });
 
   return (
     <>
@@ -159,25 +117,5 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
   );
 };
 
-const makeMapStateToProps = () => {
-  const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
-  const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
-  const mapStateToProps = (state: State, { inputId = 'global', queryId }: OwnProps) => {
-    const props =
-      inputId === 'global' ? getGlobalQuery(state, queryId) : getTimelineQuery(state, queryId);
-    // refetch caused unnecessary component rerender and it was even not used
-    const propsWithoutRefetch = omit('refetch', props);
-    return propsWithoutRefetch;
-  };
-  return mapStateToProps;
-};
-
-const mapDispatchToProps = {
-  setIsInspected: inputsActions.setInspectionParameter,
-};
-
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const InspectButton = connector(React.memo(InspectButtonComponent));
+InspectButtonComponent.displayName = 'InspectButtonComponent';
+export const InspectButton = React.memo(InspectButtonComponent);

@@ -22,6 +22,7 @@ import {
   MAP_READY,
   MAP_DESTROYED,
   SET_QUERY,
+  UPDATE_LAYER,
   UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE,
   SET_LAYER_STYLE_META,
@@ -53,6 +54,7 @@ import {
   getLayerIndex,
   removeTrackedLayerState,
   rollbackTrackedLayerState,
+  setLayer,
   trackCurrentLayerState,
   updateLayerInList,
   updateLayerSourceDescriptorProp,
@@ -249,13 +251,11 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
       return updateLayerSourceDescriptorProp(state, action.layerId, action.propName, action.value);
     case SET_JOINS:
       const layerDescriptor = state.layerList.find(
-        (descriptor) => descriptor.id === action.layer.getId()
+        (descriptor) => descriptor.id === action.layerId
       );
       if (layerDescriptor) {
         const newLayerDescriptor = { ...layerDescriptor, joins: action.joins.slice() };
-        const index = state.layerList.findIndex(
-          (descriptor) => descriptor.id === action.layer.getId()
-        );
+        const index = state.layerList.findIndex((descriptor) => descriptor.id === action.layerId);
         const newLayerList = state.layerList.slice();
         newLayerList[index] = newLayerDescriptor;
         return { ...state, layerList: newLayerList };
@@ -270,6 +270,11 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
       return {
         ...state,
         layerList: [...state.layerList.filter(({ id }) => id !== action.id)],
+      };
+    case UPDATE_LAYER:
+      return {
+        ...state,
+        layerList: setLayer(state.layerList, action.layer),
       };
     case ADD_WAITING_FOR_MAP_READY_LAYER:
       return {

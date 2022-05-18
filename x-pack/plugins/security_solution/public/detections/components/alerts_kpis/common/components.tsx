@@ -12,17 +12,23 @@ import { PANEL_HEIGHT, MOBILE_PANEL_HEIGHT } from './config';
 import { useStackByFields } from './hooks';
 import * as i18n from './translations';
 
-export const KpiPanel = styled(EuiPanel)<{ height?: number }>`
+export const KpiPanel = styled(EuiPanel)<{ height?: number; $toggleStatus: boolean }>`
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: hidden;
-
-  height: ${MOBILE_PANEL_HEIGHT}px;
-
   @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.m}) {
+    ${({ $toggleStatus }) =>
+      $toggleStatus &&
+      `
     height: ${PANEL_HEIGHT}px;
+  `}
   }
+  ${({ $toggleStatus }) =>
+    $toggleStatus &&
+    `
+    height: ${MOBILE_PANEL_HEIGHT}px;
+  `}
 `;
 interface StackedBySelectProps {
   selected: string;
@@ -58,6 +64,7 @@ export const StackByComboBox: React.FC<StackedBySelectProps> = ({ selected, onSe
         placeholder={i18n.STACK_BY_PLACEHOLDER}
         prepend={i18n.STACK_BY_LABEL}
         singleSelection={singleSelection}
+        isClearable={false}
         sortMatchesBy="startsWith"
         options={stackOptions}
         selectedOptions={selectedOptions}

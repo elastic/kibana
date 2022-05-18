@@ -61,7 +61,6 @@ exports[`Storyshots components/Sidebar/SidebarHeader with layer controls 1`] = `
             <button
               aria-label="Move element to top layer"
               className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
-              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -73,7 +72,9 @@ exports[`Storyshots components/Sidebar/SidebarHeader with layer controls 1`] = `
                 color="inherit"
                 data-euiicon-type="sortUp"
                 size="m"
-              />
+              >
+                
+              </span>
             </button>
           </span>
         </div>
@@ -88,7 +89,6 @@ exports[`Storyshots components/Sidebar/SidebarHeader with layer controls 1`] = `
             <button
               aria-label="Move element up one layer"
               className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
-              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -100,7 +100,9 @@ exports[`Storyshots components/Sidebar/SidebarHeader with layer controls 1`] = `
                 color="inherit"
                 data-euiicon-type="arrowUp"
                 size="m"
-              />
+              >
+                
+              </span>
             </button>
           </span>
         </div>
@@ -115,7 +117,6 @@ exports[`Storyshots components/Sidebar/SidebarHeader with layer controls 1`] = `
             <button
               aria-label="Move element down one layer"
               className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
-              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -127,7 +128,9 @@ exports[`Storyshots components/Sidebar/SidebarHeader with layer controls 1`] = `
                 color="inherit"
                 data-euiicon-type="arrowDown"
                 size="m"
-              />
+              >
+                
+              </span>
             </button>
           </span>
         </div>
@@ -142,7 +145,6 @@ exports[`Storyshots components/Sidebar/SidebarHeader with layer controls 1`] = `
             <button
               aria-label="Move element to bottom layer"
               className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
-              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -154,7 +156,9 @@ exports[`Storyshots components/Sidebar/SidebarHeader with layer controls 1`] = `
                 color="inherit"
                 data-euiicon-type="sortDown"
                 size="m"
-              />
+              >
+                
+              </span>
             </button>
           </span>
         </div>

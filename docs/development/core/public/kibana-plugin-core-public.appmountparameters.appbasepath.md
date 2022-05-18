@@ -6,7 +6,7 @@
 
 > Warning: This API is now obsolete.
 > 
-> Use [AppMountParameters.history](./kibana-plugin-core-public.appmountparameters.history.md) instead.
+> Use [AppMountParameters.history](./kibana-plugin-core-public.appmountparameters.history.md) instead.  8.8.0
 > 
 
 The route path for configuring navigation to the application. This string should not include the base path from HTTP.

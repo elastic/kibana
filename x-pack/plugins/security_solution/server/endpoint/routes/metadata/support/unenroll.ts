@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { AgentClient } from '../../../../../../fleet/server';
-import { Agent } from '../../../../../../fleet/common/types/models';
+import type { AgentClient } from '@kbn/fleet-plugin/server';
+import { Agent } from '@kbn/fleet-plugin/common/types/models';
 
 export async function findAllUnenrolledAgentIds(
   agentClient: AgentClient,

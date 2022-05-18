@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ChromeBreadcrumb } from 'kibana/public';
+import { ChromeBreadcrumb } from '@kbn/core/public';
 import { useEffect } from 'react';
+import { useLinkProps } from '@kbn/observability-plugin/public';
 import { observabilityTitle } from '../translations';
 import { useKibanaContextForPlugin } from './use_kibana';
-import { useLinkProps } from '../../../observability/public';
 
 type AppId = 'logs' | 'metrics';
 

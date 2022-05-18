@@ -12,11 +12,14 @@ import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eu
 import * as i18n from '../translations';
 import { Case } from '../../../../common/ui/types';
 import { CreateCaseForm } from '../form';
-import { UsePostComment } from '../../../containers/use_post_comment';
+import { UseCreateAttachments } from '../../../containers/use_create_attachments';
 import { CaseAttachments } from '../../../types';
 
 export interface CreateCaseFlyoutProps {
-  afterCaseCreated?: (theCase: Case, postComment: UsePostComment['postComment']) => Promise<void>;
+  afterCaseCreated?: (
+    theCase: Case,
+    createAttachments: UseCreateAttachments['createAttachments']
+  ) => Promise<void>;
   onClose?: () => void;
   onSuccess?: (theCase: Case) => Promise<void>;
   attachments?: CaseAttachments;

@@ -1,6 +1,7 @@
 [role="xpack"]
 [[reporting-troubleshooting]]
 == Reporting troubleshooting
+
 ++++
 <titleabbrev>Troubleshooting</titleabbrev>
 ++++

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { SavedObjectReference } from 'src/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { SavedObjectReference } from '@kbn/core/server';
 import {
   EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME,
   getSavedObjectReferenceForExceptionsList,

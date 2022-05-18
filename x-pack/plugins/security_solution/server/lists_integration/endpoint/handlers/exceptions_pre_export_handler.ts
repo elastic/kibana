@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { ExceptionsListPreExportServerExtension } from '@kbn/lists-plugin/server';
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { ExceptionsListPreExportServerExtension } from '../../../../../lists/server';
 import {
   TrustedAppValidator,
   HostIsolationExceptionsValidator,
   EventFilterValidator,
+  BlocklistValidator,
 } from '../validators';
 
 type ValidatorCallback = ExceptionsListPreExportServerExtension['callback'];
@@ -38,6 +39,7 @@ export const getExceptionsPreExportHandler = (
       await new TrustedAppValidator(endpointAppContextService, request).validatePreExport();
       return data;
     }
+
     // Host Isolation Exceptions validations
     if (HostIsolationExceptionsValidator.isHostIsolationException({ listId })) {
       await new HostIsolationExceptionsValidator(
@@ -50,6 +52,12 @@ export const getExceptionsPreExportHandler = (
     // Event Filter validations
     if (EventFilterValidator.isEventFilter({ listId })) {
       await new EventFilterValidator(endpointAppContextService, request).validatePreExport();
+      return data;
+    }
+
+    // Validate Blocklists
+    if (BlocklistValidator.isBlocklist({ listId })) {
+      await new BlocklistValidator(endpointAppContextService, request).validatePreExport();
       return data;
     }
 

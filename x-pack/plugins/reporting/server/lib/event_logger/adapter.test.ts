@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { LogMeta } from 'kibana/server';
-import { createMockLevelLogger } from '../../test_helpers';
+import { LogMeta } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { EcsLogAdapter } from './adapter';
 
 describe('EcsLogAdapter', () => {
-  const logger = createMockLevelLogger();
+  const logger = loggingSystemMock.createLogger();
   beforeAll(() => {
     jest
       .spyOn(global.Date, 'now')
@@ -28,7 +28,7 @@ describe('EcsLogAdapter', () => {
     const event = { kibana: { reporting: { wins: 5000 } } } as object & LogMeta; // an object that extends LogMeta
     eventLogger.logEvent('hello world', event);
 
-    expect(logger.debug).toBeCalledWith('hello world', ['events'], {
+    expect(logger.debug).toBeCalledWith('hello world', {
       event: {
         duration: undefined,
         end: undefined,
@@ -50,7 +50,7 @@ describe('EcsLogAdapter', () => {
     const event = { kibana: { reporting: { wins: 9000 } } } as object & LogMeta; // an object that extends LogMeta
     eventLogger.logEvent('hello duration', event);
 
-    expect(logger.debug).toBeCalledWith('hello duration', ['events'], {
+    expect(logger.debug).toBeCalledWith('hello duration', {
       event: {
         duration: 120000000000,
         end: '2021-04-12T16:02:00.000Z',

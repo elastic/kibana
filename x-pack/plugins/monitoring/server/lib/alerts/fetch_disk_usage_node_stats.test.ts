@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchDiskUsageNodeStats } from './fetch_disk_usage_node_stats';
 
 jest.mock('../../static_globals', () => ({

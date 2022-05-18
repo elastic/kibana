@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { indexPatterns } from '../../../../../../src/plugins/data/public';
+import { indexPatterns } from '@kbn/data-plugin/public';
 import './mocks';
 import { setupEnvironment, pageHelpers, nextTick, delay } from './helpers';
 import { RemoteClustersFormField } from '../../app/components';
@@ -14,15 +14,13 @@ const { setup } = pageHelpers.followerIndexAdd;
 const { setup: setupAutoFollowPatternAdd } = pageHelpers.autoFollowPatternAdd;
 
 describe('Create Follower index', () => {
-  let server;
+  let httpSetup;
   let httpRequestsMockHelpers;
 
   beforeAll(() => {
-    ({ server, httpRequestsMockHelpers } = setupEnvironment());
-  });
-
-  afterAll(() => {
-    server.restore();
+    const mockEnvironment = setupEnvironment();
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    httpSetup = mockEnvironment.httpSetup;
   });
 
   beforeEach(() => {
@@ -165,15 +163,12 @@ describe('Create Follower index', () => {
         test('should make a request to check if the index name is available in ES', async () => {
           httpRequestsMockHelpers.setGetClusterIndicesResponse([]);
 
-          // Keep track of the request count made until this point
-          const totalRequests = server.requests.length;
-
           form.setInputValue('followerIndexInput', 'index-name');
           await delay(550); // we need to wait as there is a debounce of 500ms on the http validation
 
-          expect(server.requests.length).toBe(totalRequests + 1);
-          expect(server.requests[server.requests.length - 1].url).toBe(
-            '/api/index_management/indices'
+          expect(httpSetup.get).toHaveBeenLastCalledWith(
+            `/api/index_management/indices`,
+            expect.anything()
           );
         });
 

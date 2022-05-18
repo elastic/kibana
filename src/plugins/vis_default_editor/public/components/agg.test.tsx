@@ -10,8 +10,8 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 
-import { IndexPattern, IAggType, AggGroupNames } from 'src/plugins/data/public';
-import type { Schema } from '../../../visualizations/public';
+import { IndexPattern, IAggType, AggGroupNames } from '@kbn/data-plugin/public';
+import type { Schema } from '@kbn/visualizations-plugin/public';
 
 import { DefaultEditorAgg, DefaultEditorAggProps } from './agg';
 import { DefaultEditorAggParams } from './agg_params';
@@ -171,9 +171,9 @@ describe('DefaultEditorAgg component', () => {
 
     it('should not have actions', () => {
       const comp = shallow(<DefaultEditorAgg {...defaultProps} />);
-      const actions = shallow(comp.prop('extraAction'));
+      const actions = comp.prop('extraAction');
 
-      expect(actions.children().exists()).toBeFalsy();
+      expect(actions).toBeNull();
     });
 
     it('should have disable and remove actions', () => {

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getHistogramsForFields } from '../../ml/server';
+export { getHistogramsForFields } from '@kbn/ml-plugin/server';

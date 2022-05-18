@@ -15,7 +15,7 @@ import { EuiBasicTable, EuiLink, EuiBadge, EuiEmptyPrompt } from '@elastic/eui';
 
 import { mountWithIntl } from '../../../../../test_helpers';
 
-import { QueryClicksTable } from './';
+import { QueryClicksTable } from '.';
 
 describe('QueryClicksTable', () => {
   const items = [

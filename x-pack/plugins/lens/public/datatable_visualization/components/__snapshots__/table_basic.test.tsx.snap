@@ -126,7 +126,15 @@ exports[`DatatableComponent it renders actions column when there are row actions
             },
             "cellActions": undefined,
             "display": <div
-              className="lnsTableCell--left"
+              css={
+                Object {
+                  "map": undefined,
+                  "name": "13brihr",
+                  "next": undefined,
+                  "styles": "text-align:left;",
+                  "toString": [Function],
+                }
+              }
             >
               a
             </div>,
@@ -167,7 +175,15 @@ exports[`DatatableComponent it renders actions column when there are row actions
             },
             "cellActions": undefined,
             "display": <div
-              className="lnsTableCell--left"
+              css={
+                Object {
+                  "map": undefined,
+                  "name": "13brihr",
+                  "next": undefined,
+                  "styles": "text-align:left;",
+                  "toString": [Function],
+                }
+              }
             >
               b
             </div>,
@@ -208,7 +224,15 @@ exports[`DatatableComponent it renders actions column when there are row actions
             },
             "cellActions": undefined,
             "display": <div
-              className="lnsTableCell--right"
+              css={
+                Object {
+                  "map": undefined,
+                  "name": "s2uf1z",
+                  "next": undefined,
+                  "styles": "text-align:right;",
+                  "toString": [Function],
+                }
+              }
             >
               c
             </div>,
@@ -227,6 +251,13 @@ exports[`DatatableComponent it renders actions column when there are row actions
       onColumnResize={[Function]}
       renderCellValue={[Function]}
       rowCount={1}
+      rowHeightsOptions={
+        Object {
+          "defaultHeight": Object {
+            "lineCount": 1,
+          },
+        }
+      }
       sorting={
         Object {
           "columns": Array [],
@@ -371,7 +402,15 @@ exports[`DatatableComponent it renders the title and value 1`] = `
             },
             "cellActions": undefined,
             "display": <div
-              className="lnsTableCell--left"
+              css={
+                Object {
+                  "map": undefined,
+                  "name": "13brihr",
+                  "next": undefined,
+                  "styles": "text-align:left;",
+                  "toString": [Function],
+                }
+              }
             >
               a
             </div>,
@@ -412,7 +451,15 @@ exports[`DatatableComponent it renders the title and value 1`] = `
             },
             "cellActions": undefined,
             "display": <div
-              className="lnsTableCell--left"
+              css={
+                Object {
+                  "map": undefined,
+                  "name": "13brihr",
+                  "next": undefined,
+                  "styles": "text-align:left;",
+                  "toString": [Function],
+                }
+              }
             >
               b
             </div>,
@@ -453,7 +500,15 @@ exports[`DatatableComponent it renders the title and value 1`] = `
             },
             "cellActions": undefined,
             "display": <div
-              className="lnsTableCell--right"
+              css={
+                Object {
+                  "map": undefined,
+                  "name": "s2uf1z",
+                  "next": undefined,
+                  "styles": "text-align:right;",
+                  "toString": [Function],
+                }
+              }
             >
               c
             </div>,
@@ -472,6 +527,13 @@ exports[`DatatableComponent it renders the title and value 1`] = `
       onColumnResize={[Function]}
       renderCellValue={[Function]}
       rowCount={1}
+      rowHeightsOptions={
+        Object {
+          "defaultHeight": Object {
+            "lineCount": 1,
+          },
+        }
+      }
       sorting={
         Object {
           "columns": Array [],
@@ -611,7 +673,15 @@ exports[`DatatableComponent it should render hide, reset, and sort actions on he
             },
             "cellActions": undefined,
             "display": <div
-              className="lnsTableCell--left"
+              css={
+                Object {
+                  "map": undefined,
+                  "name": "13brihr",
+                  "next": undefined,
+                  "styles": "text-align:left;",
+                  "toString": [Function],
+                }
+              }
             >
               a
             </div>,
@@ -652,7 +722,15 @@ exports[`DatatableComponent it should render hide, reset, and sort actions on he
             },
             "cellActions": undefined,
             "display": <div
-              className="lnsTableCell--left"
+              css={
+                Object {
+                  "map": undefined,
+                  "name": "13brihr",
+                  "next": undefined,
+                  "styles": "text-align:left;",
+                  "toString": [Function],
+                }
+              }
             >
               b
             </div>,
@@ -693,7 +771,15 @@ exports[`DatatableComponent it should render hide, reset, and sort actions on he
             },
             "cellActions": undefined,
             "display": <div
-              className="lnsTableCell--right"
+              css={
+                Object {
+                  "map": undefined,
+                  "name": "s2uf1z",
+                  "next": undefined,
+                  "styles": "text-align:right;",
+                  "toString": [Function],
+                }
+              }
             >
               c
             </div>,
@@ -712,6 +798,13 @@ exports[`DatatableComponent it should render hide, reset, and sort actions on he
       onColumnResize={[Function]}
       renderCellValue={[Function]}
       rowCount={1}
+      rowHeightsOptions={
+        Object {
+          "defaultHeight": Object {
+            "lineCount": 1,
+          },
+        }
+      }
       sorting={
         Object {
           "columns": Array [],

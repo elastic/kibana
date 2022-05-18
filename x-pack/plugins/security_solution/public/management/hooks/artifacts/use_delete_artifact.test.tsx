@@ -6,15 +6,15 @@
  */
 
 import { useDeleteArtifact } from './use_delete_artifact';
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 import {
   getFakeListId,
   getFakeListDefinition,
   getFakeHttpService,
   renderMutation,
-} from './test_utils';
-import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+} from '../test_utils';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { act } from '@testing-library/react-hooks';
 
 describe('Delete artifact hook', () => {
@@ -49,7 +49,7 @@ describe('Delete artifact hook', () => {
     expect(fakeHttpServices.delete).toHaveBeenCalledTimes(0);
 
     await act(async () => {
-      const res = await result.mutateAsync('fakeId');
+      const res = await result.mutateAsync({ id: 'fakeId' });
       expect(res).toBe(exceptionItem);
       expect(onSuccessMock).toHaveBeenCalledTimes(1);
       expect(fakeHttpServices.delete).toHaveBeenCalledTimes(1);
@@ -82,7 +82,7 @@ describe('Delete artifact hook', () => {
 
     await act(async () => {
       try {
-        await result.mutateAsync('fakeId');
+        await result.mutateAsync({ itemId: 'fakeId' });
       } catch (err) {
         expect(err).toBe(error);
         expect(fakeHttpServices.delete).toHaveBeenCalledTimes(1);

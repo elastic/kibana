@@ -10,13 +10,12 @@ import seedrandom from 'seedrandom';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { KbnClient } from '@kbn/test';
 import { AxiosResponse } from 'axios';
-import { merge } from 'lodash';
-import { EndpointDocGenerator, TreeOptions } from './generate_data';
 import {
   CreatePackagePolicyResponse,
   EPM_API_ROUTES,
   GetPackagesResponse,
-} from '../../../fleet/common';
+} from '@kbn/fleet-plugin/common';
+import { EndpointDocGenerator, TreeOptions } from './generate_data';
 import {
   deleteIndexedEndpointHosts,
   DeleteIndexedEndpointHostsResponse,
@@ -26,6 +25,7 @@ import {
 import { enableFleetServerIfNecessary } from './data_loaders/index_fleet_server';
 import { indexAlerts } from './data_loaders/index_alerts';
 import { setupFleetForEndpoint } from './data_loaders/setup_fleet_for_endpoint';
+import { mergeAndAppendArrays } from './data_loaders/utils';
 
 export type IndexedHostsAndAlertsResponse = IndexedHostsResponse;
 
@@ -57,7 +57,6 @@ export async function indexHostsAndAlerts(
   alertIndex: string,
   alertsPerHost: number,
   fleet: boolean,
-  logsEndpoint: boolean,
   options: TreeOptions = {}
 ): Promise<IndexedHostsAndAlertsResponse> {
   const random = seedrandom(seed);
@@ -103,11 +102,10 @@ export async function indexHostsAndAlerts(
       metadataIndex,
       policyResponseIndex,
       enrollFleet: fleet,
-      addEndpointActions: logsEndpoint,
       generator,
     });
 
-    merge(response, indexedHosts);
+    mergeAndAppendArrays(response, indexedHosts);
 
     await indexAlerts({
       client,

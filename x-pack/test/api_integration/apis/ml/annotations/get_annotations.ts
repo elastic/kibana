@@ -43,12 +43,12 @@ export default ({ getService }: FtrProviderContext) => {
         latestMs: Date.now(),
         maxAnnotations: 500,
       };
-      const { body } = await supertest
+      const { body, status } = await supertest
         .post('/api/ml/annotations')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(requestBody)
-        .expect(200);
+        .send(requestBody);
+      ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body.success).to.eql(true);
       expect(body.annotations).not.to.be(undefined);
@@ -68,12 +68,12 @@ export default ({ getService }: FtrProviderContext) => {
         latestMs: Date.now(),
         maxAnnotations: 500,
       };
-      const { body } = await supertest
+      const { body, status } = await supertest
         .post('/api/ml/annotations')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(requestBody)
-        .expect(200);
+        .send(requestBody);
+      ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body.success).to.eql(true);
       expect(body.annotations).not.to.be(undefined);
@@ -93,12 +93,13 @@ export default ({ getService }: FtrProviderContext) => {
         latestMs: Date.now(),
         maxAnnotations: 500,
       };
-      const { body } = await supertest
+      const { body, status } = await supertest
         .post('/api/ml/annotations')
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(requestBody)
-        .expect(200);
+        .send(requestBody);
+      ml.api.assertResponseStatusCode(200, status, body);
+
       expect(body.success).to.eql(true);
       expect(body.annotations).not.to.be(undefined);
       jobIds.forEach((jobId, idx) => {
@@ -117,12 +118,12 @@ export default ({ getService }: FtrProviderContext) => {
         latestMs: Date.now(),
         maxAnnotations: 500,
       };
-      const { body } = await supertest
+      const { body, status } = await supertest
         .post('/api/ml/annotations')
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS)
-        .send(requestBody)
-        .expect(403);
+        .send(requestBody);
+      ml.api.assertResponseStatusCode(403, status, body);
 
       expect(body.error).to.eql('Forbidden');
       expect(body.message).to.eql('Forbidden');

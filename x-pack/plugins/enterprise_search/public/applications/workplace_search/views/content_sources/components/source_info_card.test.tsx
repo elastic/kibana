@@ -13,18 +13,20 @@ import { EuiBadge, EuiHealth, EuiText, EuiTitle } from '@elastic/eui';
 
 import { SourceIcon } from '../../../components/shared/source_icon';
 
+import { ContentSourceFullData } from '../../../types';
+
 import { SourceInfoCard } from './source_info_card';
 
 describe('SourceInfoCard', () => {
-  const props = {
-    sourceName: 'source',
-    sourceType: 'custom',
-    dateCreated: '2021-01-20',
+  const contentSource = {
+    name: 'source',
+    serviceType: 'custom',
+    createdAt: '2021-01-20',
     isFederatedSource: true,
-  };
+  } as ContentSourceFullData;
 
   it('renders', () => {
-    const wrapper = shallow(<SourceInfoCard {...props} />);
+    const wrapper = shallow(<SourceInfoCard contentSource={contentSource} />);
 
     expect(wrapper.find(SourceIcon)).toHaveLength(1);
     expect(wrapper.find(EuiBadge)).toHaveLength(1);

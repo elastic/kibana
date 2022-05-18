@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog, pickLevelFromFlags } from '../tooling_log';
+import { ToolingLog, pickLevelFromFlags } from '@kbn/tooling-log';
 import { RunContext, RunOptions } from './run';
 import { getFlags, FlagOptions, mergeFlagOptions } from './flags';
 import { Cleanup } from './cleanup';

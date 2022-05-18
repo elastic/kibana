@@ -47,7 +47,7 @@ export function registerSnapshotsRoutes({
   router.get(
     { path: addBasePath('snapshots'), validate: { query: snapshotListSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const sortField =
         sortFieldToESParams[(req.query as TypeOf<typeof snapshotListSchema>).sortField];
       const sortDirection = (req.query as TypeOf<typeof snapshotListSchema>).sortDirection;
@@ -127,8 +127,6 @@ export function registerSnapshotsRoutes({
                   operator: searchOperator,
                 })
               : '_all',
-          // @ts-expect-error @elastic/elasticsearch new API params
-          // https://github.com/elastic/elasticsearch-specification/issues/845
           slm_policy_filter:
             searchField === 'policyName'
               ? getSnapshotSearchWildcard({
@@ -139,6 +137,7 @@ export function registerSnapshotsRoutes({
                 })
               : '*,_none',
           order: sortDirection,
+          // @ts-expect-error sortField: string is not compatible with SnapshotSnapshotSort type
           sort: sortField,
           size: pageSize,
           offset: pageIndex * pageSize,
@@ -177,7 +176,7 @@ export function registerSnapshotsRoutes({
       validate: { params: getOneParamsSchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { repository, snapshot } = req.params as TypeOf<typeof getOneParamsSchema>;
       const managedRepository = await getManagedRepositoryName(clusterClient.asCurrentUser);
 
@@ -233,7 +232,7 @@ export function registerSnapshotsRoutes({
   router.post(
     { path: addBasePath('snapshots/bulk_delete'), validate: { body: deleteSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
 
       const response: {
         itemsDeleted: Array<{ snapshot: string; repository: string }>;

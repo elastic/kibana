@@ -12,7 +12,8 @@ import {
   FormattedIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
 } from './column_types';
-import { IndexPattern } from '../../types';
+import { IndexPattern, IndexPatternField } from '../../types';
+import { hasField } from '../../pure_utils';
 
 export function getInvalidFieldMessage(
   column: FieldBasedIndexPatternColumn,
@@ -21,47 +22,66 @@ export function getInvalidFieldMessage(
   if (!indexPattern) {
     return;
   }
-  const { sourceField, operationType } = column;
-  const field = sourceField ? indexPattern.getFieldByName(sourceField) : undefined;
-  const operationDefinition = operationType && operationDefinitionMap[operationType];
+  const { operationType } = column;
+  const operationDefinition = operationType ? operationDefinitionMap[operationType] : undefined;
+  const fieldNames =
+    hasField(column) && operationDefinition
+      ? operationDefinition?.getCurrentFields?.(column) ?? [column.sourceField]
+      : [];
+  const fields = fieldNames.map((fieldName) => indexPattern.getFieldByName(fieldName));
+  const filteredFields = fields.filter(Boolean) as IndexPatternField[];
 
   const isInvalid = Boolean(
-    sourceField &&
-      operationDefinition &&
+    fields.length > filteredFields.length ||
       !(
-        field &&
         operationDefinition?.input === 'field' &&
-        operationDefinition.getPossibleOperationForField(field) !== undefined
+        filteredFields.every(
+          (field) => operationDefinition.getPossibleOperationForField(field) != null
+        )
       )
   );
 
   const isWrongType = Boolean(
-    sourceField &&
-      operationDefinition &&
-      field &&
-      !operationDefinition.isTransferable(
+    filteredFields.length &&
+      !operationDefinition?.isTransferable(
         column as GenericIndexPatternColumn,
         indexPattern,
         operationDefinitionMap
       )
   );
+
   if (isInvalid) {
-    if (isWrongType) {
+    // Missing fields have priority over wrong type
+    // This has been moved as some transferable checks also perform exist checks internally and fail eventually
+    // but that would make type mismatch error appear in place of missing fields scenarios
+    const missingFields = fields.map((field, i) => (field ? null : fieldNames[i])).filter(Boolean);
+    if (missingFields.length) {
       return [
-        i18n.translate('xpack.lens.indexPattern.fieldWrongType', {
-          defaultMessage: 'Field {invalidField} is of the wrong type',
+        i18n.translate('xpack.lens.indexPattern.fieldsNotFound', {
+          defaultMessage:
+            '{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found',
           values: {
-            invalidField: sourceField,
+            count: missingFields.length,
+            missingFields: missingFields.join(', '),
           },
         }),
       ];
     }
-    return [
-      i18n.translate('xpack.lens.indexPattern.fieldNotFound', {
-        defaultMessage: 'Field {invalidField} was not found',
-        values: { invalidField: sourceField },
-      }),
-    ];
+    if (isWrongType) {
+      // as fallback show all the fields as invalid?
+      const wrongTypeFields =
+        operationDefinition?.getNonTransferableFields?.(column, indexPattern) ?? fieldNames;
+      return [
+        i18n.translate('xpack.lens.indexPattern.fieldsWrongType', {
+          defaultMessage:
+            '{count, plural, one {Field} other {Fields}} {invalidFields} {count, plural, one {is} other {are}} of the wrong type',
+          values: {
+            count: wrongTypeFields.length,
+            invalidFields: wrongTypeFields.join(', '),
+          },
+        }),
+      ];
+    }
   }
 
   return undefined;

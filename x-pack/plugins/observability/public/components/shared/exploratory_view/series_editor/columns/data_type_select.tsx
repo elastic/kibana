@@ -57,6 +57,10 @@ export function DataTypesSelect({ seriesId, series }: Props) {
       if (reportType === ReportTypes.CORE_WEB_VITAL) {
         return id === DataTypes.UX;
       }
+      // NOTE: Logs only provides a config for KPI over time
+      if (id === DataTypes.LOGS) {
+        return reportType === ReportTypes.KPI;
+      }
       return true;
     })
     .map(({ id, label }) => ({

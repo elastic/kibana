@@ -8,15 +8,15 @@
 
 import { uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, ExecutionContext } from 'src/plugins/expressions/common';
-import { Adapters } from 'src/plugins/inspector/common';
+import { ExpressionFunctionDefinition, ExecutionContext } from '@kbn/expressions-plugin/common';
+import { Adapters } from '@kbn/inspector-plugin/common';
 import { Filter } from '@kbn/es-query';
 import { Query, uniqFilters } from '@kbn/es-query';
-import { unboxExpressionValue } from '../../../../expressions/common';
+import { unboxExpressionValue } from '@kbn/expressions-plugin/common';
+import { SavedObjectReference } from '@kbn/core/types';
 import { ExecutionContextSearch, KibanaContext, KibanaFilter } from './kibana_context_type';
 import { KibanaQueryOutput } from './kibana_context_type';
 import { KibanaTimerangeOutput } from './timerange';
-import { SavedObjectReference } from '../../../../../core/types';
 import { SavedObjectsClientCommon } from '../..';
 
 export interface KibanaContextStartDependencies {

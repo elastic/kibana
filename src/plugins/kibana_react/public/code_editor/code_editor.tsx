@@ -178,11 +178,9 @@ export const CodeEditor: React.FC<Props> = ({
 
   const [isHintActive, setIsHintActive] = useState(true);
 
-  /* eslint-disable @typescript-eslint/naming-convention */
   const promptClasses = classNames('kibanaCodeEditor__keyboardHint', {
     'kibanaCodeEditor__keyboardHint--isInactive': !isHintActive,
   });
-  /* eslint-enable  @typescript-eslint/naming-convention */
 
   const _updateDimensions = useCallback(() => {
     _editor.current?.layout();

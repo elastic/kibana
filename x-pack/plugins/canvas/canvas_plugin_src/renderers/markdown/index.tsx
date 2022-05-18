@@ -7,14 +7,14 @@
 
 import React, { CSSProperties } from 'react';
 import ReactDOM from 'react-dom';
-import { CoreTheme } from 'kibana/public';
+import { CoreTheme } from '@kbn/core/public';
 import { Observable } from 'rxjs';
-import { KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
-import { defaultTheme$ } from '../../../../../../src/plugins/presentation_util/common/lib';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { defaultTheme$ } from '@kbn/presentation-util-plugin/common/lib';
+import { Markdown } from '@kbn/kibana-react-plugin/public';
 import { StartInitializer } from '../../plugin';
 import { RendererStrings } from '../../../i18n';
 import { Return as Config } from '../../functions/browser/markdown';
-import { Markdown } from '../../../../../../src/plugins/kibana_react/public';
 import { RendererFactory } from '../../../types';
 
 const { markdown: strings } = RendererStrings;

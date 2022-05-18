@@ -6,7 +6,7 @@
  */
 
 import { SuggestionRequest, VisualizationSuggestion, TableSuggestion } from '../types';
-import type { MetricState } from '../../common/expressions';
+import type { MetricState } from '../../common/types';
 import { layerTypes } from '../../common';
 import { LensIconChartMetric } from '../assets/chart_metric';
 import { supportedTypes } from './visualization';

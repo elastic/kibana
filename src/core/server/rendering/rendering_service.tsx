@@ -8,11 +8,12 @@
 
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { take } from 'rxjs/operators';
+import { catchError, take, timeout } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
-import { UiPlugins } from '../plugins';
+import { firstValueFrom, of } from 'rxjs';
+import type { UiPlugins } from '../plugins';
 import { CoreContext } from '../core_context';
 import { Template } from './views';
 import {
@@ -25,10 +26,13 @@ import {
 } from './types';
 import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
 import { getSettingValue, getStylesheetPaths } from './render_utils';
-import { KibanaRequest } from '../http';
+import type { HttpAuth, KibanaRequest } from '../http';
 import { IUiSettingsClient } from '../ui_settings';
+import { filterUiPlugins } from './filter_ui_plugins';
 
-type RenderOptions = (RenderingPrebootDeps & { status?: never }) | RenderingSetupDeps;
+type RenderOptions =
+  | (RenderingPrebootDeps & { status?: never; elasticsearch?: never })
+  | RenderingSetupDeps;
 
 /** @internal */
 export class RenderingService {
@@ -56,6 +60,7 @@ export class RenderingService {
   }
 
   public async setup({
+    elasticsearch,
     http,
     status,
     uiPlugins,
@@ -71,15 +76,15 @@ export class RenderingService {
     });
 
     return {
-      render: this.render.bind(this, { http, uiPlugins, status }),
+      render: this.render.bind(this, { elasticsearch, http, uiPlugins, status }),
     };
   }
 
   private async render(
-    { http, uiPlugins, status }: RenderOptions,
+    { elasticsearch, http, uiPlugins, status }: RenderOptions,
     request: KibanaRequest,
     uiSettings: IUiSettingsClient,
-    { includeUserSettings = true, vars }: IRenderOptions = {}
+    { isAnonymousPage = false, vars, includeExposedConfigKeys }: IRenderOptions = {}
   ) {
     const env = {
       mode: this.coreContext.env.mode,
@@ -90,8 +95,23 @@ export class RenderingService {
     const { serverBasePath, publicBaseUrl } = http.basePath;
     const settings = {
       defaults: uiSettings.getRegistered() ?? {},
-      user: includeUserSettings ? await uiSettings.getUserProvided() : {},
+      user: isAnonymousPage ? {} : await uiSettings.getUserProvided(),
     };
+
+    let clusterInfo = {};
+    try {
+      // Only provide the clusterInfo if the request is authenticated and the elasticsearch service is available.
+      if (isAuthenticated(http.auth, request) && elasticsearch) {
+        clusterInfo = await firstValueFrom(
+          elasticsearch.clusterInfo$.pipe(
+            timeout(50), // If not available, just return undefined
+            catchError(() => of({}))
+          )
+        );
+      }
+    } catch (err) {
+      // swallow error
+    }
 
     const darkMode = getSettingValue('theme:darkMode', settings, Boolean);
     const themeVersion: ThemeVersion = 'v8';
@@ -103,10 +123,12 @@ export class RenderingService {
       buildNum,
     });
 
+    const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
+    const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
     const metadata: RenderingMetadata = {
       strictCsp: http.csp.strict,
       uiPublicUrl: `${basePath}/ui`,
-      bootstrapScriptUrl: `${basePath}/bootstrap.js`,
+      bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
       i18n: i18n.translate,
       locale: i18n.getLocale(),
       darkMode,
@@ -120,6 +142,7 @@ export class RenderingService {
         serverBasePath,
         publicBaseUrl,
         env,
+        clusterInfo,
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
           translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
@@ -132,11 +155,15 @@ export class RenderingService {
         externalUrl: http.externalUrl,
         vars: vars ?? {},
         uiPlugins: await Promise.all(
-          [...uiPlugins.public].map(async ([id, plugin]) => ({
-            id,
-            plugin,
-            config: await getUiConfig(uiPlugins, id),
-          }))
+          filteredPlugins.map(async ([id, plugin]) => {
+            const { browserConfig, exposedConfigKeys } = await getUiConfig(uiPlugins, id);
+            return {
+              id,
+              plugin,
+              config: browserConfig,
+              ...(includeExposedConfigKeys && { exposedConfigKeys }),
+            };
+          })
         ),
         legacyMetadata: {
           uiSettings: settings,
@@ -152,5 +179,14 @@ export class RenderingService {
 
 const getUiConfig = async (uiPlugins: UiPlugins, pluginId: string) => {
   const browserConfig = uiPlugins.browserConfigs.get(pluginId);
-  return ((await browserConfig?.pipe(take(1)).toPromise()) ?? {}) as Record<string, any>;
+  return ((await browserConfig?.pipe(take(1)).toPromise()) ?? {
+    browserConfig: {},
+    exposedConfigKeys: {},
+  }) as { browserConfig: Record<string, unknown>; exposedConfigKeys: Record<string, string> };
+};
+
+const isAuthenticated = (auth: HttpAuth, request: KibanaRequest) => {
+  const { status: authStatus } = auth.get(request);
+  // status is 'unknown' when auth is disabled. we just need to not be `unauthenticated` here.
+  return authStatus !== 'unauthenticated';
 };

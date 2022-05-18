@@ -13,7 +13,7 @@ import {
 import { act } from '@testing-library/react';
 import { fireEvent } from '@testing-library/dom';
 import { EventFilterDeleteModal } from './event_filter_delete_modal';
-import { getExceptionListItemSchemaMock } from '../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { showDeleteModal } from '../../store/selector';
 import { isFailedResourceState, isLoadedResourceState } from '../../../../state';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';

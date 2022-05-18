@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LocatorDefinition, KibanaLocation } from '../../../../../src/plugins/share/public';
+import type { LocatorDefinition, KibanaLocation } from '@kbn/share-plugin/public';
 import {
   DataFrameAnalyticsExplorationUrlState,
   MlLocatorParams,
@@ -77,6 +77,7 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
         path = formatTrainedModelsNodesManagementUrl('', params.pageState);
         break;
       case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB:
+      case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER:
       case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ADVANCED:
       case ML_PAGES.DATA_VISUALIZER:
       case ML_PAGES.DATA_VISUALIZER_FILE:

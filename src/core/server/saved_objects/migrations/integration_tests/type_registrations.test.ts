@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { REMOVED_TYPES } from '../../migrations/core';
+import { REMOVED_TYPES } from '../core';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 
 // Types should NEVER be removed from this array
@@ -17,6 +17,7 @@ const previouslyRegisteredTypes = [
   'api_key_pending_invalidation',
   'apm-indices',
   'apm-server-schema',
+  'apm-service-group',
   'apm-services-telemetry',
   'apm-telemetry',
   'app_search_telemetry',
@@ -33,6 +34,7 @@ const previouslyRegisteredTypes = [
   'cases-connector-mappings',
   'cases-sub-case',
   'cases-user-actions',
+  'cases-telemetry',
   'config',
   'connector_token',
   'core-usage-stats',
@@ -54,6 +56,7 @@ const previouslyRegisteredTypes = [
   'fleet-preconfiguration-deletion-record',
   'graph-workspace',
   'index-pattern',
+  'infrastructure-monitoring-log-view',
   'infrastructure-ui-source',
   'ingest-agent-policies',
   'ingest-outputs',
@@ -68,10 +71,12 @@ const previouslyRegisteredTypes = [
   'maps-telemetry',
   'metrics-explorer-view',
   'ml-job',
+  'ml-trained-model',
   'ml-module',
   'ml-telemetry',
   'monitoring-telemetry',
   'osquery-pack',
+  'osquery-pack-asset',
   'osquery-saved-query',
   'osquery-usage-metric',
   'osquery-manager-usage-metric',

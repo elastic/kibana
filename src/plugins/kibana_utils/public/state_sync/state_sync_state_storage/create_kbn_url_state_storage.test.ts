@@ -11,9 +11,9 @@ import { createKbnUrlStateStorage, IKbnUrlStateStorage } from './create_kbn_url_
 import { History, createBrowserHistory } from 'history';
 import { takeUntil, toArray } from 'rxjs/operators';
 import { Subject } from 'rxjs';
-import { ScopedHistory } from '../../../../../core/public';
+import { ScopedHistory } from '@kbn/core/public';
 import { withNotifyOnErrors } from '../../state_management/url';
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
 describe('KbnUrlStateStorage', () => {
   describe('useHash: false', () => {
@@ -73,7 +73,7 @@ describe('KbnUrlStateStorage', () => {
     it('should notify about url changes', async () => {
       expect(urlStateStorage.change$).toBeDefined();
       const key = '_s';
-      const destroy$ = new Subject();
+      const destroy$ = new Subject<void>();
       const result = urlStateStorage.change$!(key).pipe(takeUntil(destroy$), toArray()).toPromise();
 
       history.push(`/#?${key}=(ok:1,test:test)`);
@@ -139,7 +139,7 @@ describe('KbnUrlStateStorage', () => {
     it('should notify about url changes', async () => {
       expect(urlStateStorage.change$).toBeDefined();
       const key = '_s';
-      const destroy$ = new Subject();
+      const destroy$ = new Subject<void>();
       const result = urlStateStorage.change$!(key).pipe(takeUntil(destroy$), toArray()).toPromise();
 
       history.push(`/#?${key}=(ok:1,test:test)`);
@@ -248,7 +248,7 @@ describe('KbnUrlStateStorage', () => {
     it('should notify about url changes', async () => {
       expect(urlStateStorage.change$).toBeDefined();
       const key = '_s';
-      const destroy$ = new Subject();
+      const destroy$ = new Subject<void>();
       const result = urlStateStorage.change$!(key).pipe(takeUntil(destroy$), toArray()).toPromise();
 
       history.push(`/?${key}=(ok:1,test:test)`);
@@ -357,7 +357,7 @@ describe('KbnUrlStateStorage', () => {
     it('should notify about url changes', async () => {
       expect(urlStateStorage.change$).toBeDefined();
       const key = '_s';
-      const destroy$ = new Subject();
+      const destroy$ = new Subject<void>();
       const result = urlStateStorage.change$!(key).pipe(takeUntil(destroy$), toArray()).toPromise();
 
       history.push(`/#?${key}=(ok:1,test:test)`);

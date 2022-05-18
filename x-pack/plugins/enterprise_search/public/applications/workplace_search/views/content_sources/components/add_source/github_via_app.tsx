@@ -61,7 +61,8 @@ export const GitHubViaApp: React.FC<GithubViaAppProps> = ({ isGithubEnterpriseSe
 
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const name = isGithubEnterpriseServer ? SOURCE_NAMES.GITHUB_ENTERPRISE : SOURCE_NAMES.GITHUB;
-  const data = staticSourceData.find((source) => source.name === name);
+  const serviceType = isGithubEnterpriseServer ? 'github_enterprise_server' : 'github';
+  const data = staticSourceData.find((source) => source.serviceType === serviceType);
   const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
 
   const handleSubmit = (e: FormEvent) => {

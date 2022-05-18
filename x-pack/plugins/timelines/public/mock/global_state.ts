@@ -34,8 +34,6 @@ export const mockGlobalState: TimelineState = {
         'packetbeat-*',
         'winlogbeat-*',
       ],
-      isAddToExistingCaseOpen: false,
-      isCreateNewCaseOpen: false,
       isLoading: false,
       isSelectAllChecked: false,
       itemsPerPage: 5,

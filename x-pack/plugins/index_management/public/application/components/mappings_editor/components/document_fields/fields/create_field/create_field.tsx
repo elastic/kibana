@@ -175,10 +175,8 @@ export const CreateField = React.memo(function CreateFieldComponent({
       >
         <div
           className={classNames('mappingsEditor__createFieldWrapper', {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'mappingsEditor__createFieldWrapper--toggle':
               Boolean(maxNestedDepth) && maxNestedDepth! > 0,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'mappingsEditor__createFieldWrapper--multiField': isMultiField,
           })}
           style={{

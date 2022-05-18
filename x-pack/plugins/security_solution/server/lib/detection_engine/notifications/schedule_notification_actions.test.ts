@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertServicesMock, alertsMock } from '../../../../../alerting/server/mocks';
+import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { sampleThresholdAlert } from '../rule_types/__mocks__/threshold';
 import {
   NotificationRuleTypeParams,
@@ -13,7 +13,7 @@ import {
 } from './schedule_notification_actions';
 
 describe('schedule_notification_actions', () => {
-  const alertServices: AlertServicesMock = alertsMock.createAlertServices();
+  const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
   const alertId = 'fb30ddd1-5edc-43e2-9afb-3bcd970b78ee';
 
   const notificationRuleParams: NotificationRuleTypeParams = {

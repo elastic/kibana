@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { KibanaRequest, SavedObjectsClientContract } from '../../../../../../src/core/server';
-import { httpServerMock, savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import { httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { hasMlAdminPermissions } from '../../../common/machine_learning/has_ml_admin_permissions';
 import { mlServicesMock } from './mocks';
 import { hasMlLicense, isMlAdmin, buildMlAuthz } from './authz';
-import { licensingMock } from '../../../../licensing/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
 jest.mock('../../../common/machine_learning/has_ml_admin_permissions');
 

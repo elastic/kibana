@@ -41,11 +41,12 @@ export function TransactionDetailsTabs() {
     tabs.find((tab) => tab.key === currentTab) ?? traceSamplesTab;
 
   const { environment, kuery, transactionName } = query;
-  const { traceSamplesData } = useTransactionTraceSamplesFetcher({
-    transactionName,
-    kuery,
-    environment,
-  });
+  const { traceSamplesData, traceSamplesStatus } =
+    useTransactionTraceSamplesFetcher({
+      transactionName,
+      kuery,
+      environment,
+    });
 
   const selectSampleFromChartSelection = (selection: XYBrushEvent) => {
     if (selection !== undefined) {
@@ -139,6 +140,7 @@ export function TransactionDetailsTabs() {
             sampleRangeTo,
             selectSampleFromChartSelection,
             traceSamples,
+            traceSamplesStatus,
           }}
         />
       </EuiPanel>

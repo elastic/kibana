@@ -7,7 +7,7 @@
  */
 import { fetchIndexPattern, isStringTypeIndexPattern } from '../../common/index_patterns_utils';
 import type { IndexPatternValue } from '../../common/types';
-import { getDataStart } from '../services';
+import { getDataViewsStart } from '../services';
 
 export const getDataSourceInfo = async (
   modelIndexPattern: IndexPatternValue,
@@ -15,7 +15,7 @@ export const getDataSourceInfo = async (
   isOverwritten: boolean,
   overwrittenIndexPattern: IndexPatternValue | undefined
 ) => {
-  const { dataViews } = getDataStart();
+  const dataViews = getDataViewsStart();
   let indexPatternId =
     modelIndexPattern && !isStringTypeIndexPattern(modelIndexPattern) ? modelIndexPattern.id : '';
 

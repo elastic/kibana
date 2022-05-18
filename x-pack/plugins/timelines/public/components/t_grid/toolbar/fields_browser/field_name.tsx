@@ -15,7 +15,7 @@ export const FieldName = React.memo<{
 }>(({ fieldId, highlight = '' }) => {
   return (
     <EuiText size="xs">
-      <EuiHighlight data-test-subj={`field-name-${fieldId}`} search={highlight}>
+      <EuiHighlight data-test-subj={`field-${fieldId}-name`} search={highlight}>
         {fieldId}
       </EuiHighlight>
     </EuiText>

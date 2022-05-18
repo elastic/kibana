@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { ChartsPluginSetup, PaletteRegistry } from '../../../../charts/public';
-import type { IFieldFormat, SerializedFieldFormat } from '../../../../field_formats/common';
-import type { RangeSelectContext, ValueClickContext } from '../../../../embeddable/public';
-import type { PersistedState } from '../../../../visualizations/public';
+import type { PaletteRegistry } from '@kbn/coloring';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { RangeSelectContext, ValueClickContext } from '@kbn/embeddable-plugin/public';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import type { HeatmapExpressionProps } from './expression_functions';
 
 export interface FilterEvent {
@@ -34,23 +35,3 @@ export type HeatmapRenderProps = HeatmapExpressionProps & {
   uiState: PersistedState;
   interactive: boolean;
 };
-
-export interface ColorStop {
-  color: string;
-  stop: number;
-}
-
-export interface CustomPaletteParams {
-  name?: string;
-  reverse?: boolean;
-  rangeType?: 'number' | 'percent';
-  continuity?: 'above' | 'below' | 'all' | 'none';
-  progression?: 'fixed';
-  rangeMin?: number;
-  rangeMax?: number;
-  stops?: ColorStop[];
-  colorStops?: ColorStop[];
-  steps?: number;
-}
-
-export type RequiredPaletteParamTypes = Required<CustomPaletteParams>;

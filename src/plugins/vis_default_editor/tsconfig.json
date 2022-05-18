@@ -16,6 +16,7 @@
     { "path": "../discover/tsconfig.json" },
     { "path": "../kibana_utils/tsconfig.json" },
     { "path": "../kibana_react/tsconfig.json" },
-    { "path": "../field_formats/tsconfig.json" }
+    { "path": "../field_formats/tsconfig.json" },
+    { "path": "../unified_search/tsconfig.json" }
   ]
 }

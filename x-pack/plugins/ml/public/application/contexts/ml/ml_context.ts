@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { DataView, DataViewsContract } from '../../../../../../../src/plugins/data_views/public';
+import { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { SavedSearchSavedObject } from '../../../../common/types/kibana';
 import { MlServicesContext } from '../../app';
 

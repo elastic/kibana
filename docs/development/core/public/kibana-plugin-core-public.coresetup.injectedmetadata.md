@@ -6,6 +6,7 @@
 
 > Warning: This API is now obsolete.
 > 
+>  8.8.0
 > 
 
 exposed temporarily until https://github.com/elastic/kibana/issues/41990 done use \*only\* to retrieve config values. There is no way to set injected values in the new platform.

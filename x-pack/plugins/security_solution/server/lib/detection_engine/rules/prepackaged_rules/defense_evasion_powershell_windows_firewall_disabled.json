@@ -2,7 +2,7 @@
   "author": [
     "Austin Songer"
   ],
-  "description": "Identifies when the Windows Firewall is disabled using PowerShell cmdlets, which attackers do to evade network constraints, like internet and network lateral communication restrictions.",
+  "description": "Identifies when the Windows Firewall is disabled using PowerShell cmdlets, which can help attackers evade network constraints, like internet and network lateral communication restrictions.",
   "false_positives": [
     "Windows Firewall can be disabled by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Windows Profile being disabled by unfamiliar users should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
   ],
@@ -15,6 +15,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Windows Firewall Disabled via PowerShell",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.action == \"start\" and\n  (process.name : (\"powershell.exe\", \"pwsh.exe\", \"powershell_ise.exe\") or process.pe.original_file_name == \"PowerShell.EXE\") and\n   process.args : \"*Set-NetFirewallProfile*\" and\n  (process.args : \"*-Enabled*\" and process.args : \"*False*\") and\n  (process.args : \"*-All*\" or process.args : (\"*Public*\", \"*Domain*\", \"*Private*\"))\n",
   "references": [
     "https://docs.microsoft.com/en-us/powershell/module/netsecurity/set-netfirewallprofile?view=windowsserver2019-ps",
@@ -58,5 +59,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }

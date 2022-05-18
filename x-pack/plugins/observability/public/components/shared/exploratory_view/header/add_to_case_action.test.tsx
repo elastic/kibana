@@ -57,7 +57,12 @@ describe('AddToCaseAction', function () {
     const useAddToCaseHook = jest.spyOn(useCaseHook, 'useAddToCase');
 
     const { getByText } = render(
-      <AddToCaseAction lensAttributes={null} timeRange={{ to: '', from: '' }} />
+      <AddToCaseAction
+        lensAttributes={null}
+        timeRange={{ to: '', from: '' }}
+        appId="securitySolutionUI"
+        owner="security"
+      />
     );
 
     expect(await forNearestButton(getByText)('Add to case')).toBeDisabled();
@@ -69,6 +74,8 @@ describe('AddToCaseAction', function () {
           from: '',
           to: '',
         },
+        appId: 'securitySolutionUI',
+        owner: 'security',
       })
     );
   });
@@ -95,8 +102,8 @@ describe('AddToCaseAction', function () {
     );
     fireEvent.click(await findByText('Add to case'));
 
-    expect(core?.cases?.getAllCasesSelectorModal).toHaveBeenCalledTimes(1);
-    expect(core?.cases?.getAllCasesSelectorModal).toHaveBeenCalledWith(
+    expect(core?.cases?.ui.getAllCasesSelectorModal).toHaveBeenCalledTimes(1);
+    expect(core?.cases?.ui.getAllCasesSelectorModal).toHaveBeenCalledWith(
       expect.objectContaining({
         owner: ['observability'],
         userCanCrud: true,

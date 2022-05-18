@@ -7,10 +7,10 @@
 
 import type { Observable } from 'rxjs';
 
+import type { HttpResources, IBasePath, Logger } from '@kbn/core/server';
+import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { HttpResources, IBasePath, Logger } from 'src/core/server';
 
-import type { KibanaFeature } from '../../../features/server';
 import type { SecurityLicense } from '../../common';
 import type { AnonymousAccessServiceStart } from '../anonymous_access';
 import type { InternalAuthenticationServiceStart } from '../authentication';

@@ -20,7 +20,7 @@ export const deleteTransformsRequestSchema = schema.object({
     })
   ),
   deleteDestIndex: schema.maybe(schema.boolean()),
-  deleteDestIndexPattern: schema.maybe(schema.boolean()),
+  deleteDestDataView: schema.maybe(schema.boolean()),
   forceDelete: schema.maybe(schema.boolean()),
 });
 
@@ -29,7 +29,7 @@ export type DeleteTransformsRequestSchema = TypeOf<typeof deleteTransformsReques
 export interface DeleteTransformStatus {
   transformDeleted: ResponseStatus;
   destIndexDeleted?: ResponseStatus;
-  destIndexPatternDeleted?: ResponseStatus;
+  destDataViewDeleted?: ResponseStatus;
   destinationIndex?: string | undefined;
 }
 

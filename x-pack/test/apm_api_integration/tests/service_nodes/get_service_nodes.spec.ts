@@ -58,7 +58,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           timerange(start, end)
             .interval('1m')
             .rate(1)
-            .flatMap((timestamp) =>
+            .generator((timestamp) =>
               instance
                 .appMetrics({
                   'system.process.cpu.total.norm.pct': 1,
@@ -67,7 +67,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   'jvm.thread.count': 25,
                 })
                 .timestamp(timestamp)
-                .serialize()
             )
         );
       });

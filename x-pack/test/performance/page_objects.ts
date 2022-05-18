@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from '../functional/page_objects';
+export const pageObjects = {};

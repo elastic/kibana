@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const testSubjSelector = require('./');
+const testSubjSelector = require('.');
 
 describe('testSubjSelector()', function () {
   it('converts subjectSelectors to cssSelectors', function () {

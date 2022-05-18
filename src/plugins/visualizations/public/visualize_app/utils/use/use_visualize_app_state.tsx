@@ -13,13 +13,9 @@ import { EventEmitter } from 'events';
 import { i18n } from '@kbn/i18n';
 import { FilterStateStore } from '@kbn/es-query';
 
-import {
-  KibanaThemeProvider,
-  MarkdownSimple,
-  toMountPoint,
-} from '../../../../../kibana_react/public';
+import { KibanaThemeProvider, MarkdownSimple, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { connectToQueryState } from '@kbn/data-plugin/public';
 import { migrateLegacyQuery } from '../migrate_legacy_query';
-import { connectToQueryState } from '../../../../../data/public';
 import {
   VisualizeServices,
   VisualizeAppStateContainer,

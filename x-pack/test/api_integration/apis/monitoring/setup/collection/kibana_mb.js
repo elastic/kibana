@@ -6,25 +6,30 @@
  */
 
 import expect from '@kbn/expect';
-import fixture from './fixtures/kibana_mb';
+import fixture from './fixtures/kibana_mb.json';
+import { getLifecycleMethods } from '../../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
   describe('kibana mb', () => {
-    const archive = 'x-pack/test/functional/es_archives/monitoring/setup/collection/kibana_mb';
+    const { setup, tearDown } = getLifecycleMethods(getService);
+    const archive = 'x-pack/test/functional/es_archives/monitoring/setup/collection/kibana';
+    const archiveMb = 'x-pack/test/functional/es_archives/monitoring/setup/collection/kibana_mb_8';
     const timeRange = {
       min: '2019-04-09T00:00:00.741Z',
       max: '2019-04-09T23:59:59.741Z',
     };
 
-    before('load archive', () => {
-      return esArchiver.load(archive);
+    before('load archive', async () => {
+      await esArchiver.load(archive);
+      await setup(archiveMb);
     });
 
-    after('unload archive', () => {
-      return esArchiver.unload(archive);
+    after('unload archive', async () => {
+      await esArchiver.unload(archive);
+      await tearDown();
     });
 
     it('should get collection status', async () => {

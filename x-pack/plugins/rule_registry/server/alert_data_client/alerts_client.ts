@@ -21,16 +21,16 @@ import {
   InlineScript,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { AlertTypeParams, AlertingAuthorizationFilterType } from '../../../alerting/server';
+import { RuleTypeParams } from '@kbn/alerting-plugin/server';
 import {
   ReadOperations,
   AlertingAuthorization,
   WriteOperations,
   AlertingAuthorizationEntity,
-} from '../../../alerting/server';
-import { Logger, ElasticsearchClient, EcsEventOutcome } from '../../../../../src/core/server';
+} from '@kbn/alerting-plugin/server';
+import { Logger, ElasticsearchClient, EcsEventOutcome } from '@kbn/core/server';
+import { AuditLogger } from '@kbn/security-plugin/server';
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
-import { AuditLogger } from '../../../security/server';
 import {
   ALERT_WORKFLOW_STATUS,
   ALERT_RULE_CONSUMER,
@@ -39,6 +39,7 @@ import {
 } from '../../common/technical_rule_data_field_names';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import { Dataset, IRuleDataService } from '../rule_data_plugin_service';
+import { getAuthzFilter, getSpacesFilter } from '../lib';
 
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> & {
@@ -68,14 +69,14 @@ export interface ConstructorOptions {
   ruleDataService: IRuleDataService;
 }
 
-export interface UpdateOptions<Params extends AlertTypeParams> {
+export interface UpdateOptions<Params extends RuleTypeParams> {
   id: string;
   status: string;
   _version: string | undefined;
   index: string;
 }
 
-export interface BulkUpdateOptions<Params extends AlertTypeParams> {
+export interface BulkUpdateOptions<Params extends RuleTypeParams> {
   ids: string[] | undefined | null;
   status: STATUS_VALUES;
   index: string;
@@ -369,14 +370,8 @@ export class AlertsClient {
     config: EsQueryConfig
   ) {
     try {
-      const { filter: authzFilter } = await this.authorization.getAuthorizationFilter(
-        AlertingAuthorizationEntity.Alert,
-        {
-          type: AlertingAuthorizationFilterType.ESDSL,
-          fieldNames: { consumer: ALERT_RULE_CONSUMER, ruleTypeId: ALERT_RULE_TYPE_ID },
-        },
-        operation
-      );
+      const authzFilter = (await getAuthzFilter(this.authorization, operation)) as Filter;
+      const spacesFilter = getSpacesFilter(alertSpaceId) as unknown as Filter;
       let esQuery;
       if (id != null) {
         esQuery = { query: `_id:${id}`, language: 'kuery' };
@@ -388,10 +383,7 @@ export class AlertsClient {
       const builtQuery = buildEsQuery(
         undefined,
         esQuery == null ? { query: ``, language: 'kuery' } : esQuery,
-        [
-          authzFilter as unknown as Filter,
-          { query: { term: { [SPACE_IDS]: alertSpaceId } } } as unknown as Filter,
-        ],
+        [authzFilter, spacesFilter],
         config
       );
       if (query != null && typeof query === 'object') {
@@ -504,7 +496,7 @@ export class AlertsClient {
     }
   }
 
-  public async update<Params extends AlertTypeParams = never>({
+  public async update<Params extends RuleTypeParams = never>({
     id,
     status,
     _version,
@@ -548,7 +540,7 @@ export class AlertsClient {
     }
   }
 
-  public async bulkUpdate<Params extends AlertTypeParams = never>({
+  public async bulkUpdate<Params extends RuleTypeParams = never>({
     ids,
     query,
     index,
@@ -606,7 +598,7 @@ export class AlertsClient {
     }
   }
 
-  public async find<Params extends AlertTypeParams = never>({
+  public async find<Params extends RuleTypeParams = never>({
     query,
     aggs,
     _source,
@@ -655,7 +647,6 @@ export class AlertsClient {
         [ReadOperations.Find, ReadOperations.Get, WriteOperations.Update],
         AlertingAuthorizationEntity.Alert
       );
-
       // As long as the user can read a minimum of one type of rule type produced by the provided feature,
       // the user should be provided that features' alerts index.
       // Limiting which alerts that user can read on that index will be done via the findAuthorizationFilter
@@ -663,19 +654,16 @@ export class AlertsClient {
       for (const ruleType of augmentedRuleTypes.authorizedRuleTypes) {
         authorizedFeatures.add(ruleType.producer);
       }
-
       const validAuthorizedFeatures = Array.from(authorizedFeatures).filter(
         (feature): feature is ValidFeatureId =>
           featureIds.includes(feature) && isValidFeatureId(feature)
       );
-
-      const toReturn = validAuthorizedFeatures.flatMap((feature) => {
-        const indices = this.ruleDataService.findIndicesByFeature(feature, Dataset.alerts);
-        if (feature === 'siem') {
-          return indices.map((i) => `${i.baseName}-${this.spaceId}`);
-        } else {
-          return indices.map((i) => i.baseName);
+      const toReturn = validAuthorizedFeatures.map((feature) => {
+        const index = this.ruleDataService.findIndexByFeature(feature, Dataset.alerts);
+        if (index == null) {
+          throw new Error(`This feature id ${feature} should be associated to an alert index`);
         }
+        return index?.getPrimaryAlias(this.spaceId ?? '*') ?? '';
       });
 
       return toReturn;

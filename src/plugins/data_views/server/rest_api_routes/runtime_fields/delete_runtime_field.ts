@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { UsageCounter } from 'src/plugins/usage_collection/server';
-import { DataViewsService } from 'src/plugins/data_views/common';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
+import { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import { DataViewsService } from '../../../common';
 import { ErrorIndexPatternFieldNotFound } from '../../error';
 import { handleErrors } from '../util/handle_errors';
-import { IRouter, StartServicesAccessor } from '../../../../../core/server';
 import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
@@ -35,14 +35,10 @@ export const deleteRuntimeField = async ({
 }: DeleteRuntimeFieldArgs) => {
   usageCollection?.incrementCounter({ counterName });
   const dataView = await dataViewsService.get(id);
-  const field = dataView.fields.getByName(name);
+  const field = dataView.getRuntimeField(name);
 
   if (!field) {
     throw new ErrorIndexPatternFieldNotFound(id, name);
-  }
-
-  if (!field.runtimeField) {
-    throw new Error('Only runtime fields can be deleted.');
   }
 
   dataView.removeRuntimeField(name);
@@ -77,8 +73,9 @@ const deleteRuntimeFieldRouteFactory =
         },
       },
       handleErrors(async (ctx, req, res) => {
-        const savedObjectsClient = ctx.core.savedObjects.client;
-        const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+        const core = await ctx.core;
+        const savedObjectsClient = core.savedObjects.client;
+        const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
         const [, , { dataViewsServiceFactory }] = await getStartServices();
         const dataViewsService = await dataViewsServiceFactory(
           savedObjectsClient,

@@ -20,7 +20,7 @@ import {
   LabelOverflowConstraint,
 } from '@elastic/charts';
 
-import { DatatableRow } from '../../../../expressions/public';
+import { DatatableRow } from '@kbn/expressions-plugin/public';
 
 import { ChartType } from '../../common';
 import { SeriesParam, VisConfig, Aspect } from '../types';
@@ -195,6 +195,11 @@ export const renderAllSeries = (
               areaSeriesStyle={{
                 area: {
                   ...(type === ChartType.Line ? { opacity: 0 } : { opacity: fillOpacity }),
+                },
+                fit: {
+                  area: {
+                    ...(type === ChartType.Line ? { opacity: 0 } : { opacity: fillOpacity }),
+                  },
                 },
                 line: {
                   strokeWidth,

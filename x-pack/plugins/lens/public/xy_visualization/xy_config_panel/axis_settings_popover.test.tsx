@@ -89,11 +89,9 @@ describe('Axes Settings', () => {
     expect(props.setOrientation).toHaveBeenCalled();
   });
 
-  it('should disable the orientation group if the tickLabels are set to not visible', () => {
+  it('should hide the orientation group if the tickLabels are set to not visible', () => {
     const component = shallow(<AxisSettingsPopover {...props} areTickLabelsVisible={false} />);
-    expect(
-      component.find('[data-test-subj="lnsXY_axisOrientation_groups"]').prop('isDisabled')
-    ).toEqual(true);
+    expect(component.exists('[data-test-subj="lnsXY_axisOrientation_groups"]')).toEqual(false);
   });
 
   it('hides the endzone visibility flag if no setter is passed in', () => {
@@ -123,8 +121,11 @@ describe('Axes Settings', () => {
           setExtent={setSpy}
         />
       );
-      const lower = component.find('[data-test-subj="lnsXY_axisExtent_lowerBound"]');
-      const upper = component.find('[data-test-subj="lnsXY_axisExtent_upperBound"]');
+      const rangeInput = component
+        .find('[data-test-subj="lnsXY_axisExtent_customBounds"]')
+        .shallow();
+      const lower = rangeInput.find('[data-test-subj="lnsXY_axisExtent_lowerBound"]');
+      const upper = rangeInput.find('[data-test-subj="lnsXY_axisExtent_upperBound"]');
       expect(lower.prop('value')).toEqual(123);
       expect(upper.prop('value')).toEqual(456);
     });

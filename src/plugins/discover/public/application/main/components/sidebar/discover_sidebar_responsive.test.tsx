@@ -11,12 +11,13 @@ import { BehaviorSubject } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-expect-error
-import realHits from '../../../../__fixtures__/real_hits.js';
+import realHits from '../../../../__fixtures__/real_hits';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { flattenHit, IndexPatternAttributes } from '../../../../../../data/common';
-import { SavedObject } from '../../../../../../../core/types';
+import { DataViewAttributes } from '@kbn/data-views-plugin/public';
+import { flattenHit } from '@kbn/data-plugin/public';
+import { SavedObject } from '@kbn/core/types';
 import {
   DiscoverSidebarResponsive,
   DiscoverSidebarResponsiveProps,
@@ -24,10 +25,10 @@ import {
 import { DiscoverServices } from '../../../../build_services';
 import { FetchStatus } from '../../../types';
 import { AvailableFields$, DataDocuments$ } from '../../utils/use_saved_search';
-import { stubLogstashIndexPattern } from '../../../../../../data/common/stubs';
+import { stubLogstashIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { ElasticSearchHit } from '../../../../types';
-import { KibanaContextProvider } from '../../../../../../kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 const mockServices = {
   history: () => ({
@@ -50,6 +51,7 @@ const mockServices = {
       }
     },
   },
+  docLinks: { links: { discover: { fieldTypeHelp: '' } } },
 } as unknown as DiscoverServices;
 
 const mockfieldCounts: Record<string, number> = {};
@@ -72,15 +74,14 @@ jest.mock('../../utils/calc_field_counts', () => ({
 function getCompProps(): DiscoverSidebarResponsiveProps {
   const indexPattern = stubLogstashIndexPattern;
 
-  // @ts-expect-error _.each() is passing additional args to flattenHit
-  const hits = each(cloneDeep(realHits), (hit) => flattenHit(hit, indexPattern)) as Array<
-    Record<string, unknown>
-  > as ElasticSearchHit[];
+  const hits = each(cloneDeep(realHits), (hit) =>
+    flattenHit(hit, indexPattern)
+  ) as unknown as ElasticSearchHit[];
 
   const indexPatternList = [
-    { id: '0', attributes: { title: 'b' } } as SavedObject<IndexPatternAttributes>,
-    { id: '1', attributes: { title: 'a' } } as SavedObject<IndexPatternAttributes>,
-    { id: '2', attributes: { title: 'c' } } as SavedObject<IndexPatternAttributes>,
+    { id: '0', attributes: { title: 'b' } } as SavedObject<DataViewAttributes>,
+    { id: '1', attributes: { title: 'a' } } as SavedObject<DataViewAttributes>,
+    { id: '2', attributes: { title: 'c' } } as SavedObject<DataViewAttributes>,
   ];
 
   for (const hit of hits) {

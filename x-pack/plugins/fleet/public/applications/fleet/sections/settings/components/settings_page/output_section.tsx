@@ -12,7 +12,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useLink } from '../../../../hooks';
 import type { Output } from '../../../../types';
 import { OutputsTable } from '../outputs_table';
-import { FEATURE_ADD_OUTPUT_ENABLED } from '../../constants';
 
 export interface OutputSectionProps {
   outputs: Output[];
@@ -42,14 +41,16 @@ export const OutputSection: React.FunctionComponent<OutputSectionProps> = ({
       <EuiSpacer size="m" />
       <OutputsTable outputs={outputs} deleteOutput={deleteOutput} />
       <EuiSpacer size="s" />
-      {FEATURE_ADD_OUTPUT_ENABLED && (
-        <EuiButtonEmpty iconType="plusInCircle" href={getHref('settings_create_outputs')}>
-          <FormattedMessage
-            id="xpack.fleet.settings.outputCreateButtonLabel"
-            defaultMessage="Add output"
-          />
-        </EuiButtonEmpty>
-      )}
+      <EuiButtonEmpty
+        iconType="plusInCircle"
+        href={getHref('settings_create_outputs')}
+        data-test-subj="addOutputBtn"
+      >
+        <FormattedMessage
+          id="xpack.fleet.settings.outputCreateButtonLabel"
+          defaultMessage="Add output"
+        />
+      </EuiButtonEmpty>
     </>
   );
 };

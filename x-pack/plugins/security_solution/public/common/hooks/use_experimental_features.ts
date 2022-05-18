@@ -6,7 +6,7 @@
  */
 
 import { useSelector } from 'react-redux';
-import { State } from '../../common/store';
+import { State } from '../store';
 import {
   ExperimentalFeatures,
   getExperimentalAllowedValues,

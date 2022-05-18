@@ -9,7 +9,7 @@ import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants
 
 import { HostsRequestOptions } from '../../../../../../common/search_strategy/security_solution';
 import * as buildQuery from './query.all_hosts.dsl';
-import * as buildRiskQuery from '../risk_score/query.hosts_risk.dsl';
+import * as buildRiskQuery from '../../risk_score/all/query.risk_score.dsl';
 import { allHosts } from '.';
 import {
   mockOptions,
@@ -104,7 +104,7 @@ describe('allHosts search strategy', () => {
     });
 
     test('should query host risk only for hostNames in the current page', async () => {
-      const buildHostsRiskQuery = jest.spyOn(buildRiskQuery, 'buildHostsRiskScoreQuery');
+      const buildHostsRiskQuery = jest.spyOn(buildRiskQuery, 'buildRiskScoreQuery');
       const mockedDeps = mockDeps();
       // @ts-expect-error incomplete type
       mockedDeps.esClient.asCurrentUser.search.mockResponse({ hits: { hits: [] } });
@@ -121,7 +121,7 @@ describe('allHosts search strategy', () => {
 
       expect(buildHostsRiskQuery).toHaveBeenCalledWith({
         defaultIndex: ['ml_host_risk_score_latest_test-space'],
-        hostNames: [hostName],
+        filterQuery: { terms: { 'host.name': [hostName] } },
       });
     });
 

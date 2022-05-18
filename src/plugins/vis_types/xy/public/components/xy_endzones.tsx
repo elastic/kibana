@@ -10,7 +10,7 @@ import React, { FC } from 'react';
 
 import { DomainRange } from '@elastic/charts';
 
-import { Endzones } from '../../../../charts/public';
+import { Endzones } from '@kbn/charts-plugin/public';
 
 interface XYEndzones {
   enabled: boolean;

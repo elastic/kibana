@@ -42,8 +42,8 @@ export const deleteListRoute = (router: ListsPluginRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const lists = getListClient(context);
-        const exceptionLists = getExceptionListClient(context);
+        const lists = await getListClient(context);
+        const exceptionLists = await getExceptionListClient(context);
         const { id, deleteReferences, ignoreReferences } = request.query;
         let deleteExceptionItemResponses;
 

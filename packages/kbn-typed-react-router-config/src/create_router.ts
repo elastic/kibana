@@ -99,7 +99,15 @@ export function createRouter<TRoutes extends RouteMap>(routes: TRoutes): Router<
       if (optional) {
         return [];
       }
-      throw new Error(`No matching route found for ${paths}`);
+
+      let errorMessage: string;
+
+      if (paths.length === 1) {
+        errorMessage = `${paths[0]} does not match current path ${location.pathname}`;
+      } else {
+        errorMessage = `None of ${paths.join(', ')} match current path ${location.pathname}`;
+      }
+      throw new Error(errorMessage);
     }
 
     return matches.slice(0, matchIndex + 1).map((matchedRoute) => {

@@ -8,10 +8,10 @@
 import React, { useMemo } from 'react';
 import { isEmpty } from 'lodash';
 import { ExistsFilter, PhraseFilter } from '@kbn/es-query';
+import { ESFilter } from '@kbn/core/types/elasticsearch';
+import { PersistableFilter } from '@kbn/lens-plugin/common';
 import FieldValueSuggestions from '../../../field_value_suggestions';
-import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
-import { ESFilter } from '../../../../../../../../../src/core/types/elasticsearch';
-import { PersistableFilter } from '../../../../../../../lens/common';
+import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 import { buildPhrasesFilter } from '../../configurations/utils';
 import { SeriesConfig, SeriesUrl } from '../../types';
 import { ALL_VALUES_SELECTED } from '../../../field_value_suggestions/field_value_combobox';
@@ -36,7 +36,7 @@ export function ReportDefinitionField({
   onChange,
   filters,
 }: Props) {
-  const { indexPattern } = useAppIndexPatternContext(series.dataType);
+  const { dataView } = useAppDataViewContext(series.dataType);
 
   const field = typeof fieldProp === 'string' ? fieldProp : fieldProp.field;
 
@@ -62,10 +62,10 @@ export function ReportDefinitionField({
       definitionFields.forEach((fieldObj) => {
         const fieldT = typeof fieldObj === 'string' ? fieldObj : fieldObj.field;
 
-        if (indexPattern && selectedReportDefinitions?.[fieldT] && fieldT !== field) {
+        if (dataView && selectedReportDefinitions?.[fieldT] && fieldT !== field) {
           const values = selectedReportDefinitions?.[fieldT];
           if (!values.includes(ALL_VALUES_SELECTED)) {
-            const valueFilter = buildPhrasesFilter(fieldT, values, indexPattern)[0];
+            const valueFilter = buildPhrasesFilter(fieldT, values, dataView)[0];
             if (valueFilter.query) {
               filtersN.push(valueFilter.query);
             }
@@ -78,7 +78,7 @@ export function ReportDefinitionField({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(selectedReportDefinitions), JSON.stringify(baseFilters)]);
 
-  if (!indexPattern) {
+  if (!dataView) {
     return null;
   }
 
@@ -86,7 +86,7 @@ export function ReportDefinitionField({
     <FieldValueSuggestions
       label={labels[field] ?? field}
       sourceField={field}
-      indexPatternTitle={indexPattern.title}
+      dataViewTitle={dataView.title}
       selectedValue={selectedReportDefinitions?.[field]}
       onChange={(val?: string[]) => onChange(field, val)}
       filters={queryFilters}

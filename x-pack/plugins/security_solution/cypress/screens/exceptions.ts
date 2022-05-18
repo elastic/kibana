@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export const EDIT_EXCEPTIONS_BTN = '[data-test-subj="exceptionsViewerEditBtn"]';
+
 export const ADD_EXCEPTIONS_BTN = '[data-test-subj="exceptionsHeaderAddExceptionBtn"]';
 
 export const CLOSE_ALERTS_CHECKBOX =
@@ -23,6 +25,9 @@ export const OPERATOR_INPUT = '[data-test-subj="operatorAutocompleteComboBox"]';
 
 export const VALUES_INPUT =
   '[data-test-subj="valuesAutocompleteMatch"] [data-test-subj="comboBoxInput"]';
+
+export const VALUES_MATCH_ANY_INPUT =
+  '[data-test-subj="valuesAutocompleteMatchAny"] [data-test-subj="comboBoxInput"]';
 
 export const ADD_AND_BTN = '[data-test-subj="exceptionsAndButton"]';
 
@@ -61,3 +66,10 @@ export const EXCEPTION_FIELD_LIST =
   '[data-test-subj="comboBoxOptionsList fieldAutocompleteComboBox-optionsList"]';
 
 export const EXCEPTION_FLYOUT_TITLE = '[data-test-subj="exception-flyout-title"]';
+
+export const EXCEPTION_EDIT_FLYOUT_SAVE_BTN = '[data-test-subj="edit-exception-confirm-button"]';
+
+export const EXCEPTION_FLYOUT_VERSION_CONFLICT =
+  '[data-test-subj="exceptionsFlyoutVersionConflict"]';
+
+export const EXCEPTION_FLYOUT_LIST_DELETED_ERROR = '[data-test-subj="errorCalloutContainer"]';

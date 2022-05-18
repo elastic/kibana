@@ -6,12 +6,11 @@
  */
 
 import expect from '@kbn/expect';
+import { applicationUsageSchema } from '@kbn/kibana-usage-collection-plugin/server/collectors/application_usage/schema';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { applicationUsageSchema } from '../../../../../src/plugins/kibana_usage_collection/server/collectors/application_usage/schema';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Application Usage', function () {
-    this.tags('ciGroup1');
     const { common } = getPageObjects(['common']);
     const browser = getService('browser');
 

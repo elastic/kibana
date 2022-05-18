@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
+import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import { Plugin } from './plugin';
 import {
   InfraClientSetupExports,

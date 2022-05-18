@@ -148,12 +148,9 @@ run(
     await init();
     for (const pr of prs) {
       log.info('pr #%s', pr.number);
-      log.indent(4);
-      try {
+      await log.indent(4, async () => {
         await updatePr(pr);
-      } finally {
-        log.indent(-4);
-      }
+      });
     }
   },
   {

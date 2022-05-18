@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, FormEvent } from 'react';
+import React, { useEffect, FormEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -46,13 +46,10 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
   features,
   objTypes,
   name,
-  serviceType,
   needsPermissions,
   onFormCreated,
   header,
 }) => {
-  const [formLoading, setFormLoading] = useState(false);
-
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 
   const {
@@ -64,7 +61,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     setSourceIndexPermissionsValue,
   } = useActions(AddSourceLogic);
 
-  const { loginValue, passwordValue, indexPermissionsValue, subdomainValue } =
+  const { buttonLoading, loginValue, passwordValue, indexPermissionsValue, subdomainValue } =
     useValues(AddSourceLogic);
 
   const { isOrganization } = useValues(AppLogic);
@@ -76,13 +73,10 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
 
   const redirectOauth = (oauthUrl: string) => window.location.replace(oauthUrl);
   const redirectFormCreated = () => onFormCreated(name);
-  const onOauthFormSubmit = () => getSourceConnectData(serviceType, redirectOauth);
-  const handleFormSubmitError = () => setFormLoading(false);
-  const onCredentialsFormSubmit = () =>
-    createContentSource(serviceType, redirectFormCreated, handleFormSubmitError);
+  const onOauthFormSubmit = () => getSourceConnectData(redirectOauth);
+  const onCredentialsFormSubmit = () => createContentSource(redirectFormCreated);
 
   const handleFormSubmit = (e: FormEvent) => {
-    setFormLoading(true);
     e.preventDefault();
     const onSubmit = hasOauthRedirect ? onOauthFormSubmit : onCredentialsFormSubmit;
     onSubmit();
@@ -145,7 +139,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
       {permissionsExcluded && !hasPlatinumLicense && <DocumentPermissionsCallout />}
 
       <EuiFormRow>
-        <EuiButton color="primary" type="submit" fill isLoading={formLoading}>
+        <EuiButton color="primary" type="submit" fill isLoading={buttonLoading}>
           {i18n.translate('xpack.enterpriseSearch.workplaceSearch.contentSource.connect.button', {
             defaultMessage: 'Connect {name}',
             values: { name },

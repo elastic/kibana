@@ -139,7 +139,7 @@ exports[`FieldIcon renders known field types murmur3 is rendered 1`] = `
 <EuiToken
   aria-label="murmur3"
   className="kbnFieldIcon"
-  iconType="tokenFile"
+  iconType="tokenSearchType"
   size="s"
   title="murmur3"
 />

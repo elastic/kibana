@@ -13,10 +13,7 @@ import { useValues } from 'kea';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import {
-  KibanaPageTemplate,
-  KibanaPageTemplateProps,
-} from '../../../../../../../src/plugins/kibana_react/public';
+import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
 
 import { FlashMessages } from '../flash_messages';
 import { HttpLogic } from '../http';
@@ -26,7 +23,7 @@ import { Loading } from '../loading';
 import './page_template.scss';
 
 /*
- * EnterpriseSearchPageTemplate is a light wrapper for KibanaPageTemplate (which
+ * EnterpriseSearchPageTemplateWrapper is a light wrapper for KibanaPageTemplate (which
  * is a light wrapper for EuiPageTemplate). It should contain only concerns shared
  * between both AS & WS, which should have their own AppSearchPageTemplate &
  * WorkplaceSearchPageTemplate sitting on top of this template (:nesting_dolls:),
@@ -46,7 +43,7 @@ export type PageTemplateProps = KibanaPageTemplateProps & {
   pageViewTelemetry?: string;
 };
 
-export const EnterpriseSearchPageTemplate: React.FC<PageTemplateProps> = ({
+export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = ({
   children,
   className,
   hideFlashMessages,

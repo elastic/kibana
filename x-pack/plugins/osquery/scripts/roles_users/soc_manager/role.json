@@ -1,0 +1,29 @@
+{
+  "elasticsearch": {
+    "cluster": ["manage"],
+    "indices": [
+      {
+        "names": [".items-*", ".lists-*", ".alerts-security.alerts-*", ".siem-signals-*"],
+        "privileges": ["manage", "read", "write", "view_index_metadata", "maintenance"]
+      },
+      {
+        "names": ["*"],
+        "privileges": ["read"]
+      }
+    ]
+  },
+  "kibana": [
+    {
+      "feature": {
+        "discover": ["read"],
+        "infrastructure": ["read"],
+        "ml": ["all"],
+        "siem": ["all"],
+        "osquery": ["all"],
+        "visualize": ["read"]
+      },
+      "spaces": ["*"]
+    }
+  ]
+}
+

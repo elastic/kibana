@@ -16,20 +16,40 @@ import {
   useMessagesStorage,
   UseMessagesStorage,
 } from '../../common/containers/local_storage/use_messages_storage';
-import { Overview } from './index';
+import { Overview } from '.';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useFetchIndex } from '../../common/containers/source';
 import { useAllTiDataSources } from '../containers/overview_cti_links/use_all_ti_data_sources';
-import { useTiIntegrations } from '../containers/overview_cti_links/use_ti_integrations';
 import { mockCtiLinksResponse, mockTiDataSources } from '../components/overview_cti_links/mock';
 import { useCtiDashboardLinks } from '../containers/overview_cti_links';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { initialUserPrivilegesState } from '../../common/components/user_privileges/user_privileges_context';
 import { EndpointPrivileges } from '../../../common/endpoint/types';
-import { useHostRiskScore } from '../../hosts/containers/host_risk_score';
+import { useHostRiskScore } from '../../risk_score/containers';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import { LandingPageComponent } from '../../common/components/landing_page';
 
-jest.mock('../../common/lib/kibana');
+const mockNavigateToApp = jest.fn();
+jest.mock('../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../common/lib/kibana');
+
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        ...original.useKibana().services,
+        application: {
+          ...original.useKibana().services.application,
+          navigateToApp: mockNavigateToApp,
+        },
+        cases: {
+          ...mockCasesContract(),
+        },
+      },
+    }),
+  };
+});
 jest.mock('../../common/containers/source');
 jest.mock('../../common/containers/sourcerer');
 jest.mock('../../common/containers/use_global_time', () => ({
@@ -69,6 +89,10 @@ jest.mock('../../common/containers/local_storage/use_messages_storage');
 
 jest.mock('../containers/overview_cti_links');
 
+jest.mock('../../common/components/visualization_actions', () => ({
+  VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
+}));
+
 const useCtiDashboardLinksMock = useCtiDashboardLinks as jest.Mock;
 useCtiDashboardLinksMock.mockReturnValue(mockCtiLinksResponse);
 
@@ -76,11 +100,7 @@ jest.mock('../containers/overview_cti_links/use_all_ti_data_sources');
 const useAllTiDataSourcesMock = useAllTiDataSources as jest.Mock;
 useAllTiDataSourcesMock.mockReturnValue(mockTiDataSources);
 
-jest.mock('../containers/overview_cti_links/use_ti_integrations');
-const useTiIntegrationsMock = useTiIntegrations as jest.Mock;
-useTiIntegrationsMock.mockReturnValue({});
-
-jest.mock('../../hosts/containers/host_risk_score');
+jest.mock('../../risk_score/containers');
 const useHostRiskScoreMock = useHostRiskScore as jest.Mock;
 useHostRiskScoreMock.mockReturnValue([false, { data: [], isModuleEnabled: false }]);
 
@@ -130,6 +150,9 @@ describe('Overview', () => {
   });
 
   describe('rendering', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
     test('it DOES NOT render the Getting started text when an index is available', () => {
       mockUseSourcererDataView.mockReturnValue({
         selectedPatterns: [],
@@ -147,7 +170,7 @@ describe('Overview', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(false);
+      expect(mockNavigateToApp).not.toHaveBeenCalled();
       wrapper.unmount();
     });
 
@@ -279,7 +302,7 @@ describe('Overview', () => {
         mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
       });
 
-      it('renders the Setup Instructions text', () => {
+      it('renders getting started page', () => {
         const wrapper = mount(
           <TestProviders>
             <MemoryRouter>
@@ -287,7 +310,8 @@ describe('Overview', () => {
             </MemoryRouter>
           </TestProviders>
         );
-        expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(true);
+
+        expect(wrapper.find(LandingPageComponent).exists()).toBe(true);
       });
     });
   });

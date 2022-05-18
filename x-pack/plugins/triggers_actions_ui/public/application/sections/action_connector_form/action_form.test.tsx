@@ -8,13 +8,13 @@
 import React, { lazy } from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { EuiAccordion } from '@elastic/eui';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import {
   ValidationResult,
   Rule,
-  AlertAction,
+  RuleAction,
   ConnectorValidationResult,
   GenericValidationResult,
 } from '../../../types';
@@ -23,7 +23,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import {
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
-} from '../../../../../alerting/common';
+} from '@kbn/alerting-plugin/common';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/action_connector_api', () => ({
@@ -133,6 +133,7 @@ describe('action_form', () => {
       name: 'Test connector',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     },
     {
       secrets: {},
@@ -142,6 +143,7 @@ describe('action_form', () => {
       name: 'Test connector 2',
       config: {},
       isPreconfigured: true,
+      isDeprecated: false,
     },
     {
       secrets: {},
@@ -151,6 +153,7 @@ describe('action_form', () => {
       name: 'Preconfigured Only',
       config: {},
       isPreconfigured: true,
+      isDeprecated: false,
     },
     {
       secrets: {},
@@ -160,6 +163,7 @@ describe('action_form', () => {
       name: 'Regular connector',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     },
     {
       secrets: {},
@@ -169,6 +173,7 @@ describe('action_form', () => {
       name: 'Non consumer connector',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     },
     {
       secrets: {},
@@ -178,6 +183,7 @@ describe('action_form', () => {
       name: 'Connector with disabled action group',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     },
     {
       secrets: null,
@@ -187,13 +193,14 @@ describe('action_form', () => {
       name: 'Connector with disabled action group',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     },
   ];
 
   const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
   describe('action_form in alert', () => {
-    async function setup(customActions?: AlertAction[], customRecoveredActionGroup?: string) {
+    async function setup(customActions?: RuleAction[], customRecoveredActionGroup?: string) {
       const actionTypeRegistry = actionTypeRegistryMock.create();
 
       const { loadAllActions } = jest.requireMock('../../lib/action_connector_api');
@@ -283,7 +290,7 @@ describe('action_form', () => {
           setActionGroupIdByIndex={(group: string, index: number) => {
             initialAlert.actions[index].group = group;
           }}
-          setActions={(_updatedActions: AlertAction[]) => {}}
+          setActions={(_updatedActions: RuleAction[]) => {}}
           setActionParamsProperty={(key: string, value: any, index: number) =>
             (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
           }

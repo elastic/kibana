@@ -22,6 +22,32 @@
   border-color: darken($euiColorLightestShade, 2%);
 }
 
+.optionsList__popoverTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.optionsList__filterInvalid {
+  color: $euiTextSubduedColor;
+  text-decoration: line-through;
+  margin-left: $euiSizeS;
+  font-weight: 300;
+}
+
+.optionsList__ignoredBadge {
+  margin-left: $euiSizeS;
+}
+
+.optionsList-control-ignored-selection-title {
+  padding-left: $euiSizeS;
+}
+
+.optionsList__selectionInvalid {
+  text-decoration: line-through;
+  color: $euiTextSubduedColor;
+}
+
 .optionsList--filterBtnWrapper {
   height: 100%;
 }

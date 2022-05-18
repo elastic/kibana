@@ -16,6 +16,7 @@ import {
   UsernameAutocompleteComponent,
   IndexTemplateAutocompleteComponent,
   ComponentTemplateAutocompleteComponent,
+  DataStreamAutocompleteComponent,
 } from '../autocomplete/components';
 
 import $ from 'jquery';
@@ -93,6 +94,9 @@ const parametrizedComponentFactories = {
   },
   component_template: function (name, parent) {
     return new ComponentTemplateAutocompleteComponent(name, parent);
+  },
+  data_stream: function (name, parent) {
+    return new DataStreamAutocompleteComponent(name, parent);
   },
 };
 

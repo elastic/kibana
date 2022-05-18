@@ -10,10 +10,8 @@ export CLI_COUNT=$BUILDKITE_PARALLEL_JOB_COUNT
 
 echo "--- Security Solution tests (Chrome)"
 
-cd "$XPACK_DIR"
-
 checks-reporter-with-killswitch "Security Solution Cypress Tests (Chrome) $CLI_NUMBER" \
  node scripts/functional_tests \
    --debug --bail \
    --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-   --config test/security_solution_cypress/cli_config_ci.ts
+   --config x-pack/test/security_solution_cypress/cli_config.ts

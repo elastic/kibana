@@ -38,7 +38,7 @@ export async function generateData({
   const traceEvents = timerange(start, end)
     .interval('30s')
     .rate(rate)
-    .flatMap((timestamp) =>
+    .generator((timestamp) =>
       instance
         .transaction(transaction.name)
         .defaults({
@@ -49,7 +49,6 @@ export async function generateData({
         .timestamp(timestamp)
         .duration(transaction.duration)
         .success()
-        .serialize()
     );
 
   await synthtraceEsClient.index(traceEvents);

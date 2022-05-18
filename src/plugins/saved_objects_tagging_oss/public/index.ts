@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { SavedObjectTaggingOssPlugin } from './plugin';
 
 export type { SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart } from './types';

@@ -9,8 +9,8 @@ import { apm, timerange } from '@elastic/apm-synthtrace';
 import {
   APIClientRequestParamsOf,
   APIReturnType,
-} from '../../../../plugins/apm/public/services/rest/create_call_apm_api';
-import { RecursivePartial } from '../../../../plugins/apm/typings/common';
+} from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 type ErrorGroups =
@@ -76,51 +76,47 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .instance('instance-a');
 
           await synthtraceEsClient.index([
-            ...timerange(start, end)
+            timerange(start, end)
               .interval('1m')
               .rate(appleTransaction.successRate)
-              .flatMap((timestamp) =>
+              .generator((timestamp) =>
                 serviceInstance
                   .transaction(appleTransaction.name)
                   .timestamp(timestamp)
                   .duration(1000)
                   .success()
-                  .serialize()
               ),
-            ...timerange(start, end)
+            timerange(start, end)
               .interval('1m')
               .rate(appleTransaction.failureRate)
-              .flatMap((timestamp) =>
+              .generator((timestamp) =>
                 serviceInstance
                   .transaction(appleTransaction.name)
                   .errors(serviceInstance.error('error 1', 'foo').timestamp(timestamp))
                   .duration(1000)
                   .timestamp(timestamp)
                   .failure()
-                  .serialize()
               ),
-            ...timerange(start, end)
+            timerange(start, end)
               .interval('1m')
               .rate(bananaTransaction.successRate)
-              .flatMap((timestamp) =>
+              .generator((timestamp) =>
                 serviceInstance
                   .transaction(bananaTransaction.name)
                   .timestamp(timestamp)
                   .duration(1000)
                   .success()
-                  .serialize()
               ),
-            ...timerange(start, end)
+            timerange(start, end)
               .interval('1m')
               .rate(bananaTransaction.failureRate)
-              .flatMap((timestamp) =>
+              .generator((timestamp) =>
                 serviceInstance
                   .transaction(bananaTransaction.name)
                   .errors(serviceInstance.error('error 2', 'bar').timestamp(timestamp))
                   .duration(1000)
                   .timestamp(timestamp)
                   .failure()
-                  .serialize()
               ),
           ]);
         });

@@ -68,16 +68,6 @@ export default function ({ getService }: FtrProviderContext) {
             '[request params.id]: value has length [1759] but it must have a maximum length of [1000].'
           );
         });
-
-        it('returns error when attempting to fetch a field which is not a runtime field', async () => {
-          const response2 = await supertest.get(
-            `${config.path}/${indexPattern.id}/runtime_field/foo`
-          );
-
-          expect(response2.status).to.be(400);
-          expect(response2.body.statusCode).to.be(400);
-          expect(response2.body.message).to.be('Only runtime fields can be retrieved.');
-        });
       });
     });
   });

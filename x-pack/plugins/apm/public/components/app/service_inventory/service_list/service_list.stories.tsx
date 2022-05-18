@@ -8,12 +8,13 @@
 import { Meta, Story } from '@storybook/react';
 import React, { ComponentProps } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { CoreStart } from '../../../../../../../../src/core/public';
-import { createKibanaReactContext } from '../../../../../../../../src/plugins/kibana_react/public';
+import { CoreStart } from '@kbn/core/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
+import { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
 import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
-import { ServiceList } from './';
+import { ServiceList } from '.';
 import { items } from './__fixtures__/service_api_mock_data';
 
 type Args = ComponentProps<typeof ServiceList>;
@@ -59,6 +60,10 @@ export const Example: Story<Args> = (args) => {
 Example.args = {
   isLoading: false,
   items,
+  displayHealthStatus: true,
+  initialSortField: ServiceInventoryFieldName.HealthStatus,
+  initialSortDirection: 'desc',
+  sortFn: (sortItems) => sortItems,
 };
 
 export const EmptyState: Story<Args> = (args) => {
@@ -67,6 +72,10 @@ export const EmptyState: Story<Args> = (args) => {
 EmptyState.args = {
   isLoading: false,
   items: [],
+  displayHealthStatus: true,
+  initialSortField: ServiceInventoryFieldName.HealthStatus,
+  initialSortDirection: 'desc',
+  sortFn: (sortItems) => sortItems,
 };
 
 export const WithHealthWarnings: Story<Args> = (args) => {

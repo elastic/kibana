@@ -18,7 +18,7 @@ exports[`GaugeComponent renders the chart 1`] = `
       ]
     }
   />
-  <Component
+  <Goal
     actual={3}
     bandFillColor={[Function]}
     bands={
@@ -28,6 +28,12 @@ exports[`GaugeComponent renders the chart 1`] = `
       ]
     }
     base={0}
+    domain={
+      Object {
+        "max": 4,
+        "min": 0,
+      }
+    }
     id="goal"
     labelMajor="Count of records   "
     labelMinor=""
@@ -41,6 +47,7 @@ exports[`GaugeComponent renders the chart 1`] = `
         4,
       ]
     }
+    tooltipValueFormatter={[Function]}
   />
 </Chart>
 `;

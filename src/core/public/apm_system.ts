@@ -10,6 +10,7 @@ import type { ApmBase, AgentConfigOptions, Transaction } from '@elastic/apm-rum'
 import { modifyUrl } from '@kbn/std';
 import { CachedResourceObserver } from './apm_resource_counter';
 import type { InternalApplicationStart } from './application';
+import { ExecutionContextStart } from './execution_context';
 
 /** "GET protocol://hostname:port/pathname" */
 const HTTP_REQUEST_TRANSACTION_NAME_REGEX =
@@ -27,6 +28,7 @@ interface ApmConfig extends AgentConfigOptions {
 
 interface StartDeps {
   application: InternalApplicationStart;
+  executionContext: ExecutionContextStart;
 }
 
 export class ApmSystem {
@@ -34,6 +36,7 @@ export class ApmSystem {
   private pageLoadTransaction?: Transaction;
   private resourceObserver: CachedResourceObserver;
   private apm?: ApmBase;
+
   /**
    * `apmConfig` would be populated with relevant APM RUM agent
    * configuration if server is started with elastic.apm.* config.
@@ -63,6 +66,15 @@ export class ApmSystem {
     if (!this.enabled || !start) return;
 
     this.markPageLoadStart();
+
+    start.executionContext.context$.subscribe((c) => {
+      // We're using labels because we want the context to be indexed
+      // https://www.elastic.co/guide/en/apm/get-started/current/metadata.html
+      const apmContext = start.executionContext.getAsLabels();
+      this.apm?.addLabels(apmContext);
+    });
+
+    // TODO: Start a new transaction every page change instead of every app change.
 
     /**
      * Register listeners for navigation changes and capture them as

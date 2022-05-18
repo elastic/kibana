@@ -8,7 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { globalNode } from '../../../common/mock';
+import { globalNode } from '../../mock';
 import { AutoDownload } from './auto_download';
 
 describe('AutoDownload', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ILicense } from '../../../licensing/server';
+import { ILicense } from '@kbn/licensing-plugin/server';
 import { ExportTypeDefinition } from '../types';
 import { ExportTypesRegistry } from './export_types_registry';
 

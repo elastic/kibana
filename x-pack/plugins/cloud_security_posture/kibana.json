@@ -1,0 +1,15 @@
+{
+  "id": "cloudSecurityPosture",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "cloudSecurityPosture"],
+  "owner": {
+    "name": "Cloud Security Posture",
+    "githubTeam": "cloud-posture-security"
+  },
+  "description": "The cloud security posture plugin",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["navigation", "data", "fleet", "unifiedSearch"],
+  "requiredBundles": ["kibanaReact"]
+}

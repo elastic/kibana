@@ -15,17 +15,17 @@ import {
   SavedObjectsClientContract,
   IUiSettingsClient,
   ApplicationStart,
-} from 'kibana/public';
+} from '@kbn/core/public';
 import { UiCounterMetricType } from '@kbn/analytics';
-import { TelemetryPluginStart } from '../../../telemetry/public';
-import { UrlForwardingStart } from '../../../url_forwarding/public';
-import { DataViewsContract } from '../../../data_views/public';
+import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
 import { TutorialService } from '../services/tutorials';
 import { AddDataService } from '../services/add_data';
 import { FeatureCatalogueRegistry } from '../services/feature_catalogue';
 import { EnvironmentService } from '../services/environment';
 import { ConfigSchema } from '../../config';
-import { SharePluginSetup } from '../../../share/public';
+import type { WelcomeService } from '../services/welcome';
 
 export interface HomeKibanaServices {
   dataViewsService: DataViewsContract;
@@ -46,9 +46,9 @@ export interface HomeKibanaServices {
   docLinks: DocLinksStart;
   addBasePath: (url: string) => string;
   environmentService: EnvironmentService;
-  telemetry?: TelemetryPluginStart;
   tutorialService: TutorialService;
   addDataService: AddDataService;
+  welcomeService: WelcomeService;
 }
 
 let services: HomeKibanaServices | null = null;

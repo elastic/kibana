@@ -5,10 +5,11 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import moment from 'moment';
 
 import type { Agent, BulkActionResult } from '../../types';
-import { agentPolicyService } from '../../services';
+import { agentPolicyService } from '..';
 import {
   AgentReassignmentError,
   HostedAgentPolicyRestrictionRelatedError,
@@ -17,7 +18,7 @@ import {
 import { isAgentUpgradeable } from '../../../common/services';
 import { appContextService } from '../app_context';
 
-import { bulkCreateAgentActions, createAgentAction } from './actions';
+import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
 import {
   getAgentDocuments,
@@ -27,6 +28,8 @@ import {
   getAgentPolicyForAgent,
 } from './crud';
 import { searchHitToAgent } from './helpers';
+
+const MINIMUM_EXECUTION_DURATION_SECONDS = 1800; // 30m
 
 function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetGetResult {
   return Boolean(doc && 'found' in doc);
@@ -59,7 +62,7 @@ export async function sendUpgradeAgentAction({
   }
 
   await createAgentAction(esClient, {
-    agent_id: agentId,
+    agents: [agentId],
     created_at: now,
     data,
     ack_data: data,
@@ -75,9 +78,10 @@ export async function sendUpgradeAgentsActions(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   options: ({ agents: Agent[] } | GetAgentsOptions) & {
-    sourceUri: string | undefined;
     version: string;
+    sourceUri?: string | undefined;
     force?: boolean;
+    upgradeDurationSeconds?: number;
   }
 ) {
   // Full set of agents
@@ -158,16 +162,22 @@ export async function sendUpgradeAgentsActions(
     source_uri: options.sourceUri,
   };
 
-  await bulkCreateAgentActions(
-    esClient,
-    agentsToUpdate.map((agent) => ({
-      agent_id: agent.id,
-      created_at: now,
-      data,
-      ack_data: data,
-      type: 'UPGRADE',
-    }))
-  );
+  const rollingUpgradeOptions = options?.upgradeDurationSeconds
+    ? {
+        start_time: now,
+        minimum_execution_duration: MINIMUM_EXECUTION_DURATION_SECONDS,
+        expiration: moment().add(options?.upgradeDurationSeconds, 'seconds').toISOString(),
+      }
+    : {};
+
+  await createAgentAction(esClient, {
+    created_at: now,
+    data,
+    ack_data: data,
+    type: 'UPGRADE',
+    agents: agentsToUpdate.map((agent) => agent.id),
+    ...rollingUpgradeOptions,
+  });
 
   await bulkUpdateAgents(
     esClient,

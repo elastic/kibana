@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { DataView, getFieldSubtypeMulti } from '../../../data/common';
+import { getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 export const getFieldsToShow = (
   fields: string[],

@@ -19,7 +19,7 @@ import { useMlKibana } from '../contexts/kibana';
 import { MlPageHeader } from '../components/page_header';
 
 interface TimeSeriesExplorerPageProps {
-  dateFormatTz: string;
+  dateFormatTz?: string;
   resizeRef?: any;
   noSingleMetricJobsFound?: boolean;
 }
@@ -56,7 +56,7 @@ export const TimeSeriesExplorerPage: FC<TimeSeriesExplorerPageProps> = ({
         </MlPageHeader>
 
         {noSingleMetricJobsFound ? null : (
-          <JobSelector dateFormatTz={dateFormatTz} singleSelection={true} timeseriesOnly={true} />
+          <JobSelector dateFormatTz={dateFormatTz!} singleSelection={true} timeseriesOnly={true} />
         )}
 
         {children}

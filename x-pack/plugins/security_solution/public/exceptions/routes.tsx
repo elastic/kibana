@@ -7,11 +7,13 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
-import { TrackApplicationView } from '../../../../../src/plugins/usage_collection/public';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import * as i18n from './translations';
 import { EXCEPTIONS_PATH, SecurityPageName } from '../../common/constants';
 import { ExceptionListsTable } from '../detections/pages/detection_engine/rules/all/exceptions/exceptions_table';
 import { SpyRoute } from '../common/utils/route/spy_routes';
 import { NotFoundPage } from '../app/404';
+import { useReadonlyHeader } from '../use_readonly_header';
 
 const ExceptionsRoutes = () => {
   return (
@@ -22,7 +24,9 @@ const ExceptionsRoutes = () => {
   );
 };
 
-const renderExceptionsRoutes = () => {
+const ExceptionsContainerComponent: React.FC = () => {
+  useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
+
   return (
     <Switch>
       <Route path={EXCEPTIONS_PATH} exact component={ExceptionsRoutes} />
@@ -30,6 +34,10 @@ const renderExceptionsRoutes = () => {
     </Switch>
   );
 };
+
+const Exceptions = React.memo(ExceptionsContainerComponent);
+
+const renderExceptionsRoutes = () => <Exceptions />;
 
 export const routes = [
   {

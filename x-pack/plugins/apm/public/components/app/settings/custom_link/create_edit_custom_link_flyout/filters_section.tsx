@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import moment from 'moment';
 import {
   EuiButtonEmpty,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSelect,
@@ -27,6 +26,7 @@ import {
   FILTER_SELECT_OPTIONS,
   getSelectOptions,
 } from './helper';
+import { SuggestionsSelect } from '../../../../shared/suggestions_select';
 
 export function FiltersSection({
   filters,
@@ -117,16 +117,20 @@ export function FiltersSection({
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFieldText
-                data-test-subj={`${key}.value`}
-                fullWidth
+              <SuggestionsSelect
+                dataTestSubj={`${key}.value`}
+                fieldName={key}
                 placeholder={i18n.translate(
                   'xpack.apm.settings.customLink.flyOut.filters.defaultOption.value',
                   { defaultMessage: 'Value' }
                 )}
-                onChange={(e) => onChangeFilter(key, e.target.value, idx)}
-                value={value}
+                onChange={(selectedValue) =>
+                  onChangeFilter(key, selectedValue as string, idx)
+                }
+                defaultValue={value}
                 isInvalid={!isEmpty(key) && isEmpty(value)}
+                start={moment().subtract(24, 'h').toISOString()}
+                end={moment().toISOString()}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

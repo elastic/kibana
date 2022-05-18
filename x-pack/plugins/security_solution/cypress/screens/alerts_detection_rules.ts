@@ -23,9 +23,9 @@ export const DUPLICATE_RULE_ACTION_BTN = '[data-test-subj="duplicateRuleAction"]
 
 export const DUPLICATE_RULE_MENU_PANEL_BTN = '[data-test-subj="rules-details-duplicate-rule"]';
 
-export const ACTIVATE_RULE_BULK_BTN = '[data-test-subj="activateRuleBulk"]';
+export const ENABLE_RULE_BULK_BTN = '[data-test-subj="enableRuleBulk"]';
 
-export const DEACTIVATE_RULE_BULK_BTN = '[data-test-subj="deactivateRuleBulk"]';
+export const DISABLE_RULE_BULK_BTN = '[data-test-subj="disableRuleBulk"]';
 
 export const DELETE_RULE_BULK_BTN = '[data-test-subj="deleteRuleBulk"]';
 

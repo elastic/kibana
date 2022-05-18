@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "SolarWinds Process Disabling Services via Registry",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "registry where registry.path : \"HKLM\\\\SYSTEM\\\\*ControlSet*\\\\Services\\\\*\\\\Start\" and\n  registry.data.strings : (\"4\", \"0x00000004\") and\n  process.name : (\n      \"SolarWinds.BusinessLayerHost*.exe\", \n      \"ConfigurationWizard*.exe\", \n      \"NetflowDatabaseMaintenance*.exe\", \n      \"NetFlowService*.exe\", \n      \"SolarWinds.Administration*.exe\", \n      \"SolarWinds.Collector.Service*.exe\" , \n      \"SolarwindsDiagnostics*.exe\")\n",
   "references": [
     "https://www.fireeye.com/blog/threat-research/2020/12/evasive-attacker-leverages-solarwinds-supply-chain-compromises-with-sunburst-backdoor.html"
@@ -74,5 +75,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 5
 }

@@ -357,6 +357,59 @@ describe('heatmap suggestions', () => {
       ]);
     });
 
+    test('for tables with a single metric dimension', () => {
+      expect(
+        getSuggestions({
+          table: {
+            layerId: 'first',
+            isMultiRow: true,
+            columns: [
+              {
+                columnId: 'test-column',
+                operation: {
+                  isBucketed: false,
+                  dataType: 'number',
+                  label: 'Count of records',
+                },
+              },
+            ],
+            changeType: 'reduced',
+          },
+          state: {
+            layerId: 'first',
+            layerType: layerTypes.DATA,
+          } as HeatmapVisualizationState,
+          keptLayerIds: ['first'],
+        })
+      ).toEqual([
+        {
+          state: {
+            layerId: 'first',
+            layerType: layerTypes.DATA,
+            shape: 'heatmap',
+            valueAccessor: 'test-column',
+            gridConfig: {
+              type: HEATMAP_GRID_FUNCTION,
+              isCellLabelVisible: false,
+              isYAxisLabelVisible: true,
+              isXAxisLabelVisible: true,
+              isYAxisTitleVisible: false,
+              isXAxisTitleVisible: false,
+            },
+            legend: {
+              isVisible: true,
+              position: Position.Right,
+              type: LEGEND_FUNCTION,
+            },
+          },
+          title: 'Heat map',
+          hide: true,
+          previewIcon: 'empty',
+          score: 0.3,
+        },
+      ]);
+    });
+
     test('when at least one axis has a date histogram', () => {
       expect(
         getSuggestions({

@@ -176,7 +176,6 @@ describe('#checkOriginConflicts', () => {
     ): SavedObjectsImportFailure => ({
       type: object.type,
       id: object.id,
-      title: object.attributes.title,
       meta: { title: object.attributes.title },
       error: {
         type: 'ambiguous_conflict',
@@ -189,7 +188,6 @@ describe('#checkOriginConflicts', () => {
     ): SavedObjectsImportFailure => ({
       type: object.type,
       id: object.id,
-      title: object.attributes?.title,
       meta: { title: object.attributes.title },
       error: {
         type: 'conflict',

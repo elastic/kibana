@@ -12,7 +12,7 @@ import {
   AlertUtils as RuleUtils,
   checkAAD,
   getUrlPrefix,
-  getTestAlertData as getTestRuleData,
+  getTestRuleData,
   ObjectRemover,
   getEventLog,
 } from '../../../common/lib';
@@ -138,6 +138,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         message: "instance 'instance-0' has recovered due to the rule was disabled",
         shouldHaveEventEnd: false,
         shouldHaveTask: false,
+        ruleTypeId: createdRule.rule_type_id,
         rule: {
           id: ruleId,
           category: createdRule.rule_type_id,
@@ -145,6 +146,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
           ruleset: 'alertsFixture',
           name: 'abc',
         },
+        consumer: 'alertsFixture',
       });
     });
 

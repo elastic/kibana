@@ -11,7 +11,7 @@ import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
 import moment from 'moment';
 
-import { dispatchRenderComplete } from '../../../../../kibana_utils/public';
+import { dispatchRenderComplete } from '@kbn/kibana-utils-plugin/public';
 
 import { visTypes as chartTypes } from '../visualizations/vis_types';
 import { NoResults } from '../errors';
@@ -95,7 +95,7 @@ export class Handler {
             });
           case 'click':
             return self.vis.emit(eventType, {
-              name: 'filterBucket',
+              name: 'filter',
               data: eventPayload,
             });
         }

@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import { PLUGIN_ID } from '../common/constants';
-import { ReportingCore } from './';
+import { ReportingCore } from '.';
 import { buildConfig, registerUiSettings, ReportingConfigType } from './config';
 import { registerDeprecations } from './deprecations';
-import { LevelLogger, ReportingStore } from './lib';
+import { ReportingStore } from './lib';
 import { registerRoutes } from './routes';
 import { setFieldFormats } from './services';
 import type {
@@ -28,11 +34,11 @@ import { registerReportingUsageCollector } from './usage';
 export class ReportingPlugin
   implements Plugin<ReportingSetup, ReportingStart, ReportingSetupDeps, ReportingStartDeps>
 {
-  private logger: LevelLogger;
+  private logger: Logger;
   private reportingCore?: ReportingCore;
 
   constructor(private initContext: PluginInitializerContext<ReportingConfigType>) {
-    this.logger = new LevelLogger(initContext.logger.get());
+    this.logger = initContext.logger.get();
   }
 
   public setup(core: CoreSetup, plugins: ReportingSetupDeps) {
@@ -112,5 +118,9 @@ export class ReportingPlugin
     });
 
     return reportingCore.getContract();
+  }
+
+  stop() {
+    this.reportingCore?.pluginStop();
   }
 }

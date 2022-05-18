@@ -7,8 +7,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EmbeddablePersistableStateService } from 'src/plugins/embeddable/common';
+import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 
+import { identity, pickBy } from 'lodash';
+import {
+  ControlGroupContainer,
+  ControlGroupInput,
+  ControlGroupOutput,
+  CONTROL_GROUP_TYPE,
+} from '@kbn/controls-plugin/public';
+import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
 import { DashboardContainerInput } from '../..';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 import type { DashboardContainer, DashboardContainerServices } from './dashboard_container';
@@ -23,13 +31,6 @@ import {
   createExtract,
   createInject,
 } from '../../../common/embeddable/dashboard_container_persistable_state';
-import {
-  ControlGroupContainer,
-  ControlGroupInput,
-  ControlGroupOutput,
-  CONTROL_GROUP_TYPE,
-} from '../../../../controls/public';
-import { getDefaultDashboardControlGroupInput } from '../../dashboard_constants';
 
 export type DashboardContainerFactory = EmbeddableFactory<
   DashboardContainerInput,
@@ -72,6 +73,7 @@ export class DashboardContainerFactoryDefinition
       isFullScreenMode: false,
       useMargins: true,
       syncColors: true,
+      syncTooltips: true,
     };
   }
 
@@ -85,11 +87,15 @@ export class DashboardContainerFactoryDefinition
       ControlGroupOutput,
       ControlGroupContainer
     >(CONTROL_GROUP_TYPE);
+    const { filters, query, timeRange, viewMode, controlGroupInput, id } = initialInput;
     const controlGroup = await controlsGroupFactory?.create({
-      ...getDefaultDashboardControlGroupInput(),
-      ...(initialInput.controlGroupInput ?? {}),
-      viewMode: initialInput.viewMode,
-      id: `control_group_${initialInput.id ?? 'new_dashboard'}`,
+      id: `control_group_${id ?? 'new_dashboard'}`,
+      ...getDefaultControlGroupInput(),
+      ...pickBy(controlGroupInput, identity), // undefined keys in initialInput should not overwrite defaults
+      timeRange,
+      viewMode,
+      filters,
+      query,
     });
     const { DashboardContainer: DashboardContainerEmbeddable } = await import(
       './dashboard_container'

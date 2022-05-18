@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PaletteOutput } from '@kbn/coloring';
 import { getSuggestions, getTopSuggestionForField } from './suggestion_helpers';
 import { createMockVisualization, createMockDatasource, DatasourceMock } from '../../mocks';
 import {
@@ -13,7 +14,6 @@ import {
   Visualization,
   VisualizeEditorContext,
 } from '../../types';
-import { PaletteOutput } from 'src/plugins/charts/public';
 import { DatasourceStates } from '../../state_management';
 
 const generateSuggestion = (state = {}, layerId: string = 'first'): DatasourceSuggestion => ({
@@ -702,10 +702,12 @@ describe('suggestion helpers', () => {
       defaultParams = [
         {
           '1': {
-            getTableSpec: () => [{ columnId: 'col1' }],
+            getTableSpec: () => [{ columnId: 'col1', fields: [] }],
             datasourceId: '',
             getOperationForColumnId: jest.fn(),
             getVisualDefaults: jest.fn(),
+            getSourceId: jest.fn(),
+            getFilters: jest.fn(),
           },
         },
         { activeId: 'testVis', state: {} },
@@ -729,6 +731,41 @@ describe('suggestion helpers', () => {
         },
         expect.any(Function)
       );
+    });
+
+    it('should get the top non-hidden suggestion if there is no active visualization', () => {
+      defaultParams[0] = {
+        '1': {
+          getTableSpec: () => [],
+          datasourceId: '',
+          getOperationForColumnId: jest.fn(),
+          getVisualDefaults: jest.fn(),
+          getSourceId: jest.fn(),
+          getFilters: jest.fn(),
+        },
+      };
+      defaultParams[3] = {
+        testVis: mockVisualization1,
+        vis2: mockVisualization2,
+      };
+      mockVisualization1.getSuggestions.mockReturnValue([]);
+      mockVisualization2.getSuggestions.mockReturnValue([
+        {
+          score: 0.3,
+          title: 'second suggestion',
+          state: { second: true },
+          previewIcon: 'empty',
+        },
+        {
+          score: 0.5,
+          title: 'mop suggestion',
+          state: { first: true },
+          previewIcon: 'empty',
+          hide: true,
+        },
+      ]);
+      const result = getTopSuggestionForField(...defaultParams);
+      expect(result!.title).toEqual('second suggestion');
     });
 
     it('should return nothing if visualization does not produce suggestions', () => {
@@ -764,6 +801,8 @@ describe('suggestion helpers', () => {
           datasourceId: '',
           getOperationForColumnId: jest.fn(),
           getVisualDefaults: jest.fn(),
+          getSourceId: jest.fn(),
+          getFilters: jest.fn(),
         },
       };
       mockVisualization1.getSuggestions.mockReturnValue([]);

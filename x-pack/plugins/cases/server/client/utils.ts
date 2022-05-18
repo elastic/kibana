@@ -12,7 +12,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { nodeBuilder, fromKueryExpression, KueryNode } from '@kbn/es-query';
+import { nodeBuilder, fromKueryExpression, KueryNode, escapeKuery } from '@kbn/es-query';
 import { CASE_SAVED_OBJECT } from '../../common/constants';
 import {
   OWNER_FIELD,
@@ -23,6 +23,7 @@ import {
   ContextTypeUserRt,
   excess,
   throwErrors,
+  CaseSeverity,
 } from '../../common/api';
 import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
 import {
@@ -114,6 +115,25 @@ export const addStatusFilter = ({
   return filters.length > 1 ? nodeBuilder.and(filters) : filters[0];
 };
 
+export const addSeverityFilter = ({
+  severity,
+  appendFilter,
+  type = CASE_SAVED_OBJECT,
+}: {
+  severity: CaseSeverity;
+  appendFilter?: KueryNode;
+  type?: string;
+}): KueryNode => {
+  const filters: KueryNode[] = [];
+  filters.push(nodeBuilder.is(`${type}.attributes.severity`, severity));
+
+  if (appendFilter) {
+    filters.push(appendFilter);
+  }
+
+  return filters.length > 1 ? nodeBuilder.and(filters) : filters[0];
+};
+
 interface FilterField {
   filters?: string | string[];
   field: string;
@@ -183,20 +203,61 @@ export function stringToKueryNode(expression?: string): KueryNode | undefined {
   return fromKueryExpression(expression);
 }
 
+export const buildRangeFilter = ({
+  from,
+  to,
+  field = 'created_at',
+  savedObjectType = CASE_SAVED_OBJECT,
+}: {
+  from?: string;
+  to?: string;
+  field?: string;
+  savedObjectType?: string;
+}): KueryNode | undefined => {
+  if (from == null && to == null) {
+    return;
+  }
+
+  try {
+    const fromKQL =
+      from != null
+        ? `${escapeKuery(savedObjectType)}.attributes.${escapeKuery(field)} >= ${escapeKuery(from)}`
+        : undefined;
+    const toKQL =
+      to != null
+        ? `${escapeKuery(savedObjectType)}.attributes.${escapeKuery(field)} <= ${escapeKuery(to)}`
+        : undefined;
+
+    const rangeKQLQuery = `${fromKQL != null ? fromKQL : ''} ${
+      fromKQL != null && toKQL != null ? 'and' : ''
+    } ${toKQL != null ? toKQL : ''}`;
+
+    return stringToKueryNode(rangeKQLQuery);
+  } catch (error) {
+    throw badRequest('Invalid "from" and/or "to" query parameters');
+  }
+};
+
 export const constructQueryOptions = ({
   tags,
   reporters,
   status,
+  severity,
   sortByField,
   owner,
   authorizationFilter,
+  from,
+  to,
 }: {
   tags?: string | string[];
   reporters?: string | string[];
   status?: CaseStatuses;
+  severity?: CaseSeverity;
   sortByField?: string;
   owner?: string | string[];
   authorizationFilter?: KueryNode;
+  from?: string;
+  to?: string;
 }): SavedObjectFindOptionsKueryNode => {
   const kueryNodeExists = (filter: KueryNode | null | undefined): filter is KueryNode =>
     filter != null;
@@ -211,10 +272,17 @@ export const constructQueryOptions = ({
   const ownerFilter = buildFilter({ filters: owner ?? [], field: OWNER_FIELD, operator: 'or' });
 
   const statusFilter = status != null ? addStatusFilter({ status }) : undefined;
+  const severityFilter = severity != null ? addSeverityFilter({ severity }) : undefined;
+  const rangeFilter = buildRangeFilter({ from, to });
 
-  const filters: KueryNode[] = [statusFilter, tagsFilter, reportersFilter, ownerFilter].filter(
-    kueryNodeExists
-  );
+  const filters: KueryNode[] = [
+    statusFilter,
+    severityFilter,
+    tagsFilter,
+    reportersFilter,
+    rangeFilter,
+    ownerFilter,
+  ].filter(kueryNodeExists);
 
   const caseFilters = filters.length > 1 ? nodeBuilder.and(filters) : filters[0];
 

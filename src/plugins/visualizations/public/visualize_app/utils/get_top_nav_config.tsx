@@ -13,26 +13,27 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { EuiBetaBadgeProps } from '@elastic/eui';
 import { parse } from 'query-string';
 
-import { Capabilities } from 'src/core/public';
-import { TopNavMenuData } from 'src/plugins/navigation/public';
+import { Capabilities } from '@kbn/core/public';
+import { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import {
+  showSaveModal,
+  SavedObjectSaveModalOrigin,
+  SavedObjectSaveOpts,
+  OnSaveProps,
+} from '@kbn/saved-objects-plugin/public';
+import {
+  LazySavedObjectSaveModalDashboard,
+  withSuspense,
+} from '@kbn/presentation-util-plugin/public';
+import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
+import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { saveVisualization } from '../../utils/saved_visualize_utils';
 import {
   VISUALIZE_EMBEDDABLE_TYPE,
   VisualizeInput,
   getFullPath,
   NavigateToLensContext,
-} from '../../../../visualizations/public';
-import {
-  showSaveModal,
-  SavedObjectSaveModalOrigin,
-  SavedObjectSaveOpts,
-  OnSaveProps,
-} from '../../../../saved_objects/public';
-import {
-  LazySavedObjectSaveModalDashboard,
-  withSuspense,
-} from '../../../../presentation_util/public';
-import { unhashUrl } from '../../../../kibana_utils/public';
+} from '../..';
 
 import {
   VisualizeServices,
@@ -41,7 +42,6 @@ import {
 } from '../types';
 import { VISUALIZE_APP_NAME, VisualizeConstants } from '../../../common/constants';
 import { getEditBreadcrumbs } from './breadcrumbs';
-import { EmbeddableStateTransfer } from '../../../../embeddable/public';
 import { VISUALIZE_APP_LOCATOR, VisualizeLocatorParams } from '../../../common/locator';
 import { getUiActions } from '../../services';
 import { VISUALIZE_EDITOR_TRIGGER } from '../../triggers';
@@ -627,7 +627,7 @@ export const getTopNavConfig = (
               }
             ),
             testId: 'visualizesaveAndReturnButton',
-            disableButton: hasUnappliedChanges || !dashboardCapabilities.showWriteControls,
+            disableButton: hasUnappliedChanges,
             tooltip() {
               if (hasUnappliedChanges) {
                 return i18n.translate(

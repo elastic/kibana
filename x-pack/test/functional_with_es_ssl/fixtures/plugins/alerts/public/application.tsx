@@ -9,7 +9,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route, RouteComponentProps } from 'react-router-dom';
 import { EuiPage, EuiText } from '@elastic/eui';
-import { AppMountParameters, CoreStart } from '../../../../../../../src/core/public';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 
 export interface AlertingExampleComponentParams {
   basename: string;

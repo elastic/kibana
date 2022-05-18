@@ -11,30 +11,36 @@ import {
   JSON_TEXT,
   TABLE_CONTAINER,
   TABLE_ROWS,
+  SUMMARY_VIEW_PREVALENCE_CELL,
+  SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON,
 } from '../../screens/alerts_details';
+import { QUERY_TAB_BUTTON, TIMELINE_TITLE } from '../../screens/timeline';
 
 import { expandFirstAlert } from '../../tasks/alerts';
-import { openJsonView, openTable } from '../../tasks/alerts_details';
-import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
+import { openJsonView, openOverview, openTable } from '../../tasks/alerts_details';
+import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
-import { esArchiverLoad } from '../../tasks/es_archiver';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
-import { refreshPage } from '../../tasks/security_header';
+import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { getUnmappedRule } from '../../objects/rule';
 
 import { ALERTS_URL } from '../../urls/navigation';
+import { pageSelector } from '../../screens/alerts_detection_rules';
 
-describe.skip('Alert details with unmapped fields', () => {
-  beforeEach(() => {
+describe('Alert details with unmapped fields', () => {
+  before(() => {
     cleanKibana();
     esArchiverLoad('unmapped_fields');
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    createCustomRuleActivated(getUnmappedRule());
-    refreshPage();
+    login();
+    createCustomRuleEnabled(getUnmappedRule());
+    visitWithoutDateRange(ALERTS_URL);
     waitForAlertsToPopulate();
     expandFirstAlert();
+  });
+  after(() => {
+    esArchiverUnload('unmapped_fields');
   });
 
   it('Displays the unmapped field on the JSON view', () => {
@@ -48,21 +54,19 @@ describe.skip('Alert details with unmapped fields', () => {
     });
   });
 
-  // This test needs to be updated to not look for the field in a specific row, as it prevents us from adding/removing fields
-  it.skip('Displays the unmapped field on the table', () => {
+  it('Displays the unmapped field on the table', () => {
     const expectedUnmmappedField = {
-      row: 83,
       field: 'unmapped',
       text: 'This is the unmapped field',
     };
 
     openTable();
+    cy.get(ALERT_FLYOUT).find(pageSelector(5)).click({ force: true });
     cy.get(ALERT_FLYOUT)
       .find(TABLE_ROWS)
-      .eq(expectedUnmmappedField.row)
       .within(() => {
-        cy.get(CELL_TEXT).eq(2).should('have.text', expectedUnmmappedField.field);
-        cy.get(CELL_TEXT).eq(4).should('have.text', expectedUnmmappedField.text);
+        cy.get(CELL_TEXT).should('contain', expectedUnmmappedField.field);
+        cy.get(CELL_TEXT).should('contain', expectedUnmmappedField.text);
       });
   });
 
@@ -75,10 +79,29 @@ describe.skip('Alert details with unmapped fields', () => {
       .within(($tableContainer) => {
         expect($tableContainer[0].scrollLeft).to.equal(0);
 
-        // Try to scroll left and make sure that the table hasn't actually scrolled
+        // Due to the introduction of pagination on the table, a slight horizontal overflow has been introduced.
+        // scroll ignores the `overflow-x:hidden` attribute and will still scroll the element if there is a hidden overflow
+        // Updated the below to equal 4 to account for this and keep a test to make sure it doesn't grow
         $tableContainer[0].scroll({ left: 1000 });
 
-        expect($tableContainer[0].scrollLeft).to.equal(0);
+        expect($tableContainer[0].scrollLeft).to.equal(4);
+      });
+  });
+
+  it('Opens a new timeline investigation', () => {
+    openOverview();
+
+    cy.get(SUMMARY_VIEW_PREVALENCE_CELL)
+      .invoke('text')
+      .then((alertCount) => {
+        // Click on the first button that lets us investigate in timeline
+        cy.get(ALERT_FLYOUT).find(SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON).click();
+
+        // Make sure a new timeline is created and opened
+        cy.get(TIMELINE_TITLE).should('contain.text', 'Untitled timeline');
+
+        // The alert count in this timeline should match the count shown on the alert flyout
+        cy.get(QUERY_TAB_BUTTON).should('contain.text', alertCount);
       });
   });
 });

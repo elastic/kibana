@@ -18,9 +18,9 @@ import {
 } from '../../../common/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { createStore, State } from '../../../common/store';
-import { hostsModel } from '../../../hosts/store';
-import { HostsTableType } from '../../../hosts/store/model';
-import { HostsTable } from './index';
+import { hostsModel } from '../../store';
+import { HostsTableType } from '../../store/model';
+import { HostsTable } from '.';
 import { mockData } from './mock';
 import { render } from '@testing-library/react';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
@@ -69,6 +69,7 @@ describe('Hosts Table', () => {
             fakeTotalCount={0}
             loading={false}
             loadPage={loadPage}
+            setQuerySkip={jest.fn()}
             showMorePagesIndicator={false}
             totalCount={-1}
             type={hostsModel.HostsType.page}
@@ -91,6 +92,7 @@ describe('Hosts Table', () => {
             data={mockData}
             totalCount={0}
             fakeTotalCount={-1}
+            setQuerySkip={jest.fn()}
             showMorePagesIndicator={false}
             loadPage={loadPage}
             type={hostsModel.HostsType.page}
@@ -113,6 +115,7 @@ describe('Hosts Table', () => {
             data={mockData}
             totalCount={0}
             fakeTotalCount={-1}
+            setQuerySkip={jest.fn()}
             showMorePagesIndicator={false}
             loadPage={loadPage}
             type={hostsModel.HostsType.page}
@@ -136,6 +139,7 @@ describe('Hosts Table', () => {
               data={mockData}
               totalCount={0}
               fakeTotalCount={-1}
+              setQuerySkip={jest.fn()}
               showMorePagesIndicator={false}
               loadPage={loadPage}
               type={hostsModel.HostsType.page}

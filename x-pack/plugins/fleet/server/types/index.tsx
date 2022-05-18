@@ -12,10 +12,6 @@ export type {
   AgentStatus,
   AgentType,
   AgentAction,
-  AgentPolicyAction,
-  BaseAgentActionSOAttributes,
-  AgentActionSOAttributes,
-  AgentPolicyActionSOAttributes,
   PackagePolicy,
   PackagePolicyInput,
   PackagePolicyInputStream,
@@ -63,6 +59,8 @@ export type {
   RegistrySearchResult,
   IndexTemplateEntry,
   IndexTemplateMappings,
+  TemplateMap,
+  TemplateMapEntry,
   Settings,
   SettingsSOAttributes,
   InstallType,
@@ -74,6 +72,7 @@ export type {
   FleetServerAgent,
   FleetServerAgentAction,
   FleetServerPolicy,
+  FullAgentPolicyInputStream,
 } from '../../common';
 export {
   ElasticsearchAssetType,

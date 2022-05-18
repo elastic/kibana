@@ -8,17 +8,11 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { AggFunctionsMapping, UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
-import {
-  extendedBoundsToAst,
-  numericalRangeToAst,
-} from '../../../../../../../../src/plugins/data/common';
-import {
-  buildExpressionFunction,
-  Range,
-} from '../../../../../../../../src/plugins/expressions/public';
+import { AggFunctionsMapping, UI_SETTINGS } from '@kbn/data-plugin/public';
+import { extendedBoundsToAst, numericalRangeToAst } from '@kbn/data-plugin/common';
+import { buildExpressionFunction, Range } from '@kbn/expressions-plugin/public';
 import { RangeEditor } from './range_editor';
-import { OperationDefinition } from '../index';
+import { OperationDefinition } from '..';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { updateColumnParam } from '../../layer_helpers';
 import { supportedFormats } from '../../../../../common/expressions/format_column/supported_formats';
@@ -44,6 +38,7 @@ export interface RangeIndexPatternColumn extends FieldBasedIndexPatternColumn {
     maxBars: typeof AUTO_BARS | number;
     ranges: RangeTypeLens[];
     format?: { id: string; params?: { decimals: number } };
+    includeEmptyRows?: boolean;
     parentFormat?: {
       id: string;
       params?: { id?: string; template?: string; replaceInfinity?: boolean };
@@ -112,6 +107,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
       isBucketed: true,
       scale: 'interval', // ordinal for Range
       params: {
+        includeEmptyRows: true,
         type: MODES.Histogram,
         ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
         maxBars: AUTO_BARS,
@@ -175,7 +171,8 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
       maxBars: params.maxBars === AUTO_BARS ? maxBarsDefaultValue : params.maxBars,
       interval: 'auto',
       has_extended_bounds: false,
-      min_doc_count: false,
+      min_doc_count: Boolean(params.includeEmptyRows),
+      autoExtendBounds: Boolean(params.includeEmptyRows),
       extended_bounds: extendedBoundsToAst({}),
     }).toAst();
   },

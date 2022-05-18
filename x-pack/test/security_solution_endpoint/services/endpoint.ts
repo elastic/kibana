@@ -7,22 +7,22 @@
 
 import { errors } from '@elastic/elasticsearch';
 import { Client } from '@elastic/elasticsearch';
-import { FtrService } from '../../functional/ftr_provider_context';
 import {
   metadataCurrentIndexPattern,
   metadataTransformPrefix,
   METADATA_UNITED_INDEX,
-} from '../../../plugins/security_solution/common/endpoint/constants';
+} from '@kbn/security-solution-plugin/common/endpoint/constants';
 import {
   deleteIndexedHostsAndAlerts,
   IndexedHostsAndAlertsResponse,
   indexHostsAndAlerts,
-} from '../../../plugins/security_solution/common/endpoint/index_data';
-import { TransformConfigUnion } from '../../../plugins/transform/common/types/transform';
-import { GetTransformsResponseSchema } from '../../../plugins/transform/common/api_schemas/transforms';
-import { catchAndWrapError } from '../../../plugins/security_solution/server/endpoint/utils';
-import { installOrUpgradeEndpointFleetPackage } from '../../../plugins/security_solution/common/endpoint/data_loaders/setup_fleet_for_endpoint';
-import { EndpointError } from '../../../plugins/security_solution/common/endpoint/errors';
+} from '@kbn/security-solution-plugin/common/endpoint/index_data';
+import { TransformConfigUnion } from '@kbn/transform-plugin/common/types/transform';
+import { GetTransformsResponseSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
+import { catchAndWrapError } from '@kbn/security-solution-plugin/server/endpoint/utils';
+import { installOrUpgradeEndpointFleetPackage } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/setup_fleet_for_endpoint';
+import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
+import { FtrService } from '../../functional/ftr_provider_context';
 
 export class EndpointTestResources extends FtrService {
   private readonly esClient = this.ctx.getService('es');
@@ -85,7 +85,7 @@ export class EndpointTestResources extends FtrService {
    * @param [options.alertsPerHost=1] Number of Alerts and Events to be loaded per Endpoint Host
    * @param [options.enableFleetIntegration=true] When set to `true`, Fleet data will also be loaded (ex. Integration Policies, Agent Policies, "fake" Agents)
    * @param [options.generatorSeed='seed`] The seed to be used by the data generator. Important in order to ensure the same data is generated on very run.
-   * @param [options.waitUntilTransformed=true] If set to `true`, the data loading process will wait until the endpoint hosts metadata is processd by the transform
+   * @param [options.waitUntilTransformed=true] If set to `true`, the data loading process will wait until the endpoint hosts metadata is processed by the transform
    */
   async loadEndpointData(
     options: Partial<{
@@ -93,7 +93,6 @@ export class EndpointTestResources extends FtrService {
       numHostDocs: number;
       alertsPerHost: number;
       enableFleetIntegration: boolean;
-      logsEndpoint: boolean;
       generatorSeed: string;
       waitUntilTransformed: boolean;
     }> = {}
@@ -103,7 +102,6 @@ export class EndpointTestResources extends FtrService {
       numHostDocs = 1,
       alertsPerHost = 1,
       enableFleetIntegration = true,
-      logsEndpoint = false,
       generatorSeed = 'seed',
       waitUntilTransformed = true,
     } = options;
@@ -120,8 +118,7 @@ export class EndpointTestResources extends FtrService {
       'logs-endpoint.events.process-default',
       'logs-endpoint.alerts-default',
       alertsPerHost,
-      enableFleetIntegration,
-      logsEndpoint
+      enableFleetIntegration
     );
 
     if (waitUntilTransformed) {

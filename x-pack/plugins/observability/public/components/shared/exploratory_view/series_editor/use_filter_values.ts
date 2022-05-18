@@ -6,17 +6,17 @@
  */
 import { ExistsFilter, isExistsFilter } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ESFilter } from '@kbn/core/types/elasticsearch';
+import { PersistableFilter } from '@kbn/lens-plugin/common';
 import { useValuesList } from '../../../../hooks/use_values_list';
 import { FilterProps } from './columns/filter_expanded';
-import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
-import { ESFilter } from '../../../../../../../../src/core/types/elasticsearch';
-import { PersistableFilter } from '../../../../../../lens/common';
+import { useAppDataViewContext } from '../hooks/use_app_data_view';
 
 export function useFilterValues(
   { field, series, baseFilters, label }: FilterProps,
   query?: string
 ) {
-  const { indexPatterns } = useAppIndexPatternContext(series.dataType);
+  const { dataViews } = useAppDataViewContext(series.dataType);
 
   const queryFilters: ESFilter[] = [];
 
@@ -36,6 +36,6 @@ export function useFilterValues(
     time: series.time,
     keepHistory: true,
     filters: queryFilters,
-    indexPatternTitle: indexPatterns[series.dataType]?.title,
+    dataViewTitle: dataViews[series.dataType]?.title,
   });
 }

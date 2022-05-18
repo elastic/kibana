@@ -6,7 +6,7 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-types';
-import { TiDataSources } from '../../containers/overview_cti_links/use_ti_data_sources';
+import { TiDataSources } from './use_ti_data_sources';
 import { LinkPanelListItem } from '../../components/link_panel';
 import { useKibana } from '../../../common/lib/kibana';
 

@@ -27,7 +27,7 @@ import {
 } from '../../../../components/layout';
 import { ContentSection } from '../../../../components/shared/content_section';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
-import { NAV, CUSTOM_SERVICE_TYPE } from '../../../../constants';
+import { NAV, CUSTOM_SERVICE_TYPE, EXTERNAL_SERVICE_TYPE } from '../../../../constants';
 import { SourceDataItem } from '../../../../types';
 import { SourcesLogic } from '../../sources_logic';
 
@@ -90,12 +90,12 @@ export const AddSourceList: React.FC = () => {
   const filterConfiguredSources = (source: SourceDataItem) =>
     filterSources(source, configuredSources);
 
-  const visibleAvailableSources = availableSources.filter(
-    filterAvailableSources
-  ) as SourceDataItem[];
-  const visibleConfiguredSources = configuredSources.filter(
-    filterConfiguredSources
-  ) as SourceDataItem[];
+  const visibleAvailableSources = availableSources
+    .filter(filterAvailableSources)
+    .filter((source) => source.serviceType !== EXTERNAL_SERVICE_TYPE);
+  // The API returns available external sources as a separate entry, but we don't want to present them as options to add
+
+  const visibleConfiguredSources = configuredSources.filter(filterConfiguredSources);
 
   const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
 

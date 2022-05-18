@@ -9,6 +9,7 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { isString } from 'lodash/fp';
+import { StatefulEventContext } from '@kbn/timelines-plugin/public';
 import {
   TimelineId,
   TimelineTabs,
@@ -20,7 +21,6 @@ import { UserDetailsLink } from '../../../../../common/components/links';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { timelineActions } from '../../../../store/timeline';
-import { StatefulEventContext } from '../../../../../../../timelines/public';
 
 interface Props {
   contextId: string;
@@ -83,7 +83,7 @@ const UserNameComponent: React.FC<Props> = ({
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
-  // When this component is used outside of timeline/alerts table (i.e. in the flyout) we would still like it to link to the Host Details page
+  // When this component is used outside of timeline/alerts table (i.e. in the flyout) we would still like it to link to the User Details page
   const content = useMemo(
     () => (
       <UserDetailsLink

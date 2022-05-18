@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RequestHandler } from 'kibana/server';
+import { RequestHandler } from '@kbn/core/server';
 import { TypeOf } from '@kbn/config-schema';
 import { policyIndexPattern } from '../../../../common/endpoint/constants';
 import {
@@ -22,11 +22,8 @@ export const getHostPolicyResponseHandler = function (): RequestHandler<
   undefined
 > {
   return async (context, request, response) => {
-    const doc = await getPolicyResponseByAgentId(
-      policyIndexPattern,
-      request.query.agentId,
-      context.core.elasticsearch.client
-    );
+    const client = (await context.core).elasticsearch.client;
+    const doc = await getPolicyResponseByAgentId(policyIndexPattern, request.query.agentId, client);
 
     if (doc) {
       return response.ok({ body: doc });

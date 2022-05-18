@@ -121,6 +121,7 @@ export const EventFiltersListPage = memo(() => {
 
   // load the list of policies
   const policiesRequest = useGetEndpointSpecificPolicies({
+    perPage: 1000,
     onError: (err) => {
       toasts.addDanger(getLoadPoliciesError(err));
     },

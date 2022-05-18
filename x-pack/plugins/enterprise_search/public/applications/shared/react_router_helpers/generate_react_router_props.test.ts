@@ -8,7 +8,7 @@
 import { mockKibanaValues } from '../../__mocks__/kea_logic';
 import { mockHistory } from '../../__mocks__/react_router';
 
-import { generateReactRouterProps } from './';
+import { generateReactRouterProps } from '.';
 
 describe('generateReactRouterProps', () => {
   beforeEach(() => {

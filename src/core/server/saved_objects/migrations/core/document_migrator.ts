@@ -549,19 +549,21 @@ function convertNamespaceType(doc: SavedObjectUnsanitizedDoc) {
 
   const { id: originId, type } = otherAttrs;
   const id = SavedObjectsUtils.getConvertedObjectId(namespace, type, originId!);
-  if (namespace !== undefined) {
-    const legacyUrlAlias: SavedObjectUnsanitizedDoc<LegacyUrlAlias> = {
-      id: `${namespace}:${type}:${originId}`,
-      type: LEGACY_URL_ALIAS_TYPE,
-      attributes: {
-        sourceId: originId,
-        targetNamespace: namespace,
-        targetType: type,
-        targetId: id,
-      },
-    };
-    additionalDocs.push(legacyUrlAlias);
-  }
+  const legacyUrlAlias: SavedObjectUnsanitizedDoc<LegacyUrlAlias> = {
+    id: `${namespace}:${type}:${originId}`,
+    type: LEGACY_URL_ALIAS_TYPE,
+    attributes: {
+      // NOTE TO MAINTAINERS: If a saved object migration is added in `src/core/server/saved_objects/object_types/registration.ts`, these
+      // values must be updated accordingly. That's because a user can upgrade Kibana from 7.17 to 8.x, and any defined migrations will not
+      // be applied to aliases that are created during the conversion process.
+      sourceId: originId,
+      targetNamespace: namespace,
+      targetType: type,
+      targetId: id,
+      purpose: 'savedObjectConversion',
+    },
+  };
+  additionalDocs.push(legacyUrlAlias);
   return {
     transformedDoc: { ...otherAttrs, id, originId, namespaces: [namespace] },
     additionalDocs,

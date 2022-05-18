@@ -5,17 +5,29 @@
  * 2.0.
  */
 
-import { AuthenticationExpiredError } from '.';
+import * as errors from '.';
 
-describe('ReportingError', () => {
+const { ReportingError: _, ...nonAbstractErrors } = errors;
+
+describe('Reporting error', () => {
   it('provides error code when stringified', () => {
-    expect(new AuthenticationExpiredError() + '').toBe(
-      `ReportingError(code: authentication_expired)`
+    expect(new errors.AuthenticationExpiredError() + '').toBe(
+      `ReportingError(code: authentication_expired_error)`
     );
   });
   it('provides details if there are any and error code when stringified', () => {
-    expect(new AuthenticationExpiredError('some details') + '').toBe(
-      `ReportingError(code: authentication_expired) "some details"`
+    expect(new errors.AuthenticationExpiredError('some details') + '').toBe(
+      `ReportingError(code: authentication_expired_error) "some details"`
     );
+  });
+  it('has the expected error code structure', () => {
+    Object.values(nonAbstractErrors).forEach((Ctor) => {
+      expect(Ctor.code).toMatch(/^[a-z_]+_error$/);
+    });
+  });
+  it('has the same error code values on static "code" and instance "code" properties', () => {
+    Object.values(nonAbstractErrors).forEach((Ctor) => {
+      expect(Ctor.code).toBe(new Ctor().code);
+    });
   });
 });

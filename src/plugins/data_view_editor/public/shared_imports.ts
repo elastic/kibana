@@ -10,17 +10,17 @@ export type {
   DataPublicPluginStart,
   GetFieldsOptions,
   IndexPatternAggRestrictions,
-} from '../../data/public';
-export { IndexPattern, IndexPatternField } from '../../data/public';
-export type { DataViewSpec } from '../../data_views/public';
-export { DataView } from '../../data_views/public';
+} from '@kbn/data-plugin/public';
+export { IndexPattern, IndexPatternField } from '@kbn/data-plugin/public';
+export type { DataViewSpec } from '@kbn/data-views-plugin/public';
+export { DataView } from '@kbn/data-views-plugin/public';
 
 export {
   createKibanaReactContext,
   toMountPoint,
   CodeEditor,
   useKibana,
-} from '../../kibana_react/public';
+} from '@kbn/kibana-react-plugin/public';
 
 export type {
   FormSchema,
@@ -29,7 +29,7 @@ export type {
   FieldConfig,
   ValidationConfig,
   ValidationFuncArg,
-} from '../../es_ui_shared/static/forms/hook_form_lib';
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 export {
   useForm,
   useFormData,
@@ -37,9 +37,9 @@ export {
   Form,
   UseField,
   getFieldValidityAndErrorMessage,
-} from '../../es_ui_shared/static/forms/hook_form_lib';
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
-export { fieldValidators } from '../../es_ui_shared/static/forms/helpers';
+export { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 
 export {
   TextField,
@@ -48,6 +48,6 @@ export {
   SelectField,
   FormRow,
   SuperSelectField,
-} from '../../es_ui_shared/static/forms/components';
+} from '@kbn/es-ui-shared-plugin/static/forms/components';
 
-export type { HttpStart } from '../../../core/public';
+export type { HttpStart } from '@kbn/core/public';

@@ -6,13 +6,16 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { keyBy, keys, merge } from 'lodash';
-import type { RequestHandler } from 'src/core/server';
+import type { RequestHandler, ElasticsearchClient } from '@kbn/core/server';
+
+import type { TypeOf } from '@kbn/config-schema';
 
 import type { DataStream } from '../../types';
 import { KibanaSavedObjectType } from '../../../common';
 import type { GetDataStreamsResponse } from '../../../common';
 import { getPackageSavedObjects } from '../../services/epm/packages/get';
 import { defaultIngestErrorHandler } from '../../errors';
+import type { GetDataStreamsListRequestSchema } from '../../../common/constants/data_streams';
 
 const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*,synthetics-*-*';
 
@@ -37,16 +40,138 @@ interface ESDataStreamInfo {
   hidden: boolean;
 }
 
-interface ESDataStreamStats {
-  data_stream: string;
-  backing_indices: number;
-  store_size_bytes: number;
-  maximum_timestamp: number;
+async function getMetadataFromTermsEnum({
+  dataStreamName,
+  esClient,
+}: {
+  dataStreamName: string;
+  esClient: ElasticsearchClient;
+}) {
+  const [maxEventIngestedResponse, namespaceResponse, datasetResponse, typeResponse] =
+    await Promise.all([
+      esClient.search({
+        size: 1,
+        index: dataStreamName,
+        sort: {
+          // @ts-expect-error Type '{ 'event.ingested': string; }' is not assignable to type 'string | string[] | undefined'.
+          'event.ingested': 'desc',
+        },
+        _source: false,
+        fields: ['event.ingested'],
+      }),
+      esClient.termsEnum({
+        index: dataStreamName,
+        field: 'data_stream.namespace',
+      }),
+      esClient.termsEnum({
+        index: dataStreamName,
+        field: 'data_stream.dataset',
+      }),
+      esClient.termsEnum({
+        index: dataStreamName,
+        field: 'data_stream.type',
+      }),
+    ]);
+
+  const maxIngested = new Date(
+    maxEventIngestedResponse.hits.hits[0]?.fields!['event.ingested']
+  ).getTime();
+
+  const namespace = namespaceResponse.terms[0] ?? '';
+  const dataset = datasetResponse.terms[0] ?? '';
+  const type = typeResponse.terms[0] ?? '';
+
+  return {
+    maxIngested,
+    namespace,
+    dataset,
+    type,
+  };
+}
+
+async function getMetadataFromAggregations({
+  dataStreamName,
+  esClient,
+}: {
+  dataStreamName: string;
+  esClient: ElasticsearchClient;
+}) {
+  // Query backing indices to extract data stream dataset, namespace, and type values
+  const { aggregations: dataStreamAggs } = await esClient.search({
+    index: dataStreamName,
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            {
+              exists: {
+                field: 'data_stream.namespace',
+              },
+            },
+            {
+              exists: {
+                field: 'data_stream.dataset',
+              },
+            },
+          ],
+        },
+      },
+      aggs: {
+        maxIngestedTimestamp: {
+          max: {
+            field: 'event.ingested',
+          },
+        },
+        dataset: {
+          terms: {
+            field: 'data_stream.dataset',
+            size: 1,
+          },
+        },
+        namespace: {
+          terms: {
+            field: 'data_stream.namespace',
+            size: 1,
+          },
+        },
+        type: {
+          terms: {
+            field: 'data_stream.type',
+            size: 1,
+          },
+        },
+      },
+    },
+  });
+
+  const { maxIngestedTimestamp } = dataStreamAggs as Record<
+    string,
+    estypes.AggregationsRateAggregate
+  >;
+  const { dataset, namespace, type } = dataStreamAggs as Record<
+    string,
+    estypes.AggregationsMultiBucketAggregateBase<{ key?: string; value?: number }>
+  >;
+
+  const maxIngested = maxIngestedTimestamp?.value;
+
+  return {
+    maxIngested,
+    dataset: (dataset.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '',
+    namespace: (namespace.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '',
+    type: (type.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '',
+  };
 }
 
 export const getListHandler: RequestHandler = async (context, request, response) => {
   // Query datastreams as the current user as the Kibana internal user may not have all the required permission
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const { savedObjects, elasticsearch } = await context.core;
+  const esClient = elasticsearch.client.asCurrentUser;
+
+  const { use_terms_enum: useTermsEnum } = request.params as TypeOf<
+    typeof GetDataStreamsListRequestSchema['params']
+  >;
 
   const body: GetDataStreamsResponse = {
     data_streams: [],
@@ -60,12 +185,12 @@ export const getListHandler: RequestHandler = async (context, request, response)
       packageSavedObjects,
     ] = await Promise.all([
       esClient.indices.getDataStream({ name: DATA_STREAM_INDEX_PATTERN }),
-      esClient.indices.dataStreamsStats({ name: DATA_STREAM_INDEX_PATTERN }),
-      getPackageSavedObjects(context.core.savedObjects.client),
+      esClient.indices.dataStreamsStats({ name: DATA_STREAM_INDEX_PATTERN, human: true }),
+      getPackageSavedObjects(savedObjects.client),
     ]);
 
     const dataStreamsInfoByName = keyBy<ESDataStreamInfo>(dataStreamsInfo, 'name');
-    const dataStreamsStatsByName = keyBy<ESDataStreamStats>(dataStreamStats, 'data_stream');
+    const dataStreamsStatsByName = keyBy(dataStreamStats, 'data_stream');
 
     // Combine data stream info
     const dataStreams = merge(dataStreamsInfoByName, dataStreamsStatsByName);
@@ -88,7 +213,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
       allDashboards[pkgSavedObject.id] = dashboards;
       return allDashboards;
     }, {});
-    const allDashboardSavedObjectsResponse = await context.core.savedObjects.client.bulkGet<{
+    const allDashboardSavedObjectsResponse = await savedObjects.client.bulkGet<{
       title?: string;
     }>(
       Object.values(dashboardIdsByPackageName).flatMap((dashboardIds) =>
@@ -127,78 +252,24 @@ export const getListHandler: RequestHandler = async (context, request, response)
         package_version: '',
         last_activity_ms: dataStream.maximum_timestamp, // overridden below if maxIngestedTimestamp agg returns a result
         size_in_bytes: dataStream.store_size_bytes,
+        // `store_size` should be available from ES due to ?human=true flag
+        // but fallback to bytes just in case
+        size_in_bytes_formatted: dataStream.store_size || `${dataStream.store_size_bytes}b`,
         dashboards: [],
       };
 
-      // Query backing indices to extract data stream dataset, namespace, and type values
-      const { aggregations: dataStreamAggs } = await esClient.search({
-        index: dataStream.name,
-        body: {
-          size: 0,
-          query: {
-            bool: {
-              filter: [
-                {
-                  exists: {
-                    field: 'data_stream.namespace',
-                  },
-                },
-                {
-                  exists: {
-                    field: 'data_stream.dataset',
-                  },
-                },
-              ],
-            },
-          },
-          aggs: {
-            maxIngestedTimestamp: {
-              max: {
-                field: 'event.ingested',
-              },
-            },
-            dataset: {
-              terms: {
-                field: 'data_stream.dataset',
-                size: 1,
-              },
-            },
-            namespace: {
-              terms: {
-                field: 'data_stream.namespace',
-                size: 1,
-              },
-            },
-            type: {
-              terms: {
-                field: 'data_stream.type',
-                size: 1,
-              },
-            },
-          },
-        },
-      });
-
-      const { maxIngestedTimestamp } = dataStreamAggs as Record<
-        string,
-        estypes.AggregationsRateAggregate
-      >;
-      const { dataset, namespace, type } = dataStreamAggs as Record<
-        string,
-        estypes.AggregationsMultiBucketAggregateBase<{ key?: string; value?: number }>
-      >;
+      const { maxIngested, namespace, dataset, type } = useTermsEnum
+        ? await getMetadataFromTermsEnum({ dataStreamName: dataStream.name, esClient })
+        : await getMetadataFromAggregations({ dataStreamName: dataStream.name, esClient });
 
       // some integrations e.g custom logs don't have event.ingested
-      if (maxIngestedTimestamp?.value) {
-        dataStreamResponse.last_activity_ms = maxIngestedTimestamp?.value;
+      if (maxIngested) {
+        dataStreamResponse.last_activity_ms = maxIngested;
       }
 
-      dataStreamResponse.dataset =
-        (dataset.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '';
-      dataStreamResponse.namespace =
-        (namespace.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '';
-      dataStreamResponse.type =
-        (type.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '';
+      dataStreamResponse.dataset = dataset;
+      dataStreamResponse.namespace = namespace;
+      dataStreamResponse.type = type;
 
       // Find package saved object
       const pkgName = dataStreamResponse.package;

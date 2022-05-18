@@ -8,7 +8,7 @@
 import { AnyAction, Reducer } from 'redux';
 import reduceReducers from 'reduce-reducers';
 
-import { tGridReducer } from '../../../../timelines/public';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 import { hostsReducer } from '../../hosts/store';
 import { networkReducer } from '../../network/store';

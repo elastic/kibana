@@ -6,9 +6,9 @@
  */
 
 import { SemVer } from 'semver';
-import { IScopedClusterClient, kibanaResponseFactory } from 'src/core/server';
-import { coreMock } from 'src/core/server/mocks';
-import { licensingMock } from '../../../../plugins/licensing/server/mocks';
+import { IScopedClusterClient, kibanaResponseFactory } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { MAJOR_VERSION } from '../../common/constants';
 import { getMockVersionInfo } from './__fixtures__/version';
 
@@ -104,7 +104,10 @@ describe('EsVersionPrecheck', () => {
 
     ctx.core.elasticsearch.client.asInternalUser.nodes.info.mockRejectedValue({ statusCode: 403 });
 
-    const result = await esVersionCheck(ctx, kibanaResponseFactory);
+    const result = await esVersionCheck(
+      coreMock.createCustomRequestHandlerContext(ctx),
+      kibanaResponseFactory
+    );
     expect(result).toHaveProperty('status', 403);
   });
 
@@ -120,7 +123,10 @@ describe('EsVersionPrecheck', () => {
       },
     });
 
-    const result = await esVersionCheck(ctx, kibanaResponseFactory);
+    const result = await esVersionCheck(
+      coreMock.createCustomRequestHandlerContext(ctx),
+      kibanaResponseFactory
+    );
     expect(result).toHaveProperty('status', 426);
     expect(result).toHaveProperty('payload.attributes.allNodesUpgraded', false);
   });
@@ -137,7 +143,10 @@ describe('EsVersionPrecheck', () => {
       },
     });
 
-    const result = await esVersionCheck(ctx, kibanaResponseFactory);
+    const result = await esVersionCheck(
+      coreMock.createCustomRequestHandlerContext(ctx),
+      kibanaResponseFactory
+    );
     expect(result).toHaveProperty('status', 426);
     expect(result).toHaveProperty('payload.attributes.allNodesUpgraded', true);
   });
@@ -154,6 +163,8 @@ describe('EsVersionPrecheck', () => {
       },
     });
 
-    await expect(esVersionCheck(ctx, kibanaResponseFactory)).resolves.toBe(undefined);
+    await expect(
+      esVersionCheck(coreMock.createCustomRequestHandlerContext(ctx), kibanaResponseFactory)
+    ).resolves.toBe(undefined);
   });
 });

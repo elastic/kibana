@@ -1,0 +1,53 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Detects the creation and modification of an account with the \"Don't Expire Password\" option Enabled. Attackers can abuse this misconfiguration to persist in the domain and maintain long-term access using compromised accounts with this property.",
+  "false_positives": [
+    "User accounts can be used as service accounts and have their password set never to expire. This is a bad security practice that exposes the account to Credential Access attacks. For cases in which user accounts cannot be avoided, Microsoft provides the Group Managed Service Accounts (gMSA) feature, which ensures that the account password is robust and changed regularly and automatically."
+  ],
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-system.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Account configured with never Expiring Password",
+  "query": "event.action:\"modified-user-account\" and event.code:\"4738\" and message:\"'Don't Expire Password' - Enabled\" and not user.id:\"S-1-5-18\"\n",
+  "references": [
+    "https://www.cert.ssi.gouv.fr/uploads/guide-ad.html#dont_expire",
+    "https://blog.menasec.net/2019/02/threat-hunting-26-persistent-password.html"
+  ],
+  "risk_score": 47,
+  "rule_id": "62a70f6f-3c37-43df-a556-f64fa475fba2",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Persistence",
+    "Active Directory"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1098",
+          "name": "Account Manipulation",
+          "reference": "https://attack.mitre.org/techniques/T1098/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 1
+}

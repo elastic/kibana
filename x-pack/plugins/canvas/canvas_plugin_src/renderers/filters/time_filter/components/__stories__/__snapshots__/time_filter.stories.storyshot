@@ -42,13 +42,17 @@ exports[`Storyshots renderers/TimeFilter default 1`] = `
                     color="inherit"
                     data-euiicon-type="arrowDown"
                     size="s"
-                  />
+                  >
+                    
+                  </span>
                   <span
                     className="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
                   >
                     <span
                       data-euiicon-type="calendar"
-                    />
+                    >
+                      
+                    </span>
                   </span>
                 </span>
               </button>
@@ -91,7 +95,9 @@ exports[`Storyshots renderers/TimeFilter default 1`] = `
                     color="inherit"
                     data-euiicon-type="timeRefresh"
                     size="m"
-                  />
+                  >
+                    
+                  </span>
                   <span
                     className="euiButtonEmpty__text"
                   >
@@ -150,13 +156,17 @@ exports[`Storyshots renderers/TimeFilter with absolute time bounds 1`] = `
                     color="inherit"
                     data-euiicon-type="arrowDown"
                     size="s"
-                  />
+                  >
+                    
+                  </span>
                   <span
                     className="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
                   >
                     <span
                       data-euiicon-type="calendar"
-                    />
+                    >
+                      
+                    </span>
                   </span>
                 </span>
               </button>
@@ -235,7 +245,9 @@ exports[`Storyshots renderers/TimeFilter with absolute time bounds 1`] = `
                     color="inherit"
                     data-euiicon-type="timeRefresh"
                     size="m"
-                  />
+                  >
+                    
+                  </span>
                   <span
                     className="euiButtonEmpty__text"
                   >
@@ -294,13 +306,17 @@ exports[`Storyshots renderers/TimeFilter with commonlyUsedRanges 1`] = `
                     color="inherit"
                     data-euiicon-type="arrowDown"
                     size="s"
-                  />
+                  >
+                    
+                  </span>
                   <span
                     className="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
                   >
                     <span
                       data-euiicon-type="calendar"
-                    />
+                    >
+                      
+                    </span>
                   </span>
                 </span>
               </button>
@@ -343,7 +359,9 @@ exports[`Storyshots renderers/TimeFilter with commonlyUsedRanges 1`] = `
                     color="inherit"
                     data-euiicon-type="timeRefresh"
                     size="m"
-                  />
+                  >
+                    
+                  </span>
                   <span
                     className="euiButtonEmpty__text"
                   >
@@ -402,13 +420,17 @@ exports[`Storyshots renderers/TimeFilter with dateFormat 1`] = `
                     color="inherit"
                     data-euiicon-type="arrowDown"
                     size="s"
-                  />
+                  >
+                    
+                  </span>
                   <span
                     className="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
                   >
                     <span
                       data-euiicon-type="calendar"
-                    />
+                    >
+                      
+                    </span>
                   </span>
                 </span>
               </button>
@@ -451,7 +473,9 @@ exports[`Storyshots renderers/TimeFilter with dateFormat 1`] = `
                     color="inherit"
                     data-euiicon-type="timeRefresh"
                     size="m"
-                  />
+                  >
+                    
+                  </span>
                   <span
                     className="euiButtonEmpty__text"
                   >
@@ -510,13 +534,17 @@ exports[`Storyshots renderers/TimeFilter with relative time bounds 1`] = `
                     color="inherit"
                     data-euiicon-type="arrowDown"
                     size="s"
-                  />
+                  >
+                    
+                  </span>
                   <span
                     className="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
                   >
                     <span
                       data-euiicon-type="calendar"
-                    />
+                    >
+                      
+                    </span>
                   </span>
                 </span>
               </button>
@@ -595,7 +623,9 @@ exports[`Storyshots renderers/TimeFilter with relative time bounds 1`] = `
                     color="inherit"
                     data-euiicon-type="timeRefresh"
                     size="m"
-                  />
+                  >
+                    
+                  </span>
                   <span
                     className="euiButtonEmpty__text"
                   >

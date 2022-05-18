@@ -21,7 +21,7 @@ const validate = {
 export function registerSetManyRoute(router: IRouter) {
   router.post({ path: '/api/kibana/settings', validate }, async (context, request, response) => {
     try {
-      const uiSettingsClient = context.core.uiSettings.client;
+      const uiSettingsClient = (await context.core).uiSettings.client;
 
       const { changes } = request.body;
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
-import { difference, first, has, isNaN, isNumber, isObject, last, mapValues } from 'lodash';
+import { ElasticsearchClient } from '@kbn/core/server';
 import moment from 'moment';
+import { difference, first, has, isNaN, isNumber, isObject, last, mapValues } from 'lodash';
 import {
   Aggregators,
   Comparator,

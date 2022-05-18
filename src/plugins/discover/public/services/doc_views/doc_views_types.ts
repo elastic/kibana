@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataView, DataViewField } from '../../../../data/common';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { ElasticSearchHit } from '../../types';
 import { IgnoredReason } from '../../utils/get_ignored_reason';
 

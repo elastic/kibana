@@ -17,13 +17,15 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
+  EuiBadge,
 } from '@elastic/eui';
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 
 import { i18n } from '@kbn/i18n';
 
-import { useUiTracker } from '../../../../../observability/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useUiTracker } from '@kbn/observability-plugin/public';
 
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
 import { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
@@ -48,6 +50,18 @@ import { getTransactionDistributionChartData } from './get_transaction_distribut
 import { useTheme } from '../../../hooks/use_theme';
 import { ChartTitleToolTip } from './chart_title_tool_tip';
 import { MIN_TAB_TITLE_HEIGHT } from '../transaction_details/distribution';
+import { getLatencyCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
+
+export function FallbackCorrelationBadge() {
+  return (
+    <EuiBadge>
+      <FormattedMessage
+        id="xpack.apm.correlations.latencyCorrelations.fallbackCorrelationBadgeMessage"
+        defaultMessage="Very low"
+      />
+    </EuiBadge>
+  );
+}
 
 export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   const {
@@ -151,6 +165,31 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
           },
           sortable: true,
         },
+        {
+          width: '116px',
+          field: 'pValue',
+          name: (
+            <>
+              {i18n.translate(
+                'xpack.apm.correlations.failedTransactions.correlationsTable.impactLabel',
+                {
+                  defaultMessage: 'Impact',
+                }
+              )}
+            </>
+          ),
+          render: (_, { correlation, isFallbackResult }) => {
+            const label = getLatencyCorrelationImpactLabel(
+              correlation,
+              isFallbackResult
+            );
+            return label ? (
+              <EuiBadge color={label.color}>{label.impact}</EuiBadge>
+            ) : null;
+          },
+          sortable: true,
+        },
+
         {
           field: 'fieldName',
           name: i18n.translate(

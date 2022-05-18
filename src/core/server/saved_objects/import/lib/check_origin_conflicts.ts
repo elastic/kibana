@@ -229,7 +229,6 @@ export async function checkOriginConflicts({
         errors.push({
           type,
           id,
-          title,
           meta: { title },
           error: {
             type: 'conflict',
@@ -253,7 +252,6 @@ export async function checkOriginConflicts({
     errors.push({
       type,
       id,
-      title,
       meta: { title },
       error: {
         type: 'ambiguous_conflict',

@@ -6,7 +6,7 @@
  */
 
 import { cleanKibana, reload } from '../../tasks/common';
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 import { HOSTS_URL } from '../../urls/navigation';
 import { openEvents } from '../../tasks/hosts/main';
 import { DATAGRID_HEADERS } from '../../screens/timeline';
@@ -14,10 +14,11 @@ import { waitsForEventsToBeLoaded } from '../../tasks/hosts/events';
 import { removeColumn } from '../../tasks/timeline';
 
 // TODO: Fix bug in persisting the columns of timeline
-describe('persistent timeline', () => {
-  beforeEach(() => {
+describe.skip('persistent timeline', () => {
+  before(() => {
     cleanKibana();
-    loginAndWaitForPage(HOSTS_URL);
+    login();
+    visit(HOSTS_URL);
     openEvents();
     waitsForEventsToBeLoaded();
     cy.get(DATAGRID_HEADERS).then((header) =>

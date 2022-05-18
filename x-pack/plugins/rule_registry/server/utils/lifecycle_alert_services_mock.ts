@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AlertInstanceContext, AlertInstanceState } from '../../../alerting/server';
-import { alertsMock } from '../../../alerting/server/mocks';
+import { AlertInstanceContext, AlertInstanceState } from '@kbn/alerting-plugin/server';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { LifecycleAlertServices } from './create_lifecycle_executor';
 
 /**
@@ -18,7 +18,7 @@ class AlertsMockWrapper<
   InstanceContext extends AlertInstanceContext = AlertInstanceContext
 > {
   createAlertServices() {
-    return alertsMock.createAlertServices<InstanceState, InstanceContext>();
+    return alertsMock.createRuleExecutorServices<InstanceState, InstanceContext>();
   }
 }
 
@@ -35,4 +35,5 @@ export const createLifecycleAlertServicesMock = <
   alertServices: AlertServices<InstanceState, InstanceContext>
 ): LifecycleAlertServices<InstanceState, InstanceContext, ActionGroupIds> => ({
   alertWithLifecycle: ({ id }) => alertServices.alertFactory.create(id),
+  getAlertStartedDate: jest.fn((id: string) => null),
 });

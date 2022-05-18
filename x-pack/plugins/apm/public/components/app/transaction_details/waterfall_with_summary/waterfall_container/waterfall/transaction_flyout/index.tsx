@@ -76,7 +76,10 @@ export function TransactionFlyout({
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <TransactionActionMenu transaction={transactionDoc} />
+              <TransactionActionMenu
+                isLoading={false}
+                transaction={transactionDoc}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>

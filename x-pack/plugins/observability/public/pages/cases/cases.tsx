@@ -19,7 +19,7 @@ interface CasesProps {
 }
 export const Cases = React.memo<CasesProps>(({ userCanCrud }) => {
   const {
-    cases: casesUi,
+    cases,
     application: { getUrlForApp, navigateToApp },
   } = useKibana().services;
   const { observabilityRuleTypeRegistry } = usePluginContext();
@@ -42,7 +42,7 @@ export const Cases = React.memo<CasesProps>(({ userCanCrud }) => {
           />
         </Suspense>
       )}
-      {casesUi.getCases({
+      {cases.ui.getCases({
         basePath: CASES_PATH,
         userCanCrud,
         owner: [CASES_OWNER],

@@ -9,10 +9,7 @@ import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiNotificationBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import {
-  LazyLabsFlyout,
-  withSuspense,
-} from '../../../../../../../src/plugins/presentation_util/public';
+import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 
 import { useLabsService } from '../../../services';
 
