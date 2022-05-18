@@ -44,7 +44,7 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'errors'
     | 'metrics'
     | 'nodes'
-    | 'infra'
+    | 'infrastructure'
     | 'service-map'
     | 'logs'
     | 'profiling';
@@ -249,8 +249,8 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       hidden: isJVMsTabHidden({ agentName, runtimeName }),
     },
     {
-      key: 'infra',
-      href: router.link('/services/{serviceName}/infra', {
+      key: 'infrastructure',
+      href: router.link('/services/{serviceName}/infrastructure', {
         path: { serviceName },
         query,
       }),

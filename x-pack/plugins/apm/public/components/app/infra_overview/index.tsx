@@ -10,10 +10,8 @@ import { InfraTabs } from './infra_tabs';
 
 export function InfraOverview() {
   return (
-    <>
-      <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
-        <InfraTabs />
-      </EuiPanel>
-    </>
+    <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
+      <InfraTabs />
+    </EuiPanel>
   );
 }

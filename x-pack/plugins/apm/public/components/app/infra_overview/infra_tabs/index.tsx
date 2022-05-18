@@ -5,61 +5,57 @@
  * 2.0.
  */
 
-import {
-  EuiTabbedContent,
-  EuiTabbedContentProps,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
-import React, { useMemo } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { EuiTabbedContent, EuiLoadingSpinner } from '@elastic/eui';
+import React from 'react';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { ApmPluginStartDeps } from '../../../../plugin';
 import { EmptyPrompt } from './empty_prompt';
 import { FailurePrompt } from './failure_prompt';
+import { useTabs } from './use_tabs';
 
-type Tab = NonNullable<EuiTabbedContentProps['tabs']>[0] & {
-  id: 'containers' | 'pods' | 'hosts';
-  hidden?: boolean;
+const INITIAL_STATE = {
+  containerIds: [],
+  hostNames: [],
+  podNames: [],
 };
 
 export function InfraTabs() {
   const { serviceName } = useApmServiceContext();
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
-  } = useApmParams('/services/{serviceName}/infra');
+  } = useApmParams('/services/{serviceName}/infrastructure');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { data, status } = useFetcher(
+  const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
-        return callApmApi('GET /internal/apm/services/{serviceName}/infra', {
-          params: {
-            path: { serviceName },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/infrastructure_attributes',
+          {
+            params: {
+              path: { serviceName },
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+              },
             },
-          },
-        });
+          }
+        );
       }
     },
     [environment, kuery, serviceName, start, end]
   );
 
-  const containerIds = data?.containerIds;
-  const podNames = data?.podNames;
-  const hostNames = data?.hostNames;
+  const { containerIds, podNames, hostNames } = data;
 
   const tabs = useTabs({
-    containerIds: containerIds || [],
-    podNames: podNames || [],
-    hostNames: hostNames || [],
+    containerIds,
+    podNames,
+    hostNames,
     start,
     end,
   });
@@ -82,12 +78,9 @@ export function InfraTabs() {
 
   if (
     status === FETCH_STATUS.SUCCESS &&
-    containerIds &&
-    containerIds.length <= 0 &&
-    podNames &&
-    podNames.length <= 0 &&
-    hostNames &&
-    hostNames?.length <= 0
+    !containerIds.length &&
+    !podNames.length &&
+    !hostNames.length
   ) {
     return (
       <div style={{ textAlign: 'center' }}>
@@ -106,98 +99,4 @@ export function InfraTabs() {
       />
     </>
   );
-}
-
-function useTabs({
-  containerIds,
-  podNames,
-  hostNames,
-  start,
-  end,
-}: {
-  containerIds: string[];
-  podNames: string[];
-  hostNames: string[];
-  start: string;
-  end: string;
-}) {
-  const { services } = useKibana<ApmPluginStartDeps>();
-  const { infra } = services;
-  const HostMetricsTable = infra?.HostMetricsTable;
-  const ContainerMetricsTable = infra?.ContainerMetricsTable;
-  const PodMetricsTable = infra?.PodMetricsTable;
-
-  const timerange = useMemo(
-    () => ({
-      from: start,
-      to: end,
-    }),
-    [start, end]
-  );
-
-  const hostsFilter = useMemo(
-    (): QueryDslQueryContainer => ({
-      bool: {
-        should: [
-          {
-            terms: {
-              'host.name': hostNames,
-            },
-          },
-        ],
-        minimum_should_match: 1,
-      },
-    }),
-    [hostNames]
-  );
-  const podsFilter = useMemo(
-    () => ({
-      bool: {
-        filter: [{ terms: { 'kubernetes.pod.name': podNames } }],
-      },
-    }),
-    [podNames]
-  );
-  const containersFilter = useMemo(
-    () => ({
-      bool: {
-        filter: [{ terms: { 'container.id': containerIds } }],
-      },
-    }),
-    [containerIds]
-  );
-
-  const tabs: Tab[] = [
-    {
-      id: 'containers',
-      name: 'Containers',
-      content:
-        ContainerMetricsTable &&
-        ContainerMetricsTable({ timerange, filterClauseDsl: containersFilter }),
-      hidden: containerIds && containerIds.length <= 0,
-    },
-    {
-      id: 'pods',
-      name: 'Pods',
-      content:
-        PodMetricsTable &&
-        PodMetricsTable({ timerange, filterClauseDsl: podsFilter }),
-      hidden: podNames && podNames.length <= 0,
-    },
-    {
-      id: 'hosts',
-      name: 'Hosts',
-      content:
-        HostMetricsTable &&
-        HostMetricsTable({ timerange, filterClauseDsl: hostsFilter }),
-    },
-  ];
-
-  return tabs
-    .filter((t) => !t.hidden)
-    .map(({ id, name, content }) => ({
-      id,
-      name,
-      content,
-    }));
 }

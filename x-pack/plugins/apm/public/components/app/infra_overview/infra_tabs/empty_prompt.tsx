@@ -36,7 +36,6 @@ export function EmptyPrompt() {
             })}
           </p>
         }
-        // actions={<SetupInstructionsLink buttonFill={true} />}
       />
     </EuiPageTemplate>
   );

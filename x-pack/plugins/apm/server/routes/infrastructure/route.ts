@@ -9,11 +9,11 @@ import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { getInfrastructureData } from './get_infrastructure_data';
-import { getMetricIndices } from '../../lib/helpers/get_metric_indices';
-import { getHostNames } from './get_host_names';
+import { getContainerHostNames } from './get_host_names';
 
 const infrastructureRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/infra',
+  endpoint:
+    'GET /internal/apm/services/{serviceName}/infrastructure_attributes',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -30,7 +30,11 @@ const infrastructureRoute = createApmServerRoute({
   }> => {
     const setup = await setupRequest(resources);
 
-    const { context, params, plugins } = resources;
+    const {
+      context,
+      params,
+      plugins: { infra },
+    } = resources;
 
     const {
       path: { serviceName },
@@ -47,31 +51,20 @@ const infrastructureRoute = createApmServerRoute({
     });
 
     const containerIds = infrastructureData.containerIds;
-    let containerHostNames;
-
     // due some limitations on the data we get from apm-metrics indices, if we have a service running in a container we want to query, to get the host.name, filtering by container.id
-    if (containerIds.length > 0) {
-      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-      const savedObjectsClient = (await context.core).savedObjects.client;
-      const metricIndices = await getMetricIndices({
-        infraPlugin: plugins.infra,
-        savedObjectsClient,
-      });
-
-      containerHostNames = await getHostNames({
-        esClient,
-        containerIds,
-        index: metricIndices,
-        start,
-        end,
-      });
-    }
+    const containerHostNames = await getContainerHostNames({
+      containerIds,
+      context,
+      infra,
+      start,
+      end,
+    });
 
     return {
       containerIds,
       hostNames:
         containerIds.length > 0 // if we have container ids we rely on the hosts fetched filtering by container.id
-          ? containerHostNames?.hostNames ?? []
+          ? containerHostNames
           : infrastructureData.hostNames,
       podNames: infrastructureData.podNames,
     };
