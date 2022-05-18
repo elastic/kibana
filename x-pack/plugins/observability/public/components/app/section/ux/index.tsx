@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SectionContainer } from '..';
 import { getDataHandler } from '../../../../data_handler';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -93,12 +94,14 @@ export function UXSection({ bucketSize }: Props) {
       }}
       hasError={status === FETCH_STATUS.FAILURE}
     >
-      <ExploratoryViewEmbeddable
-        attributes={seriesList}
-        reportType="data-distribution"
-        title={'Page load distribution'}
-        withActions={['save', 'explore']}
-      />
+      <div style={{ height: 500 }}>
+        <ExploratoryViewEmbeddable
+          attributes={seriesList}
+          reportType="data-distribution"
+          title={'Page load distribution'}
+          withActions={['save', 'explore']}
+        />
+      </div>
 
       <CoreVitals
         data={coreWebVitals}
