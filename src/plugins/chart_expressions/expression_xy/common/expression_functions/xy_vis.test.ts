@@ -7,6 +7,7 @@
  */
 
 import { xyVisFunction } from '.';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
 import { sampleArgs, sampleLayer } from '../__mocks__';
 import { XY_VIS } from '../constants';
@@ -14,10 +15,25 @@ import { XY_VIS } from '../constants';
 describe('xyVis', () => {
   test('it renders with the specified data and args', async () => {
     const { data, args } = sampleArgs();
+    const newData = {
+      ...data,
+      type: 'datatable',
+
+      columns: data.columns.map((c) =>
+        c.id !== 'c'
+          ? c
+          : {
+              ...c,
+              meta: {
+                type: 'string',
+              },
+            }
+      ),
+    } as Datatable;
     const { layers, ...rest } = args;
     const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
     const result = await xyVisFunction.fn(
-      data,
+      newData,
       { ...rest, ...restLayerArgs, referenceLineLayers: [], annotationLayers: [] },
       createMockExecutionContext()
     );
@@ -28,9 +44,89 @@ describe('xyVis', () => {
       value: {
         args: {
           ...rest,
-          layers: [{ layerType, table: data, layerId: 'dataLayers-0', type, ...restLayerArgs }],
+          layers: [{ layerType, table: newData, layerId: 'dataLayers-0', type, ...restLayerArgs }],
         },
       },
     });
+  });
+
+  test('it should throw error if minTimeBarInterval is invalid', async () => {
+    const { data, args } = sampleArgs();
+    const { layers, ...rest } = args;
+    const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
+    expect(
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          minTimeBarInterval: '1q',
+          referenceLineLayers: [],
+          annotationLayers: [],
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  test('it should throw error if minTimeBarInterval applied for not time bar chart', async () => {
+    const { data, args } = sampleArgs();
+    const { layers, ...rest } = args;
+    const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
+    expect(
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          minTimeBarInterval: '1h',
+          referenceLineLayers: [],
+          annotationLayers: [],
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  test('it should throw error if splitRowAccessor is pointing to the absent column', async () => {
+    const { data, args } = sampleArgs();
+    const { layers, ...rest } = args;
+    const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
+    const splitRowAccessor = 'absent-accessor';
+
+    expect(
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          referenceLineLayers: [],
+          annotationLayers: [],
+          splitRowAccessor,
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  test('it should throw error if splitColumnAccessor is pointing to the absent column', async () => {
+    const { data, args } = sampleArgs();
+    const { layers, ...rest } = args;
+    const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
+    const splitColumnAccessor = 'absent-accessor';
+
+    expect(
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          referenceLineLayers: [],
+          annotationLayers: [],
+          splitColumnAccessor,
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
   });
 });
