@@ -1616,7 +1616,6 @@ export class SavedObjectsRepository {
             // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
             SavedObjectsUtils.namespaceIdToString(actualResult!._source.namespace),
           ];
-          // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
           versionProperties = getExpectedVersionProperties(version);
         } else {
           if (this._registry.isSingleNamespace(type)) {
