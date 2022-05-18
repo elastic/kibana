@@ -8,9 +8,23 @@ import { useQuery } from 'react-query';
 import { lastValueFrom } from 'rxjs';
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Pagination } from '@elastic/eui';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { showErrorToast } from '../latest_findings/use_latest_findings';
 import type { FindingsBaseEsQuery, FindingsQueryResult } from '../types';
+
+// a large number to probably get all the buckets
+const MAX_BUCKETS = 60 * 1000;
+
+interface UseResourceFindingsOptions extends FindingsBaseEsQuery {
+  from: NonNullable<estypes.SearchRequest['from']>;
+  size: NonNullable<estypes.SearchRequest['size']>;
+}
+
+export interface FindingsByResourceQuery {
+  pageIndex: Pagination['pageIndex'];
+  pageSize: Pagination['pageSize'];
+}
 
 type FindingsAggRequest = IKibanaSearchRequest<estypes.SearchRequest>;
 type FindingsAggResponse = IKibanaSearchResponse<
@@ -18,47 +32,53 @@ type FindingsAggResponse = IKibanaSearchResponse<
 >;
 
 export type CspFindingsByResourceResult = FindingsQueryResult<
-  ReturnType<typeof useFindingsByResource>['data'] | undefined,
+  ReturnType<typeof useFindingsByResource>['data'],
   unknown
 >;
 
-interface FindingsByResourceAggs extends estypes.AggregationsCompositeAggregate {
-  groupBy: {
-    buckets: FindingsAggBucket[];
-  };
+interface FindingsByResourceAggs {
+  resource_total: estypes.AggregationsCardinalityAggregate;
+  resources: estypes.AggregationsMultiBucketAggregateBase<FindingsAggBucket>;
 }
 
-interface FindingsAggBucket {
-  doc_count: number;
-  failed_findings: { doc_count: number };
-  key: {
-    resource_id: string;
-    cluster_id: string;
-    cis_section: string;
-  };
+interface FindingsAggBucket extends estypes.AggregationsStringRareTermsBucketKeys {
+  failed_findings: estypes.AggregationsMultiBucketBase;
+  cis_sections: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
 }
 
 export const getFindingsByResourceAggQuery = ({
   index,
   query,
-}: FindingsBaseEsQuery): estypes.SearchRequest => ({
+  from,
+  size,
+}: UseResourceFindingsOptions): estypes.SearchRequest => ({
   index,
-  size: 0,
   body: {
     query,
+    size: 0,
     aggs: {
-      groupBy: {
-        composite: {
-          size: 10 * 1000,
-          sources: [
-            { resource_id: { terms: { field: 'resource_id.keyword' } } },
-            { cluster_id: { terms: { field: 'cluster_id.keyword' } } },
-            { cis_section: { terms: { field: 'rule.section.keyword' } } },
-          ],
-        },
+      resource_total: { cardinality: { field: 'resource.id.keyword' } },
+      resources: {
+        terms: { field: 'resource.id.keyword', size: MAX_BUCKETS },
         aggs: {
+          cis_sections: {
+            terms: { field: 'rule.section.keyword' },
+          },
           failed_findings: {
             filter: { term: { 'result.evaluation.keyword': 'failed' } },
+          },
+          sort_failed_findings: {
+            bucket_sort: {
+              from,
+              size,
+              sort: [
+                {
+                  'failed_findings>_count': { order: 'desc' },
+                  _count: { order: 'desc' },
+                  _key: { order: 'asc' },
+                },
+              ],
+            },
           },
         },
       },
@@ -66,33 +86,47 @@ export const getFindingsByResourceAggQuery = ({
   },
 });
 
-export const useFindingsByResource = ({ index, query }: FindingsBaseEsQuery) => {
+export const useFindingsByResource = ({ index, query, from, size }: UseResourceFindingsOptions) => {
   const {
     data,
     notifications: { toasts },
   } = useKibana().services;
 
   return useQuery(
-    ['csp_findings_resource', { index, query }],
+    ['csp_findings_resource', { index, query, size, from }],
     () =>
       lastValueFrom(
         data.search.search<FindingsAggRequest, FindingsAggResponse>({
-          params: getFindingsByResourceAggQuery({ index, query }),
+          params: getFindingsByResourceAggQuery({ index, query, from, size }),
         })
-      ),
-    {
-      select: ({ rawResponse }) => ({
-        page: rawResponse.aggregations?.groupBy.buckets.map(createFindingsByResource) || [],
+      ).then(({ rawResponse: { aggregations } }) => {
+        if (!aggregations) throw new Error('expected aggregations to be defined');
+
+        if (!Array.isArray(aggregations.resources.buckets))
+          throw new Error('expected resources buckets to be an array');
+
+        return {
+          page: aggregations.resources.buckets.map(createFindingsByResource),
+          total: aggregations.resource_total.value,
+        };
       }),
+    {
+      keepPreviousData: true,
       onError: (err) => showErrorToast(toasts, err),
     }
   );
 };
 
-const createFindingsByResource = (bucket: FindingsAggBucket) => ({
-  ...bucket.key,
-  failed_findings: {
-    total: bucket.failed_findings.doc_count,
-    normalized: bucket.doc_count > 0 ? bucket.failed_findings.doc_count / bucket.doc_count : 0,
-  },
-});
+const createFindingsByResource = (bucket: FindingsAggBucket) => {
+  if (!Array.isArray(bucket.cis_sections.buckets))
+    throw new Error('expected buckets to be an array');
+
+  return {
+    resource_id: bucket.key,
+    cis_sections: bucket.cis_sections.buckets.map((v) => v.key),
+    failed_findings: {
+      total: bucket.failed_findings.doc_count,
+      normalized: bucket.doc_count > 0 ? bucket.failed_findings.doc_count / bucket.doc_count : 0,
+    },
+  };
+};
