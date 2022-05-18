@@ -188,7 +188,7 @@ PUT _index_template/tri_met_tracks
               "doc_values": true
             },
             "vehicleID": {
-              "type": "integer"
+              "type": "keyword"
             },
             "offRoute": {
               "type": "boolean"
