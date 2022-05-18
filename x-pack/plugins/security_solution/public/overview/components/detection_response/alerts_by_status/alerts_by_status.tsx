@@ -49,11 +49,6 @@ const StyledLegendFlexItem = styled(EuiFlexItem)`
   padding-top: 45px;
 `;
 
-// To Do remove this styled component once togglequery is updated: #131405
-const StyledEuiPanel = styled(EuiPanel)`
-  height: fit-content;
-`;
-
 interface AlertsByStatusProps {
   signalIndexName: string | null;
 }
@@ -124,10 +119,7 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
   return (
     <>
       <HoverVisibilityContainer show={true} targetClassNames={[INPECT_BUTTON_CLASS]}>
-        <StyledEuiPanel
-          hasBorder
-          data-test-subj={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-panel`}
-        >
+        <EuiPanel hasBorder data-test-subj={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-panel`}>
           {loading && (
             <EuiProgress
               data-test-subj="initialLoadingPanelMatrixOverTime"
@@ -213,7 +205,7 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
               <EuiSpacer size="m" />
             </>
           )}
-        </StyledEuiPanel>
+        </EuiPanel>
       </HoverVisibilityContainer>
     </>
   );

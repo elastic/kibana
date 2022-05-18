@@ -40,13 +40,13 @@ export interface RuleAlertsTableProps {
 export type GetTableColumns = (params: {
   getAppUrl: GetAppUrl;
   navigateTo: NavigateTo;
-  navigateToRule: (ruleName: string) => void;
+  openRuleInTimeline: (ruleName: string) => void;
 }) => Array<EuiBasicTableColumn<RuleAlertsItem>>;
 
 const DETECTION_RESPONSE_RULE_ALERTS_QUERY_ID =
   'detection-response-rule-alerts-severity-table' as const;
 
-export const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo, navigateToRule }) => [
+export const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo, openRuleInTimeline }) => [
   {
     field: 'name',
     name: i18n.RULE_ALERTS_COLUMN_RULE_NAME,
@@ -82,7 +82,7 @@ export const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo, naviga
     name: i18n.RULE_ALERTS_COLUMN_ALERT_COUNT,
     'data-test-subj': 'severityRuleAlertsTable-alertCount',
     render: (alertCount: number, { name }) => (
-      <EuiLink onClick={() => navigateToRule(name)}>
+      <EuiLink onClick={() => openRuleInTimeline(name)}>
         <FormattedCount count={alertCount} />
       </EuiLink>
     ),
@@ -106,15 +106,15 @@ export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexNa
     skip: !toggleStatus,
   });
 
-  const { navigateToRule } = useNavigateToTimeline();
+  const { openRuleInTimeline } = useNavigateToTimeline();
 
   const navigateToAlerts = useCallback(() => {
     navigateTo({ deepLinkId: SecurityPageName.alerts });
   }, [navigateTo]);
 
   const columns = useMemo(
-    () => getTableColumns({ getAppUrl, navigateTo, navigateToRule }),
-    [getAppUrl, navigateTo, navigateToRule]
+    () => getTableColumns({ getAppUrl, navigateTo, openRuleInTimeline }),
+    [getAppUrl, navigateTo, openRuleInTimeline]
   );
 
   return (

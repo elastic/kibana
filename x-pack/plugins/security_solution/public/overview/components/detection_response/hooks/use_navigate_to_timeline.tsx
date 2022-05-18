@@ -43,13 +43,7 @@ export const useNavigateToTimeline = () => {
     );
   };
 
-  const navigateToVulnerableHost = ({
-    hostName,
-    severity,
-  }: {
-    hostName: string;
-    severity?: string;
-  }) => {
+  const openHostInTimeline = ({ hostName, severity }: { hostName: string; severity?: string }) => {
     const dataProvider = getDataProvider('host.name', '', hostName);
 
     if (severity) {
@@ -59,13 +53,7 @@ export const useNavigateToTimeline = () => {
     navigateToTimeline(dataProvider);
   };
 
-  const navigateToVulnerableUser = ({
-    userName,
-    severity,
-  }: {
-    userName: string;
-    severity?: string;
-  }) => {
+  const openUserInTimeline = ({ userName, severity }: { userName: string; severity?: string }) => {
     const dataProvider = getDataProvider('user.name', '', userName);
 
     if (severity) {
@@ -74,15 +62,15 @@ export const useNavigateToTimeline = () => {
     navigateToTimeline(dataProvider);
   };
 
-  const navigateToRule = (ruleName: string) => {
+  const openRuleInTimeline = (ruleName: string) => {
     const dataProvider = getDataProvider('kibana.alert.rule.name', '', ruleName);
 
     navigateToTimeline(dataProvider);
   };
 
   return {
-    navigateToVulnerableHost,
-    navigateToRule,
-    navigateToVulnerableUser,
+    openHostInTimeline,
+    openRuleInTimeline,
+    openUserInTimeline,
   };
 };

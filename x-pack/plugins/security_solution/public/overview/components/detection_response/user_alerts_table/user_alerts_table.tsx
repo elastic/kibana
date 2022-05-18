@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
 
 import {
   EuiBasicTable,
@@ -40,13 +39,8 @@ type GetTableColumns = (
 
 const DETECTION_RESPONSE_USER_SEVERITY_QUERY_ID = 'vulnerableUsersBySeverityQuery';
 
-// To Do remove this styled component once togglequery is updated: #131405
-const StyledEuiPanel = styled(EuiPanel)`
-  height: fit-content;
-`;
-
 export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableProps) => {
-  const { navigateToVulnerableUser } = useNavigateToTimeline();
+  const { openUserInTimeline } = useNavigateToTimeline();
   const { toggleStatus, setToggleStatus } = useQueryToggle(
     DETECTION_RESPONSE_USER_SEVERITY_QUERY_ID
   );
@@ -56,14 +50,11 @@ export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableP
     signalIndexName,
   });
 
-  const columns = useMemo(
-    () => getTableColumns(navigateToVulnerableUser),
-    [navigateToVulnerableUser]
-  );
+  const columns = useMemo(() => getTableColumns(openUserInTimeline), [openUserInTimeline]);
 
   return (
     <HoverVisibilityContainer show={true} targetClassNames={[INPECT_BUTTON_CLASS]}>
-      <StyledEuiPanel hasBorder data-test-subj="severityUserAlertsPanel">
+      <EuiPanel hasBorder data-test-subj="severityUserAlertsPanel">
         <HeaderSection
           id={DETECTION_RESPONSE_USER_SEVERITY_QUERY_ID}
           title={i18n.USER_ALERTS_SECTION_TITLE}
@@ -97,7 +88,7 @@ export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableP
             )}
           </>
         )}
-      </StyledEuiPanel>
+      </EuiPanel>
     </HoverVisibilityContainer>
   );
 });
