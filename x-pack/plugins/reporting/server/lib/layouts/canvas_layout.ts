@@ -40,11 +40,11 @@ export class CanvasLayout extends Layout implements LayoutInstance {
     super(LayoutTypes.CANVAS);
 
     const height = Math.round(size.height);
-    const width = Math.round(size.width);
-
     this.height = height;
-    this.width = height;
     this.scaledHeight = height * ZOOM;
+
+    const width = Math.round(size.width);
+    this.width = width;
     this.scaledWidth = width * ZOOM;
   }
 

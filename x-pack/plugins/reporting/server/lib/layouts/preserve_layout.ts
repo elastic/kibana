@@ -26,11 +26,11 @@ export class PreserveLayout extends Layout implements LayoutInstance {
     super(LAYOUT_TYPES.PRESERVE_LAYOUT);
 
     const height = Math.round(size.height);
-    const width = Math.round(size.width);
-
     this.height = height;
-    this.width = height;
     this.scaledHeight = height * ZOOM;
+
+    const width = Math.round(size.width);
+    this.width = width;
     this.scaledWidth = width * ZOOM;
 
     this.selectors = {
