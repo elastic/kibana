@@ -40,7 +40,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           indices: [
             {
               names: ['ecommerce'],
-              privileges: ['read'],
+              privileges: ['read', 'view_index_metadata'],
               field_security: { grant: ['*'], except: [] },
             },
           ],
