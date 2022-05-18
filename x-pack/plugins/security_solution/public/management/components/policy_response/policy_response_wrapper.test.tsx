@@ -84,12 +84,6 @@ describe('when on the policy response', () => {
     render = () => mockedContext.render(<PolicyResponseWrapper endpointId="id" />);
   });
 
-  afterEach(() => {
-    useGetEndpointPolicyResponseMock.mockClear();
-    useGetEndpointPolicyResponseMock.mockReset();
-    useGetEndpointPolicyResponseMock.mockRestore();
-  });
-
   it('should include the title', async () => {
     runMock();
     expect((await render().findByTestId('endpointDetailsPolicyResponseTitle')).textContent).toBe(
