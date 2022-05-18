@@ -115,7 +115,7 @@ export interface LayerConfig {
 export class LensAttributes {
   layers: Record<string, PersistedIndexPatternLayer>;
   visualization?: XYState;
-  layerConfigs?: LayerConfig[];
+  layerConfigs: LayerConfig[] = [];
   isMultiSeries?: boolean;
   globalFilter?: { query: string; language: string };
   reportType: string;

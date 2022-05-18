@@ -83,8 +83,6 @@ export interface SeriesConfig {
   query?: { query: string; language: 'kuery' };
 }
 
-const TypeSeriesConfig = SeriesConfig<ReportType>
-
 export type URLReportDefinition = Record<string, string[]>;
 export type URLTextReportDefinition = Record<string, string>;
 
@@ -119,15 +117,7 @@ export interface ConfigProps {
   series?: SeriesUrl;
 }
 
-export type AppDataType =
-  | 'synthetics'
-  | 'ux'
-  | 'infra_logs'
-  | 'infra_metrics'
-  | 'apm'
-  | 'mobile'
-  | 'security'
-  | 'securityAlerts';
+export type AppDataType = 'synthetics' | 'ux' | 'infra_logs' | 'infra_metrics' | 'apm' | 'mobile';
 
 type FormatType = 'duration' | 'number' | 'bytes' | 'percent';
 type InputFormat = 'microseconds' | 'milliseconds' | 'seconds';

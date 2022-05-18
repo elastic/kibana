@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MetricState, TypedLensByValueInput } from '../../../../../../../lens/public';
+import { MetricState, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 
 import {
   buildNumberColumn,

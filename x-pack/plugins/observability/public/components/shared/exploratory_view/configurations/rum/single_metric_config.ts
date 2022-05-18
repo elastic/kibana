@@ -10,19 +10,20 @@ import { FieldLabels } from '../constants';
 import { buildPhraseFilter } from '../utils';
 import { PROCESSOR_EVENT, TRANSACTION_TYPE } from '../constants/elasticsearch_fieldnames';
 
-export function getSingleMetricConfig({ indexPattern }: ConfigProps): SeriesConfig {
+export function getSingleMetricConfig({ dataView }: ConfigProps): SeriesConfig {
   return {
+    defaultSeriesType: 'line',
     xAxisColumn: {},
     yAxisColumns: [],
     breakdownFields: [],
-    defaultSeriesType: '',
     filterFields: [],
     seriesTypes: [],
+    hasOperationType: true,
     definitionFields: ['service.name'],
     reportType: 'single-metric',
     baseFilters: [
-      ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
-      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
+      ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', dataView),
+      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', dataView),
     ],
     metricOptions: [
       {
