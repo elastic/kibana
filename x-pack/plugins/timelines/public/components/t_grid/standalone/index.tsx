@@ -147,6 +147,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   data,
   unit,
   showCheckboxes = true,
+  bulkActions = {},
   queryFields = [],
 }) => {
   const dispatch = useDispatch();
@@ -387,6 +388,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                       filterStatus={filterStatus}
                       trailingControlColumns={trailingControlColumns}
                       showCheckboxes={showCheckboxes}
+                      bulkActions={bulkActions}
                     />
                   </ScrollableFlexItem>
                 </FullWidthFlexGroup>

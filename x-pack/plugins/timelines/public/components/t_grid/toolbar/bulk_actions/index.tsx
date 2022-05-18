@@ -60,6 +60,12 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({
     setIsActionsPopoverOpen(false);
   }, [setIsActionsPopoverOpen]);
 
+  const closeIfPopoverIsOpen = useCallback(() => {
+    if (isActionsPopoverOpen) {
+      setIsActionsPopoverOpen(false);
+    }
+  }, [isActionsPopoverOpen]);
+
   const toggleSelectAll = useCallback(() => {
     if (!showClearSelection) {
       onSelectAll();
@@ -91,7 +97,10 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({
   );
 
   return (
-    <BulkActionsContainer data-test-subj="bulk-actions-button-container">
+    <BulkActionsContainer
+      onClick={closeIfPopoverIsOpen}
+      data-test-subj="bulk-actions-button-container"
+    >
       <EuiPopover
         isOpen={isActionsPopoverOpen}
         anchorPosition="upCenter"

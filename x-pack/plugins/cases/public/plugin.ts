@@ -23,6 +23,7 @@ import { getCasesLazy } from './client/ui/get_cases';
 import { getCasesContextLazy } from './client/ui/get_cases_context';
 import { getCreateCaseFlyoutLazy } from './client/ui/get_create_case_flyout';
 import { getRecentCasesLazy } from './client/ui/get_recent_cases';
+import { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
 
 /**
  * @public
@@ -102,6 +103,7 @@ export class CasesUiPlugin
       helpers: {
         canUseCases: canUseCases(core.application.capabilities),
         getRuleIdFromEvent,
+        groupAlertsByRule,
       },
     };
   }

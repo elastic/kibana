@@ -264,10 +264,10 @@ export const CASE_SUCCESS_TOAST = (title: string) =>
     defaultMessage: '{title} has been updated',
   });
 
-export const CASE_ALERT_SUCCESS_TOAST = (title: string) =>
+export const CASE_ALERT_SUCCESS_TOAST = (title: string, quantity: number = 1) =>
   i18n.translate('xpack.cases.actions.caseAlertSuccessToast', {
-    values: { title },
-    defaultMessage: 'An alert was added to "{title}"',
+    values: { quantity, title },
+    defaultMessage: '{quantity, plural, =1 {An alert was} other {Alerts were}} added to "{title}"',
   });
 
 export const CASE_ALERT_SUCCESS_SYNC_TEXT = i18n.translate(

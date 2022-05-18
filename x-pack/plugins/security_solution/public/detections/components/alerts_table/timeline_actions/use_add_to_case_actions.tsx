@@ -52,13 +52,11 @@ export const useAddToCaseActions = ({
   }, [casesUi.helpers, ecsData, nonEcsData]);
 
   const createCaseFlyout = casesUi.hooks.getUseCasesAddToNewCaseFlyout({
-    attachments: caseAttachments,
     onClose: onMenuItemClick,
     onSuccess,
   });
 
   const selectCaseModal = casesUi.hooks.getUseCasesAddToExistingCaseModal({
-    attachments: caseAttachments,
     onClose: onMenuItemClick,
     onRowClick: onSuccess,
   });
@@ -66,14 +64,14 @@ export const useAddToCaseActions = ({
   const handleAddToNewCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`
     onMenuItemClick();
-    createCaseFlyout.open();
-  }, [onMenuItemClick, createCaseFlyout]);
+    createCaseFlyout.open({ attachments: caseAttachments });
+  }, [onMenuItemClick, createCaseFlyout, caseAttachments]);
 
   const handleAddToExistingCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`
     onMenuItemClick();
-    selectCaseModal.open();
-  }, [onMenuItemClick, selectCaseModal]);
+    selectCaseModal.open({ attachments: caseAttachments });
+  }, [caseAttachments, onMenuItemClick, selectCaseModal]);
 
   const addToCaseActionItems = useMemo(() => {
     if (

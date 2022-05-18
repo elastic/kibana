@@ -13,11 +13,12 @@ import type {
   SetEventsDeleted,
   OnUpdateAlertStatusSuccess,
   OnUpdateAlertStatusError,
+  CustomBulkActionProp,
 } from '../../../../../common/types';
 import type { Refetch } from '../../../../store/t_grid/inputs';
 import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../../store/t_grid';
 import { BulkActions } from '.';
-import { useStatusBulkActionItems } from '../../../../hooks/use_status_bulk_action_items';
+import { useBulkActionItems } from '../../../../hooks/use_bulk_action_items';
 
 interface OwnProps {
   id: string;
@@ -25,17 +26,19 @@ interface OwnProps {
   filterStatus?: AlertStatus;
   query?: string;
   indexName: string;
+  showAlertStatusActions?: boolean;
   onActionSuccess?: OnUpdateAlertStatusSuccess;
   onActionFailure?: OnUpdateAlertStatusError;
+  customBulkActions?: CustomBulkActionProp[];
   refetch: Refetch;
 }
 
-export type StatefulAlertStatusBulkActionsProps = OwnProps & PropsFromRedux;
+export type StatefulAlertBulkActionsProps = OwnProps & PropsFromRedux;
 
 /**
  * Component to render status bulk actions
  */
-export const AlertStatusBulkActionsComponent = React.memo<StatefulAlertStatusBulkActionsProps>(
+export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProps>(
   ({
     id,
     totalItems,
@@ -45,8 +48,10 @@ export const AlertStatusBulkActionsComponent = React.memo<StatefulAlertStatusBul
     isSelectAllChecked,
     clearSelected,
     indexName,
+    showAlertStatusActions,
     onActionSuccess,
     onActionFailure,
+    customBulkActions,
     refetch,
   }) => {
     const dispatch = useDispatch();
@@ -111,15 +116,17 @@ export const AlertStatusBulkActionsComponent = React.memo<StatefulAlertStatusBul
       [dispatch, id]
     );
 
-    const statusBulkActionItems = useStatusBulkActionItems({
+    const bulkActionItems = useBulkActionItems({
       indexName,
       eventIds: Object.keys(selectedEventIds),
       currentStatus: filterStatus,
       ...(showClearSelection ? { query } : {}),
       setEventsLoading,
       setEventsDeleted,
+      showAlertStatusActions,
       onUpdateSuccess,
       onUpdateFailure,
+      customBulkActions,
       timelineId: id,
     });
 
@@ -131,13 +138,13 @@ export const AlertStatusBulkActionsComponent = React.memo<StatefulAlertStatusBul
         showClearSelection={showClearSelection}
         onSelectAll={onSelectAll}
         onClearSelection={onClearSelection}
-        bulkActionItems={statusBulkActionItems}
+        bulkActionItems={bulkActionItems}
       />
     );
   }
 );
 
-AlertStatusBulkActionsComponent.displayName = 'AlertStatusBulkActionsComponent';
+AlertBulkActionsComponent.displayName = 'AlertBulkActionsComponent';
 
 const makeMapStateToProps = () => {
   const getTGrid = tGridSelectors.getTGridByIdSelector();
@@ -161,7 +168,7 @@ const connector = connect(makeMapStateToProps, mapDispatchToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
-export const StatefulAlertStatusBulkActions = connector(AlertStatusBulkActionsComponent);
+export const StatefulAlertBulkActions = connector(AlertBulkActionsComponent);
 
 // eslint-disable-next-line import/no-default-export
-export { StatefulAlertStatusBulkActions as default };
+export { StatefulAlertBulkActions as default };
