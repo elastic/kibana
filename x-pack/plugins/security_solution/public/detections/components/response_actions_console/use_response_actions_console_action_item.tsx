@@ -32,16 +32,15 @@ export const useResponseActionsConsoleActionItem = (
   return useMemo(() => {
     const actions: JSX.Element[] = [];
 
-    if (!eventDetailsData || !isEndpointAlert || !endpointId) {
-      return actions;
-    }
-
     if (isResponseActionsConsoleEnabled) {
       actions.push(
-        <ResponseActionsConsoleContextMenuItem endpointId={endpointId} onClick={onClick} />
+        <ResponseActionsConsoleContextMenuItem
+          endpointId={isEndpointAlert ? endpointId : ''}
+          onClick={onClick}
+        />
       );
     }
 
     return actions;
-  }, [endpointId, eventDetailsData, isEndpointAlert, isResponseActionsConsoleEnabled, onClick]);
+  }, [endpointId, isEndpointAlert, isResponseActionsConsoleEnabled, onClick]);
 };

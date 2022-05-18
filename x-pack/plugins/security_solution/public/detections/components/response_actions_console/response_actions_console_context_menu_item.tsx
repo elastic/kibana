@@ -13,6 +13,19 @@ import { HostStatus } from '../../../../common/endpoint/types';
 import { useGetEndpointDetails } from '../../../management/hooks/endpoint/use_get_endpoint_details';
 import { useShowEndpointResponseActionsConsole } from '../../../management/hooks';
 
+export const NOT_FROM_ENDPOINT_HOST_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.notSupportedTooltip',
+  { defaultMessage: 'The current item does not support endpoint response actions' }
+);
+export const HOST_ENDPOINT_UNENROLLED_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.unenrolledTooltip',
+  { defaultMessage: 'Host is not longer enrolled with endpoint security' }
+);
+export const LOADING_ENDPOINT_DATA_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.loadingTooltip',
+  { defaultMessage: 'Loading' }
+);
+
 export interface ResponseActionsConsoleContextMenuItemProps {
   endpointId: string;
   onClick?: () => void;
@@ -21,22 +34,20 @@ export interface ResponseActionsConsoleContextMenuItemProps {
 export const ResponseActionsConsoleContextMenuItem =
   memo<ResponseActionsConsoleContextMenuItemProps>(({ endpointId, onClick }) => {
     const showEndpointResponseActionsConsole = useShowEndpointResponseActionsConsole();
-    const { data: endpointHostInfo, isFetching, error } = useGetEndpointDetails(endpointId);
+    const {
+      data: endpointHostInfo,
+      isFetching,
+      error,
+    } = useGetEndpointDetails(endpointId, { enabled: Boolean(endpointId) });
 
     const [isDisabled, tooltip]: [disabled: boolean, tooltip: ReactNode] = useMemo(() => {
       if (!endpointId) {
-        return [
-          true,
-          i18n.translate(
-            'xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.notSupportedTooltip',
-            { defaultMessage: 'The current item does not support endpoint response actions' }
-          ),
-        ];
+        return [true, NOT_FROM_ENDPOINT_HOST_TOOLTIP];
       }
 
       // Still loading Endpoint host info
       if (isFetching) {
-        return [true, undefined];
+        return [true, LOADING_ENDPOINT_DATA_TOOLTIP];
       }
 
       // if we got an error and it's a 404 (alerts can exist for endpoint that are no longer around)
@@ -46,13 +57,7 @@ export const ResponseActionsConsoleContextMenuItem =
         (error && error.body.statusCode === 404) ||
         endpointHostInfo?.host_status === HostStatus.UNENROLLED
       ) {
-        return [
-          true,
-          i18n.translate(
-            'xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.unenrolledTooltip',
-            { defaultMessage: 'Host is not longer enrolled with endpoint security' }
-          ),
-        ];
+        return [true, HOST_ENDPOINT_UNENROLLED_TOOLTIP];
       }
 
       return [false, undefined];
