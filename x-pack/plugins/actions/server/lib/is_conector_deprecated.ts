@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { isPlainObject } from 'lodash';
 import { PreConfiguredAction, RawAction } from '../types';
 
 export type ConnectorWithOptionalDeprecation = Omit<PreConfiguredAction, 'isDeprecated'> &
   Pick<Partial<PreConfiguredAction>, 'isDeprecated'>;
+
+const isObject = (obj: unknown): obj is Record<string, unknown> => isPlainObject(obj);
 
 export const isConnectorDeprecated = (
   connector: RawAction | ConnectorWithOptionalDeprecation
@@ -25,7 +28,7 @@ export const isConnectorDeprecated = (
      * deprecated without config. In this case
      * we always return false.
      */
-    if (connector.config == null) {
+    if (!isObject(connector.config)) {
       return false;
     }
 
@@ -40,7 +43,7 @@ export const isConnectorDeprecated = (
      * According to the schema defined here x-pack/plugins/actions/server/builtin_action_types/servicenow/schema.ts
      * if the property is not defined it will be set to true at the execution of the connector.
      */
-    if (connector.config.usesTableApi == null) {
+    if (!Object.hasOwn(connector.config, 'usesTableApi')) {
       return true;
     }
 
