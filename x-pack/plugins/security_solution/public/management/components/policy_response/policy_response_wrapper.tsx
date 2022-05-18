@@ -42,7 +42,7 @@ export const PolicyResponseWrapper = memo<{
 
   return (
     <>
-      <EuiText data-test-subj="endpointDetailsPolicyResponseFlyoutTitle">
+      <EuiText data-test-subj="endpointDetailsPolicyResponseTitle">
         <h4>
           <FormattedMessage
             id="xpack.securitySolution.endpoint.policyResponse.title"
