@@ -70,7 +70,7 @@ export function TimeComparison() {
     <EuiSelect
       fullWidth={isSmall}
       data-test-subj="comparisonSelect"
-      disabled={!comparisonEnabled}
+      disabled={comparisonEnabled === false}
       options={comparisonOptions}
       value={
         comparisonEnabled === ML_EXPECTED_BOUNDS ? ML_EXPECTED_BOUNDS : offset
@@ -82,7 +82,9 @@ export function TimeComparison() {
             label={i18n.translate('xpack.apm.timeComparison.label', {
               defaultMessage: 'Comparison',
             })}
-            checked={true}
+            checked={
+              comparisonEnabled === true || comparisonEnabled === 'mlBounds'
+            }
             onChange={() => {
               const nextComparisonEnabledValue = !comparisonEnabled;
               if (nextComparisonEnabledValue === false) {

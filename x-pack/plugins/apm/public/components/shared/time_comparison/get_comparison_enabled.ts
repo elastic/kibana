@@ -6,13 +6,14 @@
  */
 import { CoreStart } from '@kbn/core/public';
 import { enableComparisonByDefault } from '@kbn/observability-plugin/public';
+import type { ComparisonEnabled } from '../../../../common/comparison_rt';
 
 export function getComparisonEnabled({
   core,
   urlComparisonEnabled,
 }: {
   core: CoreStart;
-  urlComparisonEnabled?: boolean;
+  urlComparisonEnabled?: ComparisonEnabled;
 }) {
   const isEnabledByDefault = core.uiSettings.get<boolean>(
     enableComparisonByDefault

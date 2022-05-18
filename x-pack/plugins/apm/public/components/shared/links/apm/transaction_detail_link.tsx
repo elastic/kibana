@@ -9,6 +9,7 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { EuiLink } from '@elastic/eui';
 import { pickBy, identity } from 'lodash';
+import type { ComparisonEnabled } from '../../../../../common/comparison_rt';
 import { getLegacyApmHref, APMLinkExtendProps } from './apm_link';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { pickKeys } from '../../../../../common/utils/pick_keys';
@@ -24,7 +25,7 @@ interface Props extends APMLinkExtendProps {
   transactionType: string;
   latencyAggregationType?: string;
   environment?: string;
-  comparisonEnabled?: boolean;
+  comparisonEnabled?: ComparisonEnabled;
   offset?: string;
 }
 

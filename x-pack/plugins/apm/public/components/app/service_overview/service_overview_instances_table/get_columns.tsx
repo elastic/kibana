@@ -13,6 +13,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
 import { ActionMenu } from '@kbn/observability-plugin/public';
+import type { ComparisonEnabled } from '../../../../../common/comparison_rt';
 import { isJavaAgentName } from '../../../../../common/agent_name';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import {
@@ -63,7 +64,7 @@ export function getColumns({
   latencyAggregationType?: LatencyAggregationType;
   detailedStatsLoading: boolean;
   detailedStatsData?: ServiceInstanceDetailedStatistics;
-  comparisonEnabled?: boolean;
+  comparisonEnabled?: ComparisonEnabled;
   toggleRowDetails: (selectedServiceNodeName: string) => void;
   itemIdToExpandedRowMap: Record<string, ReactNode>;
   toggleRowActionMenu: (selectedServiceNodeName: string) => void;

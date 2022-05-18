@@ -8,7 +8,7 @@ import * as t from 'io-ts';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Outlet } from '@kbn/typed-react-router-config';
-import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
+import { toNumberRt } from '@kbn/io-ts-utils';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
 import { ServiceOverview } from '../../app/service_overview';

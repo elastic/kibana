@@ -14,6 +14,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import type { ComparisonEnabled } from '../../../../../common/comparison_rt';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { asInteger } from '../../../../../common/utils/formatters';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
@@ -61,7 +62,7 @@ interface Props {
   serviceName: string;
   detailedStatisticsLoading: boolean;
   detailedStatistics: ErrorGroupDetailedStatistics;
-  comparisonEnabled?: boolean;
+  comparisonEnabled?: ComparisonEnabled;
 }
 
 function ErrorGroupList({
