@@ -7,7 +7,119 @@
  */
 
 import type { RootSchema } from '@kbn/analytics-client';
+import { OpsProcessMetrics } from '.';
 import type { OpsMetrics } from './types';
+
+const processSchema: RootSchema<OpsProcessMetrics> = {
+  pid: {
+    type: 'long',
+    _meta: { description: 'pid of the kibana process' },
+  },
+  memory: {
+    properties: {
+      heap: {
+        properties: {
+          total_in_bytes: {
+            type: 'byte',
+            _meta: { description: 'total heap available' },
+          },
+          used_in_bytes: {
+            type: 'byte',
+            _meta: { description: 'used heap' },
+          },
+          size_limit: {
+            type: 'byte',
+            _meta: { description: 'v8 heap size limit' },
+          },
+        },
+      },
+      resident_set_size_in_bytes: {
+        type: 'byte',
+        _meta: { description: 'node rss' },
+      },
+    },
+    _meta: {
+      description: 'heap memory usage',
+      optional: false,
+    },
+  },
+  event_loop_delay: {
+    type: 'long',
+    _meta: { description: 'mean event loop delay since last collection' },
+  },
+  event_loop_delay_histogram: {
+    properties: {
+      fromTimestamp: {
+        type: 'date',
+        _meta: {
+          description:
+            'The first timestamp the interval timer kicked in for collecting data points.',
+        },
+      },
+      lastUpdatedAt: {
+        type: 'date',
+        _meta: {
+          description: 'Last timestamp the interval timer kicked in for collecting data points.',
+        },
+      },
+      min: {
+        type: 'long',
+        _meta: { description: 'The minimum recorded event loop delay.' },
+      },
+      max: {
+        type: 'long',
+        _meta: { description: 'The maximum recorded event loop delay.' },
+      },
+      mean: {
+        type: 'long',
+        _meta: { description: 'The mean of the recorded event loop delays.' },
+      },
+      exceeds: {
+        type: 'long',
+        _meta: {
+          description:
+            'The number of times the event loop delay exceeded the maximum 1 hour event loop delay threshold.',
+        },
+      },
+      stddev: {
+        type: 'long',
+        _meta: { description: 'The standard deviation of the recorded event loop delays.' },
+      },
+      percentiles: {
+        properties: {
+          '50': {
+            type: 'long',
+            _meta: { description: '50th percentile of delays of the collected data points.' },
+          },
+          '75': {
+            type: 'long',
+            _meta: { description: '75th percentile of delays of the collected data points.' },
+          },
+          '95': {
+            type: 'long',
+            _meta: { description: '95th percentile of delays of the collected data points.' },
+          },
+          '99': {
+            type: 'long',
+            _meta: { description: '99th percentile of delays of the collected data points.' },
+          },
+        },
+        _meta: {
+          description: 'An object detailing the accumulated percentile distribution.',
+          optional: false,
+        },
+      },
+    },
+    _meta: {
+      description: 'node event loop delay histogram since last collection',
+      optional: false,
+    },
+  },
+  uptime_in_millis: {
+    type: 'long',
+    _meta: { description: 'uptime of the kibana process' },
+  },
+};
 
 export const opsMetricsSchema: RootSchema<OpsMetrics> = {
   collected_at: {
@@ -15,117 +127,7 @@ export const opsMetricsSchema: RootSchema<OpsMetrics> = {
     _meta: { description: 'Time metrics were recorded at.' },
   },
   process: {
-    properties: {
-      pid: {
-        type: 'long',
-        _meta: { description: 'pid of the kibana process' },
-      },
-      memory: {
-        properties: {
-          heap: {
-            properties: {
-              total_in_bytes: {
-                type: 'byte',
-                _meta: { description: 'total heap available' },
-              },
-              used_in_bytes: {
-                type: 'byte',
-                _meta: { description: 'used heap' },
-              },
-              size_limit: {
-                type: 'byte',
-                _meta: { description: 'v8 heap size limit' },
-              },
-            },
-          },
-          resident_set_size_in_bytes: {
-            type: 'byte',
-            _meta: { description: 'node rss' },
-          },
-        },
-        _meta: {
-          description: 'heap memory usage',
-          optional: false,
-        },
-      },
-      event_loop_delay: {
-        type: 'long',
-        _meta: { description: 'mean event loop delay since last collection' },
-      },
-      event_loop_delay_histogram: {
-        properties: {
-          fromTimestamp: {
-            type: 'date',
-            _meta: {
-              description:
-                'The first timestamp the interval timer kicked in for collecting data points.',
-            },
-          },
-          lastUpdatedAt: {
-            type: 'date',
-            _meta: {
-              description:
-                'Last timestamp the interval timer kicked in for collecting data points.',
-            },
-          },
-          min: {
-            type: 'long',
-            _meta: { description: 'The minimum recorded event loop delay.' },
-          },
-          max: {
-            type: 'long',
-            _meta: { description: 'The maximum recorded event loop delay.' },
-          },
-          mean: {
-            type: 'long',
-            _meta: { description: 'The mean of the recorded event loop delays.' },
-          },
-          exceeds: {
-            type: 'long',
-            _meta: {
-              description:
-                'The number of times the event loop delay exceeded the maximum 1 hour event loop delay threshold.',
-            },
-          },
-          stddev: {
-            type: 'long',
-            _meta: { description: 'The standard deviation of the recorded event loop delays.' },
-          },
-          percentiles: {
-            properties: {
-              '50': {
-                type: 'long',
-                _meta: { description: '50th percentile of delays of the collected data points.' },
-              },
-              '75': {
-                type: 'long',
-                _meta: { description: '75th percentile of delays of the collected data points.' },
-              },
-              '95': {
-                type: 'long',
-                _meta: { description: '95th percentile of delays of the collected data points.' },
-              },
-              '99': {
-                type: 'long',
-                _meta: { description: '99th percentile of delays of the collected data points.' },
-              },
-            },
-            _meta: {
-              description: 'An object detailing the accumulated percentile distribution.',
-              optional: false,
-            },
-          },
-        },
-        _meta: {
-          description: 'node event loop delay histogram since last collection',
-          optional: false,
-        },
-      },
-      uptime_in_millis: {
-        type: 'long',
-        _meta: { description: 'uptime of the kibana process' },
-      },
-    },
+    properties: processSchema,
     _meta: {
       description: 'Process related metrics.',
       optional: false,
@@ -134,52 +136,7 @@ export const opsMetricsSchema: RootSchema<OpsMetrics> = {
   processes: {
     type: 'array',
     items: {
-      properties: {
-        pid: {
-          type: 'long',
-          _meta: { description: 'pid of the kibana process' },
-        },
-        memory: {
-          properties: {
-            heap: {
-              properties: {
-                total_in_bytes: {
-                  type: 'byte',
-                  _meta: { description: 'total heap available' },
-                },
-                used_in_bytes: {
-                  type: 'byte',
-                  _meta: { description: 'used heap' },
-                },
-                size_limit: {
-                  type: 'byte',
-                  _meta: { description: 'v8 heap size limit' },
-                },
-              },
-            },
-            resident_set_size_in_bytes: {
-              type: 'byte',
-              _meta: { description: 'node rss' },
-            },
-          },
-          _meta: {
-            description: 'heap memory usage',
-            optional: false,
-          },
-        },
-        event_loop_delay: {
-          type: 'pass_through',
-          _meta: { description: 'mean event loop delay since last collection' },
-        },
-        event_loop_delay_histogram: {
-          type: 'pass_through',
-          _meta: { description: 'node event loop delay histogram since last collection' },
-        },
-        uptime_in_millis: {
-          type: 'pass_through',
-          _meta: { description: 'uptime of the kibana process' },
-        },
-      },
+      properties: processSchema,
       _meta: {
         description: 'Process related metrics.',
         optional: false,
@@ -197,7 +154,7 @@ export const opsMetricsSchema: RootSchema<OpsMetrics> = {
         _meta: { description: 'The os platform release, prefixed by the platform name ' },
       },
       distro: {
-        type: 'text',
+        type: 'keyword',
         _meta: {
           description: 'The os distribution. Only present for linux platform',
           optional: true,
