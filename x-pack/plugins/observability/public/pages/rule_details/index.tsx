@@ -33,7 +33,7 @@ import {
   deleteRules,
   useLoadRuleTypes,
   RuleType,
-  NOTIFY_WHEN_OPTIONS
+  NOTIFY_WHEN_OPTIONS,
 } from '@kbn/triggers-actions-ui-plugin/public';
 // TODO: use a Delete modal from triggersActionUI when it's sharable
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
@@ -433,7 +433,12 @@ export function RuleDetailsPage() {
                     })}
                   </ItemTitleRuleSummary>
 
-                  <ItemValueRuleSummary itemValue={String(NOTIFY_WHEN_OPTIONS.find(option => option.value === rule?.notifyWhen)?.inputDisplay || rule.notifyWhen)} />
+                  <ItemValueRuleSummary
+                    itemValue={String(
+                      NOTIFY_WHEN_OPTIONS.find((option) => option.value === rule?.notifyWhen)
+                        ?.inputDisplay || rule.notifyWhen
+                    )}
+                  />
                 </EuiFlexGroup>
 
                 <EuiSpacer size="l" />
