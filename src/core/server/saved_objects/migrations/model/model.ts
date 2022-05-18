@@ -28,7 +28,7 @@ import {
 } from './extract_errors';
 import type { ExcludeRetryableEsError } from './types';
 import {
-  appendExcludedTypes,
+  addMustNotClausesToQuery,
   getAliases,
   indexBelongsToLaterVersion,
   indexVersion,
@@ -233,7 +233,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // continue to timeout and eventually lead to a failed migration.
         const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
         return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
-      } else if (isLeftTypeof(left, 'cluster_shard_limit_exceeded')) {
+      } else if (isTypeof(left, 'cluster_shard_limit_exceeded')) {
         return {
           ...stateP,
           controlState: 'FATAL',
@@ -395,7 +395,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       const unknownTypes = [...new Set(res.right.unknownDocs.map(({ type }) => type))].map(
         (type) => ({ term: { type } })
       );
-      excludeOnUpgradeQuery = appendExcludedTypes(stateP.excludeOnUpgradeQuery, unknownTypes);
+      excludeOnUpgradeQuery = addMustNotClausesToQuery(stateP.excludeOnUpgradeQuery, unknownTypes);
     }
 
     const source = stateP.sourceIndex;
@@ -438,7 +438,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
 
     if (Either.isRight(res)) {
-      const excludeOnUpgradeQuery = appendExcludedTypes(
+      const excludeOnUpgradeQuery = addMustNotClausesToQuery(
         stateP.excludeOnUpgradeQuery,
         res.right.mustNotClauses
       );
@@ -473,7 +473,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // continue to timeout and eventually lead to a failed migration.
         const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
         return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
-      } else if (isLeftTypeof(left, 'cluster_shard_limit_exceeded')) {
+      } else if (isTypeof(left, 'cluster_shard_limit_exceeded')) {
         return {
           ...stateP,
           controlState: 'FATAL',
@@ -714,7 +714,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // continue to timeout and eventually lead to a failed migration.
         const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
         return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
-      } else if (isLeftTypeof(left, 'cluster_shard_limit_exceeded')) {
+      } else if (isTypeof(left, 'cluster_shard_limit_exceeded')) {
         return {
           ...stateP,
           controlState: 'FATAL',
@@ -975,7 +975,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // continue to timeout and eventually lead to a failed migration.
         const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
         return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
-      } else if (isLeftTypeof(left, 'cluster_shard_limit_exceeded')) {
+      } else if (isTypeof(left, 'cluster_shard_limit_exceeded')) {
         return {
           ...stateP,
           controlState: 'FATAL',

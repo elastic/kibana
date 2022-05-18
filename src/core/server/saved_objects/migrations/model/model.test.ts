@@ -1004,7 +1004,7 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('CREATE_REINDEX_TEMP');
 
         expect(newState.excludeOnUpgradeQuery).toEqual({
-          // New filter should be combined unused type query and filter from response
+          // new filters should be added inside a must_not clause, enriching excludeOnUpgradeQuery
           bool: {
             filter: {
               bool: {

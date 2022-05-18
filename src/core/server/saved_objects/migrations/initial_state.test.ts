@@ -160,6 +160,7 @@ describe('createInitialState', () => {
         "logs": Array [],
         "maxBatchSizeBytes": 104857600,
         "migrationDocLinks": Object {
+          "clusterShardLimitExceeded": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#cluster-shard-limit-exceeded",
           "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
           "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
           "routingAllocationDisabled": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#routing-allocation-disabled",

@@ -69,7 +69,7 @@ export function indexBelongsToLaterVersion(indexName: string, kibanaVersion: str
   return version != null ? gt(version, kibanaVersion) : false;
 }
 
-export function appendExcludedTypes(
+export function addMustNotClausesToQuery(
   query: QueryDslQueryContainer,
   mustNotClauses: QueryDslQueryContainer[]
 ): QueryDslQueryContainer {

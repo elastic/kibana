@@ -7,14 +7,14 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { appendExcludedTypes } from './helpers';
+import { addMustNotClausesToQuery } from './helpers';
 
-describe('appendExcludedTypes', () => {
+describe('addMustNotClausesToQuery', () => {
   it('creates a valid query object if the existing query was not defined', () => {
     const query: QueryDslQueryContainer = {};
     const mustNotClauses = [{ term: { type: 'bar' } }, { term: { type: 'baz' } }];
 
-    expect(appendExcludedTypes(query, mustNotClauses)).toMatchInlineSnapshot(`
+    expect(addMustNotClausesToQuery(query, mustNotClauses)).toMatchInlineSnapshot(`
       Object {
         "bool": Object {
           "filter": Object {
@@ -49,7 +49,7 @@ describe('appendExcludedTypes', () => {
     };
     const mustNotClauses = [{ term: { type: 'bar' } }, { term: { type: 'baz' } }];
 
-    expect(appendExcludedTypes(query, mustNotClauses)).toMatchInlineSnapshot(`
+    expect(addMustNotClausesToQuery(query, mustNotClauses)).toMatchInlineSnapshot(`
       Object {
         "bool": Object {
           "filter": Object {
@@ -107,7 +107,7 @@ describe('appendExcludedTypes', () => {
     };
     const mustNotClauses = [{ term: { type: 'bar' } }, { term: { type: 'baz' } }];
 
-    expect(appendExcludedTypes(query, mustNotClauses)).toMatchInlineSnapshot(`
+    expect(addMustNotClausesToQuery(query, mustNotClauses)).toMatchInlineSnapshot(`
       Object {
         "bool": Object {
           "filter": Object {
@@ -154,7 +154,7 @@ describe('appendExcludedTypes', () => {
     };
     const mustNotClauses = [{ term: { type: 'bar' } }, { term: { type: 'baz' } }];
 
-    expect(appendExcludedTypes(query, mustNotClauses)).toMatchInlineSnapshot(`
+    expect(addMustNotClausesToQuery(query, mustNotClauses)).toMatchInlineSnapshot(`
       Object {
         "bool": Object {
           "filter": Array [
@@ -223,7 +223,7 @@ describe('appendExcludedTypes', () => {
     };
     const mustNotClauses = [{ term: { type: 'bar' } }, { term: { type: 'baz' } }];
 
-    expect(appendExcludedTypes(query, mustNotClauses)).toMatchInlineSnapshot(`
+    expect(addMustNotClausesToQuery(query, mustNotClauses)).toMatchInlineSnapshot(`
       Object {
         "bool": Object {
           "filter": Object {
@@ -283,7 +283,7 @@ describe('appendExcludedTypes', () => {
     };
     const mustNotClauses = [{ term: { type: 'baz' } }, { term: { type: 'qux' } }];
 
-    expect(appendExcludedTypes(query, mustNotClauses)).toMatchInlineSnapshot(`
+    expect(addMustNotClausesToQuery(query, mustNotClauses)).toMatchInlineSnapshot(`
       Object {
         "bool": Object {
           "filter": Object {
