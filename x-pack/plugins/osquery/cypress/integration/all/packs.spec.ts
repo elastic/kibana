@@ -110,7 +110,7 @@ describe('ALL - Packs', () => {
         `pack_${PACK_NAME}_${SAVED_QUERY_ID}`
       );
     });
-    it('by clicking in Lens button', () => {
+    it.skip('by clicking in Lens button', () => {
       let lensUrl = '';
       cy.window().then((win) => {
         cy.stub(win, 'open')
