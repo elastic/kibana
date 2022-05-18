@@ -19,6 +19,8 @@ import {
   RuleTypeParams,
   RuleTypeState,
 } from '@kbn/alerting-plugin/server';
+import { getReasonFromError } from '@kbn/alerting-plugin/server/lib/error_with_reason';
+import { RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
 import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import {
@@ -29,6 +31,7 @@ import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
+  ALERT_STATUS_DROPPED,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   EVENT_ACTION,
@@ -162,20 +165,34 @@ export const createLifecycleExecutor =
       ActionGroupIds
     > = {
       alertWithLifecycle: ({ id, fields }) => {
+        const alert = alertFactory.create(id);
         currentAlerts[id] = fields;
-        return alertFactory.create(id);
+        return alert;
       },
       getAlertStartedDate: (alertId: string) => state.trackedAlerts[alertId]?.started ?? null,
     };
 
-    const nextWrappedState = await wrappedExecutor({
-      ...options,
-      state: state.wrapped != null ? state.wrapped : ({} as State),
-      services: {
-        ...options.services,
-        ...lifecycleAlertServices,
-      },
-    });
+    let nextWrappedState;
+    let hasReachedMaxAlerts = false;
+    try {
+      nextWrappedState = await wrappedExecutor({
+        ...options,
+        state: state.wrapped != null ? state.wrapped : ({} as State),
+        services: {
+          ...options.services,
+          ...lifecycleAlertServices,
+        },
+      });
+    } catch (err) {
+      if (
+        getReasonFromError(err) === RuleExecutionStatusErrorReasons.MaxAlerts ||
+        err.message.match(/Rule generated greater than \d alerts/)
+      ) {
+        hasReachedMaxAlerts = true;
+      } else {
+        throw err;
+      }
+    }
 
     const currentAlertIds = Object.keys(currentAlerts);
     const trackedAlertIds = Object.keys(state.trackedAlerts);
@@ -237,7 +254,11 @@ export const createLifecycleExecutor =
           [ALERT_INSTANCE_ID]: alertId,
           [ALERT_START]: started,
           [ALERT_UUID]: alertUuid,
-          [ALERT_STATUS]: isRecovered ? ALERT_STATUS_RECOVERED : ALERT_STATUS_ACTIVE,
+          [ALERT_STATUS]: !isRecovered
+            ? ALERT_STATUS_ACTIVE
+            : hasReachedMaxAlerts
+            ? ALERT_STATUS_DROPPED
+            : ALERT_STATUS_RECOVERED,
           [ALERT_WORKFLOW_STATUS]: alertData?.fields[ALERT_WORKFLOW_STATUS] ?? 'open',
           [EVENT_KIND]: 'signal',
           [EVENT_ACTION]: isNew ? 'open' : isActive ? 'active' : 'close',

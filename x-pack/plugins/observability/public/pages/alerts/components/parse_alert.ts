@@ -9,6 +9,7 @@ import {
   ALERT_START,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_DROPPED,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_NAME,
   ALERT_REASON,
@@ -47,6 +48,7 @@ export const parseAlert =
       ...formatted,
       fields: parsedFields,
       active: parsedFields[ALERT_STATUS] === ALERT_STATUS_ACTIVE,
+      dropped: parsedFields[ALERT_STATUS] === ALERT_STATUS_DROPPED,
       start: new Date(parsedFields[ALERT_START] ?? 0).getTime(),
     };
   };

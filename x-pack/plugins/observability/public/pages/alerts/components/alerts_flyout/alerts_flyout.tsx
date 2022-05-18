@@ -30,6 +30,7 @@ import {
   ALERT_RULE_NAME,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
+  ALERT_STATUS_DROPPED,
 } from '@kbn/rule-data-utils';
 import moment from 'moment-timezone';
 import React, { useMemo } from 'react';
@@ -84,7 +85,13 @@ export function AlertsFlyout({
       title: translations.alertsFlyout.statusLabel,
       description: (
         <AlertStatusIndicator
-          alertStatus={alertData.active ? ALERT_STATUS_ACTIVE : ALERT_STATUS_RECOVERED}
+          alertStatus={
+            alertData.active
+              ? ALERT_STATUS_ACTIVE
+              : alertData.dropped
+              ? ALERT_STATUS_DROPPED
+              : ALERT_STATUS_RECOVERED
+          }
         />
       ),
     },

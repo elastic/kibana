@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { ALERT_STATUS, ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
+import {
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+  ALERT_STATUS_DROPPED,
+} from '@kbn/rule-data-utils';
 import type { CellValueElementProps } from '@kbn/timelines-plugin/common';
 import { createObservabilityRuleTypeRegistryMock } from '../../../../rules/observability_rule_type_registry_mock';
 import * as PluginHook from '../../../../hooks/use_plugin_context';
@@ -13,7 +18,10 @@ import { render } from '../../../../utils/test_helper';
 import { getRenderCellValue } from './render_cell_value';
 
 interface AlertsTableRow {
-  alertStatus: typeof ALERT_STATUS_ACTIVE | typeof ALERT_STATUS_RECOVERED;
+  alertStatus:
+    | typeof ALERT_STATUS_ACTIVE
+    | typeof ALERT_STATUS_RECOVERED
+    | typeof ALERT_STATUS_DROPPED;
 }
 
 describe('getRenderCellValue', () => {

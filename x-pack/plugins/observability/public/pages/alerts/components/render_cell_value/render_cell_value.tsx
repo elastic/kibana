@@ -12,6 +12,7 @@ import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
+  ALERT_STATUS_DROPPED,
   ALERT_REASON,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
@@ -58,9 +59,13 @@ export const getRenderCellValue = ({
 
     switch (columnId) {
       case ALERT_STATUS:
-        if (value !== ALERT_STATUS_ACTIVE && value !== ALERT_STATUS_RECOVERED) {
+        if (
+          value !== ALERT_STATUS_ACTIVE &&
+          value !== ALERT_STATUS_RECOVERED &&
+          value !== ALERT_STATUS_DROPPED
+        ) {
           // NOTE: This should only be needed to narrow down the type.
-          // Status should be either "active" or "recovered".
+          // Status should be either "active" or "recovered" or "dropped".
           return null;
         }
         return <AlertStatusIndicator alertStatus={value} />;

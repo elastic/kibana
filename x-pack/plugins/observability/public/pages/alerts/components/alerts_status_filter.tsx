@@ -8,7 +8,12 @@
 import { EuiButtonGroup, EuiButtonGroupOptionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, ALERT_STATUS } from '@kbn/rule-data-utils';
+import {
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+  ALERT_STATUS_DROPPED,
+  ALERT_STATUS,
+} from '@kbn/rule-data-utils';
 import { AlertStatusFilterButton } from '../../../../common/typings';
 import { AlertStatusFilter } from '../../../../common/typings';
 
@@ -41,6 +46,14 @@ export const recoveredAlerts: AlertStatusFilter = {
   }),
 };
 
+export const droppedAlerts: AlertStatusFilter = {
+  status: ALERT_STATUS_DROPPED,
+  query: `${ALERT_STATUS}: "${ALERT_STATUS_DROPPED}"`,
+  label: i18n.translate('xpack.observability.alerts.alertStatusFilter.dropped', {
+    defaultMessage: 'Dropped',
+  }),
+};
+
 const options: EuiButtonGroupOptionProps[] = [
   {
     id: allAlerts.status,
@@ -59,6 +72,12 @@ const options: EuiButtonGroupOptionProps[] = [
     label: recoveredAlerts.label,
     value: recoveredAlerts.query,
     'data-test-subj': 'alert-status-filter-recovered-button',
+  },
+  {
+    id: droppedAlerts.status,
+    label: droppedAlerts.label,
+    value: droppedAlerts.query,
+    'data-test-subj': 'alert-status-filter-dropped-button',
   },
 ];
 

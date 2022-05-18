@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiHealth, EuiText } from '@elastic/eui';
-import { ALERT_STATUS_ACTIVE, AlertStatus } from '@kbn/rule-data-utils';
+import { ALERT_STATUS_ACTIVE, ALERT_STATUS_DROPPED, AlertStatus } from '@kbn/rule-data-utils';
 import { useTheme } from '../../hooks/use_theme';
 
 interface AlertStatusIndicatorProps {
@@ -23,6 +23,16 @@ export function AlertStatusIndicator({ alertStatus }: AlertStatusIndicatorProps)
       <EuiHealth color="primary" textSize="xs">
         {i18n.translate('xpack.observability.alertsTGrid.statusActiveDescription', {
           defaultMessage: 'Active',
+        })}
+      </EuiHealth>
+    );
+  }
+
+  if (alertStatus === ALERT_STATUS_DROPPED) {
+    return (
+      <EuiHealth color="subdued" textSize="xs">
+        {i18n.translate('xpack.observability.alertsTGrid.statusDroppedDescription', {
+          defaultMessage: 'Dropped',
         })}
       </EuiHealth>
     );

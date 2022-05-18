@@ -54,6 +54,7 @@ export interface TopAlert {
   reason: string;
   link?: string;
   active: boolean;
+  dropped: boolean;
 }
 
 const regExpEscape = (str: string) => str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
