@@ -139,7 +139,7 @@ PUT _index_template/tri_met_tracks
               "type": "integer"
             },
             "nextLocID": {
-              "type": "integer"
+              "type": "keyword"
             },
             "locationInScheduleDay": {
               "type": "integer"
