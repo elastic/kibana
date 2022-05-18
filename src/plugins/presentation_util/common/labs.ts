@@ -38,7 +38,7 @@ export const projects: { [ID in ProjectID]: ProjectConfig & { id: ID } } = {
   },
   [DASHBOARD_CONTROLS]: {
     id: DASHBOARD_CONTROLS,
-    isActive: false,
+    isActive: true,
     isDisplayed: true,
     environments: ['kibana', 'browser', 'session'],
     name: i18n.translate('presentationUtil.labs.enableDashboardControlsProjectName', {

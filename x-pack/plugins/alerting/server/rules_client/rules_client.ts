@@ -1832,7 +1832,7 @@ export class RulesClient {
   }
 
   private async enableWithOCC({ id }: { id: string }) {
-    let apiKeyToInvalidate: string | null = null;
+    let existingApiKey: string | null = null;
     let attributes: RawRule;
     let version: string | undefined;
 
@@ -1841,14 +1841,11 @@ export class RulesClient {
         await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>('alert', id, {
           namespace: this.namespace,
         });
-      apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
+      existingApiKey = decryptedAlert.attributes.apiKey;
       attributes = decryptedAlert.attributes;
       version = decryptedAlert.version;
     } catch (e) {
-      // We'll skip invalidating the API key since we failed to load the decrypted saved object
-      this.logger.error(
-        `enable(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
-      );
+      this.logger.error(`enable(): Failed to load API key of alert ${id}: ${e.message}`);
       // Still attempt to load the attributes and version using SOC
       const alert = await this.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
       attributes = alert.attributes;
@@ -1890,19 +1887,10 @@ export class RulesClient {
     if (attributes.enabled === false) {
       const username = await this.getUserName();
 
-      let createdAPIKey = null;
-      try {
-        createdAPIKey = await this.createAPIKey(
-          this.generateAPIKeyName(attributes.alertTypeId, attributes.name)
-        );
-      } catch (error) {
-        throw Boom.badRequest(`Error enabling rule: could not create API key - ${error.message}`);
-      }
-
       const updateAttributes = this.updateMeta({
         ...attributes,
+        ...(!existingApiKey && (await this.createNewAPIKeySet({ attributes, username }))),
         enabled: true,
-        ...this.apiKeyAsAlertAttributes(createdAPIKey, username),
         updatedBy: username,
         updatedAt: new Date().toISOString(),
         executionStatus: {
@@ -1913,15 +1901,10 @@ export class RulesClient {
           warning: null,
         },
       });
+
       try {
         await this.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });
       } catch (e) {
-        // Avoid unused API key
-        await bulkMarkApiKeysForInvalidation(
-          { apiKeys: updateAttributes.apiKey ? [updateAttributes.apiKey] : [] },
-          this.logger,
-          this.unsecuredSavedObjectsClient
-        );
         throw e;
       }
       const scheduledTask = await this.scheduleRule({
@@ -1934,14 +1917,26 @@ export class RulesClient {
       await this.unsecuredSavedObjectsClient.update('alert', id, {
         scheduledTaskId: scheduledTask.id,
       });
-      if (apiKeyToInvalidate) {
-        await bulkMarkApiKeysForInvalidation(
-          { apiKeys: [apiKeyToInvalidate] },
-          this.logger,
-          this.unsecuredSavedObjectsClient
-        );
-      }
     }
+  }
+
+  private async createNewAPIKeySet({
+    attributes,
+    username,
+  }: {
+    attributes: RawRule;
+    username: string | null;
+  }): Promise<Pick<RawRule, 'apiKey' | 'apiKeyOwner'>> {
+    let createdAPIKey = null;
+    try {
+      createdAPIKey = await this.createAPIKey(
+        this.generateAPIKeyName(attributes.alertTypeId, attributes.name)
+      );
+    } catch (error) {
+      throw Boom.badRequest(`Error creating API key for rule: ${error.message}`);
+    }
+
+    return this.apiKeyAsAlertAttributes(createdAPIKey, username);
   }
 
   public async disable({ id }: { id: string }): Promise<void> {
@@ -1953,7 +1948,6 @@ export class RulesClient {
   }
 
   private async disableWithOCC({ id }: { id: string }) {
-    let apiKeyToInvalidate: string | null = null;
     let attributes: RawRule;
     let version: string | undefined;
 
@@ -1962,14 +1956,10 @@ export class RulesClient {
         await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>('alert', id, {
           namespace: this.namespace,
         });
-      apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
       attributes = decryptedAlert.attributes;
       version = decryptedAlert.version;
     } catch (e) {
-      // We'll skip invalidating the API key since we failed to load the decrypted saved object
-      this.logger.error(
-        `disable(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
-      );
+      this.logger.error(`disable(): Failed to load API key of alert ${id}: ${e.message}`);
       // Still attempt to load the attributes and version using SOC
       const alert = await this.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
       attributes = alert.attributes;
@@ -2062,26 +2052,14 @@ export class RulesClient {
           ...attributes,
           enabled: false,
           scheduledTaskId: null,
-          apiKey: null,
-          apiKeyOwner: null,
           updatedBy: await this.getUserName(),
           updatedAt: new Date().toISOString(),
         }),
         { version }
       );
-
-      await Promise.all([
-        attributes.scheduledTaskId
-          ? this.taskManager.removeIfExists(attributes.scheduledTaskId)
-          : null,
-        apiKeyToInvalidate
-          ? await bulkMarkApiKeysForInvalidation(
-              { apiKeys: [apiKeyToInvalidate] },
-              this.logger,
-              this.unsecuredSavedObjectsClient
-            )
-          : null,
-      ]);
+      if (attributes.scheduledTaskId) {
+        await this.taskManager.removeIfExists(attributes.scheduledTaskId);
+      }
     }
   }
 
