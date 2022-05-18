@@ -170,7 +170,7 @@ function ObservabilityActions({
 
   const casePermissions = useGetUserCasesPermissions();
   const ruleId = alert.fields['kibana.alert.rule.uuid'] ?? null;
-  const linkToRule = ruleId ? http.basePath.prepend(paths.management.ruleDetails(ruleId)) : null;
+  const linkToRule = ruleId ? http.basePath.prepend(`/app/observability/alerts/rules/${ruleId}`) : null;
 
   const caseAttachments: CaseAttachments = useMemo(() => {
     return ecsData?._id
