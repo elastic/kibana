@@ -8,21 +8,21 @@
 
 import { MonitoringConfig } from '../config';
 import { decorateDebugServer } from '../debug_logger';
-import { RouteDependencies } from '../types';
-// @ts-ignore
-import * as uiRoutes from './api/v1/ui'; // namespace import
+import { MonitoringCore, RouteDependencies } from '../types';
+import * as uiRoutes from './api/v1/ui';
 
 export function requireUIRoutes(
-  _server: any,
+  server: MonitoringCore,
   config: MonitoringConfig,
   npRoute: RouteDependencies
 ) {
   const routes = Object.keys(uiRoutes);
-  const server = config.ui.debug_mode
-    ? decorateDebugServer(_server, config, npRoute.logger)
-    : _server;
+  const decoratedServer = config.ui.debug_mode
+    ? decorateDebugServer(server, config, npRoute.logger)
+    : server;
 
   routes.forEach((route) => {
+    // @ts-expect-error
     const registerRoute = uiRoutes[route]; // computed reference to module objects imported via namespace
     registerRoute(server, npRoute);
   });
