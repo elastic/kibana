@@ -8,7 +8,7 @@ In this tutorial, you’ll look at live urban transit data from the city of Port
 
 You’ll learn to:
 
-- Use Filebeat to ingest the TriMet REST API into Elasticsearch.
+- Use {filebeat} to ingest the TriMet REST API into Elasticsearch.
 - Create a map with layers that visualize asset tracks and last-known locations.
 - Use symbols and colors to style data values and show which direction an asset is heading.
 - Set up tracking containment alerts to monitor moving vehicles.
@@ -27,13 +27,13 @@ image::maps/images/asset-tracking-tutorial/construction_zones.png[]
 
 [float]
 === Part 1: Ingest the Portland bus data
-To get to the fun of visualizing and alerting on Portland buses, you must first create a Filebeat input to ingest the TriMet Portland bus data into {es}.
+To get to the fun of visualizing and alerting on Portland buses, you must first create a {filebeat} input to ingest the TriMet Portland bus data into {es}.
 
 [float]
 ==== Step 1: Set up an Elasticsearch index
 
 . In Kibana, open the main menu, then click *Dev Tools*.
-. In *Console*, create the `tri_met_tracks` index lifecyle policy. This policy will keep the events in the hot data phase for 7 days at the end of which moves the data to the warm phase, after 365 days in the warm phase the data is deleted. 
+. In *Console*, create the `tri_met_tracks` index lifecyle policy. This policy will keep the events in the hot data phase for 7 days. The data then moves to the warm phase. After 365 days in the warm phase, the data is deleted. 
 +
 [source,js]
 ----------------------------------
@@ -73,7 +73,7 @@ PUT _ilm/policy/tri_met_tracks
   }
 }
 ----------------------------------
-. In *Console*, create the `tri_met_tracks` index template which is configured to use Datastreams:
+. In *Console*, create the `tri_met_tracks` index template, which is configured to use datastreams:
 +
 [source,js]
 ----------------------------------
@@ -208,7 +208,7 @@ PUT _index_template/tri_met_tracks
   "composed_of": []
 }
 ----------------------------------
-. In Console, Add the `tri_met_track` ingest pipeline. 
+. In **Console**, add the `tri_met_track` ingest pipeline. 
 +
 [source,js]
 ----------------------------------
@@ -270,9 +270,9 @@ PUT _ingest/pipeline/tri_met_tracks
 ----------------------------------
 
 [float]
-==== Step 2: Start Filebeat
+==== Step 2: Start {filebeat}
 
-. Replace the contents within your `filebeat.yml` file with the following.
+. Replace the contents in your `filebeat.yml` file with the following:
 +
 [source,yaml]
 ----------------------------------
@@ -300,17 +300,17 @@ cloud.auth: <username:password>
 . Replace `<tri_met_app_id>` with your TriMet application id.
 . Replace `<username:password>` with your Elastic Cloud deployment credentials.
 . Replace `<cloud_id>` with your {ece}/ece-cloud-id.html[elastic cloud id].
-. Open a terminal window, and then navigate to the Filebeat folder.
-. In your `filebeat` folder, run Filebeat with the edited config:
+. Open a terminal window, and then navigate to the {filebeat} folder.
+. In your `filebeat` folder, run {filebeat} with the edited config:
 +
 [source,bash]
 ----------------------------------
 /bin/filebeat -c filebeat.yml
 ----------------------------------
 
-. Wait for Filebeat to start shipping data to Elastic Cloud, filebeat shouldn't produce any output to stdout. 
+. Wait for {filebeat} to start shipping data to Elastic Cloud. {filebeat} should not produce any output to stdout. 
 
-. Leave the terminal window open and Filebeat running throughout this tutorial.
+. Leave the terminal window open and {filebeat} running throughout this tutorial.
 
 [float]
 ==== Step 3: Create a data view for the tri_met_tracks {es} index
