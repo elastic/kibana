@@ -10,6 +10,7 @@ import ReactDOM from 'react-dom';
 import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { CoreSetup, CoreStart } from '@kbn/core/public';
+import type { FileLayer } from '@elastic/ems-client';
 import type { MapsPluginStartDependencies } from '../../plugin';
 import type { ChoroplethChartProps } from './types';
 import type { MapEmbeddableInput, MapEmbeddableOutput } from '../../embeddable';
@@ -40,12 +41,19 @@ export function getExpressionRenderer(coreSetup: CoreSetup<MapsPluginStartDepend
         return;
       }
 
+      let emsFileLayers: FileLayer[] = [];
+      try {
+        emsFileLayers = await getEmsFileLayers();
+      } catch (error) {
+        // ignore error, lack of EMS file layers will be surfaced in dimension editor
+      }
+
       ReactDOM.render(
         <ChoroplethChart
           {...config}
           formatFactory={plugins.fieldFormats.deserialize}
           uiSettings={coreStart.uiSettings}
-          emsFileLayers={await getEmsFileLayers()}
+          emsFileLayers={emsFileLayers}
           mapEmbeddableFactory={mapEmbeddableFactory}
         />,
         domNode,
