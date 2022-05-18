@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RRule, ByWeekday, Weekday, WeekdayStr, rrulestr } from 'rrule';
+import { RRule, ByWeekday, Weekday, rrulestr } from 'rrule';
 import { SanitizedRule, RuleTypeParams } from '../../common/rule';
 
 type RuleSnoozeProps = Pick<SanitizedRule<RuleTypeParams>, 'muteAll' | 'snoozeSchedule'>;
