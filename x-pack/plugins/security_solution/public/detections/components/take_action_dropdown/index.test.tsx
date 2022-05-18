@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
-import { waitFor } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 
 import { TakeActionDropdown, TakeActionDropdownProps } from '.';
 import { mockAlertDetailsData } from '../../../common/components/event_details/__mocks__';
@@ -16,10 +16,15 @@ import { TimelineId } from '../../../../common/types';
 import { TestProviders } from '../../../common/mock';
 import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
-import { useKibana, useGetUserCasesPermissions } from '../../../common/lib/kibana';
+import { useKibana, useGetUserCasesPermissions, useHttp } from '../../../common/lib/kibana';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { cloneDeep } from 'lodash';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { NOT_FROM_ENDPOINT_HOST_TOOLTIP } from '../response_actions_console/response_actions_console_context_menu_item';
+import { endpointMetadataHttpMocks } from '../../../management/pages/endpoint_hosts/mocks';
+import { HttpSetup } from '@kbn/core/public';
 
 jest.mock('../../../common/components/user_privileges');
 
@@ -71,26 +76,29 @@ jest.mock('../../containers/detection_engine/alerts/use_host_isolation_status', 
 jest.mock('../../../common/components/user_privileges');
 
 describe('take action dropdown', () => {
-  const defaultProps: TakeActionDropdownProps = {
-    detailsData: mockAlertDetailsData as TimelineEventsDetailsItem[],
-    ecsData: mockEcsDataWithAlert,
-    handleOnEventClosed: jest.fn(),
-    indexName: 'index',
-    isHostIsolationPanelOpen: false,
-    loadingEventDetails: false,
-    onAddEventFilterClick: jest.fn(),
-    onAddExceptionTypeClick: jest.fn(),
-    onAddIsolationStatusClick: jest.fn(),
-    refetch: jest.fn(),
-    refetchFlyoutData: jest.fn(),
-    timelineId: TimelineId.active,
-    onOsqueryClick: jest.fn(),
-  };
+  let defaultProps: TakeActionDropdownProps;
+  let mockStartServicesMock: ReturnType<typeof createStartServicesMock>;
 
-  beforeAll(() => {
+  beforeEach(() => {
+    defaultProps = {
+      detailsData: mockAlertDetailsData as TimelineEventsDetailsItem[],
+      ecsData: cloneDeep(mockEcsDataWithAlert),
+      handleOnEventClosed: jest.fn(),
+      indexName: 'index',
+      isHostIsolationPanelOpen: false,
+      loadingEventDetails: false,
+      onAddEventFilterClick: jest.fn(),
+      onAddExceptionTypeClick: jest.fn(),
+      onAddIsolationStatusClick: jest.fn(),
+      refetch: jest.fn(),
+      refetchFlyoutData: jest.fn(),
+      timelineId: TimelineId.active,
+      onOsqueryClick: jest.fn(),
+    };
+
+    mockStartServicesMock = createStartServicesMock();
+
     (useKibana as jest.Mock).mockImplementation(() => {
-      const mockStartServicesMock = createStartServicesMock();
-
       return {
         services: {
           ...mockStartServicesMock,
@@ -105,6 +113,8 @@ describe('take action dropdown', () => {
         },
       };
     });
+
+    (useHttp as jest.Mock).mockReturnValue(mockStartServicesMock.http);
   });
 
   test('should render takeActionButton', () => {
@@ -128,14 +138,12 @@ describe('take action dropdown', () => {
   });
 
   describe('should render take action items', () => {
-    const testProps = {
-      ...defaultProps,
-    };
     let wrapper: ReactWrapper;
+
     beforeAll(() => {
       wrapper = mount(
         <TestProviders>
-          <TakeActionDropdown {...testProps} />
+          <TakeActionDropdown {...defaultProps} />
         </TestProviders>
       );
       wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
@@ -205,6 +213,13 @@ describe('take action dropdown', () => {
         expect(wrapper.find('[data-test-subj="osquery-action-item"]').first().text()).toEqual(
           'Run Osquery'
         );
+      });
+    });
+    test('should render "Launch responder"', async () => {
+      await waitFor(() => {
+        expect(
+          wrapper.find('[data-test-subj="endpointResponseActions-action-item"]').first().text()
+        ).toEqual('Launch responder');
       });
     });
   });
@@ -291,5 +306,74 @@ describe('take action dropdown', () => {
         expect(wrapper.exists('[data-test-subj="add-event-filter-menu-item"]')).toBeFalsy();
       });
     });
+  });
+
+  describe('should correctly enable/disable the "Launch responder" button', () => {
+    let wrapper: ReactWrapper;
+    let apiMocks: ReturnType<typeof endpointMetadataHttpMocks>;
+
+    const render = (): ReactWrapper => {
+      wrapper = mount(
+        <TestProviders>
+          <TakeActionDropdown {...defaultProps} />
+        </TestProviders>
+      );
+      wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
+
+      return wrapper;
+    };
+
+    const findLaunchResponderButton = (): ReturnType<typeof wrapper.find> => {
+      return wrapper.find('[data-test-subj="endpointResponseActions-action-item"]');
+    };
+
+    beforeEach(() => {
+      apiMocks = endpointMetadataHttpMocks(mockStartServicesMock.http as jest.Mocked<HttpSetup>);
+    });
+
+    describe('when the `responseActionsConsoleEnabled` feature flag is false', () => {
+      beforeAll(() => {
+        (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((featureKey) => {
+          if (featureKey === 'responseActionsConsoleEnabled') {
+            return false;
+          }
+          return true;
+        });
+      });
+
+      afterAll(() => {
+        (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(() => true);
+      });
+
+      it('should hide the button if feature flag if off', async () => {
+        render();
+
+        expect(findLaunchResponderButton()).toHaveLength(0);
+      });
+    });
+
+    it('should disable the button if alert NOT from a host running endpoint', async () => {
+      if (defaultProps.ecsData) {
+        defaultProps.ecsData.agent = {
+          // @ts-expect-error Ecs definition for agent seems to be missing properties
+          id: '123',
+          type: ['some-agent'],
+        };
+      }
+      render();
+
+      await act(async () => {
+        await waitFor(() => {
+          expect(apiMocks.responseProvider.metadataDetails).toHaveBeenCalled();
+        });
+      });
+
+      expect(findLaunchResponderButton().first().prop('disabled')).toBe(true);
+      expect(findLaunchResponderButton().first().prop('toolTipContent')).toEqual(
+        NOT_FROM_ENDPOINT_HOST_TOOLTIP
+      );
+    });
+
+    it.todo('should disable the button if host is no longer running endpoint');
   });
 });
