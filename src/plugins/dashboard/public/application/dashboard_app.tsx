@@ -114,10 +114,10 @@ export function DashboardApp({
     };
   }, [data.search.session]);
 
-  const [printMode] = useMemo(() => {
-    const latestDashboardState = dashboardAppState.getLatestDashboardState?.();
-    return [latestDashboardState?.viewMode === ViewMode.PRINT];
-  }, [dashboardAppState]);
+  const printMode = useMemo(
+    () => dashboardAppState.getLatestDashboardState?.().viewMode === ViewMode.PRINT,
+    [dashboardAppState]
+  );
 
   useEffect(() => {
     if (!embedSettings) chrome.setIsVisible(!printMode);
@@ -133,6 +133,7 @@ export function DashboardApp({
             embedSettings={embedSettings}
             dashboardAppState={dashboardAppState}
           />
+
           {dashboardAppState.savedDashboard.outcome === 'conflict' &&
           dashboardAppState.savedDashboard.id &&
           dashboardAppState.savedDashboard.aliasId

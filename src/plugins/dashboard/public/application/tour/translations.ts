@@ -24,56 +24,56 @@ export const DashboardTourStrings = {
       i18n.translate('dashboard.tour.editMode.title', {
         defaultMessage: 'Dashboard tour',
       }),
-    firstStep: {
+    createVisualization: {
       getTitle: () =>
-        i18n.translate('dashboard.tour.editMode.firstStep.title', {
+        i18n.translate('dashboard.tour.editMode.createVisualization.title', {
           defaultMessage: 'Create visualizations',
         }),
       getDescription: () =>
-        i18n.translate('dashboard.tour.editMode.firstStep.description', {
+        i18n.translate('dashboard.tour.editMode.createVisualization.description', {
           defaultMessage:
             'Build maps, charts, gauges, and other visualizations that best display your data.',
         }),
     },
-    secondStep: {
+    panelOptions: {
       getTitle: () =>
-        i18n.translate('dashboard.tour.editMode.secondStep.title', {
+        i18n.translate('dashboard.tour.editMode.panelOptions.title', {
           defaultMessage: 'Add your style',
         }),
       getDescription: () =>
-        i18n.translate('dashboard.tour.editMode.secondStep.description', {
+        i18n.translate('dashboard.tour.editMode.panelOptions.description', {
           defaultMessage: 'Customize your visualization to give your data its best look.',
         }),
     },
-    thirdStep: {
+    timePicker: {
       getTitle: () =>
-        i18n.translate('dashboard.tour.editMode.thirdStep.title', {
+        i18n.translate('dashboard.tour.editMode.timePicker.title', {
           defaultMessage: 'Expand the time range',
         }),
       getDescription: () =>
-        i18n.translate('dashboard.tour.editMode.thirdStep.description', {
+        i18n.translate('dashboard.tour.editMode.timePicker.description', {
           defaultMessage:
             'View hits for a particular day, the last year, or whatever gets you the data you want.',
         }),
     },
-    fourthStep: {
+    filters: {
       getTitle: () =>
-        i18n.translate('dashboard.tour.editMode.fourthStep.title', {
+        i18n.translate('dashboard.tour.editMode.addFilter.title', {
           defaultMessage: 'Filter the data',
         }),
       getDescription: () =>
-        i18n.translate('dashboard.tour.editMode.fourthStep.description', {
+        i18n.translate('dashboard.tour.editMode.addFilter.description', {
           defaultMessage:
             'To reduce the amount of data displayed, filter for data that exists, does not exist, contains a value, and more.',
         }),
     },
-    fifthStep: {
+    controls: {
       getTitle: () =>
-        i18n.translate('dashboard.tour.editMode.fifthStep.title', {
+        i18n.translate('dashboard.tour.editMode.controls.title', {
           defaultMessage: 'Make it interactive',
         }),
       getDescription: () =>
-        i18n.translate('dashboard.tour.editMode.fifthStep.description', {
+        i18n.translate('dashboard.tour.editMode.controls.description', {
           defaultMessage: 'Add controls for a more engaging, more memorable experience.',
         }),
     },
