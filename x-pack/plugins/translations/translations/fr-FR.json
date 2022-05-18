@@ -2929,7 +2929,6 @@
     "discover.fieldNameIcons.unknownFieldAriaLabel": "Champ inconnu",
     "discover.fieldNameIcons.versionFieldAriaLabel": "Champ de version",
     "discover.goToDiscoverMainViewButtonText": "Accédez à la vue principale de Discover",
-    "discover.grid.copyToClipBoardButton": "Copier dans le presse-papiers",
     "discover.grid.documentHeader": "Document",
     "discover.grid.filterFor": "Filtrer sur",
     "discover.grid.filterForAria": "Filtrer sur cette {value}",
