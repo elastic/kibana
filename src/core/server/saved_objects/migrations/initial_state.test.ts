@@ -8,9 +8,9 @@
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import * as Option from 'fp-ts/Option';
-import { DocLinksServiceSetup } from '../../doc_links';
+import type { DocLinksServiceSetup } from '../../doc_links';
 import { docLinksServiceMock, loggingSystemMock } from '../../mocks';
-import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
+import type { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { createInitialState } from './initial_state';
 
@@ -51,7 +51,7 @@ describe('createInitialState', () => {
       controlState: 'INIT',
       currentAlias: '.kibana_task_manager',
       excludeFromUpgradeFilterHooks: {},
-      ignoreUnknownObjects: false,
+      discardUnknownObjects: false,
       indexPrefix: '.kibana_task_manager',
       kibanaVersion: '8.1.0',
       knownTypes: [],
@@ -93,26 +93,30 @@ describe('createInitialState', () => {
           },
         },
       },
-      unusedTypesQuery: {
+      excludeOnUpgradeQuery: {
         bool: {
-          must_not: expect.arrayContaining([
-            {
-              bool: {
-                must: [
-                  {
-                    match: {
-                      type: 'search-session',
-                    },
+          filter: {
+            bool: {
+              must_not: expect.arrayContaining([
+                {
+                  bool: {
+                    must: [
+                      {
+                        match: {
+                          type: 'search-session',
+                        },
+                      },
+                      {
+                        match: {
+                          'search-session.persisted': false,
+                        },
+                      },
+                    ],
                   },
-                  {
-                    match: {
-                      'search-session.persisted': false,
-                    },
-                  },
-                ],
-              },
+                },
+              ]),
             },
-          ]),
+          },
         },
       },
       versionAlias: '.kibana_task_manager_8.1.0',
@@ -282,7 +286,7 @@ describe('createInitialState', () => {
       `);
   });
 
-  it('initializes the `ignoreUnknownObjects` flag to false if the value provided in the config does not match the current kibana version', () => {
+  it('initializes the `discardUnknownObjects` flag to false if the value provided in the config does not match the current kibana version', () => {
     const logger = mockLogger.get();
     const initialState = createInitialState({
       kibanaVersion: '8.1.0',
@@ -294,21 +298,21 @@ describe('createInitialState', () => {
       indexPrefix: '.kibana_task_manager',
       migrationsConfig: {
         ...migrationsConfig,
-        ignoreUnknownObjects: '8.0.0',
+        discardUnknownObjects: '8.0.0',
       },
       typeRegistry,
       docLinks,
       logger,
     });
 
-    expect(initialState.ignoreUnknownObjects).toEqual(false);
+    expect(initialState.discardUnknownObjects).toEqual(false);
     expect(logger.warn).toBeCalledTimes(1);
     expect(logger.warn).toBeCalledWith(
-      'The flag `migrations.ignoreUnknownObjects` is defined but does not match the current kibana version; unknown objects will NOT be ignored.'
+      'The flag `migrations.discardUnknownObjects` is defined but does not match the current kibana version; unknown objects will NOT be ignored.'
     );
   });
 
-  it('initializes the `ignoreUnknownObjects` flag to true if the value provided in the config matches the current kibana version', () => {
+  it('initializes the `discardUnknownObjects` flag to true if the value provided in the config matches the current kibana version', () => {
     const initialState = createInitialState({
       kibanaVersion: '8.1.0',
       targetMappings: {
@@ -319,13 +323,13 @@ describe('createInitialState', () => {
       indexPrefix: '.kibana_task_manager',
       migrationsConfig: {
         ...migrationsConfig,
-        ignoreUnknownObjects: '8.1.0',
+        discardUnknownObjects: '8.1.0',
       },
       typeRegistry,
       docLinks,
       logger: mockLogger.get(),
     });
 
-    expect(initialState.ignoreUnknownObjects).toEqual(true);
+    expect(initialState.discardUnknownObjects).toEqual(true);
   });
 });

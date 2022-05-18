@@ -7,10 +7,10 @@
  */
 
 import { gt, valid } from 'semver';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { State } from '../state';
-import { IndexMapping } from '../../mappings';
-import { FetchIndexResponse } from '../actions';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { State } from '../state';
+import type { IndexMapping } from '../../mappings';
+import type { FetchIndexResponse } from '../actions';
 
 /**
  * A helper function/type for ensuring that all control state's are handled.
@@ -69,13 +69,51 @@ export function indexBelongsToLaterVersion(indexName: string, kibanaVersion: str
   return version != null ? gt(version, kibanaVersion) : false;
 }
 
-export function addFiltersToQuery(
-  query: estypes.QueryDslQueryContainer,
-  filter: estypes.QueryDslQueryContainer
-): estypes.QueryDslQueryContainer {
+export function appendExcludedTypes(
+  query: QueryDslQueryContainer,
+  mustNotClauses: QueryDslQueryContainer[]
+): QueryDslQueryContainer {
+  let filter: QueryDslQueryContainer[] | QueryDslQueryContainer = [];
+
+  if (query.bool?.filter) {
+    if (Array.isArray(query.bool.filter)) {
+      filter = filter.concat(query.bool.filter);
+
+      filter.push({
+        bool: {
+          must_not: mustNotClauses,
+        },
+      });
+    } else {
+      let currentMustNot: QueryDslQueryContainer[] = [];
+
+      if (query.bool.filter.bool?.must_not) {
+        currentMustNot = currentMustNot.concat(query.bool.filter.bool.must_not);
+      }
+
+      currentMustNot.push(...mustNotClauses);
+
+      filter = {
+        ...query.bool.filter,
+        bool: {
+          ...query.bool.filter.bool,
+          must_not: currentMustNot,
+        },
+      };
+    }
+  } else {
+    filter = {
+      bool: {
+        must_not: mustNotClauses,
+      },
+    };
+  }
+
   return {
+    ...query,
     bool: {
-      filter: [query, filter],
+      ...query.bool,
+      filter,
     },
   };
 }

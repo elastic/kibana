@@ -13,9 +13,10 @@ import type { ServiceConfigDescriptor } from '../internal_types';
 const migrationSchema = schema.object({
   batchSize: schema.number({ defaultValue: 1_000 }),
   maxBatchSizeBytes: schema.byteSize({ defaultValue: '100mb' }), // 100mb is the default http.max_content_length Elasticsearch config value
-  ignoreUnknownObjects: schema.maybe(
+  discardUnknownObjects: schema.maybe(
     schema.string({
-      validate: (value) => (valid(value) ? undefined : 'The value is not a valid semantic version'),
+      validate: (value: string) =>
+        valid(value) ? undefined : 'The value is not a valid semantic version',
     })
   ),
   scrollDuration: schema.string({ defaultValue: '15m' }),

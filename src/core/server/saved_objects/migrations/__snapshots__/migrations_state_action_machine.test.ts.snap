@@ -21,7 +21,7 @@ Object {
               "controlState": "LEGACY_REINDEX",
               "currentAlias": ".my-so-index",
               "excludeFromUpgradeFilterHooks": Object {},
-              "ignoreUnknownObjects": false,
+              "discardUnknownObjects": false,
               "indexPrefix": ".my-so-index",
               "kibanaVersion": "7.11.0",
               "knownTypes": Array [],
@@ -67,7 +67,7 @@ Object {
                 },
               },
               "transformedDocBatches": Array [],
-              "unusedTypesQuery": Object {
+              "excludeOnUpgradeQuery": Object {
                 "bool": Object {
                   "must_not": Array [
                     Object {
@@ -189,7 +189,7 @@ Object {
               "controlState": "LEGACY_DELETE",
               "currentAlias": ".my-so-index",
               "excludeFromUpgradeFilterHooks": Object {},
-              "ignoreUnknownObjects": false,
+              "discardUnknownObjects": false,
               "indexPrefix": ".my-so-index",
               "kibanaVersion": "7.11.0",
               "knownTypes": Array [],
@@ -239,7 +239,7 @@ Object {
                 },
               },
               "transformedDocBatches": Array [],
-              "unusedTypesQuery": Object {
+              "excludeOnUpgradeQuery": Object {
                 "bool": Object {
                   "must_not": Array [
                     Object {
@@ -361,7 +361,7 @@ Object {
               "controlState": "LEGACY_DELETE",
               "currentAlias": ".my-so-index",
               "excludeFromUpgradeFilterHooks": Object {},
-              "ignoreUnknownObjects": false,
+              "discardUnknownObjects": false,
               "indexPrefix": ".my-so-index",
               "kibanaVersion": "7.11.0",
               "knownTypes": Array [],
@@ -415,7 +415,7 @@ Object {
                 },
               },
               "transformedDocBatches": Array [],
-              "unusedTypesQuery": Object {
+              "excludeOnUpgradeQuery": Object {
                 "bool": Object {
                   "must_not": Array [
                     Object {
@@ -537,7 +537,7 @@ Object {
               "controlState": "DONE",
               "currentAlias": ".my-so-index",
               "excludeFromUpgradeFilterHooks": Object {},
-              "ignoreUnknownObjects": false,
+              "discardUnknownObjects": false,
               "indexPrefix": ".my-so-index",
               "kibanaVersion": "7.11.0",
               "knownTypes": Array [],
@@ -595,7 +595,7 @@ Object {
                 },
               },
               "transformedDocBatches": Array [],
-              "unusedTypesQuery": Object {
+              "excludeOnUpgradeQuery": Object {
                 "bool": Object {
                   "must_not": Array [
                     Object {
@@ -755,7 +755,7 @@ Object {
               "controlState": "LEGACY_DELETE",
               "currentAlias": ".my-so-index",
               "excludeFromUpgradeFilterHooks": Object {},
-              "ignoreUnknownObjects": false,
+              "discardUnknownObjects": false,
               "indexPrefix": ".my-so-index",
               "kibanaVersion": "7.11.0",
               "knownTypes": Array [],
@@ -812,7 +812,7 @@ Object {
                   },
                 ],
               ],
-              "unusedTypesQuery": Object {
+              "excludeOnUpgradeQuery": Object {
                 "bool": Object {
                   "must_not": Array [
                     Object {
@@ -934,7 +934,7 @@ Object {
               "controlState": "FATAL",
               "currentAlias": ".my-so-index",
               "excludeFromUpgradeFilterHooks": Object {},
-              "ignoreUnknownObjects": false,
+              "discardUnknownObjects": false,
               "indexPrefix": ".my-so-index",
               "kibanaVersion": "7.11.0",
               "knownTypes": Array [],
@@ -995,7 +995,7 @@ Object {
                   },
                 ],
               ],
-              "unusedTypesQuery": Object {
+              "excludeOnUpgradeQuery": Object {
                 "bool": Object {
                   "must_not": Array [
                     Object {

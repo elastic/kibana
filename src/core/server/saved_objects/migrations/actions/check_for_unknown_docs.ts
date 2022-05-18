@@ -8,20 +8,19 @@
 
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsRawDocSource } from '../../serialization';
-import { ElasticsearchClient } from '../../../elasticsearch';
+import type { ElasticsearchClient } from '../../../elasticsearch';
 import {
   catchRetryableEsClientErrors,
-  RetryableEsClientError,
+  type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
 
 /** @internal */
 export interface CheckForUnknownDocsParams {
   client: ElasticsearchClient;
-  ignoreUnknownObjects: boolean;
   indexName: string;
-  unusedTypesQuery: estypes.QueryDslQueryContainer;
+  excludeOnUpgradeQuery: QueryDslQueryContainer;
   knownTypes: string[];
 }
 
@@ -40,16 +39,15 @@ export interface UnknownDocsFound {
 export const checkForUnknownDocs =
   ({
     client,
-    ignoreUnknownObjects,
     indexName,
-    unusedTypesQuery,
+    excludeOnUpgradeQuery,
     knownTypes,
   }: CheckForUnknownDocsParams): TaskEither.TaskEither<
-    RetryableEsClientError | UnknownDocsFound,
+    RetryableEsClientError,
     UnknownDocsFound | {}
   > =>
   () => {
-    const query = createUnknownDocQuery(unusedTypesQuery, knownTypes);
+    const query = createUnknownDocQuery(excludeOnUpgradeQuery, knownTypes);
     return client
       .search<SavedObjectsRawDocSource>({
         index: indexName,
@@ -64,26 +62,24 @@ export const checkForUnknownDocs =
           return Either.right({});
         }
 
-        const response = {
+        return Either.right({
           type: 'unknown_docs_found' as const,
           unknownDocs: hits.map((hit) => ({
             id: hit._id,
             type: hit._source?.type ?? 'unknown',
           })),
-        };
-
-        return ignoreUnknownObjects ? Either.right(response) : Either.left(response);
+        });
       })
       .catch(catchRetryableEsClientErrors);
   };
 
 const createUnknownDocQuery = (
-  unusedTypesQuery: estypes.QueryDslQueryContainer,
+  excludeOnUpgradeQuery: QueryDslQueryContainer,
   knownTypes: string[]
-): estypes.QueryDslQueryContainer => {
+): QueryDslQueryContainer => {
   return {
     bool: {
-      must: unusedTypesQuery,
+      must: excludeOnUpgradeQuery,
       must_not: knownTypes.map((type) => ({
         term: {
           type,

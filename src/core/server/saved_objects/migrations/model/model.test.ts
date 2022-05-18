@@ -59,7 +59,7 @@ describe('migrations v2 model', () => {
     retryAttempts: 15,
     batchSize: 1000,
     maxBatchSizeBytes: 1e8,
-    ignoreUnknownObjects: false,
+    discardUnknownObjects: false,
     indexPrefix: '.kibana',
     outdatedDocumentsQuery: {},
     targetIndexMappings: {
@@ -82,15 +82,19 @@ describe('migrations v2 model', () => {
     versionAlias: '.kibana_7.11.0',
     versionIndex: '.kibana_7.11.0_001',
     tempIndex: '.kibana_7.11.0_reindex_temp',
-    unusedTypesQuery: {
+    excludeOnUpgradeQuery: {
       bool: {
-        must_not: [
-          {
-            term: {
-              type: 'unused-fleet-agent-events',
-            },
+        filter: {
+          bool: {
+            must_not: [
+              {
+                term: {
+                  type: 'unused-fleet-agent-events',
+                },
+              },
+            ],
           },
-        ],
+        },
       },
     },
     knownTypes: ['dashboard', 'config'],
@@ -795,7 +799,7 @@ describe('migrations v2 model', () => {
         },
       } as const;
 
-      test('CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK if action succeeds', () => {
+      test('CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK if action succeeds and no unknown docs are found', () => {
         const checkUnknownDocumentsSourceState: CheckUnknownDocumentsState = {
           ...baseState,
           controlState: 'CHECK_UNKNOWN_DOCUMENTS',
@@ -843,34 +847,35 @@ describe('migrations v2 model', () => {
         expect(newState.logs).toEqual([]);
       });
 
-      test('CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK if action succeeds but unknown docs were found', () => {
-        const checkUnknownDocumentsSourceState: CheckUnknownDocumentsState = {
-          ...baseState,
-          controlState: 'CHECK_UNKNOWN_DOCUMENTS',
-          sourceIndex: Option.some('.kibana_3') as Option.Some<string>,
-          sourceIndexMappings: mappingsWithUnknownType,
-        };
+      describe('when unknown docs are found', () => {
+        test('CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK if discardUnknownObjects=true', () => {
+          const checkUnknownDocumentsSourceState: CheckUnknownDocumentsState = {
+            ...baseState,
+            discardUnknownObjects: true,
+            controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+            sourceIndex: Option.some('.kibana_3') as Option.Some<string>,
+            sourceIndexMappings: mappingsWithUnknownType,
+          };
 
-        const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.right({
-          type: 'unknown_docs_found',
-          unknownDocs: [
-            { id: 'dashboard:12', type: 'dashboard' },
-            { id: 'foo:17', type: 'foo' },
-          ],
-        });
-        const newState = model(checkUnknownDocumentsSourceState, res);
+          const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.right({
+            type: 'unknown_docs_found',
+            unknownDocs: [
+              { id: 'dashboard:12', type: 'dashboard' },
+              { id: 'foo:17', type: 'foo' },
+            ],
+          });
+          const newState = model(checkUnknownDocumentsSourceState, res);
 
-        expect(newState).toMatchObject({
-          controlState: 'SET_SOURCE_WRITE_BLOCK',
-          sourceIndex: Option.some('.kibana_3'),
-          targetIndex: '.kibana_7.11.0_001',
-        });
+          expect(newState).toMatchObject({
+            controlState: 'SET_SOURCE_WRITE_BLOCK',
+            sourceIndex: Option.some('.kibana_3'),
+            targetIndex: '.kibana_7.11.0_001',
+          });
 
-        expect(newState.unusedTypesQuery).toMatchInlineSnapshot(`
-          Object {
-            "bool": Object {
-              "filter": Array [
-                Object {
+          expect(newState.excludeOnUpgradeQuery).toMatchInlineSnapshot(`
+            Object {
+              "bool": Object {
+                "filter": Object {
                   "bool": Object {
                     "must_not": Array [
                       Object {
@@ -878,12 +883,6 @@ describe('migrations v2 model', () => {
                           "type": "unused-fleet-agent-events",
                         },
                       },
-                    ],
-                  },
-                },
-                Object {
-                  "bool": Object {
-                    "must_not": Array [
                       Object {
                         "term": Object {
                           "type": "dashboard",
@@ -897,42 +896,44 @@ describe('migrations v2 model', () => {
                     ],
                   },
                 },
-              ],
-            },
-          }
-        `);
+              },
+            }
+          `);
 
-        // we should have a warning in the logs about the ignored types
-        expect(
-          newState.logs.find(({ level, message }) => {
-            return level === 'warning' && message.includes('dashboard') && message.includes('foo');
-          })
-        ).toBeDefined();
-      });
-
-      test('CHECK_UNKNOWN_DOCUMENTS -> FATAL if action fails and unknown docs were found', () => {
-        const checkUnknownDocumentsSourceState: CheckUnknownDocumentsState = {
-          ...baseState,
-          controlState: 'CHECK_UNKNOWN_DOCUMENTS',
-          sourceIndex: Option.some('.kibana_3') as Option.Some<string>,
-          sourceIndexMappings: mappingsWithUnknownType,
-        };
-
-        const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.left({
-          type: 'unknown_docs_found',
-          unknownDocs: [
-            { id: 'dashboard:12', type: 'dashboard' },
-            { id: 'foo:17', type: 'foo' },
-          ],
+          // we should have a warning in the logs about the ignored types
+          expect(
+            newState.logs.find(({ level, message }) => {
+              return (
+                level === 'warning' && message.includes('dashboard') && message.includes('foo')
+              );
+            })
+          ).toBeDefined();
         });
-        const newState = model(checkUnknownDocumentsSourceState, res);
-        expect(newState.controlState).toEqual('FATAL');
 
-        expect(newState).toMatchObject({
-          controlState: 'FATAL',
-          reason: expect.stringContaining(
-            'Migration failed because documents were found for unknown saved object types'
-          ),
+        test('CHECK_UNKNOWN_DOCUMENTS -> FATAL if discardUnknownObjects=false', () => {
+          const checkUnknownDocumentsSourceState: CheckUnknownDocumentsState = {
+            ...baseState,
+            controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+            sourceIndex: Option.some('.kibana_3') as Option.Some<string>,
+            sourceIndexMappings: mappingsWithUnknownType,
+          };
+
+          const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.right({
+            type: 'unknown_docs_found',
+            unknownDocs: [
+              { id: 'dashboard:12', type: 'dashboard' },
+              { id: 'foo:17', type: 'foo' },
+            ],
+          });
+          const newState = model(checkUnknownDocumentsSourceState, res);
+          expect(newState.controlState).toEqual('FATAL');
+
+          expect(newState).toMatchObject({
+            controlState: 'FATAL',
+            reason: expect.stringContaining(
+              'Migration failed because some documents were found which use unknown saved object types'
+            ),
+          });
         });
       });
     });
@@ -983,32 +984,33 @@ describe('migrations v2 model', () => {
         const newState = model(state, res);
         expect(newState.controlState).toEqual('CALCULATE_EXCLUDE_FILTERS');
       });
-      test('CALCULATE_EXCLUDE_FILTERS -> CREATE_REINDEX_TEMP if action succeeds with filters', () => {
+      it('CALCULATE_EXCLUDE_FILTERS -> CREATE_REINDEX_TEMP if action succeeds with filters', () => {
         const res: ResponseType<'CALCULATE_EXCLUDE_FILTERS'> = Either.right({
-          excludeFilter: { bool: { must: { term: { fieldA: 'abc' } } } },
+          mustNotClauses: [{ term: { fieldA: 'abc' } }],
           errorsByType: { type1: new Error('an error!') },
         });
         const newState = model(state, res);
         expect(newState.controlState).toEqual('CREATE_REINDEX_TEMP');
-        expect(newState.unusedTypesQuery).toEqual({
+
+        expect(newState.excludeOnUpgradeQuery).toEqual({
           // New filter should be combined unused type query and filter from response
           bool: {
-            filter: [
-              {
-                bool: {
-                  must_not: [
-                    {
-                      term: {
-                        type: 'unused-fleet-agent-events',
-                      },
+            filter: {
+              bool: {
+                must_not: [
+                  {
+                    term: {
+                      type: 'unused-fleet-agent-events',
                     },
-                  ],
-                },
+                  },
+                  {
+                    term: {
+                      fieldA: 'abc',
+                    },
+                  },
+                ],
               },
-              {
-                bool: { must: { term: { fieldA: 'abc' } } },
-              },
-            ],
+            },
           },
         });
         // Logs should be added for any errors encountered from excludeOnUpgrade hooks

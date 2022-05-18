@@ -8,11 +8,11 @@
 
 import Path from 'path';
 import fs from 'fs/promises';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import * as kbnTestServer from '../../../../test_helpers/kbn_server';
-import { Root } from '../../../root';
+import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 import { Env } from '@kbn/config';
 import { REPO_ROOT } from '@kbn/utils';
+import * as kbnTestServer from '../../../../test_helpers/kbn_server';
+import type { Root } from '../../../root';
 import { getEnvOptions } from '../../../config/mocks';
 
 const logFilePath = Path.join(__dirname, '7_13_unknown_types.log');
@@ -57,7 +57,7 @@ describe('migration v2', () => {
     await new Promise((resolve) => setTimeout(resolve, 10000));
   });
 
-  describe('when `ignoreUnknownObjects` does not match current kibana version', () => {
+  describe('when `discardUnknownObjects` does not match current kibana version', () => {
     it('fails the migration if unknown types are found in the source index', async () => {
       // Start kibana with foo and space types disabled
       root = createRoot('7.13.0');
@@ -73,9 +73,8 @@ describe('migration v2', () => {
 
         expect(
           errorMessage.startsWith(
-            'Unable to complete saved object migrations for the [.kibana] index: Migration failed because documents ' +
-              'were found for unknown saved object types. To proceed with the migration, please delete these documents from the ' +
-              '".kibana_7.13.0_001" index.'
+            'Unable to complete saved object migrations for the [.kibana] index: Migration failed because some documents ' +
+              'were found which use unknown saved object types:'
           )
         ).toBeTruthy();
 
@@ -101,14 +100,14 @@ describe('migration v2', () => {
           { index: '.kibana_7.13.0_001' },
           { meta: true }
         );
-        const settings = response['.kibana_7.13.0_001'].settings as estypes.IndicesIndexSettings;
+        const settings = response['.kibana_7.13.0_001'].settings as IndicesIndexSettings;
         expect(settings.index).not.toBeUndefined();
         expect(settings.index!.blocks?.write).not.toEqual('true');
       }
     });
   });
 
-  describe('when `ignoreUnknownObjects` matches current kibana version', () => {
+  describe('when `discardUnknownObjects` matches current kibana version', () => {
     const currentVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 
     it('continues with the migration even when unknown types are found in the source index', async () => {
@@ -122,13 +121,13 @@ describe('migration v2', () => {
   });
 });
 
-function createRoot(ignoreUnknownObjects?: string) {
+function createRoot(discardUnknownObjects?: string) {
   return kbnTestServer.createRootWithCorePlugins(
     {
       migrations: {
         skip: false,
         batchSize: 5,
-        ignoreUnknownObjects,
+        discardUnknownObjects,
       },
       logging: {
         appenders: {

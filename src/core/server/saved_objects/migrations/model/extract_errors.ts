@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { TransformErrorObjects } from '../core';
-import { CheckForUnknownDocsFoundDoc } from '../actions';
+import type { TransformErrorObjects } from '../core';
+import type { CheckForUnknownDocsFoundDoc } from '../actions';
 
 /**
  * Constructs migration failure message strings from corrupt document ids and document transformation errors
@@ -46,19 +46,12 @@ export function extractIgnoredUnknownDocs(unknownDocs: CheckForUnknownDocsFoundD
 
 export function extractUnknownDocFailureReason(
   resolveMigrationFailuresUrl: string,
-  unknownDocs: CheckForUnknownDocsFoundDoc[],
-  sourceIndex: string
+  unknownDocs: CheckForUnknownDocsFoundDoc[]
 ): string {
   return (
-    `Migration failed because documents were found for unknown saved object types. ` +
-    `To proceed with the migration, please delete these documents from the "${sourceIndex}" index.\n` +
-    `The documents with unknown types are:\n` +
+    `Migration failed because some documents were found which use unknown saved object types:\n` +
     unknownDocs.map((doc) => `- "${doc.id}" (type: "${doc.type}")\n`).join('') +
-    `You can delete them using the following command:\n` +
-    `curl -X POST "{elasticsearch}/${sourceIndex}/_bulk?pretty" -H 'Content-Type: application/json' -d'\n` +
-    unknownDocs.map((doc) => `{ "delete" : { "_id" : "${doc.id}" } }\n`).join('') +
-    `'\n\n` +
-    `Alternatively, you can configure kibana to ignore unknown saved objects for this migration.\n` +
+    `\nTo proceed with the migration you can configure Kibana to discard unknown saved objects for this migration.\n` +
     `Please refer to ${resolveMigrationFailuresUrl} for more information.`
   );
 }

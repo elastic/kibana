@@ -28,7 +28,7 @@ import {
 } from './extract_errors';
 import type { ExcludeRetryableEsError } from './types';
 import {
-  addFiltersToQuery,
+  appendExcludedTypes,
   getAliases,
   indexBelongsToLaterVersion,
   indexVersion,
@@ -363,63 +363,54 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'CHECK_UNKNOWN_DOCUMENTS') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
 
-    if (Either.isRight(res)) {
-      let logs: MigrationLog[] = stateP.logs;
-      let unusedTypesQuery = stateP.unusedTypesQuery;
-      if (isTypeof(res.right, 'unknown_docs_found')) {
-        logs = [
-          ...stateP.logs,
-          { level: 'warning', message: extractIgnoredUnknownDocs(res.right.unknownDocs) },
-        ];
+    let logs: MigrationLog[] = stateP.logs;
+    let excludeOnUpgradeQuery = stateP.excludeOnUpgradeQuery;
 
-        const unknownTypeTerms = [...new Set(res.right.unknownDocs.map(({ type }) => type))].map(
-          (type) => ({ term: { type } })
-        );
-
-        const unknownTypesQuery = {
-          bool: {
-            must_not: unknownTypeTerms,
-          },
-        };
-
-        unusedTypesQuery = addFiltersToQuery(stateP.unusedTypesQuery, unknownTypesQuery);
-      }
-
-      const source = stateP.sourceIndex;
-      const target = stateP.versionIndex;
-      return {
-        ...stateP,
-        controlState: 'SET_SOURCE_WRITE_BLOCK',
-        logs,
-        unusedTypesQuery,
-        sourceIndex: source,
-        targetIndex: target,
-        targetIndexMappings: disableUnknownTypeMappingFields(
-          stateP.targetIndexMappings,
-          stateP.sourceIndexMappings
-        ),
-        versionIndexReadyActions: Option.some<AliasAction[]>([
-          { remove: { index: source.value, alias: stateP.currentAlias, must_exist: true } },
-          { add: { index: target, alias: stateP.currentAlias } },
-          { add: { index: target, alias: stateP.versionAlias } },
-          { remove_index: { index: stateP.tempIndex } },
-        ]),
-      };
-    } else {
-      if (isTypeof(res.left, 'unknown_docs_found')) {
+    if (isTypeof(res.right, 'unknown_docs_found')) {
+      if (!stateP.discardUnknownObjects) {
         return {
           ...stateP,
           controlState: 'FATAL',
           reason: extractUnknownDocFailureReason(
             stateP.migrationDocLinks.resolveMigrationFailures,
-            res.left.unknownDocs,
-            stateP.sourceIndex.value
+            res.right.unknownDocs
           ),
         };
-      } else {
-        return throwBadResponse(stateP, res.left);
       }
+
+      // at this point, users have configured kibana to discard unknown objects
+      // thus, we have to proceed with the migration
+      logs = [
+        ...stateP.logs,
+        { level: 'warning', message: extractIgnoredUnknownDocs(res.right.unknownDocs) },
+      ];
+
+      const unknownTypes = [...new Set(res.right.unknownDocs.map(({ type }) => type))].map(
+        (type) => ({ term: { type } })
+      );
+      excludeOnUpgradeQuery = appendExcludedTypes(stateP.excludeOnUpgradeQuery, unknownTypes);
     }
+
+    const source = stateP.sourceIndex;
+    const target = stateP.versionIndex;
+    return {
+      ...stateP,
+      controlState: 'SET_SOURCE_WRITE_BLOCK',
+      logs,
+      excludeOnUpgradeQuery,
+      sourceIndex: source,
+      targetIndex: target,
+      targetIndexMappings: disableUnknownTypeMappingFields(
+        stateP.targetIndexMappings,
+        stateP.sourceIndexMappings
+      ),
+      versionIndexReadyActions: Option.some<AliasAction[]>([
+        { remove: { index: source.value, alias: stateP.currentAlias, must_exist: true } },
+        { add: { index: target, alias: stateP.currentAlias } },
+        { add: { index: target, alias: stateP.versionAlias } },
+        { remove_index: { index: stateP.tempIndex } },
+      ]),
+    };
   } else if (stateP.controlState === 'SET_SOURCE_WRITE_BLOCK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
@@ -440,10 +431,15 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
 
     if (Either.isRight(res)) {
+      const excludeOnUpgradeQuery = appendExcludedTypes(
+        stateP.excludeOnUpgradeQuery,
+        res.right.mustNotClauses
+      );
+
       return {
         ...stateP,
         controlState: 'CREATE_REINDEX_TEMP',
-        unusedTypesQuery: addFiltersToQuery(stateP.unusedTypesQuery, res.right.excludeFilter),
+        excludeOnUpgradeQuery,
         logs: [
           ...stateP.logs,
           ...Object.entries(res.right.errorsByType).map(([soType, error]) => ({

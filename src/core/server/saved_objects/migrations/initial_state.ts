@@ -7,14 +7,14 @@
  */
 
 import * as Option from 'fp-ts/Option';
-import { IndexMapping } from '../mappings';
-import { SavedObjectsMigrationVersion } from '../../../types';
-import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
+import type { IndexMapping } from '../mappings';
+import type { SavedObjectsMigrationVersion } from '../../../types';
+import type { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 import type { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import { InitState } from './state';
+import type { InitState } from './state';
 import { excludeUnusedTypesQuery } from './core';
-import { DocLinksServiceStart } from '../../doc_links';
-import { Logger } from '../../logging';
+import type { DocLinksServiceStart } from '../../doc_links';
+import type { Logger } from '../../logging';
 
 /**
  * Construct the initial state for the model
@@ -74,11 +74,11 @@ export const createInitialState = ({
   const migrationDocLinks = docLinks.links.kibanaUpgradeSavedObjects;
 
   if (
-    migrationsConfig.ignoreUnknownObjects &&
-    migrationsConfig.ignoreUnknownObjects !== kibanaVersion
+    migrationsConfig.discardUnknownObjects &&
+    migrationsConfig.discardUnknownObjects !== kibanaVersion
   ) {
     logger.warn(
-      'The flag `migrations.ignoreUnknownObjects` is defined but does not match the current kibana version; unknown objects will NOT be ignored.'
+      'The flag `migrations.discardUnknownObjects` is defined but does not match the current kibana version; unknown objects will NOT be ignored.'
     );
   }
 
@@ -100,9 +100,9 @@ export const createInitialState = ({
     retryAttempts: migrationsConfig.retryAttempts,
     batchSize: migrationsConfig.batchSize,
     maxBatchSizeBytes: migrationsConfig.maxBatchSizeBytes.getValueInBytes(),
-    ignoreUnknownObjects: migrationsConfig.ignoreUnknownObjects === kibanaVersion,
+    discardUnknownObjects: migrationsConfig.discardUnknownObjects === kibanaVersion,
     logs: [],
-    unusedTypesQuery: excludeUnusedTypesQuery,
+    excludeOnUpgradeQuery: excludeUnusedTypesQuery,
     knownTypes,
     excludeFromUpgradeFilterHooks: excludeFilterHooks,
     migrationDocLinks,

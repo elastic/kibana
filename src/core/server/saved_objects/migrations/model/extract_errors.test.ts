@@ -15,32 +15,22 @@ import {
 describe('extractUnknownDocFailureReason', () => {
   it('generates the correct error message', () => {
     expect(
-      extractUnknownDocFailureReason(
-        'some-url.co',
-        [
-          {
-            id: 'unknownType:12',
-            type: 'unknownType',
-          },
-          {
-            id: 'anotherUnknownType:42',
-            type: 'anotherUnknownType',
-          },
-        ],
-        '.kibana_15'
-      )
+      extractUnknownDocFailureReason('some-url.co', [
+        {
+          id: 'unknownType:12',
+          type: 'unknownType',
+        },
+        {
+          id: 'anotherUnknownType:42',
+          type: 'anotherUnknownType',
+        },
+      ])
     ).toMatchInlineSnapshot(`
-      "Migration failed because documents were found for unknown saved object types. To proceed with the migration, please delete these documents from the \\".kibana_15\\" index.
-      The documents with unknown types are:
+      "Migration failed because some documents were found which use unknown saved object types:
       - \\"unknownType:12\\" (type: \\"unknownType\\")
       - \\"anotherUnknownType:42\\" (type: \\"anotherUnknownType\\")
-      You can delete them using the following command:
-      curl -X POST \\"{elasticsearch}/.kibana_15/_bulk?pretty\\" -H 'Content-Type: application/json' -d'
-      { \\"delete\\" : { \\"_id\\" : \\"unknownType:12\\" } }
-      { \\"delete\\" : { \\"_id\\" : \\"anotherUnknownType:42\\" } }
-      '
 
-      Alternatively, you can configure kibana to ignore unknown saved objects for this migration.
+      To proceed with the migration you can configure Kibana to discard unknown saved objects for this migration.
       Please refer to some-url.co for more information."
     `);
   });

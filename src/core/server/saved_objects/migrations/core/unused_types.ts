@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 /**
  * Types that are no longer registered and need to be removed
@@ -41,31 +41,35 @@ export const REMOVED_TYPES: string[] = [
 // saved objects which are no longer used. These saved objects will still be
 // kept in the outdated index for backup purposes, but won't be available in
 // the upgraded index.
-export const excludeUnusedTypesQuery: estypes.QueryDslQueryContainer = {
+export const excludeUnusedTypesQuery: QueryDslQueryContainer = {
   bool: {
-    must_not: [
-      ...REMOVED_TYPES.map((typeName) => ({
-        term: {
-          type: typeName,
-        },
-      })),
-      // https://github.com/elastic/kibana/issues/96131
-      {
-        bool: {
-          must: [
-            {
-              match: {
-                type: 'search-session',
-              },
+    filter: {
+      bool: {
+        must_not: [
+          ...REMOVED_TYPES.map((typeName) => ({
+            term: {
+              type: typeName,
             },
-            {
-              match: {
-                'search-session.persisted': false,
-              },
+          })),
+          // https://github.com/elastic/kibana/issues/96131
+          {
+            bool: {
+              must: [
+                {
+                  match: {
+                    type: 'search-session',
+                  },
+                },
+                {
+                  match: {
+                    'search-session.persisted': false,
+                  },
+                },
+              ],
             },
-          ],
-        },
+          },
+        ],
       },
-    ],
+    },
   },
 };
