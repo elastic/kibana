@@ -55,5 +55,17 @@ export default function ({ getService }: FtrProviderContext) {
         expect(initialEvent.properties[key]).not.to.be(thirdEvent.properties[key]);
       });
     });
+
+    it('should not send a huge json file', () => {
+      const firstEventByteSize = Buffer.byteLength(JSON.stringify(initialEvent));
+      const secondEventByteSize = Buffer.byteLength(JSON.stringify(secondEvent));
+      const thirdEventByteSize = Buffer.byteLength(JSON.stringify(thirdEvent));
+
+      expect(firstEventByteSize).to.be.lessThan(5000);
+      expect(secondEventByteSize).to.be.lessThan(5000);
+      expect(thirdEventByteSize).to.be.lessThan(5000);
+
+      expect(thirdEventByteSize - firstEventByteSize).to.be.greaterThan(0);
+    });
   });
 }
