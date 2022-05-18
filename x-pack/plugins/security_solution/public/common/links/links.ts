@@ -155,7 +155,6 @@ const getNormalizedLinks = (
  * Normalized indexed version of the global `links` array, referencing the parent by id, instead of having nested links children
  */
 const normalizedLinks: Readonly<NormalizedLinks> = Object.freeze(getNormalizedLinks(appLinks));
-
 /**
  * Returns the `NormalizedLink` from a link id parameter.
  * The object reference is frozen to make sure it is not mutated by the caller.
@@ -192,4 +191,8 @@ export const getAncestorLinksInfo = (id: SecurityPageName): LinkInfo[] => {
  */
 export const needsUrlState = (id: SecurityPageName): boolean => {
   return !getNormalizedLink(id).skipUrlState;
+};
+
+export const getLinksWithHiddenTimeline = (): LinkInfo[] => {
+  return Object.values(normalizedLinks).filter((link) => link.hideTimeline);
 };

@@ -58,6 +58,7 @@ export interface LinkItem {
   links?: LinkItem[];
   path: string;
   skipUrlState?: boolean; // defaults to false
+  hideTimeline?: boolean; // defaults to false
   title: string;
 }
 

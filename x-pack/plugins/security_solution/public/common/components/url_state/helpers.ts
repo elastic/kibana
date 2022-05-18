@@ -30,6 +30,7 @@ import { SourcererScopeName, SourcererUrlState } from '../../store/sourcerer/mod
 export const isDetectionsPages = (pageName: string) =>
   pageName === SecurityPageName.alerts ||
   pageName === SecurityPageName.rules ||
+  pageName === SecurityPageName.rulesCreate ||
   pageName === SecurityPageName.exceptions;
 
 export const decodeRisonUrlState = <T>(value: string | undefined): T | null => {
@@ -103,7 +104,7 @@ export const getUrlType = (pageName: string): UrlStateType => {
     return 'network';
   } else if (pageName === SecurityPageName.alerts) {
     return 'alerts';
-  } else if (pageName === SecurityPageName.rules) {
+  } else if (pageName === SecurityPageName.rules || pageName === SecurityPageName.rulesCreate) {
     return 'rules';
   } else if (pageName === SecurityPageName.exceptions) {
     return 'exceptions';

@@ -21,9 +21,11 @@ export const getCasesLinkItems = (): LinkItem => {
       [SecurityPageName.caseConfigure]: {
         features: [FEATURE.casesCrud],
         licenseType: 'gold',
+        hideTimeline: true,
       },
       [SecurityPageName.caseCreate]: {
         features: [FEATURE.casesCrud],
+        hideTimeline: true,
       },
     },
   });
