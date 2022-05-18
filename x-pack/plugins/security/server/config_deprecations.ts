@@ -35,7 +35,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   (settings, _fromPath, addDeprecation, { branch }) => {
     if (Array.isArray(settings?.xpack?.security?.authc?.providers)) {
       // TODO: remove when docs support "main"
-      const docsBranch = branch === 'main' ? 'master' : 'main';
+      const docsBranch = branch === 'main' ? 'master' : 'branch';
       addDeprecation({
         configPath: 'xpack.security.authc.providers',
         title: i18n.translate('xpack.security.deprecations.authcProvidersTitle', {
@@ -62,7 +62,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   },
   (settings, _fromPath, addDeprecation, { branch }) => {
     // TODO: remove when docs support "main"
-    const docsBranch = branch === 'main' ? 'master' : 'main';
+    const docsBranch = branch === 'main' ? 'master' : 'branch';
 
     const hasProviderType = (providerType: string) => {
       const providers = settings?.xpack?.security?.authc?.providers;
@@ -106,7 +106,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   },
   (settings, _fromPath, addDeprecation, { branch }) => {
     // TODO: remove when docs support "main"
-    const docsBranch = branch === 'main' ? 'master' : 'main';
+    const docsBranch = branch === 'main' ? 'master' : 'branch';
     const samlProviders = (settings?.xpack?.security?.authc?.providers?.saml ?? {}) as Record<
       string,
       any
@@ -140,7 +140,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   },
   (settings, _fromPath, addDeprecation, { branch }) => {
     // TODO: remove when docs support "main"
-    const docsBranch = branch === 'main' ? 'master' : 'main';
+    const docsBranch = branch === 'main' ? 'master' : 'branch';
     const anonProviders = (settings?.xpack?.security?.authc?.providers?.anonymous ?? {}) as Record<
       string,
       any
