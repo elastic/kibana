@@ -520,6 +520,7 @@ describe('Lens Attribute', () => {
       lnsAttr = new LensAttributes([layerConfig1], reportViewConfig.reportType);
 
       lnsAttr.getBreakdownColumn({
+        layerConfig: layerConfig1,
         sourceField: USER_AGENT_NAME,
         layerId: 'layer0',
         indexPattern: mockDataView,
@@ -559,8 +560,7 @@ describe('Lens Attribute', () => {
             params: {
               missingBucket: false,
               orderBy: {
-                columnId: 'y-axis-column-layer0',
-                type: 'column',
+                type: 'alphabetical',
               },
               orderDirection: 'desc',
               otherBucket: true,

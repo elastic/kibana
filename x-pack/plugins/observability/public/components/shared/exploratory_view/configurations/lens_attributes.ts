@@ -167,13 +167,19 @@ export class LensAttributes {
     layerId,
     labels,
     indexPattern,
+    layerConfig,
   }: {
     sourceField: string;
     layerId: string;
     labels: Record<string, string>;
     indexPattern: DataView;
+    layerConfig: LayerConfig;
   }): TermsIndexPatternColumn {
     const fieldMeta = indexPattern.getFieldByName(sourceField);
+
+    const { sourceField: yAxisSourceField } = layerConfig.seriesConfig.yAxisColumns[0];
+
+    const isFormulaColumn = yAxisSourceField === RECORDS_PERCENTAGE_FIELD;
 
     return {
       sourceField,
@@ -183,7 +189,9 @@ export class LensAttributes {
       scale: 'ordinal',
       isBucketed: true,
       params: {
-        orderBy: { type: 'column', columnId: `y-axis-column-${layerId}` },
+        orderBy: isFormulaColumn
+          ? { type: 'alphabetical' }
+          : { type: 'column', columnId: `y-axis-column-${layerId}` },
         size: 10,
         orderDirection: 'desc',
         otherBucket: true,
@@ -431,6 +439,7 @@ export class LensAttributes {
     if (xAxisColumn?.sourceField === USE_BREAK_DOWN_COLUMN) {
       return this.getBreakdownColumn({
         layerId,
+        layerConfig,
         indexPattern: layerConfig.indexPattern,
         sourceField: layerConfig.breakdown || layerConfig.seriesConfig.breakdownFields[0],
         labels: layerConfig.seriesConfig.labels,
@@ -773,6 +782,7 @@ export class LensAttributes {
                   sourceField: breakdown,
                   indexPattern: layerConfig.indexPattern,
                   labels: layerConfig.seriesConfig.labels,
+                  layerConfig,
                 }),
               }
             : {}),
