@@ -39,7 +39,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
     it('Opens the integrations page when there is no data', async () => {
@@ -53,7 +52,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('adds a new data view when no data views', async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
-      await PageObjects.common.navigateToApp('dashboard');
+
+      // create the new data view from the dashboards/create route in order to test that the dashboard is loaded properly as soon as the data view is created...
+      await PageObjects.common.navigateToUrl('dashboard', '/create');
 
       const button = await testSubjects.find('createDataViewButtonFlyout');
       button.click();
@@ -71,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.click('addFilter');
           const fields = await filterBar.getFilterEditorFields();
           await filterBar.ensureFieldEditorModalIsClosed();
-          return fields === [];
+          return fields.length > 0;
         }
       );
     });
