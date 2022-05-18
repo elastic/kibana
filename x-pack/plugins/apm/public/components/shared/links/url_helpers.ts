@@ -8,6 +8,7 @@
 import { History } from 'history';
 import { parse, stringify } from 'query-string';
 import { url } from '@kbn/kibana-utils-plugin/public';
+import type { ComparisonEnabled } from '../../../../common/comparison_rt';
 
 export function toQuery(search?: string): APMQueryParamsRaw {
   return search ? parse(search.slice(1), { sort: false }) : {};
@@ -87,7 +88,7 @@ export interface APMQueryParams {
   searchTerm?: string;
   percentile?: 50 | 75 | 90 | 95 | 99;
   latencyAggregationType?: string;
-  comparisonEnabled?: boolean;
+  comparisonEnabled?: ComparisonEnabled;
   offset?: string;
   transactionResult?: string;
   host?: string;

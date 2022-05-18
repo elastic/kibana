@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import type { ComparisonEnabled } from '../../../../../common/comparison_rt';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { useFetcher } from '../../../../hooks/use_fetcher';
@@ -34,7 +35,7 @@ interface Props {
   kuery: string;
   environment: string;
   transactionName?: string;
-  comparisonEnabled?: boolean;
+  comparisonEnabled?: ComparisonEnabled;
   offset?: string;
 }
 

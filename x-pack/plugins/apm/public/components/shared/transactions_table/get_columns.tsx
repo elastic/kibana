@@ -16,6 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ValuesType } from 'utility-types';
+import type { ComparisonEnabled } from '../../../../common/comparison_rt';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import {
   asMillisecondDuration,
@@ -55,7 +56,7 @@ export function getColumns({
   latencyAggregationType?: LatencyAggregationType;
   transactionGroupDetailedStatisticsLoading: boolean;
   transactionGroupDetailedStatistics?: TransactionGroupDetailedStatistics;
-  comparisonEnabled?: boolean;
+  comparisonEnabled?: ComparisonEnabled;
   shouldShowSparkPlots?: boolean;
   offset?: string;
 }): Array<EuiBasicTableColumn<ServiceTransactionGroupItem>> {

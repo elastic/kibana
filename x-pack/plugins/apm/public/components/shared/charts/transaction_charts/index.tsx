@@ -7,6 +7,7 @@
 
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import type { ComparisonEnabled } from '../../../../../common/comparison_rt';
 import { AnnotationsContextProvider } from '../../../../context/annotations/annotations_context';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { ServiceOverviewThroughputChart } from '../../../app/service_overview/service_overview_throughput_chart';
@@ -31,7 +32,7 @@ export function TransactionCharts({
   end: string;
   transactionName?: string;
   isServerlessContext?: boolean;
-  comparisonEnabled?: boolean;
+  comparisonEnabled?: ComparisonEnabled;
   offset?: string;
 }) {
   return (

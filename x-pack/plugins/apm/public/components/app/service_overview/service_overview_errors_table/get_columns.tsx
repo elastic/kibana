@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import type { ComparisonEnabled } from '../../../../../common/comparison_rt';
 import { asInteger } from '../../../../../common/utils/formatters';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { truncate } from '../../../../utils/style';
@@ -43,7 +44,7 @@ export function getColumns({
   serviceName: string;
   errorGroupDetailedStatisticsLoading: boolean;
   errorGroupDetailedStatistics: ErrorGroupDetailedStatistics;
-  comparisonEnabled?: boolean;
+  comparisonEnabled?: ComparisonEnabled;
   query: TypeOf<ApmRoutes, '/services/{serviceName}/errors'>['query'];
 }): Array<EuiBasicTableColumn<ErrorGroupMainStatistics['errorGroups'][0]>> {
   return [
