@@ -32,7 +32,7 @@ const noDataConfig = {
       title: 'Add Integrations',
     },
   },
-  docsLink: 'http://www.docs.com',
+  docsLink: 'http://docs.elastic.dev',
 };
 
 type Params = Pick<NoDataPageProps, 'solution' | 'logo'> & DataServiceFactoryConfig;
