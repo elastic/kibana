@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { keyBy, keys, merge } from 'lodash';
-import type { RequestHandler, ElasticsearchClient } from '@kbn/core/server';
+import type { RequestHandler } from '@kbn/core/server';
 
 import type { TypeOf } from '@kbn/config-schema';
 
@@ -16,6 +15,9 @@ import type { GetDataStreamsResponse } from '../../../common';
 import { getPackageSavedObjects } from '../../services/epm/packages/get';
 import { defaultIngestErrorHandler } from '../../errors';
 import type { GetDataStreamsListRequestSchema } from '../../../common/constants/data_streams';
+
+import { getMetadataFromTermsEnum } from './get_metadata_from_terms_enum';
+import { getMetadataFromAggregations } from './get_metadata_from_aggregations';
 
 const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*,synthetics-*-*';
 
@@ -40,129 +42,8 @@ interface ESDataStreamInfo {
   hidden: boolean;
 }
 
-async function getMetadataFromTermsEnum({
-  dataStreamName,
-  esClient,
-}: {
-  dataStreamName: string;
-  esClient: ElasticsearchClient;
-}) {
-  const [maxEventIngestedResponse, namespaceResponse, datasetResponse, typeResponse] =
-    await Promise.all([
-      esClient.search({
-        size: 1,
-        index: dataStreamName,
-        sort: {
-          // @ts-expect-error Type '{ 'event.ingested': string; }' is not assignable to type 'string | string[] | undefined'.
-          'event.ingested': 'desc',
-        },
-        _source: false,
-        fields: ['event.ingested'],
-      }),
-      esClient.termsEnum({
-        index: dataStreamName,
-        field: 'data_stream.namespace',
-      }),
-      esClient.termsEnum({
-        index: dataStreamName,
-        field: 'data_stream.dataset',
-      }),
-      esClient.termsEnum({
-        index: dataStreamName,
-        field: 'data_stream.type',
-      }),
-    ]);
-
-  const maxIngested = new Date(
-    maxEventIngestedResponse.hits.hits[0]?.fields!['event.ingested']
-  ).getTime();
-
-  const namespace = namespaceResponse.terms[0] ?? '';
-  const dataset = datasetResponse.terms[0] ?? '';
-  const type = typeResponse.terms[0] ?? '';
-
-  return {
-    maxIngested,
-    namespace,
-    dataset,
-    type,
-  };
-}
-
-async function getMetadataFromAggregations({
-  dataStreamName,
-  esClient,
-}: {
-  dataStreamName: string;
-  esClient: ElasticsearchClient;
-}) {
-  // Query backing indices to extract data stream dataset, namespace, and type values
-  const { aggregations: dataStreamAggs } = await esClient.search({
-    index: dataStreamName,
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              exists: {
-                field: 'data_stream.namespace',
-              },
-            },
-            {
-              exists: {
-                field: 'data_stream.dataset',
-              },
-            },
-          ],
-        },
-      },
-      aggs: {
-        maxIngestedTimestamp: {
-          max: {
-            field: 'event.ingested',
-          },
-        },
-        dataset: {
-          terms: {
-            field: 'data_stream.dataset',
-            size: 1,
-          },
-        },
-        namespace: {
-          terms: {
-            field: 'data_stream.namespace',
-            size: 1,
-          },
-        },
-        type: {
-          terms: {
-            field: 'data_stream.type',
-            size: 1,
-          },
-        },
-      },
-    },
-  });
-
-  const { maxIngestedTimestamp } = dataStreamAggs as Record<
-    string,
-    estypes.AggregationsRateAggregate
-  >;
-  const { dataset, namespace, type } = dataStreamAggs as Record<
-    string,
-    estypes.AggregationsMultiBucketAggregateBase<{ key?: string; value?: number }>
-  >;
-
-  const maxIngested = maxIngestedTimestamp?.value;
-
-  return {
-    maxIngested,
-    dataset: (dataset.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '',
-    namespace: (namespace.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '',
-    type: (type.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '',
-  };
-}
+const hasASingleBucket = (buckets: Array<string | undefined>): buckets is [string] =>
+  Array.isArray(buckets) && buckets.length === 1 && Boolean(buckets[0]);
 
 export const getListHandler: RequestHandler = async (context, request, response) => {
   // Query datastreams as the current user as the Kibana internal user may not have all the required permission
@@ -256,9 +137,19 @@ export const getListHandler: RequestHandler = async (context, request, response)
         // but fallback to bytes just in case
         size_in_bytes_formatted: dataStream.store_size || `${dataStream.store_size_bytes}b`,
         dashboards: [],
+        serviceDetails: null,
+        isErrorOnlyLogsStream: false,
       };
 
-      const { maxIngested, namespace, dataset, type } = useTermsEnum
+      const {
+        maxIngested,
+        namespace,
+        dataset,
+        type,
+        serviceNames,
+        environments,
+        processorEventTypes,
+      } = useTermsEnum
         ? await getMetadataFromTermsEnum({ dataStreamName: dataStream.name, esClient })
         : await getMetadataFromAggregations({ dataStreamName: dataStream.name, esClient });
 
@@ -267,6 +158,17 @@ export const getListHandler: RequestHandler = async (context, request, response)
         dataStreamResponse.last_activity_ms = maxIngested;
       }
 
+      if (hasASingleBucket(serviceNames)) {
+        const serviceDetails = {
+          serviceName: serviceNames[0],
+          environment: hasASingleBucket(environments) ? environments[0] : 'ENVIRONMENT_ALL',
+        };
+        dataStreamResponse.serviceDetails = serviceDetails;
+      }
+
+      dataStreamResponse.isErrorOnlyLogsStream = Boolean(
+        hasASingleBucket(processorEventTypes) && processorEventTypes[0] === 'error'
+      );
       dataStreamResponse.dataset = dataset;
       dataStreamResponse.namespace = namespace;
       dataStreamResponse.type = type;
