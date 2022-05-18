@@ -27,8 +27,7 @@ import {
   sendPostBulkAgentUpgrade,
   useStartServices,
 } from '../../../../hooks';
-
-import { FALLBACK_VERSIONS, MAINTAINANCE_WINDOWS } from './constants';
+import { FALLBACK_VERSIONS, MAINTAINANCE_VALUES } from './constants';
 
 interface Props {
   onClose: () => void;
@@ -43,43 +42,51 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
 }) => {
   const { notifications } = useStartServices();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const fallbackVersions: Array<EuiComboBoxOptionOption<string>> = FALLBACK_VERSIONS.map(
-    (option) => ({
-      label: option,
-      value: option,
-    })
-  );
-  const maintainanceOptions: Array<EuiComboBoxOptionOption<string>> = MAINTAINANCE_WINDOWS.map(
-    (option) => ({
-      label: option === 1 ? `${option} hour` : `${option} hours`,
-      value: `${option * 3600}`,
-    })
-  );
-  const [selectedVersion, setSelectedVersion] = useState([fallbackVersions[0]]);
-  const [selectedMantainanceWindow, setSelectedMantainanceWindow] = useState([
-    maintainanceOptions[0],
-  ]);
   const isSingleAgent = Array.isArray(agents) && agents.length === 1;
+  const isSmallBatch =  Array.isArray(agents) && agents.length > 1 && agents.length <= 10;
   const isAllAgents = agents === '';
 
-  const getVersion = (selectedVersion: Array<EuiComboBoxOptionOption<string>>) =>
-    selectedVersion[0].value as string;
-  const getRolloutDuration = (selectedMantainanceWindow: Array<EuiComboBoxOptionOption<string>>) =>
-    Number(selectedMantainanceWindow[0].value);
+  const fallbackVersions: Array<EuiComboBoxOptionOption<string>> = FALLBACK_VERSIONS.map((option) => ({
+    label: option,
+    value: option,
+  }));
+  const maintainanceWindows = isSmallBatch ? [0].concat(MAINTAINANCE_VALUES) : MAINTAINANCE_VALUES;
+  const maintainanceOptions: Array<EuiComboBoxOptionOption<number>> = maintainanceWindows.map((option) => ({
+    label: option === 0 ? i18n.translate(
+      'xpack.fleet.upgradeAgents.noMaintainanceWindowOption',
+      {
+        defaultMessage: 'Immediately',
+      }
+    ) : i18n.translate('xpack.fleet.upgradeAgents.hourLabel', {
+      defaultMessage:
+        '{option} {count, plural, one {hour} other {hours}}',
+      values: { option, count: option === 1  },
+    }),
+    value: option === 0 ? 0 : option * 3600
+  }));
+  const [selectedVersion, setSelectedVersion] = useState([fallbackVersions[0]]);
+  const [selectedMantainanceWindow, setSelectedMantainanceWindow] = useState([maintainanceOptions[0]]);
+
+
+  const getVersion = (version: EuiComboBoxOptionOption<string>[]) => version[0].value as string;
 
   async function onSubmit() {
     const version = getVersion(selectedVersion);
+    const rolloutOptions = selectedMantainanceWindow.length > 0 && selectedMantainanceWindow[0]?.value as number > 0 ? {
+      rollout_duration_seconds: selectedMantainanceWindow[0].value
+    } : {};
+
     try {
       setIsSubmitting(true);
       const { data, error } = isSingleAgent
         ? await sendPostAgentUpgrade((agents[0] as Agent).id, {
             version,
           })
-        : await sendPostBulkAgentUpgrade({
-            agents: Array.isArray(agents) ? agents.map((agent) => agent.id) : agents,
+        :  await sendPostBulkAgentUpgrade({
             version,
-            rollout_duration_seconds: getRolloutDuration(selectedMantainanceWindow),
-          });
+            agents: Array.isArray(agents) ? agents.map((agent) => agent.id) : agents,
+            ...rolloutOptions
+          })
       if (error) {
         throw error;
       }
@@ -112,6 +119,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
               isAllAgents,
             },
           });
+      // remove toasts
       if (counts.success === counts.total) {
         notifications.toasts.addSuccess(successMessage);
       } else if (counts.error === counts.total) {
@@ -257,7 +265,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
             singleSelection={{ asPlainText: true }}
             options={maintainanceOptions}
             selectedOptions={selectedMantainanceWindow}
-            onChange={(selected: Array<EuiComboBoxOptionOption<string>>) => {
+            onChange={(selected: Array<EuiComboBoxOptionOption<number>>) => {
               setSelectedMantainanceWindow(selected);
             }}
           />

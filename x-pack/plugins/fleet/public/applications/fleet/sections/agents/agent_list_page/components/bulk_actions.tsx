@@ -148,7 +148,6 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
       {isUpgradeModalOpen && (
         <EuiPortal>
           <AgentUpgradeAgentModal
-            // version={kibanaVersion}
             agents={agents}
             agentCount={agentCount}
             onClose={() => {

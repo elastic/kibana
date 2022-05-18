@@ -89,7 +89,7 @@ export interface PostBulkAgentUpgradeRequest {
     agents: string[] | string;
     source_uri?: string;
     version: string;
-    rollout_duration_seconds: number;
+    rollout_duration_seconds?: number
   };
 }
 
