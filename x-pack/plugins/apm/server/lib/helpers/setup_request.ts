@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import { KibanaRequest } from '@kbn/core/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { APMConfig } from '../..';
