@@ -70,7 +70,7 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const onDataViewCreated = useCallback(async (dataView: unknown) => {
+  const onDataViewCreated = useCallback((dataView: unknown) => {
     if (dataView) {
       setShowNoDataPage(false);
     }
@@ -90,7 +90,7 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
     const checkESOrDataViewExist = async () => {
       // check if there is any data view or data source
       const hasUserDataView = await dataViews.hasData.hasUserDataView().catch(() => false);
-      const hasEsData = await dataViews.hasData.hasESData().catch(() => true);
+      const hasEsData = await dataViews.hasData.hasESData().catch(() => false);
       if (!hasUserDataView || !hasEsData) {
         setShowNoDataPage(true);
       }
