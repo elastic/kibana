@@ -24,7 +24,7 @@ import { createAuditEvent } from '../audit_events';
 import { InternalFileService } from '../file_service/internal_file_service';
 
 /**
- * Public file class that wraps all functionality consumers will need at the
+ * Public class that provides all data and functionality consumers will need at the
  * individual file level
  */
 export class File<M = unknown> implements IFile {

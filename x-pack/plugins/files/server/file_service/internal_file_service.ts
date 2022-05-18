@@ -45,8 +45,9 @@ interface FindFileArgs {
 }
 
 /**
- * Service containing methods for working with classes. All business logic for files
- * is encapsulated in {@link File} class.
+ * Service containing methods for working with files.
+ *
+ * All file business logic is encapsulated in the {@link File} class.
  *
  * @internal
  */
