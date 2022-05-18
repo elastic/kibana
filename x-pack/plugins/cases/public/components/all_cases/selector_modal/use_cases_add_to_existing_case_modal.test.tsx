@@ -34,7 +34,7 @@ const AllCasesSelectorModalMock = AllCasesSelectorModal as unknown as jest.Mock;
 
 // test component to test the hook integration
 const TestComponent: React.FC = () => {
-  const hook = useCasesAddToExistingCaseModal({});
+  const hook = useCasesAddToExistingCaseModal();
 
   const onClick = () => {
     hook.open({ attachments: [alertComment] });
