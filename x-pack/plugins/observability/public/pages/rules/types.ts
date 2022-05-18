@@ -44,6 +44,7 @@ export interface FetchRulesProps {
   ruleLastResponseFilter: string[];
   ruleStatusesFilter: RuleStatus[];
   typesFilter: string[];
+  tagsFilter: string[];
   page: Pagination;
   setPage: Dispatch<SetStateAction<Pagination>>;
   sort: EuiTableSortingType<RuleTableItem>['sort'];
@@ -65,4 +66,9 @@ export interface RuleState {
   data: Rule[];
   error: string | null;
   totalItemCount: number;
+}
+
+export interface TagsState {
+  data: string[];
+  error: string | null;
 }
