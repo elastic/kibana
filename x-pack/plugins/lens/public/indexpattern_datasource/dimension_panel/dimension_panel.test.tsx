@@ -1942,9 +1942,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
       'Minimum',
       'Moving average',
       'Percentile',
+      'Percentile ranks',
       'Sum',
       'Unique count',
-      '\u00a0',
     ]);
   });
 

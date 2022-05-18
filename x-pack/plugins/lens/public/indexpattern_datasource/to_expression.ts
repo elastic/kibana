@@ -165,9 +165,21 @@ function getExpressionForLayer(
     }
 
     const idMap = esAggEntries.reduce((currentIdMap, [colId, column], index) => {
-      const esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
+      let esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
         ? `col-${index + (column.isBucketed ? 0 : 1)}-${index}`
         : `col-${index}-${index}`;
+      // for aggregations that accept multiple values, the id also contains the
+      // values that are being aggregated over, for example for a percentile_ranks agg
+      // of 400 this must be specified as `col-0-0.400`
+      if (
+        column.isMultiValuesAggregation &&
+        !column.filter &&
+        'params' in column &&
+        column.params &&
+        'value' in column.params
+      ) {
+        esAggsId += `.${column.params.value}`;
+      }
 
       return {
         ...currentIdMap,

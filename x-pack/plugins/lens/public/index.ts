@@ -56,6 +56,7 @@ export type {
   SumIndexPatternColumn,
   MedianIndexPatternColumn,
   PercentileIndexPatternColumn,
+  PercentileRanksIndexPatternColumn,
   CountIndexPatternColumn,
   LastValueIndexPatternColumn,
   CumulativeSumIndexPatternColumn,

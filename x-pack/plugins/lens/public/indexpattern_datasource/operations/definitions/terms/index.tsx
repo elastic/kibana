@@ -235,6 +235,22 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         max_doc_count: column.params.orderBy.maxDocCount,
       }).toAst();
     }
+    let orderBy = '_key';
+
+    if (column.params?.orderBy.type === 'column') {
+      const orderColumn = layer.columns[column.params.orderBy.columnId];
+      orderBy = String(orderedColumnIds.indexOf(column.params.orderBy.columnId));
+      // for multivalues aggregations, the orderBy parameter also needs the aggregation value
+      // for example for a percentile rank of 400 we need to pass the value such as ${index}.400
+      if (
+        orderColumn.isMultiValuesAggregation &&
+        'params' in orderColumn &&
+        orderColumn.params &&
+        'value' in orderColumn.params
+      ) {
+        orderBy = `${orderBy}.${orderColumn.params?.value}`;
+      }
+    }
 
     // To get more accurate results, we set shard_size to a minimum of 1000
     // The other calculation matches the current Elasticsearch shard_size default,
@@ -249,10 +265,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         enabled: true,
         schema: 'segment',
         fields: [column.sourceField, ...column.params.secondaryFields],
-        orderBy:
-          column.params.orderBy.type === 'alphabetical'
-            ? '_key'
-            : String(orderedColumnIds.indexOf(column.params.orderBy.columnId)),
+        orderBy,
         order: column.params.orderDirection,
         size: column.params.size,
         shardSize,
@@ -267,10 +280,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       enabled: true,
       schema: 'segment',
       field: column.sourceField,
-      orderBy:
-        column.params.orderBy.type === 'alphabetical'
-          ? '_key'
-          : String(orderedColumnIds.indexOf(column.params.orderBy.columnId)),
+      orderBy,
       order: column.params.orderDirection,
       size: column.params.size,
       shardSize,
