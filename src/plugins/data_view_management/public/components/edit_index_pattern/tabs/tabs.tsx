@@ -517,7 +517,7 @@ export function Tabs({
                 capabilities={application.capabilities}
                 getAllowedTypes={savedObjectsManagement.getAllowedTypes}
                 getRelationships={savedObjectsManagement.getRelationships}
-                navigateToApp={application.navigateToUrl}
+                navigateToUrl={application.navigateToUrl}
               />
             </Fragment>
           );

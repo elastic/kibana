@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core/public';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 import { get } from 'lodash';
-// import { RedirectAppLinksProvider } from '@kbn/shared-ux/link/redirect_app';
+// import { RedirectAppLinksProvider } from '@kbn/shared-ux-link-redirect_app';
 
 import {
   SavedObjectRelation,
@@ -58,6 +58,13 @@ export const RelationshipsTable = ({
 }) => {
   const [relationships, setRelationships] = useState<SavedObjectRelation[]>([]);
   const [allowedTypes, setAllowedTypes] = useState<SavedObjectManagementTypeInfo[]>([]);
+  const [query, setQuery] = useState('');
+
+  const handleOnChange = ({ queryText, error }: { queryText: string; error: unknown }) => {
+    if (!error) {
+      setQuery(queryText);
+    }
+  };
 
   useEffect(() => {
     getAllowedTypes().then((resp) => {
@@ -145,6 +152,14 @@ export const RelationshipsTable = ({
   );
 
   const search = {
+    query,
+    onChange: handleOnChange,
+    box: {
+      incremental: true,
+      schema: {
+        fields: { 'meta.title': { type: 'string' } },
+      },
+    },
     filters: [
       {
         type: 'field_value_selection',
