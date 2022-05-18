@@ -28,6 +28,7 @@ const NUMBER_OF_TRIGGERED_ACTIONS_FIELD =
   'kibana.alert.rule.execution.metrics.number_of_triggered_actions';
 const NUMBER_OF_GENERATED_ACTIONS_FIELD =
   'kibana.alert.rule.execution.metrics.number_of_generated_actions';
+const NUMBER_OF_DROPPED_ALERTS_FIELD = 'kibana.alert.rule.execution.metrics.alert_counts.dropped';
 const EXECUTION_UUID_FIELD = 'kibana.alert.rule.execution.uuid';
 
 const Millis2Nanos = 1000 * 1000;
@@ -60,6 +61,7 @@ interface IExecutionUuidAggBucket extends estypes.AggregationsStringTermsBucketK
     totalSearchDuration: estypes.AggregationsMaxAggregate;
     numTriggeredActions: estypes.AggregationsMaxAggregate;
     numGeneratedActions: estypes.AggregationsMaxAggregate;
+    numDroppedAlerts: estypes.AggregationsMaxAggregate;
     outcomeAndMessage: estypes.AggregationsTopHitsAggregate;
   };
   alertCounts: IAlertCounts;
@@ -91,6 +93,7 @@ const ExecutionLogSortFields: Record<string, string> = {
   schedule_delay: 'ruleExecution>scheduleDelay',
   num_triggered_actions: 'ruleExecution>numTriggeredActions',
   num_generated_actions: 'ruleExecution>numGeneratedActions',
+  num_dropped_alerts: 'ruleExecution>numDroppedAlerts',
 };
 
 export function getExecutionLogAggregation({ page, perPage, sort }: IExecutionLogAggOptions) {
@@ -209,6 +212,11 @@ export function getExecutionLogAggregation({ page, perPage, sort }: IExecutionLo
                     field: NUMBER_OF_GENERATED_ACTIONS_FIELD,
                   },
                 },
+                numDroppedAlerts: {
+                  max: {
+                    field: NUMBER_OF_DROPPED_ALERTS_FIELD,
+                  },
+                },
                 executionDuration: {
                   max: {
                     field: DURATION_FIELD,
@@ -284,6 +292,7 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     num_active_alerts: bucket?.alertCounts?.buckets?.activeAlerts?.doc_count ?? 0,
     num_new_alerts: bucket?.alertCounts?.buckets?.newAlerts?.doc_count ?? 0,
     num_recovered_alerts: bucket?.alertCounts?.buckets?.recoveredAlerts?.doc_count ?? 0,
+    num_dropped_alerts: bucket?.ruleExecution?.numDroppedAlerts?.value ?? 0,
     num_triggered_actions: bucket?.ruleExecution?.numTriggeredActions?.value ?? 0,
     num_generated_actions: bucket?.ruleExecution?.numGeneratedActions?.value ?? 0,
     num_succeeded_actions: actionExecutionSuccess,

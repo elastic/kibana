@@ -111,6 +111,16 @@ const columns = [
     isSortable: getIsColumnSortable('num_recovered_alerts'),
   },
   {
+    id: 'num_dropped_alerts',
+    displayAsText: i18n.translate(
+      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.droppedAlerts',
+      {
+        defaultMessage: 'Dropped alerts',
+      }
+    ),
+    isSortable: getIsColumnSortable('num_dropped_alerts'),
+  },
+  {
     id: 'num_triggered_actions',
     displayAsText: i18n.translate(
       'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.triggeredActions',
