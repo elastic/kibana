@@ -52,7 +52,8 @@ const testPolicy = {
   },
 };
 
-const isDesignatedManagedPolicy = (i: number) => i > 0 && i % 2 === 0;
+const isLinkedWithIndices = (i: number) => i > 0 && i % 2 === 0;
+const isDesignatedManagedPolicy = (i: number) => i > 0 && i % 3 === 0;
 const policies: PolicyFromES[] = [testPolicy];
 for (let i = 1; i < 105; i++) {
   policies.push({
@@ -104,6 +105,8 @@ const getPolicies = (rendered: ReactWrapper) => {
     return {
       version,
       name,
+      isManagedPolicy: isDesignatedManagedPolicy(version),
+      isLinkedWithIndices: isLinkedWithIndices(version),
     };
   });
   return visiblePolicies;
@@ -163,32 +166,6 @@ describe('policy table', () => {
     expect(hasManagedPolicies).toEqual(false);
   });
 
-  test('shows hidden policies with Managed badges when setting is switched on', () => {
-    const rendered = mountWithIntl(component);
-    const includeHiddenPoliciesSwitch = findTestSubject(rendered, `includeHiddenPoliciesSwitch`);
-    includeHiddenPoliciesSwitch.find('button').simulate('click');
-
-    rendered.update();
-    const visiblePolicyNames = getPolicyNames(rendered);
-    const visiblePolicies = visiblePolicyNames.map((name) => {
-      const version = parseInt(name.replace('testy', ''), 10);
-      return {
-        version,
-        name,
-      };
-    });
-
-    visiblePolicies.forEach((p) => {
-      const policyRow = findTestSubject(rendered, `policyTableRow-${p.name}`);
-      const warningBadge = findTestSubject(policyRow, 'managedPolicyBadge');
-      if (isDesignatedManagedPolicy(p.version)) {
-        expect(warningBadge.exists()).toBeTruthy();
-      } else {
-        expect(warningBadge.exists()).toBeFalsy();
-      }
-    });
-  });
-
   test('shows more policies when "Rows per page" value is increased', () => {
     const rendered = mountWithIntl(component);
 
@@ -199,6 +176,35 @@ describe('policy table', () => {
     numberOfRowsButton.simulate('click');
     rendered.update();
     expect(getPolicyNames(rendered).length).toBe(25);
+  });
+
+  test('shows hidden policies with Managed badges when setting is switched on', () => {
+    const rendered = mountWithIntl(component);
+    const includeHiddenPoliciesSwitch = findTestSubject(rendered, `includeHiddenPoliciesSwitch`);
+    includeHiddenPoliciesSwitch.find('button').simulate('click');
+    rendered.update();
+
+    // Increase page size for better sample set that contains managed indices
+    // Since table is ordered alphabetically and not numerically
+    const perPageButton = rendered.find('EuiTablePagination EuiPopover').find('button');
+    perPageButton.simulate('click');
+    rendered.update();
+    const numberOfRowsButton = rendered.find('.euiContextMenuItem').at(2);
+    numberOfRowsButton.simulate('click');
+    rendered.update();
+
+    const visiblePolicies = getPolicies(rendered);
+    expect(visiblePolicies.filter((p) => p.isManagedPolicy).length).toBeGreaterThan(0);
+
+    visiblePolicies.forEach((p) => {
+      const policyRow = findTestSubject(rendered, `policyTableRow-${p.name}`);
+      const warningBadge = findTestSubject(policyRow, 'managedPolicyBadge');
+      if (p.isManagedPolicy) {
+        expect(warningBadge.exists()).toBeTruthy();
+      } else {
+        expect(warningBadge.exists()).toBeFalsy();
+      }
+    });
   });
 
   test('filters based on content of search input', () => {
@@ -241,6 +247,36 @@ describe('policy table', () => {
     rendered.update();
     expect(findTestSubject(rendered, 'deletePolicyModal').exists()).toBeTruthy();
   });
+
+  test('confirmation modal shows warning when delete button is pressed for a hidden policy', () => {
+    const rendered = mountWithIntl(component);
+
+    // Toggles switch to show managed policies
+    const includeHiddenPoliciesSwitch = findTestSubject(rendered, `includeHiddenPoliciesSwitch`);
+    includeHiddenPoliciesSwitch.find('button').simulate('click');
+    rendered.update();
+
+    // Increase page size for better sample set that contains managed indices
+    // Since table is ordered alphabetically and not numerically
+    const perPageButton = rendered.find('EuiTablePagination EuiPopover').find('button');
+    perPageButton.simulate('click');
+    rendered.update();
+    const numberOfRowsButton = rendered.find('.euiContextMenuItem').at(2);
+    numberOfRowsButton.simulate('click');
+    rendered.update();
+
+    const visiblePolicies = getPolicies(rendered);
+    const managedPolicy = visiblePolicies.find((p) => p.isManagedPolicy && !p.isLinkedWithIndices);
+    expect(managedPolicy).toBeDefined();
+
+    const policyRow = findTestSubject(rendered, `policyTableRow-${managedPolicy!.name}`);
+    const addPolicyToTemplateButton = findTestSubject(policyRow, 'deletePolicy');
+    addPolicyToTemplateButton.simulate('click');
+    rendered.update();
+    expect(findTestSubject(rendered, 'deletePolicyModal').exists()).toBeTruthy();
+    expect(findTestSubject(rendered, 'deleteManagedPolicyCallOut').exists()).toBeTruthy();
+  });
+
   test('add index template modal shows when add policy to index template button is pressed', () => {
     const rendered = mountWithIntl(component);
     const policyRow = findTestSubject(rendered, `policyTableRow-${testPolicy.name}`);
