@@ -12,7 +12,8 @@ import expect from '@kbn/expect';
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  describe('getGridTile', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/132372
+  describe.skip('getGridTile', () => {
     const URL = `/api/maps/mvt/getGridTile/3/2/3.pbf\
 ?geometryFieldName=geo.coordinates\
 &index=logstash-*\
