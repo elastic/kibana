@@ -14,7 +14,7 @@ import { RGBAImage } from './image_utils';
 import { AbstractLayer } from '../layer';
 import {
   AUTOSELECT_EMS_LOCALE,
-  DEFAULT_EMS_LOCALE,
+  NO_EMS_LOCALE,
   SOURCE_DATA_REQUEST_ID,
   LAYER_TYPE,
   LAYER_STYLE_TYPE,
@@ -97,7 +97,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
   }
 
   getLocale() {
-    return this._descriptor.locale ?? DEFAULT_EMS_LOCALE;
+    return this._descriptor.locale ?? NO_EMS_LOCALE;
   }
 
   _canSkipSync({
@@ -405,7 +405,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
 
   _setLanguage(mbMap: MbMap, mbLayer: LayerSpecification, mbLayerId: string) {
     const locale = this.getLocale();
-    if (locale === null || locale === DEFAULT_EMS_LOCALE) {
+    if (locale === null || locale === NO_EMS_LOCALE) {
       if (mbLayer.type !== 'symbol') return;
 
       const textProperty = mbLayer.layout?.['text-field'];

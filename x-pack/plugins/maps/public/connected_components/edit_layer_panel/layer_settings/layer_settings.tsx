@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ValidatedDualRange } from '@kbn/kibana-react-plugin/public';
 import { Attribution } from '../../../../common/descriptor_types';
-import { AUTOSELECT_EMS_LOCALE, DEFAULT_EMS_LOCALE, MAX_ZOOM } from '../../../../common/constants';
+import { AUTOSELECT_EMS_LOCALE, NO_EMS_LOCALE, MAX_ZOOM } from '../../../../common/constants';
 import { AlphaSlider } from '../../../components/alpha_slider';
 import { ILayer } from '../../../classes/layers/layer';
 import { AttributionFormRow } from './attribution_form_row';
@@ -169,12 +169,6 @@ export function LayerSettings(props: Props) {
 
     const options = [
       {
-        text: i18n.translate('xpack.maps.layerPanel.settingsPanel.labelLanguageDefaultDropDown', {
-          defaultMessage: 'Default',
-        }),
-        value: DEFAULT_EMS_LOCALE,
-      },
-      {
         text: i18n.translate(
           'xpack.maps.layerPanel.settingsPanel.labelLanguageAutoselectDropDown',
           {
@@ -195,6 +189,12 @@ export function LayerSettings(props: Props) {
       { value: 'pt-pt', text: 'Português' },
       { value: 'ru-ru', text: 'русский' },
       { value: 'zh-cn', text: '简体中文' },
+      {
+        text: i18n.translate('xpack.maps.layerPanel.settingsPanel.labelLanguageNoneDropDown', {
+          defaultMessage: 'None',
+        }),
+        value: NO_EMS_LOCALE,
+      },
     ];
 
     return (
@@ -206,7 +206,7 @@ export function LayerSettings(props: Props) {
       >
         <EuiSelect
           options={options}
-          value={props.layer.getLocale() ?? DEFAULT_EMS_LOCALE}
+          value={props.layer.getLocale() ?? NO_EMS_LOCALE}
           onChange={onLocaleChange}
           compressed
         />

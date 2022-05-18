@@ -56,12 +56,12 @@ describe('EmsVectorTileLayer', () => {
   });
 
   describe('getLocale', () => {
-    test('should set locale to default for existing layers where locale is not defined', () => {
+    test('should set locale to none for existing layers where locale is not defined', () => {
       const layer = new EmsVectorTileLayer({
         source: {} as unknown as EMSTMSSource,
         layerDescriptor: {} as unknown as LayerDescriptor,
       });
-      expect(layer.getLocale()).toBe('default');
+      expect(layer.getLocale()).toBe('none');
     });
 
     test('should set locale for new layers', () => {
