@@ -292,11 +292,13 @@ const RuleStatusMenu: React.FunctionComponent<RuleStatusMenuProps> = ({
           name: ENABLED,
           icon: isEnabled && !isSnoozed ? 'check' : 'empty',
           onClick: enableRule,
+          'data-test-subj': 'statusDropdownEnabledItem',
         },
         {
           name: DISABLED,
           icon: !isEnabled ? 'check' : 'empty',
           onClick: disableRule,
+          'data-test-subj': 'statusDropdownDisabledItem',
         },
         {
           name: snoozeButtonTitle,

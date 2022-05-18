@@ -19,5 +19,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./alerts/table_storage'));
     loadTestFile(require.resolve('./exploratory_view'));
     loadTestFile(require.resolve('./feature_controls'));
+    loadTestFile(require.resolve('./alerts/rules_page'));
   });
 }

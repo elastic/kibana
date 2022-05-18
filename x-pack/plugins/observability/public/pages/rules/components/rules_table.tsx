@@ -42,7 +42,7 @@ export function RulesTable({
     [onPageChange, onSortChange]
   );
   return (
-    <section data-test-subj="rulesList">
+    <section>
       <EuiSpacer size="xs" />
       <>
         <EuiSpacer size="xs" />
