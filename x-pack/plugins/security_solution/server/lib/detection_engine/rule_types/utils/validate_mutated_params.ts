@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { RuleTypeParams } from '../../types';
+
 export const validateImmutable = (immutable: boolean) => {
   if (immutable === true) {
     throw new Error("Elastic rule can't be edited");
@@ -17,8 +19,6 @@ export const validateIndexPatterns = (indices: string[] | undefined) => {
   }
 };
 
-export const incrementVersion = <RuleParams extends { version: number }>(
-  ruleParams: RuleParams
-) => {
+export const incrementVersion = <RuleParams extends RuleTypeParams>(ruleParams: RuleParams) => {
   return { ...ruleParams, version: ruleParams.version + 1 };
 };
