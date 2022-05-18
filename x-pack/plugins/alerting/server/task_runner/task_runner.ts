@@ -455,6 +455,8 @@ export class TaskRunner<
     ruleRunMetricsStore.setTotalSearchDurationMs(searchMetrics.totalSearchDurationMs);
     ruleRunMetricsStore.setEsSearchDurationMs(searchMetrics.esSearchDurationMs);
 
+    ruleRunMetricsStore.setHasReachedMaxAlerts(hasReachedMaxAlerts);
+
     // These are the active alerts this run cycle
     const alertsWithScheduledActions = pickBy(
       alerts,
@@ -468,6 +470,7 @@ export class TaskRunner<
       activeAlerts: alertsWithScheduledActions,
       recoveredAlerts,
       ruleLabel,
+      hasReachedMaxAlerts,
       canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
     });
 
@@ -484,6 +487,7 @@ export class TaskRunner<
         currentAlerts: alertsWithScheduledActions,
         recoveredAlerts,
         ruleLabel,
+        hasReachedMaxAlerts,
         ruleRunMetricsStore,
       });
     }
@@ -526,19 +530,21 @@ export class TaskRunner<
         )
       );
 
-      await scheduleActionsForRecoveredAlerts<
-        InstanceState,
-        InstanceContext,
-        RecoveryActionGroupId
-      >({
-        recoveryActionGroup: this.ruleType.recoveryActionGroup,
-        recoveredAlerts,
-        executionHandler,
-        mutedAlertIdsSet,
-        logger: this.logger,
-        ruleLabel,
-        ruleRunMetricsStore,
-      });
+      if (!hasReachedMaxAlerts) {
+        await scheduleActionsForRecoveredAlerts<
+          InstanceState,
+          InstanceContext,
+          RecoveryActionGroupId
+        >({
+          recoveryActionGroup: this.ruleType.recoveryActionGroup,
+          recoveredAlerts,
+          executionHandler,
+          mutedAlertIdsSet,
+          logger: this.logger,
+          ruleLabel,
+          ruleRunMetricsStore,
+        });
+      }
     } else {
       if (ruleIsSnoozed) {
         this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`);
@@ -949,6 +955,7 @@ function generateNewAndRecoveredAlertEvents<
     originalAlerts,
     recoveredAlerts,
     ruleRunMetricsStore,
+    hasReachedMaxAlerts,
   } = params;
   const originalAlertIds = Object.keys(originalAlerts);
   const currentAlertIds = Object.keys(currentAlerts);
@@ -963,16 +970,25 @@ function generateNewAndRecoveredAlertEvents<
 
   ruleRunMetricsStore.setNumberOfActiveAlerts(currentAlertIds.length);
   ruleRunMetricsStore.setNumberOfNewAlerts(newIds.length);
-  ruleRunMetricsStore.setNumberOfRecoveredAlerts(recoveredAlertIds.length);
+
+  if (hasReachedMaxAlerts) {
+    ruleRunMetricsStore.setNumberOfDroppedAlerts(recoveredAlertIds.length);
+  } else {
+    ruleRunMetricsStore.setNumberOfRecoveredAlerts(recoveredAlertIds.length);
+  }
 
   for (const id of recoveredAlertIds) {
     const { group: actionGroup, subgroup: actionSubgroup } =
       recoveredAlerts[id].getLastScheduledActions() ?? {};
     const state = recoveredAlerts[id].getState();
-    const message = `${params.ruleLabel} alert '${id}' has recovered`;
+    const message = hasReachedMaxAlerts
+      ? `${params.ruleLabel} alert '${id}' has been dropped`
+      : `${params.ruleLabel} alert '${id}' has recovered`;
 
     alertingEventLogger.logAlert({
-      action: EVENT_LOG_ACTIONS.recoveredInstance,
+      action: hasReachedMaxAlerts
+        ? EVENT_LOG_ACTIONS.droppedInstance
+        : EVENT_LOG_ACTIONS.recoveredInstance,
       id,
       group: actionGroup,
       subgroup: actionSubgroup,
@@ -1072,7 +1088,14 @@ function logActiveAndRecoveredAlerts<
     RecoveryActionGroupId
   >
 ) {
-  const { logger, activeAlerts, recoveredAlerts, ruleLabel, canSetRecoveryContext } = params;
+  const {
+    logger,
+    activeAlerts,
+    recoveredAlerts,
+    ruleLabel,
+    hasReachedMaxAlerts,
+    canSetRecoveryContext,
+  } = params;
   const activeAlertIds = Object.keys(activeAlerts);
   const recoveredAlertIds = Object.keys(recoveredAlerts);
 
@@ -1094,13 +1117,14 @@ function logActiveAndRecoveredAlerts<
     );
   }
   if (recoveredAlertIds.length > 0) {
+    const recoveredOrDropped = hasReachedMaxAlerts ? 'dropped' : 'recovered';
     logger.debug(
-      `rule ${ruleLabel} has ${recoveredAlertIds.length} recovered alerts: ${JSON.stringify(
-        recoveredAlertIds
-      )}`
+      `rule ${ruleLabel} has ${
+        recoveredAlertIds.length
+      } ${recoveredOrDropped} alerts: ${JSON.stringify(recoveredAlertIds)}`
     );
 
-    if (canSetRecoveryContext) {
+    if (canSetRecoveryContext && !hasReachedMaxAlerts) {
       for (const id of recoveredAlertIds) {
         if (!recoveredAlerts[id].hasContext()) {
           logger.debug(

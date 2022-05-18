@@ -12,7 +12,8 @@ import {
   RuleExecutionStatusErrorReasons,
 } from '../types';
 import { Alert } from './alert';
-import { ErrorWithReason, getRecoveredAlerts } from '../lib';
+import { getRecoveredAlerts } from '../lib';
+import { ErrorWithReason } from '../lib/error_with_reason';
 
 export interface AlertFactoryDoneUtils<
   InstanceState extends AlertInstanceState,

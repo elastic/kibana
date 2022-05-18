@@ -10,6 +10,8 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Alert } from './alert';
 import { createAlertFactory } from './create_alert_factory';
 import { getRecoveredAlerts } from '../lib';
+import { getReasonFromError } from '../lib/error_with_reason';
+import { RuleExecutionStatusErrorReasons } from '../types';
 
 jest.mock('../lib', () => ({
   getRecoveredAlerts: jest.fn(),
@@ -29,6 +31,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
+      maxAlerts: 10,
     });
     const result = alertFactory.create('1');
     expect(result).toMatchInlineSnapshot(`
@@ -50,6 +53,7 @@ describe('createAlertFactory()', () => {
         '1': alert,
       },
       logger,
+      maxAlerts: 10,
     });
     const result = alertFactory.create('1');
     expect(result).toMatchInlineSnapshot(`
@@ -72,6 +76,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts,
       logger,
+      maxAlerts: 10,
     });
     alertFactory.create('1');
     expect(alerts).toMatchInlineSnapshot(`
@@ -84,10 +89,29 @@ describe('createAlertFactory()', () => {
         `);
   });
 
+  test('throws error when more alerts created than allowed', () => {
+    const alertFactory = createAlertFactory({
+      alerts: {},
+      logger,
+      maxAlerts: 3,
+    });
+    alertFactory.create('1');
+    alertFactory.create('2');
+    alertFactory.create('3');
+
+    try {
+      alertFactory.create('4');
+    } catch (err) {
+      expect(err).toMatchInlineSnapshot(`[Error: Rule generated greater than 3 alerts]`);
+      expect(getReasonFromError(err)).toEqual(RuleExecutionStatusErrorReasons.MaxAlerts);
+    }
+  });
+
   test('throws error when creating alerts after done() is called', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
+      maxAlerts: 10,
     });
     const result = alertFactory.create('1');
     expect(result).toEqual({
@@ -123,6 +147,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
+      maxAlerts: 10,
       canSetRecoveryContext: true,
     });
     const result = alertFactory.create('1');
@@ -146,6 +171,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
+      maxAlerts: 10,
       canSetRecoveryContext: true,
     });
     const result = alertFactory.create('1');
@@ -168,6 +194,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
+      maxAlerts: 10,
       canSetRecoveryContext: true,
     });
     const result = alertFactory.create('1');
@@ -189,6 +216,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
+      maxAlerts: 10,
       canSetRecoveryContext: false,
     });
     const result = alertFactory.create('1');

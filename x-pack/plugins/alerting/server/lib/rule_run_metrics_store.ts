@@ -17,7 +17,9 @@ interface State {
   numberOfGeneratedActions: number;
   numberOfActiveAlerts: number;
   numberOfRecoveredAlerts: number;
+  numberOfDroppedAlerts: number;
   numberOfNewAlerts: number;
+  hasReachedMaxAlerts: boolean;
   connectorTypes: {
     [key: string]: {
       triggeredActionsStatus: ActionsCompletion;
@@ -39,7 +41,9 @@ export class RuleRunMetricsStore {
     numberOfGeneratedActions: 0,
     numberOfActiveAlerts: 0,
     numberOfRecoveredAlerts: 0,
+    numberOfDroppedAlerts: 0,
     numberOfNewAlerts: 0,
+    hasReachedMaxAlerts: false,
     connectorTypes: {},
   };
 
@@ -71,11 +75,17 @@ export class RuleRunMetricsStore {
   public getNumberOfRecoveredAlerts = () => {
     return this.state.numberOfRecoveredAlerts;
   };
+  public getNumberOfDroppedAlerts = () => {
+    return this.state.numberOfDroppedAlerts;
+  };
   public getNumberOfNewAlerts = () => {
     return this.state.numberOfNewAlerts;
   };
   public getStatusByConnectorType = (actionTypeId: string) => {
     return this.state.connectorTypes[actionTypeId];
+  };
+  public getHasReachMaxAlerts = () => {
+    return this.state.hasReachedMaxAlerts;
   };
   public getMetrics = (): RuleRunMetrics => {
     const { connectorTypes, ...metrics } = this.state;
@@ -107,8 +117,14 @@ export class RuleRunMetricsStore {
   public setNumberOfRecoveredAlerts = (numberOfRecoveredAlerts: number) => {
     this.state.numberOfRecoveredAlerts = numberOfRecoveredAlerts;
   };
+  public setNumberOfDroppedAlerts = (numberOfDroppedAlerts: number) => {
+    this.state.numberOfDroppedAlerts = numberOfDroppedAlerts;
+  };
   public setNumberOfNewAlerts = (numberOfNewAlerts: number) => {
     this.state.numberOfNewAlerts = numberOfNewAlerts;
+  };
+  public setHasReachedMaxAlerts = (hasReachedMaxAlerts: boolean) => {
+    this.state.hasReachedMaxAlerts = hasReachedMaxAlerts;
   };
   public setTriggeredActionsStatusByConnectorType = ({
     actionTypeId,

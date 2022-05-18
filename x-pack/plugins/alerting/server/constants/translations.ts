@@ -17,6 +17,9 @@ export const translations = {
             'The maximum number of actions for this rule type was reached; excess actions were not triggered.',
         }
       ),
+      maxAlerts: i18n.translate('xpack.alerting.taskRunner.warning.maxAlerts', {
+        defaultMessage: `Rule generated greater than the maximum allowed number of alerts. Excess alerts and any recovered alerts were dropped.`,
+      }),
     },
   },
 };

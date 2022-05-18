@@ -66,6 +66,7 @@ export interface GenerateNewAndRecoveredAlertEventsParams<
   currentAlerts: Dictionary<Alert<InstanceState, InstanceContext>>;
   recoveredAlerts: Dictionary<Alert<InstanceState, InstanceContext>>;
   ruleLabel: string;
+  hasReachedMaxAlerts: boolean;
   ruleRunMetricsStore: RuleRunMetricsStore;
 }
 
@@ -92,6 +93,7 @@ export interface LogActiveAndRecoveredAlertsParams<
   logger: Logger;
   activeAlerts: Dictionary<Alert<InstanceState, InstanceContext, ActionGroupIds>>;
   recoveredAlerts: Dictionary<Alert<InstanceState, InstanceContext, RecoveryActionGroupId>>;
+  hasReachedMaxAlerts: boolean;
   ruleLabel: string;
   canSetRecoveryContext: boolean;
 }

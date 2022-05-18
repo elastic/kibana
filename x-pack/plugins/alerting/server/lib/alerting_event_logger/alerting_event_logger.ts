@@ -378,6 +378,7 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
         active: metrics.numberOfActiveAlerts ? metrics.numberOfActiveAlerts : 0,
         new: metrics.numberOfNewAlerts ? metrics.numberOfNewAlerts : 0,
         recovered: metrics.numberOfRecoveredAlerts ? metrics.numberOfRecoveredAlerts : 0,
+        dropped: metrics.numberOfDroppedAlerts ? metrics.numberOfDroppedAlerts : 0,
       },
       number_of_searches: metrics.numSearches ? metrics.numSearches : 0,
       es_search_duration_ms: metrics.esSearchDurationMs ? metrics.esSearchDurationMs : 0,

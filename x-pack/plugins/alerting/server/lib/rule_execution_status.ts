@@ -29,27 +29,32 @@ export function executionStatusFromState(
   lastExecutionDate?: Date
 ): IExecutionStatusAndMetrics {
   const alertIds = Object.keys(stateWithMetrics.alertInstances ?? {});
+  let status: RuleExecutionStatuses =
+    alertIds.length === 0 ? RuleExecutionStatusValues[0] : RuleExecutionStatusValues[1];
 
   const hasIncompleteAlertExecution =
     stateWithMetrics.metrics.triggeredActionsStatus === ActionsCompletion.PARTIAL;
 
-  let status: RuleExecutionStatuses =
-    alertIds.length === 0 ? RuleExecutionStatusValues[0] : RuleExecutionStatusValues[1];
+  const hasReachedMaxAlerts = stateWithMetrics.metrics.hasReachedMaxAlerts;
 
-  if (hasIncompleteAlertExecution) {
+  let warning = null;
+  if (hasIncompleteAlertExecution || hasReachedMaxAlerts) {
     status = RuleExecutionStatusValues[5];
+    warning = {
+      reason: hasReachedMaxAlerts
+        ? RuleExecutionStatusWarningReasons.MAX_ALERTS
+        : RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+      message: hasReachedMaxAlerts
+        ? translations.taskRunner.warning.maxAlerts
+        : translations.taskRunner.warning.maxExecutableActions,
+    };
   }
 
   return {
     status: {
       lastExecutionDate: lastExecutionDate ?? new Date(),
       status,
-      ...(hasIncompleteAlertExecution && {
-        warning: {
-          reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
-          message: translations.taskRunner.warning.maxExecutableActions,
-        },
-      }),
+      ...(warning ? { warning } : {}),
     },
     metrics: stateWithMetrics.metrics,
   };
