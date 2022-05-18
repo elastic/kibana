@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { RRule, ByWeekday, Weekday, WeekdayStr } from 'rrule';
+import { RRule, ByWeekday, Weekday, WeekdayStr, rrulestr } from 'rrule';
 import { SanitizedRule, RuleTypeParams } from '../../common/rule';
 
 type RuleSnoozeProps = Pick<SanitizedRule<RuleTypeParams>, 'muteAll' | 'snoozeSchedule'>;
-
-const WEEKDAY_CODES = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
 
 export function getRuleSnoozeEndTime(rule: RuleSnoozeProps): Date | null {
   if (rule.snoozeSchedule == null) {
@@ -59,12 +57,7 @@ export function isRuleSnoozed(rule: RuleSnoozeProps) {
 }
 
 function parseByWeekday(byweekday: Array<string | number>): ByWeekday[] {
-  return byweekday.map((w) => {
-    if (typeof w === 'number') return w;
-    if (WEEKDAY_CODES.includes(w)) return w as WeekdayStr;
-    // Handle nth day codes, for example, +1MO means the first Monday of the month, -1FR means the last Friday, -2TH means second to last Thursday
-    const dayOfWeek = w.slice(-2) as WeekdayStr;
-    const nthDay = w.slice(0, 2);
-    return RRule[dayOfWeek].nth(Number(nthDay));
-  });
+  const rRuleString = `RRULE:BYDAY=${byweekday.join(',')}`;
+  const parsedRRule = rrulestr(rRuleString);
+  return parsedRRule.origOptions.byweekday as ByWeekday[];
 }
