@@ -10,6 +10,7 @@ import { action } from '@storybook/addon-actions';
 
 import { NoDataViewsPrompt as NoDataViewsPromptComponent, Props } from './no_data_views.component';
 import { NoDataViewsPrompt } from './no_data_views';
+import { NoDataViewsPromptProvider, NoDataViewsPromptServices } from './services';
 
 import mdx from '../README.mdx';
 
@@ -23,13 +24,35 @@ export default {
   },
 };
 
-export const ConnectedComponent = () => {
-  return <NoDataViewsPrompt onDataViewCreated={action('onDataViewCreated')} />;
+type ConnectedParams = Pick<NoDataViewsPromptServices, 'canCreateNewDataView' | 'dataViewsDocLink'>;
+
+const openDataViewEditor: NoDataViewsPromptServices['openDataViewEditor'] = (options) => {
+  action('openDataViewEditor')(options);
+  return () => {};
 };
 
-type Params = Pick<Props, 'canCreateNewDataView' | 'dataViewsDocLink'>;
+export const ConnectedComponent = (params: ConnectedParams) => {
+  return (
+    <NoDataViewsPromptProvider {...{ openDataViewEditor, ...params }}>
+      <NoDataViewsPrompt onDataViewCreated={action('onDataViewCreated')} />
+    </NoDataViewsPromptProvider>
+  );
+};
 
-export const PureComponent = (params: Params) => {
+ConnectedComponent.argTypes = {
+  canCreateNewDataView: {
+    control: 'boolean',
+    defaultValue: true,
+  },
+  dataViewsDocLink: {
+    options: ['some/link', undefined],
+    control: { type: 'radio' },
+  },
+};
+
+type PureParams = Pick<Props, 'canCreateNewDataView' | 'dataViewsDocLink'>;
+
+export const PureComponent = (params: PureParams) => {
   return <NoDataViewsPromptComponent onClickCreate={action('onClick')} {...params} />;
 };
 

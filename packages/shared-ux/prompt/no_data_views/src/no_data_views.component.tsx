@@ -39,7 +39,7 @@ export const NoDataViewsPrompt = ({
   dataViewsDocLink,
   emptyPromptColor = 'plain',
 }: Props) => {
-  const createNewButton = canCreateNewDataView && (
+  const actions = canCreateNewDataView && (
     <EuiButton
       onClick={onClickCreate}
       iconType="plusInCircle"
@@ -87,6 +87,9 @@ export const NoDataViewsPrompt = ({
     </p>
   );
 
+  const icon = <DataViewIllustration />;
+  const footer = dataViewsDocLink ? <DocumentationLink href={dataViewsDocLink} /> : undefined;
+
   return (
     <EuiEmptyPrompt
       data-test-subj="noDataViewsPrompt"
@@ -96,11 +99,7 @@ export const NoDataViewsPrompt = ({
         flex-grow: 0;
       `}
       color={emptyPromptColor}
-      icon={<DataViewIllustration />}
-      title={title}
-      body={body}
-      actions={createNewButton}
-      footer={dataViewsDocLink && <DocumentationLink href={dataViewsDocLink} />}
+      {...{ actions, icon, title, body, footer }}
     />
   );
 };
