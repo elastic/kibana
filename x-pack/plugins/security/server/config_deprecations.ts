@@ -178,7 +178,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
             }
           ),
           level: 'warning',
-          documentationUrl: `https://www.elastic.co/guide/en/kibana/${docsBranch}/security-settings-kb.html#authentication-security-settings`,
+          documentationUrl: `https://www.elastic.co/guide/en/kibana/${docsBranch}/kibana-authentication.html#anonymous-authentication`,
           correctiveActions: {
             manualSteps: [
               i18n.translate('xpack.security.deprecations.anonAuthCredentials.manualSteps1', {
