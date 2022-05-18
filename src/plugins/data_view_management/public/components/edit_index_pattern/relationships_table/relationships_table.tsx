@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core/public';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 import { get } from 'lodash';
+// import { RedirectAppLinksProvider } from '@kbn/shared-ux/link/redirect_app';
 
 import {
   SavedObjectRelation,
@@ -28,6 +29,7 @@ import {
 } from '@kbn/saved-objects-management-plugin/public';
 
 import { EuiToolTip, EuiIcon, SearchFilterConfig } from '@elastic/eui';
+// import { IPM_APP_ID } from '../../../plugin';
 
 const canGoInApp = (
   savedObject: SavedObjectRelation,
@@ -45,9 +47,11 @@ export const RelationshipsTable = ({
   id,
   getAllowedTypes,
   getRelationships,
+  navigateToUrl,
 }: {
   http: CoreStart['http'];
   capabilities: CoreStart['application']['capabilities'];
+  navigateToUrl: CoreStart['application']['navigateToUrl'];
   id: string;
   getAllowedTypes: SavedObjectsManagementPluginStart['getAllowedTypes'];
   getRelationships: SavedObjectsManagementPluginStart['getRelationships'];
@@ -156,6 +160,7 @@ export const RelationshipsTable = ({
   };
 
   return (
+    /* <RedirectAppLinksProvider currentAppId={IPM_APP_ID} navigateToUrl={navigateToUrl}> */
     <EuiInMemoryTable<SavedObjectRelation>
       items={relationships}
       columns={columns}
@@ -165,5 +170,6 @@ export const RelationshipsTable = ({
         'data-test-subj': `relationshipsTableRow`,
       })}
     />
+    /* </RedirectAppLinksProvider> */
   );
 };
