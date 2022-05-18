@@ -66,7 +66,7 @@ export const ControlGroupStrings = {
       }),
     getControlSettingsTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.controlSettingsTitle', {
-        defaultMessage: 'Control settings',
+        defaultMessage: 'Additional settings',
       }),
     getSaveChangesTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.saveChangesTitle', {

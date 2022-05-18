@@ -33,6 +33,7 @@ import {
   EuiSpacer,
   EuiIcon,
   EuiSwitch,
+  EuiTextColor,
 } from '@elastic/eui';
 import { DataViewListItem, DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { IFieldSubTypeMulti } from '@kbn/es-query';
@@ -251,16 +252,20 @@ export const ControlEditor = ({
             />
           </EuiFormRow>
           <EuiFormRow label={ControlGroupStrings.manageControl.getControlTypeTitle()}>
-            <EuiFlexGroup alignItems="center" gutterSize="xs">
-              <EuiFlexItem grow={false}>
-                <EuiIcon type={factory ? factory.getIconType() : 'alert'} />
-              </EuiFlexItem>
-              <EuiFlexItem data-test-subj="control-editor-type">
-                {factory
-                  ? factory.getDisplayName()
-                  : ControlGroupStrings.manageControl.getSelectFieldMessage()}
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            {factory ? (
+              <EuiFlexGroup alignItems="center" gutterSize="xs">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type={factory.getIconType()} />
+                </EuiFlexItem>
+                <EuiFlexItem data-test-subj="control-editor-type">
+                  {factory.getDisplayName()}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ) : (
+              <EuiTextColor color="subdued">
+                {ControlGroupStrings.manageControl.getSelectFieldMessage()}
+              </EuiTextColor>
+            )}
           </EuiFormRow>
           <EuiFormRow label={ControlGroupStrings.manageControl.getTitleInputTitle()}>
             <EuiFieldText
