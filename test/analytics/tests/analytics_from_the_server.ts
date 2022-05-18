@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import expect from '@kbn/expect';
-import type { TelemetryCounter } from '@kbn/core/server';
-import { Action } from '@kbn/analytics-plugin-a-plugin/server/custom_shipper';
-import { FtrProviderContext } from '../services';
+import type { Event, TelemetryCounter } from '@kbn/core/server';
+import type { Action } from '@kbn/analytics-plugin-a-plugin/server/custom_shipper';
+import type { FtrProviderContext } from '../services';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -27,10 +26,9 @@ export default function ({ getService }: FtrProviderContext) {
     return resp.body;
   };
 
-  const getActions = async (takeNumberOfActions: number): Promise<Action[]> => {
+  const getActions = async (): Promise<Action[]> => {
     const resp = await supertest
       .get(`/internal/analytics_plugin_a/actions`)
-      .query({ takeNumberOfActions })
       .set('kbn-xsrf', 'xxx')
       .expect(200);
 
@@ -62,7 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('after setting opt-in, it should extend the contexts and send the events', async () => {
       await ebtServerHelper.setOptIn(true);
 
-      const actions = await getActions(3);
+      const actions = await getActions();
 
       // Validating the remote PID because that's the only field that it's added by the FTR plugin.
       const context = actions[1].meta;
@@ -70,45 +68,67 @@ export default function ({ getService }: FtrProviderContext) {
       expect(context.pid).to.be.a('number');
 
       // Some context providers emit very early. We are OK with that.
-      const initialContext = actions[2].meta[0].context;
-
-      const reportEventContext = actions[2].meta[1].context;
       expect(context).to.have.property('pid');
       expect(context.pid).to.be.a('number');
 
-      expect(actions).to.eql([
-        { action: 'optIn', meta: true },
-        { action: 'extendContext', meta: context },
-        {
-          action: 'reportEvents',
-          meta: [
-            {
-              timestamp: actions[2].meta[0].timestamp,
-              event_type: 'test-plugin-lifecycle',
-              context: initialContext,
-              properties: { plugin: 'analyticsPluginA', step: 'setup' },
-            },
-            {
-              timestamp: actions[2].meta[1].timestamp,
-              event_type: 'test-plugin-lifecycle',
-              context: reportEventContext,
-              properties: { plugin: 'analyticsPluginA', step: 'start' },
-            },
-          ],
-        },
-      ]);
+      const [optInAction, extendContextAction, ...reportEventsActions] = actions;
+      expect(optInAction).to.eql({ action: 'optIn', meta: true });
+      expect(extendContextAction).to.eql({ action: 'extendContext', meta: context });
+      // We know that after opting-in, the client will send the events in batches, grouped by event-type.
+
+      reportEventsActions.forEach((reportEventAction) => {
+        expect(reportEventAction.action).to.eql('reportEvents');
+        // Get the first event type
+        const initiallyBatchedEventType = reportEventAction.meta[0].event_type;
+        // Check that all event types in this batch are the same.
+        reportEventAction.meta.forEach((event: Event) => {
+          expect(event.event_type).to.eql(initiallyBatchedEventType);
+        });
+      });
+
+      // Find the action calling to report test-plugin-lifecycle events.
+      const reportTestPluginLifecylecEventsAction = reportEventsActions.find(
+        (reportEventAction) => {
+          return (
+            reportEventAction.action === 'reportEvents' &&
+            reportEventAction.meta[0].event_type === 'test-plugin-lifecycle'
+          );
+        }
+      );
+
+      expect(reportTestPluginLifecylecEventsAction).to.not.be('undefined');
+      // Find the setup and start events and validate that they are sent in the correct order.
+      const initialContext = reportTestPluginLifecylecEventsAction!.meta[0].context; // read this from the reportTestPlugin
+      const reportEventContext = reportTestPluginLifecylecEventsAction!.meta[1].context;
+
+      const setupEvent = reportTestPluginLifecylecEventsAction!.meta.findIndex(
+        (event: Event) =>
+          event.event_type === 'test-plugin-lifecycle' &&
+          event.properties.plugin === 'analyticsPluginA' &&
+          event.properties.step === 'setup'
+      );
+
+      const startEvent = reportTestPluginLifecylecEventsAction!.meta.findIndex(
+        (event: Event) =>
+          event.event_type === 'test-plugin-lifecycle' &&
+          event.properties.plugin === 'analyticsPluginA' &&
+          event.properties.step === 'start'
+      );
+
+      expect(setupEvent).to.be.greaterThan(-1);
+      expect(startEvent).to.be.greaterThan(setupEvent);
 
       // This helps us to also test the helpers
       const events = await ebtServerHelper.getLastEvents(2, ['test-plugin-lifecycle']);
       expect(events).to.eql([
         {
-          timestamp: actions[2].meta[0].timestamp,
+          timestamp: reportTestPluginLifecylecEventsAction!.meta[setupEvent].timestamp,
           event_type: 'test-plugin-lifecycle',
           context: initialContext,
           properties: { plugin: 'analyticsPluginA', step: 'setup' },
         },
         {
-          timestamp: actions[2].meta[1].timestamp,
+          timestamp: reportTestPluginLifecylecEventsAction!.meta[startEvent].timestamp,
           event_type: 'test-plugin-lifecycle',
           context: reportEventContext,
           properties: { plugin: 'analyticsPluginA', step: 'start' },
