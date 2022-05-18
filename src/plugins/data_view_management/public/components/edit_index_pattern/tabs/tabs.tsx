@@ -147,6 +147,7 @@ export function Tabs({
     dataViews,
     http,
     application,
+    savedObjectsManagement,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
   const [syncingStateFunc, setSyncingStateFunc] = useState<any>({
@@ -514,6 +515,8 @@ export function Tabs({
                 http={http}
                 id={indexPattern.id!}
                 capabilities={application.capabilities}
+                getAllowedTypes={savedObjectsManagement.getAllowedTypes}
+                getRelationships={savedObjectsManagement.getRelationships}
               />
             </Fragment>
           );
@@ -540,6 +543,7 @@ export function Tabs({
       dataViews,
       http,
       application,
+      savedObjectsManagement,
     ]
   );
 

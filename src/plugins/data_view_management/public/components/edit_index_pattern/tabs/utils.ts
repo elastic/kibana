@@ -104,7 +104,7 @@ export function getTabs(indexPattern: DataView, fieldFilter: string) {
   });
 
   tabs.push({
-    name: 'relationships',
+    name: 'Relationships',
     id: TAB_RELATIONSHIPS,
     'data-test-subj': 'tab-relationships',
   });

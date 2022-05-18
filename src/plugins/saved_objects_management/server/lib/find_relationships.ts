@@ -22,6 +22,7 @@ export async function findRelationships({
   client,
   referenceTypes,
   savedObjectsManagement,
+  namespaces,
 }: {
   type: string;
   id: string;
@@ -29,6 +30,7 @@ export async function findRelationships({
   client: SavedObjectsClientContract;
   referenceTypes: string[];
   savedObjectsManagement: ISavedObjectsManagement;
+  namespaces?: string[];
 }): Promise<SavedObjectGetRelationshipsResponse> {
   const { references = [] } = await client.get(type, id);
 
@@ -47,6 +49,8 @@ export async function findRelationships({
       hasReference: { type, id },
       perPage: size,
       type: referenceTypes,
+      // todo
+      namespaces,
     }),
   ]);
 
