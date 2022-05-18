@@ -170,6 +170,7 @@ export interface Process {
   searchMatched: string | null; // either false, or set to searchQuery
   addEvent(event: ProcessEvent): void;
   addAlert(alert: ProcessEvent): void;
+  addChild(child: Process): void;
   clearSearch(): void;
   hasOutput(): boolean;
   hasAlerts(): boolean;
