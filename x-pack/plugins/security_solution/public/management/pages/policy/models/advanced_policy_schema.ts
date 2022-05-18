@@ -888,7 +888,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     key: 'linux.advanced.eventfilters',
     first_supported_version: '8.3',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.eventfilters',
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.eventFilters',
       {
         defaultMessage: 'Event filters.  Default: true',
       }
@@ -898,7 +898,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     key: 'mac.advanced.eventfilters',
     first_supported_version: '8.3',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.eventfilters',
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.eventFilters',
       {
         defaultMessage: 'Event filters.  Default: true',
       }
@@ -908,7 +908,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     key: 'windows.advanced.eventfilters',
     first_supported_version: '8.3',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.eventfilters',
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.eventFilters',
       {
         defaultMessage: 'Event filters.  Default: true',
       }
