@@ -56,11 +56,11 @@ export const RuleTagFilter = (props: RuleTagFilterProps) => {
     return [...new Set([...tags, ...selectedTags])].sort();
   }, [tags, selectedTags]);
 
-  const options: EuiSelectableOption[] = useMemo(
+  const options = useMemo(
     () =>
       allTags.map((tag) => ({
         label: tag,
-        checked: selectedTags.includes(tag) ? 'on' : undefined,
+        checked: selectedTags.includes(tag) ? ('on' as const) : undefined,
         'data-test-subj': optionDataTestSubj(tag),
       })),
     [allTags, selectedTags, optionDataTestSubj]

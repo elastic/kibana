@@ -18,6 +18,7 @@ import { useLocation } from 'react-router-dom';
 import { RisonObject } from 'rison-node';
 import { buildEsQuery } from '@kbn/es-query';
 import { getFindingsCountAggQuery } from '../use_findings_count';
+import { getPaginationQuery } from '../utils';
 
 jest.mock('../../../common/api/use_latest_findings_data_view');
 jest.mock('../../../common/api/use_cis_kubernetes_integration');
@@ -69,9 +70,8 @@ describe('<LatestFindingsContainer />', () => {
     expect(dataMock.search.search).toHaveBeenNthCalledWith(2, {
       params: getFindingsQuery({
         ...baseQuery,
+        ...getPaginationQuery(query),
         sort: query.sort,
-        size: query.size,
-        from: query.from,
       }),
     });
   });
