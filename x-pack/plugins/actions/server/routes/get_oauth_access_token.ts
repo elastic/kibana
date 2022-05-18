@@ -70,7 +70,6 @@ export const getOAuthAccessToken = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const actionsClient = (await context.actions).getActionsClient();
-
         return res.ok({
           body: await actionsClient.getOAuthAccessToken(req.body, configurationUtilities),
         });
