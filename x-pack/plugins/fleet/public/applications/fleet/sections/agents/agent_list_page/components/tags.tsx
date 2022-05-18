@@ -9,10 +9,13 @@ import { EuiToolTip } from '@elastic/eui';
 import { take } from 'lodash';
 import React from 'react';
 
+import { truncateTag } from '../utils';
+
 interface Props {
   tags: string[];
 }
 
+// Number of tags displayed before "+ N more" is displayed
 const MAX_TAGS_TO_DISPLAY = 3;
 
 export const Tags: React.FunctionComponent<Props> = ({ tags }) => {
@@ -22,12 +25,12 @@ export const Tags: React.FunctionComponent<Props> = ({ tags }) => {
         <>
           <EuiToolTip content={<span data-test-subj="agentTagsTooltip">{tags.join(', ')}</span>}>
             <span data-test-subj="agentTags">
-              {take(tags, 3).join(', ')} + {tags.length - MAX_TAGS_TO_DISPLAY} more
+              {take(tags, 3).map(truncateTag).join(', ')} + {tags.length - MAX_TAGS_TO_DISPLAY} more
             </span>
           </EuiToolTip>
         </>
       ) : (
-        <span data-test-subj="agentTags">{tags.join(', ')}</span>
+        <span data-test-subj="agentTags">{tags.map(truncateTag).join(', ')}</span>
       )}
     </>
   );

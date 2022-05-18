@@ -56,7 +56,6 @@ export const sampleLayer: DataLayerConfig = {
   splitAccessor: 'd',
   columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
   xScaleType: 'ordinal',
-  yScaleType: 'linear',
   isHistogram: false,
   palette: mockPaletteOutput,
   table: createSampleDatatableWithRows([]),
@@ -108,6 +107,8 @@ export const createArgsWithLayers = (
     type: 'axisExtentConfig',
   },
   layers: Array.isArray(layers) ? layers : [layers],
+  yLeftScale: 'linear',
+  yRightScale: 'linear',
 });
 
 export function sampleArgs() {
