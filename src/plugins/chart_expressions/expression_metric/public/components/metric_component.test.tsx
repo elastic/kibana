@@ -72,6 +72,7 @@ describe('MetricVisComponent', function () {
       visData,
       renderComplete: jest.fn(),
       fireEvent: jest.fn(),
+      filterable: [true],
       ...propOverrides,
     };
 
@@ -88,6 +89,7 @@ describe('MetricVisComponent', function () {
 
   it('should render correct structure for multi-value metrics', function () {
     const component = getComponent({
+      filterable: [true, false],
       visData: {
         type: 'datatable',
         columns: [

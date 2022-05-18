@@ -5,31 +5,59 @@
  * 2.0.
  */
 
-import type { HeadlessChromiumDriver } from '../browsers';
+import { Logger } from '@kbn/logging';
+import { HeadlessChromiumDriver } from '../browsers';
+import { Layout } from '../layouts';
 import { Actions, EventLogger } from './event_logger';
 import type { ElementsPositionAndAttribute } from './get_element_position_data';
+import type { Screenshot } from './types';
 
-export interface Screenshot {
-  /**
-   * Screenshot PNG image data.
-   */
-  data: Buffer;
+/**
+ * Resize the viewport to contain the element to capture.
+ *
+ * @async
+ * @param {HeadlessChromiumDriver} browser - used for its methods to control the page
+ * @param {ElementsPositionAndAttribute['position']} position - position data for the element to capture
+ * @param {Layout} layout - used for client-side layout data from the job params
+ * @param {Logger} logger
+ */
+const resizeViewport = async (
+  browser: HeadlessChromiumDriver,
+  position: ElementsPositionAndAttribute['position'],
+  layout: Layout,
+  logger: Logger
+) => {
+  const { boundingClientRect, scroll } = position;
 
-  /**
-   * Screenshot title.
-   */
-  title: string | null;
+  // Using width from the layout is preferred, it avoids the elements moving around horizontally,
+  // which would invalidate the position data that was passed in.
+  const width = layout.width || boundingClientRect.left + scroll.x + boundingClientRect.width;
 
-  /**
-   * Screenshot description.
-   */
-  description: string | null;
-}
+  await browser.setViewport(
+    {
+      width,
+      height: boundingClientRect.top + scroll.y + boundingClientRect.height,
+      zoom: layout.getBrowserZoom(),
+    },
+    logger
+  );
+};
 
+/**
+ * Get screenshots of multiple areas of the page
+ *
+ * @async
+ * @param {HeadlessChromiumDriver} browser - used for its methods to control the page
+ * @param {EventLogger} eventLogger
+ * @param {ElementsPositionAndAttribute[]} elements[] - position data about all the elements to capture
+ * @param {Layout} layout - used for client-side layout data from the job params
+ * @returns {Promise<Screenshot[]>}
+ */
 export const getScreenshots = async (
   browser: HeadlessChromiumDriver,
   eventLogger: EventLogger,
-  elementsPositionAndAttributes: ElementsPositionAndAttribute[]
+  elements: ElementsPositionAndAttribute[],
+  layout: Layout
 ): Promise<Screenshot[]> => {
   const { kbnLogger } = eventLogger;
   kbnLogger.info(`taking screenshots`);
@@ -37,16 +65,20 @@ export const getScreenshots = async (
   const screenshots: Screenshot[] = [];
 
   try {
-    for (let i = 0; i < elementsPositionAndAttributes.length; i++) {
-      const item = elementsPositionAndAttributes[i];
+    for (let i = 0; i < elements.length; i++) {
+      const element = elements[i];
+      const { position, attributes } = element;
+
+      await resizeViewport(browser, position, layout, eventLogger.kbnLogger);
+
       const endScreenshot = eventLogger.logScreenshottingEvent(
         'screenshot capture',
         Actions.GET_SCREENSHOT,
         'read',
-        eventLogger.getPixelsFromElementPosition(item.position)
+        eventLogger.getPixelsFromElementPosition(position)
       );
 
-      const data = await browser.screenshot(item.position);
+      const data = await browser.screenshot(position);
 
       if (!data?.byteLength) {
         throw new Error(`Failure in getScreenshots! Screenshot data is void`);
@@ -54,8 +86,8 @@ export const getScreenshots = async (
 
       screenshots.push({
         data,
-        title: item.attributes.title,
-        description: item.attributes.description,
+        title: attributes.title,
+        description: attributes.description,
       });
 
       endScreenshot({ byte_length: data.byteLength });
