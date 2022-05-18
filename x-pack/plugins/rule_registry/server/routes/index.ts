@@ -12,6 +12,7 @@ import { updateAlertByIdRoute } from './update_alert_by_id';
 import { getAlertsIndexRoute } from './get_alert_index';
 import { bulkUpdateAlertsRoute } from './bulk_update_alerts';
 import { findAlertsByQueryRoute } from './find';
+import { getFeatureIdsByRegistrationContexts } from './get_feature_ids_by_registration_contexts';
 
 export function defineRoutes(router: IRouter<RacRequestHandlerContext>) {
   getAlertByIdRoute(router);
@@ -19,4 +20,5 @@ export function defineRoutes(router: IRouter<RacRequestHandlerContext>) {
   getAlertsIndexRoute(router);
   bulkUpdateAlertsRoute(router);
   findAlertsByQueryRoute(router);
+  getFeatureIdsByRegistrationContexts(router);
 }

@@ -9,43 +9,53 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { SecurityPageName } from '../../app/types';
 import { TestProviders } from '../../common/mock';
-import { LandingCategories, NavConfigType } from './manage';
+import { LandingCategories } from './manage';
+import { NavLinkItem } from '../../common/links/types';
 
 const RULES_ITEM_LABEL = 'elastic rules!';
 const EXCEPTIONS_ITEM_LABEL = 'exceptional!';
 
-const testConfig: NavConfigType = {
-  categories: [
-    {
-      label: 'first tests category',
-      itemIds: [SecurityPageName.rules],
-    },
-    {
-      label: 'second tests category',
-      itemIds: [SecurityPageName.exceptions],
-    },
-  ],
-  items: [
+const mockAppManageLink: NavLinkItem = {
+  id: SecurityPageName.administration,
+  path: '',
+  title: 'admin',
+  links: [
     {
       id: SecurityPageName.rules,
-      label: RULES_ITEM_LABEL,
+      title: RULES_ITEM_LABEL,
       description: '',
       icon: 'testIcon1',
+      path: '',
     },
     {
       id: SecurityPageName.exceptions,
-      label: EXCEPTIONS_ITEM_LABEL,
+      title: EXCEPTIONS_ITEM_LABEL,
       description: '',
       icon: 'testIcon2',
+      path: '',
     },
   ],
 };
+jest.mock('../../common/components/navigation/nav_links', () => ({
+  useAppRootNavLink: jest.fn(() => mockAppManageLink),
+}));
 
 describe('LandingCategories', () => {
   it('renders items', () => {
     const { queryByText } = render(
       <TestProviders>
-        <LandingCategories navConfig={testConfig} />
+        <LandingCategories
+          categories={[
+            {
+              label: 'first tests category',
+              linkIds: [SecurityPageName.rules],
+            },
+            {
+              label: 'second tests category',
+              linkIds: [SecurityPageName.exceptions],
+            },
+          ]}
+        />
       </TestProviders>
     );
 
@@ -57,15 +67,12 @@ describe('LandingCategories', () => {
     const { queryAllByTestId } = render(
       <TestProviders>
         <LandingCategories
-          navConfig={{
-            ...testConfig,
-            categories: [
-              {
-                label: '',
-                itemIds: [SecurityPageName.exceptions, SecurityPageName.rules],
-              },
-            ],
-          }}
+          categories={[
+            {
+              label: '',
+              linkIds: [SecurityPageName.exceptions, SecurityPageName.rules],
+            },
+          ]}
         />
       </TestProviders>
     );
