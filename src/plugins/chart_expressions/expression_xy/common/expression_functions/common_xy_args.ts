@@ -128,4 +128,8 @@ export const commonXYArgs: CommonXYFn['args'] = {
     types: ['string'],
     help: strings.getAriaLabelHelp(),
   },
+  minTimeBarInterval: {
+    types: ['string'],
+    help: strings.getMinTimeBarIntervalHelp(),
+  },
 };
