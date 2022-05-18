@@ -183,7 +183,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
             manualSteps: [
               i18n.translate('xpack.security.deprecations.anonAuthCredentials.manualSteps1', {
                 defaultMessage:
-                  'Change anonymous authentication provider to use username and password credentials.',
+                  'Change the anonymous authentication provider to use username and password credentials.',
               }),
             ],
           },
