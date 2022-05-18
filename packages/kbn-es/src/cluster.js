@@ -342,7 +342,7 @@ exports.Cluster = class Cluster {
     if (this._ssl) {
       esArgs.set('xpack.security.http.ssl.enabled', 'true');
       // Include default keystore settings only if ssl isn't disabled by esArgs and keystore isn't configured.
-      if (!esArgs.has('xpack.security.http.ssl.keystore')) {
+      if (!esArgs.get('xpack.security.http.ssl.keystore.path')) {
         // We are explicitly using ES_NOPASSWORD_P12_PATH instead of ES_P12_PATH + ES_P12_PASSWORD. The reasoning for this is that setting
         // the keystore password using environment variables causes Elasticsearch to emit deprecation warnings.
         esArgs.set(`xpack.security.http.ssl.keystore.path`, ES_NOPASSWORD_P12_PATH);
