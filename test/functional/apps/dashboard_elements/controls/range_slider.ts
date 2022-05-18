@@ -206,7 +206,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.rangeSliderSetUpperBound(firstId, '400');
       });
 
-      it('disables inputs when no data available', async () => {
+      it('disables range slider when no data available', async () => {
         await dashboardControls.createControl({
           controlType: RANGE_SLIDER_CONTROL,
           dataViewTitle: 'logstash-*',
@@ -214,12 +214,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           width: 'small',
         });
         const secondId = (await dashboardControls.getAllControlIds())[1];
-        expect(
-          await dashboardControls.rangeSliderGetLowerBoundAttribute(secondId, 'disabled')
-        ).to.be('true');
-        expect(
-          await dashboardControls.rangeSliderGetUpperBoundAttribute(secondId, 'disabled')
-        ).to.be('true');
         await dashboardControls.rangeSliderOpenPopover(secondId);
         await dashboardControls.rangeSliderPopoverAssertOpen();
         expect(
