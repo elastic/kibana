@@ -44,10 +44,19 @@ export function createLensVisToADJobAction(getStartServices: MlCoreSetup['getSta
         return false;
       }
 
-      const [{ getJobsItemsFromEmbeddable, isCompatibleVisualizationType }] = await Promise.all([
-        import('../application/jobs/new_job/job_from_lens'),
-        getStartServices(),
-      ]);
+      const [{ getJobsItemsFromEmbeddable, isCompatibleVisualizationType }, [coreStart]] =
+        await Promise.all([
+          import('../application/jobs/new_job/job_from_lens'),
+          getStartServices(),
+        ]);
+
+      if (
+        !coreStart.application.capabilities.ml?.canCreateJob ||
+        !coreStart.application.capabilities.ml?.canStartStopDatafeed
+      ) {
+        return false;
+      }
+
       const { vis } = getJobsItemsFromEmbeddable(context.embeddable);
       return isCompatibleVisualizationType(vis);
     },
