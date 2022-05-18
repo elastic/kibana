@@ -11,7 +11,7 @@ import { getAutocompleteInfo } from '../../../services';
 import { ListComponent } from './list_component';
 
 function FieldGenerator(context) {
-  return _.map(getAutocompleteInfo().getFactoryFor('fields', context), function (field) {
+  return _.map(getAutocompleteInfo().getEntityProvider('fields', context), function (field) {
     return { name: field.name, meta: field.type };
   });
 }

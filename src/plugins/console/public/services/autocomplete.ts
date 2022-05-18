@@ -34,7 +34,7 @@ export class AutocompleteInfo {
     this.http = http;
   }
 
-  public getFactoryFor(
+  public getEntityProvider(
     type: string,
     context: { indices: string[]; types: string[] } = { indices: [], types: [] }
   ) {
@@ -84,9 +84,9 @@ export class AutocompleteInfo {
   }
 
   private load(data: MappingsApiResponse) {
+    this.mapping.loadMappings(data.mappings);
     const collaborator = this.mapping;
     this.alias.loadAliases(data.aliases, collaborator);
-    this.mapping.loadMappings(data.mappings);
     this.indexTemplate.loadTemplates(data.indexTemplates);
     this.componentTemplate.loadTemplates(data.componentTemplates);
     this.legacyTemplate.loadTemplates(data.legacyTemplates);

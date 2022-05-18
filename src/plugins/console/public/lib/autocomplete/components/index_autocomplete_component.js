@@ -16,7 +16,7 @@ function nonValidIndexType(token) {
 
 export class IndexAutocompleteComponent extends ListComponent {
   constructor(name, parent, multiValued) {
-    super(name, getAutocompleteInfo().getFactoryFor('indices'), parent, multiValued);
+    super(name, getAutocompleteInfo().getEntityProvider('indices'), parent, multiValued);
   }
   validateTokens(tokens) {
     if (!this.multiValued && tokens.length > 1) {

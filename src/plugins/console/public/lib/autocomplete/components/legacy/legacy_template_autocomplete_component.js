@@ -11,7 +11,7 @@ import { ListComponent } from '../list_component';
 
 export class LegacyTemplateAutocompleteComponent extends ListComponent {
   constructor(name, parent) {
-    super(name, getAutocompleteInfo().getFactoryFor('legacyTemplates'), parent, true, true);
+    super(name, getAutocompleteInfo().getEntityProvider('legacyTemplates'), parent, true, true);
   }
   getContextKey() {
     return 'template';

@@ -62,8 +62,15 @@ export function registerGetRoute({ router, lib: { handleEsError } }: RouteDepend
     async (ctx, request, response) => {
       try {
         const settings = parse(request.url.search, { parseBooleans: true }) as unknown as Settings;
-        const esClient = (await ctx.core).elasticsearch.client;
 
+        // If no settings are provided return 400
+        if (Object.keys(settings).length === 0) {
+          return response.badRequest({
+            body: 'Request must contain a query param of autocomplete settings',
+          });
+        }
+
+        const esClient = (await ctx.core).elasticsearch.client;
         const mappings = await getMappings(esClient, settings);
         const aliases = await getAliases(esClient, settings);
         const dataStreams = await getDataStreams(esClient, settings);

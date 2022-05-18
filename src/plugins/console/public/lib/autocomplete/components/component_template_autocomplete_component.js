@@ -11,7 +11,7 @@ import { ListComponent } from './list_component';
 
 export class ComponentTemplateAutocompleteComponent extends ListComponent {
   constructor(name, parent) {
-    super(name, getAutocompleteInfo().getFactoryFor('componentTemplates'), parent, true, true);
+    super(name, getAutocompleteInfo().getEntityProvider('componentTemplates'), parent, true, true);
   }
 
   getContextKey() {

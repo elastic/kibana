@@ -11,7 +11,7 @@ import { getAutocompleteInfo } from '../../../services';
 
 export class DataStreamAutocompleteComponent extends ListComponent {
   constructor(name, parent, multiValued) {
-    super(name, getAutocompleteInfo().getFactoryFor('dataStreams'), parent, multiValued);
+    super(name, getAutocompleteInfo().getEntityProvider('dataStreams'), parent, multiValued);
   }
 
   getContextKey() {

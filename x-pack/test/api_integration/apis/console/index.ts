@@ -10,6 +10,5 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function consoleApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
   describe('console', () => {
     loadTestFile(require.resolve('./feature_controls'));
-    loadTestFile(require.resolve('./autocomplete_entities'));
   });
 }
