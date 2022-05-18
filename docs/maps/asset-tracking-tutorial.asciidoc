@@ -169,7 +169,7 @@ PUT _index_template/tri_met_tracks
               "type": "integer"
             },
             "extraBlockID": {
-              "type": "integer"
+              "type": "keyword"
             },
             "messageCode": {
               "type": "integer"
