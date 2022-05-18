@@ -9,12 +9,12 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
     class="euiPageContentBody"
   >
     <h1
-      class="euiTitle euiTitle--medium"
+      class="euiTitle css-1w464ad-euiTitle-m"
     >
       Upload your license
     </h1>
     <div
-      class="euiSpacer euiSpacer--l css-jz428s-euiSpacer-l"
+      class="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
     />
     <div
       class="euiText euiText--medium"
@@ -29,7 +29,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
       </p>
     </div>
     <div
-      class="euiSpacer euiSpacer--l css-jz428s-euiSpacer-l"
+      class="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
     />
     <div
       class="euiForm"
@@ -64,10 +64,10 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
         </div>
       </div>
       <div
-        class="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
+        class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
       />
       <div
-        class="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
+        class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
       />
       <div
         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -126,12 +126,12 @@ exports[`UploadLicense should display an error when ES says license is expired 1
     class="euiPageContentBody"
   >
     <h1
-      class="euiTitle euiTitle--medium"
+      class="euiTitle css-1w464ad-euiTitle-m"
     >
       Upload your license
     </h1>
     <div
-      class="euiSpacer euiSpacer--l css-jz428s-euiSpacer-l"
+      class="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
     />
     <div
       class="euiText euiText--medium"
@@ -146,28 +146,24 @@ exports[`UploadLicense should display an error when ES says license is expired 1
       </p>
     </div>
     <div
-      class="euiSpacer euiSpacer--l css-jz428s-euiSpacer-l"
+      class="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
     />
     <div
       class="euiForm"
     >
       <div
         aria-live="assertive"
-        class="euiCallOut euiCallOut--danger euiForm__errors"
+        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--danger euiPanel--noShadow euiPanel--noBorder euiCallOut euiCallOut--danger euiForm__errors css-1flvw80-euiCallOut"
         role="alert"
         tabindex="-1"
       >
-        <div
-          class="euiCallOutHeader"
+        <p
+          class="euiTitle euiCallOutHeader__title css-st4zhi-euiTitle-xs-euiCallOutHeader-danger"
         >
-          <span
-            class="euiCallOutHeader__title"
-          >
-            Please address the highlighted errors.
-          </span>
-        </div>
+          Please address the highlighted errors.
+        </p>
         <div
-          class="euiText euiText--small"
+          class="euiText euiText--small css-i7i3v9-euiCallOut__description"
         >
           <div
             class="euiTextColor euiTextColor--default"
@@ -212,10 +208,10 @@ exports[`UploadLicense should display an error when ES says license is expired 1
         </div>
       </div>
       <div
-        class="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
+        class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
       />
       <div
-        class="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
+        class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
       />
       <div
         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -274,12 +270,12 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
     class="euiPageContentBody"
   >
     <h1
-      class="euiTitle euiTitle--medium"
+      class="euiTitle css-1w464ad-euiTitle-m"
     >
       Upload your license
     </h1>
     <div
-      class="euiSpacer euiSpacer--l css-jz428s-euiSpacer-l"
+      class="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
     />
     <div
       class="euiText euiText--medium"
@@ -294,28 +290,24 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
       </p>
     </div>
     <div
-      class="euiSpacer euiSpacer--l css-jz428s-euiSpacer-l"
+      class="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
     />
     <div
       class="euiForm"
     >
       <div
         aria-live="assertive"
-        class="euiCallOut euiCallOut--danger euiForm__errors"
+        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--danger euiPanel--noShadow euiPanel--noBorder euiCallOut euiCallOut--danger euiForm__errors css-1flvw80-euiCallOut"
         role="alert"
         tabindex="-1"
       >
-        <div
-          class="euiCallOutHeader"
+        <p
+          class="euiTitle euiCallOutHeader__title css-st4zhi-euiTitle-xs-euiCallOutHeader-danger"
         >
-          <span
-            class="euiCallOutHeader__title"
-          >
-            Please address the highlighted errors.
-          </span>
-        </div>
+          Please address the highlighted errors.
+        </p>
         <div
-          class="euiText euiText--small"
+          class="euiText euiText--small css-i7i3v9-euiCallOut__description"
         >
           <div
             class="euiTextColor euiTextColor--default"
@@ -360,10 +352,10 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
         </div>
       </div>
       <div
-        class="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
+        class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
       />
       <div
-        class="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
+        class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
       />
       <div
         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -422,12 +414,12 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
     class="euiPageContentBody"
   >
     <h1
-      class="euiTitle euiTitle--medium"
+      class="euiTitle css-1w464ad-euiTitle-m"
     >
       Upload your license
     </h1>
     <div
-      class="euiSpacer euiSpacer--l css-jz428s-euiSpacer-l"
+      class="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
     />
     <div
       class="euiText euiText--medium"
@@ -442,28 +434,24 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
       </p>
     </div>
     <div
-      class="euiSpacer euiSpacer--l css-jz428s-euiSpacer-l"
+      class="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
     />
     <div
       class="euiForm"
     >
       <div
         aria-live="assertive"
-        class="euiCallOut euiCallOut--danger euiForm__errors"
+        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--danger euiPanel--noShadow euiPanel--noBorder euiCallOut euiCallOut--danger euiForm__errors css-1flvw80-euiCallOut"
         role="alert"
         tabindex="-1"
       >
-        <div
-          class="euiCallOutHeader"
+        <p
+          class="euiTitle euiCallOutHeader__title css-st4zhi-euiTitle-xs-euiCallOutHeader-danger"
         >
-          <span
-            class="euiCallOutHeader__title"
-          >
-            Please address the highlighted errors.
-          </span>
-        </div>
+          Please address the highlighted errors.
+        </p>
         <div
-          class="euiText euiText--small"
+          class="euiText euiText--small css-i7i3v9-euiCallOut__description"
         >
           <div
             class="euiTextColor euiTextColor--default"
@@ -508,10 +496,10 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
         </div>
       </div>
       <div
-        class="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
+        class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
       />
       <div
-        class="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
+        class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
       />
       <div
         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -570,12 +558,12 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
     class="euiPageContentBody"
   >
     <h1
-      class="euiTitle euiTitle--medium"
+      class="euiTitle css-1w464ad-euiTitle-m"
     >
       Upload your license
     </h1>
     <div
-      class="euiSpacer euiSpacer--l css-jz428s-euiSpacer-l"
+      class="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
     />
     <div
       class="euiText euiText--medium"
@@ -590,28 +578,24 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
       </p>
     </div>
     <div
-      class="euiSpacer euiSpacer--l css-jz428s-euiSpacer-l"
+      class="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
     />
     <div
       class="euiForm"
     >
       <div
         aria-live="assertive"
-        class="euiCallOut euiCallOut--danger euiForm__errors"
+        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--danger euiPanel--noShadow euiPanel--noBorder euiCallOut euiCallOut--danger euiForm__errors css-1flvw80-euiCallOut"
         role="alert"
         tabindex="-1"
       >
-        <div
-          class="euiCallOutHeader"
+        <p
+          class="euiTitle euiCallOutHeader__title css-st4zhi-euiTitle-xs-euiCallOutHeader-danger"
         >
-          <span
-            class="euiCallOutHeader__title"
-          >
-            Please address the highlighted errors.
-          </span>
-        </div>
+          Please address the highlighted errors.
+        </p>
         <div
-          class="euiText euiText--small"
+          class="euiText euiText--small css-i7i3v9-euiCallOut__description"
         >
           <div
             class="euiTextColor euiTextColor--default"
@@ -656,10 +640,10 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
         </div>
       </div>
       <div
-        class="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
+        class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
       />
       <div
-        class="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
+        class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
       />
       <div
         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"

@@ -3,7 +3,7 @@
 exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collection.enabled setting 1`] = `
 Array [
   <h2
-    class="euiTitle euiTitle--large"
+    class="euiTitle css-1bexacr-euiTitle-l"
   >
     Monitoring is currently off
   </h2>,
@@ -19,7 +19,7 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-ilegow-euiHorizontalRule-half-l"
+    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-16ybxy8-euiHorizontalRule-half-l"
   />,
   <div
     class="euiText euiText--medium"
@@ -40,7 +40,7 @@ Array [
     </p>
   </div>,
   <div
-    class="euiSpacer euiSpacer--l css-jz428s-euiSpacer-l"
+    class="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
   />,
   <div
     class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
