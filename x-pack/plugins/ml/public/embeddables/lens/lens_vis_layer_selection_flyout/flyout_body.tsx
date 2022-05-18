@@ -31,6 +31,7 @@ import {
 } from '../../../application/jobs/new_job/job_from_lens';
 import type { LayerResult } from '../../../application/jobs/new_job/job_from_lens';
 import { CREATED_BY_LABEL } from '../../../../common/constants/new_job';
+import { extractErrorMessage } from '../../../../common/util/errors';
 
 interface Props {
   embeddable: Embeddable;
@@ -125,10 +126,14 @@ export const FlyoutBody: FC<Props> = ({ onClose, embeddable, data, share, lens }
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiText color="subdued" size="s">
-                        <FormattedMessage
-                          id="xpack.ml.embeddables.lensLayerFlyout.defaultLayerError"
-                          defaultMessage="This layer cannot be used to create an anomaly detection job"
-                        />
+                        {layer.error ? (
+                          extractErrorMessage(layer.error)
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.ml.embeddables.lensLayerFlyout.defaultLayerError"
+                            defaultMessage="This layer cannot be used to create an anomaly detection job"
+                          />
+                        )}
                       </EuiText>
                     </EuiFlexItem>
                   </EuiFlexGroup>
