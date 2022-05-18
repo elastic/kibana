@@ -61,7 +61,6 @@ export class File<M = unknown> implements IFile {
     return this;
   }
 
-  // TODO: Use security audit logger to log file content upload
   async uploadContent(content: Readable): Promise<void> {
     if (!this.canUpload()) {
       this.logger.error('File content already uploaded.');
@@ -92,7 +91,6 @@ export class File<M = unknown> implements IFile {
     return this.blobStorageService.download(id, size);
   }
 
-  // TODO: Use security audit logger to log file deletion
   async delete(): Promise<void> {
     const { attributes, id } = this.fileSO;
     if (attributes.content_ref) {

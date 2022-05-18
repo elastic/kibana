@@ -110,7 +110,10 @@ describe('FileService', () => {
 
   it('deletes files', async () => {
     const file = await fileService.createFile({ fileKind, name: 'test' });
+    const files = await fileService.list({ fileKind });
+    expect(files.length).toBe(1);
     await file.delete();
+    expect(await fileService.list({ fileKind })).toEqual([]);
   });
 
   it('updates files', async () => {
