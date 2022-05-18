@@ -129,7 +129,7 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
-                data-test-subj="closeIndexSelectPopover"
+                data-test-subj="closePopover"
                 iconType="cross"
                 color="danger"
                 aria-label={i18n.translate(

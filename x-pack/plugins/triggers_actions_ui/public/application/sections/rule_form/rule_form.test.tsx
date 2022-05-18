@@ -350,6 +350,7 @@ describe('rule_form', () => {
     it('renders rule name', async () => {
       await setup();
       const ruleNameField = wrapper.find('[data-test-subj="ruleNameInput"]');
+
       expect(ruleNameField.exists()).toBeTruthy();
       expect(ruleNameField.first().prop('value')).toBe('test');
     });
@@ -608,6 +609,7 @@ describe('rule_form', () => {
     it('renders rule name', async () => {
       await setup();
       const ruleNameField = wrapper.find('[data-test-subj="ruleNameInput"]');
+
       expect(ruleNameField.exists()).toBeTruthy();
       expect(ruleNameField.first().prop('value')).toBe('test');
     });
