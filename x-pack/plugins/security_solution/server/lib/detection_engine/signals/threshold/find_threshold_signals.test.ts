@@ -35,6 +35,7 @@ describe('findThresholdSignals', () => {
     await findThresholdSignals({
       from: 'now-6m',
       to: 'now',
+      maxSignals: 100,
       inputIndexPattern: ['*'],
       services: mockService,
       logger: mockLogger,
@@ -79,6 +80,7 @@ describe('findThresholdSignals', () => {
     await findThresholdSignals({
       from: 'now-6m',
       to: 'now',
+      maxSignals: 100,
       inputIndexPattern: ['*'],
       services: mockService,
       logger: mockLogger,
@@ -121,6 +123,7 @@ describe('findThresholdSignals', () => {
     await findThresholdSignals({
       from: 'now-6m',
       to: 'now',
+      maxSignals: 100,
       inputIndexPattern: ['*'],
       services: mockService,
       logger: mockLogger,
@@ -173,6 +176,7 @@ describe('findThresholdSignals', () => {
     await findThresholdSignals({
       from: 'now-6m',
       to: 'now',
+      maxSignals: 100,
       inputIndexPattern: ['*'],
       services: mockService,
       logger: mockLogger,
@@ -244,6 +248,7 @@ describe('findThresholdSignals', () => {
     await findThresholdSignals({
       from: 'now-6m',
       to: 'now',
+      maxSignals: 100,
       inputIndexPattern: ['*'],
       services: mockService,
       logger: mockLogger,
