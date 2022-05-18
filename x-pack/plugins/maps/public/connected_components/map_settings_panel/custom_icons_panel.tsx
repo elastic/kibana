@@ -20,8 +20,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DEFAULT_CUSTOM_ICON_CUTOFF, DEFAULT_CUSTOM_ICON_RADIUS } from '../../../common/constants';
 import { getIsDarkMode } from '../../kibana_services';
-// @ts-expect-error
-import { getCustomIconId } from '../../classes/styles/vector/symbol_utils';
 import { SymbolIcon } from '../../classes/styles/vector/components/legend/symbol_icon';
 import { CustomIconModal } from '../../classes/styles/vector/components/symbol/custom_icon_modal';
 import { CustomIcon } from '../../../common/descriptor_types';

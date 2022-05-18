@@ -7,12 +7,14 @@
 
 import { useMemo } from 'react';
 import { useFetcher } from '../../../hooks/use_fetcher';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { getWaterfall } from './waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 
-const INITIAL_DATA = {
+const INITIAL_DATA: APIReturnType<'GET /internal/apm/traces/{traceId}'> = {
   errorDocs: [],
   traceDocs: [],
   exceedsMax: false,
+  linkedChildrenOfSpanCountBySpanId: {},
 };
 
 export function useWaterfallFetcher({
