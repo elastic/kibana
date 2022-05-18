@@ -99,6 +99,7 @@ export const normalizePushedMonitor = ({
     [ConfigKey.NAMESPACE]: namespace || defaultFields[ConfigKey.NAMESPACE],
     [ConfigKey.ORIGINAL_SPACE]: namespace || defaultFields[ConfigKey.ORIGINAL_SPACE],
     [ConfigKey.CUSTOM_HEARTBEAT_ID]: `${monitor.id}-${projectId}-${namespace}`,
+    [ConfigKey.TIMEOUT]: null,
   };
   return {
     ...DEFAULT_FIELDS[DataStream.BROWSER],
