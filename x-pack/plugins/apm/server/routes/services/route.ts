@@ -52,7 +52,7 @@ import { ConnectionStatsItemWithImpact } from '../../../common/connections';
 import { getSortedAndFilteredServices } from './get_services/get_sorted_and_filtered_services';
 import { ServiceHealthStatus } from '../../../common/service_health_status';
 import { getServiceGroup } from '../service_groups/get_service_group';
-import { offsetRt } from '../../../common/offset_rt';
+import { offsetRt } from '../../../common/comparison_rt';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',

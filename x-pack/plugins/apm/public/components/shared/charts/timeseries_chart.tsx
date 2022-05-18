@@ -26,6 +26,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useChartTheme } from '@kbn/observability-plugin/public';
+import { ML_EXPECTED_BOUNDS } from '../../../../common/comparison_rt';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ServiceAnomalyTimeseries } from '../../../../common/anomaly_detection/service_anomaly_timeseries';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
@@ -82,7 +83,7 @@ export function TimeseriesChart({
   const theme = useTheme();
   const chartTheme = useChartTheme();
   const {
-    query: { mlExpectedBounds },
+    query: { comparisonEnabled },
   } = useAnyOfApmParams('/services', '/backends/*', '/services/{serviceName}');
 
   const xValues = timeseries.flatMap(({ data }) => data.map(({ x }) => x));
@@ -97,14 +98,14 @@ export function TimeseriesChart({
     theme,
     comparisonColor,
   });
-  // console.log('anomalyTimeseries', id, anomalyTimeseries);
 
   const xFormatter = niceTimeFormatter([min, max]);
   const isEmpty = isTimeseriesEmpty(timeseries);
   const annotationColor = theme.eui.euiColorSuccess;
   const allSeries = [
     ...timeseries,
-    ...(mlExpectedBounds === true && anomalyChartTimeseries?.boundaries
+    ...(comparisonEnabled === ML_EXPECTED_BOUNDS &&
+    anomalyChartTimeseries?.boundaries
       ? anomalyChartTimeseries?.boundaries
       : []),
     ...(anomalyChartTimeseries?.scores ?? []),

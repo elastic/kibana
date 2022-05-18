@@ -28,7 +28,10 @@ import { ServiceDependencies } from '../../app/service_dependencies';
 import { ServiceLogs } from '../../app/service_logs';
 import { InfraOverview } from '../../app/infra_overview';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import { offsetRt } from '../../../../common/offset_rt';
+import {
+  comparisonEnabledRt,
+  offsetRt,
+} from '../../../../common/comparison_rt';
 
 function page({
   title,
@@ -78,7 +81,7 @@ export const serviceDetail = {
             rangeTo: t.string,
             kuery: t.string,
             serviceGroup: t.string,
-            comparisonEnabled: toBooleanRt,
+            comparisonEnabled: comparisonEnabledRt,
           }),
           t.partial({
             latencyAggregationType: t.string,
@@ -147,7 +150,7 @@ export const serviceDetail = {
               query: t.intersection([
                 t.type({
                   transactionName: t.string,
-                  comparisonEnabled: toBooleanRt,
+                  comparisonEnabled: comparisonEnabledRt,
                 }),
                 t.partial({
                   traceId: t.string,
