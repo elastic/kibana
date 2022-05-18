@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { mountWithIntl, findTestSubject } from '@kbn/test-jest-helpers';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   CALLOUT_STATE_KEY,
@@ -15,11 +15,12 @@ import {
 } from './document_explorer_update_callout';
 import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
 import { DiscoverServices } from '../../../../build_services';
+import { discoverServiceMock } from '../../../../__mocks__/services';
+import { DiscoverTourProvider } from '../../../../components/discover_tour';
 
 const defaultServices = {
-  addBasePath: () => '',
-  docLinks: { links: { discover: { documentExplorer: '' } } },
-  capabilities: { advancedSettings: { save: true } },
+  ...discoverServiceMock,
+  capabilities: { ...discoverServiceMock.capabilities, advancedSettings: { save: true } },
   storage: new LocalStorageMock({ [CALLOUT_STATE_KEY]: false }),
 } as unknown as DiscoverServices;
 
@@ -56,5 +57,19 @@ describe('Document Explorer Update callout', () => {
     const result = mount(services);
 
     expect(result.find('.dscDocumentExplorerCallout').exists()).toBeFalsy();
+  });
+
+  it('should start a tour when the button is clicked', () => {
+    const result = mountWithIntl(
+      <KibanaContextProvider services={defaultServices}>
+        <DiscoverTourProvider>
+          <DocumentExplorerUpdateCallout />
+        </DiscoverTourProvider>
+      </KibanaContextProvider>
+    );
+
+    expect(result.find({ isStepOpen: true })).toHaveLength(0);
+    findTestSubject(result, 'discoverTakeTourButton').simulate('click');
+    expect(result.find({ isStepOpen: true })).toHaveLength(1);
   });
 });

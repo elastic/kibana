@@ -35,12 +35,6 @@ export interface ElementPosition {
   };
 }
 
-export interface Viewport {
-  zoom: number;
-  width: number;
-  height: number;
-}
-
 interface OpenOptions {
   context?: Context;
   headers: Headers;
@@ -203,7 +197,7 @@ export class HeadlessChromiumDriver {
   }
 
   /*
-   * Call Page.screenshot and return a base64-encoded string of the image
+   * Receive a PNG buffer of the page screenshot from Chromium
    */
   async screenshot(elementPosition: ElementPosition): Promise<Buffer | undefined> {
     const { boundingClientRect, scroll } = elementPosition;
@@ -214,6 +208,7 @@ export class HeadlessChromiumDriver {
         height: boundingClientRect.height,
         width: boundingClientRect.width,
       },
+      captureBeyondViewport: false, // workaround for an internal resize. See: https://github.com/puppeteer/puppeteer/issues/7043
     });
 
     if (Buffer.isBuffer(screenshot)) {
@@ -263,14 +258,18 @@ export class HeadlessChromiumDriver {
     await this.page.waitForFunction(fn, { timeout, polling: WAIT_FOR_DELAY_MS }, ...args);
   }
 
+  /**
+   * Setting the viewport is required to ensure that all capture elements are visible: anything not in the
+   * viewport can not be captured.
+   */
   async setViewport(
-    { width: _width, height: _height, zoom }: Viewport,
+    { width: _width, height: _height, zoom }: { zoom: number; width: number; height: number },
     logger: Logger
   ): Promise<void> {
     const width = Math.floor(_width);
     const height = Math.floor(_height);
 
-    logger.debug(`Setting viewport to: width=${width} height=${height} zoom=${zoom}`);
+    logger.debug(`Setting viewport to: width=${width} height=${height} scaleFactor=${zoom}`);
 
     await this.page.setViewport({
       width,
