@@ -539,6 +539,7 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
     avatarType: data.avatar?.imageUrl ? 'image' : 'initials',
   });
 
+  const [validateOnBlurOrChange, setValidateOnBlurOrChange] = useState(false);
   const formik = useFormik<UserProfileFormValues>({
     onSubmit: async (values) => {
       try {
@@ -578,9 +579,18 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
     },
     initialValues,
     enableReinitialize: true,
-    validateOnBlur: false,
-    validateOnChange: true,
+    validateOnBlur: validateOnBlurOrChange,
+    validateOnChange: validateOnBlurOrChange,
   });
+
+  // We perform _the first_ validation only when the user submits the form to make UX less annoying. But after the user
+  // submits the form, the validation model changes to on blur/change (as the user's mindset has changed from completing
+  // the form to correcting the form).
+  if (formik.submitCount > 0 && !validateOnBlurOrChange) {
+    setValidateOnBlurOrChange(true);
+  } else if (formik.submitCount === 0 && validateOnBlurOrChange) {
+    setValidateOnBlurOrChange(false);
+  }
 
   const customAvatarInitials = useRef(
     !!data.avatar?.initials && data.avatar?.initials !== getUserAvatarInitials(user)
