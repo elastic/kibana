@@ -8,7 +8,7 @@
 
 import dateMath from '@kbn/datemath';
 import classNames from 'classnames';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
 import type { Filter } from '@kbn/es-query';
@@ -126,6 +126,20 @@ const SharingMetaFields = React.memo(function SharingMetaFields({
 export const QueryBarTopRow = React.memo(
   function QueryBarTopRow(props: QueryBarTopRowProps) {
     const isMobile = useIsWithinBreakpoints(['xs', 's']);
+    const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
+
+    useEffect(() => {
+      function handleResize() {
+        setIsXXLarge(window.innerWidth >= 1440);
+      }
+
+      window.removeEventListener('resize', handleResize);
+      window.addEventListener('resize', handleResize);
+      handleResize();
+
+      return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     const {
       showQueryInput = true,
       showDatePicker = true,
@@ -367,7 +381,7 @@ export const QueryBarTopRow = React.memo(
         <EuiFlexItem grow={false}>
           <EuiSuperUpdateButton
             iconType={props.isDirty ? 'kqlFunction' : 'refresh'}
-            iconOnly
+            iconOnly={!isXXLarge}
             aria-label={props.isLoading ? buttonLabelUpdate : buttonLabelRefresh}
             isDisabled={isDateRangeInvalid}
             isLoading={props.isLoading}
