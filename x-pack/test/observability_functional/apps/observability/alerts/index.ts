@@ -29,16 +29,11 @@ export default ({ getService }: FtrProviderContext) => {
     const security = getService('security');
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
       const setup = async () => {
         await observability.alerts.common.setKibanaTimeZoneToUTC();
         await observability.alerts.common.navigateToTimeWithData();
       };
       await setup();
-    });
-
-    after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
     });
 
     describe('With no data', () => {
@@ -49,12 +44,14 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Alerts table', () => {
       before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await observability.alerts.common.navigateToTimeWithData();
       });
 
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
       });
 
       it('Renders the table', async () => {
