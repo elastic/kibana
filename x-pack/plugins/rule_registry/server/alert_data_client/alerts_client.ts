@@ -681,4 +681,39 @@ export class AlertsClient {
       throw Boom.failedDependency(errMessage);
     }
   }
+
+  public async getFeatureIdsByRegistrationContexts(
+    RegistrationContexts: string[]
+  ): Promise<string[]> {
+    try {
+      const featureIds =
+        this.ruleDataService.findFeatureIdsByRegistrationContexts(RegistrationContexts);
+      if (featureIds.length > 0) {
+        // ATTENTION FUTURE DEVELOPER when you are a super user the augmentedRuleTypes.authorizedRuleTypes will
+        // return all of the features that you can access and does not care about your featureIds
+        const augmentedRuleTypes = await this.authorization.getAugmentedRuleTypesWithAuthorization(
+          featureIds,
+          [ReadOperations.Find, ReadOperations.Get, WriteOperations.Update],
+          AlertingAuthorizationEntity.Alert
+        );
+        // As long as the user can read a minimum of one type of rule type produced by the provided feature,
+        // the user should be provided that features' alerts index.
+        // Limiting which alerts that user can read on that index will be done via the findAuthorizationFilter
+        const authorizedFeatures = new Set<string>();
+        for (const ruleType of augmentedRuleTypes.authorizedRuleTypes) {
+          authorizedFeatures.add(ruleType.producer);
+        }
+        const validAuthorizedFeatures = Array.from(authorizedFeatures).filter(
+          (feature): feature is ValidFeatureId =>
+            featureIds.includes(feature) && isValidFeatureId(feature)
+        );
+        return validAuthorizedFeatures;
+      }
+      return featureIds;
+    } catch (exc) {
+      const errMessage = `getFeatureIdsByRegistrationContexts failed to get feature ids: ${exc}`;
+      this.logger.error(errMessage);
+      throw Boom.failedDependency(errMessage);
+    }
+  }
 }
