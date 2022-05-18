@@ -17,11 +17,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
-  EuiTitle,
   EuiSpacer,
-  EuiPanel,
   EuiIcon,
   EuiText,
+  EuiSplitPanel,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 
 import {
@@ -62,28 +62,23 @@ export const FlyoutBody: FC<Props> = ({ onClose, embeddable, data, share, lens }
     <>
       {layerResult.map((layer, i) => (
         <>
-          <EuiPanel paddingSize="none">
-            <header className="mlLnsLayerPanel__layerHeader">
-              <EuiFlexGroup
-                gutterSize="s"
-                alignItems="center"
-                responsive={false}
-                className={'lnsLayerPanel__settingsStaticHeader'}
-              >
+          <EuiSplitPanel.Outer grow>
+            <EuiSplitPanel.Inner>
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 {layer.icon && (
                   <EuiFlexItem grow={false}>
                     <EuiIcon type={layer.icon} />
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem grow>
-                  <EuiTitle size="xxs">
-                    <h5 className={layer.isCompatible ? '' : 'mlSubdued'}>{layer.label}</h5>
-                  </EuiTitle>
+                  <EuiText color={layer.isCompatible ? '' : 'subdued'}>
+                    <h5>{layer.label}</h5>
+                  </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </header>
-
-            <div className="mlLnsLayerPanel__row">
+            </EuiSplitPanel.Inner>
+            <EuiHorizontalRule margin="none" />
+            <EuiSplitPanel.Inner grow={false} color="subdued">
               {layer.isCompatible ? (
                 <>
                   <EuiFlexGroup gutterSize="s">
@@ -139,8 +134,8 @@ export const FlyoutBody: FC<Props> = ({ onClose, embeddable, data, share, lens }
                   </EuiFlexGroup>
                 </>
               )}
-            </div>
-          </EuiPanel>
+            </EuiSplitPanel.Inner>
+          </EuiSplitPanel.Outer>
           <EuiSpacer />
         </>
       ))}
