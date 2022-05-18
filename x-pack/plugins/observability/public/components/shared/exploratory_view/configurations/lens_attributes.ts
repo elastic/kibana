@@ -43,9 +43,7 @@ import {
   PERCENTILE_RANKS,
   ReportTypes,
 } from './constants';
-import { ColumnFilter, SeriesConfig, UrlFilter, URLReportDefinition } from '../types';
 import { ColumnFilter, ParamFilter, SeriesConfig, UrlFilter, URLReportDefinition } from '../types';
-import { PersistableFilter } from '../../../../../../lens/common';
 import { parseRelativeDate } from '../components/date_range_picker';
 import { getDistributionInPercentageColumn } from './lens_columns/overall_column';
 
@@ -857,28 +855,13 @@ export class LensAttributes {
     ];
   }
   getJSON(lastRefresh?: number): TypedLensByValueInput['attributes'] {
-    const uniqueIndexPatternsIds = Array.from(
-      new Set([...this.layerConfigs.map(({ indexPattern }) => indexPattern.id)])
-    );
-
     const query = this.globalFilter || this.layerConfigs[0].seriesConfig.query;
 
     return {
       title: 'Prefilled from exploratory view app',
       description: lastRefresh ? `Last refreshed at ${new Date(lastRefresh).toISOString()}` : '',
       visualizationType: 'lnsXY',
-      references: [
-        ...uniqueIndexPatternsIds.map((patternId) => ({
-          id: patternId!,
-          name: 'indexpattern-datasource-current-indexpattern',
-          type: 'index-pattern',
-        })),
-        ...this.layerConfigs.map(({ indexPattern }, index) => ({
-          id: indexPattern.id!,
-          name: getLayerReferenceName(`layer${index}`),
-          type: 'index-pattern',
-        })),
-      ],
+      references: this.getReferences(),
       state: {
         datasourceStates: {
           indexpattern: {
