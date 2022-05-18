@@ -68,11 +68,11 @@ export async function SecuritySolutionCypressCliTestRunnerCI(
   });
 }
 
-export async function SecuritySolutionCypressCliResponseOpsTestRunner({ getService }) {
+export async function SecuritySolutionCypressCliResponseOpsTestRunner(context: FtrProviderContext) {
   return SecuritySolutionConfigurableCypressCliTestRunner(context, 'cypress:run:respops');
 }
 
-export async function SecuritySolutionCypressCliCasesTestRunner({ getService }) {
+export async function SecuritySolutionCypressCliCasesTestRunner(context: FtrProviderContext) {
   return SecuritySolutionConfigurableCypressCliTestRunner(context, 'cypress:run:cases');
 }
 
