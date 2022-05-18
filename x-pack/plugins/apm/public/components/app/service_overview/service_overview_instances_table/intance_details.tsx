@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import {
@@ -28,7 +28,7 @@ import {
   POD_UID,
   NAMESPACE,
   REPLICASET,
-  DEPLOYMENT_NAME,
+  DEPLOYMENT,
   K8s_LABELS,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
@@ -50,7 +50,13 @@ interface Props {
 }
 
 function toKeyValuePairs(keys: string[], data: ServiceInstanceDetails) {
-  return keys.map((key) => ({ key, value: get(data, key) }));
+  return keys.map((key) => {
+    let value = get(data, key);
+    if (Array.isArray(value) && !isEmpty(value)) {
+      value = value.join(' AND ');
+    }
+    return { key, value };
+  });
 }
 
 const serviceDetailsKeys = [
@@ -68,7 +74,7 @@ const containerDetailsKeys = [
   POD_UID,
   NAMESPACE,
   REPLICASET,
-  DEPLOYMENT_NAME,
+  DEPLOYMENT,
   K8s_LABELS,
 ];
 const cloudDetailsKeys = [

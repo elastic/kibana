@@ -12,8 +12,8 @@ export interface Kubernetes {
     image: string;
   };
   pod?: { uid: string; [key: string]: unknown };
-  namespace?: { name: string[] };
-  replicaset?: { name: string };
-  deployment?: { name: string };
+  namespace?: string[];
+  replicaset?: string[];
+  deployment?: string[];
   labels?: string[];
 }

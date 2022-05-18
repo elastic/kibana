@@ -128,9 +128,12 @@ export const CONTAINER_IMAGE = 'container.image.name';
 export const CONTAINER_ID = 'container.id';
 export const POD_NAME = 'kubernetes.pod.name';
 export const POD_UID = 'kubernetes.pod.uid';
-export const NAMESPACE = 'kubernetes.namespace.name';
-export const REPLICASET = 'kubernetes.replicaset.name';
+export const NAMESPACE_NAME = 'kubernetes.namespace.name';
+export const NAMESPACE = 'kubernetes.namespace';
+export const REPLICASET_NAME = 'kubernetes.replicaset.name';
+export const REPLICASET = 'kubernetes.replicaset';
 export const DEPLOYMENT_NAME = 'kubernetes.deployment.name';
+export const DEPLOYMENT = 'kubernetes.deployment';
 export const K8s_LABELS = 'kubernetes.labels';
 
 export const CLIENT_GEO_COUNTRY_ISO_CODE = 'client.geo.country_iso_code';

@@ -261,7 +261,9 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
       end,
     });
 
-    if (serviceMetadataDetails?.container?.id) {
+    console.log('container', serviceMetadataDetails.container);
+
+    if (serviceMetadataDetails?.container?.ids) {
       const esClient = (await context.core).elasticsearch.client.asCurrentUser;
       const savedObjectsClient = (await context.core).savedObjects.client;
 
@@ -273,7 +275,7 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
       const containerMetadata = await getServiceKubernetesMetadata({
         esClient,
         index,
-        containerId: serviceMetadataDetails?.container?.id,
+        containerIds: serviceMetadataDetails.container.ids,
         start,
         end,
       });
@@ -391,7 +393,7 @@ const serviceNodeMetadataRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (
     resources
-  ): Promise<{ host: string | number; containerId: string | number }> => {
+  ): Promise<{ host: string | number; containerIds: string | number }> => {
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { serviceName, serviceNodeName } = params.path;
@@ -901,7 +903,7 @@ export const serviceInstancesMetadataDetails = createApmServerRoute({
       const containerMetadata = await getServiceKubernetesMetadata({
         esClient,
         index,
-        containerId: serviceInstanceMetadataDetails?.container?.id,
+        containerIds: [serviceInstanceMetadataDetails?.container?.id],
         start,
         end,
       });

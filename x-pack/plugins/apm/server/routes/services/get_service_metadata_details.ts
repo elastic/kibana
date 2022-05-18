@@ -15,6 +15,7 @@ import {
   CLOUD_MACHINE_TYPE,
   CLOUD_SERVICE_NAME,
   CONTAINER,
+  CONTAINER_ID,
   HOST,
   KUBERNETES,
   SERVICE,
@@ -51,7 +52,7 @@ export interface ServiceMetadataDetails {
   };
   container?: {
     os?: string;
-    id?: string;
+    ids?: string[];
     image?: { name: string };
     totalNumberInstances?: number;
     type?: ContainerType;
@@ -110,6 +111,12 @@ export async function getServiceMetadataDetails({
             field: SERVICE_VERSION,
             size: 10,
             order: { _key: 'desc' as const },
+          },
+        },
+        containerIds: {
+          terms: {
+            field: CONTAINER_ID,
+            size: 10,
           },
         },
         availabilityZones: {
@@ -186,7 +193,9 @@ export async function getServiceMetadataDetails({
       ? {
           os: host?.os?.platform,
           type: (!!kubernetes ? 'Kubernetes' : 'Docker') as ContainerType,
-          id: container?.id,
+          ids: response.aggregations?.containerIds.buckets.map(
+            (bucket) => bucket.key as string
+          ),
           totalNumberInstances,
         }
       : undefined;

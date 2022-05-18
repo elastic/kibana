@@ -17,7 +17,7 @@ import {
   K8s_CONTAINER_NAME,
   POD_NAME,
   POD_UID,
-  REPLICASET,
+  REPLICASET_NAME,
   DEPLOYMENT_NAME,
   NAMESPACE,
   K8s_LABELS,
@@ -32,13 +32,13 @@ type ESResponse = SearchResponse;
 export const getServiceKubernetesMetadata = async ({
   esClient,
   index,
-  containerId,
+  containerIds,
   start,
   end,
 }: {
   esClient: ElasticsearchClient;
   index?: string;
-  containerId: string;
+  containerIds: string[];
   start: number;
   end: number;
 }): Promise<KubernetesMetadataDetails> => {
@@ -50,7 +50,7 @@ export const getServiceKubernetesMetadata = async ({
     { exists: { field: NAMESPACE } },
     { exists: { field: POD_NAME } },
     { exists: { field: POD_UID } },
-    { exists: { field: REPLICASET } },
+    { exists: { field: REPLICASET_NAME } },
     { exists: { field: DEPLOYMENT_NAME } },
     { exists: { field: K8s_LABELS } },
     { exists: { field: CONTAINER_IMAGE } },
@@ -67,20 +67,57 @@ export const getServiceKubernetesMetadata = async ({
       bool: {
         filter: [
           {
-            term: { [CONTAINER_ID]: containerId },
+            terms: {
+              [CONTAINER_ID]: containerIds,
+            },
           },
           ...rangeQuery(start, end),
         ],
         should,
       },
     },
+    aggs: {
+      deploymentNames: {
+        terms: {
+          field: DEPLOYMENT_NAME,
+          size: 10,
+        },
+      },
+      namespaceNames: {
+        terms: {
+          field: NAMESPACE,
+          size: 10,
+        },
+      },
+      replicasetNames: {
+        terms: {
+          field: REPLICASET_NAME,
+          size: 10,
+        },
+      },
+      labels: {
+        terms: { field: DEPLOYMENT_NAME, size: 10 },
+        aggs: {
+          all_labels: {
+            top_hits: {
+              _source: [K8s_LABELS],
+              size: 1,
+            },
+          },
+        },
+      },
+    },
   });
-
-  const sources = maybe(response.hits.hits[0])?._source;
 
   if (response.hits.total.value === 0) {
     return {};
   }
+
+  const sources = maybe(response.hits.hits[0])?._source;
+
+  const allLabels = response.aggregations?.labels?.buckets.map(
+    (bucket) => bucket.all_labels.hits.hits[0]._source.kubernetes.labels
+  );
 
   return {
     kubernetes: {
@@ -93,12 +130,18 @@ export const getServiceKubernetesMetadata = async ({
         name: sources?.kubernetes?.pod.name,
         uid: sources?.kubernetes?.pod.uid,
       },
-      deployment: sources?.kubernetes?.deployment,
-      replicaset: sources?.kubernetes?.replicaset,
-      namespace: { name: sources?.kubernetes?.namespace },
-      labels: Object.entries(sources?.kubernetes?.labels).map(
-        ([label, value]) => label.concat(':', value)
+      deployment: response.aggregations?.deploymentNames?.buckets.map(
+        (bucket) => bucket.key as string
       ),
+      replicaset: response.aggregations?.replicasetNames?.buckets.map(
+        (bucket) => bucket.key as string
+      ),
+      namespace: response.aggregations?.namespaceNames?.buckets.map(
+        (bucket) => bucket.key as string
+      ),
+      labels: allLabels
+        .map((label) => Object.keys(label).map((key) => `${key}:${label[key]}`))
+        .flat(),
     },
     container: {
       image: { name: sources?.container.image.name },

@@ -30,29 +30,45 @@ export function ContainerDetails({ container, kubernetes }: Props) {
     listItems.push({
       title: i18n.translate(
         'xpack.apm.serviceIcons.serviceDetails.container.image.name',
-        { defaultMessage: 'Container name' }
+        { defaultMessage: 'Container image' }
       ),
       description: container.image.name,
     });
   }
 
-  if (kubernetes?.namespace?.name) {
+  if (kubernetes?.namespace) {
     listItems.push({
       title: i18n.translate(
         'xpack.apm.serviceIcons.serviceDetails.container.namespace',
-        { defaultMessage: 'Namespace' }
+        { defaultMessage: 'Namespaces' }
       ),
-      description: kubernetes?.namespace.name,
+      description: (
+        <ul>
+          {kubernetes?.namespace.map((name, index) => (
+            <li key={index}>
+              <EuiBadge color="hollow">{name}</EuiBadge>
+            </li>
+          ))}
+        </ul>
+      ),
     });
   }
 
-  if (kubernetes?.deployment?.name) {
+  if (kubernetes?.deployment) {
     listItems.push({
       title: i18n.translate(
         'xpack.apm.serviceIcons.serviceDetails.container.deployment.name',
-        { defaultMessage: 'Deployment name' }
+        { defaultMessage: 'Deployments' }
       ),
-      description: kubernetes.deployment.name,
+      description: (
+        <ul>
+          {kubernetes?.deployment.map((name, index) => (
+            <li key={index}>
+              <EuiBadge color="hollow">{name}</EuiBadge>
+            </li>
+          ))}
+        </ul>
+      ),
     });
   }
 
