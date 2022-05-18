@@ -365,6 +365,94 @@ describe('<EditRolePage />', () => {
     expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
     expectSaveFormButtons(wrapper);
   });
+
+  it('renders an error for exisitng role name in create mode', async () => {
+    const props = getProps({ action: 'edit' });
+    const wrapper = mountWithIntl(<EditRolePage {...props} />);
+
+    await waitForRender(wrapper);
+
+    const nameInput = wrapper.find('input[name="name"]');
+    nameInput.simulate('change', { target: { value: 'system_indices_superuser' } });
+    nameInput.simulate('blur');
+
+    await waitForRender(wrapper);
+
+    expect(wrapper.find('EuiFormRow[data-test-subj="roleNameFormRow"]').props()).toMatchObject({
+      error: 'A role with this name already exists.',
+      isInvalid: true,
+    });
+    expectSaveFormButtons(wrapper);
+  });
+
+  it('does not render an error for new role name in create mode', async () => {
+    const props = getProps({ action: 'edit' });
+    const wrapper = mountWithIntl(<EditRolePage {...props} />);
+
+    props.rolesAPIClient.getRole.mockRejectedValue(new Error('not found'));
+
+    await waitForRender(wrapper);
+
+    const nameInput = wrapper.find('input[name="name"]');
+    nameInput.simulate('change', { target: { value: 'system_indices_superuser' } });
+    nameInput.simulate('blur');
+
+    await waitForRender(wrapper);
+
+    expect(wrapper.find('EuiFormRow[data-test-subj="roleNameFormRow"]').props()).toMatchObject({
+      isInvalid: false,
+    });
+    expectSaveFormButtons(wrapper);
+  });
+
+  it('renders a notification on save of existing role name in create mode', async () => {
+    const props = getProps({ action: 'edit' });
+    const wrapper = mountWithIntl(<EditRolePage {...props} />);
+
+    props.rolesAPIClient.saveRole.mockRejectedValue({
+      body: { message: 'Role already exists and cannot be created: system_indices_superuser' },
+    });
+
+    await waitForRender(wrapper);
+
+    const nameInput = wrapper.find('input[name="name"]');
+    const saveButton = wrapper.find('button[data-test-subj="roleFormSaveButton"]');
+
+    nameInput.simulate('change', { target: { value: 'system_indices_superuser' } });
+    saveButton.simulate('click');
+
+    await waitForRender(wrapper);
+
+    expect(props.notifications.toasts.addDanger).toBeCalledTimes(1);
+    expect(props.notifications.toasts.addDanger.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "Role already exists and cannot be created: system_indices_superuser",
+        ],
+      ]
+    `);
+    expectSaveFormButtons(wrapper);
+  });
+
+  it('does not render a notification on save of new role name in create mode', async () => {
+    const props = getProps({ action: 'edit' });
+    const wrapper = mountWithIntl(<EditRolePage {...props} />);
+
+    props.rolesAPIClient.getRole.mockRejectedValue(new Error('not found'));
+
+    await waitForRender(wrapper);
+
+    const nameInput = wrapper.find('input[name="name"]');
+    const saveButton = wrapper.find('button[data-test-subj="roleFormSaveButton"]');
+
+    nameInput.simulate('change', { target: { value: 'system_indices_superuser' } });
+    saveButton.simulate('click');
+
+    await waitForRender(wrapper);
+
+    expect(props.notifications.toasts.addDanger).toBeCalledTimes(0);
+    expectSaveFormButtons(wrapper);
+  });
 });
 
 async function waitForRender(wrapper: ReactWrapper<any>) {

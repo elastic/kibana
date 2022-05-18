@@ -44,6 +44,7 @@ const privilegeMap = {
 
 interface TestOptions {
   name: string;
+  createOnly?: boolean;
   licenseCheckResult?: LicenseCheck;
   apiResponses?: {
     get: () => unknown;
@@ -63,6 +64,7 @@ const putRoleTest = (
   description: string,
   {
     name,
+    createOnly,
     payload,
     licenseCheckResult = { state: 'valid' },
     apiResponses,
@@ -147,6 +149,7 @@ const putRoleTest = (
     const mockRequest = httpServerMock.createKibanaRequest({
       method: 'put',
       path: `/api/security/role/${name}`,
+      query: { createOnly },
       params: { name },
       body: payload !== undefined ? (validate as any).body.validate(payload) : undefined,
       headers,
@@ -267,6 +270,34 @@ describe('PUT role', () => {
           result: {
             message:
               'Role cannot be updated due to validation errors: ["Feature privilege [bar.all] requires all spaces to be selected but received [bar-space]","Feature [bar] does not support privilege [read]."]',
+          },
+        },
+      });
+    });
+
+    describe('create only validation', () => {
+      putRoleTest(`creates conflict role`, {
+        name: 'conflict-role',
+        createOnly: true,
+        payload: {},
+        apiResponses: {
+          get: () => ({}),
+          put: () => {},
+        },
+        asserts: {
+          statusCode: 204,
+          result: undefined,
+        },
+      });
+
+      putRoleTest('returns conflict error', {
+        name: 'conflict-role',
+        createOnly: true,
+        payload: {},
+        asserts: {
+          statusCode: 409,
+          result: {
+            message: 'Role already exists and cannot be created: conflict-role',
           },
         },
       });

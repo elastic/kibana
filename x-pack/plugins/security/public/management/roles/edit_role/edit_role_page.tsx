@@ -383,6 +383,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
     return (
       <EuiPanel hasShadow={false} hasBorder={true}>
         <EuiFormRow
+          data-test-subj={'roleNameFormRow'}
           label={
             <FormattedMessage
               id="xpack.security.management.editRole.roleNameFormRowTitle"
