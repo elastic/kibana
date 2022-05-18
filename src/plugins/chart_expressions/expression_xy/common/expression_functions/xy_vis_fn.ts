@@ -44,7 +44,6 @@ const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult 
     yConfig: args.yConfig,
     layerType: LayerTypes.DATA,
     table: normalizedTable,
-    markSizeAccessor: args.markSizeAccessor,
     ...accessors,
   };
 };
@@ -113,7 +112,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   const hasNotHistogramBars = !hasHistogramBarLayer(dataLayers);
 
   validateValueLabels(args.valueLabels, hasBar, hasNotHistogramBars);
-  validateMarkSizeRatioWithAccessor(args.markSizeRatio, args.markSizeAccessor);
+  validateMarkSizeRatioWithAccessor(args.markSizeRatio, dataLayers[0].markSizeAccessor);
   validateMarkSizeRatioLimits(args.markSizeRatio);
 
   return {
@@ -123,7 +122,8 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
       args: {
         ...restArgs,
         layers,
-        markSizeRatio: args.markSizeAccessor && !args.markSizeRatio ? 10 : args.markSizeRatio,
+        markSizeRatio:
+          dataLayers[0].markSizeAccessor && !args.markSizeRatio ? 10 : args.markSizeRatio,
         ariaLabel:
           args.ariaLabel ??
           (handlers.variables?.embeddableTitle as string) ??
