@@ -316,6 +316,38 @@ describe('#start(installPath)', () => {
       ]
     `);
   });
+
+  it.only(`allows overriding search.check_ccs_compatibility`, async () => {
+    mockEsBin({ start: true });
+
+    extractConfigFiles.mockReturnValueOnce([]);
+
+    const cluster = new Cluster({
+      log,
+      ssl: false,
+    });
+
+    await cluster.start(undefined, {
+      esArgs: ['search.check_ccs_compatibility=false'],
+    });
+
+    expect(extractConfigFiles.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Array [
+            "action.destructive_requires_name=true",
+            "cluster.routing.allocation.disk.threshold_enabled=false",
+            "ingest.geoip.downloader.enabled=false",
+            "search.check_ccs_compatibility=false",
+          ],
+          undefined,
+          Object {
+            "log": <ToolingLog>,
+          },
+        ],
+      ]
+    `);
+  });
 });
 
 describe('#run()', () => {

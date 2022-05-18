@@ -51,7 +51,6 @@ exports.run = async (defaults = {}) => {
       skipReadyCheck: 'skip-ready-check',
       readyTimeout: 'ready-timeout',
       secureFiles: 'secure-files',
-      testDefaults: 'test-defaults',
       esArgs: 'E',
     },
 

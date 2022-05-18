@@ -14,7 +14,6 @@ export interface EsClusterExecOptions {
   esJavaOpts?: string;
   password?: string;
   skipReadyCheck?: boolean;
-  testDefaults?: boolean;
   readyTimeout?: number;
   onEarlyExit?: (msg: string) => void;
 }
