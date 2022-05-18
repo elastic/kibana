@@ -15,7 +15,6 @@ import { AppMockRenderer, createAppMockRenderer } from '../../../common/mock';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import { alertComment } from '../../../containers/mock';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
-import { SupportedCaseAttachment } from '../../../types';
 import { CasesContext } from '../../cases_context';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
 import { useCasesAddToExistingCaseModal } from './use_cases_add_to_existing_case_modal';
@@ -35,12 +34,10 @@ const AllCasesSelectorModalMock = AllCasesSelectorModal as unknown as jest.Mock;
 
 // test component to test the hook integration
 const TestComponent: React.FC = () => {
-  const hook = useCasesAddToExistingCaseModal({
-    attachments: [alertComment as SupportedCaseAttachment],
-  });
+  const hook = useCasesAddToExistingCaseModal();
 
   const onClick = () => {
-    hook.open();
+    hook.open({ attachments: [alertComment] });
   };
 
   return <button type="button" data-test-subj="open-modal" onClick={onClick} />;
