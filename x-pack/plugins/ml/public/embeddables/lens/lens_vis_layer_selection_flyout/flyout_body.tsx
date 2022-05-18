@@ -109,11 +109,12 @@ export const FlyoutBody: FC<Props> = ({ onClose, embeddable, data, share, lens }
                     )}
                   />
                   <EuiSpacer size="s" />
-                  <EuiButton onClick={createADJob.bind(null, i)} size="s" iconType="popout">
+                  <EuiButton onClick={createADJob.bind(null, i)} size="s">
                     <FormattedMessage
                       id="xpack.ml.embeddables.lensLayerFlyout.createJobButton"
                       defaultMessage="Create job from this layer"
-                    />
+                    />{' '}
+                    <EuiIcon type="popout" />
                   </EuiButton>
                 </>
               ) : (
