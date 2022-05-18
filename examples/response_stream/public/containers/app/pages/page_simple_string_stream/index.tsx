@@ -8,4 +8,65 @@
 
 import React, { FC } from 'react';
 
-export const PageSimpleStringStream: FC = () => <div>CONTENT PageSimpleStringStream.</div>;
+import { i18n } from '@kbn/i18n';
+
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+
+import { useStreamFetchReducer } from '@kbn/aiops-plugin/public';
+
+import { ApiSimpleStringStream } from '../../../../../common/api';
+import { simpleStringReducer } from '../../../../../common/api/simple_string_stream/reducer';
+
+import { Page } from '../../../../components/page';
+
+export const PageSimpleStringStream: FC = () => {
+  const { dispatch, start, cancel, data, isRunning } = useStreamFetchReducer<ApiSimpleStringStream>(
+    '/internal/response_stream/simple_string_stream',
+    simpleStringReducer,
+    '',
+    { timeout: 500 }
+  );
+
+  const onClickHandler = async () => {
+    if (isRunning) {
+      cancel();
+    } else {
+      dispatch(undefined);
+      start();
+    }
+  };
+
+  const buttonLabel = isRunning
+    ? i18n.translate('xpack.response_stream.simpleString.StopbuttonText', {
+        defaultMessage: 'Stop',
+      })
+    : i18n.translate('xpack.response_stream.simpleString.startbuttonText', {
+        defaultMessage: 'Start',
+      });
+
+  return (
+    <Page title={'Simple string stream'}>
+      <EuiText>
+        <p>
+          This demonstrates a single endpoint with streaming support that sends just chunks of a
+          string from server to client. The client uses a custom hook that receives stream chunks
+          and passes them on to `useReducer()` that acts on the string chunks it receives. The
+          custom hook includes code to buffer chunks and is able to apply them in bulk so the DOM
+          does not get hammered with updates. Hit &quot;Start&quot; to trigger the stream!
+        </p>
+      </EuiText>
+      <br />
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiButton type="primary" size="s" onClick={onClickHandler} aria-label={buttonLabel}>
+            {buttonLabel}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
+      <EuiText>
+        <p>{data}</p>
+      </EuiText>
+    </Page>
+  );
+};

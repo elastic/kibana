@@ -1,28 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import type { IRouter, Logger } from '@kbn/core/server';
 
+import { streamFactory } from '@kbn/aiops-plugin/server';
 import {
-  aiopsExampleStreamSchema,
+  reducerStreamRequestBodySchema,
   updateProgressAction,
   addToEntityAction,
   deleteEntityAction,
-} from '../../common/api/example_stream';
+  ReducerStreamApiAction,
+} from '../../common/api/reducer_stream';
 import { API_ENDPOINT } from '../../common/api';
 
-import { streamFactory } from '../lib/stream_factory';
-
-export const defineExampleStreamRoute = (router: IRouter, logger: Logger) => {
+export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
   router.post(
     {
-      path: API_ENDPOINT.EXAMPLE_STREAM,
+      path: API_ENDPOINT.REDUCER_STREAM,
       validate: {
-        body: aiopsExampleStreamSchema,
+        body: reducerStreamRequestBodySchema,
       },
     },
     async (context, request, response) => {
@@ -37,9 +38,8 @@ export const defineExampleStreamRoute = (router: IRouter, logger: Logger) => {
         shouldStop = true;
       });
 
-      const { DELIMITER, end, push, responseWithHeaders, stream } = streamFactory<
-        typeof API_ENDPOINT.EXAMPLE_STREAM
-      >(logger, request.headers);
+      const { DELIMITER, end, push, responseWithHeaders, stream } =
+        streamFactory<ReducerStreamApiAction>(logger, request.headers);
 
       const entities = [
         'kimchy',

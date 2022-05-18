@@ -25,12 +25,18 @@ import {
 
 import { useStreamFetchReducer } from '@kbn/aiops-plugin/public';
 
+import { ApiReducerStream } from '../../../../../common/api';
+import {
+  initialState,
+  resetStream,
+  reducerStreamReducer,
+} from '../../../../../common/api/reducer_stream/reducer';
+
 import { Page } from '../../../../components/page';
 
 import { useDeps } from '../../../../hooks/use_deps';
 
 import { getStatusMessage } from './get_status_message';
-import { initialState, resetStream, streamReducer } from './stream_reducer';
 
 export const PageReducerStream: FC = () => {
   const {
@@ -39,12 +45,13 @@ export const PageReducerStream: FC = () => {
 
   const [simulateErrors, setSimulateErrors] = useState(false);
 
-  const { dispatch, start, cancel, data, isCancelled, isRunning } = useStreamFetchReducer(
-    '/internal/aiops/example_stream',
-    streamReducer,
-    initialState,
-    { simulateErrors }
-  );
+  const { dispatch, start, cancel, data, isCancelled, isRunning } =
+    useStreamFetchReducer<ApiReducerStream>(
+      '/internal/response_stream/reducer_stream',
+      reducerStreamReducer,
+      initialState,
+      { simulateErrors }
+    );
 
   const { errors, progress, entities } = data;
 
@@ -64,10 +71,10 @@ export const PageReducerStream: FC = () => {
   }, [errors, notifications.toasts]);
 
   const buttonLabel = isRunning
-    ? i18n.translate('xpack.aiops.stopbuttonText', {
+    ? i18n.translate('xpack.response_stream.stopbuttonText', {
         defaultMessage: 'Stop development',
       })
-    : i18n.translate('xpack.aiops.startbuttonText', {
+    : i18n.translate('xpack.response_stream.startbuttonText', {
         defaultMessage: 'Start development',
       });
 
@@ -106,14 +113,14 @@ export const PageReducerStream: FC = () => {
           <Axis
             id="entities"
             position={Position.Bottom}
-            title={i18n.translate('xpack.aiops.barChart.commitsTitle', {
+            title={i18n.translate('xpack.response_stream.barChart.commitsTitle', {
               defaultMessage: 'Commits',
             })}
             showOverlappingTicks
           />
           <Axis
             id="left2"
-            title={i18n.translate('xpack.aiops.barChart.developersTitle', {
+            title={i18n.translate('xpack.response_stream.barChart.developersTitle', {
               defaultMessage: 'Developers',
             })}
             position={Position.Left}
@@ -139,8 +146,8 @@ export const PageReducerStream: FC = () => {
       <EuiText>
         <p>{getStatusMessage(isRunning, isCancelled, data.progress)}</p>
         <EuiCheckbox
-          id="aiopSimulateErrorsCheckbox"
-          label={i18n.translate('xpack.aiops.explainLogRateSpikes.simulateErrorsCheckboxLabel', {
+          id="responseStreamSimulateErrorsCheckbox"
+          label={i18n.translate('xpack.responseStream.simulateErrorsCheckboxLabel', {
             defaultMessage:
               'Simulate errors (gets applied to new streams only, not currently running ones).',
           })}

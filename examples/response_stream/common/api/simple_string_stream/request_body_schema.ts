@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
-import { ResponseStreamPlugin } from './plugin';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new ResponseStreamPlugin(initializerContext);
-}
+export const simpleStringStreamRequestBodySchema = schema.object({
+  /** Maximum timeout between streaming messages. */
+  timeout: schema.number(),
+});
+export type SimpleStringStreamRequestBodySchema = TypeOf<
+  typeof simpleStringStreamRequestBodySchema
+>;

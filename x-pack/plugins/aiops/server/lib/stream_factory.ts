@@ -10,8 +10,6 @@ import zlib from 'zlib';
 
 import type { Headers, Logger } from '@kbn/core/server';
 
-import { ApiEndpoint, ApiEndpointActions } from '../../common/api';
-
 import { acceptCompression } from './accept_compression';
 
 // We need this otherwise Kibana server will crash with a 'ERR_METHOD_NOT_IMPLEMENTED' error.
@@ -30,15 +28,15 @@ const DELIMITER = '\n';
  * @param headers - Request headers.
  * @returns An object with stream attributes and methods.
  */
-export function streamFactory<T extends ApiEndpoint>(logger: Logger, headers: Headers) {
+export function streamFactory<T = unknown>(logger: Logger, headers: Headers, ndjson = true) {
   const isCompressed = acceptCompression(headers);
 
   const stream = isCompressed ? zlib.createGzip() : new ResponseStream();
 
-  function push(d: ApiEndpointActions[T]) {
+  function push(d: T) {
     try {
-      const line = JSON.stringify(d);
-      stream.write(`${line}${DELIMITER}`);
+      const line = ndjson ? `${JSON.stringify(d)}${DELIMITER}` : d;
+      stream.write(line);
 
       // Calling .flush() on a compression stream will
       // make zlib return as much output as currently possible.

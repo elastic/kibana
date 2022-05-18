@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import type React from 'react';
+import type { ReducerAction } from 'react';
 
-import type { ApiEndpoint, ApiEndpointActions, ApiEndpointOptions } from '../../common/api';
+import type { UseStreamFetcherParams } from './use_stream_fetch_reducer';
 
-interface ErrorAction {
-  type: 'error';
-  payload: string;
-}
-
-export async function* streamFetch<E extends ApiEndpoint>(
-  endpoint: E,
+export async function* streamFetch<I extends UseStreamFetcherParams>(
+  endpoint: I['endpoint'],
   abortCtrl: React.MutableRefObject<AbortController>,
-  options: ApiEndpointOptions[E],
-  basePath = ''
-): AsyncGenerator<Array<ApiEndpointActions[E] | ErrorAction>> {
+  options: I['options'],
+  basePath = '',
+  ndjson = true
+): AsyncGenerator<ReducerAction<I['reducer']> | Array<ReducerAction<I['reducer']>>> {
   const stream = await fetch(`${basePath}${endpoint}`, {
     signal: abortCtrl.current.signal,
     method: 'POST',
@@ -29,7 +25,7 @@ export async function* streamFetch<E extends ApiEndpoint>(
       'Content-Type': 'application/json',
       'kbn-xsrf': 'stream',
     },
-    body: JSON.stringify(options),
+    ...(Object.keys(options).length > 0 ? { body: JSON.stringify(options) } : {}),
   });
 
   if (stream.body !== null) {
@@ -41,7 +37,7 @@ export async function* streamFetch<E extends ApiEndpoint>(
 
     const bufferBounce = 100;
     let partial = '';
-    let actionBuffer: Array<ApiEndpointActions[E]> = [];
+    let actionBuffer: Array<ReducerAction<I['reducer']>> = [];
     let lastCall = 0;
 
     while (true) {
@@ -52,12 +48,14 @@ export async function* streamFetch<E extends ApiEndpoint>(
         const value = new TextDecoder().decode(uint8array);
 
         const full = `${partial}${value}`;
-        const parts = full.split('\n');
-        const last = parts.pop();
+        const parts = ndjson ? full.split('\n') : [full];
+        const last = ndjson ? parts.pop() : '';
 
         partial = last ?? '';
 
-        const actions = parts.map((p) => JSON.parse(p)) as Array<ApiEndpointActions[E]>;
+        const actions = (ndjson ? parts.map((p) => JSON.parse(p)) : parts) as Array<
+          ReducerAction<I['reducer']>
+        >;
         actionBuffer.push(...actions);
 
         const now = Date.now();
@@ -71,7 +69,7 @@ export async function* streamFetch<E extends ApiEndpoint>(
           // we trigger this client side timeout to clear a potential intermediate buffer state.
           // Since `yield` cannot be passed on to other scopes like callbacks,
           // this pattern using a Promise is used to wait for the timeout.
-          yield new Promise<Array<ApiEndpointActions[E]>>((resolve) => {
+          yield new Promise<Array<ReducerAction<I['reducer']>>>((resolve) => {
             setTimeout(() => {
               if (actionBuffer.length > 0) {
                 resolve(actionBuffer);
@@ -85,7 +83,9 @@ export async function* streamFetch<E extends ApiEndpoint>(
         }
       } catch (error) {
         if (error.name !== 'AbortError') {
-          yield [{ type: 'error', payload: error.toString() }];
+          yield [{ type: 'error', payload: error.toString() }] as Array<
+            ReducerAction<I['reducer']>
+          >;
         }
         break;
       }

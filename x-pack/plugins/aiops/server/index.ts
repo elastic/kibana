@@ -12,4 +12,5 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new AiopsPlugin(initializerContext);
 }
 
+export { streamFactory } from './lib/stream_factory';
 export type { AiopsPluginSetup, AiopsPluginStart } from './types';

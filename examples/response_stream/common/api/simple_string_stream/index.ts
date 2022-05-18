@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
-import { ResponseStreamPlugin } from './plugin';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new ResponseStreamPlugin(initializerContext);
-}
+export { simpleStringReducer } from './reducer';
+export {
+  simpleStringStreamRequestBodySchema,
+  SimpleStringStreamRequestBodySchema,
+} from './request_body_schema';

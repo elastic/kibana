@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
+import { Plugin, PluginInitializerContext, CoreSetup, CoreStart, Logger } from '@kbn/core/server';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+
+import { defineReducerStreamRoute, defineSimpleStringStreamRoute } from './routes';
 
 // eslint-disable-next-line
 export interface ResponseStreamSetupPlugins {}
@@ -15,7 +18,20 @@ export interface ResponseStreamSetupPlugins {}
 export interface ResponseStreamStartPlugins {}
 
 export class ResponseStreamPlugin implements Plugin {
-  public setup(core: CoreSetup, plugins: ResponseStreamSetupPlugins) {}
+  private readonly logger: Logger;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
+  }
+
+  public setup(core: CoreSetup, plugins: ResponseStreamSetupPlugins) {
+    const router = core.http.createRouter<DataRequestHandlerContext>();
+
+    core.getStartServices().then(([_, depsStart]) => {
+      defineReducerStreamRoute(router, this.logger);
+      defineSimpleStringStreamRoute(router, this.logger);
+    });
+  }
 
   public start(core: CoreStart, plugins: ResponseStreamStartPlugins) {}
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AiopsExampleStreamApiAction, API_ACTION_NAME } from '@kbn/aiops-plugin/common';
+import { ReducerStreamApiAction, API_ACTION_NAME } from '.';
 
 export const UI_ACTION_NAME = {
   ERROR: 'error',
@@ -38,13 +38,13 @@ export function resetStream(): UiActionResetStream {
 }
 
 type UiAction = UiActionResetStream | UiActionError;
-export type ReducerAction = AiopsExampleStreamApiAction | UiAction;
-export function streamReducer(
+export type ReducerAction = ReducerStreamApiAction | UiAction;
+export function reducerStreamReducer(
   state: StreamState,
   action: ReducerAction | ReducerAction[]
 ): StreamState {
   if (Array.isArray(action)) {
-    return action.reduce(streamReducer, state);
+    return action.reduce(reducerStreamReducer, state);
   }
 
   switch (action.type) {

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  API_ACTION_NAME,
-  AiopsExplainLogRateSpikesApiAction,
-} from '../../../common/api/explain_log_rate_spikes';
+import { API_ACTION_NAME, AiopsExplainLogRateSpikesApiAction } from './explain_log_rate_spikes';
 
 interface StreamState {
   fields: string[];

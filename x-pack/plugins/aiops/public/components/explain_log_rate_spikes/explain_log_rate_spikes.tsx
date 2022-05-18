@@ -13,7 +13,8 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { useStreamFetchReducer } from '../../hooks/use_stream_fetch_reducer';
 
-import { initialState, streamReducer } from './stream_reducer';
+import { initialState, streamReducer } from '../../../common/api/stream_reducer';
+import type { ApiExplainLogRateSpikes } from '../../../common/api';
 
 /**
  * ExplainLogRateSpikes props require a data view.
@@ -24,7 +25,7 @@ export interface ExplainLogRateSpikesProps {
 }
 
 export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({ dataView }) => {
-  const { start, data, isRunning } = useStreamFetchReducer(
+  const { start, data, isRunning } = useStreamFetchReducer<ApiExplainLogRateSpikes>(
     '/internal/aiops/explain_log_rate_spikes',
     streamReducer,
     initialState,
