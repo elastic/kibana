@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { EsQueryAlertParams, SearchType } from './types';
-
-export interface TriggersAndActionsUiDeps {
-  data: DataPublicPluginStart;
-}
+import { EsQueryAlertParams, SearchType, TriggersAndActionsUiDeps } from './types';
 
 export const isSearchSourceAlert = (
   ruleParams: EsQueryAlertParams

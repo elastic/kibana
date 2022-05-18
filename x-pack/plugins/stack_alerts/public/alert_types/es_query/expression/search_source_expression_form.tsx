@@ -54,8 +54,6 @@ interface SearchSourceExpressionFormProps {
   setParam: (paramField: string, paramValue: unknown) => void;
 }
 
-type LangMode = 'lucene' | 'text' | undefined;
-
 const isSearchSourceParam = (action: LocalStateAction): action is SearchSourceParamsAction => {
   return action.type === 'filter' || action.type === 'index' || action.type === 'query';
 };

@@ -188,6 +188,7 @@ describe('rule_add', () => {
     wrapper.find('[data-test-subj="my-rule-type-SelectOption"]').first().simulate('click');
 
     expect(wrapper.find('input#ruleName').props().value).toBe('');
+
     expect(wrapper.find('[data-test-subj="tagsComboBox"]').first().text()).toBe('');
 
     expect(wrapper.find('.euiSelect').first().props().value).toBe('m');
@@ -213,8 +214,8 @@ describe('rule_add', () => {
     );
 
     expect(wrapper.find('input#ruleName').props().value).toBe('Simple status rule');
-    expect(wrapper.find('[data-test-subj="intervalInput"]').first().props().value).toEqual(1);
     expect(wrapper.find('[data-test-subj="tagsComboBox"]').first().text()).toBe('uptimelogs');
+    expect(wrapper.find('[data-test-subj="intervalInput"]').first().props().value).toEqual(1);
     expect(wrapper.find('[data-test-subj="intervalInputUnit"]').first().props().value).toBe('h');
   });
 
