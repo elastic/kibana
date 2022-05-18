@@ -8,7 +8,11 @@
 import * as t from 'io-ts';
 import { toBooleanRt } from '@kbn/io-ts-utils';
 
+export const ML_EXPECTED_BOUNDS = 'mlBounds';
+export const comparisonEnabledRt = t.union([
+  t.literal(ML_EXPECTED_BOUNDS),
+  toBooleanRt,
+]);
 export const offsetRt = t.partial({
   offset: t.string,
-  mlExpectedBounds: toBooleanRt,
 });

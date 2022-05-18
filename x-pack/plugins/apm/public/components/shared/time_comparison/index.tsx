@@ -11,6 +11,8 @@ import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useUiTracker } from '@kbn/observability-plugin/public';
+import { ML_EXPECTED_BOUNDS } from '../../../../common/comparison_rt';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -31,18 +33,26 @@ export function TimeComparison() {
   const history = useHistory();
   const { isSmall } = useBreakpoints();
   const {
-    query: { rangeFrom, rangeTo, comparisonEnabled, offset, mlExpectedBounds },
+    query: { rangeFrom, rangeTo, comparisonEnabled, offset },
   } = useAnyOfApmParams('/services', '/backends/*', '/services/{serviceName}');
+  const { core } = useApmPluginContext();
+  const canGetJobs = !!core.application.capabilities.ml?.canGetJobs;
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const comparisonOptions = useMemo(
-    () => [
-      ...getComparisonOptions({ start, end }),
-      { text: 'Expected bounds', value: 'ml_expected_bounds' },
-    ],
-    []
-  );
+  const comparisonOptions = useMemo(() => {
+    const timeComparisonOptions = getComparisonOptions({ start, end });
+
+    if (canGetJobs) {
+      timeComparisonOptions.push({
+        value: ML_EXPECTED_BOUNDS,
+        text: i18n.translate('xpack.apm.comparison.mlExpectedBounds', {
+          defaultMessage: 'Expected bounds',
+        }),
+      });
+    }
+    return timeComparisonOptions;
+  }, [canGetJobs, start, end]);
 
   const isSelectedComparisonTypeAvailable = comparisonOptions.some(
     ({ value }) => value === offset
@@ -62,7 +72,9 @@ export function TimeComparison() {
       data-test-subj="comparisonSelect"
       disabled={!comparisonEnabled}
       options={comparisonOptions}
-      value={mlExpectedBounds === true ? 'ml_expected_bounds' : offset}
+      value={
+        comparisonEnabled === ML_EXPECTED_BOUNDS ? ML_EXPECTED_BOUNDS : offset
+      }
       prepend={
         <PrependContainer>
           <EuiCheckbox
@@ -70,7 +82,7 @@ export function TimeComparison() {
             label={i18n.translate('xpack.apm.timeComparison.label', {
               defaultMessage: 'Comparison',
             })}
-            checked={comparisonEnabled}
+            checked={true}
             onChange={() => {
               const nextComparisonEnabledValue = !comparisonEnabled;
               if (nextComparisonEnabledValue === false) {
@@ -93,17 +105,17 @@ export function TimeComparison() {
         trackApmEvent({
           metric: `time_comparison_type_change_${e.target.value}`,
         });
-        if (e.target.value === 'ml_expected_bounds') {
+        if (e.target.value === ML_EXPECTED_BOUNDS) {
           urlHelpers.push(history, {
             query: {
-              mlExpectedBounds: 'true',
+              comparisonEnabled: ML_EXPECTED_BOUNDS,
             },
           });
         } else {
           urlHelpers.push(history, {
             query: {
+              comparisonEnabled: 'true',
               offset: e.target.value,
-              mlExpectedBounds: 'false',
             },
           });
         }

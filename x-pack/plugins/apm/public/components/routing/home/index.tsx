@@ -22,7 +22,10 @@ import { RedirectToBackendOverviewRouteView } from './redirect_to_backend_overvi
 import { ServiceGroupTemplate } from '../templates/service_group_template';
 import { ServiceGroupsRedirect } from '../service_groups_redirect';
 import { RedirectTo } from '../redirect_to';
-import { offsetRt } from '../../../../common/offset_rt';
+import {
+  comparisonEnabledRt,
+  offsetRt,
+} from '../../../../common/comparison_rt';
 
 function page<TPath extends string>({
   path,
@@ -133,7 +136,7 @@ export const home = {
           rangeFrom: t.string,
           rangeTo: t.string,
           kuery: t.string,
-          comparisonEnabled: toBooleanRt,
+          comparisonEnabled: comparisonEnabledRt,
         }),
         t.partial({
           refreshPaused: t.union([t.literal('true'), t.literal('false')]),
@@ -173,7 +176,7 @@ export const home = {
         params: t.partial({
           query: t.intersection([
             t.type({
-              comparisonEnabled: toBooleanRt,
+              comparisonEnabled: comparisonEnabledRt,
             }),
             offsetRt,
           ]),

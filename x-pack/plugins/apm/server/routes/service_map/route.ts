@@ -18,7 +18,7 @@ import { getServiceMapServiceNodeInfo } from './get_service_map_service_node_inf
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, rangeRt } from '../default_api_types';
 import { getServiceGroup } from '../service_groups/get_service_group';
-import { offsetRt } from '../../../common/offset_rt';
+import { offsetRt } from '../../../common/comparison_rt';
 
 const serviceMapRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-map',
