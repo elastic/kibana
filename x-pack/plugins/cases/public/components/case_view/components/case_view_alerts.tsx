@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 
+import { EuiFlexItem, EuiFlexGroup, EuiProgress } from '@elastic/eui';
 import { Case } from '../../../../common';
 import { useKibana } from '../../../common/lib/kibana';
 import { getManualAlertIds, getRegistrationContextFromAlerts } from './helpers';
@@ -31,7 +32,8 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
     [caseData.comments]
   );
 
-  const alertFeatureIds = useGetFeatureIds(alertRegistrationContexts);
+  const { isLoading: isLoadingAlertFeatureIds, alertFeatureIds } =
+    useGetFeatureIds(alertRegistrationContexts);
 
   const alertStateProps = {
     alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
@@ -41,6 +43,14 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
     query: alertIdsQuery,
   };
 
-  return <>{triggersActionsUi.getAlertsStateTable(alertStateProps)}</>;
+  return isLoadingAlertFeatureIds ? (
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiProgress size="xs" color="primary" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  ) : (
+    triggersActionsUi.getAlertsStateTable(alertStateProps)
+  );
 };
 CaseViewAlerts.displayName = 'CaseViewAlerts';
