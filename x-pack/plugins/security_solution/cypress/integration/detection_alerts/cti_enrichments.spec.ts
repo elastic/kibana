@@ -101,7 +101,7 @@ describe('CTI Enrichment', () => {
 
     cy.get(JSON_TEXT).then((x) => {
       const parsed = JSON.parse(x.text());
-      expect(parsed._source.threat.enrichments).to.deep.equal(expectedEnrichment);
+      expect(parsed.fields['threat.enrichments']).to.deep.equal(expectedEnrichment);
     });
   });
 
