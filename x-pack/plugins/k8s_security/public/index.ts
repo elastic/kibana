@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { K8sSecurityPlugin } from './plugin';
 
-export const PAGE_TITLE = i18n.translate('xpack.securitySolution.kubernetes.pageTitle', {
-  defaultMessage: 'Kubernetes',
-});
+export type { K8sSecurityStart } from './types';
+
+export function plugin() {
+  return new K8sSecurityPlugin();
+}

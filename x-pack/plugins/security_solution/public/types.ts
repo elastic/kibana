@@ -26,6 +26,7 @@ import type { CasesUiStart } from '@kbn/cases-plugin/public';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
 import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { SessionViewStart } from '@kbn/session-view-plugin/public';
+import type { K8sSecurityStart } from '@kbn/k-8s-security-plugin/public';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type { OsqueryPluginStart } from '@kbn/osquery-plugin/public';
 import type { LicensingPluginStart, LicensingPluginSetup } from '@kbn/licensing-plugin/public';
@@ -64,6 +65,7 @@ export interface StartPlugins {
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
   fleet?: FleetStart;
+  k8sSecurity: K8sSecurityStart;
   lens: LensPublicStart;
   lists?: ListsPluginStart;
   licensing: LicensingPluginStart;

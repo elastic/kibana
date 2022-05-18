@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { PluginInitializerContext } from '@kbn/core/server';
+import { K8sSecurityPlugin } from './plugin';
 
-export const PAGE_TITLE = i18n.translate('xpack.securitySolution.kubernetes.pageTitle', {
-  defaultMessage: 'Kubernetes',
-});
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new K8sSecurityPlugin(initializerContext);
+}

@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const PAGE_TITLE = i18n.translate('xpack.securitySolution.kubernetes.pageTitle', {
-  defaultMessage: 'Kubernetes',
-});
+export const KUBERNETES_PATH = '/kubernetes' as const;
