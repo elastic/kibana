@@ -86,7 +86,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
         <EuiFlexItem grow={false}>
           <EuiSwitch
             id="checkboxShowHiddenIndices"
-            data-test-subj="includeHiddenPoliciesToggle"
+            data-test-subj="includeHiddenPoliciesSwitch"
             checked={managedPoliciesVisible}
             onChange={(event) => setManagedPoliciesVisible(event.target.checked)}
             label={
@@ -134,7 +134,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
               <>
                 &nbsp;
                 <EuiToolTip content={managedPolicyTooltips.badgeTooltip}>
-                  <EuiBadge color="hollow" data-test-subj="templateTypeBadge">
+                  <EuiBadge color="hollow" data-test-subj="managedPolicyBadge">
                     {managedPolicyTooltips.badge}
                   </EuiBadge>
                 </EuiToolTip>

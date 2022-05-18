@@ -52,6 +52,7 @@ const testPolicy = {
   },
 };
 
+const isDesignatedManagedPolicy = (i: number) => i > 0 && i % 2 === 0;
 const policies: PolicyFromES[] = [testPolicy];
 for (let i = 1; i < 105; i++) {
   policies.push({
@@ -63,6 +64,13 @@ for (let i = 1; i < 105; i++) {
     policy: {
       name: `testy${i}`,
       phases: {},
+      ...(isDesignatedManagedPolicy(i)
+        ? {
+            _meta: {
+              managed: true,
+            },
+          }
+        : {}),
     },
   });
 }
@@ -87,6 +95,18 @@ const getPolicyLinks = (rendered: ReactWrapper) => {
 };
 const getPolicyNames = (rendered: ReactWrapper): string[] => {
   return (getPolicyLinks(rendered) as ReactWrapper).map((button) => button.text());
+};
+
+const getPolicies = (rendered: ReactWrapper) => {
+  const visiblePolicyNames = getPolicyNames(rendered);
+  const visiblePolicies = visiblePolicyNames.map((name) => {
+    const version = parseInt(name.replace('testy', ''), 10);
+    return {
+      version,
+      name,
+    };
+  });
+  return visiblePolicies;
 };
 
 const testSort = (headerName: string) => {
@@ -129,8 +149,49 @@ describe('policy table', () => {
     rendered.update();
     snapshot(getPolicyNames(rendered));
   });
+
+  test('does not show any hidden policies by default', () => {
+    const rendered = mountWithIntl(component);
+    const includeHiddenPoliciesSwitch = findTestSubject(rendered, `includeHiddenPoliciesSwitch`);
+    expect(includeHiddenPoliciesSwitch.prop('aria-checked')).toEqual(false);
+    const visiblePolicies = getPolicies(rendered);
+    const hasManagedPolicies = visiblePolicies.some((p) => {
+      const policyRow = findTestSubject(rendered, `policyTableRow-${p.name}`);
+      const warningBadge = findTestSubject(policyRow, 'managedPolicyBadge');
+      return warningBadge.exists();
+    });
+    expect(hasManagedPolicies).toEqual(false);
+  });
+
+  test('shows hidden policies with Managed badges when setting is switched on', () => {
+    const rendered = mountWithIntl(component);
+    const includeHiddenPoliciesSwitch = findTestSubject(rendered, `includeHiddenPoliciesSwitch`);
+    includeHiddenPoliciesSwitch.find('button').simulate('click');
+
+    rendered.update();
+    const visiblePolicyNames = getPolicyNames(rendered);
+    const visiblePolicies = visiblePolicyNames.map((name) => {
+      const version = parseInt(name.replace('testy', ''), 10);
+      return {
+        version,
+        name,
+      };
+    });
+
+    visiblePolicies.forEach((p) => {
+      const policyRow = findTestSubject(rendered, `policyTableRow-${p.name}`);
+      const warningBadge = findTestSubject(policyRow, 'managedPolicyBadge');
+      if (isDesignatedManagedPolicy(p.version)) {
+        expect(warningBadge.exists()).toBeTruthy();
+      } else {
+        expect(warningBadge.exists()).toBeFalsy();
+      }
+    });
+  });
+
   test('shows more policies when "Rows per page" value is increased', () => {
     const rendered = mountWithIntl(component);
+
     const perPageButton = rendered.find('EuiTablePagination EuiPopover').find('button');
     perPageButton.simulate('click');
     rendered.update();
@@ -139,6 +200,7 @@ describe('policy table', () => {
     rendered.update();
     expect(getPolicyNames(rendered).length).toBe(25);
   });
+
   test('filters based on content of search input', () => {
     const rendered = mountWithIntl(component);
     const searchInput = rendered.find('.euiFieldSearch').first();
@@ -190,8 +252,8 @@ describe('policy table', () => {
   test('displays policy properties', () => {
     const rendered = mountWithIntl(component);
     const firstRow = findTestSubject(rendered, 'policyTableRow-testy0');
-    const policyName = findTestSubject(firstRow, 'policy-name').text();
-    expect(policyName).toBe(`Name${testPolicy.name}`);
+    const policyName = findTestSubject(firstRow, 'policyTablePolicyNameLink').text();
+    expect(policyName).toBe(`${testPolicy.name}`);
     const policyIndexTemplates = findTestSubject(firstRow, 'policy-indexTemplates').text();
     expect(policyIndexTemplates).toBe(`Linked index templates${testPolicy.indexTemplates.length}`);
     const policyIndices = findTestSubject(firstRow, 'policy-indices').text();
