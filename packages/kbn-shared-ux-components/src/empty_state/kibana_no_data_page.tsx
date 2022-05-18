@@ -36,7 +36,7 @@ export const KibanaNoDataPage = ({ onDataViewCreated, noDataConfig }: Props) => 
   }, [hasESData, hasUserDataView]);
 
   if (isLoading) {
-    return <EuiLoadingElastic css={{ alignSelf: 'center', justifySelf: 'center' }} size="xxl" />;
+    return <EuiLoadingElastic css={{ margin: 'auto' }} size="xxl" />;
   }
 
   if (!dataExists) {
