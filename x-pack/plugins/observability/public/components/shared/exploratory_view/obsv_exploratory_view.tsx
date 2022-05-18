@@ -31,7 +31,6 @@ import { getMobileKPIConfig } from './configurations/mobile/kpi_over_time_config
 import { getMobileDeviceDistributionConfig } from './configurations/mobile/device_distribution_config';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { getLogsKPIConfig } from './configurations/infra_logs/kpi_over_time_config';
-import { getMetricsKPIConfig } from './configurations/infra_metrics/kpi_over_time_config';
 import { getSingleMetricConfig } from './configurations/rum/single_metric_config';
 
 export const DataTypesLabels = {
