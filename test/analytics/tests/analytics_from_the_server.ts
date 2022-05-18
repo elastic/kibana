@@ -7,9 +7,9 @@
  */
 
 import expect from '@kbn/expect';
-import type { TelemetryCounter } from '@kbn/core/server';
-import { Action } from '@kbn/analytics-plugin-a-plugin/server/custom_shipper';
-import { FtrProviderContext } from '../services';
+import type { Event, TelemetryCounter } from '@kbn/core/server';
+import type { Action } from '@kbn/analytics-plugin-a-plugin/server/custom_shipper';
+import type { FtrProviderContext } from '../services';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -76,27 +76,23 @@ export default function ({ getService }: FtrProviderContext) {
       expect(context).to.have.property('pid');
       expect(context.pid).to.be.a('number');
 
-      expect(actions).to.eql([
-        { action: 'optIn', meta: true },
-        { action: 'extendContext', meta: context },
-        {
-          action: 'reportEvents',
-          meta: [
-            {
-              timestamp: actions[2].meta[0].timestamp,
-              event_type: 'test-plugin-lifecycle',
-              context: initialContext,
-              properties: { plugin: 'analyticsPluginA', step: 'setup' },
-            },
-            {
-              timestamp: actions[2].meta[1].timestamp,
-              event_type: 'test-plugin-lifecycle',
-              context: reportEventContext,
-              properties: { plugin: 'analyticsPluginA', step: 'start' },
-            },
-          ],
-        },
-      ]);
+      expect(actions[0]).to.eql({ action: 'optIn', meta: true });
+      expect(actions[1]).to.eql({ action: 'extendContext', meta: context });
+      expect(actions[2].action).to.eql('reportEvents');
+      const setupEvent = actions[2].meta.findIndex(
+        (event: Event) =>
+          event.event_type === 'test-plugin-lifecycle' &&
+          event.properties.plugin === 'analyticsPluginA' &&
+          event.properties.step === 'setup'
+      );
+      const startEvent = actions[2].meta.findIndex(
+        (event: Event) =>
+          event.event_type === 'test-plugin-lifecycle' &&
+          event.properties.plugin === 'analyticsPluginA' &&
+          event.properties.step === 'start'
+      );
+      expect(setupEvent).to.be.greaterThan(-1);
+      expect(startEvent).to.be.greaterThan(setupEvent);
 
       // This helps us to also test the helpers
       const events = await ebtServerHelper.getLastEvents(2, ['test-plugin-lifecycle']);

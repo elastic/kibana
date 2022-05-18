@@ -7,9 +7,9 @@
  */
 
 import expect from '@kbn/expect';
-import type { TelemetryCounter } from '@kbn/core/server';
-import { Action } from '@kbn/analytics-plugin-a-plugin/server/custom_shipper';
-import { FtrProviderContext } from '../services';
+import type { Event, TelemetryCounter } from '@kbn/core/public';
+import type { Action } from '@kbn/analytics-plugin-a-plugin/public/custom_shipper';
+import type { FtrProviderContext } from '../services';
 import '@kbn/analytics-plugin-a-plugin/public/types';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -79,27 +79,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(reportEventContext).to.have.property('user_agent');
       expect(reportEventContext.user_agent).to.be.a('string');
 
-      expect(actions).to.eql([
-        { action: 'optIn', meta: true },
-        { action: 'extendContext', meta: context },
-        {
-          action: 'reportEvents',
-          meta: [
-            {
-              timestamp: actions[2].meta[0].timestamp,
-              event_type: 'test-plugin-lifecycle',
-              context: initialContext,
-              properties: { plugin: 'analyticsPluginA', step: 'setup' },
-            },
-            {
-              timestamp: actions[2].meta[1].timestamp,
-              event_type: 'test-plugin-lifecycle',
-              context: reportEventContext,
-              properties: { plugin: 'analyticsPluginA', step: 'start' },
-            },
-          ],
-        },
-      ]);
+      expect(actions[0]).to.eql({ action: 'optIn', meta: true });
+      expect(actions[1]).to.eql({ action: 'extendContext', meta: context });
+      expect(actions[2].action).to.eql('reportEvents');
+      const setupEvent = actions[2].meta.findIndex(
+        (event: Event) =>
+          event.event_type === 'test-plugin-lifecycle' &&
+          event.properties.plugin === 'analyticsPluginA' &&
+          event.properties.step === 'setup'
+      );
+      const startEvent = actions[2].meta.findIndex(
+        (event: Event) =>
+          event.event_type === 'test-plugin-lifecycle' &&
+          event.properties.plugin === 'analyticsPluginA' &&
+          event.properties.step === 'start'
+      );
+      expect(setupEvent).to.be.greaterThan(-1);
+      expect(startEvent).to.be.greaterThan(setupEvent);
 
       // Testing the FTR helper as well
       expect(await ebtUIHelper.getLastEvents(2, ['test-plugin-lifecycle'])).to.eql([
