@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 
-import { CreateRulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
@@ -25,7 +24,6 @@ import {
   getSimpleRule,
   getSimpleRuleAsNdjson,
   getSimpleRuleOutput,
-  getThresholdRuleForSignalTesting,
   getWebHookAction,
   removeServerGeneratedProperties,
   ruleToNdjson,
@@ -199,6 +197,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body).to.eql({
           success: false,
           success_count: 0,
+          rules_count: 1,
           errors: [
             {
               error: {
@@ -216,110 +215,12 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_id: 'rule-1',
             },
           ],
-          rules_count: 1,
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
         });
       });
     });
-
-    describe('threshold validation', () => {
-      it('should result in partial success if no threshold-specific fields are provided', async () => {
-        const { threshold, ...rule } = getThresholdRuleForSignalTesting(['*']);
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .set('kbn-xsrf', 'true')
-          .attach('file', ruleToNdjson(rule as CreateRulesSchema), 'rules.ndjson')
-          .expect(200);
-
-        expect(body.errors[0]).to.eql({
-          rule_id: '(unknown id)',
-          error: {
-            message: 'when "type" is "threshold", "threshold" is required',
-            status_code: 400,
-          },
-        });
-      });
-
-      it('should result in partial success if more than 3 threshold fields', async () => {
-        const baseRule = getThresholdRuleForSignalTesting(['*']);
-        const rule = {
-          ...baseRule,
-          threshold: {
-            ...baseRule.threshold,
-            field: ['field-1', 'field-2', 'field-3', 'field-4'],
-          },
-        };
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .set('kbn-xsrf', 'true')
-          .attach('file', ruleToNdjson(rule), 'rules.ndjson')
-          .expect(200);
-
-        expect(body.errors[0]).to.eql({
-          rule_id: '(unknown id)',
-          error: {
-            message: 'Number of fields must be 3 or less',
-            status_code: 400,
-          },
-        });
-      });
-
-      it('should result in partial success if threshold value is less than 1', async () => {
-        const baseRule = getThresholdRuleForSignalTesting(['*']);
-        const rule = {
-          ...baseRule,
-          threshold: {
-            ...baseRule.threshold,
-            value: 0,
-          },
-        };
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .set('kbn-xsrf', 'true')
-          .attach('file', ruleToNdjson(rule), 'rules.ndjson')
-          .expect(200);
-
-        expect(body.errors[0]).to.eql({
-          rule_id: '(unknown id)',
-          error: {
-            message: 'Invalid value "0" supplied to "threshold,value"',
-            status_code: 400,
-          },
-        });
-      });
-
-      it('should result in 400 error if cardinality is also an agg field', async () => {
-        const baseRule = getThresholdRuleForSignalTesting(['*']);
-        const rule = {
-          ...baseRule,
-          threshold: {
-            ...baseRule.threshold,
-            cardinality: [
-              {
-                field: 'process.name',
-                value: 5,
-              },
-            ],
-          },
-        };
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .set('kbn-xsrf', 'true')
-          .attach('file', ruleToNdjson(rule), 'rules.ndjson')
-          .expect(200);
-
-        expect(body.errors[0]).to.eql({
-          rule_id: '(unknown id)',
-          error: {
-            message: 'Cardinality of a field that is being aggregated on is always 1',
-            status_code: 400,
-          },
-        });
-      });
-    });
-
     describe('importing rules with an index', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest, log);
@@ -426,7 +327,7 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
           success: false,
           success_count: 1,
-          rules_count: 2,
+          rules_count: 1,
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
@@ -444,7 +345,7 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [],
           success: true,
           success_count: 1,
-          rules_count: 2,
+          rules_count: 1,
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
@@ -1031,7 +932,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(body).to.eql({
             success: false,
             success_count: 1,
-            rules_count: 1,
+            rules_count: 2,
             errors: [
               {
                 rule_id: 'rule-1',
