@@ -6,6 +6,7 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
+import { Logger } from '@kbn/core/server';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import {
   ExecutorParamsSchema,
@@ -25,8 +26,7 @@ export interface ExternalServiceValidation {
 }
 
 export interface CreateIncidentParams {
-  summary: string;
-  description: string;
+  incident: Incident;
 }
 
 export interface ExternalServiceIncidentResponse {
@@ -35,13 +35,28 @@ export interface ExternalServiceIncidentResponse {
   url: string;
   pushedDate: string;
 }
+export type Incident = Omit<ExecutorSubActionPushParams['incident'], 'externalId'>;
 
 export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
 export type ExecutorSubActionPushParams = TypeOf<typeof ExecutorSubActionPushParamsSchema>;
-
+export type PushToServiceApiParams = ExecutorSubActionPushParams;
 export interface ExternalService {
   createIncident: (params: CreateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
 }
+
+export interface ExternalServiceApiHandlerArgs {
+  externalService: ExternalService;
+}
+export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerArgs {
+  params: PushToServiceApiParams;
+  logger: Logger;
+}
+export type PushToServiceResponse = ExternalServiceIncidentResponse;
+
+export interface ExternalServiceApi {
+  pushToService: (args: PushToServiceApiHandlerArgs) => Promise<PushToServiceResponse>;
+}
+
 export type CasesWebhookExecutorResultData = ExternalServiceIncidentResponse;
 
 export interface ResponseError {

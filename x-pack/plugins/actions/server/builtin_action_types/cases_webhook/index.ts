@@ -14,12 +14,14 @@ import {
   CasesWebhookPublicConfigurationType,
   CasesWebhookSecretConfigurationType,
   ExecutorParams,
+  ExecutorSubActionPushParams,
 } from './types';
 import { nullableType } from '../lib/nullable';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../../types';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { createExternalService } from './service';
 import { ExecutorParamsSchema } from './schema';
+import { api } from './api';
 
 // config definition
 export enum CasesWebhookMethods {
@@ -74,6 +76,8 @@ const SecretsSchema = schema.object(secretSchemaProps, {
 
 // params definition
 export type ActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
+
+const supportedSubActions: string[] = ['pushToService'];
 
 export const ActionTypeId = '.cases-webhook';
 // action type definition
@@ -145,32 +149,44 @@ export async function executor(
   }: { logger: Logger; configurationUtilities: ActionsConfigurationUtilities },
   execOptions: CasesWebhookActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<unknown>> {
-  try {
-    const actionId = execOptions.actionId;
-    const { subAction, subActionParams } = execOptions.params;
-    const externalService = createExternalService(
-      actionId,
-      {
-        config: execOptions.config,
-        secrets: execOptions.secrets,
-      },
-      logger,
-      configurationUtilities
-    );
-    if (subAction === 'pushToService') {
-      const { summary, description } = subActionParams.incident;
-      const result = await externalService.createIncident({
-        summary,
-        description: description || '',
-      });
-      console.log('result', result);
-      return result; // successResult(actionId, result);
-    }
-    return errorResultRequestFailed(actionId, 'wow what a massive fail');
-  } catch (err) {
-    console.log('err', err);
-    return err;
+  const actionId = execOptions.actionId;
+  const { subAction, subActionParams } = execOptions.params;
+  let data: CasesWebhookExecutorResultData | null = null;
+
+  const externalService = createExternalService(
+    actionId,
+    {
+      config: execOptions.config,
+      secrets: execOptions.secrets,
+    },
+    logger,
+    configurationUtilities
+  );
+
+  if (!api[subAction]) {
+    const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;
+    logger.error(errorMessage);
+    throw new Error(errorMessage);
   }
+
+  if (!supportedSubActions.includes(subAction)) {
+    const errorMessage = `[Action][ExternalService] subAction ${subAction} not implemented.`;
+    logger.error(errorMessage);
+    throw new Error(errorMessage);
+  }
+
+  if (subAction === 'pushToService') {
+    const pushToServiceParams = subActionParams as ExecutorSubActionPushParams;
+    data = await api.pushToService({
+      externalService,
+      params: pushToServiceParams,
+      logger,
+    });
+
+    logger.debug(`response push to service for incident id: ${data.id}`);
+  }
+
+  return { status: 'ok', data: data ?? {}, actionId };
 
   // if (isOk(result)) {
   //   // const {

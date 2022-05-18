@@ -29,7 +29,7 @@ export const createExternalService = (
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities
 ): ExternalService => {
-  const { url, incident } = config as CasesWebhookPublicConfigurationType;
+  const { url, incident: incidentStringified } = config as CasesWebhookPublicConfigurationType;
   const { password, user } = secrets as CasesWebhookSecretConfigurationType;
   if (!url || !password || !user) {
     throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
@@ -132,17 +132,15 @@ export const createExternalService = (
   };
 
   const replaceSumDesc = (sum: string, desc: string) => {
-    let str = incident; // incident is stringified object
+    let str = incidentStringified; // incident is stringified object
     str = str.replace('$SUM', sum);
     str = str.replace('$DESC', desc);
     return JSON.parse(str);
   };
 
-  const createIncident = async ({
-    summary,
-    description,
-  }: CreateIncidentParams): Promise<unknown> => {
-    const data = replaceSumDesc(summary, description);
+  const createIncident = async ({ incident }: CreateIncidentParams): Promise<unknown> => {
+    const { summary, description } = incident;
+    const data = replaceSumDesc(summary, description ?? '');
     console.log('cases webhook data!!', {
       data,
     });
@@ -166,7 +164,7 @@ export const createExternalService = (
         console.log('DATA', data2);
         logger.debug(`response from webhook action "${actionId}": [HTTP ${status}] ${statusText}`);
 
-        return successResult(actionId, data);
+        return data; // successResult(actionId, data);
       } else {
         const { error } = result;
         if (error.response) {
