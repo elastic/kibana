@@ -20,19 +20,20 @@ const changedPaths = {
 
 export { changedPaths as mockedChangedPaths };
 
-export const mockApplyDeprecations = jest.fn<ReturnType<typeof applyDeprecations>,
-  Parameters<typeof applyDeprecations>>((config, deprecations, createAddDeprecation) => ({ config, changedPaths }));
+export const mockApplyDeprecations = jest.fn<
+  ReturnType<typeof applyDeprecations>,
+  Parameters<typeof applyDeprecations>
+>((config, deprecations, createAddDeprecation) => ({ config, changedPaths }));
 
 jest.mock('./deprecation/apply_deprecations', () => ({
   applyDeprecations: mockApplyDeprecations,
 }));
 
-
 export const docLinksMock = {
-  settings: 'settings'
+  settings: 'settings',
 } as DocLinks;
 export const getDocLinksMock = jest.fn().mockReturnValue(docLinksMock);
 
 jest.doMock('@kbn/doc-links', () => ({
   getDocLinks: getDocLinksMock,
-}))
+}));

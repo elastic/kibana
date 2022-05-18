@@ -9,7 +9,12 @@
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first, take } from 'rxjs/operators';
 
-import { mockApplyDeprecations, mockedChangedPaths, docLinksMock, getDocLinksMock } from './config_service.test.mocks';
+import {
+  mockApplyDeprecations,
+  mockedChangedPaths,
+  docLinksMock,
+  getDocLinksMock,
+} from './config_service.test.mocks';
 import { rawConfigServiceMock } from './raw/raw_config_service.mock';
 
 import { schema } from '@kbn/config-schema';
