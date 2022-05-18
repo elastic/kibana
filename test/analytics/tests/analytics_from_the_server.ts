@@ -87,7 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       // Find the action calling to report test-plugin-lifecycle events.
-      const reportTestPluginLifecylecEventsAction = reportEventsActions.find(
+      const reportTestPluginLifecycleEventsAction = reportEventsActions.find(
         (reportEventAction) => {
           return (
             reportEventAction.action === 'reportEvents' &&
@@ -96,19 +96,19 @@ export default function ({ getService }: FtrProviderContext) {
         }
       );
 
-      expect(reportTestPluginLifecylecEventsAction).to.not.be('undefined');
+      expect(reportTestPluginLifecycleEventsAction).to.not.be('undefined');
       // Find the setup and start events and validate that they are sent in the correct order.
-      const initialContext = reportTestPluginLifecylecEventsAction!.meta[0].context; // read this from the reportTestPlugin
-      const reportEventContext = reportTestPluginLifecylecEventsAction!.meta[1].context;
+      const initialContext = reportTestPluginLifecycleEventsAction!.meta[0].context; // read this from the reportTestPlugin
+      const reportEventContext = reportTestPluginLifecycleEventsAction!.meta[1].context;
 
-      const setupEvent = reportTestPluginLifecylecEventsAction!.meta.findIndex(
+      const setupEvent = reportTestPluginLifecycleEventsAction!.meta.findIndex(
         (event: Event) =>
           event.event_type === 'test-plugin-lifecycle' &&
           event.properties.plugin === 'analyticsPluginA' &&
           event.properties.step === 'setup'
       );
 
-      const startEvent = reportTestPluginLifecylecEventsAction!.meta.findIndex(
+      const startEvent = reportTestPluginLifecycleEventsAction!.meta.findIndex(
         (event: Event) =>
           event.event_type === 'test-plugin-lifecycle' &&
           event.properties.plugin === 'analyticsPluginA' &&
@@ -122,13 +122,13 @@ export default function ({ getService }: FtrProviderContext) {
       const events = await ebtServerHelper.getLastEvents(2, ['test-plugin-lifecycle']);
       expect(events).to.eql([
         {
-          timestamp: reportTestPluginLifecylecEventsAction!.meta[setupEvent].timestamp,
+          timestamp: reportTestPluginLifecycleEventsAction!.meta[setupEvent].timestamp,
           event_type: 'test-plugin-lifecycle',
           context: initialContext,
           properties: { plugin: 'analyticsPluginA', step: 'setup' },
         },
         {
-          timestamp: reportTestPluginLifecylecEventsAction!.meta[startEvent].timestamp,
+          timestamp: reportTestPluginLifecycleEventsAction!.meta[startEvent].timestamp,
           event_type: 'test-plugin-lifecycle',
           context: reportEventContext,
           properties: { plugin: 'analyticsPluginA', step: 'start' },
