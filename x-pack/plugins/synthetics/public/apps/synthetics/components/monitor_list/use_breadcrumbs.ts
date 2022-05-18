@@ -10,7 +10,7 @@ import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { MONITOR_MANAGEMENT_ROUTE } from '../../../../../common/constants';
 import { PLUGIN } from '../../../../../common/constants/plugin';
 
-export const useMonitorManagementBreadcrumbs = () => {
+export const useMonitorListBreadcrumbs = () => {
   const kibana = useKibana();
   const appPath = kibana.services.application?.getUrlForApp(PLUGIN.SYNTHETICS_PLUGIN_ID) ?? '';
 

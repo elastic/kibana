@@ -24,7 +24,7 @@ import {
   MONITOR_MANAGEMENT_ROUTE,
   OVERVIEW_ROUTE,
 } from '../../../common/constants';
-import { MonitorManagementPage } from './components/monitor_management/monitor_management_page';
+import { MonitorListPage } from './components/monitor_list/monitor_list_page';
 import { apiService } from '../../utils/api_service';
 
 type RouteProps = {
@@ -91,7 +91,7 @@ const getRoutes = (): RouteProps[] => {
       path: MONITOR_MANAGEMENT_ROUTE,
       component: () => (
         <ServiceAllowedWrapper>
-          <MonitorManagementPage />
+          <MonitorListPage />
         </ServiceAllowedWrapper>
       ),
       dataTestSubj: 'syntheticsMonitorManagementPage',
