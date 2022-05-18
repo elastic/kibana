@@ -70,12 +70,16 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
   muteAll,
   mutedInstanceIds,
   executionStatus,
+  snoozeSchedule,
+  isSnoozedUntil,
   ...rest
 }) => ({
   ...rest,
   api_key_owner: apiKeyOwner,
   created_by: createdBy,
   updated_by: updatedBy,
+  snooze_schedule: snoozeSchedule,
+  ...(isSnoozedUntil ? { is_snoozed_until: isSnoozedUntil } : {}),
   ...(alertTypeId ? { rule_type_id: alertTypeId } : {}),
   ...(scheduledTaskId ? { scheduled_task_id: scheduledTaskId } : {}),
   ...(createdAt ? { created_at: createdAt } : {}),
