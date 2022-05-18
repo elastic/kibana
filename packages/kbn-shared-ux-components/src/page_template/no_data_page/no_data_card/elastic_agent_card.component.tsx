@@ -68,10 +68,10 @@ export const ElasticAgentCardComponent: FunctionComponent<ElasticAgentCardCompon
     <EuiImage
       size="fullWidth"
       style={{
-        width: `max(100%, 360px)`,
+        width: 'max(100%, 360px)',
         height: 240,
-        objectFit: `cover`,
-        background: `aliceblue`,
+        objectFit: 'cover',
+        background: 'aliceblue',
       }}
       url={ElasticAgentCardIllustration}
       alt=""
