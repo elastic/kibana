@@ -74,7 +74,7 @@ export async function syncMvtSourceData({
 
     const tileUrl = await source.getTileUrl(requestMeta, refreshToken);
     if (source.isESSource()) {
-      source.getInspectorAdapters()?.vectorTiles.addLayer(layerId, layerName, tileUrl);
+      syncContext.inspectorAdapters.vectorTiles.addLayer(layerId, layerName, tileUrl);
     }
     const sourceData = {
       tileUrl,

@@ -98,7 +98,6 @@ export interface ILayer {
   ): ReactElement<any> | null;
   getInFlightRequestTokens(): symbol[];
   getPrevRequestToken(dataId: string): symbol | undefined;
-  destroy: () => void;
   isPreviewLayer: () => boolean;
   areLabelsOnTop: () => boolean;
   supportsLabelsOnTop: () => boolean;
@@ -149,12 +148,6 @@ export class AbstractLayer implements ILayer {
       includeInFitToBounds:
         typeof options.includeInFitToBounds === 'boolean' ? options.includeInFitToBounds : true,
     };
-  }
-
-  destroy() {
-    if (this._source) {
-      this._source.destroy();
-    }
   }
 
   constructor({ layerDescriptor, source }: ILayerArguments) {

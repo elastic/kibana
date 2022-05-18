@@ -8,7 +8,6 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { ReactElement } from 'react';
-import { Adapters } from '@kbn/inspector-plugin/public';
 import { GeoJsonProperties } from 'geojson';
 import { copyPersistentState } from '../../reducers/copy_persistent_state';
 import { IField } from '../fields/field';
@@ -41,9 +40,7 @@ export type ImmutableSourceProperty = {
 };
 
 export interface ISource {
-  destroy(): void;
   getDisplayName(): Promise<string>;
-  getInspectorAdapters(): Adapters | undefined;
   getType(): string;
   isFieldAware(): boolean;
   isFilterByMapBounds(): boolean;
@@ -74,14 +71,10 @@ export interface ISource {
 
 export class AbstractSource implements ISource {
   readonly _descriptor: AbstractSourceDescriptor;
-  private readonly _inspectorAdapters?: Adapters;
 
-  constructor(descriptor: AbstractSourceDescriptor, inspectorAdapters?: Adapters) {
+  constructor(descriptor: AbstractSourceDescriptor) {
     this._descriptor = descriptor;
-    this._inspectorAdapters = inspectorAdapters;
   }
-
-  destroy(): void {}
 
   cloneDescriptor(): AbstractSourceDescriptor {
     return copyPersistentState(this._descriptor);
@@ -97,10 +90,6 @@ export class AbstractSource implements ISource {
    */
   async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
     return [];
-  }
-
-  getInspectorAdapters(): Adapters | undefined {
-    return this._inspectorAdapters;
   }
 
   getType(): string {

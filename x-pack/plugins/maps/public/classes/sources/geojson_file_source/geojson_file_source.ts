@@ -6,7 +6,6 @@
  */
 
 import { Feature, FeatureCollection } from 'geojson';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { AbstractVectorSource, BoundsRequestMeta, GeoJsonWithMeta } from '../vector_source';
 import { EMPTY_FEATURE_COLLECTION, FIELD_ORIGIN, SOURCE_TYPES } from '../../../../common/constants';
 import {
@@ -55,9 +54,9 @@ export class GeoJsonFileSource extends AbstractVectorSource {
     };
   }
 
-  constructor(descriptor: Partial<GeojsonFileSourceDescriptor>, inspectorAdapters?: Adapters) {
+  constructor(descriptor: Partial<GeojsonFileSourceDescriptor>) {
     const normalizedDescriptor = GeoJsonFileSource.createDescriptor(descriptor);
-    super(normalizedDescriptor, inspectorAdapters);
+    super(normalizedDescriptor);
   }
 
   _getFields(): InlineFieldDescriptor[] {
