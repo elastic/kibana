@@ -34,7 +34,7 @@ export function UXSection({ bucketSize }: Props) {
 
   const seriesList = [
     {
-      name: 'Page load distribution',
+      name: PAGE_LOAD_DISTRIBUTION_TITLE,
       time: {
         from: relativeStart,
         to: relativeEnd,
@@ -98,7 +98,7 @@ export function UXSection({ bucketSize }: Props) {
         <ExploratoryViewEmbeddable
           attributes={seriesList}
           reportType="data-distribution"
-          title={'Page load distribution'}
+          title={PAGE_LOAD_DISTRIBUTION_TITLE}
           withActions={['save', 'explore']}
         />
       </div>
@@ -112,3 +112,10 @@ export function UXSection({ bucketSize }: Props) {
     </SectionContainer>
   );
 }
+
+const PAGE_LOAD_DISTRIBUTION_TITLE = i18n.translate(
+  'xpack.observability.overview.ux.pageLoadDistribution.title',
+  {
+    defaultMessage: 'Page load distribution',
+  }
+);
