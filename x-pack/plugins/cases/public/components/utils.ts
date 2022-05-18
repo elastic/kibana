@@ -10,7 +10,6 @@ import { ConnectorTypes } from '../../common/api';
 import { FieldConfig, ValidationConfig } from '../common/shared_imports';
 import { CasesPluginStart } from '../types';
 import { connectorValidator as swimlaneConnectorValidator } from './connectors/swimlane/validator';
-import { connectorValidator as servicenowConnectorValidator } from './connectors/servicenow/validator';
 import { CaseActionConnector } from './types';
 
 export const getConnectorById = (
@@ -23,8 +22,16 @@ const validators: Record<
   (connector: CaseActionConnector) => ReturnType<ValidationConfig['validator']>
 > = {
   [ConnectorTypes.swimlane]: swimlaneConnectorValidator,
-  [ConnectorTypes.serviceNowITSM]: servicenowConnectorValidator,
-  [ConnectorTypes.serviceNowSIR]: servicenowConnectorValidator,
+};
+
+export const connectorDeprecationValidator = (
+  connector: CaseActionConnector
+): ReturnType<ValidationConfig['validator']> => {
+  if (connector.isDeprecated) {
+    return {
+      message: 'Deprecated connector',
+    };
+  }
 };
 
 export const getConnectorsFormValidators = ({
@@ -36,6 +43,14 @@ export const getConnectorsFormValidators = ({
 }): FieldConfig => ({
   ...config,
   validations: [
+    {
+      validator: ({ value: connectorId }) => {
+        const connector = getConnectorById(connectorId as string, connectors);
+        if (connector != null) {
+          return connectorDeprecationValidator(connector);
+        }
+      },
+    },
     {
       validator: ({ value: connectorId }) => {
         const connector = getConnectorById(connectorId as string, connectors);

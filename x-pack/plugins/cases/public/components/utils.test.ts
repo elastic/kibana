@@ -7,9 +7,19 @@
 
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
-import { getConnectorIcon, isDeprecatedConnector } from './utils';
+import { connectorDeprecationValidator, getConnectorIcon, isDeprecatedConnector } from './utils';
 
 describe('Utils', () => {
+  const connector = {
+    id: 'test',
+    actionTypeId: '.webhook',
+    name: 'Test',
+    config: { usesTableApi: false },
+    secrets: {},
+    isPreconfigured: false,
+    isDeprecated: false,
+  };
+
   describe('getConnectorIcon', () => {
     const { createMockActionTypeModel } = actionTypeRegistryMock;
     const mockTriggersActionsUiService = triggersActionsUiMock.createStart();
@@ -38,20 +48,23 @@ describe('Utils', () => {
     });
   });
 
-  describe('isDeprecatedConnector', () => {
-    const connector = {
-      id: 'test',
-      actionTypeId: '.webhook',
-      name: 'Test',
-      config: { usesTableApi: false },
-      secrets: {},
-      isPreconfigured: false,
-      isDeprecated: false,
-    };
+  describe('connectorDeprecationValidator', () => {
+    it('returns undefined if the connector is not deprecated', () => {
+      expect(connectorDeprecationValidator(connector)).toBe(undefined);
+    });
 
+    it('returns a deprecation message if the connector is deprecated', () => {
+      expect(connectorDeprecationValidator({ ...connector, isDeprecated: true })).toEqual({
+        message: 'Deprecated connector',
+      });
+    });
+  });
+
+  describe('isDeprecatedConnector', () => {
     it('returns false if the connector is not defined', () => {
       expect(isDeprecatedConnector()).toBe(false);
     });
+
     it('returns false if the connector is marked as deprecated', () => {
       expect(isDeprecatedConnector({ ...connector, isDeprecated: false })).toBe(false);
     });
@@ -59,10 +72,17 @@ describe('Utils', () => {
     it('returns true if the connector is marked as deprecated', () => {
       expect(isDeprecatedConnector({ ...connector, isDeprecated: true })).toBe(true);
     });
+
     it('returns true if the connector is marked as deprecated (preconfigured connector)', () => {
       expect(
         isDeprecatedConnector({ ...connector, isDeprecated: true, isPreconfigured: true })
       ).toBe(true);
+    });
+
+    it('returns false if the connector is not marked as deprecated (preconfigured connector)', () => {
+      expect(
+        isDeprecatedConnector({ ...connector, isDeprecated: false, isPreconfigured: true })
+      ).toBe(false);
     });
   });
 });
