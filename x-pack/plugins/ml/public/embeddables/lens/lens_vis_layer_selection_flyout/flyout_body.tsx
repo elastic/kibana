@@ -10,7 +10,6 @@ import type { Embeddable } from '@kbn/lens-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import './style.scss';
@@ -20,12 +19,11 @@ import {
   EuiButton,
   EuiTitle,
   EuiSpacer,
-  EuiCallOut,
   EuiPanel,
   EuiIcon,
+  EuiText,
 } from '@elastic/eui';
 
-import { extractErrorMessage } from '../../../../common/util/errors';
 import {
   getLayers,
   getJobsItemsFromEmbeddable,
@@ -73,12 +71,12 @@ export const FlyoutBody: FC<Props> = ({ onClose, embeddable, data, share, lens }
               >
                 {layer.icon && (
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type={layer.icon} />{' '}
+                    <EuiIcon type={layer.icon} />
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem grow>
                   <EuiTitle size="xxs">
-                    <h5>{layer.label}</h5>
+                    <h5 className={layer.isCompatible ? '' : 'mlSubdued'}>{layer.label}</h5>
                   </EuiTitle>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -87,25 +85,29 @@ export const FlyoutBody: FC<Props> = ({ onClose, embeddable, data, share, lens }
             <div className="mlLnsLayerPanel__row">
               {layer.isCompatible ? (
                 <>
-                  <EuiCallOut
-                    size="s"
-                    color="success"
-                    iconType={'checkInCircleFilled'}
-                    title={i18n.translate(
-                      'xpack.ml.embeddables.lensLayerFlyout.createJobCalloutTitle',
-                      {
-                        defaultMessage: 'This layer can be used to create a {type} job',
-                        values: {
-                          type:
-                            layer.jobWizardType === CREATED_BY_LABEL.MULTI_METRIC
-                              ? 'multi-metric'
-                              : 'single metric',
-                        },
-                      }
-                    )}
-                  />
-                  <EuiSpacer size="s" />
-                  <EuiButton onClick={createADJob.bind(null, i)} size="s">
+                  <EuiFlexGroup gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s">
+                        <EuiIcon type="checkInCircleFilled" color="success" />
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiText size="s">
+                        <FormattedMessage
+                          id="xpack.ml.embeddables.lensLayerFlyout.createJobCalloutTitle"
+                          defaultMessage="This layer can be used to create a {type} job"
+                          values={{
+                            type:
+                              layer.jobWizardType === CREATED_BY_LABEL.MULTI_METRIC
+                                ? 'multi-metric'
+                                : 'single metric',
+                          }}
+                        />
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiSpacer size="m" />
+                  <EuiButton onClick={createADJob.bind(null, i)} size="s" color="success">
                     <FormattedMessage
                       id="xpack.ml.embeddables.lensLayerFlyout.createJobButton"
                       defaultMessage="Create job from this layer"
@@ -114,19 +116,23 @@ export const FlyoutBody: FC<Props> = ({ onClose, embeddable, data, share, lens }
                   </EuiButton>
                 </>
               ) : (
-                <EuiCallOut
-                  size="s"
-                  color="warning"
-                  iconType="alert"
-                  title={
-                    layer.error
-                      ? extractErrorMessage(layer.error)
-                      : i18n.translate('xpack.ml.embeddables.lensLayerFlyout.defaultLayerError', {
-                          defaultMessage:
-                            'This layer cannot be used to create an anomaly detection job',
-                        })
-                  }
-                />
+                <>
+                  <EuiFlexGroup gutterSize="s" color="subdued">
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s">
+                        <EuiIcon type="crossInACircleFilled" color="subdued" />
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiText color="subdued" size="s">
+                        <FormattedMessage
+                          id="xpack.ml.embeddables.lensLayerFlyout.defaultLayerError"
+                          defaultMessage="This layer cannot be used to create an anomaly detection job"
+                        />
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </>
               )}
             </div>
           </EuiPanel>

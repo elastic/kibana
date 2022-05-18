@@ -21,6 +21,7 @@ import {
   EuiFlyoutBody,
   EuiTitle,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 
 import { FlyoutBody } from './flyout_body';
@@ -46,10 +47,12 @@ export const LensLayerSelectionFlyout: FC<Props> = ({ onClose, embeddable, data,
           </h3>
         </EuiTitle>
         <EuiSpacer size="m" />
-        <FormattedMessage
-          id="xpack.ml.embeddables.lensLayerFlyout.secondTitle"
-          defaultMessage="Select a compatible layer from the visualization to create an anomaly detection job."
-        />
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.ml.embeddables.lensLayerFlyout.secondTitle"
+            defaultMessage="Select a compatible layer from the visualization to create an anomaly detection job."
+          />
+        </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody className="mlLensToJobFlyoutBody">
         <FlyoutBody
