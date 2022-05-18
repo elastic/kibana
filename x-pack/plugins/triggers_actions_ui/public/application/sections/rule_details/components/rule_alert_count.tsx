@@ -6,26 +6,13 @@
  */
 
 import React, { memo } from 'react';
-import semverLt from 'semver/functions/lt';
+import { formatRuleAlertCount } from '../../../../common/lib/format_rule_alert_count';
 
 interface Props {
   version?: string;
   value: string;
 }
 
-export const RuleAlertCount = memo((props: Props) => {
-  const { version, value } = props;
-
-  if (version) {
-    try {
-      const intValue = parseInt(value, 10);
-      if (intValue === 0 && semverLt(version, '8.3.0')) {
-        return <>{'--'}</>;
-      }
-    } catch (err) {
-      return <>{value}</>;
-    }
-  }
-
-  return <>{value}</>;
+export const RuleAlertCount = memo(({ version, value }: Props) => {
+  return <>{formatRuleAlertCount(value, version)}</>;
 });
