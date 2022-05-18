@@ -7,16 +7,27 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiConfirmModal, EuiComboBox, EuiFormRow, EuiSpacer, EuiToolTip, EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiConfirmModal,
+  EuiComboBox,
+  EuiFormRow,
+  EuiSpacer,
+  EuiToolTip,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
+
 import type { Agent } from '../../../../types';
 import {
   sendPostAgentUpgrade,
   sendPostBulkAgentUpgrade,
   useStartServices,
 } from '../../../../hooks';
+
 import { FALLBACK_VERSIONS, MAINTAINANCE_WINDOWS } from './constants';
 
 interface Props {
@@ -32,21 +43,29 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
 }) => {
   const { notifications } = useStartServices();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const fallbackVersions: Array<EuiComboBoxOptionOption<string>> = FALLBACK_VERSIONS.map((option) => ({
-    label: option,
-    value: option,
-  }));
-  const maintainanceOptions: Array<EuiComboBoxOptionOption<string>> = MAINTAINANCE_WINDOWS.map((option) => ({
-    label: option === 1 ? `${option} hour` : `${option} hours`,
-    value: `${option * 3600}`
-  }));
+  const fallbackVersions: Array<EuiComboBoxOptionOption<string>> = FALLBACK_VERSIONS.map(
+    (option) => ({
+      label: option,
+      value: option,
+    })
+  );
+  const maintainanceOptions: Array<EuiComboBoxOptionOption<string>> = MAINTAINANCE_WINDOWS.map(
+    (option) => ({
+      label: option === 1 ? `${option} hour` : `${option} hours`,
+      value: `${option * 3600}`,
+    })
+  );
   const [selectedVersion, setSelectedVersion] = useState([fallbackVersions[0]]);
-  const [selectedMantainanceWindow, setSelectedMantainanceWindow] = useState([maintainanceOptions[0]]);
+  const [selectedMantainanceWindow, setSelectedMantainanceWindow] = useState([
+    maintainanceOptions[0],
+  ]);
   const isSingleAgent = Array.isArray(agents) && agents.length === 1;
   const isAllAgents = agents === '';
 
-  const getVersion = (selectedVersion: EuiComboBoxOptionOption<string>[]) => selectedVersion[0].value as string;
-  const getRolloutDuration = (selectedMantainanceWindow: EuiComboBoxOptionOption<string>[]) =>  Number(selectedMantainanceWindow[0].value)
+  const getVersion = (selectedVersion: Array<EuiComboBoxOptionOption<string>>) =>
+    selectedVersion[0].value as string;
+  const getRolloutDuration = (selectedMantainanceWindow: Array<EuiComboBoxOptionOption<string>>) =>
+    Number(selectedMantainanceWindow[0].value);
 
   async function onSubmit() {
     const version = getVersion(selectedVersion);
@@ -59,7 +78,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
         : await sendPostBulkAgentUpgrade({
             agents: Array.isArray(agents) ? agents.map((agent) => agent.id) : agents,
             version,
-            rollout_duration_seconds: getRolloutDuration(selectedMantainanceWindow)
+            rollout_duration_seconds: getRolloutDuration(selectedMantainanceWindow),
           });
       if (error) {
         throw error;
@@ -169,7 +188,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
         )
       }
     >
-     <p>
+      <p>
         {isSingleAgent ? (
           <FormattedMessage
             id="xpack.fleet.upgradeAgents.upgradeSingleDescription"
@@ -189,12 +208,9 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
       </p>
       <EuiSpacer size="m" />
       <EuiFormRow
-        label= {i18n.translate(
-          'xpack.fleet.upgradeAgents.chooseVersionLabel',
-          {
-            defaultMessage: 'Upgrade version',
-          }
-        )}
+        label={i18n.translate('xpack.fleet.upgradeAgents.chooseVersionLabel', {
+          defaultMessage: 'Upgrade version',
+        })}
         fullWidth
       >
         <EuiComboBox
@@ -208,31 +224,32 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
-      { !isSingleAgent ?
+      {!isSingleAgent ? (
         <EuiFormRow
-          label= {
+          label={
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={false}>
-                {i18n.translate(
-                  'xpack.fleet.upgradeAgents.maintainanceAvailableLabel',
-                  {
-                    defaultMessage: 'Maintainance window available',
-                  }
-                )}
+                {i18n.translate('xpack.fleet.upgradeAgents.maintainanceAvailableLabel', {
+                  defaultMessage: 'Maintainance window available',
+                })}
               </EuiFlexItem>
               <EuiSpacer size="xs" />
               <EuiFlexItem grow={false}>
-                <EuiToolTip position="top" content={i18n.translate(
-                  'xpack.fleet.upgradeAgents.maintainanceAvailableTooltip',
-                  {
-                    defaultMessage: 'Defines the duration of time available to perform the upgrade. The agent upgrades are spread uniformly across this duration in order to avoid exhausting network resources.',
-                  }
-                )}>
+                <EuiToolTip
+                  position="top"
+                  content={i18n.translate(
+                    'xpack.fleet.upgradeAgents.maintainanceAvailableTooltip',
+                    {
+                      defaultMessage:
+                        'Defines the duration of time available to perform the upgrade. The agent upgrades are spread uniformly across this duration in order to avoid exhausting network resources.',
+                    }
+                  )}
+                >
                   <EuiIcon type="iInCircle" title="TooltipIcon" />
                 </EuiToolTip>
               </EuiFlexItem>
-          </EuiFlexGroup>
-        }
+            </EuiFlexGroup>
+          }
           fullWidth
         >
           <EuiComboBox
@@ -245,9 +262,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
             }}
           />
         </EuiFormRow>
-        : null
-      }
-
+      ) : null}
     </EuiConfirmModal>
   );
 };
