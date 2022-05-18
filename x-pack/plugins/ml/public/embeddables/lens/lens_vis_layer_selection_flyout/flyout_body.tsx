@@ -61,7 +61,7 @@ export const FlyoutBody: FC<Props> = ({ onClose, embeddable, data, share, lens }
 
   return (
     <>
-      {layerResult.map((l, i) => (
+      {layerResult.map((layer, i) => (
         <>
           <EuiPanel paddingSize="none">
             <header className="mlLnsLayerPanel__layerHeader">
@@ -71,21 +71,21 @@ export const FlyoutBody: FC<Props> = ({ onClose, embeddable, data, share, lens }
                 responsive={false}
                 className={'lnsLayerPanel__settingsStaticHeader'}
               >
-                {l.icon && (
+                {layer.icon && (
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type={l.icon} />{' '}
+                    <EuiIcon type={layer.icon} />{' '}
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem grow>
                   <EuiTitle size="xxs">
-                    <h5>{l.label}</h5>
+                    <h5>{layer.label}</h5>
                   </EuiTitle>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </header>
 
             <div className="mlLnsLayerPanel__row">
-              {l.compatible ? (
+              {layer.isCompatible ? (
                 <>
                   <EuiCallOut
                     size="s"
@@ -97,7 +97,7 @@ export const FlyoutBody: FC<Props> = ({ onClose, embeddable, data, share, lens }
                         defaultMessage: 'This layer can be used to create a {type} job',
                         values: {
                           type:
-                            l.jobWizardType === CREATED_BY_LABEL.MULTI_METRIC
+                            layer.jobWizardType === CREATED_BY_LABEL.MULTI_METRIC
                               ? 'multi-metric'
                               : 'single metric',
                         },
@@ -119,8 +119,8 @@ export const FlyoutBody: FC<Props> = ({ onClose, embeddable, data, share, lens }
                   color="warning"
                   iconType="alert"
                   title={
-                    l.error
-                      ? extractErrorMessage(l.error)
+                    layer.error
+                      ? extractErrorMessage(layer.error)
                       : i18n.translate('xpack.ml.embeddables.lensLayerFlyout.defaultLayerError', {
                           defaultMessage:
                             'This layer cannot be used to create an anomaly detection job',

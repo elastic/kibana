@@ -49,7 +49,7 @@ export interface LayerResult {
   layerType: typeof layerTypes[keyof typeof layerTypes];
   label: string;
   icon: VisualizationType['icon'];
-  compatible: boolean;
+  isCompatible: boolean;
   jobWizardType: CREATED_BY_LABEL | null;
   error?: ErrorType;
 }
@@ -150,7 +150,7 @@ export async function getLayers(
             label,
             icon,
             jobWizardType: createdBy,
-            compatible: true,
+            isCompatible: true,
           };
         } catch (error) {
           return {
@@ -158,8 +158,8 @@ export async function getLayers(
             layerType: layer.layerType,
             label,
             icon,
-            compatible: false,
             jobWizardType: null,
+            isCompatible: false,
             error,
           };
         }
