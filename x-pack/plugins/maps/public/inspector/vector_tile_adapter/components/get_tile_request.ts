@@ -36,7 +36,7 @@ export function getTileRequest(tileRequest: TileRequest): { path?: string; body?
   const geometryFieldName = searchParams.get('geometryFieldName') as string;
 
   const hasLabels = searchParams.has('hasLabels')
-    ? (searchParams.get('hasLabels') as unknown as boolean)
+    ? searchParams.get('hasLabels') === 'true'
     : false;
 
   if (tileRequest.tileUrl.includes(MVT_GETGRIDTILE_API_PATH)) {
