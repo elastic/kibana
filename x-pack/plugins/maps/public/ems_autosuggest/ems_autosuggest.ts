@@ -33,8 +33,13 @@ interface FileLayerFieldShim {
 export async function suggestEMSTermJoinConfig(
   sampleValuesConfig: SampleValuesConfig
 ): Promise<EMSTermJoinConfig | null> {
-  const fileLayers = await getEmsFileLayers();
-  return emsAutoSuggest(sampleValuesConfig, fileLayers);
+  try {
+    const fileLayers = await getEmsFileLayers();
+    return emsAutoSuggest(sampleValuesConfig, fileLayers);
+  } catch (error) {
+    // can not return suggestions since EMS is not available.
+    return null;
+  }
 }
 
 export function emsAutoSuggest(
