@@ -16,6 +16,10 @@ import {
 import { redirectWhenMissing } from '@kbn/kibana-utils-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import {
+  AnalyticsNoDataPageKibanaProvider,
+  AnalyticsNoDataPage,
+} from '@kbn/shared-ux-page-analytics-no-data';
+import {
   SavedSearch,
   getSavedSearch,
   getSavedSearchFullPathUrl,
@@ -45,6 +49,7 @@ export function DiscoverMainRoute() {
     data,
     toastNotifications,
     http: { basePath },
+    dataViewEditor,
   } = services;
   const [error, setError] = useState<Error>();
   const [savedSearch, setSavedSearch] = useState<SavedSearch>();
@@ -52,6 +57,7 @@ export function DiscoverMainRoute() {
   const [indexPatternList, setIndexPatternList] = useState<Array<SavedObject<DataViewAttributes>>>(
     []
   );
+  const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const { id } = useParams<DiscoverLandingParams>();
 
   useExecutionContext(core.executionContext, {
@@ -60,27 +66,20 @@ export function DiscoverMainRoute() {
     id: id || 'new',
   });
 
-  const navigateToOverview = useCallback(() => {
-    core.application.navigateToApp('kibanaOverview', { path: '#' });
-  }, [core.application]);
-
-  const checkForDataViews = useCallback(async () => {
-    const hasUserDataView = await data.dataViews.hasUserDataView().catch(() => true);
-    if (!hasUserDataView) {
-      navigateToOverview();
-    }
-    const defaultDataView = await data.dataViews.getDefaultDataView();
-    if (!defaultDataView) {
-      navigateToOverview();
-    }
-  }, [navigateToOverview, data.dataViews]);
-
-  useEffect(() => {
-    const savedSearchId = id;
-
-    async function loadDefaultOrCurrentIndexPattern(searchSource: ISearchSource) {
+  const loadDefaultOrCurrentIndexPattern = useCallback(
+    async (searchSource: ISearchSource) => {
       try {
-        await checkForDataViews();
+        const hasUserDataView = await data.dataViews.hasData.hasUserDataView().catch(() => false);
+        const hasEsData = await data.dataViews.hasData.hasESData().catch(() => false);
+        if (!hasUserDataView || !hasEsData) {
+          setShowNoDataPage(true);
+          return;
+        }
+        const defaultDataView = await data.dataViews.getDefaultDataView();
+        if (!defaultDataView) {
+          setShowNoDataPage(true);
+          return;
+        }
         const { appStateContainer } = getState({ history, uiSettings: config });
         const { index } = appStateContainer.getState();
         const ip = await loadIndexPattern(index || '', data.dataViews, config);
@@ -94,77 +93,90 @@ export function DiscoverMainRoute() {
       } catch (e) {
         setError(e);
       }
-    }
+    },
+    [config, data.dataViews, history, toastNotifications]
+  );
 
-    async function loadSavedSearch() {
-      try {
-        const currentSavedSearch = await getSavedSearch(savedSearchId, {
-          search: services.data.search,
-          savedObjectsClient: core.savedObjects.client,
-          spaces: services.spaces,
-        });
+  const loadSavedSearch = useCallback(async () => {
+    try {
+      const currentSavedSearch = await getSavedSearch(id, {
+        search: services.data.search,
+        savedObjectsClient: core.savedObjects.client,
+        spaces: services.spaces,
+      });
 
-        const loadedIndexPattern = await loadDefaultOrCurrentIndexPattern(
-          currentSavedSearch.searchSource
+      const loadedIndexPattern = await loadDefaultOrCurrentIndexPattern(
+        currentSavedSearch.searchSource
+      );
+
+      if (!loadedIndexPattern) {
+        return;
+      }
+
+      if (!currentSavedSearch.searchSource.getField('index')) {
+        currentSavedSearch.searchSource.setField('index', loadedIndexPattern);
+      }
+
+      setSavedSearch(currentSavedSearch);
+
+      if (currentSavedSearch.id) {
+        chrome.recentlyAccessed.add(
+          getSavedSearchFullPathUrl(currentSavedSearch.id),
+          currentSavedSearch.title ?? '',
+          currentSavedSearch.id
         );
-
-        if (!loadedIndexPattern) {
-          return;
-        }
-
-        if (!currentSavedSearch.searchSource.getField('index')) {
-          currentSavedSearch.searchSource.setField('index', loadedIndexPattern);
-        }
-
-        setSavedSearch(currentSavedSearch);
-
-        if (currentSavedSearch.id) {
-          chrome.recentlyAccessed.add(
-            getSavedSearchFullPathUrl(currentSavedSearch.id),
-            currentSavedSearch.title ?? '',
-            currentSavedSearch.id
-          );
-        }
-      } catch (e) {
-        if (e instanceof DataViewSavedObjectConflictError) {
-          setError(e);
-        } else {
-          redirectWhenMissing({
-            history,
-            navigateToApp: core.application.navigateToApp,
-            basePath,
-            mapping: {
-              search: '/',
-              'index-pattern': {
-                app: 'management',
-                path: `kibana/objects/savedSearches/${id}`,
-              },
+      }
+    } catch (e) {
+      if (e instanceof DataViewSavedObjectConflictError) {
+        setError(e);
+      } else {
+        redirectWhenMissing({
+          history,
+          navigateToApp: core.application.navigateToApp,
+          basePath,
+          mapping: {
+            search: '/',
+            'index-pattern': {
+              app: 'management',
+              path: `kibana/objects/savedSearches/${id}`,
             },
-            toastNotifications,
-            onBeforeRedirect() {
-              getUrlTracker().setTrackedUrl('/');
-            },
-            theme: core.theme,
-          })(e);
-        }
+          },
+          toastNotifications,
+          onBeforeRedirect() {
+            getUrlTracker().setTrackedUrl('/');
+          },
+          theme: core.theme,
+        })(e);
       }
     }
-
-    loadSavedSearch();
   }, [
-    core.savedObjects.client,
-    basePath,
-    chrome.recentlyAccessed,
-    config,
-    core.application.navigateToApp,
-    data.dataViews,
-    history,
     id,
-    services,
-    toastNotifications,
+    services.data.search,
+    services.spaces,
+    core.savedObjects.client,
+    core.application.navigateToApp,
     core.theme,
-    checkForDataViews,
+    loadDefaultOrCurrentIndexPattern,
+    chrome.recentlyAccessed,
+    history,
+    basePath,
+    toastNotifications,
   ]);
+
+  const onDataViewCreated = useCallback(
+    async (dataView: unknown) => {
+      if (dataView) {
+        setShowNoDataPage(false);
+        setError(undefined);
+        await loadSavedSearch();
+      }
+    },
+    [loadSavedSearch]
+  );
+
+  useEffect(() => {
+    loadSavedSearch();
+  }, [loadSavedSearch]);
 
   useEffect(() => {
     chrome.setBreadcrumbs(
@@ -173,6 +185,19 @@ export function DiscoverMainRoute() {
         : getRootBreadcrumbs()
     );
   }, [chrome, savedSearch]);
+
+  if (showNoDataPage) {
+    const analyticsServices = {
+      coreStart: core,
+      dataViews: data.dataViews,
+      dataViewEditor,
+    };
+    return (
+      <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
+        <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} />
+      </AnalyticsNoDataPageKibanaProvider>
+    );
+  }
 
   if (error) {
     return <DiscoverError error={error} />;
