@@ -33,7 +33,7 @@ export const VisualizationMissedDataViewError = ({
     <EuiEmptyPrompt
       iconType="alert"
       iconColor="danger"
-      data-test-subj="visualization-error"
+      data-test-subj="visualization-missed-data-view-error"
       actions={
         renderMode === 'edit' && isManagementEnabled && isIndexPatternManagementEnabled ? (
           <RedirectAppLinks navigateToUrl={application.navigateToUrl}>

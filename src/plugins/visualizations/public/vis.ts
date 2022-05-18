@@ -150,7 +150,7 @@ export class Vis<TVisParams = VisParams> {
       const aggs = state.data.aggs ? cloneDeep(state.data.aggs) : [];
       const configStates = this.initializeDefaultsFromSchemas(aggs, this.type.schemas.all || []);
 
-      if (!this.data.indexPattern) {
+      if (!this.data.indexPattern && aggs.length) {
         this.data.indexPattern = new DataView({
           spec: {
             id: state.data.searchSource?.index ?? '-',
@@ -162,7 +162,9 @@ export class Vis<TVisParams = VisParams> {
         this.data.searchSource?.setField('index', this.data.indexPattern);
       }
 
-      this.data.aggs = getAggs().createAggConfigs(this.data.indexPattern, configStates);
+      if (this.data.indexPattern) {
+        this.data.aggs = getAggs().createAggConfigs(this.data.indexPattern, configStates);
+      }
     }
   }
 
