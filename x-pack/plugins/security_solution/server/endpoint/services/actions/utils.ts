@@ -98,7 +98,7 @@ export const getActionCompletionInfo = (
   const completedInfo: ActionCompletionInfo = {
     isCompleted: Boolean(agentIds.length),
     completedAt: undefined,
-    wasSuccessful: true,
+    wasSuccessful: Boolean(agentIds.length),
     errors: undefined,
   };
 
@@ -107,12 +107,15 @@ export const getActionCompletionInfo = (
   for (const agentId of agentIds) {
     if (!responsesByAgentId[agentId] || !responsesByAgentId[agentId].isCompleted) {
       completedInfo.isCompleted = false;
+      completedInfo.wasSuccessful = false;
       break;
     }
   }
 
-  // If completed, then get the completed at date
+  // If completed, then get the completed at date and determine if action was successful or not
   if (completedInfo.isCompleted) {
+    const responseErrors: ActionCompletionInfo['errors'] = [];
+
     for (const normalizedAgentResponse of Object.values(responsesByAgentId)) {
       if (
         !completedInfo.completedAt ||
@@ -120,6 +123,17 @@ export const getActionCompletionInfo = (
       ) {
         completedInfo.completedAt = normalizedAgentResponse.completedAt;
       }
+
+      if (!normalizedAgentResponse.wasSuccessful) {
+        completedInfo.wasSuccessful = false;
+        responseErrors.push(
+          ...(normalizedAgentResponse.errors ? normalizedAgentResponse.errors : [])
+        );
+      }
+    }
+
+    if (responseErrors.length) {
+      completedInfo.errors = responseErrors;
     }
   }
 
