@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import * as i18n from './translations';
 import { CredentialsApiUrl } from './credentials_api_url';
-import { CredentialsAuth } from './credentials_auth';
+import { CredentialsAuth, OAuth } from './auth_types';
 
 interface Props {
   readOnly: boolean;
@@ -35,6 +35,14 @@ const CredentialsComponent: React.FC<Props> = ({ readOnly, isLoading }) => {
           </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiSwitch
+        label={i18n.IS_OAUTH}
+        disabled={readOnly}
+        checked={isOAuth || false}
+        onChange={switchIsOAuth}
+      />
+      <EuiSpacer size="l" />
       <EuiFlexItem>
         <CredentialsAuth readOnly={readOnly} isLoading={isLoading} />
       </EuiFlexItem>

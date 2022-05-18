@@ -9,15 +9,15 @@ import React, { memo } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCallOut,
   EuiFlyout,
-  EuiFlyoutHeader,
-  EuiTitle,
   EuiFlyoutBody,
   EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiSteps,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -26,7 +26,7 @@ import { useForm, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook
 import { CredentialsApiUrl } from './credentials_api_url';
 import { ApplicationRequiredCallout } from './application_required_callout';
 import { SNStoreLink } from './sn_store_button';
-import { CredentialsAuth } from './credentials_auth';
+import { CredentialsAuth, OAuth } from './auth_types';
 
 const title = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.updateFormTitle',
@@ -154,27 +154,6 @@ const UpdateConnectorComponent: React.FC<Props> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty data-test-subj="snUpdateInstallationCancel" onClick={onCancel}>
-              {cancelButtonText}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="snUpdateInstallationSubmit"
-              onClick={onConfirm}
-              color="danger"
-              fill
-              disabled={!form.isValid}
-              isLoading={isLoading}
-            >
-              {confirmButtonText}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 };
