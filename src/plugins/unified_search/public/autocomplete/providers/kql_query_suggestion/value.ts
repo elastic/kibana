@@ -8,6 +8,8 @@
 
 import { flatten } from 'lodash';
 import { CoreSetup } from '@kbn/core/public';
+// for replace IIndexPattern => DataView and IFieldType => DataViewField
+// need to fix the issue https://github.com/elastic/kibana/issues/131292
 import type { IIndexPattern, IFieldType } from '@kbn/data-views-plugin/common';
 import { escapeQuotes } from './lib/escape_kuery';
 import { KqlQuerySuggestionProvider } from './types';

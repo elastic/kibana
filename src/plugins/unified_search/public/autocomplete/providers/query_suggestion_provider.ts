@@ -7,6 +7,7 @@
  */
 
 import { ValueSuggestionsMethod } from '@kbn/data-plugin/common';
+// for replace IIndexPattern => DataView need to fix the issue https://github.com/elastic/kibana/issues/131292
 import type { DataViewField, IIndexPattern } from '@kbn/data-views-plugin/common';
 
 export enum QuerySuggestionTypes {
