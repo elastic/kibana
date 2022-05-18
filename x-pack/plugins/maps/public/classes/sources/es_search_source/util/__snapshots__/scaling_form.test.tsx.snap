@@ -11,6 +11,7 @@ exports[`scaling form should disable clusters option when clustering is not supp
         id="xpack.maps.esSearch.scaleTitle"
         values={Object {}}
       />
+       
       <ScalingDocumenationPopover
         clustersOptionLabel="Show clusters when results exceed 10,000"
         limitOptionLabel="Limit results to 10,000"
@@ -88,6 +89,7 @@ exports[`scaling form should render 1`] = `
         id="xpack.maps.esSearch.scaleTitle"
         values={Object {}}
       />
+       
       <ScalingDocumenationPopover
         clustersOptionLabel="Show clusters when results exceed 10,000"
         limitOptionLabel="Limit results to 10,000"
