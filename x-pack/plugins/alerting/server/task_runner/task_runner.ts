@@ -25,6 +25,7 @@ import {
   getRecoveredAlerts,
   ruleExecutionStatusToRaw,
   validateRuleTypeParams,
+  isRuleSnoozed,
 } from '../lib';
 import {
   Rule,
@@ -247,18 +248,6 @@ export class TaskRunner<
     }
   }
 
-  private isRuleSnoozed(rule: SanitizedRule<Params>): boolean {
-    if (rule.muteAll) {
-      return true;
-    }
-
-    if (rule.snoozeEndTime == null) {
-      return false;
-    }
-
-    return Date.now() < rule.snoozeEndTime.getTime();
-  }
-
   private shouldLogAndScheduleActionsForAlerts() {
     // if execution hasn't been cancelled, return true
     if (!this.cancelled) {
@@ -477,7 +466,10 @@ export class TaskRunner<
       });
     }
 
-    const ruleIsSnoozed = this.isRuleSnoozed(rule);
+    const ruleIsSnoozed = isRuleSnoozed(rule);
+    if (ruleIsSnoozed) {
+      this.markRuleAsSnoozed(rule.id);
+    }
     if (!ruleIsSnoozed && this.shouldLogAndScheduleActionsForAlerts()) {
       const mutedAlertIdsSet = new Set(mutedInstanceIds);
 
@@ -578,6 +570,23 @@ export class TaskRunner<
       fakeRequest
     );
     return this.executeRule(fakeRequest, rule, validatedParams, executionHandler, spaceId);
+  }
+
+  private async markRuleAsSnoozed(id: string) {
+    let apiKey: string | null;
+
+    const {
+      params: { alertId: ruleId, spaceId },
+    } = this.taskInstance;
+    try {
+      const decryptedAttributes = await this.getDecryptedAttributes(ruleId, spaceId);
+      apiKey = decryptedAttributes.apiKey;
+    } catch (err) {
+      throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Decrypt, err);
+    }
+    const fakeRequest = this.getFakeKibanaRequest(spaceId, apiKey);
+    const rulesClient = this.context.getRulesClientWithRequest(fakeRequest);
+    await rulesClient.updateSnoozedUntilTime({ id });
   }
 
   private async loadRuleAttributesAndRun(): Promise<Resultable<RuleRunResult, Error>> {

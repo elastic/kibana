@@ -67,12 +67,14 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   notifyWhen,
   muteAll,
   mutedInstanceIds,
+  snoozeSchedule,
   executionStatus: { lastExecutionDate, lastDuration, ...executionStatus },
   ...rest
 }) => ({
   ...rest,
   rule_type_id: alertTypeId,
   scheduled_task_id: scheduledTaskId,
+  snooze_schedule: snoozeSchedule,
   created_by: createdBy,
   updated_by: updatedBy,
   created_at: createdAt,

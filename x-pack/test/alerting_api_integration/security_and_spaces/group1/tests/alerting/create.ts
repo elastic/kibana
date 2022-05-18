@@ -115,6 +115,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 created_by: user.username,
                 schedule: { interval: '1m' },
                 scheduled_task_id: response.body.scheduled_task_id,
+                snooze_schedule: response.body.snooze_schedule,
                 created_at: response.body.created_at,
                 updated_at: response.body.updated_at,
                 throttle: '1m',
