@@ -14,12 +14,13 @@ const CenteredRoundedBottomBar = styled(EuiBottomBar)`
   max-width: 820px;
   margin: 0 auto;
   border-radius: 8px 8px 0px 0px;
+  animation-delay: -99s; #stop bottom bar flying in on step change
 `;
 
 export const CreatePackagePolicyBottomBar: React.FC<{
   isLoading?: boolean;
   cancelClickHandler: React.ReactEventHandler;
-  cancelUrl: string;
+  cancelUrl?: string;
   actionMessage: React.ReactElement;
   onNext: () => void;
 }> = ({ isLoading, onNext, cancelClickHandler, cancelUrl, actionMessage }) => (

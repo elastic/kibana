@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-export * from './add_first_integration_splash';
-export * from './bottom_bar';
-export * from './multi_page_steps_layout';
-export * from './horizontal_page_steps';
-export * from './page_steps';
+export { InstallElasticAgentPageStep } from './install_elastic_agent';
+export { AddIntegrationPageStep } from './add_integration';

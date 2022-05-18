@@ -14,13 +14,50 @@ import { useGetPackageInfoByKey } from '../../../../hooks';
 import type { AddToPolicyParams, CreatePackagePolicyParams } from '../types';
 import { useCancelAddPackagePolicy } from '../hooks';
 
-import { AddFirstIntegrationSplashScreen, MultiPageStepsLayout } from './components';
+import {
+  AddFirstIntegrationSplashScreen,
+  MultiPageStepsLayout,
+  InstallElasticAgentPageStep,
+  AddIntegrationPageStep,
+} from './components';
+
+const fleetManagedSteps = [
+  {
+    title: 'Install Elastic Agent',
+    component: InstallElasticAgentPageStep,
+  },
+  {
+    title: 'Add the integration',
+    component: AddIntegrationPageStep,
+  },
+  {
+    title: 'Confirm incoming data',
+    component: InstallElasticAgentPageStep,
+  },
+];
+
+const standaloneSteps = [
+  {
+    title: 'Add the integration',
+    component: AddIntegrationPageStep,
+  },
+  {
+    title: 'Install Elastic Agent',
+    component: InstallElasticAgentPageStep,
+  },
+  {
+    title: 'Confirm incoming data',
+    component: InstallElasticAgentPageStep,
+  },
+];
 
 export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({ from }) => {
   const { params } = useRouteMatch<AddToPolicyParams>();
 
   const { pkgName, pkgVersion } = splitPkgKey(params.pkgkey);
   const [onSplash, setOnSplash] = useState(true);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [isManaged, setIsManaged] = useState(true);
   const {
     data: packageInfoData,
     error: packageInfoError,
@@ -38,7 +75,7 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({ from }
 
   const splashScreenNext = () => {
     setOnSplash(false);
-  }; // TODO: (in following PR) this will display the add package policy steps
+  };
 
   const { cancelClickHandler, cancelUrl } = useCancelAddPackagePolicy({
     from,
@@ -59,13 +96,39 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({ from }
     );
   }
 
+  const steps = isManaged ? fleetManagedSteps : standaloneSteps;
+  const stepsNext = () => {
+    if (currentStep === steps.length - 1) {
+      return;
+    }
+
+    setCurrentStep(currentStep + 1);
+  };
+
+  const stepsBack = () => {
+    if (currentStep === 0) {
+      cancelClickHandler(null);
+      return;
+    }
+
+    setCurrentStep(currentStep - 1);
+  };
+
   return (
     <MultiPageStepsLayout
+      currentStep={currentStep}
+      steps={steps}
       packageInfo={packageInfo}
       integrationInfo={integrationInfo}
       cancelUrl={cancelUrl}
       cancelClickHandler={cancelClickHandler}
-      onNext={splashScreenNext}
+      onNext={stepsNext}
+      onBack={stepsBack}
+      isManaged={isManaged}
+      setIsManaged={(newIsManaged: boolean) => {
+        setIsManaged(newIsManaged);
+        setCurrentStep(0);
+      }}
     />
   );
 };

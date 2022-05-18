@@ -11,30 +11,22 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiTitle, EuiSpacer } from '@elastic/eui';
 
-import type { RegistryPolicyTemplate, PackageInfo } from '../../../../../types';
 import { IntegrationBreadcrumb } from '../../components';
 import { pkgKeyFromPackageInfo } from '../../../../../services';
 import { WithHeaderLayout } from '../../../../../layouts';
 
-import { CreatePackagePolicyBottomBar, PageSteps } from '.';
+import type { MultiPageStepLayoutProps } from '../types';
+
+import { PageSteps } from '.';
 
 const CentralH1 = styled('h1')`
   text-align: center;
 `;
 
-export const MultiPageStepsLayout = ({
-  packageInfo,
-  integrationInfo,
-  cancelClickHandler,
-  cancelUrl,
-  onNext,
-}: {
-  packageInfo: PackageInfo;
-  integrationInfo?: RegistryPolicyTemplate;
-  cancelClickHandler: React.ReactEventHandler;
-  cancelUrl: string;
-  onNext: () => void;
-}) => {
+export const MultiPageStepsLayout = (props: MultiPageStepLayoutProps) => {
+  const { packageInfo, integrationInfo, steps, currentStep } = props;
+
+  const StepComponent = steps[currentStep].component;
   const topContent = (
     <>
       <EuiTitle size="l">
@@ -49,36 +41,27 @@ export const MultiPageStepsLayout = ({
         </CentralH1>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <PageSteps
-        currentStep={1}
-        steps={['Install Elastic Agent', 'Add the integration', 'Confirm incoming data']}
-      />
+      <PageSteps currentStep={currentStep} steps={steps.map((s) => s.title)} />
+      <EuiSpacer size="xl" />
     </>
   );
 
+  const maxWidth = 866;
   return (
-    <WithHeaderLayout topContent={topContent}>
-      <>
-        {'hello'}
-        <CreatePackagePolicyBottomBar
-          cancelUrl={cancelUrl}
-          cancelClickHandler={cancelClickHandler}
-          onNext={onNext}
-          actionMessage={
-            <FormattedMessage
-              id="xpack.fleet.addFirstIntegrationSplash.installAgentButton"
-              defaultMessage="Add the integration"
-            />
-          }
+    <WithHeaderLayout
+      topContent={topContent}
+      restrictHeaderWidth={maxWidth}
+      restrictWidth={maxWidth}
+    >
+      <StepComponent {...props} />
+
+      {packageInfo && (
+        <IntegrationBreadcrumb
+          pkgTitle={integrationInfo?.title || packageInfo.title}
+          pkgkey={pkgKeyFromPackageInfo(packageInfo)}
+          integration={integrationInfo?.name}
         />
-        {packageInfo && (
-          <IntegrationBreadcrumb
-            pkgTitle={integrationInfo?.title || packageInfo.title}
-            pkgkey={pkgKeyFromPackageInfo(packageInfo)}
-            integration={integrationInfo?.name}
-          />
-        )}
-      </>
+      )}
     </WithHeaderLayout>
   );
 };

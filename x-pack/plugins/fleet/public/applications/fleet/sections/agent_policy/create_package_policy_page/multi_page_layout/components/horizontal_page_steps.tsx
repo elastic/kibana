@@ -26,8 +26,9 @@ const NumberlessHorizontalSteps = styled(EuiStepsHorizontal)`
     top: 32px;
   }
 `;
-const getStepStatus = (currentStep: number, stepIndex: number) => {
+const getStepStatus = (currentStep: number, stepIndex: number, currentStepComplete: boolean) => {
   if (currentStep === stepIndex) {
+    if (currentStepComplete) return 'complete';
     return 'current';
   }
 
@@ -41,12 +42,12 @@ const getStepStatus = (currentStep: number, stepIndex: number) => {
 export const PageSteps: React.FC<{
   steps: string[];
   currentStep?: number;
-}> = ({ steps: stepTitles, currentStep = 0 }) => {
+  currentStepComplete?: boolean;
+}> = ({ steps: stepTitles, currentStep = 0, currentStepComplete = false }) => {
   const steps = stepTitles.map((title, index) => {
     return {
       title,
-      status: getStepStatus(currentStep, index),
-      onClick: () => {},
+      status: getStepStatus(currentStep, index, currentStepComplete),
     };
   }) as EuiStepsHorizontalProps['steps'];
 
