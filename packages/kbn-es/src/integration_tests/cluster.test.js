@@ -317,7 +317,7 @@ describe('#start(installPath)', () => {
     `);
   });
 
-  it.only(`allows overriding search.check_ccs_compatibility`, async () => {
+  it(`allows overriding search.check_ccs_compatibility`, async () => {
     mockEsBin({ start: true });
 
     extractConfigFiles.mockReturnValueOnce([]);
