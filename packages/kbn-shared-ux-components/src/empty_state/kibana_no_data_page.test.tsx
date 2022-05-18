@@ -9,7 +9,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { EuiLoadingElastic } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { SharedUxServicesProvider, mockServicesFactory } from '@kbn/shared-ux-services';
 
@@ -67,30 +66,6 @@ describe('Kibana No Data Page', () => {
     component.update();
 
     expect(component.find(NoDataViews).length).toBe(1);
-    expect(component.find(NoDataConfigPage).length).toBe(0);
-  });
-
-  test('renders loading indicator', async () => {
-    const dataCheck = () => new Promise<boolean>((resolve, reject) => {});
-    const services = {
-      ...mockServicesFactory(),
-      data: {
-        hasESData: dataCheck,
-        hasUserDataView: dataCheck,
-        hasDataView: dataCheck,
-      },
-    };
-    const component = mountWithIntl(
-      <SharedUxServicesProvider {...services}>
-        <KibanaNoDataPage noDataConfig={noDataConfig} onDataViewCreated={onDataViewCreated} />
-      </SharedUxServicesProvider>
-    );
-
-    await act(() => new Promise(setImmediate));
-    component.update();
-
-    expect(component.find(EuiLoadingElastic).length).toBe(1);
-    expect(component.find(NoDataViews).length).toBe(0);
     expect(component.find(NoDataConfigPage).length).toBe(0);
   });
 });
