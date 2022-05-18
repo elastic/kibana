@@ -332,6 +332,8 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
 
     // Check if new range filter results in no data
     if (!ignoreParentSettings?.ignoreValidations) {
+      const searchSource = await this.dataService.searchSource.create();
+
       filters.push(rangeFilter);
 
       const timeFilter = this.dataService.timefilter.createFilter(dataView, timeRange);
@@ -340,9 +342,24 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
         filters.push(timeFilter);
       }
 
-      const { min, max } = await this.fetchMinMax({ dataView, field, filters, query });
+      searchSource.setField('size', 0);
+      searchSource.setField('index', dataView);
 
-      if (!min && !max) {
+      searchSource.setField('filter', filters);
+
+      if (query) {
+        searchSource.setField('query', query);
+      }
+
+      const {
+        rawResponse: {
+          hits: { total },
+        },
+      } = await lastValueFrom(searchSource.fetch$());
+
+      const docCount = typeof total === 'number' ? total : total?.value;
+
+      if (!docCount) {
         this.updateComponentState({ loading: false, isInvalid: true });
         this.updateOutput({
           filters: [],
