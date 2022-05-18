@@ -158,10 +158,7 @@ exports[`TableListView render list view 1`] = `
     }
     sorting={
       Object {
-        "sort": Object {
-          "direction": "asc",
-          "field": "",
-        },
+        "sort": undefined,
       }
     }
     tableCaption="test caption"
