@@ -16,7 +16,15 @@ export const PackageIcon: React.FunctionComponent<
   UsePackageIconType & Omit<EuiIconProps, 'type'>
 > = ({ packageName, integrationName, version, icons, tryApi, ...euiIconProps }) => {
   const iconType = usePackageIconType({ packageName, integrationName, version, icons, tryApi });
-  return <EuiIcon size="s" type={iconType} {...euiIconProps} />;
+  return (
+    <EuiIcon
+      size="s"
+      type={iconType}
+      {...euiIconProps}
+      // @ts-expect-error EuiIconProps is missing img attributes but accept it
+      loading="lazy"
+    />
+  );
 };
 
 export const CardIcon: React.FunctionComponent<UsePackageIconType & Omit<EuiIconProps, 'type'>> = (
@@ -26,7 +34,15 @@ export const CardIcon: React.FunctionComponent<UsePackageIconType & Omit<EuiIcon
   if (icons && icons.length === 1 && icons[0].type === 'eui') {
     return <EuiIcon size={'xl'} type={icons[0].src} {...props} />;
   } else if (icons && icons.length === 1 && icons[0].type === 'svg') {
-    return <EuiIcon size={'xl'} type={icons[0].src} {...props} />;
+    return (
+      <EuiIcon
+        size={'xl'}
+        type={icons[0].src}
+        {...props}
+        // @ts-expect-error EuiIconProps is missing img attributes but accept it
+        loading="lazy"
+      />
+    );
   } else {
     return <PackageIcon {...props} />;
   }
