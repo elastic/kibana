@@ -37,8 +37,8 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
     value: option,
   }));
   const maintainanceOptions: Array<EuiComboBoxOptionOption<string>> = MAINTAINANCE_WINDOWS.map((option) => ({
-    label: option,
-    value: option,
+    label: option === 1 ? `${option} hour` : `${option} hours`,
+    value: `${option * 3600}`
   }));
   const [selectedVersion, setSelectedVersion] = useState([fallbackVersions[0]]);
   const [selectedMantainanceWindow, setSelectedMantainanceWindow] = useState([maintainanceOptions[0]]);
@@ -46,6 +46,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
   const isAllAgents = agents === '';
 
   const getVersion = (selectedVersion: EuiComboBoxOptionOption<string>[]) => selectedVersion[0].value as string;
+  const getRolloutDuration = (selectedMantainanceWindow: EuiComboBoxOptionOption<string>[]) =>  Number(selectedMantainanceWindow[0].value)
 
   async function onSubmit() {
     const version = getVersion(selectedVersion);
@@ -58,6 +59,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
         : await sendPostBulkAgentUpgrade({
             agents: Array.isArray(agents) ? agents.map((agent) => agent.id) : agents,
             version,
+            rollout_duration_seconds: getRolloutDuration(selectedMantainanceWindow)
           });
       if (error) {
         throw error;
@@ -206,42 +208,45 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
-      <EuiFormRow
-        label= {
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem grow={false}>
-              {i18n.translate(
-                'xpack.fleet.upgradeAgents.maintainanceAvailableLabel',
-                {
-                  defaultMessage: 'Maintainance window available',
-                }
-              )}
-            </EuiFlexItem>
-            <EuiSpacer size="xs" />
-            <EuiFlexItem grow={false}>
-              <EuiToolTip position="top" content={i18n.translate(
-                'xpack.fleet.upgradeAgents.maintainanceAvailableTooltip',
-                {
-                  defaultMessage: 'Defines the duration of time available to perform the upgrade. The agent upgrades are spread uniformly across this duration in order to avoid exhausting network resources.',
-                }
-              )}>
-                <EuiIcon type="iInCircle" title="TooltipIcon" />
-              </EuiToolTip>
-            </EuiFlexItem>
-        </EuiFlexGroup>
-      }
-        fullWidth
-      >
-        <EuiComboBox
+      { !isSingleAgent ?
+        <EuiFormRow
+          label= {
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={false}>
+                {i18n.translate(
+                  'xpack.fleet.upgradeAgents.maintainanceAvailableLabel',
+                  {
+                    defaultMessage: 'Maintainance window available',
+                  }
+                )}
+              </EuiFlexItem>
+              <EuiSpacer size="xs" />
+              <EuiFlexItem grow={false}>
+                <EuiToolTip position="top" content={i18n.translate(
+                  'xpack.fleet.upgradeAgents.maintainanceAvailableTooltip',
+                  {
+                    defaultMessage: 'Defines the duration of time available to perform the upgrade. The agent upgrades are spread uniformly across this duration in order to avoid exhausting network resources.',
+                  }
+                )}>
+                  <EuiIcon type="iInCircle" title="TooltipIcon" />
+                </EuiToolTip>
+              </EuiFlexItem>
+          </EuiFlexGroup>
+        }
           fullWidth
-          singleSelection={{ asPlainText: true }}
-          options={maintainanceOptions}
-          selectedOptions={selectedMantainanceWindow}
-          onChange={(selectedMantainanceWindow: Array<EuiComboBoxOptionOption<string>>) => {
-            setSelectedMantainanceWindow(selectedMantainanceWindow);
-          }}
-        />
-      </EuiFormRow>
+        >
+          <EuiComboBox
+            fullWidth
+            singleSelection={{ asPlainText: true }}
+            options={maintainanceOptions}
+            selectedOptions={selectedMantainanceWindow}
+            onChange={(selectedMantainanceWindow: Array<EuiComboBoxOptionOption<string>>) => {
+              setSelectedMantainanceWindow(selectedMantainanceWindow);
+            }}
+          />
+        </EuiFormRow>
+        : null
+      }
 
     </EuiConfirmModal>
   );

@@ -500,7 +500,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               setAgentToUpgrade(undefined);
               fetchData();
             }}
-            version={kibanaVersion}
           />
         </EuiPortal>
       )}

@@ -31,11 +31,11 @@ export const FALLBACK_VERSIONS = [
 ];
 
 export const MAINTAINANCE_WINDOWS = [
-  '1 hour',
-  '2 hours',
-  '4 hours',
-  '8 hours',
-  '12 hours',
-  '24 hours',
-  '48 hours',
+  1,
+  2,
+  4,
+  8,
+  12,
+  24,
+  48
 ];
