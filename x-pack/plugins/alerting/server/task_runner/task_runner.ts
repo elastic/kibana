@@ -434,7 +434,10 @@ export class TaskRunner<
         })
       );
     } catch (err) {
-      if (getReasonFromError(err) === RuleExecutionStatusErrorReasons.MaxAlerts) {
+      if (
+        getReasonFromError(err) === RuleExecutionStatusErrorReasons.MaxAlerts ||
+        err.message.match(/Rule generated greater than \d alerts/)
+      ) {
         hasReachedMaxAlerts = true;
       } else {
         this.alertingEventLogger.setExecutionFailed(
