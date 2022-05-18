@@ -119,10 +119,22 @@ export class ConsolePageObject extends FtrService {
     return await this.testSubjects.find('console-textarea');
   }
 
-  public async getVisibleTextAt(lineIndex: number) {
+  public async getAllTextLines() {
     const editor = await this.getEditor();
-    const lines = await editor.findAllByClassName('ace_line_group');
+    return await editor.findAllByClassName('ace_line_group');
+  }
 
+  public async getAllVisibleText() {
+    let textString = '';
+    const textLineElements = await this.getAllTextLines();
+    for (let i = 0; i < textLineElements.length; i++) {
+      textString = textString.concat(await textLineElements[i].getVisibleText());
+    }
+    return textString;
+  }
+
+  public async getVisibleTextAt(lineIndex: number) {
+    const lines = await this.getAllTextLines();
     if (lines.length < lineIndex) {
       throw new Error(`No line with index: ${lineIndex}`);
     }
