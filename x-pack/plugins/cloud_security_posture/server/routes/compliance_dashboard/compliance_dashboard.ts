@@ -7,6 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type { ComplianceDashboardData } from '../../../common/types';
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS, STATS_ROUTE_PATH } from '../../../common/constants';
 import { CspAppContext } from '../../plugin';
@@ -33,6 +34,18 @@ const getClustersTrends = (clustersWithoutTrends: ClusterWithoutTrend[], trends:
 const getSummaryTrend = (trends: Trends) =>
   trends.map(({ timestamp, summary }) => ({ timestamp, ...summary }));
 
+const hasLatestFindings = async (esClient: ElasticsearchClient) => {
+  const queryResult = await esClient.search({
+    index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+    query: {
+      match_all: {},
+    },
+    size: 1,
+  });
+
+  return !!queryResult.hits.hits.length;
+};
+
 export const defineGetComplianceDashboardRoute = (
   router: CspRouter,
   cspContext: CspAppContext
@@ -45,6 +58,11 @@ export const defineGetComplianceDashboardRoute = (
     async (context, _, response) => {
       try {
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+        if (!(await hasLatestFindings(esClient))) {
+          return response.ok({
+            body: undefined,
+          });
+        }
 
         const { id: pitId } = await esClient.openPointInTime({
           index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
