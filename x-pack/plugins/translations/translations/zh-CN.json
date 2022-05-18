@@ -3986,7 +3986,6 @@
     "home.tutorials.common.filebeatInstructions.config.debTextPostMarkdown": "其中，{passwordTemplate} 是 `elastic` 用户的密码，{esUrlTemplate} 是 Elasticsearch             的 URL，{kibanaUrlTemplate} 是 Kibana 的 URL。要使用 Elasticsearch 生成的默认证书            [配置 SSL]({configureSslUrl})，请在 {esCertFingerprintTemplate} 中添加其指纹。",
     "home.tutorials.common.filebeatInstructions.config.debTextPre": "修改 {path} 以设置连接信息：",
     "home.tutorials.common.filebeatInstructions.config.debTitle": "编辑配置",
-    "home.tutorials.common.filebeatInstructions.config.osxTextPostMarkdown": "其中，{passwordTemplate} 是 `elastic` 用户的密码，{esUrlTemplate} 是 Elasticsearch               的 URL，{kibanaUrlTemplate} 是 Kibana 的 URL。要使用 Elasticsearch 生成的默认证书                [配置 SSL]({configureSslUrl})，请在 {esCertFingerprintTemplate} 中添加其指纹。",
     "home.tutorials.common.filebeatInstructions.config.osxTextPre": "修改 {path} 以设置连接信息：",
     "home.tutorials.common.filebeatInstructions.config.osxTitle": "编辑配置",
     "home.tutorials.common.filebeatInstructions.config.rpmTextPostMarkdown": "其中，{passwordTemplate} 是 `elastic` 用户的密码，{esUrlTemplate} 是 Elasticsearch             的 URL，{kibanaUrlTemplate} 是 Kibana 的 URL。要使用 Elasticsearch 生成的默认证书            [配置 SSL]({configureSslUrl})，请在 {esCertFingerprintTemplate} 中添加其指纹。",
