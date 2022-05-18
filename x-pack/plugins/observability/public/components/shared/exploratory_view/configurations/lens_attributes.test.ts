@@ -545,8 +545,7 @@ describe('Lens Attribute', () => {
             params: {
               missingBucket: false,
               orderBy: {
-                columnId: 'y-axis-column-layer0',
-                type: 'column',
+                type: 'alphabetical',
               },
               orderDirection: 'desc',
               otherBucket: true,
