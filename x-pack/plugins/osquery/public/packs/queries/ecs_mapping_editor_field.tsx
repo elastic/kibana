@@ -136,7 +136,7 @@ const ECSFieldWrapper = styled(EuiFlexItem)`
   max-width: 100%;
 `;
 
-const singleSelection = { asPlainText: true };
+const SINGLE_SELECTION = { asPlainText: true };
 
 const ECSSchemaOptions = ECSSchema.map((ecs) => ({
   label: ecs.field,
@@ -162,6 +162,7 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
   );
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const describedByIds = useMemo(() => (idAria ? [idAria] : []), [idAria]);
+  const [formData] = useFormData();
 
   const handleChange = useCallback(
     (newSelectedOptions) => {
@@ -229,6 +230,12 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
     return text;
   }, [selectedOptions]);
 
+  const availableECSSchemaOptions = useMemo(() => {
+    const currentFormECSFieldValues = map(formData.ecs_mapping, 'key');
+
+    return ECSSchemaOptions.filter(({ label }) => !currentFormECSFieldValues.includes(label));
+  }, [formData.ecs_mapping]);
+
   useEffect(() => {
     // @ts-expect-error update types
     setSelected(() => {
@@ -236,7 +243,16 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
 
       const selectedOption = find(ECSSchemaOptions, ['label', field.value]);
 
-      return selectedOption ? [selectedOption] : [];
+      return selectedOption
+        ? [selectedOption]
+        : [
+            {
+              label: field.value,
+              value: {
+                value: field.value,
+              },
+            },
+          ];
     });
   }, [field.value]);
 
@@ -253,9 +269,9 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
       <EuiComboBox
         prepend={prepend}
         fullWidth
-        singleSelection={singleSelection}
+        singleSelection={SINGLE_SELECTION}
         // @ts-expect-error update types
-        options={ECSSchemaOptions}
+        options={availableECSSchemaOptions}
         selectedOptions={selectedOptions}
         onChange={handleChange}
         data-test-subj="ECS-field-input"
@@ -317,6 +333,7 @@ interface OsqueryColumnFieldProps {
   resultType: FieldHook<string>;
   resultValue: FieldHook<string | string[]>;
   euiFieldProps: EuiComboBoxProps<OsquerySchemaOption>;
+  item: ArrayItem;
   idAria?: string;
 }
 
@@ -325,6 +342,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   resultValue,
   euiFieldProps = {},
   idAria,
+  item,
 }) => {
   const inputRef = useRef<HTMLInputElement>();
   const { setValue } = resultValue;
@@ -334,6 +352,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   const [selectedOptions, setSelected] = useState<
     Array<EuiComboBoxOptionOption<OsquerySchemaOption>>
   >([]);
+  const [formData] = useFormData();
 
   const renderOsqueryOption = useCallback(
     (option, searchValue, contentClassName) => (
@@ -370,14 +389,25 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
     [setValue, setSelected]
   );
 
+  const isSingleSelection = useMemo(() => {
+    const ecsKey = get(formData, item.path)?.key;
+    if (ecsKey?.length && typeValue === 'value') {
+      const ecsKeySchemaOption = find(ECSSchemaOptions, ['label', ecsKey]);
+
+      return ecsKeySchemaOption?.value?.normalization !== 'array';
+    }
+
+    return true;
+  }, [typeValue, formData, item.path]);
+
   const onTypeChange = useCallback(
     (newType) => {
       if (newType !== typeValue) {
         setType(newType);
-        setValue(newType === 'value' && euiFieldProps.singleSelection === false ? [] : '');
+        setValue(newType === 'value' && isSingleSelection === false ? [] : '');
       }
     },
-    [typeValue, setType, setValue, euiFieldProps.singleSelection]
+    [typeValue, setType, setValue, isSingleSelection]
   );
 
   const handleCreateOption = useCallback(
@@ -386,7 +416,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
 
       if (!trimmedNewOption.length) return;
 
-      if (euiFieldProps.singleSelection === false) {
+      if (isSingleSelection === false) {
         setValue([trimmedNewOption]);
         if (resultValue.value.length) {
           setValue([...castArray(resultValue.value), trimmedNewOption]);
@@ -399,7 +429,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
         setValue(trimmedNewOption);
       }
     },
-    [euiFieldProps.singleSelection, resultValue.value, setValue]
+    [isSingleSelection, resultValue.value, setValue]
   );
 
   const Prepend = useMemo(
@@ -421,14 +451,14 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   );
 
   useEffect(() => {
-    if (euiFieldProps?.singleSelection && isArray(resultValue.value)) {
+    if (isSingleSelection && isArray(resultValue.value)) {
       setValue(resultValue.value.join(' '));
     }
 
-    if (!euiFieldProps?.singleSelection && !isArray(resultValue.value)) {
+    if (!isSingleSelection && !isArray(resultValue.value)) {
       setValue(resultValue.value.length ? [resultValue.value] : []);
     }
-  }, [euiFieldProps?.singleSelection, resultValue.value, setValue]);
+  }, [isSingleSelection, resultValue.value, setValue]);
 
   useEffect(() => {
     setSelected(() => {
@@ -471,6 +501,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
             rowHeight={32}
             isClearable
             {...euiFieldProps}
+            singleSelection={isSingleSelection ? SINGLE_SELECTION : false}
             options={(typeValue === 'field' && euiFieldProps.options) || EMPTY_ARRAY}
           />
         </EuiFlexItem>
@@ -566,7 +597,6 @@ const osqueryResultFieldValidator = async (
             },
           }
         ),
-        __isBlocking__: false,
       }
     : undefined;
 };
@@ -586,8 +616,6 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
   isLastItem,
   onDelete,
 }) => {
-  const multipleValuesField = useRef(false);
-
   const MultiFields = useMemo(
     () => (
       <UseMultiFields
@@ -625,19 +653,18 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
         {(fields) => (
           <OsqueryColumnField
             {...fields}
+            item={item}
             // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
             euiFieldProps={{
               // @ts-expect-error update types
               options: osquerySchemaOptions,
               isDisabled,
-              // @ts-expect-error update types
-              singleSelection: !multipleValuesField.current ? { asPlainText: true } : false,
             }}
           />
         )}
       </UseMultiFields>
     ),
-    [item.path, osquerySchemaOptions, isLastItem, isDisabled]
+    [item, osquerySchemaOptions, isLastItem, isDisabled]
   );
 
   const ecsComboBoxEuiFieldProps = useMemo(() => ({ isDisabled }), [isDisabled]);
@@ -738,7 +765,7 @@ export const ECSMappingEditorField = React.memo(
   ({ euiFieldProps }: ECSMappingEditorFieldProps) => {
     const lastItemPath = useRef<string>();
     const onAdd = useRef<FormArrayField['addItem']>();
-    const osquerySchemaOptions = useRef<OsquerySchemaOption[]>([]);
+    const [osquerySchemaOptions, setOsquerySchemaOptions] = useState<OsquerySchemaOption[]>([]);
     const [{ query, ...formData }, formDataSerializer, isMounted] = useFormData();
 
     useEffect(() => {
@@ -917,9 +944,12 @@ export const ECSMappingEditorField = React.memo(
           .flat();
 
       // Remove column duplicates by keeping the column from the table that appears last in the query
-      osquerySchemaOptions.current = sortedUniqBy(
+      const newOptions = sortedUniqBy(
         orderBy(suggestions, ['value.suggestion_label', 'value.tableOrder'], ['asc', 'desc']),
         'label'
+      );
+      setOsquerySchemaOptions((prevValue) =>
+        !deepEqual(prevValue, newOptions) ? newOptions : prevValue
       );
     }, [query]);
 
@@ -999,7 +1029,7 @@ export const ECSMappingEditorField = React.memo(
                 {items.map((item, index) => (
                   <ECSMappingEditorForm
                     key={item.id}
-                    osquerySchemaOptions={osquerySchemaOptions.current}
+                    osquerySchemaOptions={osquerySchemaOptions}
                     item={item}
                     isLastItem={index === items.length - 1}
                     onDelete={removeItem}
