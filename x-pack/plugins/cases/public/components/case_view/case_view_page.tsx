@@ -26,11 +26,6 @@ import { ACTIVITY_TAB, ALERTS_TAB } from './translations';
 import { CaseViewPageProps, CASE_VIEW_PAGE_TABS } from './types';
 import { useOnUpdateField } from './use_on_update_field';
 
-// This hardcoded constant is left here intentionally
-// as a way to hide a wip functionality
-// that will be merge in the 8.3 release.
-const ENABLE_ALERTS_TAB = true;
-
 export const CaseViewPage = React.memo<CaseViewPageProps>(
   ({
     caseData,
@@ -182,7 +177,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
             />
           ),
         },
-        ...(features.alerts.enabled && ENABLE_ALERTS_TAB
+        ...(features.alerts.enabled
           ? [
               {
                 id: CASE_VIEW_PAGE_TABS.ALERTS,
