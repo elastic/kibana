@@ -8,8 +8,9 @@
 // eslint-disable-next-line max-classes-per-file
 import { AxiosError } from 'axios';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
-import { SubActionConnector } from '@kbn/actions-plugin/server';
+import { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server/plugin';
 import { schema, TypeOf } from '@kbn/config-schema';
+import { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 
 const TestConfigSchema = schema.object({ url: schema.string() });
 const TestSecretsSchema = schema.object({
@@ -25,73 +26,84 @@ interface ErrorSchema {
   errorCode: number;
 }
 
-class TestSubActionConnector extends SubActionConnector<TestConfig, TestSecrets> {
-  constructor(params: ServiceParams<TestConfig, TestSecrets>) {
-    super(params);
-    this.registerSubAction({
-      name: 'subActionWithParams',
-      method: 'subActionWithParams',
-      schema: schema.object({ id: schema.string() }),
-    });
+export const getTestSubActionConnector = (
+  actions: ActionsPluginSetup
+): SubActionConnectorType<TestConfig, TestSecrets> => {
+  const SubActionConnector = actions.getSubActionConnectorClass<TestConfig, TestSecrets>();
 
-    this.registerSubAction({
-      name: 'subActionWithoutParams',
-      method: 'subActionWithoutParams',
-      schema: null,
-    });
+  class TestSubActionConnector extends SubActionConnector {
+    constructor(params: ServiceParams<TestConfig, TestSecrets>) {
+      super(params);
+      this.registerSubAction({
+        name: 'subActionWithParams',
+        method: 'subActionWithParams',
+        schema: schema.object({ id: schema.string() }),
+      });
 
-    this.registerSubAction({
-      name: 'notExist',
-      method: 'notExist',
-      schema: schema.object({}),
-    });
+      this.registerSubAction({
+        name: 'subActionWithoutParams',
+        method: 'subActionWithoutParams',
+        schema: null,
+      });
 
-    this.registerSubAction({
-      name: 'notAFunction',
-      method: 'notAFunction',
-      schema: schema.object({}),
-    });
+      this.registerSubAction({
+        name: 'notExist',
+        method: 'notExist',
+        schema: schema.object({}),
+      });
 
-    this.registerSubAction({
-      name: 'noData',
-      method: 'noData',
-      schema: null,
-    });
+      this.registerSubAction({
+        name: 'notAFunction',
+        method: 'notAFunction',
+        schema: schema.object({}),
+      });
+
+      this.registerSubAction({
+        name: 'noData',
+        method: 'noData',
+        schema: null,
+      });
+    }
+
+    protected getResponseErrorMessage(error: AxiosError<ErrorSchema>) {
+      return `Message: ${error.response?.data.errorMessage}. Code: ${error.response?.data.errorCode}`;
+    }
+
+    public async subActionWithParams({ id }: { id: string }) {
+      return { id };
+    }
+
+    public async subActionWithoutParams() {
+      return { id: 'test' };
+    }
+
+    public async noData() {}
+  }
+  return {
+    id: '.test-sub-action-connector',
+    name: 'Test: Sub action connector',
+    minimumLicenseRequired: 'platinum' as const,
+    schema: { config: TestConfigSchema, secrets: TestSecretsSchema },
+    Service: TestSubActionConnector,
+  };
+};
+
+export const getTestSubActionConnectorWithoutSubActions = (
+  actions: ActionsPluginSetup
+): SubActionConnectorType<TestConfig, TestSecrets> => {
+  const SubActionConnector = actions.getSubActionConnectorClass<TestConfig, TestSecrets>();
+
+  class TestNoSubActions extends SubActionConnector {
+    protected getResponseErrorMessage(error: AxiosError<ErrorSchema>) {
+      return `Error`;
+    }
   }
 
-  protected getResponseErrorMessage(error: AxiosError<ErrorSchema>) {
-    return `Message: ${error.response?.data.errorMessage}. Code: ${error.response?.data.errorCode}`;
-  }
-
-  public async subActionWithParams({ id }: { id: string }) {
-    return { id };
-  }
-
-  public async subActionWithoutParams() {
-    return { id: 'test' };
-  }
-
-  public async noData() {}
-}
-
-export const getTestSubActionConnector = () => ({
-  id: '.test-sub-action-connector',
-  name: 'Test: Sub action connector',
-  minimumLicenseRequired: 'platinum' as const,
-  schema: { config: TestConfigSchema, secrets: TestSecretsSchema },
-  Service: TestSubActionConnector,
-});
-
-export class TestNoSubActions extends SubActionConnector<TestConfig, TestSecrets> {
-  protected getResponseErrorMessage(error: AxiosError<ErrorSchema>) {
-    return `Error`;
-  }
-}
-
-export const getTestSubActionConnectorWithoutSubActions = () => ({
-  id: '.test-sub-action-connector-without-sub-actions',
-  name: 'Test: Sub action connector',
-  minimumLicenseRequired: 'platinum' as const,
-  schema: { config: TestConfigSchema, secrets: TestSecretsSchema },
-  Service: TestNoSubActions,
-});
+  return {
+    id: '.test-sub-action-connector-without-sub-actions',
+    name: 'Test: Sub action connector',
+    minimumLicenseRequired: 'platinum' as const,
+    schema: { config: TestConfigSchema, secrets: TestSecretsSchema },
+    Service: TestNoSubActions,
+  };
+};

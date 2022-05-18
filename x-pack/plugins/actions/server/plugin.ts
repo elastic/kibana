@@ -98,7 +98,9 @@ import {
   ConnectorWithOptionalDeprecation,
 } from './lib/is_conector_deprecated';
 import { createSubActionConnectorFramework } from './sub_action_framework';
-import { SubActionConnectorType } from './sub_action_framework/types';
+import { IServiceAbstract, SubActionConnectorType } from './sub_action_framework/types';
+import { SubActionConnector } from './sub_action_framework/sub_action_connector';
+import { CaseConnector } from './sub_action_framework/case';
 
 export interface PluginSetupContract {
   registerType<
@@ -116,6 +118,8 @@ export interface PluginSetupContract {
     connector: SubActionConnectorType<Config, Secrets>
   ): void;
   isPreconfiguredConnector(connectorId: string): boolean;
+  getSubActionConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
+  getCaseConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
 }
 
 export interface PluginStartContract {
@@ -368,6 +372,8 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           (preconfigured) => preconfigured.id === connectorId
         );
       },
+      getSubActionConnectorClass: () => SubActionConnector,
+      getCaseConnectorClass: () => CaseConnector,
     };
   }
 

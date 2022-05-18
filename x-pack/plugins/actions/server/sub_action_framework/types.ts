@@ -30,6 +30,10 @@ export type IService<Config, Secrets> = new (
   params: ServiceParams<Config, Secrets>
 ) => SubActionConnector<Config, Secrets>;
 
+export type IServiceAbstract<Config, Secrets> = abstract new (
+  params: ServiceParams<Config, Secrets>
+) => SubActionConnector<Config, Secrets>;
+
 export interface SubActionConnectorType<Config, Secrets> {
   id: string;
   name: string;

@@ -59,8 +59,8 @@ export function defineActionTypes(
 
   /** Sub action framework */
 
-  actions.registerSubActionConnectorType(getTestSubActionConnector());
-  actions.registerSubActionConnectorType(getTestSubActionConnectorWithoutSubActions());
+  actions.registerSubActionConnectorType(getTestSubActionConnector(actions));
+  actions.registerSubActionConnectorType(getTestSubActionConnectorWithoutSubActions(actions));
 }
 
 function getIndexRecordActionType() {
