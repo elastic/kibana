@@ -209,6 +209,9 @@ export function RuleDetailsPage() {
         />
       </EuiPanel>
     );
+  const getNotifyText = () =>
+    NOTIFY_WHEN_OPTIONS.find((option) => option.value === rule?.notifyWhen)?.inputDisplay ||
+    rule.notifyWhen;
   return (
     <ObservabilityPageTemplate
       pageHeader={{
@@ -432,13 +435,7 @@ export function RuleDetailsPage() {
                       defaultMessage: 'Notify',
                     })}
                   </ItemTitleRuleSummary>
-
-                  <ItemValueRuleSummary
-                    itemValue={String(
-                      NOTIFY_WHEN_OPTIONS.find((option) => option.value === rule?.notifyWhen)
-                        ?.inputDisplay || rule.notifyWhen
-                    )}
-                  />
+                  <ItemValueRuleSummary itemValue={String(getNotifyText())} />
                 </EuiFlexGroup>
 
                 <EuiSpacer size="l" />
