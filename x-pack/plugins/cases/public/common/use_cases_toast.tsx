@@ -38,11 +38,13 @@ function getAlertsCount(attachments: CaseAttachments): number {
   let alertsCount = 0;
   for (const attachment of attachments) {
     if (attachment.type === CommentType.alert) {
+      // alertId might be an array
       if (Array.isArray(attachment.alertId) && attachment.alertId.length > 1) {
         alertsCount += attachment.alertId.length;
+      } else {
+        // or might be a single string
+        alertsCount++;
       }
-
-      alertsCount++;
     }
   }
   return alertsCount;
