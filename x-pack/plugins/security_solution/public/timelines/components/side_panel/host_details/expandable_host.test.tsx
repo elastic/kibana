@@ -26,7 +26,7 @@ describe('Expandable Host Component', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('ExpandableHostDetails')).toMatchSnapshot();
+      expect(wrapper.find('ExpandableHostDetails').render()).toMatchSnapshot();
     });
 
     test('it should render the HostOverview of the ExpandableHostDetails with the correct indices', () => {
