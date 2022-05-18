@@ -20,6 +20,7 @@ interface Usage {
   sessionIdleTimeoutInMinutes: number;
   sessionLifespanInMinutes: number;
   sessionCleanupInMinutes: number;
+  anonymousCredentialType: string | undefined;
 }
 
 interface Deps {
@@ -122,6 +123,13 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
             'The session cleanup interval that is configured, in minutes (0 if disabled).',
         },
       },
+      anonymousCredentialType: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The credential type that is configured for the anonymous authentication provider.',
+        },
+      },
     },
     fetch: () => {
       const { allowRbac, allowAccessAgreement, allowAuditLogging } = license.getFeatures();
@@ -136,6 +144,7 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
           sessionIdleTimeoutInMinutes: 0,
           sessionLifespanInMinutes: 0,
           sessionCleanupInMinutes: 0,
+          anonymousCredentialType: undefined,
         };
       }
 
@@ -163,6 +172,24 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
       const sessionLifespanInMinutes = sessionExpirations.lifespan?.asMinutes() ?? 0;
       const sessionCleanupInMinutes = config.session.cleanupInterval?.asMinutes() ?? 0;
 
+      const anonProviders = config.authc.providers.anonymous ?? ({} as Record<string, any>);
+      const foundProvider = Object.entries(anonProviders).find(
+        ([_, provider]) => !!provider.credentials && provider.enabled
+      );
+
+      const credElasticAnonUser = 'elasticsearch_anonymous_user';
+      const credApiKey = 'api_key';
+      const credUsernamePassword = 'username_password';
+
+      let anonymousCredentialType;
+      if (foundProvider) {
+        if (!!foundProvider[1].credentials.apiKey) anonymousCredentialType = credApiKey;
+        else if (foundProvider[1].credentials === credElasticAnonUser)
+          anonymousCredentialType = credElasticAnonUser;
+        else if (!!foundProvider[1].credentials.username && !!foundProvider[1].credentials.password)
+          anonymousCredentialType = credUsernamePassword;
+      }
+
       return {
         auditLoggingEnabled,
         loginSelectorEnabled,
@@ -173,6 +200,7 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
         sessionIdleTimeoutInMinutes,
         sessionLifespanInMinutes,
         sessionCleanupInMinutes,
+        anonymousCredentialType,
       };
     },
   });
