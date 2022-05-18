@@ -71,7 +71,7 @@ export function RuleDetailsPage() {
   const { ruleId } = useParams<RuleDetailsPathParams>();
   const { ObservabilityPageTemplate } = usePluginContext();
   const { isRuleLoading, rule, errorRule, reloadRule } = useFetchRule({ ruleId, http });
-  const { ruleTypes } = useLoadRuleTypes({
+  const { ruleTypes, ruleTypeIndex } = useLoadRuleTypes({
     filteredSolutions: OBSERVABILITY_SOLUTIONS,
   });
 
@@ -105,8 +105,9 @@ export function RuleDetailsPage() {
   useEffect(() => {
     if (ruleTypes.length && rule) {
       const matchedRuleType = ruleTypes.find((type) => type.id === rule.ruleTypeId);
+      setRuleType(matchedRuleType);
+
       if (rule.consumer === ALERTS_FEATURE_ID && matchedRuleType && matchedRuleType.producer) {
-        setRuleType(matchedRuleType);
         setFeatures(matchedRuleType.producer);
       } else setFeatures(rule.consumer);
     }
@@ -370,7 +371,7 @@ export function RuleDetailsPage() {
                       defaultMessage: 'Rule type',
                     })}
                   </ItemTitleRuleSummary>
-                  <ItemValueRuleSummary itemValue={rule.ruleTypeId} />
+                  <ItemValueRuleSummary itemValue={ruleTypeIndex.get(rule.ruleTypeId)?.name || rule.ruleTypeId} />
                 </EuiFlexGroup>
 
                 <EuiSpacer size="l" />
