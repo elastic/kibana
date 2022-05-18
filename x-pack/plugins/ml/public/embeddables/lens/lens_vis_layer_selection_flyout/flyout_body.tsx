@@ -90,11 +90,7 @@ export const FlyoutBody: FC<Props> = ({ onClose, embeddable, data, share, lens }
                   <EuiCallOut
                     size="s"
                     color="success"
-                    iconType={
-                      l.jobWizardType === CREATED_BY_LABEL.MULTI_METRIC
-                        ? 'createMultiMetricJob'
-                        : 'createSingleMetricJob'
-                    }
+                    iconType={'checkInCircleFilled'}
                     title={i18n.translate(
                       'xpack.ml.embeddables.lensLayerFlyout.createJobCalloutTitle',
                       {
