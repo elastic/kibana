@@ -371,7 +371,9 @@ export function RuleDetailsPage() {
                       defaultMessage: 'Rule type',
                     })}
                   </ItemTitleRuleSummary>
-                  <ItemValueRuleSummary itemValue={ruleTypeIndex.get(rule.ruleTypeId)?.name || rule.ruleTypeId} />
+                  <ItemValueRuleSummary
+                    itemValue={ruleTypeIndex.get(rule.ruleTypeId)?.name || rule.ruleTypeId}
+                  />
                 </EuiFlexGroup>
 
                 <EuiSpacer size="l" />
