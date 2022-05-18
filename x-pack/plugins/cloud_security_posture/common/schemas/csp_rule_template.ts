@@ -19,6 +19,10 @@ const cspRuleTemplateSchema = rt.object({
   rego_rule_id: rt.string(),
   enabled: rt.boolean(),
   muted: rt.boolean(),
+  section: rt.string(),
+  audit: rt.string(),
+  references: rt.string(),
+  profile_applicability: rt.string(),
 });
 export const cloudSecurityPostureRuleTemplateSavedObjectType = 'csp-rule-template';
 export type CloudSecurityPostureRuleTemplateSchema = TypeOf<typeof cspRuleTemplateSchema>;
