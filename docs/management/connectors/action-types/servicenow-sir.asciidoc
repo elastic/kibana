@@ -1,16 +1,16 @@
 [role="xpack"]
 [[servicenow-sir-action-type]]
-=== ServiceNow SecOps connector and action
+=== {sn-sir} connector and action
 ++++
 <titleabbrev>ServiceNow SecOps</titleabbrev>
 ++++
 
-The {sn} SecOps connector uses the https://developer.servicenow.com/dev.do#!/reference/api/sandiego/rest/c_ImportSetAPI[Import Set API] to create {sn} security incidents.
+The {sn-sir} connector uses the https://developer.servicenow.com/dev.do#!/reference/api/sandiego/rest/c_ImportSetAPI[Import Set API] to create {sn} security incidents.
 
 [float]
 [[servicenow-sir-connector-prerequisites]]
 ==== Prerequisites
-After upgrading from {stack} version 7.15.0 or earlier to version 7.16.0 or later, you must complete the following within your {sn} instance before creating a new {sn} SecOps connector or <<servicenow-sir-connector-update, updating an existing one>>:
+After upgrading from {stack} version 7.15.0 or earlier to version 7.16.0 or later, you must complete the following within your {sn} instance before creating a new {sn-sir} connector or <<servicenow-sir-connector-update, updating an existing one>>:
 
 * Install https://store.servicenow.com/sn_appstore_store.do#!/store/application/2f0746801baeb01019ae54e4604bcb0f[Elastic for Security Operations (SecOps)] from the {sn} Store.
 * Create a {sn} integration user and assign it the appropriate roles.
@@ -142,9 +142,9 @@ image::management/connectors/images/servicenow-oauth-values.png[Shows where to f
 
 [float]
 [[servicenow-sir-connector-update]]
-==== Update a deprecated {sn} SecOps connector
+==== Update a deprecated {sn-sir} connector
 
-{sn} SecOps connectors created in {stack} version 7.15.0 or earlier are marked as deprecated after you upgrade to version 7.16.0 or later. Deprecated connectors have a yellow icon after their name and display a warning message when selected.
+{sn-sir} connectors created in {stack} version 7.15.0 or earlier are marked as deprecated after you upgrade to version 7.16.0 or later. Deprecated connectors have a yellow icon after their name and display a warning message when selected.
 
 [role="screenshot"]
 image::management/connectors/images/servicenow-sir-update-connector.png[Shows deprecated ServiceNow connectors]
@@ -166,7 +166,7 @@ To update a deprecated connector:
 [[servicenow-sir-connector-configuration]]
 ==== Connector configuration
 
-{sn} SecOps connectors have the following configuration properties.
+{sn-sir} connectors have the following configuration properties.
 
 Name::      The name of the connector. The name is used to identify a  connector in the **Stack Management** UI connector listing, and in the connector list when configuring an action.
 Is OAuth::  The type of authentication to use.
@@ -246,7 +246,7 @@ Secrets defines sensitive information for the connector type.
 [[define-servicenow-sir-ui]]
 ==== Define connector in Stack Management
 
-Define {sn} SecOps connector properties. Choose whether to use OAuth for authentication.
+Define {sn-sir} connector properties. Choose whether to use OAuth for authentication.
 
 [role="screenshot"]
 image::management/connectors/images/servicenow-sir-connector-basic.png[ServiceNow SecOps connector using basic auth]
@@ -254,7 +254,7 @@ image::management/connectors/images/servicenow-sir-connector-basic.png[ServiceNo
 [role="screenshot"]
 image::management/connectors/images/servicenow-sir-connector-oauth.png[ServiceNow SecOps connector using OAuth]
 
-Test {sn} SecOps action parameters.
+Test {sn-sir} action parameters.
 
 [role="screenshot"]
 image::management/connectors/images/servicenow-sir-params-test.png[ServiceNow SecOps params test]
@@ -279,6 +279,6 @@ Additional comments::  Additional information for the client, such as how to tro
 
 [float]
 [[configuring-servicenow-sir]]
-==== Configure {sn} SecOps
+==== Configure {sn-sir}
 
 {sn} offers free https://developer.servicenow.com/dev.do#!/guides/madrid/now-platform/pdi-guide/obtaining-a-pdi[Personal Developer Instances], which you can use to test incidents.
