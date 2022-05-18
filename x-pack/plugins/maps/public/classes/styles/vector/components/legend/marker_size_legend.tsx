@@ -16,7 +16,7 @@ import { IDynamicStyleProperty } from '../../properties/dynamic_style_property';
 
 const FONT_SIZE = 10;
 const HALF_FONT_SIZE = FONT_SIZE / 2;
-const MIN_MARKER_DISTANCE = (FONT_SIZE * 1.5) / 2;
+const MIN_MARKER_DISTANCE = (FONT_SIZE + 2) / 2;
 
 function getSymbolSizeIcons() {
   const defaultStyle = {
