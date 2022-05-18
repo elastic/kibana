@@ -87,7 +87,12 @@ export const deleteMonitor = async ({
 
     await savedObjectsClient.delete(syntheticsMonitorType, monitorId);
     const errors = await syntheticsService.deleteConfigs([
-      { ...normalizedMonitor.attributes, id: monitorId },
+      {
+        ...normalizedMonitor.attributes,
+        id:
+          (normalizedMonitor.attributes as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID] ||
+          monitorId,
+      },
     ]);
 
     sendTelemetryEvents(

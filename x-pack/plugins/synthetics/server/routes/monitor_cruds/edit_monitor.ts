@@ -129,7 +129,9 @@ export const syncEditedMonitor = async ({
   const errors = await server.syntheticsService.pushConfigs([
     {
       ...editedMonitor,
-      id: editedMonitorSavedObject.id,
+      id:
+        (editedMonitor as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID] ||
+        editedMonitorSavedObject.id,
       fields: {
         config_id: editedMonitorSavedObject.id,
       },

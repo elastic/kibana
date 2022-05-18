@@ -68,7 +68,7 @@ export const syncNewMonitor = async ({
 }) => {
   const errors = await server.syntheticsService.addConfig({
     ...monitor,
-    id: monitorSavedObject.id,
+    id: (monitor as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID] || monitorSavedObject.id,
     fields: {
       config_id: monitorSavedObject.id,
     },
