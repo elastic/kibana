@@ -16,9 +16,12 @@ export default function ({ getService, getPageObjects }) {
     describe('maps visualize alias', () => {
       describe('with write permission', () => {
         before(async () => {
-          await security.testUser.setRoles(['global_maps_all', 'global_visualize_all'], {
-            skipBrowserRefresh: true,
-          });
+          await security.testUser.setRoles(
+            ['global_maps_all', 'global_visualize_all', 'test_logstash_reader'],
+            {
+              skipBrowserRefresh: true,
+            }
+          );
 
           await PageObjects.visualize.navigateToNewVisualization();
         });
@@ -38,9 +41,12 @@ export default function ({ getService, getPageObjects }) {
 
       describe('without write permission', () => {
         before(async () => {
-          await security.testUser.setRoles(['global_maps_read', 'global_visualize_all'], {
-            skipBrowserRefresh: true,
-          });
+          await security.testUser.setRoles(
+            ['global_maps_read', 'global_visualize_all', 'test_logstash_reader'],
+            {
+              skipBrowserRefresh: true,
+            }
+          );
 
           await PageObjects.visualize.navigateToNewVisualization();
         });
@@ -58,7 +64,9 @@ export default function ({ getService, getPageObjects }) {
 
     describe('aggregion based visualizations', () => {
       before(async () => {
-        await security.testUser.setRoles(['global_visualize_all'], { skipBrowserRefresh: true });
+        await security.testUser.setRoles(['global_visualize_all', 'test_logstash_reader'], {
+          skipBrowserRefresh: true,
+        });
 
         await PageObjects.visualize.navigateToNewAggBasedVisualization();
       });
