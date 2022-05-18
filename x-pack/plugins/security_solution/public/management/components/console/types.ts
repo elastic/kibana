@@ -10,7 +10,7 @@
 import type { ComponentType } from 'react';
 import type { CommonProps } from '@elastic/eui';
 import type { CommandExecutionState } from './components/console_state/types';
-import type { Immutable } from '../../../../common/endpoint/types';
+import type { Immutable, MaybeImmutable } from '../../../../common/endpoint/types';
 import type { ParsedArgData, ParsedCommandInput } from './service/parsed_command_input';
 
 export interface CommandDefinition<TMeta = any> {
@@ -84,7 +84,9 @@ export interface CommandExecutionComponentProps<
   /**
    * Sets the `store` data above. Function will be called the latest (prevState) store data
    */
-  setStore: (updateStoreFn: (prevState: Immutable<Partial<TStore>>) => TStore) => void;
+  setStore: (
+    updateStoreFn: (prevState: Immutable<Partial<TStore>>) => MaybeImmutable<TStore>
+  ) => void;
 
   /**
    * The status of the command execution.
