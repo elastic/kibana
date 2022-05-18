@@ -120,11 +120,11 @@ describe('FileService', () => {
     const file = await createDisposableFile({ fileKind, name: 'test' });
     const updatableFields = { name: 'new name', alt: 'my alt text', meta: { some: 'data' } };
     const updatedFile1 = await file.update(updatableFields);
-    // Fetch the file anew to be doubly sure
     expect(updatedFile1.meta).toEqual(expect.objectContaining(updatableFields.meta));
     expect(updatedFile1.name).toBe(updatableFields.name);
     expect(updatedFile1.alt).toBe(updatableFields.alt);
 
+    // Fetch the file anew to be doubly sure
     const updatedFile2 = await fileService.find({ fileKind, id: file.id });
     expect(updatedFile2.meta).toEqual(expect.objectContaining(updatableFields.meta));
     expect(updatedFile2.name).toBe(updatableFields.name);
