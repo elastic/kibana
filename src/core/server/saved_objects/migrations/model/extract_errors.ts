@@ -38,7 +38,7 @@ export function extractTransformFailuresReason(
 
 export function extractIgnoredUnknownDocs(unknownDocs: CheckForUnknownDocsFoundDoc[]): string {
   return (
-    `Kibana has been configured to ignore unknown documents for this migration.\n` +
+    `Kibana has been configured to discard unknown documents for this migration.\n` +
     `Therefore, the following documents with unknown types will not be taken into account and they will not be available after the migration:\n` +
     unknownDocs.map((doc) => `- "${doc.id}" (type: "${doc.type}")\n`).join('')
   );

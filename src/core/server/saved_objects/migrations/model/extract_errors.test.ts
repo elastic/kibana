@@ -50,7 +50,7 @@ describe('extractIgnoredUnknownDocs', () => {
         },
       ])
     ).toMatchInlineSnapshot(`
-      "Kibana has been configured to ignore unknown documents for this migration.
+      "Kibana has been configured to discard unknown documents for this migration.
       Therefore, the following documents with unknown types will not be taken into account and they will not be available after the migration:
       - \\"unknownType:12\\" (type: \\"unknownType\\")
       - \\"anotherUnknownType:42\\" (type: \\"anotherUnknownType\\")
