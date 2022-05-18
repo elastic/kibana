@@ -31,6 +31,7 @@ import {
   NO_DATA_ACTIONS,
 } from './metric_threshold_executor';
 import { Evaluation } from './lib/evaluate_rule';
+import type { LogMeta, Logger } from '@kbn/logging';
 
 jest.mock('./lib/evaluate_rule', () => ({ evaluateRule: jest.fn() }));
 
@@ -1520,6 +1521,19 @@ const createMockStaticConfiguration = (sources: any) => ({
   sources,
 });
 
+const fakeLogger = <Meta extends LogMeta = LogMeta>(msg: string, meta?: Meta) => {};
+
+const logger = {
+  trace: fakeLogger,
+  debug: fakeLogger,
+  info: fakeLogger,
+  warn: fakeLogger,
+  error: fakeLogger,
+  fatal: fakeLogger,
+  log: () => void 0,
+  get: () => logger,
+} as unknown as Logger;
+
 const mockLibs: any = {
   sources: new InfraSources({
     config: createMockStaticConfiguration({}),
@@ -1532,6 +1546,7 @@ const mockLibs: any = {
     publicBaseUrl: 'http://localhost:5601',
     prepend: (path: string) => path,
   },
+  logger,
 };
 
 const executor = createMetricThresholdExecutor(mockLibs);
