@@ -5,24 +5,19 @@
  * 2.0.
  */
 
-import type {
-  Logger,
-  SavedObjectsServiceSetup,
-  SavedObjectsServiceStart,
-  ISavedObjectsRepository,
-} from '@kbn/core/server';
+import type { Logger, SavedObjectsClientContract, ISavedObjectsRepository } from '@kbn/core/server';
+import { AuditEvent, AuditLogger } from '@kbn/security-plugin/server';
 
-import { BlobStorageService } from './blob_storage_service';
-import { fileObjectType } from './saved_objects';
+import { BlobStorageService } from '../blob_storage_service';
 import {
   FileSavedObjectAttributes,
   File as IFile,
   FileSavedObject,
   UpdatableFileAttributes,
-} from '../common';
-import { File, createDefaultFileAttributes } from './file';
+} from '../../common';
+import { File } from '../file';
 
-interface CreateFileArgs<Meta = {}> {
+interface CreateFileArgs<Meta = unknown> {
   name: string;
   fileKind: string;
   alt?: string;
@@ -50,32 +45,32 @@ interface FindFileArgs {
 }
 
 /**
+ * Service containing methods for working with classes. All business logic for files
+ * is encapsulated in {@link File} class.
+ *
  * @internal
  */
 export class InternalFileService {
-  private soClient: ISavedObjectsRepository;
   constructor(
-    private readonly savedObjectsService: SavedObjectsServiceStart,
+    private readonly savedObjectType: string,
+    private readonly soClient: SavedObjectsClientContract | ISavedObjectsRepository,
     private readonly blobStorageService: BlobStorageService,
+    private readonly auditLogger: undefined | AuditLogger,
     private readonly logger: Logger
-  ) {
-    this.soClient = this.savedObjectsService.createInternalRepository([this.savedObjectType]);
-  }
-
-  private readonly savedObjectType = fileObjectType.name;
+  ) {}
 
   // TODO: Enforce that file kind exists based on registry
-  // TODO: Use security audit logger to log file creation
-  public async createFile({ fileKind, name, alt, meta }: CreateFileArgs): Promise<IFile> {
-    const fileSO = await this.soClient.create<FileSavedObjectAttributes>(this.savedObjectType, {
-      ...createDefaultFileAttributes(),
-      file_kind: fileKind,
-      name,
-      alt,
-      meta,
-    });
+  public async createFile(args: CreateFileArgs): Promise<IFile> {
+    return await File.create(args, this);
+  }
 
-    return this.toFile(fileSO);
+  public createAuditLog(event: AuditEvent) {
+    if (this.auditLogger) {
+      this.auditLogger.log(event);
+    } else {
+      // Otherwise just log to info
+      this.logger.info(event.message);
+    }
   }
 
   public async updateFile({ attributes, fileKind, id }: UpdateFileArgs): Promise<void> {
@@ -112,7 +107,11 @@ export class InternalFileService {
   }
 
   public toFile(fileSO: FileSavedObject): IFile {
-    return new File(this, this.blobStorageService, fileSO, this.logger.get(`file-${fileSO.id}`));
+    return new File(fileSO, this, this.blobStorageService, this.logger.get(`file-${fileSO.id}`));
+  }
+
+  public async createSO(attributes: FileSavedObjectAttributes): Promise<FileSavedObject<unknown>> {
+    return this.soClient.create<FileSavedObjectAttributes>(this.savedObjectType, attributes);
   }
 
   public async deleteSO(id: string): Promise<void> {
@@ -125,9 +124,5 @@ export class InternalFileService {
   ): Promise<FileSavedObject> {
     const updateResponse = await this.soClient.update(this.savedObjectType, id, attributes);
     return updateResponse as FileSavedObject;
-  }
-
-  public static setup(savedObjectsSetup: SavedObjectsServiceSetup): void {
-    savedObjectsSetup.registerType<FileSavedObjectAttributes<{}>>(fileObjectType);
   }
 }

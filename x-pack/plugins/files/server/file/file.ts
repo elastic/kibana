@@ -15,27 +15,32 @@ import {
   UpdatableFileAttributes,
 } from '../../common';
 import { BlobStorageService } from '../blob_storage_service';
-import { fileAttributesReducer, Action } from './file_attributes_reducer';
-
-interface InternalSavedObjectsClient {
-  deleteSO(id: string): Promise<void>;
-  updateSO(id: string, attr: FileSavedObjectAttributes): Promise<FileSavedObject>;
-}
+import {
+  fileAttributesReducer,
+  Action,
+  createDefaultFileAttributes,
+} from './file_attributes_reducer';
+import { createAuditEvent } from '../audit_events';
+import { InternalFileService } from '../file_service/internal_file_service';
 
 /**
  * Public file class that wraps all functionality consumers will need at the
  * individual file level
  */
 export class File<M = unknown> implements IFile {
+  private readonly logAuditEvent: InternalFileService['createAuditLog'];
+
   constructor(
-    private readonly soClient: InternalSavedObjectsClient,
-    private readonly blobStorageService: BlobStorageService,
     private fileSO: FileSavedObject,
+    private readonly internalFileService: InternalFileService,
+    private readonly blobStorageService: BlobStorageService,
     private readonly logger: Logger
-  ) {}
+  ) {
+    this.logAuditEvent = this.internalFileService.createAuditLog.bind(this.internalFileService);
+  }
 
   private async updateFileState(action: Action) {
-    this.fileSO = await this.soClient.updateSO(
+    this.fileSO = await this.internalFileService.updateSO(
       this.id,
       fileAttributesReducer(this.attributes, action)
     );
@@ -53,7 +58,6 @@ export class File<M = unknown> implements IFile {
       action: 'updateFile',
       payload: attrs,
     });
-
     return this;
   }
 
@@ -74,7 +78,6 @@ export class File<M = unknown> implements IFile {
         action: 'uploaded',
         payload: { content_ref: contentRef, size },
       });
-      this.logger.debug(`File uploaded. New file ID: "${contentRef}".`);
     } catch (e) {
       await this.updateFileState({ action: 'uploadError' });
       throw e;
@@ -95,7 +98,39 @@ export class File<M = unknown> implements IFile {
     if (attributes.content_ref) {
       await this.blobStorageService.delete(attributes.content_ref);
     }
-    await this.soClient.deleteSO(id);
+    await this.internalFileService.deleteSO(id);
+    this.logAuditEvent(
+      createAuditEvent({
+        action: 'delete',
+        outcome: 'success',
+        message: `Deleted file "${this.name}" of kind "${this.fileKind}" with id "${this.id}"`,
+      })
+    );
+  }
+
+  /**
+   * Static method for creating files so that we can keep all of the audit logging for files
+   * in the same place.
+   */
+  public static async create(
+    { name, fileKind, alt, meta }: { name: string; fileKind: string; alt?: string; meta?: unknown },
+    internalFileService: InternalFileService
+  ) {
+    const fileSO = await internalFileService.createSO({
+      ...createDefaultFileAttributes(),
+      file_kind: fileKind,
+      name,
+      alt,
+      meta,
+    });
+    const file = internalFileService.toFile(fileSO);
+    internalFileService.createAuditLog(
+      createAuditEvent({
+        action: 'create',
+        message: `Created file "${file.name}" of kind "${file.fileKind}" and id "${file.id}"`,
+      })
+    );
+    return file;
   }
 
   private get attributes(): FileSavedObjectAttributes {

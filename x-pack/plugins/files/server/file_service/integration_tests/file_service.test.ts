@@ -13,10 +13,11 @@ import {
 } from '@kbn/core/test_helpers/kbn_server';
 import { Readable } from 'stream';
 
-import type { FileStatus, File } from '../../common';
+import type { FileStatus, File } from '../../../common';
 
-import { BlobStorageService } from '../blob_storage_service';
-import { InternalFileService } from '../file_service';
+import { BlobStorageService } from '../../blob_storage_service';
+import { FileServiceFactory } from '..';
+import type { InternalFileService } from '../internal_file_service';
 
 describe('FileService', () => {
   const fileKind: string = 'test';
@@ -28,6 +29,7 @@ describe('FileService', () => {
   let esClient: ElasticsearchClient;
   let coreSetup: Awaited<ReturnType<typeof kbnRoot.setup>>;
   let coreStart: CoreStart;
+  let fileServiceFactory: FileServiceFactory;
 
   beforeAll(async () => {
     const { startES } = createTestServers({ adjustTimeout: jest.setTimeout });
@@ -35,7 +37,7 @@ describe('FileService', () => {
     kbnRoot = createRootWithCorePlugins();
     await kbnRoot.preboot();
     coreSetup = await kbnRoot.setup();
-    InternalFileService.setup(coreSetup.savedObjects);
+    FileServiceFactory.setup(coreSetup.savedObjects);
     coreStart = await kbnRoot.start();
     esClient = coreStart.elasticsearch.client.asInternalUser;
   });
@@ -47,11 +49,13 @@ describe('FileService', () => {
 
   beforeEach(() => {
     blobStorageService = new BlobStorageService(esClient, kbnRoot.logger.get('test-blob-service'));
-    fileService = new InternalFileService(
+    fileServiceFactory = new FileServiceFactory(
       coreStart.savedObjects,
       blobStorageService,
+      undefined, // skip security for these tests
       kbnRoot.logger.get('test-file-service')
     );
+    fileService = fileServiceFactory.asInternal();
   });
 
   let disposables: File[] = [];
