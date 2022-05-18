@@ -14,6 +14,8 @@ export const defaultHeaders: ColumnHeaderOptions[] = [
     columnHeaderType: defaultColumnHeaderType,
     id: '@timestamp',
     initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
+    esTypes: ['date'],
+    type: 'date',
   },
   {
     columnHeaderType: defaultColumnHeaderType,
