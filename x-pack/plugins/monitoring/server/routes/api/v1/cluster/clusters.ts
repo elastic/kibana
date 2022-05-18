@@ -6,13 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { LegacyRequest, LegacyServer } from '../../../../types';
 import { getClustersFromRequest } from '../../../../lib/cluster/get_clusters_from_request';
+import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
 import { verifyMonitoringAuth } from '../../../../lib/elasticsearch/verify_monitoring_auth';
 import { handleError } from '../../../../lib/errors';
-import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
+import { LegacyRequest, MonitoringCore } from '../../../../types';
 
-export function clustersRoute(server: LegacyServer) {
+export function clustersRoute(server: MonitoringCore) {
   /*
    * Monitoring Home
    * Route Init (for checking license and compatibility for multi-cluster monitoring
@@ -20,18 +20,16 @@ export function clustersRoute(server: LegacyServer) {
 
   // TODO switch from the LegacyServer route() method to the "new platform" route methods
   server.route({
-    method: 'POST',
+    method: 'post',
     path: '/api/monitoring/v1/clusters',
-    config: {
-      validate: {
-        body: schema.object({
-          timeRange: schema.object({
-            min: schema.string(),
-            max: schema.string(),
-          }),
-          codePaths: schema.arrayOf(schema.string()),
+    validate: {
+      body: schema.object({
+        timeRange: schema.object({
+          min: schema.string(),
+          max: schema.string(),
         }),
-      },
+        codePaths: schema.arrayOf(schema.string()),
+      }),
     },
     handler: async (req: LegacyRequest) => {
       let clusters = [];
@@ -42,7 +40,7 @@ export function clustersRoute(server: LegacyServer) {
       // the monitoring data. `try/catch` makes it a little more explicit.
       try {
         await verifyMonitoringAuth(req);
-        const indexPatterns = getIndexPatterns(server, {
+        const indexPatterns = getIndexPatterns(config, {
           filebeatIndexPattern: config.ui.logs.index,
         });
         clusters = await getClustersFromRequest(req, indexPatterns, {

@@ -5,6 +5,13 @@
  * 2.0.
  */
 
-export { clusterSetupStatusRoute } from './cluster_setup_status';
-export { nodeSetupStatusRoute } from './node_setup_status';
-export { disableElasticsearchInternalCollectionRoute } from './disable_elasticsearch_internal_collection';
+import { MonitoringCore } from '../../../../types';
+import { clusterSetupStatusRoute } from './cluster_setup_status';
+import { disableElasticsearchInternalCollectionRoute } from './disable_elasticsearch_internal_collection';
+import { nodeSetupStatusRoute } from './node_setup_status';
+
+export function registerV1SetupRoutes(server: MonitoringCore) {
+  clusterSetupStatusRoute(server);
+  disableElasticsearchInternalCollectionRoute(server);
+  nodeSetupStatusRoute(server);
+}

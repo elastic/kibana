@@ -9,6 +9,16 @@
 import { MonitoringConfig } from '../config';
 import { decorateDebugServer } from '../debug_logger';
 import { MonitoringCore, RouteDependencies } from '../types';
+import {
+  registerV1AlertRoutes,
+  registerV1ApmRoutes,
+  registerV1BeatsRoutes,
+  registerV1CheckAccessRoutes,
+  registerV1ClusterRoutes,
+  registerV1ElasticsearchRoutes,
+  registerV1ElasticsearchSettingsRoutes,
+  registerV1SetupRoutes,
+} from './api/v1';
 import * as uiRoutes from './api/v1/ui';
 
 export function requireUIRoutes(
@@ -26,4 +36,13 @@ export function requireUIRoutes(
     const registerRoute = uiRoutes[route]; // computed reference to module objects imported via namespace
     registerRoute(server, npRoute);
   });
+
+  registerV1AlertRoutes(decoratedServer, npRoute);
+  registerV1ApmRoutes(server);
+  registerV1BeatsRoutes(server);
+  registerV1CheckAccessRoutes(server);
+  registerV1ClusterRoutes(server);
+  registerV1ElasticsearchRoutes(server);
+  registerV1ElasticsearchSettingsRoutes(server, npRoute);
+  registerV1SetupRoutes(server);
 }

@@ -5,31 +5,11 @@
  * 2.0.
  */
 
-// all routes for the app
-export { checkAccessRoute } from './check_access';
-export * from './alerts';
-export { beatsDetailRoute, beatsListingRoute, beatsOverviewRoute } from './beats';
-export { clusterRoute, clustersRoute } from './cluster';
-export {
-  esIndexRoute,
-  esIndicesRoute,
-  esNodeRoute,
-  esNodesRoute,
-  esOverviewRoute,
-  mlJobRoute,
-  ccrRoute,
-  ccrShardRoute,
-} from './elasticsearch';
-export {
-  internalMonitoringCheckRoute,
-  clusterSettingsCheckRoute,
-  nodesSettingsCheckRoute,
-  setCollectionEnabledRoute,
-  setCollectionIntervalRoute,
-} from './elasticsearch_settings';
+// these are the remaining routes not yet converted to TypeScript
+// all others are registered through index.ts
+
 // @ts-expect-error
 export { kibanaInstanceRoute, kibanaInstancesRoute, kibanaOverviewRoute } from './kibana';
-export { apmInstanceRoute, apmInstancesRoute, apmOverviewRoute } from './apm';
 export {
   logstashClusterPipelinesRoute,
   logstashNodePipelinesRoute,
@@ -41,4 +21,3 @@ export {
 } from './logstash';
 // @ts-expect-error
 export { entSearchOverviewRoute } from './enterprise_search';
-export * from './setup';
