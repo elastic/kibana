@@ -10120,7 +10120,6 @@
     "xpack.csp.rules.rulesTable.rulesTableColumn.enabledLabel": "Activé",
     "xpack.csp.rules.rulesTable.rulesTableColumn.lastModifiedLabel": "Dernière modification",
     "xpack.csp.rules.rulesTable.rulesTableColumn.nameLabel": "Nom de règle",
-    "xpack.csp.rules.rulesTable.rulesTableColumn.sectionLabel": "Section",
     "xpack.csp.rules.saveButtonLabel": "Enregistrer",
     "xpack.csp.rules.searchPlaceholder": "Recherche",
     "xpack.csp.rules.selectAllButtonLabel": "Tout sélectionner",
