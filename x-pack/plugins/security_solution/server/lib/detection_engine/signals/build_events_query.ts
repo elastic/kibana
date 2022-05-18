@@ -173,6 +173,7 @@ export const buildEqlSearchRequest = (
   from: string,
   to: string,
   size: number,
+  filter: estypes.QueryDslQueryContainer,
   timestampOverride: TimestampOverrideOrUndefined,
   exceptionLists: ExceptionListItemSchema[],
   eventCategoryOverride: string | undefined
@@ -197,7 +198,7 @@ export const buildEqlSearchRequest = (
   });
 
   const rangeFilter = buildTimeRangeFilter({ to, from, timestampOverride });
-  const requestFilter: estypes.QueryDslQueryContainer[] = [rangeFilter];
+  const requestFilter: estypes.QueryDslQueryContainer[] = [rangeFilter, filter];
   if (exceptionFilter !== undefined) {
     requestFilter.push({
       bool: {

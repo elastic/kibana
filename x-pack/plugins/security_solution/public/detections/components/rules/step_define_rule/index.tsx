@@ -375,6 +375,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     onValidityChange: setIsQueryBarValid,
                     idAria: 'detectionEngineStepDefineRuleEqlQueryBar',
                     isDisabled: isLoading,
+                    indexPattern: indexPatterns,
                     isLoading: indexPatternsLoading,
                     dataTestSubj: 'detectionEngineStepDefineRuleEqlQueryBar',
                   }}

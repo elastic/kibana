@@ -34,6 +34,7 @@ import {
   BaseFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/detection_engine/schemas/alerts';
+import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
 
 export const eqlExecutor = async ({
   completeRule,
@@ -76,12 +77,21 @@ export const eqlExecutor = async ({
       index: ruleParams.index,
     });
 
+    const esFilter = getQueryFilter(
+      ruleParams.query,
+      ruleParams.language,
+      ruleParams.filters || [],
+      inputIndex,
+      exceptionItems
+    );
+
     const request = buildEqlSearchRequest(
       ruleParams.query,
       inputIndex,
       tuple.from.toISOString(),
       tuple.to.toISOString(),
       completeRule.ruleParams.maxSignals,
+      esFilter,
       ruleParams.timestampOverride,
       exceptionItems,
       ruleParams.eventCategoryOverride

@@ -475,6 +475,7 @@ describe('create_signals', () => {
         'now-5m',
         'now',
         100,
+        {},
         undefined,
         [],
         undefined
@@ -497,6 +498,7 @@ describe('create_signals', () => {
                     },
                   },
                 },
+                {},
               ],
             },
           },
@@ -521,6 +523,7 @@ describe('create_signals', () => {
         'now-5m',
         'now',
         100,
+        {},
         'event.ingested',
         [],
         'event.other_category'
@@ -575,6 +578,7 @@ describe('create_signals', () => {
                     ],
                   },
                 },
+                {},
               ],
             },
           },
@@ -603,6 +607,7 @@ describe('create_signals', () => {
         'now-5m',
         'now',
         100,
+        {},
         undefined,
         [getExceptionListItemSchemaMock()],
         undefined
@@ -625,6 +630,7 @@ describe('create_signals', () => {
                     },
                   },
                 },
+                {},
                 {
                   bool: {
                     must_not: {
