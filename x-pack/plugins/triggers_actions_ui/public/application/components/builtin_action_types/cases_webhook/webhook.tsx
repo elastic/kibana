@@ -17,7 +17,7 @@ import {
   CasesWebhookConfig,
   CasesWebhookSecrets,
   CasesWebhookActionConnector,
-} from '../types';
+} from './types';
 import { isValidUrl } from '../../../lib/value_validators';
 
 export function getActionType(): ActionTypeModel<
@@ -50,7 +50,7 @@ export function getActionType(): ActionTypeModel<
       const configErrors = {
         url: new Array<string>(),
         method: new Array<string>(),
-        incident: new Array<string>(),
+        incidentJson: new Array<string>(),
       };
       const secretsErrors = {
         user: new Array<string>(),
@@ -66,8 +66,8 @@ export function getActionType(): ActionTypeModel<
       if (action.config.url && !isValidUrl(action.config.url)) {
         configErrors.url = [...configErrors.url, translations.URL_INVALID];
       }
-      if (!action.config.incident) {
-        configErrors.incident.push(translations.INCIDENT_REQUIRED);
+      if (!action.config.incidentJson) {
+        configErrors.incidentJson.push(translations.INCIDENT_REQUIRED);
       }
       if (!action.config.method) {
         configErrors.method.push(translations.METHOD_REQUIRED);

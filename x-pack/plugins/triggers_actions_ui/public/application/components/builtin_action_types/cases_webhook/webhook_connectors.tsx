@@ -26,7 +26,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionConnectorFieldsProps } from '../../../../types';
-import { CasesWebhookActionConnector } from '../types';
+import { CasesWebhookActionConnector } from './types';
 import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 import { JsonEditorWithMessageVariables } from '../../json_editor_with_message_variables';
 
@@ -37,7 +37,6 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
 > = ({ action, editActionConfig, editActionSecrets, errors, readOnly }) => {
   const { user, password } = action.secrets;
   const { method, url, incidentJson, headers, hasAuth } = action.config;
-  console.log('incident here', incidentJson);
 
   const [httpHeaderKey, setHttpHeaderKey] = useState<string>('');
   const [httpHeaderValue, setHttpHeaderValue] = useState<string>('');
@@ -232,8 +231,10 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
   const isUserInvalid: boolean =
     user !== undefined && errors.user !== undefined && errors.user.length > 0;
 
-  const isIncidentInvalid: boolean =
-    errors.url !== undefined && errors.url.length > 0 && url !== undefined;
+  const isIncidentJsonInvalid: boolean =
+    errors.incidentJson !== undefined &&
+    errors.incidentJson.length > 0 &&
+    incidentJson !== undefined;
 
   return (
     <>
@@ -294,10 +295,10 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
-            id="incident"
+            id="incidentJson"
             fullWidth
-            error={errors.incident}
-            isInvalid={isIncidentInvalid}
+            error={errors.incidentJson}
+            isInvalid={isIncidentJsonInvalid}
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.urlTextFieldLabel',
               {
@@ -308,13 +309,13 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
               'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.urlTextFieldLabel',
               {
                 defaultMessage:
-                  'JSON object to post incident. Sub $SUM where the summary/title should go and $DESC where the description should go',
+                  'JSON object to post incidentJson. Sub $SUM where the summary/title should go and $DESC where the description should go',
               }
             )}
           >
             <JsonEditorWithMessageVariables
-              inputTargetValue={incident}
-              paramsProperty={'body'}
+              inputTargetValue={incidentJson}
+              paramsProperty={'incidentJson'}
               label={i18n.translate(
                 'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.bodyFieldLabel',
                 {
@@ -327,13 +328,13 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
                   defaultMessage: 'Code editor',
                 }
               )}
-              errors={errors.incident as string[]}
+              errors={errors.incidentJson as string[]}
               onDocumentsChange={(json: string) => {
-                editActionConfig('incident', json);
+                editActionConfig('incidentJson', json);
               }}
               onBlur={() => {
-                if (!incident) {
-                  editActionConfig('incident', '');
+                if (!incidentJson) {
+                  editActionConfig('incidentJson', '');
                 }
               }}
             />

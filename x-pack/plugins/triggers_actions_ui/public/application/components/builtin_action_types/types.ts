@@ -6,7 +6,6 @@
  */
 
 import { EuiIconProps } from '@elastic/eui';
-import { ExecutorSubActionPushParams } from '@kbn/actions-plugin/server/builtin_action_types/cases_webhook/types';
 import { UserConfiguredActionConnector } from '../../../types';
 
 export interface EmailActionParams {
@@ -73,11 +72,6 @@ export interface WebhookActionParams {
   body?: string;
 }
 
-export interface CasesWebhookActionParams {
-  subAction: string;
-  subActionParams: ExecutorSubActionPushParams;
-}
-
 export interface EmailConfig {
   from: string;
   host: string;
@@ -137,24 +131,6 @@ export interface WebhookSecrets {
 }
 
 export type WebhookActionConnector = UserConfiguredActionConnector<WebhookConfig, WebhookSecrets>;
-
-export interface CasesWebhookConfig {
-  method: string;
-  url: string;
-  incidentJson: string;
-  headers: Record<string, string>;
-  hasAuth: boolean;
-}
-
-export interface CasesWebhookSecrets {
-  user: string;
-  password: string;
-}
-
-export type CasesWebhookActionConnector = UserConfiguredActionConnector<
-  CasesWebhookConfig,
-  CasesWebhookSecrets
->;
 
 export enum XmattersSeverityOptions {
   CRITICAL = 'critical',
