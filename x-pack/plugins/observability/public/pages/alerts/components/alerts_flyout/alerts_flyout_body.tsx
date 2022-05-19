@@ -29,7 +29,8 @@ import { translations, paths } from '../../../../config';
 import { AlertStatusIndicator } from '../../../../components/shared/alert_status_indicator';
 import { FlyoutProps } from './types';
 
-export function AlertsFlyoutBody({ alert }: FlyoutProps) {
+// eslint-disable-next-line import/no-default-export
+export default function AlertsFlyoutBody({ alert }: FlyoutProps) {
   const { services } = useKibana();
   const { http } = services;
   const dateFormat = useUiSetting<string>('dateFormat');

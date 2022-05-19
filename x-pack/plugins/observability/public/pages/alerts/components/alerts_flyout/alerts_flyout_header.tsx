@@ -11,7 +11,8 @@ import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { ExperimentalBadge } from '../../../../components/shared/experimental_badge';
 import { FlyoutProps } from './types';
 
-export function AlertsFlyoutHeader({ alert }: FlyoutProps) {
+// eslint-disable-next-line import/no-default-export
+export default function AlertsFlyoutHeader({ alert }: FlyoutProps) {
   return (
     <>
       <ExperimentalBadge />

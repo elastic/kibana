@@ -10,7 +10,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FlyoutProps } from './types';
 import { translations } from '../../../../config';
 
-export function AlertsFlyoutFooter({ alert, isInApp }: FlyoutProps & { isInApp: boolean }) {
+// eslint-disable-next-line import/no-default-export
+export default function AlertsFlyoutFooter({ alert, isInApp }: FlyoutProps & { isInApp: boolean }) {
   const { services } = useKibana();
   const { http } = services;
   const prepend = http?.basePath.prepend;
