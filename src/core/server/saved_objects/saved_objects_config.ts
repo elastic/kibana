@@ -7,7 +7,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import type { ServiceConfigDescriptor } from '../internal_types';
+import type { ServiceConfigDescriptor } from '@kbn/core-server-internal-base';
 
 const migrationSchema = schema.object({
   batchSize: schema.number({ defaultValue: 1_000 }),

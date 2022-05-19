@@ -2986,6 +2986,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-server-internal-base@link:bazel-bin/packages/core/server/internal-base":
+  version "0.0.0"
+  uid ""
+
 "@kbn/crypto@link:bazel-bin/packages/kbn-crypto":
   version "0.0.0"
   uid ""
@@ -6114,6 +6118,10 @@
   uid ""
 
 "@types/kbn__config@link:bazel-bin/packages/kbn-config/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-server-internal-base@link:bazel-bin/packages/core/server/internal-base/npm_module_types":
   version "0.0.0"
   uid ""
 

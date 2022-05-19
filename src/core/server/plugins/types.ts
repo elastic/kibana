@@ -10,6 +10,7 @@ import { Observable } from 'rxjs';
 import { Type } from '@kbn/config-schema';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { PathConfigType } from '@kbn/utils';
+import { PluginOpaqueId, PluginName } from '@kbn/core-server-internal-base';
 
 import { ConfigPath, EnvironmentMode, PackageInfo, ConfigDeprecationProvider } from '../config';
 import { LoggerFactory } from '../logging';
@@ -18,6 +19,9 @@ import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
 import { CorePreboot, CoreSetup, CoreStart } from '..';
 
 type Maybe<T> = T | undefined;
+
+// re-exporting for now to avoid adapting all imports, will be removed later on in the migration process
+export type { PluginOpaqueId, PluginName } from '@kbn/core-server-internal-base';
 
 /**
  * Dedicated type for plugin configuration schema.
@@ -120,17 +124,6 @@ export type MakeUsageFromSchema<T> = {
     ? MakeUsageFromSchema<T[Key]> | boolean
     : boolean;
 };
-
-/**
- * Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays
- * that use it as a key or value more obvious.
- *
- * @public
- */
-export type PluginName = string;
-
-/** @public */
-export type PluginOpaqueId = symbol;
 
 /** @public */
 export enum PluginType {

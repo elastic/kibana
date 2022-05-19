@@ -7,7 +7,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { ServiceConfigDescriptor } from '../internal_types';
+import type { ServiceConfigDescriptor } from '@kbn/core-server-internal-base';
 
 const statusConfigSchema = schema.object({
   allowAnonymous: schema.boolean({ defaultValue: false }),

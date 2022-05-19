@@ -7,8 +7,8 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { ConfigDeprecationProvider } from '..';
-import { ServiceConfigDescriptor } from '../internal_types';
+import type { ServiceConfigDescriptor } from '@kbn/core-server-internal-base';
+import { ConfigDeprecationProvider } from '@kbn/config';
 
 const deprecations: ConfigDeprecationProvider = ({ unused, renameFromRoot }) => [
   unused('enabled', { level: 'warning' }),
