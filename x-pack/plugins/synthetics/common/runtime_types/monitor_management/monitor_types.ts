@@ -15,6 +15,7 @@ import {
   ModeCodec,
   ResponseBodyIndexPolicyCodec,
   ScheduleUnitCodec,
+  SourceTypeCodec,
   TLSVersionCodec,
   VerificationModeCodec,
 } from './monitor_configs';
@@ -76,6 +77,7 @@ export const CommonFieldsCodec = t.intersection([
   t.partial({
     [ConfigKey.TIMEOUT]: t.union([t.string, t.null]),
     [ConfigKey.REVISION]: t.number,
+    [ConfigKey.SOURCE_TYPE]: SourceTypeCodec,
   }),
 ]);
 
@@ -211,7 +213,6 @@ export const EncryptedBrowserSimpleFieldsCodec = t.intersection([
       [ConfigKey.PLAYWRIGHT_OPTIONS]: t.string,
       [ConfigKey.JOURNEY_ID]: t.string,
       [ConfigKey.PROJECT_ID]: t.string,
-      [ConfigKey.IS_PUSH_MONITOR]: t.boolean,
       [ConfigKey.ORIGINAL_SPACE]: t.string,
       [ConfigKey.CUSTOM_HEARTBEAT_ID]: t.string,
     }),

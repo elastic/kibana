@@ -87,4 +87,5 @@ export const commonNormalizers: CommonNormalizerMap = {
   [ConfigKey.NAMESPACE]: (fields) =>
     fields?.[ConfigKey.NAMESPACE]?.value ?? DEFAULT_NAMESPACE_STRING,
   [ConfigKey.REVISION]: getCommonNormalizer(ConfigKey.REVISION),
+  [ConfigKey.SOURCE_TYPE]: getCommonNormalizer(ConfigKey.SOURCE_TYPE),
 };

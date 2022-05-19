@@ -14,6 +14,7 @@ import {
   Locations,
   ProjectBrowserMonitor,
   ScheduleUnit,
+  SourceType,
 } from '../../../common/runtime_types/monitor_management';
 
 /* Represents all of the push-monitor related fields that need to be
@@ -55,7 +56,7 @@ export const normalizeProjectMonitor = ({
   const defaultFields = DEFAULT_FIELDS[DataStream.BROWSER];
   const normalizedFields: NormalizedPublicFields = {
     [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
-    [ConfigKey.IS_PUSH_MONITOR]: true,
+    [ConfigKey.SOURCE_TYPE]: SourceType.PROJECT,
     [ConfigKey.NAME]: monitor.name || '',
     [ConfigKey.SCHEDULE]: {
       number: `${monitor.schedule}`,

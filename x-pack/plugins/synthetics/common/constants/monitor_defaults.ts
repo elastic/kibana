@@ -18,6 +18,7 @@ import {
   ResponseBodyIndexPolicy,
   ScheduleUnit,
   ScreenshotOption,
+  SourceType,
   TCPAdvancedFields,
   TCPSimpleFields,
   TLSFields,
@@ -41,6 +42,7 @@ export const DEFAULT_COMMON_FIELDS: CommonFields = {
   [ConfigKey.NAME]: '',
   [ConfigKey.LOCATIONS]: [],
   [ConfigKey.NAMESPACE]: DEFAULT_NAMESPACE_STRING,
+  [ConfigKey.SOURCE_TYPE]: SourceType.UI,
 };
 
 export const DEFAULT_BROWSER_ADVANCED_FIELDS: BrowserAdvancedFields = {
@@ -61,7 +63,6 @@ export const DEFAULT_BROWSER_SIMPLE_FIELDS: BrowserSimpleFields = {
   [ConfigKey.JOURNEY_ID]: '',
   [ConfigKey.PROJECT_ID]: '',
   [ConfigKey.PLAYWRIGHT_OPTIONS]: '',
-  [ConfigKey.IS_PUSH_MONITOR]: false,
   [ConfigKey.METADATA]: {
     script_source: {
       is_generated_script: false,

@@ -13,6 +13,7 @@ import {
   EncryptedSyntheticsMonitor,
   ConfigKey,
   ServiceLocationErrors,
+  SourceType,
 } from '../../../common/runtime_types';
 import type { MonitorUpdateEvent } from '../../legacy_uptime/lib/telemetry/types';
 
@@ -154,7 +155,7 @@ function getScriptType(
       return 'recorder';
     case Boolean(isInlineScript):
       return 'inline';
-    case Boolean(attributes[ConfigKey.IS_PUSH_MONITOR]):
+    case attributes[ConfigKey.SOURCE_TYPE] === SourceType.PROJECT:
       return 'project';
     default:
       return undefined;

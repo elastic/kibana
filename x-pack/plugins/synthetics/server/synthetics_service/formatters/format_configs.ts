@@ -10,7 +10,7 @@ import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
 import { formatters } from '.';
 
 const UI_KEYS_TO_SKIP = [
-  ConfigKey.IS_PUSH_MONITOR,
+  ConfigKey.SOURCE_TYPE,
   ConfigKey.JOURNEY_ID,
   ConfigKey.PROJECT_ID,
   ConfigKey.METADATA,
@@ -20,6 +20,7 @@ const UI_KEYS_TO_SKIP = [
   ConfigKey.IS_THROTTLING_ENABLED,
   ConfigKey.LOCATIONS,
   ConfigKey.REVISION,
+  ConfigKey.CUSTOM_HEARTBEAT_ID,
   'secrets',
 ];
 

@@ -42,5 +42,6 @@
   "throttling.config": "5d/3u/20l",
   "locations": [],
   "name": "Test HTTP Monitor 03",
-  "namespace": "testnamespace"
+  "namespace": "testnamespace",
+  "source_type": "ui"
 }

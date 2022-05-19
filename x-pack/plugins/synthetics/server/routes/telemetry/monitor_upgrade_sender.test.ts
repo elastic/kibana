@@ -113,7 +113,7 @@ describe('monitor upgrade telemetry helpers', () => {
   });
 
   it.each([
-    [ConfigKey.IS_PUSH_MONITOR, true, 'project', false, false],
+    [ConfigKey.SOURCE_TYPE, true, 'project', false, false],
     [ConfigKey.SOURCE_INLINE, 'test', 'recorder', true, true],
     [ConfigKey.SOURCE_INLINE, 'test', 'inline', false, true],
     [ConfigKey.SOURCE_ZIP_URL, 'test', 'zip', false, false],

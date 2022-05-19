@@ -80,7 +80,6 @@ export const browserNormalizers: BrowserNormalizerMap = {
   [ConfigKey.SCREENSHOTS]: getBrowserNormalizer(ConfigKey.SCREENSHOTS),
   [ConfigKey.SYNTHETICS_ARGS]: getBrowserJsonToJavascriptNormalizer(ConfigKey.SYNTHETICS_ARGS),
   [ConfigKey.IS_THROTTLING_ENABLED]: isThrottlingEnabledNormalizer,
-  [ConfigKey.IS_PUSH_MONITOR]: getBrowserNormalizer(ConfigKey.IS_PUSH_MONITOR),
   [ConfigKey.DOWNLOAD_SPEED]: getThrottlingParamNormalizer(ConfigKey.DOWNLOAD_SPEED),
   [ConfigKey.UPLOAD_SPEED]: getThrottlingParamNormalizer(ConfigKey.UPLOAD_SPEED),
   [ConfigKey.LATENCY]: getThrottlingParamNormalizer(ConfigKey.LATENCY),

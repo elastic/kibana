@@ -50,8 +50,8 @@ export const syntheticsMonitor: SavedObjectsType = {
       project_id: {
         type: 'keyword',
       },
-      is_push_monitor: {
-        type: 'boolean',
+      source_type: {
+        type: 'keyword',
       },
     },
   },

@@ -86,7 +86,7 @@ export class ProjectMonitorFormatter {
     this.encryptedSavedObjectsClient = encryptedSavedObjectsClient;
     this.monitors = monitors;
     this.server = server;
-    this.projectFilter = `${syntheticsMonitorType}.attributes.${ConfigKey.IS_PUSH_MONITOR}: true AND ${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}: "${this.projectId}"`;
+    this.projectFilter = `${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}: "${this.projectId}"`;
   }
 
   public configureAllProjectMonitors = async () => {
