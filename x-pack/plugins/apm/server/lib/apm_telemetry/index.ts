@@ -93,6 +93,7 @@ export async function createApmTelemetry({
       logger,
       indicesStats,
       transportRequest,
+      savedObjectsClient,
     });
 
     await savedObjectsClient.create(
