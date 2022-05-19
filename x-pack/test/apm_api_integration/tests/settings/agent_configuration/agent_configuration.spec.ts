@@ -417,7 +417,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
           expect(agentConfiguration?.applied_by_agent).to.be(false);
         });
 
-        describe('when there are agent config metrics for this etag', () => {
+        describe.skip('when there are agent config metrics for this etag', () => {
           before(async () => {
             const start = new Date().getTime();
             const end = moment(start).add(5, 'minutes').valueOf();
