@@ -14,6 +14,7 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import type { Client } from '@elastic/elasticsearch';
 import { ConfigPath } from '@kbn/config';
 import { ContextProviderOpts } from '@kbn/analytics-client';
+import { CoreId } from '@kbn/core-server-internal-base';
 import { DetailedPeerCertificate } from 'tls';
 import type { DocLinks } from '@kbn/doc-links';
 import { EnvironmentMode } from '@kbn/config';
@@ -44,6 +45,8 @@ import { OptInConfig } from '@kbn/analytics-client';
 import { PackageInfo } from '@kbn/config';
 import { Path } from 'history';
 import { PeerCertificate } from 'tls';
+import { PluginName } from '@kbn/core-server-internal-base';
+import { PluginOpaqueId } from '@kbn/core-server-internal-base';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { default as React_2 } from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
@@ -398,8 +401,6 @@ export { ContextProviderOpts }
 
 // @internal (undocumented)
 export interface CoreContext {
-    // Warning: (ae-forgotten-export) The symbol "CoreId" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     coreId: CoreId;
     // (undocumented)
@@ -974,8 +975,7 @@ export interface PluginInitializerContext<ConfigSchema extends object = object> 
     readonly opaqueId: PluginOpaqueId;
 }
 
-// @public (undocumented)
-export type PluginOpaqueId = symbol;
+export { PluginOpaqueId }
 
 // @public
 export type PublicAppDeepLinkInfo = Omit<AppDeepLink, 'deepLinks' | 'keywords' | 'navLinkStatus' | 'searchable'> & {

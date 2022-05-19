@@ -10,7 +10,7 @@ Set of helpers used to create `KibanaResponse` to form HTTP response on an incom
 
 ```typescript
 kibanaResponseFactory: {
-    custom: <T extends string | Record<string, any> | Error | Buffer | Stream | {
+    custom: <T extends string | Record<string, any> | Buffer | Error | Stream | {
         message: string | Error;
         attributes?: ResponseErrorAttributes | undefined;
     } | undefined>(options: CustomHttpResponseOptions<T>) => KibanaResponse<T>;
@@ -34,7 +34,7 @@ kibanaResponseFactory: {
         message: string | Error;
         attributes?: ResponseErrorAttributes | undefined;
     }>;
-    customError: (options: CustomHttpResponseOptions<ResponseError | Buffer | Stream>) => KibanaResponse<string | Error | Buffer | Stream | {
+    customError: (options: CustomHttpResponseOptions<ResponseError | Buffer | Stream>) => KibanaResponse<string | Buffer | Error | Stream | {
         message: string | Error;
         attributes?: ResponseErrorAttributes | undefined;
     }>;
