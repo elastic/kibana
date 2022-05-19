@@ -58,13 +58,13 @@ export const buildEqlDsl = (options: TimelineEqlRequestOptions): Record<string, 
         : {}),
       size: options.size ?? 100,
       timestamp_field: options.timestampField ?? '@timestamp',
-      _source: false,
-      fields: [{ field: '*', include_unmapped: true },
-      {
-        field: '@timestamp',
-        format: 'strict_date_optional_time',
-      },
-    ],
+      fields: [
+        { field: '*', include_unmapped: true },
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
     },
   };
 };

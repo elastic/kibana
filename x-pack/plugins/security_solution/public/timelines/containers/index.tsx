@@ -365,7 +365,7 @@ export const useTimelineEvents = ({
         defaultIndex: indexNames,
         factoryQueryType: TimelineEventsQueries.all,
         fieldRequested: fields,
-        fields: [],
+        fields,
         filterQuery: createFilter(filterQuery),
         pagination: {
           activePage: newActivePage,
