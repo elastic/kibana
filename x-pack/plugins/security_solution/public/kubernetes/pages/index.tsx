@@ -18,14 +18,20 @@ import { useSourcererDataView } from '../../common/containers/sourcerer';
 
 export const KubernetesContainer = React.memo(() => {
   const { kubernetesSecurity } = useKibana().services;
+  const { globalFullScreen } = useGlobalFullScreen();
+  const {
+    indexPattern,
+    // runtimeMappings,
+    // loading: isLoadingIndexPattern,
+  } = useSourcererDataView();
   return (
     <SecuritySolutionPageWrapper noPadding>
       {kubernetesSecurity.getKubernetesPage({
-        FiltersGlobal,
-        SiemSearchBar,
-        showGlobalFilters,
-        useGlobalFullScreen,
-        useSourcererDataView,
+        filter: (
+          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId: undefined })}>
+            <SiemSearchBar id="global" indexPattern={indexPattern} />
+          </FiltersGlobal>
+        ),
       })}
       <SpyRoute pageName={SecurityPageName.kubernetes} />
     </SecuritySolutionPageWrapper>

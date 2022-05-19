@@ -87,19 +87,7 @@ const SORT_BY_OPTIONS: Array<EuiComboBoxOptionOption<string>> = [
   },
 ];
 
-const KubernetesSecurityRoutesComponent = ({
-  FiltersGlobal,
-  SiemSearchBar,
-  showGlobalFilters,
-  useGlobalFullScreen,
-  useSourcererDataView,
-}: KubernetesSecurityDeps) => {
-  const { globalFullScreen } = useGlobalFullScreen();
-  const {
-    indexPattern,
-    // runtimeMappings,
-    // loading: isLoadingIndexPattern,
-  } = useSourcererDataView();
+const KubernetesSecurityRoutesComponent = ({ filter }: KubernetesSecurityDeps) => {
   const clusterOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(
     () =>
       MOCK_CLUSTERS.map((cluster) => ({
@@ -117,9 +105,7 @@ const KubernetesSecurityRoutesComponent = ({
   return (
     <Switch>
       <Route strict exact path={KUBERNETES_PATH}>
-        <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId: undefined })}>
-          <SiemSearchBar id="global" indexPattern={indexPattern} />
-        </FiltersGlobal>
+        {filter}
         <EuiFlexGroup>
           <EuiFlexItem grow={3}>
             <KubernetesWidget
