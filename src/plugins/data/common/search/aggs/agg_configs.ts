@@ -13,6 +13,8 @@ import { Assign } from '@kbn/utility-types';
 import { isRangeFilter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IndexPatternLoadExpressionFunctionDefinition } from '@kbn/data-views-plugin/common';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 
 import {
   IEsSearchResponse,
@@ -21,6 +23,7 @@ import {
   RangeFilter,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../public';
+import type { EsaggsExpressionFunctionDefinition } from '../expressions';
 import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';
 import { IAggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
@@ -492,5 +495,22 @@ export class AggConfigs {
       // @ts-ignore
       this.getRequestAggs().map((agg: AggConfig) => agg.onSearchRequestStart(searchSource, options))
     );
+  }
+
+  toExpressionAst() {
+    return buildExpression([
+      buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
+        index: buildExpression([
+          buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>(
+            'indexPatternLoad',
+            {
+              id: this.indexPattern.id!,
+            }
+          ),
+        ]),
+        metricsAtAllLevels: this.hierarchical,
+        aggs: this.aggs.map((agg) => buildExpression(agg.toExpressionAst())),
+      }),
+    ]).toAst();
   }
 }
