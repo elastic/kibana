@@ -80,6 +80,7 @@ class DocLinks {
   public workplaceSearchJiraServer: string;
   public workplaceSearchNetworkDrive: string;
   public workplaceSearchOneDrive: string;
+  public workplaceSearchOutlook: string;
   public workplaceSearchPermissions: string;
   public workplaceSearchSalesforce: string;
   public workplaceSearchSecurity: string;
@@ -163,6 +164,7 @@ class DocLinks {
     this.workplaceSearchJiraServer = '';
     this.workplaceSearchNetworkDrive = '';
     this.workplaceSearchOneDrive = '';
+    this.workplaceSearchOutlook = '';
     this.workplaceSearchPermissions = '';
     this.workplaceSearchSalesforce = '';
     this.workplaceSearchSecurity = '';
@@ -250,6 +252,7 @@ class DocLinks {
     this.workplaceSearchJiraServer = docLinks.links.workplaceSearch.jiraServer;
     this.workplaceSearchNetworkDrive = docLinks.links.workplaceSearch.networkDrive;
     this.workplaceSearchOneDrive = docLinks.links.workplaceSearch.oneDrive;
+    this.workplaceSearchOutlook = docLinks.links.workplaceSearch.outlook;
     this.workplaceSearchPermissions = docLinks.links.workplaceSearch.permissions;
     this.workplaceSearchSalesforce = docLinks.links.workplaceSearch.salesforce;
     this.workplaceSearchSecurity = docLinks.links.workplaceSearch.security;

@@ -141,6 +141,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       jiraServer: `${WORKPLACE_SEARCH_DOCS}workplace-search-jira-server-connector.html`,
       networkDrive: `${WORKPLACE_SEARCH_DOCS}network-drives.html`,
       oneDrive: `${WORKPLACE_SEARCH_DOCS}workplace-search-onedrive-connector.html`,
+      outlook: `${WORKPLACE_SEARCH_DOCS}microsoft-outlook.html`,
       permissions: `${WORKPLACE_SEARCH_DOCS}workplace-search-permissions.html#organizational-sources-private-sources`,
       salesforce: `${WORKPLACE_SEARCH_DOCS}workplace-search-salesforce-connector.html`,
       security: `${WORKPLACE_SEARCH_DOCS}workplace-search-security.html`,

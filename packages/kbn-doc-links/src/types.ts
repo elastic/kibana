@@ -127,6 +127,7 @@ export interface DocLinks {
     readonly jiraServer: string;
     readonly networkDrive: string;
     readonly oneDrive: string;
+    readonly outlook: string;
     readonly permissions: string;
     readonly salesforce: string;
     readonly security: string;

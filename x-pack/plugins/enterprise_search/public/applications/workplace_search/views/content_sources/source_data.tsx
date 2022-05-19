@@ -433,7 +433,7 @@ export const staticSourceData: SourceDataItem[] = [
       isPublicKey: false,
       hasOauthRedirect: false,
       needsBaseUrl: false,
-      documentationUrl: docLinks.workplaceSearchCustomSources, // TODO Update this when we have a doclink
+      documentationUrl: docLinks.workplaceSearchOutlook,
       applicationPortalUrl: '',
       githubRepository: 'elastic/enterprise-search-outlook-connector',
     },
