@@ -272,7 +272,7 @@ export const ChangePasswordModal: FunctionComponent<ChangePasswordModalProps> = 
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty
-          data-test-subj="changePasswordFormModalCancelButton"
+          data-test-subj="changePasswordFormCancelButton"
           isDisabled={form.isSubmitting}
           onClick={onCancel}
         >
