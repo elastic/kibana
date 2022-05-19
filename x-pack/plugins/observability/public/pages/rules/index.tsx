@@ -234,6 +234,7 @@ function RulesPage() {
         field: 'enabled',
         name: STATUS_COLUMN_TITLE,
         sortable: true,
+        'data-test-subj': 'rulesTableCell-ContextStatus',
         render: (_enabled: boolean, item: RuleTableItem) => {
           return triggersActionsUi.getRuleStatusDropdown({
             rule: item,

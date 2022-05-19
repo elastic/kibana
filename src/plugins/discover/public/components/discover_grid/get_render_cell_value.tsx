@@ -214,10 +214,10 @@ function renderPopoverContent({
   }
 
   return (
-    <EuiFlexGroup gutterSize="none" direction="row">
+    <EuiFlexGroup gutterSize="none" direction="row" responsive={false}>
       <EuiFlexItem>
         <span
-          className="dscDiscoverGrid__cellPopoverValue"
+          className="dscDiscoverGrid__cellPopoverValue eui-textBreakWord"
           // formatFieldValue guarantees sanitized values
           // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{
