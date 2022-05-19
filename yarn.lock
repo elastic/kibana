@@ -2979,6 +2979,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-common-internal-base@link:bazel-bin/packages/core/common/internal-base":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-public-internal-base@link:bazel-bin/packages/core/public/internal-base":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-server-internal-base@link:bazel-bin/packages/core/server/internal-base":
   version "0.0.0"
   uid ""
@@ -6209,6 +6217,14 @@
   uid ""
 
 "@types/kbn__config@link:bazel-bin/packages/kbn-config/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-common-internal-base@link:bazel-bin/packages/core/common/internal-base/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-public-internal-base@link:bazel-bin/packages/core/public/internal-base/npm_module_types":
   version "0.0.0"
   uid ""
 
