@@ -8,7 +8,6 @@
 import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { DataViewAttributes } from '@kbn/data-views-plugin/common';
 
 import { Logger } from '@kbn/core/server';
 
@@ -21,7 +20,6 @@ import { IRuleDataReader } from '@kbn/rule-registry-plugin/server';
 import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
 import { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { getFilter } from '../get_filter';
-import { getInputIndex } from '../get_input_output_index';
 import {
   bulkCreateThresholdSignals,
   findThresholdSignals,
@@ -46,6 +44,8 @@ import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { buildThresholdSignalHistory } from '../threshold/build_signal_history';
 
 export const thresholdExecutor = async ({
+  inputIndex,
+  runtimeMappings,
   completeRule,
   tuple,
   exceptionItems,
@@ -60,6 +60,8 @@ export const thresholdExecutor = async ({
   wrapHits,
   ruleDataReader,
 }: {
+  inputIndex: string[];
+  runtimeMappings: estypes.MappingRuntimeFields;
   completeRule: CompleteRule<ThresholdRuleParams>;
   tuple: RuleRangeTuple;
   exceptionItems: ExceptionListItemSchema[];
@@ -107,28 +109,6 @@ export const thresholdExecutor = async ({
         'Exceptions that use "is in list" or "is not in list" operators are not applied to Threshold rules'
       );
       result.warning = true;
-    }
-
-    let inputIndex = await getInputIndex({
-      experimentalFeatures,
-      services,
-      version,
-      index: ruleParams.index,
-    });
-
-    let runtimeMappings: estypes.MappingRuntimeFields = {};
-    if (ruleParams.dataViewId != null && ruleParams.dataViewId !== '') {
-      const dataView = await services.savedObjectsClient.get<DataViewAttributes>(
-        'index-pattern',
-        ruleParams.dataViewId
-      );
-      if (dataView != null && dataView.attributes.title != null) {
-        inputIndex = dataView.attributes.title.split(',');
-      }
-      if (dataView?.attributes.runtimeFieldMap != null) {
-        runtimeMappings = JSON.parse(dataView.attributes.runtimeFieldMap);
-        logger.debug(`runtime mappings ${runtimeMappings}`);
-      }
     }
 
     // Eliminate dupes

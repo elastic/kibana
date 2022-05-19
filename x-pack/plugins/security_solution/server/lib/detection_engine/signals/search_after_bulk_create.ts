@@ -7,7 +7,6 @@
 
 import { identity } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { DataViewAttributes, SavedObject } from '@kbn/data-views-plugin/common';
 import { singleSearchAfter } from './single_search_after';
 import { filterEventsAgainstList } from './filters/filter_events_against_list';
 import { sendAlertTelemetryEvents } from './send_telemetry_events';
@@ -22,7 +21,6 @@ import {
 } from './utils';
 import { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
 import { withSecuritySpan } from '../../../utils/with_security_span';
-import { hasDataViewInParams } from '../schemas/utils';
 
 // search_after through documents and re-index using bulk endpoint.
 export const searchAfterAndBulkCreate = async ({
@@ -43,6 +41,7 @@ export const searchAfterAndBulkCreate = async ({
   trackTotalHits,
   tuple,
   wrapHits,
+  runtimeMappings,
 }: SearchAfterAndBulkCreateParams): Promise<SearchAfterAndBulkCreateReturnType> => {
   // eslint-disable-next-line complexity
   return withSecuritySpan('searchAfterAndBulkCreate', async () => {
@@ -65,24 +64,6 @@ export const searchAfterAndBulkCreate = async ({
       });
     }
 
-    let runtimeMappings = {};
-    let kibanaIndexPattern: SavedObject<DataViewAttributes> | null = null;
-    // hasDataViewInParams is a typeguard that asserts ruleParams are either
-    // threat match, threshold, eql, or query rule types
-    if (
-      hasDataViewInParams(ruleParams) &&
-      ruleParams.dataViewId != null &&
-      ruleParams.dataViewId !== ''
-    ) {
-      kibanaIndexPattern = await services.savedObjectsClient.get<DataViewAttributes>(
-        'index-pattern',
-        ruleParams.dataViewId
-      );
-      if (kibanaIndexPattern?.attributes.runtimeFieldMap != null) {
-        runtimeMappings = JSON.parse(kibanaIndexPattern.attributes.runtimeFieldMap);
-        logger.debug(`runtime mappings ${runtimeMappings}`);
-      }
-    }
     signalsCreatedCount = 0;
     while (signalsCreatedCount < tuple.maxSignals) {
       try {
@@ -92,13 +73,7 @@ export const searchAfterAndBulkCreate = async ({
           const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
             buildRuleMessage,
             searchAfterSortIds: sortIds,
-            // TODO: use a kibana config key for determining whether to default to dataview or inputIndexPattern
-            index:
-              hasDataViewInParams(ruleParams) &&
-              ruleParams.dataViewId != null &&
-              kibanaIndexPattern != null // default to data view id if present on rule definition.
-                ? kibanaIndexPattern.attributes.title.split(',')
-                : inputIndexPattern,
+            index: inputIndexPattern,
             runtimeMappings,
             from: tuple.from.toISOString(),
             to: tuple.to.toISOString(),

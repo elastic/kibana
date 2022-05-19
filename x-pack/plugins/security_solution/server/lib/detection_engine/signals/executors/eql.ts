@@ -14,11 +14,9 @@ import {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { DataViewAttributes } from '@kbn/data-views-plugin/common';
 
 import { buildEqlSearchRequest } from '../build_events_query';
 import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
-import { getInputIndex } from '../get_input_output_index';
 
 import {
   BulkCreate,
@@ -39,6 +37,8 @@ import {
 } from '../../../../../common/detection_engine/schemas/alerts';
 
 export const eqlExecutor = async ({
+  inputIndex,
+  runtimeMappings,
   completeRule,
   tuple,
   exceptionItems,
@@ -50,6 +50,8 @@ export const eqlExecutor = async ({
   wrapHits,
   wrapSequences,
 }: {
+  inputIndex: string[];
+  runtimeMappings?: estypes.MappingRuntimeFields | null;
   completeRule: CompleteRule<EqlRuleParams>;
   tuple: RuleRangeTuple;
   exceptionItems: ExceptionListItemSchema[];
@@ -72,28 +74,6 @@ export const eqlExecutor = async ({
       result.warning = true;
     }
 
-    let inputIndex = await getInputIndex({
-      experimentalFeatures,
-      services,
-      version,
-      index: ruleParams.index,
-    });
-
-    let runtimeMappings: estypes.MappingRuntimeFields = {};
-    if (ruleParams.dataViewId != null && ruleParams.dataViewId !== '') {
-      const dataView = await services.savedObjectsClient.get<DataViewAttributes>(
-        'index-pattern',
-        ruleParams.dataViewId
-      );
-      if (dataView != null && dataView.attributes.title != null) {
-        inputIndex = dataView.attributes.title.split(',');
-      }
-      if (dataView?.attributes.runtimeFieldMap != null) {
-        runtimeMappings = JSON.parse(dataView.attributes.runtimeFieldMap);
-        logger.debug(`runtime mappings ${runtimeMappings}`);
-      }
-    }
-
     const request = buildEqlSearchRequest(
       ruleParams.query,
       inputIndex,
@@ -103,7 +83,6 @@ export const eqlExecutor = async ({
       ruleParams.timestampOverride,
       exceptionItems,
       ruleParams.eventCategoryOverride,
-      // TODO: assert non-null or allow undefined
       runtimeMappings
     );
 

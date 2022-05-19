@@ -7,7 +7,6 @@
 
 import { Logger } from '@kbn/core/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { DataViewAttributes } from '@kbn/data-views-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
@@ -16,7 +15,6 @@ import {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import { ListClient } from '@kbn/lists-plugin/server';
-import { getInputIndex } from '../get_input_output_index';
 import { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
 import { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
@@ -27,6 +25,8 @@ import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 
 export const threatMatchExecutor = async ({
+  inputIndex,
+  runtimeMappings,
   completeRule,
   tuple,
   listClient,
@@ -41,6 +41,8 @@ export const threatMatchExecutor = async ({
   bulkCreate,
   wrapHits,
 }: {
+  inputIndex: string[];
+  runtimeMappings?: estypes.MappingRuntimeFields | null;
   completeRule: CompleteRule<ThreatRuleParams>;
   tuple: RuleRangeTuple;
   listClient: ListClient;
@@ -58,28 +60,6 @@ export const threatMatchExecutor = async ({
   const ruleParams = completeRule.ruleParams;
 
   return withSecuritySpan('threatMatchExecutor', async () => {
-    let inputIndex = await getInputIndex({
-      experimentalFeatures,
-      services,
-      version,
-      index: ruleParams.index,
-    });
-
-    let runtimeMappings: estypes.MappingRuntimeFields = {};
-    if (ruleParams.dataViewId != null && ruleParams.dataViewId !== '') {
-      const dataView = await services.savedObjectsClient.get<DataViewAttributes>(
-        'index-pattern',
-        ruleParams.dataViewId
-      );
-      if (dataView != null && dataView.attributes.title != null) {
-        inputIndex = dataView.attributes.title.split(',');
-      }
-      if (dataView?.attributes.runtimeFieldMap != null) {
-        runtimeMappings = JSON.parse(dataView.attributes.runtimeFieldMap);
-        logger.debug(`runtime mappings ${runtimeMappings}`);
-      }
-    }
-
     return createThreatSignals({
       alertId: completeRule.alertId,
       buildRuleMessage,

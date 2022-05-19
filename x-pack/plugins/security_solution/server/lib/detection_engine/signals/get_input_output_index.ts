@@ -10,35 +10,98 @@ import {
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
+import { DataViewAttributes } from '@kbn/data-views-plugin/common';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Logger } from '@kbn/core/server';
+
 import { DEFAULT_INDEX_KEY, DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
-import { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { withSecuritySpan } from '../../../utils/with_security_span';
 
 export interface GetInputIndex {
-  experimentalFeatures: ExperimentalFeatures;
   index: string[] | null | undefined;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
+  logger: Logger;
+  // the rule's rule_id
+  ruleId: string;
+  dataViewId?: string | null;
+}
+
+export interface GetInputIndexReturn {
+  index: string[] | null;
+  runtimeMappings: estypes.MappingRuntimeFields | null;
+  errorToWrite?: string;
+  warningToWrite?: string;
 }
 
 export const getInputIndex = async ({
-  experimentalFeatures,
   index,
   services,
   version,
-}: GetInputIndex): Promise<string[]> => {
-  if (index != null) {
-    return index;
-  } else {
-    const configuration = await withSecuritySpan('getDefaultIndex', () =>
-      services.savedObjectsClient.get<{
-        'securitySolution:defaultIndex': string[];
-      }>('config', version)
+  logger,
+  ruleId,
+  dataViewId,
+}: GetInputIndex): Promise<GetInputIndexReturn> => {
+  // If data views defined, use it
+  if (dataViewId != null && dataViewId !== '') {
+    // Check to see that the selected dataView exists
+    const dataView = await services.savedObjectsClient.get<DataViewAttributes>(
+      'index-pattern',
+      dataViewId
     );
-    if (configuration.attributes != null && configuration.attributes[DEFAULT_INDEX_KEY] != null) {
-      return configuration.attributes[DEFAULT_INDEX_KEY];
+    const indices = dataView.attributes.title.split(',');
+    const runtimeMappings =
+      dataView.attributes.runtimeFieldMap != null
+        ? JSON.parse(dataView.attributes.runtimeFieldMap)
+        : {};
+
+    logger.debug(
+      `[rule_id:${ruleId}] - Data view "${dataViewId}" found - indices to search include: ${indices}.`
+    );
+    logger.debug(
+      `[rule_id:${ruleId}] - Data view "${dataViewId}" includes ${
+        Object.keys(runtimeMappings).length
+      } mapped runtime fields.`
+    );
+
+    // if data view does exist, return it and it's runtimeMappings
+    return {
+      index: indices,
+      runtimeMappings,
+    };
+  } else {
+    if (index != null) {
+      logger.debug(`[rule_id:${ruleId}] - Indices to search include: ${index}.`);
+
+      return {
+        index,
+        runtimeMappings: {},
+      };
     } else {
-      return DEFAULT_INDEX_PATTERN;
+      const configuration = await withSecuritySpan('getDefaultIndex', () =>
+        services.savedObjectsClient.get<{
+          'securitySolution:defaultIndex': string[];
+        }>('config', version)
+      );
+      if (configuration.attributes != null && configuration.attributes[DEFAULT_INDEX_KEY] != null) {
+        logger.debug(
+          `[rule_id:${ruleId}] - No index patterns defined, falling back to using configured default indices: ${configuration.attributes[DEFAULT_INDEX_KEY]}.`
+        );
+
+        return {
+          index: configuration.attributes[DEFAULT_INDEX_KEY],
+          runtimeMappings: {},
+        };
+      } else {
+        logger.debug(
+          `[rule_id:${ruleId}] - No index patterns defined, falling back to using default indices: ${DEFAULT_INDEX_PATTERN}.`
+        );
+
+        return {
+          index: DEFAULT_INDEX_PATTERN,
+          runtimeMappings: {},
+        };
+      }
     }
   }
 };

@@ -50,6 +50,8 @@ export const createQueryAlertType = (
     async executor(execOptions) {
       const {
         runOpts: {
+          inputIndex,
+          runtimeMappings,
           buildRuleMessage,
           bulkCreate,
           exceptionItems,
@@ -77,6 +79,8 @@ export const createQueryAlertType = (
         tuple,
         version,
         wrapHits,
+        inputIndex,
+        runtimeMappings,
       });
       return { ...result, state };
     },

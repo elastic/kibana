@@ -16,6 +16,7 @@ import { getIndexVersion } from '../../routes/index/get_index_version';
 import { SIGNALS_TEMPLATE_VERSION } from '../../routes/index/get_signals_template';
 import { allowedExperimentalValues } from '../../../../../common/experimental_features';
 import { EqlRuleParams } from '../../schemas/rule_schemas';
+import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
 
 jest.mock('../../routes/index/get_index_version');
 
@@ -47,6 +48,8 @@ describe('eql_executor', () => {
     it('should set a warning when exception list for eql rule contains value list exceptions', async () => {
       const exceptionItems = [getExceptionListItemSchemaMock({ entries: [getEntryListMock()] })];
       const response = await eqlExecutor({
+        inputIndex: DEFAULT_INDEX_PATTERN,
+        runtimeMappings: {},
         completeRule: eqlCompleteRule,
         tuple,
         exceptionItems,
