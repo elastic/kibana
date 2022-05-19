@@ -1,4 +1,4 @@
-export const hashEcs = {
+export const hash_ecs = {
   md5: {
     dashed_name: 'hash-md5',
     description: 'MD5 hash.',

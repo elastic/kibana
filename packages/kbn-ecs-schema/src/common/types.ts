@@ -10,7 +10,9 @@ export const TOP_LEVEL_NAME = 'topLevel';
 export const TOP_LEVEL_GROUPS = ['base', 'tracing'];
 
 export type EcsNestedSpec = Record<string, GroupSpec>;
-export type GroupSpec = { fields: Group; };
+export interface GroupSpec {
+  fields: Group;
+}
 
 export type Schema = Record<string, Group>;
 export type Group = Record<string, FieldDetails>;

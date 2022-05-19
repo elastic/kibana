@@ -17,32 +17,33 @@ export function printSchema(schema: Schema, outPath: string) {
 }
 
 function printGroupFiles(schema: Schema, outPath: string) {
-  for (const group in schema) {    
+  for (const group in schema) {
     if (group !== TOP_LEVEL_NAME) {
+      // eslint-disable-next-line no-console
       console.log(`Writing ${group} to ${outPath}/${group.toLowerCase()}.ts`);
 
-      const details = `export const ${group}Ecs = ${util.inspect(schema[group], {depth: null})}`;
+      const details = `export const ${group}_ecs = ${util.inspect(schema[group], { depth: null })}`;
       write(`${outPath}/${group.toLowerCase()}.ts`, details);
     }
-  }  
+  }
 }
 
-function printIndex(topLevelFields: Group, groups: string[], outPath: string){
+function printIndex(topLevelFields: Group, groups: string[], outPath: string) {
   /** The base fields belong at the top level, so remove them from the others for printing. */
-  groups = groups.filter(item => item !== TOP_LEVEL_NAME);
+  groups = groups.filter((item) => item !== TOP_LEVEL_NAME);
 
   /** Printing the imports. */
   for (const group of groups) {
-    const declaration = `import { ${group}Ecs } from './${group}';\n`;
+    const declaration = `import { ${group}_ecs } from './${group}';\n`;
     append(`${outPath}/index.ts`, declaration);
   }
 
   /** Printing the ecs object */
-  var schema = `\nexport const ecsSchema = {\n`;
+  let schema = `\nexport const ecs_schema = {\n`;
   const baseFieldInfo = util.inspect(topLevelFields).slice(2, -2).concat(',\n');
   schema += baseFieldInfo;
   for (const group of groups) {
-    schema += `  ${group}Ecs\: {...${group}Ecs},\n`;
+    schema += `  ${group}_ecs\: {...${group}_ecs},\n`;
   }
   schema += '};';
 

@@ -1,4 +1,4 @@
-export const relatedEcs = {
+export const related_ecs = {
   hash: {
     dashed_name: 'related-hash',
     description: "All the hashes seen on your event. Populating this field, then using it to search for hashes can help in situations where you're unsure what the hash algorithm is (and therefore which key name to search).",

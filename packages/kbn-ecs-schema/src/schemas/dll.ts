@@ -1,4 +1,4 @@
-export const dllEcs = {
+export const dll_ecs = {
   code_signature: {
     digest_algorithm: {
       dashed_name: 'dll-code-signature-digest-algorithm',

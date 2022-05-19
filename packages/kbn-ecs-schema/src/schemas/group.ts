@@ -1,4 +1,4 @@
-export const groupEcs = {
+export const group_ecs = {
   domain: {
     dashed_name: 'group-domain',
     description: 'Name of the directory the group is a member of.\n' +

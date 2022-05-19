@@ -1,4 +1,4 @@
-export const user_agentEcs = {
+export const user_agent_ecs = {
   device: {
     name: {
       dashed_name: 'user-agent-device-name',

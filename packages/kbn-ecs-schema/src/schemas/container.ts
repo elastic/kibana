@@ -1,4 +1,4 @@
-export const containerEcs = {
+export const container_ecs = {
   cpu: {
     usage: {
       beta: 'This field is beta and subject to change.',

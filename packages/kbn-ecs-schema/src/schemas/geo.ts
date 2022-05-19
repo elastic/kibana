@@ -1,4 +1,4 @@
-export const geoEcs = {
+export const geo_ecs = {
   city_name: {
     dashed_name: 'geo-city-name',
     description: 'City name.',

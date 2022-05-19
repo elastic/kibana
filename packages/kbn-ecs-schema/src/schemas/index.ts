@@ -1,51 +1,51 @@
-import { agentEcs } from './agent';
-import { asEcs } from './as';
-import { clientEcs } from './client';
-import { cloudEcs } from './cloud';
-import { code_signatureEcs } from './code_signature';
-import { containerEcs } from './container';
-import { data_streamEcs } from './data_stream';
-import { destinationEcs } from './destination';
-import { dllEcs } from './dll';
-import { dnsEcs } from './dns';
-import { ecsEcs } from './ecs';
-import { elfEcs } from './elf';
-import { emailEcs } from './email';
-import { errorEcs } from './error';
-import { eventEcs } from './event';
-import { faasEcs } from './faas';
-import { fileEcs } from './file';
-import { geoEcs } from './geo';
-import { groupEcs } from './group';
-import { hashEcs } from './hash';
-import { hostEcs } from './host';
-import { httpEcs } from './http';
-import { interfaceEcs } from './interface';
-import { logEcs } from './log';
-import { networkEcs } from './network';
-import { observerEcs } from './observer';
-import { orchestratorEcs } from './orchestrator';
-import { organizationEcs } from './organization';
-import { osEcs } from './os';
-import { packageEcs } from './package';
-import { peEcs } from './pe';
-import { processEcs } from './process';
-import { registryEcs } from './registry';
-import { relatedEcs } from './related';
-import { ruleEcs } from './rule';
-import { serverEcs } from './server';
-import { serviceEcs } from './service';
-import { sourceEcs } from './source';
-import { threatEcs } from './threat';
-import { tlsEcs } from './tls';
-import { urlEcs } from './url';
-import { userEcs } from './user';
-import { user_agentEcs } from './user_agent';
-import { vlanEcs } from './vlan';
-import { vulnerabilityEcs } from './vulnerability';
-import { x509Ecs } from './x509';
+import { agent_ecs } from './agent';
+import { as_ecs } from './as';
+import { client_ecs } from './client';
+import { cloud_ecs } from './cloud';
+import { code_signature_ecs } from './code_signature';
+import { container_ecs } from './container';
+import { data_stream_ecs } from './data_stream';
+import { destination_ecs } from './destination';
+import { dll_ecs } from './dll';
+import { dns_ecs } from './dns';
+import { ecs_ecs } from './ecs';
+import { elf_ecs } from './elf';
+import { email_ecs } from './email';
+import { error_ecs } from './error';
+import { event_ecs } from './event';
+import { faas_ecs } from './faas';
+import { file_ecs } from './file';
+import { geo_ecs } from './geo';
+import { group_ecs } from './group';
+import { hash_ecs } from './hash';
+import { host_ecs } from './host';
+import { http_ecs } from './http';
+import { interface_ecs } from './interface';
+import { log_ecs } from './log';
+import { network_ecs } from './network';
+import { observer_ecs } from './observer';
+import { orchestrator_ecs } from './orchestrator';
+import { organization_ecs } from './organization';
+import { os_ecs } from './os';
+import { package_ecs } from './package';
+import { pe_ecs } from './pe';
+import { process_ecs } from './process';
+import { registry_ecs } from './registry';
+import { related_ecs } from './related';
+import { rule_ecs } from './rule';
+import { server_ecs } from './server';
+import { service_ecs } from './service';
+import { source_ecs } from './source';
+import { threat_ecs } from './threat';
+import { tls_ecs } from './tls';
+import { url_ecs } from './url';
+import { user_ecs } from './user';
+import { user_agent_ecs } from './user_agent';
+import { vlan_ecs } from './vlan';
+import { vulnerability_ecs } from './vulnerability';
+import { x509_ecs } from './x509';
 
-export const ecsSchema = {
+export const ecs_schema = {
   '@timestamp': {
     dashed_name: 'timestamp',
     description: 'Date/time when the event originated.\n' +
@@ -145,50 +145,50 @@ export const ecsSchema = {
       type: 'keyword'
     }
   },
-  agentEcs: {...agentEcs},
-  asEcs: {...asEcs},
-  clientEcs: {...clientEcs},
-  cloudEcs: {...cloudEcs},
-  code_signatureEcs: {...code_signatureEcs},
-  containerEcs: {...containerEcs},
-  data_streamEcs: {...data_streamEcs},
-  destinationEcs: {...destinationEcs},
-  dllEcs: {...dllEcs},
-  dnsEcs: {...dnsEcs},
-  ecsEcs: {...ecsEcs},
-  elfEcs: {...elfEcs},
-  emailEcs: {...emailEcs},
-  errorEcs: {...errorEcs},
-  eventEcs: {...eventEcs},
-  faasEcs: {...faasEcs},
-  fileEcs: {...fileEcs},
-  geoEcs: {...geoEcs},
-  groupEcs: {...groupEcs},
-  hashEcs: {...hashEcs},
-  hostEcs: {...hostEcs},
-  httpEcs: {...httpEcs},
-  interfaceEcs: {...interfaceEcs},
-  logEcs: {...logEcs},
-  networkEcs: {...networkEcs},
-  observerEcs: {...observerEcs},
-  orchestratorEcs: {...orchestratorEcs},
-  organizationEcs: {...organizationEcs},
-  osEcs: {...osEcs},
-  packageEcs: {...packageEcs},
-  peEcs: {...peEcs},
-  processEcs: {...processEcs},
-  registryEcs: {...registryEcs},
-  relatedEcs: {...relatedEcs},
-  ruleEcs: {...ruleEcs},
-  serverEcs: {...serverEcs},
-  serviceEcs: {...serviceEcs},
-  sourceEcs: {...sourceEcs},
-  threatEcs: {...threatEcs},
-  tlsEcs: {...tlsEcs},
-  urlEcs: {...urlEcs},
-  userEcs: {...userEcs},
-  user_agentEcs: {...user_agentEcs},
-  vlanEcs: {...vlanEcs},
-  vulnerabilityEcs: {...vulnerabilityEcs},
-  x509Ecs: {...x509Ecs},
+  agent_ecs: {...agent_ecs},
+  as_ecs: {...as_ecs},
+  client_ecs: {...client_ecs},
+  cloud_ecs: {...cloud_ecs},
+  code_signature_ecs: {...code_signature_ecs},
+  container_ecs: {...container_ecs},
+  data_stream_ecs: {...data_stream_ecs},
+  destination_ecs: {...destination_ecs},
+  dll_ecs: {...dll_ecs},
+  dns_ecs: {...dns_ecs},
+  ecs_ecs: {...ecs_ecs},
+  elf_ecs: {...elf_ecs},
+  email_ecs: {...email_ecs},
+  error_ecs: {...error_ecs},
+  event_ecs: {...event_ecs},
+  faas_ecs: {...faas_ecs},
+  file_ecs: {...file_ecs},
+  geo_ecs: {...geo_ecs},
+  group_ecs: {...group_ecs},
+  hash_ecs: {...hash_ecs},
+  host_ecs: {...host_ecs},
+  http_ecs: {...http_ecs},
+  interface_ecs: {...interface_ecs},
+  log_ecs: {...log_ecs},
+  network_ecs: {...network_ecs},
+  observer_ecs: {...observer_ecs},
+  orchestrator_ecs: {...orchestrator_ecs},
+  organization_ecs: {...organization_ecs},
+  os_ecs: {...os_ecs},
+  package_ecs: {...package_ecs},
+  pe_ecs: {...pe_ecs},
+  process_ecs: {...process_ecs},
+  registry_ecs: {...registry_ecs},
+  related_ecs: {...related_ecs},
+  rule_ecs: {...rule_ecs},
+  server_ecs: {...server_ecs},
+  service_ecs: {...service_ecs},
+  source_ecs: {...source_ecs},
+  threat_ecs: {...threat_ecs},
+  tls_ecs: {...tls_ecs},
+  url_ecs: {...url_ecs},
+  user_ecs: {...user_ecs},
+  user_agent_ecs: {...user_agent_ecs},
+  vlan_ecs: {...vlan_ecs},
+  vulnerability_ecs: {...vulnerability_ecs},
+  x509_ecs: {...x509_ecs},
 };

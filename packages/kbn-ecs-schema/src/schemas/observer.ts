@@ -1,4 +1,4 @@
-export const observerEcs = {
+export const observer_ecs = {
   egress: {
     dashed_name: 'observer-egress',
     description: 'Observer.egress holds information like interface number and name, vlan, and zone information to classify egress traffic.  Single armed monitoring such as a network sensor on a span port should only use observer.ingress to categorize traffic.',

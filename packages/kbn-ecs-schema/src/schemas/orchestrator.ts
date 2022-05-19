@@ -1,4 +1,4 @@
-export const orchestratorEcs = {
+export const orchestrator_ecs = {
   api_version: {
     dashed_name: 'orchestrator-api-version',
     description: 'API version being used to carry out the action',

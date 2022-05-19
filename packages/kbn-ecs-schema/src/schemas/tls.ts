@@ -1,4 +1,4 @@
-export const tlsEcs = {
+export const tls_ecs = {
   cipher: {
     dashed_name: 'tls-cipher',
     description: 'String indicating the cipher used during the current connection.',

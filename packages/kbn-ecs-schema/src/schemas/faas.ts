@@ -1,4 +1,4 @@
-export const faasEcs = {
+export const faas_ecs = {
   coldstart: {
     dashed_name: 'faas-coldstart',
     description: 'Boolean value indicating a cold start of a function.',

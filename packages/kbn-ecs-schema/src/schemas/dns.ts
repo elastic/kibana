@@ -1,4 +1,4 @@
-export const dnsEcs = {
+export const dns_ecs = {
   answers: {
     dashed_name: 'dns-answers',
     description: 'An array containing an object for each answer section returned by the server.\n' +

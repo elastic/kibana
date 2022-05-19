@@ -1,4 +1,4 @@
-export const ruleEcs = {
+export const rule_ecs = {
   author: {
     dashed_name: 'rule-author',
     description: 'Name, organization, or pseudonym of the author or authors who created the rule used to generate this event.',

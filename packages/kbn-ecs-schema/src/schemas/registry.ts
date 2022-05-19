@@ -1,4 +1,4 @@
-export const registryEcs = {
+export const registry_ecs = {
   data: {
     bytes: {
       dashed_name: 'registry-data-bytes',

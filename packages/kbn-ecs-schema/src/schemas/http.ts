@@ -1,4 +1,4 @@
-export const httpEcs = {
+export const http_ecs = {
   request: {
     body: {
       bytes: {

@@ -1,4 +1,4 @@
-export const elfEcs = {
+export const elf_ecs = {
   architecture: {
     dashed_name: 'elf-architecture',
     description: 'Machine architecture of the ELF file.',

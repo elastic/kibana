@@ -1,4 +1,4 @@
-export const threatEcs = {
+export const threat_ecs = {
   enrichments: {
     beta: 'This field is beta and subject to change.',
     dashed_name: 'threat-enrichments',

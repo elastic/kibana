@@ -1,4 +1,4 @@
-export const agentEcs = {
+export const agent_ecs = {
   build: {
     original: {
       dashed_name: 'agent-build-original',

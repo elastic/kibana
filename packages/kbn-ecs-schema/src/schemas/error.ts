@@ -1,4 +1,4 @@
-export const errorEcs = {
+export const error_ecs = {
   code: {
     dashed_name: 'error-code',
     description: 'Error code describing the error.',

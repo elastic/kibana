@@ -18,8 +18,9 @@ import { printSchema } from './printer';
 
 const PACKAGE_DIR = path.resolve(REPO_ROOT, 'packages/kbn-ecs-schema/');
 
-function execute(spec: string,  outDir: string) {
-  const specPath = path.resolve(PACKAGE_DIR, '.', spec)
+/* eslint-disable no-console */
+function execute(spec: string, outDir: string) {
+  const specPath = path.resolve(PACKAGE_DIR, '.', spec);
   console.log(`Loading ecs_nested.yml from ${specPath}`);
 
   const specYaml = loadYaml(specPath);
@@ -44,18 +45,20 @@ function emptyGeneratedFolder(outPath: string) {
 
 export function runCli() {
   new RunWithCommands({
-    description: 'Generate TypeScript schema definitions for a given version' +
-    'of the Elastic Common Schema (ECS).',
+    description:
+      'Generate TypeScript schema definitions for a given version' +
+      'of the Elastic Common Schema (ECS).',
   })
     .command({
       name: 'generate',
-      description: 'Generate TypeScript schema definitions for a given version' +
-      'of the Elastic Common Schema (ECS).',
+      description:
+        'Generate TypeScript schema definitions for a given version' +
+        'of the Elastic Common Schema (ECS).',
       flags: {
         string: ['spec', 'dir'],
         alias: {
           s: 'spec',
-          d: 'dir'
+          d: 'dir',
         },
         help: `
           --spec, -s    path to the ecs_nested.yml spec
@@ -63,12 +66,12 @@ export function runCli() {
         `,
         default: {
           s: 'tmp/ecs_nested.yml',
-          d: 'src/schemas'
-        }
+          d: 'src/schemas',
+        },
       },
       async run({ flags }) {
-        const inputPath = flags['spec'];
-        const outputDir = flags['dir'];
+        const inputPath = flags.spec;
+        const outputDir = flags.dir;
 
         if (inputPath === undefined || typeof inputPath !== 'string') {
           throw createFlagError('expected a single string --spec flag');

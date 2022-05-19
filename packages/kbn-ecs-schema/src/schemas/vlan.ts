@@ -1,4 +1,4 @@
-export const vlanEcs = {
+export const vlan_ecs = {
   id: {
     dashed_name: 'vlan-id',
     description: 'VLAN ID as reported by the observer.',

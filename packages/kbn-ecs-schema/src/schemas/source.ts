@@ -1,4 +1,4 @@
-export const sourceEcs = {
+export const source_ecs = {
   address: {
     dashed_name: 'source-address',
     description: 'Some event source addresses are defined ambiguously. The event will sometimes list an IP, a domain or a unix socket.  You should always store the raw address in the `.address` field.\n' +

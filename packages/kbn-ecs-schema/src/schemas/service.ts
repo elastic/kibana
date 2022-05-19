@@ -1,4 +1,4 @@
-export const serviceEcs = {
+export const service_ecs = {
   address: {
     dashed_name: 'service-address',
     description: 'Address where data about this service was collected from.\n' +

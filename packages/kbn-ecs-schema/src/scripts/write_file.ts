@@ -9,6 +9,7 @@
 import path from 'path';
 import fs from 'fs';
 
+/* eslint-disable no-console */
 export function write(filePath: string, content: string) {
   try {
     fs.writeFileSync(path.resolve(__dirname, filePath), content);

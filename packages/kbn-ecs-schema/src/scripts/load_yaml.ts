@@ -10,6 +10,7 @@ import path from 'path';
 import fs from 'fs';
 import { safeLoad } from 'js-yaml';
 
+/* eslint-disable no-console */
 export function loadYaml(specPath: string) {
   try {
     const doc = safeLoad(fs.readFileSync(path.resolve(__dirname, '..', '..', specPath), 'utf8'));

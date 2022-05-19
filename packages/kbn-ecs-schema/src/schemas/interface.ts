@@ -1,4 +1,4 @@
-export const interfaceEcs = {
+export const interface_ecs = {
   alias: {
     dashed_name: 'interface-alias',
     description: 'Interface alias as reported by the system, typically used in firewall implementations for e.g. inside, outside, or dmz logical interface naming.',

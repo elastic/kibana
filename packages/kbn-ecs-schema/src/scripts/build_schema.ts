@@ -9,15 +9,15 @@
 import { set } from 'lodash';
 import { EcsNestedSpec, Schema, TOP_LEVEL_NAME, TOP_LEVEL_GROUPS } from '../common/types';
 
-export function buildSchema(spec: EcsNestedSpec) : Schema {
+export function buildSchema(spec: EcsNestedSpec): Schema {
   const schema: Schema = {};
 
   for (const [group, details] of Object.entries(spec)) {
     for (const [, field] of Object.entries(details.fields)) {
-      var full_field_name = field.flat_name.split(".").slice(1);
+      const full_field_name = field.flat_name.split('.').slice(1);
       const name = TOP_LEVEL_GROUPS.includes(group)
-        ? `${TOP_LEVEL_NAME}.${field.flat_name}` 
-        : `${group}.${full_field_name.join(".")}`;
+        ? `${TOP_LEVEL_NAME}.${field.flat_name}`
+        : `${group}.${full_field_name.join('.')}`;
 
       validateExampleFieldtype(name, field.example);
       set(schema, name, field);
@@ -27,7 +27,13 @@ export function buildSchema(spec: EcsNestedSpec) : Schema {
 }
 
 function validateExampleFieldtype(fieldName: string, example: any) {
-  if (example !== undefined && typeof example !== 'string' && typeof example !== 'number' && typeof example !== 'boolean') {
+  if (
+    example !== undefined &&
+    typeof example !== 'string' &&
+    typeof example !== 'number' &&
+    typeof example !== 'boolean'
+  ) {
+    // eslint-disable-next-line no-console
     console.error(`ERROR: ${fieldName} has invalid example type`);
   }
 }
