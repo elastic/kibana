@@ -12,14 +12,34 @@ import { nullableType } from '../lib/nullable';
 const HeadersSchema = schema.recordOf(schema.string(), schema.string());
 
 export const ExternalIncidentServiceConfiguration = {
-  url: schema.string(),
-  method: schema.oneOf(
+  createIncidentUrl: schema.string(),
+  createIncidentMethod: schema.oneOf(
     [schema.literal(CasesWebhookMethods.POST), schema.literal(CasesWebhookMethods.PUT)],
     {
       defaultValue: CasesWebhookMethods.POST,
     }
   ),
-  incidentJson: schema.string(), // stringified object
+  createIncidentJson: schema.string(), // stringified object
+  createIncidentResponseKey: schema.string(),
+  getIncidentUrl: schema.string(),
+  getIncidentResponseExternalTitleKey: schema.string(),
+  getIncidentResponseExternalUrlKey: schema.string(),
+  updateIncidentUrl: schema.string(),
+  updateIncidentMethod: schema.oneOf(
+    [schema.literal(CasesWebhookMethods.POST), schema.literal(CasesWebhookMethods.PUT)],
+    {
+      defaultValue: CasesWebhookMethods.POST,
+    }
+  ),
+  updateIncidentJson: schema.string(),
+  createCommentUrl: schema.string(),
+  createCommentMethod: schema.oneOf(
+    [schema.literal(CasesWebhookMethods.POST), schema.literal(CasesWebhookMethods.PUT)],
+    {
+      defaultValue: CasesWebhookMethods.POST,
+    }
+  ),
+  createCommentJson: schema.string(),
   headers: nullableType(HeadersSchema),
   hasAuth: schema.boolean({ defaultValue: true }),
 };

@@ -7,16 +7,89 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const URL_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.error.requiredUrlText',
+export const CREATE_URL_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.error.requiredCreateUrlText',
   {
-    defaultMessage: 'URL is required.',
+    defaultMessage: 'Create incident URL is required.',
   }
 );
-export const INCIDENT_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.error.requiredIncidentText',
+export const CREATE_INCIDENT_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.error.requiredCreateIncidentText',
   {
-    defaultMessage: 'Incident object is required.',
+    defaultMessage: 'Create incident object is required.',
+  }
+);
+
+export const CREATE_METHOD_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.sections.addAction.casesWebhookAction.error.requiredCreateMethodText',
+  {
+    defaultMessage: 'Create incident method is required.',
+  }
+);
+
+export const CREATE_RESPONSE_KEY_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.sections.addAction.casesWebhookAction.error.requiredCreateIncidentResponseKeyText',
+  {
+    defaultMessage: 'Create incident response incident key is required.',
+  }
+);
+
+export const UPDATE_URL_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.error.requiredUpdateUrlText',
+  {
+    defaultMessage: 'Update incident URL is required.',
+  }
+);
+export const UPDATE_INCIDENT_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.error.requiredUpdateIncidentText',
+  {
+    defaultMessage: 'Update incident object is required.',
+  }
+);
+
+export const UPDATE_METHOD_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.sections.addAction.casesWebhookAction.error.requiredUpdateMethodText',
+  {
+    defaultMessage: 'Update incident method is required.',
+  }
+);
+
+export const CREATE_COMMENT_URL_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.error.requiredCreateCommentUrlText',
+  {
+    defaultMessage: 'Create comment incident URL is required.',
+  }
+);
+export const CREATE_COMMENT_INCIDENT_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.error.requiredCreateCommentIncidentText',
+  {
+    defaultMessage: 'Create comment incident object is required.',
+  }
+);
+
+export const CREATE_COMMENT_METHOD_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.sections.addAction.casesWebhookAction.error.requiredCreateCommentMethodText',
+  {
+    defaultMessage: 'Create comment method is required.',
+  }
+);
+
+export const GET_INCIDENT_URL_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.error.requiredGetIncidentUrlText',
+  {
+    defaultMessage: 'Get incident URL is required.',
+  }
+);
+export const GET_RESPONSE_EXTERNAL_TITLE_KEY_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.sections.addAction.casesWebhookAction.error.requiredGetIncidentResponseExternalTitleKeyText',
+  {
+    defaultMessage: 'Get incident response external incident title key.',
+  }
+);
+export const GET_RESPONSE_EXTERNAL_URL_KEY_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.sections.addAction.casesWebhookAction.error.requiredGetIncidentResponseExternalTitleKeyText',
+  {
+    defaultMessage: 'Get incident response external incident URL key.',
   }
 );
 
@@ -24,13 +97,6 @@ export const URL_INVALID = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.error.invalidUrlTextField',
   {
     defaultMessage: 'URL is invalid.',
-  }
-);
-
-export const METHOD_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.sections.addAction.casesWebhookAction.error.requiredMethodText',
-  {
-    defaultMessage: 'Method is required.',
   }
 );
 

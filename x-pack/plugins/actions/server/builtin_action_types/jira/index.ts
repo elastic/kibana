@@ -126,11 +126,7 @@ async function executor(
   }
   if (subAction === 'pushToService') {
     const pushToServiceParams = subActionParams as ExecutorSubActionPushParams;
-    console.log('api push to service', {
-      externalService,
-      params: pushToServiceParams,
-      logger,
-    });
+
     data = await api.pushToService({
       externalService,
       params: pushToServiceParams,

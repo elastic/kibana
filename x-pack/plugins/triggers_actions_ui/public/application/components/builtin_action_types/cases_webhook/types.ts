@@ -7,7 +7,11 @@
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 
-import { ExecutorSubActionPushParams } from '@kbn/actions-plugin/server/builtin_action_types/cases_webhook/types';
+import {
+  CasesWebhookPublicConfigurationType,
+  CasesWebhookSecretConfigurationType,
+  ExecutorSubActionPushParams,
+} from '@kbn/actions-plugin/server/builtin_action_types/cases_webhook/types';
 import { UserConfiguredActionConnector } from '../../../../types';
 
 export interface CasesWebhookActionParams {
@@ -15,18 +19,9 @@ export interface CasesWebhookActionParams {
   subActionParams: ExecutorSubActionPushParams;
 }
 
-export interface CasesWebhookConfig {
-  method: string;
-  url: string;
-  incidentJson: string;
-  headers: Record<string, string>;
-  hasAuth: boolean;
-}
+export type CasesWebhookConfig = CasesWebhookPublicConfigurationType;
 
-export interface CasesWebhookSecrets {
-  user: string;
-  password: string;
-}
+export type CasesWebhookSecrets = CasesWebhookSecretConfigurationType;
 
 export type CasesWebhookActionConnector = UserConfiguredActionConnector<
   CasesWebhookConfig,

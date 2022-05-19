@@ -17,14 +17,15 @@ const validateConfig = (
   configurationUtilities: ActionsConfigurationUtilities,
   configObject: CasesWebhookPublicConfigurationType
 ) => {
-  const configuredUrl = configObject.url;
+  const createIncidentUrl = configObject.createIncidentUrl;
   try {
-    new URL(configuredUrl);
+    new URL(createIncidentUrl);
   } catch (err) {
     return i18n.translate(
       'xpack.actions.builtin.casesWebhook.casesWebhookConfigurationErrorNoHostname',
       {
-        defaultMessage: 'error configuring cases webhook action: unable to parse url: {err}',
+        defaultMessage:
+          'error configuring cases webhook action: unable to parse createIncidentUrl: {err}',
         values: {
           err,
         },
@@ -33,7 +34,7 @@ const validateConfig = (
   }
 
   try {
-    configurationUtilities.ensureUriAllowed(configuredUrl);
+    configurationUtilities.ensureUriAllowed(createIncidentUrl);
   } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.casesWebhook.casesWebhookConfigurationError', {
       defaultMessage: 'error configuring cases webhook action: {message}',

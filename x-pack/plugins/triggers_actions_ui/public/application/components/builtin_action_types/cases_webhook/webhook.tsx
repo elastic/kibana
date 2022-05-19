@@ -44,13 +44,26 @@ export function getActionType(): ActionTypeModel<
     validateConnector: async (
       action: CasesWebhookActionConnector
     ): Promise<
-      ConnectorValidationResult<Pick<CasesWebhookConfig, 'url' | 'method'>, CasesWebhookSecrets>
+      ConnectorValidationResult<
+        Omit<CasesWebhookConfig, 'headers' | 'hasAuth'>,
+        CasesWebhookSecrets
+      >
     > => {
       const translations = await import('./translations');
       const configErrors = {
-        url: new Array<string>(),
-        method: new Array<string>(),
-        incidentJson: new Array<string>(),
+        createCommentJson: new Array<string>(),
+        createCommentMethod: new Array<string>(),
+        createCommentUrl: new Array<string>(),
+        createIncidentJson: new Array<string>(),
+        createIncidentMethod: new Array<string>(),
+        createIncidentResponseKey: new Array<string>(),
+        createIncidentUrl: new Array<string>(),
+        getIncidentResponseExternalTitleKey: new Array<string>(),
+        getIncidentResponseExternalUrlKey: new Array<string>(),
+        getIncidentUrl: new Array<string>(),
+        updateIncidentJson: new Array<string>(),
+        updateIncidentMethod: new Array<string>(),
+        updateIncidentUrl: new Array<string>(),
       };
       const secretsErrors = {
         user: new Array<string>(),
@@ -60,17 +73,66 @@ export function getActionType(): ActionTypeModel<
         config: { errors: configErrors },
         secrets: { errors: secretsErrors },
       };
-      if (!action.config.url) {
-        configErrors.url.push(translations.URL_REQUIRED);
+      if (!action.config.createIncidentUrl) {
+        configErrors.createIncidentUrl.push(translations.CREATE_URL_REQUIRED);
       }
-      if (action.config.url && !isValidUrl(action.config.url)) {
-        configErrors.url = [...configErrors.url, translations.URL_INVALID];
+      if (action.config.createIncidentUrl && !isValidUrl(action.config.createIncidentUrl)) {
+        configErrors.createIncidentUrl = [
+          ...configErrors.createIncidentUrl,
+          translations.URL_INVALID,
+        ];
       }
-      if (!action.config.incidentJson) {
-        configErrors.incidentJson.push(translations.INCIDENT_REQUIRED);
+      if (!action.config.createIncidentJson) {
+        configErrors.createIncidentJson.push(translations.CREATE_INCIDENT_REQUIRED);
       }
-      if (!action.config.method) {
-        configErrors.method.push(translations.METHOD_REQUIRED);
+      if (!action.config.createIncidentMethod) {
+        configErrors.createIncidentMethod.push(translations.CREATE_METHOD_REQUIRED);
+      }
+      if (!action.config.createIncidentResponseKey) {
+        configErrors.createIncidentResponseKey.push(translations.CREATE_RESPONSE_KEY_REQUIRED);
+      }
+      if (!action.config.getIncidentUrl) {
+        configErrors.getIncidentUrl.push(translations.GET_INCIDENT_URL_REQUIRED);
+      }
+      if (!action.config.getIncidentResponseExternalTitleKey) {
+        configErrors.getIncidentResponseExternalTitleKey.push(
+          translations.GET_RESPONSE_EXTERNAL_TITLE_KEY_REQUIRED
+        );
+      }
+      if (!action.config.getIncidentResponseExternalUrlKey) {
+        configErrors.getIncidentResponseExternalUrlKey.push(
+          translations.GET_RESPONSE_EXTERNAL_URL_KEY_REQUIRED
+        );
+      }
+      if (!action.config.updateIncidentUrl) {
+        configErrors.updateIncidentUrl.push(translations.UPDATE_URL_REQUIRED);
+      }
+      if (action.config.updateIncidentUrl && !isValidUrl(action.config.updateIncidentUrl)) {
+        configErrors.updateIncidentUrl = [
+          ...configErrors.updateIncidentUrl,
+          translations.URL_INVALID,
+        ];
+      }
+      if (!action.config.updateIncidentJson) {
+        configErrors.updateIncidentJson.push(translations.UPDATE_INCIDENT_REQUIRED);
+      }
+      if (!action.config.updateIncidentMethod) {
+        configErrors.updateIncidentMethod.push(translations.UPDATE_METHOD_REQUIRED);
+      }
+      if (!action.config.createCommentUrl) {
+        configErrors.createCommentUrl.push(translations.CREATE_COMMENT_URL_REQUIRED);
+      }
+      if (action.config.createCommentUrl && !isValidUrl(action.config.createCommentUrl)) {
+        configErrors.createCommentUrl = [
+          ...configErrors.createCommentUrl,
+          translations.URL_INVALID,
+        ];
+      }
+      if (!action.config.createCommentJson) {
+        configErrors.createCommentJson.push(translations.CREATE_COMMENT_INCIDENT_REQUIRED);
+      }
+      if (!action.config.createCommentMethod) {
+        configErrors.createCommentMethod.push(translations.CREATE_COMMENT_METHOD_REQUIRED);
       }
       if (action.config.hasAuth && !action.secrets.user && !action.secrets.password) {
         secretsErrors.user.push(translations.USERNAME_REQUIRED);

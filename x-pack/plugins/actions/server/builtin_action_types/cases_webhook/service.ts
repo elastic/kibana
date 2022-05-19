@@ -8,7 +8,6 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
 
 import { Logger } from '@kbn/core/server';
-import { ActionTypeExecutorResult } from '../../../common';
 import { isOk, promiseResult, Result } from '../lib/result_type';
 import {
   CreateIncidentParams,
@@ -17,6 +16,7 @@ import {
   ExternalService,
   CasesWebhookPublicConfigurationType,
   CasesWebhookSecretConfigurationType,
+  ExternalServiceIncidentResponse,
 } from './types';
 
 import * as i18n from './translations';
@@ -29,13 +29,15 @@ export const createExternalService = (
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities
 ): ExternalService => {
-  const { url, incidentJson } = config as CasesWebhookPublicConfigurationType;
+  const { createIncidentUrl, createIncidentJson } = config as CasesWebhookPublicConfigurationType;
   const { password, user } = secrets as CasesWebhookSecretConfigurationType;
-  if (!url || !password || !user) {
+  if (!createIncidentUrl || !password || !user) {
     throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
   }
 
-  const incidentUrl = url.endsWith('/') ? url.slice(0, -1) : url;
+  const incidentUrl = createIncidentUrl.endsWith('/')
+    ? createIncidentUrl.slice(0, -1)
+    : createIncidentUrl;
 
   const axiosInstance = axios.create({
     auth: { username: user, password },
@@ -61,47 +63,7 @@ export const createExternalService = (
       return msg;
     }, '');
   };
-  //
-  // const hasSupportForNewAPI = (capabilities: { capabilities?: {} }) =>
-  //   createMetaCapabilities.every((c) => Object.keys(capabilities?.capabilities ?? {}).includes(c));
-  //
-  // const normalizeIssueTypes = (issueTypes: Array<{ id: string; name: string }>) =>
-  //   issueTypes.map((type) => ({ id: type.id, name: type.name }));
-  //
-  // const normalizeFields = (fields: {
-  //   [key: string]: {
-  //     allowedValues?: Array<{}>;
-  //     defaultValue?: {};
-  //     name: string;
-  //     required: boolean;
-  //     schema: FieldSchema;
-  //   };
-  // }) =>
-  //   Object.keys(fields ?? {}).reduce(
-  //     (fieldsAcc, fieldKey) => ({
-  //       ...fieldsAcc,
-  //       [fieldKey]: {
-  //         required: fields[fieldKey]?.required,
-  //         allowedValues: fields[fieldKey]?.allowedValues ?? [],
-  //         defaultValue: fields[fieldKey]?.defaultValue ?? {},
-  //         schema: fields[fieldKey]?.schema,
-  //         name: fields[fieldKey]?.name,
-  //       },
-  //     }),
-  //     {}
-  //   );
-  //
-  // const normalizeSearchResults = (
-  //   issues: Array<{ id: string; key: string; fields: { summary: string } }>
-  // ) =>
-  //   issues.map((issue) => ({ id: issue.id, key: issue.key, title: issue.fields?.summary ?? null }));
-  //
-  // const normalizeIssue = (issue: { id: string; key: string; fields: { summary: string } }) => ({
-  //   id: issue.id,
-  //   key: issue.key,
-  //   title: issue.fields?.summary ?? null,
-  // });
-  //
+
   const getIncident = async (id: string) => {
     try {
       const res = await request({
@@ -132,13 +94,15 @@ export const createExternalService = (
   };
 
   const replaceSumDesc = (sum: string, desc: string) => {
-    let str = incidentJson; // incident is stringified object
+    let str = createIncidentJson; // incident is stringified object
     str = str.replace('$SUM', sum);
     str = str.replace('$DESC', desc);
     return JSON.parse(str);
   };
 
-  const createIncident = async ({ incident }: CreateIncidentParams): Promise<unknown> => {
+  const createIncident = async ({
+    incident,
+  }: CreateIncidentParams): Promise<ExternalServiceIncidentResponse> => {
     const { summary, description } = incident;
     const data = replaceSumDesc(summary, description ?? '');
     console.log('cases webhook data!!', {
@@ -501,7 +465,3 @@ export const createExternalService = (
     // getIssue,
   };
 };
-// Action Executor Result w/ internationalisation
-function successResult(actionId: string, data: unknown): ActionTypeExecutorResult<unknown> {
-  return { status: 'ok', data, actionId };
-}
