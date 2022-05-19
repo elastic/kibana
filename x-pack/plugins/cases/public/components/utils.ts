@@ -87,7 +87,6 @@ export const getConnectorIcon = (
   return emptyResponse;
 };
 
-// TODO: Remove when the applications are certified
 export const isDeprecatedConnector = (connector?: CaseActionConnector): boolean => {
   return connector?.isDeprecated ?? false;
 };
