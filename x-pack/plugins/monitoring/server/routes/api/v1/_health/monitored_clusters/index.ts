@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { fetchMonitoredClusters } from './fetch_monitored_clusters';
+export { fetchMonitoredClusters } from './fetch_monitored_clusters';
