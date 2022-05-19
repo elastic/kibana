@@ -46,6 +46,7 @@ export interface EqlQueryBarProps {
   field: FieldHook<DefineStepRule['queryBar']>;
   isLoading: boolean;
   indexPattern: DataViewBase;
+  showFilterBar?: boolean;
   idAria?: string;
   optionsData?: EqlOptionsData;
   optionsSelected?: EqlOptionsSelected;
@@ -59,6 +60,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
   field,
   isLoading = false,
   indexPattern,
+  showFilterBar,
   idAria,
   optionsData,
   optionsSelected,
@@ -144,7 +146,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
       }
       setErrorMessages([]);
       setFieldValue({
-        ...fieldValue,
+        filters: fieldValue.filters,
         query: {
           query: newQuery,
           language: 'eql',
@@ -180,16 +182,20 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
           optionsSelected={optionsSelected}
           onOptionsChange={onOptionsChange}
         />
-        <EuiSpacer size="s" />
-        <FilterBar
-          indexPattern={indexPattern}
-          isLoading={isLoading}
-          isRefreshPaused={false}
-          filterQuery={fieldValue.query}
-          filterManager={filterManager}
-          filters={filterManager.getFilters() || []}
-          displayStyle="inPage"
-        />
+        {showFilterBar && (
+          <>
+            <EuiSpacer size="s" />
+            <FilterBar
+              indexPattern={indexPattern}
+              isLoading={isLoading}
+              isRefreshPaused={false}
+              filterQuery={fieldValue.query}
+              filterManager={filterManager}
+              filters={filterManager.getFilters() || []}
+              displayStyle="inPage"
+            />
+          </>
+        )}
       </>
     </EuiFormRow>
   );
