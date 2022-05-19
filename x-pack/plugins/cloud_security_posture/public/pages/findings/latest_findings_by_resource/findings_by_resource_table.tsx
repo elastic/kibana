@@ -9,8 +9,6 @@ import {
   EuiEmptyPrompt,
   EuiBasicTable,
   EuiTextColor,
-  EuiFlexGroup,
-  EuiFlexItem,
   type EuiTableFieldDataColumnType,
   type CriteriaWithPagination,
   type Pagination,
@@ -133,16 +131,12 @@ const columns: Array<EuiTableFieldDataColumnType<CspFindingsByResource>> = [
           },
         })}
       >
-        <EuiFlexGroup gutterSize="xs">
-          <EuiFlexItem grow={false}>
-            <EuiTextColor color={failedFindings.count === 0 ? '' : 'danger'}>
-              {formatNumber(failedFindings.count)}
-            </EuiTextColor>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <span>({numeral(failedFindings.normalized).format('0%')})</span>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <>
+          <EuiTextColor color={failedFindings.count === 0 ? '' : 'danger'}>
+            {formatNumber(failedFindings.count)}
+          </EuiTextColor>
+          <span> ({numeral(failedFindings.normalized).format('0%')})</span>
+        </>
       </EuiToolTip>
     ),
   },
