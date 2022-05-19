@@ -30,8 +30,9 @@ export function defineGetUserProfileRoute({
       if (!session) {
         return response.notFound();
       }
+
       if (!session.userProfileId) {
-        logger.warn(`User profile missing from current session. (sid: ${session.sid})`);
+        logger.warn(`User profile missing from current session. (sid: ${session.sid.slice(-10)})`);
         return response.notFound();
       }
 

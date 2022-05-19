@@ -30,8 +30,9 @@ export function defineUpdateUserProfileDataRoute({
         logger.warn('User profile requested without valid session.');
         return response.notFound();
       }
+
       if (!session.userProfileId) {
-        logger.warn(`User profile missing from current session. (sid: ${session.sid})`);
+        logger.warn(`User profile missing from current session. (sid: ${session.sid.slice(-10)})`);
         return response.notFound();
       }
 

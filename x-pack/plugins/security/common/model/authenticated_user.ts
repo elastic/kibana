@@ -48,6 +48,15 @@ export function isUserAnonymous(user: Pick<AuthenticatedUser, 'authentication_pr
   return user.authentication_provider.type === 'anonymous';
 }
 
+/**
+ * All users are supposed to have profiles except anonymous users and users authenticated
+ * via authentication HTTP proxies.
+ * @param user Authenticated user information.
+ */
+export function canUserHaveProfile(user: AuthenticatedUser) {
+  return !isUserAnonymous(user) && user.authentication_provider.type !== 'http';
+}
+
 export function canUserChangePassword(
   user: Pick<AuthenticatedUser, 'authentication_realm' | 'authentication_provider'>
 ) {

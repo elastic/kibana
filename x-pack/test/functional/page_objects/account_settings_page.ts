@@ -24,7 +24,7 @@ export class AccountSettingsPageObject extends FtrService {
   }
 
   async changePassword(currentPassword: string, newPassword: string) {
-    await this.testSubjects.click('openChangePasswordFlyout');
+    await this.testSubjects.click('openChangePasswordForm');
 
     const currentPasswordInput = await this.find.byName('current_password');
     await currentPasswordInput.clearValue();
@@ -38,10 +38,10 @@ export class AccountSettingsPageObject extends FtrService {
     await confirmPasswordInput.clearValue();
     await confirmPasswordInput.type(newPassword);
 
-    await this.testSubjects.click('formFlyoutSubmitButton');
+    await this.testSubjects.click('changePasswordFormSubmitButton');
 
     const toast = await this.testSubjects.find('euiToastHeader');
     const title = await toast.getVisibleText();
-    expect(title).to.contain('Password changed');
+    expect(title).to.contain('Password successfully changed');
   }
 }

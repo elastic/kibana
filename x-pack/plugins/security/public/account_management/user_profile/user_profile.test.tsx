@@ -112,7 +112,7 @@ describe('useUserProfileForm', () => {
     });
 
     expect(result.current.values.user.full_name).toEqual('Another Name');
-    expect(result.current.values.data.avatar.initials).toEqual('AN');
+    expect(result.current.values.data?.avatar.initials).toEqual('AN');
   });
 
   it('should save user and user profile when submitting form', async () => {

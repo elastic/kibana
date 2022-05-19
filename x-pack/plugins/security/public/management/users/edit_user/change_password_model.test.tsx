@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { ChangePasswordFormValues } from './change_password_flyout';
-import { validateChangePasswordForm } from './change_password_flyout';
+import type { ChangePasswordFormValues } from './change_password_modal';
+import { validateChangePasswordForm } from './change_password_modal';
 
-describe('ChangePasswordFlyout', () => {
+describe('ChangePasswordModal', () => {
   describe('#validateChangePasswordForm', () => {
     describe('for current user', () => {
       it('should show an error when it is current user with no current password', () => {

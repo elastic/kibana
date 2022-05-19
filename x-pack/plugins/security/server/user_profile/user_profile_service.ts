@@ -29,7 +29,6 @@ export interface UserProfileServiceStart {
 
   /**
    * Updates user preferences by identifier.
-   * @param request Kibana request object
    * @param uid User ID
    * @param data Application data to be written (merged with existing data).
    */
