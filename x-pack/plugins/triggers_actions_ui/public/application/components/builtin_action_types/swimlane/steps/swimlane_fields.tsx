@@ -8,17 +8,21 @@
 import React, { useMemo } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiComboBoxProps, EuiFormRow } from '@elastic/eui';
 import {
+  FieldConfig,
   getFieldValidityAndErrorMessage,
   UseField,
   useFormData,
   VALIDATION_TYPES,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { ComboBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
 import * as i18n from '../translations';
-import { SwimlaneConnectorType, SwimlaneFieldMappingConfig } from '../types';
-import { isValidFieldForConnector } from '../helpers';
+import {
+  MappingConfigurationKeys,
+  SwimlaneConnectorType,
+  SwimlaneFieldMappingConfig,
+} from '../types';
+import { isRequiredField, isValidFieldForConnector } from '../helpers';
 import { ButtonGroupField } from '../../../button_group_field';
 
 const SINGLE_SELECTION = { asPlainText: true };
@@ -43,63 +47,89 @@ const connectorTypeButtons = [
   { id: SwimlaneConnectorType.Cases, label: 'Cases' },
 ];
 
-const { emptyField } = fieldValidators;
+const mappingConfig: FieldConfig<SwimlaneFieldMappingConfig | null> = {
+  defaultValue: null,
+  validations: [
+    {
+      validator: ({ value, customData }) => {
+        const data = customData.value as {
+          connectorType: SwimlaneConnectorType;
+          validationLabel: string;
+        };
+        if (isRequiredField(data.connectorType, value?.id as MappingConfigurationKeys)) {
+          return {
+            message: data.validationLabel,
+          };
+        }
+      },
+    },
+  ],
+};
 
 const MappingField: React.FC<{
   path: string;
   label: string;
   validationLabel: string;
   options: EuiComboBoxProps<string>['options'];
+  fieldIdMap: Map<string, SwimlaneFieldMappingConfig>;
+  connectorType: SwimlaneConnectorType;
   dataTestSubj?: string;
-}> = ({ path, options, label, validationLabel, dataTestSubj }) => {
-  return (
-    <UseField
-      path={path}
-      component={ComboBoxField}
-      config={{
-        defaultValue: [],
-        validations: [
-          {
-            validator: emptyField(validationLabel),
-          },
-          {
-            validator: emptyField(validationLabel),
-            type: VALIDATION_TYPES.ARRAY_ITEM,
-          },
-        ],
-      }}
-    >
-      {(field) => {
-        const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+}> = React.memo(
+  ({ path, options, label, validationLabel, dataTestSubj, fieldIdMap, connectorType }) => {
+    return (
+      <UseField<SwimlaneFieldMappingConfig | null>
+        path={path}
+        component={ComboBoxField}
+        config={mappingConfig}
+        validationData={{ connectorType, validationLabel }}
+      >
+        {(field) => {
+          const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
-        const onComboChange = (opt: EuiComboBoxOptionOption[]) => {
-          field.setValue(opt.map((option) => option.label));
-        };
+          const onComboChange = (opt: Array<EuiComboBoxOptionOption<string>>) => {
+            const option = opt[0];
 
-        const onSearchComboChange = (value: string) => {
-          if (value !== undefined) {
-            field.clearErrors(VALIDATION_TYPES.ARRAY_ITEM);
-          }
-        };
+            const item = fieldIdMap.get(option?.value ?? '');
+            if (!item) {
+              field.setValue(null);
+              return;
+            }
 
-        return (
-          <EuiFormRow label={label} error={errorMessage} isInvalid={isInvalid} fullWidth>
-            <EuiComboBox
-              singleSelection={SINGLE_SELECTION}
-              selectedOptions={(field.value as string[]).map((v) => ({ label: v }))}
-              onChange={onComboChange}
-              onSearchChange={onSearchComboChange}
-              fullWidth
-              noSuggestions={false}
-              data-test-subj={dataTestSubj}
-              options={options}
-            />
-          </EuiFormRow>
-        );
-      }}
-    </UseField>
-  );
-};
+            field.setValue({
+              id: item.id,
+              name: item.name,
+              key: item.key,
+              fieldType: item.fieldType,
+            });
+          };
+
+          const onSearchComboChange = (value: string) => {
+            if (value !== undefined) {
+              field.clearErrors(VALIDATION_TYPES.ARRAY_ITEM);
+            }
+          };
+
+          const selectedOptions = createSelectedOption(fieldIdMap.get(field.value?.id ?? ''));
+
+          return (
+            <EuiFormRow label={label} error={errorMessage} isInvalid={isInvalid} fullWidth>
+              <EuiComboBox
+                singleSelection={SINGLE_SELECTION}
+                selectedOptions={selectedOptions}
+                onChange={onComboChange}
+                onSearchChange={onSearchComboChange}
+                fullWidth
+                noSuggestions={false}
+                data-test-subj={dataTestSubj}
+                options={options}
+              />
+            </EuiFormRow>
+          );
+        }}
+      </UseField>
+    );
+  }
+);
 
 const SwimlaneFieldsComponent: React.FC<Props> = ({ updateCurrentStep, fields }) => {
   const [{ config }] = useFormData({
@@ -108,7 +138,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({ updateCurrentStep, fields })
 
   const connectorType = config != null ? config.connectorType : SwimlaneConnectorType.All;
 
-  const [fieldTypeMap] = useMemo(
+  const [fieldTypeMap, fieldIdMap] = useMemo(
     () =>
       fields.reduce(
         ([typeMap, idMap], field) => {
@@ -141,6 +171,8 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({ updateCurrentStep, fields })
         label={i18n.SW_CONNECTOR_TYPE_LABEL}
         legend={i18n.SW_CONNECTOR_TYPE_LABEL}
         options={connectorTypeButtons}
+        fieldIdMap={fieldIdMap}
+        connectorType={connectorType}
       />
       {isValidFieldForConnector(connectorType as SwimlaneConnectorType.All, 'alertIdConfig') && (
         <MappingField
@@ -148,15 +180,19 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({ updateCurrentStep, fields })
           label={i18n.SW_ALERT_ID_FIELD_LABEL}
           validationLabel={i18n.SW_REQUIRED_ALERT_ID}
           options={textOptions}
+          fieldIdMap={fieldIdMap}
+          connectorType={connectorType}
         />
       )}
       {isValidFieldForConnector(connectorType as SwimlaneConnectorType, 'ruleNameConfig') && (
         <MappingField
-          path="config.mappings.alertIdConfig"
+          path="config.mappings.ruleNameConfig"
           label={i18n.SW_RULE_NAME_FIELD_LABEL}
           validationLabel={i18n.SW_REQUIRED_ALERT_ID}
           options={textOptions}
           dataTestSubj="swimlaneApiUrlInput"
+          fieldIdMap={fieldIdMap}
+          connectorType={connectorType}
         />
       )}
       {isValidFieldForConnector(connectorType as SwimlaneConnectorType, 'severityConfig') && (
@@ -166,15 +202,19 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({ updateCurrentStep, fields })
           validationLabel={i18n.SW_REQUIRED_SEVERITY}
           options={textOptions}
           dataTestSubj="swimlaneSeverityInput"
+          fieldIdMap={fieldIdMap}
+          connectorType={connectorType}
         />
       )}
       {isValidFieldForConnector(connectorType as SwimlaneConnectorType, 'caseIdConfig') && (
         <MappingField
-          path="config.mappings.severityConfig"
+          path="config.mappings.caseIdConfig"
           label={i18n.SW_CASE_ID_FIELD_LABEL}
           validationLabel={i18n.SW_REQUIRED_CASE_ID}
           options={textOptions}
           dataTestSubj="swimlaneCaseIdConfig"
+          fieldIdMap={fieldIdMap}
+          connectorType={connectorType}
         />
       )}
       {isValidFieldForConnector(connectorType as SwimlaneConnectorType, 'caseNameConfig') && (
@@ -184,6 +224,8 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({ updateCurrentStep, fields })
           validationLabel={i18n.SW_REQUIRED_CASE_NAME}
           options={textOptions}
           dataTestSubj="swimlaneCaseNameConfig"
+          fieldIdMap={fieldIdMap}
+          connectorType={connectorType}
         />
       )}
       {isValidFieldForConnector(connectorType as SwimlaneConnectorType, 'commentsConfig') && (
@@ -193,15 +235,19 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({ updateCurrentStep, fields })
           validationLabel={i18n.SW_REQUIRED_COMMENTS}
           options={commentsOptions}
           dataTestSubj="swimlaneCommentsConfig"
+          fieldIdMap={fieldIdMap}
+          connectorType={connectorType}
         />
       )}
       {isValidFieldForConnector(connectorType as SwimlaneConnectorType, 'descriptionConfig') && (
         <MappingField
-          path="config.mappings.commentsConfig"
+          path="config.mappings.descriptionConfig"
           label={i18n.SW_DESCRIPTION_FIELD_LABEL}
           validationLabel={i18n.SW_REQUIRED_DESCRIPTION}
           options={textOptions}
           dataTestSubj="swimlaneDescriptionConfig"
+          fieldIdMap={fieldIdMap}
+          connectorType={connectorType}
         />
       )}
     </>

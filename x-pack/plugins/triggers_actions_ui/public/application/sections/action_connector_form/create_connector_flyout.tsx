@@ -239,6 +239,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const { isLoading: isSavingConnector, createConnector } = useCreateConnector();
 
   const onFormSubmit: FormConfig<ConnectorFormData>['onSubmit'] = async (data, isValid) => {
+    console.log('isValid', isValid);
     console.log('Form data:', data);
   };
 
