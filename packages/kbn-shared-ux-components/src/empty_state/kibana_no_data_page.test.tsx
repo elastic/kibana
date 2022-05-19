@@ -90,7 +90,7 @@ describe('Kibana No Data Page', () => {
     component.update();
 
     expect(component.find(EuiLoadingElastic).length).toBe(1);
-    expect(component.find(NoDataViews).length).toBe(0);
+    expect(component.find(NoDataViewsPrompt).length).toBe(0);
     expect(component.find(NoDataConfigPage).length).toBe(0);
   });
 });
