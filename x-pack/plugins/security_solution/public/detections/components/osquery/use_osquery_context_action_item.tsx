@@ -13,7 +13,7 @@ interface IProps {
   handleClick: () => void;
 }
 
-export const useOsqueryContextActionItem = ({ handleClick }: IProps): any => {
+export const useOsqueryContextActionItem = ({ handleClick }: IProps) => {
   const osqueryActionItem = useMemo(
     () => <OsqueryActionItem handleClick={handleClick} />,
     [handleClick]
