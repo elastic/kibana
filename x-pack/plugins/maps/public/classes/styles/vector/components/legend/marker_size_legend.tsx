@@ -74,9 +74,8 @@ export class MarkerSizeLegend extends Component<Props, State> {
 
     const svgHeight = options.maxSize * 2 + HALF_FONT_SIZE + circleStyle.strokeWidth * 2;
 
-    const cx = options.maxSize + circleStyle.strokeWidth; // put circle center in middle
-
     function makeMarker(radius: number, formattedValue: string | number) {
+      const circleCenterX = options.maxSize + circleStyle.strokeWidth;
       const circleBottomY = svgHeight - circleStyle.strokeWidth;
       const circleCenterY = circleBottomY - radius;
       const circleTopY = circleCenterY - radius;
@@ -84,19 +83,19 @@ export class MarkerSizeLegend extends Component<Props, State> {
         <g>
           <line
             style={{ stroke: '#D8D8D8' }}
-            x1={cx}
+            x1={circleCenterX}
             y1={circleTopY}
-            x2={cx * 2.25}
+            x2={circleCenterX * 2.25}
             y2={circleTopY}
           />
           <text
             style={{ fontSize: FONT_SIZE }}
-            x={cx * 2.25 + HALF_FONT_SIZE}
+            x={circleCenterX * 2.25 + HALF_FONT_SIZE}
             y={circleTopY + HALF_FONT_SIZE}
           >
             {formattedValue}
           </text>
-          <circle style={circleStyle} cx={cx} cy={circleCenterY} r={radius} />
+          <circle style={circleStyle} cx={circleCenterX} cy={circleCenterY} r={radius} />
         </g>
       );
     }
