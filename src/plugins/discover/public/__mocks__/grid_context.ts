@@ -13,7 +13,7 @@ import { dataViewWithVariousFieldTypesMock } from './data_view_with_various_fiel
 import { esHits, esHitsWithVariousFieldTypes } from './es_hits';
 import { discoverServiceMock } from './services';
 import { GridContext } from '../components/discover_grid/discover_grid_context';
-import { formatValueAsPlainText } from '../utils/format_value_as_plain_text';
+import { convertValueToString } from '../utils/convert_value_to_string';
 import type { ElasticSearchHit } from '../types';
 
 const buildGridContext = (dataView: DataView, rows: ElasticSearchHit[]): GridContext => {
@@ -32,7 +32,7 @@ const buildGridContext = (dataView: DataView, rows: ElasticSearchHit[]): GridCon
     selectedDocs: [],
     setSelectedDocs: jest.fn(),
     formatValueAsTextToCopy: (rowIndex, columnId, options) =>
-      formatValueAsPlainText({
+      convertValueToString({
         rowIndex,
         columnId,
         services: discoverServiceMock,

@@ -12,7 +12,7 @@ import { EuiDataGridColumn, EuiIconTip, EuiScreenReaderOnly } from '@elastic/eui
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ExpandButton } from './discover_grid_expand_button';
 import { DiscoverGridSettings } from './types';
-import type { ValueAsTextFormatter } from '../../types';
+import type { ValueToStringConverter } from '../../types';
 import { buildCellActions } from './discover_grid_cell_actions';
 import { getSchemaByKbnType } from './discover_grid_schema';
 import { SelectButton } from './discover_grid_document_selection';
@@ -69,7 +69,7 @@ export function buildEuiGridColumn({
   defaultColumns: boolean;
   isSortEnabled: boolean;
   services: DiscoverServices;
-  formatValueAsTextToCopy: ValueAsTextFormatter;
+  formatValueAsTextToCopy: ValueToStringConverter;
   rowsCount: number;
 }) {
   const indexPatternField = indexPattern.getFieldByName(columnName);
@@ -160,7 +160,7 @@ export function getEuiGridColumns({
   defaultColumns: boolean;
   isSortEnabled: boolean;
   services: DiscoverServices;
-  formatValueAsTextToCopy: ValueAsTextFormatter;
+  formatValueAsTextToCopy: ValueToStringConverter;
 }) {
   const timeFieldName = indexPattern.timeFieldName;
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;

@@ -8,7 +8,7 @@
 
 import { copyToClipboard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ValueAsTextFormatter } from '../../../types';
+import type { ValueToStringConverter } from '../../../types';
 import { DiscoverServices } from '../../../build_services';
 
 export const copyValueToClipboard = ({
@@ -20,7 +20,7 @@ export const copyValueToClipboard = ({
   rowIndex: number;
   columnId: string;
   services: DiscoverServices;
-  formatValueAsTextToCopy: ValueAsTextFormatter;
+  formatValueAsTextToCopy: ValueToStringConverter;
 }) => {
   const { toastNotifications } = services;
 
@@ -43,7 +43,7 @@ export const copyColumnValuesToClipboard = async ({
 }: {
   columnId: string;
   services: DiscoverServices;
-  formatValueAsTextToCopy: ValueAsTextFormatter;
+  formatValueAsTextToCopy: ValueToStringConverter;
   rowsCount: number;
 }) => {
   const { toastNotifications } = services;

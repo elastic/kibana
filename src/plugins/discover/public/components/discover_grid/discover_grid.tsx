@@ -48,10 +48,10 @@ import {
 import { DiscoverGridDocumentToolbarBtn, getDocId } from './discover_grid_document_selection';
 import { SortPairArr } from '../doc_table/lib/get_sort';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
-import type { ElasticSearchHit, ValueAsTextFormatter } from '../../types';
+import type { ElasticSearchHit, ValueToStringConverter } from '../../types';
 import { useRowHeightsOptions } from '../../utils/use_row_heights_options';
 import { useDiscoverServices } from '../../utils/use_discover_services';
-import { formatValueAsPlainText } from '../../utils/format_value_as_plain_text';
+import { convertValueToString } from '../../utils/convert_value_to_string';
 
 interface SortObj {
   id: string;
@@ -238,9 +238,9 @@ export const DiscoverGrid = ({
     });
   }, [displayedRows, indexPattern]);
 
-  const formatValueAsTextToCopy: ValueAsTextFormatter = useCallback(
+  const formatValueAsTextToCopy: ValueToStringConverter = useCallback(
     (rowIndex, columnId, options) => {
-      return formatValueAsPlainText({
+      return convertValueToString({
         rowIndex,
         rows: displayedRows,
         rowsFlattened: displayedRowsFlattened,

@@ -12,7 +12,7 @@ export type ElasticSearchHit<T = unknown> = estypes.SearchHit<T>;
 
 export type HitsFlattened = Array<Record<string, unknown>>;
 
-export type ValueAsTextFormatter = (
+export type ValueToStringConverter = (
   rowIndex: number,
   columnId: string,
   options: { allowMultiline: boolean }

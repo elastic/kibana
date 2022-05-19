@@ -11,7 +11,7 @@ import { formatFieldValue } from './format_value';
 import { ElasticSearchHit, HitsFlattened } from '../types';
 import { DiscoverServices } from '../build_services';
 
-export const formatValueAsPlainText = ({
+export const convertValueToString = ({
   rowIndex,
   rows,
   rowsFlattened,

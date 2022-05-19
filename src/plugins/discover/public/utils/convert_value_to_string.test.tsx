@@ -8,11 +8,11 @@
 
 import { discoverGridContextWithVariousFieldTypesMock } from '../__mocks__/grid_context';
 import { discoverServiceMock } from '../__mocks__/services';
-import { formatValueAsPlainText } from './format_value_as_plain_text';
+import { convertValueToString } from './convert_value_to_string';
 
-describe('formatValueAsPlainText', () => {
+describe('convertValueToString', () => {
   it('should convert a keyword value to text', () => {
-    const result = formatValueAsPlainText({
+    const result = convertValueToString({
       rows: discoverGridContextWithVariousFieldTypesMock.rows,
       rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
       dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
@@ -25,7 +25,7 @@ describe('formatValueAsPlainText', () => {
   });
 
   it('should convert a text value to text', () => {
-    const result = formatValueAsPlainText({
+    const result = convertValueToString({
       rows: discoverGridContextWithVariousFieldTypesMock.rows,
       rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
       dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
@@ -38,7 +38,7 @@ describe('formatValueAsPlainText', () => {
   });
 
   it('should convert a number value to text', () => {
-    const result = formatValueAsPlainText({
+    const result = convertValueToString({
       rows: discoverGridContextWithVariousFieldTypesMock.rows,
       rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
       dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
@@ -51,7 +51,7 @@ describe('formatValueAsPlainText', () => {
   });
 
   it('should convert a date value to text', () => {
-    const result = formatValueAsPlainText({
+    const result = convertValueToString({
       rows: discoverGridContextWithVariousFieldTypesMock.rows,
       rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
       dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
@@ -64,7 +64,7 @@ describe('formatValueAsPlainText', () => {
   });
 
   it('should convert a boolean value to text', () => {
-    const result = formatValueAsPlainText({
+    const result = convertValueToString({
       rows: discoverGridContextWithVariousFieldTypesMock.rows,
       rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
       dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
@@ -77,7 +77,7 @@ describe('formatValueAsPlainText', () => {
   });
 
   it('should convert a binary value to text', () => {
-    const result = formatValueAsPlainText({
+    const result = convertValueToString({
       rows: discoverGridContextWithVariousFieldTypesMock.rows,
       rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
       dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
@@ -90,7 +90,7 @@ describe('formatValueAsPlainText', () => {
   });
 
   it('should convert an object value to text', () => {
-    const result = formatValueAsPlainText({
+    const result = convertValueToString({
       rows: discoverGridContextWithVariousFieldTypesMock.rows,
       rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
       dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
@@ -103,7 +103,7 @@ describe('formatValueAsPlainText', () => {
   });
 
   it('should convert a nested value to text', () => {
-    const result = formatValueAsPlainText({
+    const result = convertValueToString({
       rows: discoverGridContextWithVariousFieldTypesMock.rows,
       rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
       dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
@@ -118,7 +118,7 @@ describe('formatValueAsPlainText', () => {
   });
 
   it('should convert a flattened value to text', () => {
-    const result = formatValueAsPlainText({
+    const result = convertValueToString({
       rows: discoverGridContextWithVariousFieldTypesMock.rows,
       rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
       dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
@@ -131,7 +131,7 @@ describe('formatValueAsPlainText', () => {
   });
 
   it('should convert a range value to text', () => {
-    const result = formatValueAsPlainText({
+    const result = convertValueToString({
       rows: discoverGridContextWithVariousFieldTypesMock.rows,
       rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
       dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
@@ -144,7 +144,7 @@ describe('formatValueAsPlainText', () => {
   });
 
   it('should convert a IP value to text', () => {
-    const result = formatValueAsPlainText({
+    const result = convertValueToString({
       rows: discoverGridContextWithVariousFieldTypesMock.rows,
       rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
       dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
@@ -157,7 +157,7 @@ describe('formatValueAsPlainText', () => {
   });
 
   it('should convert a version value to text', () => {
-    const result = formatValueAsPlainText({
+    const result = convertValueToString({
       rows: discoverGridContextWithVariousFieldTypesMock.rows,
       rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
       dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
@@ -170,7 +170,7 @@ describe('formatValueAsPlainText', () => {
   });
 
   it('should convert a vector value to text', () => {
-    const result = formatValueAsPlainText({
+    const result = convertValueToString({
       rows: discoverGridContextWithVariousFieldTypesMock.rows,
       rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
       dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
@@ -183,7 +183,7 @@ describe('formatValueAsPlainText', () => {
   });
 
   it('should convert a geo point value to text', () => {
-    const result = formatValueAsPlainText({
+    const result = convertValueToString({
       rows: discoverGridContextWithVariousFieldTypesMock.rows,
       rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
       dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
@@ -196,7 +196,7 @@ describe('formatValueAsPlainText', () => {
   });
 
   it('should convert a geo point object value to text', () => {
-    const result = formatValueAsPlainText({
+    const result = convertValueToString({
       rows: discoverGridContextWithVariousFieldTypesMock.rows,
       rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
       dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
@@ -209,7 +209,7 @@ describe('formatValueAsPlainText', () => {
   });
 
   it('should convert an array value to text', () => {
-    const result = formatValueAsPlainText({
+    const result = convertValueToString({
       rows: discoverGridContextWithVariousFieldTypesMock.rows,
       rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
       dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
@@ -222,7 +222,7 @@ describe('formatValueAsPlainText', () => {
   });
 
   it('should return an empty string and not fail', () => {
-    const result = formatValueAsPlainText({
+    const result = convertValueToString({
       rows: discoverGridContextWithVariousFieldTypesMock.rows,
       rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
       dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
