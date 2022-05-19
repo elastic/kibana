@@ -22,6 +22,7 @@ export function health(server: MonitoringCore) {
       query: validateQuery,
     },
     async handler(req: LegacyRequest) {
+      const index = '*:.monitoring-*,.monitoring-*';
       const timeRange = {
         min: req.query.min || 'now-30m',
         max: req.query.max || 'now',
@@ -29,6 +30,7 @@ export function health(server: MonitoringCore) {
       const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
 
       const monitoredClusters = await fetchMonitoredClusters({
+        index,
         timeRange,
         search: (params: any) => callWithRequest(req, 'search', params),
       });
