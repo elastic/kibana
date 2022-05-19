@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 
 import { withSuspense } from '@kbn/shared-ux-utility';
 
@@ -20,5 +20,5 @@ export const LazyDataViewIllustration = React.lazy(() =>
 
 export const DataViewIllustration = withSuspense(
   LazyDataViewIllustration,
-  <EuiLoadingSpinner size="xl" />
+  <EuiPanel color="subdued" style={{ width: 226, height: 206 }} />
 );

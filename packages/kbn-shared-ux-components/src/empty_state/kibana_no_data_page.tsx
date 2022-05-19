@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useEffect, useState } from 'react';
+import { EuiLoadingElastic } from '@elastic/eui';
 import { useData } from '@kbn/shared-ux-services';
 import { NoDataConfigPage, NoDataPageProps } from '../page_template';
 import { NoDataViews } from './no_data_views';
@@ -17,6 +18,7 @@ export interface Props {
 
 export const KibanaNoDataPage = ({ onDataViewCreated, noDataConfig }: Props) => {
   const { hasESData, hasUserDataView } = useData();
+  const [isLoading, setIsLoading] = useState(true);
   const [dataExists, setDataExists] = useState(false);
   const [hasUserDataViews, setHasUserDataViews] = useState(false);
 
@@ -24,11 +26,18 @@ export const KibanaNoDataPage = ({ onDataViewCreated, noDataConfig }: Props) => 
     const checkData = async () => {
       setDataExists(await hasESData());
       setHasUserDataViews(await hasUserDataView());
+      setIsLoading(false);
     };
     // TODO: add error handling
     // https://github.com/elastic/kibana/issues/130913
-    checkData().catch(() => {});
+    checkData().catch(() => {
+      setIsLoading(false);
+    });
   }, [hasESData, hasUserDataView]);
+
+  if (isLoading) {
+    return <EuiLoadingElastic css={{ margin: 'auto' }} size="xxl" />;
+  }
 
   if (!dataExists) {
     return <NoDataConfigPage noDataConfig={noDataConfig} />;
