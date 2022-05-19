@@ -335,8 +335,8 @@ export class DashboardPageObject extends FtrService {
     }
   }
 
-  public async clickNewDashboard(continueEditing = false) {
-    await this.forceSkipTour();
+  public async clickNewDashboard(continueEditing = false, skipTour = true) {
+    if (skipTour) await this.forceSkipTour();
 
     const discardButtonExists = await this.testSubjects.exists('discardDashboardPromptButton');
     if (!continueEditing && discardButtonExists) {
@@ -359,8 +359,8 @@ export class DashboardPageObject extends FtrService {
     await this.waitForRenderComplete();
   }
 
-  public async clickNewDashboardExpectWarning(continueEditing = false) {
-    await this.forceSkipTour();
+  public async clickNewDashboardExpectWarning(continueEditing = false, skipTour = true) {
+    if (skipTour) await this.forceSkipTour();
 
     const discardButtonExists = await this.testSubjects.exists('discardDashboardPromptButton');
     if (!continueEditing && discardButtonExists) {
