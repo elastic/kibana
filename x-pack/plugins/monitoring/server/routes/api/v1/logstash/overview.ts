@@ -5,42 +5,27 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import {
+  postLogstashOverviewRequestParamsRT,
+  postLogstashOverviewRequestPayloadRT,
+} from '../../../../../common/http_api/logstash/post_logstash_overview';
 import { getClusterStatus } from '../../../../lib/logstash/get_cluster_status';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors';
 import { metricSet } from './metric_set_overview';
+import { MonitoringCore } from '../../../../types';
+import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 
-/*
- * Logstash Overview route.
- */
-export function logstashOverviewRoute(server) {
-  /**
-   * Logstash Overview request.
-   *
-   * This will fetch all data required to display the Logstash Overview page.
-   *
-   * The current details returned are:
-   *
-   * - Logstash Cluster Status
-   * - Metrics
-   */
+export function logstashOverviewRoute(server: MonitoringCore) {
+  const validateParams = createValidationFunction(postLogstashOverviewRequestParamsRT);
+  const validateBody = createValidationFunction(postLogstashOverviewRequestPayloadRT);
+
   server.route({
-    method: 'POST',
+    method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/logstash',
-    config: {
-      validate: {
-        params: schema.object({
-          clusterUuid: schema.string(),
-        }),
-        body: schema.object({
-          ccs: schema.maybe(schema.string()),
-          timeRange: schema.object({
-            min: schema.string(),
-            max: schema.string(),
-          }),
-        }),
-      },
+    validate: {
+      params: validateParams,
+      body: validateBody,
     },
     async handler(req) {
       const clusterUuid = req.params.clusterUuid;

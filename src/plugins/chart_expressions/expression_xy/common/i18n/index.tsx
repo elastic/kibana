@@ -121,6 +121,10 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.ariaLabel.help', {
       defaultMessage: 'Specifies the aria label of the xy chart',
     }),
+  getMarkSizeRatioHelp: () =>
+    i18n.translate('expressionXY.xyVis.markSizeRatio.help', {
+      defaultMessage: 'Specifies the ratio of the dots at the line and area charts',
+    }),
   getMinTimeBarIntervalHelp: () =>
     i18n.translate('expressionXY.xyVis.xAxisInterval.help', {
       defaultMessage: 'Specifies the min interval for time bar chart',
@@ -168,6 +172,10 @@ export const strings = {
   getAccessorsHelp: () =>
     i18n.translate('expressionXY.dataLayer.accessors.help', {
       defaultMessage: 'The columns to display on the y axis.',
+    }),
+  getMarkSizeAccessorHelp: () =>
+    i18n.translate('expressionXY.dataLayer.markSizeAccessor.help', {
+      defaultMessage: 'Mark size accessor',
     }),
   getYConfigHelp: () =>
     i18n.translate('expressionXY.dataLayer.yConfig.help', {
