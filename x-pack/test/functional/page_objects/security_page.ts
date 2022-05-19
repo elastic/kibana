@@ -514,7 +514,7 @@ export class SecurityPageObject extends FtrService {
     if (user.username) {
       await this.retry.waitForWithTimeout('ES to acknowledge deactivation', 15000, async () => {
         const userResponse = await this.es.security.getUser({ username: user.username });
-        return userResponse[user.username!].enabled === false;
+        return userResponse.body[user.username!].enabled === false;
       });
     }
     await this.submitUpdateUserForm();
@@ -528,7 +528,7 @@ export class SecurityPageObject extends FtrService {
     if (user.username) {
       await this.retry.waitForWithTimeout('ES to acknowledge activation', 15000, async () => {
         const userResponse = await this.es.security.getUser({ username: user.username });
-        return userResponse[user.username!].enabled === true;
+        return userResponse.body[user.username!].enabled === true;
       });
     }
     await this.submitUpdateUserForm();
