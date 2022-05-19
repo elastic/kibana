@@ -141,7 +141,7 @@ export type WebhookActionConnector = UserConfiguredActionConnector<WebhookConfig
 export interface CasesWebhookConfig {
   method: string;
   url: string;
-  incident: string;
+  incidentJson: string;
   headers: Record<string, string>;
   hasAuth: boolean;
 }

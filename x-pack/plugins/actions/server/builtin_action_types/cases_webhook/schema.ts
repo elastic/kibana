@@ -6,10 +6,22 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { CasesWebhookMethods } from './types';
+import { nullableType } from '../lib/nullable';
+
+const HeadersSchema = schema.recordOf(schema.string(), schema.string());
 
 export const ExternalIncidentServiceConfiguration = {
   url: schema.string(),
-  incident: schema.string(), // JSON.stringified object
+  method: schema.oneOf(
+    [schema.literal(CasesWebhookMethods.POST), schema.literal(CasesWebhookMethods.PUT)],
+    {
+      defaultValue: CasesWebhookMethods.POST,
+    }
+  ),
+  incidentJson: schema.string(), // stringified object
+  headers: nullableType(HeadersSchema),
+  hasAuth: schema.boolean({ defaultValue: true }),
 };
 
 export const ExternalIncidentServiceConfigurationSchema = schema.object(

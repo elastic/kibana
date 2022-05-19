@@ -36,8 +36,8 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
   ActionConnectorFieldsProps<CasesWebhookActionConnector>
 > = ({ action, editActionConfig, editActionSecrets, errors, readOnly }) => {
   const { user, password } = action.secrets;
-  const { method, url, incident, headers, hasAuth } = action.config;
-  console.log('incident here', incident);
+  const { method, url, incidentJson, headers, hasAuth } = action.config;
+  console.log('incident here', incidentJson);
 
   const [httpHeaderKey, setHttpHeaderKey] = useState<string>('');
   const [httpHeaderValue, setHttpHeaderValue] = useState<string>('');

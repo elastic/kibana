@@ -17,8 +17,8 @@ export const ExternalIncidentServiceConfigurationSchema = schema.object(
 );
 
 export const ExternalIncidentServiceSecretConfiguration = {
-  email: schema.string(),
-  apiToken: schema.string(),
+  user: schema.string(),
+  password: schema.string(),
 };
 
 export const ExternalIncidentServiceSecretConfigurationSchema = schema.object(

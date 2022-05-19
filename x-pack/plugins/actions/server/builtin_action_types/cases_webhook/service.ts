@@ -29,7 +29,7 @@ export const createExternalService = (
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities
 ): ExternalService => {
-  const { url, incident: incidentStringified } = config as CasesWebhookPublicConfigurationType;
+  const { url, incidentJson } = config as CasesWebhookPublicConfigurationType;
   const { password, user } = secrets as CasesWebhookSecretConfigurationType;
   if (!url || !password || !user) {
     throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
@@ -132,7 +132,7 @@ export const createExternalService = (
   };
 
   const replaceSumDesc = (sum: string, desc: string) => {
-    let str = incidentStringified; // incident is stringified object
+    let str = incidentJson; // incident is stringified object
     str = str.replace('$SUM', sum);
     str = str.replace('$DESC', desc);
     return JSON.parse(str);

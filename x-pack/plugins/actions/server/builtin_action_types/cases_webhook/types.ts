@@ -15,18 +15,34 @@ import {
   ExternalIncidentServiceSecretConfigurationSchema,
 } from './schema';
 
+// config definition
+export const enum CasesWebhookMethods {
+  POST = 'post',
+  PUT = 'put',
+}
+
+// config
+export type CasesWebhookPublicConfigurationType = TypeOf<
+  typeof ExternalIncidentServiceConfigurationSchema
+>;
+// secrets
+export type CasesWebhookSecretConfigurationType = TypeOf<
+  typeof ExternalIncidentServiceSecretConfigurationSchema
+>;
+// params
+export type CasesWebhookActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
+
 export interface ExternalServiceCredentials {
   config: Record<string, unknown>;
   secrets: Record<string, unknown>;
 }
 
 export interface ExternalServiceValidation {
-  config: (configurationUtilities: ActionsConfigurationUtilities, configObject: any) => void;
-  secrets: (configurationUtilities: ActionsConfigurationUtilities, secrets: any) => void;
-}
-
-export interface CreateIncidentParams {
-  incident: Incident;
+  config: (
+    configurationUtilities: ActionsConfigurationUtilities,
+    configObject: CasesWebhookPublicConfigurationType
+  ) => void;
+  secrets: (secrets: CasesWebhookSecretConfigurationType) => void;
 }
 
 export interface ExternalServiceIncidentResponse {
@@ -40,13 +56,20 @@ export type Incident = Omit<ExecutorSubActionPushParams['incident'], 'externalId
 export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
 export type ExecutorSubActionPushParams = TypeOf<typeof ExecutorSubActionPushParamsSchema>;
 export type PushToServiceApiParams = ExecutorSubActionPushParams;
+
+// incident service
 export interface ExternalService {
   createIncident: (params: CreateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
+}
+export interface CreateIncidentParams {
+  incident: Incident;
 }
 
 export interface ExternalServiceApiHandlerArgs {
   externalService: ExternalService;
 }
+
+// incident api
 export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerArgs {
   params: PushToServiceApiParams;
   logger: Logger;
@@ -63,10 +86,3 @@ export interface ResponseError {
   errorMessages: string[] | null | undefined;
   errors: { [k: string]: string } | null | undefined;
 }
-
-export type CasesWebhookPublicConfigurationType = TypeOf<
-  typeof ExternalIncidentServiceConfigurationSchema
->;
-export type CasesWebhookSecretConfigurationType = TypeOf<
-  typeof ExternalIncidentServiceSecretConfigurationSchema
->;
