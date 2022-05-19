@@ -233,7 +233,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
             aria-label={NAME_LABEL}
             id="eventFiltersFormInputName"
             defaultValue={exception?.name ?? ''}
-            data-test-subj={'eventFilters-form-name-input'}
+            data-test-subj={getTestId('name-input')}
             fullWidth
             maxLength={256}
             required={hasBeenInputNameVisited}
@@ -242,7 +242,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           />
         </EuiFormRow>
       ),
-      [hasNameError, handleOnChangeName, hasBeenInputNameVisited, exception?.name]
+      [getTestId, hasNameError, handleOnChangeName, hasBeenInputNameVisited, exception?.name]
     );
 
     // description and handler
@@ -262,13 +262,13 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
             defaultValue={exception?.description ?? ''}
             onChange={handleOnDescriptionChange}
             fullWidth
-            data-test-subj={'eventFilters-form-description-input'}
+            data-test-subj={getTestId('description-input')}
             aria-label={DESCRIPTION_LABEL}
             maxLength={256}
           />
         </EuiFormRow>
       ),
-      [exception?.description, handleOnDescriptionChange]
+      [exception?.description, getTestId, handleOnDescriptionChange]
     );
 
     // selected OS and handler
@@ -528,7 +528,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     }
 
     return (
-      <EuiForm component="div" data-test-subj={getTestId('')}>
+      <EuiForm component="div">
         {detailsSection}
         <EuiHorizontalRule />
         {criteriaSection}

@@ -45,6 +45,7 @@ jest.mock('../../../../../common/hooks/use_license', () => {
 });
 
 describe('Event filter form', () => {
+  const formPrefix = 'eventFilters-form';
   const generator = new EndpointDocGenerator('effected-policy-select');
 
   let formProps: jest.Mocked<ArtifactFormComponentProps>;
@@ -187,7 +188,7 @@ describe('Event filter form', () => {
     it('should display name error only when on blur and empty name', async () => {
       render();
       expect(renderResult.queryByText(NAME_ERROR)).toBeNull();
-      const nameInput = renderResult.getByTestId('eventFilters-form-name-input');
+      const nameInput = renderResult.getByTestId(`${formPrefix}-name-input`);
       act(() => {
         fireEvent.blur(nameInput);
       });
@@ -197,7 +198,7 @@ describe('Event filter form', () => {
 
     it('should change name', async () => {
       render();
-      const nameInput = renderResult.getByTestId('eventFilters-form-name-input');
+      const nameInput = renderResult.getByTestId(`${formPrefix}-name-input`);
 
       act(() => {
         fireEvent.change(nameInput, {
@@ -215,7 +216,7 @@ describe('Event filter form', () => {
 
     it('should change name with a white space still shows an error', async () => {
       render();
-      const nameInput = renderResult.getByTestId('eventFilters-form-name-input');
+      const nameInput = renderResult.getByTestId(`${formPrefix}-name-input`);
 
       act(() => {
         fireEvent.change(nameInput, {
@@ -233,7 +234,7 @@ describe('Event filter form', () => {
 
     it('should change description', async () => {
       render();
-      const nameInput = renderResult.getByTestId('eventFilters-form-description-input');
+      const nameInput = renderResult.getByTestId(`${formPrefix}-description-input`);
 
       act(() => {
         fireEvent.change(nameInput, {
