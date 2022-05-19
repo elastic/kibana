@@ -8,13 +8,20 @@
 import { merge } from 'lodash';
 
 import { ElasticsearchResponse } from '../../../../../../common/types/es';
+import { TimeRange } from '../../../../../../common/http_api/shared';
 
 import { buildMonitoredClusters } from './build_monitored_clusters';
 import { monitoredClustersQuery, stableMetricsetsQuery } from './monitored_clusters_query';
 
-export const fetchMonitoredClusters = async (
-  search: (params: any) => Promise<ElasticsearchResponse>
-) => {
+type SearchFn = (params: any) => Promise<ElasticsearchResponse>;
+
+export const fetchMonitoredClusters = async ({
+  timeRange,
+  search,
+}: {
+  timeRange: TimeRange;
+  search: SearchFn;
+}) => {
   const index = '*:.monitoring-*,.monitoring-*';
 
   const results = await Promise.all([
@@ -22,7 +29,7 @@ export const fetchMonitoredClusters = async (
       index,
       size: 0,
       ignore_unavailable: true,
-      body: monitoredClustersQuery(),
+      body: monitoredClustersQuery(timeRange),
     })
       .then((response: ElasticsearchResponse) => response.aggregations.clusters.buckets)
       .then(buildMonitoredClusters),

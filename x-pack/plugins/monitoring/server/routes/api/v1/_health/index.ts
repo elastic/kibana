@@ -6,19 +6,32 @@
  */
 
 import { LegacyRequest, MonitoringCore } from '../../../../types';
+import { createValidationFunction } from '../../../../lib/create_route_validation_function';
+import { getHealthRequestQueryRT } from '../../../../../common/http_api/_health';
+import { TimeRange } from '../../../../../common/http_api/shared';
+
 import { fetchMonitoredClusters } from './monitored_clusters';
 
 export function health(server: MonitoringCore) {
+  const validateQuery = createValidationFunction(getHealthRequestQueryRT);
+
   server.route({
     method: 'get',
     path: '/api/monitoring/v1/_health',
-    validate: false,
+    validate: {
+      query: validateQuery,
+    },
     async handler(req: LegacyRequest) {
+      const timeRange = {
+        min: req.query.min || 'now-30m',
+        max: req.query.max || 'now',
+      } as TimeRange;
       const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
 
-      const monitoredClusters = await fetchMonitoredClusters((params) =>
-        callWithRequest(req, 'search', params)
-      );
+      const monitoredClusters = await fetchMonitoredClusters({
+        timeRange,
+        search: (params: any) => callWithRequest(req, 'search', params),
+      });
 
       return { monitoredClusters };
     },
