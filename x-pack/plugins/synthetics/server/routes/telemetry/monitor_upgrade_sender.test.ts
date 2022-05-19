@@ -13,6 +13,7 @@ import {
   ConfigKey,
   DataStream,
   ScheduleUnit,
+  SourceType,
 } from '../../../common/runtime_types/monitor_management';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 
@@ -113,7 +114,7 @@ describe('monitor upgrade telemetry helpers', () => {
   });
 
   it.each([
-    [ConfigKey.SOURCE_TYPE, true, 'project', false, false],
+    [ConfigKey.SOURCE_TYPE, SourceType.PROJECT, 'project', false, false],
     [ConfigKey.SOURCE_INLINE, 'test', 'recorder', true, true],
     [ConfigKey.SOURCE_INLINE, 'test', 'inline', false, true],
     [ConfigKey.SOURCE_ZIP_URL, 'test', 'zip', false, false],
