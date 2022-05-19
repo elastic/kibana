@@ -7,9 +7,9 @@
  */
 
 import { omit } from 'lodash';
+import { CoreContext } from '@kbn/core-public-internal-base';
 import { DiscoveredPlugin } from '../../server';
 import { PluginOpaqueId, PackageInfo, EnvironmentMode } from '../../server/types';
-import { CoreContext } from '../core_system';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
 import { CoreSetup, CoreStart } from '..';

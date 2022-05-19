@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { CoreContext } from '@kbn/core-public-internal-base';
 import { PluginName, PluginOpaqueId } from '../../server';
 import { CoreService } from '../../types';
-import { CoreContext } from '../core_system';
 import { PluginWrapper } from './plugin';
 import {
   createPluginInitializerContext,

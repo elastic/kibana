@@ -6,5 +6,7 @@
  * Side Public License, v 1.
  */
 
+export type { CoreContext } from './core_context';
+
 // re-export some types from the common package
 export type { PluginName, PluginOpaqueId } from '@kbn/core-common-internal-base';

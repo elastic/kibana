@@ -34,6 +34,7 @@ TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
   "@npm//@types/react",
+  "//packages/kbn-config:npm_module_types",
   "//packages/core/common/internal-base:npm_module_types",
 ]
 
