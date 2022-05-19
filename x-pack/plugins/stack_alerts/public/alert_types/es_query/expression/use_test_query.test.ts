@@ -7,7 +7,6 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { act } from 'react-test-renderer';
-
 import { useTestQuery } from './use_test_query';
 
 describe('useTestQuery', () => {
