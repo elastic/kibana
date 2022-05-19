@@ -4,26 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
-import { SetupUX } from './route';
-import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
-import { mergeProjection } from '../../projections/util/merge_projection';
 
-export async function getRumServices({
-  setup,
-  start,
-  end,
-}: {
-  setup: SetupUX;
-  start: number;
-  end: number;
-}) {
+import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
+import { mergeProjection } from '../../../common/utils/merge_projection';
+import { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
+import { getRumPageLoadTransactionsProjection } from './projections';
+
+export function serviceNameQuery(
+  start: number,
+  end: number,
+  uiFilters?: UxUIFilters
+) {
+  const setup: SetupUX = { uiFilters: uiFilters ? uiFilters : {} };
   const projection = getRumPageLoadTransactionsProjection({
     setup,
     start,
     end,
   });
-
   const params = mergeProjection(projection, {
     body: {
       size: 0,
@@ -40,12 +37,6 @@ export async function getRumServices({
       },
     },
   });
-
-  const { apmEventClient } = setup;
-
-  const response = await apmEventClient.search('get_rum_services', params);
-
-  const result = response.aggregations?.services.buckets ?? [];
-
-  return result.map(({ key }) => key as string);
+  const { apm: _apm, ...rest } = params;
+  return rest;
 }

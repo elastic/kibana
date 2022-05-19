@@ -14,7 +14,6 @@ import { getLongTaskMetrics } from './get_long_task_metrics';
 import { getPageLoadDistribution } from './get_page_load_distribution';
 import { getPageViewTrends } from './get_page_view_trends';
 import { getPageLoadDistBreakdown } from './get_pl_dist_breakdown';
-import { getRumServices } from './get_rum_services';
 import { getUrlSearch } from './get_url_search';
 import { getVisitorBreakdown } from './get_visitor_breakdown';
 import { getWebCoreVitals } from './get_web_core_vitals';
@@ -187,22 +186,6 @@ const rumPageViewsTrendRoute = createApmServerRoute({
       start,
       end,
     });
-  },
-});
-
-const rumServicesRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/ux/services',
-  params: t.type({
-    query: t.intersection([uiFiltersRt, rangeRt]),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (resources): Promise<{ rumServices: string[] }> => {
-    const setup = await setupUXRequest(resources);
-    const {
-      query: { start, end },
-    } = resources.params;
-    const rumServices = await getRumServices({ setup, start, end });
-    return { rumServices };
   },
 });
 
@@ -426,7 +409,6 @@ export const rumRouteRepository = {
   ...rumPageLoadDistributionRoute,
   ...rumPageLoadDistBreakdownRoute,
   ...rumPageViewsTrendRoute,
-  ...rumServicesRoute,
   ...rumVisitorsBreakdownRoute,
   ...rumWebCoreVitals,
   ...rumLongTaskMetrics,
