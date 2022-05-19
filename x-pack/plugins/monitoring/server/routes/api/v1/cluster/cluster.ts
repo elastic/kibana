@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import {
+  postClusterRequestParamsRT,
+  postClusterRequestPayloadRT,
+  postClusterResponsePayloadRT,
+} from '../../../../../common/http_api/cluster';
+import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getClustersFromRequest } from '../../../../lib/cluster/get_clusters_from_request';
 import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
 import { handleError } from '../../../../lib/errors';
-import { LegacyRequest, MonitoringCore } from '../../../../types';
+import { MonitoringCore } from '../../../../types';
 
 export function clusterRoute(server: MonitoringCore) {
   /*
    * Cluster Overview
    */
+
+  const validateParams = createValidationFunction(postClusterRequestParamsRT);
+  const validateBody = createValidationFunction(postClusterRequestPayloadRT);
+
   server.route({
     method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}',
     validate: {
-      params: schema.object({
-        clusterUuid: schema.string(),
-      }),
-      body: schema.object({
-        ccs: schema.maybe(schema.string()),
-        timeRange: schema.object({
-          min: schema.string(),
-          max: schema.string(),
-        }),
-        codePaths: schema.arrayOf(schema.string()),
-      }),
+      params: validateParams,
+      body: validateBody,
     },
-    handler: async (req: LegacyRequest) => {
+    handler: async (req) => {
       const config = server.config;
 
       const indexPatterns = getIndexPatterns(config, {
@@ -44,13 +44,12 @@ export function clusterRoute(server: MonitoringCore) {
         codePaths: req.payload.codePaths,
       };
 
-      let clusters = [];
       try {
-        clusters = await getClustersFromRequest(req, indexPatterns, options);
+        const clusters = await getClustersFromRequest(req, indexPatterns, options);
+        return postClusterResponsePayloadRT.encode(clusters);
       } catch (err) {
         throw handleError(err, req);
       }
-      return clusters;
     },
   });
 }
