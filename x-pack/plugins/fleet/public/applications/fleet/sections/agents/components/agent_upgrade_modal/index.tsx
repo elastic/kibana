@@ -296,12 +296,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
                 'Error upgrading the selected {count, plural, one {agent} other {{count} agents}}',
               values: { count: isSingleAgent },
             })}
-          >
-            <FormattedMessage
-              id="xpack.fleet.deleteAgentPolicy.confirmModal.affectedAgentsMessage"
-              defaultMessage={errors}
-            />
-          </EuiCallOut>
+          />
         </>
       ) : null}
     </EuiConfirmModal>
