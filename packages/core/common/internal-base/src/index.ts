@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { PluginName, PluginOpaqueId } from './plugins';
-export { CoreId } from './core';
+export type { PluginName, PluginOpaqueId } from './plugins';
+export type { CoreId } from './core';
