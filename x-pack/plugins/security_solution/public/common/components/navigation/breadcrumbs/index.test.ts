@@ -64,6 +64,13 @@ const getMockObject = (
       name: 'Network',
       urlKey: 'network',
     },
+    kubernetes: {
+      disabled: false,
+      href: '/app/security/kubernetes',
+      id: 'kubernetes',
+      name: 'Kubernetes',
+      urlKey: 'kubernetes',
+    },
     overview: {
       disabled: false,
       href: '/app/security/overview',
@@ -186,6 +193,20 @@ describe('Navigation Breadcrumbs', () => {
         {
           text: 'Flows',
           href: '',
+        },
+      ]);
+    });
+
+    test('should return Kubernetes breadcrumbs when supplied network pathname', () => {
+      const breadcrumbs = getBreadcrumbsForRoute(
+        getMockObject('kubernetes', '/', undefined),
+        getUrlForAppMock
+      );
+      expect(breadcrumbs).toEqual([
+        { text: 'Security', href: 'securitySolutionUI/get_started' },
+        {
+          text: 'Kubernetes',
+          href: "securitySolutionUI/kubernetes?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
         },
       ]);
     });
