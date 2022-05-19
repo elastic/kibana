@@ -42,7 +42,7 @@ export function TransactionTabs({
           return (
             <EuiTab
               onClick={() => {
-                onTabClick(currentTab.key);
+                onTabClick(key);
               }}
               isSelected={currentTab.key === key}
               key={key}
