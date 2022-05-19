@@ -138,7 +138,7 @@ describe('browser normalizers', () => {
           project_id: projectId,
           namespace: 'test-space',
           original_space: 'test-space',
-          custom_heartbeat_id: 'test-id-3-test-project-id-test-space',
+          custom_heartbeat_id: 'test-id-1-test-project-id-test-space',
           timeout: null,
         },
         {
@@ -188,7 +188,7 @@ describe('browser normalizers', () => {
           project_id: projectId,
           namespace: 'test-space',
           original_space: 'test-space',
-          custom_heartbeat_id: 'test-id-3-test-project-id-test-space',
+          custom_heartbeat_id: 'test-id-2-test-project-id-test-space',
           timeout: null,
         },
         {
