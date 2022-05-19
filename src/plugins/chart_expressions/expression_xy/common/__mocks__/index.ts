@@ -10,7 +10,7 @@ import { Position } from '@elastic/charts';
 import type { PaletteOutput } from '@kbn/coloring';
 import { Datatable, DatatableRow } from '@kbn/expressions-plugin';
 import { LayerTypes } from '../constants';
-import { DataLayerConfig, XYProps } from '../types';
+import { DataLayerConfig, ExtendedDataLayerConfig, XYProps } from '../types';
 
 export const mockPaletteOutput: PaletteOutput = {
   type: 'palette',
@@ -35,7 +35,7 @@ export const createSampleDatatableWithRows = (rows: DatatableRow[]): Datatable =
       id: 'c',
       name: 'c',
       meta: {
-        type: 'date',
+        type: 'string',
         field: 'order_date',
         sourceParams: { type: 'date-histogram', params: { interval: 'auto' } },
         params: { id: 'string' },
@@ -56,7 +56,21 @@ export const sampleLayer: DataLayerConfig = {
   splitAccessor: 'd',
   columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
   xScaleType: 'ordinal',
-  yScaleType: 'linear',
+  isHistogram: false,
+  palette: mockPaletteOutput,
+  table: createSampleDatatableWithRows([]),
+};
+
+export const sampleExtendedLayer: ExtendedDataLayerConfig = {
+  layerId: 'first',
+  type: 'extendedDataLayer',
+  layerType: LayerTypes.DATA,
+  seriesType: 'line',
+  xAccessor: 'c',
+  accessors: ['a', 'b'],
+  splitAccessor: 'd',
+  columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+  xScaleType: 'ordinal',
   isHistogram: false,
   palette: mockPaletteOutput,
   table: createSampleDatatableWithRows([]),
@@ -108,6 +122,8 @@ export const createArgsWithLayers = (
     type: 'axisExtentConfig',
   },
   layers: Array.isArray(layers) ? layers : [layers],
+  yLeftScale: 'linear',
+  yRightScale: 'linear',
 });
 
 export function sampleArgs() {

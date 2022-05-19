@@ -48,9 +48,16 @@ export abstract class BaseLayout {
     pageSizeParams: PageSizeParams
   ): CustomPageSize | PredefinedPageSize;
 
-  // Return the dimensions unscaled dimensions (before multiplying the zoom factor)
-  // driver.setViewport() Adds a top and left margin to the viewport, and then multiplies by the scaling factor
-  public abstract getViewport(itemsCount: number): ViewZoomWidthHeight | null;
+  /**
+   * Return the unscaled dimensions (before multiplying the zoom factor)
+   *
+   * `itemsCount` is only needed for the `print` layout implementation, where the number of items to capture
+   * affects the viewport size
+   *
+   * @param {number} [itemsCount=1] - The number of items to capture. Default is 1.
+   * @returns ViewZoomWidthHeight - Viewport data
+   */
+  public abstract getViewport(itemsCount?: number): ViewZoomWidthHeight | null;
 
   public abstract getBrowserZoom(): number;
 

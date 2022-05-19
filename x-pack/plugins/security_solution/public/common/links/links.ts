@@ -32,8 +32,6 @@ const createDeepLink = (link: LinkItem, linkProps?: UserPermissions): AppDeepLin
         }),
       }
     : {}),
-  ...(link.icon != null ? { euiIconType: link.icon } : {}),
-  ...(link.image != null ? { icon: link.image } : {}),
   ...(link.globalSearchKeywords != null ? { keywords: link.globalSearchKeywords } : {}),
   ...(link.globalNavEnabled != null
     ? { navLinkStatus: link.globalNavEnabled ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden }
@@ -47,8 +45,8 @@ const createNavLinkItem = (link: LinkItem, linkProps?: UserPermissions): NavLink
   path: link.path,
   title: link.title,
   ...(link.description != null ? { description: link.description } : {}),
-  ...(link.icon != null ? { icon: link.icon } : {}),
-  ...(link.image != null ? { image: link.image } : {}),
+  ...(link.landingIcon != null ? { icon: link.landingIcon } : {}),
+  ...(link.landingImage != null ? { image: link.landingImage } : {}),
   ...(link.links && link.links.length
     ? {
         links: reduceLinks<NavLinkItem>({
@@ -157,7 +155,6 @@ const getNormalizedLinks = (
  * Normalized indexed version of the global `links` array, referencing the parent by id, instead of having nested links children
  */
 const normalizedLinks: Readonly<NormalizedLinks> = Object.freeze(getNormalizedLinks(appLinks));
-
 /**
  * Returns the `NormalizedLink` from a link id parameter.
  * The object reference is frozen to make sure it is not mutated by the caller.
@@ -194,4 +191,8 @@ export const getAncestorLinksInfo = (id: SecurityPageName): LinkInfo[] => {
  */
 export const needsUrlState = (id: SecurityPageName): boolean => {
   return !getNormalizedLink(id).skipUrlState;
+};
+
+export const getLinksWithHiddenTimeline = (): LinkInfo[] => {
+  return Object.values(normalizedLinks).filter((link) => link.hideTimeline);
 };
