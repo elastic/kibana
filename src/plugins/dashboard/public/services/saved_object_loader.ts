@@ -98,12 +98,16 @@ export class SavedObjectLoader {
   mapHitSource(
     source: Record<string, unknown>,
     id: string,
-    references: SavedObjectReference[] = []
-  ) {
-    source.id = id;
-    source.url = this.urlFor(id);
-    source.references = references;
-    return source;
+    references: SavedObjectReference[] = [],
+    updatedAt?: string
+  ): Record<string, unknown> {
+    return {
+      ...source,
+      id,
+      url: this.urlFor(id),
+      references,
+      updatedAt,
+    };
   }
 
   /**
@@ -116,12 +120,14 @@ export class SavedObjectLoader {
     attributes,
     id,
     references = [],
+    updatedAt,
   }: {
     attributes: Record<string, unknown>;
     id: string;
     references?: SavedObjectReference[];
+    updatedAt?: string;
   }) {
-    return this.mapHitSource(attributes, id, references);
+    return this.mapHitSource(attributes, id, references, updatedAt);
   }
 
   /**
