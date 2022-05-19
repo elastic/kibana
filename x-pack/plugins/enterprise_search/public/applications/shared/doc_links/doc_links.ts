@@ -91,6 +91,7 @@ class DocLinks {
   public workplaceSearchSynch: string;
   public workplaceSearchTeams: string;
   public workplaceSearchZendesk: string;
+  public workplaceSearchZoom: string;
 
   constructor() {
     this.appSearchApis = '';
@@ -176,6 +177,7 @@ class DocLinks {
     this.workplaceSearchSynch = '';
     this.workplaceSearchTeams = '';
     this.workplaceSearchZendesk = '';
+    this.workplaceSearchZoom = '';
   }
 
   public setDocLinks(docLinks: DocLinksStart): void {
@@ -265,6 +267,7 @@ class DocLinks {
     this.workplaceSearchSynch = docLinks.links.workplaceSearch.synch;
     this.workplaceSearchTeams = docLinks.links.workplaceSearch.teams;
     this.workplaceSearchZendesk = docLinks.links.workplaceSearch.zendesk;
+    this.workplaceSearchZoom = docLinks.links.workplaceSearch.zoom;
   }
 }
 

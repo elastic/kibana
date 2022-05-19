@@ -138,6 +138,7 @@ export interface DocLinks {
     readonly synch: string;
     readonly teams: string;
     readonly zendesk: string;
+    readonly zoom: string;
   };
   readonly heartbeat: {
     readonly base: string;

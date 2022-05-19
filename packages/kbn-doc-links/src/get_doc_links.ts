@@ -152,6 +152,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       synch: `${WORKPLACE_SEARCH_DOCS}workplace-search-customizing-indexing-rules.html`,
       teams: `${WORKPLACE_SEARCH_DOCS}microsoft-teams.html`,
       zendesk: `${WORKPLACE_SEARCH_DOCS}workplace-search-zendesk-connector.html`,
+      zoom: `${WORKPLACE_SEARCH_DOCS}zoom.html`,
     },
     metricbeat: {
       base: `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}`,
