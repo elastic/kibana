@@ -9,20 +9,6 @@ import { GetMapping } from './types';
 
 export const getMapping: GetMapping = () => {
   return [
-    {
-      source: 'title',
-      target: 'summary',
-      action_type: 'overwrite',
-    },
-    {
-      source: 'description',
-      target: 'description',
-      action_type: 'overwrite',
-    },
-    {
-      source: 'comments',
-      target: 'comments',
-      action_type: 'append',
-    },
+    // To do??
   ];
 };

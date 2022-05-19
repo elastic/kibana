@@ -62,12 +62,20 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
     if (!action.id) {
       editActionConfig('hasAuth', true);
     }
+
+    if (!createIncidentMethod) {
+      editActionConfig('createIncidentMethod', 'post'); // set createIncidentMethod to POST by default
+    }
+
+    if (!updateIncidentMethod) {
+      editActionConfig('updateIncidentMethod', 'put'); // set updateIncidentMethod to PUT by default
+    }
+
+    if (!createCommentMethod) {
+      editActionConfig('createCommentMethod', 'put'); // set createCommentMethod to PUT by default
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  if (!createIncidentMethod) {
-    editActionConfig('createIncidentMethod', 'post'); // set createIncidentMethod to POST by default
-  }
 
   const headerErrors = {
     keyHeader: new Array<string>(),

@@ -26,9 +26,13 @@ export const ExternalIncidentServiceConfiguration = {
   getIncidentViewUrl: schema.string(),
   updateIncidentUrl: schema.string(),
   updateIncidentMethod: schema.oneOf(
-    [schema.literal(CasesWebhookMethods.POST), schema.literal(CasesWebhookMethods.PATCH)],
+    [
+      schema.literal(CasesWebhookMethods.POST),
+      schema.literal(CasesWebhookMethods.PATCH),
+      schema.literal(CasesWebhookMethods.PUT),
+    ],
     {
-      defaultValue: CasesWebhookMethods.PATCH,
+      defaultValue: CasesWebhookMethods.PUT,
     }
   ),
   updateIncidentJson: schema.string(),
@@ -40,7 +44,7 @@ export const ExternalIncidentServiceConfiguration = {
       schema.literal(CasesWebhookMethods.PATCH),
     ],
     {
-      defaultValue: CasesWebhookMethods.PATCH,
+      defaultValue: CasesWebhookMethods.PUT,
     }
   ),
   createCommentJson: schema.string(),
