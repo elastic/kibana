@@ -7,7 +7,7 @@
 
 import { alertsMock, RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
-import { mockLogger } from '../__mocks__/es_results';
+import { mockLogger, sampleEmptyDocSearchResults } from '../__mocks__/es_results';
 import { buildRuleMessageFactory } from '../rule_messages';
 import * as single_search_after from '../single_search_after';
 import { findThresholdSignals } from './find_threshold_signals';
@@ -20,7 +20,18 @@ const buildRuleMessage = buildRuleMessageFactory({
 });
 
 const queryFilter = getQueryFilter('', 'kuery', [], ['*'], []);
-const mockSingleSearchAfter = jest.fn();
+const mockSingleSearchAfter = jest.fn(async () => ({
+  searchResult: {
+    ...sampleEmptyDocSearchResults(),
+    aggregations: {
+      thresholdTerms: {
+        buckets: [],
+      },
+    },
+  },
+  searchDuration: '0.0',
+  searchErrors: [],
+}));
 
 describe('findThresholdSignals', () => {
   let mockService: RuleExecutorServicesMock;
@@ -50,7 +61,7 @@ describe('findThresholdSignals', () => {
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
         aggregations: {
-          threshold_0: {
+          thresholdTerms: {
             terms: {
               script: {
                 source: '""',
@@ -95,11 +106,19 @@ describe('findThresholdSignals', () => {
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
         aggregations: {
-          'threshold_0:host.name': {
-            terms: {
-              field: 'host.name',
-              min_doc_count: 100,
+          thresholdTerms: {
+            composite: {
               size: 10000,
+              after: undefined,
+              sources: [
+                {
+                  'host.name': {
+                    terms: {
+                      field: 'host.name',
+                    },
+                  },
+                },
+              ],
             },
             aggs: {
               max_timestamp: {
@@ -110,6 +129,14 @@ describe('findThresholdSignals', () => {
               min_timestamp: {
                 min: {
                   field: '@timestamp',
+                },
+              },
+              count_check: {
+                bucket_selector: {
+                  buckets_path: {
+                    docCount: '_count',
+                  },
+                  script: `params.docCount >= 100`,
                 },
               },
             },
@@ -139,30 +166,44 @@ describe('findThresholdSignals', () => {
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
         aggregations: {
-          'threshold_0:host.name': {
-            terms: {
-              field: 'host.name',
-              min_doc_count: 100,
+          thresholdTerms: {
+            composite: {
               size: 10000,
+              after: undefined,
+              sources: [
+                {
+                  'host.name': {
+                    terms: {
+                      field: 'host.name',
+                    },
+                  },
+                },
+                {
+                  'user.name': {
+                    terms: {
+                      field: 'user.name',
+                    },
+                  },
+                },
+              ],
             },
             aggs: {
-              'threshold_1:user.name': {
-                terms: {
-                  field: 'user.name',
-                  min_doc_count: 100,
-                  size: 10000,
+              max_timestamp: {
+                max: {
+                  field: '@timestamp',
                 },
-                aggs: {
-                  max_timestamp: {
-                    max: {
-                      field: '@timestamp',
-                    },
+              },
+              min_timestamp: {
+                min: {
+                  field: '@timestamp',
+                },
+              },
+              count_check: {
+                bucket_selector: {
+                  buckets_path: {
+                    docCount: '_count',
                   },
-                  min_timestamp: {
-                    min: {
-                      field: '@timestamp',
-                    },
-                  },
+                  script: `params.docCount >= 100`,
                 },
               },
             },
@@ -197,44 +238,57 @@ describe('findThresholdSignals', () => {
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
         aggregations: {
-          'threshold_0:host.name': {
-            terms: {
-              field: 'host.name',
-              min_doc_count: 100,
+          thresholdTerms: {
+            composite: {
               size: 10000,
+              after: undefined,
+              sources: [
+                {
+                  'host.name': {
+                    terms: {
+                      field: 'host.name',
+                    },
+                  },
+                },
+                {
+                  'user.name': {
+                    terms: {
+                      field: 'user.name',
+                    },
+                  },
+                },
+              ],
             },
             aggs: {
-              'threshold_1:user.name': {
-                terms: {
-                  field: 'user.name',
-                  order: { cardinality_count: 'desc' },
-                  min_doc_count: 100,
-                  size: 10000,
+              max_timestamp: {
+                max: {
+                  field: '@timestamp',
                 },
-                aggs: {
-                  cardinality_count: {
-                    cardinality: {
-                      field: 'destination.ip',
-                    },
+              },
+              min_timestamp: {
+                min: {
+                  field: '@timestamp',
+                },
+              },
+              count_check: {
+                bucket_selector: {
+                  buckets_path: {
+                    docCount: '_count',
                   },
-                  cardinality_check: {
-                    bucket_selector: {
-                      buckets_path: {
-                        cardinalityCount: 'cardinality_count',
-                      },
-                      script: 'params.cardinalityCount >= 2',
-                    },
+                  script: `params.docCount >= 100`,
+                },
+              },
+              cardinality_count: {
+                cardinality: {
+                  field: 'destination.ip',
+                },
+              },
+              cardinality_check: {
+                bucket_selector: {
+                  buckets_path: {
+                    cardinalityCount: 'cardinality_count',
                   },
-                  max_timestamp: {
-                    max: {
-                      field: '@timestamp',
-                    },
-                  },
-                  min_timestamp: {
-                    min: {
-                      field: '@timestamp',
-                    },
-                  },
+                  script: 'params.cardinalityCount >= 2',
                 },
               },
             },
@@ -269,7 +323,7 @@ describe('findThresholdSignals', () => {
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
         aggregations: {
-          threshold_0: {
+          thresholdTerms: {
             terms: {
               script: {
                 source: '""',

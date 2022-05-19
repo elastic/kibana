@@ -108,14 +108,6 @@ export const findThresholdSignals = async ({
           },
         }
       : {}),
-    count_check: {
-      bucket_selector: {
-        buckets_path: {
-          docCount: '_count',
-        },
-        script: `params.docCount >= ${threshold.value}`,
-      },
-    },
   };
 
   let sortKeys;
@@ -141,7 +133,17 @@ export const findThresholdSignals = async ({
               after: sortKeys,
               size: 10000,
             },
-            aggs: leafAggs,
+            aggs: {
+              ...leafAggs,
+              count_check: {
+                bucket_selector: {
+                  buckets_path: {
+                    docCount: '_count',
+                  },
+                  script: `params.docCount >= ${threshold.value}`,
+                },
+              },
+            },
           }
         : {
             terms: {
