@@ -7,6 +7,7 @@
 
 import { Capabilities } from '@kbn/core/types';
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
+import { IconType } from '@elastic/eui';
 import { LicenseService } from '../../../common/license';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 import { CASES_FEATURE_ID, SecurityPageName, SERVER_APP_ID } from '../../../common/constants';
@@ -41,20 +42,29 @@ export interface LinkItem {
   globalSearchEnabled?: boolean;
   globalSearchKeywords?: string[];
   hideWhenExperimentalKey?: keyof ExperimentalFeatures;
-  icon?: string;
   id: SecurityPageName;
-  image?: string;
+  /**
+   * Icon that is displayed on menu navigation landing page.
+   * Only required for pages that are displayed inside a landing page.
+   */
+  landingIcon?: IconType;
+  /**
+   * Image that is displayed on menu navigation landing page.
+   * Only required for pages that are displayed inside a landing page.
+   */
+  landingImage?: string;
   isBeta?: boolean;
   licenseType?: LicenseType;
   links?: LinkItem[];
   path: string;
   skipUrlState?: boolean; // defaults to false
+  hideTimeline?: boolean; // defaults to false
   title: string;
 }
 
 export interface NavLinkItem {
   description?: string;
-  icon?: string;
+  icon?: IconType;
   id: SecurityPageName;
   links?: NavLinkItem[];
   image?: string;
