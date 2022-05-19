@@ -12,17 +12,21 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 
-import { useFetchStream } from '@kbn/aiops-plugin/public';
+import { useFetchStream } from '@kbn/aiops-utils';
 
 import { ApiSimpleStringStream } from '../../../../../common/api';
 
+import { useDeps } from '../../../../hooks/use_deps';
 import { Page } from '../../../../components/page';
 
 export const PageSimpleStringStream: FC = () => {
-  const { dispatch, start, cancel, data, isRunning } = useFetchStream<ApiSimpleStringStream>(
-    '/internal/response_stream/simple_string_stream',
-    { timeout: 500 }
-  );
+  const { core } = useDeps();
+  const basePath = core.http?.basePath.get() ?? '';
+
+  const { dispatch, start, cancel, data, isRunning } = useFetchStream<
+    ApiSimpleStringStream,
+    typeof basePath
+  >(`${basePath}/internal/response_stream/simple_string_stream`, { timeout: 500 });
 
   const onClickHandler = async () => {
     if (isRunning) {

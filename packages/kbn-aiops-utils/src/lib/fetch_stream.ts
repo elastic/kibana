@@ -1,22 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import type { ReducerAction } from 'react';
 
 import type { UseFetchStreamParamsDefault } from './use_fetch_stream';
 
-export async function* fetchStream<I extends UseFetchStreamParamsDefault>(
-  endpoint: I['endpoint'],
+export async function* fetchStream<I extends UseFetchStreamParamsDefault, BasePath extends string>(
+  endpoint: `${BasePath}${I['endpoint']}`,
   abortCtrl: React.MutableRefObject<AbortController>,
   body: I['body'],
-  basePath = '',
   ndjson = true
 ): AsyncGenerator<ReducerAction<I['reducer']> | Array<ReducerAction<I['reducer']>>> {
-  const stream = await fetch(`${basePath}${endpoint}`, {
+  const stream = await fetch(endpoint, {
     signal: abortCtrl.current.signal,
     method: 'POST',
     headers: {

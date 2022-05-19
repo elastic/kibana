@@ -7,8 +7,8 @@
  */
 
 import type { IRouter, Logger } from '@kbn/core/server';
+import { streamFactory } from '@kbn/aiops-utils';
 
-import { streamFactory } from '@kbn/aiops-plugin/server';
 import { simpleStringStreamRequestBodySchema } from '../../common/api/simple_string_stream';
 import { API_ENDPOINT } from '../../common/api';
 
@@ -48,6 +48,11 @@ export const defineSimpleStringStreamRoute = (router: IRouter, logger: Logger) =
 
       async function pushStreamUpdate() {
         try {
+          if (shouldStop) {
+            end();
+            return;
+          }
+
           const token = tokens.shift();
 
           if (token !== undefined) {

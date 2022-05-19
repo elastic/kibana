@@ -10,8 +10,8 @@ import React, { useEffect, FC } from 'react';
 import { EuiBadge, EuiSpacer, EuiText } from '@elastic/eui';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-
-import { useFetchStream } from '../../hooks/use_fetch_stream';
+import { useFetchStream } from '@kbn/aiops-utils';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
 import type { ApiExplainLogRateSpikes } from '../../../common/api';
@@ -25,8 +25,11 @@ export interface ExplainLogRateSpikesProps {
 }
 
 export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({ dataView }) => {
-  const { start, data, isRunning } = useFetchStream<ApiExplainLogRateSpikes>(
-    '/internal/aiops/explain_log_rate_spikes',
+  const kibana = useKibana();
+  const basePath = kibana.services.http?.basePath.get() ?? '';
+
+  const { start, data, isRunning } = useFetchStream<ApiExplainLogRateSpikes, typeof basePath>(
+    `${basePath}/internal/aiops/explain_log_rate_spikes`,
     { index: dataView.title },
     { reducer: streamReducer, initialState }
   );

@@ -9,7 +9,7 @@
 import type {
   UseFetchStreamCustomReducerParams,
   UseFetchStreamParamsDefault,
-} from '@kbn/aiops-plugin/public';
+} from '@kbn/aiops-utils';
 
 import {
   reducerStreamReducer,

@@ -14,7 +14,7 @@ export function getStatusMessage(isRunning: boolean, isCancelled: boolean, progr
   } else if (!isRunning && isCancelled) {
     return 'Oh no, development got cancelled!';
   } else if (!isRunning && progress === 100) {
-    return 'Development clompeted, the release got out the door!';
+    return 'Development completed, the release got out the door!';
   }
 
   // When the process stops but wasn't cancelled by the user and progress is not yet at 100%,

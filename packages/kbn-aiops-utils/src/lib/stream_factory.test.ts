@@ -1,26 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import zlib from 'zlib';
 
 import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 
-import { API_ENDPOINT } from '../../common/api';
-import type { ApiEndpointActions } from '../../common/api';
-
 import { streamFactory } from './stream_factory';
 
-type Action = ApiEndpointActions['/internal/aiops/explain_log_rate_spikes'];
-
-const mockItem1: Action = {
+const mockItem1 = {
   type: 'add_fields',
   payload: ['clientip'],
 };
-const mockItem2: Action = {
+const mockItem2 = {
   type: 'add_fields',
   payload: ['referer'],
 };
@@ -33,9 +29,7 @@ describe('streamFactory', () => {
   });
 
   it('should encode and receive an uncompressed stream', async () => {
-    const { DELIMITER, end, push, responseWithHeaders, stream } = streamFactory<
-      typeof API_ENDPOINT.EXPLAIN_LOG_RATE_SPIKES
-    >(mockLogger, {});
+    const { DELIMITER, end, push, responseWithHeaders, stream } = streamFactory(mockLogger, {});
 
     push(mockItem1);
     push(mockItem2);
@@ -68,9 +62,9 @@ describe('streamFactory', () => {
   // without the need for additional custom code.
   it('should encode and receive a compressed stream', (done) => {
     (async () => {
-      const { DELIMITER, end, push, responseWithHeaders, stream } = streamFactory<
-        typeof API_ENDPOINT.EXPLAIN_LOG_RATE_SPIKES
-      >(mockLogger, { 'accept-encoding': 'gzip' });
+      const { DELIMITER, end, push, responseWithHeaders, stream } = streamFactory(mockLogger, {
+        'accept-encoding': 'gzip',
+      });
 
       push(mockItem1);
       push(mockItem2);

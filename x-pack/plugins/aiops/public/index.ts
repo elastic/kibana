@@ -14,10 +14,5 @@ export function plugin() {
 }
 
 export type { ExplainLogRateSpikesProps } from './components/explain_log_rate_spikes';
-export {
-  useFetchStream,
-  UseFetchStreamCustomReducerParams,
-  UseFetchStreamParamsDefault,
-} from './hooks/use_fetch_stream';
 export { ExplainLogRateSpikes } from './shared_lazy_components';
 export type { AiopsPluginSetup, AiopsPluginStart } from './types';

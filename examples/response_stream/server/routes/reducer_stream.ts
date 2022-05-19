@@ -7,8 +7,8 @@
  */
 
 import type { IRouter, Logger } from '@kbn/core/server';
+import { streamFactory } from '@kbn/aiops-utils';
 
-import { streamFactory } from '@kbn/aiops-plugin/server';
 import {
   reducerStreamRequestBodySchema,
   updateProgressAction,

@@ -7,6 +7,7 @@
  */
 
 import * as React from 'react';
+
 import {
   EuiPageBody,
   EuiPageContent,

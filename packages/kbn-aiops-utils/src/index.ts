@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
-
-import { ResponseStreamPlugin } from './plugin';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new ResponseStreamPlugin(initializerContext);
-}
+export { streamFactory } from './lib/stream_factory';
+export { useFetchStream } from './lib/use_fetch_stream';
+export type {
+  UseFetchStreamCustomReducerParams,
+  UseFetchStreamParamsDefault,
+} from './lib/use_fetch_stream';

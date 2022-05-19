@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -15,8 +16,6 @@ import {
   ReducerAction,
   ReducerState,
 } from 'react';
-
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { fetchStream } from './fetch_stream';
 import { stringReducer, StringReducer } from './string_reducer';
@@ -44,24 +43,25 @@ interface UseFetchStreamReturnType<Data, Action> {
 
 // These overloads allow us to fall back to a simple reducer that just acts on a string as the reducer state
 // if no options are supplied. Passing in options will use a custom reducer with appropriate type support.
-export function useFetchStream<I extends UseFetchStreamParamsDefault>(
-  endpoint: I['endpoint'],
+export function useFetchStream<I extends UseFetchStreamParamsDefault, BasePath extends string>(
+  endpoint: `${BasePath}${I['endpoint']}`,
   body: I['body']
 ): UseFetchStreamReturnType<string, ReducerAction<I['reducer']>>;
 
-export function useFetchStream<I extends UseFetchStreamCustomReducerParams>(
-  endpoint: I['endpoint'],
+export function useFetchStream<
+  I extends UseFetchStreamCustomReducerParams,
+  BasePath extends string
+>(
+  endpoint: `${BasePath}${I['endpoint']}`,
   body: I['body'],
   options: { reducer: I['reducer']; initialState: ReducerState<I['reducer']> }
 ): UseFetchStreamReturnType<ReducerState<I['reducer']>, ReducerAction<I['reducer']>>;
 
-export function useFetchStream<I extends UseFetchStreamParamsDefault>(
-  endpoint: I['endpoint'],
+export function useFetchStream<I extends UseFetchStreamParamsDefault, BasePath extends string>(
+  endpoint: `${BasePath}${I['endpoint']}`,
   body: I['body'],
   options?: { reducer: I['reducer']; initialState: ReducerState<I['reducer']> }
 ): UseFetchStreamReturnType<ReducerState<I['reducer']>, ReducerAction<I['reducer']>> {
-  const kibana = useKibana();
-
   const [isCancelled, setIsCancelled] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
 
@@ -82,11 +82,10 @@ export function useFetchStream<I extends UseFetchStreamParamsDefault>(
 
     abortCtrl.current = new AbortController();
 
-    for await (const actions of fetchStream<UseFetchStreamCustomReducerParams>(
+    for await (const actions of fetchStream<UseFetchStreamCustomReducerParams, BasePath>(
       endpoint,
       abortCtrl,
       body,
-      kibana.services.http?.basePath.get(),
       options !== undefined
     )) {
       if (actions.length > 0) {

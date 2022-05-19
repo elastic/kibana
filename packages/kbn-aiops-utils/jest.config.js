@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
-
-import { ResponseStreamPlugin } from './plugin';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new ResponseStreamPlugin(initializerContext);
-}
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-aiops-utils'],
+};

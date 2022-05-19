@@ -1,11 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import type { Headers } from '@kbn/core/server';
+// TODO: Replace these with kbn packaged versions once we have those available to us
+// These originally came from this location below before moving them to this hacked "any" types:
+// import type { Headers } from '@kbn/core/server';
+type Headers = Record<string, unknown>;
 
 /**
  * Returns whether request headers accept a response using gzip compression.
