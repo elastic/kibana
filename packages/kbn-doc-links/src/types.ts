@@ -125,6 +125,7 @@ export interface DocLinks {
     readonly indexingSchedule: string;
     readonly jiraCloud: string;
     readonly jiraServer: string;
+    readonly networkDrive: string;
     readonly oneDrive: string;
     readonly permissions: string;
     readonly salesforce: string;
