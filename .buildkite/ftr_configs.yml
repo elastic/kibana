@@ -26,12 +26,14 @@ disabled:
   - x-pack/test/security_solution_cypress/cases_cli_config.ts
   - x-pack/test/security_solution_cypress/ccs_config.ts
   - x-pack/test/security_solution_cypress/cli_config.ts
+  - x-pack/test/security_solution_cypress/cli_config_parallel.ts
   - x-pack/test/security_solution_cypress/config.firefox.ts
   - x-pack/test/security_solution_cypress/config.ts
   - x-pack/test/security_solution_cypress/response_ops_cli_config.ts
   - x-pack/test/security_solution_cypress/upgrade_config.ts
   - x-pack/test/security_solution_cypress/visual_config.ts
   - x-pack/test/functional_enterprise_search/with_host_configured.config.ts
+  - x-pack/plugins/apm/ftr_e2e/ftr_config_open.ts
   - x-pack/plugins/apm/ftr_e2e/ftr_config_run.ts
   - x-pack/plugins/apm/ftr_e2e/ftr_config.ts
 
