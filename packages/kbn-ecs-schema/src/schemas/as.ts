@@ -1,4 +1,4 @@
-export const as_ecs = {
+export const asEcs = {
   number: {
     dashed_name: 'as-number',
     description: 'Unique number allocated to the autonomous system. The autonomous system number (ASN) uniquely identifies each network on the Internet.',

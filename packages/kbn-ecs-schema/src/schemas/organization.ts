@@ -1,4 +1,4 @@
-export const organization_ecs = {
+export const organizationEcs = {
   id: {
     dashed_name: 'organization-id',
     description: 'Unique identifier for the organization.',

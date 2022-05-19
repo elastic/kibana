@@ -1,4 +1,4 @@
-export const file_ecs = {
+export const fileEcs = {
   accessed: {
     dashed_name: 'file-accessed',
     description: 'Last time the file was accessed.\n' +

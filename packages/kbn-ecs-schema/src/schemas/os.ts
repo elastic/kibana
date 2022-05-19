@@ -1,4 +1,4 @@
-export const os_ecs = {
+export const osEcs = {
   family: {
     dashed_name: 'os-family',
     description: 'OS family (such as redhat, debian, freebsd, windows).',

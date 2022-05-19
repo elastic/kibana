@@ -1,4 +1,4 @@
-export const x509_ecs = {
+export const x509Ecs = {
   alternative_names: {
     dashed_name: 'x509-alternative-names',
     description: 'List of subject alternative names (SAN). Name types vary by certificate authority and certificate type but commonly contain IP addresses, DNS names (and wildcards), and email addresses.',

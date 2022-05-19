@@ -1,4 +1,4 @@
-export const user_ecs = {
+export const userEcs = {
   changes: {
     domain: {
       dashed_name: 'user-changes-domain',

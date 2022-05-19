@@ -1,4 +1,4 @@
-export const cloud_ecs = {
+export const cloudEcs = {
   account: {
     id: {
       dashed_name: 'cloud-account-id',

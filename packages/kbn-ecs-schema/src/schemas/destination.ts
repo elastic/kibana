@@ -1,4 +1,4 @@
-export const destination_ecs = {
+export const destinationEcs = {
   address: {
     dashed_name: 'destination-address',
     description: 'Some event destination addresses are defined ambiguously. The event will sometimes list an IP, a domain or a unix socket.  You should always store the raw address in the `.address` field.\n' +

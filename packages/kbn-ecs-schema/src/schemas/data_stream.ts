@@ -1,4 +1,4 @@
-export const data_stream_ecs = {
+export const dataStreamEcs = {
   dataset: {
     dashed_name: 'data-stream-dataset',
     description: 'The field can contain anything that makes sense to signify the source of the data.\n' +

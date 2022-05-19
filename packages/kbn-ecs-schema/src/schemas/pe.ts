@@ -1,4 +1,4 @@
-export const pe_ecs = {
+export const peEcs = {
   architecture: {
     dashed_name: 'pe-architecture',
     description: 'CPU architecture target for the file.',

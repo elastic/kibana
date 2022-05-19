@@ -1,4 +1,4 @@
-export const package_ecs = {
+export const packageEcs = {
   architecture: {
     dashed_name: 'package-architecture',
     description: 'Package architecture.',

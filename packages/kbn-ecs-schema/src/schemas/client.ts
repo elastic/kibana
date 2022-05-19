@@ -1,4 +1,4 @@
-export const client_ecs = {
+export const clientEcs = {
   address: {
     dashed_name: 'client-address',
     description: 'Some event client addresses are defined ambiguously. The event will sometimes list an IP, a domain or a unix socket.  You should always store the raw address in the `.address` field.\n' +

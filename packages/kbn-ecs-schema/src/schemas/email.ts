@@ -1,4 +1,4 @@
-export const email_ecs = {
+export const emailEcs = {
   attachments: {
     dashed_name: 'email-attachments',
     description: 'A list of objects describing the attachment files sent along with an email message.',

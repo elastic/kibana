@@ -1,4 +1,4 @@
-export const host_ecs = {
+export const hostEcs = {
   architecture: {
     dashed_name: 'host-architecture',
     description: 'Operating system architecture.',

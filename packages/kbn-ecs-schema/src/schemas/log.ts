@@ -1,4 +1,4 @@
-export const log_ecs = {
+export const logEcs = {
   file: {
     path: {
       dashed_name: 'log-file-path',

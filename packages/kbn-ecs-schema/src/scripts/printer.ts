@@ -9,6 +9,7 @@
 import util from 'util';
 
 import { Group, Schema, TOP_LEVEL_NAME } from '../common/types';
+import { snakeCaseToCamelCase } from './helpers';
 import { append, write } from './write_file';
 
 export function printSchema(schema: Schema, outPath: string) {
@@ -22,7 +23,7 @@ function printGroupFiles(schema: Schema, outPath: string) {
       // eslint-disable-next-line no-console
       console.log(`Writing ${group} to ${outPath}/${group.toLowerCase()}.ts`);
 
-      const details = `export const ${group}_ecs = ${util.inspect(schema[group], { depth: null })}`;
+      const details = `export const ${snakeCaseToCamelCase(group)}Ecs = ${util.inspect(schema[group], { depth: null })}`;
       write(`${outPath}/${group.toLowerCase()}.ts`, details);
     }
   }
@@ -34,7 +35,7 @@ function printIndex(topLevelFields: Group, groups: string[], outPath: string) {
 
   /** Printing the imports. */
   for (const group of groups) {
-    const declaration = `import { ${group}_ecs } from './${group}';\n`;
+    const declaration = `import { ${snakeCaseToCamelCase(group)}Ecs } from './${group}';\n`;
     append(`${outPath}/index.ts`, declaration);
   }
 
@@ -43,7 +44,8 @@ function printIndex(topLevelFields: Group, groups: string[], outPath: string) {
   const baseFieldInfo = util.inspect(topLevelFields).slice(2, -2).concat(',\n');
   schema += baseFieldInfo;
   for (const group of groups) {
-    schema += `  ${group}_ecs\: {...${group}_ecs},\n`;
+    const groupInCamel = snakeCaseToCamelCase(group);
+    schema += `  ${groupInCamel}Ecs\: {...${groupInCamel}Ecs},\n`;
   }
   schema += '};';
 

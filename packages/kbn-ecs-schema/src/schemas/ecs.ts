@@ -1,4 +1,4 @@
-export const ecs_ecs = {
+export const ecsEcs = {
   version: {
     dashed_name: 'ecs-version',
     description: 'ECS version this event conforms to. `ecs.version` is a required field and must exist in all events.\n' +

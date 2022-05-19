@@ -1,4 +1,4 @@
-export const process_ecs = {
+export const processEcs = {
   args: {
     dashed_name: 'process-args',
     description: 'Array of process arguments, starting with the absolute path to the executable.\n' +

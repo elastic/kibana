@@ -1,4 +1,4 @@
-export const network_ecs = {
+export const networkEcs = {
   application: {
     dashed_name: 'network-application',
     description: "When a specific application or service is identified from network connection details (source/dest IPs, ports, certificates, or wire format), this field captures the application's or service's name.\n" +

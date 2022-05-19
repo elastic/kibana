@@ -1,4 +1,4 @@
-export const url_ecs = {
+export const urlEcs = {
   domain: {
     dashed_name: 'url-domain',
     description: 'Domain of the url, such as "www.elastic.co".\n' +

@@ -1,4 +1,4 @@
-export const event_ecs = {
+export const eventEcs = {
   action: {
     dashed_name: 'event-action',
     description: 'The action captured by the event.\n' +

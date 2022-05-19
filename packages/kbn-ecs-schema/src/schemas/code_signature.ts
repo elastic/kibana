@@ -1,4 +1,4 @@
-export const code_signature_ecs = {
+export const codeSignatureEcs = {
   digest_algorithm: {
     dashed_name: 'code-signature-digest-algorithm',
     description: 'The hashing algorithm used to sign the process.\n' +
