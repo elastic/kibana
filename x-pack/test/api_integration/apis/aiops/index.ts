@@ -14,7 +14,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     this.tags(['ml']);
 
     if (AIOPS_ENABLED) {
-      loadTestFile(require.resolve('./example_stream'));
       loadTestFile(require.resolve('./explain_log_rate_spikes'));
     }
   });

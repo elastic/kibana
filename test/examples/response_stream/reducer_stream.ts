@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import fetch from 'node-fetch';
@@ -10,19 +11,20 @@ import { format as formatUrl } from 'url';
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 import { parseStream } from './parse_stream';
 
+// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const config = getService('config');
   const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
 
-  describe('POST /internal/aiops/example_stream', () => {
+  describe('POST /internal/response_stream/reducer_stream', () => {
     it('should return full data without streaming', async () => {
       const resp = await supertest
-        .post(`/internal/aiops/example_stream`)
+        .post('/internal/response_stream/reducer_stream')
         .set('kbn-xsrf', 'kibana')
         .send({
           timeout: 1,
@@ -55,7 +57,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return data in chunks with streaming', async () => {
-      const response = await fetch(`${kibanaServerUrl}/internal/aiops/example_stream`, {
+      const response = await fetch(`${kibanaServerUrl}/internal/response_stream/reducer_stream`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
