@@ -54,7 +54,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
     watch: ['config.service', 'config.hasAuth'],
   });
 
-  const { service, hasAuth } = config ?? { service: null, hasAuth: false };
+  const { service = null, hasAuth = false } = config ?? {};
   const disableServiceConfig = shouldDisableEmailConfiguration(service);
 
   const { isLoading, getEmailServiceConfig } = useEmailConfig({ http, toasts });

@@ -6,6 +6,7 @@
  */
 
 import { useState, useCallback, useRef } from 'react';
+import { isEmpty } from 'lodash';
 import { ToastsApi } from '@kbn/core/public';
 import { getApplication as getApplicationApi } from './api';
 import * as i18n from './translations';
@@ -38,6 +39,10 @@ export const useGetApplication = ({
   const getApplication = useCallback(
     async ({ appId, apiToken, apiUrl }: Omit<Props, 'toastNotifications'>) => {
       try {
+        if (isEmpty(appId) || isEmpty(apiToken) || isEmpty(apiUrl)) {
+          return;
+        }
+
         isCancelledRef.current = false;
         abortCtrlRef.current.abort();
         abortCtrlRef.current = new AbortController();

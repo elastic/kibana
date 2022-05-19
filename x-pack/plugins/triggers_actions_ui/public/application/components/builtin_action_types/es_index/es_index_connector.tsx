@@ -77,7 +77,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
     watch: ['config.executionTimeField', 'config.index', '__internal__.hasTimeFieldCheckbox'],
   });
 
-  const { index } = config ?? { index: null };
+  const { index = null } = config ?? {};
 
   const [indexOptions, setIndexOptions] = useState<EuiComboBoxOptionOption[]>([]);
   const [timeFieldOptions, setTimeFieldOptions] = useState<TimeFieldOptions[]>([]);

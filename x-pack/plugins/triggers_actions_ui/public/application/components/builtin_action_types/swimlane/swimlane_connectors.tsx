@@ -29,9 +29,9 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
     toastNotifications: toasts,
   });
 
-  const apiUrl = config != null ? config.apiUrl : '';
-  const appId = config != null ? config.appId : '';
-  const apiToken = secrets != null ? secrets.apiToken : '';
+  const apiUrl = config?.apiUrl ?? '';
+  const appId = config?.appId ?? '';
+  const apiToken = secrets?.apiToken ?? '';
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [fields, setFields] = useState<SwimlaneFieldMappingConfig[]>([]);
 

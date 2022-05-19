@@ -8,17 +8,13 @@
 import React, { memo, Suspense } from 'react';
 
 import { EuiTitle, EuiSpacer, EuiErrorBoundary } from '@elastic/eui';
-import {
-  FieldConfig,
-  UseField,
-  useFormData,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { FieldConfig, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ActionTypeRegistryContract } from '../../../types';
+import { ActionTypeModel } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { useKibana } from '../../../common/lib/kibana';
@@ -29,7 +25,7 @@ interface ConnectorFormData {
 }
 
 interface CreateConnectorFormProps {
-  actionTypeRegistry: ActionTypeRegistryContract;
+  actionTypeModel: ActionTypeModel | null;
   isEdit: boolean;
 }
 
@@ -52,16 +48,14 @@ const nameConfig: FieldConfig<{ name: string }, ConnectorFormData> = {
 };
 
 const CreateConnectorFormComponent: React.FC<CreateConnectorFormProps> = ({
-  actionTypeRegistry,
+  actionTypeModel,
   isEdit,
 }) => {
   const {
     application: { capabilities },
   } = useKibana().services;
   const canSave = hasSaveActionsCapability(capabilities);
-  const [{ actionType }] = useFormData({ watch: ['actionType'] });
-  const actionTypeRegistered = actionType != null ? actionTypeRegistry.get(actionType.id) : null;
-  const FieldsComponent = actionTypeRegistered?.actionConnectorFields ?? null;
+  const FieldsComponent = actionTypeModel?.actionConnectorFields ?? null;
   return (
     <>
       <UseField

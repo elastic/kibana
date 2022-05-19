@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -21,14 +21,7 @@ import {
   EuiIcon,
   EuiText,
 } from '@elastic/eui';
-import {
-  useForm,
-  Form,
-  FormConfig,
-  UseField,
-  useFormData,
-  FormHook,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { FormConfig, FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { HttpSetup } from '@kbn/core/public';
@@ -39,12 +32,14 @@ import {
   ActionTypeModel,
   ActionTypeRegistryContract,
 } from '../../../types';
-import { CreateConnectorForm } from './create_connector_form';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { useKibana } from '../../../common/lib/kibana';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { ActionTypeMenu } from './action_type_menu';
 import { useCreateConnector } from '../../hooks/use_create_connector';
+import { ConnectorForm, CreateConnectorFormState } from './connector_form';
+import { InitialConnector } from './connector_reducer';
+import { Connector } from './types';
 
 interface CreateConnectorFlyoutProps {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -52,21 +47,17 @@ interface CreateConnectorFlyoutProps {
   onTestConnector?: (connector: ActionConnector) => void;
 }
 
-interface ConnectorFormData {
-  actionType: ActionType | null;
-  name: string;
-  [key: string]: unknown;
-}
-
 interface SaveButtonProps {
   isSaving: boolean;
+  disabled: boolean;
   createConnector: () => Promise<ActionConnector>;
-  onSubmit: FormHook['submit'];
+  onSubmit: () => Promise<void>;
   onTestConnector?: (connector: ActionConnector) => void;
 }
 
 const SaveButton: React.FC<SaveButtonProps> = ({
   isSaving,
+  disabled,
   onTestConnector,
   createConnector,
   onSubmit,
@@ -80,6 +71,7 @@ const SaveButton: React.FC<SaveButtonProps> = ({
             data-test-subj="saveAndTestNewActionButton"
             type="submit"
             isLoading={isSaving}
+            disabled={disabled}
             onClick={async () => {
               onSubmit();
               const savedConnector = await createConnector();
@@ -102,6 +94,7 @@ const SaveButton: React.FC<SaveButtonProps> = ({
           data-test-subj="saveNewActionButton"
           type="submit"
           isLoading={isSaving}
+          disabled={disabled}
           onClick={onSubmit}
         >
           <FormattedMessage
@@ -234,23 +227,67 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     http,
     application: { capabilities },
   } = useKibana().services;
-  const [hasActionsUpgradeableByTrial, setHasActionsUpgradeableByTrial] = useState<boolean>(false);
-  const canSave = hasSaveActionsCapability(capabilities);
   const { isLoading: isSavingConnector, createConnector } = useCreateConnector();
 
-  const onFormSubmit: FormConfig<ConnectorFormData>['onSubmit'] = async (data, isValid) => {
-    console.log('isValid', isValid);
-    console.log('Form data:', data);
+  const isMounted = useRef(false);
+  const [actionType, setActionType] = useState<ActionType | null>(null);
+  const [hasActionsUpgradeableByTrial, setHasActionsUpgradeableByTrial] = useState<boolean>(false);
+  const canSave = hasSaveActionsCapability(capabilities);
+  const [formState, setFormState] = useState<CreateConnectorFormState>({
+    isSubmitted: false,
+    isSubmitting: false,
+    isValid: undefined,
+    submit: async () => ({ isValid: false, data: {} as Connector }),
+  });
+
+  const initialConnector: InitialConnector<Record<string, unknown>, Record<string, unknown>> = {
+    actionTypeId: actionType?.id ?? '',
+    config: {},
+    secrets: {},
   };
 
-  const { form } = useForm({ onSubmit: onFormSubmit, defaultValue: { config: {}, secrets: {} } });
-  const [{ actionType }] = useFormData<ConnectorFormData>({ form, watch: ['actionType'] });
-  const { setFieldValue } = form;
+  const { submit, isValid: isFormValid, isSubmitting } = formState;
+  const hasErrors = isFormValid === false;
+  const isSaving = isSavingConnector || isSubmitting;
 
-  const resetActionType = useCallback(() => setFieldValue('actionType', null), [setFieldValue]);
+  const onClickSave = useCallback(async () => {
+    const { isValid, data } = await submit();
+    console.log('isValid', isValid);
+    console.log('Form data:', data);
+    // const { isValid, data } = await submit();
+
+    if (!isMounted.current) {
+      // User has closed the flyout meanwhile submitting the form
+      return;
+    }
+
+    // if (isValid) {
+    //   const nameChange = field?.name !== data.name;
+    //   const typeChange = field?.type !== data.type;
+
+    //   if (isEditingExistingField && (nameChange || typeChange)) {
+    //     setModalVisibility({
+    //       ...defaultModalVisibility,
+    //       confirmChangeNameOrType: true,
+    //     });
+    //   } else {
+    //     onSave(data);
+    //   }
+    // }
+  }, [submit]);
+
+  const resetActionType = useCallback(() => setActionType(null), []);
 
   const actionTypeModel: ActionTypeModel | null =
     actionType != null ? actionTypeRegistry.get(actionType.id) : null;
+
+  useEffect(() => {
+    isMounted.current = true;
+
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   return (
     <EuiFlyout onClose={onClose}>
@@ -264,27 +301,21 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
           ) : null
         }
       >
-        <Form form={form}>
-          <UseField<ActionType | null> path="actionType" defaultValue={null}>
-            {(field) => {
-              const { setValue } = field;
-              if (field.value != null) {
-                return null;
-              }
-
-              return (
-                <ActionTypeMenu
-                  onActionTypeChange={(type: ActionType) => setValue(type)}
-                  setHasActionsUpgradeableByTrial={setHasActionsUpgradeableByTrial}
-                  actionTypeRegistry={actionTypeRegistry}
-                />
-              );
-            }}
-          </UseField>
-          {actionType != null ? (
-            <CreateConnectorForm actionTypeRegistry={actionTypeRegistry} isEdit={false} />
-          ) : null}
-        </Form>
+        {actionType == null ? (
+          <ActionTypeMenu
+            onActionTypeChange={setActionType}
+            setHasActionsUpgradeableByTrial={setHasActionsUpgradeableByTrial}
+            actionTypeRegistry={actionTypeRegistry}
+          />
+        ) : null}
+        {actionType != null ? (
+          <ConnectorForm
+            actionTypeModel={actionTypeModel}
+            connector={initialConnector}
+            isEdit={false}
+            onChange={setFormState}
+          />
+        ) : null}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -298,8 +329,9 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="spaceBetween">
               <SaveButton
-                isSaving={isSavingConnector}
-                onSubmit={form.submit}
+                disabled={hasErrors || !canSave}
+                isSaving={isSaving}
+                onSubmit={onClickSave}
                 createConnector={() => {}}
                 onTestConnector={onTestConnector}
               />

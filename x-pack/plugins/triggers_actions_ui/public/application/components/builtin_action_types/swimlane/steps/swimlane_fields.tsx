@@ -136,7 +136,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({ updateCurrentStep, fields })
     watch: ['config.connectorType'],
   });
 
-  const connectorType = config != null ? config.connectorType : SwimlaneConnectorType.All;
+  const connectorType = config?.connectorType ?? SwimlaneConnectorType.All;
 
   const [fieldTypeMap, fieldIdMap] = useMemo(
     () =>
