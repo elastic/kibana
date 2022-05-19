@@ -7,6 +7,7 @@
 
 import React, { Component } from 'react';
 import _ from 'lodash';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { DynamicSizeProperty } from '../../properties/dynamic_size_property';
 
@@ -68,28 +69,28 @@ export class MarkerSizeLegend extends Component<Props, State> {
 
     const circleStyle = {
       fillOpacity: 0,
-      stroke: 'grey',
+      stroke: euiThemeVars.euiTextColor,
       strokeWidth: 1,
     };
 
     const svgHeight = options.maxSize * 2 + HALF_FONT_SIZE + circleStyle.strokeWidth * 2;
+    const circleCenterX = options.maxSize + circleStyle.strokeWidth;
+    const circleBottomY = svgHeight - circleStyle.strokeWidth;
 
     function makeMarker(radius: number, formattedValue: string | number) {
-      const circleCenterX = options.maxSize + circleStyle.strokeWidth;
-      const circleBottomY = svgHeight - circleStyle.strokeWidth;
       const circleCenterY = circleBottomY - radius;
       const circleTopY = circleCenterY - radius;
       return (
         <g>
           <line
-            style={{ stroke: '#D8D8D8' }}
+            style={{ stroke: euiThemeVars.euiBorderColor }}
             x1={circleCenterX}
             y1={circleTopY}
             x2={circleCenterX * 2.25}
             y2={circleTopY}
           />
           <text
-            style={{ fontSize: FONT_SIZE }}
+            style={{ fontSize: FONT_SIZE, fill: euiThemeVars.euiTextColor }}
             x={circleCenterX * 2.25 + HALF_FONT_SIZE}
             y={circleTopY + HALF_FONT_SIZE}
           >
