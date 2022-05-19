@@ -121,6 +121,10 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.ariaLabel.help', {
       defaultMessage: 'Specifies the aria label of the xy chart',
     }),
+  getMinTimeBarIntervalHelp: () =>
+    i18n.translate('expressionXY.xyVis.xAxisInterval.help', {
+      defaultMessage: 'Specifies the min interval for time bar chart',
+    }),
   getSplitColumnAccessorHelp: () =>
     i18n.translate('expressionXY.xyVis.splitColumnAccessor.help', {
       defaultMessage: 'Specifies split column of the xy chart',
