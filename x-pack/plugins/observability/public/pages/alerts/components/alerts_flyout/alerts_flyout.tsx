@@ -40,7 +40,7 @@ import type { ObservabilityRuleTypeRegistry } from '../../../../rules/create_obs
 import { parseAlert } from '../parse_alert';
 import { AlertStatusIndicator } from '../../../../components/shared/alert_status_indicator';
 import { ExperimentalBadge } from '../../../../components/shared/experimental_badge';
-import { translations, paths } from '../../../../config';
+import { translations } from '../../../../config';
 
 type AlertsFlyoutProps = {
   alert?: TopAlert;
