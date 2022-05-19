@@ -80,10 +80,11 @@ describe('EMS is enabled', () => {
       id: '12345',
       includeInFitToBounds: true,
       label: null,
+      locale: 'autoselect',
       maxZoom: 24,
       minZoom: 0,
-      source: undefined,
       sourceDescriptor: {
+        id: undefined,
         isAutoSelect: true,
         lightModeDefault: 'road_map_desaturated',
         type: 'EMS_TMS',
