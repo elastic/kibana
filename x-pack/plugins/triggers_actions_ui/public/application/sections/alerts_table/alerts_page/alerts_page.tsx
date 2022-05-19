@@ -26,7 +26,7 @@ import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_
 import { PLUGIN_ID } from '../../../../common/constants';
 import { AlertsTable } from '../alerts_table';
 import { useKibana } from '../../../../common/lib/kibana';
-import {  AlertsTableFlyoutState } from '../../../../types';
+import { AlertsTableFlyoutState } from '../../../../types';
 
 const consumers = [
   AlertConsumers.APM,

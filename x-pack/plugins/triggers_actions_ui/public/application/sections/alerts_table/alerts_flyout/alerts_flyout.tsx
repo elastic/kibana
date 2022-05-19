@@ -18,7 +18,7 @@ import {
   EuiFlyoutFooter,
 } from '@elastic/eui';
 import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-import { AlertsTableConfigurationRegistry, AlertsTableFlyoutState, } from '../../../../types';
+import { AlertsTableConfigurationRegistry, AlertsTableFlyoutState } from '../../../../types';
 
 const AlertsFlyoutHeader = lazy(() => import('./alerts_flyout_header'));
 const PAGINATION_LABEL = i18n.translate(
