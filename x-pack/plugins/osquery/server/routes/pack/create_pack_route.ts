@@ -19,7 +19,7 @@ import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { PLUGIN_ID } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
-import { convertPackQueriesToSO } from './utils';
+import { convertPackQueriesToSO, convertSOQueriesToPack } from './utils';
 import { getInternalSavedObjectsClient } from '../../usage/collector';
 
 export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
@@ -138,7 +138,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                   }
 
                   set(draft, `inputs[0].config.osquery.value.packs.${packSO.attributes.name}`, {
-                    queries,
+                    queries: convertSOQueriesToPack(queries, { removeMultiLines: true }),
                   });
 
                   return draft;
