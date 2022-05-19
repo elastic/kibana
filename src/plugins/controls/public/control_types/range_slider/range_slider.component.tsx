@@ -20,6 +20,7 @@ import './range_slider.scss';
 
 interface Props {
   componentStateSubject: BehaviorSubject<RangeSliderComponentState>;
+  ignoreValidation: boolean;
 }
 // Availableoptions and loading state is controled by the embeddable, but is not considered embeddable input.
 export interface RangeSliderComponentState {
@@ -28,9 +29,10 @@ export interface RangeSliderComponentState {
   min: string;
   max: string;
   loading: boolean;
+  isInvalid?: boolean;
 }
 
-export const RangeSliderComponent: FC<Props> = ({ componentStateSubject }) => {
+export const RangeSliderComponent: FC<Props> = ({ componentStateSubject, ignoreValidation }) => {
   // Redux embeddable Context to get state from Embeddable input
   const {
     useEmbeddableDispatch,
@@ -40,10 +42,11 @@ export const RangeSliderComponent: FC<Props> = ({ componentStateSubject }) => {
   const dispatch = useEmbeddableDispatch();
 
   // useStateObservable to get component state from Embeddable
-  const { loading, min, max, fieldFormatter } = useStateObservable<RangeSliderComponentState>(
-    componentStateSubject,
-    componentStateSubject.getValue()
-  );
+  const { loading, min, max, fieldFormatter, isInvalid } =
+    useStateObservable<RangeSliderComponentState>(
+      componentStateSubject,
+      componentStateSubject.getValue()
+    );
 
   const { value, id, title } = useEmbeddableSelector((state) => state);
 
@@ -64,6 +67,7 @@ export const RangeSliderComponent: FC<Props> = ({ componentStateSubject }) => {
       value={value ?? ['', '']}
       onChange={onChangeComplete}
       fieldFormatter={fieldFormatter}
+      isInvalid={!ignoreValidation && isInvalid}
     />
   );
 };
