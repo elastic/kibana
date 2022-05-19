@@ -60,7 +60,7 @@ export function buildEuiGridColumn({
   defaultColumns,
   isSortEnabled,
   services,
-  formatValueAsTextToCopy,
+  valueToStringConverter,
   rowsCount,
 }: {
   columnName: string;
@@ -69,7 +69,7 @@ export function buildEuiGridColumn({
   defaultColumns: boolean;
   isSortEnabled: boolean;
   services: DiscoverServices;
-  formatValueAsTextToCopy: ValueToStringConverter;
+  valueToStringConverter: ValueToStringConverter;
   rowsCount: number;
 }) {
   const indexPatternField = indexPattern.getFieldByName(columnName);
@@ -102,8 +102,8 @@ export function buildEuiGridColumn({
         buildCopyColumnValuesButton({
           columnId: columnName,
           services,
-          formatValueAsTextToCopy,
           rowsCount,
+          valueToStringConverter,
         }),
       ],
     },
@@ -150,7 +150,7 @@ export function getEuiGridColumns({
   defaultColumns,
   isSortEnabled,
   services,
-  formatValueAsTextToCopy,
+  valueToStringConverter,
 }: {
   columns: string[];
   rowsCount: number;
@@ -160,7 +160,7 @@ export function getEuiGridColumns({
   defaultColumns: boolean;
   isSortEnabled: boolean;
   services: DiscoverServices;
-  formatValueAsTextToCopy: ValueToStringConverter;
+  valueToStringConverter: ValueToStringConverter;
 }) {
   const timeFieldName = indexPattern.timeFieldName;
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
@@ -178,7 +178,7 @@ export function getEuiGridColumns({
       defaultColumns,
       isSortEnabled,
       services,
-      formatValueAsTextToCopy,
+      valueToStringConverter,
       rowsCount,
     })
   );

@@ -238,7 +238,7 @@ export const DiscoverGrid = ({
     });
   }, [displayedRows, indexPattern]);
 
-  const formatValueAsTextToCopy: ValueToStringConverter = useCallback(
+  const valueToStringConverter: ValueToStringConverter = useCallback(
     (rowIndex, columnId, options) => {
       return convertValueToString({
         rowIndex,
@@ -344,7 +344,7 @@ export const DiscoverGrid = ({
         defaultColumns,
         isSortEnabled,
         services,
-        formatValueAsTextToCopy,
+        valueToStringConverter,
       }),
     [
       displayedColumns,
@@ -355,7 +355,7 @@ export const DiscoverGrid = ({
       defaultColumns,
       isSortEnabled,
       services,
-      formatValueAsTextToCopy,
+      valueToStringConverter,
     ]
   );
 
@@ -481,7 +481,7 @@ export const DiscoverGrid = ({
             setIsFilterActive(false);
           }
         },
-        formatValueAsTextToCopy,
+        valueToStringConverter,
       }}
     >
       <span

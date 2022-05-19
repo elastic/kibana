@@ -21,7 +21,7 @@ export interface GridContext {
   isDarkMode: boolean;
   selectedDocs: string[];
   setSelectedDocs: (selected: string[]) => void;
-  formatValueAsTextToCopy: ValueToStringConverter;
+  valueToStringConverter: ValueToStringConverter;
 }
 
 const defaultContext = {} as unknown as GridContext;

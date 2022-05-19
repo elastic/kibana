@@ -31,7 +31,7 @@ const buildGridContext = (dataView: DataView, rows: ElasticSearchHit[]): GridCon
     isDarkMode: false,
     selectedDocs: [],
     setSelectedDocs: jest.fn(),
-    formatValueAsTextToCopy: (rowIndex, columnId, options) =>
+    valueToStringConverter: (rowIndex, columnId, options) =>
       convertValueToString({
         rowIndex,
         columnId,

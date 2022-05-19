@@ -9,7 +9,10 @@
 import React from 'react';
 import { EuiListGroupItemProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { copyColumnValuesToClipboard, copyColumnNameToClipboard } from './utils/copy_to_clipboard';
+import {
+  copyColumnValuesToClipboard,
+  copyColumnNameToClipboard,
+} from '../../utils/copy_value_to_clipboard';
 import { DiscoverServices } from '../../build_services';
 import type { ValueToStringConverter } from '../../types';
 
@@ -52,13 +55,13 @@ export function buildCopyColumnNameButton({
 export function buildCopyColumnValuesButton({
   columnId,
   services,
-  formatValueAsTextToCopy,
   rowsCount,
+  valueToStringConverter,
 }: {
   columnId: string;
   services: DiscoverServices;
-  formatValueAsTextToCopy: ValueToStringConverter;
   rowsCount: number;
+  valueToStringConverter: ValueToStringConverter;
 }): EuiListGroupItemProps {
   return buildCopyColumnButton({
     label: (
@@ -71,8 +74,8 @@ export function buildCopyColumnValuesButton({
       await copyColumnValuesToClipboard({
         columnId,
         services,
-        formatValueAsTextToCopy,
         rowsCount,
+        valueToStringConverter,
       }),
   });
 }

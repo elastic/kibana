@@ -49,8 +49,8 @@ describe('Build a column button to copy to clipboard', () => {
     const { label, iconType, onClick } = buildCopyColumnValuesButton({
       columnId: 'extension',
       services: discoverServiceMock,
-      formatValueAsTextToCopy: discoverGridContextMock.formatValueAsTextToCopy,
       rowsCount: 3,
+      valueToStringConverter: discoverGridContextMock.valueToStringConverter,
     });
 
     const wrapper = mountWithIntl(
@@ -71,7 +71,7 @@ describe('Build a column button to copy to clipboard', () => {
     } = buildCopyColumnValuesButton({
       columnId: '_source',
       services: discoverServiceMock,
-      formatValueAsTextToCopy: discoverGridContextMock.formatValueAsTextToCopy,
+      valueToStringConverter: discoverGridContextMock.valueToStringConverter,
       rowsCount: 3,
     });
 
