@@ -30,7 +30,7 @@ import { CasesWebhookActionConnector, CasesWebhookConfig, CasesWebhookSecrets } 
 import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 import { JsonEditorWithMessageVariables } from '../../json_editor_with_message_variables';
 
-const HTTP_VERBS = ['post', 'put'];
+const HTTP_VERBS = ['post', 'put', 'patch'];
 
 const CasesWebhookActionConnectorFields: React.FunctionComponent<
   ActionConnectorFieldsProps<CasesWebhookActionConnector>
