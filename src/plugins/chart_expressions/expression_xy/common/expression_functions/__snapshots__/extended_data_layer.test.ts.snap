@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`extendedDataLayerConfig throws the error if markSizeAccessor doesn't have the corresponding column in the table 1`] = `"Provided column name or index is invalid: nonsense"`;
+
+exports[`extendedDataLayerConfig throws the error if markSizeAccessor is provided to the not line/area chart 1`] = `"\`markSizeAccessor\` can't be used. Dots are applied only for line or area charts"`;
