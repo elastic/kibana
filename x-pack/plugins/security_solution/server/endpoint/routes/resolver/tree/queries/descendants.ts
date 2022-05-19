@@ -15,6 +15,7 @@ interface DescendantsParams {
   schema: ResolverSchema;
   indexPatterns: string | string[];
   timeRange: TimeRange;
+  isInternalRequest: boolean;
 }
 
 /**
@@ -25,12 +26,14 @@ export class DescendantsQuery {
   private readonly indexPatterns: string | string[];
   private readonly timeRange: TimeRange;
   private readonly docValueFields: JsonValue[];
+  private readonly isInternalRequest: boolean;
 
-  constructor({ schema, indexPatterns, timeRange }: DescendantsParams) {
+  constructor({ schema, indexPatterns, timeRange, isInternalRequest }: DescendantsParams) {
     this.docValueFields = docValueFields(schema);
     this.schema = schema;
     this.indexPatterns = indexPatterns;
     this.timeRange = timeRange;
+    this.isInternalRequest = isInternalRequest;
   }
 
   private query(nodes: NodeID[], size: number): JsonObject {
@@ -198,14 +201,16 @@ export class DescendantsQuery {
       return [];
     }
 
+    const esClient = this.isInternalRequest ? client.asInternalUser : client.asCurrentUser;
+
     let response: estypes.SearchResponse<unknown>;
     if (this.schema.ancestry) {
-      response = await client.asCurrentUser.search({
+      response = await esClient.search({
         body: this.queryWithAncestryArray(validNodes, this.schema.ancestry, limit),
         index: this.indexPatterns,
       });
     } else {
-      response = await client.asCurrentUser.search({
+      response = await esClient.search({
         body: this.query(validNodes, limit),
         index: this.indexPatterns,
       });
