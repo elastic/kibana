@@ -9,9 +9,9 @@
 import React, { useState, FC, useEffect } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
-import { NoDataViewsComponent } from '@kbn/shared-ux-components';
 import { EuiFlyoutBody } from '@elastic/eui';
 import { DEFAULT_ASSETS_TO_IGNORE } from '@kbn/data-plugin/common';
+import { NoDataViewsPromptComponent } from '@kbn/shared-ux-prompt-no-data-views';
 import { useKibana } from '../../shared_imports';
 
 import { MatchedItem, DataViewEditorContext } from '../../types';
@@ -105,7 +105,7 @@ export const EmptyPrompts: FC<Props> = ({
       return (
         <>
           <EuiFlyoutBody>
-            <NoDataViewsComponent
+            <NoDataViewsPromptComponent
               onClickCreate={() => setGoToForm(true)}
               canCreateNewDataView={application.capabilities.indexPatterns.save as boolean}
               dataViewsDocLink={docLinks.links.indexPatterns.introduction}
