@@ -42,10 +42,7 @@ interface AlertsListDeps {
 export const AlertsList = ({ children, onInspect }: AlertsListDeps) => (
   <div css={alertsListContainer}>
     <div>
-      <FormattedMessage
-        id="xpack.securitySolution.kubernetes.widget.alerts"
-        defaultMessage="Alerts"
-      />
+      <FormattedMessage id="xpack.kubernetesSecurity.widget.alerts" defaultMessage="Alerts" />
     </div>
     <div css={alertsList}>{children}</div>
     {onInspect && (
