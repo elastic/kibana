@@ -76,6 +76,7 @@ const customRule = {
 
 const customRuleWithDataViewId = {
   ...getNewRule(),
+  index: DEFAULT_INDEX_PATTERNS,
   dataViewId: 'myfakedataview',
   name: DATA_VIEW_RULE_NAME,
 };
@@ -143,7 +144,7 @@ describe('Detection rules, bulk edit', () => {
     openBulkEditAddIndexPatternsForm();
     typeIndexPatterns([CUSTOM_INDEX_PATTERN_1]);
     confirmBulkEditForm();
-    waitForBulkEditActionToFinish({ rulesCount: 6 });
+    waitForBulkEditActionToFinish({ rulesCount: 7 });
 
     // check if rule has been updated
     changeRowsPerPageTo(20);
@@ -158,7 +159,7 @@ describe('Detection rules, bulk edit', () => {
     openBulkEditDeleteIndexPatternsForm();
     typeIndexPatterns([CUSTOM_INDEX_PATTERN_1]);
     confirmBulkEditForm();
-    waitForBulkEditActionToFinish({ rulesCount: 6 });
+    waitForBulkEditActionToFinish({ rulesCount: 7 });
 
     // check if rule has been updated
     goToTheRuleDetailsOf(DATA_VIEW_RULE_NAME);
@@ -173,11 +174,11 @@ describe('Detection rules, bulk edit', () => {
       .click();
     cy.get(RULES_BULK_EDIT_INDEX_PATTERNS_WARNING).should(
       'have.text',
-      'You’re about to overwrite index patterns for 6 selected rules, press Save to apply changes.'
+      'You’re about to overwrite index patterns for 7 selected rules, press Save to apply changes.'
     );
     typeIndexPatterns(OVERWRITE_INDEX_PATTERNS);
     confirmBulkEditForm();
-    waitForBulkEditActionToFinish({ rulesCount: 6 });
+    waitForBulkEditActionToFinish({ rulesCount: 7 });
 
     // check if rule has been updated
     goToTheRuleDetailsOf(DATA_VIEW_RULE_NAME);

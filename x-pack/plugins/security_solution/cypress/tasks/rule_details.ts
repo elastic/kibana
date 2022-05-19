@@ -125,6 +125,6 @@ export const hasIndexPatterns = (indexPatterns: string) => {
 
 export const doesNotHaveDataView = () => {
   cy.get(DEFINITION_DETAILS).within(() => {
-    getDetails(DATA_VIEW_DETAILS).should('not.exist');
+    cy.get(DETAILS_TITLE).within(() => cy.get(DATA_VIEW_DETAILS).should('not.exist'));
   });
 };

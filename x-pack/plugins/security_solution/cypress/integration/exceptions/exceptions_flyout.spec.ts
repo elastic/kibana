@@ -214,9 +214,9 @@ describe('Exceptions flyout', () => {
     cy.get(ADD_OR_BTN).click();
     addExceptionEntryFieldValueOfItemX('agent.name', 1, 0);
     cy.get(ADD_NESTED_BTN).click();
-    addExceptionEntryFieldValueOfItemX('user.id{downarrow}{enter}', 1, 1);
+    addExceptionEntryFieldValueOfItemX('user.id{downArrow}{enter}', 1, 1);
     cy.get(ADD_AND_BTN).click();
-    addExceptionEntryFieldValueOfItemX('last{downarrow}{enter}', 1, 3);
+    addExceptionEntryFieldValueOfItemX('last{downArrow}{enter}', 1, 3);
     // This button will now read `Add non-nested button`
     cy.get(ADD_NESTED_BTN).scrollIntoView();
     cy.get(ADD_NESTED_BTN).focus().click();
