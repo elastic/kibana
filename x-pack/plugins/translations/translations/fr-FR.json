@@ -13073,8 +13073,6 @@
     "xpack.fleet.upgradeAgents.cancelButtonLabel": "Annuler",
     "xpack.fleet.upgradeAgents.confirmMultipleButtonLabel": "Mettre à niveau {count, plural, one {l'agent} other {{count} agents} =true {tous les agents sélectionnés}}",
     "xpack.fleet.upgradeAgents.confirmSingleButtonLabel": "Mettre à niveau l'agent",
-    "xpack.fleet.upgradeAgents.experimentalLabel": "Expérimental",
-    "xpack.fleet.upgradeAgents.experimentalLabelTooltip": "Une modification ou une suppression de la mise à niveau de l'agent peut intervenir dans une version ultérieure. La mise à niveau n'est pas soumise à l'accord de niveau de service du support technique.",
     "xpack.fleet.upgradeAgents.fatalErrorNotificationTitle": "Erreur lors de la mise à niveau de {count, plural, one {l'agent} other {{count} agents} =true {tous les agents sélectionnés}}",
     "xpack.fleet.upgradeAgents.successMultiNotificationTitle": "{isMixed, select, true {{success} agents sur {total}} other {{isAllAgents, select, true {Tous les agents sélectionnés} other {{success}} }}} mis à niveau",
     "xpack.fleet.upgradeAgents.successSingleNotificationTitle": "{count} agent mis à niveau",

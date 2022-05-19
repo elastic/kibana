@@ -16,6 +16,7 @@ import {
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiCallOut
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -43,6 +44,8 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
 }) => {
   const { notifications } = useStartServices();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<string | undefined>();
+
   const isSingleAgent = Array.isArray(agents) && agents.length === 1;
   const isSmallBatch = Array.isArray(agents) && agents.length > 1 && agents.length <= 10;
   const isAllAgents = agents === '';
@@ -97,6 +100,9 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
             ...rolloutOptions,
           });
       if (error) {
+        if (error?.statusCode === 400) {
+          setErrors(error?.message);
+        }
         throw error;
       }
 
@@ -128,7 +134,6 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
               isAllAgents,
             },
           });
-      // remove toasts
       if (counts.success === counts.total) {
         notifications.toasts.addSuccess(successMessage);
       } else if (counts.error === counts.total) {
@@ -231,6 +236,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
         fullWidth
       >
         <EuiComboBox
+          data-test-subj="agentUpgradeModal.VersionCombobox"
           fullWidth
           singleSelection={{ asPlainText: true }}
           options={fallbackVersions}
@@ -270,6 +276,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
           fullWidth
         >
           <EuiComboBox
+            data-test-subj="agentUpgradeModal.MaintainanceCombobox"
             fullWidth
             singleSelection={{ asPlainText: true }}
             options={maintainanceOptions}
@@ -280,6 +287,25 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
           />
         </EuiFormRow>
       ) : null}
+      { errors ?
+        <>
+          <EuiCallOut
+            color="danger"
+            title={
+              i18n.translate('xpack.fleet.upgradeAgents.warningCallout', {
+                defaultMessage:
+                  'Error upgrading the selected {count, plural, one {agent} other {{count} agents}}',
+                values: { count: isSingleAgent },
+              })
+            }
+          >
+            <FormattedMessage
+              id="xpack.fleet.deleteAgentPolicy.confirmModal.affectedAgentsMessage"
+              defaultMessage={errors}
+            />
+          </EuiCallOut>
+        </> : null
+      }
     </EuiConfirmModal>
   );
 };
