@@ -47,7 +47,8 @@ const renderComponent = () =>
     </TestProviders>
   );
 
-describe('UserAlertsTable', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/132360
+describe.skip('UserAlertsTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

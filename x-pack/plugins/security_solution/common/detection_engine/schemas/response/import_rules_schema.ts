@@ -16,6 +16,7 @@ export const importRulesSchema = t.exact(
     exceptions_success: t.boolean,
     exceptions_success_count: PositiveInteger,
     exceptions_errors: t.array(errorSchema),
+    rules_count: PositiveInteger,
     success,
     success_count,
     errors: t.array(errorSchema),
