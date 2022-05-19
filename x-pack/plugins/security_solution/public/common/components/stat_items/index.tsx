@@ -39,7 +39,12 @@ import { HoverVisibilityContainer } from '../hover_visibility_container';
 import { LensAttributes } from '../visualization_actions/types';
 import * as i18n from '../../containers/query_toggle/translations';
 import { UserskKpiStrategyResponse } from '../../../../common/search_strategy/security_solution/users';
-
+const FlexGroup = styled(EuiFlexGroup)`
+  .no-margin {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+`;
 const FlexItem = styled(EuiFlexItem)`
   min-width: 0;
   position: relative;
@@ -256,9 +261,9 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
     return (
       <FlexItem grow={grow} data-test-subj={`stat-${statKey}`}>
         <EuiPanel hasBorder>
-          <EuiFlexGroup gutterSize={'none'}>
-            <EuiFlexItem>
-              <EuiFlexGroup gutterSize={'none'}>
+          <FlexGroup gutterSize={'none'}>
+            <EuiFlexItem className={toggleStatus ? '' : 'no-margin'}>
+              <EuiFlexGroup gutterSize={'none'} responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
                     aria-label={i18n.QUERY_BUTTON_TITLE(toggleStatus)}
@@ -283,7 +288,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                 <InspectButton queryId={id} title={description} inspectIndex={index} />
               </EuiFlexItem>
             )}
-          </EuiFlexGroup>
+          </FlexGroup>
           {loading && (
             <EuiFlexGroup justifyContent="center" alignItems="center">
               <EuiFlexItem grow={false}>

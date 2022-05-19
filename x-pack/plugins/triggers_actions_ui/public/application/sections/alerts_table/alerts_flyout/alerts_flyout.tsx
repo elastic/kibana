@@ -15,12 +15,28 @@ import {
   EuiTitle,
   EuiText,
   EuiHorizontalRule,
-  EuiFlyoutFooter,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
+  EuiPagination,
+  EuiProgress,
+  EuiLoadingContent,
 } from '@elastic/eui';
-import { AlertsField, AlertsData } from '../../../../types';
+import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
+import { AlertsField } from '../../../../types';
+
+const SAMPLE_TITLE_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.sampleTitle',
+  {
+    defaultMessage: 'Sample title',
+  }
+);
+
+const NAME_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.name',
+  {
+    defaultMessage: 'Name',
+  }
+);
 
 const REASON_LABEL = i18n.translate(
   'xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.reason',
@@ -29,67 +45,84 @@ const REASON_LABEL = i18n.translate(
   }
 );
 
-const NEXT_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.next',
+const PAGINATION_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.paginationLabel',
   {
-    defaultMessage: 'Next',
-  }
-);
-const PREVIOUS_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.previous',
-  {
-    defaultMessage: 'Previous',
+    defaultMessage: 'Alert navigation',
   }
 );
 
 interface AlertsFlyoutProps {
-  alert: AlertsData;
+  alert: EcsFieldsResponse;
+  flyoutIndex: number;
+  alertsCount: number;
+  isLoading: boolean;
   onClose: () => void;
-  onPaginateNext: () => void;
-  onPaginatePrevious: () => void;
+  onPaginate: (pageIndex: number) => void;
 }
 export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
   alert,
+  flyoutIndex,
+  alertsCount,
+  isLoading,
   onClose,
-  onPaginateNext,
-  onPaginatePrevious,
+  onPaginate,
 }: AlertsFlyoutProps) => {
   return (
     <EuiFlyout onClose={onClose} size="s" data-test-subj="alertsFlyout">
+      {isLoading && <EuiProgress size="xs" color="accent" data-test-subj="alertsFlyoutLoading" />}
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m" data-test-subj="alertsFlyoutTitle">
-          <h2>{get(alert, AlertsField.name)}</h2>
+        <EuiTitle size="m">
+          <h2>{SAMPLE_TITLE_LABEL}</h2>
         </EuiTitle>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiPagination
+              aria-label={PAGINATION_LABEL}
+              pageCount={alertsCount}
+              activePage={flyoutIndex}
+              onPageClick={onPaginate}
+              compressed
+              data-test-subj="alertsFlyoutPagination"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiTitle size="xs">
-          <h4>{REASON_LABEL}</h4>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText size="s" data-test-subj="alertsFlyoutReason">
-          {get(alert, AlertsField.reason)}
-        </EuiText>
+        <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" direction="column">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h4>{NAME_LABEL}</h4>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            {isLoading ? (
+              <EuiLoadingContent lines={1} />
+            ) : (
+              <EuiText size="s" data-test-subj="alertsFlyoutName">
+                {/* any is required here to improve typescript performance */}
+                {get(alert as any, AlertsField.name, [])[0] as string}
+              </EuiText>
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h4>{REASON_LABEL}</h4>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            {isLoading ? (
+              <EuiLoadingContent lines={3} />
+            ) : (
+              <EuiText size="s" data-test-subj="alertsFlyoutReason">
+                {/* any is required here to improve typescript performance */}
+                {get(alert as any, AlertsField.reason, [])[0] as string}
+              </EuiText>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiHorizontalRule size="full" />
       </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="flexStart">
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="alertsFlyoutPaginatePrevious"
-              fill
-              onClick={onPaginatePrevious}
-            >
-              {PREVIOUS_LABEL}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton data-test-subj="alertsFlyoutPaginateNext" fill onClick={onPaginateNext}>
-              {NEXT_LABEL}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 };

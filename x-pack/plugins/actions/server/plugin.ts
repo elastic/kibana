@@ -311,12 +311,12 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     }
 
     // Routes
-    defineRoutes(
-      core.http.createRouter<ActionsRequestHandlerContext>(),
-      this.licenseState,
+    defineRoutes({
+      router: core.http.createRouter<ActionsRequestHandlerContext>(),
+      licenseState: this.licenseState,
       actionsConfigUtils,
-      this.usageCounter
-    );
+      usageCounter: this.usageCounter,
+    });
 
     // Cleanup failed execution task definition
     if (this.actionsConfig.cleanupFailedExecutionsTask.enabled) {
@@ -386,6 +386,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       );
 
       return new ActionsClient({
+        logger,
         unsecuredSavedObjectsClient,
         actionTypeRegistry: actionTypeRegistry!,
         defaultKibanaIndex: kibanaIndex!,
@@ -577,6 +578,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             includedHiddenTypes,
           });
           return new ActionsClient({
+            logger,
             unsecuredSavedObjectsClient,
             actionTypeRegistry: actionTypeRegistry!,
             defaultKibanaIndex,
