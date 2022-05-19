@@ -42,7 +42,6 @@ export const useGetFeatureIds = (
         const response = await getFeatureIds(query, abortCtrlRef.current.signal);
 
         if (!isCancelledRef.current) {
-          // setAlertFeatureIds(response);
           setStatus({ isLoading: false, alertFeatureIds: response, isError: false });
         }
       } catch (error) {
