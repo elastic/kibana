@@ -44,16 +44,18 @@ export async function showLensVisToADJobFlyout(
 
   return new Promise(async (resolve, reject) => {
     try {
-      const onFlyoutClose = () => {
-        flyoutSession.close();
-        resolve();
-      };
-
+      // do not show the flyout if the results only contain one layer
+      // and that layer can be used for creating an AD job
       const layerResults = await getResultLayersFromEmbeddable(embeddable, data.dataViews, lens);
       if (layerResults.length === 1 && layerResults[0].isCompatible) {
         convertLensToADJob(embeddable, share, 0);
         return resolve();
       }
+
+      const onFlyoutClose = () => {
+        flyoutSession.close();
+        resolve();
+      };
 
       const flyoutSession = overlays.openFlyout(
         toMountPoint(
