@@ -13,7 +13,7 @@ import { connect, ConnectedProps } from 'react-redux';
 import { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import { get } from 'lodash/fp';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
-import { OsqueryActionItem } from '../../osquery/osquery_action_item';
+import { useOsqueryContextActionItem } from '../../osquery/use_osquery_context_action_item';
 import { OsqueryFlyout } from '../../osquery/osquery_flyout';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { buildGetAlertByIdQuery } from '../../../../common/components/exceptions/helpers';
@@ -196,13 +196,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     setPopover(false);
   }, []);
 
-  const osqueryActionItem = useMemo(
-    () =>
-      OsqueryActionItem({
-        handleClick: handleOnOsqueryClick,
-      }),
-    [handleOnOsqueryClick]
-  );
+  const { osqueryActionItems } = useOsqueryContextActionItem({ handleClick: handleOnOsqueryClick });
 
   const items: React.ReactElement[] = useMemo(
     () =>
@@ -211,12 +205,12 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
             ...addToCaseActionItems,
             ...statusActionItems,
             ...exceptionActionItems,
-            ...(agentId ? [osqueryActionItem] : []),
+            ...(agentId ? osqueryActionItems : []),
           ]
         : [
             ...addToCaseActionItems,
             ...eventFilterActionItems,
-            ...(agentId ? [osqueryActionItem] : []),
+            ...(agentId ? osqueryActionItems : []),
           ],
     [
       isEvent,
@@ -225,7 +219,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
       statusActionItems,
       exceptionActionItems,
       agentId,
-      osqueryActionItem,
+      osqueryActionItems,
       eventFilterActionItems,
     ]
   );
