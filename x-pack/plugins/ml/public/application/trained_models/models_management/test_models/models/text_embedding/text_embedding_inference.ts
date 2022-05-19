@@ -53,7 +53,13 @@ export class TextEmbeddingInference extends InferenceBase<TextEmbeddingResponse>
   }
 
   public getInputComponent(): JSX.Element {
-    return getGeneralInputComponent(this);
+    const placeholder = i18n.translate(
+      'xpack.ml.trainedModels.testModelsFlyout.textEmbedding.inputText',
+      {
+        defaultMessage: 'Enter a phrase to test',
+      }
+    );
+    return getGeneralInputComponent(this, placeholder);
   }
 
   public getOutputComponent(): JSX.Element {
