@@ -32,7 +32,7 @@ export const useGetFeatureIds = (
 
   const fetchFeatureIds = useCallback(
     async (registrationContext: string[]) => {
-      setStatus({ isLoading: true, alertFeatureIds: [], isError: true });
+      setStatus({ isLoading: true, alertFeatureIds: [], isError: false });
       try {
         isCancelledRef.current = false;
         abortCtrlRef.current.abort();

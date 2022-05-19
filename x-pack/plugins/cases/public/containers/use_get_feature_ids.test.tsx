@@ -30,6 +30,7 @@ describe('useGetFeaturesIds', () => {
     act(() => {
       expect(result.current.alertFeatureIds).toEqual([]);
       expect(result.current.isLoading).toEqual(true);
+      expect(result.current.isError).toEqual(false);
     });
   });
   //
@@ -48,6 +49,7 @@ describe('useGetFeaturesIds', () => {
 
     expect(result.current.alertFeatureIds).toEqual(['siem', 'observability']);
     expect(result.current.isLoading).toEqual(false);
+    expect(result.current.isError).toEqual(false);
   });
 
   it('sets isError to true when an error occurs', async () => {
