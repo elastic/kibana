@@ -141,8 +141,7 @@ describe('useSecuritySolutionNavigation', () => {
       () => useSecuritySolutionNavigation(),
       { wrapper: TestProviders }
     );
-
-    expect(result?.current?.items?.[2].items?.[2].id).toEqual(SecurityPageName.kubernetes);
+    expect(result?.current?.items?.[2].items?.[3].id).toEqual(SecurityPageName.kubernetes);
   });
 
   it('should omit host isolation exceptions if hook reports false', () => {

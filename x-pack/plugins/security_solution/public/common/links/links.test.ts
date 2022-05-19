@@ -72,6 +72,7 @@ const featureFlagPages = [
   SecurityPageName.hostsAuthentications,
   SecurityPageName.hostsRisk,
   SecurityPageName.usersRisk,
+  SecurityPageName.kubernetes,
 ];
 const premiumPages = [
   SecurityPageName.caseConfigure,
@@ -81,6 +82,7 @@ const premiumPages = [
   SecurityPageName.detectionAndResponse,
   SecurityPageName.hostsRisk,
   SecurityPageName.usersRisk,
+  SecurityPageName.kubernetes,
 ];
 const nonCasesPages = allPages.reduce(
   (acc: SecurityPageName[], p) =>
