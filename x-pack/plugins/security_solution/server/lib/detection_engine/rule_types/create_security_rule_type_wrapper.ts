@@ -197,7 +197,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               }
             }
           } catch (exc) {
-            console.error(exc);
             const errorMessage = buildRuleMessage(`Check privileges failed to execute ${exc}`);
             logger.warn(errorMessage);
             await ruleExecutionLogger.logStatusChange({

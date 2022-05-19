@@ -32,7 +32,6 @@ export const injectDataViewReferences = ({
     const reference = foundSavedObject.id;
     return reference;
   } else {
-    logger.error('the saved object references for data view id were not found on this rule');
     return undefined;
   }
 };

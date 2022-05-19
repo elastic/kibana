@@ -119,7 +119,6 @@ const IndexPatternsFormComponent = ({
         <FormattedMessage
           id="xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.setIndexPatternsWithDataViewsWarningCallout"
           defaultMessage="If you have selected rules which depend on a data view this action will force those rules to read from the index pattern defined on the rule, not the dataview, and may result in broken rules."
-          values={{ rulesCount }}
         />
       </EuiCallOut>
       <CommonUseField
