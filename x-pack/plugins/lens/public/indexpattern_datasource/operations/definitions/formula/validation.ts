@@ -1002,7 +1002,12 @@ export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<str
       const missingArgs = mandatoryArguments.filter((_, i) => node.args[i] == null);
       const [missingArgsWithAlternatives, missingArgsWithoutAlternative] = partition(
         missingArgs,
-        ({ alternativeWhenMissing }) => alternativeWhenMissing != null
+        (
+          v
+        ): v is {
+          name: string;
+          alternativeWhenMissing: string;
+        } => v.alternativeWhenMissing != null
       );
 
       if (missingArgsWithoutAlternative.length) {
@@ -1011,7 +1016,7 @@ export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<str
             messageId: 'missingMathArgument',
             values: {
               operation: node.name,
-              count: missingArgsWithoutAlternative.length - node.args.length,
+              count: mandatoryArguments.length - node.args.length,
               params: missingArgsWithoutAlternative.map(({ name }) => name).join(', '),
             },
             locations: node.location ? [node.location] : [],
@@ -1027,7 +1032,7 @@ export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<str
             values: {
               operation: node.name,
               params: firstArg.name,
-              alternativeFn: firstArg.alternativeWhenMissing!,
+              alternativeFn: firstArg.alternativeWhenMissing,
             },
             locations: node.location ? [node.location] : [],
           })
