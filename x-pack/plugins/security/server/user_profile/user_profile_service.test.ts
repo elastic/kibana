@@ -8,6 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { userProfileMock } from '../../common/model/user_profile.mock';
 import { securityMock } from '../mocks';
@@ -283,9 +284,9 @@ describe('UserProfileService', () => {
       });
     });
 
-    it('fails if activation fails', async () => {
+    it('fails if activation fails with non-409 error', async () => {
       const failureReason = new errors.ResponseError(
-        securityMock.createApiResponse({ statusCode: 409, body: 'some message' })
+        securityMock.createApiResponse({ statusCode: 500, body: 'some message' })
       );
       mockStartParams.clusterClient.asInternalUser.transport.request.mockRejectedValue(
         failureReason
@@ -297,6 +298,104 @@ describe('UserProfileService', () => {
       ).rejects.toBe(failureReason);
       expect(mockStartParams.clusterClient.asInternalUser.transport.request).toHaveBeenCalledTimes(
         1
+      );
+      expect(mockStartParams.clusterClient.asInternalUser.transport.request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: '_security/profile/_activate',
+        body: { grant_type: 'access_token', access_token: 'some-token' },
+      });
+    });
+
+    it('retries activation if initially fails with 409 error', async () => {
+      jest.useFakeTimers();
+
+      const failureReason = new errors.ResponseError(
+        securityMock.createApiResponse({ statusCode: 409, body: 'some message' })
+      );
+      mockStartParams.clusterClient.asInternalUser.transport.request
+        .mockRejectedValueOnce(failureReason)
+        .mockResolvedValueOnce(userProfileMock.create());
+
+      const startContract = userProfileService.start(mockStartParams);
+      const activatePromise = startContract.activate({
+        type: 'accessToken',
+        accessToken: 'some-token',
+      });
+      await nextTick();
+      jest.runAllTimers();
+
+      await expect(activatePromise).resolves.toMatchInlineSnapshot(`
+              Object {
+                "data": Object {},
+                "enabled": true,
+                "uid": "some-profile-uid",
+                "user": Object {
+                  "active": true,
+                  "authentication_provider": Object {
+                    "name": "basic1",
+                    "type": "basic",
+                  },
+                  "authentication_realm": Object {
+                    "name": "native1",
+                    "type": "native",
+                  },
+                  "authentication_type": "realm",
+                  "email": "email",
+                  "enabled": true,
+                  "full_name": "full name",
+                  "lookup_realm": Object {
+                    "name": "native1",
+                    "type": "native",
+                  },
+                  "metadata": Object {
+                    "_reserved": false,
+                  },
+                  "roles": Array [],
+                  "username": "some-username",
+                },
+              }
+            `);
+      expect(mockStartParams.clusterClient.asInternalUser.transport.request).toHaveBeenCalledTimes(
+        2
+      );
+      expect(mockStartParams.clusterClient.asInternalUser.transport.request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: '_security/profile/_activate',
+        body: { grant_type: 'access_token', access_token: 'some-token' },
+      });
+    });
+
+    it('fails if activation max retries exceeded', async () => {
+      jest.useFakeTimers();
+
+      const failureReason = new errors.ResponseError(
+        securityMock.createApiResponse({ statusCode: 409, body: 'some message' })
+      );
+      mockStartParams.clusterClient.asInternalUser.transport.request.mockRejectedValue(
+        failureReason
+      );
+
+      const startContract = userProfileService.start(mockStartParams);
+
+      // Initial activation attempt.
+      const activatePromise = startContract.activate({
+        type: 'accessToken',
+        accessToken: 'some-token',
+      });
+      await nextTick();
+      jest.runAllTimers();
+
+      // The first retry.
+      await nextTick();
+      jest.runAllTimers();
+
+      // The second retry.
+      await nextTick();
+      jest.runAllTimers();
+
+      await expect(activatePromise).rejects.toBe(failureReason);
+      expect(mockStartParams.clusterClient.asInternalUser.transport.request).toHaveBeenCalledTimes(
+        3
       );
       expect(mockStartParams.clusterClient.asInternalUser.transport.request).toHaveBeenCalledWith({
         method: 'POST',

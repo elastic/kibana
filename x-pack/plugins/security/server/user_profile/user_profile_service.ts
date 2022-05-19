@@ -8,10 +8,12 @@
 import type { IClusterClient, Logger } from '@kbn/core/server';
 
 import type { AuthenticationProvider, UserData, UserInfo, UserProfile } from '../../common';
-import { getDetailedErrorMessage } from '../errors';
+import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import type { UserProfileGrant } from './user_profile_grant';
 
 const KIBANA_DATA_ROOT = 'kibana';
+const ACTIVATION_MAX_RETRIES = 3;
+const ACTIVATION_RETRY_SCALE_DURATION_MS = 150;
 
 export interface UserProfileServiceStart {
   /**
@@ -63,23 +65,56 @@ export class UserProfileService {
     async function activate(grant: UserProfileGrant): Promise<UserProfile> {
       logger.debug(`Activating user profile via ${grant.type} grant.`);
 
-      try {
-        const response = await clusterClient.asInternalUser.transport.request<UserProfile>({
-          method: 'POST',
-          path: '_security/profile/_activate',
-          body:
-            grant.type === 'password'
-              ? { grant_type: 'password', username: grant.username, password: grant.password }
-              : { grant_type: 'access_token', access_token: grant.accessToken },
-        });
+      const activateGrant =
+        grant.type === 'password'
+          ? { grant_type: 'password', username: grant.username, password: grant.password }
+          : { grant_type: 'access_token', access_token: grant.accessToken };
 
-        logger.debug(`Successfully activated profile for "${response.user.username}".`);
+      // Profile activation is a multistep process that might or might not cause profile document to be created or
+      // updated. If Elasticsearch needs to handle multiple profile activation requests for the same user in parallel
+      // it can hit document version conflicts and fail (409 status code). In this case it's safe to retry activation
+      // request after some time. Most of the Kibana users won't be affected by this issue, but there are edge cases
+      // when users can be hit by the conflicts during profile activation, e.g. for PKI or Kerberos authentication when
+      // client certificate/ticket changes and multiple requests can trigger profile re-activation at the same time.
+      let activationRetriesLeft = ACTIVATION_MAX_RETRIES;
+      do {
+        try {
+          const response = await clusterClient.asInternalUser.transport.request<UserProfile>({
+            method: 'POST',
+            path: '_security/profile/_activate',
+            body: activateGrant,
+          });
 
-        return response;
-      } catch (err) {
-        logger.error(`Failed to activate user profile: ${getDetailedErrorMessage(err)}.`);
-        throw err;
-      }
+          logger.debug(`Successfully activated profile for "${response.user.username}".`);
+
+          return response;
+        } catch (err) {
+          const detailedErrorMessage = getDetailedErrorMessage(err);
+          if (getErrorStatusCode(err) !== 409) {
+            logger.error(`Failed to activate user profile: ${detailedErrorMessage}.`);
+            throw err;
+          }
+
+          activationRetriesLeft--;
+          logger.error(
+            `Failed to activate user profile (retries left: ${activationRetriesLeft}): ${detailedErrorMessage}.`
+          );
+
+          if (activationRetriesLeft === 0) {
+            throw err;
+          }
+        }
+
+        await new Promise((resolve) =>
+          setTimeout(
+            resolve,
+            (ACTIVATION_MAX_RETRIES - activationRetriesLeft) * ACTIVATION_RETRY_SCALE_DURATION_MS
+          )
+        );
+      } while (activationRetriesLeft > 0);
+
+      // This should be unreachable code, unless we have a bug in retry handling logic.
+      throw new Error('Failed to activate user profile, max retries exceeded.');
     }
 
     async function get<T extends UserData>(uid: string, dataPath?: string) {
