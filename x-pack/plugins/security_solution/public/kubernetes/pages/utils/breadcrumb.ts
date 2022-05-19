@@ -9,7 +9,6 @@ import { isEmpty } from 'lodash/fp';
 
 import { ChromeBreadcrumb } from '@kbn/core/public';
 
-import * as i18n from '../../translations';
 import { GetUrlForApp } from '../../../common/components/navigation/types';
 import { APP_UI_ID } from '../../../../common/constants';
 import { SecurityPageName } from '../../../app/types';
@@ -20,7 +19,7 @@ export const getBreadcrumbs = (
 ): ChromeBreadcrumb[] => {
   const breadcrumb = [
     {
-      text: i18n.PAGE_TITLE,
+      text: 'Kubernetes',
       href: getUrlForApp(APP_UI_ID, {
         path: !isEmpty(search[0]) ? search[0] : '',
         deepLinkId: SecurityPageName.kubernetes,
