@@ -5,7 +5,16 @@
  * 2.0.
  */
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { FileServiceFactory } from './file_service';
 
-export interface FilePluginSetup {
+export interface FilesPluginSetup {
+  registerFileKind(arg: unknown): void;
+}
+
+export interface FilesPluginStart {
+  fileServiceFactory: FileServiceFactory;
+}
+
+export interface FilesPluginSetupDependencies {
   security?: SecurityPluginSetup;
 }
