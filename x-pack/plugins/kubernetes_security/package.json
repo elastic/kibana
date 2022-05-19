@@ -1,7 +1,7 @@
 {
   "author": "Elastic",
   "name": "kubernetes_security",
-  "version": "8.0.0",
+  "version": "1.0.0",
   "private": true,
   "license": "Elastic-License",
   "scripts": {
