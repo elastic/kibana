@@ -789,6 +789,59 @@ describe('enrichSignalThreatMatches', () => {
       },
     ]);
   });
+
+  it('enriches signals from threat with ip_range CIDR', async () => {
+    getMatchedThreats = async () => [
+      getThreatListItemMock({
+        _id: '123',
+        _source: {
+          threat: {indicator: {ip_range:'127.0.0.1/30'}}
+        },
+      }),
+    ];
+
+    matchedQuery = encodeThreatMatchNamedQuery(
+      getNamedQueryMock({
+        id: '123',
+        index: 'custom_index',
+        field: 'host.ip',
+        value: 'threat.indicator.ip_range',
+      })
+    );
+
+    const signalHit = getSignalHitMock({
+      _source: {
+        host: {
+          ip: '127.0.0.1',
+        },
+      },
+      matched_queries: [matchedQuery],
+    });
+    const signals: SignalSourceHit[] = [signalHit];
+    const enrichedSignals = await enrichSignalThreatMatches(
+      signals,
+      getMatchedThreats,
+      indicatorPath
+    );
+    const [enrichedHit] = enrichedSignals;
+    const enrichments = get(enrichedHit._source, ENRICHMENT_DESTINATION_PATH);
+
+    expect(enrichments).toEqual([
+      {
+        feed: {},
+        indicator: {
+          ip_range: '127.0.0.1/30',
+        },
+        matched: {
+          atomic: '127.0.0.1/30',
+          id: '123',
+          index: 'custom_index',
+          field: 'host.ip',
+          type: ENRICHMENT_TYPES.IndicatorMatchRule,
+        },
+      },
+    ]);
+  });
 });
 
 describe('getSignalMatchesFromThreatList', () => {
