@@ -16,7 +16,7 @@ import {
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCallOut
+  EuiCallOut,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -287,25 +287,23 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
           />
         </EuiFormRow>
       ) : null}
-      { errors ?
+      {errors ? (
         <>
           <EuiCallOut
             color="danger"
-            title={
-              i18n.translate('xpack.fleet.upgradeAgents.warningCallout', {
-                defaultMessage:
-                  'Error upgrading the selected {count, plural, one {agent} other {{count} agents}}',
-                values: { count: isSingleAgent },
-              })
-            }
+            title={i18n.translate('xpack.fleet.upgradeAgents.warningCallout', {
+              defaultMessage:
+                'Error upgrading the selected {count, plural, one {agent} other {{count} agents}}',
+              values: { count: isSingleAgent },
+            })}
           >
             <FormattedMessage
               id="xpack.fleet.deleteAgentPolicy.confirmModal.affectedAgentsMessage"
               defaultMessage={errors}
             />
           </EuiCallOut>
-        </> : null
-      }
+        </>
+      ) : null}
     </EuiConfirmModal>
   );
 };
