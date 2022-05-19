@@ -22,6 +22,12 @@ export type SimpleMetricDescriptor = string;
 
 export type MetricDescriptor = SimpleMetricDescriptor | NamedMetricDescriptor;
 
+export function isNamedMetricDescriptor(
+  metricDescriptor: MetricDescriptor
+): metricDescriptor is NamedMetricDescriptor {
+  return (metricDescriptor as NamedMetricDescriptor).name !== undefined;
+}
+
 // TODO: Switch to an options object argument here
 export async function getMetrics(
   req: LegacyRequest,

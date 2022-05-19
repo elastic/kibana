@@ -142,6 +142,14 @@ export interface ElasticsearchIndexStats {
   };
 }
 
+export interface ElasticsearchLogstashStatePipeline {
+  representation?: {
+    graph?: {
+      vertices?: ElasticsearchSourceLogstashPipelineVertex[];
+    };
+  };
+}
+
 export interface ElasticsearchLegacySource {
   timestamp: string;
   cluster_uuid: string;
@@ -204,13 +212,7 @@ export interface ElasticsearchLegacySource {
     expiry_date_in_millis?: number;
   };
   logstash_state?: {
-    pipeline?: {
-      representation?: {
-        graph?: {
-          vertices?: ElasticsearchSourceLogstashPipelineVertex[];
-        };
-      };
-    };
+    pipeline?: ElasticsearchLogstashStatePipeline;
   };
   logstash_stats?: {
     timestamp?: string;

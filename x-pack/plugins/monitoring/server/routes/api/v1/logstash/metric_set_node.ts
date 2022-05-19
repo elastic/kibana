@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export const metricSets = {
+import { MetricDescriptor } from '../../../../lib/details/get_metrics';
+
+export const metricSets: {
+  advanced: MetricDescriptor[];
+  overview: MetricDescriptor[];
+} = {
   advanced: [
     {
       keys: ['logstash_node_cpu_utilization', 'logstash_node_cgroup_quota'],
