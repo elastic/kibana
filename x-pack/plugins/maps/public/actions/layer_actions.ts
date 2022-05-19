@@ -472,6 +472,15 @@ export function updateLayerLabel(id: string, newLabel: string) {
   };
 }
 
+export function updateLayerLocale(id: string, locale: string) {
+  return {
+    type: UPDATE_LAYER_PROP,
+    id,
+    propName: 'locale',
+    newValue: locale,
+  };
+}
+
 export function setLayerAttribution(id: string, attribution: Attribution) {
   return {
     type: UPDATE_LAYER_PROP,
