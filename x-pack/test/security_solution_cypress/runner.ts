@@ -27,7 +27,7 @@ const retrieveIntegrations = (chunksTotal: number, chunkIndex: number) => {
   return chunk(integrationsPaths, chunkSize)[chunkIndex - 1];
 };
 
-export async function SecuritySolutionConfigurableCypressCliTestRunner(
+export async function SecuritySolutionConfigurableCypressTestRunner(
   { getService }: FtrProviderContext,
   command: string,
   envVars?: Record<string, string>
@@ -63,29 +63,29 @@ export async function SecuritySolutionCypressCliTestRunnerCI(
   ciJobNumber: number
 ) {
   const integrations = retrieveIntegrations(totalCiJobs, ciJobNumber);
-  return SecuritySolutionConfigurableCypressCliTestRunner(context, 'cypress:run:spec', {
+  return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:run:spec', {
     SPEC_LIST: integrations.join(','),
   });
 }
 
 export async function SecuritySolutionCypressCliResponseOpsTestRunner(context: FtrProviderContext) {
-  return SecuritySolutionConfigurableCypressCliTestRunner(context, 'cypress:run:respops');
+  return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:run:respops');
 }
 
 export async function SecuritySolutionCypressCliCasesTestRunner(context: FtrProviderContext) {
-  return SecuritySolutionConfigurableCypressCliTestRunner(context, 'cypress:run:cases');
+  return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:run:cases');
 }
 
 export async function SecuritySolutionCypressCliTestRunner(context: FtrProviderContext) {
-  return SecuritySolutionConfigurableCypressCliTestRunner(context, 'cypress:run');
+  return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:run');
 }
 
 export async function SecuritySolutionCypressCliFirefoxTestRunner(context: FtrProviderContext) {
-  return SecuritySolutionConfigurableCypressCliTestRunner(context, 'cypress:run:firefox');
+  return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:run:firefox');
 }
 
 export async function SecuritySolutionCypressVisualTestRunner(context: FtrProviderContext) {
-  return SecuritySolutionConfigurableCypressCliTestRunner(context, 'cypress:open');
+  return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:open');
 }
 
 export async function SecuritySolutionCypressCcsTestRunner({ getService }: FtrProviderContext) {
