@@ -33,6 +33,8 @@ export const appLinks: Readonly<LinkItem[]> = Object.freeze([
       }),
     ],
     links: [hostsLinks, networkLinks, usersLinks],
+    skipUrlState: true,
+    hideTimeline: true,
   },
   timelinesLinks,
   getCasesLinkItems(),

@@ -7,14 +7,19 @@
  */
 
 import { XY_VIS_RENDERER } from '../constants';
-import { appendLayerIds } from '../helpers';
+import { appendLayerIds, getDataLayers } from '../helpers';
 import { LayeredXyVisFn } from '../types';
 import { logDatatables } from '../utils';
+import { validateMinTimeBarInterval, hasBarLayer } from './validate';
 
 export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers) => {
   const layers = appendLayerIds(args.layers ?? [], 'layers');
 
   logDatatables(layers, handlers);
+
+  const dataLayers = getDataLayers(layers);
+  const hasBar = hasBarLayer(dataLayers);
+  validateMinTimeBarInterval(dataLayers, hasBar, args.minTimeBarInterval);
 
   return {
     type: 'render',

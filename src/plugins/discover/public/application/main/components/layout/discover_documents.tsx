@@ -35,6 +35,7 @@ import { SortPairArr } from '../../../../components/doc_table/lib/get_sort';
 import { ElasticSearchHit } from '../../../../types';
 import { DocumentExplorerCallout } from '../document_explorer_callout';
 import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/document_explorer_update_callout';
+import { DiscoverTourProvider } from '../../../../components/discover_tour';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -157,7 +158,9 @@ function DiscoverDocumentsComponent({
       )}
       {!isLegacy && (
         <>
-          <DocumentExplorerUpdateCallout />
+          <DiscoverTourProvider>
+            <DocumentExplorerUpdateCallout />
+          </DiscoverTourProvider>
           <div className="dscDiscoverGrid">
             <DataGridMemoized
               ariaLabelledBy="documentsAriaLabel"
