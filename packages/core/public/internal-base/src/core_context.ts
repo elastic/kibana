@@ -7,7 +7,7 @@
  */
 
 import type { EnvironmentMode, PackageInfo } from '@kbn/config';
-import { CoreId } from '@kbn/core-common-internal-base';
+import type { CoreId } from '@kbn/core-common-internal-base';
 
 /** @internal */
 export interface CoreContext {
