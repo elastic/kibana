@@ -34,6 +34,7 @@ import {
   deleteRules,
   useLoadRuleTypes,
   RuleType,
+  NOTIFY_WHEN_OPTIONS,
   RuleEventLogListProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 // TODO: use a Delete modal from triggersActionUI when it's sharable
@@ -56,12 +57,8 @@ import { PageTitle, ItemTitleRuleSummary, ItemValueRuleSummary, Actions } from '
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchLast24hAlerts } from '../../hooks/use_fetch_last24h_alerts';
 import { formatInterval } from './utils';
-import {
-  hasExecuteActionsCapability,
-  hasAllPrivilege,
-  RULES_PAGE_LINK,
-  ALERT_PAGE_LINK,
-} from './config';
+import { hasExecuteActionsCapability, hasAllPrivilege } from './config';
+import { paths } from '../../config/paths';
 
 export function RuleDetailsPage() {
   const {
@@ -80,7 +77,7 @@ export function RuleDetailsPage() {
   const { ruleId } = useParams<RuleDetailsPathParams>();
   const { ObservabilityPageTemplate } = usePluginContext();
   const { isRuleLoading, rule, errorRule, reloadRule } = useFetchRule({ ruleId, http });
-  const { ruleTypes } = useLoadRuleTypes({
+  const { ruleTypes, ruleTypeIndex } = useLoadRuleTypes({
     filteredSolutions: OBSERVABILITY_SOLUTIONS,
   });
 
@@ -114,8 +111,9 @@ export function RuleDetailsPage() {
   useEffect(() => {
     if (ruleTypes.length && rule) {
       const matchedRuleType = ruleTypes.find((type) => type.id === rule.ruleTypeId);
+      setRuleType(matchedRuleType);
+
       if (rule.consumer === ALERTS_FEATURE_ID && matchedRuleType && matchedRuleType.producer) {
-        setRuleType(matchedRuleType);
         setFeatures(matchedRuleType.producer);
       } else setFeatures(rule.consumer);
     }
@@ -126,10 +124,10 @@ export function RuleDetailsPage() {
       text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
         defaultMessage: 'Alerts',
       }),
-      href: http.basePath.prepend(ALERT_PAGE_LINK),
+      href: http.basePath.prepend(paths.observability.alerts),
     },
     {
-      href: http.basePath.prepend(RULES_PAGE_LINK),
+      href: http.basePath.prepend(paths.observability.rules),
       text: RULES_BREADCRUMB_TEXT,
     },
     {
@@ -222,6 +220,9 @@ export function RuleDetailsPage() {
         />
       </EuiPanel>
     );
+  const getNotifyText = () =>
+    NOTIFY_WHEN_OPTIONS.find((option) => option.value === rule?.notifyWhen)?.inputDisplay ||
+    rule.notifyWhen;
   return (
     <ObservabilityPageTemplate
       pageHeader={{
@@ -385,7 +386,9 @@ export function RuleDetailsPage() {
                       defaultMessage: 'Rule type',
                     })}
                   </ItemTitleRuleSummary>
-                  <ItemValueRuleSummary itemValue={rule.ruleTypeId} />
+                  <ItemValueRuleSummary
+                    itemValue={ruleTypeIndex.get(rule.ruleTypeId)?.name || rule.ruleTypeId}
+                  />
                 </EuiFlexGroup>
 
                 <EuiSpacer size="l" />
@@ -443,8 +446,7 @@ export function RuleDetailsPage() {
                       defaultMessage: 'Notify',
                     })}
                   </ItemTitleRuleSummary>
-
-                  <ItemValueRuleSummary itemValue={String(rule.notifyWhen)} />
+                  <ItemValueRuleSummary itemValue={String(getNotifyText())} />
                 </EuiFlexGroup>
 
                 <EuiSpacer size="l" />
@@ -477,11 +479,11 @@ export function RuleDetailsPage() {
       <DeleteModalConfirmation
         onDeleted={async () => {
           setRuleToDelete([]);
-          navigateToUrl(http.basePath.prepend(RULES_PAGE_LINK));
+          navigateToUrl(http.basePath.prepend(paths.observability.rules));
         }}
         onErrors={async () => {
           setRuleToDelete([]);
-          navigateToUrl(http.basePath.prepend(RULES_PAGE_LINK));
+          navigateToUrl(http.basePath.prepend(paths.observability.rules));
         }}
         onCancel={() => {}}
         apiDeleteCall={deleteRules}
