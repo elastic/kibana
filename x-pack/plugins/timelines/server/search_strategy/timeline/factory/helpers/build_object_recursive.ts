@@ -10,7 +10,19 @@ import { get } from 'lodash/fp';
 import { Ecs } from '../../../../../common/ecs';
 import { Fields } from '../../../../../common/search_strategy';
 import { toStringArray } from '../../../../../common/utils/to_array';
+import { getNestedParentPath } from './get_nested_parent_path';
 
 export const buildObjectRecursive = (fieldPath: string, fields: Fields): Partial<Ecs> => {
-  return set({}, fieldPath, toStringArray(get(fieldPath, fields)));
+  const nestedParentPath = getNestedParentPath(fieldPath, fields);
+  if (!nestedParentPath) {
+    return set({}, fieldPath, toStringArray(get(fieldPath, fields)));
+  }
+
+  const subPath = fieldPath.replace(`${nestedParentPath}.`, '');
+  const subFields = (get(nestedParentPath, fields) ?? []) as Fields[];
+  return set(
+    {},
+    nestedParentPath,
+    subFields.map((subField) => buildObjectRecursive(subPath, subField))
+  );
 };
