@@ -16,8 +16,11 @@ import { AlertingAuthorization } from '../../authorization/alerting_authorizatio
 import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { InvalidatePendingApiKey } from '../../types';
 import { getBeforeSetup, setGlobalDate } from './lib';
+
+jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
+  bulkMarkApiKeysForInvalidation: jest.fn(),
+}));
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -47,23 +50,22 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   auditLogger,
 };
 
-beforeEach(() => {
-  getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
-  (auditLogger.log as jest.Mock).mockClear();
-});
-
 setGlobalDate();
 
 describe('enable()', () => {
   let rulesClient: RulesClient;
-  const existingAlert = {
+
+  const existingRule = {
     id: '1',
     type: 'alert',
     attributes: {
+      name: 'name',
       consumer: 'myApp',
       schedule: { interval: '10s' },
       alertTypeId: 'myType',
       enabled: false,
+      apiKey: 'MTIzOmFiYw==',
+      apiKeyOwner: 'elastic',
       actions: [
         {
           group: 'default',
@@ -80,22 +82,23 @@ describe('enable()', () => {
     references: [],
   };
 
+  const existingRuleWithoutApiKey = {
+    ...existingRule,
+    attributes: {
+      ...existingRule.attributes,
+      apiKey: null,
+      apiKeyOwner: null,
+    },
+  };
+
   beforeEach(() => {
+    getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
+    (auditLogger.log as jest.Mock).mockClear();
     rulesClient = new RulesClient(rulesClientParams);
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingAlert);
-    unsecuredSavedObjectsClient.get.mockResolvedValue(existingAlert);
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingRule);
+    unsecuredSavedObjectsClient.get.mockResolvedValue(existingRule);
     rulesClientParams.createAPIKey.mockResolvedValue({
       apiKeysEnabled: false,
-    });
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      ...existingAlert,
-      attributes: {
-        ...existingAlert.attributes,
-        enabled: true,
-        apiKey: null,
-        apiKeyOwner: null,
-        updatedBy: 'elastic',
-      },
     });
     taskManager.schedule.mockResolvedValue({
       id: '1',
@@ -183,38 +186,17 @@ describe('enable()', () => {
   });
 
   test('enables a rule', async () => {
-    const createdAt = new Date().toISOString();
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      ...existingAlert,
-      attributes: {
-        ...existingAlert.attributes,
-        enabled: true,
-        apiKey: null,
-        apiKeyOwner: null,
-        updatedBy: 'elastic',
-      },
-    });
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '123',
-        createdAt,
-      },
-      references: [],
-    });
-
     await rulesClient.enable({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
     });
     expect(unsecuredSavedObjectsClient.create).not.toBeCalledWith('api_key_pending_invalidation');
-    expect(rulesClientParams.createAPIKey).toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       'alert',
       '1',
       {
+        name: 'name',
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
         consumer: 'myApp',
@@ -224,8 +206,8 @@ describe('enable()', () => {
         },
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
-        apiKey: null,
-        apiKeyOwner: null,
+        apiKey: 'MTIzOmFiYw==',
+        apiKeyOwner: 'elastic',
         actions: [
           {
             group: 'default',
@@ -272,40 +254,65 @@ describe('enable()', () => {
     });
   });
 
-  test('invalidates API key if ever one existed prior to updating', async () => {
-    const createdAt = new Date().toISOString();
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
-      ...existingAlert,
-      attributes: {
-        ...existingAlert.attributes,
-        apiKey: Buffer.from('123:abc').toString('base64'),
-      },
+  test('enables a rule that does not have an apiKey', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingRuleWithoutApiKey);
+    rulesClientParams.createAPIKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '123', name: '123', api_key: 'abc' },
     });
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '123',
-        createdAt,
-      },
-      references: [],
-    });
-
     await rulesClient.enable({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
     });
-    expect(
-      (unsecuredSavedObjectsClient.create.mock.calls[0][1] as InvalidatePendingApiKey).apiKeyId
-    ).toBe('123');
+    expect(unsecuredSavedObjectsClient.create).not.toBeCalledWith('api_key_pending_invalidation');
+    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: myType/name');
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      'alert',
+      '1',
+      {
+        name: 'name',
+        schedule: { interval: '10s' },
+        alertTypeId: 'myType',
+        consumer: 'myApp',
+        enabled: true,
+        meta: {
+          versionApiKeyLastmodified: kibanaVersion,
+        },
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+        apiKey: 'MTIzOmFiYw==',
+        apiKeyOwner: 'elastic',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            actionTypeId: '1',
+            actionRef: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        executionStatus: {
+          status: 'pending',
+          lastDuration: 0,
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          error: null,
+          warning: null,
+        },
+      },
+      {
+        version: '123',
+      }
+    );
   });
 
   test(`doesn't enable already enabled alerts`, async () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      ...existingAlert,
+      ...existingRuleWithoutApiKey,
       attributes: {
-        ...existingAlert.attributes,
+        ...existingRuleWithoutApiKey.attributes,
         enabled: true,
       },
     });
@@ -328,6 +335,7 @@ describe('enable()', () => {
       'alert',
       '1',
       {
+        name: 'name',
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
         consumer: 'myApp',
@@ -365,14 +373,14 @@ describe('enable()', () => {
   });
 
   test('throws an error if API key creation throws', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingRuleWithoutApiKey);
+
     rulesClientParams.createAPIKey.mockImplementation(() => {
       throw new Error('no');
     });
-    expect(
+    await expect(
       async () => await rulesClient.enable({ id: '1' })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Error enabling rule: could not create API key - no"`
-    );
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Error creating API key for rule: no"`);
   });
 
   test('falls back when failing to getDecryptedAsInternalUser', async () => {
@@ -381,7 +389,7 @@ describe('enable()', () => {
     await rulesClient.enable({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
     expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
-      'enable(): Failed to load API key to invalidate on alert 1: Fail'
+      'enable(): Failed to load API key of alert 1: Fail'
     );
   });
 
@@ -399,31 +407,17 @@ describe('enable()', () => {
   });
 
   test('throws error when failing to update the first time', async () => {
-    const createdAt = new Date().toISOString();
     rulesClientParams.createAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
       result: { id: '123', name: '123', api_key: 'abc' },
     });
     unsecuredSavedObjectsClient.update.mockReset();
     unsecuredSavedObjectsClient.update.mockRejectedValueOnce(new Error('Fail to update'));
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '123',
-        createdAt,
-      },
-      references: [],
-    });
 
     await expect(rulesClient.enable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Fail to update"`
     );
     expect(rulesClientParams.getUserName).toHaveBeenCalled();
-    expect(rulesClientParams.createAPIKey).toHaveBeenCalled();
-    expect(
-      (unsecuredSavedObjectsClient.create.mock.calls[0][1] as InvalidatePendingApiKey).apiKeyId
-    ).toBe('123');
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
@@ -431,9 +425,9 @@ describe('enable()', () => {
   test('throws error when failing to update the second time', async () => {
     unsecuredSavedObjectsClient.update.mockReset();
     unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
-      ...existingAlert,
+      ...existingRuleWithoutApiKey,
       attributes: {
-        ...existingAlert.attributes,
+        ...existingRuleWithoutApiKey.attributes,
         enabled: true,
       },
     });
@@ -445,7 +439,6 @@ describe('enable()', () => {
       `"Fail to update second time"`
     );
     expect(rulesClientParams.getUserName).toHaveBeenCalled();
-    expect(rulesClientParams.createAPIKey).toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(2);
     expect(taskManager.schedule).toHaveBeenCalled();
   });
@@ -457,30 +450,19 @@ describe('enable()', () => {
       `"Fail to schedule"`
     );
     expect(rulesClientParams.getUserName).toHaveBeenCalled();
-    expect(rulesClientParams.createAPIKey).toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
   });
 
   test('enables a rule if conflict errors received when scheduling a task', async () => {
-    const createdAt = new Date().toISOString();
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      ...existingAlert,
+      ...existingRuleWithoutApiKey,
       attributes: {
-        ...existingAlert.attributes,
+        ...existingRuleWithoutApiKey.attributes,
         enabled: true,
         apiKey: null,
         apiKeyOwner: null,
         updatedBy: 'elastic',
       },
-    });
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '123',
-        createdAt,
-      },
-      references: [],
     });
     taskManager.schedule.mockRejectedValueOnce(
       Object.assign(new Error('Conflict!'), { statusCode: 409 })
@@ -492,11 +474,11 @@ describe('enable()', () => {
       namespace: 'default',
     });
     expect(unsecuredSavedObjectsClient.create).not.toBeCalledWith('api_key_pending_invalidation');
-    expect(rulesClientParams.createAPIKey).toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       'alert',
       '1',
       {
+        name: 'name',
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
         consumer: 'myApp',
@@ -506,8 +488,8 @@ describe('enable()', () => {
         },
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
-        apiKey: null,
-        apiKeyOwner: null,
+        apiKey: 'MTIzOmFiYw==',
+        apiKeyOwner: 'elastic',
         actions: [
           {
             group: 'default',

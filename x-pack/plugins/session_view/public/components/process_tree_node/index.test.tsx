@@ -17,8 +17,12 @@ import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { ProcessDeps, ProcessTreeNode } from '.';
 import { Cancelable } from 'lodash';
 import { DEBOUNCE_TIMEOUT } from '../../../common/constants';
+import { useDateFormat } from '../../hooks';
 
 jest.useFakeTimers('modern');
+
+jest.mock('../../hooks/use_date_format');
+const mockUseDateFormat = useDateFormat as jest.Mock;
 
 describe('ProcessTreeNode component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -45,6 +49,7 @@ describe('ProcessTreeNode component', () => {
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
+    mockUseDateFormat.mockImplementation(() => 'MMM D, YYYY @ HH:mm:ss.SSS');
   });
 
   describe('When ProcessTreeNode is mounted', () => {
@@ -57,7 +62,9 @@ describe('ProcessTreeNode component', () => {
     it('should have an alternate rendering for a session leader', async () => {
       renderResult = mockedContext.render(<ProcessTreeNode {...props} isSessionLeader />);
 
-      expect(renderResult.container.textContent).toEqual(' bash started by  vagrant');
+      expect(renderResult.container.textContent?.replace(/\s+/g, ' ')).toEqual(
+        ' bash started by vagrant'
+      );
     });
 
     // commented out until we get new UX for orphans treatment aka disjointed tree

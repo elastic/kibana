@@ -7,29 +7,36 @@
  */
 
 import { validateAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { ExtendedDataLayerArgs, ExtendedDataLayerFn } from '../types';
 import { EXTENDED_DATA_LAYER, LayerTypes } from '../constants';
-import { ExtendedDataLayerFn } from '../types';
+import { getAccessors, normalizeTable } from '../helpers';
 import {
-  validateMarkSizeForChartType,
   validateLineWidthForChartType,
-  validateShowPointsForChartType,
+  validateMarkSizeForChartType,
   validatePointsRadiusForChartType,
+  validateShowPointsForChartType,
 } from './validate';
 
-export const extendedDataLayerFn: ExtendedDataLayerFn['fn'] = async (input, args) => {
-  const table = args.table ?? input;
+export const extendedDataLayerFn: ExtendedDataLayerFn['fn'] = async (data, args, context) => {
+  const table = args.table ?? data;
+  const accessors = getAccessors<string, ExtendedDataLayerArgs>(args, table);
 
+  validateAccessor(accessors.xAccessor, table.columns);
+  validateAccessor(accessors.splitAccessor, table.columns);
+  accessors.accessors.forEach((accessor) => validateAccessor(accessor, table.columns));
   validateMarkSizeForChartType(args.markSizeAccessor, args.seriesType);
   validateAccessor(args.markSizeAccessor, table.columns);
   validateLineWidthForChartType(args.lineWidth, args.seriesType);
   validateShowPointsForChartType(args.showPoints, args.seriesType);
   validatePointsRadiusForChartType(args.pointsRadius, args.seriesType);
 
+  const normalizedTable = normalizeTable(table, accessors.xAccessor);
+
   return {
     type: EXTENDED_DATA_LAYER,
     ...args,
-    accessors: args.accessors ?? [],
     layerType: LayerTypes.DATA,
-    table,
+    ...accessors,
+    table: normalizedTable,
   };
 };

@@ -25,6 +25,7 @@ interface CreateTestConfigOptions {
   customizeLocalHostSsl?: boolean;
   rejectUnauthorized?: boolean; // legacy
   emailDomainsAllowed?: string[];
+  testFiles?: string[];
 }
 
 // test.not-enabled is specifically not enabled
@@ -42,6 +43,8 @@ const enabledActionTypes = [
   '.slack',
   '.webhook',
   '.xmatters',
+  '.test-sub-action-connector',
+  '.test-sub-action-connector-without-sub-actions',
   'test.authorization',
   'test.failing',
   'test.index-record',
@@ -64,6 +67,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     customizeLocalHostSsl = false,
     rejectUnauthorized = true, // legacy
     emailDomainsAllowed = undefined,
+    testFiles = undefined,
   } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -139,7 +143,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       : [];
 
     return {
-      testFiles: [require.resolve(`../${name}/tests/`)],
+      testFiles: testFiles ? testFiles : [require.resolve(`../${name}/tests/`)],
       servers,
       services,
       junit: {

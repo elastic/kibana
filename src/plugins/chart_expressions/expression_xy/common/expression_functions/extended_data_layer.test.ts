@@ -19,7 +19,6 @@ describe('extendedDataLayerConfig', () => {
     accessors: ['a', 'b'],
     splitAccessor: 'd',
     xScaleType: 'linear',
-    yScaleType: 'linear',
     isHistogram: false,
     palette: mockPaletteOutput,
   };

@@ -16,6 +16,7 @@ import {
   ColorVariant,
   Fit,
   GeometryValue,
+  GroupBy,
   HorizontalAlignment,
   LayoutDirection,
   LineAnnotation,
@@ -25,6 +26,7 @@ import {
   ScaleType,
   SeriesNameFn,
   Settings,
+  SmallMultiples,
   VerticalAlignment,
   XYChartSeriesIdentifier,
 } from '@elastic/charts';
@@ -58,6 +60,8 @@ import {
 } from '../../common/types';
 import { DataLayers } from './data_layers';
 import { Annotations } from './annotations';
+import { SplitChart } from './split_chart';
+import { LegendSize } from '@kbn/visualizations-plugin/common';
 
 const onClickValue = jest.fn();
 const onSelectRange = jest.fn();
@@ -154,7 +158,6 @@ describe('XYChart component', () => {
       splitAccessor: 'd',
       columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
       xScaleType: 'time',
-      yScaleType: 'linear',
       isHistogram: false,
       palette: mockPaletteOutput,
       table: {
@@ -214,7 +217,9 @@ describe('XYChart component', () => {
     });
 
     test('it uses passed in minInterval', () => {
-      const table1 = createSampleDatatableWithRows([{ a: 1, b: 2, c: 'I', d: 'Foo' }]);
+      const table1 = createSampleDatatableWithRows([
+        { a: 1, b: 2, c: '2019-01-02T05:00:00.000Z', d: 'Foo' },
+      ]);
       const table2 = createSampleDatatableWithRows([]);
 
       const component = shallow(
@@ -251,7 +256,6 @@ describe('XYChart component', () => {
         splitAccessor: 'd',
         columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
         xScaleType: 'time',
-        yScaleType: 'linear',
         isHistogram: true,
         palette: mockPaletteOutput,
         table: data,
@@ -437,7 +441,7 @@ describe('XYChart component', () => {
 
       test('should pass enabled histogram mode and min interval to endzones component', () => {
         const component = shallow(
-          <XYChart {...defaultProps} minInterval={24 * 60 * 60 * 1000} args={defaultTimeArgs} />
+          <XYChart {...defaultProps} minInterval={24 * 60 * 60 * 1000} args={timeArgs} />
         );
 
         expect(component.find(XyEndzones).dive().find('Endzones').props()).toEqual(
@@ -461,7 +465,8 @@ describe('XYChart component', () => {
                   seriesType: 'bar',
                   xScaleType: 'time',
                   isHistogram: true,
-                },
+                  table: newData,
+                } as DataLayerConfig,
               ],
             }}
           />
@@ -860,6 +865,29 @@ describe('XYChart component', () => {
     expect(component.find(EmptyPlaceholder).prop('icon')).toBeDefined();
   });
 
+  test('it renders empty placeholder for no results with references layer', () => {
+    const { data, args } = sampleArgsWithReferenceLine();
+    const emptyDataLayers = args.layers.map((layer) => {
+      if (layer.type === 'dataLayer') {
+        return { ...layer, table: { ...data, rows: [] } };
+      } else {
+        return layer;
+      }
+    });
+    const component = shallow(
+      <XYChart
+        {...defaultProps}
+        args={{
+          ...args,
+          layers: emptyDataLayers,
+        }}
+      />
+    );
+
+    expect(component.find(BarSeries)).toHaveLength(0);
+    expect(component.find(EmptyPlaceholder).prop('icon')).toBeDefined();
+  });
+
   test('onBrushEnd returns correct context data for date histogram data', () => {
     const { args } = sampleArgs();
 
@@ -876,7 +904,7 @@ describe('XYChart component', () => {
 
     expect(onSelectRange).toHaveBeenCalledWith({
       column: 0,
-      table: dateHistogramData.tables.timeLayer,
+      table: dateHistogramData,
       range: [1585757732783, 1585758880838],
     });
   });
@@ -924,7 +952,6 @@ describe('XYChart component', () => {
       layerType: LayerTypes.DATA,
       hide: false,
       xAccessor: 'xAccessorId',
-      yScaleType: 'linear',
       xScaleType: 'linear',
       isHistogram: true,
       seriesType: 'bar_stacked',
@@ -1000,7 +1027,6 @@ describe('XYChart component', () => {
               isHistogram: true,
               seriesType: 'bar_stacked',
               xAccessor: 'b',
-              yScaleType: 'linear',
               xScaleType: 'time',
               splitAccessor: 'b',
               accessors: ['d'],
@@ -1072,7 +1098,7 @@ describe('XYChart component', () => {
         {
           column: 0,
           row: 0,
-          table: dateHistogramData.tables.timeLayer,
+          table: dateHistogramData,
           value: 1585758120000,
         },
       ],
@@ -1122,7 +1148,6 @@ describe('XYChart component', () => {
       layerType: LayerTypes.DATA,
       hide: false,
       xAccessor: 'xAccessorId',
-      yScaleType: 'linear',
       xScaleType: 'linear',
       isHistogram: true,
       seriesType: 'bar_stacked',
@@ -1202,7 +1227,6 @@ describe('XYChart component', () => {
               accessors: ['a', 'b'],
               columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
               xScaleType: 'ordinal',
-              yScaleType: 'linear',
               isHistogram: false,
               palette: mockPaletteOutput,
               table: data,
@@ -1261,7 +1285,6 @@ describe('XYChart component', () => {
               accessors: ['a', 'b'],
               columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
               xScaleType: 'ordinal',
-              yScaleType: 'linear',
               isHistogram: false,
               palette: mockPaletteOutput,
               table: newData,
@@ -1292,7 +1315,6 @@ describe('XYChart component', () => {
               accessors: ['a', 'b'],
               columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
               xScaleType: 'ordinal',
-              yScaleType: 'linear',
               isHistogram: false,
               palette: mockPaletteOutput,
               table: data,
@@ -1975,7 +1997,7 @@ describe('XYChart component', () => {
         {...defaultProps}
         args={{
           ...args,
-          layers: [{ ...(args.layers[0] as DataLayerConfig), yScaleType: 'sqrt' }],
+          yLeftScale: 'sqrt',
         }}
       />
     );
@@ -2184,6 +2206,8 @@ describe('XYChart component', () => {
       xTitle: '',
       yTitle: '',
       yRightTitle: '',
+      yLeftScale: 'linear',
+      yRightScale: 'linear',
       legend: { type: 'legendConfig', isVisible: false, position: Position.Top },
       valueLabels: 'hide',
       tickLabelsVisibilitySettings: {
@@ -2224,7 +2248,6 @@ describe('XYChart component', () => {
           splitAccessor: 'b',
           columnToLabel: '',
           xScaleType: 'ordinal',
-          yScaleType: 'linear',
           isHistogram: false,
           palette: mockPaletteOutput,
           table: data1,
@@ -2239,7 +2262,6 @@ describe('XYChart component', () => {
           splitAccessor: 'b',
           columnToLabel: '',
           xScaleType: 'ordinal',
-          yScaleType: 'linear',
           isHistogram: false,
           palette: mockPaletteOutput,
           table: data2,
@@ -2303,6 +2325,8 @@ describe('XYChart component', () => {
         type: 'axisExtentConfig',
       },
       markSizeRatio: 1,
+      yLeftScale: 'linear',
+      yRightScale: 'linear',
       layers: [
         {
           layerId: 'first',
@@ -2314,7 +2338,6 @@ describe('XYChart component', () => {
           splitAccessor: 'b',
           columnToLabel: '',
           xScaleType: 'ordinal',
-          yScaleType: 'linear',
           isHistogram: false,
           palette: mockPaletteOutput,
           table: data,
@@ -2376,6 +2399,8 @@ describe('XYChart component', () => {
         type: 'axisExtentConfig',
       },
       markSizeRatio: 1,
+      yLeftScale: 'linear',
+      yRightScale: 'linear',
       layers: [
         {
           layerId: 'first',
@@ -2387,7 +2412,6 @@ describe('XYChart component', () => {
           splitAccessor: 'b',
           columnToLabel: '',
           xScaleType: 'ordinal',
-          yScaleType: 'linear',
           isHistogram: false,
           palette: mockPaletteOutput,
           table: data,
@@ -2482,6 +2506,37 @@ describe('XYChart component', () => {
     );
 
     expect(component.find(Settings).prop('legendPosition')).toEqual('top');
+  });
+
+  it('computes correct legend sizes', () => {
+    const { args } = sampleArgs();
+
+    const component = shallow(
+      <XYChart
+        {...defaultProps}
+        args={{
+          ...args,
+          legend: { ...args.legend, legendSize: LegendSize.SMALL },
+        }}
+      />
+    );
+    expect(component.find(Settings).prop('legendSize')).toEqual(80);
+
+    component.setProps({
+      args: {
+        ...args,
+        legend: { ...args.legend, legendSize: LegendSize.AUTO },
+      },
+    });
+    expect(component.find(Settings).prop('legendSize')).toBeUndefined();
+
+    component.setProps({
+      args: {
+        ...args,
+        legend: { ...args.legend, legendSize: undefined },
+      },
+    });
+    expect(component.find(Settings).prop('legendSize')).toEqual(130);
   });
 
   test('it should apply the fitting function to all non-bar series', () => {
@@ -2606,7 +2661,6 @@ describe('XYChart component', () => {
       xAccessor: 'c',
       accessors: ['a', 'b'],
       xScaleType: 'ordinal',
-      yScaleType: 'linear',
       isHistogram: false,
       palette: mockPaletteOutput,
       table: data,
@@ -2771,6 +2825,96 @@ describe('XYChart component', () => {
 
       expect(lineAnnotations.length).toEqual(2);
       expect(rectAnnotations.length).toEqual(1);
+    });
+  });
+
+  describe('split chart', () => {
+    const SPLIT_COLUMN = '__split_column__';
+    const SPLIT_ROW = '__split_row__';
+
+    it('should render split chart if splitRowAccessor is specified', () => {
+      const { args } = sampleArgs();
+      const splitRowAccessor = 'b';
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            layers: [{ ...(args.layers[0] as DataLayerConfig), seriesType: 'bar' }],
+            splitRowAccessor,
+          }}
+        />
+      );
+      expect(component).toMatchSnapshot();
+
+      const splitChart = component.find(SplitChart);
+
+      expect(splitChart.prop('splitRowAccessor')).toEqual(splitRowAccessor);
+
+      const groupBy = splitChart.dive().find(GroupBy);
+      const smallMultiples = splitChart.dive().find(SmallMultiples);
+
+      expect(groupBy.at(0).prop('id')).toEqual(SPLIT_ROW);
+      expect(smallMultiples.prop('splitHorizontally')).toEqual(SPLIT_ROW);
+    });
+
+    it('should render split chart if splitColumnAccessor is specified', () => {
+      const { args } = sampleArgs();
+      const splitColumnAccessor = 'b';
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            layers: [{ ...(args.layers[0] as DataLayerConfig), seriesType: 'bar' }],
+            splitColumnAccessor,
+          }}
+        />
+      );
+      expect(component).toMatchSnapshot();
+
+      const splitChart = component.find(SplitChart);
+
+      expect(splitChart.prop('splitColumnAccessor')).toEqual(splitColumnAccessor);
+
+      const groupBy = splitChart.dive().find(GroupBy);
+      const smallMultiples = splitChart.dive().find(SmallMultiples);
+
+      expect(groupBy.at(0).prop('id')).toEqual(SPLIT_COLUMN);
+      expect(smallMultiples.prop('splitVertically')).toEqual(SPLIT_COLUMN);
+    });
+
+    it('should render split chart if both, splitRowAccessor and splitColumnAccessor are specified', () => {
+      const { args } = sampleArgs();
+      const splitColumnAccessor = 'b';
+      const splitRowAccessor = 'c';
+
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            layers: [{ ...(args.layers[0] as DataLayerConfig), seriesType: 'bar' }],
+            splitColumnAccessor,
+            splitRowAccessor,
+          }}
+        />
+      );
+      expect(component).toMatchSnapshot();
+
+      const splitChart = component.find(SplitChart);
+
+      expect(splitChart.prop('splitRowAccessor')).toEqual(splitRowAccessor);
+      expect(splitChart.prop('splitColumnAccessor')).toEqual(splitColumnAccessor);
+
+      const groupBy = splitChart.dive().find(GroupBy);
+      const smallMultiples = splitChart.dive().find(SmallMultiples);
+
+      expect(groupBy.at(0).prop('id')).toEqual(SPLIT_COLUMN);
+      expect(groupBy.at(1).prop('id')).toEqual(SPLIT_ROW);
+
+      expect(smallMultiples.prop('splitVertically')).toEqual(SPLIT_COLUMN);
+      expect(smallMultiples.prop('splitHorizontally')).toEqual(SPLIT_ROW);
     });
   });
 });

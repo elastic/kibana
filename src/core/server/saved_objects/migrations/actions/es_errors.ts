@@ -21,3 +21,12 @@ export const isIncompatibleMappingException = ({ type }: estypes.ErrorCause): bo
 export const isIndexNotFoundException = ({ type }: estypes.ErrorCause): boolean => {
   return type === 'index_not_found_exception';
 };
+
+export const isClusterShardLimitExceeded = ({ type, reason }: estypes.ErrorCause): boolean => {
+  return (
+    type === 'validation_exception' &&
+    reason.match(
+      /this action would add .* shards, but this cluster currently has .* maximum normal shards open/
+    ) !== null
+  );
+};

@@ -35,7 +35,7 @@ export const createSampleDatatableWithRows = (rows: DatatableRow[]): Datatable =
       id: 'c',
       name: 'c',
       meta: {
-        type: 'date',
+        type: 'string',
         field: 'order_date',
         sourceParams: { type: 'date-histogram', params: { interval: 'auto' } },
         params: { id: 'string' },
@@ -56,7 +56,6 @@ export const sampleLayer: DataLayerConfig = {
   splitAccessor: 'd',
   columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
   xScaleType: 'ordinal',
-  yScaleType: 'linear',
   isHistogram: false,
   palette: mockPaletteOutput,
   table: createSampleDatatableWithRows([]),
@@ -72,7 +71,6 @@ export const sampleExtendedLayer: ExtendedDataLayerConfig = {
   splitAccessor: 'd',
   columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
   xScaleType: 'ordinal',
-  yScaleType: 'linear',
   isHistogram: false,
   palette: mockPaletteOutput,
   table: createSampleDatatableWithRows([]),
@@ -125,6 +123,8 @@ export const createArgsWithLayers = (
   },
   markSizeRatio: 5,
   layers: Array.isArray(layers) ? layers : [layers],
+  yLeftScale: 'linear',
+  yRightScale: 'linear',
 });
 
 export function sampleArgs() {

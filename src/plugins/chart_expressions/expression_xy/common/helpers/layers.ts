@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { WithLayerId } from '../types';
+import { Datatable, PointSeriesColumnNames } from '@kbn/expressions-plugin/common';
+import { WithLayerId, ExtendedDataLayerConfig, XYExtendedLayerConfigResult } from '../types';
+import { LayerTypes } from '../constants';
 
 function isWithLayerId<T>(layer: T): layer is T & WithLayerId {
   return (layer as T & WithLayerId).layerId ? true : false;
@@ -24,4 +26,33 @@ export function appendLayerIds<T>(
       ...l,
       layerId: isWithLayerId(l) ? l.layerId : generateLayerId(keyword, index),
     }));
+}
+
+export function getDataLayers(layers: XYExtendedLayerConfigResult[]) {
+  return layers.filter<ExtendedDataLayerConfig>(
+    (layer): layer is ExtendedDataLayerConfig =>
+      layer.layerType === LayerTypes.DATA || !layer.layerType
+  );
+}
+
+export function getAccessors<
+  T,
+  U extends { splitAccessor?: T; xAccessor?: T; accessors: T[]; markSizeAccessor?: T }
+>(args: U, table: Datatable) {
+  let splitAccessor: T | string | undefined = args.splitAccessor;
+  let xAccessor: T | string | undefined = args.xAccessor;
+  let accessors: Array<T | string> = args.accessors ?? [];
+  let markSizeAccessor: T | string | undefined = args.markSizeAccessor;
+
+  if (!splitAccessor && !xAccessor && !(accessors && accessors.length) && !markSizeAccessor) {
+    const y = table.columns.find((column) => column.id === PointSeriesColumnNames.Y)?.id;
+    xAccessor = table.columns.find((column) => column.id === PointSeriesColumnNames.X)?.id;
+    splitAccessor = table.columns.find((column) => column.id === PointSeriesColumnNames.COLOR)?.id;
+    accessors = y ? [y] : [];
+    markSizeAccessor = table.columns.find(
+      (column) => column.id === PointSeriesColumnNames.SIZE
+    )?.id;
+  }
+
+  return { splitAccessor, xAccessor, accessors, markSizeAccessor };
 }

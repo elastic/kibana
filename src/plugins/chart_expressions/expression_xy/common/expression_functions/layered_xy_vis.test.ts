@@ -14,7 +14,7 @@ import { XY_VIS } from '../constants';
 describe('layeredXyVis', () => {
   test('it renders with the specified data and args', async () => {
     const { data, args } = sampleArgs();
-    const { layers, ...rest } = args;
+    const { layers, markSizeRatio, ...rest } = args;
     const result = await layeredXyVisFunction.fn(
       data,
       { ...rest, layers: [sampleExtendedLayer] },
@@ -50,6 +50,23 @@ describe('layeredXyVis', () => {
         {
           ...rest,
           markSizeRatio: 101,
+          layers: [sampleExtendedLayer],
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  test('it should throw error if markSizeRatio is specified if no markSizeAccessor is present', async () => {
+    const { data, args } = sampleArgs();
+    const { layers, ...rest } = args;
+
+    expect(
+      layeredXyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          markSizeRatio: 10,
           layers: [sampleExtendedLayer],
         },
         createMockExecutionContext()
