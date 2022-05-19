@@ -21,8 +21,7 @@ function findFeature(layer, callbackFn) {
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  // Failing: See https://github.com/elastic/kibana/issues/132368
-  describe.skip('getTile', () => {
+  describe('getTile', () => {
     it('should return ES vector tile containing documents and metadata', async () => {
       const resp = await supertest
         .get(
@@ -78,9 +77,9 @@ export default function ({ getService }) {
       expect(metadataFeature.loadGeometry()).to.eql([
         [
           { x: 44, y: 2382 },
-          { x: 550, y: 2382 },
-          { x: 550, y: 1913 },
           { x: 44, y: 1913 },
+          { x: 550, y: 1913 },
+          { x: 550, y: 2382 },
           { x: 44, y: 2382 },
         ],
       ]);
