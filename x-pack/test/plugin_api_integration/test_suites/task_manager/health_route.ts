@@ -225,7 +225,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(typeof proposed.avg_required_throughput_per_minute_per_kibana).to.eql('number');
     });
 
-    it('should return an estimation of task manager capacity', async () => {
+    it('should return an estimation of task manager capacity as an array', async () => {
       const {
         workload: { value: workload },
       } = (await getHealth()).stats;
@@ -240,15 +240,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(typeof workload.capacity_requirements.per_day).to.eql('number');
 
       expect(Array.isArray(workload.estimated_schedule_density)).to.eql(true);
-
-      // test run with the default poll_interval of 3s and a monitored_aggregated_stats_refresh_rate of 5s,
-      // so we expect the estimated_schedule_density to span a minute (which means 20 buckets, as 60s / 3s = 20)
-      // Note: Due to an issue in ES, sometimes it returns 21 buckets for the active time span
-      // which causes miscalculation of the expected result (22)
-      expect(
-        workload.estimated_schedule_density.length === 20 ||
-          workload.estimated_schedule_density.length === 22
-      ).to.be(true);
     });
 
     it('should return the task manager runtime stats', async () => {
