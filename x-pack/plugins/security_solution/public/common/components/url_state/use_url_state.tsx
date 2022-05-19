@@ -40,9 +40,9 @@ import {
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { UrlInputsModel } from '../../store/inputs/model';
 import { queryTimelineByIdOnUrlChange } from './query_timeline_by_id_on_url_change';
-import { useIsGroupedNavigationEnabled } from '../navigation/helpers';
 import { getLinkInfo } from '../../links';
 import { SecurityPageName } from '../../../app/types';
+import { useIsGroupedNavigationEnabled } from '../navigation/helpers';
 
 function usePrevious(value: PreviousLocationUrlState) {
   const ref = useRef<PreviousLocationUrlState>(value);
@@ -66,6 +66,7 @@ export const useUrlStateHooks = ({
   const { pathname: browserPathName } = useLocation();
   const prevProps = usePrevious({ pathName, pageName, urlState, search });
   const isGroupedNavEnabled = useIsGroupedNavigationEnabled();
+  const linkInfo = pageName ? getLinkInfo(pageName as SecurityPageName) : undefined;
 
   const { setInitialStateFromUrl, updateTimeline, updateTimelineIsLoading } =
     useSetInitialStateFromUrl();
@@ -74,9 +75,10 @@ export const useUrlStateHooks = ({
     (type: UrlStateType) => {
       const urlStateUpdatesToStore: UrlStateToRedux[] = [];
       const urlStateUpdatesToLocation: ReplaceStateInLocation[] = [];
+      const skipUrlState = isGroupedNavEnabled ? linkInfo?.skipUrlState : isAdministration(type);
 
       // Delete all query strings from URL when the page is security/administration (Manage menu group)
-      if (isAdministration(type)) {
+      if (skipUrlState) {
         ALL_URL_STATE_KEYS.forEach((urlKey: KeyUrlState) => {
           urlStateUpdatesToLocation.push({
             urlStateToReplace: '',
@@ -150,6 +152,8 @@ export const useUrlStateHooks = ({
       setInitialStateFromUrl,
       urlState,
       isFirstPageLoad,
+      isGroupedNavEnabled,
+      linkInfo?.skipUrlState,
     ]
   );
 
@@ -163,8 +167,9 @@ export const useUrlStateHooks = ({
     if (browserPathName !== pathName) return;
 
     const type: UrlStateType = getUrlType(pageName);
+    const skipUrlState = isGroupedNavEnabled ? linkInfo?.skipUrlState : isAdministration(type);
 
-    if (!deepEqual(urlState, prevProps.urlState) && !isFirstPageLoad && !isAdministration(type)) {
+    if (!deepEqual(urlState, prevProps.urlState) && !isFirstPageLoad && !skipUrlState) {
       const urlStateUpdatesToLocation: ReplaceStateInLocation[] = ALL_URL_STATE_KEYS.map(
         (urlKey: KeyUrlState) => ({
           urlStateToReplace: getUrlStateKeyValue(urlState, urlKey),
@@ -190,15 +195,17 @@ export const useUrlStateHooks = ({
     browserPathName,
     handleInitialize,
     search,
+    isGroupedNavEnabled,
+    linkInfo?.skipUrlState,
   ]);
 
   useEffect(() => {
     if (!isGroupedNavEnabled) {
       document.title = `${getTitle(pageName, navTabs)} - Kibana`;
     } else {
-      document.title = `${getLinkInfo(pageName as SecurityPageName)?.title ?? ''} - Kibana`;
+      document.title = `${linkInfo?.title ?? ''} - Kibana`;
     }
-  }, [pageName, navTabs, isGroupedNavEnabled]);
+  }, [pageName, navTabs, isGroupedNavEnabled, linkInfo]);
 
   useEffect(() => {
     queryTimelineByIdOnUrlChange({
