@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { TimeRange } from '../../../../../../common/http_api/shared';
+
 /**
  * returns a nested aggregation of the monitored products per cluster, standalone
  * included. each product aggregation retrieves the related metricsets and the
  * last time they were ingested.
  */
-export const monitoredClustersQuery = () => {
+export const monitoredClustersQuery = ({ min, max }: TimeRange) => {
   return {
     query: {
       bool: {
@@ -18,8 +20,8 @@ export const monitoredClustersQuery = () => {
           {
             range: {
               timestamp: {
-                gte: 'now-60m',
-                lte: 'now',
+                gte: min,
+                lte: max,
               },
             },
           },
@@ -28,15 +30,7 @@ export const monitoredClustersQuery = () => {
     },
     aggs: {
       clusters: {
-        terms: {
-          script: `
-            if (doc['cluster_uuid'].size() == 0 || doc['cluster_uuid'].empty) {
-              return 'standalone';
-            } else {
-              return doc['cluster_uuid'].value;
-            }
-          `,
-        },
+        terms: clusterUuidTerm,
         aggs: {
           cluster: clusterAggregation,
           elasticsearch: esAggregation,
@@ -58,15 +52,7 @@ export const stableMetricsetsQuery = () => {
   return {
     aggs: {
       clusters: {
-        terms: {
-          script: `
-            if (doc['cluster_uuid'].size() == 0 || doc['cluster_uuid'].empty) {
-              return 'standalone';
-            } else {
-              return doc['cluster_uuid'].value;
-            }
-          `,
-        },
+        terms: clusterUuidTerm,
         aggs: {
           elasticsearch: {
             terms: {
@@ -127,7 +113,17 @@ export const stableMetricsetsQuery = () => {
   };
 };
 
-const lastSeenByIndex = (aggregation) => {
+const clusterUuidTerm = {
+  script: `
+    if (doc['cluster_uuid'].size() == 0 || doc['cluster_uuid'].empty) {
+      return 'standalone';
+    } else {
+      return doc['cluster_uuid'].value;
+    }
+  `,
+};
+
+const lastSeenByIndex = (aggregation: { filter: any }) => {
   return {
     ...aggregation,
     aggs: {
