@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import {
   EuiHealth,
@@ -29,35 +29,25 @@ interface Props {
 
 const formatNumber = (value: number) => (value < 1000 ? value : numeral(value).format('0.0a'));
 
-export const FindingsDistributionBar = ({ failed, passed, total, pageEnd, pageStart }: Props) => {
-  const count = useMemo(
-    () =>
-      total
-        ? { total, passed: passed / total, failed: failed / total }
-        : { total: 0, passed: 0, failed: 0 },
-    [total, failed, passed]
-  );
-
-  return (
-    <div>
-      <Counters {...{ failed, passed, total, pageEnd, pageStart }} />
-      <EuiSpacer size="s" />
-      <DistributionBar {...count} />
-    </div>
-  );
-};
+export const FindingsDistributionBar = (props: Props) => (
+  <div>
+    <Counters {...props} />
+    <EuiSpacer size="s" />
+    <DistributionBar {...props} />
+  </div>
+);
 
 const Counters = ({ pageStart, pageEnd, total, failed, passed }: Props) => (
   <EuiFlexGroup justifyContent="spaceBetween">
     <EuiFlexItem>
-      {!!total && <CurrentPageOfTotal pageStart={pageStart} pageEnd={pageEnd} total={total} />}
+      <CurrentPageOfTotal pageStart={pageStart} pageEnd={pageEnd} total={total} />
     </EuiFlexItem>
     <EuiFlexItem
       css={css`
         align-items: flex-end;
       `}
     >
-      {!!total && <PassedFailedCounters passed={passed} failed={failed} />}
+      <PassedFailedCounters passed={passed} failed={failed} />
     </EuiFlexItem>
   </EuiFlexGroup>
 );
