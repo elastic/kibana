@@ -10,9 +10,9 @@ import { isEmpty } from 'lodash';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import agent from 'elastic-apm-node';
 
-import { DataViewAttributes, SavedObject } from '@kbn/data-views-plugin/common';
-
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import { buildRuleMessageFactory } from './factories/build_rule_message_factory';
 import {
   checkPrivilegesFromEsClient,
@@ -38,11 +38,19 @@ import { scheduleThrottledNotificationActions } from '../notifications/schedule_
 import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
 import { extractReferences, injectReferences } from '../signals/saved_object_references';
 import { withSecuritySpan } from '../../../utils/with_security_span';
-import { hasDataViewInParams } from '../schemas/utils';
+import { getInputIndex } from '../signals/get_input_output_index';
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
-  ({ lists, logger, config, ruleDataClient, eventLogService, ruleExecutionLoggerFactory }) =>
+  ({
+    lists,
+    logger,
+    config,
+    ruleDataClient,
+    eventLogService,
+    ruleExecutionLoggerFactory,
+    version,
+  }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
     const persistenceRuleType = createPersistenceRuleTypeWrapper({ ruleDataClient, logger });
@@ -70,6 +78,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             rule,
           } = options;
           let runState = state;
+          let hasError = false;
+          let inputIndex: string[] = [];
+          let runtimeMappings: estypes.MappingRuntimeFields = {};
           const { from, maxSignals, meta, ruleId, timestampOverride, to } = params;
           const {
             alertWithPersistence,
@@ -133,35 +144,43 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             id: alertId,
           };
 
+          // Data views logic:
+          // All rules other than ML currently support data views OR
+          // index patterns. This checks for a few error states and also
+          // determines the index pattern to be used
+          if (!isMachineLearningParams(params)) {
+            try {
+              const { index, runtimeMappings: dataViewRuntimeMappings } = await getInputIndex({
+                index: params.index,
+                services,
+                version,
+                logger,
+                ruleId: params.ruleId,
+                dataViewId: params.dataViewId,
+              });
+
+              inputIndex = index ?? [];
+              runtimeMappings = dataViewRuntimeMappings ?? {};
+            } catch (exc) {
+              const errorMessage = buildRuleMessage(`Check for indices to search failed ${exc}`);
+              logger.error(errorMessage);
+              await ruleExecutionLogger.logStatusChange({
+                newStatus: RuleExecutionStatus.failed,
+                message: errorMessage,
+              });
+
+              return result.state;
+            }
+          }
+
           // check if rule has permissions to access given index pattern
           // move this collection of lines into a function in utils
           // so that we can use it in create rules route, bulk, etc.
           try {
             if (!isMachineLearningParams(params)) {
-              let runtimeMappings = {};
-              let kibanaIndexPattern: SavedObject<DataViewAttributes> | null = null;
-              // hasDataViewInParams is a typeguard that asserts ruleParams are either
-              // threat match, threshold, eql, or query rule types
-              if (
-                hasDataViewInParams(params) &&
-                params.dataViewId != null &&
-                params.dataViewId !== ''
-              ) {
-                kibanaIndexPattern = await services.savedObjectsClient.get<DataViewAttributes>(
-                  'index-pattern',
-                  params.dataViewId
-                );
-                if (kibanaIndexPattern?.attributes.runtimeFieldMap != null) {
-                  runtimeMappings = JSON.parse(kibanaIndexPattern.attributes.runtimeFieldMap);
-                  logger.debug(`runtime mappings ${runtimeMappings}`);
-                }
-              }
-              const index = kibanaIndexPattern?.attributes.title.split(',') ?? params.index;
               const hasTimestampOverride = !!timestampOverride;
 
-              const inputIndices = index ?? [];
-
-              const privileges = await checkPrivilegesFromEsClient(esClient, inputIndices);
+              const privileges = await checkPrivilegesFromEsClient(esClient, inputIndex);
 
               wroteWarningStatus = await hasReadIndexPrivileges({
                 privileges,
@@ -175,7 +194,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 const timestampFieldCaps = await withSecuritySpan('fieldCaps', () =>
                   services.scopedClusterClient.asCurrentUser.fieldCaps(
                     {
-                      index,
+                      index: inputIndex,
                       fields: hasTimestampOverride
                         ? ['@timestamp', timestampOverride]
                         : ['@timestamp'],
@@ -189,7 +208,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 wroteWarningStatus = await hasTimestampFields({
                   timestampField: hasTimestampOverride ? timestampOverride : '@timestamp',
                   timestampFieldCapsResponse: timestampFieldCaps,
-                  inputIndices,
+                  inputIndices: inputIndex,
                   ruleExecutionLogger,
                   logger,
                   buildRuleMessage,
@@ -205,7 +224,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             });
             wroteWarningStatus = true;
           }
-          let hasError = false;
           const { tuples, remainingGap } = getRuleRangeTuples({
             logger,
             previousStartedAt,
@@ -275,6 +293,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 services,
                 state: runState,
                 runOpts: {
+                  inputIndex,
+                  runtimeMappings,
                   buildRuleMessage,
                   bulkCreate,
                   exceptionItems,

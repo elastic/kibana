@@ -152,15 +152,6 @@ const CreateRulePageComponent: React.FC = () => {
     fetchDataViews();
   }, [dataServices.dataViews]);
 
-  // const fetchDataViewIndices = async (datVId: string) => {
-  //   const dv = await data.dataViews.get(datVId);
-  //   indexFieldsSearch(dv.title.split(','));
-  // };
-
-  // useEffect(() => {
-  //   fetchDataViewIndices();
-  // });
-
   const handleAccordionToggle = useCallback(
     (step: RuleStep, isOpen: boolean) =>
       setOpenSteps((_openSteps) => ({
@@ -351,10 +342,6 @@ const CreateRulePageComponent: React.FC = () => {
                 }
               >
                 <EuiHorizontalRule margin="m" />
-                {/* {console.error(
-                  'DEFAULT VALUES',
-                  JSON.stringify(stepsData.current[RuleStep.defineRule].data, null, 2)
-                )} */}
                 <StepDefineRule
                   addPadding={true}
                   defaultValues={stepsData.current[RuleStep.defineRule].data}

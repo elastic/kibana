@@ -7,16 +7,26 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const IMPORT_TIMELINE_MODAL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.importTimelineModalTitle',
-  {
-    defaultMessage: 'Import query from saved timeline',
-  }
-);
-
 export const PICK_INDEX_PATTERNS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.pickDataView',
+  'xpack.securitySolution.detectionEngine.stepDefineRule.pickDataView',
   {
     defaultMessage: 'Select a Data View',
   }
 );
+
+export const DATA_VIEW_NOT_FOUND_WARNING_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.stepDefineRule.dataViewNotFoundLabel',
+  {
+    defaultMessage: 'Selected data view not found',
+  }
+);
+
+export const DATA_VIEW_NOT_FOUND_WARNING_DESCRIPTION = (dataView: string) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.stepDefineRule.dataViewNotFoundDescription',
+    {
+      values: { dataView },
+      defaultMessage:
+        'Your data view of "id": "{dataView}" was not found. It could be that it has since been deleted.',
+    }
+  );

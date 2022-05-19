@@ -332,6 +332,7 @@ export interface SearchAfterAndBulkCreateParams {
   wrapHits: WrapHits;
   trackTotalHits?: boolean;
   sortOrder?: estypes.SortOrder;
+  runtimeMappings?: estypes.MappingRuntimeFields | null;
 }
 
 export interface SearchAfterAndBulkCreateReturnType {
