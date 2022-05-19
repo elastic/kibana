@@ -6,5 +6,13 @@
  * Side Public License, v 1.
  */
 
-export { NoDataViews } from './no_data_views';
-export { NoDataViews as NoDataViewsComponent } from './no_data_views.component';
+import { FtrConfigProviderContext } from '@kbn/test';
+
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+  const functionalConfig = await readConfigFile(require.resolve('../../../config.base.js'));
+
+  return {
+    ...functionalConfig.getAll(),
+    testFiles: [require.resolve('.')],
+  };
+}
