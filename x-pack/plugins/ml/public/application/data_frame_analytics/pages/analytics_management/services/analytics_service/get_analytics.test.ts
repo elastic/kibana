@@ -15,7 +15,7 @@ describe('get_analytics', () => {
     const mockResponse: GetDataFrameAnalyticsStatsResponseOk = {
       count: 2,
       data_frame_analytics: [
-        // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
+        // @ts-expect-error test response missing expected properties
         {
           id: 'outlier-cloudwatch',
           state: DATA_FRAME_TASK_STATE.STOPPED,
@@ -38,7 +38,7 @@ describe('get_analytics', () => {
             },
           ],
         },
-        // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
+        // @ts-expect-error test response missing expected properties
         {
           id: 'reg-gallery',
           state: DATA_FRAME_TASK_STATE.FAILED,

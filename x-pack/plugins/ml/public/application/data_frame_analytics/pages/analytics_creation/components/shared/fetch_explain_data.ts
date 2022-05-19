@@ -7,7 +7,7 @@
 
 import { ml } from '../../../../../services/ml_api_service';
 import { extractErrorProperties } from '../../../../../../../common/util/errors';
-import { DfAnalyticsExplainResponse, FieldSelectionItem } from '../../../../common/analytics';
+import { DfAnalyticsExplainResponse, FieldSelectionItem } from '../../../../../../../common/types/data_frame_analytics';
 import {
   getJobConfigFromFormState,
   State,

@@ -55,11 +55,7 @@ export interface ClassificationAnalysis {
   classification: Classification;
 }
 
-interface GenericAnalysis {
-  [key: string]: Record<string, any>;
-}
-
-export type AnalysisConfig = estypes.MlDataframeAnalysisContainer | GenericAnalysis;
+export type AnalysisConfig = estypes.MlDataframeAnalysisContainer;
 export interface DataFrameAnalyticsConfig
   extends Omit<estypes.MlDataframeAnalyticsSummary, 'analyzed_fields'> {
   analyzed_fields?: estypes.MlDataframeAnalysisAnalyzedFields;
@@ -73,6 +69,13 @@ export type DataFrameTaskStateType = estypes.MlDataframeState | 'analyzing' | 'r
 export interface DataFrameAnalyticsStats extends Omit<estypes.MlDataframeAnalytics, 'state'> {
   failure_reason?: string;
   state: DataFrameTaskStateType;
+}
+
+export type DfAnalyticsExplainResponse = estypes.MlExplainDataFrameAnalyticsResponse;
+
+export interface FieldSelectionItem
+  extends Omit<estypes.MlDataframeAnalyticsFieldSelection, 'mapping_types'> {
+  mapping_types?: string[];
 }
 
 export interface AnalyticsMapNodeElement {

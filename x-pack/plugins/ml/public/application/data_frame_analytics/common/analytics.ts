@@ -9,7 +9,6 @@ import { useEffect } from 'react';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter } from 'rxjs/operators';
 import { cloneDeep } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ml } from '../../services/ml_api_service';
 import { Dictionary } from '../../../../common/types/common';
 import { extractErrorMessage } from '../../../../common/util/errors';
@@ -107,12 +106,6 @@ export enum INDEX_STATUS {
   ERROR,
 }
 
-export interface FieldSelectionItem
-  extends Omit<estypes.MlDataframeAnalyticsFieldSelection, 'mapping_types'> {
-  mapping_types?: string[];
-}
-
-export type DfAnalyticsExplainResponse = estypes.MlExplainDataFrameAnalyticsResponse;
 export interface Eval {
   mse: number | string;
   msle: number | string;
