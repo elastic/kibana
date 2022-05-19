@@ -89,6 +89,7 @@ class DocLinks {
   public workplaceSearchSharePointServer: string;
   public workplaceSearchSlack: string;
   public workplaceSearchSynch: string;
+  public workplaceSearchTeams: string;
   public workplaceSearchZendesk: string;
 
   constructor() {
@@ -173,6 +174,7 @@ class DocLinks {
     this.workplaceSearchSharePointServer = '';
     this.workplaceSearchSlack = '';
     this.workplaceSearchSynch = '';
+    this.workplaceSearchTeams = '';
     this.workplaceSearchZendesk = '';
   }
 
@@ -261,6 +263,7 @@ class DocLinks {
     this.workplaceSearchSharePointServer = docLinks.links.workplaceSearch.sharePointServer;
     this.workplaceSearchSlack = docLinks.links.workplaceSearch.slack;
     this.workplaceSearchSynch = docLinks.links.workplaceSearch.synch;
+    this.workplaceSearchTeams = docLinks.links.workplaceSearch.teams;
     this.workplaceSearchZendesk = docLinks.links.workplaceSearch.zendesk;
   }
 }

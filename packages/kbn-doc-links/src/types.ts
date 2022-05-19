@@ -136,6 +136,7 @@ export interface DocLinks {
     readonly sharePointServer: string;
     readonly slack: string;
     readonly synch: string;
+    readonly teams: string;
     readonly zendesk: string;
   };
   readonly heartbeat: {

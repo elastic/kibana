@@ -649,7 +649,7 @@ export const staticSourceData: SourceDataItem[] = [
       isPublicKey: false,
       hasOauthRedirect: false,
       needsBaseUrl: false,
-      documentationUrl: docLinks.workplaceSearchCustomSources, // TODO Update this when we have a doclink
+      documentationUrl: docLinks.workplaceSearchTeams,
       applicationPortalUrl: '',
       githubRepository: 'elastic/enterprise-search-teams-connector',
     },
