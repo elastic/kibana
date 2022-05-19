@@ -82,7 +82,6 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
     return (
       <Panel loading={loading} data-test-subj="user-anomalies-tab">
         <HeaderSection
-          height={!toggleStatus ? 40 : undefined}
           subtitle={`${i18n.SHOWING}: ${pagination.totalItemCount.toLocaleString()} ${i18n.UNIT(
             pagination.totalItemCount
           )}`}
