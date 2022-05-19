@@ -15,6 +15,7 @@ import type { ApplicationStart } from '@kbn/core/public';
 import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
 import type { NavigationSection } from '../../../services/navigation_registry';
 import { NavNameWithBadge, hideBadge } from './nav_name_with_badge';
+import { ObservabilityTour } from '../tour';
 
 export type WrappedPageTemplateProps = Pick<
   KibanaPageTemplateProps,
@@ -85,6 +86,7 @@ export function ObservabilityPageTemplate({
             ),
             href,
             isSelected,
+            'data-nav-id': entry.label.toLowerCase().split(' ').join('_'),
             onClick: (event) => {
               if (entry.onClick) {
                 entry.onClick(event);
@@ -131,7 +133,10 @@ export function ObservabilityPageTemplate({
           : undefined
       }
     >
-      {children}
+      <>
+        <ObservabilityTour />
+        {children}
+      </>
     </KibanaPageTemplate>
   );
 }
