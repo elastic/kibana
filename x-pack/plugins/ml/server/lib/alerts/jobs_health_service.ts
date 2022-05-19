@@ -367,10 +367,11 @@ export function jobsHealthServiceProvider(
       if (config.mml.enabled) {
         const response = await this.getMmlReport(jobIds);
         if (response && response.length > 0) {
-          const { hard_limit: hardLimitJobs, soft_limit: softLimitJobs } = groupBy(
-            response,
-            'memory_status'
-          );
+          const {
+            hard_limit: hardLimitJobs,
+            soft_limit: softLimitJobs,
+            ok: okJobs,
+          } = groupBy(response, 'memory_status');
 
           const isHealthy = hardLimitJobs.length === 0 && softLimitJobs.length === 0;
 
@@ -421,7 +422,7 @@ export function jobsHealthServiceProvider(
             isHealthy,
             name: HEALTH_CHECK_NAMES.mml.name,
             context: {
-              results: response,
+              results: isHealthy ? okJobs : [...(hardLimitJobs ?? []), ...(softLimitJobs ?? [])],
               message,
             },
           });

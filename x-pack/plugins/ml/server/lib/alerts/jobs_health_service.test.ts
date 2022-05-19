@@ -287,6 +287,7 @@ describe('JobsHealthService', () => {
 
     expect(executionResult).toEqual([
       {
+        isHealthy: false,
         name: 'Data delay has occurred',
         context: {
           results: [
@@ -342,6 +343,7 @@ describe('JobsHealthService', () => {
 
     expect(executionResult).toEqual([
       {
+        isHealthy: false,
         name: 'Datafeed is not started',
         context: {
           results: [
@@ -356,6 +358,7 @@ describe('JobsHealthService', () => {
         },
       },
       {
+        isHealthy: false,
         name: 'Model memory limit reached',
         context: {
           results: [
@@ -374,6 +377,7 @@ describe('JobsHealthService', () => {
         },
       },
       {
+        isHealthy: false,
         name: 'Data delay has occurred',
         context: {
           results: [
