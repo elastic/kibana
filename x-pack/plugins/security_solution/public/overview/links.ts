@@ -48,6 +48,7 @@ export const gettingStartedLinks: LinkItem = {
     }),
   ],
   skipUrlState: true,
+  hideTimeline: true,
 };
 
 export const detectionResponseLinks: LinkItem = {

@@ -32,8 +32,8 @@ const appLinksUpdater$ = new BehaviorSubject<{
   normalizedLinks: {}, // stores a flatten normalized object for direct id access
 });
 
-const getAppLinksValue = () => appLinksUpdater$.getValue().links;
-const getNormalizedLinksValue = () => appLinksUpdater$.getValue().normalizedLinks;
+const getAppLinksValue = (): AppLinkItems => appLinksUpdater$.getValue().links;
+const getNormalizedLinksValue = (): NormalizedLinks => appLinksUpdater$.getValue().normalizedLinks;
 
 /**
  * Subscribes to the updater to get the app links updates
@@ -220,4 +220,8 @@ const isLinkAllowed = (
     return false;
   }
   return true;
+};
+
+export const getLinksWithHiddenTimeline = (): LinkInfo[] => {
+  return Object.values(getNormalizedLinksValue()).filter((link) => link.hideTimeline);
 };

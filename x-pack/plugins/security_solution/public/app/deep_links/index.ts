@@ -36,6 +36,7 @@ import {
   GETTING_STARTED,
   THREAT_HUNTING,
   DASHBOARDS,
+  CREATE_NEW_RULE,
 } from '../translations';
 import {
   OVERVIEW_PATH,
@@ -60,6 +61,7 @@ import {
   THREAT_HUNTING_PATH,
   DASHBOARDS_PATH,
   MANAGE_PATH,
+  RULES_CREATE_PATH,
 } from '../../../common/constants';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 import { subscribeAppLinks } from '../../common/links';
@@ -186,6 +188,15 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
           }),
         ],
         searchable: true,
+        deepLinks: [
+          {
+            id: SecurityPageName.rulesCreate,
+            title: CREATE_NEW_RULE,
+            path: RULES_CREATE_PATH,
+            navLinkStatus: AppNavLinkStatus.hidden,
+            searchable: false,
+          },
+        ],
       },
       {
         id: SecurityPageName.exceptions,

@@ -104,6 +104,10 @@ export interface LinkItem {
    */
   skipUrlState?: boolean;
   /**
+   * Disables the timeline call to action on the bottom of the page. Defaults to false.
+   */
+  hideTimeline?: boolean; // defaults to false
+  /**
    * Title of the link
    */
   title: string;

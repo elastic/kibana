@@ -325,29 +325,41 @@ exports.Cluster = class Cluster {
     this._log.info(chalk.bold('Starting'));
     this._log.indent(4);
 
-    const esArgs = [
-      'action.destructive_requires_name=true',
-      'ingest.geoip.downloader.enabled=false',
-      'search.check_ccs_compatibility=true',
-      'cluster.routing.allocation.disk.threshold_enabled=false',
-    ].concat(options.esArgs || []);
+    const esArgs = new Map([
+      ['action.destructive_requires_name', 'true'],
+      ['cluster.routing.allocation.disk.threshold_enabled', 'false'],
+      ['ingest.geoip.downloader.enabled', 'false'],
+      ['search.check_ccs_compatibility', 'true'],
+    ]);
+
+    // options.esArgs overrides the default esArg values
+    for (const arg of [].concat(options.esArgs || [])) {
+      const [key, ...value] = arg.split('=');
+      esArgs.set(key.trim(), value.join('=').trim());
+    }
 
     // Add to esArgs if ssl is enabled
     if (this._ssl) {
-      esArgs.push('xpack.security.http.ssl.enabled=true');
-
-      // Include default keystore settings only if keystore isn't configured.
-      if (!esArgs.some((arg) => arg.startsWith('xpack.security.http.ssl.keystore'))) {
-        esArgs.push(`xpack.security.http.ssl.keystore.path=${ES_NOPASSWORD_P12_PATH}`);
-        esArgs.push(`xpack.security.http.ssl.keystore.type=PKCS12`);
+      esArgs.set('xpack.security.http.ssl.enabled', 'true');
+      // Include default keystore settings only if ssl isn't disabled by esArgs and keystore isn't configured.
+      if (!esArgs.get('xpack.security.http.ssl.keystore.path')) {
         // We are explicitly using ES_NOPASSWORD_P12_PATH instead of ES_P12_PATH + ES_P12_PASSWORD. The reasoning for this is that setting
         // the keystore password using environment variables causes Elasticsearch to emit deprecation warnings.
+        esArgs.set(`xpack.security.http.ssl.keystore.path`, ES_NOPASSWORD_P12_PATH);
+        esArgs.set(`xpack.security.http.ssl.keystore.type`, `PKCS12`);
       }
     }
 
-    const args = parseSettings(extractConfigFiles(esArgs, installPath, { log: this._log }), {
-      filter: SettingsFilter.NonSecureOnly,
-    }).reduce(
+    const args = parseSettings(
+      extractConfigFiles(
+        Array.from(esArgs).map((e) => e.join('=')),
+        installPath,
+        { log: this._log }
+      ),
+      {
+        filter: SettingsFilter.NonSecureOnly,
+      }
+    ).reduce(
       (acc, [settingName, settingValue]) => acc.concat(['-E', `${settingName}=${settingValue}`]),
       []
     );
