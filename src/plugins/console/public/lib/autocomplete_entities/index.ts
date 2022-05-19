@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { createHistory, History } from './history';
-export { createStorage, Storage, StorageKeys } from './storage';
-export type { DevToolsSettings } from './settings';
-export { createSettings, Settings, DEFAULT_SETTINGS } from './settings';
-export { AutocompleteInfo, getAutocompleteInfo, setAutocompleteInfo } from './autocomplete';
+export { Alias } from './alias';
+export { Mapping } from './mapping';
+export { DataStream } from './data_stream';
+export { LegacyTemplate } from './legacy';
+export { IndexTemplate } from './index_template';
+export { ComponentTemplate } from './component_template';
+export { getTypes } from './type';

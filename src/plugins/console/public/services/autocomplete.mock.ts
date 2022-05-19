@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { createHistory, History } from './history';
-export { createStorage, Storage, StorageKeys } from './storage';
-export type { DevToolsSettings } from './settings';
-export { createSettings, Settings, DEFAULT_SETTINGS } from './settings';
-export { AutocompleteInfo, getAutocompleteInfo, setAutocompleteInfo } from './autocomplete';
+import { AutocompleteInfo } from './autocomplete';
+
+export class AutocompleteInfoMock extends AutocompleteInfo {
+  setup = jest.fn();
+  getEntityProvider = jest.fn();
+  retrieve = jest.fn();
+  clearSubscriptions = jest.fn();
+  clear = jest.fn();
+}

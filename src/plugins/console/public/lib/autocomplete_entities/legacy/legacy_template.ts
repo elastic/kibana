@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { createHistory, History } from './history';
-export { createStorage, Storage, StorageKeys } from './storage';
-export type { DevToolsSettings } from './settings';
-export { createSettings, Settings, DEFAULT_SETTINGS } from './settings';
-export { AutocompleteInfo, getAutocompleteInfo, setAutocompleteInfo } from './autocomplete';
+import type { IndicesGetTemplateResponse } from '@elastic/elasticsearch/lib/api/types';
+import { BaseTemplate } from '../base_template';
+
+export class LegacyTemplate extends BaseTemplate<IndicesGetTemplateResponse> {
+  loadTemplates = (templates: IndicesGetTemplateResponse) => {
+    this.templates = Object.keys(templates).sort();
+  };
+}

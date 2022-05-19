@@ -6,8 +6,16 @@
  * Side Public License, v 1.
  */
 
-export { createHistory, History } from './history';
-export { createStorage, Storage, StorageKeys } from './storage';
-export type { DevToolsSettings } from './settings';
-export { createSettings, Settings, DEFAULT_SETTINGS } from './settings';
-export { AutocompleteInfo, getAutocompleteInfo, setAutocompleteInfo } from './autocomplete';
+export abstract class BaseTemplate<T> {
+  protected templates: string[] = [];
+
+  public abstract loadTemplates(templates: T): void;
+
+  public getTemplates = (): string[] => {
+    return [...this.templates];
+  };
+
+  public clearTemplates = () => {
+    this.templates = [];
+  };
+}
