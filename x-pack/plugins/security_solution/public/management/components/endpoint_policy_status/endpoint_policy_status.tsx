@@ -6,7 +6,7 @@
  */
 
 import React, { memo, PropsWithChildren } from 'react';
-import { EuiHealth, EuiToolTip, EuiText } from '@elastic/eui';
+import { EuiHealth, EuiToolTip, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   POLICY_STATUS_TO_HEALTH_COLOR,
@@ -31,26 +31,40 @@ export const EndpointPolicyStatus = memo<EndpointPolicyStatusProps>(
   ({ policyApplied, children }) => {
     return (
       <EuiToolTip
-        content={
-          <EuiText>
-            <EuiText size="s">
-              <FormattedMessage
-                id="xpack.securitySolution.endpointPolicyStatus.tooltipPolicyNameLabel"
-                defaultMessage="Policy"
-              />
-            </EuiText>
-            <div>{policyApplied.name}</div>
-
-            <EuiText size="s">
-              <FormattedMessage
-                id="xpack.securitySolution.endpointPolicyStatus.tooltipPolicyRevisionLabel"
-                defaultMessage="Revision"
-              />
-            </EuiText>
-            <div>{policyApplied.endpoint_policy_version}</div>
-          </EuiText>
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.endpointPolicyStatus.tooltipTitleLabel"
+            defaultMessage="Policy applied"
+          />
         }
         anchorClassName="eui-textTruncate"
+        content={
+          <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+            <EuiFlexItem className="eui-textTruncate" grow>
+              <EuiText size="s" className="eui-textTruncate">
+                {policyApplied.name}
+              </EuiText>
+            </EuiFlexItem>
+
+            {policyApplied.endpoint_policy_version && (
+              <EuiFlexItem grow={false}>
+                <EuiText
+                  color="subdued"
+                  size="xs"
+                  style={{ whiteSpace: 'nowrap', paddingLeft: '6px' }}
+                  className="eui-textTruncate"
+                  data-test-subj="policyRevision"
+                >
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.list.policy.revisionNumber"
+                    defaultMessage="rev. {revNumber}"
+                    values={{ revNumber: policyApplied.endpoint_policy_version }}
+                  />
+                </EuiText>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        }
       >
         <EuiHealth
           color={POLICY_STATUS_TO_HEALTH_COLOR[policyApplied.status]}
