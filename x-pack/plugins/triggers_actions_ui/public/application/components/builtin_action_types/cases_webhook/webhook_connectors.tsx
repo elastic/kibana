@@ -45,7 +45,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
     createIncidentResponseKey,
     createIncidentUrl,
     getIncidentResponseExternalTitleKey,
-    getIncidentResponseExternalUrlKey,
+    getIncidentViewUrl,
     getIncidentUrl,
     hasAuth,
     headers,
@@ -413,6 +413,13 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
                 defaultMessage: 'Get Incident URL',
               }
             )}
+            helpText={i18n.translate(
+              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentUrlTextFieldLabel',
+              {
+                defaultMessage:
+                  'API URL to GET incident details JSON from external system. Withold the ID from the URL as Kibana will dynamically insert the id based on the provided Create Incident Response Incident Key.',
+              }
+            )}
           >
             <EuiFieldText
               name="getIncidentUrl"
@@ -472,37 +479,37 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow
-            id="getIncidentResponseExternalUrlKey"
+            id="getIncidentViewUrl"
             fullWidth
-            error={errors.getIncidentResponseExternalUrlKey}
-            isInvalid={isConfigKeyValueInvalid('getIncidentResponseExternalUrlKey')}
+            error={errors.getIncidentViewUrl}
+            isInvalid={isConfigKeyValueInvalid('getIncidentViewUrl')}
             label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentResponseExternalUrlKeyTextFieldLabel',
+              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentViewUrlTextFieldLabel',
               {
-                defaultMessage: 'Get Incident Response External Incident URL Key',
+                defaultMessage: 'Get External Incident View URL',
               }
             )}
             helpText={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentResponseExternalUrlKeyTextFieldLabel',
+              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentViewUrlTextFieldLabel',
               {
                 defaultMessage:
-                  'JSON key in create incident response that contains the external incident url',
+                  'URL to view incident in external system. Withold the ID from the URL as Kibana will dynamically insert the id based on the provided Create Incident Response Incident Key.',
               }
             )}
           >
             <EuiFieldText
-              name="getIncidentResponseExternalUrlKey"
-              isInvalid={isConfigKeyValueInvalid('getIncidentResponseExternalUrlKey')}
+              name="getIncidentViewUrl"
+              isInvalid={isConfigKeyValueInvalid('getIncidentViewUrl')}
               fullWidth
               readOnly={readOnly}
-              value={getIncidentResponseExternalUrlKey || ''}
-              data-test-subj="getIncidentResponseExternalUrlKeyText"
+              value={getIncidentViewUrl || ''}
+              data-test-subj="getIncidentViewUrlText"
               onChange={(e) => {
-                editActionConfig('getIncidentResponseExternalUrlKey', e.target.value);
+                editActionConfig('getIncidentViewUrl', e.target.value);
               }}
               onBlur={() => {
-                if (!getIncidentResponseExternalUrlKey) {
-                  editActionConfig('getIncidentResponseExternalUrlKey', '');
+                if (!getIncidentViewUrl) {
+                  editActionConfig('getIncidentViewUrl', '');
                 }
               }}
             />
@@ -523,7 +530,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
           >
             <EuiSelect
               name="updateIncidentMethod"
-              value={updateIncidentMethod || 'post'}
+              value={updateIncidentMethod || 'put'}
               disabled={readOnly}
               data-test-subj="webhookUpdateMethodSelect"
               options={HTTP_VERBS.map((verb) => ({ text: verb.toUpperCase(), value: verb }))}
@@ -543,6 +550,13 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
               'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.updateIncidentUrlTextFieldLabel',
               {
                 defaultMessage: 'Update Incident URL',
+              }
+            )}
+            helpText={i18n.translate(
+              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.updateIncidentUrlTextFieldLabel',
+              {
+                defaultMessage:
+                  'API URL to update incident. Withold the ID from the URL as Kibana will dynamically insert the id based on the provided Create Incident Response Incident Key.',
               }
             )}
           >
@@ -621,13 +635,13 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.createCommentMethodTextFieldLabel',
               {
-                defaultMessage: 'Create Comment Incident Method',
+                defaultMessage: 'Create Comment Method',
               }
             )}
           >
             <EuiSelect
               name="createCommentMethod"
-              value={createCommentMethod || 'post'}
+              value={createCommentMethod || 'put'}
               disabled={readOnly}
               data-test-subj="webhookCreateCommentMethodSelect"
               options={HTTP_VERBS.map((verb) => ({ text: verb.toUpperCase(), value: verb }))}
@@ -646,7 +660,14 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.createCommentUrlTextFieldLabel',
               {
-                defaultMessage: 'Create Comment Incident URL',
+                defaultMessage: 'Create Comment URL',
+              }
+            )}
+            helpText={i18n.translate(
+              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.createCommentUrlTextFieldLabel',
+              {
+                defaultMessage:
+                  'API URL to add comment to incident. Withold the ID from the URL as Kibana will dynamically insert the id based on the provided Create Incident Response Incident Key.',
               }
             )}
           >
@@ -678,7 +699,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.createCommentJsonTextFieldLabel',
               {
-                defaultMessage: 'Create Comment Incident Object',
+                defaultMessage: 'Create Comment Object',
               }
             )}
             helpText={i18n.translate(

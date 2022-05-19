@@ -59,7 +59,7 @@ export function getActionType(): ActionTypeModel<
         createIncidentResponseKey: new Array<string>(),
         createIncidentUrl: new Array<string>(),
         getIncidentResponseExternalTitleKey: new Array<string>(),
-        getIncidentResponseExternalUrlKey: new Array<string>(),
+        getIncidentViewUrl: new Array<string>(),
         getIncidentUrl: new Array<string>(),
         updateIncidentJson: new Array<string>(),
         updateIncidentMethod: new Array<string>(),
@@ -99,10 +99,8 @@ export function getActionType(): ActionTypeModel<
           translations.GET_RESPONSE_EXTERNAL_TITLE_KEY_REQUIRED
         );
       }
-      if (!action.config.getIncidentResponseExternalUrlKey) {
-        configErrors.getIncidentResponseExternalUrlKey.push(
-          translations.GET_RESPONSE_EXTERNAL_URL_KEY_REQUIRED
-        );
+      if (!action.config.getIncidentViewUrl) {
+        configErrors.getIncidentViewUrl.push(translations.GET_INCIDENT_VIEW_URL);
       }
       if (!action.config.updateIncidentUrl) {
         configErrors.updateIncidentUrl.push(translations.UPDATE_URL_REQUIRED);

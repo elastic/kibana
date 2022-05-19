@@ -17,6 +17,7 @@ import {
 
 // config definition
 export const enum CasesWebhookMethods {
+  PATCH = 'patch',
   POST = 'post',
   PUT = 'put',
 }

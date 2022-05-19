@@ -86,10 +86,10 @@ export const GET_RESPONSE_EXTERNAL_TITLE_KEY_REQUIRED = i18n.translate(
     defaultMessage: 'Get incident response external incident title key.',
   }
 );
-export const GET_RESPONSE_EXTERNAL_URL_KEY_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.sections.addAction.casesWebhookAction.error.requiredGetIncidentResponseExternalTitleKeyText',
+export const GET_INCIDENT_VIEW_URL = i18n.translate(
+  'xpack.triggersActionsUI.sections.addAction.casesWebhookAction.error.requiredGetIncidentViewUrlKeyText',
   {
-    defaultMessage: 'Get incident response external incident URL key.',
+    defaultMessage: 'Get external incident view URL.',
   }
 );
 
