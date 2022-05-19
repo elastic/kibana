@@ -22,6 +22,6 @@ export const useOsqueryContextActionItem = ({ handleClick }: IProps) => {
 
   return {
     osqueryActionItems:
-      permissions.writeLiveQueries || permissions.runSavedQueries ? [osqueryActionItem] : [],
+      permissions?.writeLiveQueries || permissions?.runSavedQueries ? [osqueryActionItem] : [],
   };
 };
