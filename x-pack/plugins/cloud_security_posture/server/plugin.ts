@@ -29,6 +29,7 @@ import { cspRuleTemplateAssetType } from './saved_objects/csp_rule_template';
 import { cspRuleAssetType } from './saved_objects/csp_rule_type';
 import { initializeCspTransformsIndices } from './create_indices/create_transforms_indices';
 import { initializeCspTransforms } from './create_transforms/create_transforms';
+import { initializeCspWatcher, stopWatcher } from './create_transforms/create_watcher';
 import {
   onPackagePolicyPostCreateCallback,
   onPackagePolicyDeleteCallback,
@@ -122,6 +123,7 @@ export class CspPlugin
               );
             }
           }
+          await stopWatcher(core.elasticsearch.client.asInternalUser, this.logger);
         }
       );
     });
@@ -135,5 +137,6 @@ export class CspPlugin
     this.logger.debug('initialize');
     await initializeCspTransformsIndices(core.elasticsearch.client.asInternalUser, this.logger);
     await initializeCspTransforms(core.elasticsearch.client.asInternalUser, this.logger);
+    await initializeCspWatcher(core.elasticsearch.client.asInternalUser, this.logger);
   }
 }
