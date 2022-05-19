@@ -188,7 +188,7 @@ describe('SubActionConnector', () => {
     it('validates the response correctly', async () => {
       axiosInstanceMock.mockReturnValue({ data: { invalidField: 'test' } });
       await expect(async () => service.testUrl({ url: 'https://example.com' })).rejects.toThrow(
-        '[status]: expected value of type [string] but got [undefined]'
+        'Response validation failed (Error: [status]: expected value of type [string] but got [undefined])'
       );
     });
 

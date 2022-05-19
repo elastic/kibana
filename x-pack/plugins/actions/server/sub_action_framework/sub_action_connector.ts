@@ -90,6 +90,14 @@ export abstract class SubActionConnector<Config, Secrets> {
     return { ...headers, 'Content-Type': 'application/json' };
   }
 
+  private validateResponse(responseSchema: Type<unknown>, data: unknown) {
+    try {
+      responseSchema.validate(data);
+    } catch (resValidationError) {
+      throw new Error(`Response validation failed (${resValidationError})`);
+    }
+  }
+
   protected registerSubAction(subAction: SubAction) {
     this.subActions.set(subAction.name, subAction);
   }
@@ -108,8 +116,7 @@ export abstract class SubActionConnector<Config, Secrets> {
 
   protected abstract getResponseErrorMessage(error: AxiosError): string;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  protected async request<R = any>({
+  protected async request<R>({
     url,
     data,
     method = 'get',
@@ -149,7 +156,7 @@ export abstract class SubActionConnector<Config, Secrets> {
         timeout,
       });
 
-      responseSchema.validate(res.data);
+      this.validateResponse(responseSchema, res.data);
 
       return res;
     } catch (error) {

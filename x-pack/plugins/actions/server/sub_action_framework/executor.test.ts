@@ -191,6 +191,8 @@ describe('Executor', () => {
 
     await expect(async () =>
       executor({ actionId, params: { ...params, subAction: 'echo' }, config, secrets, services })
-    ).rejects.toThrowError('[id]: expected value of type [string] but got [undefined]');
+    ).rejects.toThrowError(
+      'Request validation failed (Error: [id]: expected value of type [string] but got [undefined])'
+    );
   });
 });

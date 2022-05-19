@@ -168,7 +168,8 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           message: 'an error occurred while running the action',
           retry: false,
           connector_id: res.body.id,
-          service_message: '[id]: expected value of type [string] but got [undefined]',
+          service_message:
+            'Request validation failed (Error: [id]: expected value of type [string] but got [undefined])',
         });
       });
 

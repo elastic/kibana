@@ -73,7 +73,11 @@ export const buildExecutor = <Config, Secrets>({
     }
 
     if (action.schema) {
-      action.schema.validate(subActionParams);
+      try {
+        action.schema.validate(subActionParams);
+      } catch (reqValidationError) {
+        throw new Error(`Request validation failed (${reqValidationError})`);
+      }
     }
 
     const data = await func.call(service, subActionParams);

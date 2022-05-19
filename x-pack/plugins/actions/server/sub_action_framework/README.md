@@ -266,8 +266,8 @@ export class TestCaseConnector extends CaseConnector<TestConfig, TestSecrets> {
     });
 
     return {
-      id: res.id,
-      title: res.title,
+      id: res.data.id,
+      title: res.data.title,
       url: 'https://example.com',
       pushedDate: '2022-05-06T09:41:00.401Z',
     };
@@ -287,8 +287,8 @@ export class TestCaseConnector extends CaseConnector<TestConfig, TestSecrets> {
     });
 
     return {
-      id: res.id,
-      title: res.title,
+      id: res.data.id,
+      title: res.data.title,
       url: 'https://example.com',
       pushedDate: '2022-05-06T09:41:00.401Z',
     };
@@ -308,8 +308,8 @@ export class TestCaseConnector extends CaseConnector<TestConfig, TestSecrets> {
     });
 
     return {
-      id: res.id,
-      title: res.title,
+      id: res.data.id,
+      title: res.data.title,
       url: 'https://example.com',
       pushedDate: '2022-05-06T09:41:00.401Z',
     };
@@ -322,8 +322,8 @@ export class TestCaseConnector extends CaseConnector<TestConfig, TestSecrets> {
     });
 
     return {
-      id: res.id,
-      title: res.title,
+      id: res.data.id,
+      title: res.data.title,
       url: 'https://example.com',
       pushedDate: '2022-05-06T09:41:00.401Z',
     };
