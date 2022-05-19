@@ -461,26 +461,30 @@ export function jobsHealthServiceProvider(
 
       if (config.errorMessages.enabled && previousStartedAt) {
         const response = await this.getErrorsReport(jobIds, previousStartedAt);
-        if (response.length > 0) {
-          const { count, jobsString } = getJobsAlertingMessageValues(response);
-          const isHealthy = false;
+        const { count, jobsString } = getJobsAlertingMessageValues(response);
+        const isHealthy = response.length === 0;
 
-          results.push({
-            isHealthy,
-            name: HEALTH_CHECK_NAMES.errorMessages.name,
-            context: {
-              results: response,
-              message: i18n.translate(
-                'xpack.ml.alertTypes.jobsHealthAlertingRule.errorMessagesMessage',
-                {
+        results.push({
+          isHealthy,
+          name: HEALTH_CHECK_NAMES.errorMessages.name,
+          context: {
+            results: response,
+            message: isHealthy
+              ? i18n.translate(
+                  'xpack.ml.alertTypes.jobsHealthAlertingRule.errorMessagesRecoveredMessage',
+                  {
+                    defaultMessage:
+                      '{count, plural, one {Job} other {Jobs}} {jobsString} {count, plural, one {contains} other {contain}} no errors in the messages.',
+                    values: { count, jobsString },
+                  }
+                )
+              : i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.errorMessagesMessage', {
                   defaultMessage:
                     '{count, plural, one {Job} other {Jobs}} {jobsString} {count, plural, one {contains} other {contain}} errors in the messages.',
                   values: { count, jobsString },
-                }
-              ),
-            },
-          });
-        }
+                }),
+          },
+        });
       }
 
       return results;
