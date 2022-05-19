@@ -50,6 +50,37 @@ describe('xyVis', () => {
     });
   });
 
+  test('it should throw error if markSizeRatio is lower then 1 or greater then 100', async () => {
+    const { data, args } = sampleArgs();
+    const { layers, ...rest } = args;
+    expect(
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...{ ...sampleLayer, markSizeAccessor: 'b' },
+          markSizeRatio: 0,
+          referenceLineLayers: [],
+          annotationLayers: [],
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+
+    expect(
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...{ ...sampleLayer, markSizeAccessor: 'b' },
+          markSizeRatio: 101,
+          referenceLineLayers: [],
+          annotationLayers: [],
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
   test('it should throw error if minTimeBarInterval is invalid', async () => {
     const { data, args } = sampleArgs();
     const { layers, ...rest } = args;
@@ -124,6 +155,26 @@ describe('xyVis', () => {
           referenceLineLayers: [],
           annotationLayers: [],
           splitColumnAccessor,
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  test('it should throw error if markSizeRatio is specified while markSizeAccessor is not', async () => {
+    const { data, args } = sampleArgs();
+    const { layers, ...rest } = args;
+    const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
+
+    expect(
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          referenceLineLayers: [],
+          annotationLayers: [],
+          markSizeRatio: 5,
         },
         createMockExecutionContext()
       )

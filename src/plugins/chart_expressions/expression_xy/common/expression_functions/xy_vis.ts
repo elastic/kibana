@@ -51,6 +51,10 @@ export const xyVisFunction: XyVisFn = {
       types: ['vis_dimension', 'string'],
       help: strings.getSplitRowAccessorHelp(),
     },
+    markSizeAccessor: {
+      types: ['vis_dimension', 'string'],
+      help: strings.getMarkSizeAccessorHelp(),
+    },
   },
   async fn(data, args, handlers) {
     const { xyVisFn } = await import('./xy_vis_fn');
