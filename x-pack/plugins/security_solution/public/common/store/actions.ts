@@ -7,7 +7,6 @@
 
 import { EndpointAction } from '../../management/pages/endpoint_hosts/store/action';
 import { PolicyDetailsAction } from '../../management/pages/policy/store/policy_details';
-import { EventFiltersPageAction } from '../../management/pages/event_filters/store/action';
 
 export { appActions } from './app';
 export { dragAndDropActions } from './drag_and_drop';
@@ -15,8 +14,4 @@ export { inputsActions } from './inputs';
 export { sourcererActions } from './sourcerer';
 import { RoutingAction } from './routing';
 
-export type AppAction =
-  | EndpointAction
-  | RoutingAction
-  | PolicyDetailsAction
-  | EventFiltersPageAction;
+export type AppAction = EndpointAction | RoutingAction | PolicyDetailsAction;
