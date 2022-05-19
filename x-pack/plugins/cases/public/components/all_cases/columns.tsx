@@ -19,6 +19,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiHealth,
+  EuiToolTip,
 } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
@@ -50,14 +51,6 @@ export type CasesColumns =
 
 const MediumShadeText = styled.p`
   color: ${({ theme }) => theme.eui.euiColorMediumShade};
-`;
-
-const Spacer = styled.span`
-  margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
-`;
-
-const TagWrapper = styled(EuiBadgeGroup)`
-  width: 100%;
 `;
 
 const renderStringField = (field: string, dataTestSubj: string) =>
@@ -185,16 +178,18 @@ export const useCasesColumns = ({
       render: (createdBy: Case['createdBy']) => {
         if (createdBy != null) {
           return (
-            <>
+            <EuiToolTip
+              position="top"
+              content={createdBy.username ?? i18n.UNKNOWN}
+              data-test-subj="case-table-column-createdBy-tooltip"
+            >
               <EuiAvatar
                 className="userAction__circle"
                 name={createdBy.fullName ? createdBy.fullName : createdBy.username ?? i18n.UNKNOWN}
                 size="s"
+                data-test-subj="case-table-column-createdBy"
               />
-              <Spacer data-test-subj="case-table-column-createdBy">
-                {createdBy.username ?? i18n.UNKNOWN}
-              </Spacer>
-            </>
+            </EuiToolTip>
           );
         }
         return getEmptyTagValue();
@@ -205,8 +200,8 @@ export const useCasesColumns = ({
       name: i18n.TAGS,
       render: (tags: Case['tags']) => {
         if (tags != null && tags.length > 0) {
-          return (
-            <TagWrapper>
+          const badges = (
+            <EuiBadgeGroup data-test-subj="case-table-column-tags">
               {tags.map((tag: string, i: number) => (
                 <EuiBadge
                   color="hollow"
@@ -216,7 +211,17 @@ export const useCasesColumns = ({
                   {tag}
                 </EuiBadge>
               ))}
-            </TagWrapper>
+            </EuiBadgeGroup>
+          );
+
+          return (
+            <EuiToolTip
+              data-test-subj="case-table-column-tags-tooltip"
+              position="left"
+              content={badges}
+            >
+              {badges}
+            </EuiToolTip>
           );
         }
         return getEmptyTagValue();

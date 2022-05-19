@@ -303,6 +303,7 @@ export interface ExceptionsImportError {
 export interface ImportDataResponse {
   success: boolean;
   success_count: number;
+  rules_count?: number;
   errors: Array<ImportRulesResponseError | ImportResponseError>;
   exceptions_success?: boolean;
   exceptions_success_count?: number;
