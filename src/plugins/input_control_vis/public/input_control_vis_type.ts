@@ -21,12 +21,12 @@ export function createInputControlVisTypeDefinition(
   return {
     name: 'input_control_vis',
     title: i18n.translate('inputControl.register.controlsTitle', {
-      defaultMessage: 'Controls (deprecated)',
+      defaultMessage: 'Input controls',
     }),
     icon: 'controlsHorizontal',
     group: VisGroups.TOOLS,
     description: i18n.translate('inputControl.register.controlsDescription', {
-      defaultMessage: 'Add dropdown menus and range sliders to your dashboard.',
+      defaultMessage: 'Input controls are deprecated and will be removed in a future version.',
     }),
     stage: 'deprecated',
     visConfig: {

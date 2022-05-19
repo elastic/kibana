@@ -161,7 +161,7 @@ export const VisualizeEditorCommon = ({
         (visInstance?.vis?.type?.stage === 'deprecated' && (
           <VizChartWarning
             chartType={chartName as CHARTS_TO_BE_DEPRECATED}
-            chartConfigToken={chartToken}
+            chartConfigToken={chartToken ?? undefined}
             mode="new"
           />
         ))}

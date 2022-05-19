@@ -23,7 +23,7 @@ import type {
 
 interface Props {
   chartType: CHART_WITHOUT_SMALL_MULTIPLES | CHART_TO_BE_DEPRECATED;
-  chartConfigToken: string;
+  chartConfigToken?: string;
   mode?: 'old' | 'new';
 }
 
