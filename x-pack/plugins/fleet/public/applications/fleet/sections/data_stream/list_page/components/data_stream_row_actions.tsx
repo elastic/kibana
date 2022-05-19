@@ -35,9 +35,9 @@ export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastre
   });
 
   const viewServiceInApmActionTitle = i18n.translate(
-    'xpack.fleet.dataStreamList.viewServiceInApmActionText',
+    'xpack.fleet.dataStreamList.viewInApmActionText',
     {
-      defaultMessage: 'View Service in APM',
+      defaultMessage: 'View in APM',
     }
   );
 

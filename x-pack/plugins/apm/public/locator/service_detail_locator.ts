@@ -7,7 +7,11 @@
 import { IUiSettingsClient } from '@kbn/core/public';
 import { LocatorDefinition } from '@kbn/share-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { enableComparisonByDefault } from '@kbn/observability-plugin/common';
+import {
+  defaultApmServiceEnvironment,
+  enableComparisonByDefault,
+} from '@kbn/observability-plugin/common';
+import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
 import type { TimePickerTimeDefaults } from '../components/shared/date_picker/typings';
 import type { APMLocatorPayload } from './helpers';
 
@@ -34,10 +38,15 @@ export class APMServiceDetailLocator
     const isComparisonEnabledByDefault = this.uiSettings.get<boolean>(
       enableComparisonByDefault
     );
+    const defaultEnvironment = this.uiSettings.get<string>(
+      defaultApmServiceEnvironment,
+      ENVIRONMENT_ALL.value
+    );
 
     const path = getPathForServiceDetail(payload, {
       ...defaultTimeRange,
       isComparisonEnabledByDefault,
+      defaultEnvironment,
     });
 
     return {
