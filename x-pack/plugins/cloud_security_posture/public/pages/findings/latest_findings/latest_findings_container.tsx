@@ -8,6 +8,7 @@ import React, { useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import type { DataView } from '@kbn/data-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { number } from 'io-ts';
 import { FindingsTable } from './latest_findings_table';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
 import * as TEST_SUBJECTS from '../test_subjects';
@@ -47,6 +48,15 @@ export const LatestFindingsContainer = ({ dataView }: { dataView: DataView }) =>
     sort: urlQuery.sort,
   });
 
+  const findingsDistribution = getFindingsDistribution({
+    total: findingsGroupByNone.data?.total,
+    passed: findingsCount.data?.passed,
+    failed: findingsCount.data?.failed,
+    pageIndex: urlQuery.pageIndex,
+    pageSize: urlQuery.pageSize,
+    currentPageSize: findingsGroupByNone.data?.page.length,
+  });
+
   return (
     <div data-test-subj={TEST_SUBJECTS.FINDINGS_CONTAINER}>
       <FindingsSearchBar
@@ -54,18 +64,12 @@ export const LatestFindingsContainer = ({ dataView }: { dataView: DataView }) =>
         setQuery={setUrlQuery}
         query={urlQuery.query}
         filters={urlQuery.filters}
-        loading={findingsGroupByNone.isFetching}
+        loading={findingsCount.isFetching}
       />
       <PageWrapper>
         <LatestFindingsPageTitle />
         <FindingsGroupBySelector type="default" />
-        <FindingsDistributionBar
-          total={findingsGroupByNone.data?.total || 0}
-          passed={findingsCount.data?.passed || 0}
-          failed={findingsCount.data?.failed || 0}
-          pageStart={urlQuery.pageIndex * urlQuery.pageSize + 1} // API index is 0, but UI is 1
-          pageEnd={urlQuery.pageIndex * urlQuery.pageSize + urlQuery.pageSize}
-        />
+        {findingsDistribution && <FindingsDistributionBar {...findingsDistribution} />}
         <EuiSpacer />
         <FindingsTable
           data={findingsGroupByNone.data}
@@ -95,3 +99,24 @@ const LatestFindingsPageTitle = () => (
     />
   </PageTitle>
 );
+
+const getFindingsDistribution = ({
+  total,
+  passed,
+  failed,
+  currentPageSize,
+  pageIndex,
+  pageSize,
+}: Record<'currentPageSize' | 'total' | 'passed' | 'failed', number | undefined> &
+  Record<'pageIndex' | 'pageSize', number>) => {
+  if (!number.is(total) || !number.is(passed) || !number.is(failed) || !number.is(currentPageSize))
+    return;
+
+  return {
+    total,
+    passed,
+    failed,
+    pageStart: pageIndex * pageSize + 1,
+    pageEnd: pageIndex * pageSize + currentPageSize,
+  };
+};
