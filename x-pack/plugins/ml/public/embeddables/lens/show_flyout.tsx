@@ -23,6 +23,11 @@ import { DashboardConstants } from '@kbn/dashboard-plugin/public';
 import { getMlGlobalServices } from '../../application/app';
 import { LensLayerSelectionFlyout } from './lens_vis_layer_selection_flyout';
 
+import {
+  getResultLayersFromEmbeddable,
+  convertLensToADJob,
+} from '../../application/jobs/new_job/job_from_lens';
+
 export async function showLensVisToADJobFlyout(
   embeddable: Embeddable,
   coreStart: CoreStart,
@@ -44,6 +49,12 @@ export async function showLensVisToADJobFlyout(
         resolve();
       };
 
+      const layerResults = await getResultLayersFromEmbeddable(embeddable, data.dataViews, lens);
+      if (layerResults.length === 1 && layerResults[0].isCompatible) {
+        convertLensToADJob(embeddable, share, 0);
+        return resolve();
+      }
+
       const flyoutSession = overlays.openFlyout(
         toMountPoint(
           wrapWithTheme(
@@ -56,9 +67,8 @@ export async function showLensVisToADJobFlyout(
                   onFlyoutClose();
                   resolve();
                 }}
-                data={data}
+                layerResults={layerResults}
                 share={share}
-                lens={lens}
               />
             </KibanaContextProvider>,
             theme$
