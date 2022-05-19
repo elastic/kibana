@@ -142,7 +142,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
   }
 
   renderLegendDetailRow() {
-    return this.getStyleName() === VECTOR_STYLES.ICON_SIZE ? (
+    return this.getStyleName() === VECTOR_STYLES.ICON_SIZE && !this._isSymbolizedAsIcon ? (
       <MarkerSizeLegend style={this} />
     ) : (
       <OrdinalLegend style={this} />
