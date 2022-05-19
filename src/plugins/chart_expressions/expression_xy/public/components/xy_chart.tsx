@@ -48,17 +48,15 @@ import {
   getAnnotationsLayers,
   getDataLayers,
   Series,
-  getFormattedTablesByLayers,
-  validateExtent,
   getFormat,
-} from '../helpers';
-import {
+  getFormattedTablesByLayers,
   getFilteredLayers,
   getReferenceLayers,
   isDataLayer,
   getAxesConfiguration,
   GroupsConfiguration,
   getLinesCausedPaddings,
+  validateExtent,
 } from '../helpers';
 import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './legend_action';
@@ -157,6 +155,8 @@ export function XYChart({
     yLeftExtent,
     yRightExtent,
     valuesInLegend,
+    yLeftScale,
+    yRightScale,
     splitColumnAccessor,
     splitRowAccessor,
   } = args;
@@ -210,7 +210,13 @@ export function XYChart({
     filteredLayers.some((layer) => isDataLayer(layer) && layer.splitAccessor);
   const shouldRotate = isHorizontalChart(dataLayers);
 
-  const yAxesConfiguration = getAxesConfiguration(dataLayers, shouldRotate, formatFactory);
+  const yAxesConfiguration = getAxesConfiguration(
+    dataLayers,
+    shouldRotate,
+    formatFactory,
+    yLeftScale,
+    yRightScale
+  );
 
   const xTitle = args.xTitle || (xAxisColumn && xAxisColumn.name);
   const axisTitlesVisibilitySettings = args.axisTitlesVisibilitySettings || {
@@ -563,6 +569,7 @@ export function XYChart({
               shouldRotate
             ),
           },
+          markSizeRatio: args.markSizeRatio,
         }}
         baseTheme={chartBaseTheme}
         tooltip={{

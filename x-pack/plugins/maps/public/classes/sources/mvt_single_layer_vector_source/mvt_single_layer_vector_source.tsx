@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import React from 'react';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { AbstractSource, ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { BoundsRequestMeta, GeoJsonWithMeta, IMvtVectorSource } from '../vector_source';
 import {
@@ -63,11 +62,8 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
   readonly _descriptor: TiledSingleLayerVectorSourceDescriptor;
   readonly _tooltipFields: MVTField[];
 
-  constructor(
-    sourceDescriptor: TiledSingleLayerVectorSourceDescriptor,
-    inspectorAdapters?: Adapters
-  ) {
-    super(sourceDescriptor, inspectorAdapters);
+  constructor(sourceDescriptor: TiledSingleLayerVectorSourceDescriptor) {
+    super(sourceDescriptor);
     this._descriptor = MVTSingleLayerVectorSource.createDescriptor(sourceDescriptor);
 
     this._tooltipFields = this._descriptor.tooltipProperties
