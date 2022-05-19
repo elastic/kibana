@@ -185,7 +185,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                   listItems={[
                     {
                       title: (
-                        <EuiText color="subdued" size="s">
+                        <EuiText color={euiTheme.colors.darkestShade} size="s">
                           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
                             <EuiFlexItem grow={false}>{item.title}</EuiFlexItem>
                             <EuiFlexItem grow={false} style={{ marginLeft: '0.33em' }}>
