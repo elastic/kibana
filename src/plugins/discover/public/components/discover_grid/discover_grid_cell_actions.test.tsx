@@ -33,7 +33,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { FilterInBtn, FilterOutBtn, buildCellActions, CopyBtn } from './discover_grid_cell_actions';
 import { DiscoverGridContext } from './discover_grid_context';
 import { EuiButton } from '@elastic/eui';
-import { discoverGridContextMock } from './__mocks__/grid_context';
+import { discoverGridContextMock } from '../../__mocks__/grid_context';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 
 describe('Discover cell actions ', function () {

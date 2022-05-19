@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { DiscoverGridContext, GridContext } from './discover_grid_context';
 import { useDiscoverServices } from '../../utils/use_discover_services';
-import { copyValueToClipboard } from '../../utils/copy_to_clipboard';
+import { copyValueToClipboard } from './utils/copy_to_clipboard';
 
 function onFilterCell(
   context: GridContext,

@@ -9,7 +9,7 @@
 import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { getEuiGridColumns } from './discover_grid_columns';
 import { indexPatternWithTimefieldMock } from '../../__mocks__/index_pattern_with_timefield';
-import { discoverGridContextMock } from './__mocks__/grid_context';
+import { discoverGridContextMock } from '../../__mocks__/grid_context';
 import { discoverServiceMock } from '../../__mocks__/services';
 
 describe('Discover grid columns', function () {
@@ -64,11 +64,14 @@ describe('Discover grid columns', function () {
             "showMoveLeft": true,
             "showMoveRight": true,
           },
-          "cellActions": undefined,
-          "display": undefined,
+          "cellActions": Array [
+            [Function],
+            [Function],
+          ],
+          "display": "extension",
           "id": "extension",
           "isSortable": false,
-          "schema": "kibana-json",
+          "schema": "string",
         },
         Object {
           "actions": Object {
@@ -108,10 +111,10 @@ describe('Discover grid columns', function () {
             "showMoveRight": true,
           },
           "cellActions": undefined,
-          "display": undefined,
+          "display": "message",
           "id": "message",
           "isSortable": false,
-          "schema": "kibana-json",
+          "schema": "string",
         },
       ]
     `);

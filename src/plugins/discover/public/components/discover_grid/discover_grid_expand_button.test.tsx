@@ -11,7 +11,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { ExpandButton } from './discover_grid_expand_button';
 import { DiscoverGridContext } from './discover_grid_context';
-import { discoverGridContextMock } from './__mocks__/grid_context';
+import { discoverGridContextMock } from '../../__mocks__/grid_context';
 
 describe('Discover grid view button ', function () {
   it('when no document is expanded, setExpanded is called with current document', async () => {

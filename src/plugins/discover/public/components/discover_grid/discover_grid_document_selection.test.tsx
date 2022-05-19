@@ -13,7 +13,7 @@ import {
   getDocId,
   SelectButton,
 } from './discover_grid_document_selection';
-import { discoverGridContextMock } from './__mocks__/grid_context';
+import { discoverGridContextMock } from '../../__mocks__/grid_context';
 import { DiscoverGridContext } from './discover_grid_context';
 
 describe('document selection', () => {

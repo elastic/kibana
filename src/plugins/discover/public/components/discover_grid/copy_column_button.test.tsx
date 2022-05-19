@@ -11,7 +11,7 @@ import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './copy_c
 import { EuiButton } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { discoverServiceMock } from '../../__mocks__/services';
-import { discoverGridContextMock } from './__mocks__/grid_context';
+import { discoverGridContextMock } from '../../__mocks__/grid_context';
 
 const execCommandMock = (global.document.execCommand = jest.fn());
 const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});

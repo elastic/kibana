@@ -7,11 +7,11 @@
  */
 
 import { flattenHit } from '@kbn/data-plugin/common';
-import { indexPatternMock } from '../../../__mocks__/index_pattern';
-import { esHits } from '../../../__mocks__/es_hits';
-import { discoverServiceMock } from '../../../__mocks__/services';
-import { GridContext } from '../discover_grid_context';
-import { getCellValueAsTextToCopy } from '../../../utils/copy_to_clipboard';
+import { indexPatternMock } from './index_pattern';
+import { esHits } from './es_hits';
+import { discoverServiceMock } from './services';
+import { GridContext } from '../components/discover_grid/discover_grid_context';
+import { formatValueAsPlainText } from '../utils/format_value_as_plain_text';
 
 const esHitsFlattened = esHits.map((hit) => flattenHit(hit, indexPatternMock));
 
@@ -26,7 +26,7 @@ export const discoverGridContextMock: GridContext = {
   selectedDocs: [],
   setSelectedDocs: jest.fn(),
   getCellTextToCopy: (rowIndex, columnId, options) =>
-    getCellValueAsTextToCopy({
+    formatValueAsPlainText({
       rowIndex,
       columnId,
       services: discoverServiceMock,

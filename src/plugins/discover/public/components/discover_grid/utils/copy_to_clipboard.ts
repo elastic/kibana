@@ -8,41 +8,8 @@
 
 import { copyToClipboard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { formatFieldValue } from './format_value';
-import { ElasticSearchHit, HitsFlattened, GetCellTextToCopy } from '../types';
-import { DiscoverServices } from '../build_services';
-
-export const getCellValueAsTextToCopy = ({
-  rowIndex,
-  rows,
-  rowsFlattened,
-  columnId,
-  dataView,
-  services,
-  options,
-}: {
-  rowIndex: number;
-  rows: ElasticSearchHit[];
-  rowsFlattened: HitsFlattened;
-  columnId: string;
-  dataView: DataView;
-  services: DiscoverServices;
-  options: {
-    allowMultiline: boolean;
-  };
-}): string => {
-  const { fieldFormats } = services;
-  const rowFlattened = rowsFlattened[rowIndex];
-  const field = dataView.fields.getByName(columnId);
-  const value = rowFlattened[columnId];
-
-  return field?.type === '_source'
-    ? options.allowMultiline
-      ? JSON.stringify(rowFlattened, null, 2)
-      : JSON.stringify(rowFlattened)
-    : formatFieldValue(value, rows[rowIndex], fieldFormats, dataView, field, 'text');
-};
+import { GetCellTextToCopy } from '../../../types';
+import { DiscoverServices } from '../../../build_services';
 
 export const copyValueToClipboard = ({
   rowIndex,

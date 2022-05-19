@@ -9,10 +9,7 @@
 import React from 'react';
 import { EuiListGroupItemProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  copyColumnValuesToClipboard,
-  copyColumnNameToClipboard,
-} from '../../utils/copy_to_clipboard';
+import { copyColumnValuesToClipboard, copyColumnNameToClipboard } from './utils/copy_to_clipboard';
 import { DiscoverServices } from '../../build_services';
 import { GetCellTextToCopy } from '../../types';
 

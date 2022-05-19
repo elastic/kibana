@@ -51,7 +51,7 @@ import { getFieldsToShow } from '../../utils/get_fields_to_show';
 import { ElasticSearchHit, GetCellTextToCopy } from '../../types';
 import { useRowHeightsOptions } from '../../utils/use_row_heights_options';
 import { useDiscoverServices } from '../../utils/use_discover_services';
-import { getCellValueAsTextToCopy } from '../../utils/copy_to_clipboard';
+import { formatValueAsPlainText } from '../../utils/format_value_as_plain_text';
 
 interface SortObj {
   id: string;
@@ -240,7 +240,7 @@ export const DiscoverGrid = ({
 
   const getCellTextToCopy: GetCellTextToCopy = useCallback(
     (rowIndex, columnId, options) => {
-      return getCellValueAsTextToCopy({
+      return formatValueAsPlainText({
         rowIndex,
         rows: displayedRows,
         rowsFlattened: displayedRowsFlattened,
