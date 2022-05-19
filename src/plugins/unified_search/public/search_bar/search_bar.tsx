@@ -10,8 +10,8 @@ import { compact } from 'lodash';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
-import { get, isEqual } from 'lodash';
 import { EuiIconProps, withEuiTheme, WithEuiThemeProps } from '@elastic/eui';
+import { get, isEqual } from 'lodash';
 import memoizeOne from 'memoize-one';
 
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -213,11 +213,18 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
    * in case you the date range (from/to)
    */
   private shouldRenderTimeFilterInSavedQueryForm() {
-    const { dateRangeFrom, dateRangeTo, showDatePicker } = this.props;
-    return (
-      showDatePicker ||
-      (!showDatePicker && dateRangeFrom !== undefined && dateRangeTo !== undefined)
-    );
+    const { dateRangeFrom, dateRangeTo, showDatePicker, indexPatterns } = this.props;
+
+    if (!showDatePicker && dateRangeFrom !== undefined && dateRangeTo !== undefined) {
+      return false;
+    }
+
+    if (indexPatterns?.length) {
+      // return true if at least one of the DateView has timeFieldName
+      return indexPatterns.some((dataView) => Boolean(dataView.timeFieldName));
+    }
+
+    return true;
   }
 
   public onSave = async (savedQueryMeta: SavedQueryMeta, saveAsNew = false) => {
