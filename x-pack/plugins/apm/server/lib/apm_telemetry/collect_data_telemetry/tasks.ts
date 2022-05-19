@@ -44,6 +44,10 @@ import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { Span } from '../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { APMTelemetry } from '../types';
+import {
+  ServiceGroup,
+  APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
+} from '../../../../common/service_groups';
 const TIME_RANGES = ['1d', 'all'] as const;
 type TimeRange = typeof TIME_RANGES[number];
 
@@ -1116,6 +1120,29 @@ export const tasks: TelemetryTask[] = [
               },
             },
           },
+        },
+      };
+    },
+  },
+  {
+    name: 'service_groups',
+    executor: async ({ savedObjectsClient }) => {
+      const response = await savedObjectsClient.find<ServiceGroup>({
+        type: APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
+        page: 1,
+        perPage: 500,
+      });
+
+      const queries = response.saved_objects.map(({ attributes }) => {
+        const { kuery } = attributes;
+        if (kuery) {
+          return kuery;
+        }
+      });
+
+      return {
+        service_groups: {
+          queries,
         },
       };
     },
