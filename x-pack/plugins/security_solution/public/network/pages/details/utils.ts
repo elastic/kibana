@@ -35,7 +35,6 @@ export const getTrailingBreadcrumbs = (
 
   if (params.detailName != null) {
     breadcrumb = [
-      ...breadcrumb,
       {
         text: decodeIpv6(params.detailName),
         href: getSecuritySolutionUrl({

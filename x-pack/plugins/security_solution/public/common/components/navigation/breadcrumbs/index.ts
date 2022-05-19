@@ -78,7 +78,7 @@ export const getBreadcrumbsForRoute = (
 ): ChromeBreadcrumb[] | null => {
   const spyState: RouteSpyState = omit('navTabs', object);
 
-  if (!spyState || !object.navTabs || !spyState.pageName) {
+  if (!spyState || !object.navTabs || !spyState.pageName || isCaseRoutes(spyState)) {
     return null;
   }
 
@@ -96,11 +96,6 @@ export const getBreadcrumbsForRoute = (
   const leadingBreadcrumbs = isGroupedNavigationEnabled
     ? newMenuLeadingBreadcrumbs
     : [siemRootBreadcrumb, pageBreadcrumb];
-
-  // Cases plugin controls breadcrumbs
-  if (isCaseRoutes(spyState)) {
-    return null;
-  }
 
   // Admin URL works differently. All admin pages are under '/administration'
   if (isAdminRoutes(spyState)) {

@@ -37,7 +37,6 @@ export const getTrailingBreadcrumbs = (
 
   if (params.detailName != null) {
     breadcrumb = [
-      ...breadcrumb,
       {
         text: params.detailName,
         href: getSecuritySolutionUrl({
