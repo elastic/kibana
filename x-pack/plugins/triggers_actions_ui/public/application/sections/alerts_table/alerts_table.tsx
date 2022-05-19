@@ -31,8 +31,6 @@ const GridStyles: EuiDataGridStyle = {
   header: 'underline',
 };
 
-const AlertsFlyout = lazy(() => import('./alerts_flyout'));
-
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
   const [rowClasses, setRowClasses] = useState<EuiDataGridStyle['rowClasses']>({});
   const {
@@ -133,7 +131,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
             alertsCount={alertsCount}
             state={props.flyoutState}
             onClose={handleFlyoutClose}
-            alertsTableConfiguration={alertsTableConfiguration}
+            alertsTableConfiguration={props.alertsTableConfigurationRegistry}
             flyoutIndex={flyoutAlertIndex + pagination.pageIndex * pagination.pageSize}
             onPaginate={onPaginateFlyout}
             isLoading={isLoading}

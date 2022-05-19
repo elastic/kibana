@@ -37,8 +37,9 @@ export type {
   AlertStatus,
   AlertsTableConfigurationRegistryContract,
   AlertsTableFlyoutBaseProps,
-  AlertsData,
 } from './types';
+
+export { AlertsTableFlyoutState } from './types';
 
 export {
   ActionForm,

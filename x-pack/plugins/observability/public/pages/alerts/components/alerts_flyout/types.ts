@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AlertsTableFlyoutBaseProps, AlertsData } from '@kbn/triggers-actions-ui-plugin/public';
+import { AlertsTableFlyoutBaseProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
+import { EcsFieldsResponse } from '../../../../../../rule_registry/common/search_strategy';
 
 export type FlyoutProps = AlertsTableFlyoutBaseProps & {
-  alert: AlertsData & {
+  alert: EcsFieldsResponse & {
     fields: ParsedTechnicalFields & ParsedExperimentalFields;
     start: number;
     reason: string;

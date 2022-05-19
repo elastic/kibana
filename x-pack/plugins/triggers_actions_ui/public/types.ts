@@ -412,6 +412,7 @@ export interface BulkActionsObjectProp {
 }
 
 export interface AlertsTableProps {
+  alertsTableConfiguration: AlertsTableConfigurationRegistry;
   columns: EuiDataGridColumn[];
   bulkActions: BulkActionsObjectProp;
   // defaultCellActions: TGridCellAction[];
@@ -436,7 +437,7 @@ export type RenderCellValueProps = EuiDataGridCellValueElementProps & {
 export interface AlertsTableConfigurationRegistry {
   id: string;
   columns: EuiDataGridColumn[];
-  externalFlyout: {
+  externalFlyout?: {
     header?:
       | React.FunctionComponent<AlertsTableFlyoutBaseProps>
       | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>;
@@ -447,7 +448,7 @@ export interface AlertsTableConfigurationRegistry {
       | React.FunctionComponent<AlertsTableFlyoutBaseProps>
       | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>;
   };
-  internalFlyout: {
+  internalFlyout?: {
     header?:
       | React.FunctionComponent<AlertsTableFlyoutBaseProps>
       | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>;

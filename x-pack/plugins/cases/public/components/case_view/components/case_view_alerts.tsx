@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 
+import { AlertsTableFlyoutState } from '@kbn/triggers-actions-ui-plugin/public';
 import { Case } from '../../../../common';
 import { useKibana } from '../../../common/lib/kibana';
 import { getManualAlertIds, getRegistrationContextFromAlerts } from './helpers';
@@ -37,6 +38,9 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
     alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
     configurationId: caseData.owner,
     id: `case-details-alerts-${caseData.owner}`,
+    flyoutState: alertFeatureIds.includes('siem')
+      ? AlertsTableFlyoutState.internal
+      : AlertsTableFlyoutState.external,
     featureIds: alertFeatureIds,
     query: alertIdsQuery,
   };

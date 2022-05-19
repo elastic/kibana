@@ -22,9 +22,9 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useFetchAlerts } from './hooks/use_fetch_alerts';
 import { AlertsTable } from './alerts_table';
-import { AlertsTableConfigurationRegistry, RenderCellValueProps } from '../../../types';
-import { TypeRegistry } from '../../type_registry';
+import { AlertsTableConfigurationRegistry, AlertsTableFlyoutState, RenderCellValueProps } from '../../../types';
 import { ALERTS_TABLE_CONF_ERROR_MESSAGE, ALERTS_TABLE_CONF_ERROR_TITLE } from './translations';
+import { TypeRegistry } from '../../type_registry';
 
 const DefaultPagination = {
   pageSize: 10,
@@ -36,6 +36,7 @@ export interface AlertsTableStateProps {
   configurationId: string;
   id: string;
   featureIds: ValidFeatureId[];
+  flyoutState: AlertsTableFlyoutState;
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
 }
 
@@ -65,6 +66,7 @@ const AlertsTableState = ({
   configurationId,
   id,
   featureIds,
+  flyoutState,
   query,
 }: AlertsTableStateProps) => {
   const hasAlertsTableConfiguration =
@@ -172,10 +174,12 @@ const AlertsTableState = ({
 
   const tableProps = useMemo(
     () => ({
+      alertsTableConfiguration,
       columns,
       bulkActions: [],
       deletedEventIds: [],
       disabledCellActions: [],
+      flyoutState,
       pageSize: pagination.pageSize,
       pageSizeOptions: [1, 2, 5, 10, 20, 50, 100],
       leadingControlColumns: [],
@@ -189,7 +193,7 @@ const AlertsTableState = ({
       useFetchAlertsData,
       'data-test-subj': 'internalAlertsState',
     }),
-    [columns, pagination.pageSize, showCheckboxes, useFetchAlertsData]
+    [alertsTableConfiguration, columns, flyoutState, pagination.pageSize, showCheckboxes, useFetchAlertsData]
   );
 
   return hasAlertsTableConfiguration ? (

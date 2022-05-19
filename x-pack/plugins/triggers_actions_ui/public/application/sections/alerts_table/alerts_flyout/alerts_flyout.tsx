@@ -49,19 +49,19 @@ export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
   onPaginate,
 }: AlertsFlyoutProps) => {
   let Header: AlertsTableConfigurationRegistry['externalFlyout']['header'];
-  let Body: AlertsTableConfigurationRegistry['externalFlyout']['body'];
-  let Footer: AlertsTableConfigurationRegistry['externalFlyout']['footer'];
+  let Body: AlertsTableConfigurationRegistry['externalFlyout']['body'] | null;
+  let Footer: AlertsTableConfigurationRegistry['externalFlyout']['footer'] | null;
 
   switch (state) {
     case AlertsTableFlyoutState.external:
-      Header = alertsTableConfiguration.externalFlyout.header ?? AlertsFlyoutHeader;
-      Body = alertsTableConfiguration.externalFlyout.body;
-      Footer = alertsTableConfiguration.externalFlyout.footer;
+      Header = alertsTableConfiguration?.externalFlyout?.header ?? AlertsFlyoutHeader;
+      Body = alertsTableConfiguration?.externalFlyout?.body;
+      Footer = alertsTableConfiguration?.externalFlyout?.footer;
       break;
     case AlertsTableFlyoutState.internal:
-      Header = alertsTableConfiguration.internalFlyout.header ?? AlertsFlyoutHeader;
-      Body = alertsTableConfiguration.internalFlyout.body;
-      Footer = alertsTableConfiguration.internalFlyout.footer;
+      Header = alertsTableConfiguration?.internalFlyout?.header ?? AlertsFlyoutHeader;
+      Body = alertsTableConfiguration?.internalFlyout?.body ?? null;
+      Footer = alertsTableConfiguration?.internalFlyout?.footer ?? null;
       break;
   }
 
