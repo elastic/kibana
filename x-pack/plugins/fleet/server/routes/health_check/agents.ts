@@ -63,6 +63,11 @@ export const checkAgents: IHealthCheck = async ({
   );
 
   // Stats of all agents and their health
+  const nonFSAgents = agents.agents.filter((agent) => fsAgentIds.indexOf(agent.id) === -1);
+  if (nonFSAgents.length > 0) {
+    updateReport(``);
+    updateReport(`Enrolled Elastic Agents:`);
+  }
 
   // Finish and report overall status for this check
   updateReport(``);
