@@ -21,7 +21,7 @@ describe('Discover grid columns', function () {
       showTimeCol: false,
       defaultColumns: false,
       isSortEnabled: true,
-      getCellTextToCopy: discoverGridContextMock.getCellTextToCopy,
+      formatValueAsTextToCopy: discoverGridContextMock.formatValueAsTextToCopy,
       rowsCount: 100,
       services: discoverServiceMock,
     });
@@ -127,7 +127,7 @@ describe('Discover grid columns', function () {
       showTimeCol: false,
       defaultColumns: true,
       isSortEnabled: true,
-      getCellTextToCopy: discoverGridContextMock.getCellTextToCopy,
+      formatValueAsTextToCopy: discoverGridContextMock.formatValueAsTextToCopy,
       rowsCount: 100,
       services: discoverServiceMock,
     });
@@ -227,7 +227,7 @@ describe('Discover grid columns', function () {
       showTimeCol: true,
       defaultColumns: false,
       isSortEnabled: true,
-      getCellTextToCopy: discoverGridContextMock.getCellTextToCopy,
+      formatValueAsTextToCopy: discoverGridContextMock.formatValueAsTextToCopy,
       rowsCount: 100,
       services: discoverServiceMock,
     });

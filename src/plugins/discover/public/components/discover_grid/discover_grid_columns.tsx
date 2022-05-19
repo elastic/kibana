@@ -12,7 +12,7 @@ import { EuiDataGridColumn, EuiIconTip, EuiScreenReaderOnly } from '@elastic/eui
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ExpandButton } from './discover_grid_expand_button';
 import { DiscoverGridSettings } from './types';
-import { GetCellTextToCopy } from '../../types';
+import { ValueAsTextFormatter } from '../../types';
 import { buildCellActions } from './discover_grid_cell_actions';
 import { getSchemaByKbnType } from './discover_grid_schema';
 import { SelectButton } from './discover_grid_document_selection';
@@ -60,7 +60,7 @@ export function buildEuiGridColumn({
   defaultColumns,
   isSortEnabled,
   services,
-  getCellTextToCopy,
+  formatValueAsTextToCopy,
   rowsCount,
 }: {
   columnName: string;
@@ -69,7 +69,7 @@ export function buildEuiGridColumn({
   defaultColumns: boolean;
   isSortEnabled: boolean;
   services: DiscoverServices;
-  getCellTextToCopy: GetCellTextToCopy;
+  formatValueAsTextToCopy: ValueAsTextFormatter;
   rowsCount: number;
 }) {
   const indexPatternField = indexPattern.getFieldByName(columnName);
@@ -102,7 +102,7 @@ export function buildEuiGridColumn({
         buildCopyColumnValuesButton({
           columnId: columnName,
           services,
-          getCellTextToCopy,
+          formatValueAsTextToCopy,
           rowsCount,
         }),
       ],
@@ -150,7 +150,7 @@ export function getEuiGridColumns({
   defaultColumns,
   isSortEnabled,
   services,
-  getCellTextToCopy,
+  formatValueAsTextToCopy,
 }: {
   columns: string[];
   rowsCount: number;
@@ -160,7 +160,7 @@ export function getEuiGridColumns({
   defaultColumns: boolean;
   isSortEnabled: boolean;
   services: DiscoverServices;
-  getCellTextToCopy: GetCellTextToCopy;
+  formatValueAsTextToCopy: ValueAsTextFormatter;
 }) {
   const timeFieldName = indexPattern.timeFieldName;
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
@@ -178,7 +178,7 @@ export function getEuiGridColumns({
       defaultColumns,
       isSortEnabled,
       services,
-      getCellTextToCopy,
+      formatValueAsTextToCopy,
       rowsCount,
     })
   );

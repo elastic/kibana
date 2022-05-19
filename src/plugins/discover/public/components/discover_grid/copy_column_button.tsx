@@ -11,7 +11,7 @@ import { EuiListGroupItemProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { copyColumnValuesToClipboard, copyColumnNameToClipboard } from './utils/copy_to_clipboard';
 import { DiscoverServices } from '../../build_services';
-import { GetCellTextToCopy } from '../../types';
+import { ValueAsTextFormatter } from '../../types';
 
 function buildCopyColumnButton({
   label,
@@ -52,12 +52,12 @@ export function buildCopyColumnNameButton({
 export function buildCopyColumnValuesButton({
   columnId,
   services,
-  getCellTextToCopy,
+  formatValueAsTextToCopy,
   rowsCount,
 }: {
   columnId: string;
   services: DiscoverServices;
-  getCellTextToCopy: GetCellTextToCopy;
+  formatValueAsTextToCopy: ValueAsTextFormatter;
   rowsCount: number;
 }): EuiListGroupItemProps {
   return buildCopyColumnButton({
@@ -71,7 +71,7 @@ export function buildCopyColumnValuesButton({
       await copyColumnValuesToClipboard({
         columnId,
         services,
-        getCellTextToCopy,
+        formatValueAsTextToCopy,
         rowsCount,
       }),
   });

@@ -49,7 +49,7 @@ describe('Copy to clipboard button', () => {
     const { label, iconType, onClick } = buildCopyColumnValuesButton({
       columnId: 'extension',
       services: discoverServiceMock,
-      getCellTextToCopy: discoverGridContextMock.getCellTextToCopy,
+      formatValueAsTextToCopy: discoverGridContextMock.formatValueAsTextToCopy,
       rowsCount: 3,
     });
 
@@ -71,7 +71,7 @@ describe('Copy to clipboard button', () => {
     } = buildCopyColumnValuesButton({
       columnId: '_source',
       services: discoverServiceMock,
-      getCellTextToCopy: discoverGridContextMock.getCellTextToCopy,
+      formatValueAsTextToCopy: discoverGridContextMock.formatValueAsTextToCopy,
       rowsCount: 3,
     });
 

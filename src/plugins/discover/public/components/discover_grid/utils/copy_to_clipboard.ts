@@ -8,23 +8,23 @@
 
 import { copyToClipboard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { GetCellTextToCopy } from '../../../types';
+import { ValueAsTextFormatter } from '../../../types';
 import { DiscoverServices } from '../../../build_services';
 
 export const copyValueToClipboard = ({
   rowIndex,
   columnId,
   services,
-  getCellTextToCopy,
+  formatValueAsTextToCopy,
 }: {
   rowIndex: number;
   columnId: string;
   services: DiscoverServices;
-  getCellTextToCopy: GetCellTextToCopy;
+  formatValueAsTextToCopy: ValueAsTextFormatter;
 }) => {
   const { toastNotifications } = services;
 
-  const valueFormatted = getCellTextToCopy(rowIndex, columnId, { allowMultiline: true });
+  const valueFormatted = formatValueAsTextToCopy(rowIndex, columnId, { allowMultiline: true });
 
   copyToClipboard(valueFormatted);
 
@@ -38,18 +38,18 @@ export const copyValueToClipboard = ({
 export const copyColumnValuesToClipboard = async ({
   columnId,
   services,
-  getCellTextToCopy,
+  formatValueAsTextToCopy,
   rowsCount,
 }: {
   columnId: string;
   services: DiscoverServices;
-  getCellTextToCopy: GetCellTextToCopy;
+  formatValueAsTextToCopy: ValueAsTextFormatter;
   rowsCount: number;
 }) => {
   const { toastNotifications } = services;
 
   const valuesFormatted = [...Array(rowsCount)].map((_, rowIndex) => {
-    return getCellTextToCopy(rowIndex, columnId, { allowMultiline: false });
+    return formatValueAsTextToCopy(rowIndex, columnId, { allowMultiline: false });
   });
 
   const textToCopy = `${columnId}\n${valuesFormatted.join('\n')}`;

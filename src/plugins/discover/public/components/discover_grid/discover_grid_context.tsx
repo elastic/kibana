@@ -9,7 +9,7 @@
 import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
-import type { ElasticSearchHit, HitsFlattened, GetCellTextToCopy } from '../../types';
+import type { ElasticSearchHit, HitsFlattened, ValueAsTextFormatter } from '../../types';
 
 export interface GridContext {
   expanded?: ElasticSearchHit;
@@ -21,7 +21,7 @@ export interface GridContext {
   isDarkMode: boolean;
   selectedDocs: string[];
   setSelectedDocs: (selected: string[]) => void;
-  getCellTextToCopy: GetCellTextToCopy;
+  formatValueAsTextToCopy: ValueAsTextFormatter;
 }
 
 const defaultContext = {} as unknown as GridContext;

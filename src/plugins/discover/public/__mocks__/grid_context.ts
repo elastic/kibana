@@ -25,7 +25,7 @@ export const discoverGridContextMock: GridContext = {
   isDarkMode: false,
   selectedDocs: [],
   setSelectedDocs: jest.fn(),
-  getCellTextToCopy: (rowIndex, columnId, options) =>
+  formatValueAsTextToCopy: (rowIndex, columnId, options) =>
     formatValueAsPlainText({
       rowIndex,
       columnId,

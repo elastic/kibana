@@ -48,7 +48,7 @@ import {
 import { DiscoverGridDocumentToolbarBtn, getDocId } from './discover_grid_document_selection';
 import { SortPairArr } from '../doc_table/lib/get_sort';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
-import { ElasticSearchHit, GetCellTextToCopy } from '../../types';
+import { ElasticSearchHit, ValueAsTextFormatter } from '../../types';
 import { useRowHeightsOptions } from '../../utils/use_row_heights_options';
 import { useDiscoverServices } from '../../utils/use_discover_services';
 import { formatValueAsPlainText } from '../../utils/format_value_as_plain_text';
@@ -238,7 +238,7 @@ export const DiscoverGrid = ({
     });
   }, [displayedRows, indexPattern]);
 
-  const getCellTextToCopy: GetCellTextToCopy = useCallback(
+  const formatValueAsTextToCopy: ValueAsTextFormatter = useCallback(
     (rowIndex, columnId, options) => {
       return formatValueAsPlainText({
         rowIndex,
@@ -344,7 +344,7 @@ export const DiscoverGrid = ({
         defaultColumns,
         isSortEnabled,
         services,
-        getCellTextToCopy,
+        formatValueAsTextToCopy,
       }),
     [
       displayedColumns,
@@ -355,7 +355,7 @@ export const DiscoverGrid = ({
       defaultColumns,
       isSortEnabled,
       services,
-      getCellTextToCopy,
+      formatValueAsTextToCopy,
     ]
   );
 
@@ -464,8 +464,6 @@ export const DiscoverGrid = ({
     );
   }
 
-  // TODO: add `useMemo`
-
   return (
     <DiscoverGridContext.Provider
       value={{
@@ -483,7 +481,7 @@ export const DiscoverGrid = ({
             setIsFilterActive(false);
           }
         },
-        getCellTextToCopy,
+        formatValueAsTextToCopy,
       }}
     >
       <span
