@@ -464,6 +464,8 @@ export const DiscoverGrid = ({
     );
   }
 
+  // TODO: add `useMemo`
+
   return (
     <DiscoverGridContext.Provider
       value={{

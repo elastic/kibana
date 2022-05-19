@@ -64,27 +64,42 @@ const fields = [
   },
 ] as DataView['fields'];
 
-fields.getByName = (name: string) => {
-  return fields.find((field) => field.name === name);
-};
-
-fields.getAll = () => {
-  return fields;
-};
-
-const indexPattern = {
-  id: 'the-index-pattern-id',
-  title: 'the-index-pattern-title',
-  metaFields: ['_index', '_score'],
+export const buildDataViewMock = ({
+  name,
   fields,
-  getComputedFields: () => ({ docvalueFields: [], scriptFields: {}, storedFields: ['*'] }),
-  getSourceFiltering: () => ({}),
-  getFieldByName: jest.fn(() => ({})),
-  timeFieldName: '',
-  docvalueFields: [],
-  getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
-} as unknown as DataView;
+  timeFieldName,
+}: {
+  name: string;
+  fields: DataView['fields'];
+  timeFieldName?: string;
+}): DataView => {
+  const dataViewFields = [...fields] as DataView['fields'];
 
-indexPattern.isTimeBased = () => !!indexPattern.timeFieldName;
+  dataViewFields.getByName = (name: string) => {
+    return dataViewFields.find((field) => field.name === name);
+  };
 
-export const indexPatternMock = indexPattern;
+  dataViewFields.getAll = () => {
+    return fields;
+  };
+
+  const dataView = {
+    id: `${name}-id`,
+    title: `${name}-title`,
+    metaFields: ['_index', '_score'],
+    fields: dataViewFields,
+    getComputedFields: () => ({ docvalueFields: [], scriptFields: {}, storedFields: ['*'] }),
+    getSourceFiltering: () => ({}),
+    getFieldByName: jest.fn((name: string) => dataViewFields.getByName(name)),
+    timeFieldName: timeFieldName || '',
+    docvalueFields: [],
+    getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
+    isTimeNanosBased: () => false,
+  } as unknown as DataView;
+
+  dataView.isTimeBased = () => !!timeFieldName;
+
+  return dataView;
+};
+
+export const indexPatternMock = buildDataViewMock({ name: 'the-index-pattern', fields });
