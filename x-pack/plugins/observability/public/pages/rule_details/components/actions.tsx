@@ -28,15 +28,15 @@ export function Actions({ ruleActions, actionTypeRegistry }: ActionsProps) {
   } = useKibana().services;
   const { isLoadingActions, allActions, errorActions } = useFetchRuleActions({ http });
   if (ruleActions && ruleActions.length <= 0)
-  return (
-    <EuiFlexItem>
-      <EuiText size="s">
-        {i18n.translate('xpack.observability.ruleDetails.noActions', {
-          defaultMessage: 'No actions',
-        })}
-      </EuiText>
-    </EuiFlexItem>
-  );
+    return (
+      <EuiFlexItem>
+        <EuiText size="s">
+          {i18n.translate('xpack.observability.ruleDetails.noActions', {
+            defaultMessage: 'No actions',
+          })}
+        </EuiText>
+      </EuiFlexItem>
+    );
 
   function getActionIconClass(actionGroupId?: string): IconType | undefined {
     const actionGroup = actionTypeRegistry.list().find((group) => group.id === actionGroupId);
