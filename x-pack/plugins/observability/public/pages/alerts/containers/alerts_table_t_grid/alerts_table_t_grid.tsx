@@ -65,7 +65,7 @@ import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { LazyAlertsFlyout } from '../../../..';
 import { parseAlert } from '../../components/parse_alert';
-import { translations } from '../../../../config';
+import { translations, paths } from '../../../../config';
 import { addDisplayNames } from './add_display_names';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from './translations';
 import { ObservabilityAppServices } from '../../../../application/types';
@@ -170,10 +170,7 @@ function ObservabilityActions({
 
   const casePermissions = useGetUserCasesPermissions();
   const ruleId = alert.fields['kibana.alert.rule.uuid'] ?? null;
-  const linkToRule = ruleId
-    ? http.basePath.prepend(`/app/observability/alerts/rules/${ruleId}`)
-    : null;
-
+  const linkToRule = ruleId ? http.basePath.prepend(paths.observability.ruleDetails(ruleId)) : null;
   const caseAttachments: CaseAttachments = useMemo(() => {
     return ecsData?._id
       ? [

@@ -8,6 +8,7 @@
 export const paths = {
   observability: {
     alerts: '/app/observability/alerts',
+    ruleDetails: (ruleId: string) => `/app/observability/alerts/rules/${encodeURI(ruleId)}`,
   },
   management: {
     rules: '/app/management/insightsAndAlerting/triggersActions/rules',

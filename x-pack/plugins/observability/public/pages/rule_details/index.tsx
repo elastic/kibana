@@ -210,7 +210,7 @@ export function RuleDetailsPage() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: <PageTitle rule={rule} />,
+        pageTitle: <PageTitle data-test-subj="ruleDetailPageTitle" rule={rule} />,
         bottomBorder: false,
         rightSideItems: hasEditButton
           ? [
