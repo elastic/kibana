@@ -20,14 +20,14 @@ import { HostMetadata } from '../../../../common/endpoint/types';
  * By default, the policy status is displayed as plain text, however, that can be overriden
  * by defining the `children` prop or passing a child component to this one.
  */
-type EndpointPolicyStatusProps = PropsWithChildren<{
+type EndpointAppliedPolicyStatusProps = PropsWithChildren<{
   policyApplied: HostMetadata['Endpoint']['policy']['applied'];
 }>;
 
 /**
  * Display the status of the Policy applied on an endpoint
  */
-export const EndpointPolicyStatus = memo<EndpointPolicyStatusProps>(
+export const EndpointAppliedPolicyStatus = memo<EndpointAppliedPolicyStatusProps>(
   ({ policyApplied, children }) => {
     return (
       <EuiToolTip
@@ -56,7 +56,7 @@ export const EndpointPolicyStatus = memo<EndpointPolicyStatusProps>(
                   data-test-subj="policyRevision"
                 >
                   <FormattedMessage
-                    id="xpack.securitySolution.endpoint.list.policy.revisionNumber"
+                    id="xpack.securitySolution.endpointPolicyStatus.revisionNumber"
                     defaultMessage="rev. {revNumber}"
                     values={{ revNumber: policyApplied.endpoint_policy_version }}
                   />
@@ -69,7 +69,7 @@ export const EndpointPolicyStatus = memo<EndpointPolicyStatusProps>(
         <EuiHealth
           color={POLICY_STATUS_TO_HEALTH_COLOR[policyApplied.status]}
           className="eui-textTruncate eui-fullWidth"
-          data-test-subj="rowPolicyStatus"
+          data-test-subj="policyStatus"
         >
           {children !== undefined ? children : POLICY_STATUS_TO_TEXT[policyApplied.status]}
         </EuiHealth>
@@ -77,4 +77,4 @@ export const EndpointPolicyStatus = memo<EndpointPolicyStatusProps>(
     );
   }
 );
-EndpointPolicyStatus.displayName = 'EndpointPolicyStatus';
+EndpointAppliedPolicyStatus.displayName = 'EndpointAppliedPolicyStatus';

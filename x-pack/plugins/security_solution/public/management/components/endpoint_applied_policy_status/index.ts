@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { EndpointPolicyStatus } from './endpoint_policy_status';
+export { EndpointAppliedPolicyStatus } from './endpoint_applied_policy_status';

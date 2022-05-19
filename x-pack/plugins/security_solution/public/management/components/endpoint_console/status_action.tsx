@@ -16,7 +16,7 @@ import type { EndpointCommandDefinitionMeta } from './types';
 import { EndpointHostIsolationStatusProps } from '../../../common/components/endpoint/host_isolation';
 import { useGetEndpointPendingActionsSummary } from '../../hooks/endpoint/use_get_endpoint_pending_actions_summary';
 import { FormattedDate } from '../../../common/components/formatted_date';
-import { EndpointPolicyStatus } from '../endpoint_policy_status';
+import { EndpointAppliedPolicyStatus } from '../endpoint_applied_policy_status';
 import { EndpointAgentAndIsolationStatus } from '../endpoint_agent_and_isolation_status';
 import { useGetEndpointDetails } from '../../hooks';
 import type { CommandExecutionComponentProps } from '../console/types';
@@ -151,7 +151,9 @@ export const EndpointStatusActionResult = memo<
             defaultMessage="Policy status"
           />
         </EuiText>
-        <EndpointPolicyStatus policyApplied={endpointDetails.metadata.Endpoint.policy.applied} />
+        <EndpointAppliedPolicyStatus
+          policyApplied={endpointDetails.metadata.Endpoint.policy.applied}
+        />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiText size="s">
