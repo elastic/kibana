@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
-
-export const clusterUuidRT = rt.string;
-export type ClusterUuid = rt.TypeOf<typeof clusterUuidRT>;
+export * from './post_kibana_instance';
+export * from './post_kibana_instances';
+export * from './post_kibana_overview';

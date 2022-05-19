@@ -5,10 +5,18 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
 import { getKibanasForClusters } from '../../../../lib/kibana/get_kibanas_for_clusters';
+import { LegacyRequest } from '../../../../types';
+import { ClusterUuid } from '../../../../../common/http_api/shared';
 
-export const getKibanaClusterStatus = (req, { clusterUuid }) => {
+export const getKibanaClusterStatus = (
+  req: LegacyRequest,
+  {
+    clusterUuid,
+  }: {
+    clusterUuid: ClusterUuid;
+  }
+) => {
   const clusters = [{ cluster_uuid: clusterUuid }];
-  return getKibanasForClusters(req, clusters).then((kibanas) => get(kibanas, '[0].stats'));
+  return getKibanasForClusters(req, clusters).then((kibanas) => kibanas && kibanas[0]?.stats);
 };

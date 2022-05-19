@@ -5,32 +5,27 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { getKibanaClusterStatus } from './_get_kibana_cluster_status';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { metricSet } from './metric_set_overview';
 import { handleError } from '../../../../lib/errors';
+import {
+  postKibanaOverviewRequestParamsRT,
+  postKibanaOverviewRequestPayloadRT,
+} from '../../../../../common/http_api/kibana';
+import { createValidationFunction } from '../../../../lib/create_route_validation_function';
+import { MonitoringCore } from '../../../../types';
 
-export function kibanaOverviewRoute(server) {
-  /**
-   * Kibana overview (metrics)
-   */
+export function kibanaOverviewRoute(server: MonitoringCore) {
+  const validateParams = createValidationFunction(postKibanaOverviewRequestParamsRT);
+  const validateBody = createValidationFunction(postKibanaOverviewRequestPayloadRT);
+
   server.route({
-    method: 'POST',
+    method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/kibana',
-    config: {
-      validate: {
-        params: schema.object({
-          clusterUuid: schema.string(),
-        }),
-        body: schema.object({
-          ccs: schema.maybe(schema.string()),
-          timeRange: schema.object({
-            min: schema.string(),
-            max: schema.string(),
-          }),
-        }),
-      },
+    validate: {
+      params: validateParams,
+      body: validateBody,
     },
     async handler(req) {
       const clusterUuid = req.params.clusterUuid;
