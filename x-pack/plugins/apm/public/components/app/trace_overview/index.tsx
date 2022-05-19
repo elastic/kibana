@@ -5,23 +5,17 @@
  * 2.0.
  */
 import React from 'react';
-import { apmTraceExplorerTab } from '@kbn/observability-plugin/common';
 import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
 import { TraceSearchType } from '../../../../common/trace_explorer';
 import { TransactionTab } from '../transaction_details/waterfall_with_summary/transaction_tabs';
+import { useTraceExplorerEnabledSetting } from '../../../hooks/use_trace_explorer_enabled_setting';
 
 export function TraceOverview({ children }: { children: React.ReactElement }) {
-  const { core } = useApmPluginContext();
-
-  const isTraceExplorerEnabled = core.uiSettings.get<boolean>(
-    apmTraceExplorerTab,
-    false
-  );
+  const isTraceExplorerEnabled = useTraceExplorerEnabledSetting();
 
   const router = useApmRouter();
 

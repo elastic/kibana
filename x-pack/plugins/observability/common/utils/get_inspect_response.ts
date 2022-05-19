@@ -71,7 +71,7 @@ function getStats({
     },
   };
 
-  if (esResponse?.hits) {
+  if (esResponse?.hits?.hits) {
     stats.hits = {
       label: i18n.translate('xpack.observability.inspector.stats.hitsLabel', {
         defaultMessage: 'Hits',

@@ -11,6 +11,7 @@ import { TypeOf } from '@kbn/typed-react-router-config';
 import { METRIC_TYPE } from '@kbn/analytics';
 import React from 'react';
 import { useUiTracker } from '@kbn/observability-plugin/public';
+import { NodeDataDefinition } from 'cytoscape';
 import { ContentsProps } from '.';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
@@ -27,11 +28,13 @@ const INITIAL_STATE: Partial<BackendReturn> = {
 };
 
 export function BackendContents({
-  nodeData,
+  elementData,
   environment,
   start,
   end,
 }: ContentsProps) {
+  const nodeData = elementData as NodeDataDefinition;
+
   const { query } = useAnyOfApmParams(
     '/service-map',
     '/services/{serviceName}/service-map'
