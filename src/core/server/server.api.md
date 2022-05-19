@@ -1472,10 +1472,10 @@ export type KibanaResponseFactory = typeof kibanaResponseFactory;
 
 // @public
 export const kibanaResponseFactory: {
-    custom: <T extends string | Record<string, any> | Buffer | Error | Stream | {
+    custom: <T extends string | Error | Buffer | Record<string, any> | {
         message: string | Error;
         attributes?: ResponseErrorAttributes | undefined;
-    } | undefined>(options: CustomHttpResponseOptions<T>) => KibanaResponse<T>;
+    } | Stream | undefined>(options: CustomHttpResponseOptions<T>) => KibanaResponse<T>;
     badRequest: (options?: ErrorHttpResponseOptions) => KibanaResponse<string | Error | {
         message: string | Error;
         attributes?: ResponseErrorAttributes | undefined;
@@ -1496,13 +1496,13 @@ export const kibanaResponseFactory: {
         message: string | Error;
         attributes?: ResponseErrorAttributes | undefined;
     }>;
-    customError: (options: CustomHttpResponseOptions<ResponseError | Buffer | Stream>) => KibanaResponse<string | Buffer | Error | Stream | {
+    customError: (options: CustomHttpResponseOptions<ResponseError | Buffer | Stream>) => KibanaResponse<string | Error | Buffer | {
         message: string | Error;
         attributes?: ResponseErrorAttributes | undefined;
-    }>;
-    redirected: (options: RedirectResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
-    ok: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
-    accepted: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
+    } | Stream>;
+    redirected: (options: RedirectResponseOptions) => KibanaResponse<string | Buffer | Record<string, any> | Stream>;
+    ok: (options?: HttpResponseOptions) => KibanaResponse<string | Buffer | Record<string, any> | Stream>;
+    accepted: (options?: HttpResponseOptions) => KibanaResponse<string | Buffer | Record<string, any> | Stream>;
     noContent: (options?: HttpResponseOptions) => KibanaResponse<undefined>;
 };
 

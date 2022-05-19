@@ -14,7 +14,7 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import type { Client } from '@elastic/elasticsearch';
 import { ConfigPath } from '@kbn/config';
 import { ContextProviderOpts } from '@kbn/analytics-client';
-import { CoreId } from '@kbn/core-server-internal-base';
+import { CoreContext } from '@kbn/core-public-internal-base';
 import { DetailedPeerCertificate } from 'tls';
 import type { DocLinks } from '@kbn/doc-links';
 import { EnvironmentMode } from '@kbn/config';
@@ -399,16 +399,7 @@ export interface ChromeUserBanner {
 
 export { ContextProviderOpts }
 
-// @internal (undocumented)
-export interface CoreContext {
-    // (undocumented)
-    coreId: CoreId;
-    // (undocumented)
-    env: {
-        mode: Readonly<EnvironmentMode>;
-        packageInfo: Readonly<PackageInfo>;
-    };
-}
+export { CoreContext }
 
 // @public
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
@@ -1590,6 +1581,6 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:195:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:186:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```
