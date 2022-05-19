@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { getDataStreams } from '../../mappings/mappings';
 import { ListComponent } from './list_component';
+import { getAutocompleteInfo } from '../../../services';
 
 export class DataStreamAutocompleteComponent extends ListComponent {
   constructor(name, parent, multiValued) {
-    super(name, getDataStreams, parent, multiValued);
+    super(name, getAutocompleteInfo().getEntityProvider('dataStreams'), parent, multiValued);
   }
 
   getContextKey() {
