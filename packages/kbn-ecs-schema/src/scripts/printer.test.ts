@@ -6,26 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { Schema } from "../common/types";
+import util from 'util';
+import path from 'path';
+import { REPO_ROOT } from '@kbn/utils';
+
+import { Group, Schema } from '../common/types';
+import { printSchema } from './printer';
+import * as write_file from './write_file';
+
+const DIR = path.resolve(REPO_ROOT, 'packages/kbn-ecs-schema/src/schemas');
 
 describe('printSchema', () => {
-  const group: Schema = {
-    agent: {
-      id: {
-        dashed_name: 'agent-id',
-        description: 'Unique identifier of this agent (if one exists).\n' +
-          'Example: For Beats this would be beat.id.',
-        example: '8a4f500d',
-        flat_name: 'agent.id',
-        ignore_above: 1024,
-        level: 'core',
-        name: 'id',
-        normalize: [],
-        short: 'Unique identifier of this agent.',
-        type: 'keyword'
-      }
-    },
-    topLevel: {
+
+  test('printing top-level fields', () => {
+    const base: Group = {
       '@timestamp': {
         dashed_name: 'timestamp',
         description: 'Date/time when the event originated.\n' +
@@ -41,11 +35,60 @@ describe('printSchema', () => {
         short: 'Date/time when the event originated.',
         type: 'date'
       }
-    }
-  };
+    };
 
-  test('TBD', () => {
-    
+    const schema: Schema = {
+      topLevel: {...base},
+    };
+
+    const logSpy = jest.spyOn(console, 'log');
+    const writeSpy = jest.spyOn(write_file ,'write');
+    const appendSpy = jest.spyOn(write_file, 'append');
+
+    printSchema(schema, DIR);
+
+    expect(logSpy).toHaveBeenCalledTimes(0);
+    expect(writeSpy).toHaveBeenCalledTimes(0);
+
+    expect(appendSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test('printing groups', () => {
+    const agent: Group = {
+      id: {
+        dashed_name: 'agent-id',
+        description: 'Unique identifier of this agent (if one exists).\n' +
+          'Example: For Beats this would be beat.id.',
+        example: '8a4f500d',
+        flat_name: 'agent.id',
+        ignore_above: 1024,
+        level: 'core',
+        name: 'id',
+        normalize: [],
+        short: 'Unique identifier of this agent.',
+        type: 'keyword'
+      }
+    };
+  
+    const schema: Schema = {
+      agent: {...agent},
+    };
+
+    const logSpy = jest.spyOn(console, 'log');
+    const writeSpy = jest.spyOn(write_file ,'write');
+    const appendSpy = jest.spyOn(write_file, 'append');
+
+    printSchema(schema, DIR);
+
+    expect(logSpy).toHaveBeenCalledWith(`Writing agent to ${DIR}/agent.ts`);
+
+    expect(writeSpy).toBeCalledTimes(1);
+
+    const agentFile = `export const agentEcs = ${util.inspect(agent, {depth: null})}`;
+    const outFile = `${DIR}/agent.ts`
+    expect(writeSpy).toHaveBeenCalledWith(outFile, agentFile);
+
+    expect(appendSpy).toBeCalledTimes(3);
   });
 
 });
