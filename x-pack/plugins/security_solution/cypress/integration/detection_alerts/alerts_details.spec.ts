@@ -50,7 +50,7 @@ describe('Alert details with unmapped fields', () => {
 
     cy.get(JSON_TEXT).then((x) => {
       const parsed = JSON.parse(x.text());
-      expect(parsed.fields['unmapped']).to.equal(expectedUnmappedValue);
+      expect(parsed.fields.unmapped).to.equal(expectedUnmappedValue);
     });
   });
 
