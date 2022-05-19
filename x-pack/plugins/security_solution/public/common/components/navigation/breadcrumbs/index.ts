@@ -83,7 +83,9 @@ const isAdminRoutes = (spyState: RouteSpyState): spyState is AdministrationRoute
   spyState != null && spyState.pageName === SecurityPageName.administration;
 
 const isRulesRoutes = (spyState: RouteSpyState): spyState is AdministrationRouteSpyState =>
-  spyState != null && spyState.pageName === SecurityPageName.rules;
+  spyState != null &&
+  (spyState.pageName === SecurityPageName.rules ||
+    spyState.pageName === SecurityPageName.rulesCreate);
 
 // eslint-disable-next-line complexity
 export const getBreadcrumbsForRoute = (
