@@ -5,41 +5,26 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { getClusterStatus } from '../../../../lib/logstash/get_cluster_status';
 import { getNodes } from '../../../../lib/logstash/get_nodes';
 import { handleError } from '../../../../lib/errors';
+import { MonitoringCore } from '../../../../types';
+import {
+  postLogstashNodesRequestParamsRT,
+  postLogstashNodesRequestPayloadRT,
+} from '../../../../../common/http_api/logstash/post_logstash_nodes';
+import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 
-/*
- * Logstash Nodes route.
- */
-export function logstashNodesRoute(server) {
-  /**
-   * Logstash Nodes request.
-   *
-   * This will fetch all data required to display the Logstash Nodes page.
-   *
-   * The current details returned are:
-   *
-   * - Logstash Cluster Status
-   * - Nodes list
-   */
+export function logstashNodesRoute(server: MonitoringCore) {
+  const validateParams = createValidationFunction(postLogstashNodesRequestParamsRT);
+  const validateBody = createValidationFunction(postLogstashNodesRequestPayloadRT);
+
   server.route({
-    method: 'POST',
+    method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/logstash/nodes',
-    config: {
-      validate: {
-        params: schema.object({
-          clusterUuid: schema.string(),
-        }),
-        body: schema.object({
-          ccs: schema.maybe(schema.string()),
-          timeRange: schema.object({
-            min: schema.string(),
-            max: schema.string(),
-          }),
-        }),
-      },
+    validate: {
+      params: validateParams,
+      body: validateBody,
     },
     async handler(req) {
       const clusterUuid = req.params.clusterUuid;
