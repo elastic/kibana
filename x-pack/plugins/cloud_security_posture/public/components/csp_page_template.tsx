@@ -168,10 +168,7 @@ export const CspPageTemplate = <TData, TError>({
   const cisIntegrationLink = useCISIntegrationLink();
 
   const getNoDataConfig = (): KibanaPageTemplateProps['noDataConfig'] => {
-    if (
-      cisKubernetesPackageInfo?.isSuccess &&
-      cisKubernetesPackageInfo.data.item.status === 'not_installed'
-    ) {
+    if (cisKubernetesPackageInfo.data?.item.status !== 'installed') {
       return getPackageNotInstalledNoDataConfig(cisIntegrationLink);
     }
 
@@ -180,18 +177,18 @@ export const CspPageTemplate = <TData, TError>({
       return kibanaPageTemplateProps.noDataConfig || DEFAULT_NO_DATA_CONFIG;
     }
 
-    // when the consumer didn't pass a query, most likely to handle the render on his own
-    if (!query) return kibanaPageTemplateProps.noDataConfig;
+    return kibanaPageTemplateProps.noDataConfig;
   };
 
   const getTemplate = (): KibanaPageTemplateProps['template'] => {
-    if (query?.isLoading || query?.isError) return 'centeredContent';
+    if (query?.isLoading || query?.isError || cisKubernetesPackageInfo.isLoading)
+      return 'centeredContent';
 
     return kibanaPageTemplateProps.template || 'default';
   };
 
   const render = () => {
-    if (query?.isLoading) return loadingRender();
+    if (query?.isLoading || cisKubernetesPackageInfo.isLoading) return loadingRender();
     if (query?.isError) return errorRender(query.error);
     if (query?.isSuccess) return children;
 
@@ -203,11 +200,9 @@ export const CspPageTemplate = <TData, TError>({
       {...DEFAULT_PAGE_PROPS}
       {...kibanaPageTemplateProps}
       template={getTemplate()}
-      noDataConfig={getNoDataConfig()}
+      noDataConfig={cisKubernetesPackageInfo.isSuccess ? getNoDataConfig() : undefined}
     >
-      <EuiErrorBoundary>
-        {cisKubernetesPackageInfo?.data?.item.status === 'installed' && render()}
-      </EuiErrorBoundary>
+      <EuiErrorBoundary>{render()}</EuiErrorBoundary>
     </KibanaPageTemplate>
   );
 };

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export const FINDINGS_STATUS_ROUTE_PATH = '/internal/cloud_security_posture/findings_status';
 export const STATS_ROUTE_PATH = '/internal/cloud_security_posture/stats';
 export const FINDINGS_ROUTE_PATH = '/internal/cloud_security_posture/findings';
 export const BENCHMARKS_ROUTE_PATH = '/internal/cloud_security_posture/benchmarks';

@@ -41,18 +41,15 @@ export interface Cluster {
 }
 
 export interface ComplianceDashboardData {
-  status: 'applicable';
   stats: Stats;
   groupedFindingsEvaluation: GroupedFindingsEvaluation[];
   clusters: Cluster[];
   trend: PostureTrend[];
 }
 
-export interface InapplicableComplianceDashboard {
-  status: 'inapplicable';
+export interface FindingsStatus {
+  status: 'applicable' | 'inapplicable';
 }
-
-export type ComplianceDashboard = ComplianceDashboardData | InapplicableComplianceDashboard;
 
 export interface CspRulesStatus {
   all: number;
