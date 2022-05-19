@@ -32,11 +32,11 @@ export type {
   AsApiContract,
   RuleTableItem,
   AlertsTableProps,
-  AlertsData,
   BulkActionsObjectProp,
   RuleSummary,
   AlertStatus,
   AlertsTableConfigurationRegistryContract,
+  RuleEventLogListProps,
 } from './types';
 
 export {
@@ -49,11 +49,28 @@ export type { ActionGroupWithCondition } from './application/sections';
 
 export { AlertConditions, AlertConditionsGroup } from './application/sections';
 
-export * from './common';
-
 export function plugin(context: PluginInitializerContext) {
   return new Plugin(context);
 }
+
+export type { AggregationType, Comparator } from './common';
+
+export {
+  WhenExpression,
+  OfExpression,
+  ForLastExpression,
+  ThresholdExpression,
+  ValueExpression,
+  builtInComparators,
+  builtInGroupByTypes,
+  builtInAggregationTypes,
+  getFields,
+  firstFieldOption,
+  getIndexOptions,
+  getTimeFieldOptions,
+  GroupByExpression,
+  COMPARATORS,
+} from './common';
 
 export { Plugin };
 export * from './plugin';
