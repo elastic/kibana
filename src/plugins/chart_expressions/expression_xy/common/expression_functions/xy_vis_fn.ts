@@ -23,9 +23,12 @@ import {
   hasHistogramBarLayer,
   validateExtent,
   validateFillOpacity,
+  validateMarkSizeRatioLimits,
   validateValueLabels,
   validateAddTimeMarker,
   validateMinTimeBarInterval,
+  validateMarkSizeForChartType,
+  validateMarkSizeRatioWithAccessor,
 } from './validate';
 
 const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult => {
@@ -64,6 +67,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
     isHistogram,
     yConfig,
     palette,
+    markSizeAccessor,
     ...restArgs
   } = args;
 
@@ -72,6 +76,9 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   validateAccessor(dataLayers[0].xAccessor, data.columns);
   validateAccessor(dataLayers[0].splitAccessor, data.columns);
   dataLayers[0].accessors.forEach((accessor) => validateAccessor(accessor, data.columns));
+
+  validateMarkSizeForChartType(dataLayers[0].markSizeAccessor, args.seriesType);
+  validateAccessor(dataLayers[0].markSizeAccessor, data.columns);
 
   const layers: XYLayerConfig[] = [
     ...appendLayerIds(dataLayers, 'dataLayers'),
@@ -107,6 +114,8 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   const hasNotHistogramBars = !hasHistogramBarLayer(dataLayers);
 
   validateValueLabels(args.valueLabels, hasBar, hasNotHistogramBars);
+  validateMarkSizeRatioWithAccessor(args.markSizeRatio, dataLayers[0].markSizeAccessor);
+  validateMarkSizeRatioLimits(args.markSizeRatio);
 
   return {
     type: 'render',
@@ -115,6 +124,8 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
       args: {
         ...restArgs,
         layers,
+        markSizeRatio:
+          dataLayers[0].markSizeAccessor && !args.markSizeRatio ? 10 : args.markSizeRatio,
         ariaLabel:
           args.ariaLabel ??
           (handlers.variables?.embeddableTitle as string) ??

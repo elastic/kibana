@@ -227,9 +227,14 @@ const getSeriesName: GetSeriesNameFn = (
   return splitColumnId ? data.seriesKeys[0] : columnToLabelMap[data.seriesKeys[0]] ?? null;
 };
 
-const getPointConfig = (xAccessor?: string, emphasizeFitting?: boolean) => ({
-  visible: !xAccessor,
+const getPointConfig = (
+  xAccessor: string | undefined,
+  markSizeAccessor: string | undefined,
+  emphasizeFitting?: boolean
+) => ({
+  visible: !xAccessor || markSizeAccessor !== undefined,
   radius: xAccessor && !emphasizeFitting ? 5 : 0,
+  fill: markSizeAccessor ? ColorVariant.Series : undefined,
 });
 
 const getLineConfig = () => ({ visible: true, stroke: ColorVariant.Series, opacity: 1, dash: [] });
@@ -278,7 +283,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   formattedDatatableInfo,
   defaultXScaleType,
 }): SeriesSpec => {
-  const { table } = layer;
+  const { table, markSizeAccessor } = layer;
   const isStacked = layer.seriesType.includes('stacked');
   const isPercentage = layer.seriesType.includes('percentage');
   const isBarChart = layer.seriesType.includes('bar');
@@ -295,6 +300,14 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     ? getFormatByAccessor(layer.splitAccessor, table.columns)
     : undefined;
   const splitFormatter = formatFactory(splitHint);
+
+  const markSizeColumnId = markSizeAccessor
+    ? getAccessorByDimension(markSizeAccessor, table.columns)
+    : undefined;
+
+  const markFormatter = formatFactory(
+    markSizeAccessor ? getFormat(table.columns, markSizeAccessor) : undefined
+  );
 
   // what if row values are not primitive? That is the case of, for instance, Ranges
   // remaps them to their serialized version with the formatHint metadata
@@ -328,6 +341,8 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     id: splitColumnId ? `${splitColumnId}-${accessor}` : accessor,
     xAccessor: xColumnId || 'unifiedX',
     yAccessors: [accessor],
+    markSizeAccessor: markSizeColumnId,
+    markFormat: (value) => markFormatter.convert(value),
     data: rows,
     xScaleType: xColumnId ? layer.xScaleType ?? defaultXScaleType : 'ordinal',
     yScaleType:
@@ -348,14 +363,14 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     stackMode: isPercentage ? StackMode.Percentage : undefined,
     timeZone,
     areaSeriesStyle: {
-      point: getPointConfig(xColumnId, emphasizeFitting),
+      point: getPointConfig(xColumnId, markSizeColumnId, emphasizeFitting),
       ...(fillOpacity && { area: { opacity: fillOpacity } }),
       ...(emphasizeFitting && {
         fit: { area: { opacity: fillOpacity || 0.5 }, line: getLineConfig() },
       }),
     },
     lineSeriesStyle: {
-      point: getPointConfig(xColumnId, emphasizeFitting),
+      point: getPointConfig(xColumnId, markSizeColumnId, emphasizeFitting),
       ...(emphasizeFitting && { fit: { line: getLineConfig() } }),
     },
     name(d) {

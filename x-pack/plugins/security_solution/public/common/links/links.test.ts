@@ -98,9 +98,11 @@ const threatHuntingLinkInfo = {
   features: ['siem.show'],
   globalNavEnabled: false,
   globalSearchKeywords: ['Threat hunting'],
-  id: 'threat-hunting',
+  id: 'threat_hunting',
   path: '/threat_hunting',
   title: 'Threat Hunting',
+  hideTimeline: true,
+  skipUrlState: true,
 };
 
 const hostsLinkInfo = {

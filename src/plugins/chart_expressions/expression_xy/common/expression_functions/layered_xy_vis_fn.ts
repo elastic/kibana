@@ -9,7 +9,13 @@
 import { XY_VIS_RENDERER } from '../constants';
 import { LayeredXyVisFn } from '../types';
 import { logDatatables } from '../utils';
-import { validateAddTimeMarker, validateMinTimeBarInterval, hasBarLayer } from './validate';
+import {
+  validateMarkSizeRatioLimits,
+  validateAddTimeMarker,
+  validateMinTimeBarInterval,
+  hasBarLayer,
+  errors,
+} from './validate';
 import { appendLayerIds, getDataLayers } from '../helpers';
 
 export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers) => {
@@ -20,7 +26,14 @@ export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers)
   const dataLayers = getDataLayers(layers);
   const hasBar = hasBarLayer(dataLayers);
   validateAddTimeMarker(dataLayers, args.addTimeMarker);
+  validateMarkSizeRatioLimits(args.markSizeRatio);
   validateMinTimeBarInterval(dataLayers, hasBar, args.minTimeBarInterval);
+  const hasMarkSizeAccessors =
+    dataLayers.filter((dataLayer) => dataLayer.markSizeAccessor !== undefined).length > 0;
+
+  if (!hasMarkSizeAccessors && args.markSizeRatio !== undefined) {
+    throw new Error(errors.markSizeRatioWithoutAccessor());
+  }
 
   return {
     type: 'render',
@@ -29,6 +42,7 @@ export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers)
       args: {
         ...args,
         layers,
+        markSizeRatio: hasMarkSizeAccessors && !args.markSizeRatio ? 10 : args.markSizeRatio,
         ariaLabel:
           args.ariaLabel ??
           (handlers.variables?.embeddableTitle as string) ??
