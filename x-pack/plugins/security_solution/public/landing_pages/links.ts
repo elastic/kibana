@@ -31,6 +31,8 @@ export const dashboardsLandingLinks: LinkItem = {
     }),
   ],
   links: [overviewLinks, detectionResponseLinks],
+  skipUrlState: true,
+  hideTimeline: true,
 };
 
 export const threatHuntingLandingLinks: LinkItem = {
@@ -45,4 +47,6 @@ export const threatHuntingLandingLinks: LinkItem = {
     }),
   ],
   links: [hostsLinks, networkLinks, usersLinks],
+  skipUrlState: true,
+  hideTimeline: true,
 };

@@ -6,7 +6,12 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { allowedExperimentalValues } from '../../../../common/experimental_features';
+import { updateAppLinks } from '../../links';
+import { getAppLinks } from '../../links/app_links';
 import { useShowTimeline } from './use_show_timeline';
+import { StartPlugins } from '../../../types';
 
 const mockUseLocation = jest.fn().mockReturnValue({ pathname: '/overview' });
 jest.mock('react-router-dom', () => {
@@ -17,40 +22,113 @@ jest.mock('react-router-dom', () => {
   };
 });
 
+const mockedUseIsGroupedNavigationEnabled = jest.fn();
+
+jest.mock('../../components/navigation/helpers', () => ({
+  useIsGroupedNavigationEnabled: () => mockedUseIsGroupedNavigationEnabled(),
+}));
+
 describe('use show timeline', () => {
-  it('shows timeline for routes on default', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useShowTimeline());
-      await waitForNextUpdate();
-      const showTimeline = result.current;
-      expect(showTimeline).toEqual([true]);
+  beforeAll(async () => {
+    // initialize all App links before running test
+    const appLinks = await getAppLinks(coreMock.createStart(), {} as StartPlugins);
+    updateAppLinks(appLinks, {
+      experimentalFeatures: allowedExperimentalValues,
+      capabilities: {
+        navLinks: {},
+        management: {},
+        catalogue: {},
+        actions: { show: true, crud: true },
+        siem: {
+          show: true,
+          crud: true,
+        },
+      },
     });
   });
-  it('hides timeline for blacklist routes', async () => {
-    mockUseLocation.mockReturnValueOnce({ pathname: '/rules/create' });
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useShowTimeline());
-      await waitForNextUpdate();
-      const showTimeline = result.current;
-      expect(showTimeline).toEqual([false]);
+  describe('useIsGroupedNavigationEnabled false', () => {
+    beforeAll(() => {
+      mockedUseIsGroupedNavigationEnabled.mockReturnValue(false);
+    });
+
+    it('shows timeline for routes on default', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => useShowTimeline());
+        await waitForNextUpdate();
+        const showTimeline = result.current;
+        expect(showTimeline).toEqual([true]);
+      });
+    });
+
+    it('hides timeline for blacklist routes', async () => {
+      mockUseLocation.mockReturnValueOnce({ pathname: '/rules/create' });
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => useShowTimeline());
+        await waitForNextUpdate();
+        const showTimeline = result.current;
+        expect(showTimeline).toEqual([false]);
+      });
+    });
+    it('shows timeline for partial blacklist routes', async () => {
+      mockUseLocation.mockReturnValueOnce({ pathname: '/rules' });
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => useShowTimeline());
+        await waitForNextUpdate();
+        const showTimeline = result.current;
+        expect(showTimeline).toEqual([true]);
+      });
+    });
+    it('hides timeline for sub blacklist routes', async () => {
+      mockUseLocation.mockReturnValueOnce({ pathname: '/administration/policy' });
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => useShowTimeline());
+        await waitForNextUpdate();
+        const showTimeline = result.current;
+        expect(showTimeline).toEqual([false]);
+      });
     });
   });
-  it('shows timeline for partial blacklist routes', async () => {
-    mockUseLocation.mockReturnValueOnce({ pathname: '/rules' });
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useShowTimeline());
-      await waitForNextUpdate();
-      const showTimeline = result.current;
-      expect(showTimeline).toEqual([true]);
+
+  describe('useIsGroupedNavigationEnabled true', () => {
+    beforeAll(() => {
+      mockedUseIsGroupedNavigationEnabled.mockReturnValue(true);
     });
-  });
-  it('hides timeline for sub blacklist routes', async () => {
-    mockUseLocation.mockReturnValueOnce({ pathname: '/administration/policy' });
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useShowTimeline());
-      await waitForNextUpdate();
-      const showTimeline = result.current;
-      expect(showTimeline).toEqual([false]);
+
+    it('shows timeline for routes on default', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => useShowTimeline());
+        await waitForNextUpdate();
+        const showTimeline = result.current;
+        expect(showTimeline).toEqual([true]);
+      });
+    });
+
+    it('hides timeline for blacklist routes', async () => {
+      mockUseLocation.mockReturnValueOnce({ pathname: '/rules/create' });
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => useShowTimeline());
+        await waitForNextUpdate();
+        const showTimeline = result.current;
+        expect(showTimeline).toEqual([false]);
+      });
+    });
+    it('shows timeline for partial blacklist routes', async () => {
+      mockUseLocation.mockReturnValueOnce({ pathname: '/rules' });
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => useShowTimeline());
+        await waitForNextUpdate();
+        const showTimeline = result.current;
+        expect(showTimeline).toEqual([true]);
+      });
+    });
+    it('hides timeline for sub blacklist routes', async () => {
+      mockUseLocation.mockReturnValueOnce({ pathname: '/administration/policy' });
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => useShowTimeline());
+        await waitForNextUpdate();
+        const showTimeline = result.current;
+        expect(showTimeline).toEqual([false]);
+      });
     });
   });
 });
