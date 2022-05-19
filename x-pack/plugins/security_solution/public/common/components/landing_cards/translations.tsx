@@ -55,7 +55,20 @@ export const SIEM_CARD_TITLE = i18n.translate(
 export const SIEM_CARD_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.overview.landingCards.box.siemCard.desc',
   {
-    defaultMessage: 'Detect, investigate, and respond to evolving threats.',
+    defaultMessage: 'Detect, investigate, and respond to evolving threats in your environment.',
+  }
+);
+
+export const CLOUD_CARD_TITLE = i18n.translate(
+  'xpack.securitySolution.overview.landingCards.box.cloudCard.title',
+  {
+    defaultMessage: 'Cloud protection end-to-end',
+  }
+);
+export const CLOUD_CARD_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.overview.landingCards.box.cloudCard.desc',
+  {
+    defaultMessage: 'Assess your Cloud Posture and protect your workloads from attacks.',
   }
 );
 
