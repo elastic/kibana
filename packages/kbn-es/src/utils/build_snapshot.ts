@@ -9,7 +9,7 @@
 import path from 'path';
 import os from 'os';
 
-import { withProcRunner } from '@kbn/dev-utils';
+import { withProcRunner } from '@kbn/dev-proc-runner';
 import { ToolingLog } from '@kbn/tooling-log';
 
 import { createCliError } from '../errors';
