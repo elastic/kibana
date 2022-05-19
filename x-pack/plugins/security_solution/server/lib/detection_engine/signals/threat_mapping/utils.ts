@@ -6,14 +6,11 @@
  */
 
 import moment from 'moment';
-import type {
-  ThreatMapping
-} from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import { SearchAfterAndBulkCreateReturnType, SignalSourceHit } from '../types';
 import { parseInterval } from '../utils';
-import { ThreatMatchNamedQuery, ThreatListItem,  } from './types';
-
+import { ThreatMatchNamedQuery, ThreatListItem } from './types';
 
 /**
  * Given two timers this will take the max of each and add them to each other and return that addition.
@@ -174,24 +171,26 @@ export const buildExecutionIntervalValidator: (interval: string) => () => void =
   };
 };
 
-
 export const getThreatListConfig = ({
   threatIndicatorPath,
-  threatMapping
+  threatMapping,
 }: {
-  threatIndicatorPath?: string,
-  threatMapping?: ThreatMapping,
+  threatIndicatorPath?: string;
+  threatMapping?: ThreatMapping;
 }) => {
-  let sourceFields:string[] = [];
-  if(threatIndicatorPath) {
+  let sourceFields: string[] = [];
+  if (threatIndicatorPath) {
     sourceFields = [...sourceFields, `${threatIndicatorPath}.*`, 'threat.feed.*'];
   }
-  if(threatMapping) {
-    sourceFields = [...sourceFields, ...threatMapping.map((mapping) => mapping.entries.map((item) => item.value)).flat()]
+  if (threatMapping) {
+    sourceFields = [
+      ...sourceFields,
+      ...threatMapping.map((mapping) => mapping.entries.map((item) => item.value)).flat(),
+    ];
   }
-  
+
   return {
     _source: sourceFields,
     fields: undefined,
-  }
-}
+  };
+};

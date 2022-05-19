@@ -22,7 +22,7 @@ export const buildThreatEnrichment = ({
   threatQuery,
   pitId,
   reassignPitId,
-  threatListConfig
+  threatListConfig,
 }: BuildThreatEnrichmentOptions): SignalsEnrichment => {
   const getMatchedThreats: GetMatchedThreats = async (ids) => {
     const matchedThreatsFilter = {

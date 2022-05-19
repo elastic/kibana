@@ -17,7 +17,11 @@ import {
 import { createThreatSignal } from './create_threat_signal';
 import { createEventSignal } from './create_event_signal';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
-import { buildExecutionIntervalValidator, combineConcurrentResults, getThreatListConfig } from './utils';
+import {
+  buildExecutionIntervalValidator,
+  combineConcurrentResults,
+  getThreatListConfig,
+} from './utils';
 import { buildThreatEnrichment } from './build_threat_enrichment';
 import { getEventCount, getEventList } from './get_event_count';
 import { getMappingFilters } from './get_mapping_filters';
@@ -113,7 +117,6 @@ export const createThreatSignals = async ({
 
   logger.debug(buildRuleMessage(`Total indicator items: ${threatListCount}`));
 
-
   const threatEnrichment = buildThreatEnrichment({
     buildRuleMessage,
     exceptionItems,
@@ -126,7 +129,7 @@ export const createThreatSignals = async ({
     threatQuery,
     pitId: threatPitId,
     reassignPitId: reassignThreatPitId,
-    threatListConfig: getThreatListConfig({threatMapping, threatIndicatorPath}),
+    threatListConfig: getThreatListConfig({ threatMapping, threatIndicatorPath }),
   });
 
   const createSignals = async ({
@@ -226,7 +229,7 @@ export const createThreatSignals = async ({
           tuple,
           type,
           wrapHits,
-          threatListConfig: getThreatListConfig({threatMapping, threatIndicatorPath}),
+          threatListConfig: getThreatListConfig({ threatMapping, threatIndicatorPath }),
         }),
     });
   } else {
@@ -245,7 +248,9 @@ export const createThreatSignals = async ({
           buildRuleMessage,
           perPage,
           threatListConfig: {
-            fields: threatMapping.map((mapping) => mapping.entries.map((item) => item.value)).flat(),
+            fields: threatMapping
+              .map((mapping) => mapping.entries.map((item) => item.value))
+              .flat(),
             _source: false,
           },
           pitId: threatPitId,
