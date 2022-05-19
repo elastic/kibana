@@ -6,53 +6,42 @@
  */
 
 import { notFound } from '@hapi/boom';
-import { schema } from '@kbn/config-schema';
 import { handleError, PipelineNotFoundError } from '../../../../lib/errors';
+import {
+  postLogstashPipelineRequestParamsRT,
+  postLogstashPipelineRequestPayloadRT,
+} from '../../../../../common/http_api/logstash/post_logstash_pipeline';
 import { getPipelineVersions } from '../../../../lib/logstash/get_pipeline_versions';
 import { getPipeline } from '../../../../lib/logstash/get_pipeline';
 import { getPipelineVertex } from '../../../../lib/logstash/get_pipeline_vertex';
+import { MonitoringCore, PipelineVersion } from '../../../../types';
+import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 
-function getPipelineVersion(versions, pipelineHash) {
-  return pipelineHash ? versions.find(({ hash }) => hash === pipelineHash) : versions[0];
+function getPipelineVersion(versions: PipelineVersion[], pipelineHash: string | null) {
+  return pipelineHash
+    ? versions.find(({ hash }) => hash === pipelineHash) ?? versions[0]
+    : versions[0];
 }
 
-/*
- * Logstash Pipeline route.
- */
-export function logstashPipelineRoute(server) {
-  /**
-   * Logstash Pipeline Viewer request.
-   *
-   * This will fetch all data required to display a Logstash Pipeline Viewer page.
-   *
-   * The current details returned are:
-   *
-   * - Pipeline Metrics
-   */
+export function logstashPipelineRoute(server: MonitoringCore) {
+  const validateParams = createValidationFunction(postLogstashPipelineRequestParamsRT);
+  const validateBody = createValidationFunction(postLogstashPipelineRequestPayloadRT);
+
   server.route({
-    method: 'POST',
+    method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/logstash/pipeline/{pipelineId}/{pipelineHash?}',
-    config: {
-      validate: {
-        params: schema.object({
-          clusterUuid: schema.string(),
-          pipelineId: schema.string(),
-          pipelineHash: schema.maybe(schema.string()),
-        }),
-        body: schema.object({
-          ccs: schema.maybe(schema.string()),
-          detailVertexId: schema.maybe(schema.string()),
-        }),
-      },
+    validate: {
+      params: validateParams,
+      body: validateBody,
     },
-    handler: async (req) => {
+    async handler(req) {
       const config = server.config;
       const clusterUuid = req.params.clusterUuid;
       const detailVertexId = req.payload.detailVertexId;
 
       const pipelineId = req.params.pipelineId;
       // Optional params default to empty string, set to null to be more explicit.
-      const pipelineHash = req.params.pipelineHash || null;
+      const pipelineHash = req.params.pipelineHash ?? null;
 
       // Figure out which version of the pipeline we want to show
       let versions;
@@ -67,16 +56,19 @@ export function logstashPipelineRoute(server) {
       }
       const version = getPipelineVersion(versions, pipelineHash);
 
-      // noinspection ES6MissingAwait
-      const promises = [getPipeline(req, config, clusterUuid, pipelineId, version)];
-      if (detailVertexId) {
-        promises.push(
-          getPipelineVertex(req, config, clusterUuid, pipelineId, version, detailVertexId)
-        );
-      }
+      const callGetPipelineVertexFunc = () => {
+        if (!detailVertexId) {
+          return Promise.resolve(undefined);
+        }
+
+        return getPipelineVertex(req, config, clusterUuid, pipelineId, version, detailVertexId);
+      };
 
       try {
-        const [pipeline, vertex] = await Promise.all(promises);
+        const [pipeline, vertex] = await Promise.all([
+          getPipeline(req, config, clusterUuid, pipelineId, version),
+          callGetPipelineVertexFunc(),
+        ]);
         return {
           versions,
           pipeline,

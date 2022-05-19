@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const metricSet = [
+import { SimpleMetricDescriptor } from '../../../../lib/details/get_metrics';
+
+export const metricSet: SimpleMetricDescriptor[] = [
   'logstash_cluster_events_input_rate',
   'logstash_cluster_events_output_rate',
   'logstash_cluster_events_latency',
