@@ -23,6 +23,7 @@ export const CHARTS_WITHOUT_SMALL_MULTIPLES = {
 export const CHARTS_TO_BE_DEPRECATED = {
   pie: 'pie',
   timelion: 'timelion',
+  controls: 'input_control_vis',
 } as const;
 
 export type CHARTS_WITHOUT_SMALL_MULTIPLES = $Values<typeof CHARTS_WITHOUT_SMALL_MULTIPLES>;

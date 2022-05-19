@@ -26,6 +26,7 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiDescriptionList,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DocLinksStart } from '@kbn/core/public';
@@ -224,7 +225,7 @@ const ToolsGroup = ({ visType, onVisTypeSelected, showExperimental }: VisCardPro
         <EuiIcon type={visType.icon || 'empty'} size="l" />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiLink data-test-subj={`visType-${visType.name}`} onClick={onClick}>
               {'titleInWizard' in visType && visType.titleInWizard
@@ -232,7 +233,7 @@ const ToolsGroup = ({ visType, onVisTypeSelected, showExperimental }: VisCardPro
                 : visType.title}
             </EuiLink>
           </EuiFlexItem>
-          {visType.stage === 'experimental' && (
+          {visType.stage === 'experimental' ? (
             <EuiFlexItem grow={false}>
               <EuiBetaBadge
                 iconType="beaker"
@@ -245,6 +246,21 @@ const ToolsGroup = ({ visType, onVisTypeSelected, showExperimental }: VisCardPro
                 })}
               />
             </EuiFlexItem>
+          ) : (
+            visType.stage === 'deprecated' && (
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge
+                  iconType="alert"
+                  tooltipContent={i18n.translate('visualizations.newVisWizard.deprecatedTooltip', {
+                    defaultMessage:
+                      'This functionality is deprecated and will be removed completely in a future release.',
+                  })}
+                  label={i18n.translate('visualizations.newVisWizard.deprecatedTitle', {
+                    defaultMessage: 'Deprecated',
+                  })}
+                />
+              </EuiFlexItem>
+            )
           )}
         </EuiFlexGroup>
         <EuiText color="subdued" size="s">

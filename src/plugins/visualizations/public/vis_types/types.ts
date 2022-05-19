@@ -193,7 +193,7 @@ export interface VisTypeDefinition<TVisParams> {
    * Describes the visualization stage
    * @default 'production'
    */
-  readonly stage?: 'experimental' | 'beta' | 'production';
+  readonly stage?: 'experimental' | 'beta' | 'production' | 'deprecated';
   /**
    * Describes the experience group that the visualization belongs.
    * It can be on tools, aggregation based or promoted group.
