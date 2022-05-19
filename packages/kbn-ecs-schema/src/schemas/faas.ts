@@ -1,3 +1,11 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
 export const faasEcs = {
   coldstart: {
     dashed_name: 'faas-coldstart',
@@ -7,7 +15,7 @@ export const faasEcs = {
     name: 'coldstart',
     normalize: [],
     short: 'Boolean value indicating a cold start of a function.',
-    type: 'boolean'
+    type: 'boolean',
   },
   execution: {
     dashed_name: 'faas-execution',
@@ -19,11 +27,12 @@ export const faasEcs = {
     name: 'execution',
     normalize: [],
     short: 'The execution ID of the current function execution.',
-    type: 'keyword'
+    type: 'keyword',
   },
   id: {
     dashed_name: 'faas-id',
-    description: 'The unique identifier of a serverless function.\n' +
+    description:
+      'The unique identifier of a serverless function.\n' +
       "For AWS Lambda it's the function ARN (Amazon Resource Name) without a version or alias suffix.",
     example: 'arn:aws:lambda:us-west-2:123456789012:function:my-function',
     flat_name: 'faas.id',
@@ -32,7 +41,7 @@ export const faasEcs = {
     name: 'id',
     normalize: [],
     short: 'The unique identifier of a serverless function.',
-    type: 'keyword'
+    type: 'keyword',
   },
   name: {
     dashed_name: 'faas-name',
@@ -44,7 +53,7 @@ export const faasEcs = {
     name: 'name',
     normalize: [],
     short: 'The name of a serverless function.',
-    type: 'keyword'
+    type: 'keyword',
   },
   trigger: {
     dashed_name: 'faas-trigger',
@@ -56,7 +65,8 @@ export const faasEcs = {
     short: 'Details about the function trigger.',
     type: {
       dashed_name: 'faas-trigger-type',
-      description: 'The trigger for the function execution.\n' +
+      description:
+        'The trigger for the function execution.\n' +
         'Expected values are:\n' +
         '  * http\n' +
         '  * pubsub\n' +
@@ -70,7 +80,7 @@ export const faasEcs = {
       name: 'trigger.type',
       normalize: [],
       short: 'The trigger for the function execution.',
-      type: 'keyword'
+      type: 'keyword',
     },
     request_id: {
       dashed_name: 'faas-trigger-request-id',
@@ -82,8 +92,8 @@ export const faasEcs = {
       name: 'trigger.request_id',
       normalize: [],
       short: 'The ID of the trigger request , message, event, etc.',
-      type: 'keyword'
-    }
+      type: 'keyword',
+    },
   },
   version: {
     dashed_name: 'faas-version',
@@ -95,6 +105,6 @@ export const faasEcs = {
     name: 'version',
     normalize: [],
     short: 'The version of a serverless function.',
-    type: 'keyword'
-  }
-}
+    type: 'keyword',
+  },
+};

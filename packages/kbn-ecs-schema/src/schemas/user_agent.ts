@@ -1,3 +1,11 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
 export const userAgentEcs = {
   device: {
     name: {
@@ -10,8 +18,8 @@ export const userAgentEcs = {
       name: 'device.name',
       normalize: [],
       short: 'Name of the device.',
-      type: 'keyword'
-    }
+      type: 'keyword',
+    },
   },
   name: {
     dashed_name: 'user-agent-name',
@@ -23,12 +31,13 @@ export const userAgentEcs = {
     name: 'name',
     normalize: [],
     short: 'Name of the user agent.',
-    type: 'keyword'
+    type: 'keyword',
   },
   original: {
     dashed_name: 'user-agent-original',
     description: 'Unparsed user_agent string.',
-    example: 'Mozilla/5.0 (iPhone; CPU iPhone OS 12_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1',
+    example:
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 12_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1',
     flat_name: 'user_agent.original',
     ignore_above: 1024,
     level: 'extended',
@@ -36,13 +45,13 @@ export const userAgentEcs = {
       {
         flat_name: 'user_agent.original.text',
         name: 'text',
-        type: 'match_only_text'
-      }
+        type: 'match_only_text',
+      },
     ],
     name: 'original',
     normalize: [],
     short: 'Unparsed user_agent string.',
-    type: 'keyword'
+    type: 'keyword',
   },
   os: {
     family: {
@@ -56,7 +65,7 @@ export const userAgentEcs = {
       normalize: [],
       original_fieldset: 'os',
       short: 'OS family (such as redhat, debian, freebsd, windows).',
-      type: 'keyword'
+      type: 'keyword',
     },
     full: {
       dashed_name: 'user-agent-os-full',
@@ -69,14 +78,14 @@ export const userAgentEcs = {
         {
           flat_name: 'user_agent.os.full.text',
           name: 'text',
-          type: 'match_only_text'
-        }
+          type: 'match_only_text',
+        },
       ],
       name: 'full',
       normalize: [],
       original_fieldset: 'os',
       short: 'Operating system name, including the version or code name.',
-      type: 'keyword'
+      type: 'keyword',
     },
     kernel: {
       dashed_name: 'user-agent-os-kernel',
@@ -89,7 +98,7 @@ export const userAgentEcs = {
       normalize: [],
       original_fieldset: 'os',
       short: 'Operating system kernel version as a raw string.',
-      type: 'keyword'
+      type: 'keyword',
     },
     name: {
       dashed_name: 'user-agent-os-name',
@@ -102,14 +111,14 @@ export const userAgentEcs = {
         {
           flat_name: 'user_agent.os.name.text',
           name: 'text',
-          type: 'match_only_text'
-        }
+          type: 'match_only_text',
+        },
       ],
       name: 'name',
       normalize: [],
       original_fieldset: 'os',
       short: 'Operating system name, without the version.',
-      type: 'keyword'
+      type: 'keyword',
     },
     platform: {
       dashed_name: 'user-agent-os-platform',
@@ -122,11 +131,12 @@ export const userAgentEcs = {
       normalize: [],
       original_fieldset: 'os',
       short: 'Operating system platform (such centos, ubuntu, windows).',
-      type: 'keyword'
+      type: 'keyword',
     },
     type: {
       dashed_name: 'user-agent-os-type',
-      description: 'Use the `os.type` field to categorize the operating system into one of the broad commercial families.\n' +
+      description:
+        'Use the `os.type` field to categorize the operating system into one of the broad commercial families.\n' +
         'One of these following values should be used (lowercase): linux, macos, unix, windows.\n' +
         "If the OS you're dealing with is not in the list, the field should not be populated. Please let us know by opening an issue with ECS, to propose its addition.",
       example: 'macos',
@@ -137,7 +147,7 @@ export const userAgentEcs = {
       normalize: [],
       original_fieldset: 'os',
       short: 'Which commercial OS family (one of: linux, macos, unix or windows).',
-      type: 'keyword'
+      type: 'keyword',
     },
     version: {
       dashed_name: 'user-agent-os-version',
@@ -150,8 +160,8 @@ export const userAgentEcs = {
       normalize: [],
       original_fieldset: 'os',
       short: 'Operating system version as a raw string.',
-      type: 'keyword'
-    }
+      type: 'keyword',
+    },
   },
   version: {
     dashed_name: 'user-agent-version',
@@ -163,6 +173,6 @@ export const userAgentEcs = {
     name: 'version',
     normalize: [],
     short: 'Version of the user agent.',
-    type: 'keyword'
-  }
-}
+    type: 'keyword',
+  },
+};

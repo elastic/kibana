@@ -14,10 +14,10 @@ export function buildSchema(spec: EcsNestedSpec): Schema {
 
   for (const [group, details] of Object.entries(spec)) {
     for (const [, field] of Object.entries(details.fields)) {
-      const full_field_name = field.flat_name.split('.').slice(1);
+      const fullFieldName = field.flat_name.split('.').slice(1);
       const name = TOP_LEVEL_GROUPS.includes(group)
         ? `${TOP_LEVEL_NAME}.${field.flat_name}`
-        : `${group}.${full_field_name.join('.')}`;
+        : `${group}.${fullFieldName.join('.')}`;
 
       validateExampleFieldtype(name, field.example);
       set(schema, name, field);

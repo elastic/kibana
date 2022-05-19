@@ -1,7 +1,16 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
 export const observerEcs = {
   egress: {
     dashed_name: 'observer-egress',
-    description: 'Observer.egress holds information like interface number and name, vlan, and zone information to classify egress traffic.  Single armed monitoring such as a network sensor on a span port should only use observer.ingress to categorize traffic.',
+    description:
+      'Observer.egress holds information like interface number and name, vlan, and zone information to classify egress traffic.  Single armed monitoring such as a network sensor on a span port should only use observer.ingress to categorize traffic.',
     flat_name: 'observer.egress',
     level: 'extended',
     name: 'egress',
@@ -11,7 +20,8 @@ export const observerEcs = {
     interface: {
       alias: {
         dashed_name: 'observer-egress-interface-alias',
-        description: 'Interface alias as reported by the system, typically used in firewall implementations for e.g. inside, outside, or dmz logical interface naming.',
+        description:
+          'Interface alias as reported by the system, typically used in firewall implementations for e.g. inside, outside, or dmz logical interface naming.',
         example: 'outside',
         flat_name: 'observer.egress.interface.alias',
         ignore_above: 1024,
@@ -20,7 +30,7 @@ export const observerEcs = {
         normalize: [],
         original_fieldset: 'interface',
         short: 'Interface alias',
-        type: 'keyword'
+        type: 'keyword',
       },
       id: {
         dashed_name: 'observer-egress-interface-id',
@@ -33,7 +43,7 @@ export const observerEcs = {
         normalize: [],
         original_fieldset: 'interface',
         short: 'Interface ID',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'observer-egress-interface-name',
@@ -46,8 +56,8 @@ export const observerEcs = {
         normalize: [],
         original_fieldset: 'interface',
         short: 'Interface name',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     vlan: {
       id: {
@@ -61,7 +71,7 @@ export const observerEcs = {
         normalize: [],
         original_fieldset: 'vlan',
         short: 'VLAN ID as reported by the observer.',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'observer-egress-vlan-name',
@@ -74,12 +84,13 @@ export const observerEcs = {
         normalize: [],
         original_fieldset: 'vlan',
         short: 'Optional VLAN name as reported by the observer.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     zone: {
       dashed_name: 'observer-egress-zone',
-      description: 'Network zone of outbound traffic as reported by the observer to categorize the destination area of egress traffic, e.g. Internal, External, DMZ, HR, Legal, etc.',
+      description:
+        'Network zone of outbound traffic as reported by the observer to categorize the destination area of egress traffic, e.g. Internal, External, DMZ, HR, Legal, etc.',
       example: 'Public_Internet',
       flat_name: 'observer.egress.zone',
       ignore_above: 1024,
@@ -87,8 +98,8 @@ export const observerEcs = {
       name: 'egress.zone',
       normalize: [],
       short: 'Observer Egress zone',
-      type: 'keyword'
-    }
+      type: 'keyword',
+    },
   },
   geo: {
     city_name: {
@@ -102,7 +113,7 @@ export const observerEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'City name.',
-      type: 'keyword'
+      type: 'keyword',
     },
     continent_code: {
       dashed_name: 'observer-geo-continent-code',
@@ -115,7 +126,7 @@ export const observerEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'Continent code.',
-      type: 'keyword'
+      type: 'keyword',
     },
     continent_name: {
       dashed_name: 'observer-geo-continent-name',
@@ -128,7 +139,7 @@ export const observerEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'Name of the continent.',
-      type: 'keyword'
+      type: 'keyword',
     },
     country_iso_code: {
       dashed_name: 'observer-geo-country-iso-code',
@@ -141,7 +152,7 @@ export const observerEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'Country ISO code.',
-      type: 'keyword'
+      type: 'keyword',
     },
     country_name: {
       dashed_name: 'observer-geo-country-name',
@@ -154,7 +165,7 @@ export const observerEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'Country name.',
-      type: 'keyword'
+      type: 'keyword',
     },
     location: {
       dashed_name: 'observer-geo-location',
@@ -166,11 +177,12 @@ export const observerEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'Longitude and latitude.',
-      type: 'geo_point'
+      type: 'geo_point',
     },
     name: {
       dashed_name: 'observer-geo-name',
-      description: 'User-defined description of a location, at the level of granularity they care about.\n' +
+      description:
+        'User-defined description of a location, at the level of granularity they care about.\n' +
         'Could be the name of their data centers, the floor number, if this describes a local physical entity, city names.\n' +
         'Not typically used in automated geolocation.',
       example: 'boston-dc',
@@ -181,11 +193,12 @@ export const observerEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'User-defined description of a location.',
-      type: 'keyword'
+      type: 'keyword',
     },
     postal_code: {
       dashed_name: 'observer-geo-postal-code',
-      description: 'Postal code associated with the location.\n' +
+      description:
+        'Postal code associated with the location.\n' +
         'Values appropriate for this field may also be known as a postcode or ZIP code and will vary widely from country to country.',
       example: 94040,
       flat_name: 'observer.geo.postal_code',
@@ -195,7 +208,7 @@ export const observerEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'Postal code.',
-      type: 'keyword'
+      type: 'keyword',
     },
     region_iso_code: {
       dashed_name: 'observer-geo-region-iso-code',
@@ -208,7 +221,7 @@ export const observerEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'Region ISO code.',
-      type: 'keyword'
+      type: 'keyword',
     },
     region_name: {
       dashed_name: 'observer-geo-region-name',
@@ -221,7 +234,7 @@ export const observerEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'Region name.',
-      type: 'keyword'
+      type: 'keyword',
     },
     timezone: {
       dashed_name: 'observer-geo-timezone',
@@ -234,8 +247,8 @@ export const observerEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'Time zone.',
-      type: 'keyword'
-    }
+      type: 'keyword',
+    },
   },
   hostname: {
     dashed_name: 'observer-hostname',
@@ -246,11 +259,12 @@ export const observerEcs = {
     name: 'hostname',
     normalize: [],
     short: 'Hostname of the observer.',
-    type: 'keyword'
+    type: 'keyword',
   },
   ingress: {
     dashed_name: 'observer-ingress',
-    description: 'Observer.ingress holds information like interface number and name, vlan, and zone information to classify ingress traffic.  Single armed monitoring such as a network sensor on a span port should only use observer.ingress to categorize traffic.',
+    description:
+      'Observer.ingress holds information like interface number and name, vlan, and zone information to classify ingress traffic.  Single armed monitoring such as a network sensor on a span port should only use observer.ingress to categorize traffic.',
     flat_name: 'observer.ingress',
     level: 'extended',
     name: 'ingress',
@@ -260,7 +274,8 @@ export const observerEcs = {
     interface: {
       alias: {
         dashed_name: 'observer-ingress-interface-alias',
-        description: 'Interface alias as reported by the system, typically used in firewall implementations for e.g. inside, outside, or dmz logical interface naming.',
+        description:
+          'Interface alias as reported by the system, typically used in firewall implementations for e.g. inside, outside, or dmz logical interface naming.',
         example: 'outside',
         flat_name: 'observer.ingress.interface.alias',
         ignore_above: 1024,
@@ -269,7 +284,7 @@ export const observerEcs = {
         normalize: [],
         original_fieldset: 'interface',
         short: 'Interface alias',
-        type: 'keyword'
+        type: 'keyword',
       },
       id: {
         dashed_name: 'observer-ingress-interface-id',
@@ -282,7 +297,7 @@ export const observerEcs = {
         normalize: [],
         original_fieldset: 'interface',
         short: 'Interface ID',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'observer-ingress-interface-name',
@@ -295,8 +310,8 @@ export const observerEcs = {
         normalize: [],
         original_fieldset: 'interface',
         short: 'Interface name',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     vlan: {
       id: {
@@ -310,7 +325,7 @@ export const observerEcs = {
         normalize: [],
         original_fieldset: 'vlan',
         short: 'VLAN ID as reported by the observer.',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'observer-ingress-vlan-name',
@@ -323,12 +338,13 @@ export const observerEcs = {
         normalize: [],
         original_fieldset: 'vlan',
         short: 'Optional VLAN name as reported by the observer.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     zone: {
       dashed_name: 'observer-ingress-zone',
-      description: 'Network zone of incoming traffic as reported by the observer to categorize the source area of ingress traffic. e.g. internal, External, DMZ, HR, Legal, etc.',
+      description:
+        'Network zone of incoming traffic as reported by the observer to categorize the source area of ingress traffic. e.g. internal, External, DMZ, HR, Legal, etc.',
       example: 'DMZ',
       flat_name: 'observer.ingress.zone',
       ignore_above: 1024,
@@ -336,8 +352,8 @@ export const observerEcs = {
       name: 'ingress.zone',
       normalize: [],
       short: 'Observer ingress zone',
-      type: 'keyword'
-    }
+      type: 'keyword',
+    },
   },
   ip: {
     dashed_name: 'observer-ip',
@@ -345,27 +361,29 @@ export const observerEcs = {
     flat_name: 'observer.ip',
     level: 'core',
     name: 'ip',
-    normalize: [ 'array' ],
+    normalize: ['array'],
     short: 'IP addresses of the observer.',
-    type: 'ip'
+    type: 'ip',
   },
   mac: {
     dashed_name: 'observer-mac',
-    description: 'MAC addresses of the observer.\n' +
+    description:
+      'MAC addresses of the observer.\n' +
       'The notation format from RFC 7042 is suggested: Each octet (that is, 8-bit byte) is represented by two [uppercase] hexadecimal digits giving the value of the octet as an unsigned integer. Successive octets are separated by a hyphen.',
     example: '["00-00-5E-00-53-23", "00-00-5E-00-53-24"]',
     flat_name: 'observer.mac',
     ignore_above: 1024,
     level: 'core',
     name: 'mac',
-    normalize: [ 'array' ],
+    normalize: ['array'],
     pattern: '^[A-F0-9]{2}(-[A-F0-9]{2}){5,}$',
     short: 'MAC addresses of the observer.',
-    type: 'keyword'
+    type: 'keyword',
   },
   name: {
     dashed_name: 'observer-name',
-    description: 'Custom name of the observer.\n' +
+    description:
+      'Custom name of the observer.\n' +
       'This is a name that can be given to an observer. This can be helpful for example if multiple firewalls of the same model are used in an organization.\n' +
       'If no custom name is needed, the field can be left empty.',
     example: '1_proxySG',
@@ -375,7 +393,7 @@ export const observerEcs = {
     name: 'name',
     normalize: [],
     short: 'Custom name of the observer.',
-    type: 'keyword'
+    type: 'keyword',
   },
   os: {
     family: {
@@ -389,7 +407,7 @@ export const observerEcs = {
       normalize: [],
       original_fieldset: 'os',
       short: 'OS family (such as redhat, debian, freebsd, windows).',
-      type: 'keyword'
+      type: 'keyword',
     },
     full: {
       dashed_name: 'observer-os-full',
@@ -402,14 +420,14 @@ export const observerEcs = {
         {
           flat_name: 'observer.os.full.text',
           name: 'text',
-          type: 'match_only_text'
-        }
+          type: 'match_only_text',
+        },
       ],
       name: 'full',
       normalize: [],
       original_fieldset: 'os',
       short: 'Operating system name, including the version or code name.',
-      type: 'keyword'
+      type: 'keyword',
     },
     kernel: {
       dashed_name: 'observer-os-kernel',
@@ -422,7 +440,7 @@ export const observerEcs = {
       normalize: [],
       original_fieldset: 'os',
       short: 'Operating system kernel version as a raw string.',
-      type: 'keyword'
+      type: 'keyword',
     },
     name: {
       dashed_name: 'observer-os-name',
@@ -435,14 +453,14 @@ export const observerEcs = {
         {
           flat_name: 'observer.os.name.text',
           name: 'text',
-          type: 'match_only_text'
-        }
+          type: 'match_only_text',
+        },
       ],
       name: 'name',
       normalize: [],
       original_fieldset: 'os',
       short: 'Operating system name, without the version.',
-      type: 'keyword'
+      type: 'keyword',
     },
     platform: {
       dashed_name: 'observer-os-platform',
@@ -455,11 +473,12 @@ export const observerEcs = {
       normalize: [],
       original_fieldset: 'os',
       short: 'Operating system platform (such centos, ubuntu, windows).',
-      type: 'keyword'
+      type: 'keyword',
     },
     type: {
       dashed_name: 'observer-os-type',
-      description: 'Use the `os.type` field to categorize the operating system into one of the broad commercial families.\n' +
+      description:
+        'Use the `os.type` field to categorize the operating system into one of the broad commercial families.\n' +
         'One of these following values should be used (lowercase): linux, macos, unix, windows.\n' +
         "If the OS you're dealing with is not in the list, the field should not be populated. Please let us know by opening an issue with ECS, to propose its addition.",
       example: 'macos',
@@ -470,7 +489,7 @@ export const observerEcs = {
       normalize: [],
       original_fieldset: 'os',
       short: 'Which commercial OS family (one of: linux, macos, unix or windows).',
-      type: 'keyword'
+      type: 'keyword',
     },
     version: {
       dashed_name: 'observer-os-version',
@@ -483,8 +502,8 @@ export const observerEcs = {
       normalize: [],
       original_fieldset: 'os',
       short: 'Operating system version as a raw string.',
-      type: 'keyword'
-    }
+      type: 'keyword',
+    },
   },
   product: {
     dashed_name: 'observer-product',
@@ -496,7 +515,7 @@ export const observerEcs = {
     name: 'product',
     normalize: [],
     short: 'The product name of the observer.',
-    type: 'keyword'
+    type: 'keyword',
   },
   serial_number: {
     dashed_name: 'observer-serial-number',
@@ -507,11 +526,12 @@ export const observerEcs = {
     name: 'serial_number',
     normalize: [],
     short: 'Observer serial number.',
-    type: 'keyword'
+    type: 'keyword',
   },
   type: {
     dashed_name: 'observer-type',
-    description: 'The type of the observer the data is coming from.\n' +
+    description:
+      'The type of the observer the data is coming from.\n' +
       'There is no predefined list of observer types. Some examples are `forwarder`, `firewall`, `ids`, `ips`, `proxy`, `poller`, `sensor`, `APM server`.',
     example: 'firewall',
     flat_name: 'observer.type',
@@ -520,7 +540,7 @@ export const observerEcs = {
     name: 'type',
     normalize: [],
     short: 'The type of the observer the data is coming from.',
-    type: 'keyword'
+    type: 'keyword',
   },
   vendor: {
     dashed_name: 'observer-vendor',
@@ -532,7 +552,7 @@ export const observerEcs = {
     name: 'vendor',
     normalize: [],
     short: 'Vendor name of the observer.',
-    type: 'keyword'
+    type: 'keyword',
   },
   version: {
     dashed_name: 'observer-version',
@@ -543,6 +563,6 @@ export const observerEcs = {
     name: 'version',
     normalize: [],
     short: 'Observer version.',
-    type: 'keyword'
-  }
-}
+    type: 'keyword',
+  },
+};

@@ -1,7 +1,16 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
 export const networkEcs = {
   application: {
     dashed_name: 'network-application',
-    description: "When a specific application or service is identified from network connection details (source/dest IPs, ports, certificates, or wire format), this field captures the application's or service's name.\n" +
+    description:
+      "When a specific application or service is identified from network connection details (source/dest IPs, ports, certificates, or wire format), this field captures the application's or service's name.\n" +
       'For example, the original event identifies the network connection being from a specific web service in a `https` network connection, like `facebook` or `twitter`.\n' +
       'The field value must be normalized to lowercase for querying.',
     example: 'aim',
@@ -11,11 +20,12 @@ export const networkEcs = {
     name: 'application',
     normalize: [],
     short: 'Application level protocol name.',
-    type: 'keyword'
+    type: 'keyword',
   },
   bytes: {
     dashed_name: 'network-bytes',
-    description: 'Total bytes transferred in both directions.\n' +
+    description:
+      'Total bytes transferred in both directions.\n' +
       'If `source.bytes` and `destination.bytes` are known, `network.bytes` is their sum.',
     example: 368,
     flat_name: 'network.bytes',
@@ -24,11 +34,12 @@ export const networkEcs = {
     name: 'bytes',
     normalize: [],
     short: 'Total bytes transferred in both directions.',
-    type: 'long'
+    type: 'long',
   },
   community_id: {
     dashed_name: 'network-community-id',
-    description: 'A hash of source and destination IPs and ports, as well as the protocol used in a communication. This is a tool-agnostic standard to identify flows.\n' +
+    description:
+      'A hash of source and destination IPs and ports, as well as the protocol used in a communication. This is a tool-agnostic standard to identify flows.\n' +
       'Learn more at https://github.com/corelight/community-id-spec.',
     example: '1:hO+sN4H+MG5MY/8hIrXPqc4ZQz0=',
     flat_name: 'network.community_id',
@@ -37,11 +48,12 @@ export const networkEcs = {
     name: 'community_id',
     normalize: [],
     short: 'A hash of source and destination IPs and ports.',
-    type: 'keyword'
+    type: 'keyword',
   },
   direction: {
     dashed_name: 'network-direction',
-    description: 'Direction of the network traffic.\n' +
+    description:
+      'Direction of the network traffic.\n' +
       'Recommended values are:\n' +
       '  * ingress\n' +
       '  * egress\n' +
@@ -61,7 +73,7 @@ export const networkEcs = {
     name: 'direction',
     normalize: [],
     short: 'Direction of the network traffic.',
-    type: 'keyword'
+    type: 'keyword',
   },
   forwarded_ip: {
     dashed_name: 'network-forwarded-ip',
@@ -72,11 +84,12 @@ export const networkEcs = {
     name: 'forwarded_ip',
     normalize: [],
     short: 'Host IP address when the source IP address is the proxy.',
-    type: 'ip'
+    type: 'ip',
   },
   iana_number: {
     dashed_name: 'network-iana-number',
-    description: 'IANA Protocol Number (https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml). Standardized list of protocols. This aligns well with NetFlow and sFlow related logs which use the IANA Protocol Number.',
+    description:
+      'IANA Protocol Number (https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml). Standardized list of protocols. This aligns well with NetFlow and sFlow related logs which use the IANA Protocol Number.',
     example: 6,
     flat_name: 'network.iana_number',
     ignore_above: 1024,
@@ -84,11 +97,12 @@ export const networkEcs = {
     name: 'iana_number',
     normalize: [],
     short: 'IANA Protocol Number.',
-    type: 'keyword'
+    type: 'keyword',
   },
   inner: {
     dashed_name: 'network-inner',
-    description: 'Network.inner fields are added in addition to network.vlan fields to describe the innermost VLAN when q-in-q VLAN tagging is present. Allowed fields include vlan.id and vlan.name. Inner vlan fields are typically used when sending traffic with multiple 802.1q encapsulations to a network sensor (e.g. Zeek, Wireshark.)',
+    description:
+      'Network.inner fields are added in addition to network.vlan fields to describe the innermost VLAN when q-in-q VLAN tagging is present. Allowed fields include vlan.id and vlan.name. Inner vlan fields are typically used when sending traffic with multiple 802.1q encapsulations to a network sensor (e.g. Zeek, Wireshark.)',
     flat_name: 'network.inner',
     level: 'extended',
     name: 'inner',
@@ -107,7 +121,7 @@ export const networkEcs = {
         normalize: [],
         original_fieldset: 'vlan',
         short: 'VLAN ID as reported by the observer.',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'network-inner-vlan-name',
@@ -120,9 +134,9 @@ export const networkEcs = {
         normalize: [],
         original_fieldset: 'vlan',
         short: 'Optional VLAN name as reported by the observer.',
-        type: 'keyword'
-      }
-    }
+        type: 'keyword',
+      },
+    },
   },
   name: {
     dashed_name: 'network-name',
@@ -134,11 +148,12 @@ export const networkEcs = {
     name: 'name',
     normalize: [],
     short: 'Name given by operators to sections of their network.',
-    type: 'keyword'
+    type: 'keyword',
   },
   packets: {
     dashed_name: 'network-packets',
-    description: 'Total packets transferred in both directions.\n' +
+    description:
+      'Total packets transferred in both directions.\n' +
       'If `source.packets` and `destination.packets` are known, `network.packets` is their sum.',
     example: 24,
     flat_name: 'network.packets',
@@ -146,11 +161,12 @@ export const networkEcs = {
     name: 'packets',
     normalize: [],
     short: 'Total packets transferred in both directions.',
-    type: 'long'
+    type: 'long',
   },
   protocol: {
     dashed_name: 'network-protocol',
-    description: 'In the OSI Model this would be the Application Layer protocol. For example, `http`, `dns`, or `ssh`.\n' +
+    description:
+      'In the OSI Model this would be the Application Layer protocol. For example, `http`, `dns`, or `ssh`.\n' +
       'The field value must be normalized to lowercase for querying.',
     example: 'http',
     flat_name: 'network.protocol',
@@ -159,11 +175,12 @@ export const networkEcs = {
     name: 'protocol',
     normalize: [],
     short: 'Application protocol name.',
-    type: 'keyword'
+    type: 'keyword',
   },
   transport: {
     dashed_name: 'network-transport',
-    description: 'Same as network.iana_number, but instead using the Keyword name of the transport layer (udp, tcp, ipv6-icmp, etc.)\n' +
+    description:
+      'Same as network.iana_number, but instead using the Keyword name of the transport layer (udp, tcp, ipv6-icmp, etc.)\n' +
       'The field value must be normalized to lowercase for querying.',
     example: 'tcp',
     flat_name: 'network.transport',
@@ -172,11 +189,12 @@ export const networkEcs = {
     name: 'transport',
     normalize: [],
     short: 'Protocol Name corresponding to the field `iana_number`.',
-    type: 'keyword'
+    type: 'keyword',
   },
   type: {
     dashed_name: 'network-type',
-    description: 'In the OSI Model this would be the Network Layer. ipv4, ipv6, ipsec, pim, etc\n' +
+    description:
+      'In the OSI Model this would be the Network Layer. ipv4, ipv6, ipsec, pim, etc\n' +
       'The field value must be normalized to lowercase for querying.',
     example: 'ipv4',
     flat_name: 'network.type',
@@ -185,7 +203,7 @@ export const networkEcs = {
     name: 'type',
     normalize: [],
     short: 'In the OSI Model this would be the Network Layer. ipv4, ipv6, ipsec, pim, etc',
-    type: 'keyword'
+    type: 'keyword',
   },
   vlan: {
     id: {
@@ -199,7 +217,7 @@ export const networkEcs = {
       normalize: [],
       original_fieldset: 'vlan',
       short: 'VLAN ID as reported by the observer.',
-      type: 'keyword'
+      type: 'keyword',
     },
     name: {
       dashed_name: 'network-vlan-name',
@@ -212,7 +230,7 @@ export const networkEcs = {
       normalize: [],
       original_fieldset: 'vlan',
       short: 'Optional VLAN name as reported by the observer.',
-      type: 'keyword'
-    }
-  }
-}
+      type: 'keyword',
+    },
+  },
+};

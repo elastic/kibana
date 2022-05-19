@@ -1,8 +1,17 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
 export const registryEcs = {
   data: {
     bytes: {
       dashed_name: 'registry-data-bytes',
-      description: 'Original bytes written with base64 encoding.\n' +
+      description:
+        'Original bytes written with base64 encoding.\n' +
         'For Windows registry operations, such as SetValueEx and RegQueryValueEx, this corresponds to the data pointed by `lp_data`. This is optional but provides better recoverability and should be populated for REG_BINARY encoded values.',
       example: 'ZQBuAC0AVQBTAAAAZQBuAAAAAAA=',
       flat_name: 'registry.data.bytes',
@@ -11,19 +20,20 @@ export const registryEcs = {
       name: 'data.bytes',
       normalize: [],
       short: 'Original bytes written with base64 encoding.',
-      type: 'keyword'
+      type: 'keyword',
     },
     strings: {
       dashed_name: 'registry-data-strings',
-      description: 'Content when writing string types.\n' +
+      description:
+        'Content when writing string types.\n' +
         'Populated as an array when writing string data to the registry. For single string registry types (REG_SZ, REG_EXPAND_SZ), this should be an array with one string. For sequences of string with REG_MULTI_SZ, this array will be variable length. For numeric data, such as REG_DWORD and REG_QWORD, this should be populated with the decimal representation (e.g `"1"`).',
       example: '["C:\\rta\\red_ttp\\bin\\myapp.exe"]',
       flat_name: 'registry.data.strings',
       level: 'core',
       name: 'data.strings',
-      normalize: [ 'array' ],
+      normalize: ['array'],
       short: 'List of strings representing what was written to the registry.',
-      type: 'wildcard'
+      type: 'wildcard',
     },
     type: {
       dashed_name: 'registry-data-type',
@@ -35,8 +45,8 @@ export const registryEcs = {
       name: 'data.type',
       normalize: [],
       short: 'Standard registry type for encoding contents',
-      type: 'keyword'
-    }
+      type: 'keyword',
+    },
   },
   hive: {
     dashed_name: 'registry-hive',
@@ -48,31 +58,33 @@ export const registryEcs = {
     name: 'hive',
     normalize: [],
     short: 'Abbreviated name for the hive.',
-    type: 'keyword'
+    type: 'keyword',
   },
   key: {
     dashed_name: 'registry-key',
     description: 'Hive-relative path of keys.',
-    example: 'SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\winword.exe',
+    example:
+      'SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\winword.exe',
     flat_name: 'registry.key',
     ignore_above: 1024,
     level: 'core',
     name: 'key',
     normalize: [],
     short: 'Hive-relative path of keys.',
-    type: 'keyword'
+    type: 'keyword',
   },
   path: {
     dashed_name: 'registry-path',
     description: 'Full path, including hive, key and value',
-    example: 'HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\winword.exe\\Debugger',
+    example:
+      'HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\winword.exe\\Debugger',
     flat_name: 'registry.path',
     ignore_above: 1024,
     level: 'core',
     name: 'path',
     normalize: [],
     short: 'Full path, including hive, key and value',
-    type: 'keyword'
+    type: 'keyword',
   },
   value: {
     dashed_name: 'registry-value',
@@ -84,6 +96,6 @@ export const registryEcs = {
     name: 'value',
     normalize: [],
     short: 'Name of the value written.',
-    type: 'keyword'
-  }
-}
+    type: 'keyword',
+  },
+};

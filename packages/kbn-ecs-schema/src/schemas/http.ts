@@ -1,3 +1,11 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
 export const httpEcs = {
   request: {
     body: {
@@ -11,7 +19,7 @@ export const httpEcs = {
         name: 'request.body.bytes',
         normalize: [],
         short: 'Size in bytes of the request body.',
-        type: 'long'
+        type: 'long',
       },
       content: {
         dashed_name: 'http-request-body-content',
@@ -23,14 +31,14 @@ export const httpEcs = {
           {
             flat_name: 'http.request.body.content.text',
             name: 'text',
-            type: 'match_only_text'
-          }
+            type: 'match_only_text',
+          },
         ],
         name: 'request.body.content',
         normalize: [],
         short: 'The full HTTP request body.',
-        type: 'wildcard'
-      }
+        type: 'wildcard',
+      },
     },
     bytes: {
       dashed_name: 'http-request-bytes',
@@ -42,11 +50,12 @@ export const httpEcs = {
       name: 'request.bytes',
       normalize: [],
       short: 'Total size in bytes of the request (body and headers).',
-      type: 'long'
+      type: 'long',
     },
     id: {
       dashed_name: 'http-request-id',
-      description: 'A unique identifier for each HTTP request to correlate logs between clients and servers in transactions.\n' +
+      description:
+        'A unique identifier for each HTTP request to correlate logs between clients and servers in transactions.\n' +
         'The id may be contained in a non-standard HTTP header, such as `X-Request-ID` or `X-Correlation-ID`.',
       example: '123e4567-e89b-12d3-a456-426614174000',
       flat_name: 'http.request.id',
@@ -55,11 +64,12 @@ export const httpEcs = {
       name: 'request.id',
       normalize: [],
       short: 'HTTP request ID.',
-      type: 'keyword'
+      type: 'keyword',
     },
     method: {
       dashed_name: 'http-request-method',
-      description: 'HTTP request method.\n' +
+      description:
+        'HTTP request method.\n' +
         'The value should retain its casing from the original event. For example, `GET`, `get`, and `GeT` are all considered valid values for this field.',
       example: 'POST',
       flat_name: 'http.request.method',
@@ -68,11 +78,12 @@ export const httpEcs = {
       name: 'request.method',
       normalize: [],
       short: 'HTTP request method.',
-      type: 'keyword'
+      type: 'keyword',
     },
     mime_type: {
       dashed_name: 'http-request-mime-type',
-      description: 'Mime type of the body of the request.\n' +
+      description:
+        'Mime type of the body of the request.\n' +
         "This value must only be populated based on the content of the request body, not on the `Content-Type` header. Comparing the mime type of a request with the request's Content-Type header can be helpful in detecting threats or misconfigured clients.",
       example: 'image/gif',
       flat_name: 'http.request.mime_type',
@@ -81,7 +92,7 @@ export const httpEcs = {
       name: 'request.mime_type',
       normalize: [],
       short: 'Mime type of the body of the request.',
-      type: 'keyword'
+      type: 'keyword',
     },
     referrer: {
       dashed_name: 'http-request-referrer',
@@ -93,8 +104,8 @@ export const httpEcs = {
       name: 'request.referrer',
       normalize: [],
       short: 'Referrer for this HTTP request.',
-      type: 'keyword'
-    }
+      type: 'keyword',
+    },
   },
   response: {
     body: {
@@ -108,7 +119,7 @@ export const httpEcs = {
         name: 'response.body.bytes',
         normalize: [],
         short: 'Size in bytes of the response body.',
-        type: 'long'
+        type: 'long',
       },
       content: {
         dashed_name: 'http-response-body-content',
@@ -120,14 +131,14 @@ export const httpEcs = {
           {
             flat_name: 'http.response.body.content.text',
             name: 'text',
-            type: 'match_only_text'
-          }
+            type: 'match_only_text',
+          },
         ],
         name: 'response.body.content',
         normalize: [],
         short: 'The full HTTP response body.',
-        type: 'wildcard'
-      }
+        type: 'wildcard',
+      },
     },
     bytes: {
       dashed_name: 'http-response-bytes',
@@ -139,11 +150,12 @@ export const httpEcs = {
       name: 'response.bytes',
       normalize: [],
       short: 'Total size in bytes of the response (body and headers).',
-      type: 'long'
+      type: 'long',
     },
     mime_type: {
       dashed_name: 'http-response-mime-type',
-      description: 'Mime type of the body of the response.\n' +
+      description:
+        'Mime type of the body of the response.\n' +
         "This value must only be populated based on the content of the response body, not on the `Content-Type` header. Comparing the mime type of a response with the response's Content-Type header can be helpful in detecting misconfigured servers.",
       example: 'image/gif',
       flat_name: 'http.response.mime_type',
@@ -152,7 +164,7 @@ export const httpEcs = {
       name: 'response.mime_type',
       normalize: [],
       short: 'Mime type of the body of the response.',
-      type: 'keyword'
+      type: 'keyword',
     },
     status_code: {
       dashed_name: 'http-response-status-code',
@@ -164,8 +176,8 @@ export const httpEcs = {
       name: 'response.status_code',
       normalize: [],
       short: 'HTTP response status code.',
-      type: 'long'
-    }
+      type: 'long',
+    },
   },
   version: {
     dashed_name: 'http-version',
@@ -177,6 +189,6 @@ export const httpEcs = {
     name: 'version',
     normalize: [],
     short: 'HTTP version.',
-    type: 'keyword'
-  }
-}
+    type: 'keyword',
+  },
+};

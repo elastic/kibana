@@ -1,32 +1,43 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
 export const fileEcs = {
   accessed: {
     dashed_name: 'file-accessed',
-    description: 'Last time the file was accessed.\n' +
+    description:
+      'Last time the file was accessed.\n' +
       'Note that not all filesystems keep track of access time.',
     flat_name: 'file.accessed',
     level: 'extended',
     name: 'accessed',
     normalize: [],
     short: 'Last time the file was accessed.',
-    type: 'date'
+    type: 'date',
   },
   attributes: {
     dashed_name: 'file-attributes',
-    description: 'Array of file attributes.\n' +
+    description:
+      'Array of file attributes.\n' +
       "Attributes names will vary by platform. Here's a non-exhaustive list of values that are expected in this field: archive, compressed, directory, encrypted, execute, hidden, read, readonly, system, write.",
     example: '["readonly", "system"]',
     flat_name: 'file.attributes',
     ignore_above: 1024,
     level: 'extended',
     name: 'attributes',
-    normalize: [ 'array' ],
+    normalize: ['array'],
     short: 'Array of file attributes.',
-    type: 'keyword'
+    type: 'keyword',
   },
   code_signature: {
     digest_algorithm: {
       dashed_name: 'file-code-signature-digest-algorithm',
-      description: 'The hashing algorithm used to sign the process.\n' +
+      description:
+        'The hashing algorithm used to sign the process.\n' +
         'This value can distinguish signatures when a file is signed multiple times by the same signer but with a different digest algorithm.',
       example: 'sha256',
       flat_name: 'file.code_signature.digest_algorithm',
@@ -36,7 +47,7 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'code_signature',
       short: 'Hashing algorithm used to sign the process.',
-      type: 'keyword'
+      type: 'keyword',
     },
     exists: {
       dashed_name: 'file-code-signature-exists',
@@ -48,11 +59,12 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'code_signature',
       short: 'Boolean to capture if a signature is present.',
-      type: 'boolean'
+      type: 'boolean',
     },
     signing_id: {
       dashed_name: 'file-code-signature-signing-id',
-      description: 'The identifier used to sign the process.\n' +
+      description:
+        'The identifier used to sign the process.\n' +
         'This is used to identify the application manufactured by a software vendor. The field is relevant to Apple *OS only.',
       example: 'com.apple.xpc.proxy',
       flat_name: 'file.code_signature.signing_id',
@@ -62,11 +74,12 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'code_signature',
       short: 'The identifier used to sign the process.',
-      type: 'keyword'
+      type: 'keyword',
     },
     status: {
       dashed_name: 'file-code-signature-status',
-      description: 'Additional information about the certificate status.\n' +
+      description:
+        'Additional information about the certificate status.\n' +
         'This is useful for logging cryptographic errors with the certificate validity or trust status. Leave unpopulated if the validity or trust of the certificate was unchecked.',
       example: 'ERROR_UNTRUSTED_ROOT',
       flat_name: 'file.code_signature.status',
@@ -76,7 +89,7 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'code_signature',
       short: 'Additional information about the certificate status.',
-      type: 'keyword'
+      type: 'keyword',
     },
     subject_name: {
       dashed_name: 'file-code-signature-subject-name',
@@ -89,11 +102,12 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'code_signature',
       short: 'Subject name of the code signer',
-      type: 'keyword'
+      type: 'keyword',
     },
     team_id: {
       dashed_name: 'file-code-signature-team-id',
-      description: 'The team identifier used to sign the process.\n' +
+      description:
+        'The team identifier used to sign the process.\n' +
         'This is used to identify the team or vendor of a software product. The field is relevant to Apple *OS only.',
       example: 'EQHXZ8M8AV',
       flat_name: 'file.code_signature.team_id',
@@ -103,7 +117,7 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'code_signature',
       short: 'The team identifier used to sign the process.',
-      type: 'keyword'
+      type: 'keyword',
     },
     timestamp: {
       dashed_name: 'file-code-signature-timestamp',
@@ -115,11 +129,12 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'code_signature',
       short: 'When the signature was generated and signed.',
-      type: 'date'
+      type: 'date',
     },
     trusted: {
       dashed_name: 'file-code-signature-trusted',
-      description: 'Stores the trust status of the certificate chain.\n' +
+      description:
+        'Stores the trust status of the certificate chain.\n' +
         'Validating the trust of the certificate chain may be complicated, and this field should only be populated by tools that actively check the status.',
       example: 'true',
       flat_name: 'file.code_signature.trusted',
@@ -128,11 +143,12 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'code_signature',
       short: 'Stores the trust status of the certificate chain.',
-      type: 'boolean'
+      type: 'boolean',
     },
     valid: {
       dashed_name: 'file-code-signature-valid',
-      description: 'Boolean to capture if the digital signature is verified against the binary content.\n' +
+      description:
+        'Boolean to capture if the digital signature is verified against the binary content.\n' +
         'Leave unpopulated if a certificate was unchecked.',
       example: 'true',
       flat_name: 'file.code_signature.valid',
@@ -141,30 +157,30 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'code_signature',
       short: 'Boolean to capture if the digital signature is verified against the binary content.',
-      type: 'boolean'
-    }
+      type: 'boolean',
+    },
   },
   created: {
     dashed_name: 'file-created',
-    description: 'File creation time.\n' +
-      'Note that not all filesystems store the creation time.',
+    description: 'File creation time.\n' + 'Note that not all filesystems store the creation time.',
     flat_name: 'file.created',
     level: 'extended',
     name: 'created',
     normalize: [],
     short: 'File creation time.',
-    type: 'date'
+    type: 'date',
   },
   ctime: {
     dashed_name: 'file-ctime',
-    description: 'Last time the file attributes or metadata changed.\n' +
+    description:
+      'Last time the file attributes or metadata changed.\n' +
       'Note that changes to the file content will update `mtime`. This implies `ctime` will be adjusted at the same time, since `mtime` is an attribute of the file.',
     flat_name: 'file.ctime',
     level: 'extended',
     name: 'ctime',
     normalize: [],
     short: 'Last time the file attributes or metadata changed.',
-    type: 'date'
+    type: 'date',
   },
   device: {
     dashed_name: 'file-device',
@@ -176,11 +192,12 @@ export const fileEcs = {
     name: 'device',
     normalize: [],
     short: 'Device that is the source of the file.',
-    type: 'keyword'
+    type: 'keyword',
   },
   directory: {
     dashed_name: 'file-directory',
-    description: 'Directory where the file is located. It should include the drive letter, when appropriate.',
+    description:
+      'Directory where the file is located. It should include the drive letter, when appropriate.',
     example: '/home/alice',
     flat_name: 'file.directory',
     ignore_above: 1024,
@@ -188,11 +205,12 @@ export const fileEcs = {
     name: 'directory',
     normalize: [],
     short: 'Directory where the file is located.',
-    type: 'keyword'
+    type: 'keyword',
   },
   drive_letter: {
     dashed_name: 'file-drive-letter',
-    description: 'Drive letter where the file is located. This field is only relevant on Windows.\n' +
+    description:
+      'Drive letter where the file is located. This field is only relevant on Windows.\n' +
       'The value should be uppercase, and not include the colon.',
     example: 'C',
     flat_name: 'file.drive_letter',
@@ -201,7 +219,7 @@ export const fileEcs = {
     name: 'drive_letter',
     normalize: [],
     short: 'Drive letter where the file is located.',
-    type: 'keyword'
+    type: 'keyword',
   },
   elf: {
     architecture: {
@@ -215,7 +233,7 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'elf',
       short: 'Machine architecture of the ELF file.',
-      type: 'keyword'
+      type: 'keyword',
     },
     byte_order: {
       dashed_name: 'file-elf-byte-order',
@@ -228,7 +246,7 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'elf',
       short: 'Byte sequence of ELF file.',
-      type: 'keyword'
+      type: 'keyword',
     },
     cpu_type: {
       dashed_name: 'file-elf-cpu-type',
@@ -241,18 +259,19 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'elf',
       short: 'CPU type of the ELF file.',
-      type: 'keyword'
+      type: 'keyword',
     },
     creation_date: {
       dashed_name: 'file-elf-creation-date',
-      description: "Extracted when possible from the file's metadata. Indicates when it was built or compiled. It can also be faked by malware creators.",
+      description:
+        "Extracted when possible from the file's metadata. Indicates when it was built or compiled. It can also be faked by malware creators.",
       flat_name: 'file.elf.creation_date',
       level: 'extended',
       name: 'creation_date',
       normalize: [],
       original_fieldset: 'elf',
       short: 'Build or compile date.',
-      type: 'date'
+      type: 'date',
     },
     exports: {
       dashed_name: 'file-elf-exports',
@@ -260,10 +279,10 @@ export const fileEcs = {
       flat_name: 'file.elf.exports',
       level: 'extended',
       name: 'exports',
-      normalize: [ 'array' ],
+      normalize: ['array'],
       original_fieldset: 'elf',
       short: 'List of exported element names and types.',
-      type: 'flattened'
+      type: 'flattened',
     },
     header: {
       abi_version: {
@@ -276,7 +295,7 @@ export const fileEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'Version of the ELF Application Binary Interface (ABI).',
-        type: 'keyword'
+        type: 'keyword',
       },
       class: {
         dashed_name: 'file-elf-header-class',
@@ -288,7 +307,7 @@ export const fileEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'Header class of the ELF file.',
-        type: 'keyword'
+        type: 'keyword',
       },
       data: {
         dashed_name: 'file-elf-header-data',
@@ -300,7 +319,7 @@ export const fileEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'Data table of the ELF header.',
-        type: 'keyword'
+        type: 'keyword',
       },
       entrypoint: {
         dashed_name: 'file-elf-header-entrypoint',
@@ -312,7 +331,7 @@ export const fileEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'Header entrypoint of the ELF file.',
-        type: 'long'
+        type: 'long',
       },
       object_version: {
         dashed_name: 'file-elf-header-object-version',
@@ -324,7 +343,7 @@ export const fileEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: '"0x1" for original ELF files.',
-        type: 'keyword'
+        type: 'keyword',
       },
       os_abi: {
         dashed_name: 'file-elf-header-os-abi',
@@ -336,7 +355,7 @@ export const fileEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'Application Binary Interface (ABI) of the Linux OS.',
-        type: 'keyword'
+        type: 'keyword',
       },
       type: {
         dashed_name: 'file-elf-header-type',
@@ -348,7 +367,7 @@ export const fileEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'Header type of the ELF file.',
-        type: 'keyword'
+        type: 'keyword',
       },
       version: {
         dashed_name: 'file-elf-header-version',
@@ -360,8 +379,8 @@ export const fileEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'Version of the ELF header.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     imports: {
       dashed_name: 'file-elf-imports',
@@ -369,14 +388,15 @@ export const fileEcs = {
       flat_name: 'file.elf.imports',
       level: 'extended',
       name: 'imports',
-      normalize: [ 'array' ],
+      normalize: ['array'],
       original_fieldset: 'elf',
       short: 'List of imported element names and types.',
-      type: 'flattened'
+      type: 'flattened',
     },
     sections: {
       dashed_name: 'file-elf-sections',
-      description: 'An array containing an object for each section of the ELF file.\n' +
+      description:
+        'An array containing an object for each section of the ELF file.\n' +
         'The keys that should be present in these objects are defined by sub-fields underneath `elf.sections.*`.',
       flat_name: 'file.elf.sections',
       level: 'extended',
@@ -390,9 +410,9 @@ export const fileEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'ELF Section List name.',
-        type: 'keyword'
+        type: 'keyword',
       },
-      normalize: [ 'array' ],
+      normalize: ['array'],
       original_fieldset: 'elf',
       short: 'Section information of the ELF file.',
       type: {
@@ -405,7 +425,7 @@ export const fileEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'ELF Section List type.',
-        type: 'keyword'
+        type: 'keyword',
       },
       chi2: {
         dashed_name: 'file-elf-sections-chi2',
@@ -417,7 +437,7 @@ export const fileEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'Chi-square probability distribution of the section.',
-        type: 'long'
+        type: 'long',
       },
       entropy: {
         dashed_name: 'file-elf-sections-entropy',
@@ -429,7 +449,7 @@ export const fileEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'Shannon entropy calculation from the section.',
-        type: 'long'
+        type: 'long',
       },
       flags: {
         dashed_name: 'file-elf-sections-flags',
@@ -441,7 +461,7 @@ export const fileEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'ELF Section List flags.',
-        type: 'keyword'
+        type: 'keyword',
       },
       physical_offset: {
         dashed_name: 'file-elf-sections-physical-offset',
@@ -453,7 +473,7 @@ export const fileEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'ELF Section List offset.',
-        type: 'keyword'
+        type: 'keyword',
       },
       physical_size: {
         dashed_name: 'file-elf-sections-physical-size',
@@ -465,7 +485,7 @@ export const fileEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'ELF Section List physical size.',
-        type: 'long'
+        type: 'long',
       },
       virtual_address: {
         dashed_name: 'file-elf-sections-virtual-address',
@@ -477,7 +497,7 @@ export const fileEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'ELF Section List virtual address.',
-        type: 'long'
+        type: 'long',
       },
       virtual_size: {
         dashed_name: 'file-elf-sections-virtual-size',
@@ -489,17 +509,18 @@ export const fileEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'ELF Section List virtual size.',
-        type: 'long'
-      }
+        type: 'long',
+      },
     },
     segments: {
       dashed_name: 'file-elf-segments',
-      description: 'An array containing an object for each segment of the ELF file.\n' +
+      description:
+        'An array containing an object for each segment of the ELF file.\n' +
         'The keys that should be present in these objects are defined by sub-fields underneath `elf.segments.*`.',
       flat_name: 'file.elf.segments',
       level: 'extended',
       name: 'segments',
-      normalize: [ 'array' ],
+      normalize: ['array'],
       original_fieldset: 'elf',
       short: 'ELF object segment list.',
       type: {
@@ -512,7 +533,7 @@ export const fileEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'ELF object segment type.',
-        type: 'keyword'
+        type: 'keyword',
       },
       sections: {
         dashed_name: 'file-elf-segments-sections',
@@ -524,8 +545,8 @@ export const fileEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'ELF object segment sections.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     shared_libraries: {
       dashed_name: 'file-elf-shared-libraries',
@@ -534,10 +555,10 @@ export const fileEcs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'shared_libraries',
-      normalize: [ 'array' ],
+      normalize: ['array'],
       original_fieldset: 'elf',
       short: 'List of shared libraries used by this ELF object.',
-      type: 'keyword'
+      type: 'keyword',
     },
     telfhash: {
       dashed_name: 'file-elf-telfhash',
@@ -549,12 +570,13 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'elf',
       short: 'telfhash hash for ELF file.',
-      type: 'keyword'
-    }
+      type: 'keyword',
+    },
   },
   extension: {
     dashed_name: 'file-extension',
-    description: 'File extension, excluding the leading dot.\n' +
+    description:
+      'File extension, excluding the leading dot.\n' +
       'Note that when the file name has multiple extensions (example.tar.gz), only the last one should be captured ("gz", not "tar.gz").',
     example: 'png',
     flat_name: 'file.extension',
@@ -563,11 +585,12 @@ export const fileEcs = {
     name: 'extension',
     normalize: [],
     short: 'File extension, excluding the leading dot.',
-    type: 'keyword'
+    type: 'keyword',
   },
   fork_name: {
     dashed_name: 'file-fork-name',
-    description: 'A fork is additional data associated with a filesystem object.\n' +
+    description:
+      'A fork is additional data associated with a filesystem object.\n' +
       'On Linux, a resource fork is used to store additional data with a filesystem object. A file always has at least one fork for the data portion, and additional forks may exist.\n' +
       'On NTFS, this is analogous to an Alternate Data Stream (ADS), and the default data stream for a file is just called $DATA. Zone.Identifier is commonly used by Windows to track contents downloaded from the Internet. An ADS is typically of the form: `C:\\path\\to\\filename.extension:some_fork_name`, and `some_fork_name` is the value that should populate `fork_name`. `filename.extension` should populate `file.name`, and `extension` should populate `file.extension`. The full path, `file.path`, will include the fork name.',
     example: 'Zone.Identifer',
@@ -577,7 +600,7 @@ export const fileEcs = {
     name: 'fork_name',
     normalize: [],
     short: 'A fork is additional data associated with a filesystem object.',
-    type: 'keyword'
+    type: 'keyword',
   },
   gid: {
     dashed_name: 'file-gid',
@@ -589,7 +612,7 @@ export const fileEcs = {
     name: 'gid',
     normalize: [],
     short: 'Primary group ID (GID) of the file.',
-    type: 'keyword'
+    type: 'keyword',
   },
   group: {
     dashed_name: 'file-group',
@@ -601,7 +624,7 @@ export const fileEcs = {
     name: 'group',
     normalize: [],
     short: 'Primary group name of the file.',
-    type: 'keyword'
+    type: 'keyword',
   },
   hash: {
     md5: {
@@ -614,7 +637,7 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'hash',
       short: 'MD5 hash.',
-      type: 'keyword'
+      type: 'keyword',
     },
     sha1: {
       dashed_name: 'file-hash-sha1',
@@ -626,7 +649,7 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'hash',
       short: 'SHA1 hash.',
-      type: 'keyword'
+      type: 'keyword',
     },
     sha256: {
       dashed_name: 'file-hash-sha256',
@@ -638,7 +661,7 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'hash',
       short: 'SHA256 hash.',
-      type: 'keyword'
+      type: 'keyword',
     },
     sha384: {
       dashed_name: 'file-hash-sha384',
@@ -650,7 +673,7 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'hash',
       short: 'SHA384 hash.',
-      type: 'keyword'
+      type: 'keyword',
     },
     sha512: {
       dashed_name: 'file-hash-sha512',
@@ -662,7 +685,7 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'hash',
       short: 'SHA512 hash.',
-      type: 'keyword'
+      type: 'keyword',
     },
     ssdeep: {
       dashed_name: 'file-hash-ssdeep',
@@ -674,7 +697,7 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'hash',
       short: 'SSDEEP hash.',
-      type: 'keyword'
+      type: 'keyword',
     },
     tlsh: {
       dashed_name: 'file-hash-tlsh',
@@ -686,8 +709,8 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'hash',
       short: 'TLSH hash.',
-      type: 'keyword'
-    }
+      type: 'keyword',
+    },
   },
   inode: {
     dashed_name: 'file-inode',
@@ -699,18 +722,19 @@ export const fileEcs = {
     name: 'inode',
     normalize: [],
     short: 'Inode representing the file in the filesystem.',
-    type: 'keyword'
+    type: 'keyword',
   },
   mime_type: {
     dashed_name: 'file-mime-type',
-    description: 'MIME type should identify the format of the file or stream of bytes using https://www.iana.org/assignments/media-types/media-types.xhtml[IANA official types], where possible. When more than one type is applicable, the most specific type should be used.',
+    description:
+      'MIME type should identify the format of the file or stream of bytes using https://www.iana.org/assignments/media-types/media-types.xhtml[IANA official types], where possible. When more than one type is applicable, the most specific type should be used.',
     flat_name: 'file.mime_type',
     ignore_above: 1024,
     level: 'extended',
     name: 'mime_type',
     normalize: [],
     short: 'Media type of file, document, or arrangement of bytes.',
-    type: 'keyword'
+    type: 'keyword',
   },
   mode: {
     dashed_name: 'file-mode',
@@ -722,7 +746,7 @@ export const fileEcs = {
     name: 'mode',
     normalize: [],
     short: 'Mode of the file in octal representation.',
-    type: 'keyword'
+    type: 'keyword',
   },
   mtime: {
     dashed_name: 'file-mtime',
@@ -732,7 +756,7 @@ export const fileEcs = {
     name: 'mtime',
     normalize: [],
     short: 'Last time the file content was modified.',
-    type: 'date'
+    type: 'date',
   },
   name: {
     dashed_name: 'file-name',
@@ -744,7 +768,7 @@ export const fileEcs = {
     name: 'name',
     normalize: [],
     short: 'Name of the file including the extension, without the directory.',
-    type: 'keyword'
+    type: 'keyword',
   },
   owner: {
     dashed_name: 'file-owner',
@@ -756,11 +780,12 @@ export const fileEcs = {
     name: 'owner',
     normalize: [],
     short: "File owner's username.",
-    type: 'keyword'
+    type: 'keyword',
   },
   path: {
     dashed_name: 'file-path',
-    description: 'Full path to the file, including the file name. It should include the drive letter, when appropriate.',
+    description:
+      'Full path to the file, including the file name. It should include the drive letter, when appropriate.',
     example: '/home/alice/example.png',
     flat_name: 'file.path',
     ignore_above: 1024,
@@ -769,13 +794,13 @@ export const fileEcs = {
       {
         flat_name: 'file.path.text',
         name: 'text',
-        type: 'match_only_text'
-      }
+        type: 'match_only_text',
+      },
     ],
     name: 'path',
     normalize: [],
     short: 'Full path to the file, including the file name.',
-    type: 'keyword'
+    type: 'keyword',
   },
   pe: {
     architecture: {
@@ -789,7 +814,7 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'pe',
       short: 'CPU architecture target for the file.',
-      type: 'keyword'
+      type: 'keyword',
     },
     company: {
       dashed_name: 'file-pe-company',
@@ -802,7 +827,7 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'pe',
       short: 'Internal company name of the file, provided at compile-time.',
-      type: 'keyword'
+      type: 'keyword',
     },
     description: {
       dashed_name: 'file-pe-description',
@@ -815,7 +840,7 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'pe',
       short: 'Internal description of the file, provided at compile-time.',
-      type: 'keyword'
+      type: 'keyword',
     },
     file_version: {
       dashed_name: 'file-pe-file-version',
@@ -828,11 +853,12 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'pe',
       short: 'Process name.',
-      type: 'keyword'
+      type: 'keyword',
     },
     imphash: {
       dashed_name: 'file-pe-imphash',
-      description: 'A hash of the imports in a PE file. An imphash -- or import hash -- can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.\n' +
+      description:
+        'A hash of the imports in a PE file. An imphash -- or import hash -- can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.\n' +
         'Learn more at https://www.fireeye.com/blog/threat-research/2014/01/tracking-malware-import-hashing.html.',
       example: '0c6803c4e922103c4dca5963aad36ddf',
       flat_name: 'file.pe.imphash',
@@ -842,7 +868,7 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'pe',
       short: 'A hash of the imports in a PE file.',
-      type: 'keyword'
+      type: 'keyword',
     },
     original_file_name: {
       dashed_name: 'file-pe-original-file-name',
@@ -855,11 +881,12 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'pe',
       short: 'Internal name of the file, provided at compile-time.',
-      type: 'keyword'
+      type: 'keyword',
     },
     pehash: {
       dashed_name: 'file-pe-pehash',
-      description: 'A hash of the PE header and data from one or more PE sections. An pehash can be used to cluster files by transforming structural information about a file into a hash value.\n' +
+      description:
+        'A hash of the PE header and data from one or more PE sections. An pehash can be used to cluster files by transforming structural information about a file into a hash value.\n' +
         'Learn more at https://www.usenix.org/legacy/events/leet09/tech/full_papers/wicherski/wicherski_html/index.html.',
       example: '73ff189b63cd6be375a7ff25179a38d347651975',
       flat_name: 'file.pe.pehash',
@@ -869,7 +896,7 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'pe',
       short: 'A hash of the PE header and data from one or more PE sections.',
-      type: 'keyword'
+      type: 'keyword',
     },
     product: {
       dashed_name: 'file-pe-product',
@@ -882,8 +909,8 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'pe',
       short: 'Internal product name of the file, provided at compile-time.',
-      type: 'keyword'
-    }
+      type: 'keyword',
+    },
   },
   size: {
     dashed_name: 'file-size',
@@ -894,7 +921,7 @@ export const fileEcs = {
     name: 'size',
     normalize: [],
     short: 'File size in bytes.',
-    type: 'long'
+    type: 'long',
   },
   target_path: {
     dashed_name: 'file-target-path',
@@ -906,13 +933,13 @@ export const fileEcs = {
       {
         flat_name: 'file.target_path.text',
         name: 'text',
-        type: 'match_only_text'
-      }
+        type: 'match_only_text',
+      },
     ],
     name: 'target_path',
     normalize: [],
     short: 'Target path for symlinks.',
-    type: 'keyword'
+    type: 'keyword',
   },
   type: {
     dashed_name: 'file-type',
@@ -924,7 +951,7 @@ export const fileEcs = {
     name: 'type',
     normalize: [],
     short: 'File type (file, dir, or symlink).',
-    type: 'keyword'
+    type: 'keyword',
   },
   uid: {
     dashed_name: 'file-uid',
@@ -936,21 +963,22 @@ export const fileEcs = {
     name: 'uid',
     normalize: [],
     short: 'The user ID (UID) or security identifier (SID) of the file owner.',
-    type: 'keyword'
+    type: 'keyword',
   },
   x509: {
     alternative_names: {
       dashed_name: 'file-x509-alternative-names',
-      description: 'List of subject alternative names (SAN). Name types vary by certificate authority and certificate type but commonly contain IP addresses, DNS names (and wildcards), and email addresses.',
+      description:
+        'List of subject alternative names (SAN). Name types vary by certificate authority and certificate type but commonly contain IP addresses, DNS names (and wildcards), and email addresses.',
       example: '*.elastic.co',
       flat_name: 'file.x509.alternative_names',
       ignore_above: 1024,
       level: 'extended',
       name: 'alternative_names',
-      normalize: [ 'array' ],
+      normalize: ['array'],
       original_fieldset: 'x509',
       short: 'List of subject alternative names (SAN).',
-      type: 'keyword'
+      type: 'keyword',
     },
     issuer: {
       common_name: {
@@ -961,10 +989,10 @@ export const fileEcs = {
         ignore_above: 1024,
         level: 'extended',
         name: 'issuer.common_name',
-        normalize: [ 'array' ],
+        normalize: ['array'],
         original_fieldset: 'x509',
         short: 'List of common name (CN) of issuing certificate authority.',
-        type: 'keyword'
+        type: 'keyword',
       },
       country: {
         dashed_name: 'file-x509-issuer-country',
@@ -974,15 +1002,16 @@ export const fileEcs = {
         ignore_above: 1024,
         level: 'extended',
         name: 'issuer.country',
-        normalize: [ 'array' ],
+        normalize: ['array'],
         original_fieldset: 'x509',
         short: 'List of country (C) codes',
-        type: 'keyword'
+        type: 'keyword',
       },
       distinguished_name: {
         dashed_name: 'file-x509-issuer-distinguished-name',
         description: 'Distinguished name (DN) of issuing certificate authority.',
-        example: 'C=US, O=Example Inc, OU=www.example.com, CN=Example SHA2 High Assurance Server CA',
+        example:
+          'C=US, O=Example Inc, OU=www.example.com, CN=Example SHA2 High Assurance Server CA',
         flat_name: 'file.x509.issuer.distinguished_name',
         ignore_above: 1024,
         level: 'extended',
@@ -990,7 +1019,7 @@ export const fileEcs = {
         normalize: [],
         original_fieldset: 'x509',
         short: 'Distinguished name (DN) of issuing certificate authority.',
-        type: 'keyword'
+        type: 'keyword',
       },
       locality: {
         dashed_name: 'file-x509-issuer-locality',
@@ -1000,10 +1029,10 @@ export const fileEcs = {
         ignore_above: 1024,
         level: 'extended',
         name: 'issuer.locality',
-        normalize: [ 'array' ],
+        normalize: ['array'],
         original_fieldset: 'x509',
         short: 'List of locality names (L)',
-        type: 'keyword'
+        type: 'keyword',
       },
       organization: {
         dashed_name: 'file-x509-issuer-organization',
@@ -1013,10 +1042,10 @@ export const fileEcs = {
         ignore_above: 1024,
         level: 'extended',
         name: 'issuer.organization',
-        normalize: [ 'array' ],
+        normalize: ['array'],
         original_fieldset: 'x509',
         short: 'List of organizations (O) of issuing certificate authority.',
-        type: 'keyword'
+        type: 'keyword',
       },
       organizational_unit: {
         dashed_name: 'file-x509-issuer-organizational-unit',
@@ -1026,10 +1055,10 @@ export const fileEcs = {
         ignore_above: 1024,
         level: 'extended',
         name: 'issuer.organizational_unit',
-        normalize: [ 'array' ],
+        normalize: ['array'],
         original_fieldset: 'x509',
         short: 'List of organizational units (OU) of issuing certificate authority.',
-        type: 'keyword'
+        type: 'keyword',
       },
       state_or_province: {
         dashed_name: 'file-x509-issuer-state-or-province',
@@ -1039,11 +1068,11 @@ export const fileEcs = {
         ignore_above: 1024,
         level: 'extended',
         name: 'issuer.state_or_province',
-        normalize: [ 'array' ],
+        normalize: ['array'],
         original_fieldset: 'x509',
         short: 'List of state or province names (ST, S, or P)',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     not_after: {
       dashed_name: 'file-x509-not-after',
@@ -1055,7 +1084,7 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'x509',
       short: 'Time at which the certificate is no longer considered valid.',
-      type: 'date'
+      type: 'date',
     },
     not_before: {
       dashed_name: 'file-x509-not-before',
@@ -1067,7 +1096,7 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'x509',
       short: 'Time at which the certificate is first considered valid.',
-      type: 'date'
+      type: 'date',
     },
     public_key_algorithm: {
       dashed_name: 'file-x509-public-key-algorithm',
@@ -1080,11 +1109,12 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'x509',
       short: 'Algorithm used to generate the public key.',
-      type: 'keyword'
+      type: 'keyword',
     },
     public_key_curve: {
       dashed_name: 'file-x509-public-key-curve',
-      description: 'The curve used by the elliptic curve public key algorithm. This is algorithm specific.',
+      description:
+        'The curve used by the elliptic curve public key algorithm. This is algorithm specific.',
       example: 'nistp521',
       flat_name: 'file.x509.public_key_curve',
       ignore_above: 1024,
@@ -1092,8 +1122,9 @@ export const fileEcs = {
       name: 'public_key_curve',
       normalize: [],
       original_fieldset: 'x509',
-      short: 'The curve used by the elliptic curve public key algorithm. This is algorithm specific.',
-      type: 'keyword'
+      short:
+        'The curve used by the elliptic curve public key algorithm. This is algorithm specific.',
+      type: 'keyword',
     },
     public_key_exponent: {
       dashed_name: 'file-x509-public-key-exponent',
@@ -1107,7 +1138,7 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'x509',
       short: 'Exponent used to derive the public key. This is algorithm specific.',
-      type: 'long'
+      type: 'long',
     },
     public_key_size: {
       dashed_name: 'file-x509-public-key-size',
@@ -1119,11 +1150,12 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'x509',
       short: 'The size of the public key space in bits.',
-      type: 'long'
+      type: 'long',
     },
     serial_number: {
       dashed_name: 'file-x509-serial-number',
-      description: 'Unique serial number issued by the certificate authority. For consistency, if this value is alphanumeric, it should be formatted without colons and uppercase characters.',
+      description:
+        'Unique serial number issued by the certificate authority. For consistency, if this value is alphanumeric, it should be formatted without colons and uppercase characters.',
       example: '55FBB9C7DEBF09809D12CCAA',
       flat_name: 'file.x509.serial_number',
       ignore_above: 1024,
@@ -1132,11 +1164,12 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'x509',
       short: 'Unique serial number issued by the certificate authority.',
-      type: 'keyword'
+      type: 'keyword',
     },
     signature_algorithm: {
       dashed_name: 'file-x509-signature-algorithm',
-      description: 'Identifier for certificate signature algorithm. We recommend using names found in Go Lang Crypto library. See https://github.com/golang/go/blob/go1.14/src/crypto/x509/x509.go#L337-L353.',
+      description:
+        'Identifier for certificate signature algorithm. We recommend using names found in Go Lang Crypto library. See https://github.com/golang/go/blob/go1.14/src/crypto/x509/x509.go#L337-L353.',
       example: 'SHA256-RSA',
       flat_name: 'file.x509.signature_algorithm',
       ignore_above: 1024,
@@ -1145,7 +1178,7 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'x509',
       short: 'Identifier for certificate signature algorithm.',
-      type: 'keyword'
+      type: 'keyword',
     },
     subject: {
       common_name: {
@@ -1156,10 +1189,10 @@ export const fileEcs = {
         ignore_above: 1024,
         level: 'extended',
         name: 'subject.common_name',
-        normalize: [ 'array' ],
+        normalize: ['array'],
         original_fieldset: 'x509',
         short: 'List of common names (CN) of subject.',
-        type: 'keyword'
+        type: 'keyword',
       },
       country: {
         dashed_name: 'file-x509-subject-country',
@@ -1169,15 +1202,16 @@ export const fileEcs = {
         ignore_above: 1024,
         level: 'extended',
         name: 'subject.country',
-        normalize: [ 'array' ],
+        normalize: ['array'],
         original_fieldset: 'x509',
         short: 'List of country (C) code',
-        type: 'keyword'
+        type: 'keyword',
       },
       distinguished_name: {
         dashed_name: 'file-x509-subject-distinguished-name',
         description: 'Distinguished name (DN) of the certificate subject entity.',
-        example: 'C=US, ST=California, L=San Francisco, O=Example, Inc., CN=shared.global.example.net',
+        example:
+          'C=US, ST=California, L=San Francisco, O=Example, Inc., CN=shared.global.example.net',
         flat_name: 'file.x509.subject.distinguished_name',
         ignore_above: 1024,
         level: 'extended',
@@ -1185,7 +1219,7 @@ export const fileEcs = {
         normalize: [],
         original_fieldset: 'x509',
         short: 'Distinguished name (DN) of the certificate subject entity.',
-        type: 'keyword'
+        type: 'keyword',
       },
       locality: {
         dashed_name: 'file-x509-subject-locality',
@@ -1195,10 +1229,10 @@ export const fileEcs = {
         ignore_above: 1024,
         level: 'extended',
         name: 'subject.locality',
-        normalize: [ 'array' ],
+        normalize: ['array'],
         original_fieldset: 'x509',
         short: 'List of locality names (L)',
-        type: 'keyword'
+        type: 'keyword',
       },
       organization: {
         dashed_name: 'file-x509-subject-organization',
@@ -1208,10 +1242,10 @@ export const fileEcs = {
         ignore_above: 1024,
         level: 'extended',
         name: 'subject.organization',
-        normalize: [ 'array' ],
+        normalize: ['array'],
         original_fieldset: 'x509',
         short: 'List of organizations (O) of subject.',
-        type: 'keyword'
+        type: 'keyword',
       },
       organizational_unit: {
         dashed_name: 'file-x509-subject-organizational-unit',
@@ -1220,10 +1254,10 @@ export const fileEcs = {
         ignore_above: 1024,
         level: 'extended',
         name: 'subject.organizational_unit',
-        normalize: [ 'array' ],
+        normalize: ['array'],
         original_fieldset: 'x509',
         short: 'List of organizational units (OU) of subject.',
-        type: 'keyword'
+        type: 'keyword',
       },
       state_or_province: {
         dashed_name: 'file-x509-subject-state-or-province',
@@ -1233,11 +1267,11 @@ export const fileEcs = {
         ignore_above: 1024,
         level: 'extended',
         name: 'subject.state_or_province',
-        normalize: [ 'array' ],
+        normalize: ['array'],
         original_fieldset: 'x509',
         short: 'List of state or province names (ST, S, or P)',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     version_number: {
       dashed_name: 'file-x509-version-number',
@@ -1250,7 +1284,7 @@ export const fileEcs = {
       normalize: [],
       original_fieldset: 'x509',
       short: 'Version of x509 format.',
-      type: 'keyword'
-    }
-  }
-}
+      type: 'keyword',
+    },
+  },
+};

@@ -1,3 +1,11 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
 export const packageEcs = {
   architecture: {
     dashed_name: 'package-architecture',
@@ -9,11 +17,12 @@ export const packageEcs = {
     name: 'architecture',
     normalize: [],
     short: 'Package architecture.',
-    type: 'keyword'
+    type: 'keyword',
   },
   build_version: {
     dashed_name: 'package-build-version',
-    description: 'Additional information about the build version of the installed package.\n' +
+    description:
+      'Additional information about the build version of the installed package.\n' +
       'For example use the commit SHA of a non-released package.',
     example: '36f4f7e89dd61b0988b12ee000b98966867710cd',
     flat_name: 'package.build_version',
@@ -22,7 +31,7 @@ export const packageEcs = {
     name: 'build_version',
     normalize: [],
     short: 'Build version information',
-    type: 'keyword'
+    type: 'keyword',
   },
   checksum: {
     dashed_name: 'package-checksum',
@@ -34,7 +43,7 @@ export const packageEcs = {
     name: 'checksum',
     normalize: [],
     short: 'Checksum of the installed package for verification.',
-    type: 'keyword'
+    type: 'keyword',
   },
   description: {
     dashed_name: 'package-description',
@@ -46,7 +55,7 @@ export const packageEcs = {
     name: 'description',
     normalize: [],
     short: 'Description of the package.',
-    type: 'keyword'
+    type: 'keyword',
   },
   install_scope: {
     dashed_name: 'package-install-scope',
@@ -58,7 +67,7 @@ export const packageEcs = {
     name: 'install_scope',
     normalize: [],
     short: 'Indicating how the package was installed, e.g. user-local, global.',
-    type: 'keyword'
+    type: 'keyword',
   },
   installed: {
     dashed_name: 'package-installed',
@@ -68,11 +77,12 @@ export const packageEcs = {
     name: 'installed',
     normalize: [],
     short: 'Time when package was installed.',
-    type: 'date'
+    type: 'date',
   },
   license: {
     dashed_name: 'package-license',
-    description: 'License under which the package was released.\n' +
+    description:
+      'License under which the package was released.\n' +
       'Use a short name, e.g. the license identifier from SPDX License List where possible (https://spdx.org/licenses/).',
     example: 'Apache License 2.0',
     flat_name: 'package.license',
@@ -81,7 +91,7 @@ export const packageEcs = {
     name: 'license',
     normalize: [],
     short: 'Package license',
-    type: 'keyword'
+    type: 'keyword',
   },
   name: {
     dashed_name: 'package-name',
@@ -93,7 +103,7 @@ export const packageEcs = {
     name: 'name',
     normalize: [],
     short: 'Package name',
-    type: 'keyword'
+    type: 'keyword',
   },
   path: {
     dashed_name: 'package-path',
@@ -105,7 +115,7 @@ export const packageEcs = {
     name: 'path',
     normalize: [],
     short: 'Path where the package is installed.',
-    type: 'keyword'
+    type: 'keyword',
   },
   reference: {
     dashed_name: 'package-reference',
@@ -117,7 +127,7 @@ export const packageEcs = {
     name: 'reference',
     normalize: [],
     short: 'Package home page or reference URL',
-    type: 'keyword'
+    type: 'keyword',
   },
   size: {
     dashed_name: 'package-size',
@@ -129,11 +139,12 @@ export const packageEcs = {
     name: 'size',
     normalize: [],
     short: 'Package size in bytes.',
-    type: 'long'
+    type: 'long',
   },
   type: {
     dashed_name: 'package-type',
-    description: 'Type of package.\n' +
+    description:
+      'Type of package.\n' +
       'This should contain the package file type, rather than the package manager name. Examples: rpm, dpkg, brew, npm, gem, nupkg, jar.',
     example: 'rpm',
     flat_name: 'package.type',
@@ -142,7 +153,7 @@ export const packageEcs = {
     name: 'type',
     normalize: [],
     short: 'Package type',
-    type: 'keyword'
+    type: 'keyword',
   },
   version: {
     dashed_name: 'package-version',
@@ -154,6 +165,6 @@ export const packageEcs = {
     name: 'version',
     normalize: [],
     short: 'Package version',
-    type: 'keyword'
-  }
-}
+    type: 'keyword',
+  },
+};

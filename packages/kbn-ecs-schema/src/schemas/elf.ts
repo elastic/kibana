@@ -1,3 +1,11 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
 export const elfEcs = {
   architecture: {
     dashed_name: 'elf-architecture',
@@ -9,7 +17,7 @@ export const elfEcs = {
     name: 'architecture',
     normalize: [],
     short: 'Machine architecture of the ELF file.',
-    type: 'keyword'
+    type: 'keyword',
   },
   byte_order: {
     dashed_name: 'elf-byte-order',
@@ -21,7 +29,7 @@ export const elfEcs = {
     name: 'byte_order',
     normalize: [],
     short: 'Byte sequence of ELF file.',
-    type: 'keyword'
+    type: 'keyword',
   },
   cpu_type: {
     dashed_name: 'elf-cpu-type',
@@ -33,17 +41,18 @@ export const elfEcs = {
     name: 'cpu_type',
     normalize: [],
     short: 'CPU type of the ELF file.',
-    type: 'keyword'
+    type: 'keyword',
   },
   creation_date: {
     dashed_name: 'elf-creation-date',
-    description: "Extracted when possible from the file's metadata. Indicates when it was built or compiled. It can also be faked by malware creators.",
+    description:
+      "Extracted when possible from the file's metadata. Indicates when it was built or compiled. It can also be faked by malware creators.",
     flat_name: 'elf.creation_date',
     level: 'extended',
     name: 'creation_date',
     normalize: [],
     short: 'Build or compile date.',
-    type: 'date'
+    type: 'date',
   },
   exports: {
     dashed_name: 'elf-exports',
@@ -51,9 +60,9 @@ export const elfEcs = {
     flat_name: 'elf.exports',
     level: 'extended',
     name: 'exports',
-    normalize: [ 'array' ],
+    normalize: ['array'],
     short: 'List of exported element names and types.',
-    type: 'flattened'
+    type: 'flattened',
   },
   header: {
     abi_version: {
@@ -65,7 +74,7 @@ export const elfEcs = {
       name: 'header.abi_version',
       normalize: [],
       short: 'Version of the ELF Application Binary Interface (ABI).',
-      type: 'keyword'
+      type: 'keyword',
     },
     class: {
       dashed_name: 'elf-header-class',
@@ -76,7 +85,7 @@ export const elfEcs = {
       name: 'header.class',
       normalize: [],
       short: 'Header class of the ELF file.',
-      type: 'keyword'
+      type: 'keyword',
     },
     data: {
       dashed_name: 'elf-header-data',
@@ -87,7 +96,7 @@ export const elfEcs = {
       name: 'header.data',
       normalize: [],
       short: 'Data table of the ELF header.',
-      type: 'keyword'
+      type: 'keyword',
     },
     entrypoint: {
       dashed_name: 'elf-header-entrypoint',
@@ -98,7 +107,7 @@ export const elfEcs = {
       name: 'header.entrypoint',
       normalize: [],
       short: 'Header entrypoint of the ELF file.',
-      type: 'long'
+      type: 'long',
     },
     object_version: {
       dashed_name: 'elf-header-object-version',
@@ -109,7 +118,7 @@ export const elfEcs = {
       name: 'header.object_version',
       normalize: [],
       short: '"0x1" for original ELF files.',
-      type: 'keyword'
+      type: 'keyword',
     },
     os_abi: {
       dashed_name: 'elf-header-os-abi',
@@ -120,7 +129,7 @@ export const elfEcs = {
       name: 'header.os_abi',
       normalize: [],
       short: 'Application Binary Interface (ABI) of the Linux OS.',
-      type: 'keyword'
+      type: 'keyword',
     },
     type: {
       dashed_name: 'elf-header-type',
@@ -131,7 +140,7 @@ export const elfEcs = {
       name: 'header.type',
       normalize: [],
       short: 'Header type of the ELF file.',
-      type: 'keyword'
+      type: 'keyword',
     },
     version: {
       dashed_name: 'elf-header-version',
@@ -142,8 +151,8 @@ export const elfEcs = {
       name: 'header.version',
       normalize: [],
       short: 'Version of the ELF header.',
-      type: 'keyword'
-    }
+      type: 'keyword',
+    },
   },
   imports: {
     dashed_name: 'elf-imports',
@@ -151,13 +160,14 @@ export const elfEcs = {
     flat_name: 'elf.imports',
     level: 'extended',
     name: 'imports',
-    normalize: [ 'array' ],
+    normalize: ['array'],
     short: 'List of imported element names and types.',
-    type: 'flattened'
+    type: 'flattened',
   },
   sections: {
     dashed_name: 'elf-sections',
-    description: 'An array containing an object for each section of the ELF file.\n' +
+    description:
+      'An array containing an object for each section of the ELF file.\n' +
       'The keys that should be present in these objects are defined by sub-fields underneath `elf.sections.*`.',
     flat_name: 'elf.sections',
     level: 'extended',
@@ -170,9 +180,9 @@ export const elfEcs = {
       name: 'sections.name',
       normalize: [],
       short: 'ELF Section List name.',
-      type: 'keyword'
+      type: 'keyword',
     },
-    normalize: [ 'array' ],
+    normalize: ['array'],
     short: 'Section information of the ELF file.',
     type: {
       dashed_name: 'elf-sections-type',
@@ -183,7 +193,7 @@ export const elfEcs = {
       name: 'sections.type',
       normalize: [],
       short: 'ELF Section List type.',
-      type: 'keyword'
+      type: 'keyword',
     },
     chi2: {
       dashed_name: 'elf-sections-chi2',
@@ -194,7 +204,7 @@ export const elfEcs = {
       name: 'sections.chi2',
       normalize: [],
       short: 'Chi-square probability distribution of the section.',
-      type: 'long'
+      type: 'long',
     },
     entropy: {
       dashed_name: 'elf-sections-entropy',
@@ -205,7 +215,7 @@ export const elfEcs = {
       name: 'sections.entropy',
       normalize: [],
       short: 'Shannon entropy calculation from the section.',
-      type: 'long'
+      type: 'long',
     },
     flags: {
       dashed_name: 'elf-sections-flags',
@@ -216,7 +226,7 @@ export const elfEcs = {
       name: 'sections.flags',
       normalize: [],
       short: 'ELF Section List flags.',
-      type: 'keyword'
+      type: 'keyword',
     },
     physical_offset: {
       dashed_name: 'elf-sections-physical-offset',
@@ -227,7 +237,7 @@ export const elfEcs = {
       name: 'sections.physical_offset',
       normalize: [],
       short: 'ELF Section List offset.',
-      type: 'keyword'
+      type: 'keyword',
     },
     physical_size: {
       dashed_name: 'elf-sections-physical-size',
@@ -238,7 +248,7 @@ export const elfEcs = {
       name: 'sections.physical_size',
       normalize: [],
       short: 'ELF Section List physical size.',
-      type: 'long'
+      type: 'long',
     },
     virtual_address: {
       dashed_name: 'elf-sections-virtual-address',
@@ -249,7 +259,7 @@ export const elfEcs = {
       name: 'sections.virtual_address',
       normalize: [],
       short: 'ELF Section List virtual address.',
-      type: 'long'
+      type: 'long',
     },
     virtual_size: {
       dashed_name: 'elf-sections-virtual-size',
@@ -260,17 +270,18 @@ export const elfEcs = {
       name: 'sections.virtual_size',
       normalize: [],
       short: 'ELF Section List virtual size.',
-      type: 'long'
-    }
+      type: 'long',
+    },
   },
   segments: {
     dashed_name: 'elf-segments',
-    description: 'An array containing an object for each segment of the ELF file.\n' +
+    description:
+      'An array containing an object for each segment of the ELF file.\n' +
       'The keys that should be present in these objects are defined by sub-fields underneath `elf.segments.*`.',
     flat_name: 'elf.segments',
     level: 'extended',
     name: 'segments',
-    normalize: [ 'array' ],
+    normalize: ['array'],
     short: 'ELF object segment list.',
     type: {
       dashed_name: 'elf-segments-type',
@@ -281,7 +292,7 @@ export const elfEcs = {
       name: 'segments.type',
       normalize: [],
       short: 'ELF object segment type.',
-      type: 'keyword'
+      type: 'keyword',
     },
     sections: {
       dashed_name: 'elf-segments-sections',
@@ -292,8 +303,8 @@ export const elfEcs = {
       name: 'segments.sections',
       normalize: [],
       short: 'ELF object segment sections.',
-      type: 'keyword'
-    }
+      type: 'keyword',
+    },
   },
   shared_libraries: {
     dashed_name: 'elf-shared-libraries',
@@ -302,9 +313,9 @@ export const elfEcs = {
     ignore_above: 1024,
     level: 'extended',
     name: 'shared_libraries',
-    normalize: [ 'array' ],
+    normalize: ['array'],
     short: 'List of shared libraries used by this ELF object.',
-    type: 'keyword'
+    type: 'keyword',
   },
   telfhash: {
     dashed_name: 'elf-telfhash',
@@ -315,6 +326,6 @@ export const elfEcs = {
     name: 'telfhash',
     normalize: [],
     short: 'telfhash hash for ELF file.',
-    type: 'keyword'
-  }
-}
+    type: 'keyword',
+  },
+};

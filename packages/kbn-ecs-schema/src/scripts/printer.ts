@@ -23,7 +23,10 @@ function printGroupFiles(schema: Schema, outPath: string) {
       // eslint-disable-next-line no-console
       console.log(`Writing ${group} to ${outPath}/${group.toLowerCase()}.ts`);
 
-      const details = `export const ${snakeCaseToCamelCase(group)}Ecs = ${util.inspect(schema[group], { depth: null })}`;
+      const details = `export const ${snakeCaseToCamelCase(group)}Ecs = ${util.inspect(
+        schema[group],
+        { depth: null }
+      )}`;
       write(`${outPath}/${group.toLowerCase()}.ts`, details);
     }
   }
@@ -40,7 +43,7 @@ function printIndex(topLevelFields: Group, groups: string[], outPath: string) {
   }
 
   /** Printing the ecs object */
-  let schema = `\nexport const ecs_schema = {\n`;
+  let schema = `\nexport const ecsSchema = {\n`;
   const baseFieldInfo = util.inspect(topLevelFields).slice(2, -2).concat(',\n');
   schema += baseFieldInfo;
   for (const group of groups) {

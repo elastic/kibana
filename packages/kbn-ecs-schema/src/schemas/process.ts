@@ -1,20 +1,30 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
 export const processEcs = {
   args: {
     dashed_name: 'process-args',
-    description: 'Array of process arguments, starting with the absolute path to the executable.\n' +
+    description:
+      'Array of process arguments, starting with the absolute path to the executable.\n' +
       'May be filtered to protect sensitive information.',
     example: '["/usr/bin/ssh", "-l", "user", "10.0.0.16"]',
     flat_name: 'process.args',
     ignore_above: 1024,
     level: 'extended',
     name: 'args',
-    normalize: [ 'array' ],
+    normalize: ['array'],
     short: 'Array of process arguments.',
-    type: 'keyword'
+    type: 'keyword',
   },
   args_count: {
     dashed_name: 'process-args-count',
-    description: 'Length of the process.args array.\n' +
+    description:
+      'Length of the process.args array.\n' +
       'This field can be useful for querying or performing bucket analysis on how many arguments were provided to start a process. More arguments may be an indication of suspicious activity.',
     example: 4,
     flat_name: 'process.args_count',
@@ -22,12 +32,13 @@ export const processEcs = {
     name: 'args_count',
     normalize: [],
     short: 'Length of the process.args array.',
-    type: 'long'
+    type: 'long',
   },
   code_signature: {
     digest_algorithm: {
       dashed_name: 'process-code-signature-digest-algorithm',
-      description: 'The hashing algorithm used to sign the process.\n' +
+      description:
+        'The hashing algorithm used to sign the process.\n' +
         'This value can distinguish signatures when a file is signed multiple times by the same signer but with a different digest algorithm.',
       example: 'sha256',
       flat_name: 'process.code_signature.digest_algorithm',
@@ -37,7 +48,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'code_signature',
       short: 'Hashing algorithm used to sign the process.',
-      type: 'keyword'
+      type: 'keyword',
     },
     exists: {
       dashed_name: 'process-code-signature-exists',
@@ -49,11 +60,12 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'code_signature',
       short: 'Boolean to capture if a signature is present.',
-      type: 'boolean'
+      type: 'boolean',
     },
     signing_id: {
       dashed_name: 'process-code-signature-signing-id',
-      description: 'The identifier used to sign the process.\n' +
+      description:
+        'The identifier used to sign the process.\n' +
         'This is used to identify the application manufactured by a software vendor. The field is relevant to Apple *OS only.',
       example: 'com.apple.xpc.proxy',
       flat_name: 'process.code_signature.signing_id',
@@ -63,11 +75,12 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'code_signature',
       short: 'The identifier used to sign the process.',
-      type: 'keyword'
+      type: 'keyword',
     },
     status: {
       dashed_name: 'process-code-signature-status',
-      description: 'Additional information about the certificate status.\n' +
+      description:
+        'Additional information about the certificate status.\n' +
         'This is useful for logging cryptographic errors with the certificate validity or trust status. Leave unpopulated if the validity or trust of the certificate was unchecked.',
       example: 'ERROR_UNTRUSTED_ROOT',
       flat_name: 'process.code_signature.status',
@@ -77,7 +90,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'code_signature',
       short: 'Additional information about the certificate status.',
-      type: 'keyword'
+      type: 'keyword',
     },
     subject_name: {
       dashed_name: 'process-code-signature-subject-name',
@@ -90,11 +103,12 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'code_signature',
       short: 'Subject name of the code signer',
-      type: 'keyword'
+      type: 'keyword',
     },
     team_id: {
       dashed_name: 'process-code-signature-team-id',
-      description: 'The team identifier used to sign the process.\n' +
+      description:
+        'The team identifier used to sign the process.\n' +
         'This is used to identify the team or vendor of a software product. The field is relevant to Apple *OS only.',
       example: 'EQHXZ8M8AV',
       flat_name: 'process.code_signature.team_id',
@@ -104,7 +118,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'code_signature',
       short: 'The team identifier used to sign the process.',
-      type: 'keyword'
+      type: 'keyword',
     },
     timestamp: {
       dashed_name: 'process-code-signature-timestamp',
@@ -116,11 +130,12 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'code_signature',
       short: 'When the signature was generated and signed.',
-      type: 'date'
+      type: 'date',
     },
     trusted: {
       dashed_name: 'process-code-signature-trusted',
-      description: 'Stores the trust status of the certificate chain.\n' +
+      description:
+        'Stores the trust status of the certificate chain.\n' +
         'Validating the trust of the certificate chain may be complicated, and this field should only be populated by tools that actively check the status.',
       example: 'true',
       flat_name: 'process.code_signature.trusted',
@@ -129,11 +144,12 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'code_signature',
       short: 'Stores the trust status of the certificate chain.',
-      type: 'boolean'
+      type: 'boolean',
     },
     valid: {
       dashed_name: 'process-code-signature-valid',
-      description: 'Boolean to capture if the digital signature is verified against the binary content.\n' +
+      description:
+        'Boolean to capture if the digital signature is verified against the binary content.\n' +
         'Leave unpopulated if a certificate was unchecked.',
       example: 'true',
       flat_name: 'process.code_signature.valid',
@@ -142,12 +158,13 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'code_signature',
       short: 'Boolean to capture if the digital signature is verified against the binary content.',
-      type: 'boolean'
-    }
+      type: 'boolean',
+    },
   },
   command_line: {
     dashed_name: 'process-command-line',
-    description: 'Full command line that started the process, including the absolute path to the executable, and all arguments.\n' +
+    description:
+      'Full command line that started the process, including the absolute path to the executable, and all arguments.\n' +
       'Some arguments may be filtered to protect sensitive information.',
     example: '/usr/bin/ssh -l user 10.0.0.16',
     flat_name: 'process.command_line',
@@ -156,13 +173,13 @@ export const processEcs = {
       {
         flat_name: 'process.command_line.text',
         name: 'text',
-        type: 'match_only_text'
-      }
+        type: 'match_only_text',
+      },
     ],
     name: 'command_line',
     normalize: [],
     short: 'Full command line that started the process.',
-    type: 'wildcard'
+    type: 'wildcard',
   },
   elf: {
     architecture: {
@@ -176,7 +193,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'elf',
       short: 'Machine architecture of the ELF file.',
-      type: 'keyword'
+      type: 'keyword',
     },
     byte_order: {
       dashed_name: 'process-elf-byte-order',
@@ -189,7 +206,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'elf',
       short: 'Byte sequence of ELF file.',
-      type: 'keyword'
+      type: 'keyword',
     },
     cpu_type: {
       dashed_name: 'process-elf-cpu-type',
@@ -202,18 +219,19 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'elf',
       short: 'CPU type of the ELF file.',
-      type: 'keyword'
+      type: 'keyword',
     },
     creation_date: {
       dashed_name: 'process-elf-creation-date',
-      description: "Extracted when possible from the file's metadata. Indicates when it was built or compiled. It can also be faked by malware creators.",
+      description:
+        "Extracted when possible from the file's metadata. Indicates when it was built or compiled. It can also be faked by malware creators.",
       flat_name: 'process.elf.creation_date',
       level: 'extended',
       name: 'creation_date',
       normalize: [],
       original_fieldset: 'elf',
       short: 'Build or compile date.',
-      type: 'date'
+      type: 'date',
     },
     exports: {
       dashed_name: 'process-elf-exports',
@@ -221,10 +239,10 @@ export const processEcs = {
       flat_name: 'process.elf.exports',
       level: 'extended',
       name: 'exports',
-      normalize: [ 'array' ],
+      normalize: ['array'],
       original_fieldset: 'elf',
       short: 'List of exported element names and types.',
-      type: 'flattened'
+      type: 'flattened',
     },
     header: {
       abi_version: {
@@ -237,7 +255,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'Version of the ELF Application Binary Interface (ABI).',
-        type: 'keyword'
+        type: 'keyword',
       },
       class: {
         dashed_name: 'process-elf-header-class',
@@ -249,7 +267,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'Header class of the ELF file.',
-        type: 'keyword'
+        type: 'keyword',
       },
       data: {
         dashed_name: 'process-elf-header-data',
@@ -261,7 +279,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'Data table of the ELF header.',
-        type: 'keyword'
+        type: 'keyword',
       },
       entrypoint: {
         dashed_name: 'process-elf-header-entrypoint',
@@ -273,7 +291,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'Header entrypoint of the ELF file.',
-        type: 'long'
+        type: 'long',
       },
       object_version: {
         dashed_name: 'process-elf-header-object-version',
@@ -285,7 +303,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: '"0x1" for original ELF files.',
-        type: 'keyword'
+        type: 'keyword',
       },
       os_abi: {
         dashed_name: 'process-elf-header-os-abi',
@@ -297,7 +315,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'Application Binary Interface (ABI) of the Linux OS.',
-        type: 'keyword'
+        type: 'keyword',
       },
       type: {
         dashed_name: 'process-elf-header-type',
@@ -309,7 +327,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'Header type of the ELF file.',
-        type: 'keyword'
+        type: 'keyword',
       },
       version: {
         dashed_name: 'process-elf-header-version',
@@ -321,8 +339,8 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'Version of the ELF header.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     imports: {
       dashed_name: 'process-elf-imports',
@@ -330,14 +348,15 @@ export const processEcs = {
       flat_name: 'process.elf.imports',
       level: 'extended',
       name: 'imports',
-      normalize: [ 'array' ],
+      normalize: ['array'],
       original_fieldset: 'elf',
       short: 'List of imported element names and types.',
-      type: 'flattened'
+      type: 'flattened',
     },
     sections: {
       dashed_name: 'process-elf-sections',
-      description: 'An array containing an object for each section of the ELF file.\n' +
+      description:
+        'An array containing an object for each section of the ELF file.\n' +
         'The keys that should be present in these objects are defined by sub-fields underneath `elf.sections.*`.',
       flat_name: 'process.elf.sections',
       level: 'extended',
@@ -351,9 +370,9 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'ELF Section List name.',
-        type: 'keyword'
+        type: 'keyword',
       },
-      normalize: [ 'array' ],
+      normalize: ['array'],
       original_fieldset: 'elf',
       short: 'Section information of the ELF file.',
       type: {
@@ -366,7 +385,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'ELF Section List type.',
-        type: 'keyword'
+        type: 'keyword',
       },
       chi2: {
         dashed_name: 'process-elf-sections-chi2',
@@ -378,7 +397,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'Chi-square probability distribution of the section.',
-        type: 'long'
+        type: 'long',
       },
       entropy: {
         dashed_name: 'process-elf-sections-entropy',
@@ -390,7 +409,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'Shannon entropy calculation from the section.',
-        type: 'long'
+        type: 'long',
       },
       flags: {
         dashed_name: 'process-elf-sections-flags',
@@ -402,7 +421,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'ELF Section List flags.',
-        type: 'keyword'
+        type: 'keyword',
       },
       physical_offset: {
         dashed_name: 'process-elf-sections-physical-offset',
@@ -414,7 +433,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'ELF Section List offset.',
-        type: 'keyword'
+        type: 'keyword',
       },
       physical_size: {
         dashed_name: 'process-elf-sections-physical-size',
@@ -426,7 +445,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'ELF Section List physical size.',
-        type: 'long'
+        type: 'long',
       },
       virtual_address: {
         dashed_name: 'process-elf-sections-virtual-address',
@@ -438,7 +457,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'ELF Section List virtual address.',
-        type: 'long'
+        type: 'long',
       },
       virtual_size: {
         dashed_name: 'process-elf-sections-virtual-size',
@@ -450,17 +469,18 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'ELF Section List virtual size.',
-        type: 'long'
-      }
+        type: 'long',
+      },
     },
     segments: {
       dashed_name: 'process-elf-segments',
-      description: 'An array containing an object for each segment of the ELF file.\n' +
+      description:
+        'An array containing an object for each segment of the ELF file.\n' +
         'The keys that should be present in these objects are defined by sub-fields underneath `elf.segments.*`.',
       flat_name: 'process.elf.segments',
       level: 'extended',
       name: 'segments',
-      normalize: [ 'array' ],
+      normalize: ['array'],
       original_fieldset: 'elf',
       short: 'ELF object segment list.',
       type: {
@@ -473,7 +493,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'ELF object segment type.',
-        type: 'keyword'
+        type: 'keyword',
       },
       sections: {
         dashed_name: 'process-elf-segments-sections',
@@ -485,8 +505,8 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'ELF object segment sections.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     shared_libraries: {
       dashed_name: 'process-elf-shared-libraries',
@@ -495,10 +515,10 @@ export const processEcs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'shared_libraries',
-      normalize: [ 'array' ],
+      normalize: ['array'],
       original_fieldset: 'elf',
       short: 'List of shared libraries used by this ELF object.',
-      type: 'keyword'
+      type: 'keyword',
     },
     telfhash: {
       dashed_name: 'process-elf-telfhash',
@@ -510,8 +530,8 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'elf',
       short: 'telfhash hash for ELF file.',
-      type: 'keyword'
-    }
+      type: 'keyword',
+    },
   },
   end: {
     dashed_name: 'process-end',
@@ -522,11 +542,12 @@ export const processEcs = {
     name: 'end',
     normalize: [],
     short: 'The time the process ended.',
-    type: 'date'
+    type: 'date',
   },
   entity_id: {
     dashed_name: 'process-entity-id',
-    description: 'Unique identifier for the process.\n' +
+    description:
+      'Unique identifier for the process.\n' +
       'The implementation of this is specified by the data source, but some examples of what could be used here are a process-generated UUID, Sysmon Process GUIDs, or a hash of some uniquely identifying components of a process.\n' +
       'Constructing a globally unique identifier is a common practice to mitigate PID reuse as well as to identify a specific process over time, across multiple monitored hosts.',
     example: 'c2c455d9f99375d',
@@ -536,26 +557,28 @@ export const processEcs = {
     name: 'entity_id',
     normalize: [],
     short: 'Unique identifier for the process.',
-    type: 'keyword'
+    type: 'keyword',
   },
   entry_leader: {
     args: {
       dashed_name: 'process-entry-leader-args',
-      description: 'Array of process arguments, starting with the absolute path to the executable.\n' +
+      description:
+        'Array of process arguments, starting with the absolute path to the executable.\n' +
         'May be filtered to protect sensitive information.',
       example: '["/usr/bin/ssh", "-l", "user", "10.0.0.16"]',
       flat_name: 'process.entry_leader.args',
       ignore_above: 1024,
       level: 'extended',
       name: 'args',
-      normalize: [ 'array' ],
+      normalize: ['array'],
       original_fieldset: 'process',
       short: 'Array of process arguments.',
-      type: 'keyword'
+      type: 'keyword',
     },
     args_count: {
       dashed_name: 'process-entry-leader-args-count',
-      description: 'Length of the process.args array.\n' +
+      description:
+        'Length of the process.args array.\n' +
         'This field can be useful for querying or performing bucket analysis on how many arguments were provided to start a process. More arguments may be an indication of suspicious activity.',
       example: 4,
       flat_name: 'process.entry_leader.args_count',
@@ -564,11 +587,12 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'process',
       short: 'Length of the process.args array.',
-      type: 'long'
+      type: 'long',
     },
     command_line: {
       dashed_name: 'process-entry-leader-command-line',
-      description: 'Full command line that started the process, including the absolute path to the executable, and all arguments.\n' +
+      description:
+        'Full command line that started the process, including the absolute path to the executable, and all arguments.\n' +
         'Some arguments may be filtered to protect sensitive information.',
       example: '/usr/bin/ssh -l user 10.0.0.16',
       flat_name: 'process.entry_leader.command_line',
@@ -577,18 +601,19 @@ export const processEcs = {
         {
           flat_name: 'process.entry_leader.command_line.text',
           name: 'text',
-          type: 'match_only_text'
-        }
+          type: 'match_only_text',
+        },
       ],
       name: 'command_line',
       normalize: [],
       original_fieldset: 'process',
       short: 'Full command line that started the process.',
-      type: 'wildcard'
+      type: 'wildcard',
     },
     entity_id: {
       dashed_name: 'process-entry-leader-entity-id',
-      description: 'Unique identifier for the process.\n' +
+      description:
+        'Unique identifier for the process.\n' +
         'The implementation of this is specified by the data source, but some examples of what could be used here are a process-generated UUID, Sysmon Process GUIDs, or a hash of some uniquely identifying components of a process.\n' +
         'Constructing a globally unique identifier is a common practice to mitigate PID reuse as well as to identify a specific process over time, across multiple monitored hosts.',
       example: 'c2c455d9f99375d',
@@ -599,7 +624,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'process',
       short: 'Unique identifier for the process.',
-      type: 'keyword'
+      type: 'keyword',
     },
     entry_meta: {
       source: {
@@ -612,13 +637,14 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'source',
           short: 'IP address of the source.',
-          type: 'ip'
-        }
+          type: 'ip',
+        },
       },
       type: {
         beta: 'This field is beta and subject to change.',
         dashed_name: 'process-entry-leader-entry-meta-type',
-        description: 'The entry type for the entry session leader. Values include: init(e.g systemd), sshd, ssm, kubelet, teleport, terminal, console',
+        description:
+          'The entry type for the entry session leader. Values include: init(e.g systemd), sshd, ssm, kubelet, teleport, terminal, console',
         flat_name: 'process.entry_leader.entry_meta.type',
         ignore_above: 1024,
         level: 'extended',
@@ -626,8 +652,8 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'process',
         short: 'The entry type for the entry session leader.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     executable: {
       dashed_name: 'process-entry-leader-executable',
@@ -640,14 +666,14 @@ export const processEcs = {
         {
           flat_name: 'process.entry_leader.executable.text',
           name: 'text',
-          type: 'match_only_text'
-        }
+          type: 'match_only_text',
+        },
       ],
       name: 'executable',
       normalize: [],
       original_fieldset: 'process',
       short: 'Absolute path to the process executable.',
-      type: 'keyword'
+      type: 'keyword',
     },
     group: {
       id: {
@@ -660,7 +686,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Unique identifier for the group on the system/platform.',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'process-entry-leader-group-name',
@@ -672,13 +698,14 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Name of the group.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     interactive: {
       beta: 'This field is beta and subject to change.',
       dashed_name: 'process-entry-leader-interactive',
-      description: 'Whether the process is connected to an interactive shell.\n' +
+      description:
+        'Whether the process is connected to an interactive shell.\n' +
         'Process interactivity is inferred from the processes file descriptors. If the character device for the controlling tty is the same as stdin and stderr for the process, the process is considered interactive.\n' +
         'Note: A non-interactive process can belong to an interactive session and is simply one that does not have open file descriptors reading the controlling TTY on FD 0 (stdin) or writing to the controlling TTY on FD 2 (stderr). A backgrounded process is still considered interactive if stdin and stderr are connected to the controlling TTY.',
       example: true,
@@ -688,7 +715,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'process',
       short: 'Whether the process is connected to an interactive shell.',
-      type: 'boolean'
+      type: 'boolean',
     },
     name: {
       dashed_name: 'process-entry-leader-name',
@@ -701,19 +728,20 @@ export const processEcs = {
         {
           flat_name: 'process.entry_leader.name.text',
           name: 'text',
-          type: 'match_only_text'
-        }
+          type: 'match_only_text',
+        },
       ],
       name: 'name',
       normalize: [],
       original_fieldset: 'process',
       short: 'Process name.',
-      type: 'keyword'
+      type: 'keyword',
     },
     parent: {
       entity_id: {
         dashed_name: 'process-entry-leader-parent-entity-id',
-        description: 'Unique identifier for the process.\n' +
+        description:
+          'Unique identifier for the process.\n' +
           'The implementation of this is specified by the data source, but some examples of what could be used here are a process-generated UUID, Sysmon Process GUIDs, or a hash of some uniquely identifying components of a process.\n' +
           'Constructing a globally unique identifier is a common practice to mitigate PID reuse as well as to identify a specific process over time, across multiple monitored hosts.',
         example: 'c2c455d9f99375d',
@@ -724,7 +752,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'process',
         short: 'Unique identifier for the process.',
-        type: 'keyword'
+        type: 'keyword',
       },
       pid: {
         dashed_name: 'process-entry-leader-parent-pid',
@@ -737,12 +765,13 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'process',
         short: 'Process id.',
-        type: 'long'
+        type: 'long',
       },
       session_leader: {
         entity_id: {
           dashed_name: 'process-entry-leader-parent-session-leader-entity-id',
-          description: 'Unique identifier for the process.\n' +
+          description:
+            'Unique identifier for the process.\n' +
             'The implementation of this is specified by the data source, but some examples of what could be used here are a process-generated UUID, Sysmon Process GUIDs, or a hash of some uniquely identifying components of a process.\n' +
             'Constructing a globally unique identifier is a common practice to mitigate PID reuse as well as to identify a specific process over time, across multiple monitored hosts.',
           example: 'c2c455d9f99375d',
@@ -753,7 +782,7 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'process',
           short: 'Unique identifier for the process.',
-          type: 'keyword'
+          type: 'keyword',
         },
         pid: {
           dashed_name: 'process-entry-leader-parent-session-leader-pid',
@@ -766,7 +795,7 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'process',
           short: 'Process id.',
-          type: 'long'
+          type: 'long',
         },
         start: {
           dashed_name: 'process-entry-leader-parent-session-leader-start',
@@ -778,8 +807,8 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'process',
           short: 'The time the process started.',
-          type: 'date'
-        }
+          type: 'date',
+        },
       },
       start: {
         dashed_name: 'process-entry-leader-parent-start',
@@ -791,8 +820,8 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'process',
         short: 'The time the process started.',
-        type: 'date'
-      }
+        type: 'date',
+      },
     },
     pid: {
       dashed_name: 'process-entry-leader-pid',
@@ -805,7 +834,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'process',
       short: 'Process id.',
-      type: 'long'
+      type: 'long',
     },
     real_group: {
       id: {
@@ -818,7 +847,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Unique identifier for the group on the system/platform.',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'process-entry-leader-real-group-name',
@@ -830,8 +859,8 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Name of the group.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     real_user: {
       id: {
@@ -845,7 +874,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'user',
         short: 'Unique identifier of the user.',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'process-entry-leader-real-user-name',
@@ -858,20 +887,21 @@ export const processEcs = {
           {
             flat_name: 'process.entry_leader.real_user.name.text',
             name: 'text',
-            type: 'match_only_text'
-          }
+            type: 'match_only_text',
+          },
         ],
         name: 'name',
         normalize: [],
         original_fieldset: 'user',
         short: 'Short name or login of the user.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     same_as_process: {
       beta: 'This field is beta and subject to change.',
       dashed_name: 'process-entry-leader-same-as-process',
-      description: 'This boolean is used to identify if a leader process is the same as the top level process.\n' +
+      description:
+        'This boolean is used to identify if a leader process is the same as the top level process.\n' +
         'For example, if `process.group_leader.same_as_process = true`, it means the process event in question is the leader of its process group. Details under `process.*` like `pid` would be the same under `process.group_leader.*` The same applies for both `process.session_leader` and `process.entry_leader`.\n' +
         "This field exists to the benefit of EQL and other rule engines since it's not possible to compare equality between two fields in a single document. e.g `process.entity_id` = `process.group_leader.entity_id` (top level process is the process group leader) OR `process.entity_id` = `process.entry_leader.entity_id` (top level process is the entry session leader)\n" +
         'Instead these rules could be written like: `process.group_leader.same_as_process: true` OR `process.entry_leader.same_as_process: true`\n' +
@@ -882,8 +912,9 @@ export const processEcs = {
       name: 'same_as_process',
       normalize: [],
       original_fieldset: 'process',
-      short: 'This boolean is used to identify if a leader process is the same as the top level process.',
-      type: 'boolean'
+      short:
+        'This boolean is used to identify if a leader process is the same as the top level process.',
+      type: 'boolean',
     },
     saved_group: {
       id: {
@@ -896,7 +927,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Unique identifier for the group on the system/platform.',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'process-entry-leader-saved-group-name',
@@ -908,8 +939,8 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Name of the group.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     saved_user: {
       id: {
@@ -923,7 +954,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'user',
         short: 'Unique identifier of the user.',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'process-entry-leader-saved-user-name',
@@ -936,15 +967,15 @@ export const processEcs = {
           {
             flat_name: 'process.entry_leader.saved_user.name.text',
             name: 'text',
-            type: 'match_only_text'
-          }
+            type: 'match_only_text',
+          },
         ],
         name: 'name',
         normalize: [],
         original_fieldset: 'user',
         short: 'Short name or login of the user.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     start: {
       dashed_name: 'process-entry-leader-start',
@@ -956,7 +987,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'process',
       short: 'The time the process started.',
-      type: 'date'
+      type: 'date',
     },
     supplemental_groups: {
       id: {
@@ -969,7 +1000,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Unique identifier for the group on the system/platform.',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'process-entry-leader-supplemental-groups-name',
@@ -981,13 +1012,14 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Name of the group.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     tty: {
       beta: 'This field is beta and subject to change.',
       dashed_name: 'process-entry-leader-tty',
-      description: 'Information about the controlling TTY device. If set, the process belongs to an interactive session.',
+      description:
+        'Information about the controlling TTY device. If set, the process belongs to an interactive session.',
       flat_name: 'process.entry_leader.tty',
       level: 'extended',
       name: 'tty',
@@ -1007,12 +1039,13 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'process',
           short: "The TTY character device's major number.",
-          type: 'long'
+          type: 'long',
         },
         minor: {
           beta: 'This field is beta and subject to change.',
           dashed_name: 'process-entry-leader-tty-char-device-minor',
-          description: 'The minor number is used only by the driver specified by the major number; other parts of the kernel don’t use it, and merely pass it along to the driver. It is common for a driver to control several devices; the minor number provides a way for the driver to differentiate among them.',
+          description:
+            'The minor number is used only by the driver specified by the major number; other parts of the kernel don’t use it, and merely pass it along to the driver. It is common for a driver to control several devices; the minor number provides a way for the driver to differentiate among them.',
           example: 128,
           flat_name: 'process.entry_leader.tty.char_device.minor',
           level: 'extended',
@@ -1020,9 +1053,9 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'process',
           short: "The TTY character device's minor number.",
-          type: 'long'
-        }
-      }
+          type: 'long',
+        },
+      },
     },
     user: {
       id: {
@@ -1036,7 +1069,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'user',
         short: 'Unique identifier of the user.',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'process-entry-leader-user-name',
@@ -1049,15 +1082,15 @@ export const processEcs = {
           {
             flat_name: 'process.entry_leader.user.name.text',
             name: 'text',
-            type: 'match_only_text'
-          }
+            type: 'match_only_text',
+          },
         ],
         name: 'name',
         normalize: [],
         original_fieldset: 'user',
         short: 'Short name or login of the user.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     working_directory: {
       dashed_name: 'process-entry-leader-working-directory',
@@ -1070,20 +1103,21 @@ export const processEcs = {
         {
           flat_name: 'process.entry_leader.working_directory.text',
           name: 'text',
-          type: 'match_only_text'
-        }
+          type: 'match_only_text',
+        },
       ],
       name: 'working_directory',
       normalize: [],
       original_fieldset: 'process',
       short: 'The working directory of the process.',
-      type: 'keyword'
-    }
+      type: 'keyword',
+    },
   },
   env_vars: {
     beta: 'This field is beta and subject to change.',
     dashed_name: 'process-env-vars',
-    description: 'Environment variables (`env_vars`) set at the time of the event. May be filtered to protect sensitive information.\n' +
+    description:
+      'Environment variables (`env_vars`) set at the time of the event. May be filtered to protect sensitive information.\n' +
       'The field should not contain nested objects. All values should use `keyword`.',
     example: '{"USER": "elastic","LANG": "en_US.UTF-8","HOME": "/home/elastic"}',
     flat_name: 'process.env_vars',
@@ -1091,7 +1125,7 @@ export const processEcs = {
     name: 'env_vars',
     normalize: [],
     short: 'Environment variables set at the time of the event.',
-    type: 'object'
+    type: 'object',
   },
   executable: {
     dashed_name: 'process-executable',
@@ -1104,17 +1138,18 @@ export const processEcs = {
       {
         flat_name: 'process.executable.text',
         name: 'text',
-        type: 'match_only_text'
-      }
+        type: 'match_only_text',
+      },
     ],
     name: 'executable',
     normalize: [],
     short: 'Absolute path to the process executable.',
-    type: 'keyword'
+    type: 'keyword',
   },
   exit_code: {
     dashed_name: 'process-exit-code',
-    description: 'The exit code of the process, if this is a termination event.\n' +
+    description:
+      'The exit code of the process, if this is a termination event.\n' +
       'The field should be absent if there is no exit code for the event (e.g. process start).',
     example: 137,
     flat_name: 'process.exit_code',
@@ -1122,26 +1157,28 @@ export const processEcs = {
     name: 'exit_code',
     normalize: [],
     short: 'The exit code of the process.',
-    type: 'long'
+    type: 'long',
   },
   group_leader: {
     args: {
       dashed_name: 'process-group-leader-args',
-      description: 'Array of process arguments, starting with the absolute path to the executable.\n' +
+      description:
+        'Array of process arguments, starting with the absolute path to the executable.\n' +
         'May be filtered to protect sensitive information.',
       example: '["/usr/bin/ssh", "-l", "user", "10.0.0.16"]',
       flat_name: 'process.group_leader.args',
       ignore_above: 1024,
       level: 'extended',
       name: 'args',
-      normalize: [ 'array' ],
+      normalize: ['array'],
       original_fieldset: 'process',
       short: 'Array of process arguments.',
-      type: 'keyword'
+      type: 'keyword',
     },
     args_count: {
       dashed_name: 'process-group-leader-args-count',
-      description: 'Length of the process.args array.\n' +
+      description:
+        'Length of the process.args array.\n' +
         'This field can be useful for querying or performing bucket analysis on how many arguments were provided to start a process. More arguments may be an indication of suspicious activity.',
       example: 4,
       flat_name: 'process.group_leader.args_count',
@@ -1150,11 +1187,12 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'process',
       short: 'Length of the process.args array.',
-      type: 'long'
+      type: 'long',
     },
     command_line: {
       dashed_name: 'process-group-leader-command-line',
-      description: 'Full command line that started the process, including the absolute path to the executable, and all arguments.\n' +
+      description:
+        'Full command line that started the process, including the absolute path to the executable, and all arguments.\n' +
         'Some arguments may be filtered to protect sensitive information.',
       example: '/usr/bin/ssh -l user 10.0.0.16',
       flat_name: 'process.group_leader.command_line',
@@ -1163,18 +1201,19 @@ export const processEcs = {
         {
           flat_name: 'process.group_leader.command_line.text',
           name: 'text',
-          type: 'match_only_text'
-        }
+          type: 'match_only_text',
+        },
       ],
       name: 'command_line',
       normalize: [],
       original_fieldset: 'process',
       short: 'Full command line that started the process.',
-      type: 'wildcard'
+      type: 'wildcard',
     },
     entity_id: {
       dashed_name: 'process-group-leader-entity-id',
-      description: 'Unique identifier for the process.\n' +
+      description:
+        'Unique identifier for the process.\n' +
         'The implementation of this is specified by the data source, but some examples of what could be used here are a process-generated UUID, Sysmon Process GUIDs, or a hash of some uniquely identifying components of a process.\n' +
         'Constructing a globally unique identifier is a common practice to mitigate PID reuse as well as to identify a specific process over time, across multiple monitored hosts.',
       example: 'c2c455d9f99375d',
@@ -1185,7 +1224,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'process',
       short: 'Unique identifier for the process.',
-      type: 'keyword'
+      type: 'keyword',
     },
     executable: {
       dashed_name: 'process-group-leader-executable',
@@ -1198,14 +1237,14 @@ export const processEcs = {
         {
           flat_name: 'process.group_leader.executable.text',
           name: 'text',
-          type: 'match_only_text'
-        }
+          type: 'match_only_text',
+        },
       ],
       name: 'executable',
       normalize: [],
       original_fieldset: 'process',
       short: 'Absolute path to the process executable.',
-      type: 'keyword'
+      type: 'keyword',
     },
     group: {
       id: {
@@ -1218,7 +1257,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Unique identifier for the group on the system/platform.',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'process-group-leader-group-name',
@@ -1230,13 +1269,14 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Name of the group.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     interactive: {
       beta: 'This field is beta and subject to change.',
       dashed_name: 'process-group-leader-interactive',
-      description: 'Whether the process is connected to an interactive shell.\n' +
+      description:
+        'Whether the process is connected to an interactive shell.\n' +
         'Process interactivity is inferred from the processes file descriptors. If the character device for the controlling tty is the same as stdin and stderr for the process, the process is considered interactive.\n' +
         'Note: A non-interactive process can belong to an interactive session and is simply one that does not have open file descriptors reading the controlling TTY on FD 0 (stdin) or writing to the controlling TTY on FD 2 (stderr). A backgrounded process is still considered interactive if stdin and stderr are connected to the controlling TTY.',
       example: true,
@@ -1246,7 +1286,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'process',
       short: 'Whether the process is connected to an interactive shell.',
-      type: 'boolean'
+      type: 'boolean',
     },
     name: {
       dashed_name: 'process-group-leader-name',
@@ -1259,14 +1299,14 @@ export const processEcs = {
         {
           flat_name: 'process.group_leader.name.text',
           name: 'text',
-          type: 'match_only_text'
-        }
+          type: 'match_only_text',
+        },
       ],
       name: 'name',
       normalize: [],
       original_fieldset: 'process',
       short: 'Process name.',
-      type: 'keyword'
+      type: 'keyword',
     },
     pid: {
       dashed_name: 'process-group-leader-pid',
@@ -1279,7 +1319,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'process',
       short: 'Process id.',
-      type: 'long'
+      type: 'long',
     },
     real_group: {
       id: {
@@ -1292,7 +1332,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Unique identifier for the group on the system/platform.',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'process-group-leader-real-group-name',
@@ -1304,8 +1344,8 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Name of the group.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     real_user: {
       id: {
@@ -1319,7 +1359,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'user',
         short: 'Unique identifier of the user.',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'process-group-leader-real-user-name',
@@ -1332,20 +1372,21 @@ export const processEcs = {
           {
             flat_name: 'process.group_leader.real_user.name.text',
             name: 'text',
-            type: 'match_only_text'
-          }
+            type: 'match_only_text',
+          },
         ],
         name: 'name',
         normalize: [],
         original_fieldset: 'user',
         short: 'Short name or login of the user.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     same_as_process: {
       beta: 'This field is beta and subject to change.',
       dashed_name: 'process-group-leader-same-as-process',
-      description: 'This boolean is used to identify if a leader process is the same as the top level process.\n' +
+      description:
+        'This boolean is used to identify if a leader process is the same as the top level process.\n' +
         'For example, if `process.group_leader.same_as_process = true`, it means the process event in question is the leader of its process group. Details under `process.*` like `pid` would be the same under `process.group_leader.*` The same applies for both `process.session_leader` and `process.entry_leader`.\n' +
         "This field exists to the benefit of EQL and other rule engines since it's not possible to compare equality between two fields in a single document. e.g `process.entity_id` = `process.group_leader.entity_id` (top level process is the process group leader) OR `process.entity_id` = `process.entry_leader.entity_id` (top level process is the entry session leader)\n" +
         'Instead these rules could be written like: `process.group_leader.same_as_process: true` OR `process.entry_leader.same_as_process: true`\n' +
@@ -1356,8 +1397,9 @@ export const processEcs = {
       name: 'same_as_process',
       normalize: [],
       original_fieldset: 'process',
-      short: 'This boolean is used to identify if a leader process is the same as the top level process.',
-      type: 'boolean'
+      short:
+        'This boolean is used to identify if a leader process is the same as the top level process.',
+      type: 'boolean',
     },
     saved_group: {
       id: {
@@ -1370,7 +1412,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Unique identifier for the group on the system/platform.',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'process-group-leader-saved-group-name',
@@ -1382,8 +1424,8 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Name of the group.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     saved_user: {
       id: {
@@ -1397,7 +1439,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'user',
         short: 'Unique identifier of the user.',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'process-group-leader-saved-user-name',
@@ -1410,15 +1452,15 @@ export const processEcs = {
           {
             flat_name: 'process.group_leader.saved_user.name.text',
             name: 'text',
-            type: 'match_only_text'
-          }
+            type: 'match_only_text',
+          },
         ],
         name: 'name',
         normalize: [],
         original_fieldset: 'user',
         short: 'Short name or login of the user.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     start: {
       dashed_name: 'process-group-leader-start',
@@ -1430,7 +1472,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'process',
       short: 'The time the process started.',
-      type: 'date'
+      type: 'date',
     },
     supplemental_groups: {
       id: {
@@ -1443,7 +1485,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Unique identifier for the group on the system/platform.',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'process-group-leader-supplemental-groups-name',
@@ -1455,13 +1497,14 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Name of the group.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     tty: {
       beta: 'This field is beta and subject to change.',
       dashed_name: 'process-group-leader-tty',
-      description: 'Information about the controlling TTY device. If set, the process belongs to an interactive session.',
+      description:
+        'Information about the controlling TTY device. If set, the process belongs to an interactive session.',
       flat_name: 'process.group_leader.tty',
       level: 'extended',
       name: 'tty',
@@ -1481,12 +1524,13 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'process',
           short: "The TTY character device's major number.",
-          type: 'long'
+          type: 'long',
         },
         minor: {
           beta: 'This field is beta and subject to change.',
           dashed_name: 'process-group-leader-tty-char-device-minor',
-          description: 'The minor number is used only by the driver specified by the major number; other parts of the kernel don’t use it, and merely pass it along to the driver. It is common for a driver to control several devices; the minor number provides a way for the driver to differentiate among them.',
+          description:
+            'The minor number is used only by the driver specified by the major number; other parts of the kernel don’t use it, and merely pass it along to the driver. It is common for a driver to control several devices; the minor number provides a way for the driver to differentiate among them.',
           example: 128,
           flat_name: 'process.group_leader.tty.char_device.minor',
           level: 'extended',
@@ -1494,9 +1538,9 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'process',
           short: "The TTY character device's minor number.",
-          type: 'long'
-        }
-      }
+          type: 'long',
+        },
+      },
     },
     user: {
       id: {
@@ -1510,7 +1554,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'user',
         short: 'Unique identifier of the user.',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'process-group-leader-user-name',
@@ -1523,15 +1567,15 @@ export const processEcs = {
           {
             flat_name: 'process.group_leader.user.name.text',
             name: 'text',
-            type: 'match_only_text'
-          }
+            type: 'match_only_text',
+          },
         ],
         name: 'name',
         normalize: [],
         original_fieldset: 'user',
         short: 'Short name or login of the user.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     working_directory: {
       dashed_name: 'process-group-leader-working-directory',
@@ -1544,15 +1588,15 @@ export const processEcs = {
         {
           flat_name: 'process.group_leader.working_directory.text',
           name: 'text',
-          type: 'match_only_text'
-        }
+          type: 'match_only_text',
+        },
       ],
       name: 'working_directory',
       normalize: [],
       original_fieldset: 'process',
       short: 'The working directory of the process.',
-      type: 'keyword'
-    }
+      type: 'keyword',
+    },
   },
   hash: {
     md5: {
@@ -1565,7 +1609,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'hash',
       short: 'MD5 hash.',
-      type: 'keyword'
+      type: 'keyword',
     },
     sha1: {
       dashed_name: 'process-hash-sha1',
@@ -1577,7 +1621,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'hash',
       short: 'SHA1 hash.',
-      type: 'keyword'
+      type: 'keyword',
     },
     sha256: {
       dashed_name: 'process-hash-sha256',
@@ -1589,7 +1633,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'hash',
       short: 'SHA256 hash.',
-      type: 'keyword'
+      type: 'keyword',
     },
     sha384: {
       dashed_name: 'process-hash-sha384',
@@ -1601,7 +1645,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'hash',
       short: 'SHA384 hash.',
-      type: 'keyword'
+      type: 'keyword',
     },
     sha512: {
       dashed_name: 'process-hash-sha512',
@@ -1613,7 +1657,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'hash',
       short: 'SHA512 hash.',
-      type: 'keyword'
+      type: 'keyword',
     },
     ssdeep: {
       dashed_name: 'process-hash-ssdeep',
@@ -1625,7 +1669,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'hash',
       short: 'SSDEEP hash.',
-      type: 'keyword'
+      type: 'keyword',
     },
     tlsh: {
       dashed_name: 'process-hash-tlsh',
@@ -1637,13 +1681,14 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'hash',
       short: 'TLSH hash.',
-      type: 'keyword'
-    }
+      type: 'keyword',
+    },
   },
   interactive: {
     beta: 'This field is beta and subject to change.',
     dashed_name: 'process-interactive',
-    description: 'Whether the process is connected to an interactive shell.\n' +
+    description:
+      'Whether the process is connected to an interactive shell.\n' +
       'Process interactivity is inferred from the processes file descriptors. If the character device for the controlling tty is the same as stdin and stderr for the process, the process is considered interactive.\n' +
       'Note: A non-interactive process can belong to an interactive session and is simply one that does not have open file descriptors reading the controlling TTY on FD 0 (stdin) or writing to the controlling TTY on FD 2 (stderr). A backgrounded process is still considered interactive if stdin and stderr are connected to the controlling TTY.',
     example: true,
@@ -1652,7 +1697,7 @@ export const processEcs = {
     name: 'interactive',
     normalize: [],
     short: 'Whether the process is connected to an interactive shell.',
-    type: 'boolean'
+    type: 'boolean',
   },
   name: {
     dashed_name: 'process-name',
@@ -1665,32 +1710,34 @@ export const processEcs = {
       {
         flat_name: 'process.name.text',
         name: 'text',
-        type: 'match_only_text'
-      }
+        type: 'match_only_text',
+      },
     ],
     name: 'name',
     normalize: [],
     short: 'Process name.',
-    type: 'keyword'
+    type: 'keyword',
   },
   parent: {
     args: {
       dashed_name: 'process-parent-args',
-      description: 'Array of process arguments, starting with the absolute path to the executable.\n' +
+      description:
+        'Array of process arguments, starting with the absolute path to the executable.\n' +
         'May be filtered to protect sensitive information.',
       example: '["/usr/bin/ssh", "-l", "user", "10.0.0.16"]',
       flat_name: 'process.parent.args',
       ignore_above: 1024,
       level: 'extended',
       name: 'args',
-      normalize: [ 'array' ],
+      normalize: ['array'],
       original_fieldset: 'process',
       short: 'Array of process arguments.',
-      type: 'keyword'
+      type: 'keyword',
     },
     args_count: {
       dashed_name: 'process-parent-args-count',
-      description: 'Length of the process.args array.\n' +
+      description:
+        'Length of the process.args array.\n' +
         'This field can be useful for querying or performing bucket analysis on how many arguments were provided to start a process. More arguments may be an indication of suspicious activity.',
       example: 4,
       flat_name: 'process.parent.args_count',
@@ -1699,12 +1746,13 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'process',
       short: 'Length of the process.args array.',
-      type: 'long'
+      type: 'long',
     },
     code_signature: {
       digest_algorithm: {
         dashed_name: 'process-parent-code-signature-digest-algorithm',
-        description: 'The hashing algorithm used to sign the process.\n' +
+        description:
+          'The hashing algorithm used to sign the process.\n' +
           'This value can distinguish signatures when a file is signed multiple times by the same signer but with a different digest algorithm.',
         example: 'sha256',
         flat_name: 'process.parent.code_signature.digest_algorithm',
@@ -1714,7 +1762,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'code_signature',
         short: 'Hashing algorithm used to sign the process.',
-        type: 'keyword'
+        type: 'keyword',
       },
       exists: {
         dashed_name: 'process-parent-code-signature-exists',
@@ -1726,11 +1774,12 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'code_signature',
         short: 'Boolean to capture if a signature is present.',
-        type: 'boolean'
+        type: 'boolean',
       },
       signing_id: {
         dashed_name: 'process-parent-code-signature-signing-id',
-        description: 'The identifier used to sign the process.\n' +
+        description:
+          'The identifier used to sign the process.\n' +
           'This is used to identify the application manufactured by a software vendor. The field is relevant to Apple *OS only.',
         example: 'com.apple.xpc.proxy',
         flat_name: 'process.parent.code_signature.signing_id',
@@ -1740,11 +1789,12 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'code_signature',
         short: 'The identifier used to sign the process.',
-        type: 'keyword'
+        type: 'keyword',
       },
       status: {
         dashed_name: 'process-parent-code-signature-status',
-        description: 'Additional information about the certificate status.\n' +
+        description:
+          'Additional information about the certificate status.\n' +
           'This is useful for logging cryptographic errors with the certificate validity or trust status. Leave unpopulated if the validity or trust of the certificate was unchecked.',
         example: 'ERROR_UNTRUSTED_ROOT',
         flat_name: 'process.parent.code_signature.status',
@@ -1754,7 +1804,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'code_signature',
         short: 'Additional information about the certificate status.',
-        type: 'keyword'
+        type: 'keyword',
       },
       subject_name: {
         dashed_name: 'process-parent-code-signature-subject-name',
@@ -1767,11 +1817,12 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'code_signature',
         short: 'Subject name of the code signer',
-        type: 'keyword'
+        type: 'keyword',
       },
       team_id: {
         dashed_name: 'process-parent-code-signature-team-id',
-        description: 'The team identifier used to sign the process.\n' +
+        description:
+          'The team identifier used to sign the process.\n' +
           'This is used to identify the team or vendor of a software product. The field is relevant to Apple *OS only.',
         example: 'EQHXZ8M8AV',
         flat_name: 'process.parent.code_signature.team_id',
@@ -1781,7 +1832,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'code_signature',
         short: 'The team identifier used to sign the process.',
-        type: 'keyword'
+        type: 'keyword',
       },
       timestamp: {
         dashed_name: 'process-parent-code-signature-timestamp',
@@ -1793,11 +1844,12 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'code_signature',
         short: 'When the signature was generated and signed.',
-        type: 'date'
+        type: 'date',
       },
       trusted: {
         dashed_name: 'process-parent-code-signature-trusted',
-        description: 'Stores the trust status of the certificate chain.\n' +
+        description:
+          'Stores the trust status of the certificate chain.\n' +
           'Validating the trust of the certificate chain may be complicated, and this field should only be populated by tools that actively check the status.',
         example: 'true',
         flat_name: 'process.parent.code_signature.trusted',
@@ -1806,11 +1858,12 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'code_signature',
         short: 'Stores the trust status of the certificate chain.',
-        type: 'boolean'
+        type: 'boolean',
       },
       valid: {
         dashed_name: 'process-parent-code-signature-valid',
-        description: 'Boolean to capture if the digital signature is verified against the binary content.\n' +
+        description:
+          'Boolean to capture if the digital signature is verified against the binary content.\n' +
           'Leave unpopulated if a certificate was unchecked.',
         example: 'true',
         flat_name: 'process.parent.code_signature.valid',
@@ -1818,13 +1871,15 @@ export const processEcs = {
         name: 'valid',
         normalize: [],
         original_fieldset: 'code_signature',
-        short: 'Boolean to capture if the digital signature is verified against the binary content.',
-        type: 'boolean'
-      }
+        short:
+          'Boolean to capture if the digital signature is verified against the binary content.',
+        type: 'boolean',
+      },
     },
     command_line: {
       dashed_name: 'process-parent-command-line',
-      description: 'Full command line that started the process, including the absolute path to the executable, and all arguments.\n' +
+      description:
+        'Full command line that started the process, including the absolute path to the executable, and all arguments.\n' +
         'Some arguments may be filtered to protect sensitive information.',
       example: '/usr/bin/ssh -l user 10.0.0.16',
       flat_name: 'process.parent.command_line',
@@ -1833,14 +1888,14 @@ export const processEcs = {
         {
           flat_name: 'process.parent.command_line.text',
           name: 'text',
-          type: 'match_only_text'
-        }
+          type: 'match_only_text',
+        },
       ],
       name: 'command_line',
       normalize: [],
       original_fieldset: 'process',
       short: 'Full command line that started the process.',
-      type: 'wildcard'
+      type: 'wildcard',
     },
     elf: {
       architecture: {
@@ -1854,7 +1909,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'Machine architecture of the ELF file.',
-        type: 'keyword'
+        type: 'keyword',
       },
       byte_order: {
         dashed_name: 'process-parent-elf-byte-order',
@@ -1867,7 +1922,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'Byte sequence of ELF file.',
-        type: 'keyword'
+        type: 'keyword',
       },
       cpu_type: {
         dashed_name: 'process-parent-elf-cpu-type',
@@ -1880,18 +1935,19 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'CPU type of the ELF file.',
-        type: 'keyword'
+        type: 'keyword',
       },
       creation_date: {
         dashed_name: 'process-parent-elf-creation-date',
-        description: "Extracted when possible from the file's metadata. Indicates when it was built or compiled. It can also be faked by malware creators.",
+        description:
+          "Extracted when possible from the file's metadata. Indicates when it was built or compiled. It can also be faked by malware creators.",
         flat_name: 'process.parent.elf.creation_date',
         level: 'extended',
         name: 'creation_date',
         normalize: [],
         original_fieldset: 'elf',
         short: 'Build or compile date.',
-        type: 'date'
+        type: 'date',
       },
       exports: {
         dashed_name: 'process-parent-elf-exports',
@@ -1899,10 +1955,10 @@ export const processEcs = {
         flat_name: 'process.parent.elf.exports',
         level: 'extended',
         name: 'exports',
-        normalize: [ 'array' ],
+        normalize: ['array'],
         original_fieldset: 'elf',
         short: 'List of exported element names and types.',
-        type: 'flattened'
+        type: 'flattened',
       },
       header: {
         abi_version: {
@@ -1915,7 +1971,7 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'elf',
           short: 'Version of the ELF Application Binary Interface (ABI).',
-          type: 'keyword'
+          type: 'keyword',
         },
         class: {
           dashed_name: 'process-parent-elf-header-class',
@@ -1927,7 +1983,7 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'elf',
           short: 'Header class of the ELF file.',
-          type: 'keyword'
+          type: 'keyword',
         },
         data: {
           dashed_name: 'process-parent-elf-header-data',
@@ -1939,7 +1995,7 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'elf',
           short: 'Data table of the ELF header.',
-          type: 'keyword'
+          type: 'keyword',
         },
         entrypoint: {
           dashed_name: 'process-parent-elf-header-entrypoint',
@@ -1951,7 +2007,7 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'elf',
           short: 'Header entrypoint of the ELF file.',
-          type: 'long'
+          type: 'long',
         },
         object_version: {
           dashed_name: 'process-parent-elf-header-object-version',
@@ -1963,7 +2019,7 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'elf',
           short: '"0x1" for original ELF files.',
-          type: 'keyword'
+          type: 'keyword',
         },
         os_abi: {
           dashed_name: 'process-parent-elf-header-os-abi',
@@ -1975,7 +2031,7 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'elf',
           short: 'Application Binary Interface (ABI) of the Linux OS.',
-          type: 'keyword'
+          type: 'keyword',
         },
         type: {
           dashed_name: 'process-parent-elf-header-type',
@@ -1987,7 +2043,7 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'elf',
           short: 'Header type of the ELF file.',
-          type: 'keyword'
+          type: 'keyword',
         },
         version: {
           dashed_name: 'process-parent-elf-header-version',
@@ -1999,8 +2055,8 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'elf',
           short: 'Version of the ELF header.',
-          type: 'keyword'
-        }
+          type: 'keyword',
+        },
       },
       imports: {
         dashed_name: 'process-parent-elf-imports',
@@ -2008,14 +2064,15 @@ export const processEcs = {
         flat_name: 'process.parent.elf.imports',
         level: 'extended',
         name: 'imports',
-        normalize: [ 'array' ],
+        normalize: ['array'],
         original_fieldset: 'elf',
         short: 'List of imported element names and types.',
-        type: 'flattened'
+        type: 'flattened',
       },
       sections: {
         dashed_name: 'process-parent-elf-sections',
-        description: 'An array containing an object for each section of the ELF file.\n' +
+        description:
+          'An array containing an object for each section of the ELF file.\n' +
           'The keys that should be present in these objects are defined by sub-fields underneath `elf.sections.*`.',
         flat_name: 'process.parent.elf.sections',
         level: 'extended',
@@ -2029,9 +2086,9 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'elf',
           short: 'ELF Section List name.',
-          type: 'keyword'
+          type: 'keyword',
         },
-        normalize: [ 'array' ],
+        normalize: ['array'],
         original_fieldset: 'elf',
         short: 'Section information of the ELF file.',
         type: {
@@ -2044,7 +2101,7 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'elf',
           short: 'ELF Section List type.',
-          type: 'keyword'
+          type: 'keyword',
         },
         chi2: {
           dashed_name: 'process-parent-elf-sections-chi2',
@@ -2056,7 +2113,7 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'elf',
           short: 'Chi-square probability distribution of the section.',
-          type: 'long'
+          type: 'long',
         },
         entropy: {
           dashed_name: 'process-parent-elf-sections-entropy',
@@ -2068,7 +2125,7 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'elf',
           short: 'Shannon entropy calculation from the section.',
-          type: 'long'
+          type: 'long',
         },
         flags: {
           dashed_name: 'process-parent-elf-sections-flags',
@@ -2080,7 +2137,7 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'elf',
           short: 'ELF Section List flags.',
-          type: 'keyword'
+          type: 'keyword',
         },
         physical_offset: {
           dashed_name: 'process-parent-elf-sections-physical-offset',
@@ -2092,7 +2149,7 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'elf',
           short: 'ELF Section List offset.',
-          type: 'keyword'
+          type: 'keyword',
         },
         physical_size: {
           dashed_name: 'process-parent-elf-sections-physical-size',
@@ -2104,7 +2161,7 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'elf',
           short: 'ELF Section List physical size.',
-          type: 'long'
+          type: 'long',
         },
         virtual_address: {
           dashed_name: 'process-parent-elf-sections-virtual-address',
@@ -2116,7 +2173,7 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'elf',
           short: 'ELF Section List virtual address.',
-          type: 'long'
+          type: 'long',
         },
         virtual_size: {
           dashed_name: 'process-parent-elf-sections-virtual-size',
@@ -2128,17 +2185,18 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'elf',
           short: 'ELF Section List virtual size.',
-          type: 'long'
-        }
+          type: 'long',
+        },
       },
       segments: {
         dashed_name: 'process-parent-elf-segments',
-        description: 'An array containing an object for each segment of the ELF file.\n' +
+        description:
+          'An array containing an object for each segment of the ELF file.\n' +
           'The keys that should be present in these objects are defined by sub-fields underneath `elf.segments.*`.',
         flat_name: 'process.parent.elf.segments',
         level: 'extended',
         name: 'segments',
-        normalize: [ 'array' ],
+        normalize: ['array'],
         original_fieldset: 'elf',
         short: 'ELF object segment list.',
         type: {
@@ -2151,7 +2209,7 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'elf',
           short: 'ELF object segment type.',
-          type: 'keyword'
+          type: 'keyword',
         },
         sections: {
           dashed_name: 'process-parent-elf-segments-sections',
@@ -2163,8 +2221,8 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'elf',
           short: 'ELF object segment sections.',
-          type: 'keyword'
-        }
+          type: 'keyword',
+        },
       },
       shared_libraries: {
         dashed_name: 'process-parent-elf-shared-libraries',
@@ -2173,10 +2231,10 @@ export const processEcs = {
         ignore_above: 1024,
         level: 'extended',
         name: 'shared_libraries',
-        normalize: [ 'array' ],
+        normalize: ['array'],
         original_fieldset: 'elf',
         short: 'List of shared libraries used by this ELF object.',
-        type: 'keyword'
+        type: 'keyword',
       },
       telfhash: {
         dashed_name: 'process-parent-elf-telfhash',
@@ -2188,8 +2246,8 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'elf',
         short: 'telfhash hash for ELF file.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     end: {
       dashed_name: 'process-parent-end',
@@ -2201,11 +2259,12 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'process',
       short: 'The time the process ended.',
-      type: 'date'
+      type: 'date',
     },
     entity_id: {
       dashed_name: 'process-parent-entity-id',
-      description: 'Unique identifier for the process.\n' +
+      description:
+        'Unique identifier for the process.\n' +
         'The implementation of this is specified by the data source, but some examples of what could be used here are a process-generated UUID, Sysmon Process GUIDs, or a hash of some uniquely identifying components of a process.\n' +
         'Constructing a globally unique identifier is a common practice to mitigate PID reuse as well as to identify a specific process over time, across multiple monitored hosts.',
       example: 'c2c455d9f99375d',
@@ -2216,7 +2275,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'process',
       short: 'Unique identifier for the process.',
-      type: 'keyword'
+      type: 'keyword',
     },
     executable: {
       dashed_name: 'process-parent-executable',
@@ -2229,18 +2288,19 @@ export const processEcs = {
         {
           flat_name: 'process.parent.executable.text',
           name: 'text',
-          type: 'match_only_text'
-        }
+          type: 'match_only_text',
+        },
       ],
       name: 'executable',
       normalize: [],
       original_fieldset: 'process',
       short: 'Absolute path to the process executable.',
-      type: 'keyword'
+      type: 'keyword',
     },
     exit_code: {
       dashed_name: 'process-parent-exit-code',
-      description: 'The exit code of the process, if this is a termination event.\n' +
+      description:
+        'The exit code of the process, if this is a termination event.\n' +
         'The field should be absent if there is no exit code for the event (e.g. process start).',
       example: 137,
       flat_name: 'process.parent.exit_code',
@@ -2249,7 +2309,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'process',
       short: 'The exit code of the process.',
-      type: 'long'
+      type: 'long',
     },
     group: {
       id: {
@@ -2262,7 +2322,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Unique identifier for the group on the system/platform.',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'process-parent-group-name',
@@ -2274,13 +2334,14 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Name of the group.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     group_leader: {
       entity_id: {
         dashed_name: 'process-parent-group-leader-entity-id',
-        description: 'Unique identifier for the process.\n' +
+        description:
+          'Unique identifier for the process.\n' +
           'The implementation of this is specified by the data source, but some examples of what could be used here are a process-generated UUID, Sysmon Process GUIDs, or a hash of some uniquely identifying components of a process.\n' +
           'Constructing a globally unique identifier is a common practice to mitigate PID reuse as well as to identify a specific process over time, across multiple monitored hosts.',
         example: 'c2c455d9f99375d',
@@ -2291,7 +2352,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'process',
         short: 'Unique identifier for the process.',
-        type: 'keyword'
+        type: 'keyword',
       },
       pid: {
         dashed_name: 'process-parent-group-leader-pid',
@@ -2304,7 +2365,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'process',
         short: 'Process id.',
-        type: 'long'
+        type: 'long',
       },
       start: {
         dashed_name: 'process-parent-group-leader-start',
@@ -2316,8 +2377,8 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'process',
         short: 'The time the process started.',
-        type: 'date'
-      }
+        type: 'date',
+      },
     },
     hash: {
       md5: {
@@ -2330,7 +2391,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'hash',
         short: 'MD5 hash.',
-        type: 'keyword'
+        type: 'keyword',
       },
       sha1: {
         dashed_name: 'process-parent-hash-sha1',
@@ -2342,7 +2403,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'hash',
         short: 'SHA1 hash.',
-        type: 'keyword'
+        type: 'keyword',
       },
       sha256: {
         dashed_name: 'process-parent-hash-sha256',
@@ -2354,7 +2415,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'hash',
         short: 'SHA256 hash.',
-        type: 'keyword'
+        type: 'keyword',
       },
       sha384: {
         dashed_name: 'process-parent-hash-sha384',
@@ -2366,7 +2427,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'hash',
         short: 'SHA384 hash.',
-        type: 'keyword'
+        type: 'keyword',
       },
       sha512: {
         dashed_name: 'process-parent-hash-sha512',
@@ -2378,7 +2439,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'hash',
         short: 'SHA512 hash.',
-        type: 'keyword'
+        type: 'keyword',
       },
       ssdeep: {
         dashed_name: 'process-parent-hash-ssdeep',
@@ -2390,7 +2451,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'hash',
         short: 'SSDEEP hash.',
-        type: 'keyword'
+        type: 'keyword',
       },
       tlsh: {
         dashed_name: 'process-parent-hash-tlsh',
@@ -2402,13 +2463,14 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'hash',
         short: 'TLSH hash.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     interactive: {
       beta: 'This field is beta and subject to change.',
       dashed_name: 'process-parent-interactive',
-      description: 'Whether the process is connected to an interactive shell.\n' +
+      description:
+        'Whether the process is connected to an interactive shell.\n' +
         'Process interactivity is inferred from the processes file descriptors. If the character device for the controlling tty is the same as stdin and stderr for the process, the process is considered interactive.\n' +
         'Note: A non-interactive process can belong to an interactive session and is simply one that does not have open file descriptors reading the controlling TTY on FD 0 (stdin) or writing to the controlling TTY on FD 2 (stderr). A backgrounded process is still considered interactive if stdin and stderr are connected to the controlling TTY.',
       example: true,
@@ -2418,7 +2480,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'process',
       short: 'Whether the process is connected to an interactive shell.',
-      type: 'boolean'
+      type: 'boolean',
     },
     name: {
       dashed_name: 'process-parent-name',
@@ -2431,14 +2493,14 @@ export const processEcs = {
         {
           flat_name: 'process.parent.name.text',
           name: 'text',
-          type: 'match_only_text'
-        }
+          type: 'match_only_text',
+        },
       ],
       name: 'name',
       normalize: [],
       original_fieldset: 'process',
       short: 'Process name.',
-      type: 'keyword'
+      type: 'keyword',
     },
     pe: {
       architecture: {
@@ -2452,7 +2514,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'pe',
         short: 'CPU architecture target for the file.',
-        type: 'keyword'
+        type: 'keyword',
       },
       company: {
         dashed_name: 'process-parent-pe-company',
@@ -2465,7 +2527,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'pe',
         short: 'Internal company name of the file, provided at compile-time.',
-        type: 'keyword'
+        type: 'keyword',
       },
       description: {
         dashed_name: 'process-parent-pe-description',
@@ -2478,7 +2540,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'pe',
         short: 'Internal description of the file, provided at compile-time.',
-        type: 'keyword'
+        type: 'keyword',
       },
       file_version: {
         dashed_name: 'process-parent-pe-file-version',
@@ -2491,11 +2553,12 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'pe',
         short: 'Process name.',
-        type: 'keyword'
+        type: 'keyword',
       },
       imphash: {
         dashed_name: 'process-parent-pe-imphash',
-        description: 'A hash of the imports in a PE file. An imphash -- or import hash -- can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.\n' +
+        description:
+          'A hash of the imports in a PE file. An imphash -- or import hash -- can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.\n' +
           'Learn more at https://www.fireeye.com/blog/threat-research/2014/01/tracking-malware-import-hashing.html.',
         example: '0c6803c4e922103c4dca5963aad36ddf',
         flat_name: 'process.parent.pe.imphash',
@@ -2505,7 +2568,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'pe',
         short: 'A hash of the imports in a PE file.',
-        type: 'keyword'
+        type: 'keyword',
       },
       original_file_name: {
         dashed_name: 'process-parent-pe-original-file-name',
@@ -2518,11 +2581,12 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'pe',
         short: 'Internal name of the file, provided at compile-time.',
-        type: 'keyword'
+        type: 'keyword',
       },
       pehash: {
         dashed_name: 'process-parent-pe-pehash',
-        description: 'A hash of the PE header and data from one or more PE sections. An pehash can be used to cluster files by transforming structural information about a file into a hash value.\n' +
+        description:
+          'A hash of the PE header and data from one or more PE sections. An pehash can be used to cluster files by transforming structural information about a file into a hash value.\n' +
           'Learn more at https://www.usenix.org/legacy/events/leet09/tech/full_papers/wicherski/wicherski_html/index.html.',
         example: '73ff189b63cd6be375a7ff25179a38d347651975',
         flat_name: 'process.parent.pe.pehash',
@@ -2532,7 +2596,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'pe',
         short: 'A hash of the PE header and data from one or more PE sections.',
-        type: 'keyword'
+        type: 'keyword',
       },
       product: {
         dashed_name: 'process-parent-pe-product',
@@ -2545,12 +2609,13 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'pe',
         short: 'Internal product name of the file, provided at compile-time.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     pgid: {
       dashed_name: 'process-parent-pgid',
-      description: 'Deprecated for removal in next major version release. This field is superseded by `process.group_leader.pid`.\n' +
+      description:
+        'Deprecated for removal in next major version release. This field is superseded by `process.group_leader.pid`.\n' +
         'Identifier of the group of processes the process belongs to.',
       flat_name: 'process.parent.pgid',
       format: 'string',
@@ -2559,7 +2624,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'process',
       short: 'Deprecated identifier of the group of processes the process belongs to.',
-      type: 'long'
+      type: 'long',
     },
     pid: {
       dashed_name: 'process-parent-pid',
@@ -2572,7 +2637,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'process',
       short: 'Process id.',
-      type: 'long'
+      type: 'long',
     },
     real_group: {
       id: {
@@ -2585,7 +2650,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Unique identifier for the group on the system/platform.',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'process-parent-real-group-name',
@@ -2597,8 +2662,8 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Name of the group.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     real_user: {
       id: {
@@ -2612,7 +2677,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'user',
         short: 'Unique identifier of the user.',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'process-parent-real-user-name',
@@ -2625,15 +2690,15 @@ export const processEcs = {
           {
             flat_name: 'process.parent.real_user.name.text',
             name: 'text',
-            type: 'match_only_text'
-          }
+            type: 'match_only_text',
+          },
         ],
         name: 'name',
         normalize: [],
         original_fieldset: 'user',
         short: 'Short name or login of the user.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     saved_group: {
       id: {
@@ -2646,7 +2711,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Unique identifier for the group on the system/platform.',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'process-parent-saved-group-name',
@@ -2658,8 +2723,8 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Name of the group.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     saved_user: {
       id: {
@@ -2673,7 +2738,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'user',
         short: 'Unique identifier of the user.',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'process-parent-saved-user-name',
@@ -2686,15 +2751,15 @@ export const processEcs = {
           {
             flat_name: 'process.parent.saved_user.name.text',
             name: 'text',
-            type: 'match_only_text'
-          }
+            type: 'match_only_text',
+          },
         ],
         name: 'name',
         normalize: [],
         original_fieldset: 'user',
         short: 'Short name or login of the user.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     start: {
       dashed_name: 'process-parent-start',
@@ -2706,7 +2771,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'process',
       short: 'The time the process started.',
-      type: 'date'
+      type: 'date',
     },
     supplemental_groups: {
       id: {
@@ -2719,7 +2784,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Unique identifier for the group on the system/platform.',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'process-parent-supplemental-groups-name',
@@ -2731,8 +2796,8 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Name of the group.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     thread: {
       id: {
@@ -2746,7 +2811,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'process',
         short: 'Thread ID.',
-        type: 'long'
+        type: 'long',
       },
       name: {
         dashed_name: 'process-parent-thread-name',
@@ -2759,12 +2824,13 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'process',
         short: 'Thread name.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     title: {
       dashed_name: 'process-parent-title',
-      description: 'Process title.\n' +
+      description:
+        'Process title.\n' +
         'The proctitle, some times the same as process name. Can also be different: for example a browser setting its title to the web page currently opened.',
       flat_name: 'process.parent.title',
       ignore_above: 1024,
@@ -2773,19 +2839,20 @@ export const processEcs = {
         {
           flat_name: 'process.parent.title.text',
           name: 'text',
-          type: 'match_only_text'
-        }
+          type: 'match_only_text',
+        },
       ],
       name: 'title',
       normalize: [],
       original_fieldset: 'process',
       short: 'Process title.',
-      type: 'keyword'
+      type: 'keyword',
     },
     tty: {
       beta: 'This field is beta and subject to change.',
       dashed_name: 'process-parent-tty',
-      description: 'Information about the controlling TTY device. If set, the process belongs to an interactive session.',
+      description:
+        'Information about the controlling TTY device. If set, the process belongs to an interactive session.',
       flat_name: 'process.parent.tty',
       level: 'extended',
       name: 'tty',
@@ -2805,12 +2872,13 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'process',
           short: "The TTY character device's major number.",
-          type: 'long'
+          type: 'long',
         },
         minor: {
           beta: 'This field is beta and subject to change.',
           dashed_name: 'process-parent-tty-char-device-minor',
-          description: 'The minor number is used only by the driver specified by the major number; other parts of the kernel don’t use it, and merely pass it along to the driver. It is common for a driver to control several devices; the minor number provides a way for the driver to differentiate among them.',
+          description:
+            'The minor number is used only by the driver specified by the major number; other parts of the kernel don’t use it, and merely pass it along to the driver. It is common for a driver to control several devices; the minor number provides a way for the driver to differentiate among them.',
           example: 128,
           flat_name: 'process.parent.tty.char_device.minor',
           level: 'extended',
@@ -2818,9 +2886,9 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'process',
           short: "The TTY character device's minor number.",
-          type: 'long'
-        }
-      }
+          type: 'long',
+        },
+      },
     },
     uptime: {
       dashed_name: 'process-parent-uptime',
@@ -2832,7 +2900,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'process',
       short: 'Seconds the process has been up.',
-      type: 'long'
+      type: 'long',
     },
     user: {
       id: {
@@ -2846,7 +2914,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'user',
         short: 'Unique identifier of the user.',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'process-parent-user-name',
@@ -2859,15 +2927,15 @@ export const processEcs = {
           {
             flat_name: 'process.parent.user.name.text',
             name: 'text',
-            type: 'match_only_text'
-          }
+            type: 'match_only_text',
+          },
         ],
         name: 'name',
         normalize: [],
         original_fieldset: 'user',
         short: 'Short name or login of the user.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     working_directory: {
       dashed_name: 'process-parent-working-directory',
@@ -2880,15 +2948,15 @@ export const processEcs = {
         {
           flat_name: 'process.parent.working_directory.text',
           name: 'text',
-          type: 'match_only_text'
-        }
+          type: 'match_only_text',
+        },
       ],
       name: 'working_directory',
       normalize: [],
       original_fieldset: 'process',
       short: 'The working directory of the process.',
-      type: 'keyword'
-    }
+      type: 'keyword',
+    },
   },
   pe: {
     architecture: {
@@ -2902,7 +2970,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'pe',
       short: 'CPU architecture target for the file.',
-      type: 'keyword'
+      type: 'keyword',
     },
     company: {
       dashed_name: 'process-pe-company',
@@ -2915,7 +2983,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'pe',
       short: 'Internal company name of the file, provided at compile-time.',
-      type: 'keyword'
+      type: 'keyword',
     },
     description: {
       dashed_name: 'process-pe-description',
@@ -2928,7 +2996,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'pe',
       short: 'Internal description of the file, provided at compile-time.',
-      type: 'keyword'
+      type: 'keyword',
     },
     file_version: {
       dashed_name: 'process-pe-file-version',
@@ -2941,11 +3009,12 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'pe',
       short: 'Process name.',
-      type: 'keyword'
+      type: 'keyword',
     },
     imphash: {
       dashed_name: 'process-pe-imphash',
-      description: 'A hash of the imports in a PE file. An imphash -- or import hash -- can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.\n' +
+      description:
+        'A hash of the imports in a PE file. An imphash -- or import hash -- can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.\n' +
         'Learn more at https://www.fireeye.com/blog/threat-research/2014/01/tracking-malware-import-hashing.html.',
       example: '0c6803c4e922103c4dca5963aad36ddf',
       flat_name: 'process.pe.imphash',
@@ -2955,7 +3024,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'pe',
       short: 'A hash of the imports in a PE file.',
-      type: 'keyword'
+      type: 'keyword',
     },
     original_file_name: {
       dashed_name: 'process-pe-original-file-name',
@@ -2968,11 +3037,12 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'pe',
       short: 'Internal name of the file, provided at compile-time.',
-      type: 'keyword'
+      type: 'keyword',
     },
     pehash: {
       dashed_name: 'process-pe-pehash',
-      description: 'A hash of the PE header and data from one or more PE sections. An pehash can be used to cluster files by transforming structural information about a file into a hash value.\n' +
+      description:
+        'A hash of the PE header and data from one or more PE sections. An pehash can be used to cluster files by transforming structural information about a file into a hash value.\n' +
         'Learn more at https://www.usenix.org/legacy/events/leet09/tech/full_papers/wicherski/wicherski_html/index.html.',
       example: '73ff189b63cd6be375a7ff25179a38d347651975',
       flat_name: 'process.pe.pehash',
@@ -2982,7 +3052,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'pe',
       short: 'A hash of the PE header and data from one or more PE sections.',
-      type: 'keyword'
+      type: 'keyword',
     },
     product: {
       dashed_name: 'process-pe-product',
@@ -2995,12 +3065,13 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'pe',
       short: 'Internal product name of the file, provided at compile-time.',
-      type: 'keyword'
-    }
+      type: 'keyword',
+    },
   },
   pgid: {
     dashed_name: 'process-pgid',
-    description: 'Deprecated for removal in next major version release. This field is superseded by `process.group_leader.pid`.\n' +
+    description:
+      'Deprecated for removal in next major version release. This field is superseded by `process.group_leader.pid`.\n' +
       'Identifier of the group of processes the process belongs to.',
     flat_name: 'process.pgid',
     format: 'string',
@@ -3008,7 +3079,7 @@ export const processEcs = {
     name: 'pgid',
     normalize: [],
     short: 'Deprecated identifier of the group of processes the process belongs to.',
-    type: 'long'
+    type: 'long',
   },
   pid: {
     dashed_name: 'process-pid',
@@ -3020,26 +3091,28 @@ export const processEcs = {
     name: 'pid',
     normalize: [],
     short: 'Process id.',
-    type: 'long'
+    type: 'long',
   },
   previous: {
     args: {
       dashed_name: 'process-previous-args',
-      description: 'Array of process arguments, starting with the absolute path to the executable.\n' +
+      description:
+        'Array of process arguments, starting with the absolute path to the executable.\n' +
         'May be filtered to protect sensitive information.',
       example: '["/usr/bin/ssh", "-l", "user", "10.0.0.16"]',
       flat_name: 'process.previous.args',
       ignore_above: 1024,
       level: 'extended',
       name: 'args',
-      normalize: [ 'array' ],
+      normalize: ['array'],
       original_fieldset: 'process',
       short: 'Array of process arguments.',
-      type: 'keyword'
+      type: 'keyword',
     },
     args_count: {
       dashed_name: 'process-previous-args-count',
-      description: 'Length of the process.args array.\n' +
+      description:
+        'Length of the process.args array.\n' +
         'This field can be useful for querying or performing bucket analysis on how many arguments were provided to start a process. More arguments may be an indication of suspicious activity.',
       example: 4,
       flat_name: 'process.previous.args_count',
@@ -3048,7 +3121,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'process',
       short: 'Length of the process.args array.',
-      type: 'long'
+      type: 'long',
     },
     executable: {
       dashed_name: 'process-previous-executable',
@@ -3061,15 +3134,15 @@ export const processEcs = {
         {
           flat_name: 'process.previous.executable.text',
           name: 'text',
-          type: 'match_only_text'
-        }
+          type: 'match_only_text',
+        },
       ],
       name: 'executable',
       normalize: [],
       original_fieldset: 'process',
       short: 'Absolute path to the process executable.',
-      type: 'keyword'
-    }
+      type: 'keyword',
+    },
   },
   real_group: {
     id: {
@@ -3082,7 +3155,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'group',
       short: 'Unique identifier for the group on the system/platform.',
-      type: 'keyword'
+      type: 'keyword',
     },
     name: {
       dashed_name: 'process-real-group-name',
@@ -3094,8 +3167,8 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'group',
       short: 'Name of the group.',
-      type: 'keyword'
-    }
+      type: 'keyword',
+    },
   },
   real_user: {
     id: {
@@ -3109,7 +3182,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'user',
       short: 'Unique identifier of the user.',
-      type: 'keyword'
+      type: 'keyword',
     },
     name: {
       dashed_name: 'process-real-user-name',
@@ -3122,15 +3195,15 @@ export const processEcs = {
         {
           flat_name: 'process.real_user.name.text',
           name: 'text',
-          type: 'match_only_text'
-        }
+          type: 'match_only_text',
+        },
       ],
       name: 'name',
       normalize: [],
       original_fieldset: 'user',
       short: 'Short name or login of the user.',
-      type: 'keyword'
-    }
+      type: 'keyword',
+    },
   },
   saved_group: {
     id: {
@@ -3143,7 +3216,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'group',
       short: 'Unique identifier for the group on the system/platform.',
-      type: 'keyword'
+      type: 'keyword',
     },
     name: {
       dashed_name: 'process-saved-group-name',
@@ -3155,8 +3228,8 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'group',
       short: 'Name of the group.',
-      type: 'keyword'
-    }
+      type: 'keyword',
+    },
   },
   saved_user: {
     id: {
@@ -3170,7 +3243,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'user',
       short: 'Unique identifier of the user.',
-      type: 'keyword'
+      type: 'keyword',
     },
     name: {
       dashed_name: 'process-saved-user-name',
@@ -3183,34 +3256,36 @@ export const processEcs = {
         {
           flat_name: 'process.saved_user.name.text',
           name: 'text',
-          type: 'match_only_text'
-        }
+          type: 'match_only_text',
+        },
       ],
       name: 'name',
       normalize: [],
       original_fieldset: 'user',
       short: 'Short name or login of the user.',
-      type: 'keyword'
-    }
+      type: 'keyword',
+    },
   },
   session_leader: {
     args: {
       dashed_name: 'process-session-leader-args',
-      description: 'Array of process arguments, starting with the absolute path to the executable.\n' +
+      description:
+        'Array of process arguments, starting with the absolute path to the executable.\n' +
         'May be filtered to protect sensitive information.',
       example: '["/usr/bin/ssh", "-l", "user", "10.0.0.16"]',
       flat_name: 'process.session_leader.args',
       ignore_above: 1024,
       level: 'extended',
       name: 'args',
-      normalize: [ 'array' ],
+      normalize: ['array'],
       original_fieldset: 'process',
       short: 'Array of process arguments.',
-      type: 'keyword'
+      type: 'keyword',
     },
     args_count: {
       dashed_name: 'process-session-leader-args-count',
-      description: 'Length of the process.args array.\n' +
+      description:
+        'Length of the process.args array.\n' +
         'This field can be useful for querying or performing bucket analysis on how many arguments were provided to start a process. More arguments may be an indication of suspicious activity.',
       example: 4,
       flat_name: 'process.session_leader.args_count',
@@ -3219,11 +3294,12 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'process',
       short: 'Length of the process.args array.',
-      type: 'long'
+      type: 'long',
     },
     command_line: {
       dashed_name: 'process-session-leader-command-line',
-      description: 'Full command line that started the process, including the absolute path to the executable, and all arguments.\n' +
+      description:
+        'Full command line that started the process, including the absolute path to the executable, and all arguments.\n' +
         'Some arguments may be filtered to protect sensitive information.',
       example: '/usr/bin/ssh -l user 10.0.0.16',
       flat_name: 'process.session_leader.command_line',
@@ -3232,18 +3308,19 @@ export const processEcs = {
         {
           flat_name: 'process.session_leader.command_line.text',
           name: 'text',
-          type: 'match_only_text'
-        }
+          type: 'match_only_text',
+        },
       ],
       name: 'command_line',
       normalize: [],
       original_fieldset: 'process',
       short: 'Full command line that started the process.',
-      type: 'wildcard'
+      type: 'wildcard',
     },
     entity_id: {
       dashed_name: 'process-session-leader-entity-id',
-      description: 'Unique identifier for the process.\n' +
+      description:
+        'Unique identifier for the process.\n' +
         'The implementation of this is specified by the data source, but some examples of what could be used here are a process-generated UUID, Sysmon Process GUIDs, or a hash of some uniquely identifying components of a process.\n' +
         'Constructing a globally unique identifier is a common practice to mitigate PID reuse as well as to identify a specific process over time, across multiple monitored hosts.',
       example: 'c2c455d9f99375d',
@@ -3254,7 +3331,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'process',
       short: 'Unique identifier for the process.',
-      type: 'keyword'
+      type: 'keyword',
     },
     executable: {
       dashed_name: 'process-session-leader-executable',
@@ -3267,14 +3344,14 @@ export const processEcs = {
         {
           flat_name: 'process.session_leader.executable.text',
           name: 'text',
-          type: 'match_only_text'
-        }
+          type: 'match_only_text',
+        },
       ],
       name: 'executable',
       normalize: [],
       original_fieldset: 'process',
       short: 'Absolute path to the process executable.',
-      type: 'keyword'
+      type: 'keyword',
     },
     group: {
       id: {
@@ -3287,7 +3364,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Unique identifier for the group on the system/platform.',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'process-session-leader-group-name',
@@ -3299,13 +3376,14 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Name of the group.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     interactive: {
       beta: 'This field is beta and subject to change.',
       dashed_name: 'process-session-leader-interactive',
-      description: 'Whether the process is connected to an interactive shell.\n' +
+      description:
+        'Whether the process is connected to an interactive shell.\n' +
         'Process interactivity is inferred from the processes file descriptors. If the character device for the controlling tty is the same as stdin and stderr for the process, the process is considered interactive.\n' +
         'Note: A non-interactive process can belong to an interactive session and is simply one that does not have open file descriptors reading the controlling TTY on FD 0 (stdin) or writing to the controlling TTY on FD 2 (stderr). A backgrounded process is still considered interactive if stdin and stderr are connected to the controlling TTY.',
       example: true,
@@ -3315,7 +3393,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'process',
       short: 'Whether the process is connected to an interactive shell.',
-      type: 'boolean'
+      type: 'boolean',
     },
     name: {
       dashed_name: 'process-session-leader-name',
@@ -3328,19 +3406,20 @@ export const processEcs = {
         {
           flat_name: 'process.session_leader.name.text',
           name: 'text',
-          type: 'match_only_text'
-        }
+          type: 'match_only_text',
+        },
       ],
       name: 'name',
       normalize: [],
       original_fieldset: 'process',
       short: 'Process name.',
-      type: 'keyword'
+      type: 'keyword',
     },
     parent: {
       entity_id: {
         dashed_name: 'process-session-leader-parent-entity-id',
-        description: 'Unique identifier for the process.\n' +
+        description:
+          'Unique identifier for the process.\n' +
           'The implementation of this is specified by the data source, but some examples of what could be used here are a process-generated UUID, Sysmon Process GUIDs, or a hash of some uniquely identifying components of a process.\n' +
           'Constructing a globally unique identifier is a common practice to mitigate PID reuse as well as to identify a specific process over time, across multiple monitored hosts.',
         example: 'c2c455d9f99375d',
@@ -3351,7 +3430,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'process',
         short: 'Unique identifier for the process.',
-        type: 'keyword'
+        type: 'keyword',
       },
       pid: {
         dashed_name: 'process-session-leader-parent-pid',
@@ -3364,12 +3443,13 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'process',
         short: 'Process id.',
-        type: 'long'
+        type: 'long',
       },
       session_leader: {
         entity_id: {
           dashed_name: 'process-session-leader-parent-session-leader-entity-id',
-          description: 'Unique identifier for the process.\n' +
+          description:
+            'Unique identifier for the process.\n' +
             'The implementation of this is specified by the data source, but some examples of what could be used here are a process-generated UUID, Sysmon Process GUIDs, or a hash of some uniquely identifying components of a process.\n' +
             'Constructing a globally unique identifier is a common practice to mitigate PID reuse as well as to identify a specific process over time, across multiple monitored hosts.',
           example: 'c2c455d9f99375d',
@@ -3380,7 +3460,7 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'process',
           short: 'Unique identifier for the process.',
-          type: 'keyword'
+          type: 'keyword',
         },
         pid: {
           dashed_name: 'process-session-leader-parent-session-leader-pid',
@@ -3393,7 +3473,7 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'process',
           short: 'Process id.',
-          type: 'long'
+          type: 'long',
         },
         start: {
           dashed_name: 'process-session-leader-parent-session-leader-start',
@@ -3405,8 +3485,8 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'process',
           short: 'The time the process started.',
-          type: 'date'
-        }
+          type: 'date',
+        },
       },
       start: {
         dashed_name: 'process-session-leader-parent-start',
@@ -3418,8 +3498,8 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'process',
         short: 'The time the process started.',
-        type: 'date'
-      }
+        type: 'date',
+      },
     },
     pid: {
       dashed_name: 'process-session-leader-pid',
@@ -3432,7 +3512,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'process',
       short: 'Process id.',
-      type: 'long'
+      type: 'long',
     },
     real_group: {
       id: {
@@ -3445,7 +3525,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Unique identifier for the group on the system/platform.',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'process-session-leader-real-group-name',
@@ -3457,8 +3537,8 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Name of the group.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     real_user: {
       id: {
@@ -3472,7 +3552,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'user',
         short: 'Unique identifier of the user.',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'process-session-leader-real-user-name',
@@ -3485,20 +3565,21 @@ export const processEcs = {
           {
             flat_name: 'process.session_leader.real_user.name.text',
             name: 'text',
-            type: 'match_only_text'
-          }
+            type: 'match_only_text',
+          },
         ],
         name: 'name',
         normalize: [],
         original_fieldset: 'user',
         short: 'Short name or login of the user.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     same_as_process: {
       beta: 'This field is beta and subject to change.',
       dashed_name: 'process-session-leader-same-as-process',
-      description: 'This boolean is used to identify if a leader process is the same as the top level process.\n' +
+      description:
+        'This boolean is used to identify if a leader process is the same as the top level process.\n' +
         'For example, if `process.group_leader.same_as_process = true`, it means the process event in question is the leader of its process group. Details under `process.*` like `pid` would be the same under `process.group_leader.*` The same applies for both `process.session_leader` and `process.entry_leader`.\n' +
         "This field exists to the benefit of EQL and other rule engines since it's not possible to compare equality between two fields in a single document. e.g `process.entity_id` = `process.group_leader.entity_id` (top level process is the process group leader) OR `process.entity_id` = `process.entry_leader.entity_id` (top level process is the entry session leader)\n" +
         'Instead these rules could be written like: `process.group_leader.same_as_process: true` OR `process.entry_leader.same_as_process: true`\n' +
@@ -3509,8 +3590,9 @@ export const processEcs = {
       name: 'same_as_process',
       normalize: [],
       original_fieldset: 'process',
-      short: 'This boolean is used to identify if a leader process is the same as the top level process.',
-      type: 'boolean'
+      short:
+        'This boolean is used to identify if a leader process is the same as the top level process.',
+      type: 'boolean',
     },
     saved_group: {
       id: {
@@ -3523,7 +3605,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Unique identifier for the group on the system/platform.',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'process-session-leader-saved-group-name',
@@ -3535,8 +3617,8 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Name of the group.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     saved_user: {
       id: {
@@ -3550,7 +3632,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'user',
         short: 'Unique identifier of the user.',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'process-session-leader-saved-user-name',
@@ -3563,15 +3645,15 @@ export const processEcs = {
           {
             flat_name: 'process.session_leader.saved_user.name.text',
             name: 'text',
-            type: 'match_only_text'
-          }
+            type: 'match_only_text',
+          },
         ],
         name: 'name',
         normalize: [],
         original_fieldset: 'user',
         short: 'Short name or login of the user.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     start: {
       dashed_name: 'process-session-leader-start',
@@ -3583,7 +3665,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'process',
       short: 'The time the process started.',
-      type: 'date'
+      type: 'date',
     },
     supplemental_groups: {
       id: {
@@ -3596,7 +3678,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Unique identifier for the group on the system/platform.',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'process-session-leader-supplemental-groups-name',
@@ -3608,13 +3690,14 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Name of the group.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     tty: {
       beta: 'This field is beta and subject to change.',
       dashed_name: 'process-session-leader-tty',
-      description: 'Information about the controlling TTY device. If set, the process belongs to an interactive session.',
+      description:
+        'Information about the controlling TTY device. If set, the process belongs to an interactive session.',
       flat_name: 'process.session_leader.tty',
       level: 'extended',
       name: 'tty',
@@ -3634,12 +3717,13 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'process',
           short: "The TTY character device's major number.",
-          type: 'long'
+          type: 'long',
         },
         minor: {
           beta: 'This field is beta and subject to change.',
           dashed_name: 'process-session-leader-tty-char-device-minor',
-          description: 'The minor number is used only by the driver specified by the major number; other parts of the kernel don’t use it, and merely pass it along to the driver. It is common for a driver to control several devices; the minor number provides a way for the driver to differentiate among them.',
+          description:
+            'The minor number is used only by the driver specified by the major number; other parts of the kernel don’t use it, and merely pass it along to the driver. It is common for a driver to control several devices; the minor number provides a way for the driver to differentiate among them.',
           example: 128,
           flat_name: 'process.session_leader.tty.char_device.minor',
           level: 'extended',
@@ -3647,9 +3731,9 @@ export const processEcs = {
           normalize: [],
           original_fieldset: 'process',
           short: "The TTY character device's minor number.",
-          type: 'long'
-        }
-      }
+          type: 'long',
+        },
+      },
     },
     user: {
       id: {
@@ -3663,7 +3747,7 @@ export const processEcs = {
         normalize: [],
         original_fieldset: 'user',
         short: 'Unique identifier of the user.',
-        type: 'keyword'
+        type: 'keyword',
       },
       name: {
         dashed_name: 'process-session-leader-user-name',
@@ -3676,15 +3760,15 @@ export const processEcs = {
           {
             flat_name: 'process.session_leader.user.name.text',
             name: 'text',
-            type: 'match_only_text'
-          }
+            type: 'match_only_text',
+          },
         ],
         name: 'name',
         normalize: [],
         original_fieldset: 'user',
         short: 'Short name or login of the user.',
-        type: 'keyword'
-      }
+        type: 'keyword',
+      },
     },
     working_directory: {
       dashed_name: 'process-session-leader-working-directory',
@@ -3697,15 +3781,15 @@ export const processEcs = {
         {
           flat_name: 'process.session_leader.working_directory.text',
           name: 'text',
-          type: 'match_only_text'
-        }
+          type: 'match_only_text',
+        },
       ],
       name: 'working_directory',
       normalize: [],
       original_fieldset: 'process',
       short: 'The working directory of the process.',
-      type: 'keyword'
-    }
+      type: 'keyword',
+    },
   },
   start: {
     dashed_name: 'process-start',
@@ -3716,7 +3800,7 @@ export const processEcs = {
     name: 'start',
     normalize: [],
     short: 'The time the process started.',
-    type: 'date'
+    type: 'date',
   },
   supplemental_groups: {
     id: {
@@ -3729,7 +3813,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'group',
       short: 'Unique identifier for the group on the system/platform.',
-      type: 'keyword'
+      type: 'keyword',
     },
     name: {
       dashed_name: 'process-supplemental-groups-name',
@@ -3741,8 +3825,8 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'group',
       short: 'Name of the group.',
-      type: 'keyword'
-    }
+      type: 'keyword',
+    },
   },
   thread: {
     id: {
@@ -3755,7 +3839,7 @@ export const processEcs = {
       name: 'thread.id',
       normalize: [],
       short: 'Thread ID.',
-      type: 'long'
+      type: 'long',
     },
     name: {
       dashed_name: 'process-thread-name',
@@ -3767,12 +3851,13 @@ export const processEcs = {
       name: 'thread.name',
       normalize: [],
       short: 'Thread name.',
-      type: 'keyword'
-    }
+      type: 'keyword',
+    },
   },
   title: {
     dashed_name: 'process-title',
-    description: 'Process title.\n' +
+    description:
+      'Process title.\n' +
       'The proctitle, some times the same as process name. Can also be different: for example a browser setting its title to the web page currently opened.',
     flat_name: 'process.title',
     ignore_above: 1024,
@@ -3781,18 +3866,19 @@ export const processEcs = {
       {
         flat_name: 'process.title.text',
         name: 'text',
-        type: 'match_only_text'
-      }
+        type: 'match_only_text',
+      },
     ],
     name: 'title',
     normalize: [],
     short: 'Process title.',
-    type: 'keyword'
+    type: 'keyword',
   },
   tty: {
     beta: 'This field is beta and subject to change.',
     dashed_name: 'process-tty',
-    description: 'Information about the controlling TTY device. If set, the process belongs to an interactive session.',
+    description:
+      'Information about the controlling TTY device. If set, the process belongs to an interactive session.',
     flat_name: 'process.tty',
     level: 'extended',
     name: 'tty',
@@ -3810,21 +3896,22 @@ export const processEcs = {
         name: 'tty.char_device.major',
         normalize: [],
         short: "The TTY character device's major number.",
-        type: 'long'
+        type: 'long',
       },
       minor: {
         beta: 'This field is beta and subject to change.',
         dashed_name: 'process-tty-char-device-minor',
-        description: 'The minor number is used only by the driver specified by the major number; other parts of the kernel don’t use it, and merely pass it along to the driver. It is common for a driver to control several devices; the minor number provides a way for the driver to differentiate among them.',
+        description:
+          'The minor number is used only by the driver specified by the major number; other parts of the kernel don’t use it, and merely pass it along to the driver. It is common for a driver to control several devices; the minor number provides a way for the driver to differentiate among them.',
         example: 128,
         flat_name: 'process.tty.char_device.minor',
         level: 'extended',
         name: 'tty.char_device.minor',
         normalize: [],
         short: "The TTY character device's minor number.",
-        type: 'long'
-      }
-    }
+        type: 'long',
+      },
+    },
   },
   uptime: {
     dashed_name: 'process-uptime',
@@ -3835,7 +3922,7 @@ export const processEcs = {
     name: 'uptime',
     normalize: [],
     short: 'Seconds the process has been up.',
-    type: 'long'
+    type: 'long',
   },
   user: {
     id: {
@@ -3849,7 +3936,7 @@ export const processEcs = {
       normalize: [],
       original_fieldset: 'user',
       short: 'Unique identifier of the user.',
-      type: 'keyword'
+      type: 'keyword',
     },
     name: {
       dashed_name: 'process-user-name',
@@ -3862,15 +3949,15 @@ export const processEcs = {
         {
           flat_name: 'process.user.name.text',
           name: 'text',
-          type: 'match_only_text'
-        }
+          type: 'match_only_text',
+        },
       ],
       name: 'name',
       normalize: [],
       original_fieldset: 'user',
       short: 'Short name or login of the user.',
-      type: 'keyword'
-    }
+      type: 'keyword',
+    },
   },
   working_directory: {
     dashed_name: 'process-working-directory',
@@ -3883,12 +3970,12 @@ export const processEcs = {
       {
         flat_name: 'process.working_directory.text',
         name: 'text',
-        type: 'match_only_text'
-      }
+        type: 'match_only_text',
+      },
     ],
     name: 'working_directory',
     normalize: [],
     short: 'The working directory of the process.',
-    type: 'keyword'
-  }
-}
+    type: 'keyword',
+  },
+};
