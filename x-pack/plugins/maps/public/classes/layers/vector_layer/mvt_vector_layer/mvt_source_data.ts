@@ -20,6 +20,7 @@ export interface MvtSourceData {
   tileMaxZoom: number;
   tileUrl: string;
   refreshToken: string;
+  hasLabels: boolean;
 }
 
 export async function syncMvtSourceData({
@@ -58,7 +59,10 @@ export async function syncMvtSourceData({
       },
     });
     const canSkip =
-      !syncContext.forceRefreshDueToDrawing && noChangesInSourceState && noChangesInSearchState;
+      !syncContext.forceRefreshDueToDrawing &&
+      noChangesInSourceState &&
+      noChangesInSearchState &&
+      prevData.hasLabels === hasLabels;
 
     if (canSkip) {
       return;
