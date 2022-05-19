@@ -10,8 +10,8 @@ import { act } from 'react-test-renderer';
 
 import { useTestQuery } from './use_test_query';
 
-describe('useEsDocSearch hook', () => {
-  test('useEsDocSearch returning a valid result', async () => {
+describe('useTestQuery', () => {
+  test('returning a valid result', async () => {
     const { result } = renderHook(useTestQuery, {
       initialProps: () => Promise.resolve({ nrOfDocs: 1, timeWindow: '1s' }),
     });
@@ -22,7 +22,7 @@ describe('useEsDocSearch hook', () => {
     expect(result.current.testQueryResult).toContain('1s');
     expect(result.current.testQueryResult).toContain('1 document');
   });
-  test('useEsDocSearch returning an error', async () => {
+  test('returning an error', async () => {
     const errorMsg = 'How dare you writing such a query';
     const { result } = renderHook(useTestQuery, {
       initialProps: () => Promise.reject({ message: errorMsg }),
