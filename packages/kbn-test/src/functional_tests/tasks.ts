@@ -10,7 +10,7 @@ import { relative } from 'path';
 import * as Rx from 'rxjs';
 import { setTimeout } from 'timers/promises';
 import { startWith, switchMap, take } from 'rxjs/operators';
-import { withProcRunner } from '@kbn/dev-utils';
+import { withProcRunner } from '@kbn/dev-proc-runner';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { REPO_ROOT } from '@kbn/utils';

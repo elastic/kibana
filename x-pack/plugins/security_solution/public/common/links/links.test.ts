@@ -94,6 +94,29 @@ const mockLicense = {
   isAtLeast: licensePremiumMock,
 } as unknown as LicenseService;
 
+const threatHuntingLinkInfo = {
+  features: ['siem.show'],
+  globalNavEnabled: false,
+  globalSearchKeywords: ['Threat hunting'],
+  id: 'threat_hunting',
+  path: '/threat_hunting',
+  title: 'Threat Hunting',
+  hideTimeline: true,
+  skipUrlState: true,
+};
+
+const hostsLinkInfo = {
+  globalNavEnabled: true,
+  globalNavOrder: 9002,
+  globalSearchEnabled: true,
+  globalSearchKeywords: ['Hosts'],
+  id: 'hosts',
+  path: '/hosts',
+  title: 'Hosts',
+  landingImage: 'test-file-stub',
+  description: 'A comprehensive overview of all hosts and host-related security events.',
+};
+
 describe('security app link helpers', () => {
   beforeEach(() => {
     mockLicense.isAtLeast = licensePremiumMock;
@@ -344,46 +367,13 @@ describe('security app link helpers', () => {
   describe('getAncestorLinksInfo', () => {
     it('finds flattened links for hosts', () => {
       const hierarchy = getAncestorLinksInfo(SecurityPageName.hosts);
-      expect(hierarchy).toEqual([
-        {
-          features: ['siem.show'],
-          globalNavEnabled: false,
-          globalSearchKeywords: ['Threat hunting'],
-          id: 'threat-hunting',
-          path: '/threat_hunting',
-          title: 'Threat Hunting',
-        },
-        {
-          globalNavEnabled: true,
-          globalNavOrder: 9002,
-          globalSearchEnabled: true,
-          globalSearchKeywords: ['Hosts'],
-          id: 'hosts',
-          path: '/hosts',
-          title: 'Hosts',
-        },
-      ]);
+      expect(hierarchy).toEqual([threatHuntingLinkInfo, hostsLinkInfo]);
     });
     it('finds flattened links for uncommonProcesses', () => {
       const hierarchy = getAncestorLinksInfo(SecurityPageName.uncommonProcesses);
       expect(hierarchy).toEqual([
-        {
-          features: ['siem.show'],
-          globalNavEnabled: false,
-          globalSearchKeywords: ['Threat hunting'],
-          id: 'threat-hunting',
-          path: '/threat_hunting',
-          title: 'Threat Hunting',
-        },
-        {
-          globalNavEnabled: true,
-          globalNavOrder: 9002,
-          globalSearchEnabled: true,
-          globalSearchKeywords: ['Hosts'],
-          id: 'hosts',
-          path: '/hosts',
-          title: 'Hosts',
-        },
+        threatHuntingLinkInfo,
+        hostsLinkInfo,
         {
           id: 'uncommon_processes',
           path: '/hosts/uncommonProcesses',
@@ -407,15 +397,7 @@ describe('security app link helpers', () => {
   describe('getLinkInfo', () => {
     it('gets information for an individual link', () => {
       const linkInfo = getLinkInfo(SecurityPageName.hosts);
-      expect(linkInfo).toEqual({
-        globalNavEnabled: true,
-        globalNavOrder: 9002,
-        globalSearchEnabled: true,
-        globalSearchKeywords: ['Hosts'],
-        id: 'hosts',
-        path: '/hosts',
-        title: 'Hosts',
-      });
+      expect(linkInfo).toEqual(hostsLinkInfo);
     });
   });
 });

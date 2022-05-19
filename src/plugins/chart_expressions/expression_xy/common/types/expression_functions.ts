@@ -100,6 +100,7 @@ export interface DataLayerArgs {
   xAccessor?: string | ExpressionValueVisDimension;
   hide?: boolean;
   splitAccessor?: string | ExpressionValueVisDimension;
+  markSizeAccessor?: string | ExpressionValueVisDimension;
   columnToLabel?: string; // Actually a JSON key-value pair
   xScaleType: XScaleType;
   isHistogram: boolean;
@@ -118,10 +119,12 @@ export interface ExtendedDataLayerArgs {
   xAccessor?: string;
   hide?: boolean;
   splitAccessor?: string;
+  markSizeAccessor?: string;
   columnToLabel?: string; // Actually a JSON key-value pair
   xScaleType: XScaleType;
   isHistogram: boolean;
   palette: PaletteOutput;
+  // palette will always be set on the expression
   yConfig?: YConfigResult[];
   table?: Datatable;
 }
@@ -203,6 +206,8 @@ export interface XYArgs extends DataLayerArgs {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
+  markSizeRatio?: number;
+  minTimeBarInterval?: string;
   splitRowAccessor?: ExpressionValueVisDimension | string;
   splitColumnAccessor?: ExpressionValueVisDimension | string;
 }
@@ -230,6 +235,8 @@ export interface LayeredXYArgs {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
+  markSizeRatio?: number;
+  minTimeBarInterval?: string;
 }
 
 export interface XYProps {
@@ -255,6 +262,8 @@ export interface XYProps {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
+  markSizeRatio?: number;
+  minTimeBarInterval?: string;
   splitRowAccessor?: ExpressionValueVisDimension | string;
   splitColumnAccessor?: ExpressionValueVisDimension | string;
 }
