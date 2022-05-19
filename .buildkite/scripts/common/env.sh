@@ -38,6 +38,7 @@ export TEST_BROWSER_HEADLESS=1
 export ELASTIC_APM_ENVIRONMENT=ci
 export ELASTIC_APM_TRANSACTION_SAMPLE_RATE=0.1
 export ELASTIC_APM_SERVER_URL=https://kibana-ci-apm.apm.us-central1.gcp.cloud.es.io
+# Not really a secret, if APM supported public auth we would use it and APM requires that we use this name
 export ELASTIC_APM_SECRET_TOKEN=7YKhoXsO4MzjhXjx2c
 
 if is_pr; then

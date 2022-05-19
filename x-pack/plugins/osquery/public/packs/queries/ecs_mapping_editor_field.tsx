@@ -34,7 +34,7 @@ import {
   EuiIcon,
   EuiSuperSelect,
 } from '@elastic/eui';
-import sqlParser from 'js-sql-parser';
+import sqliteParser from '@appland/sql-parser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -59,6 +59,7 @@ import {
   FormArrayField,
 } from '../../shared_imports';
 import { OsqueryIcon } from '../../components/osquery_icon';
+import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -773,11 +774,13 @@ export const ECSMappingEditorField = React.memo(
         return;
       }
 
+      const oneLineQuery = removeMultilines(query);
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let ast: Record<string, any> | undefined;
 
       try {
-        ast = sqlParser.parse(query)?.value;
+        ast = sqliteParser(oneLineQuery)?.statement?.[0];
       } catch (e) {
         return;
       }
@@ -789,44 +792,88 @@ export const ECSMappingEditorField = React.memo(
           order: number;
         }
       > =
-        ast?.from?.value?.reduce(
-          (
-            acc: {
-              [x: string]: {
-                columns: OsqueryColumn[];
-                order: number;
-              };
-            },
-            table: {
-              value: {
-                left?: { value: { value: string }; alias?: { value: string } };
-                right?: { value: { value: string }; alias?: { value: string } };
-                value?: { value: string };
-                alias?: { value: string };
-              };
+        reduce(
+          ast,
+          (acc, data) => {
+            // select * from uptime
+            if (data?.type === 'identifier' && data?.variant === 'table') {
+              const osqueryTable = find(osquerySchema, ['name', data.name]);
+
+              if (osqueryTable) {
+                acc[data.alias || data.name] = {
+                  columns: osqueryTable.columns,
+                  order: Object.keys(acc).length,
+                };
+              }
             }
-          ) => {
-            each(['value.left', 'value.right', 'value'], (valueKey) => {
-              if (valueKey) {
-                const osqueryTable = find(osquerySchema, [
-                  'name',
-                  get(table, `${valueKey}.value.value`),
-                ]);
+
+            // select * from uptime, routes
+            if (data?.type === 'map' && data?.variant === 'join') {
+              if (data?.source?.type === 'identifier' && data?.source?.variant === 'table') {
+                const osqueryTable = find(osquerySchema, ['name', data?.source?.name]);
 
                 if (osqueryTable) {
-                  acc[
-                    get(table, `${valueKey}.alias.value`) ?? get(table, `${valueKey}.value.value`)
-                  ] = {
+                  acc[data?.source?.alias || data?.source?.name] = {
                     columns: osqueryTable.columns,
                     order: Object.keys(acc).length,
                   };
                 }
               }
-            });
+
+              if (data?.source?.type === 'statement' && data?.source?.variant === 'compound') {
+                if (
+                  data?.source?.statement.from.type === 'identifier' &&
+                  data?.source?.statement.from.variant === 'table'
+                ) {
+                  const osqueryTable = find(osquerySchema, [
+                    'name',
+                    data?.source?.statement.from.name,
+                  ]);
+
+                  if (osqueryTable) {
+                    acc[data?.source?.statement.from.alias || data?.source?.statement.from.name] = {
+                      columns: osqueryTable.columns,
+                      order: Object.keys(acc).length,
+                    };
+                  }
+                }
+              }
+
+              each(
+                data?.map,
+                (mapValue: {
+                  type: string;
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  source: { type: string; variant: string; name: any | string; alias: any };
+                }) => {
+                  if (mapValue?.type === 'join') {
+                    if (
+                      mapValue?.source?.type === 'identifier' &&
+                      mapValue?.source?.variant === 'table'
+                    ) {
+                      const osqueryTable = find(osquerySchema, ['name', mapValue?.source?.name]);
+
+                      if (osqueryTable) {
+                        acc[mapValue?.source?.alias || mapValue?.source?.name] = {
+                          columns: osqueryTable.columns,
+                          order: Object.keys(acc).length,
+                        };
+                      }
+                    }
+                  }
+                }
+              );
+            }
 
             return acc;
           },
-          {}
+          {} as Record<
+            string,
+            {
+              columns: OsqueryColumn[];
+              order: number;
+            }
+          >
         ) ?? {};
 
       // Table doesn't exist in osquery schema
@@ -834,114 +881,114 @@ export const ECSMappingEditorField = React.memo(
         return;
       }
 
-      const suggestions =
-        isArray(ast?.selectItems?.value) &&
-        ast?.selectItems?.value
-          ?.map((selectItem: { type: string; value: string; hasAs: boolean; alias?: string }) => {
-            if (selectItem.type === 'Identifier') {
-              /*
-                select * from routes, uptime;
-              */
-              if (ast?.selectItems?.value.length === 1 && selectItem.value === '*') {
-                return reduce(
-                  astOsqueryTables,
-                  (acc, { columns: osqueryColumns, order: tableOrder }, table) => {
-                    acc.push(
-                      ...osqueryColumns.map((osqueryColumn) => ({
-                        label: osqueryColumn.name,
+      const suggestions = isArray(ast?.result)
+        ? ast?.result
+            ?.map((selectItem: { type: string; name: string; alias?: string }) => {
+              if (selectItem.type === 'identifier') {
+                /*
+                  select * from routes, uptime;
+                */
+                if (ast?.result.length === 1 && selectItem.name === '*') {
+                  return reduce(
+                    astOsqueryTables,
+                    (acc, { columns: osqueryColumns, order: tableOrder }, table) => {
+                      acc.push(
+                        ...osqueryColumns.map((osqueryColumn) => ({
+                          label: osqueryColumn.name,
+                          value: {
+                            name: osqueryColumn.name,
+                            description: osqueryColumn.description,
+                            table,
+                            tableOrder,
+                            suggestion_label: osqueryColumn.name,
+                          },
+                        }))
+                      );
+
+                      return acc;
+                    },
+                    [] as OsquerySchemaOption[]
+                  );
+                }
+
+                /*
+                  select i.*, p.resident_size, p.user_time, p.system_time, time.minutes as counter from osquery_info i, processes p, time where p.pid = i.pid;
+                */
+
+                const [table, column] = selectItem.name.includes('.')
+                  ? selectItem.name?.split('.')
+                  : [Object.keys(astOsqueryTables)[0], selectItem.name];
+
+                if (column === '*' && astOsqueryTables[table]) {
+                  const { columns: osqueryColumns, order: tableOrder } = astOsqueryTables[table];
+
+                  return osqueryColumns.map((osqueryColumn) => ({
+                    label: osqueryColumn.name,
+                    value: {
+                      name: osqueryColumn.name,
+                      description: osqueryColumn.description,
+                      table,
+                      tableOrder,
+                      suggestion_label: `${osqueryColumn.name}`,
+                    },
+                  }));
+                }
+
+                if (astOsqueryTables[table]) {
+                  const osqueryColumn = find(astOsqueryTables[table].columns, ['name', column]);
+
+                  if (osqueryColumn) {
+                    const label = selectItem.alias ?? column;
+
+                    return [
+                      {
+                        label,
                         value: {
                           name: osqueryColumn.name,
                           description: osqueryColumn.description,
                           table,
-                          tableOrder,
-                          suggestion_label: osqueryColumn.name,
+                          tableOrder: astOsqueryTables[table].order,
+                          suggestion_label: `${label}`,
                         },
-                      }))
-                    );
-
-                    return acc;
-                  },
-                  [] as OsquerySchemaOption[]
-                );
+                      },
+                    ];
+                  }
+                }
               }
 
               /*
-                select i.*, p.resident_size, p.user_time, p.system_time, time.minutes as counter from osquery_info i, processes p, time where p.pid = i.pid;
+                SELECT pid, uid, name, ROUND((
+                  (user_time + system_time) / (cpu_time.tsb - cpu_time.itsb)
+                ) * 100, 2) AS percentage
+                FROM processes, (
+                SELECT (
+                  SUM(user) + SUM(nice) + SUM(system) + SUM(idle) * 1.0) AS tsb,
+                  SUM(COALESCE(idle, 0)) + SUM(COALESCE(iowait, 0)) AS itsb
+                  FROM cpu_time
+                ) AS cpu_time
+                ORDER BY user_time+system_time DESC
+                LIMIT 5;
               */
 
-              const [table, column] = selectItem.value.includes('.')
-                ? selectItem.value?.split('.')
-                : [Object.keys(astOsqueryTables)[0], selectItem.value];
-
-              if (column === '*' && astOsqueryTables[table]) {
-                const { columns: osqueryColumns, order: tableOrder } = astOsqueryTables[table];
-
-                return osqueryColumns.map((osqueryColumn) => ({
-                  label: osqueryColumn.name,
-                  value: {
-                    name: osqueryColumn.name,
-                    description: osqueryColumn.description,
-                    table,
-                    tableOrder,
-                    suggestion_label: `${osqueryColumn.name}`,
-                  },
-                }));
-              }
-
-              if (astOsqueryTables[table]) {
-                const osqueryColumn = find(astOsqueryTables[table].columns, ['name', column]);
-
-                if (osqueryColumn) {
-                  const label = selectItem.hasAs ? selectItem.alias : column;
-
-                  return [
-                    {
-                      label,
-                      value: {
-                        name: osqueryColumn.name,
-                        description: osqueryColumn.description,
-                        table,
-                        tableOrder: astOsqueryTables[table].order,
-                        suggestion_label: `${label}`,
-                      },
+              if (selectItem.type === 'function' && selectItem.alias) {
+                return [
+                  {
+                    label: selectItem.alias,
+                    value: {
+                      name: selectItem.alias,
+                      description: '',
+                      table: '',
+                      tableOrder: -1,
+                      suggestion_label: selectItem.alias,
                     },
-                  ];
-                }
-              }
-            }
-
-            /*
-              SELECT pid, uid, name, ROUND((
-                (user_time + system_time) / (cpu_time.tsb - cpu_time.itsb)
-              ) * 100, 2) AS percentage
-              FROM processes, (
-              SELECT (
-                SUM(user) + SUM(nice) + SUM(system) + SUM(idle) * 1.0) AS tsb,
-                SUM(COALESCE(idle, 0)) + SUM(COALESCE(iowait, 0)) AS itsb
-                FROM cpu_time
-              ) AS cpu_time
-              ORDER BY user_time+system_time DESC
-              LIMIT 5;
-            */
-
-            if (selectItem.hasAs && selectItem.alias) {
-              return [
-                {
-                  label: selectItem.alias,
-                  value: {
-                    name: selectItem.alias,
-                    description: '',
-                    table: '',
-                    tableOrder: -1,
-                    suggestion_label: selectItem.alias,
                   },
-                },
-              ];
-            }
+                ];
+              }
 
-            return [];
-          })
-          .flat();
+              return [];
+            })
+            .flat()
+        : [];
 
       // Remove column duplicates by keeping the column from the table that appears last in the query
       const newOptions = sortedUniqBy(

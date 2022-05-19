@@ -12,14 +12,16 @@ import {
   EVENT_FILTERS_PATH,
   EXCEPTIONS_PATH,
   HOST_ISOLATION_EXCEPTIONS_PATH,
-  MANAGEMENT_PATH,
+  MANAGE_PATH,
   POLICIES_PATH,
+  RULES_CREATE_PATH,
   RULES_PATH,
   SecurityPageName,
   TRUSTED_APPS_PATH,
 } from '../../common/constants';
 import {
   BLOCKLIST,
+  CREATE_NEW_RULE,
   ENDPOINTS,
   EVENT_FILTERS,
   EXCEPTIONS,
@@ -44,8 +46,9 @@ import { IconTrustedApplications } from './icons/trusted_applications';
 export const links: LinkItem = {
   id: SecurityPageName.administration,
   title: MANAGE,
-  path: MANAGEMENT_PATH,
+  path: MANAGE_PATH,
   skipUrlState: true,
+  hideTimeline: true,
   globalNavEnabled: false,
   features: [FEATURE.general],
   globalSearchKeywords: [
@@ -71,6 +74,16 @@ export const links: LinkItem = {
         }),
       ],
       globalSearchEnabled: true,
+      links: [
+        {
+          id: SecurityPageName.rulesCreate,
+          title: CREATE_NEW_RULE,
+          path: RULES_CREATE_PATH,
+          globalNavEnabled: false,
+          skipUrlState: true,
+          hideTimeline: true,
+        },
+      ],
     },
     {
       id: SecurityPageName.exceptions,
@@ -99,6 +112,7 @@ export const links: LinkItem = {
       globalNavOrder: 9006,
       path: ENDPOINTS_PATH,
       skipUrlState: true,
+      hideTimeline: true,
     },
     {
       id: SecurityPageName.policies,
@@ -110,6 +124,7 @@ export const links: LinkItem = {
       landingIcon: IconEndpointPolicies,
       path: POLICIES_PATH,
       skipUrlState: true,
+      hideTimeline: true,
       experimentalKey: 'policyListEnabled',
     },
     {
@@ -125,6 +140,7 @@ export const links: LinkItem = {
       landingIcon: IconTrustedApplications,
       path: TRUSTED_APPS_PATH,
       skipUrlState: true,
+      hideTimeline: true,
     },
     {
       id: SecurityPageName.eventFilters,
@@ -135,6 +151,7 @@ export const links: LinkItem = {
       landingIcon: IconEventFilters,
       path: EVENT_FILTERS_PATH,
       skipUrlState: true,
+      hideTimeline: true,
     },
     {
       id: SecurityPageName.hostIsolationExceptions,
@@ -145,6 +162,7 @@ export const links: LinkItem = {
       landingIcon: IconHostIsolation,
       path: HOST_ISOLATION_EXCEPTIONS_PATH,
       skipUrlState: true,
+      hideTimeline: true,
     },
     {
       id: SecurityPageName.blocklist,
@@ -155,6 +173,7 @@ export const links: LinkItem = {
       landingIcon: IconBlocklist,
       path: BLOCKLIST_PATH,
       skipUrlState: true,
+      hideTimeline: true,
     },
   ],
 };

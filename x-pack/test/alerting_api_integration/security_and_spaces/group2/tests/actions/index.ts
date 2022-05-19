@@ -41,5 +41,10 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./connector_types'));
     loadTestFile(require.resolve('./update'));
+
+    /**
+     * Sub action framework
+     */
+    loadTestFile(require.resolve('./sub_action_framework'));
   });
 }
