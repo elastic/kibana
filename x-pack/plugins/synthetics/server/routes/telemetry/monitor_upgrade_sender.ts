@@ -144,7 +144,7 @@ export function formatTelemetryDeleteEvent(
 function getScriptType(
   attributes: Partial<MonitorFields>,
   isInlineScript: boolean
-): 'inline' | 'recorder' | 'zip' | 'push' | undefined {
+): 'inline' | 'recorder' | 'zip' | 'project' | undefined {
   switch (true) {
     case Boolean(attributes[ConfigKey.SOURCE_ZIP_URL]):
       return 'zip';
@@ -155,7 +155,7 @@ function getScriptType(
     case Boolean(isInlineScript):
       return 'inline';
     case Boolean(attributes[ConfigKey.IS_PUSH_MONITOR]):
-      return 'push';
+      return 'project';
     default:
       return undefined;
   }

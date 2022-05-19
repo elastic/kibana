@@ -10,8 +10,8 @@ import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 
 import {
   BrowserFieldsCodec,
-  PushBrowserMonitorCodec,
-  PushBrowserMonitor,
+  ProjectBrowserMonitorCodec,
+  ProjectBrowserMonitor,
   ConfigKey,
   DataStream,
   DataStreamCodec,
@@ -82,8 +82,8 @@ export function validateMonitor(monitorFields: MonitorFields): {
   return { valid: true, reason: '', details: '', payload: monitorFields };
 }
 
-export function validatePushMonitor(
-  monitorFields: PushBrowserMonitor,
+export function validateProjectMonitor(
+  monitorFields: ProjectBrowserMonitor,
   projectId: string
 ): {
   valid: boolean;
@@ -111,7 +111,7 @@ export function validatePushMonitor(
     };
   }
   // Cast it to ICMPCodec to satisfy typing. During runtime, correct codec will be used to decode.
-  const decodedMonitor = PushBrowserMonitorCodec.decode(monitorFields);
+  const decodedMonitor = ProjectBrowserMonitorCodec.decode(monitorFields);
 
   if (isLeft(decodedMonitor)) {
     return {

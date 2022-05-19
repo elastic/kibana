@@ -6,16 +6,16 @@
  */
 import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../legacy_uptime/lib/lib';
-import { PushBrowserMonitor, Locations } from '../../../common/runtime_types';
+import { ProjectBrowserMonitor, Locations } from '../../../common/runtime_types';
 
 import { UMRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
 import { getServiceLocations } from '../../synthetics_service/get_service_locations';
-import { PushMonitorFormatter } from '../../synthetics_service/push_monitor_formatter';
+import { ProjectMonitorFormatter } from '../../synthetics_service/project_monitor_formatter';
 
-export const addPublicSyntheticsMonitorRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
+export const addSyntheticsProjectMonitorRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'PUT',
-  path: API_URLS.SYNTHETICS_MONITORS_PUSH,
+  path: API_URLS.SYNTHETICS_MONITORS_PROJECT,
   validate: {
     body: schema.object({
       project: schema.string(),
@@ -24,13 +24,13 @@ export const addPublicSyntheticsMonitorRoute: UMRestApiRouteFactory = (libs: UMS
     }),
   },
   handler: async ({ request, response, savedObjectsClient, server }): Promise<any> => {
-    const monitors = (request.body?.monitors as PushBrowserMonitor[]) || [];
+    const monitors = (request.body?.monitors as ProjectBrowserMonitor[]) || [];
     const spaceId = server.spaces.spacesService.getSpaceId(request);
     const { keep_stale: keepStale, project: projectId } = request.body || {};
     const locations: Locations = (await getServiceLocations(server)).locations;
     const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
-    const pushMonitorFormatter = new PushMonitorFormatter({
+    const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId,
       spaceId,
       keepStale,
@@ -41,7 +41,7 @@ export const addPublicSyntheticsMonitorRoute: UMRestApiRouteFactory = (libs: UMS
       server,
     });
 
-    await pushMonitorFormatter.configureAllPushMonitors();
+    await pushMonitorFormatter.configureAllProjectMonitors();
 
     return response.ok({
       body: {

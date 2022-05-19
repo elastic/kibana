@@ -9,10 +9,10 @@ import {
   DataStream,
   ScreenshotOption,
   Locations,
-  PushBrowserMonitor,
+  ProjectBrowserMonitor,
 } from '../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
-import { normalizePushedMonitors } from './browser';
+import { normalizeProjectMonitors } from './browser';
 
 describe('browser normalizers', () => {
   describe('normalize push monitors', () => {
@@ -39,7 +39,7 @@ describe('browser normalizers', () => {
         isServiceManaged: true,
       },
     ];
-    const monitors: PushBrowserMonitor[] = [
+    const monitors: ProjectBrowserMonitor[] = [
       {
         id: 'test-id-1',
         screenshots: ScreenshotOption.OFF,
@@ -95,7 +95,7 @@ describe('browser normalizers', () => {
     ];
 
     it('properly normalizes browser monitor', () => {
-      const actual = normalizePushedMonitors({
+      const actual = normalizeProjectMonitors({
         locations,
         monitors,
         projectId,

@@ -18,19 +18,19 @@ import {
   SyntheticsMonitorWithSecrets,
   EncryptedSyntheticsMonitor,
   ServiceLocationErrors,
-  PushBrowserMonitor,
+  ProjectBrowserMonitor,
   Locations,
 } from '../../common/runtime_types';
 import {
   syntheticsMonitorType,
   syntheticsMonitor,
 } from '../legacy_uptime/lib/saved_objects/synthetics_monitor';
-import { normalizePushedMonitor } from './normalizers/browser';
+import { normalizeProjectMonitor } from './normalizers/browser';
 import { formatSecrets, normalizeSecrets } from './utils/secrets';
 import { syncNewMonitor } from '../routes/monitor_cruds/add_monitor';
 import { syncEditedMonitor } from '../routes/monitor_cruds/edit_monitor';
 import { deleteMonitor } from '../routes/monitor_cruds/delete_monitor';
-import { validatePushMonitor } from '../routes/monitor_cruds/monitor_validation';
+import { validateProjectMonitor } from '../routes/monitor_cruds/monitor_validation';
 import type { UptimeServerSetup } from '../legacy_uptime/lib/adapters/framework';
 
 interface StaleMonitor {
@@ -41,7 +41,7 @@ interface StaleMonitor {
 type StaleMonitorMap = Record<string, StaleMonitor>;
 type FailedMonitors = Array<{ id: string; reason: string; details: string; payload?: object }>;
 
-export class PushMonitorFormatter {
+export class ProjectMonitorFormatter {
   private projectId: string;
   private spaceId: string;
   private keepStale: boolean;
@@ -49,7 +49,7 @@ export class PushMonitorFormatter {
   private savedObjectsClient: SavedObjectsClientContract;
   private encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   private staleMonitorsMap: StaleMonitorMap = {};
-  private monitors: PushBrowserMonitor[] = [];
+  private monitors: ProjectBrowserMonitor[] = [];
   public createdMonitors: string[] = [];
   public deletedMonitors: string[] = [];
   public updatedMonitors: string[] = [];
@@ -75,7 +75,7 @@ export class PushMonitorFormatter {
     encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
     projectId: string;
     spaceId: string;
-    monitors: PushBrowserMonitor[];
+    monitors: ProjectBrowserMonitor[];
     server: UptimeServerSetup;
   }) {
     this.projectId = projectId;
@@ -89,11 +89,11 @@ export class PushMonitorFormatter {
     this.projectFilter = `${syntheticsMonitorType}.attributes.${ConfigKey.IS_PUSH_MONITOR}: true AND ${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}: "${this.projectId}"`;
   }
 
-  public configureAllPushMonitors = async () => {
-    this.staleMonitorsMap = await this.getAllPushMonitorsForProject();
+  public configureAllProjectMonitors = async () => {
+    this.staleMonitorsMap = await this.getAllProjectMonitorsForProject();
     await Promise.all(
       this.monitors.map((monitor) =>
-        this.configurePushMonitor({
+        this.configureProjectMonitor({
           monitor,
         })
       )
@@ -102,17 +102,17 @@ export class PushMonitorFormatter {
     await this.handleStaleMonitors();
   };
 
-  private configurePushMonitor = async ({ monitor }: { monitor: PushBrowserMonitor }) => {
+  private configureProjectMonitor = async ({ monitor }: { monitor: ProjectBrowserMonitor }) => {
     try {
       // check to see if monitor already exists
-      const normalizedMonitor = normalizePushedMonitor({
+      const normalizedMonitor = normalizeProjectMonitor({
         locations: this.locations,
         monitor,
         projectId: this.projectId,
         namespace: this.spaceId,
       });
 
-      const validationResult = validatePushMonitor(monitor, this.projectId);
+      const validationResult = validateProjectMonitor(monitor, this.projectId);
 
       if (!validationResult.valid) {
         const { reason: message, details, payload } = validationResult;
@@ -162,12 +162,12 @@ export class PushMonitorFormatter {
     }
   };
 
-  private getAllPushMonitorsForProject = async (): Promise<StaleMonitorMap> => {
+  private getAllProjectMonitorsForProject = async (): Promise<StaleMonitorMap> => {
     const staleMonitors: StaleMonitorMap = {};
     let page = 1;
     let totalMonitors = 0;
     do {
-      const { total, saved_objects: savedObjects } = await this.getPushMonitorsForProject(page);
+      const { total, saved_objects: savedObjects } = await this.getProjectMonitorsForProject(page);
       savedObjects.forEach((savedObject) => {
         const journeyId = (savedObject.attributes as BrowserFields)[ConfigKey.JOURNEY_ID];
         if (journeyId) {
@@ -185,7 +185,7 @@ export class PushMonitorFormatter {
     return staleMonitors;
   };
 
-  private getPushMonitorsForProject = async (page: number) => {
+  private getProjectMonitorsForProject = async (page: number) => {
     return await this.savedObjectsClient.find<EncryptedSyntheticsMonitor>({
       type: syntheticsMonitorType,
       page,

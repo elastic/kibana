@@ -12,7 +12,7 @@ import {
   ConfigKey,
   DataStream,
   Locations,
-  PushBrowserMonitor,
+  ProjectBrowserMonitor,
   ScheduleUnit,
 } from '../../../common/runtime_types/monitor_management';
 
@@ -41,14 +41,14 @@ type NormalizedPublicFields = Omit<
   | ConfigKey.URLS
 >;
 
-export const normalizePushedMonitor = ({
+export const normalizeProjectMonitor = ({
   locations = [],
   monitor,
   projectId,
   namespace,
 }: {
   locations: Locations;
-  monitor: PushBrowserMonitor;
+  monitor: ProjectBrowserMonitor;
   projectId: string;
   namespace: string;
 }): BrowserFields => {
@@ -107,18 +107,18 @@ export const normalizePushedMonitor = ({
   };
 };
 
-export const normalizePushedMonitors = ({
+export const normalizeProjectMonitors = ({
   locations = [],
   monitors = [],
   projectId,
   namespace,
 }: {
   locations: Locations;
-  monitors: PushBrowserMonitor[];
+  monitors: ProjectBrowserMonitor[];
   projectId: string;
   namespace: string;
 }) => {
   return monitors.map((monitor) => {
-    return normalizePushedMonitor({ monitor, locations, projectId, namespace });
+    return normalizeProjectMonitor({ monitor, locations, projectId, namespace });
   });
 };
