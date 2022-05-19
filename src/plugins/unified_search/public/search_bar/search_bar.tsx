@@ -10,8 +10,8 @@ import { compact } from 'lodash';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
-import { get, isEqual } from 'lodash';
 import { EuiIconProps, withEuiTheme, WithEuiThemeProps } from '@elastic/eui';
+import { get, isEqual } from 'lodash';
 import memoizeOne from 'memoize-one';
 
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -25,7 +25,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementList } from '../saved_query_management';
-import { QueryBarMenu } from '../query_string_input/query_bar_menu';
+import { QueryBarMenu, QueryBarMenuProps } from '../query_string_input/query_bar_menu';
 import type { DataViewPickerProps } from '../dataview_picker';
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
@@ -54,6 +54,7 @@ export interface SearchBarOwnProps {
   showDatePicker?: boolean;
   showAutoRefreshOnly?: boolean;
   filters?: Filter[];
+  hiddenFilterPanelOptions?: QueryBarMenuProps['hiddenPanelOptions'];
   // Date picker
   isRefreshPaused?: boolean;
   refreshInterval?: number;
@@ -212,11 +213,18 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
    * in case you the date range (from/to)
    */
   private shouldRenderTimeFilterInSavedQueryForm() {
-    const { dateRangeFrom, dateRangeTo, showDatePicker } = this.props;
-    return (
-      showDatePicker ||
-      (!showDatePicker && dateRangeFrom !== undefined && dateRangeTo !== undefined)
-    );
+    const { dateRangeFrom, dateRangeTo, showDatePicker, indexPatterns } = this.props;
+
+    if (!showDatePicker && dateRangeFrom !== undefined && dateRangeTo !== undefined) {
+      return false;
+    }
+
+    if (indexPatterns?.length) {
+      // return true if at least one of the DateView has timeFieldName
+      return indexPatterns.some((dataView) => Boolean(dataView.timeFieldName));
+    }
+
+    return true;
   }
 
   public onSave = async (savedQueryMeta: SavedQueryMeta, saveAsNew = false) => {
@@ -393,6 +401,7 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
         openQueryBarMenu={this.state.openQueryBarMenu}
         onFiltersUpdated={this.props.onFiltersUpdated}
         filters={this.props.filters}
+        hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
         query={this.state.query}
         savedQuery={this.props.savedQuery}
         onClearSavedQuery={this.props.onClearSavedQuery}
@@ -422,6 +431,7 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
           onFiltersUpdated={this.props.onFiltersUpdated}
           indexPatterns={this.props.indexPatterns!}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
         />
       ) : (
         <FilterBar
@@ -430,6 +440,7 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
           onFiltersUpdated={this.props.onFiltersUpdated}
           indexPatterns={this.props.indexPatterns!}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
           data-test-subj="unifiedFilterBar"
         />
       );

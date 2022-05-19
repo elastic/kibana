@@ -38,7 +38,6 @@ import './styles.scss';
 import { AlertsStatusFilter, AlertsDisclaimer, AlertsSearchBar } from '../../components';
 import { renderRuleStats } from '../../components/rule_stats';
 import { ObservabilityAppServices } from '../../../../application/types';
-import { OBSERVABILITY_RULE_TYPES } from '../../../rules/config';
 
 interface RuleStatsState {
   total: number;
@@ -69,7 +68,7 @@ const ALERT_STATUS_REGEX = new RegExp(
 const ALERT_TABLE_STATE_STORAGE_KEY = 'xpack.observability.alert.tableState';
 
 function AlertsPage() {
-  const { ObservabilityPageTemplate, config } = usePluginContext();
+  const { ObservabilityPageTemplate, config, observabilityRuleTypeRegistry } = usePluginContext();
   const [alertFilterStatus, setAlertFilterStatus] = useState('' as AlertStatusFilterButton);
   const refetch = useRef<() => void>();
   const timefilterService = useTimefilterService();
@@ -110,7 +109,7 @@ function AlertsPage() {
     try {
       const response = await loadRuleAggregations({
         http,
-        typesFilter: OBSERVABILITY_RULE_TYPES,
+        typesFilter: observabilityRuleTypeRegistry.list(),
       });
       const { ruleExecutionStatus, ruleMutedStatus, ruleEnabledStatus, ruleSnoozedStatus } =
         response;
@@ -284,6 +283,7 @@ function AlertsPage() {
               setRefetch={setRefetch}
               stateStorageKey={ALERT_TABLE_STATE_STORAGE_KEY}
               storage={new Storage(window.localStorage)}
+              itemsPerPage={50}
             />
           </CasesContext>
         </EuiFlexItem>

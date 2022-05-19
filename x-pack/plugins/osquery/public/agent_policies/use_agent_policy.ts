@@ -37,8 +37,6 @@ export const useAgentPolicy = ({ policyId, skip, silent }: UseAgentPolicy) => {
             defaultMessage: 'Error while fetching agent policy details',
           }),
         }),
-      refetchOnReconnect: false,
-      refetchOnWindowFocus: false,
     }
   );
 };

@@ -20,6 +20,19 @@ export const xyVisFunction: XyVisFn = {
   args: {
     ...commonXYArgs,
     ...commonDataLayerArgs,
+    xAccessor: {
+      types: ['string', 'vis_dimension'],
+      help: strings.getXAccessorHelp(),
+    },
+    splitAccessor: {
+      types: ['string', 'vis_dimension'],
+      help: strings.getSplitAccessorHelp(),
+    },
+    accessors: {
+      types: ['string', 'vis_dimension'],
+      help: strings.getAccessorsHelp(),
+      multi: true,
+    },
     referenceLineLayers: {
       types: [REFERENCE_LINE_LAYER],
       help: strings.getReferenceLineLayerHelp(),
@@ -37,6 +50,10 @@ export const xyVisFunction: XyVisFn = {
     splitRowAccessor: {
       types: ['vis_dimension', 'string'],
       help: strings.getSplitRowAccessorHelp(),
+    },
+    markSizeAccessor: {
+      types: ['vis_dimension', 'string'],
+      help: strings.getMarkSizeAccessorHelp(),
     },
   },
   async fn(data, args, handlers) {
