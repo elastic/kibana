@@ -66,8 +66,8 @@ export const useUrlStateHooks = ({
   const { pathname: browserPathName } = useLocation();
   const prevProps = usePrevious({ pathName, pageName, urlState, search });
   const isGroupedNavEnabled = useIsGroupedNavigationEnabled();
-  const linkInfo = pageName ? getLinkInfo(pageName as SecurityPageName) : undefined;
 
+  const linkInfo = pageName ? getLinkInfo(pageName as SecurityPageName) : undefined;
   const { setInitialStateFromUrl, updateTimeline, updateTimelineIsLoading } =
     useSetInitialStateFromUrl();
 
