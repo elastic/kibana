@@ -20,6 +20,7 @@ import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { ExecutorOptions } from './types';
 import { ActionGroupId, ES_QUERY_ID } from './constants';
 import { executor } from './executor';
+import { isEsQueryAlert } from './util';
 
 export function getAlertType(
   logger: Logger,
@@ -164,14 +165,21 @@ export function getAlertType(
     useSavedObjectReferences: {
       extractReferences: (params) => {
         const [searchConfiguration, references] = extractReferences(params.searchConfiguration);
+
+        if (isEsQueryAlert(params.searchType)) {
+          return { params: params as EsQueryAlertParamsExtractedParams, references };
+        }
         const newParams = { ...params, searchConfiguration } as EsQueryAlertParamsExtractedParams;
         return { params: newParams, references };
       },
       injectReferences: (params, references) => {
+        if (isEsQueryAlert(params.searchType)) {
+          return params;
+        }
         return {
           ...params,
           searchConfiguration: injectReferences(params.searchConfiguration, references),
-        } as EsQueryAlertParams;
+        };
       },
     },
     minimumLicenseRequired: 'basic',

@@ -34,32 +34,32 @@ const EsQueryAlertParamsSchemaProperties = {
   timeWindowUnit: schema.string({ validate: validateTimeWindowUnits }),
   threshold: schema.arrayOf(schema.number(), { minSize: 1, maxSize: 2 }),
   thresholdComparator: getComparatorSchemaType(validateComparator),
-  searchType: schema.nullable(schema.literal('searchSource')),
+  searchType: schema.maybe(schema.literal('searchSource')),
   // searchSource alert param only
   searchConfiguration: schema.conditional(
     schema.siblingRef('searchType'),
-    schema.literal('searchSource'),
-    schema.object({}, { unknowns: 'allow' }),
-    schema.never()
+    schema.never(),
+    schema.never(),
+    schema.object({}, { unknowns: 'allow' })
   ),
   // esQuery alert params only
   esQuery: schema.conditional(
     schema.siblingRef('searchType'),
-    schema.literal('searchSource'),
     schema.never(),
-    schema.string({ minLength: 1 })
+    schema.string({ minLength: 1 }),
+    schema.never()
   ),
   index: schema.conditional(
     schema.siblingRef('searchType'),
-    schema.literal('searchSource'),
     schema.never(),
-    schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 })
+    schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    schema.never()
   ),
   timeField: schema.conditional(
     schema.siblingRef('searchType'),
-    schema.literal('searchSource'),
     schema.never(),
-    schema.string({ minLength: 1 })
+    schema.string({ minLength: 1 }),
+    schema.never()
   ),
 };
 
