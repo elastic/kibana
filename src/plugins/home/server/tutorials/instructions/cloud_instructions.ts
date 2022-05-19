@@ -12,7 +12,9 @@ export const cloudPasswordAndResetLink = i18n.translate(
   'home.tutorials.common.cloudInstructions.passwordAndResetLink',
   {
     defaultMessage:
-      'Where {passwordTemplate} is the password of the `elastic` user.' +
+      'Where {passwordTemplate} is the password of the `elastic` user.\n\n\
+> **_Important:_**  Do not use the built-in `elastic` user to secure clients in a production environment. Instead set up \
+authorized users or API keys, and do not expose passwords in configuration files. [Learn more]({linkUrl}).' +
       `\\{#config.cloud.profileUrl\\}
       Forgot the password? [Reset in Elastic Cloud](\\{config.cloud.baseUrl\\}\\{config.cloud.deploymentUrl\\}/security).
       \\{/config.cloud.profileUrl\\}`,
