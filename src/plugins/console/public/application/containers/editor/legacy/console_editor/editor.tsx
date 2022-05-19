@@ -20,8 +20,6 @@ import { decompressFromEncodedURIComponent } from 'lz-string';
 import { parse } from 'query-string';
 import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
 import { ace } from '@kbn/es-ui-shared-plugin/public';
-// @ts-ignore
-import { retrieveAutoCompleteInfo, clearSubscriptions } from '../../../../../lib/mappings/mappings';
 import { ConsoleMenu } from '../../../../components';
 import { useEditorReadContext, useServicesContext } from '../../../../contexts';
 import {
@@ -66,7 +64,14 @@ const inputId = 'ConAppInputTextarea';
 
 function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
   const {
-    services: { history, notifications, settings: settingsService, esHostService, http },
+    services: {
+      history,
+      notifications,
+      settings: settingsService,
+      esHostService,
+      http,
+      autocompleteInfo,
+    },
     docLinkVersion,
   } = useServicesContext();
 
@@ -196,14 +201,14 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
     setInputEditor(editor);
     setTextArea(editorRef.current!.querySelector('textarea'));
 
-    retrieveAutoCompleteInfo(http, settingsService, settingsService.getAutocomplete());
+    autocompleteInfo.retrieve(settingsService, settingsService.getAutocomplete());
 
     const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor);
     setupAutosave();
 
     return () => {
       unsubscribeResizer();
-      clearSubscriptions();
+      autocompleteInfo.clearSubscriptions();
       window.removeEventListener('hashchange', onHashChange);
       if (editorInstanceRef.current) {
         editorInstanceRef.current.getCoreEditor().destroy();
@@ -217,6 +222,7 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
     setInputEditor,
     settingsService,
     http,
+    autocompleteInfo,
   ]);
 
   useEffect(() => {

@@ -110,7 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await saveButton.isEnabled()).to.be(true);
         await dashboardControls.controlsEditorSetDataView('animals-*');
         expect(await saveButton.isEnabled()).to.be(false);
-        await dashboardControls.controlsEditorSetfield('animal.keyword');
+        await dashboardControls.controlsEditorSetfield('animal.keyword', OPTIONS_LIST_CONTROL);
         await dashboardControls.controlEditorSave();
 
         // when creating a new filter, the ability to select a data view should be removed, because the dashboard now only has one data view
@@ -129,7 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.optionsListEnsurePopoverIsClosed(secondId);
 
         await dashboardControls.editExistingControl(secondId);
-        await dashboardControls.controlsEditorSetfield('animal.keyword');
+        await dashboardControls.controlsEditorSetfield('animal.keyword', OPTIONS_LIST_CONTROL);
         await dashboardControls.controlEditorSave();
 
         const selectionString = await dashboardControls.optionsListGetSelectionsString(secondId);
