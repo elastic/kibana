@@ -7,16 +7,16 @@
  */
 
 import React from 'react';
-import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './copy_column_button';
 import { EuiButton } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { discoverGridContextMock } from '../../__mocks__/grid_context';
+import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_copy_column_button';
 
 const execCommandMock = (global.document.execCommand = jest.fn());
 const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
 
-describe('Copy to clipboard button', () => {
+describe('Build a column button to copy to clipboard', () => {
   it('should copy a column name to clipboard on click', () => {
     const { label, iconType, onClick } = buildCopyColumnNameButton({
       columnId: 'test-field-name',

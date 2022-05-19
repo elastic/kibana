@@ -6,23 +6,231 @@
  * Side Public License, v 1.
  */
 
-import { discoverGridContextMock } from '../__mocks__/grid_context';
+import { discoverGridContextWithVariousFieldTypesMock } from '../__mocks__/grid_context';
 import { discoverServiceMock } from '../__mocks__/services';
 import { formatValueAsPlainText } from './format_value_as_plain_text';
 
 describe('formatValueAsPlainText', () => {
-  it('should convert a value to text', () => {
+  it('should convert a keyword value to text', () => {
     const result = formatValueAsPlainText({
-      rows: discoverGridContextMock.rows,
-      rowsFlattened: discoverGridContextMock.rowsFlattened,
-      dataView: discoverGridContextMock.indexPattern,
+      rows: discoverGridContextWithVariousFieldTypesMock.rows,
+      rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
+      dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
+      services: discoverServiceMock,
+      columnId: 'keyword_key',
+      rowIndex: 0,
+    });
+
+    expect(result).toBe('["abcd1"]');
+  });
+
+  it('should convert a text value to text', () => {
+    const result = formatValueAsPlainText({
+      rows: discoverGridContextWithVariousFieldTypesMock.rows,
+      rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
+      dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
+      services: discoverServiceMock,
+      columnId: 'text_message',
+      rowIndex: 0,
+    });
+
+    expect(result).toBe('["Hi there! I am a sample string."]');
+  });
+
+  it('should convert a number value to text', () => {
+    const result = formatValueAsPlainText({
+      rows: discoverGridContextWithVariousFieldTypesMock.rows,
+      rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
+      dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
+      services: discoverServiceMock,
+      columnId: 'number_price',
+      rowIndex: 0,
+    });
+
+    expect(result).toBe('[10.99]');
+  });
+
+  it('should convert a date value to text', () => {
+    const result = formatValueAsPlainText({
+      rows: discoverGridContextWithVariousFieldTypesMock.rows,
+      rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
+      dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
       services: discoverServiceMock,
       columnId: 'date',
       rowIndex: 0,
     });
 
-    expect(result).toBe('2020-20-01T12:12:12.123');
+    expect(result).toBe('["2015-01-01T12:10:30.000Z"]');
+  });
 
-    // TODO: add more tests
+  it('should convert a boolean value to text', () => {
+    const result = formatValueAsPlainText({
+      rows: discoverGridContextWithVariousFieldTypesMock.rows,
+      rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
+      dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
+      services: discoverServiceMock,
+      columnId: 'bool_enabled',
+      rowIndex: 0,
+    });
+
+    expect(result).toBe('[false]');
+  });
+
+  it('should convert a binary value to text', () => {
+    const result = formatValueAsPlainText({
+      rows: discoverGridContextWithVariousFieldTypesMock.rows,
+      rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
+      dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
+      services: discoverServiceMock,
+      columnId: 'binary_blob',
+      rowIndex: 0,
+    });
+
+    expect(result).toBe('["U29tZSBiaW5hcnkgYmxvYg=="]');
+  });
+
+  it('should convert an object value to text', () => {
+    const result = formatValueAsPlainText({
+      rows: discoverGridContextWithVariousFieldTypesMock.rows,
+      rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
+      dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
+      services: discoverServiceMock,
+      columnId: 'object_user.first',
+      rowIndex: 0,
+    });
+
+    expect(result).toBe('["John"]');
+  });
+
+  it('should convert a nested value to text', () => {
+    const result = formatValueAsPlainText({
+      rows: discoverGridContextWithVariousFieldTypesMock.rows,
+      rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
+      dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
+      services: discoverServiceMock,
+      columnId: 'nested_user',
+      rowIndex: 0,
+    });
+
+    expect(result).toBe(
+      '[{"last":["Smith"],"last.keyword":["Smith"],"first":["John"],"first.keyword":["John"]},{"last":["White"],"last.keyword":["White"],"first":["Alice"],"first.keyword":["Alice"]}]'
+    );
+  });
+
+  it('should convert a flattened value to text', () => {
+    const result = formatValueAsPlainText({
+      rows: discoverGridContextWithVariousFieldTypesMock.rows,
+      rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
+      dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
+      services: discoverServiceMock,
+      columnId: 'flattened_labels',
+      rowIndex: 0,
+    });
+
+    expect(result).toBe('[{"release":["v1.2.5","v1.3.0"],"priority":"urgent"}]');
+  });
+
+  it('should convert a range value to text', () => {
+    const result = formatValueAsPlainText({
+      rows: discoverGridContextWithVariousFieldTypesMock.rows,
+      rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
+      dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
+      services: discoverServiceMock,
+      columnId: 'range_time_frame',
+      rowIndex: 0,
+    });
+
+    expect(result).toBe('[{"gte":"2015-10-31 12:00:00","lte":"2015-11-01 00:00:00"}]');
+  });
+
+  it('should convert a IP value to text', () => {
+    const result = formatValueAsPlainText({
+      rows: discoverGridContextWithVariousFieldTypesMock.rows,
+      rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
+      dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
+      services: discoverServiceMock,
+      columnId: 'ip_addr',
+      rowIndex: 0,
+    });
+
+    expect(result).toBe('["192.168.1.1"]');
+  });
+
+  it('should convert a version value to text', () => {
+    const result = formatValueAsPlainText({
+      rows: discoverGridContextWithVariousFieldTypesMock.rows,
+      rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
+      dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
+      services: discoverServiceMock,
+      columnId: 'version',
+      rowIndex: 0,
+    });
+
+    expect(result).toBe('["1.2.3"]');
+  });
+
+  it('should convert a vector value to text', () => {
+    const result = formatValueAsPlainText({
+      rows: discoverGridContextWithVariousFieldTypesMock.rows,
+      rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
+      dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
+      services: discoverServiceMock,
+      columnId: 'vector',
+      rowIndex: 0,
+    });
+
+    expect(result).toBe('[0.5,10,6]');
+  });
+
+  it('should convert a geo point value to text', () => {
+    const result = formatValueAsPlainText({
+      rows: discoverGridContextWithVariousFieldTypesMock.rows,
+      rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
+      dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
+      services: discoverServiceMock,
+      columnId: 'geo_point',
+      rowIndex: 0,
+    });
+
+    expect(result).toBe('[{"coordinates":[-71.34,41.12],"type":"Point"}]');
+  });
+
+  it('should convert a geo point object value to text', () => {
+    const result = formatValueAsPlainText({
+      rows: discoverGridContextWithVariousFieldTypesMock.rows,
+      rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
+      dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
+      services: discoverServiceMock,
+      columnId: 'geo_point',
+      rowIndex: 1,
+    });
+
+    expect(result).toBe('[{"coordinates":[-71.34,41.12],"type":"Point"}]');
+  });
+
+  it('should convert an array value to text', () => {
+    const result = formatValueAsPlainText({
+      rows: discoverGridContextWithVariousFieldTypesMock.rows,
+      rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
+      dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
+      services: discoverServiceMock,
+      columnId: 'array_tags',
+      rowIndex: 0,
+    });
+
+    expect(result).toBe('["elasticsearch","wow"]');
+  });
+
+  it('should return an empty string and not fail', () => {
+    const result = formatValueAsPlainText({
+      rows: discoverGridContextWithVariousFieldTypesMock.rows,
+      rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
+      dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
+      services: discoverServiceMock,
+      columnId: 'unknown',
+      rowIndex: 0,
+    });
+
+    expect(result).toBe('');
   });
 });

@@ -12,12 +12,12 @@ import { EuiDataGridColumn, EuiIconTip, EuiScreenReaderOnly } from '@elastic/eui
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ExpandButton } from './discover_grid_expand_button';
 import { DiscoverGridSettings } from './types';
-import { ValueAsTextFormatter } from '../../types';
+import type { ValueAsTextFormatter } from '../../types';
 import { buildCellActions } from './discover_grid_cell_actions';
 import { getSchemaByKbnType } from './discover_grid_schema';
 import { SelectButton } from './discover_grid_document_selection';
 import { defaultTimeColumnWidth } from './constants';
-import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './copy_column_button';
+import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_copy_column_button';
 import { DiscoverServices } from '../../build_services';
 
 export function getLeadControlColumns() {

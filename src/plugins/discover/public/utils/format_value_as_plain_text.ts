@@ -35,9 +35,18 @@ export const formatValueAsPlainText = ({
   const field = dataView.fields.getByName(columnId);
   const value = rowFlattened[columnId];
 
-  return field?.type === '_source'
-    ? options?.allowMultiline
-      ? JSON.stringify(rowFlattened, null, 2)
-      : JSON.stringify(rowFlattened)
-    : formatFieldValue(value, rows[rowIndex], fieldFormats, dataView, field, 'text');
+  const formattedValue =
+    field?.type === '_source'
+      ? rowFlattened
+      : formatFieldValue(value, rows[rowIndex], fieldFormats, dataView, field, 'text');
+
+  if (typeof formattedValue === 'string') {
+    return formattedValue;
+  }
+
+  return (
+    (options?.allowMultiline
+      ? JSON.stringify(formattedValue, null, 2)
+      : JSON.stringify(formattedValue)) || ''
+  );
 };

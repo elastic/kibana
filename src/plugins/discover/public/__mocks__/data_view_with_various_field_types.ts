@@ -351,7 +351,7 @@ const fields = [
   },
 ] as DataView['fields'];
 
-export const indexPatternWithVariousFieldTypesMock = buildDataViewMock({
+export const dataViewWithVariousFieldTypesMock = buildDataViewMock({
   name: 'with-various-field-types',
   fields,
   timeFieldName: 'data',

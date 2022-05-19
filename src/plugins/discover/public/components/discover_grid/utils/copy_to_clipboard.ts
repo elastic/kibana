@@ -8,7 +8,7 @@
 
 import { copyToClipboard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ValueAsTextFormatter } from '../../../types';
+import type { ValueAsTextFormatter } from '../../../types';
 import { DiscoverServices } from '../../../build_services';
 
 export const copyValueToClipboard = ({
