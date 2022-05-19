@@ -33,6 +33,42 @@
 .conApp__output {
   display: flex;
   flex: 1 1 1px;
+
+  .ace_badge {
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 18px;
+    padding: 0 8px;
+    display: inline-block;
+    text-decoration: none;
+    border-radius: 3px;
+    border: solid 1px transparent;
+    white-space: nowrap;
+    vertical-align: middle;
+    cursor: default;
+    max-width: 100%;
+    text-align: left;
+  }
+
+  .ace_badge-success {
+    background-color: $euiColorSuccess;
+  }
+
+  .ace_badge-primary {
+    background-color: $euiColorPrimary;
+  }
+
+  .ace_badge-default {
+    background-color: $euiColorGhost;
+  }
+
+  .ace_badge-warning {
+    background-color: $euiColorWarning;
+  }
+
+  .ace_badge-danger {
+    background-color: $euiColorDanger;
+  }
 }
 
 .conApp__editorContent,

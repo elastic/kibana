@@ -24,9 +24,28 @@ export function OutputJsonHighlightRules() {
       regex: '#!.*$',
     },
     {
-      token: 'comment',
-      regex: '#.*$',
+      token: function (value) {
+        const status = value.match(/\d+/g);
+        if (status <= 199) {
+          return 'badge.badge-default';
+        }
+        if (status <= 299) {
+          return 'badge.badge-success';
+        }
+        if (status <= 399) {
+          return 'badge.badge-primary';
+        }
+        if (status <= 499) {
+          return 'badge.badge-warning';
+        }
+        return 'badge.badge-danger';
+      },
+      regex: /(\d+\s(OK|Bad Request|Not Found|Continue|Created))$/,
     }
+    // {
+    //   token: 'comment',
+    //   regex: '#.*$',
+    // }
   );
 
   if (this.constructor === OutputJsonHighlightRules) {

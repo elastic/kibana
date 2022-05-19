@@ -63,6 +63,7 @@ export function Main() {
   }
 
   const lastDatum = requestData?.[requestData.length - 1] ?? requestError;
+  const isMultipleRequest = (requestData && requestData.length > 1) ?? false;
 
   return (
     <div id="consoleRoot">
@@ -105,6 +106,7 @@ export function Main() {
                       }
                     : undefined
                 }
+                isMultipleRequest={isMultipleRequest}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

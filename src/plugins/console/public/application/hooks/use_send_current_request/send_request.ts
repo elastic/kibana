@@ -106,7 +106,7 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
             }
 
             if (isMultiRequest) {
-              value = '# ' + req.method + ' ' + req.url + '\n' + value;
+              value = '# ' + req.method + ' ' + req.url + ' ' + response.status + ' ' + response.statusText + '\n' + value;
             }
 
             results.push({
@@ -141,7 +141,7 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
         }
 
         if (isMultiRequest) {
-          value = '# ' + req.method + ' ' + req.url + '\n' + value;
+          value = '# ' + req.method + ' ' + req.url + ' ' + statusCode + ' ' + statusText + '\n' + value;
         }
 
         const result = {

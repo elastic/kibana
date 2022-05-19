@@ -28,6 +28,7 @@ export interface Props {
     // The time, in milliseconds, that the last request took
     timeElapsedMs: number;
   };
+  isMultipleRequest: boolean;
 }
 
 const mapStatusCodeToBadgeColor = (statusCode: number) => {
@@ -53,6 +54,7 @@ const mapStatusCodeToBadgeColor = (statusCode: number) => {
 export const NetworkRequestStatusBar: FunctionComponent<Props> = ({
   requestInProgress,
   requestResult,
+  isMultipleRequest,
 }) => {
   let content: React.ReactNode = null;
 
@@ -66,7 +68,7 @@ export const NetworkRequestStatusBar: FunctionComponent<Props> = ({
         </EuiBadge>
       </EuiFlexItem>
     );
-  } else if (requestResult) {
+  } else if (requestResult && !isMultipleRequest) {
     const { endpoint, method, statusCode, statusText, timeElapsedMs } = requestResult;
 
     content = (
