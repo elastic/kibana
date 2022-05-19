@@ -17,6 +17,7 @@ import {
   registerV1ClusterRoutes,
   registerV1ElasticsearchRoutes,
   registerV1ElasticsearchSettingsRoutes,
+  registerV1LogstashRoutes,
   registerV1SetupRoutes,
 } from './api/v1';
 import * as uiRoutes from './api/v1/ui';
@@ -44,5 +45,6 @@ export function requireUIRoutes(
   registerV1ClusterRoutes(server);
   registerV1ElasticsearchRoutes(server);
   registerV1ElasticsearchSettingsRoutes(server, npRoute);
+  registerV1LogstashRoutes(server);
   registerV1SetupRoutes(server);
 }

@@ -10,14 +10,5 @@
 
 // @ts-expect-error
 export { kibanaInstanceRoute, kibanaInstancesRoute, kibanaOverviewRoute } from './kibana';
-export {
-  logstashClusterPipelinesRoute,
-  logstashNodePipelinesRoute,
-  logstashNodeRoute,
-  logstashNodesRoute,
-  logstashOverviewRoute,
-  logstashPipelineRoute,
-  logstashClusterPipelineIdsRoute, // @ts-expect-error
-} from './logstash';
 // @ts-expect-error
 export { entSearchOverviewRoute } from './enterprise_search';
