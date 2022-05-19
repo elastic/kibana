@@ -9,22 +9,23 @@ import { useRouteMatch } from 'react-router-dom';
 
 import { splitPkgKey } from '../../../../../../../common';
 
-import { useGetPackageInfoByKey } from '../../../../hooks';
+import { useGetPackageInfoByKey, useGetSettings } from '../../../../hooks';
 
 import type { AddToPolicyParams, CreatePackagePolicyParams } from '../types';
-import { useCancelAddPackagePolicy } from '../hooks';
+import { useCancelAddPackagePolicy, useEnsureDefaultAgentPolicy } from '../hooks';
 
 import {
   AddFirstIntegrationSplashScreen,
   MultiPageStepsLayout,
-  InstallElasticAgentPageStep,
+  InstallElasticAgentManagedPageStep,
+  InstallElasticAgentStandalonePageStep,
   AddIntegrationPageStep,
 } from './components';
 
 const fleetManagedSteps = [
   {
     title: 'Install Elastic Agent',
-    component: InstallElasticAgentPageStep,
+    component: InstallElasticAgentManagedPageStep,
   },
   {
     title: 'Add the integration',
@@ -32,7 +33,7 @@ const fleetManagedSteps = [
   },
   {
     title: 'Confirm incoming data',
-    component: InstallElasticAgentPageStep,
+    component: AddIntegrationPageStep,
   },
 ];
 
@@ -43,11 +44,11 @@ const standaloneSteps = [
   },
   {
     title: 'Install Elastic Agent',
-    component: InstallElasticAgentPageStep,
+    component: InstallElasticAgentStandalonePageStep,
   },
   {
     title: 'Confirm incoming data',
-    component: InstallElasticAgentPageStep,
+    component: AddIntegrationPageStep,
   },
 ];
 
@@ -58,13 +59,28 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({ from }
   const [onSplash, setOnSplash] = useState(true);
   const [currentStep, setCurrentStep] = useState(0);
   const [isManaged, setIsManaged] = useState(true);
+  const toggleIsManaged = (newIsManaged: boolean) => {
+    setIsManaged(newIsManaged);
+    setCurrentStep(0);
+  };
+
+  const { isLoading: isSettingsLoading, data: settingsData } = useGetSettings();
+
   const {
     data: packageInfoData,
     error: packageInfoError,
     isLoading: isPackageInfoLoading,
   } = useGetPackageInfoByKey(pkgName, pkgVersion);
 
+  const {
+    agentPolicy: defaultAgentPolicy,
+    enrollmentAPIKey,
+    error: agentPolicyError,
+    isLoading: isAgentPolicyLoading,
+  } = useEnsureDefaultAgentPolicy();
+
   const packageInfo = useMemo(() => packageInfoData?.item, [packageInfoData]);
+  const settings = useMemo(() => settingsData?.item, [settingsData]);
 
   const integrationInfo = useMemo(() => {
     if (!params.integration) return;
@@ -85,8 +101,8 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({ from }
   if (onSplash || !packageInfo) {
     return (
       <AddFirstIntegrationSplashScreen
-        isLoading={isPackageInfoLoading}
-        error={packageInfoError}
+        isLoading={isPackageInfoLoading || isSettingsLoading || isAgentPolicyLoading}
+        error={packageInfoError || agentPolicyError}
         integrationInfo={integrationInfo}
         packageInfo={packageInfo}
         cancelUrl={cancelUrl}
@@ -116,6 +132,9 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({ from }
 
   return (
     <MultiPageStepsLayout
+      settings={settings}
+      agentPolicy={defaultAgentPolicy}
+      enrollmentAPIKey={enrollmentAPIKey}
       currentStep={currentStep}
       steps={steps}
       packageInfo={packageInfo}
@@ -125,10 +144,7 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({ from }
       onNext={stepsNext}
       onBack={stepsBack}
       isManaged={isManaged}
-      setIsManaged={(newIsManaged: boolean) => {
-        setIsManaged(newIsManaged);
-        setCurrentStep(0);
-      }}
+      setIsManaged={toggleIsManaged}
     />
   );
 };

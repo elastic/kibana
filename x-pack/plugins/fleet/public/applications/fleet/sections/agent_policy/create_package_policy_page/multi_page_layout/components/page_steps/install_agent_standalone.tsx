@@ -7,15 +7,18 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiText, EuiLink } from '@elastic/eui';
+// import { EuiText, EuiLink } from '@elastic/eui';
 
 import type { MultiPageStepLayoutProps } from '../../types';
 import { CreatePackagePolicyBottomBar } from '..';
-export const InstallElasticAgentPageStep: React.FC<MultiPageStepLayoutProps> = (props) => {
+export const InstallElasticAgentStandalonePageStep: React.FC<MultiPageStepLayoutProps> = (
+  props
+) => {
   const { cancelUrl, onNext, cancelClickHandler, setIsManaged } = props;
   return (
     <div>
-      <EuiText>
+      <>standalone </>
+      {/* <EuiText>
         <FormattedMessage
           id="xpack.fleet.addIntegration.installAgentStepTitle"
           defaultMessage="These steps configure and enroll the Elastic Agent in Fleet to automatically deploy updates and
@@ -24,7 +27,7 @@ export const InstallElasticAgentPageStep: React.FC<MultiPageStepLayoutProps> = (
             standaloneLink: <EuiLink onClick={() => setIsManaged(false)}>standalone mode</EuiLink>,
           }}
         />
-      </EuiText>
+      </EuiText> */}
       <CreatePackagePolicyBottomBar
         cancelUrl={cancelUrl}
         cancelClickHandler={cancelClickHandler}

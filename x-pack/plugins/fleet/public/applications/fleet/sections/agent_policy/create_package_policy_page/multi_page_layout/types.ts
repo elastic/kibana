@@ -7,7 +7,13 @@
 
 import type React from 'react';
 
-import type { RegistryPolicyTemplate, PackageInfo } from '../../../../types';
+import type {
+  RegistryPolicyTemplate,
+  PackageInfo,
+  AgentPolicy,
+  Settings,
+  EnrollmentAPIKey,
+} from '../../../../types';
 
 export interface MultiPageStep {
   title: string;
@@ -15,6 +21,10 @@ export interface MultiPageStep {
 }
 
 export interface MultiPageStepLayoutProps {
+  settings?: Settings;
+  agentPolicy?: AgentPolicy;
+  error?: Error;
+  enrollmentAPIKey?: EnrollmentAPIKey;
   packageInfo: PackageInfo;
   integrationInfo?: RegistryPolicyTemplate;
   cancelClickHandler: React.ReactEventHandler;

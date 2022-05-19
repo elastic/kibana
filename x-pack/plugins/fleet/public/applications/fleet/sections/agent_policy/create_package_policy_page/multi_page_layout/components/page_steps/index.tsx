@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export { InstallElasticAgentPageStep } from './install_elastic_agent';
+export { InstallElasticAgentManagedPageStep } from './install_agent_managed';
+export { InstallElasticAgentStandalonePageStep } from './install_agent_standalone';
 export { AddIntegrationPageStep } from './add_integration';

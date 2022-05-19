@@ -229,7 +229,7 @@ const CenteredLearnMoreLink = () => {
 
 export const AddFirstIntegrationSplashScreen: React.FC<{
   integrationInfo?: RegistryPolicyTemplate;
-  error: RequestError | null;
+  error?: RequestError | null;
   packageInfo?: PackageInfo;
   isLoading: boolean;
   cancelClickHandler: React.ReactEventHandler;
@@ -281,6 +281,7 @@ export const AddFirstIntegrationSplashScreen: React.FC<{
           cancelClickHandler={cancelClickHandler}
           isLoading={isLoading}
           onNext={onNext}
+          noAnimation={true}
           actionMessage={
             <FormattedMessage
               id="xpack.fleet.addFirstIntegrationSplash.installAgentButton"

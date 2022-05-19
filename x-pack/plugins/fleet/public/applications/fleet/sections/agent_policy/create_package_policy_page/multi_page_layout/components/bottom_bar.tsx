@@ -14,7 +14,13 @@ const CenteredRoundedBottomBar = styled(EuiBottomBar)`
   max-width: 820px;
   margin: 0 auto;
   border-radius: 8px 8px 0px 0px;
+`;
+const NoAnimationCenteredRoundedBottomBar = styled(CenteredRoundedBottomBar)`
   animation-delay: -99s; #stop bottom bar flying in on step change
+`;
+
+export const NotObscuredByBottomBar = styled('div')`
+  padding-bottom: 100px;
 `;
 
 export const CreatePackagePolicyBottomBar: React.FC<{
@@ -23,32 +29,36 @@ export const CreatePackagePolicyBottomBar: React.FC<{
   cancelUrl?: string;
   actionMessage: React.ReactElement;
   onNext: () => void;
-}> = ({ isLoading, onNext, cancelClickHandler, cancelUrl, actionMessage }) => (
-  <CenteredRoundedBottomBar>
-    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-      <EuiFlexItem grow={false}>
+  noAnimation?: boolean;
+}> = ({ isLoading, onNext, cancelClickHandler, cancelUrl, actionMessage, noAnimation = false }) => {
+  const Bar = noAnimation ? NoAnimationCenteredRoundedBottomBar : CenteredRoundedBottomBar;
+  return (
+    <Bar>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
-          {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-          <EuiButtonEmpty color="ghost" size="s" href={cancelUrl} onClick={cancelClickHandler}>
-            <FormattedMessage
-              id="xpack.fleet.createPackagePolicyBottomBar.backButton"
-              defaultMessage="Go back"
-            />
-          </EuiButtonEmpty>
+          <EuiFlexItem grow={false}>
+            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+            <EuiButtonEmpty color="ghost" size="s" href={cancelUrl} onClick={cancelClickHandler}>
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicyBottomBar.backButton"
+                defaultMessage="Go back"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
         </EuiFlexItem>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton color="primary" fill size="m" isLoading={isLoading} onClick={onNext}>
-          {isLoading ? (
-            <FormattedMessage
-              id="xpack.fleet.createPackagePolicyBottomBar.loading"
-              defaultMessage="Loading..."
-            />
-          ) : (
-            actionMessage
-          )}
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </CenteredRoundedBottomBar>
-);
+        <EuiFlexItem grow={false}>
+          <EuiButton color="primary" fill size="m" isLoading={isLoading} onClick={onNext}>
+            {isLoading ? (
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicyBottomBar.loading"
+                defaultMessage="Loading..."
+              />
+            ) : (
+              actionMessage
+            )}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </Bar>
+  );
+};

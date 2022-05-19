@@ -13,6 +13,7 @@ import { EuiTitle, EuiSpacer } from '@elastic/eui';
 
 import { IntegrationBreadcrumb } from '../../components';
 import { pkgKeyFromPackageInfo } from '../../../../../services';
+import { Error } from '../../../../../components';
 import { WithHeaderLayout } from '../../../../../layouts';
 
 import type { MultiPageStepLayoutProps } from '../types';
@@ -24,7 +25,21 @@ const CentralH1 = styled('h1')`
 `;
 
 export const MultiPageStepsLayout = (props: MultiPageStepLayoutProps) => {
-  const { packageInfo, integrationInfo, steps, currentStep } = props;
+  const { packageInfo, integrationInfo, steps, currentStep, error } = props;
+
+  if (error) {
+    return (
+      <Error
+        title={
+          <FormattedMessage
+            id="xpack.fleet.createPackagePolicy.errorLoadingPackageTitle"
+            defaultMessage="Error loading package information"
+          />
+        }
+        error={error}
+      />
+    );
+  }
 
   const StepComponent = steps[currentStep].component;
   const topContent = (
@@ -32,7 +47,7 @@ export const MultiPageStepsLayout = (props: MultiPageStepLayoutProps) => {
       <EuiTitle size="l">
         <CentralH1>
           <FormattedMessage
-            id="xpack.fleet.addFirstIntegrationSplash.pageTitle"
+            id="xpack.fleet.createPackagePolicy.pageTitle"
             defaultMessage="Set up {title} integration"
             values={{
               title: packageInfo.title,

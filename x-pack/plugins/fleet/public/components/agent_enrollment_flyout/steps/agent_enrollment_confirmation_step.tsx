@@ -18,24 +18,32 @@ export const AgentEnrollmentConfirmationStep = ({
   troubleshootLink,
   onClickViewAgents,
   agentCount,
+  showLoading,
 }: {
   selectedPolicyId?: string;
   troubleshootLink: string;
-  onClickViewAgents: () => void;
+  onClickViewAgents?: () => void;
   agentCount: number;
+  showLoading?: boolean;
 }): EuiContainedStepProps => {
+  const isComplete = !!agentCount;
   return {
-    title: i18n.translate('xpack.fleet.agentEnrollment.stepAgentEnrollmentConfirmation', {
-      defaultMessage: 'Confirm agent enrollment',
-    }),
+    title: isComplete
+      ? i18n.translate('xpack.fleet.agentEnrollment.stepAgentEnrollmentConfirmationComplete', {
+          defaultMessage: 'Agent enrollment confirmed',
+        })
+      : i18n.translate('xpack.fleet.agentEnrollment.stepAgentEnrollmentConfirmation', {
+          defaultMessage: 'Confirm agent enrollment',
+        }),
     children: (
       <ConfirmAgentEnrollment
         policyId={selectedPolicyId}
         troubleshootLink={troubleshootLink}
         onClickViewAgents={onClickViewAgents}
         agentCount={agentCount}
+        showLoading={showLoading}
       />
     ),
-    status: !agentCount ? undefined : 'complete',
+    status: !isComplete ? undefined : 'complete',
   };
 };

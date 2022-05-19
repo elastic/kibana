@@ -6,7 +6,14 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import { EuiCallOut, EuiButton, EuiText, EuiLink } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiButton,
+  EuiText,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -17,6 +24,7 @@ interface Props {
   troubleshootLink: string;
   onClickViewAgents?: () => void;
   agentCount: number;
+  showLoading?: boolean;
 }
 
 const POLLING_INTERVAL_MS = 5 * 1000; // 5 sec
@@ -29,7 +37,6 @@ const POLLING_INTERVAL_MS = 5 * 1000; // 5 sec
  */
 export const usePollingAgentCount = (policyId: string) => {
   const [agentIds, setAgentIds] = useState<string[]>([]);
-
   const timeout = useRef<number | undefined>(undefined);
 
   useEffect(() => {
@@ -68,9 +75,19 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
   troubleshootLink,
   onClickViewAgents,
   agentCount,
+  showLoading = false,
 }) => {
   const { getHref } = useLink();
   const { application } = useStartServices();
+  const showViewAgents = !!onClickViewAgents;
+  const TroubleshootLink = () => (
+    <EuiLink target="_blank" external href={troubleshootLink}>
+      <FormattedMessage
+        id="xpack.fleet.enrollmentInstructions.troubleshootingLink"
+        defaultMessage="troubleshooting guide"
+      />
+    </EuiLink>
+  );
 
   const onButtonClick = () => {
     if (onClickViewAgents) onClickViewAgents();
@@ -78,7 +95,7 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
     application.navigateToUrl(href);
   };
 
-  if (!policyId || agentCount === 0) {
+  if (!policyId || (agentCount === 0 && !showLoading)) {
     return (
       <EuiText>
         <FormattedMessage
@@ -86,17 +103,38 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
           id="xpack.fleet.enrollmentInstructions.troubleshootingText"
           defaultMessage="If you are having trouble connecting, see our {link}."
           values={{
-            link: (
-              <EuiLink target="_blank" external href={troubleshootLink}>
-                <FormattedMessage
-                  id="xpack.fleet.enrollmentInstructions.troubleshootingLink"
-                  defaultMessage="troubleshooting guide"
-                />
-              </EuiLink>
-            ),
+            link: <TroubleshootLink />,
           }}
         />
       </EuiText>
+    );
+  }
+
+  if (showLoading && !agentCount) {
+    return (
+      <>
+        <EuiCallOut
+          size="m"
+          color="primary"
+          iconType={EuiLoadingSpinner}
+          title={
+            <FormattedMessage
+              id="xpack.fleet.agentEnrollment.loading.listening"
+              defaultMessage="Listening for agent..."
+            />
+          }
+        />
+        <EuiSpacer size="m" />
+        <EuiText>
+          <FormattedMessage
+            id="xpack.fleet.agentEnrollment.loading.instructions"
+            defaultMessage="After the agent starts up, the Elastic Stack listens for the agent and confirms the enrollment in Fleet. If you're having trouble connecting, check out the {link}."
+            values={{
+              link: <TroubleshootLink />,
+            }}
+          />
+        </EuiText>
+      </>
     );
   }
 
@@ -113,15 +151,17 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
       color="success"
       iconType="check"
     >
-      <EuiButton
-        onClick={onButtonClick}
-        color="success"
-        data-test-subj="ConfirmAgentEnrollmentButton"
-      >
-        {i18n.translate('xpack.fleet.agentEnrollment.confirmation.button', {
-          defaultMessage: 'View enrolled agents',
-        })}
-      </EuiButton>
+      {showViewAgents && (
+        <EuiButton
+          onClick={onButtonClick}
+          color="success"
+          data-test-subj="ConfirmAgentEnrollmentButton"
+        >
+          {i18n.translate('xpack.fleet.agentEnrollment.confirmation.button', {
+            defaultMessage: 'View enrolled agents',
+          })}
+        </EuiButton>
+      )}
     </EuiCallOut>
   );
 };
