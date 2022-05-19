@@ -26,7 +26,7 @@ export function getAlertType(
   core: CoreSetup
 ): RuleType<
   EsQueryAlertParams,
-  EsQueryAlertParamsExtractedParams, // Only use if defining useSavedObjectReferences hook
+  EsQueryAlertParamsExtractedParams,
   EsQueryAlertState,
   {},
   ActionContext,
