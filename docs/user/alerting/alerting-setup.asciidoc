@@ -90,16 +90,12 @@ actions. The following rule actions will re-generate the API key:
 * Updating a rule
 
 When you disable a rule, it retains the associated API key which is re-used when the 
-rule is enabled. If the disabled rule is missing an API key, then enabling the 
-rule will generate a new API key associated with the privileges of the user 
-who enabled the rule.
+rule is enabled. If the API key is missing when you enable the rule, it 
+generates a new key that has your security privileges.
 
 You can update an API key manually in 
 **{stack-manage-app} > {rules-ui}** by selecting **Update API key** in 
 the actions menu of the respective rule.
-
-[role="screenshot"]
-image::images/update-api-key.png[A screenshot of a rule with the action menu open]
 
 [IMPORTANT]
 ==============================================
