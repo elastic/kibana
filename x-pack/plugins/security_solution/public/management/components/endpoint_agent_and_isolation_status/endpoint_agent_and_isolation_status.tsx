@@ -22,7 +22,7 @@ const EuiFlexGroupStyled = styled(EuiFlexGroup)`
   }
 `;
 
-interface EndpointAgentAndIsolationStatusProps
+export interface EndpointAgentAndIsolationStatusProps
   extends Pick<EndpointHostIsolationStatusProps, 'pendingIsolate' | 'pendingUnIsolate'> {
   status: HostStatus;
   /**
@@ -36,7 +36,7 @@ interface EndpointAgentAndIsolationStatusProps
 
 export const EndpointAgentAndIsolationStatus = memo<EndpointAgentAndIsolationStatusProps>(
   ({ status, isIsolated, pendingIsolate, pendingUnIsolate, 'data-test-subj': dataTestSubj }) => {
-    const getTestId = useTestIdGenerator();
+    const getTestId = useTestIdGenerator(dataTestSubj);
     return (
       <EuiFlexGroupStyled
         gutterSize="none"
