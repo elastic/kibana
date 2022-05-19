@@ -43,7 +43,7 @@ export interface TestResult {
   /**
    * Indicates if the health check is  successful.
    */
-  isHealthy?: boolean;
+  isHealthy: boolean;
 }
 
 type TestsResults = TestResult[];
@@ -438,7 +438,10 @@ export function jobsHealthServiceProvider(
         const { count, jobsString } = getJobsAlertingMessageValues(response);
 
         if (response.length > 0) {
+          const isHealthy = false;
+
           results.push({
+            isHealthy,
             name: HEALTH_CHECK_NAMES.delayedData.name,
             context: {
               results: response,
@@ -459,7 +462,10 @@ export function jobsHealthServiceProvider(
         const response = await this.getErrorsReport(jobIds, previousStartedAt);
         if (response.length > 0) {
           const { count, jobsString } = getJobsAlertingMessageValues(response);
+          const isHealthy = false;
+
           results.push({
+            isHealthy,
             name: HEALTH_CHECK_NAMES.errorMessages.name,
             context: {
               results: response,
