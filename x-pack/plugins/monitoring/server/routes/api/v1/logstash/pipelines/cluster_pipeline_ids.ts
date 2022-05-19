@@ -5,32 +5,27 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { handleError } from '../../../../../lib/errors';
 import { getLogstashPipelineIds } from '../../../../../lib/logstash/get_pipeline_ids';
+import { MonitoringCore } from '../../../../../types';
+import { createValidationFunction } from '../../../../../lib/create_route_validation_function';
+import {
+  postLogstashPipelineClusterIdsRequestParamsRT,
+  postLogstashPipelineClusterIdsRequestPayloadRT,
+} from '../../../../../../common/http_api/logstash';
 
-/**
- * Retrieve pipelines for a cluster
- */
-export function logstashClusterPipelineIdsRoute(server) {
+export function logstashClusterPipelineIdsRoute(server: MonitoringCore) {
+  const validateParams = createValidationFunction(postLogstashPipelineClusterIdsRequestParamsRT);
+  const validateBody = createValidationFunction(postLogstashPipelineClusterIdsRequestPayloadRT);
+
   server.route({
-    method: 'POST',
+    method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/logstash/pipeline_ids',
-    config: {
-      validate: {
-        params: schema.object({
-          clusterUuid: schema.string(),
-        }),
-        body: schema.object({
-          ccs: schema.maybe(schema.string()),
-          timeRange: schema.object({
-            min: schema.string(),
-            max: schema.string(),
-          }),
-        }),
-      },
+    validate: {
+      params: validateParams,
+      body: validateBody,
     },
-    handler: async (req) => {
+    async handler(req) {
       const config = server.config;
       const clusterUuid = req.params.clusterUuid;
       const size = config.ui.max_bucket_size;
