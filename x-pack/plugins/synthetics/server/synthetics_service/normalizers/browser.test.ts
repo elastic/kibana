@@ -139,6 +139,7 @@ describe('browser normalizers', () => {
           namespace: 'test-space',
           original_space: 'test-space',
           custom_heartbeat_id: 'test-id-3-test-project-id-test-space',
+          timeout: null,
         },
         {
           ...DEFAULT_FIELDS[DataStream.BROWSER],
@@ -188,6 +189,7 @@ describe('browser normalizers', () => {
           namespace: 'test-space',
           original_space: 'test-space',
           custom_heartbeat_id: 'test-id-3-test-project-id-test-space',
+          timeout: null,
         },
         {
           ...DEFAULT_FIELDS[DataStream.BROWSER],
@@ -237,6 +239,7 @@ describe('browser normalizers', () => {
           namespace: 'test-space',
           original_space: 'test-space',
           custom_heartbeat_id: 'test-id-3-test-project-id-test-space',
+          timeout: null,
         },
       ]);
     });
