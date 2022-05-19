@@ -10,7 +10,9 @@ import path from 'path';
 import fs from 'fs';
 
 import { REPO_ROOT } from '@kbn/utils';
-import { createFlagError, RunWithCommands } from '@kbn/dev-utils';
+import { RunWithCommands } from '@kbn/dev-cli-runner';
+import { createFlagError } from '@kbn/dev-cli-errors';
+
 
 import { buildSchema } from './build_schema';
 import { loadYaml } from './load_yaml';
