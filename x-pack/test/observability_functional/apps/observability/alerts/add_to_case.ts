@@ -48,7 +48,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         });
       });
 
-      it('opens a flyout when Add to new case is clicked', async () => {
+      it.skip('opens a flyout when Add to new case is clicked', async () => {
         await observability.alerts.addToCase.addToNewCaseButtonClick();
 
         await retry.try(async () => {
