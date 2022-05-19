@@ -82,25 +82,26 @@ A rule or connector created in one space will not be visible in another.
 
 Rules are authorized using an <<api-keys,API key>> associated with the last user 
 to edit the rule. This API key captures a snapshot of the user's privileges at 
-the time of the edit. They are subsequently used to run all background tasks associated 
-with the rule, including condition checks like {es} queries and triggered 
-actions. The following rule actions will re-generate the API key:
+the time of the edit. They are subsequently used to run all background tasks 
+associated with the rule, including condition checks like {es} queries and 
+triggered actions. The following rule actions will re-generate the API key:
 
 * Creating a rule
 * Updating a rule
 
-When you disable a rule, it retains the associated API key which is re-used when the 
-rule is enabled. If the API key is missing when you enable the rule, it 
-generates a new key that has your security privileges.
+When you disable a rule, it retains the associated API key which is re-used when 
+the rule is enabled. If the API key is missing when you enable the rule (for 
+example, in case of imported rules), it generates a new key that has your 
+security privileges.
 
 You can update an API key manually in 
-**{stack-manage-app} > {rules-ui}** by selecting **Update API key** in 
-the actions menu of the respective rule.
+**{stack-manage-app} > {rules-ui}** or in the rule details page by selecting 
+**Update API key** in the actions menu.
 
 [IMPORTANT]
 ==============================================
 If a rule requires certain privileges, such as index privileges, to run, and a 
 user without those privileges updates the rule, the rule will no longer 
-function. Conversely, if a user with greater or administrator privileges modifies
-the rule, it will begin running with increased privileges.
+function. Conversely, if a user with greater or administrator privileges 
+modifies the rule, it will begin running with increased privileges.
 ==============================================
