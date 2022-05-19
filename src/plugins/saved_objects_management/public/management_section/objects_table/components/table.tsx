@@ -139,7 +139,7 @@ export class Table extends PureComponent<TableProps, TableState> {
             content={i18n.translate(
               'savedObjectsManagement.objectsTable.table.updatedDateUnknownLabel',
               {
-                defaultMessage: 'Updated date unknown',
+                defaultMessage: 'Last updated unknown',
               }
             )}
           >
