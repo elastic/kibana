@@ -127,6 +127,7 @@ export interface CreateEventSignalOptions {
   perPage?: number;
   threatPitId: OpenPointInTimeResponse['id'];
   reassignThreatPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
+  threatListConfig: ThreatListConfig;
 }
 
 type EntryKey = 'field' | 'value';
@@ -214,7 +215,7 @@ export type ThreatListItem = estypes.SearchHit<ThreatListDoc>;
 export interface ThreatEnrichment {
   feed: Record<string, unknown>;
   indicator: Record<string, unknown>;
-  matched: { id: string; index: string; field: string; atomic?: string; type: string };
+  matched: { id: string; index: string; field: string; atomic: unknown; type: string };
 }
 
 export interface SortWithTieBreaker {
@@ -242,6 +243,7 @@ export interface BuildThreatEnrichmentOptions {
   threatQuery: ThreatQuery;
   pitId: string;
   reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
+  threatListConfig: ThreatListConfig;
 }
 
 export interface EventsOptions {
