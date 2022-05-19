@@ -17,7 +17,6 @@ import { TaskRunnerContext } from './task_runner_factory';
 import { createExecutionHandler, ExecutionHandler } from './create_execution_handler';
 import { Alert, createAlertFactory } from '../alert';
 import {
-  createWrappedScopedClusterClientFactory,
   ElasticsearchError,
   ErrorWithReason,
   executionStatusFromError,
@@ -69,9 +68,12 @@ import {
   RuleRunResult,
   RuleTaskStateAndMetrics,
 } from './types';
+import { createWrappedScopedClusterClientFactory } from '../lib/wrap_scoped_cluster_client';
 import { IExecutionStatusAndMetrics } from '../lib/rule_execution_status';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
+import { wrapSearchSourceClient } from '../lib/wrap_search_source_client';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+import { SearchMetrics } from '../lib/types';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -337,9 +339,7 @@ export class TaskRunner<
 
     const ruleLabel = `${this.ruleType.id}:${ruleId}: '${name}'`;
 
-    const scopedClusterClient = this.context.elasticsearch.client.asScoped(fakeRequest);
-    const wrappedScopedClusterClient = createWrappedScopedClusterClientFactory({
-      scopedClusterClient,
+    const wrappedClientOptions = {
       rule: {
         name: rule.name,
         alertTypeId: rule.alertTypeId,
@@ -348,6 +348,16 @@ export class TaskRunner<
       },
       logger: this.logger,
       abortController: this.searchAbortController,
+    };
+    const scopedClusterClient = this.context.elasticsearch.client.asScoped(fakeRequest);
+    const wrappedScopedClusterClient = createWrappedScopedClusterClientFactory({
+      ...wrappedClientOptions,
+      scopedClusterClient,
+    });
+    const searchSourceClient = await this.context.data.search.searchSource.asScoped(fakeRequest);
+    const wrappedSearchSourceClient = wrapSearchSourceClient({
+      ...wrappedClientOptions,
+      searchSourceClient,
     });
 
     let updatedRuleTypeState: void | Record<string, unknown>;
@@ -371,9 +381,9 @@ export class TaskRunner<
           executionId: this.executionId,
           services: {
             savedObjectsClient,
+            searchSourceClient: wrappedSearchSourceClient.searchSourceClient,
             uiSettingsClient: this.context.uiSettings.asScopedToClient(savedObjectsClient),
             scopedClusterClient: wrappedScopedClusterClient.client(),
-            searchSourceClient: this.context.data.search.searchSource.asScoped(fakeRequest),
             alertFactory: createAlertFactory<
               InstanceState,
               InstanceContext,
@@ -426,9 +436,19 @@ export class TaskRunner<
 
     this.alertingEventLogger.setExecutionSucceeded(`rule executed: ${ruleLabel}`);
 
+    const scopedClusterClientMetrics = wrappedScopedClusterClient.getMetrics();
+    const searchSourceClientMetrics = wrappedSearchSourceClient.getMetrics();
+    const searchMetrics: SearchMetrics = {
+      numSearches: scopedClusterClientMetrics.numSearches + searchSourceClientMetrics.numSearches,
+      totalSearchDurationMs:
+        scopedClusterClientMetrics.totalSearchDurationMs +
+        searchSourceClientMetrics.totalSearchDurationMs,
+      esSearchDurationMs:
+        scopedClusterClientMetrics.esSearchDurationMs +
+        searchSourceClientMetrics.esSearchDurationMs,
+    };
     const ruleRunMetricsStore = new RuleRunMetricsStore();
 
-    const searchMetrics = wrappedScopedClusterClient.getMetrics();
     ruleRunMetricsStore.setNumSearches(searchMetrics.numSearches);
     ruleRunMetricsStore.setTotalSearchDurationMs(searchMetrics.totalSearchDurationMs);
     ruleRunMetricsStore.setEsSearchDurationMs(searchMetrics.esSearchDurationMs);
