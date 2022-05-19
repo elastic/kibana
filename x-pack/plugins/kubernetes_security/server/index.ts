@@ -6,8 +6,8 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { K8sSecurityPlugin } from './plugin';
+import { KubernetesSecurityPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new K8sSecurityPlugin(initializerContext);
+  return new KubernetesSecurityPlugin(initializerContext);
 }

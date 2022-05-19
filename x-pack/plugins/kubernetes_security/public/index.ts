@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { K8sSecurityPlugin } from './plugin';
+import { KubernetesSecurityPlugin } from './plugin';
 
-export type { K8sSecurityStart } from './types';
+export type { KubernetesSecurityStart } from './types';
 
 export function plugin() {
-  return new K8sSecurityPlugin();
+  return new KubernetesSecurityPlugin();
 }

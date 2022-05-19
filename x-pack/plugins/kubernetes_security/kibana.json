@@ -1,5 +1,5 @@
 {
-  "id": "k8sSecurity",
+  "id": "kubernetesSecurity",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "owner": {

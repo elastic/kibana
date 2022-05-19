@@ -8,11 +8,11 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/k8s_security'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/k8s_security',
+  roots: ['<rootDir>/x-pack/plugins/kubernetes_security'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/kubernetes_security',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/k8s_security/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/plugins/kubernetes_security/{common,public,server}/**/*.{ts,tsx}',
   ],
   setupFiles: ['jest-canvas-mock'],
 };

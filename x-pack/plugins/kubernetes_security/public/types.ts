@@ -11,7 +11,7 @@ import { BrowserFields, DocValueFields } from '@kbn/timelines-plugin/common';
 import type { DataViewBase } from '@kbn/es-query';
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 
-export type K8sSecurityServices = CoreStart;
+export type KubernetesSecurityServices = CoreStart;
 
 export interface GlobalFullScreen {
   globalFullScreen: boolean;
@@ -102,7 +102,7 @@ export interface FiltersGlobalProps {
   show?: boolean;
 }
 
-export interface K8sSecurityDeps {
+export interface KubernetesSecurityDeps {
   FiltersGlobal: React.NamedExoticComponent<FiltersGlobalProps>;
   SiemSearchBar: any;
   showGlobalFilters: ({
@@ -116,6 +116,6 @@ export interface K8sSecurityDeps {
   useSourcererDataView: (scopeId?: SourcererScopeName) => SelectedDataView;
 }
 
-export interface K8sSecurityStart {
-  getK8sPage: (k8sSecurityDeps: K8sSecurityDeps) => JSX.Element;
+export interface KubernetesSecurityStart {
+  getKubernetesPage: (kubernetesSecurityDeps: KubernetesSecurityDeps) => JSX.Element;
 }

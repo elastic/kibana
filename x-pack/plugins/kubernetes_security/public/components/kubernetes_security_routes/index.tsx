@@ -23,7 +23,7 @@ import { KUBERNETES_PATH } from '../../../common/constants';
 import { KubernetesWidget } from '../kubernetes-widget';
 import { AlertsList } from '../alerts-list';
 import { SearchFields, SearchGroup } from '../search-group';
-import { K8sSecurityDeps } from '../../types';
+import { KubernetesSecurityDeps } from '../../types';
 
 const widgetBadge: CSSObject = {
   position: 'absolute',
@@ -87,13 +87,13 @@ const SORT_BY_OPTIONS: Array<EuiComboBoxOptionOption<string>> = [
   },
 ];
 
-const K8sSecurityRoutesComponent = ({
+const KubernetesSecurityRoutesComponent = ({
   FiltersGlobal,
   SiemSearchBar,
   showGlobalFilters,
   useGlobalFullScreen,
   useSourcererDataView,
-}: K8sSecurityDeps) => {
+}: KubernetesSecurityDeps) => {
   const { globalFullScreen } = useGlobalFullScreen();
   const {
     indexPattern,
@@ -200,6 +200,6 @@ const K8sSecurityRoutesComponent = ({
   );
 };
 
-export const K8sSecurityRoutes = React.memo(K8sSecurityRoutesComponent);
+export const KubernetesSecurityRoutes = React.memo(KubernetesSecurityRoutesComponent);
 // eslint-disable-next-line import/no-default-export
-export { K8sSecurityRoutes as default };
+export { KubernetesSecurityRoutes as default };

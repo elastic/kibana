@@ -9,10 +9,10 @@ import {
   RuleRegistryPluginStartContract as RuleRegistryPluginStart,
 } from '@kbn/rule-registry-plugin/server';
 
-export interface K8sSecuritySetupPlugins {
+export interface KubernetesSecuritySetupPlugins {
   ruleRegistry: RuleRegistryPluginSetup;
 }
 
-export interface K8sSecurityStartPlugins {
+export interface KubernetesSecurityStartPlugins {
   ruleRegistry: RuleRegistryPluginStart;
 }

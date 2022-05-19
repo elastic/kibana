@@ -1,6 +1,6 @@
 {
   "author": "Elastic",
-  "name": "k8s_security",
+  "name": "kubernetes_security",
   "version": "8.0.0",
   "private": true,
   "license": "Elastic-License",

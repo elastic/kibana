@@ -17,10 +17,10 @@ import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 
 export const KubernetesContainer = React.memo(() => {
-  const { k8sSecurity } = useKibana().services;
+  const { kubernetesSecurity } = useKibana().services;
   return (
     <SecuritySolutionPageWrapper noPadding>
-      {k8sSecurity.getK8sPage({
+      {kubernetesSecurity.getKubernetesPage({
         FiltersGlobal,
         SiemSearchBar,
         showGlobalFilters,

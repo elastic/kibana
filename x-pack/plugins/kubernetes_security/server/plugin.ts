@@ -13,28 +13,28 @@ import {
   PluginInitializerContext,
   IRouter,
 } from '@kbn/core/server';
-import { K8sSecuritySetupPlugins, K8sSecurityStartPlugins } from './types';
+import { KubernetesSecuritySetupPlugins, KubernetesSecurityStartPlugins } from './types';
 import { registerRoutes } from './routes';
 
-export class K8sSecurityPlugin implements Plugin {
+export class KubernetesSecurityPlugin implements Plugin {
   private logger: Logger;
   private router: IRouter | undefined;
 
   /**
-   * Initialize K8sSecurityPlugin class properties (logger, etc) that is accessible
+   * Initialize KubernetesSecurityPlugin class properties (logger, etc) that is accessible
    * through the initializerContext.
    */
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup, plugins: K8sSecuritySetupPlugins) {
-    this.logger.debug('k8s security: Setup');
+  public setup(core: CoreSetup, plugins: KubernetesSecuritySetupPlugins) {
+    this.logger.debug('kubernetes security: Setup');
     this.router = core.http.createRouter();
   }
 
-  public start(core: CoreStart, plugins: K8sSecurityStartPlugins) {
-    this.logger.debug('k8s security: Start');
+  public start(core: CoreStart, plugins: KubernetesSecurityStartPlugins) {
+    this.logger.debug('kubernetes security: Start');
 
     // Register server routes
     if (this.router) {
@@ -43,6 +43,6 @@ export class K8sSecurityPlugin implements Plugin {
   }
 
   public stop() {
-    this.logger.debug('k8s security: Stop');
+    this.logger.debug('kubernetes security: Stop');
   }
 }
