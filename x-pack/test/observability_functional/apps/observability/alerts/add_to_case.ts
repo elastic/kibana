@@ -40,7 +40,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await observability.users.restoreDefaultTestUserRole();
       });
 
-      it('renders case options in the overflow menu', async () => {
+      it.skip('renders case options in the overflow menu', async () => {
         await observability.alerts.common.openActionsMenuForRow(0);
         await retry.try(async () => {
           await observability.alerts.addToCase.getAddToExistingCaseSelectorOrFail();
