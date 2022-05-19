@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { groupBy, keyBy, memoize } from 'lodash';
+import { groupBy, keyBy, memoize, partition } from 'lodash';
 import { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { MlJob } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -37,9 +37,13 @@ import {
 } from '../../models/job_audit_messages/job_audit_messages';
 import type { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
 
-interface TestResult {
+export interface TestResult {
   name: string;
   context: AnomalyDetectionJobsHealthAlertContext;
+  /**
+   * Indicates if test result contain recovered context.
+   */
+  recovered?: boolean;
 }
 
 type TestsResults = TestResult[];
@@ -152,7 +156,7 @@ export function jobsHealthServiceProvider(
      * Gets not started datafeeds for opened jobs.
      * @param jobIds
      */
-    async getNotStartedDatafeeds(jobIds: string[]): Promise<NotStartedDatafeedResponse[] | void> {
+    async getDatafeedsReport(jobIds: string[]): Promise<NotStartedDatafeedResponse[] | void> {
       const datafeeds = await getDatafeeds(jobIds);
 
       if (datafeeds) {
@@ -322,21 +326,39 @@ export function jobsHealthServiceProvider(
       logger.debug(`Performing health checks for job IDs: ${jobIds.join(', ')}`);
 
       if (config.datafeed.enabled) {
-        const response = await this.getNotStartedDatafeeds(jobIds);
+        const response = await this.getDatafeedsReport(jobIds);
         if (response && response.length > 0) {
-          const { count, jobsString } = getJobsAlertingMessageValues(response);
+          const [startedDatafeeds, notStartedDatafeeds] = partition(
+            response,
+            (datafeedStat) => datafeedStat.datafeed_state === 'started'
+          );
+
+          const recovered = notStartedDatafeeds.length === 0;
+          const datafeedResults = recovered ? startedDatafeeds : notStartedDatafeeds;
+          const { count, jobsString } = getJobsAlertingMessageValues(datafeedResults);
+
           results.push({
+            recovered,
             name: HEALTH_CHECK_NAMES.datafeed.name,
             context: {
-              results: response,
-              message: i18n.translate(
-                'xpack.ml.alertTypes.jobsHealthAlertingRule.datafeedStateMessage',
-                {
-                  defaultMessage:
-                    'Datafeed is not started for {count, plural, one {job} other {jobs}} {jobsString}',
-                  values: { count, jobsString },
-                }
-              ),
+              results: datafeedResults,
+              message: recovered
+                ? i18n.translate(
+                    'xpack.ml.alertTypes.jobsHealthAlertingRule.datafeedRecoveryMessage',
+                    {
+                      defaultMessage:
+                        'Datafeed is started for {count, plural, one {job} other {jobs}} {jobsString}',
+                      values: { count, jobsString },
+                    }
+                  )
+                : i18n.translate(
+                    'xpack.ml.alertTypes.jobsHealthAlertingRule.datafeedStateMessage',
+                    {
+                      defaultMessage:
+                        'Datafeed is not started for {count, plural, one {job} other {jobs}} {jobsString}',
+                      values: { count, jobsString },
+                    }
+                  ),
             },
           });
         }
