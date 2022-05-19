@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionFunctionKibana, ExpressionFunctionKibanaContext } from '@kbn/data-plugin/public';
-import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { ExpressionFunctionKibana } from '@kbn/data-plugin/public';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 
-import { queryToAst, filtersToAst } from '@kbn/data-plugin/common';
 import { VisToExpressionAst } from '../types';
 
 /**
@@ -20,30 +19,19 @@ import { VisToExpressionAst } from '../types';
  * @internal
  */
 export const toExpressionAst: VisToExpressionAst = async (vis, params) => {
-  const { savedSearchId, searchSource } = vis.data;
-  const query = searchSource?.getField('query');
-  let filters = searchSource?.getField('filter');
-  if (typeof filters === 'function') {
-    filters = filters();
-  }
-
-  const kibana = buildExpressionFunction<ExpressionFunctionKibana>('kibana', {});
-  const kibanaContext = buildExpressionFunction<ExpressionFunctionKibanaContext>('kibana_context', {
-    q: query && queryToAst(query),
-    filters: filters && filtersToAst(filters),
-    savedSearchId,
-  });
-
-  const ast = buildExpression([kibana, kibanaContext]);
-  const expression = ast.toAst();
-
   if (!vis.type.toExpressionAst) {
     throw new Error('Visualization type definition should have toExpressionAst function defined');
   }
 
+  const { searchSource } = vis.data;
   const visExpressionAst = await vis.type.toExpressionAst(vis, params);
+  const searchSourceExpressionAst = searchSource?.toExpressionAst();
+
   // expand the expression chain with a particular visualization expression chain, if it exists
-  expression.chain.push(...visExpressionAst.chain);
+  searchSourceExpressionAst?.chain.push(...visExpressionAst.chain);
+
+  const expression = searchSourceExpressionAst ?? visExpressionAst;
+  expression.chain.unshift(buildExpressionFunction<ExpressionFunctionKibana>('kibana', {}).toAst());
 
   return expression;
 };
