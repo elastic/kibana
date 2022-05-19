@@ -795,7 +795,7 @@ describe('enrichSignalThreatMatches', () => {
       getThreatListItemMock({
         _id: '123',
         _source: {
-          threat: {indicator: {ip_range:'127.0.0.1/30'}}
+          threat: { indicator: { ip_range: '127.0.0.1/30' } },
         },
       }),
     ];
