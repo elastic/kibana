@@ -151,7 +151,7 @@ export const EsQueryExpression = ({
     );
 
     const hits = rawResponse.hits;
-    return { number: totalHitsToNumber(hits.total), timeWindow: window };
+    return { nrOfDocs: totalHitsToNumber(hits.total), timeWindow: window };
   }, [data.search, esQuery, index, timeField, timeWindowSize, timeWindowUnit]);
 
   return (

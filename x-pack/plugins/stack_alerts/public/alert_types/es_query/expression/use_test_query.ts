@@ -13,7 +13,7 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
  * Hook used to test the data fetching execution by returning a number of found documents
  * Or in error in case it's failing
  */
-export function useTestQuery(fetch: () => Promise<{ number: number; timeWindow: string }>) {
+export function useTestQuery(fetch: () => Promise<{ nrOfDocs: number; timeWindow: string }>) {
   const [testQueryResult, setTestQueryResult] = useState<string | null>(null);
   const [testQueryError, setTestQueryError] = useState<string | null>(null);
 
@@ -21,12 +21,12 @@ export function useTestQuery(fetch: () => Promise<{ number: number; timeWindow: 
     setTestQueryError(null);
     setTestQueryResult(null);
     try {
-      const { number, timeWindow } = await fetch();
+      const { nrOfDocs, timeWindow } = await fetch();
 
       setTestQueryResult(
         i18n.translate('xpack.stackAlerts.esQuery.ui.numQueryMatchesText', {
           defaultMessage: 'Query matched {count} documents in the last {window}.',
-          values: { count: number, window: timeWindow },
+          values: { count: nrOfDocs, window: timeWindow },
         })
       );
     } catch (err) {

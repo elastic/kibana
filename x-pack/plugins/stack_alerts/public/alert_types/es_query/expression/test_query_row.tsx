@@ -13,7 +13,7 @@ export function TestQueryRow({
   fetch,
   hasValidationErrors,
 }: {
-  fetch: () => Promise<{ number: number; timeWindow: string }>;
+  fetch: () => Promise<{ nrOfDocs: number; timeWindow: string }>;
   hasValidationErrors: boolean;
 }) {
   const { onTestQuery, testQueryResult, testQueryError } = useTestQuery(fetch);
