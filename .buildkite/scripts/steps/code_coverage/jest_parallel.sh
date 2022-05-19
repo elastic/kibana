@@ -2,8 +2,8 @@
 
 set -uo pipefail
 
-JOB=$BUILDKITE_PARALLEL_JOB
-JOB_COUNT=$BUILDKITE_PARALLEL_JOB_COUNT
+JOB=${BUILDKITE_PARALLEL_JOB:-0}
+JOB_COUNT=${BUILDKITE_PARALLEL_JOB_COUNT:-1}
 
 # a jest failure will result in the script returning an exit code of 10
 
