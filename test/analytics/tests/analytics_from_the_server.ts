@@ -67,10 +67,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('it should extend the contexts and send the events', async () => {
-        // await ebtServerHelper.setOptIn(true);
-
-        // const actions = await getActions();
-
         // Validating the remote PID because that's the only field that it's added by the FTR plugin.
         // const context = actions[1].meta;
         expect(context).to.have.property('pid');
