@@ -34,6 +34,7 @@ describe('getRuleExecutionLogRoute', () => {
         status: 'success',
         message:
           "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+        version: '8.2.0',
         num_active_alerts: 5,
         num_new_alerts: 5,
         num_recovered_alerts: 0,
@@ -53,6 +54,7 @@ describe('getRuleExecutionLogRoute', () => {
         status: 'success',
         message:
           "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+        version: '8.2.0',
         num_active_alerts: 5,
         num_new_alerts: 5,
         num_recovered_alerts: 5,

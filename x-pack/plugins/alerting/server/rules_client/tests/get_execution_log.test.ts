@@ -111,20 +111,6 @@ const aggregateResults = {
               meta: {},
               doc_count: 0,
             },
-            alertCounts: {
-              meta: {},
-              buckets: {
-                activeAlerts: {
-                  doc_count: 5,
-                },
-                newAlerts: {
-                  doc_count: 5,
-                },
-                recoveredAlerts: {
-                  doc_count: 0,
-                },
-              },
-            },
             ruleExecution: {
               meta: {},
               doc_count: 1,
@@ -133,6 +119,15 @@ const aggregateResults = {
               },
               numGeneratedActions: {
                 value: 5.0,
+              },
+              numActiveAlerts: {
+                value: 5.0,
+              },
+              numNewAlerts: {
+                value: 5.0,
+              },
+              numRecoveredAlerts: {
+                value: 0.0,
               },
               outcomeAndMessage: {
                 hits: {
@@ -149,6 +144,9 @@ const aggregateResults = {
                       _source: {
                         event: {
                           outcome: 'success',
+                        },
+                        kibana: {
+                          version: '8.2.0',
                         },
                         message:
                           "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
@@ -196,20 +194,6 @@ const aggregateResults = {
               meta: {},
               doc_count: 0,
             },
-            alertCounts: {
-              meta: {},
-              buckets: {
-                activeAlerts: {
-                  doc_count: 5,
-                },
-                newAlerts: {
-                  doc_count: 5,
-                },
-                recoveredAlerts: {
-                  doc_count: 5,
-                },
-              },
-            },
             ruleExecution: {
               meta: {},
               doc_count: 1,
@@ -217,6 +201,15 @@ const aggregateResults = {
                 value: 5.0,
               },
               numGeneratedActions: {
+                value: 5.0,
+              },
+              numActiveAlerts: {
+                value: 5.0,
+              },
+              numNewAlerts: {
+                value: 5.0,
+              },
+              numRecoveredAlerts: {
                 value: 5.0,
               },
               outcomeAndMessage: {
@@ -234,6 +227,9 @@ const aggregateResults = {
                       _source: {
                         event: {
                           outcome: 'success',
+                        },
+                        kibana: {
+                          version: '8.2.0',
                         },
                         message:
                           "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
@@ -631,6 +627,7 @@ describe('getExecutionLogForRule()', () => {
           status: 'success',
           message:
             "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+          version: '8.2.0',
           num_active_alerts: 5,
           num_new_alerts: 5,
           num_recovered_alerts: 0,
@@ -650,6 +647,7 @@ describe('getExecutionLogForRule()', () => {
           status: 'success',
           message:
             "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+          version: '8.2.0',
           num_active_alerts: 5,
           num_new_alerts: 5,
           num_recovered_alerts: 5,
@@ -929,7 +927,7 @@ describe('getExecutionLogForRule()', () => {
         getExecutionLogByIdParams({ sort: [{ foo: { order: 'desc' } }] })
       )
     ).rejects.toMatchInlineSnapshot(
-      `[Error: Invalid sort field "foo" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions,num_generated_actions]]`
+      `[Error: Invalid sort field "foo" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions,num_generated_actions,num_active_alerts,num_recovered_alerts,num_new_alerts]]`
     );
   });
 
