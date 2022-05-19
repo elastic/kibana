@@ -61,8 +61,8 @@ describe('Alert Event Details', () => {
   it('should be able to run live query and add to timeline (-depending on the previous test)', () => {
     const TIMELINE_NAME = 'Untitled timeline';
     cy.visit('/app/security/alerts');
-    cy.wait(500);
-    cy.getBySel('timeline-context-menu-button').should('exist').first().click();
+    cy.getBySel('header-page-title').contains('Alerts').should('exist');
+    cy.getBySel('timeline-context-menu-button').first().click({ force: true });
     cy.getBySel('osquery-action-item').should('exist').contains('Run Osquery');
     cy.getBySel('expand-event').first().click();
     cy.getBySel('take-action-dropdown-btn').click();
