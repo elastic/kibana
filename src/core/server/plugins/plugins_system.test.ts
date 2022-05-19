@@ -15,16 +15,16 @@ import {
 import { BehaviorSubject } from 'rxjs';
 
 import { REPO_ROOT } from '@kbn/utils';
-import { Env } from '../config';
+import type { CoreContext, PluginName } from '@kbn/core-server-internal-base';
+import { Logger } from '@kbn/logging';
+import { Env } from '@kbn/config';
 import { configServiceMock, getEnvOptions } from '../config/mocks';
-import { CoreContext } from '../core_context';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 
 import { PluginWrapper } from './plugin';
-import { PluginName, PluginType } from './types';
+import { PluginType } from './types';
 import { PluginsSystem } from './plugins_system';
 import { coreMock } from '../mocks';
-import { Logger } from '../logging';
 
 function createPlugin(
   id: string,
@@ -202,6 +202,7 @@ test('correctly orders plugins and returns exposed values for "setup" and "start
     setup: Record<PluginName, unknown>;
     start: Record<PluginName, unknown>;
   }
+
   const plugins = new Map([
     [
       createPlugin('order-4', { required: ['order-2'] }),

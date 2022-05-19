@@ -10,9 +10,9 @@ import apm from 'elastic-apm-node';
 import { isUndefined, omitBy } from 'lodash';
 import type { Subscription } from 'rxjs';
 
-import type { CoreService, KibanaExecutionContext } from '../../types';
-import type { CoreContext } from '../core_context';
-import type { Logger } from '../logging';
+import type { CoreContext, CoreService } from '@kbn/core-server-internal-base';
+import type { Logger } from '@kbn/logging';
+import type { KibanaExecutionContext } from '../../types';
 import type { ExecutionContextConfigType } from './execution_context_config';
 
 import {

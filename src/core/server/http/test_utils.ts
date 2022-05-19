@@ -10,9 +10,9 @@ import { BehaviorSubject } from 'rxjs';
 import moment from 'moment';
 import { REPO_ROOT } from '@kbn/utils';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { Env } from '../config';
+import type { CoreContext } from '@kbn/core-server-internal-base';
+import { Env } from '@kbn/config';
 import { HttpService } from './http_service';
-import { CoreContext } from '../core_context';
 import { getEnvOptions, configServiceMock } from '../config/mocks';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 

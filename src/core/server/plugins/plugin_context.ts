@@ -7,15 +7,15 @@
  */
 
 import { shareReplay } from 'rxjs/operators';
+import type { CoreContext, PluginOpaqueId } from '@kbn/core-server-internal-base';
 import type { RequestHandlerContext } from '..';
-import { CoreContext } from '../core_context';
 import { PluginWrapper } from './plugin';
 import {
   PluginsServicePrebootSetupDeps,
   PluginsServiceSetupDeps,
   PluginsServiceStartDeps,
 } from './plugins_service';
-import { PluginInitializerContext, PluginManifest, PluginOpaqueId } from './types';
+import { PluginInitializerContext, PluginManifest } from './types';
 import { IRouter, RequestHandlerContextProvider } from '../http';
 import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
 import { CorePreboot, CoreSetup, CoreStart } from '..';

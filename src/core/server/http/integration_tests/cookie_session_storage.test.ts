@@ -13,9 +13,9 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { BehaviorSubject } from 'rxjs';
 import { duration as momentDuration } from 'moment';
 
-import { CoreContext } from '../../core_context';
+import type { CoreContext } from '@kbn/core-server-internal-base';
+import { Env } from '@kbn/config';
 import { HttpService } from '../http_service';
-import { Env } from '../../config';
 
 import { contextServiceMock } from '../../context/context_service.mock';
 import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';

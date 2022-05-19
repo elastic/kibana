@@ -12,7 +12,7 @@ import { map, shareReplay, takeUntil } from 'rxjs/operators';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import { AnalyticsServiceSetup } from '../analytics';
 import { CoreService } from '../../types';
-import { CoreContext } from '../core_context';
+import type { CoreContext } from '@kbn/core-server-internal-base';
 import { Logger } from '../logging';
 
 import { ClusterClient, ElasticsearchClientConfig } from './client';

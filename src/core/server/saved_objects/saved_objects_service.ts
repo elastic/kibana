@@ -8,6 +8,7 @@
 
 import { Subject, Observable, firstValueFrom } from 'rxjs';
 import { filter, take, switchMap } from 'rxjs/operators';
+import type { CoreContext } from '@kbn/core-server-internal-base';
 import { CoreService } from '../../types';
 import {
   SavedObjectsClient,
@@ -15,7 +16,6 @@ import {
   SavedObjectsClientProviderOptions,
 } from '.';
 import { KibanaMigrator, IKibanaMigrator } from './migrations';
-import { CoreContext } from '../core_context';
 import { InternalCoreUsageDataSetup } from '../core_usage_data';
 import {
   ElasticsearchClient,

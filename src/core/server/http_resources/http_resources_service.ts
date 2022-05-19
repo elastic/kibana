@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { CoreContext, CoreService } from '@kbn/core-server-internal-base';
+import { Logger } from '@kbn/logging';
 import { RequestHandlerContext } from '..';
-
-import { CoreContext } from '../core_context';
 import {
   IRouter,
   RouteConfig,
@@ -17,10 +17,7 @@ import {
   KibanaResponseFactory,
   InternalHttpServicePreboot,
 } from '../http';
-
-import { Logger } from '../logging';
 import { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from '../rendering';
-import { CoreService } from '../../types';
 
 import {
   InternalHttpResourcesSetup,

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import type { CoreContext } from '@kbn/core-server-internal-base';
 import { PluginOpaqueId } from '..';
 import { MockContextConstructor } from './context_service.test.mocks';
 import { ContextService } from './context_service';
-import { CoreContext } from '../core_context';
 
 const pluginDependencies = new Map<PluginOpaqueId, PluginOpaqueId[]>();
 

@@ -20,7 +20,7 @@ import { ConfigService, Env } from '../../config';
 import { PluginsConfig, PluginsConfigType, config } from '../plugins_config';
 import type { InstanceInfo } from '../plugin_context';
 import { discover } from './plugins_discovery';
-import { CoreContext } from '../../core_context';
+import type { CoreContext } from '@kbn/core-server-internal-base';
 import { PluginType } from '../types';
 
 const KIBANA_ROOT = process.cwd();

@@ -22,9 +22,9 @@ import type { NodesVersionCompatibility } from './version_check/ensure_es_versio
 import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { REPO_ROOT } from '@kbn/utils';
-import { Env } from '../config';
+import type { CoreContext } from '@kbn/core-server-internal-base';
+import { Env } from '@kbn/config';
 import { configServiceMock, getEnvOptions } from '../config/mocks';
-import { CoreContext } from '../core_context';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { executionContextServiceMock } from '../execution_context/execution_context_service.mock';

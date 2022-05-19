@@ -7,9 +7,9 @@
  */
 
 import { firstValueFrom } from 'rxjs';
-import { Logger } from '../logging';
+import type { CoreContext } from '@kbn/core-server-internal-base';
+import { Logger } from '@kbn/logging';
 import { IConfigService } from '../config';
-import { CoreContext } from '../core_context';
 import { InternalHttpServicePreboot, InternalHttpServiceSetup } from '../http';
 import { config as i18nConfigDef, I18nConfigType } from './i18n_config';
 import { getKibanaTranslationFiles } from './get_kibana_translation_files';
