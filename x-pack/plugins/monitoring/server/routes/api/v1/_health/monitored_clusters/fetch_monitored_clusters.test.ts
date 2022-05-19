@@ -19,8 +19,9 @@ describe(__filename, () => {
         },
       });
 
-      const monitoredClusters = await fetchMonitoredClusters({
-        timeRange: { min: 'now-30m', max: 'now' },
+      await fetchMonitoredClusters({
+        index: 'foo',
+        timeRange: { min: 1652979091217, max: 11652979091217 },
         search: searchFn,
       });
 
@@ -154,7 +155,8 @@ describe(__filename, () => {
         .mockResolvedValueOnce(stableMetricsetsResponse);
 
       const monitoredClusters = await fetchMonitoredClusters({
-        timeRange: { min: 'now-30m', max: 'now' },
+        index: 'foo',
+        timeRange: { min: 1652979091217, max: 11652979091217 },
         search: searchFn,
       });
 
