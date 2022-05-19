@@ -73,6 +73,7 @@ export interface ILayer {
   isFilteredByGlobalTime(): Promise<boolean>;
   hasErrors(): boolean;
   getErrors(): string;
+  getDefaultColorOperation(): { operation?: string, percentage?: number }
 
   /*
    * ILayer.getMbLayerIds returns a list of all mapbox layers assoicated with this layer.
@@ -408,6 +409,10 @@ export class AbstractLayer implements ILayer {
 
   async syncData(syncContext: DataRequestContext) {
     // no-op by default
+  }
+
+  getDefaultColorOperation() {
+    return {};
   }
 
   getMbLayerIds(): string[] {

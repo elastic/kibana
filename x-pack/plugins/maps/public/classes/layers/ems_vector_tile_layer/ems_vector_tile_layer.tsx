@@ -171,6 +171,21 @@ export class EmsVectorTileLayer extends AbstractLayer {
     return (sourceDataRequest.getData() as SourceRequestData)?.spriteSheetImageData;
   }
 
+  getDefaultColorOperation() {
+    const defaultOperation = TMSService.colorOperationDefaults.find(
+      ({ style }) => style === this.getSource().getTileLayerId()
+    );
+    if (!defaultOperation) {
+      return {
+        operation: 'screen',
+        percentage: 0,
+      };
+    }
+
+    const { operation, percentage } = defaultOperation;
+    return { operation, percentage };
+  }
+
   getMbLayerIds() {
     const vectorStyle = this._getVectorStyle();
     if (!vectorStyle || !vectorStyle.layers) {
@@ -383,12 +398,23 @@ export class EmsVectorTileLayer extends AbstractLayer {
 
   _setColorFilter(mbMap: MbMap, mbLayer: LayerSpecification, mbLayerId: string) {
     const { color, operation, percentage } = this.getColorFilter();
-    if (color !== undefined && operation !== undefined) {
-      const properties = TMSService.transformColorProperties(mbLayer, color, operation, percentage);
-      for (const { property, color } of properties) {
-        mbMap.setPaintProperty(mbLayerId, property, color);
-      }
+    if (color === undefined) {
+      // TODO reset the colors back to original style
+      // see https://github.com/elastic/ems-client/issues/116
+      return;
     }
+
+    const properties = TMSService.transformColorProperties(
+      mbLayer,
+      color,
+      operation,
+      // TODO percentage should be optional? https://github.com/elastic/ems-client/issues/115
+      percentage ?? 0,
+    );
+    for (const { property, color } of properties) {
+      mbMap.setPaintProperty(mbLayerId, property, color);
+    }
+    return;
   }
 
   _setOpacityForType(mbMap: MbMap, mbLayer: LayerSpecification, mbLayerId: string) {

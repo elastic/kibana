@@ -7,6 +7,7 @@
 
 import React, { ChangeEvent, Fragment } from 'react';
 import {
+  EuiColorPicker,
   EuiTitle,
   EuiPanel,
   EuiFormRow,
@@ -24,7 +25,6 @@ import { MAX_ZOOM } from '../../../../common/constants';
 import { AlphaSlider } from '../../../components/alpha_slider';
 import { ILayer } from '../../../classes/layers/layer';
 import { AttributionFormRow } from './attribution_form_row';
-import { ColorFilterSelect } from './color_filter_select';
 
 export interface Props {
   layer: ILayer;
@@ -50,8 +50,11 @@ export function LayerSettings(props: Props) {
     props.updateLabel(layerId, label);
   };
 
-  const onColorFilterChange = (colorFilter: ColorFilter) => {
-    props.updateColorFilter(layerId, colorFilter);
+  const onColorChange = (color: string) => {
+    // TODO default operation does not change when selecting new basemap style
+    // maybe we can move this to a layer action? more testing needed
+    const { operation, percentage } = props.layer.getDefaultColorOperation();
+    props.updateColorFilter(layerId, { color, operation, percentage });
   }
 
   const onZoomChange = (value: [string, string]) => {
@@ -166,15 +169,26 @@ export function LayerSettings(props: Props) {
       return null;
     }
 
-    const { color, operation, percentage } = props.layer.getColorFilter();
+    const { color } = props.layer.getColorFilter();
 
     return (
-        <ColorFilterSelect
-          color={color}
-          operation={operation}
-          percentage={percentage}
-          onColorFilterChange={onColorFilterChange}
+      <EuiFormRow display="columnCompressed"
+        label={i18n.translate('xpack.maps.layerPanel.settingsPanel.colorFilterPickerLabel', {
+          defaultMessage: "Color filter",
+        })}
+      >
+        <EuiColorPicker
+            compressed
+            aria-label="Color"
+            color={color}
+            onChange={onColorChange}
+            secondaryInputDisplay="top"
+            isClearable
+            format="hex"
+            placeholder="No filter"
+            aria-placeholder="No filter"
         />
+      </EuiFormRow>
     )
   }
 
