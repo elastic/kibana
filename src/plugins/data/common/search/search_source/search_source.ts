@@ -106,7 +106,12 @@ import {
   UI_SETTINGS,
 } from '../..';
 import { extractReferences } from './extract_references';
-import { ExpressionFunctionKibanaContext, filtersToAst, queryToAst } from '../expressions';
+import {
+  EsdslExpressionFunctionDefinition,
+  ExpressionFunctionKibanaContext,
+  filtersToAst,
+  queryToAst,
+} from '../expressions';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
@@ -927,7 +932,7 @@ export class SearchSource {
 
   toExpressionAst() {
     const searchRequest = this.mergeProps();
-    const { query } = searchRequest;
+    const { body, index, query } = searchRequest;
     let { filters } = searchRequest;
     if (typeof filters === 'function') {
       filters = filters();
@@ -937,6 +942,11 @@ export class SearchSource {
       buildExpressionFunction<ExpressionFunctionKibanaContext>('kibana_context', {
         q: query?.map(queryToAst),
         filters: filters && filtersToAst(filters),
+      }),
+      buildExpressionFunction<EsdslExpressionFunctionDefinition>('esdsl', {
+        size: body?.size,
+        dsl: JSON.stringify({}),
+        index: index?.id,
       }),
     ]).toAst();
   }

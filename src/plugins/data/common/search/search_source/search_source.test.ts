@@ -27,6 +27,7 @@ const mockSource = { excludes: ['foo-*'] };
 const mockSource2 = { excludes: ['bar-*'] };
 
 const indexPattern = {
+  id: '1234',
   title: 'foo',
   fields: [{ name: 'foo-bar' }, { name: 'field1' }, { name: 'field2' }, { name: '_id' }],
   getComputedFields,
@@ -1316,18 +1317,20 @@ describe('SearchSource', () => {
       return buildExpression(ast).toString();
     }
 
-    test('should generate the `kibana_context` function', () => {
-      const ast = searchSource.toExpressionAst();
-
-      expect(toString(ast)).toMatchInlineSnapshot(`"kibana_context"`);
+    test('should generate an expression AST', () => {
+      expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
+        "kibana_context
+        | esdsl dsl=\\"{}\\""
+      `);
     });
 
     test('should generate query argument', () => {
       searchSource.setField('query', { language: 'kuery', query: 'something' });
 
-      expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(
-        `"kibana_context q={kql q=\\"something\\"}"`
-      );
+      expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
+        "kibana_context q={kql q=\\"something\\"}
+        | esdsl dsl=\\"{}\\""
+      `);
     });
 
     test('should generate filters argument', () => {
@@ -1343,7 +1346,8 @@ describe('SearchSource', () => {
 
       expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
         "kibana_context filters={kibanaFilter query=\\"{\\\\\\"query_string\\\\\\":{\\\\\\"query\\\\\\":\\\\\\"query1\\\\\\"}}\\"}
-          filters={kibanaFilter query=\\"{\\\\\\"query_string\\\\\\":{\\\\\\"query\\\\\\":\\\\\\"query2\\\\\\"}}\\"}"
+          filters={kibanaFilter query=\\"{\\\\\\"query_string\\\\\\":{\\\\\\"query\\\\\\":\\\\\\"query2\\\\\\"}}\\"}
+        | esdsl dsl=\\"{}\\""
       `);
     });
 
@@ -1354,9 +1358,10 @@ describe('SearchSource', () => {
       };
       searchSource.setField('filter', () => filter);
 
-      expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(
-        `"kibana_context filters={kibanaFilter query=\\"{\\\\\\"query_string\\\\\\":{\\\\\\"query\\\\\\":\\\\\\"query\\\\\\"}}\\"}"`
-      );
+      expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
+        "kibana_context filters={kibanaFilter query=\\"{\\\\\\"query_string\\\\\\":{\\\\\\"query\\\\\\":\\\\\\"query\\\\\\"}}\\"}
+        | esdsl dsl=\\"{}\\""
+      `);
     });
 
     test('should merge properties from parent search sources', () => {
@@ -1377,7 +1382,26 @@ describe('SearchSource', () => {
 
       expect(toString(childSearchSource.toExpressionAst())).toMatchInlineSnapshot(`
         "kibana_context q={kql q=\\"something2\\"} q={kql q=\\"something1\\"} filters={kibanaFilter query=\\"{\\\\\\"query_string\\\\\\":{\\\\\\"query\\\\\\":\\\\\\"query2\\\\\\"}}\\"}
-          filters={kibanaFilter query=\\"{\\\\\\"query_string\\\\\\":{\\\\\\"query\\\\\\":\\\\\\"query1\\\\\\"}}\\"}"
+          filters={kibanaFilter query=\\"{\\\\\\"query_string\\\\\\":{\\\\\\"query\\\\\\":\\\\\\"query1\\\\\\"}}\\"}
+        | esdsl dsl=\\"{}\\""
+      `);
+    });
+
+    test('should include a data view identifier', () => {
+      searchSource.setField('index', indexPattern);
+
+      expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
+        "kibana_context
+        | esdsl dsl=\\"{}\\" index=\\"1234\\""
+      `);
+    });
+
+    test('should include size if present', () => {
+      searchSource.setField('size', 1000);
+
+      expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
+        "kibana_context
+        | esdsl size=1000 dsl=\\"{}\\""
       `);
     });
   });

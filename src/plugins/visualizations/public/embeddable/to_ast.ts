@@ -7,7 +7,7 @@
  */
 
 import { ExpressionFunctionKibana } from '@kbn/data-plugin/public';
-import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { ExpressionAstExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 
 import { VisToExpressionAst } from '../types';
 
@@ -18,7 +18,10 @@ import { VisToExpressionAst } from '../types';
  *
  * @internal
  */
-export const toExpressionAst: VisToExpressionAst = async (vis, params) => {
+export const toExpressionAst: VisToExpressionAst = async (
+  vis,
+  params
+): Promise<ExpressionAstExpression> => {
   if (!vis.type.toExpressionAst) {
     throw new Error('Visualization type definition should have toExpressionAst function defined');
   }
@@ -27,11 +30,17 @@ export const toExpressionAst: VisToExpressionAst = async (vis, params) => {
   const visExpressionAst = await vis.type.toExpressionAst(vis, params);
   const searchSourceExpressionAst = searchSource?.toExpressionAst();
 
-  // expand the expression chain with a particular visualization expression chain, if it exists
-  searchSourceExpressionAst?.chain.push(...visExpressionAst.chain);
-
-  const expression = searchSourceExpressionAst ?? visExpressionAst;
-  expression.chain.unshift(buildExpressionFunction<ExpressionFunctionKibana>('kibana', {}).toAst());
+  const expression = {
+    ...visExpressionAst,
+    chain: [
+      buildExpressionFunction<ExpressionFunctionKibana>('kibana', {}).toAst(),
+      /**
+       * @workaround Non-aggregating visualizations only accept the `kibana_context` on input.
+       */
+      ...(searchSourceExpressionAst?.chain.filter(({ function: name }) => name !== 'esdsl') ?? []),
+      ...visExpressionAst.chain,
+    ],
+  };
 
   return expression;
 };
