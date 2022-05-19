@@ -238,7 +238,7 @@ export class Table extends PureComponent<TableProps, TableState> {
           'savedObjectsManagement.objectsTable.table.columnTypeDescription',
           { defaultMessage: 'Type of the saved object' }
         ),
-        sortable: false,
+        sortable: true,
         'data-test-subj': 'savedObjectsTableRowType',
         render: (type: string, object: SavedObjectWithMetadata) => {
           const typeLabel = getSavedObjectLabel(type, allowedTypes);
