@@ -22,7 +22,11 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useFetchAlerts } from './hooks/use_fetch_alerts';
 import { AlertsTable } from './alerts_table';
-import { AlertsTableConfigurationRegistry, AlertsTableFlyoutState, RenderCellValueProps } from '../../../types';
+import {
+  AlertsTableConfigurationRegistry,
+  AlertsTableFlyoutState,
+  RenderCellValueProps,
+} from '../../../types';
 import { ALERTS_TABLE_CONF_ERROR_MESSAGE, ALERTS_TABLE_CONF_ERROR_TITLE } from './translations';
 import { TypeRegistry } from '../../type_registry';
 
@@ -193,7 +197,14 @@ const AlertsTableState = ({
       useFetchAlertsData,
       'data-test-subj': 'internalAlertsState',
     }),
-    [alertsTableConfiguration, columns, flyoutState, pagination.pageSize, showCheckboxes, useFetchAlertsData]
+    [
+      alertsTableConfiguration,
+      columns,
+      flyoutState,
+      pagination.pageSize,
+      showCheckboxes,
+      useFetchAlertsData,
+    ]
   );
 
   return hasAlertsTableConfiguration ? (

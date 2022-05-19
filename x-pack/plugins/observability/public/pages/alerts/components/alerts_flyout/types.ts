@@ -7,7 +7,7 @@
 import { AlertsTableFlyoutBaseProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
-import { EcsFieldsResponse } from '../../../../../../rule_registry/common/search_strategy';
+import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 
 export type FlyoutProps = AlertsTableFlyoutBaseProps & {
   alert: EcsFieldsResponse & {
