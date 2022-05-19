@@ -153,22 +153,46 @@ function makeSortNodes<T>(sortState: SortState<T>) {
     const nodeAValue = nodeA[sortState.field];
     const nodeBValue = nodeB[sortState.field];
 
-    if (typeof nodeAValue === 'string' && typeof nodeBValue === 'string') {
-      if (sortState.direction === 'asc') {
-        return nodeAValue.localeCompare(nodeBValue);
-      } else {
-        return nodeBValue.localeCompare(nodeAValue);
-      }
+    if (sortState.direction === 'asc') {
+      return sortAscending(nodeAValue, nodeBValue);
     }
 
-    if (typeof nodeAValue === 'number' && typeof nodeBValue === 'number') {
-      if (sortState.direction === 'asc') {
-        return nodeAValue - nodeBValue;
-      } else {
-        return nodeBValue - nodeAValue;
-      }
-    }
-
-    return 0;
+    return sortDescending(nodeAValue, nodeBValue);
   };
+}
+
+function sortAscending(nodeAValue: unknown, nodeBValue: unknown) {
+  if (nodeAValue === null) {
+    return -1;
+  } else if (nodeBValue === null) {
+    return 1;
+  }
+
+  if (typeof nodeAValue === 'string' && typeof nodeBValue === 'string') {
+    return nodeAValue.localeCompare(nodeBValue);
+  }
+
+  if (typeof nodeAValue === 'number' && typeof nodeBValue === 'number') {
+    return nodeAValue - nodeBValue;
+  }
+
+  return 0;
+}
+
+function sortDescending(nodeAValue: unknown, nodeBValue: unknown) {
+  if (nodeAValue === null) {
+    return 1;
+  } else if (nodeBValue === null) {
+    return -1;
+  }
+
+  if (typeof nodeAValue === 'string' && typeof nodeBValue === 'string') {
+    return nodeBValue.localeCompare(nodeAValue);
+  }
+
+  if (typeof nodeAValue === 'number' && typeof nodeBValue === 'number') {
+    return nodeBValue - nodeAValue;
+  }
+
+  return 0;
 }
