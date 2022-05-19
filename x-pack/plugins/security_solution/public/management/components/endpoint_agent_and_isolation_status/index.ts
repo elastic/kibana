@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export {
-  EndpointAgentAndIsolationStatus,
-  EndpointAgentAndIsolationStatusProps,
-} from './endpoint_agent_and_isolation_status';
+export { EndpointAgentAndIsolationStatus } from './endpoint_agent_and_isolation_status';
+export type { EndpointAgentAndIsolationStatusProps } from './endpoint_agent_and_isolation_status';
