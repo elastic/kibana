@@ -47,7 +47,6 @@ export const extendSearchParamsWithRuntimeFields = async (
 
 export interface SearchAPIDependencies {
   uiSettings: IUiSettingsClient;
-  injectedMetadata: CoreStart['injectedMetadata'];
   search: DataPublicPluginStart['search'];
   indexPatterns: DataViewsPublicPluginStart;
 }
