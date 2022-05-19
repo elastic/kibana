@@ -40,7 +40,7 @@ export interface RulePreviewProps {
   index: string[];
   isDisabled: boolean;
   query: FieldValueQueryBar;
-  dataViewId?: string | null | undefined;
+  dataViewId?: string;
   ruleType: Type;
   threatIndex: string[];
   threatMapping: ThreatMapping;

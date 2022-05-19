@@ -32,7 +32,6 @@ import {
   NEWS_FEED_URL_SETTING,
   NEWS_FEED_URL_SETTING_DEFAULT,
   ENABLE_CCS_READ_WARNING_SETTING,
-  DEFAULT_USE_RULE_INDEX_PATTERNS,
 } from '../common/constants';
 import { ExperimentalFeatures } from '../common/experimental_features';
 
@@ -55,23 +54,6 @@ export const initUiSettings = (
   experimentalFeatures: ExperimentalFeatures
 ) => {
   const securityUiSettings: Record<string, UiSettingsParams<unknown>> = {
-    [DEFAULT_USE_RULE_INDEX_PATTERNS]: {
-      name: i18n.translate('xpack.securitySolution.uiSettings.strictlyUseRuleIndexPatterns', {
-        defaultMessage: 'Strictly use index patterns for rules',
-      }),
-      value: false,
-      description: i18n.translate(
-        'xpack.securitySolution.uiSettings.strictlyUseRuleIndexPatternsDescription',
-        {
-          defaultMessage:
-            '<p>Rules will only use index patterns. Any existing rules using data views, will fall back to using index patterns. If no index pattern was defined, the default security solution index will be used.</p>',
-        }
-      ),
-      type: 'boolean',
-      category: [APP_ID],
-      requiresPageReload: true,
-      schema: schema.boolean(),
-    },
     [DEFAULT_APP_REFRESH_INTERVAL]: {
       type: 'json',
       name: i18n.translate('xpack.securitySolution.uiSettings.defaultRefreshIntervalLabel', {

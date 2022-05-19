@@ -34,8 +34,17 @@ export const DataViewSelector = ({
   setIndexPattern,
 }: DataViewSelectorProps) => {
   const { data } = useKibana().services;
-  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-  const dataViewId = field.value;
+
+  let isInvalid;
+  let errorMessage;
+  let dataViewId: string | null | undefined;
+  if (field != null) {
+    const fieldAndError = getFieldValidityAndErrorMessage(field);
+    isInvalid = fieldAndError.isInvalid;
+    errorMessage = fieldAndError.errorMessage;
+    dataViewId = field.value;
+  }
+
   const kibanaDataViewsDefined = useMemo(
     () => kibanaDataViews != null && Object.keys(kibanaDataViews).length > 0,
     [kibanaDataViews]
@@ -76,7 +85,7 @@ export const DataViewSelector = ({
 
       setSelectedOption(options);
       setIndexPattern(dv);
-      field.setValue(selectedDataView.id);
+      field?.setValue(selectedDataView.id);
     }
   };
 
@@ -95,8 +104,8 @@ export const DataViewSelector = ({
         </>
       )}
       <EuiFormRow
-        label={field.label}
-        helpText={field.helpText}
+        label={field?.label}
+        helpText={field?.helpText}
         error={errorMessage}
         isInvalid={isInvalid}
         data-test-subj="pick-rule-data-source"

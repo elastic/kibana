@@ -410,7 +410,7 @@ export const formatPreviewRule = ({
   anomalyThreshold,
 }: {
   index: string[];
-  dataViewId: string | null | undefined;
+  dataViewId?: string;
   threatIndex: string[];
   query: FieldValueQueryBar;
   threatQuery: FieldValueQueryBar;

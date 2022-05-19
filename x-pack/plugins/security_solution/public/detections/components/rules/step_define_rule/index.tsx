@@ -95,7 +95,6 @@ interface StepDefineRuleProps extends RuleStepProps {
 
 export const stepDefineDefaultValue: DefineStepRule = {
   anomalyThreshold: 50,
-  dataViewId: null,
   index: [],
   machineLearningJobId: [],
   ruleType: 'query',

@@ -15,8 +15,8 @@ describe('data_view_selector', () => {
   it('renders correctly', () => {
     const Component = () => {
       const field = useFormFieldMock({ value: '' });
-
-      return <DataViewSelector kibanaDataViews={[]} setIndexPattern={jest.fn()} field={field} />;
+      // @ts-expect-error TODO: FIX THIS
+      return <DataViewSelector kibanaDataViews={{}} setIndexPattern={jest.fn()} field={field} />;
     };
     const wrapper = shallow(<Component />);
 
