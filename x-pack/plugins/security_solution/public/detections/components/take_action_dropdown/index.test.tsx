@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
-import { act, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 
 import { TakeActionDropdown, TakeActionDropdownProps } from '.';
 import { mockAlertDetailsData } from '../../../common/components/event_details/__mocks__';
@@ -22,9 +22,17 @@ import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '..
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { cloneDeep } from 'lodash';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { NOT_FROM_ENDPOINT_HOST_TOOLTIP } from '../response_actions_console/response_actions_console_context_menu_item';
+import {
+  HOST_ENDPOINT_UNENROLLED_TOOLTIP,
+  NOT_FROM_ENDPOINT_HOST_TOOLTIP,
+} from '../response_actions_console/response_actions_console_context_menu_item';
 import { endpointMetadataHttpMocks } from '../../../management/pages/endpoint_hosts/mocks';
 import { HttpSetup } from '@kbn/core/public';
+import {
+  isAlertFromEndpointEvent,
+  isAlertFromEndpointAlert,
+} from '../../../common/utils/endpoint_alert_check';
+import { HostStatus } from '../../../../common/endpoint/types';
 
 jest.mock('../../../common/components/user_privileges');
 
@@ -225,7 +233,8 @@ describe('take action dropdown', () => {
   });
 
   describe('for Endpoint related actions', () => {
-    const setAlertDetailsDataMockToEndpoint = () => {
+    /** Removes the detail data that is used to determine if data is for an Alert */
+    const setAlertDetailsDataMockToEvent = () => {
       if (defaultProps.detailsData) {
         defaultProps.detailsData = defaultProps.detailsData
           .map((obj) => {
@@ -248,6 +257,34 @@ describe('take action dropdown', () => {
       }
     };
 
+    const setAlertDetailsDataMockToEndpointAgent = () => {
+      if (defaultProps.detailsData) {
+        defaultProps.detailsData = defaultProps.detailsData.map((obj) => {
+          if (obj.field === 'agent.type') {
+            return {
+              category: 'agent',
+              field: 'agent.type',
+              values: ['endpoint'],
+              originalValue: ['endpoint'],
+            };
+          }
+          if (obj.field === 'agent.id') {
+            return {
+              category: 'agent',
+              field: 'agent.id',
+              values: ['123'],
+              originalValue: ['123'],
+            };
+          }
+
+          return obj;
+        }) as TimelineEventsDetailsItem[];
+      } else {
+        expect(defaultProps.detailsData).toBeInstanceOf(Object);
+      }
+    };
+
+    /** Set the `agent.type` and `agent.id` on the EcsData */
     const setTypeOnEcsDataWithAgentType = (
       agentType: string = 'endpoint',
       agentId: string = '123'
@@ -268,7 +305,7 @@ describe('take action dropdown', () => {
 
       beforeEach(() => {
         setTypeOnEcsDataWithAgentType();
-        setAlertDetailsDataMockToEndpoint();
+        setAlertDetailsDataMockToEvent();
       });
 
       test('should enable the "Add Endpoint event filter" button if provided endpoint event', async () => {
@@ -337,8 +374,24 @@ describe('take action dropdown', () => {
         return wrapper.find('[data-test-subj="endpointResponseActions-action-item"]');
       };
 
+      beforeAll(() => {
+        // Un-Mock endpoint alert check hooks
+        const actualChecks = jest.requireActual('../../../common/utils/endpoint_alert_check');
+        (isAlertFromEndpointEvent as jest.Mock).mockImplementation(
+          actualChecks.isAlertFromEndpointEvent
+        );
+        (isAlertFromEndpointAlert as jest.Mock).mockImplementation(
+          actualChecks.isAlertFromEndpointAlert
+        );
+      });
+
+      afterAll(() => {
+        // Set the mock modules back to what they were
+        (isAlertFromEndpointEvent as jest.Mock).mockImplementation(() => true);
+        (isAlertFromEndpointAlert as jest.Mock).mockImplementation(() => true);
+      });
+
       beforeEach(() => {
-        setAlertDetailsDataMockToEndpoint();
         setTypeOnEcsDataWithAgentType();
         apiMocks = endpointMetadataHttpMocks(mockStartServicesMock.http as jest.Mocked<HttpSetup>);
       });
@@ -365,15 +418,11 @@ describe('take action dropdown', () => {
       });
 
       it('should disable the button if alert NOT from a host running endpoint', async () => {
+        setTypeOnEcsDataWithAgentType('filebeat');
+        if (defaultProps.detailsData) {
+          defaultProps.detailsData = cloneDeep(mockAlertDetailsData) as TimelineEventsDetailsItem[];
+        }
         render();
-
-        await act(async () => {
-          await waitFor(() => {
-            expect(apiMocks.responseProvider.metadataDetails).toHaveBeenCalled();
-          });
-        });
-
-        wrapper.update();
 
         expect(findLaunchResponderButton().first().prop('disabled')).toBe(true);
         expect(findLaunchResponderButton().first().prop('toolTipContent')).toEqual(
@@ -381,7 +430,31 @@ describe('take action dropdown', () => {
         );
       });
 
-      it.todo('should disable the button if host is no longer running endpoint');
+      it('should disable the button if host status is unenrolled', async () => {
+        setAlertDetailsDataMockToEndpointAgent();
+        const getApiResponse = apiMocks.responseProvider.metadataDetails.getMockImplementation();
+        apiMocks.responseProvider.metadataDetails.mockImplementation(() => {
+          if (getApiResponse) {
+            return {
+              ...getApiResponse(),
+              host_status: HostStatus.UNENROLLED,
+            };
+          }
+          throw new Error('mock implementation missing');
+        });
+        render();
+
+        await waitFor(() => {
+          expect(apiMocks.responseProvider.metadataDetails).toHaveBeenCalled();
+        });
+
+        wrapper.update();
+
+        expect(findLaunchResponderButton().first().prop('disabled')).toBe(true);
+        expect(findLaunchResponderButton().first().prop('toolTipContent')).toEqual(
+          HOST_ENDPOINT_UNENROLLED_TOOLTIP
+        );
+      });
     });
   });
 });

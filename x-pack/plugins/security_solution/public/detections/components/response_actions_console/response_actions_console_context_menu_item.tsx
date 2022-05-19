@@ -9,9 +9,11 @@ import { EuiContextMenuItem } from '@elastic/eui';
 import React, { memo, ReactNode, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import {
+  useGetEndpointDetails,
+  useShowEndpointResponseActionsConsole,
+} from '../../../management/hooks';
 import { HostStatus } from '../../../../common/endpoint/types';
-import { useGetEndpointDetails } from '../../../management/hooks/endpoint/use_get_endpoint_details';
-import { useShowEndpointResponseActionsConsole } from '../../../management/hooks';
 
 export const NOT_FROM_ENDPOINT_HOST_TOOLTIP = i18n.translate(
   'xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.notSupportedTooltip',
@@ -19,7 +21,7 @@ export const NOT_FROM_ENDPOINT_HOST_TOOLTIP = i18n.translate(
 );
 export const HOST_ENDPOINT_UNENROLLED_TOOLTIP = i18n.translate(
   'xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.unenrolledTooltip',
-  { defaultMessage: 'Host is not longer enrolled with endpoint security' }
+  { defaultMessage: 'Host is no longer enrolled with endpoint security' }
 );
 export const LOADING_ENDPOINT_DATA_TOOLTIP = i18n.translate(
   'xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.loadingTooltip',
