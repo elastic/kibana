@@ -303,6 +303,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
   const { current: validator } = useRef(new RoleValidator({ shouldValidate: false }));
   const [formError, setFormError] = useState<RoleValidationResult | null>(null);
   const [creatingRoleAlreadyExists, setCreatingRoleAlreadyExists] = useState<boolean>(false);
+  const [previousName, setPreviousName] = useState<string>('');
   const runAsUsers = useRunAsUsers(userAPIClient, fatalErrors);
   const indexPatternsTitles = useIndexPatternsTitles(dataViews, fatalErrors, notifications);
   const privileges = usePrivileges(privilegesAPIClient, fatalErrors);
@@ -424,10 +425,8 @@ export const EditRolePage: FunctionComponent<Props> = ({
     });
 
   const onNameBlur = (e: FocusEvent<HTMLInputElement>) => {
-    // ToDo: ask Thom about how to implement this better such that we're not redundantly handling multiple events when name hasn't changed
-    // ToDo: limit queued events? only execute handler on latest posted event? Check if the state has changed? NO! Because state set is asynchronous.
-    // ToDo: State change wipes event queue? https://stackoverflow.com/questions/36514629/does-react-discard-queued-events-on-state-change
-    if (!isEditingExistingRole /* && role state changed? */) {
+    if (!isEditingExistingRole && previousName !== role.name) {
+      setPreviousName(role.name);
       doesRoleExist().then((roleExists) => {
         setCreatingRoleAlreadyExists(roleExists);
       });
