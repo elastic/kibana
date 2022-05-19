@@ -41,9 +41,9 @@ export interface TestResult {
   name: string;
   context: AnomalyDetectionJobsHealthAlertContext;
   /**
-   * Indicates if test result contain recovered context.
+   * Indicates if the health check is  successful.
    */
-  recovered?: boolean;
+  isHealthy?: boolean;
 }
 
 type TestsResults = TestResult[];
@@ -186,7 +186,7 @@ export function jobsHealthServiceProvider(
       }
     },
     /**
-     * Gets jobs that reached soft or hard model memory limits.
+     * Gets the model memory report for opened jobs.
      * @param jobIds
      */
     async getMmlReport(jobIds: string[]): Promise<MmlTestResponse[]> {
@@ -195,7 +195,7 @@ export function jobsHealthServiceProvider(
       const { dateFormatter, bytesFormatter } = await getFormatters();
 
       return jobsStats
-        .filter((j) => j.state === 'opened' && j.model_size_stats.memory_status !== 'ok')
+        .filter((j) => j.state === 'opened')
         .map(({ job_id: jobId, model_size_stats: modelSizeStats }) => {
           return {
             job_id: jobId,
@@ -333,16 +333,16 @@ export function jobsHealthServiceProvider(
             (datafeedStat) => datafeedStat.datafeed_state === 'started'
           );
 
-          const recovered = notStartedDatafeeds.length === 0;
-          const datafeedResults = recovered ? startedDatafeeds : notStartedDatafeeds;
+          const isHealthy = notStartedDatafeeds.length === 0;
+          const datafeedResults = isHealthy ? startedDatafeeds : notStartedDatafeeds;
           const { count, jobsString } = getJobsAlertingMessageValues(datafeedResults);
 
           results.push({
-            recovered,
+            isHealthy,
             name: HEALTH_CHECK_NAMES.datafeed.name,
             context: {
               results: datafeedResults,
-              message: recovered
+              message: isHealthy
                 ? i18n.translate(
                     'xpack.ml.alertTypes.jobsHealthAlertingRule.datafeedRecoveryMessage',
                     {
@@ -372,41 +372,53 @@ export function jobsHealthServiceProvider(
             'memory_status'
           );
 
-          const { count: hardLimitCount, jobsString: hardLimitJobsString } =
-            getJobsAlertingMessageValues(hardLimitJobs);
-          const { count: softLimitCount, jobsString: softLimitJobsString } =
-            getJobsAlertingMessageValues(softLimitJobs);
+          const isHealthy = hardLimitJobs.length === 0 && softLimitJobs.length === 0;
 
           let message = '';
 
-          if (hardLimitCount > 0) {
-            message = i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.mmlMessage', {
-              defaultMessage: `{count, plural, one {Job} other {Jobs}} {jobsString} reached the hard model memory limit. Assign the job more memory and restore from a snapshot from prior to reaching the hard limit.`,
-              values: {
-                count: hardLimitCount,
-                jobsString: hardLimitJobsString,
-              },
-            });
-          }
-
-          if (softLimitCount > 0) {
-            if (message.length > 0) {
-              message += '\n';
-            }
-            message += i18n.translate(
-              'xpack.ml.alertTypes.jobsHealthAlertingRule.mmlSoftLimitMessage',
+          if (isHealthy) {
+            message = i18n.translate(
+              'xpack.ml.alertTypes.jobsHealthAlertingRule.mmlRecoveredMessage',
               {
-                defaultMessage:
-                  '{count, plural, one {Job} other {Jobs}} {jobsString} reached the soft model memory limit. Assign the job more memory or edit the datafeed filter to limit scope of analysis.',
-                values: {
-                  count: softLimitCount,
-                  jobsString: softLimitJobsString,
-                },
+                defaultMessage: `All jobs are running within configured model memory limits.`,
               }
             );
+          } else {
+            const { count: hardLimitCount, jobsString: hardLimitJobsString } =
+              getJobsAlertingMessageValues(hardLimitJobs);
+            const { count: softLimitCount, jobsString: softLimitJobsString } =
+              getJobsAlertingMessageValues(softLimitJobs);
+
+            if (hardLimitCount > 0) {
+              message = i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.mmlMessage', {
+                defaultMessage: `{count, plural, one {Job} other {Jobs}} {jobsString} reached the hard model memory limit. Assign the job more memory and restore from a snapshot from prior to reaching the hard limit.`,
+                values: {
+                  count: hardLimitCount,
+                  jobsString: hardLimitJobsString,
+                },
+              });
+            }
+
+            if (softLimitCount > 0) {
+              if (message.length > 0) {
+                message += '\n';
+              }
+              message += i18n.translate(
+                'xpack.ml.alertTypes.jobsHealthAlertingRule.mmlSoftLimitMessage',
+                {
+                  defaultMessage:
+                    '{count, plural, one {Job} other {Jobs}} {jobsString} reached the soft model memory limit. Assign the job more memory or edit the datafeed filter to limit scope of analysis.',
+                  values: {
+                    count: softLimitCount,
+                    jobsString: softLimitJobsString,
+                  },
+                }
+              );
+            }
           }
 
           results.push({
+            isHealthy,
             name: HEALTH_CHECK_NAMES.mml.name,
             context: {
               results: response,
