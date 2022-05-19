@@ -136,7 +136,11 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
           <EuiFlexGroup wrap responsive={false} gutterSize="s">
             <EuiFlexItem grow={false}>{titleInWizard || title}</EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiBadge color="warning">Deprecated</EuiBadge>
+              <EuiBadge color="warning">
+                {i18n.translate('dashboard.editorMenu.deprecatedTag', {
+                  defaultMessage: 'Deprecated',
+                })}
+              </EuiBadge>
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
