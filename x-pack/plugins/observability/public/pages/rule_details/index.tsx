@@ -56,12 +56,8 @@ import { PageTitle, ItemTitleRuleSummary, ItemValueRuleSummary, Actions } from '
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchLast24hAlerts } from '../../hooks/use_fetch_last24h_alerts';
 import { formatInterval } from './utils';
-import {
-  hasExecuteActionsCapability,
-  hasAllPrivilege,
-  RULES_PAGE_LINK,
-  ALERT_PAGE_LINK,
-} from './config';
+import { hasExecuteActionsCapability, hasAllPrivilege } from './config';
+import { paths } from '../../config/paths';
 
 export function RuleDetailsPage() {
   const {
@@ -125,10 +121,10 @@ export function RuleDetailsPage() {
       text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
         defaultMessage: 'Alerts',
       }),
-      href: http.basePath.prepend(ALERT_PAGE_LINK),
+      href: http.basePath.prepend(paths.observability.alerts),
     },
     {
-      href: http.basePath.prepend(RULES_PAGE_LINK),
+      href: http.basePath.prepend(paths.observability.rules),
       text: RULES_BREADCRUMB_TEXT,
     },
     {
@@ -476,11 +472,11 @@ export function RuleDetailsPage() {
       <DeleteModalConfirmation
         onDeleted={async () => {
           setRuleToDelete([]);
-          navigateToUrl(http.basePath.prepend(RULES_PAGE_LINK));
+          navigateToUrl(http.basePath.prepend(paths.observability.rules));
         }}
         onErrors={async () => {
           setRuleToDelete([]);
-          navigateToUrl(http.basePath.prepend(RULES_PAGE_LINK));
+          navigateToUrl(http.basePath.prepend(paths.observability.rules));
         }}
         onCancel={() => {}}
         apiDeleteCall={deleteRules}
