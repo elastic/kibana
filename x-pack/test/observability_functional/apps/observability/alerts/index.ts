@@ -223,7 +223,9 @@ export default ({ getService }: FtrProviderContext) => {
           const actionsButton = await observability.alerts.common.getActionsButtonByIndex(0);
           await actionsButton.click();
           await observability.alerts.common.viewRuleDetailsButtonClick();
-          expect(await find.existsByCssSelector('[title="Rules and Connectors"]')).to.eql(true);
+          expect(
+            await (await find.byCssSelector('[data-test-subj="breadcrumb first"]')).getVisibleText()
+          ).to.eql('Observability');
         });
       });
 
