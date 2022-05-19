@@ -262,7 +262,7 @@ export const ControlEditor = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
             ) : (
-              <EuiTextColor color="subdued">
+              <EuiTextColor color="subdued" data-test-subj="control-editor-type">
                 {ControlGroupStrings.manageControl.getSelectFieldMessage()}
               </EuiTextColor>
             )}
