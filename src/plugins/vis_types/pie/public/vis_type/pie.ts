@@ -63,6 +63,7 @@ export const getPieVisTypeDefinition = ({
     },
   },
   editorConfig: {
+    enableDataViewChange: true,
     optionsTemplate: getPieOptions({
       showElasticChartsOptions,
       palettes,
