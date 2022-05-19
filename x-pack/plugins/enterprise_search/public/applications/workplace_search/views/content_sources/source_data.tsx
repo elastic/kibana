@@ -25,7 +25,7 @@ export const staticGenericExternalSourceData: SourceDataItem = {
     isPublicKey: false,
     hasOauthRedirect: false,
     needsBaseUrl: false,
-    documentationUrl: docLinks.workplaceSearchCustomSources, // TODO Update this when we have a doclink
+    documentationUrl: docLinks.workplaceSearchCustomConnectorPackage,
     applicationPortalUrl: '',
   },
   objTypes: [],

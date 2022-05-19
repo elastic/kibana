@@ -65,6 +65,7 @@ class DocLinks {
   public workplaceSearchBox: string;
   public workplaceSearchConfluenceCloud: string;
   public workplaceSearchConfluenceServer: string;
+  public workplaceSearchCustomConnectorPackage: string;
   public workplaceSearchCustomSources: string;
   public workplaceSearchCustomSourcePermissions: string;
   public workplaceSearchDocumentPermissions: string;
@@ -151,6 +152,7 @@ class DocLinks {
     this.workplaceSearchBox = '';
     this.workplaceSearchConfluenceCloud = '';
     this.workplaceSearchConfluenceServer = '';
+    this.workplaceSearchCustomConnectorPackage = '';
     this.workplaceSearchCustomSources = '';
     this.workplaceSearchCustomSourcePermissions = '';
     this.workplaceSearchDocumentPermissions = '';
@@ -239,6 +241,8 @@ class DocLinks {
     this.workplaceSearchBox = docLinks.links.workplaceSearch.box;
     this.workplaceSearchConfluenceCloud = docLinks.links.workplaceSearch.confluenceCloud;
     this.workplaceSearchConfluenceServer = docLinks.links.workplaceSearch.confluenceServer;
+    this.workplaceSearchCustomConnectorPackage =
+      docLinks.links.workplaceSearch.customConnectorPackage;
     this.workplaceSearchCustomSources = docLinks.links.workplaceSearch.customSources;
     this.workplaceSearchCustomSourcePermissions =
       docLinks.links.workplaceSearch.customSourcePermissions;

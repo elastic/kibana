@@ -112,6 +112,7 @@ export interface DocLinks {
     readonly box: string;
     readonly confluenceCloud: string;
     readonly confluenceServer: string;
+    readonly customConnectorPackage: string;
     readonly customSources: string;
     readonly customSourcePermissions: string;
     readonly documentPermissions: string;
