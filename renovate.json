@@ -156,6 +156,14 @@
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],
       "enabled": true
+    },
+    {
+      "groupName": "@storybook",
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "matchPackagePatterns": ["^@storybook"],
+      "labels": ["Team:Operations", "release_note:skip"],
+      "enabled": true
     }
   ]
 }
