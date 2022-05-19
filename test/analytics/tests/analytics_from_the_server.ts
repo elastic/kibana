@@ -66,22 +66,20 @@ export default function ({ getService }: FtrProviderContext) {
         context = actions[1].meta;
       });
 
-      it('it should extend the contexts and send the events', async () => {
+      it('it should extend the contexts with pid injected by "analytics_plugin_a"', async () => {
         // Validating the remote PID because that's the only field that it's added by the FTR plugin.
-        // const context = actions[1].meta;
         expect(context).to.have.property('pid');
         expect(context.pid).to.be.a('number');
-
-        // Some context providers emit very early. We are OK with that.
-        expect(context).to.have.property('pid');
-        expect(context.pid).to.be.a('number');
-
-        const [optInAction, extendContextAction] = actions;
-        expect(optInAction).to.eql({ action: 'optIn', meta: true });
-        expect(extendContextAction).to.eql({ action: 'extendContext', meta: context });
       });
 
-      it('should send events', async () => {
+      it('it calls optIn first, then extendContext, followed by reportEvents', async () => {
+        const [optInAction, extendContextAction, ...reportEventsAction] = actions;
+        expect(optInAction).to.eql({ action: 'optIn', meta: true });
+        expect(extendContextAction).to.eql({ action: 'extendContext', meta: context });
+        reportEventsAction.forEach((entry) => expect(entry.action).to.eql('reportEvents'));
+      });
+
+      it('Initial calls to reportEvents from cached events group the requests by event_type', async () => {
         // We know that after opting-in, the client will send the events in batches, grouped by event-type.
         const [, , ...reportEventsActions] = actions;
         reportEventsActions.forEach((reportEventAction) => {
@@ -93,7 +91,11 @@ export default function ({ getService }: FtrProviderContext) {
             expect(event.event_type).to.eql(initiallyBatchedEventType);
           });
         });
+      });
 
+      it('"test-plugin-lifecycle" is received in the expected order of "setup" first, then "start"', async () => {
+        // We know that after opting-in, the client will send the events in batches, grouped by event-type.
+        const [, , ...reportEventsActions] = actions;
         // Find the action calling to report test-plugin-lifecycle events.
         const reportTestPluginLifecycleEventsAction = reportEventsActions.find(
           (reportEventAction) => {
@@ -103,8 +105,6 @@ export default function ({ getService }: FtrProviderContext) {
             );
           }
         );
-
-        expect(reportTestPluginLifecycleEventsAction).to.not.be('undefined');
         // Find the setup and start events and validate that they are sent in the correct order.
         const initialContext = reportTestPluginLifecycleEventsAction!.meta[0].context; // read this from the reportTestPlugin
         const reportEventContext = reportTestPluginLifecycleEventsAction!.meta[1].context;

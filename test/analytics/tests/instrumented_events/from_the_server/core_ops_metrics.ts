@@ -8,6 +8,7 @@
 
 import expect from '@kbn/expect';
 import { Event } from '@kbn/analytics-client';
+import { OpsMetrics } from '@kbn/core/server';
 import { FtrProviderContext } from '../../../services';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -25,47 +26,36 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should emit the initial ops metrics event', () => {
+      // properties assertions.
+      // Note: Once we implement schema and collector event validation, we can rely on ts to verify the shape
+      const osMetricsProperties = [
+        'collected_at',
+        'process',
+        'processes',
+        'os',
+        'response_times',
+        'requests',
+        'concurrent_connections',
+      ];
       expect(initialEvent.event_type).to.eql('core-ops_metrics');
-      // context assertions
-      expect(initialEvent.context).to.have.property('kibana_uuid');
-      expect(initialEvent.context.kibana_uuid).to.be.a('string');
-      expect(initialEvent.context).to.have.property('pid');
-      expect(initialEvent.context.pid).to.be.a('number');
 
-      // properties assertions. Note: Once we implement schema and collector event validation, we can rely on ts to verify the shape
-      expect(initialEvent.properties).to.have.property('collected_at');
-      expect(initialEvent.properties).to.have.property('process');
-      expect(initialEvent.properties).to.have.property('processes');
-      expect(initialEvent.properties).to.have.property('os');
-      expect(initialEvent.properties).to.have.property('response_times');
-      expect(initialEvent.properties).to.have.property('requests');
-      expect(initialEvent.properties).to.have.property('concurrent_connections');
+      osMetricsProperties.forEach((prop) => expect(initialEvent.properties).to.have.property(prop));
     });
 
-    it('should emit the 2nd event with extended context', () => {
-      expect(secondEvent.event_type).to.eql('core-ops_metrics');
-      expect(secondEvent.context).to.have.property('overall_status_level');
-      expect(secondEvent.context).to.have.property('overall_status_summary');
-    });
+    it('should emit events with updated ops metrics', () => {
+      const initialOsProperties = initialEvent.properties.os as OpsMetrics['os'];
+      const thirdOsProperties = thirdEvent.properties.os as OpsMetrics['os'];
 
-    it('should emit the 3rd event with updated ops metrics', () => {
+      expect(initialEvent.properties.collected_at).not.to.eql(thirdEvent.properties.collected_at);
       // we can be fairly certain that at least the os load will have changed after startup.
-      const propertyKeys = ['collected_at', 'os'];
-      propertyKeys.forEach((key: string) => {
-        expect(initialEvent.properties[key]).not.to.be(thirdEvent.properties[key]);
-      });
+      expect(initialOsProperties.load).not.to.eql(thirdOsProperties.load);
+      expect(initialOsProperties.platform).to.eql(thirdOsProperties.platform);
     });
 
     it('should not send a huge json file', () => {
-      const firstEventByteSize = Buffer.byteLength(JSON.stringify(initialEvent));
-      const secondEventByteSize = Buffer.byteLength(JSON.stringify(secondEvent));
-      const thirdEventByteSize = Buffer.byteLength(JSON.stringify(thirdEvent));
-
-      expect(firstEventByteSize).to.be.lessThan(5000);
-      expect(secondEventByteSize).to.be.lessThan(5000);
-      expect(thirdEventByteSize).to.be.lessThan(5000);
-
-      expect(thirdEventByteSize - firstEventByteSize).to.be.greaterThan(0);
+      [initialEvent, secondEvent, thirdEvent].forEach((event: Event) => {
+        expect(Buffer.byteLength(JSON.stringify(event))).to.be.lessThan(5000);
+      });
     });
   });
 }
