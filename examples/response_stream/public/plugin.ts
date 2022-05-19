@@ -31,7 +31,7 @@ export class ResponseStreamPlugin implements Plugin {
 
     developerExamples.register({
       appId: 'response-stream',
-      title: 'response-stream',
+      title: 'response stream',
       description:
         'This example demonstrates how to stream chunks of data to the client with just a single request.',
       links: [

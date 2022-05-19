@@ -20,23 +20,17 @@ export const Sidebar: React.FC<SidebarProps> = () => {
   return (
     <EuiPageSideBar>
       <EuiSideNav
-        items={[
-          {
-            name: 'response stream',
-            id: 'home',
-            items: routes.map(({ id, title, items }) => ({
-              id,
-              name: title,
-              isSelected: true,
-              items: items.map((route) => ({
-                id: route.id,
-                name: route.title,
-                onClick: () => history.push(`/${route.id}`),
-                'data-test-subj': route.id,
-              })),
-            })),
-          },
-        ]}
+        items={routes.map(({ id, title, items }) => ({
+          id,
+          name: title,
+          isSelected: true,
+          items: items.map((route) => ({
+            id: route.id,
+            name: route.title,
+            onClick: () => history.push(`/${route.id}`),
+            'data-test-subj': route.id,
+          })),
+        }))}
       />
     </EuiPageSideBar>
   );

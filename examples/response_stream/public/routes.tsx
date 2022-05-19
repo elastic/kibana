@@ -24,20 +24,14 @@ interface RouteDef {
 
 export const routes: RouteSectionDef[] = [
   {
-    title: 'simpleStringStream',
-    id: 'simpleStringStream',
+    title: 'response stream',
+    id: 'responseStream',
     items: [
       {
         title: 'Simple string stream',
         id: 'simple-string-stream',
         component: <PageSimpleStringStream />,
       },
-    ],
-  },
-  {
-    title: 'reducerStream',
-    id: 'reducerStream',
-    items: [
       {
         title: 'Reducer stream',
         id: 'reducer-stream',
