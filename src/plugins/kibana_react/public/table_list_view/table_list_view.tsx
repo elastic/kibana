@@ -523,7 +523,7 @@ class TableListView<V extends {}> extends React.Component<
           return (
             <EuiToolTip
               content={i18n.translate('kibana-react.tableListView.updatedDateUnknownLabel', {
-                defaultMessage: 'Updated date unknown',
+                defaultMessage: 'Last updated unknown',
               })}
             >
               <span>-</span>
