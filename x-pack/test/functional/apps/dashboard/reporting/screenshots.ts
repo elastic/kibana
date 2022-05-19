@@ -29,14 +29,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
 
+  const loadEcommerce = async () => {
+    await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
+    await kibanaServer.importExport.load(ecommerceSOPath);
+    await kibanaServer.uiSettings.replace({
+      defaultIndex: '5193f870-d861-11e9-a311-0fa548c5f953',
+    });
+  };
+  const unloadEcommerce = async () => {
+    await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
+    await kibanaServer.importExport.unload(ecommerceSOPath);
+  };
+
   describe('Dashboard Reporting Screenshots', () => {
     before('initialize tests', async () => {
-      await kibanaServer.uiSettings.replace({
-        defaultIndex: '5193f870-d861-11e9-a311-0fa548c5f953',
-      });
-
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/reporting/ecommerce');
-      await kibanaServer.importExport.load(ecommerceSOPath);
+      await loadEcommerce();
       await browser.setWindowSize(1600, 850);
 
       await security.role.create('test_dashboard_user', {
@@ -44,7 +51,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           cluster: [],
           indices: [
             {
-              names: ['ecommerce'],
+              names: ['ecommerce', 'kibana_sample_data_ecommerce'],
               privileges: ['read'],
               field_security: { grant: ['*'], except: [] },
             },
@@ -66,8 +73,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       ]);
     });
     after('clean up archives', async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
-      await kibanaServer.importExport.unload(ecommerceSOPath);
+      await unloadEcommerce();
       await es.deleteByQuery({
         index: '.reporting-*',
         refresh: true,
@@ -93,6 +99,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Print Layout', () => {
+      before(async () => {
+        await loadEcommerce();
+      });
+      after(async () => {
+        await unloadEcommerce();
+      });
+
       it('downloads a PDF file', async function () {
         // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
         // function is taking about 15 seconds per comparison in jenkins.
@@ -112,6 +125,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Print PNG button', () => {
+      before(async () => {
+        await loadEcommerce();
+      });
+      after(async () => {
+        await unloadEcommerce();
+      });
+
       it('is available if new', async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
@@ -128,6 +148,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('PNG Layout', () => {
+      before(async () => {
+        await loadEcommerce();
+      });
+      after(async () => {
+        await unloadEcommerce();
+      });
+
       const writeSessionReport = async (name: string, rawPdf: Buffer, reportExt: string) => {
         const sessionDirectory = path.resolve(REPORTS_FOLDER, 'session');
         await mkdirAsync(sessionDirectory, { recursive: true });
@@ -166,7 +193,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(percentDiff).to.be.lessThan(0.09);
       });
 
-      it('downloads a PNG file: large dashboard', async function () {
+      it('PNG file matches the baseline: large dashboard', async function () {
         this.timeout(300000);
 
         await PageObjects.common.navigateToApp('dashboard');
@@ -192,6 +219,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Preserve Layout', () => {
+      before(async () => {
+        await loadEcommerce();
+      });
+      after(async () => {
+        await unloadEcommerce();
+      });
+
       it('downloads a PDF file: small dashboard', async function () {
         this.timeout(300000);
         await PageObjects.common.navigateToApp('dashboard');

@@ -450,7 +450,7 @@ describe('Screenshot Observable Pipeline', () => {
                     "height": 1200,
                     "left": 0,
                     "top": 0,
-                    "width": 1800,
+                    "width": 1950,
                   },
                   "scroll": Object {
                     "x": 0,
