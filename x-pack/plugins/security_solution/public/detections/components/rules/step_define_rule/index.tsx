@@ -465,12 +465,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               <EuiFlexItem grow={2}>
                 <EuiText size="s">
                   <FormattedMessage
-                    id="securitySolution.dataViewSelectorText1"
+                    id="xpack.securitySolution.dataViewSelectorText1"
                     defaultMessage="Use Kibana "
                   />
                   <DocLink guidePath="kibana" docPath="data-views.html" linkText="Data Views" />
                   <FormattedMessage
-                    id="securitySolution.dataViewSelectorText2"
+                    id="xpack.securitySolution.dataViewSelectorText2"
                     defaultMessage=" or specify individual "
                   />
                   <DocLink
@@ -479,7 +479,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     linkText="index patterns"
                   />
                   <FormattedMessage
-                    id="securitySolution.dataViewSelectorText3"
+                    id="xpack.securitySolution.dataViewSelectorText3"
                     defaultMessage=" as your rule's data source to be searched."
                   />
                 </EuiText>
