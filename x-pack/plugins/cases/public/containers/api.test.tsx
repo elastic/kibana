@@ -6,6 +6,7 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
+import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import { KibanaServices } from '../common/lib/kibana';
 
 import { ConnectorTypes, CommentType, CaseStatuses, CaseSeverity } from '../../common/api';
@@ -31,6 +32,7 @@ import {
   createAttachments,
   pushCase,
   resolveCase,
+  getFeatureIds,
 } from './api';
 
 import {
@@ -603,6 +605,27 @@ describe('Case Configuration API', () => {
         signal: abortCtrl.signal,
       });
       expect(resp).toBe(undefined);
+    });
+  });
+
+  describe('getFeatureIds', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(['siem', 'observability']);
+    });
+
+    test('should be called with correct check url, method, signal', async () => {
+      const resp = await getFeatureIds(
+        { registrationContext: ['security', 'observability.logs'] },
+        abortCtrl.signal
+      );
+
+      expect(fetchMock).toHaveBeenCalledWith(`${BASE_RAC_ALERTS_API_PATH}/_feature_ids`, {
+        query: { registrationContext: ['security', 'observability.logs'] },
+        signal: abortCtrl.signal,
+      });
+
+      expect(resp).toEqual(['siem', 'observability']);
     });
   });
 });

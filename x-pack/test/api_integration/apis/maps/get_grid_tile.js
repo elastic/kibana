@@ -109,9 +109,9 @@ export default function ({ getService }) {
       expect(gridFeature.loadGeometry()).to.eql([
         [
           { x: 80, y: 672 },
-          { x: 96, y: 672 },
-          { x: 96, y: 656 },
           { x: 80, y: 656 },
+          { x: 96, y: 656 },
+          { x: 96, y: 672 },
           { x: 80, y: 672 },
         ],
       ]);
@@ -142,11 +142,11 @@ export default function ({ getService }) {
       expect(gridFeature.loadGeometry()).to.eql([
         [
           { x: 102, y: 669 },
-          { x: 99, y: 659 },
-          { x: 89, y: 657 },
-          { x: 83, y: 664 },
-          { x: 86, y: 674 },
           { x: 96, y: 676 },
+          { x: 86, y: 674 },
+          { x: 83, y: 664 },
+          { x: 89, y: 657 },
+          { x: 99, y: 659 },
           { x: 102, y: 669 },
         ],
       ]);
@@ -185,9 +185,9 @@ export default function ({ getService }) {
       expect(metadataFeature.loadGeometry()).to.eql([
         [
           { x: 0, y: 4096 },
-          { x: 4096, y: 4096 },
-          { x: 4096, y: 0 },
           { x: 0, y: 0 },
+          { x: 4096, y: 0 },
+          { x: 4096, y: 4096 },
           { x: 0, y: 4096 },
         ],
       ]);
