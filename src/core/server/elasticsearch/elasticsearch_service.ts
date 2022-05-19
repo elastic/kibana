@@ -9,10 +9,10 @@
 import { firstValueFrom, Observable, Subject } from 'rxjs';
 import { map, shareReplay, takeUntil } from 'rxjs/operators';
 
+import type { CoreContext } from '@kbn/core-server-internal-base';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import { AnalyticsServiceSetup } from '../analytics';
 import { CoreService } from '../../types';
-import type { CoreContext } from '@kbn/core-server-internal-base';
 import { Logger } from '../logging';
 
 import { ClusterClient, ElasticsearchClientConfig } from './client';
