@@ -10,10 +10,10 @@ import { useState, useEffect } from 'react';
 import {
   isClassificationEvaluateResponse,
   ResultsSearchQuery,
-  RocCurveItem,
   ANALYSIS_CONFIG_TYPE,
 } from '../../../../common/analytics';
 import { isKeywordAndTextType } from '../../../../common/fields';
+import { RocCurveItem } from '../../../../../../../common/types/data_frame_analytics';
 
 import {
   getDependentVar,

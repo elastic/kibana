@@ -61,6 +61,13 @@ export interface DataFrameAnalyticsConfig
   analyzed_fields?: estypes.MlDataframeAnalysisAnalyzedFields;
 }
 
+export interface UpdateDataFrameAnalyticsConfig {
+  allow_lazy_start?: string;
+  description?: string;
+  model_memory_limit?: string;
+  max_num_threads?: number;
+}
+
 export type DataFrameAnalysisConfigType =
   typeof ANALYSIS_CONFIG_TYPE[keyof typeof ANALYSIS_CONFIG_TYPE];
 
@@ -72,6 +79,62 @@ export interface DataFrameAnalyticsStats extends Omit<estypes.MlDataframeAnalyti
 }
 
 export type DfAnalyticsExplainResponse = estypes.MlExplainDataFrameAnalyticsResponse;
+
+export interface PredictedClass {
+  predicted_class: string;
+  count: number;
+}
+export interface ConfusionMatrix {
+  actual_class: string;
+  actual_class_doc_count: number;
+  predicted_classes: PredictedClass[];
+  other_predicted_class_doc_count: number;
+}
+
+export interface RocCurveItem {
+  fpr: number;
+  threshold: number;
+  tpr: number;
+}
+
+interface EvalClass {
+  class_name: string;
+  value: number;
+}
+export interface ClassificationEvaluateResponse {
+  classification: {
+    multiclass_confusion_matrix?: {
+      confusion_matrix: ConfusionMatrix[];
+    };
+    recall?: {
+      classes: EvalClass[];
+      avg_recall: number;
+    };
+    accuracy?: {
+      classes: EvalClass[];
+      overall_accuracy: number;
+    };
+    auc_roc?: {
+      curve?: RocCurveItem[];
+      value: number;
+    };
+  };
+}
+
+export interface EvaluateMetrics {
+  classification: {
+    accuracy?: object;
+    recall?: object;
+    multiclass_confusion_matrix?: object;
+    auc_roc?: { include_curve: boolean; class_name: string };
+  };
+  regression: {
+    r_squared: object;
+    mse: object;
+    msle: object;
+    huber: object;
+  };
+}
 
 export interface FieldSelectionItem
   extends Omit<estypes.MlDataframeAnalyticsFieldSelection, 'mapping_types'> {
@@ -103,3 +166,13 @@ export interface AnalyticsMapReturnType {
 }
 
 export type FeatureProcessor = estypes.MlDataframeAnalysisFeatureProcessor;
+
+export interface TrackTotalHitsSearchResponse {
+  hits: {
+    total: {
+      value: number;
+      relation: string;
+    };
+    hits: any[];
+  };
+}

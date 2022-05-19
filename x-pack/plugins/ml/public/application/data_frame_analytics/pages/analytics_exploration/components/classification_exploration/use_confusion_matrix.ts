@@ -9,13 +9,15 @@ import { useState, useEffect } from 'react';
 
 import {
   isClassificationEvaluateResponse,
-  ClassificationEvaluateResponse,
-  ConfusionMatrix,
   ResultsSearchQuery,
   ANALYSIS_CONFIG_TYPE,
   ClassificationMetricItem,
 } from '../../../../common/analytics';
 import { isKeywordAndTextType } from '../../../../common/fields';
+import {
+  ClassificationEvaluateResponse,
+  ConfusionMatrix,
+} from '../../../../../../../common/types/data_frame_analytics';
 
 import {
   getDependentVar,

@@ -34,10 +34,8 @@ import {
   MemoryInputValidatorResult,
 } from '../../../../../../../common/util/validators';
 import { DATA_FRAME_TASK_STATE } from '../analytics_list/common';
-import {
-  useRefreshAnalyticsList,
-  UpdateDataFrameAnalyticsConfig,
-} from '../../../../common/analytics';
+import { useRefreshAnalyticsList } from '../../../../common/analytics';
+import { UpdateDataFrameAnalyticsConfig } from '../../../../../../../common/types/data_frame_analytics';
 
 import { EditAction } from './use_edit_action';
 
