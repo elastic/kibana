@@ -43,6 +43,8 @@ const enabledActionTypes = [
   '.slack',
   '.webhook',
   '.xmatters',
+  '.test-sub-action-connector',
+  '.test-sub-action-connector-without-sub-actions',
   'test.authorization',
   'test.failing',
   'test.index-record',
