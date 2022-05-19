@@ -61,7 +61,7 @@ describe('xyVis', () => {
           ...rest,
           ...{ ...sampleLayer, markSizeAccessor: 'b' },
           markSizeRatio: 0,
-          referenceLineLayers: [],
+          referenceLines: [],
           annotationLayers: [],
         },
         createMockExecutionContext()
@@ -75,7 +75,7 @@ describe('xyVis', () => {
           ...rest,
           ...{ ...sampleLayer, markSizeAccessor: 'b' },
           markSizeRatio: 101,
-          referenceLineLayers: [],
+          referenceLines: [],
           annotationLayers: [],
         },
         createMockExecutionContext()
@@ -173,7 +173,7 @@ describe('xyVis', () => {
         {
           ...rest,
           ...restLayerArgs,
-          referenceLineLayers: [],
+          referenceLines: [],
           annotationLayers: [],
           markSizeRatio: 5,
         },
