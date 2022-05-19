@@ -81,7 +81,7 @@ export class MarkerSizeLegend extends Component<Props, State> {
       const circleCenterY = circleBottomY - radius;
       const circleTopY = circleCenterY - radius;
       return (
-        <g>
+        <g key={radius}>
           <line
             style={{ stroke: euiThemeVars.euiBorderColor }}
             x1={circleCenterX}
