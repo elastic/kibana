@@ -23,6 +23,7 @@ import {
   EuiHorizontalRule,
   EuiTabbedContent,
   EuiEmptyPrompt,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 
 import {
@@ -33,9 +34,11 @@ import {
   deleteRules,
   useLoadRuleTypes,
   RuleType,
+  RuleEventLogListProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 // TODO: use a Delete modal from triggersActionUI when it's sharable
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+
 import { DeleteModalConfirmation } from '../rules/components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from '../rules/components/center_justified_spinner';
 import { getHealthColor, OBSERVABILITY_SOLUTIONS } from '../rules/config';
@@ -68,6 +71,7 @@ export function RuleDetailsPage() {
       getRuleStatusDropdown,
       getEditAlertFlyout,
       actionTypeRegistry,
+      getRuleEventLogList,
     },
     application: { capabilities, navigateToUrl },
     notifications: { toasts },
@@ -168,7 +172,13 @@ export function RuleDetailsPage() {
         defaultMessage: 'Execution history',
       }),
       'data-test-subj': 'eventLogListTab',
-      content: <EuiText>Execution history</EuiText>,
+      content: rule ? (
+        getRuleEventLogList({
+          rule,
+        } as RuleEventLogListProps)
+      ) : (
+        <EuiLoadingSpinner size="m" />
+      ),
     },
     {
       id: ALERT_LIST_TAB,

@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { intersectionBy } from 'lodash';
 import { suspendedComponentWithProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { ActionsProps } from '../types';
 import { useFetchRuleActions } from '../../../hooks/use_fetch_rule_actions';
 import { useKibana } from '../../../utils/kibana_react';
@@ -26,7 +27,16 @@ export function Actions({ ruleActions, actionTypeRegistry }: ActionsProps) {
     notifications: { toasts },
   } = useKibana().services;
   const { isLoadingActions, allActions, errorActions } = useFetchRuleActions({ http });
-  if (ruleActions && ruleActions.length <= 0) return <EuiText size="s">0</EuiText>;
+  if (ruleActions && ruleActions.length <= 0)
+  return (
+    <EuiFlexItem>
+      <EuiText size="s">
+        {i18n.translate('xpack.observability.ruleDetails.noActions', {
+          defaultMessage: 'No actions',
+        })}
+      </EuiText>
+    </EuiFlexItem>
+  );
 
   function getActionIconClass(actionGroupId?: string): IconType | undefined {
     const actionGroup = actionTypeRegistry.list().find((group) => group.id === actionGroupId);
