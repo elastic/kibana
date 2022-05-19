@@ -110,8 +110,8 @@ export class SessionTimeout {
     }
   };
 
-  private isSessionState = (data: any): data is SessionState => {
-    return Object.hasOwn(data ?? {}, 'canBeExtended');
+  private isSessionState = (data: unknown): data is SessionState => {
+    return typeof data === 'object' && Object.hasOwn(data ?? {}, 'canBeExtended');
   };
 
   /**
