@@ -40,6 +40,9 @@ import {
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { UrlInputsModel } from '../../store/inputs/model';
 import { queryTimelineByIdOnUrlChange } from './query_timeline_by_id_on_url_change';
+import { useIsGroupedNavigationEnabled } from '../navigation/helpers';
+import { getLinkInfo } from '../../links';
+import { SecurityPageName } from '../../../app/types';
 
 function usePrevious(value: PreviousLocationUrlState) {
   const ref = useRef<PreviousLocationUrlState>(value);
@@ -62,6 +65,7 @@ export const useUrlStateHooks = ({
   const { filterManager, savedQueries } = useKibana().services.data.query;
   const { pathname: browserPathName } = useLocation();
   const prevProps = usePrevious({ pathName, pageName, urlState, search });
+  const isGroupedNavEnabled = useIsGroupedNavigationEnabled();
 
   const { setInitialStateFromUrl, updateTimeline, updateTimelineIsLoading } =
     useSetInitialStateFromUrl();
@@ -189,8 +193,12 @@ export const useUrlStateHooks = ({
   ]);
 
   useEffect(() => {
-    document.title = `${getTitle(pageName, navTabs)} - Kibana`;
-  }, [pageName, navTabs]);
+    if (!isGroupedNavEnabled) {
+      document.title = `${getTitle(pageName, navTabs)} - Kibana`;
+    } else {
+      document.title = `${getLinkInfo(pageName as SecurityPageName)?.title ?? ''} - Kibana`;
+    }
+  }, [pageName, navTabs, isGroupedNavEnabled]);
 
   useEffect(() => {
     queryTimelineByIdOnUrlChange({
