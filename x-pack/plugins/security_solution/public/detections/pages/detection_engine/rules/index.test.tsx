@@ -33,7 +33,25 @@ jest.mock('../../../containers/detection_engine/rules/use_find_rules_query');
 jest.mock('../../../../common/components/link_to');
 jest.mock('../../../components/user_info');
 
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../../common/lib/kibana');
+  return {
+    ...actual,
+
+    useKibana: () => ({
+      services: {
+        ...actual.useKibana().services,
+        application: {
+          navigateToApp: jest.fn(),
+        },
+      },
+    }),
+    useNavigation: () => ({
+      navigateTo: jest.fn(),
+    }),
+  };
+});
+
 jest.mock('../../../../common/components/toasters', () => {
   const actual = jest.requireActual('../../../../common/components/toasters');
   return {
