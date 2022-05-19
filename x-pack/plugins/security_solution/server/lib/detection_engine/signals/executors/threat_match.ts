@@ -42,7 +42,7 @@ export const threatMatchExecutor = async ({
   wrapHits,
 }: {
   inputIndex: string[];
-  runtimeMappings?: estypes.MappingRuntimeFields | null;
+  runtimeMappings: estypes.MappingRuntimeFields;
   completeRule: CompleteRule<ThreatRuleParams>;
   tuple: RuleRangeTuple;
   listClient: ListClient;

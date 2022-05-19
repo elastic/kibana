@@ -231,6 +231,7 @@ export const createThreatSignals = async ({
           tuple,
           type,
           wrapHits,
+          runtimeMappings,
         }),
     });
   } else {
@@ -278,6 +279,7 @@ export const createThreatSignals = async ({
           tuple,
           type,
           wrapHits,
+          runtimeMappings,
         }),
     });
   }

@@ -43,7 +43,6 @@ export const searchAfterAndBulkCreate = async ({
   wrapHits,
   runtimeMappings,
 }: SearchAfterAndBulkCreateParams): Promise<SearchAfterAndBulkCreateReturnType> => {
-  // eslint-disable-next-line complexity
   return withSecuritySpan('searchAfterAndBulkCreate', async () => {
     const ruleParams = completeRule.ruleParams;
     let toReturn = createSearchAfterReturnType();

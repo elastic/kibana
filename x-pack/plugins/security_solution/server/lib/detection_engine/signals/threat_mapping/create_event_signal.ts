@@ -47,6 +47,7 @@ export const createEventSignal = async ({
   threatIndicatorPath,
   threatPitId,
   reassignThreatPitId,
+  runtimeMappings,
 }: CreateEventSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
@@ -139,6 +140,7 @@ export const createEventSignal = async ({
       trackTotalHits: false,
       tuple,
       wrapHits,
+      runtimeMappings,
     });
 
     logger.debug(

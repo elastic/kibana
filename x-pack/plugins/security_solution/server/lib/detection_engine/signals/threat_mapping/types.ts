@@ -67,7 +67,7 @@ export interface CreateThreatSignalsOptions {
   tuple: RuleRangeTuple;
   type: Type;
   wrapHits: WrapHits;
-  runtimeMappings?: estypes.MappingRuntimeFields | null;
+  runtimeMappings: estypes.MappingRuntimeFields;
 }
 
 export interface CreateThreatSignalOptions {
@@ -94,6 +94,7 @@ export interface CreateThreatSignalOptions {
   tuple: RuleRangeTuple;
   type: Type;
   wrapHits: WrapHits;
+  runtimeMappings: estypes.MappingRuntimeFields;
 }
 
 export interface CreateEventSignalOptions {
@@ -128,6 +129,7 @@ export interface CreateEventSignalOptions {
   perPage?: number;
   threatPitId: OpenPointInTimeResponse['id'];
   reassignThreatPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
+  runtimeMappings: estypes.MappingRuntimeFields;
 }
 
 type EntryKey = 'field' | 'value';
