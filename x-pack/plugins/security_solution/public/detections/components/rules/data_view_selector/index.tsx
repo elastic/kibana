@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 
 import {
   EuiCallOut,
@@ -77,15 +77,23 @@ export const DataViewSelector = ({
       : [];
   }, [kibanaDataViewsDefined, kibanaDataViews]);
 
+  useEffect(() => {
+    const fetchSingleDataView = async () => {
+      if (selectedOption != null) {
+        const dv = await data.dataViews.get(selectedOption.id);
+        setIndexPattern(dv);
+      }
+    };
+
+    fetchSingleDataView();
+  }, [data.dataViews, selectedOption, setIndexPattern]);
+
   const onChangeDataViews = async (options: Array<EuiComboBoxOptionOption<string>>) => {
-    const [selectedDataView] = options;
+    const [selectedDataViewOption] = options;
 
-    if (selectedDataView != null && selectedDataView.id != null) {
-      const dv = await data.dataViews.get(selectedDataView.id);
-
+    if (selectedDataViewOption != null && selectedDataViewOption.id != null) {
       setSelectedOption(options);
-      setIndexPattern(dv);
-      field?.setValue(selectedDataView.id);
+      field?.setValue(selectedDataViewOption.id);
     }
   };
 

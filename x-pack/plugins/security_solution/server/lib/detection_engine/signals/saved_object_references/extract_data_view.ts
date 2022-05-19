@@ -36,7 +36,6 @@ export const extractDataView = ({
     | null;
 }): SavedObjectReference[] => {
   if (dataViewId == null) {
-    logger.error('Data View Id is null returning empty saved object reference');
     return [];
   } else {
     return [
