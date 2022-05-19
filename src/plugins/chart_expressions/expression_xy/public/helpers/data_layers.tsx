@@ -279,13 +279,20 @@ const getColor: GetColorFn = (
 const EMPTY_ACCESSOR = '-';
 const SPLIT_CHAR = '.';
 
-const generateSeriesId = (
-  { layerId, xAccessor, splitAccessor }: CommonXYDataLayerConfig,
-  accessor: string
+export const generateSeriesId = (
+  {
+    layerId,
+    xAccessor,
+    splitAccessor,
+  }: Pick<CommonXYDataLayerConfig, 'layerId' | 'xAccessor' | 'splitAccessor'>,
+  accessor?: string
 ) =>
-  [layerId, xAccessor ?? EMPTY_ACCESSOR, accessor, splitAccessor ?? EMPTY_ACCESSOR].join(
-    SPLIT_CHAR
-  );
+  [
+    layerId,
+    xAccessor ?? EMPTY_ACCESSOR,
+    accessor ?? EMPTY_ACCESSOR,
+    splitAccessor ?? EMPTY_ACCESSOR,
+  ].join(SPLIT_CHAR);
 
 export const getMetaFromSeriesId = (seriesId: string) => {
   const [layerId, xAccessor, yAccessor, splitAccessor] = seriesId.split(SPLIT_CHAR);
