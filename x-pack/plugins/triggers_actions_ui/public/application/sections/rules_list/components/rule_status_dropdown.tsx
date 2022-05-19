@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import {
@@ -32,6 +32,8 @@ import {
 import { parseInterval } from '../../../../../common';
 
 import { Rule } from '../../../../types';
+
+import { RuleSnoozeScheduler } from './rule_snooze_scheduler';
 
 type SnoozeUnit = 'm' | 'h' | 'd' | 'w' | 'M';
 const SNOOZE_END_TIME_FORMAT = 'LL @ LT';
@@ -256,6 +258,8 @@ const RuleStatusMenu: React.FunctionComponent<RuleStatusMenuProps> = ({
   snoozeEndTime,
   previousSnoozeInterval,
 }) => {
+  const contextMenuRef = useRef<React.ReactNode>(null);
+
   const enableRule = useCallback(() => {
     if (isSnoozed) {
       // Unsnooze if the rule is snoozed and the user clicks Enabled
@@ -277,6 +281,28 @@ const RuleStatusMenu: React.FunctionComponent<RuleStatusMenuProps> = ({
     },
     [onClosePopover, onChangeSnooze]
   );
+
+  const showScheduler = () => {
+    if (contextMenuRef.current) {
+      contextMenuRef.current.updater.enqueueSetState(contextMenuRef.current, {
+        outgoingPanelId: 1,
+        incomingPanelId: 2,
+        transitionDirection: 'next',
+        isOutgoingPanelVisible: true,
+      });
+    }
+  };
+
+  const exitScheduler = () => {
+    if (contextMenuRef.current) {
+      contextMenuRef.current.updater.enqueueSetState(contextMenuRef.current, {
+        outgoingPanelId: 2,
+        incomingPanelId: 1,
+        transitionDirection: 'previous',
+        isOutgoingPanelVisible: true,
+      });
+    }
+  };
 
   let snoozeButtonTitle = <EuiText size="s">{SNOOZE}</EuiText>;
   if (isSnoozed && snoozeEndTime) {
@@ -326,12 +352,27 @@ const RuleStatusMenu: React.FunctionComponent<RuleStatusMenuProps> = ({
           interval={futureTimeToInterval(snoozeEndTime)}
           showCancel={isSnoozed}
           previousSnoozeInterval={previousSnoozeInterval}
+          scheduledSnoozes={[]}
+          showScheduler={showScheduler}
         />
       ),
     },
+    {
+      id: 2,
+      width: 360,
+      content: <RuleSnoozeScheduler onClose={exitScheduler} />,
+    },
   ];
-
-  return <EuiContextMenu data-test-subj="ruleStatusMenu" initialPanelId={0} panels={panels} />;
+  return (
+    <EuiContextMenu
+      ref={(node) => {
+        contextMenuRef.current = node;
+      }}
+      data-test-subj="ruleStatusMenu"
+      initialPanelId={0}
+      panels={panels}
+    />
+  );
 };
 
 interface SnoozePanelProps {
@@ -339,6 +380,7 @@ interface SnoozePanelProps {
   applySnooze: (value: number | -1, unit?: SnoozeUnit) => void;
   showCancel: boolean;
   previousSnoozeInterval: string | null;
+  scheduledSnoozes: string[];
 }
 
 const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
@@ -346,6 +388,8 @@ const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
   applySnooze,
   showCancel,
   previousSnoozeInterval,
+  scheduledSnoozes,
+  showScheduler,
 }) => {
   const [intervalValue, setIntervalValue] = useState(parseInterval(interval).value);
   const [intervalUnit, setIntervalUnit] = useState(parseInterval(interval).unit);
@@ -365,6 +409,8 @@ const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
     [applySnooze, intervalValue, intervalUnit]
   );
   const onCancelSnooze = useCallback(() => applySnooze(0, 'm'), [applySnooze]);
+
+  const hasSchedules = useMemo(() => scheduledSnoozes.length > 0, [scheduledSnoozes]);
 
   const parsedPrevSnooze = previousSnoozeInterval ? parseInterval(previousSnoozeInterval) : null;
   const prevSnoozeEqualsCurrentSnooze =
@@ -394,7 +440,7 @@ const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
     </>
   );
   return (
-    <EuiPanel paddingSize="none">
+    <EuiPanel paddingSize="s" style={{ boxShadow: 'none' }}>
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem>
@@ -466,13 +512,47 @@ const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
           </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiHorizontalRule margin="s" />
+      {!hasSchedules && (
+        <>
+          <EuiFlexGroup>
+            <EuiFlexItem grow>
+              <EuiButton
+                color="primary"
+                onClick={showScheduler}
+                data-test-subj="ruleAddSchedule"
+                iconType="calendar"
+              >
+                {i18n.translate('xpack.triggersActionsUI.sections.rulesList.addSchedule', {
+                  defaultMessage: 'Add schedule',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiFlexGroup gutterSize="m">
+            <EuiFlexItem>
+              <EuiText textAlign="center" size="xs" color="subdued">
+                {i18n.translate(
+                  'xpack.triggersActionsUI.sections.rulesList.addScheduleDescription',
+                  {
+                    defaultMessage:
+                      'Create recurring schedules to silence actions during expected downtimes',
+                  }
+                )}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
       {showCancel && (
         <>
           <EuiHorizontalRule margin="s" />
           <EuiFlexGroup>
             <EuiFlexItem grow>
               <EuiButton color="danger" onClick={onCancelSnooze} data-test-subj="ruleSnoozeCancel">
-                Cancel snooze
+                {i18n.translate('xpack.triggersActionsUI.sections.rulesList.cancelSnooze', {
+                  defaultMessage: 'Cancel snooze',
+                })}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
