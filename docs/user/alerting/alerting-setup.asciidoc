@@ -82,20 +82,20 @@ A rule or connector created in one space will not be visible in another.
 
 Rules are authorized using an <<api-keys,API key>> associated with the last user 
 to edit the rule. This API key captures a snapshot of the user's privileges at 
-the time of edit and is subsequently used to run all background tasks associated 
+the time of the edit. They are subsequently used to run all background tasks associated 
 with the rule, including condition checks like {es} queries and triggered 
 actions. The following rule actions will re-generate the API key:
 
 * Creating a rule
 * Updating a rule
 
-Disabling a rule retains the associated API key which will be re-used when the 
+When you disable a rule, it retains the associated API key which is re-used when the 
 rule is enabled. If the disabled rule is missing an API key, then enabling the 
 rule will generate a new API key associated with the privileges of the user 
 who enabled the rule.
 
 You can update an API key manually in 
-**Stack Management > Rules and Connectors** by selecting **Update API key** in 
+**{stack-manage-app} > {rules-ui}** by selecting **Update API key** in 
 the actions menu of the respective rule.
 
 [role="screenshot"]
