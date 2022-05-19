@@ -12,14 +12,27 @@ import * as i18n from './translations';
 import { useToasts } from '../common/lib/kibana';
 import { getFeatureIds } from './api';
 
-export const useGetFeatureIds = (alertRegistrationContexts: string[]): ValidFeatureId[] => {
-  const [alertFeatureIds, setAlertFeatureIds] = useState<ValidFeatureId[]>([]);
+const initialStatus = {
+  isLoading: true,
+  alertFeatureIds: [] as ValidFeatureId[],
+  isError: false,
+};
+
+export const useGetFeatureIds = (
+  alertRegistrationContexts: string[]
+): {
+  isLoading: boolean;
+  isError: boolean;
+  alertFeatureIds: ValidFeatureId[];
+} => {
   const toasts = useToasts();
   const isCancelledRef = useRef(false);
   const abortCtrlRef = useRef(new AbortController());
+  const [status, setStatus] = useState(initialStatus);
 
   const fetchFeatureIds = useCallback(
     async (registrationContext: string[]) => {
+      setStatus({ isLoading: true, alertFeatureIds: [], isError: false });
       try {
         isCancelledRef.current = false;
         abortCtrlRef.current.abort();
@@ -29,10 +42,11 @@ export const useGetFeatureIds = (alertRegistrationContexts: string[]): ValidFeat
         const response = await getFeatureIds(query, abortCtrlRef.current.signal);
 
         if (!isCancelledRef.current) {
-          setAlertFeatureIds(response);
+          setStatus({ isLoading: false, alertFeatureIds: response, isError: false });
         }
       } catch (error) {
         if (!isCancelledRef.current) {
+          setStatus({ isLoading: false, alertFeatureIds: [], isError: true });
           if (error.name !== 'AbortError') {
             toasts.addError(
               error.body && error.body.message ? new Error(error.body.message) : error,
@@ -52,7 +66,9 @@ export const useGetFeatureIds = (alertRegistrationContexts: string[]): ValidFeat
       abortCtrlRef.current.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [alertRegistrationContexts]);
+  }, alertRegistrationContexts);
 
-  return alertFeatureIds;
+  return status;
 };
+
+export type UseGetFeatureIds = typeof useGetFeatureIds;

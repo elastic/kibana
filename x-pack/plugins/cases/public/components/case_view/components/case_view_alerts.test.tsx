@@ -65,4 +65,18 @@ describe('Case View Page activity tab', () => {
       );
     });
   });
+
+  it('should show an empty prompt when the cases has no alerts', async () => {
+    const result = appMockRender.render(
+      <CaseViewAlerts
+        caseData={{
+          ...caseData,
+          comments: [],
+        }}
+      />
+    );
+    await waitFor(async () => {
+      expect(result.getByTestId('caseViewAlertsEmpty')).toBeTruthy();
+    });
+  });
 });
