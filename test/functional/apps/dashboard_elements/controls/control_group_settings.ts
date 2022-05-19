@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('apply new default width and grow', async () => {
       it('defaults to medium width and grow enabled', async () => {
-        await dashboardControls.openCreateControlFlyout(OPTIONS_LIST_CONTROL);
+        await dashboardControls.openCreateControlFlyout();
         const mediumWidthButton = await testSubjects.find('control-editor-width-medium');
         expect(await mediumWidthButton.elementHasClass('euiButtonGroupButton-isSelected')).to.be(
           true
@@ -70,7 +70,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await secondControl.elementHasClass('controlFrameWrapper--small')).to.be(true);
         expect(await secondControl.elementHasClass('euiFlexItem--flexGrowZero')).to.be(true);
 
-        await dashboardControls.openCreateControlFlyout(OPTIONS_LIST_CONTROL);
+        await dashboardControls.openCreateControlFlyout();
         const smallWidthButton = await testSubjects.find('control-editor-width-small');
         expect(await smallWidthButton.elementHasClass('euiButtonGroupButton-isSelected')).to.be(
           true

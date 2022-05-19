@@ -7,11 +7,21 @@
  */
 
 import expect from '@kbn/expect';
-import { OPTIONS_LIST_CONTROL, ControlWidth } from '@kbn/controls-plugin/common';
+import {
+  OPTIONS_LIST_CONTROL,
+  RANGE_SLIDER_CONTROL,
+  ControlWidth,
+} from '@kbn/controls-plugin/common';
 import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common/control_group/types';
 import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 import { FtrService } from '../ftr_provider_context';
+
+const CONTROL_DISPLAY_NAMES: { [key: string]: string } = {
+  default: 'Please select a field',
+  [OPTIONS_LIST_CONTROL]: 'Options list',
+  [RANGE_SLIDER_CONTROL]: 'Range slider',
+};
 
 export class DashboardPageControls extends FtrService {
   private readonly log = this.ctx.getService('log');
@@ -78,14 +88,14 @@ export class DashboardPageControls extends FtrService {
     }
   }
 
-  public async openCreateControlFlyout(type: string) {
-    this.log.debug(`Opening flyout for ${type} control`);
+  public async openCreateControlFlyout() {
+    this.log.debug(`Opening flyout for creating a control`);
     await this.testSubjects.click('dashboard-controls-menu-button');
     await this.testSubjects.click('controls-create-button');
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail('control-editor-flyout');
     });
-    await this.controlEditorSetType(type);
+    await this.controlEditorVerifyType('default');
   }
 
   /* -----------------------------------------------------------
@@ -238,10 +248,12 @@ export class DashboardPageControls extends FtrService {
     grow?: boolean;
   }) {
     this.log.debug(`Creating ${controlType} control ${title ?? fieldName}`);
-    await this.openCreateControlFlyout(controlType);
+    await this.openCreateControlFlyout();
 
     if (dataViewTitle) await this.controlsEditorSetDataView(dataViewTitle);
-    if (fieldName) await this.controlsEditorSetfield(fieldName);
+
+    if (fieldName) await this.controlsEditorSetfield(fieldName, controlType);
+
     if (title) await this.controlEditorSetTitle(title);
     if (width) await this.controlEditorSetWidth(width);
     if (grow !== undefined) await this.controlEditorSetGrow(grow);
@@ -377,6 +389,9 @@ export class DashboardPageControls extends FtrService {
   public async controlEditorSave() {
     this.log.debug(`Saving changes in control editor`);
     await this.testSubjects.click(`control-editor-save`);
+    await this.retry.waitFor('flyout to close', async () => {
+      return !(await this.testSubjects.exists('control-editor-flyout'));
+    });
   }
 
   public async controlEditorCancel(confirm?: boolean) {
@@ -396,7 +411,11 @@ export class DashboardPageControls extends FtrService {
     await this.testSubjects.click(`data-view-picker-${dataViewTitle}`);
   }
 
-  public async controlsEditorSetfield(fieldName: string, shouldSearch: boolean = false) {
+  public async controlsEditorSetfield(
+    fieldName: string,
+    expectedType?: string,
+    shouldSearch: boolean = false
+  ) {
     this.log.debug(`Setting control field to ${fieldName}`);
     if (shouldSearch) {
       await this.testSubjects.setValue('field-search-input', fieldName);
@@ -405,17 +424,19 @@ export class DashboardPageControls extends FtrService {
       await this.testSubjects.existOrFail(`field-picker-select-${fieldName}`);
     });
     await this.testSubjects.click(`field-picker-select-${fieldName}`);
+    if (expectedType) await this.controlEditorVerifyType(expectedType);
   }
 
-  public async controlEditorSetType(type: string) {
-    this.log.debug(`Setting control type to ${type}`);
-    await this.testSubjects.click(`create-${type}-control`);
+  public async controlEditorVerifyType(type: string) {
+    this.log.debug(`Verifying that the control editor picked the type ${type}`);
+    const autoSelectedType = await this.testSubjects.getVisibleText('control-editor-type');
+    expect(autoSelectedType).to.equal(CONTROL_DISPLAY_NAMES[type]);
   }
 
   // Options List editor functions
   public async optionsListEditorGetCurrentDataView(openAndCloseFlyout?: boolean) {
     if (openAndCloseFlyout) {
-      await this.openCreateControlFlyout(OPTIONS_LIST_CONTROL);
+      await this.openCreateControlFlyout();
     }
     const dataViewName = (await this.testSubjects.find('open-data-view-picker')).getVisibleText();
     if (openAndCloseFlyout) {
