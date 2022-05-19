@@ -26,6 +26,7 @@ describe('buildTimelineEventsAllQuery', () => {
           direction: Direction.asc,
           field: '@timestamp',
           type: 'datetime',
+          esTypes: ['date'],
         },
       ],
       timerange: {

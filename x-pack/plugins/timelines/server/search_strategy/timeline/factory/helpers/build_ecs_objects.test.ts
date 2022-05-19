@@ -15,16 +15,6 @@ describe('buildEcsObjects', () => {
       _index: '.test-index',
       _id: 'test-id',
       _score: 0,
-      _source: {
-        '@timestamp': 123456,
-        host: {
-          architecture: 'windows98',
-          hostname: 'test-name',
-          id: 'some-id',
-          ip: [],
-          name: 'test-name',
-        },
-      },
       fields: {
         '@timestamp': [123456],
         'host.architecture': ['windows98'],
