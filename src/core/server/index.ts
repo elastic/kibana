@@ -117,7 +117,7 @@ export type {
   HandlerContextType,
   HandlerParameters,
 } from './context';
-export type { CoreId } from './core_context';
+export type { CoreId } from '@kbn/core-server-internal-base';
 
 export { CspConfig } from './csp';
 export type { ICspConfig } from './csp';

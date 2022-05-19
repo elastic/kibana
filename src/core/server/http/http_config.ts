@@ -7,12 +7,12 @@
  */
 
 import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
+import { IHttpConfig, SslConfig, sslSchema } from '@kbn/server-http-tools';
 import type { ServiceConfigDescriptor } from '@kbn/core-server-internal-base';
 import { hostname } from 'os';
 import url from 'url';
 
 import type { Duration } from 'moment';
-import { ServiceConfigDescriptor } from '../internal_types';
 import { CspConfigType, CspConfig, ICspConfig } from '../csp';
 import { ExternalUrlConfig, IExternalUrlConfig } from '../external_url';
 import {
