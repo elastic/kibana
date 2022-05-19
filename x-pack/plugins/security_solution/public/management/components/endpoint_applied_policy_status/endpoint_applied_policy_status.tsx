@@ -20,7 +20,7 @@ import { HostMetadata } from '../../../../common/endpoint/types';
  * By default, the policy status is displayed as plain text, however, that can be overriden
  * by defining the `children` prop or passing a child component to this one.
  */
-type EndpointAppliedPolicyStatusProps = PropsWithChildren<{
+export type EndpointAppliedPolicyStatusProps = PropsWithChildren<{
   policyApplied: HostMetadata['Endpoint']['policy']['applied'];
 }>;
 
@@ -39,7 +39,12 @@ export const EndpointAppliedPolicyStatus = memo<EndpointAppliedPolicyStatusProps
         }
         anchorClassName="eui-textTruncate"
         content={
-          <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+          <EuiFlexGroup
+            responsive={false}
+            gutterSize="s"
+            alignItems="center"
+            data-test-subj="endpointAppliedPolicyTooltipInfo"
+          >
             <EuiFlexItem className="eui-textTruncate" grow>
               <EuiText size="s" className="eui-textTruncate">
                 {policyApplied.name}

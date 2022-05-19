@@ -6,3 +6,4 @@
  */
 
 export { EndpointAppliedPolicyStatus } from './endpoint_applied_policy_status';
+export type { EndpointAppliedPolicyStatusProps } from './endpoint_applied_policy_status';
