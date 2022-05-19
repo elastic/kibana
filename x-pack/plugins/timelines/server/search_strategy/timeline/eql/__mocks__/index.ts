@@ -27,7 +27,6 @@ export const sequenceResponse = {
               {
                 _index: '.ds-logs-endpoint.events.security-default-2021.02.05-000005',
                 _id: 'qhymg3cBX5UUcOOYP3Ec',
-                _source: {},
                 fields: {
                   'agent.id': ['1d15cf9e-3dc7-5b97-f586-743f7c2518b2'],
                   'agent.type': ['endpoint'],
@@ -80,7 +79,6 @@ export const sequenceResponse = {
               {
                 _index: '.ds-logs-endpoint.events.security-default-2021.02.05-000005',
                 _id: 'qxymg3cBX5UUcOOYP3Ec',
-                _source: {},
                 fields: {
                   'agent.id': ['1d15cf9e-3dc7-5b97-f586-743f7c2518b2'],
                   'agent.type': ['endpoint'],
@@ -130,7 +128,6 @@ export const sequenceResponse = {
               {
                 _index: '.ds-logs-endpoint.events.security-default-2021.02.05-000005',
                 _id: 'rBymg3cBX5UUcOOYP3Ec',
-                _source: {},
                 fields: {
                   'agent.id': ['1d15cf9e-3dc7-5b97-f586-743f7c2518b2'],
                   'agent.type': ['endpoint'],
@@ -185,7 +182,6 @@ export const sequenceResponse = {
               {
                 _index: '.ds-logs-endpoint.events.security-default-2021.02.05-000005',
                 _id: 'qhymg3cBX5UUcOOYP3Ec',
-                _source: {},
                 fields: {
                   'agent.id': ['1d15cf9e-3dc7-5b97-f586-743f7c2518b2'],
                   'agent.type': ['endpoint'],
@@ -235,7 +231,6 @@ export const sequenceResponse = {
               {
                 _index: '.ds-logs-endpoint.events.security-default-2021.02.05-000005',
                 _id: 'rBymg3cBX5UUcOOYP3Ec',
-                _source: {},
                 fields: {
                   'agent.id': ['1d15cf9e-3dc7-5b97-f586-743f7c2518b2'],
                   'agent.type': ['endpoint'],
@@ -285,7 +280,6 @@ export const sequenceResponse = {
               {
                 _index: '.ds-logs-endpoint.events.process-default-2021.02.02-000005',
                 _id: 'pxymg3cBX5UUcOOYP3Ec',
-                _source: {},
                 fields: {
                   'agent.id': ['1d15cf9e-3dc7-5b97-f586-743f7c2518b2'],
                   'agent.type': ['endpoint'],
@@ -378,7 +372,6 @@ export const sequenceResponse = {
               {
                 _index: '.ds-logs-endpoint.events.security-default-2021.02.05-000005',
                 _id: 'rBymg3cBX5UUcOOYP3Ec',
-                _source: {},
                 fields: {
                   'agent.id': ['1d15cf9e-3dc7-5b97-f586-743f7c2518b2'],
                   'agent.type': ['endpoint'],
@@ -426,7 +419,6 @@ export const sequenceResponse = {
               {
                 _index: '.ds-logs-endpoint.events.process-default-2021.02.02-000005',
                 _id: 'pxymg3cBX5UUcOOYP3Ec',
-                _source: {},
                 fields: {
                   'agent.id': ['1d15cf9e-3dc7-5b97-f586-743f7c2518b2'],
                   'agent.type': ['endpoint'],
@@ -513,7 +505,6 @@ export const sequenceResponse = {
               {
                 _index: '.ds-logs-endpoint.events.network-default-2021.02.02-000005',
                 _id: 'qBymg3cBX5UUcOOYP3Ec',
-                _source: {},
                 fields: {
                   'agent.id': ['1d15cf9e-3dc7-5b97-f586-743f7c2518b2'],
                   'agent.type': ['endpoint'],
@@ -600,7 +591,6 @@ export const eventsResponse = {
           {
             _index: '.ds-logs-endpoint.events.security-default-2021.02.05-000005',
             _id: 'qhymg3cBX5UUcOOYP3Ec',
-            _source: {},
             fields: {
               'agent.id': ['1d15cf9e-3dc7-5b97-f586-743f7c2518b2'],
               'agent.type': ['endpoint'],
@@ -653,7 +643,6 @@ export const eventsResponse = {
           {
             _index: '.ds-logs-endpoint.events.security-default-2021.02.05-000005',
             _id: 'qxymg3cBX5UUcOOYP3Ec',
-            _source: {},
             fields: {
               'agent.id': ['1d15cf9e-3dc7-5b97-f586-743f7c2518b2'],
               'agent.type': ['endpoint'],
@@ -703,7 +692,6 @@ export const eventsResponse = {
           {
             _index: '.ds-logs-endpoint.events.security-default-2021.02.05-000005',
             _id: 'rBymg3cBX5UUcOOYP3Ec',
-            _source: {},
             fields: {
               'agent.id': ['1d15cf9e-3dc7-5b97-f586-743f7c2518b2'],
               'agent.type': ['endpoint'],
@@ -753,7 +741,6 @@ export const eventsResponse = {
           {
             _index: '.ds-logs-endpoint.events.security-default-2021.02.05-000005',
             _id: 'qxymg3cBX5UUcOOYP3Ec',
-            _source: {},
             fields: {
               'agent.id': ['1d15cf9e-3dc7-5b97-f586-743f7c2518b2'],
               'agent.type': ['endpoint'],
@@ -803,7 +790,6 @@ export const eventsResponse = {
           {
             _index: '.ds-logs-endpoint.events.security-default-2021.02.05-000005',
             _id: 'rBymg3cBX5UUcOOYP3Ec',
-            _source: {},
             fields: {
               'agent.id': ['1d15cf9e-3dc7-5b97-f586-743f7c2518b2'],
               'agent.type': ['endpoint'],
@@ -853,7 +839,6 @@ export const eventsResponse = {
           {
             _index: '.ds-logs-endpoint.events.process-default-2021.02.02-000005',
             _id: 'pxymg3cBX5UUcOOYP3Ec',
-            _source: {},
             fields: {
               'agent.id': ['1d15cf9e-3dc7-5b97-f586-743f7c2518b2'],
               'agent.type': ['endpoint'],

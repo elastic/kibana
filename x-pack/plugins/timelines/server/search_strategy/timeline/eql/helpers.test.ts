@@ -50,7 +50,6 @@ describe('Search Strategy EQL helper', () => {
         Object {
           "allow_no_indices": true,
           "body": Object {
-            "_source": false,
             "event_category_field": "event.category",
             "fields": Array [
               Object {
@@ -114,7 +113,6 @@ describe('Search Strategy EQL helper', () => {
         Object {
           "allow_no_indices": true,
           "body": Object {
-            "_source": false,
             "event_category_field": "event.super.category",
             "fields": Array [
               Object {
