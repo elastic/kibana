@@ -66,21 +66,21 @@ const fields = [
 
 export const buildDataViewMock = ({
   name,
-  fields,
+  fields: definedFields,
   timeFieldName,
 }: {
   name: string;
   fields: DataView['fields'];
   timeFieldName?: string;
 }): DataView => {
-  const dataViewFields = [...fields] as DataView['fields'];
+  const dataViewFields = [...definedFields] as DataView['fields'];
 
-  dataViewFields.getByName = (name: string) => {
-    return dataViewFields.find((field) => field.name === name);
+  dataViewFields.getByName = (fieldName: string) => {
+    return dataViewFields.find((field) => field.name === fieldName);
   };
 
   dataViewFields.getAll = () => {
-    return fields;
+    return dataViewFields;
   };
 
   const dataView = {
@@ -90,7 +90,7 @@ export const buildDataViewMock = ({
     fields: dataViewFields,
     getComputedFields: () => ({ docvalueFields: [], scriptFields: {}, storedFields: ['*'] }),
     getSourceFiltering: () => ({}),
-    getFieldByName: jest.fn((name: string) => dataViewFields.getByName(name)),
+    getFieldByName: jest.fn((fieldName: string) => dataViewFields.getByName(fieldName)),
     timeFieldName: timeFieldName || '',
     docvalueFields: [],
     getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
