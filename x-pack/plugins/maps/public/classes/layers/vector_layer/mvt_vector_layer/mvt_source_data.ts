@@ -88,6 +88,7 @@ export async function syncMvtSourceData({
       tileMinZoom: source.getMinZoom(),
       tileMaxZoom: source.getMaxZoom(),
       refreshToken,
+      hasLabels,
     };
     syncContext.stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, sourceData, {});
   } catch (error) {
