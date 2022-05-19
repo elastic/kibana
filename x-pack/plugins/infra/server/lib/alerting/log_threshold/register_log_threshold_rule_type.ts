@@ -111,6 +111,7 @@ export async function registerLogThresholdRuleType(
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor: createLogThresholdExecutor(libs),
+    doesSetRecoveryContext: true,
     actionVariables: {
       context: [
         { name: 'timestamp', description: timestampActionVariableDescription },

@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 import {
   Aggregators,
   Comparator,
@@ -80,6 +81,7 @@ export const getData = async (
   compositeSize: number,
   alertOnGroupDisappear: boolean,
   timeframe: { start: number; end: number },
+  logger: Logger,
   lastPeriodEnd?: number,
   previousResults: GetDataResponse = {},
   afterKey?: Record<string, string>
@@ -137,6 +139,7 @@ export const getData = async (
           compositeSize,
           alertOnGroupDisappear,
           timeframe,
+          logger,
           lastPeriodEnd,
           previous,
           nextAfterKey
@@ -203,7 +206,10 @@ export const getData = async (
       afterKey
     ),
   };
-  const { aggregations, _shards } = await esClient.search<undefined, ResponseAggregations>(request);
+  logger.trace(`Request: ${JSON.stringify(request)}`);
+  const body = await esClient.search<undefined, ResponseAggregations>(request);
+  const { aggregations, _shards } = body;
+  logger.trace(`Response: ${JSON.stringify(body)}`);
   if (aggregations) {
     return handleResponse(aggregations, previousResults, _shards.successful);
   } else if (_shards.successful) {
