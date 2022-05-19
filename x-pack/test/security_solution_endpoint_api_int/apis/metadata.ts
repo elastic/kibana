@@ -8,6 +8,7 @@
 import uuid from 'uuid';
 import expect from '@kbn/expect';
 import { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
+
 import { FtrProviderContext } from '../ftr_provider_context';
 import {
   deleteAllDocsFromMetadataCurrentIndex,
@@ -32,6 +33,7 @@ import { AGENTS_INDEX } from '../../../plugins/fleet/common';
 import { generateAgentDocs, generateMetadataDocs } from './metadata.fixtures';
 import { indexFleetEndpointPolicy } from '../../../plugins/security_solution/common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { TRANSFORM_STATES } from '../../../plugins/security_solution/common/constants';
+import type { IndexedHostsAndAlertsResponse } from '../../../plugins/security_solution/common/endpoint/index_data';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -47,38 +49,37 @@ export default function ({ getService }: FtrProviderContext) {
         const numberOfHostsInFixture = 2;
 
         before(async () => {
-          await stopTransform(getService, `${METADATA_UNITED_TRANSFORM}*`);
           await deleteAllDocsFromFleetAgents(getService);
           await deleteAllDocsFromMetadataDatastream(getService);
           await deleteAllDocsFromMetadataCurrentIndex(getService);
           await deleteAllDocsFromIndex(getService, METADATA_UNITED_INDEX);
 
-          // generate an endpoint policy and attach id to agents since
-          // metadata list api filters down to endpoint policies only
-          const policy = await indexFleetEndpointPolicy(
-            getService('kibanaServer'),
-            `Default ${uuid.v4()}`,
-            '1.1.1'
-          );
-          const policyId = policy.integrationPolicies[0].policy_id;
-          const currentTime = new Date().getTime();
+          const customIndexFn = async (): Promise<IndexedHostsAndAlertsResponse> => {
+            // generate an endpoint policy and attach id to agents since
+            // metadata list api filters down to endpoint policies only
+            const policy = await indexFleetEndpointPolicy(
+              getService('kibanaServer'),
+              `Default ${uuid.v4()}`,
+              '1.1.1'
+            );
+            const policyId = policy.integrationPolicies[0].policy_id;
+            const currentTime = new Date().getTime();
 
-          const agentDocs = generateAgentDocs(currentTime, policyId);
+            const agentDocs = generateAgentDocs(currentTime, policyId);
+            const metadataDocs = generateMetadataDocs(currentTime);
 
-          await Promise.all([
-            bulkIndex(getService, AGENTS_INDEX, agentDocs),
-            bulkIndex(getService, METADATA_DATASTREAM, generateMetadataDocs(currentTime)),
-          ]);
+            await Promise.all([
+              bulkIndex(getService, AGENTS_INDEX, agentDocs),
+              bulkIndex(getService, METADATA_DATASTREAM, metadataDocs),
+            ]);
 
-          await endpointTestResources.waitForEndpoints(
-            agentDocs.map((doc) => doc.agent.id),
-            60000
-          );
-          await startTransform(getService, METADATA_UNITED_TRANSFORM);
-          await endpointTestResources.waitForUnitedEndpoints(
-            agentDocs.map((doc) => doc.agent.id),
-            60000
-          );
+            return {
+              agents: agentDocs,
+              hosts: metadataDocs,
+            } as unknown as IndexedHostsAndAlertsResponse;
+          };
+
+          await endpointTestResources.loadEndpointData({ customIndexFn });
         });
 
         after(async () => {

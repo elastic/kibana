@@ -15,23 +15,15 @@ import {
 import { wrapErrorAndRejectPromise } from '../../../plugins/security_solution/common/endpoint/data_loaders/utils';
 
 export default function ({ getService }: FtrProviderContext) {
-  const endpointTestResources = getService('endpointTestResources');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('When attempting to call an endpoint api with no authz', () => {
-    let loadedData: IndexedHostsAndAlertsResponse;
-
     before(async () => {
       // create role/user
       await createUserAndRole(getService, ROLES.t1_analyst);
-      loadedData = await endpointTestResources.loadEndpointData();
     });
 
     after(async () => {
-      if (loadedData) {
-        await endpointTestResources.unloadEndpointData(loadedData);
-      }
-
       // delete role/user
       await deleteUserAndRole(getService, ROLES.t1_analyst);
     });
