@@ -8,13 +8,17 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { kibanaService } from '../../state/kibana_service';
-import { ServiceLocationErrors, ServiceLocations } from '../../../../common/runtime_types';
+import { IToasts } from '@kbn/core/public';
+import { ServiceLocationErrors, ServiceLocations } from '../../../../../common/runtime_types';
 
-export const showSyncErrors = (errors: ServiceLocationErrors, locations: ServiceLocations) => {
+export const showSyncErrors = (
+  errors: ServiceLocationErrors,
+  locations: ServiceLocations,
+  toasts: IToasts
+) => {
   Object.values(errors).forEach((location) => {
     const { status: responseStatus, reason } = location.error || {};
-    kibanaService.toasts.addWarning({
+    toasts.addWarning({
       title: i18n.translate('xpack.synthetics.monitorManagement.service.error.title', {
         defaultMessage: `Unable to sync monitor config`,
       }),

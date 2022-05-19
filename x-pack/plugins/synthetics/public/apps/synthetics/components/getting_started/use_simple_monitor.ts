@@ -8,6 +8,9 @@
 import { useFetcher } from '@kbn/observability-plugin/public';
 import { useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useSelector } from 'react-redux';
+import { serviceLocationsSelector } from '../../state/monitor_management/selectors';
+import { showSyncErrors } from '../monitor_management/show_sync_errors';
 import { createMonitorAPI } from '../../state/monitor_management/api';
 import { DEFAULT_FIELDS } from '../../../../../common/constants/monitor_defaults';
 import { ConfigKey } from '../../../../../common/constants/monitor_management';
@@ -17,6 +20,7 @@ import { kibanaService } from '../../../../utils/kibana_service';
 
 export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData }) => {
   const { application } = useKibana().services;
+  const locationsList = useSelector(serviceLocationsSelector);
 
   const { data, loading } = useFetcher(() => {
     if (!monitorData) {
@@ -28,8 +32,8 @@ export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData
       monitor: {
         ...DEFAULT_FIELDS.browser,
         'source.inline.script': `step('Go to ${urls}', async () => {
-                                    await page.goto('${urls}');
-                                });`,
+  await page.goto('${urls}');
+});`,
         [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
         [ConfigKey.NAME]: MY_FIRST_MONITOR,
         [ConfigKey.LOCATIONS]: locations,
@@ -40,6 +44,11 @@ export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData
 
   useEffect(() => {
     const newMonitor = data as SyntheticsMonitorWithId;
+    const hasErrors = data && 'attributes' in data && data.attributes.errors?.length > 0;
+    if (hasErrors && !loading) {
+      showSyncErrors(data.attributes.errors, locationsList, kibanaService.toasts);
+    }
+
     if (!loading && newMonitor?.id) {
       kibanaService.toasts.addSuccess({
         title: MONITOR_SUCCESS_LABEL,
@@ -47,7 +56,7 @@ export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData
       });
       application?.navigateToApp('uptime', { path: `/monitor/${btoa(newMonitor.id)}` });
     }
-  }, [application, data, loading]);
+  }, [application, data, loading, locationsList]);
 
   return { data, loading };
 };
