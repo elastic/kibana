@@ -153,7 +153,7 @@ const ControlsWarningFormatMessage: FC<WarningMessageProps> = (props) => {
   return (
     <FormattedMessage
       id="visualizations.controls.notificationMessage"
-      defaultMessage="Controls is deprecated and will be removed in a future release. Use the new Controls to filter and interact with your dashboard data. "
+      defaultMessage="Input controls are deprecated and will be removed in a future release. Use the new Controls to filter and interact with your dashboard data. "
     />
   );
 };
