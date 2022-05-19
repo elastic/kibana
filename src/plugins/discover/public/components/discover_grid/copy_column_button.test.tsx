@@ -50,7 +50,7 @@ describe('Copy to clipboard button', () => {
       columnId: 'extension',
       services: discoverServiceMock,
       getCellTextToCopy: discoverGridContextMock.getCellTextToCopy,
-      rowsNumber: 3,
+      rowsCount: 3,
     });
 
     const wrapper = mountWithIntl(
@@ -72,7 +72,7 @@ describe('Copy to clipboard button', () => {
       columnId: '_source',
       services: discoverServiceMock,
       getCellTextToCopy: discoverGridContextMock.getCellTextToCopy,
-      rowsNumber: 3,
+      rowsCount: 3,
     });
 
     const wrapperSource = mountWithIntl(

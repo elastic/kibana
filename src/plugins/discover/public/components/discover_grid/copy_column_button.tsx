@@ -56,12 +56,12 @@ export function buildCopyColumnValuesButton({
   columnId,
   services,
   getCellTextToCopy,
-  rowsNumber,
+  rowsCount,
 }: {
   columnId: string;
   services: DiscoverServices;
   getCellTextToCopy: GetCellTextToCopy;
-  rowsNumber: number;
+  rowsCount: number;
 }): EuiListGroupItemProps {
   return buildCopyColumnButton({
     label: (
@@ -75,7 +75,7 @@ export function buildCopyColumnValuesButton({
         columnId,
         services,
         getCellTextToCopy,
-        rowsNumber,
+        rowsCount,
       }),
   });
 }

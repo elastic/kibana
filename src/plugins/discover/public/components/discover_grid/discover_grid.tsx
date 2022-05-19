@@ -337,7 +337,7 @@ export const DiscoverGrid = ({
     () =>
       getEuiGridColumns({
         columns: displayedColumns,
-        rowsNumber: displayedRows.length,
+        rowsCount: displayedRows.length,
         settings,
         indexPattern,
         showTimeCol,

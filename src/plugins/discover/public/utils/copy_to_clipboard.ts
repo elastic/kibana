@@ -72,16 +72,16 @@ export const copyColumnValuesToClipboard = async ({
   columnId,
   services,
   getCellTextToCopy,
-  rowsNumber,
+  rowsCount,
 }: {
   columnId: string;
   services: DiscoverServices;
   getCellTextToCopy: GetCellTextToCopy;
-  rowsNumber: number;
+  rowsCount: number;
 }) => {
   const { toastNotifications } = services;
 
-  const valuesFormatted = [...Array(rowsNumber)].map((_, rowIndex) => {
+  const valuesFormatted = [...Array(rowsCount)].map((_, rowIndex) => {
     return getCellTextToCopy(rowIndex, columnId, { allowMultiline: false });
   });
 

@@ -61,7 +61,7 @@ export function buildEuiGridColumn({
   isSortEnabled,
   services,
   getCellTextToCopy,
-  rowsNumber,
+  rowsCount,
 }: {
   columnName: string;
   columnWidth: number | undefined;
@@ -70,7 +70,7 @@ export function buildEuiGridColumn({
   isSortEnabled: boolean;
   services: DiscoverServices;
   getCellTextToCopy: GetCellTextToCopy;
-  rowsNumber: number;
+  rowsCount: number;
 }) {
   const indexPatternField = indexPattern.getFieldByName(columnName);
   const column: EuiDataGridColumn = {
@@ -103,7 +103,7 @@ export function buildEuiGridColumn({
           columnId: columnName,
           services,
           getCellTextToCopy,
-          rowsNumber,
+          rowsCount,
         }),
       ],
     },
@@ -143,7 +143,7 @@ export function buildEuiGridColumn({
 
 export function getEuiGridColumns({
   columns,
-  rowsNumber,
+  rowsCount,
   settings,
   indexPattern,
   showTimeCol,
@@ -153,7 +153,7 @@ export function getEuiGridColumns({
   getCellTextToCopy,
 }: {
   columns: string[];
-  rowsNumber: number;
+  rowsCount: number;
   settings: DiscoverGridSettings | undefined;
   indexPattern: DataView;
   showTimeCol: boolean;
@@ -179,7 +179,7 @@ export function getEuiGridColumns({
       isSortEnabled,
       services,
       getCellTextToCopy,
-      rowsNumber,
+      rowsCount,
     })
   );
 }

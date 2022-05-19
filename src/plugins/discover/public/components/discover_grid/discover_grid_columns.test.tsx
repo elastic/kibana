@@ -22,7 +22,7 @@ describe('Discover grid columns', function () {
       defaultColumns: false,
       isSortEnabled: true,
       getCellTextToCopy: discoverGridContextMock.getCellTextToCopy,
-      rowsNumber: 100,
+      rowsCount: 100,
       services: discoverServiceMock,
     });
     expect(actual).toMatchInlineSnapshot(`
@@ -125,7 +125,7 @@ describe('Discover grid columns', function () {
       defaultColumns: true,
       isSortEnabled: true,
       getCellTextToCopy: discoverGridContextMock.getCellTextToCopy,
-      rowsNumber: 100,
+      rowsCount: 100,
       services: discoverServiceMock,
     });
     expect(actual).toMatchInlineSnapshot(`
@@ -225,7 +225,7 @@ describe('Discover grid columns', function () {
       defaultColumns: false,
       isSortEnabled: true,
       getCellTextToCopy: discoverGridContextMock.getCellTextToCopy,
-      rowsNumber: 100,
+      rowsCount: 100,
       services: discoverServiceMock,
     });
     expect(actual).toMatchInlineSnapshot(`
