@@ -18,7 +18,7 @@ export function getSingleMetricConfig({ dataView }: ConfigProps): SeriesConfig {
     breakdownFields: [],
     filterFields: [],
     seriesTypes: [],
-    hasOperationType: true,
+    hasOperationType: false,
     definitionFields: ['service.name'],
     reportType: 'single-metric',
     baseFilters: [

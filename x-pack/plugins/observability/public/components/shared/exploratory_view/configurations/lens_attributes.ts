@@ -125,7 +125,7 @@ export class LensAttributes {
     this.reportType = reportType;
 
     layerConfigs.forEach(({ seriesConfig, operationType }) => {
-      if (operationType && reportType !== 'single-metric') {
+      if (operationType && reportType !== ReportTypes.SINGLE_METRIC) {
         seriesConfig.yAxisColumns.forEach((yAxisColumn) => {
           if (typeof yAxisColumn.operationType !== undefined) {
             yAxisColumn.operationType =
@@ -135,7 +135,7 @@ export class LensAttributes {
       }
     });
 
-    if (reportType === 'single-metric') {
+    if (reportType === ReportTypes.SINGLE_METRIC) {
       return;
     }
 
@@ -864,6 +864,7 @@ export class LensAttributes {
       })),
     ];
   }
+
   getJSON(lastRefresh?: number): TypedLensByValueInput['attributes'] {
     const query = this.globalFilter || this.layerConfigs[0].seriesConfig.query;
 

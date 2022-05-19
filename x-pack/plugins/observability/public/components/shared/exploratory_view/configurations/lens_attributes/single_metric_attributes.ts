@@ -34,7 +34,10 @@ export class SingleMetricLensAttributes extends LensAttributes {
   getSingleMetricLayer() {
     const { seriesConfig, selectedMetricField, operationType } = this.layerConfigs[0];
 
-    const { columnFilter, columnField } = parseCustomFieldName(seriesConfig, selectedMetricField);
+    const { columnFilter, columnField, columnLabel } = parseCustomFieldName(
+      seriesConfig,
+      selectedMetricField
+    );
 
     const getSourceField = () => {
       if (selectedMetricField.startsWith('Records') || selectedMetricField.startsWith('records')) {
@@ -45,16 +48,12 @@ export class SingleMetricLensAttributes extends LensAttributes {
 
     const sourceField = getSourceField();
 
-    // if (!operationType && sourceField !== 'Records') {
-    //   throw new Error('OperationTYpe is required for SingleMetric');
-    // }
-
     return {
       layer0: {
         columns: {
           [this.columnId]: {
             ...buildNumberColumn(sourceField),
-            label: '',
+            label: columnLabel,
             operationType: operationType ?? sourceField === 'Records' ? 'count' : 'median',
             filter: columnFilter,
           },

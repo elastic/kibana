@@ -140,6 +140,7 @@ export enum ReportTypes {
   DISTRIBUTION = 'data-distribution',
   CORE_WEB_VITAL = 'core-web-vitals',
   DEVICE_DISTRIBUTION = 'device-data-distribution',
+  SINGLE_METRIC = 'single-metric',
 }
 
 export enum DataTypes {

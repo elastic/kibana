@@ -113,7 +113,7 @@ export interface UrlFilter {
 }
 
 export interface ConfigProps {
-  dataView: DataView;
+  dataView?: DataView;
   series?: SeriesUrl;
 }
 
