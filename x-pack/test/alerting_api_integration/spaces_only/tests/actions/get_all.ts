@@ -271,12 +271,12 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
             referencedByCount: 0,
           },
           {
-            connector_type_id: '.servicenow',
+            actionTypeId: '.servicenow',
             id: 'my-deprecated-servicenow-default',
-            is_preconfigured: true,
-            is_deprecated: true,
+            isPreconfigured: true,
+            isDeprecated: true,
             name: 'ServiceNow#xyz',
-            referenced_by_count: 0,
+            referencedByCount: 0,
           },
           {
             id: 'my-slack1',
