@@ -14,7 +14,6 @@ import {
   EuiLink,
   EuiTableDataType,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core/public';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 import { get } from 'lodash';
@@ -22,14 +21,19 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import {
   SavedObjectRelation,
-  getSavedObjectLabel,
   SavedObjectManagementTypeInfo,
-  getDefaultTitle,
   SavedObjectsManagementPluginStart,
 } from '@kbn/saved-objects-management-plugin/public';
 
 import { EuiToolTip, EuiIcon, SearchFilterConfig } from '@elastic/eui';
 import { IPM_APP_ID } from '../../../plugin';
+import {
+  typeFieldName,
+  typeFieldDescription,
+  titleFieldName,
+  titleFieldDescription,
+  filterTitle,
+} from './i18n';
 
 const canGoInApp = (
   savedObject: SavedObjectRelation,
@@ -42,19 +46,23 @@ const canGoInApp = (
 };
 
 export const RelationshipsTable = ({
-  http,
+  basePath,
   capabilities,
   id,
   getAllowedTypes,
   getRelationships,
   navigateToUrl,
+  getDefaultTitle,
+  getSavedObjectLabel,
 }: {
-  http: CoreStart['http'];
+  basePath: CoreStart['http']['basePath'];
   capabilities: CoreStart['application']['capabilities'];
   navigateToUrl: CoreStart['application']['navigateToUrl'];
   id: string;
   getAllowedTypes: SavedObjectsManagementPluginStart['getAllowedTypes'];
   getRelationships: SavedObjectsManagementPluginStart['getRelationships'];
+  getDefaultTitle: SavedObjectsManagementPluginStart['getDefaultTitle'];
+  getSavedObjectLabel: SavedObjectsManagementPluginStart['getSavedObjectLabel'];
 }) => {
   // todo move data access higher
   const [relationships, setRelationships] = useState<SavedObjectRelation[]>([]);
@@ -86,16 +94,10 @@ export const RelationshipsTable = ({
   const columns = [
     {
       field: 'type',
-      // todo move translations
-      name: i18n.translate('indexPatternManagement.objectsTable.relationships.columnTypeName', {
-        defaultMessage: 'Type',
-      }),
+      name: typeFieldName,
       width: '50px',
       align: 'center' as HorizontalAlignment,
-      description: i18n.translate(
-        'indexPatternManagement.objectsTable.relationships.columnTypeDescription',
-        { defaultMessage: 'Type of the saved object' }
-      ),
+      description: typeFieldDescription,
       sortable: false,
       render: (type: string, object: SavedObjectRelation) => {
         const typeLabel = getSavedObjectLabel(type, allowedTypes);
@@ -113,30 +115,23 @@ export const RelationshipsTable = ({
     },
     {
       field: 'meta.title',
-      name: i18n.translate('indexPatternManagement.objectsTable.relationships.columnTitleName', {
-        defaultMessage: 'Title',
-      }),
-      description: i18n.translate(
-        'indexPatternManagement.objectsTable.relationships.columnTitleDescription',
-        { defaultMessage: 'Title of the saved object' }
-      ),
+      name: titleFieldName,
+      description: titleFieldDescription,
       dataType: 'string' as EuiTableDataType,
       sortable: false,
       render: (title: string, object: SavedObjectRelation) => {
-        const { path = '' } = object.meta.inAppUrl || {};
+        const path = object.meta.inAppUrl?.path || '';
         const showUrl = canGoInApp(object, capabilities);
-        if (!showUrl) {
-          return (
-            <EuiText size="s" data-test-subj="relationshipsTitle">
-              {title || getDefaultTitle(object)}
-            </EuiText>
-          );
-        }
-        // todo navigate to the app
-        return (
-          <EuiLink href={http.basePath.prepend(path)} data-test-subj="relationshipsTitle">
-            {title || getDefaultTitle(object)}
+        const titleDisplayed = title || getDefaultTitle(object);
+
+        return showUrl ? (
+          <EuiLink href={basePath.prepend(path)} data-test-subj="relationshipsTitle">
+            {titleDisplayed}
           </EuiLink>
+        ) : (
+          <EuiText size="s" data-test-subj="relationshipsTitle">
+            {titleDisplayed}
+          </EuiText>
         );
       },
     },
@@ -166,10 +161,7 @@ export const RelationshipsTable = ({
       {
         type: 'field_value_selection',
         field: 'type',
-        name: i18n.translate(
-          'indexPatternManagement.objectsTable.relationships.search.filters.type.name',
-          { defaultMessage: 'Type' }
-        ),
+        name: filterTitle,
         multiSelect: 'or',
         options: [...filterTypesMap.values()],
       },

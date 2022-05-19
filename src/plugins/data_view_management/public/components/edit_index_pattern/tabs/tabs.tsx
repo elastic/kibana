@@ -512,12 +512,14 @@ export function Tabs({
             <Fragment>
               <EuiSpacer size="m" />
               <RelationshipsTable
-                http={http}
+                basePath={http.basePath}
                 id={indexPattern.id!}
                 capabilities={application.capabilities}
                 getAllowedTypes={savedObjectsManagement.getAllowedTypes}
                 getRelationships={savedObjectsManagement.getRelationships}
                 navigateToUrl={application.navigateToUrl}
+                getDefaultTitle={savedObjectsManagement.getDefaultTitle}
+                getSavedObjectLabel={savedObjectsManagement.getSavedObjectLabel}
               />
             </Fragment>
           );
