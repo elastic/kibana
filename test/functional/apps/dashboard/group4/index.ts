@@ -27,8 +27,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./dashboard_empty'));
     loadTestFile(require.resolve('./dashboard_save'));
-    loadTestFile(require.resolve('./dashboard_time'));
-    loadTestFile(require.resolve('./dashboard_listing'));
-    loadTestFile(require.resolve('./dashboard_clone'));
+    // loadTestFile(require.resolve('./dashboard_time'));
+    // loadTestFile(require.resolve('./dashboard_listing'));
+    // loadTestFile(require.resolve('./dashboard_clone'));
   });
 }
