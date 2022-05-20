@@ -65,12 +65,11 @@ const CenteredEuiImage = (props: EuiImageProps) => (
   </div>
 );
 
-const AddIntegrationStepsIllustrations = () => {
-  const { http } = useStartServices();
-  const assetsBasePath = http.basePath.prepend('/plugins/fleet/assets/');
+const ResponsiveStepGroup: React.FC = ({ children }) => {
   const { width } = useWindowSize();
   const isScreenSmall = isWithinMaxBreakpoint(width, 's');
-  const ResponsiveStepGroup: React.FC = ({ children }) => (
+
+  return (
     <EuiFlexGroup
       direction="column"
       gutterSize={isScreenSmall ? 'xs' : 'l'}
@@ -81,6 +80,12 @@ const AddIntegrationStepsIllustrations = () => {
       {children}
     </EuiFlexGroup>
   );
+};
+
+const AddIntegrationStepsIllustrations = () => {
+  const { http } = useStartServices();
+  const assetsBasePath = http.basePath.prepend('/plugins/fleet/assets/');
+
   return (
     <EuiFlexGroup alignItems="center" justifyContent="spaceEvenly" gutterSize="none">
       <EuiFlexItem grow={false}>
