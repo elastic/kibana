@@ -36,7 +36,7 @@ if [[ ! -d "$DOCS_DIR" ]]; then
 else
   cd "$DOCS_DIR"
   git pull
-  cd -
+  cd "$WORKSPACE"
 fi
 
 if [[ ! -d "$DEV_DIR" ]]; then
@@ -45,7 +45,7 @@ if [[ ! -d "$DEV_DIR" ]]; then
 else
   cd "$DEV_DIR"
   git pull
-  cd -
+  cd "$WORKSPACE"
 fi
 
 if [[ ! -d "$TEAM_DIR" ]]; then
@@ -54,7 +54,7 @@ if [[ ! -d "$TEAM_DIR" ]]; then
 else
   cd "$TEAM_DIR"
   git pull
-  cd -
+  cd "$WORKSPACE"
 fi
 
 # The minimum sources required to build kibana docs
@@ -89,6 +89,11 @@ yarn
 if [[ ! -d .docsmobile ]]; then
   yarn init-docs
 fi
+
+echo ""
+echo "The docs.elastic.dev project is located at:"
+echo "$DOCS_DIR"
+echo ""
 
 if [[ "${1:-}" ]]; then
   yarn "$@"
