@@ -27,6 +27,10 @@ interface Props {
   showLoading?: boolean;
 }
 
+interface UsePollingAgentCountOptions {
+  noLowerTimeLimit?: boolean;
+}
+
 const POLLING_INTERVAL_MS = 5 * 1000; // 5 sec
 
 /**
@@ -35,9 +39,13 @@ const POLLING_INTERVAL_MS = 5 * 1000; // 5 sec
  * @param policyId
  * @returns agentIds
  */
-export const usePollingAgentCount = (policyId: string) => {
+export const usePollingAgentCount = (policyId: string, opts?: UsePollingAgentCountOptions) => {
   const [agentIds, setAgentIds] = useState<string[]>([]);
   const timeout = useRef<number | undefined>(undefined);
+
+  const kuery =
+    `${AGENTS_PREFIX}.policy_id:"${policyId}" and not (_exists_:"${AGENTS_PREFIX}.unenrolled_at") ` +
+    (opts?.noLowerTimeLimit ? '' : `and ${AGENTS_PREFIX}.enrolled_at >= now-10m`);
 
   useEffect(() => {
     let isAborted = false;
@@ -45,7 +53,7 @@ export const usePollingAgentCount = (policyId: string) => {
     const poll = () => {
       timeout.current = window.setTimeout(async () => {
         const request = await sendGetAgents({
-          kuery: `${AGENTS_PREFIX}.policy_id:"${policyId}" and ${AGENTS_PREFIX}.enrolled_at >= now-10m`,
+          kuery,
           showInactive: false,
         });
 
@@ -66,7 +74,7 @@ export const usePollingAgentCount = (policyId: string) => {
     return () => {
       isAborted = true;
     };
-  }, [agentIds, policyId]);
+  }, [agentIds, policyId, kuery]);
   return agentIds;
 };
 

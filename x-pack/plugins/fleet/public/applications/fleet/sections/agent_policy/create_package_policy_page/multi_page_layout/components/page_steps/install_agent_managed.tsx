@@ -32,7 +32,7 @@ export const InstallElasticAgentManagedPageStep: React.FC<MultiPageStepLayoutPro
   const kibanaVersion = useKibanaVersion();
   const { docLinks } = core;
   const link = docLinks.links.fleet.troubleshooting;
-  const enrolledAgentIds = usePollingAgentCount(agentPolicy?.id || '');
+  const enrolledAgentIds = usePollingAgentCount(agentPolicy?.id || '', { noLowerTimeLimit: true });
   const fleetServerHosts = useMemo(() => {
     return settings?.fleet_server_hosts || [];
   }, [settings]);
