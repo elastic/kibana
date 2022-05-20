@@ -22,6 +22,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
+import semverCoerce from 'semver/functions/coerce';
+import semverLt from 'semver/functions/lt';
+
 import type { Agent } from '../../../../types';
 import {
   sendPostAgentUpgrade,
@@ -38,7 +41,7 @@ interface Props {
   agentCount: number;
 }
 
-const getVersion = (version: Array<EuiComboBoxOptionOption<string>>) => version[0].value as string;
+const getVersion = (version: Array<EuiComboBoxOptionOption<string>>) => version[0]?.value as string;
 
 export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
   onClose,
@@ -169,6 +172,17 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
     }
   }
 
+  const onCreateOption = (searchValue: string) => {
+    const agentVersionNumber = semverCoerce(searchValue);
+    if (agentVersionNumber?.version && semverLt(agentVersionNumber?.version, kibanaVersion)) {
+      const newOption = {
+        label: searchValue,
+        value: searchValue,
+      };
+      setSelectedVersion([newOption]);
+    }
+  };
+
   return (
     <EuiConfirmModal
       data-test-subj="agentUpgradeModal"
@@ -230,7 +244,6 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
           />
         )}
       </p>
-      <EuiSpacer size="m" />
       <EuiFormRow
         label={i18n.translate('xpack.fleet.upgradeAgents.chooseVersionLabel', {
           defaultMessage: 'Upgrade version',
@@ -246,8 +259,21 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
           onChange={(selected: Array<EuiComboBoxOptionOption<string>>) => {
             setSelectedVersion(selected);
           }}
+          onCreateOption={onCreateOption}
+          customOptionText="Input the desired version"
         />
       </EuiFormRow>
+      {!isSingleAgent ? (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            color="warning"
+            title={i18n.translate('xpack.fleet.upgradeAgents.warningCallout', {
+              defaultMessage: 'Only available for Elastic Agent versions 8.3+',
+            })}
+          />
+        </>
+      ) : null}
       <EuiSpacer size="m" />
       {!isSingleAgent ? (
         <EuiFormRow
@@ -293,7 +319,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
         <>
           <EuiCallOut
             color="danger"
-            title={i18n.translate('xpack.fleet.upgradeAgents.warningCallout', {
+            title={i18n.translate('xpack.fleet.upgradeAgents.warningCalloutErrors', {
               defaultMessage:
                 'Error upgrading the selected {count, plural, one {agent} other {{count} agents}}',
               values: { count: isSingleAgent },
