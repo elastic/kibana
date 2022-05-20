@@ -6,13 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { XScaleTypes } from '../constants';
 import { CommonXYDataLayerConfigResult } from '../types';
 
 export function isTimeChart(layers: CommonXYDataLayerConfigResult[]) {
   return layers.every<CommonXYDataLayerConfigResult>(
     (l): l is CommonXYDataLayerConfigResult =>
-      l.table.columns.find((col) => col.id === l.xAccessor)?.meta.type === 'date' &&
-      l.xScaleType === XScaleTypes.TIME
+      (l.xAccessor
+        ? getColumnByAccessor(l.xAccessor, l.table.columns)?.meta.type === 'date'
+        : false) &&
+      (!l.xScaleType || l.xScaleType === XScaleTypes.TIME)
   );
 }

@@ -233,6 +233,10 @@ export interface EndpointMetrics {
     library_load_events?: SystemImpactEventsMetrics;
   }>;
   threads: Array<{ name: string; cpu: { mean: number } }>;
+  event_filter: {
+    active_global_count: number;
+    active_user_count: number;
+  };
 }
 
 interface EndpointMetricOS {
