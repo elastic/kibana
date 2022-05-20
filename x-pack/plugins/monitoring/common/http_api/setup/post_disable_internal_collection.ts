@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { MonitoringCore } from '../../../../types';
-import { checkAccessRoute } from './check_access';
+import * as rt from 'io-ts';
+import { clusterUuidRT } from '../shared';
 
-export function registerV1CheckAccessRoutes(server: MonitoringCore) {
-  checkAccessRoute(server);
-}
+export const postDisableInternalCollectionRequestParamsRT = rt.partial({
+  // the cluster uuid seems to be required but never used
+  clusterUuid: clusterUuidRT,
+});
