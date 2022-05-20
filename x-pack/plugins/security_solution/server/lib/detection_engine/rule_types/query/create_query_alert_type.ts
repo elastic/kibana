@@ -32,6 +32,12 @@ export const createQueryAlertType = (
           }
           return validated;
         },
+        /**
+         * validate rule params when rule is updated or created
+         * returned params can be modified (useful in case of version increment)
+         * @param mutatedRuleParams
+         * @returns mutatedRuleParams
+         */
         validateMutatedParams: (mutatedRuleParams) => {
           validateImmutable(mutatedRuleParams.immutable);
           validateIndexPatterns(mutatedRuleParams.index);
