@@ -17,14 +17,15 @@ import type { FileStatus, File } from '../../../common';
 
 import { BlobStorageService } from '../../blob_storage_service';
 import { FileServiceFactory } from '..';
-import type { InternalFileService } from '../internal_file_service';
+import { FileServiceStart } from '../file_service';
+import { CreateFileArgs } from '../internal_file_service';
 
 describe('FileService', () => {
   const fileKind: string = 'test';
 
   let manageES: TestElasticsearchUtils;
   let kbnRoot: ReturnType<typeof createRootWithCorePlugins>;
-  let fileService: InternalFileService;
+  let fileService: FileServiceStart;
   let blobStorageService: BlobStorageService;
   let esClient: ElasticsearchClient;
   let coreSetup: Awaited<ReturnType<typeof kbnRoot.setup>>;
@@ -59,11 +60,11 @@ describe('FileService', () => {
   });
 
   let disposables: File[] = [];
-  const createDisposableFile: typeof fileService.createFile = async (args) => {
-    const file = await fileService.createFile(args);
+  async function createDisposableFile<M = unknown>(args: CreateFileArgs<M>) {
+    const file = await fileService.create(args);
     disposables.push(file);
     return file;
-  };
+  }
   afterEach(async () => {
     await Promise.all(disposables.map((file) => file.delete()));
     const results = await fileService.list({ fileKind });
@@ -109,24 +110,33 @@ describe('FileService', () => {
   });
 
   it('deletes files', async () => {
-    const file = await fileService.createFile({ fileKind, name: 'test' });
+    const file = await fileService.create({ fileKind, name: 'test' });
     const files = await fileService.list({ fileKind });
     expect(files.length).toBe(1);
     await file.delete();
     expect(await fileService.list({ fileKind })).toEqual([]);
   });
 
+  interface CustomMeta {
+    some: string;
+  }
   it('updates files', async () => {
-    const file = await createDisposableFile({ fileKind, name: 'test' });
-    const updatableFields = { name: 'new name', alt: 'my alt text', meta: { some: 'data' } };
+    const file = await createDisposableFile<CustomMeta>({ fileKind, name: 'test' });
+    const updatableFields = {
+      name: 'new name',
+      alt: 'my alt text',
+      meta: { some: 'data' },
+    };
     const updatedFile1 = await file.update(updatableFields);
     expect(updatedFile1.meta).toEqual(expect.objectContaining(updatableFields.meta));
     expect(updatedFile1.name).toBe(updatableFields.name);
     expect(updatedFile1.alt).toBe(updatableFields.alt);
 
     // Fetch the file anew to be doubly sure
-    const updatedFile2 = await fileService.find({ fileKind, id: file.id });
+    const updatedFile2 = await fileService.find<CustomMeta>({ fileKind, id: file.id });
     expect(updatedFile2.meta).toEqual(expect.objectContaining(updatableFields.meta));
+    // Below also tests that our meta type is work as expected by using `some` field.
+    expect(updatedFile2.meta.some).toBe(updatableFields.meta.some);
     expect(updatedFile2.name).toBe(updatableFields.name);
     expect(updatedFile2.alt).toBe(updatableFields.alt);
   });
