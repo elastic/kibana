@@ -48,8 +48,8 @@ const findTheValue = (obj: Record<string, Record<string, unknown> | unknown>, ke
 export const getObjectValueByKey = (
   obj: Record<string, Record<string, unknown> | unknown>,
   key: string
-) => {
-  return findTheValue(obj, splitKeys(key));
+): string => {
+  return findTheValue(obj, splitKeys(key)) as string;
 };
 
 export const throwIfResponseIsNotValidSpecial = ({

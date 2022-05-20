@@ -88,9 +88,9 @@ export const createExternalService = (
         ],
       });
 
-      const title = getObjectValueByKey(res.data, getIncidentResponseExternalTitleKey) as string;
-      const created = getObjectValueByKey(res.data, getIncidentResponseCreatedDateKey) as string;
-      const updated = getObjectValueByKey(res.data, getIncidentResponseUpdatedDateKey) as string;
+      const title = getObjectValueByKey(res.data, getIncidentResponseExternalTitleKey);
+      const created = getObjectValueByKey(res.data, getIncidentResponseCreatedDateKey);
+      const updated = getObjectValueByKey(res.data, getIncidentResponseUpdatedDateKey);
 
       return { id, title, created, updated };
     } catch (error) {
@@ -125,7 +125,7 @@ export const createExternalService = (
         res,
         requiredAttributesToBeInTheResponse: [createIncidentResponseKey],
       });
-      const incidentId = getObjectValueByKey(data, createIncidentResponseKey) as string;
+      const incidentId = getObjectValueByKey(data, createIncidentResponseKey);
       const insertedIncident = await getIncident(incidentId);
 
       logger.debug(`response from webhook action "${actionId}": [HTTP ${status}] ${statusText}`);
@@ -222,227 +222,10 @@ export const createExternalService = (
   //   }
   // };
 
-  // const getCapabilities = async () => {
-  //   try {
-  //     const res = await request({
-  //       axios: axiosInstance,
-  //       method: 'get',
-  //       url: capabilitiesUrl,
-  //       logger,
-  //       configurationUtilities,
-  //     });
-  //
-  //     throwIfResponseIsNotValid({
-  //       res,
-  //       requiredAttributesToBeInTheResponse: ['capabilities'],
-  //     });
-  //
-  //     return { ...res.data };
-  //   } catch (error) {
-  //     throw new Error(
-  //       getErrorMessage(
-  //         i18n.NAME,
-  //         `Unable to get capabilities. Error: ${error.message}. Reason: ${createErrorMessage(
-  //           error.response?.data
-  //         )}`
-  //       )
-  //     );
-  //   }
-  // };
-  //
-  // const getIssueTypes = async () => {
-  //   const capabilitiesResponse = await getCapabilities();
-  //   const supportsNewAPI = hasSupportForNewAPI(capabilitiesResponse);
-  //   try {
-  //     if (!supportsNewAPI) {
-  //       const res = await request({
-  //         axios: axiosInstance,
-  //         method: 'get',
-  //         url: getIssueTypesOldAPIURL,
-  //         logger,
-  //         configurationUtilities,
-  //       });
-  //
-  //       throwIfResponseIsNotValid({
-  //         res,
-  //       });
-  //
-  //       const issueTypes = res.data.projects[0]?.issuetypes ?? [];
-  //       return normalizeIssueTypes(issueTypes);
-  //     } else {
-  //       const res = await request({
-  //         axios: axiosInstance,
-  //         method: 'get',
-  //         url: getIssueTypesUrl,
-  //         logger,
-  //         configurationUtilities,
-  //       });
-  //
-  //       throwIfResponseIsNotValid({
-  //         res,
-  //       });
-  //
-  //       const issueTypes = res.data.values;
-  //       return normalizeIssueTypes(issueTypes);
-  //     }
-  //   } catch (error) {
-  //     throw new Error(
-  //       getErrorMessage(
-  //         i18n.NAME,
-  //         `Unable to get issue types. Error: ${error.message}. Reason: ${createErrorMessage(
-  //           error.response?.data
-  //         )}`
-  //       )
-  //     );
-  //   }
-  // };
-  //
-  // const getFieldsByIssueType = async (issueTypeId: string) => {
-  //   const capabilitiesResponse = await getCapabilities();
-  //   const supportsNewAPI = hasSupportForNewAPI(capabilitiesResponse);
-  //   try {
-  //     if (!supportsNewAPI) {
-  //       const res = await request({
-  //         axios: axiosInstance,
-  //         method: 'get',
-  //         url: createGetIssueTypeFieldsUrl(getIssueTypeFieldsOldAPIURL, issueTypeId),
-  //         logger,
-  //         configurationUtilities,
-  //       });
-  //
-  //       throwIfResponseIsNotValid({
-  //         res,
-  //       });
-  //
-  //       const fields = res.data.projects[0]?.issuetypes[0]?.fields || {};
-  //       return normalizeFields(fields);
-  //     } else {
-  //       const res = await request({
-  //         axios: axiosInstance,
-  //         method: 'get',
-  //         url: createGetIssueTypeFieldsUrl(getIssueTypeFieldsUrl, issueTypeId),
-  //         logger,
-  //         configurationUtilities,
-  //       });
-  //
-  //       throwIfResponseIsNotValid({
-  //         res,
-  //       });
-  //
-  //       const fields = res.data.values.reduce(
-  //         (acc: { [x: string]: {} }, value: { fieldId: string }) => ({
-  //           ...acc,
-  //           [value.fieldId]: { ...value },
-  //         }),
-  //         {}
-  //       );
-  //       return normalizeFields(fields);
-  //     }
-  //   } catch (error) {
-  //     throw new Error(
-  //       getErrorMessage(
-  //         i18n.NAME,
-  //         `Unable to get fields. Error: ${error.message}. Reason: ${createErrorMessage(
-  //           error.response?.data
-  //         )}`
-  //       )
-  //     );
-  //   }
-  // };
-  //
-  // const getFields = async () => {
-  //   try {
-  //     const issueTypes = await getIssueTypes();
-  //     const fieldsPerIssueType = await Promise.all(
-  //       issueTypes.map((issueType) => getFieldsByIssueType(issueType.id))
-  //     );
-  //     return fieldsPerIssueType.reduce((acc: GetCommonFieldsResponse, fieldTypesByIssue) => {
-  //       const currentListOfFields = Object.keys(acc);
-  //       return currentListOfFields.length === 0
-  //         ? fieldTypesByIssue
-  //         : currentListOfFields.reduce(
-  //             (add: GetCommonFieldsResponse, field) =>
-  //               Object.keys(fieldTypesByIssue).includes(field)
-  //                 ? { ...add, [field]: acc[field] }
-  //                 : add,
-  //             {}
-  //           );
-  //     }, {});
-  //   } catch (error) {
-  //     // errors that happen here would be thrown in the contained async calls
-  //     throw error;
-  //   }
-  // };
-  //
-  // const getIssues = async (title: string) => {
-  //   const query = `${searchUrl}?jql=${encodeURIComponent(
-  //     `project="${projectKey}" and summary ~"${title}"`
-  //   )}`;
-  //
-  //   try {
-  //     const res = await request({
-  //       axios: axiosInstance,
-  //       method: 'get',
-  //       url: query,
-  //       logger,
-  //       configurationUtilities,
-  //     });
-  //
-  //     throwIfResponseIsNotValid({
-  //       res,
-  //     });
-  //
-  //     return normalizeSearchResults(res.data?.issues ?? []);
-  //   } catch (error) {
-  //     throw new Error(
-  //       getErrorMessage(
-  //         i18n.NAME,
-  //         `Unable to get issues. Error: ${error.message}. Reason: ${createErrorMessage(
-  //           error.response?.data
-  //         )}`
-  //       )
-  //     );
-  //   }
-  // };
-  //
-  // const getIssue = async (id: string) => {
-  //   const getIssueUrl = `${createIncidentUrl}/${id}`;
-  //   try {
-  //     const res = await request({
-  //       axios: axiosInstance,
-  //       method: 'get',
-  //       url: getIssueUrl,
-  //       logger,
-  //       configurationUtilities,
-  //     });
-  //
-  //     throwIfResponseIsNotValid({
-  //       res,
-  //     });
-  //
-  //     return normalizeIssue(res.data ?? {});
-  //   } catch (error) {
-  //     throw new Error(
-  //       getErrorMessage(
-  //         i18n.NAME,
-  //         `Unable to get issue with id ${id}. Error: ${error.message}. Reason: ${createErrorMessage(
-  //           error.response?.data
-  //         )}`
-  //       )
-  //     );
-  //   }
-  // };
-
   return {
-    // getFields,
     getIncident,
     createIncident,
     // updateIncident,
     // createComment,
-    // getCapabilities,
-    // getIssueTypes,
-    // getFieldsByIssueType,
-    // getIssues,
-    // getIssue,
   };
 };
