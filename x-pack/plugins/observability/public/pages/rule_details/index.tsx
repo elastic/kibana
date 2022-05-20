@@ -18,7 +18,6 @@ import {
   EuiButtonIcon,
   EuiPanel,
   EuiTitle,
-  EuiHealth,
   EuiPopover,
   EuiHorizontalRule,
   EuiTabbedContent,
@@ -42,7 +41,7 @@ import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 
 import { DeleteModalConfirmation } from '../rules/components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from '../rules/components/center_justified_spinner';
-import { getHealthColor, OBSERVABILITY_SOLUTIONS } from '../rules/config';
+import { OBSERVABILITY_SOLUTIONS } from '../rules/config';
 import { RuleDetailsPathParams, EVENT_LOG_LIST_TAB, ALERT_LIST_TAB } from './types';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../hooks/use_plugin_context';
