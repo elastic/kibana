@@ -102,6 +102,9 @@ export function Popover({
     }
     setSelectedElement(undefined);
   }, [cy, setSelectedElement]);
+
+  const isTraceExplorerEnabled = useTraceExplorerEnabledSetting();
+
   const renderedHeight = selectedElement?.renderedHeight() ?? 0;
   const renderedWidth = selectedElement?.renderedWidth() ?? 0;
   const box = selectedElement?.renderedBoundingBox({});
@@ -155,7 +158,7 @@ export function Popover({
         cy.removeListener('unselect', 'edge', deselect);
       }
     };
-  }, [cy, deselect]);
+  }, [cy, deselect, isTraceExplorerEnabled]);
 
   // Handle positioning of popover. This makes it so the popover positions
   // itself correctly and the arrows are always pointing to where they should.
@@ -183,8 +186,6 @@ export function Popover({
   const onFocusClick = isAlreadyFocused
     ? centerSelectedNode
     : (_event: MouseEvent<HTMLAnchorElement>) => deselect();
-
-  const isTraceExplorerEnabled = useTraceExplorerEnabledSetting();
 
   const ContentsComponent = getContentsComponent(
     selectedElementData,
