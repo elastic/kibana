@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-import { MonitoringCore } from '../../../../types';
-import { checkAccessRoute } from './check_access';
-
-export function registerV1CheckAccessRoutes(server: MonitoringCore) {
-  checkAccessRoute(server);
-}
+export * from './post_cluster';
+export * from './post_clusters';
