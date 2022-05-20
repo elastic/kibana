@@ -339,9 +339,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const onOptionsChange = useCallback((field: FieldsEqlOptions, value: string | null) => {
     setOptionsSelected((prevOptions) => ({
       ...prevOptions,
-      ...{
-        [field]: value,
-      },
+      [field]: value,
     }));
   }, []);
 
