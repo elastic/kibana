@@ -31,8 +31,8 @@ export interface ConnectorAddFlyoutProps {
   isExecutingAction: boolean;
   setActionParams: (params: Record<string, unknown>) => void;
   actionParams: Record<string, unknown>;
-  onExecutAction: () => Promise<ActionTypeExecutorResult<unknown>>;
-  executionResult: Option<ActionTypeExecutorResult<unknown>>;
+  onExecutionAction: () => Promise<void>;
+  executionResult: Option<ActionTypeExecutorResult<unknown> | undefined>;
   actionTypeRegistry: ActionTypeRegistryContract;
 }
 
@@ -42,7 +42,7 @@ export const TestConnectorForm = ({
   executionResult,
   actionParams,
   setActionParams,
-  onExecutAction,
+  onExecutionAction,
   isExecutingAction,
   actionTypeRegistry,
 }: ConnectorAddFlyoutProps) => {
@@ -129,7 +129,7 @@ export const TestConnectorForm = ({
               isLoading={isExecutingAction}
               isDisabled={!executeEnabled || hasErrors || isExecutingAction}
               data-test-subj="executeActionButton"
-              onClick={onExecutAction}
+              onClick={onExecutionAction}
             >
               <FormattedMessage
                 defaultMessage="Run"
@@ -150,7 +150,7 @@ export const TestConnectorForm = ({
       children: pipe(
         executionResult,
         map((result) =>
-          result.status === 'ok' ? (
+          result?.status === 'ok' ? (
             <SuccessfulExecution />
           ) : (
             <FailedExecussion executionResult={result} />
@@ -198,9 +198,9 @@ const SuccessfulExecution = () => (
 );
 
 const FailedExecussion = ({
-  executionResult: { message, serviceMessage },
+  executionResult,
 }: {
-  executionResult: ActionTypeExecutorResult<unknown>;
+  executionResult: ActionTypeExecutorResult<unknown> | undefined;
 }) => {
   const items = [
     {
@@ -211,7 +211,7 @@ const FailedExecussion = ({
         }
       ),
       description:
-        message ??
+        executionResult?.message ??
         i18n.translate(
           'xpack.triggersActionsUI.sections.testConnectorForm.executionFailureUnknownReason',
           {
@@ -220,7 +220,7 @@ const FailedExecussion = ({
         ),
     },
   ];
-  if (serviceMessage) {
+  if (executionResult?.serviceMessage) {
     items.push({
       title: i18n.translate(
         'xpack.triggersActionsUI.sections.testConnectorForm.executionFailureAdditionalDetails',
@@ -228,7 +228,7 @@ const FailedExecussion = ({
           defaultMessage: 'Details:',
         }
       ),
-      description: serviceMessage,
+      description: executionResult.serviceMessage,
     });
   }
   return (
