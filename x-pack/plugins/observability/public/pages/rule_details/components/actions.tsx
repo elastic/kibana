@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiText,
   EuiSpacer,
@@ -27,6 +27,11 @@ export function Actions({ ruleActions, actionTypeRegistry }: ActionsProps) {
     notifications: { toasts },
   } = useKibana().services;
   const { isLoadingActions, allActions, errorActions } = useFetchRuleActions({ http });
+  useEffect(() => {
+    if (errorActions) {
+      toasts.addDanger({ title: errorActions });
+    }
+  }, [errorActions, toasts]);
   if (ruleActions && ruleActions.length <= 0)
     return (
       <EuiFlexItem>
@@ -63,7 +68,6 @@ export function Actions({ ruleActions, actionTypeRegistry }: ActionsProps) {
           <EuiSpacer size="s" />
         </React.Fragment>
       ))}
-      {errorActions && toasts.addDanger({ title: errorActions })}
     </EuiFlexGroup>
   );
 }
