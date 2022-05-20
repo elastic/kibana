@@ -14,6 +14,7 @@ import { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-alerti
 import { DataViewBase, Filter, FilterStateStore } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
+import { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
 import { AboutStepRiskScore, AboutStepSeverity } from '../../../pages/detection_engine/rules/types';
 import { FieldValueTimeline } from '../pick_timeline';
@@ -31,6 +32,7 @@ import {
   buildRuleTypeDescription,
   buildThresholdDescription,
   buildThreatMappingDescription,
+  buildEqlOptionsDescription,
 } from './helpers';
 import { buildMlJobsDescription } from './ml_job_description';
 import { buildActionsDescription } from './actions_description';
@@ -151,7 +153,7 @@ export const addFilterStateIfNotThere = (filters: Filter[]): Filter[] => {
   });
 };
 
-/* eslint complexity: ["error", 21]*/
+/* eslint complexity: ["error", 22]*/
 export const getDescriptionItem = (
   field: string,
   label: string,
@@ -171,6 +173,9 @@ export const getDescriptionItem = (
       savedId,
       indexPatterns,
     });
+  } else if (field === 'eqlOptions') {
+    const eqlOptions: EqlOptionsSelected = get(field, data);
+    return buildEqlOptionsDescription(eqlOptions);
   } else if (field === 'threat') {
     const threats: Threats = get(field, data);
     return buildThreatDescription({ label, threat: filterEmptyThreats(threats) });
