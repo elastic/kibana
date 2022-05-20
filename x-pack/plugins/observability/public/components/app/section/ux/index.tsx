@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { AppDataType } from '../../../shared/exploratory_view/types';
 import { SectionContainer } from '..';
 import { getDataHandler } from '../../../../data_handler';
@@ -30,7 +30,10 @@ export function UXSection({ bucketSize }: Props) {
   const uxHasDataResponse = hasDataMap.ux;
   const serviceName = uxHasDataResponse?.serviceName as string;
 
-  const ExploratoryViewEmbeddable = getExploratoryViewEmbeddable(core, plugins);
+  const ExploratoryViewEmbeddable = useMemo(
+    () => getExploratoryViewEmbeddable(core, plugins),
+    [core, plugins]
+  );
 
   const seriesList = [
     {
