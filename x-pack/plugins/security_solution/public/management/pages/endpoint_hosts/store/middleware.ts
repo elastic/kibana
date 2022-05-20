@@ -12,7 +12,6 @@ import semverGte from 'semver/functions/gte';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import {
   BASE_POLICY_RESPONSE_ROUTE,
-  ENDPOINT_ACTION_LOG_ROUTE,
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
   metadataCurrentIndexPattern,
