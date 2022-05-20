@@ -59,6 +59,14 @@ describe('query_service', () => {
     queryStringManager = queryServiceStart.queryString;
   });
 
+  test('implements PersistableState interface', () => {
+    expect(queryServiceStart).toHaveProperty('inject');
+    expect(queryServiceStart).toHaveProperty('extract');
+    expect(queryServiceStart).toHaveProperty('telemetry');
+    expect(queryServiceStart).toHaveProperty('migrateToLatest');
+    expect(queryServiceStart).toHaveProperty('getAllMigrations');
+  });
+
   test('state is initialized with state from query service', () => {
     const state = queryServiceStart.getState();
 

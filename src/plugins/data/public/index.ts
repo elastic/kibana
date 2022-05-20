@@ -262,6 +262,7 @@ export {
   getQueryLog,
   mapAndFlattenFilters,
   QueryService,
+  QueryState$,
 } from './query';
 
 export { NowProvider } from './now_provider';

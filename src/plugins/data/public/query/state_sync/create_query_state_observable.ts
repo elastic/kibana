@@ -16,6 +16,8 @@ import { getQueryState, QueryState } from '../query_state';
 import { QueryStateChange } from './types';
 import type { QueryStringContract } from '../query_string';
 
+export type QueryState$ = Observable<{ changes: QueryStateChange; state: QueryState }>;
+
 export function createQueryStateObservable({
   timefilter,
   filterManager,
@@ -24,7 +26,7 @@ export function createQueryStateObservable({
   timefilter: TimefilterSetup;
   filterManager: FilterManager;
   queryString: QueryStringContract;
-}): Observable<{ changes: QueryStateChange; state: QueryState }> {
+}): QueryState$ {
   const state = createStateContainer<QueryState>(
     getQueryState({ timefilter, filterManager, queryString })
   );
