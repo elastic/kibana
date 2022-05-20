@@ -13,7 +13,7 @@ export interface OpsMetricsEvent {
   /** Time metrics were recorded at. */
   collected_at: Date;
   /** Process related metrics. */
-  single_process: OpsProcessMetrics;
+  processes: OpsProcessMetrics[];
   /** OS related metrics */
   os: OpsOsMetrics;
   /** server response time stats */
@@ -140,11 +140,14 @@ export const opsMetricsEventSchema: RootSchema<OpsMetricsEvent> = {
     type: 'date',
     _meta: { description: 'Time metrics were recorded at.' },
   },
-  single_process: {
-    properties: processSchema,
-    _meta: {
-      description: 'Process related metrics.',
-      optional: false,
+  processes: {
+    type: 'array',
+    items: {
+      properties: processSchema,
+      _meta: {
+        description: 'Process related metrics.',
+        optional: false,
+      },
     },
   },
   os: {

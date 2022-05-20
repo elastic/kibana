@@ -30,7 +30,6 @@ export default function ({ getService }: FtrProviderContext) {
       // Note: Once we implement schema and collector event validation, we can rely on ts to verify the shape
       const osMetricsProperties = [
         'collected_at',
-        'process',
         'processes',
         'os',
         'response_times',

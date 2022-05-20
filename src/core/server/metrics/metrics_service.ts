@@ -96,13 +96,8 @@ export class MetricsService
   }
 
   private convertToMetricEvent(metrics: OpsMetrics): OpsMetricsEvent {
-    const { processes, process, ...rest } = metrics;
-    const formattedMetrics =
-      metrics.processes && metrics.processes?.length > 0
-        ? { ...rest, single_process: metrics.processes[0] }
-        : { ...rest, single_process: metrics.process };
-    // single node process
-    return { ...formattedMetrics };
+    const { process, ...rest } = metrics;
+    return rest;
   }
 
   private setupOpsMetricsEventType(
