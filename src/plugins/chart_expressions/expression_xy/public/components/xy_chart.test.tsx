@@ -13,6 +13,7 @@ import {
   AreaSeries,
   Axis,
   BarSeries,
+  ColorVariant,
   Fit,
   GeometryValue,
   GroupBy,
@@ -685,6 +686,40 @@ describe('XYChart component', () => {
       />
     );
     expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(true);
+  });
+
+  test('applies the mark size ratio', () => {
+    const { args } = sampleArgs();
+    const markSizeRatioArg = { markSizeRatio: 50 };
+    const component = shallow(
+      <XYChart {...defaultProps} args={{ ...args, ...markSizeRatioArg }} />
+    );
+    expect(component.find(Settings).at(0).prop('theme')).toEqual(
+      expect.objectContaining(markSizeRatioArg)
+    );
+  });
+
+  test('applies the mark size accessor', () => {
+    const { args } = sampleArgs();
+    const markSizeAccessorArg = { markSizeAccessor: 'b' };
+    const component = shallow(
+      <XYChart
+        {...defaultProps}
+        args={{ ...args, layers: [{ ...args.layers[0], ...markSizeAccessorArg }] }}
+      />
+    );
+    const dataLayers = component.find(DataLayers).dive();
+    const lineArea = dataLayers.find(LineSeries).at(0);
+    expect(lineArea.prop('markSizeAccessor')).toEqual(markSizeAccessorArg.markSizeAccessor);
+    const expectedSeriesStyle = expect.objectContaining({
+      point: expect.objectContaining({
+        visible: true,
+        fill: ColorVariant.Series,
+      }),
+    });
+
+    expect(lineArea.prop('areaSeriesStyle')).toEqual(expectedSeriesStyle);
+    expect(lineArea.prop('lineSeriesStyle')).toEqual(expectedSeriesStyle);
   });
 
   test('it renders bar', () => {
@@ -1932,17 +1967,10 @@ describe('XYChart component', () => {
   test('it should pass the formatter function to the axis', () => {
     const { args } = sampleArgs();
 
-    const instance = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
+    shallow(<XYChart {...defaultProps} args={{ ...args }} />);
 
-    const tickFormatter = instance.find(Axis).first().prop('tickFormat');
-
-    if (!tickFormatter) {
-      throw new Error('tickFormatter prop not found');
-    }
-
-    tickFormatter('I');
-
-    expect(convertSpy).toHaveBeenCalledWith('I');
+    expect(convertSpy).toHaveBeenCalledWith(1652034840000);
+    expect(convertSpy).toHaveBeenCalledWith(1652122440000);
   });
 
   test('it should set the tickLabel visibility on the x axis if the tick labels is hidden', () => {
@@ -2132,6 +2160,7 @@ describe('XYChart component', () => {
         mode: 'full',
         type: 'axisExtentConfig',
       },
+      markSizeRatio: 1,
       layers: [
         {
           layerId: 'first',
@@ -2219,6 +2248,7 @@ describe('XYChart component', () => {
         mode: 'full',
         type: 'axisExtentConfig',
       },
+      markSizeRatio: 1,
       yLeftScale: 'linear',
       yRightScale: 'linear',
       layers: [
@@ -2292,6 +2322,7 @@ describe('XYChart component', () => {
         mode: 'full',
         type: 'axisExtentConfig',
       },
+      markSizeRatio: 1,
       yLeftScale: 'linear',
       yRightScale: 'linear',
       layers: [
