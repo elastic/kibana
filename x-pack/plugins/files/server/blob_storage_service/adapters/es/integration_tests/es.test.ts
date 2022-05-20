@@ -36,12 +36,16 @@ describe('Elasticsearch blob storage', () => {
     await manageES.stop();
   });
 
-  beforeEach(() => {
-    esBlobStorage = new ElasticsearchBlobStorage(
+  const createEsBlobStorage = ({ chunkSize }: { chunkSize?: string } = {}) =>
+    new ElasticsearchBlobStorage(
       esClient,
       undefined,
+      chunkSize,
       manageKbn.root.logger.get('es-blob-test')
     );
+
+  beforeEach(() => {
+    esBlobStorage = createEsBlobStorage();
     sandbox.spy(esClient, 'get');
   });
 
@@ -85,9 +89,8 @@ describe('Elasticsearch blob storage', () => {
 
   it('uploads and downloads a file of many chunks', async () => {
     const fileString = 'upload this'.repeat(10);
-    const { id } = await esBlobStorage.upload(Readable.from([fileString]), {
-      chunkSize: '1028B',
-    });
+    esBlobStorage = createEsBlobStorage({ chunkSize: '1028B' });
+    const { id } = await esBlobStorage.upload(Readable.from([fileString]));
     expect(await getAllDocCount()).toMatchObject({ count: 37 });
     const rs = await esBlobStorage.download({ id });
     const chunks: string[] = [];
@@ -114,13 +117,10 @@ describe('Elasticsearch blob storage', () => {
 
   it('chunks files and then deletes all chunks when cleaning up', async () => {
     const fileString = 'upload this'.repeat(10);
-    const { id } = await esBlobStorage.upload(Readable.from([fileString]), {
-      chunkSize: '1028B',
-    });
+    esBlobStorage = createEsBlobStorage({ chunkSize: '1028B' });
+    const { id } = await esBlobStorage.upload(Readable.from([fileString]));
     const fileString2 = 'another file'.repeat(10);
-    const { id: id2 } = await esBlobStorage.upload(Readable.from([fileString2]), {
-      chunkSize: '1028B',
-    });
+    const { id: id2 } = await esBlobStorage.upload(Readable.from([fileString2]));
     expect(await getAllDocCount()).toMatchObject({ count: 77 });
     await esBlobStorage.delete(id);
     expect(await getAllDocCount()).toMatchObject({ count: 40 });
