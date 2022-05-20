@@ -19,7 +19,8 @@ import type { PackageInfo, NewPackagePolicy, NewPackagePolicyInput } from '../..
 import { Loading } from '../../../../components';
 import { getStreamsForInputType, doesPackageHaveIntegrations } from '../../../../services';
 
-import type { PackagePolicyValidationResults } from './services';
+import type { PackagePolicyValidationResults } from '../services';
+
 import { PackagePolicyInputPanel } from './components';
 
 export const StepConfigurePackagePolicy: React.FunctionComponent<{
@@ -47,7 +48,6 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
         : packageInfo.policy_templates || [],
     [packageInfo.policy_templates, showOnlyIntegration]
   );
-
   // Configure inputs (and their streams)
   const renderConfigureInputs = () =>
     packagePolicyTemplates.length ? (

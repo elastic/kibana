@@ -13,8 +13,51 @@ import type { AddToPolicyParams, EditPackagePolicyFrom } from './types';
 import { CreatePackagePolicySinglePage } from './single_page_layout';
 import { CreatePackagePolicyMultiPage } from './multi_page_layout';
 
-export const CreatePackagePolicyPage: React.FC<{}> = () => {
-  const { search } = useLocation();
+import { agentPolicyFormValidation, ConfirmDeployAgentPolicyModal } from '../../components';
+import { useUIExtension } from '../../../../hooks';
+import type { PackagePolicyEditExtensionComponentProps } from '../../../../types';
+import { pkgKeyFromPackageInfo } from '../../../../services';
+
+import type {
+  PackagePolicyFormState,
+  AddToPolicyParams,
+  CreatePackagePolicyParams,
+} from '../types';
+
+import { IntegrationBreadcrumb } from '../components';
+
+import type { PackagePolicyValidationResults } from '../services';
+import { validatePackagePolicy, validationHasErrors } from '../services';
+
+import { CreatePackagePolicySinglePageLayout, PostInstallAddAgentModal } from './components';
+import { StepConfigurePackagePolicy } from './step_configure_package';
+import { StepDefinePackagePolicy } from './step_define_package_policy';
+import { SelectedPolicyTab, StepSelectHosts } from './step_select_hosts';
+
+const StepsWithLessPadding = styled(EuiSteps)`
+  .euiStep__content {
+    padding-bottom: ${(props) => props.theme.eui.paddingSizes.m};
+  }
+
+  // compensating for EuiBottomBar hiding the content
+  @media (max-width: ${(props) => props.theme.eui.euiBreakpoints.m}) {
+    margin-bottom: 100px;
+  }
+`;
+
+const CustomEuiBottomBar = styled(EuiBottomBar)`
+  /* A relatively _low_ z-index value here to account for EuiComboBox popover that might appear under the bottom bar */
+  z-index: 50;
+`;
+
+export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
+  from,
+  queryParamsPolicyId,
+}) => {
+  const { notifications } = useStartServices();
+  const {
+    agents: { enabled: isFleetEnabled },
+  } = useConfig();
   const { params } = useRouteMatch<AddToPolicyParams>();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const useMultiPageLayout = useMemo(() => queryParams.has('useMultiPageLayout'), [queryParams]);
@@ -44,6 +87,82 @@ export const CreatePackagePolicyPage: React.FC<{}> = () => {
   if (useMultiPageLayout) {
     return <CreatePackagePolicyMultiPage {...pageParams} />;
   }
-
-  return <CreatePackagePolicySinglePage {...pageParams} />;
+  return (
+    <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
+      <EuiErrorBoundary>
+        {formState === 'CONFIRM' && agentPolicy && (
+          <ConfirmDeployAgentPolicyModal
+            agentCount={agentCount}
+            agentPolicy={agentPolicy}
+            onConfirm={onSubmit}
+            onCancel={() => setFormState('VALID')}
+          />
+        )}
+        {formState === 'SUBMITTED_NO_AGENTS' && agentPolicy && packageInfo && (
+          <PostInstallAddAgentModal
+            packageInfo={packageInfo}
+            agentPolicy={agentPolicy}
+            onConfirm={() => navigateAddAgent(savedPackagePolicy)}
+            onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
+          />
+        )}
+        {packageInfo && (
+          <IntegrationBreadcrumb
+            pkgTitle={integrationInfo?.title || packageInfo.title}
+            pkgkey={pkgKeyFromPackageInfo(packageInfo)}
+            integration={integrationInfo?.name}
+          />
+        )}
+        <StepsWithLessPadding steps={steps} />
+        <EuiSpacer size="xl" />
+        <EuiSpacer size="xl" />
+        <CustomEuiBottomBar data-test-subj="integrationsBottomBar">
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              {packageInfo && (formState === 'INVALID' || hasAgentPolicyError) ? (
+                <FormattedMessage
+                  id="xpack.fleet.createPackagePolicy.errorOnSaveText"
+                  defaultMessage="Your integration policy has errors. Please fix them before saving."
+                />
+              ) : null}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+                <EuiFlexItem grow={false}>
+                  {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                  <EuiButtonEmpty
+                    color="ghost"
+                    href={cancelUrl}
+                    onClick={cancelClickHandler}
+                    data-test-subj="createPackagePolicyCancelButton"
+                  >
+                    <FormattedMessage
+                      id="xpack.fleet.createPackagePolicy.cancelButton"
+                      defaultMessage="Cancel"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    onClick={onSubmit}
+                    isLoading={formState === 'LOADING'}
+                    disabled={formState !== 'VALID' || hasAgentPolicyError || !validationResults}
+                    iconType="save"
+                    color="primary"
+                    fill
+                    data-test-subj="createPackagePolicySaveButton"
+                  >
+                    <FormattedMessage
+                      id="xpack.fleet.createPackagePolicy.saveButton"
+                      defaultMessage="Save and continue"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </CustomEuiBottomBar>
+      </EuiErrorBoundary>
+    </CreatePackagePolicySinglePageLayout>
+  );
 };
