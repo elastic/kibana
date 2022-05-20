@@ -15,6 +15,7 @@
   "references": [
     { "path": "../../src/core/tsconfig.json" },
     { "path": "../developer_examples/tsconfig.json" },
+    { "path": "../../src/plugins/data/tsconfig.json" },
     { "path": "../../src/plugins/kibana_react/tsconfig.json" },
   ]
 }
