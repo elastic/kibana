@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { agentConfig, timerange } from '../..';
+import { observer, timerange } from '../..';
 import { Scenario } from '../scenario';
 import { getLogger } from '../utils/get_common_services';
 import { RunOptions } from '../utils/parse_run_cli_flags';
@@ -17,7 +17,7 @@ const scenario: Scenario<AgentConfigFields> = async (runOptions: RunOptions) => 
 
   return {
     generate: ({ from, to }) => {
-      const agentConfigMetrics = agentConfig('test-etag').metrics();
+      const agentConfig = observer().agentConfig();
 
       const range = timerange(from, to);
       return range
@@ -25,7 +25,7 @@ const scenario: Scenario<AgentConfigFields> = async (runOptions: RunOptions) => 
         .rate(1)
         .generator((timestamp) => {
           const events = logger.perf('generating_agent_config_events', () => {
-            return agentConfigMetrics.timestamp(timestamp);
+            return agentConfig.etag('test-etag').timestamp(timestamp);
           });
           return events;
         });

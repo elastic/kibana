@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { agentConfig } from './agent_config';
+export { observer } from './observer';

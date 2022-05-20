@@ -6,20 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { Metricset } from '../apm/metricset';
 import { AgentConfigFields } from './agent_config_fields';
+import { AgentConfig } from './agent_config';
+import { Entity } from '../entity';
 
-export class AgentConfigMetrics extends Metricset<AgentConfigFields> {
-  constructor(fields: AgentConfigFields) {
-    super({
-      'metricset.name': 'agent_config',
-      ...fields,
-    });
+export class Observer extends Entity<AgentConfigFields> {
+  agentConfig() {
+    return new AgentConfig();
   }
+}
 
-  timestamp(timestamp: number): this {
-    super.timestamp(timestamp);
-    this.fields['event.ingested'] = new Date(timestamp).getTime();
-    return this;
-  }
+export function observer() {
+  return new Observer({});
 }

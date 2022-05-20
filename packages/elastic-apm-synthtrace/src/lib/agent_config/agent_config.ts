@@ -6,21 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { Entity } from '../entity';
 import { AgentConfigFields } from './agent_config_fields';
-import { AgentConfigMetrics } from './agent_config_metrics';
+import { Metricset } from '../apm/metricset';
 
-export class AgentConfig extends Entity<AgentConfigFields> {
-  metrics() {
-    return new AgentConfigMetrics({
-      ...this.fields,
+export class AgentConfig extends Metricset<AgentConfigFields> {
+  constructor() {
+    super({
+      'metricset.name': 'agent_config',
       agent_config_applied: 1,
     });
   }
-}
 
-export function agentConfig(etag: string) {
-  return new AgentConfig({
-    'labels.etag': etag,
-  });
+  etag(etag: string) {
+    this.fields['labels.etag'] = etag;
+    return this;
+  }
 }
