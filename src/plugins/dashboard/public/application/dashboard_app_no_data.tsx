@@ -16,7 +16,11 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DashboardAppServices } from '../types';
 import { useKibana } from '../services/kibana_react';
 
-export const DashboardAppEmpty = ({ onDataViewCreated }: { onDataViewCreated: () => void }) => {
+export const DashboardAppNoDataPage = ({
+  onDataViewCreated,
+}: {
+  onDataViewCreated: () => void;
+}) => {
   const {
     services: { core, data, dataViewEditor },
   } = useKibana<DashboardAppServices>();
@@ -34,7 +38,9 @@ export const DashboardAppEmpty = ({ onDataViewCreated }: { onDataViewCreated: ()
   );
 };
 
-export const isDashboardAppEmpty = async (dataViews: DataPublicPluginStart['dataViews']) => {
+export const isDashboardAppInNoDataState = async (
+  dataViews: DataPublicPluginStart['dataViews']
+) => {
   const hasUserDataView = await dataViews.hasData.hasUserDataView().catch(() => false);
   const hasEsData = await dataViews.hasData.hasESData().catch(() => true);
   if (!hasUserDataView || !hasEsData) {

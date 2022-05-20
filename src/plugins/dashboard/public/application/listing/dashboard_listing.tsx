@@ -37,7 +37,7 @@ import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { confirmCreateWithUnsaved, confirmDiscardUnsavedChanges } from './confirm_overlays';
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
-import { DashboardAppEmpty, isDashboardAppEmpty } from '../dashboard_app_empty';
+import { DashboardAppNoDataPage, isDashboardAppInNoDataState } from '../dashboard_app_no_data';
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
@@ -71,7 +71,7 @@ export const DashboardListing = ({
 
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   useMount(() => {
-    (async () => setShowNoDataPage(await isDashboardAppEmpty(dataViews)))();
+    (async () => setShowNoDataPage(await isDashboardAppInNoDataState(dataViews)))();
   });
 
   const [unsavedDashboardIds, setUnsavedDashboardIds] = useState<string[]>(
@@ -295,7 +295,9 @@ export const DashboardListing = ({
     dashboardListingTable;
   return (
     <>
-      {showNoDataPage && <DashboardAppEmpty onDataViewCreated={() => setShowNoDataPage(false)} />}
+      {showNoDataPage && (
+        <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
+      )}
       {!showNoDataPage && (
         <TableListView
           createItem={!showWriteControls ? undefined : createItem}

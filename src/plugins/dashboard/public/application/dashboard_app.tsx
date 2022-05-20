@@ -23,7 +23,7 @@ import { EmbeddableRenderer, ViewMode } from '../services/embeddable';
 import { DashboardTopNav, isCompleteDashboardAppState } from './top_nav/dashboard_top_nav';
 import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../types';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
-import { DashboardAppEmpty } from './dashboard_app_empty';
+import { DashboardAppNoDataPage } from './dashboard_app_no_data';
 export interface DashboardAppProps {
   history: History;
   savedDashboardId?: string;
@@ -131,7 +131,9 @@ export function DashboardApp({
 
   return (
     <>
-      {showNoDataPage && <DashboardAppEmpty onDataViewCreated={() => setShowNoDataPage(false)} />}
+      {showNoDataPage && (
+        <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
+      )}
       {!showNoDataPage && isCompleteDashboardAppState(dashboardAppState) && (
         <>
           <DashboardTopNav

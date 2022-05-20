@@ -39,7 +39,7 @@ import {
   areTimeRangesEqual,
   areRefreshIntervalsEqual,
 } from '../lib';
-import { isDashboardAppEmpty } from '../dashboard_app_empty';
+import { isDashboardAppInNoDataState } from '../dashboard_app_no_data';
 
 export interface UseDashboardStateProps {
   history: History;
@@ -146,7 +146,7 @@ export const useDashboardAppState = ({
       /**
        * Ensure default data view exists and there is data in elasticsearch
        */
-      const isEmpty = await isDashboardAppEmpty(dataViews);
+      const isEmpty = await isDashboardAppInNoDataState(dataViews);
       if (showNoDataPage || isEmpty) {
         setShowNoDataPage(true);
         return;
