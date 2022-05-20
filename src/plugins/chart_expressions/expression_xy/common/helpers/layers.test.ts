@@ -63,7 +63,7 @@ describe('#getDataLayers', () => {
         palette: { type: 'system_palette', name: 'system' },
       },
       {
-        type: 'extendedReferenceLineLayer',
+        type: 'referenceLineLayer',
         layerType: 'referenceLine',
         accessors: ['y'],
         table: { rows: [], columns: [], type: 'datatable' },

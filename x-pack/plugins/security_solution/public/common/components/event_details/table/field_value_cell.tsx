@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { CSSObject } from 'styled-components';
 import { BrowserField } from '../../../containers/source';
 import { OverflowField } from '../../tables/helpers';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
@@ -22,7 +21,7 @@ export interface FieldValueCellProps {
   getLinkValue?: (field: string) => string | null;
   isDraggable?: boolean;
   linkValue?: string | null | undefined;
-  style?: CSSObject | undefined;
+  style?: CSSProperties | undefined;
   values: string[] | null | undefined;
 }
 

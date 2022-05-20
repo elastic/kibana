@@ -20,12 +20,12 @@ export async function fetchSearchSourceQuery(
   latestTimestamp: string | undefined,
   services: {
     logger: Logger;
-    searchSourceClient: Promise<ISearchStartSearchSource>;
+    searchSourceClient: ISearchStartSearchSource;
   }
 ) {
   const { logger, searchSourceClient } = services;
-  const client = await searchSourceClient;
-  const initialSearchSource = await client.create(params.searchConfiguration);
+
+  const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
 
   const { searchSource, dateStart, dateEnd } = updateSearchSource(
     initialSearchSource,
