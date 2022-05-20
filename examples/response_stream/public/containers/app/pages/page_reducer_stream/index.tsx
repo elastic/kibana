@@ -47,7 +47,7 @@ export const PageReducerStream: FC = () => {
 
   const [simulateErrors, setSimulateErrors] = useState(false);
 
-  const { dispatch, start, cancel, data, isCancelled, isRunning } = useFetchStream<
+  const { dispatch, start, cancel, data, error, isCancelled, isRunning } = useFetchStream<
     ApiReducerStream,
     typeof basePath
   >(
@@ -56,7 +56,7 @@ export const PageReducerStream: FC = () => {
     { reducer: reducerStreamReducer, initialState }
   );
 
-  const { errors, progress, entities } = data;
+  const { progress, entities } = data;
 
   const onClickHandler = async () => {
     if (isRunning) {
@@ -68,10 +68,10 @@ export const PageReducerStream: FC = () => {
   };
 
   useEffect(() => {
-    if (errors.length > 0) {
-      notifications.toasts.addDanger(errors[errors.length - 1]);
+    if (error) {
+      notifications.toasts.addDanger(error);
     }
-  }, [errors, notifications.toasts]);
+  }, [error, notifications.toasts]);
 
   const buttonLabel = isRunning
     ? i18n.translate('xpack.response_stream.stopbuttonText', {

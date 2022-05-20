@@ -39,6 +39,8 @@ export function streamFactory<T = unknown>(logger: Logger, headers: Headers, ndj
 
   const stream = isCompressed ? zlib.createGzip() : new ResponseStream();
 
+  stream.emit('error', 'ERROR CAN HAZ?');
+
   function push(d: T) {
     try {
       const line = ndjson ? `${JSON.stringify(d)}${DELIMITER}` : d;
@@ -55,10 +57,6 @@ export function streamFactory<T = unknown>(logger: Logger, headers: Headers, ndj
     }
   }
 
-  function end() {
-    stream.end();
-  }
-
   const responseWithHeaders = {
     body: stream,
     ...(isCompressed
@@ -70,5 +68,5 @@ export function streamFactory<T = unknown>(logger: Logger, headers: Headers, ndj
       : {}),
   };
 
-  return { DELIMITER, end, push, responseWithHeaders, stream };
+  return { DELIMITER, end: stream.end, push, responseWithHeaders };
 }

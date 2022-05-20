@@ -10,12 +10,16 @@ import type { ReducerAction } from 'react';
 
 import type { UseFetchStreamParamsDefault } from './use_fetch_stream';
 
+type GeneratorError = string | undefined;
+
 export async function* fetchStream<I extends UseFetchStreamParamsDefault, BasePath extends string>(
   endpoint: `${BasePath}${I['endpoint']}`,
   abortCtrl: React.MutableRefObject<AbortController>,
   body: I['body'],
   ndjson = true
-): AsyncGenerator<ReducerAction<I['reducer']> | Array<ReducerAction<I['reducer']>>> {
+): AsyncGenerator<
+  [GeneratorError, ReducerAction<I['reducer']> | Array<ReducerAction<I['reducer']>> | undefined]
+> {
   const stream = await fetch(endpoint, {
     signal: abortCtrl.current.signal,
     method: 'POST',
@@ -27,6 +31,11 @@ export async function* fetchStream<I extends UseFetchStreamParamsDefault, BasePa
     },
     ...(Object.keys(body).length > 0 ? { body: JSON.stringify(body) } : {}),
   });
+
+  if (!stream.ok) {
+    yield [`Error ${stream.status}: ${stream.statusText}`, undefined];
+    return;
+  }
 
   if (stream.body !== null) {
     // Note that Firefox 99 doesn't support `TextDecoderStream` yet.
@@ -61,7 +70,7 @@ export async function* fetchStream<I extends UseFetchStreamParamsDefault, BasePa
         const now = Date.now();
 
         if (now - lastCall >= bufferBounce && actionBuffer.length > 0) {
-          yield actionBuffer;
+          yield [undefined, actionBuffer];
           actionBuffer = [];
           lastCall = now;
 
@@ -69,23 +78,26 @@ export async function* fetchStream<I extends UseFetchStreamParamsDefault, BasePa
           // we trigger this client side timeout to clear a potential intermediate buffer state.
           // Since `yield` cannot be passed on to other scopes like callbacks,
           // this pattern using a Promise is used to wait for the timeout.
-          yield new Promise<Array<ReducerAction<I['reducer']>>>((resolve) => {
+          yield new Promise<
+            [
+              GeneratorError,
+              ReducerAction<I['reducer']> | Array<ReducerAction<I['reducer']>> | undefined
+            ]
+          >((resolve) => {
             setTimeout(() => {
               if (actionBuffer.length > 0) {
-                resolve(actionBuffer);
+                resolve([undefined, actionBuffer]);
                 actionBuffer = [];
                 lastCall = now;
               } else {
-                resolve([]);
+                resolve([undefined, []]);
               }
             }, bufferBounce + 10);
           });
         }
       } catch (error) {
         if (error.name !== 'AbortError') {
-          yield [{ type: 'error', payload: error.toString() }] as Array<
-            ReducerAction<I['reducer']>
-          >;
+          yield [error.toString(), undefined];
         }
         break;
       }
@@ -94,7 +106,7 @@ export async function* fetchStream<I extends UseFetchStreamParamsDefault, BasePa
     // The reader might finish with a partially filled actionBuffer so
     // we need to clear it once more after the request is done.
     if (actionBuffer.length > 0) {
-      yield actionBuffer;
+      yield [undefined, actionBuffer];
       actionBuffer.length = 0;
     }
   }

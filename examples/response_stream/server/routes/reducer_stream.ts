@@ -38,8 +38,10 @@ export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
         shouldStop = true;
       });
 
-      const { DELIMITER, end, push, responseWithHeaders, stream } =
-        streamFactory<ReducerStreamApiAction>(logger, request.headers);
+      const { end, push, responseWithHeaders } = streamFactory<ReducerStreamApiAction>(
+        logger,
+        request.headers
+      );
 
       const entities = [
         'kimchy',
@@ -87,14 +89,12 @@ export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
               throw new Error('There was a (simulated) server side error!');
             } else if (randomAction === 'client-error') {
               // Return not properly encoded JSON to the client.
-              stream.push(`{body:'Not valid JSON${DELIMITER}`);
+              // stream.push(`{body:'Not valid JSON${DELIMITER}`);
+              end();
             }
 
             pushStreamUpdate();
           } catch (error) {
-            stream.push(
-              `${JSON.stringify({ type: 'error', payload: error.toString() })}${DELIMITER}`
-            );
             end();
           }
         }, Math.floor(Math.random() * maxTimeoutMs));

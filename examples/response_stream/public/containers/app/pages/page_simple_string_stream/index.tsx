@@ -10,7 +10,7 @@ import React, { FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { useFetchStream } from '@kbn/aiops-utils';
 
@@ -23,7 +23,7 @@ export const PageSimpleStringStream: FC = () => {
   const { core } = useDeps();
   const basePath = core.http?.basePath.get() ?? '';
 
-  const { dispatch, start, cancel, data, isRunning } = useFetchStream<
+  const { dispatch, error, start, cancel, data, isRunning } = useFetchStream<
     ApiSimpleStringStream,
     typeof basePath
   >(`${basePath}/internal/response_stream/simple_string_stream`, { timeout: 500 });
@@ -69,6 +69,11 @@ export const PageSimpleStringStream: FC = () => {
       <EuiText>
         <p>{data}</p>
       </EuiText>
+      {error && (
+        <EuiCallOut title="Sorry, there was an error" color="danger" iconType="alert">
+          <p>{error}</p>
+        </EuiCallOut>
+      )}
     </Page>
   );
 };

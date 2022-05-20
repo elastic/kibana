@@ -9,26 +9,19 @@
 import { ReducerStreamApiAction, API_ACTION_NAME } from '.';
 
 export const UI_ACTION_NAME = {
-  ERROR: 'error',
   RESET: 'reset',
 } as const;
 export type UiActionName = typeof UI_ACTION_NAME[keyof typeof UI_ACTION_NAME];
 
 export interface StreamState {
-  errors: string[];
   progress: number;
   entities: Record<string, number>;
 }
 export const initialState: StreamState = {
-  errors: [],
   progress: 0,
   entities: {},
 };
 
-interface UiActionError {
-  type: typeof UI_ACTION_NAME.ERROR;
-  payload: string;
-}
 interface UiActionResetStream {
   type: typeof UI_ACTION_NAME.RESET;
 }
@@ -37,7 +30,7 @@ export function resetStream(): UiActionResetStream {
   return { type: UI_ACTION_NAME.RESET };
 }
 
-type UiAction = UiActionResetStream | UiActionError;
+type UiAction = UiActionResetStream;
 export type ReducerAction = ReducerStreamApiAction | UiAction;
 export function reducerStreamReducer(
   state: StreamState,
@@ -73,15 +66,7 @@ export function reducerStreamReducer(
       };
     case UI_ACTION_NAME.RESET:
       return initialState;
-    case UI_ACTION_NAME.ERROR:
-      return {
-        ...state,
-        errors: [...state.errors, action.payload],
-      };
     default:
-      return {
-        ...state,
-        errors: [...state.errors, 'UNKNOWN_ACTION_ERROR'],
-      };
+      return state;
   }
 }

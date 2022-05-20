@@ -36,6 +36,7 @@ interface UseFetchStreamReturnType<Data, Action> {
   cancel: () => void;
   data: Data;
   dispatch: Dispatch<Action>;
+  error: string | undefined;
   isCancelled: boolean;
   isRunning: boolean;
   start: () => Promise<void>;
@@ -62,6 +63,7 @@ export function useFetchStream<I extends UseFetchStreamParamsDefault, BasePath e
   body: I['body'],
   options?: { reducer: I['reducer']; initialState: ReducerState<I['reducer']> }
 ): UseFetchStreamReturnType<ReducerState<I['reducer']>, ReducerAction<I['reducer']>> {
+  const [error, setError] = useState<string | undefined>();
   const [isCancelled, setIsCancelled] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
 
@@ -74,21 +76,23 @@ export function useFetchStream<I extends UseFetchStreamParamsDefault, BasePath e
 
   const start = async () => {
     if (isRunning) {
-      throw new Error('Restart not supported yet');
+      setError('Restart not supported yet.');
+      return;
     }
 
+    setError(undefined);
     setIsRunning(true);
     setIsCancelled(false);
 
     abortCtrl.current = new AbortController();
 
-    for await (const actions of fetchStream<UseFetchStreamCustomReducerParams, BasePath>(
-      endpoint,
-      abortCtrl,
-      body,
-      options !== undefined
-    )) {
-      if (actions.length > 0) {
+    for await (const [fetchError, actions] of fetchStream<
+      UseFetchStreamCustomReducerParams,
+      BasePath
+    >(endpoint, abortCtrl, body, options !== undefined)) {
+      if (fetchError) {
+        setError(fetchError);
+      } else if (actions.length > 0) {
         dispatch(actions as ReducerAction<I['reducer']>);
       }
     }
@@ -111,6 +115,7 @@ export function useFetchStream<I extends UseFetchStreamParamsDefault, BasePath e
     cancel,
     data,
     dispatch,
+    error,
     isCancelled,
     isRunning,
     start,
