@@ -8,19 +8,20 @@
 import type { PluginInitializerContext, CoreSetup, Plugin, Logger } from '@kbn/core/server';
 
 import { BlobStorageService } from './blob_storage_service';
-import { InternalFileService } from './file_service';
+import { FileServiceFactory } from './file_service';
+import { FilePluginSetup } from './types';
 
 export class FilesPlugin implements Plugin {
   private readonly logger: Logger;
-  private fileService: undefined | InternalFileService;
+  private fileServiceFactory: undefined | FileServiceFactory;
   private readyPromise: Promise<void> = Promise.resolve();
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup) {
-    InternalFileService.setup(core.savedObjects);
+  public setup(core: CoreSetup, deps: FilePluginSetup) {
+    FileServiceFactory.setup(core.savedObjects);
 
     this.readyPromise = core.getStartServices().then(async ([coreStart]) => {
       const esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -28,9 +29,10 @@ export class FilesPlugin implements Plugin {
         esClient,
         this.logger.get('blob-storage-service')
       );
-      this.fileService = new InternalFileService(
+      this.fileServiceFactory = new FileServiceFactory(
         coreStart.savedObjects,
         blobStorageService,
+        deps.security,
         this.logger.get('files-service')
       );
     });
@@ -40,7 +42,7 @@ export class FilesPlugin implements Plugin {
 
   public start() {
     this.readyPromise.then(() => {
-      this.logger.info(`Files ready: ${Boolean(this.fileService)}`);
+      this.logger.debug(`Is file servicer ready? ${Boolean(this.fileServiceFactory)}`);
     });
     return {};
   }
