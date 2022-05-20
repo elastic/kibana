@@ -291,21 +291,8 @@ export function RuleDetailsPage() {
       <EuiFlexGroup wrap={true} gutterSize="m">
         {/* Left side of Rule Summary */}
         <EuiFlexItem grow={1}>
-          <EuiPanel
-            color={getHealthColor(rule.executionStatus.status)}
-            hasBorder={false}
-            paddingSize={'m'}
-          >
+          <EuiPanel color="subdued" hasBorder={false} paddingSize={'m'}>
             <EuiFlexGroup direction="column" gutterSize="xs">
-              <EuiFlexItem>
-                <EuiTitle size="s">
-                  <EuiHealth textSize="inherit" color={getHealthColor(rule.executionStatus.status)}>
-                    {rule.executionStatus.status.charAt(0).toUpperCase() +
-                      rule.executionStatus.status.slice(1)}
-                  </EuiHealth>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiSpacer size="m" />
               <EuiFlexGroup>
                 <ItemTitleRuleSummary>
                   {i18n.translate('xpack.observability.ruleDetails.lastRun', {
