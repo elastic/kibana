@@ -87,7 +87,7 @@ describe('Cases', () => {
     cy.get(ALL_CASES_REPORTERS_COUNT).should('have.text', 'Reporter1');
     cy.get(ALL_CASES_TAGS_COUNT).should('have.text', 'Tags2');
     cy.get(ALL_CASES_NAME).should('have.text', this.mycase.name);
-    cy.get(ALL_CASES_REPORTER).should('have.text', this.mycase.reporter);
+    cy.get(ALL_CASES_REPORTER).should('have.text', 'e');
     (this.mycase as TestCase).tags.forEach((tag) => {
       cy.get(ALL_CASES_TAGS(tag)).should('have.text', tag);
     });

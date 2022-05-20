@@ -11,6 +11,7 @@ import {
   EuiPanel,
   EuiFormRow,
   EuiFieldText,
+  EuiSelect,
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
@@ -20,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ValidatedDualRange } from '@kbn/kibana-react-plugin/public';
 import { Attribution } from '../../../../common/descriptor_types';
-import { MAX_ZOOM } from '../../../../common/constants';
+import { AUTOSELECT_EMS_LOCALE, NO_EMS_LOCALE, MAX_ZOOM } from '../../../../common/constants';
 import { AlphaSlider } from '../../../components/alpha_slider';
 import { ILayer } from '../../../classes/layers/layer';
 import { AttributionFormRow } from './attribution_form_row';
@@ -30,6 +31,7 @@ export interface Props {
   clearLayerAttribution: (layerId: string) => void;
   setLayerAttribution: (id: string, attribution: Attribution) => void;
   updateLabel: (layerId: string, label: string) => void;
+  updateLocale: (layerId: string, locale: string) => void;
   updateMinZoom: (layerId: string, minZoom: number) => void;
   updateMaxZoom: (layerId: string, maxZoom: number) => void;
   updateAlpha: (layerId: string, alpha: number) => void;
@@ -46,6 +48,11 @@ export function LayerSettings(props: Props) {
   const onLabelChange = (event: ChangeEvent<HTMLInputElement>) => {
     const label = event.target.value;
     props.updateLabel(layerId, label);
+  };
+
+  const onLocaleChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    const { value } = event.target;
+    if (value) props.updateLocale(layerId, value);
   };
 
   const onZoomChange = (value: [string, string]) => {
@@ -155,6 +162,58 @@ export function LayerSettings(props: Props) {
     );
   };
 
+  const renderShowLocaleSelector = () => {
+    if (!props.layer.supportsLabelLocales()) {
+      return null;
+    }
+
+    const options = [
+      {
+        text: i18n.translate(
+          'xpack.maps.layerPanel.settingsPanel.labelLanguageAutoselectDropDown',
+          {
+            defaultMessage: 'Autoselect based on Kibana locale',
+          }
+        ),
+        value: AUTOSELECT_EMS_LOCALE,
+      },
+      { value: 'ar', text: 'العربية' },
+      { value: 'de', text: 'Deutsch' },
+      { value: 'en', text: 'English' },
+      { value: 'es', text: 'Español' },
+      { value: 'fr-fr', text: 'Français' },
+      { value: 'hi-in', text: 'हिन्दी' },
+      { value: 'it', text: 'Italiano' },
+      { value: 'ja-jp', text: '日本語' },
+      { value: 'ko', text: '한국어' },
+      { value: 'pt-pt', text: 'Português' },
+      { value: 'ru-ru', text: 'русский' },
+      { value: 'zh-cn', text: '简体中文' },
+      {
+        text: i18n.translate('xpack.maps.layerPanel.settingsPanel.labelLanguageNoneDropDown', {
+          defaultMessage: 'None',
+        }),
+        value: NO_EMS_LOCALE,
+      },
+    ];
+
+    return (
+      <EuiFormRow
+        display="columnCompressed"
+        label={i18n.translate('xpack.maps.layerPanel.settingsPanel.labelLanguageLabel', {
+          defaultMessage: 'Label language',
+        })}
+      >
+        <EuiSelect
+          options={options}
+          value={props.layer.getLocale() ?? NO_EMS_LOCALE}
+          onChange={onLocaleChange}
+          compressed
+        />
+      </EuiFormRow>
+    );
+  };
+
   return (
     <Fragment>
       <EuiPanel>
@@ -172,6 +231,7 @@ export function LayerSettings(props: Props) {
         {renderZoomSliders()}
         <AlphaSlider alpha={props.layer.getAlpha()} onChange={onAlphaChange} />
         {renderShowLabelsOnTop()}
+        {renderShowLocaleSelector()}
         <AttributionFormRow layer={props.layer} onChange={onAttributionChange} />
         {renderIncludeInFitToBounds()}
       </EuiPanel>

@@ -69,6 +69,7 @@ export type {
   FormulaPublicApi,
   StaticValueIndexPatternColumn,
   TimeScaleIndexPatternColumn,
+  IndexPatternLayer,
 } from './indexpattern_datasource/types';
 export type {
   XYArgs,
@@ -104,7 +105,8 @@ export type {
   LabelsOrientationConfigResult,
   AxisTitlesVisibilityConfigResult,
 } from '@kbn/expression-xy-plugin/common';
-export type { LensEmbeddableInput } from './embeddable';
+export type { LensEmbeddableInput, LensSavedObjectAttributes, Embeddable } from './embeddable';
+
 export { layerTypes } from '../common';
 
 export type { LensPublicStart, LensPublicSetup } from './plugin';
