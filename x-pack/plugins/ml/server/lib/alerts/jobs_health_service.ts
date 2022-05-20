@@ -180,8 +180,8 @@ export function jobsHealthServiceProvider(
             };
           })
           .filter((datafeedStat) => {
-            // Find opened jobs with not started datafeeds
-            return datafeedStat.job_state === 'opened' && datafeedStat.datafeed_state !== 'started';
+            // Find opened jobs
+            return datafeedStat.job_state === 'opened';
           });
       }
     },
