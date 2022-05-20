@@ -17,8 +17,8 @@ import type {
   TopLeftBottomRightGeoBounds,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-// @ts-expect-error
 import { i18n } from '@kbn/i18n';
+// @ts-expect-error
 import { UpdateSourceEditor } from './update_source_editor';
 import { SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
