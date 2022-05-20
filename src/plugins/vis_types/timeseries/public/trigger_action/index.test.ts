@@ -87,7 +87,7 @@ describe('triggerTSVBtoLensConfiguration', () => {
           ...model.series[0],
           metrics: [
             {
-              type: 'percentile_rank',
+              type: 'std_deviation',
             },
           ] as Series['metrics'],
         },
