@@ -50,7 +50,7 @@ export function Actions({ ruleActions, actionTypeRegistry }: ActionsProps) {
     <EuiFlexGroup direction="column">
       {actions.map(({ actionTypeId, name }) => (
         <React.Fragment key={actionTypeId}>
-          <EuiFlexGroup alignItems="baseline">
+          <EuiFlexGroup alignItems="center" gutterSize="s" component="span">
             <EuiFlexItem grow={false}>
               <EuiIcon size="m" type={getActionIconClass(actionTypeId) ?? 'apps'} />
             </EuiFlexItem>
