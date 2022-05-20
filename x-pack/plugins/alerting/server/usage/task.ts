@@ -98,11 +98,11 @@ export function telemetryTaskRunner(
       async run() {
         const esClient = await getEsClient();
         return Promise.all([
-          getTotalCountAggregations(esClient, kibanaIndex),
-          getTotalCountInUse(esClient, kibanaIndex),
-          getExecutionsPerDayCount(esClient, eventLogIndex),
-          getExecutionTimeoutsPerDayCount(esClient, eventLogIndex),
-          getFailedAndUnrecognizedTasksPerDay(esClient, taskManagerIndex),
+          getTotalCountAggregations(esClient, kibanaIndex, logger),
+          getTotalCountInUse(esClient, kibanaIndex, logger),
+          getExecutionsPerDayCount(esClient, eventLogIndex, logger),
+          getExecutionTimeoutsPerDayCount(esClient, eventLogIndex, logger),
+          getFailedAndUnrecognizedTasksPerDay(esClient, taskManagerIndex, logger),
         ])
           .then(
             ([
@@ -112,6 +112,7 @@ export function telemetryTaskRunner(
               dailyExecutionTimeoutCounts,
               dailyFailedAndUnrecognizedTasks,
             ]) => {
+              logger.info('alerting telemetry success!');
               return {
                 state: {
                   runs: (state.runs || 0) + 1,
@@ -169,5 +170,5 @@ export function telemetryTaskRunner(
 }
 
 function getNextMidnight() {
-  return moment().add(1, 'd').startOf('d').toDate();
+  return moment().add(1, 'm').startOf('m').toDate();
 }
