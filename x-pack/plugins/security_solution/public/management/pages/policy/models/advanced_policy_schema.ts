@@ -895,7 +895,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
-    key: 'macadvanced.event_filter.default',
+    key: 'mac.advanced.event_filter.default',
     first_supported_version: '8.3',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.event_filter.default',
