@@ -7,5 +7,5 @@
  */
 
 export { opsMetricsEventSchema } from './ops_metrics_event_schema';
-export type { OpsMetricsEvent } from './ops_metrics_event_schema';
+export type { OpsMetricsEvent } from './ops_metrics_event';
 export { convertToMetricEvent } from './ops_metrics_event';
