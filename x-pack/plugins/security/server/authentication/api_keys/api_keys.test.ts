@@ -38,6 +38,7 @@ describe('API Keys', () => {
       clusterClient: mockClusterClient,
       logger: loggingSystemMock.create().get('api-keys'),
       license: mockLicense,
+      applicationName: '.kibana,.kibana',
     });
   });
 
