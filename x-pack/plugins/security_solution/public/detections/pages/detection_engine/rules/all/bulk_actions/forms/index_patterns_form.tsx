@@ -65,7 +65,11 @@ const schema: FormSchema<IndexPatternsFormData> = {
   },
 };
 
-const initialFormData: IndexPatternsFormData = { index: [], overwrite: false, overwriteDataViews: false };
+const initialFormData: IndexPatternsFormData = {
+  index: [],
+  overwrite: false,
+  overwriteDataViews: false,
+};
 
 const getFormConfig = (editAction: IndexPatternsEditActions) =>
   editAction === BulkActionEditType.add_index_patterns
@@ -100,7 +104,10 @@ const IndexPatternsFormComponent = ({
 
   const { indexHelpText, indexLabel, formTitle } = getFormConfig(editAction);
 
-  const [{ overwrite, overwriteDataViews }] = useFormData({ form, watch: ['overwrite', 'overwriteDataViews'] });
+  const [{ overwrite, overwriteDataViews }] = useFormData({
+    form,
+    watch: ['overwrite', 'overwriteDataViews'],
+  });
   const { uiSettings } = useKibana().services;
   const defaultPatterns = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
 
@@ -113,7 +120,7 @@ const IndexPatternsFormComponent = ({
     const payload = {
       value: data.index,
       type: data.overwrite ? BulkActionEditType.set_index_patterns : editAction,
-      overwriteDataViews: data.overwriteDataViews
+      overwriteDataViews: data.overwriteDataViews,
     };
 
     onConfirm(payload);

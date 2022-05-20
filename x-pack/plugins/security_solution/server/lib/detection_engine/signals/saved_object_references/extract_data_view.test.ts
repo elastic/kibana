@@ -23,11 +23,9 @@ describe('extract_data_view', () => {
   });
 
   test('It returns exception list transformed into a saved object references', () => {
-    expect(
-      extractDataView({ dataViewId: 'logs-*' })
-    ).toEqual<FuncReturn>([
+    expect(extractDataView({ dataViewId: 'logs-*' })).toEqual<FuncReturn>([
       {
-        id: 'logs-*', 
+        id: 'logs-*',
         name: 'dataViewId_0',
         type: 'index-pattern',
       },

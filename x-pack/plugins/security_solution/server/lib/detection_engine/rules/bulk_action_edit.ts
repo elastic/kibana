@@ -24,7 +24,7 @@ export const deleteItemsFromArray = <T>(arr: T[], items: T[]): T[] => {
 
 export const applyBulkActionEditToRule = (
   existingRule: RuleAlertType,
-  action: BulkActionEditPayload,
+  action: BulkActionEditPayload
 ): RuleAlertType => {
   const rule = { ...existingRule, params: { ...existingRule.params } };
 
@@ -50,7 +50,12 @@ export const applyBulkActionEditToRule = (
         "Index patterns can't be added. Machine learning rule doesn't have index patterns property"
       );
 
-      if (!(rule.params.dataViewId != null && rule.params.dataViewId.trim() !== '') || (rule.params.dataViewId != null && rule.params.dataViewId.trim() !== '' && action.overwriteDataViews)) {
+      if (
+        !(rule.params.dataViewId != null && rule.params.dataViewId.trim() !== '') ||
+        (rule.params.dataViewId != null &&
+          rule.params.dataViewId.trim() !== '' &&
+          action.overwriteDataViews)
+      ) {
         rule.params.index = addItemsToArray(rule.params.index ?? [], action.value);
         rule.params.dataViewId = undefined;
       }
@@ -63,7 +68,12 @@ export const applyBulkActionEditToRule = (
         "Index patterns can't be deleted. Machine learning rule doesn't have index patterns property"
       );
 
-      if (!(rule.params.dataViewId != null && rule.params.dataViewId.trim() !== '') || ((rule.params.dataViewId != null && rule.params.dataViewId.trim() !== '') && action.overwriteDataViews)) {
+      if (
+        !(rule.params.dataViewId != null && rule.params.dataViewId.trim() !== '') ||
+        (rule.params.dataViewId != null &&
+          rule.params.dataViewId.trim() !== '' &&
+          action.overwriteDataViews)
+      ) {
         rule.params.index = deleteItemsFromArray(rule.params.index ?? [], action.value);
         rule.params.dataViewId = undefined;
 
@@ -82,7 +92,12 @@ export const applyBulkActionEditToRule = (
       );
       invariant(action.value.length !== 0, "Index patterns can't be overwritten with empty list");
 
-      if (!(rule.params.dataViewId != null && rule.params.dataViewId.trim() !== '') || ((rule.params.dataViewId != null && rule.params.dataViewId.trim() !== '') && action.overwriteDataViews)) {
+      if (
+        !(rule.params.dataViewId != null && rule.params.dataViewId.trim() !== '') ||
+        (rule.params.dataViewId != null &&
+          rule.params.dataViewId.trim() !== '' &&
+          action.overwriteDataViews)
+      ) {
         rule.params.index = action.value;
         rule.params.dataViewId = undefined;
       }

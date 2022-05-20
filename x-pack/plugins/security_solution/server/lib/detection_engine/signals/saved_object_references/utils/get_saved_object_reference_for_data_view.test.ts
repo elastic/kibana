@@ -7,9 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { SavedObjectReference } from '@kbn/core/server';
-import {
-  getSavedObjectReferenceForDataView,
-} from '.';
+import { getSavedObjectReferenceForDataView } from '.';
 
 describe('get_saved_object_reference_for_data_view', () => {
   type FuncReturn = ReturnType<typeof getSavedObjectReferenceForDataView>;

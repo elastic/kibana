@@ -46,7 +46,11 @@ export const injectExceptionsReferences = ({
       };
       return reference;
     } else {
-      logMissingSavedObjectError({ logger, missingFieldValue: exceptionItem, missingField: 'exception list' });
+      logMissingSavedObjectError({
+        logger,
+        missingFieldValue: exceptionItem,
+        missingField: 'exception list',
+      });
       return exceptionItem;
     }
   });
