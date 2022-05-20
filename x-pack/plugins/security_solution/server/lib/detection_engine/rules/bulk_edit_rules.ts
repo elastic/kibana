@@ -22,7 +22,7 @@ export interface BulkEditRulesArguments {
   actions: BulkActionEditPayload[];
   filter?: string;
   ids?: string[];
-  mlAuthz?: MlAuthz;
+  mlAuthz: MlAuthz;
 }
 
 /**
@@ -45,9 +45,7 @@ export const bulkEditRules = ({
     ...(ids ? { ids } : { filter: enrichFilterWithRuleTypeMapping(filter) }),
     operations: attributesActions.map(bulkEditActionToRulesClientOperation),
     paramsModifier: async (ruleParams: RuleAlertType['params']) => {
-      if (mlAuthz) {
-        throwAuthzError(await mlAuthz?.validateRuleType?.(ruleParams.type));
-      }
+      throwAuthzError(await mlAuthz?.validateRuleType?.(ruleParams.type));
 
       return ruleParamsModifier(ruleParams, paramsActions);
     },

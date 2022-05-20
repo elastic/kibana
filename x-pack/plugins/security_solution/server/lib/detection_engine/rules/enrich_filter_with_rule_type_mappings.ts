@@ -7,6 +7,11 @@
 
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
+/**
+ * updates filter to restrict search results to only Security Solution rule types (siem.eqlRule, siem.mlRule, etc..)
+ * @param filter
+ * @returns modified filter
+ */
 export const enrichFilterWithRuleTypeMapping = (filter: string | null | undefined) => {
   const alertTypeFilter = `(${Object.values(ruleTypeMappings)
     .map((type) => `alert.attributes.alertTypeId: ${type}`)
