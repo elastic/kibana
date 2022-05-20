@@ -248,7 +248,16 @@ describe('JobsHealthService', () => {
     expect(logger.warn).not.toHaveBeenCalled();
     expect(logger.debug).toHaveBeenCalledWith(`Performing health checks for job IDs: test_job_01`);
     expect(datafeedsService.getDatafeedByJobId).not.toHaveBeenCalled();
-    expect(executionResult).toEqual([]);
+    expect(executionResult).toEqual([
+      {
+        context: {
+          message: 'Jobs  contain no errors in the messages.',
+          results: [],
+        },
+        isHealthy: true,
+        name: 'Errors in job messages',
+      },
+    ]);
   });
 
   test('takes into account delayed data params', async () => {
@@ -397,6 +406,14 @@ describe('JobsHealthService', () => {
             },
           ],
           message: 'Jobs test_job_01, test_job_02 are suffering from delayed data.',
+        },
+      },
+      {
+        isHealthy: true,
+        name: 'Errors in job messages',
+        context: {
+          message: 'Jobs  contain no errors in the messages.',
+          results: [],
         },
       },
     ]);
