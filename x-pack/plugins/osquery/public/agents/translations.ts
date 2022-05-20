@@ -43,6 +43,10 @@ export const SELECT_AGENT_LABEL = i18n.translate('xpack.osquery.agents.selectAge
   defaultMessage: `Select agents or groups`,
 });
 
+export const SELECT_AGENT_ROW_LABEL = i18n.translate('xpack.osquery.agents.selectAgentRowLabel', {
+  defaultMessage: `Agents`,
+});
+
 export const ERROR_ALL_AGENTS = i18n.translate('xpack.osquery.agents.errorSearchDescription', {
   defaultMessage: `An error has occurred on all agents search`,
 });

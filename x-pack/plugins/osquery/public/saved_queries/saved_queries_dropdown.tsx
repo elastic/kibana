@@ -12,6 +12,7 @@ import { SimpleSavedObject } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
+import { OsquerySchemaLink } from '../components/osquery_schema_link';
 
 import { useSavedQueries } from './use_saved_queries';
 import { useFormData } from '../shared_imports';
@@ -136,16 +137,17 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
       label={
         <FormattedMessage
           id="xpack.osquery.savedQueries.dropdown.searchFieldLabel"
-          defaultMessage="Build from a saved query (optional)"
+          defaultMessage="Select or create new query"
         />
       }
+      labelAppend={<OsquerySchemaLink />}
       fullWidth
     >
       <EuiComboBox
         isDisabled={disabled}
         fullWidth
         placeholder={i18n.translate('xpack.osquery.savedQueries.dropdown.searchFieldPlaceholder', {
-          defaultMessage: 'Search for saved queries',
+          defaultMessage: 'New query',
         })}
         // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
         singleSelection={{ asPlainText: true }}
