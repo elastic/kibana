@@ -722,6 +722,75 @@ describe('XYChart component', () => {
     expect(lineArea.prop('lineSeriesStyle')).toEqual(expectedSeriesStyle);
   });
 
+  test('applies the line width to the chart', () => {
+    const { args } = sampleArgs();
+    const lineWidthArg = { lineWidth: 10 };
+    const component = shallow(
+      <XYChart
+        {...defaultProps}
+        args={{ ...args, layers: [{ ...args.layers[0], ...lineWidthArg }] }}
+      />
+    );
+    const dataLayers = component.find(DataLayers).dive();
+    const lineArea = dataLayers.find(LineSeries).at(0);
+    const expectedSeriesStyle = expect.objectContaining({
+      line: { strokeWidth: lineWidthArg.lineWidth },
+    });
+
+    expect(lineArea.prop('areaSeriesStyle')).toEqual(expectedSeriesStyle);
+    expect(lineArea.prop('lineSeriesStyle')).toEqual(expectedSeriesStyle);
+  });
+
+  test('applies showPoints to the chart', () => {
+    const checkIfPointsVisibilityIsApplied = (showPoints: boolean) => {
+      const { args } = sampleArgs();
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            layers: [{ ...(args.layers[0] as DataLayerConfig), showPoints }],
+          }}
+        />
+      );
+      const dataLayers = component.find(DataLayers).dive();
+      const lineArea = dataLayers.find(LineSeries).at(0);
+      const expectedSeriesStyle = expect.objectContaining({
+        point: expect.objectContaining({
+          visible: showPoints,
+        }),
+      });
+      expect(lineArea.prop('areaSeriesStyle')).toEqual(expectedSeriesStyle);
+      expect(lineArea.prop('lineSeriesStyle')).toEqual(expectedSeriesStyle);
+    };
+
+    checkIfPointsVisibilityIsApplied(true);
+    checkIfPointsVisibilityIsApplied(false);
+  });
+
+  test('applies point radius to the chart', () => {
+    const pointsRadius = 10;
+    const { args } = sampleArgs();
+    const component = shallow(
+      <XYChart
+        {...defaultProps}
+        args={{
+          ...args,
+          layers: [{ ...(args.layers[0] as DataLayerConfig), pointsRadius }],
+        }}
+      />
+    );
+    const dataLayers = component.find(DataLayers).dive();
+    const lineArea = dataLayers.find(LineSeries).at(0);
+    const expectedSeriesStyle = expect.objectContaining({
+      point: expect.objectContaining({
+        radius: pointsRadius,
+      }),
+    });
+    expect(lineArea.prop('areaSeriesStyle')).toEqual(expectedSeriesStyle);
+    expect(lineArea.prop('lineSeriesStyle')).toEqual(expectedSeriesStyle);
+  });
+
   test('it renders bar', () => {
     const { args } = sampleArgs();
     const component = shallow(
@@ -1967,17 +2036,10 @@ describe('XYChart component', () => {
   test('it should pass the formatter function to the axis', () => {
     const { args } = sampleArgs();
 
-    const instance = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
+    shallow(<XYChart {...defaultProps} args={{ ...args }} />);
 
-    const tickFormatter = instance.find(Axis).first().prop('tickFormat');
-
-    if (!tickFormatter) {
-      throw new Error('tickFormatter prop not found');
-    }
-
-    tickFormatter('I');
-
-    expect(convertSpy).toHaveBeenCalledWith('I');
+    expect(convertSpy).toHaveBeenCalledWith(1652034840000);
+    expect(convertSpy).toHaveBeenCalledWith(1652122440000);
   });
 
   test('it should set the tickLabel visibility on the x axis if the tick labels is hidden', () => {
