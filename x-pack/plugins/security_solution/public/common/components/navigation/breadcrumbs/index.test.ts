@@ -20,6 +20,11 @@ import { APP_UI_ID } from '../../../../../common/constants';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { useIsGroupedNavigationEnabled } from '../helpers';
 import { navTabs } from '../../../../app/home/home_navigations';
+import { getAppLinks } from '../../../links/app_links';
+import { allowedExperimentalValues } from '../../../../../common/experimental_features';
+import { StartPlugins } from '../../../../types';
+import { coreMock } from '@kbn/core/public/mocks';
+import { updateAppLinks } from '../../../links';
 
 jest.mock('../../../hooks/use_selector');
 
@@ -128,6 +133,23 @@ jest.mock('../../../lib/kibana/kibana_react', () => {
 });
 
 describe('Navigation Breadcrumbs', () => {
+  beforeAll(async () => {
+    const appLinks = await getAppLinks(coreMock.createStart(), {} as StartPlugins);
+    updateAppLinks(appLinks, {
+      experimentalFeatures: allowedExperimentalValues,
+      capabilities: {
+        navLinks: {},
+        management: {},
+        catalogue: {},
+        actions: { show: true, crud: true },
+        siem: {
+          show: true,
+          crud: true,
+        },
+      },
+    });
+  });
+
   const hostName = 'siem-kibana';
 
   const ipv4 = '192.0.2.255';
