@@ -5,15 +5,24 @@
  * 2.0.
  */
 
-import type { AiopsExampleStreamSchema } from './example_stream';
+import type {
+  AiopsExplainLogRateSpikesSchema,
+  AiopsExplainLogRateSpikesApiAction,
+} from './explain_log_rate_spikes';
+import type { AiopsExampleStreamSchema, AiopsExampleStreamApiAction } from './example_stream';
 
 export const API_ENDPOINT = {
   EXAMPLE_STREAM: '/internal/aiops/example_stream',
-  ANOTHER: '/internal/aiops/another',
+  EXPLAIN_LOG_RATE_SPIKES: '/internal/aiops/explain_log_rate_spikes',
 } as const;
 export type ApiEndpoint = typeof API_ENDPOINT[keyof typeof API_ENDPOINT];
 
 export interface ApiEndpointOptions {
   [API_ENDPOINT.EXAMPLE_STREAM]: AiopsExampleStreamSchema;
-  [API_ENDPOINT.ANOTHER]: { anotherOption: string };
+  [API_ENDPOINT.EXPLAIN_LOG_RATE_SPIKES]: AiopsExplainLogRateSpikesSchema;
+}
+
+export interface ApiEndpointActions {
+  [API_ENDPOINT.EXAMPLE_STREAM]: AiopsExampleStreamApiAction;
+  [API_ENDPOINT.EXPLAIN_LOG_RATE_SPIKES]: AiopsExplainLogRateSpikesApiAction;
 }
