@@ -24,7 +24,6 @@ import {
   AgentUnenrollAgentModal,
   AgentUpgradeAgentModal,
 } from '../../components';
-import { useKibanaVersion } from '../../../../hooks';
 
 import type { SelectionMode } from './types';
 
@@ -48,11 +47,10 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   selectedAgents,
   refreshAgents,
 }) => {
-  const kibanaVersion = useKibanaVersion();
   // Bulk actions menu states
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const closeMenu = () => setIsMenuOpen(false);
-  const openMenu = () => setIsMenuOpen(true);
+  const onClickMenu = () => setIsMenuOpen(!isMenuOpen);
 
   // Actions states
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState<boolean>(false);
@@ -150,7 +148,6 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
       {isUpgradeModalOpen && (
         <EuiPortal>
           <AgentUpgradeAgentModal
-            version={kibanaVersion}
             agents={agents}
             agentCount={agentCount}
             onClose={() => {
@@ -172,7 +169,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
                     fill
                     iconType="arrowDown"
                     iconSide="right"
-                    onClick={openMenu}
+                    onClick={onClickMenu}
                     data-test-subj="agentBulkActionsButton"
                   >
                     <FormattedMessage
