@@ -65,4 +65,7 @@ export function deleteEntityAction(payload: string): ApiActionDeleteEntity {
   };
 }
 
-export type ApiAction = ApiActionUpdateProgress | ApiActionAddToEntity | ApiActionDeleteEntity;
+export type AiopsExampleStreamApiAction =
+  | ApiActionUpdateProgress
+  | ApiActionAddToEntity
+  | ApiActionDeleteEntity;

@@ -46,12 +46,14 @@ import {
 } from '../components';
 import { useFleetServerUnhealthy } from '../hooks/use_fleet_server_unhealthy';
 
+import { CurrentBulkUpgradeCallout } from './components';
 import { AgentTableHeader } from './components/table_header';
 import type { SelectionMode } from './components/types';
 import { SearchAndFilterBar } from './components/search_and_filter_bar';
 import { Tags } from './components/tags';
 import { TableRowActions } from './components/table_row_actions';
 import { EmptyPrompt } from './components/empty_prompt';
+import { useCurrentUpgrades } from './hooks';
 
 const REFRESH_INTERVAL_MS = 30000;
 
@@ -335,6 +337,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     flyoutContext.openFleetServerFlyout();
   }, [flyoutContext]);
 
+  // Current upgrades
+  const { abortUpgrade, currentUpgrades, refreshUpgrades } = useCurrentUpgrades();
+
   const columns = [
     {
       field: 'local_metadata.host.hostname',
@@ -395,12 +400,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'local_metadata.elastic.agent.version',
-      width: '120px',
+      width: '135px',
       name: i18n.translate('xpack.fleet.agentList.versionTitle', {
         defaultMessage: 'Version',
       }),
       render: (version: string, agent: Agent) => (
-        <EuiFlexGroup gutterSize="s" alignItems="center" style={{ minWidth: 0 }}>
+        <EuiFlexGroup gutterSize="none" style={{ minWidth: 0 }} direction="column">
           <EuiFlexItem grow={false} className="eui-textNoWrap">
             {safeMetadata(version)}
           </EuiFlexItem>
@@ -490,7 +495,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           />
         </EuiPortal>
       )}
-
       {agentToUpgrade && (
         <EuiPortal>
           <AgentUpgradeAgentModal
@@ -499,12 +503,11 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             onClose={() => {
               setAgentToUpgrade(undefined);
               fetchData();
+              refreshUpgrades();
             }}
-            version={kibanaVersion}
           />
         </EuiPortal>
       )}
-
       {isFleetServerUnhealthy && (
         <>
           {cloud?.deploymentUrl ? (
@@ -515,7 +518,13 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           <EuiSpacer size="l" />
         </>
       )}
-
+      {/* Current upgrades callout */}
+      {currentUpgrades.map((currentUpgrade) => (
+        <React.Fragment key={currentUpgrade.actionId}>
+          <CurrentBulkUpgradeCallout currentUpgrade={currentUpgrade} abortUpgrade={abortUpgrade} />
+          <EuiSpacer size="l" />
+        </React.Fragment>
+      ))}
       {/* Search and filter bar */}
       <SearchAndFilterBar
         agentPolicies={agentPolicies}
@@ -539,7 +548,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         refreshAgents={() => fetchData()}
       />
       <EuiSpacer size="m" />
-
       {/* Agent total, bulk actions and status bar */}
       <AgentTableHeader
         showInactive={showInactive}
@@ -557,7 +565,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         }}
       />
       <EuiSpacer size="s" />
-
       {/* Agent list table */}
       <EuiBasicTable<Agent>
         ref={tableRef}

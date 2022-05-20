@@ -114,7 +114,6 @@
     {
       "groupName": "platform security modules",
       "matchPackageNames": [
-        "broadcast-channel",
         "node-forge",
         "@types/node-forge",
         "require-in-the-middle",
