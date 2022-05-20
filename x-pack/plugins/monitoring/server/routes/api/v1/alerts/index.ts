@@ -5,5 +5,11 @@
  * 2.0.
  */
 
-export { enableAlertsRoute } from './enable';
-export { alertStatusRoute } from './status';
+import { MonitoringCore, RouteDependencies } from '../../../../types';
+import { enableAlertsRoute } from './enable';
+import { alertStatusRoute } from './status';
+
+export function registerV1AlertRoutes(server: MonitoringCore, npRoute: RouteDependencies) {
+  alertStatusRoute(npRoute);
+  enableAlertsRoute(server, npRoute);
+}
