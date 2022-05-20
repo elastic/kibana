@@ -23,7 +23,7 @@ export const HOSTS = i18n.translate('xpack.securitySolution.navigation.hosts', {
 });
 
 export const GETTING_STARTED = i18n.translate('xpack.securitySolution.navigation.gettingStarted', {
-  defaultMessage: 'Getting started',
+  defaultMessage: 'Get started',
 });
 
 export const THREAT_HUNTING = i18n.translate('xpack.securitySolution.navigation.threatHunting', {
@@ -108,6 +108,10 @@ export const MANAGE = i18n.translate('xpack.securitySolution.navigation.manage',
 
 export const BLOCKLIST = i18n.translate('xpack.securitySolution.navigation.blocklist', {
   defaultMessage: 'Blocklist',
+});
+
+export const CREATE_NEW_RULE = i18n.translate('xpack.securitySolution.navigation.newRuleTitle', {
+  defaultMessage: 'Create new rule',
 });
 
 export const GO_TO_DOCUMENTATION = i18n.translate(

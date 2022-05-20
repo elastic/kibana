@@ -64,6 +64,7 @@ import {
   snoozeRule,
   unsnoozeRule,
   deleteRules,
+  updateAPIKey,
 } from '../../../lib/rule_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
@@ -85,6 +86,7 @@ import { useLoadTags } from '../../../hooks/use_load_tags';
 import { useLoadRuleAggregations } from '../../../hooks/use_load_rule_aggregations';
 import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
 import { RulesListAutoRefresh } from './rules_list_auto_refresh';
+import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
 
 const ENTER_KEY = 13;
 
@@ -205,6 +207,7 @@ export const RulesList: React.FunctionComponent = () => {
     onError,
   });
 
+  const [rulesToUpdateAPIKey, setRulesToUpdateAPIKey] = useState<string[]>([]);
   const onRuleEdit = (ruleItem: RuleTableItem) => {
     setEditFlyoutVisibility(true);
     setCurrentRuleToEdit(ruleItem);
@@ -684,6 +687,7 @@ export const RulesList: React.FunctionComponent = () => {
             onRuleChanged={() => loadData()}
             setRulesToDelete={setRulesToDelete}
             onEditRule={() => onRuleEdit(rule)}
+            onUpdateAPIKey={setRulesToUpdateAPIKey}
           />
         )}
         renderRuleError={(rule) => {
@@ -759,6 +763,20 @@ export const RulesList: React.FunctionComponent = () => {
         })}
         setIsLoadingState={(isLoading: boolean) => {
           setRulesState({ ...rulesState, isLoading });
+        }}
+      />
+      <UpdateApiKeyModalConfirmation
+        onCancel={() => {
+          setRulesToUpdateAPIKey([]);
+        }}
+        idsToUpdate={rulesToUpdateAPIKey}
+        apiUpdateApiKeyCall={updateAPIKey}
+        setIsLoadingState={(isLoading: boolean) => {
+          setRulesState({ ...rulesState, isLoading });
+        }}
+        onUpdated={async () => {
+          setRulesToUpdateAPIKey([]);
+          await loadRulesData();
         }}
       />
       <EuiSpacer size="xs" />

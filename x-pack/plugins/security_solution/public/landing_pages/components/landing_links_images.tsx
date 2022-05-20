@@ -7,19 +7,11 @@
 import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { SecurityPageName } from '../../app/types';
 import { withSecuritySolutionLink } from '../../common/components/links';
+import { NavLinkItem } from '../../common/components/navigation/types';
 
 interface LandingLinksImagesProps {
-  items: NavItem[];
-}
-
-export interface NavItem {
-  id: SecurityPageName;
-  label: string;
-  image: string;
-  description: string;
-  path?: string;
+  items: NavLinkItem[];
 }
 
 const PrimaryEuiTitle = styled(EuiTitle)`
@@ -47,24 +39,26 @@ const Content = styled(EuiFlexItem)`
 
 export const LandingLinksImages: React.FC<LandingLinksImagesProps> = ({ items }) => (
   <EuiFlexGroup direction="column">
-    {items.map(({ label, description, path, image, id }) => (
+    {items.map(({ title, description, image, id }) => (
       <EuiFlexItem key={id} data-test-subj="LandingItem">
-        <SecuritySolutionLink deepLinkId={id} path={path} tabIndex={-1}>
+        <SecuritySolutionLink deepLinkId={id} tabIndex={-1}>
           {/* Empty onClick is to force hover style on `EuiPanel` */}
           <EuiPanel hasBorder hasShadow={false} paddingSize="m" onClick={() => {}}>
             <EuiFlexGroup>
               <StyledFlexItem grow={false}>
-                <EuiImage
-                  data-test-subj="LandingLinksImage"
-                  size="l"
-                  role="presentation"
-                  alt=""
-                  src={image}
-                />
+                {image && (
+                  <EuiImage
+                    data-test-subj="LandingLinksImage"
+                    size="l"
+                    role="presentation"
+                    alt=""
+                    src={image}
+                  />
+                )}
               </StyledFlexItem>
               <Content>
                 <PrimaryEuiTitle size="s">
-                  <h2>{label}</h2>
+                  <h2>{title}</h2>
                 </PrimaryEuiTitle>
                 <LandingLinksDescripton size="s" color="text">
                   {description}

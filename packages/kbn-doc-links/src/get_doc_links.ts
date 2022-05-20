@@ -112,6 +112,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       synonyms: `${APP_SEARCH_DOCS}synonyms-guide.html`,
       webCrawler: `${APP_SEARCH_DOCS}web-crawler.html`,
       webCrawlerEventLogs: `${APP_SEARCH_DOCS}view-web-crawler-events-logs.html`,
+      webCrawlerReference: `${APP_SEARCH_DOCS}web-crawler-reference.html`,
     },
     enterpriseSearch: {
       configuration: `${ENTERPRISE_SEARCH_DOCS}configuration.html`,
@@ -124,7 +125,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       apiKeys: `${WORKPLACE_SEARCH_DOCS}workplace-search-api-authentication.html`,
       box: `${WORKPLACE_SEARCH_DOCS}workplace-search-box-connector.html`,
       confluenceCloud: `${WORKPLACE_SEARCH_DOCS}workplace-search-confluence-cloud-connector.html`,
+      confluenceCloudConnectorPackage: `${WORKPLACE_SEARCH_DOCS}confluence-cloud.html`,
       confluenceServer: `${WORKPLACE_SEARCH_DOCS}workplace-search-confluence-server-connector.html`,
+      customConnectorPackage: `${WORKPLACE_SEARCH_DOCS}custom-connector-package.html`,
       customSources: `${WORKPLACE_SEARCH_DOCS}workplace-search-custom-api-sources.html`,
       customSourcePermissions: `${WORKPLACE_SEARCH_DOCS}workplace-search-custom-api-sources.html#custom-api-source-document-level-access-control`,
       documentPermissions: `${WORKPLACE_SEARCH_DOCS}workplace-search-sources-document-permissions.html`,
@@ -138,7 +141,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       indexingSchedule: `${WORKPLACE_SEARCH_DOCS}workplace-search-customizing-indexing-rules.html#_indexing_schedule`,
       jiraCloud: `${WORKPLACE_SEARCH_DOCS}workplace-search-jira-cloud-connector.html`,
       jiraServer: `${WORKPLACE_SEARCH_DOCS}workplace-search-jira-server-connector.html`,
+      networkDrive: `${WORKPLACE_SEARCH_DOCS}network-drives.html`,
       oneDrive: `${WORKPLACE_SEARCH_DOCS}workplace-search-onedrive-connector.html`,
+      outlook: `${WORKPLACE_SEARCH_DOCS}microsoft-outlook.html`,
       permissions: `${WORKPLACE_SEARCH_DOCS}workplace-search-permissions.html#organizational-sources-private-sources`,
       salesforce: `${WORKPLACE_SEARCH_DOCS}workplace-search-salesforce-connector.html`,
       security: `${WORKPLACE_SEARCH_DOCS}workplace-search-security.html`,
@@ -147,7 +152,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       sharePointServer: `${WORKPLACE_SEARCH_DOCS}sharepoint-server.html`,
       slack: `${WORKPLACE_SEARCH_DOCS}workplace-search-slack-connector.html`,
       synch: `${WORKPLACE_SEARCH_DOCS}workplace-search-customizing-indexing-rules.html`,
+      teams: `${WORKPLACE_SEARCH_DOCS}microsoft-teams.html`,
       zendesk: `${WORKPLACE_SEARCH_DOCS}workplace-search-zendesk-connector.html`,
+      zoom: `${WORKPLACE_SEARCH_DOCS}zoom.html`,
     },
     metricbeat: {
       base: `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}`,
@@ -443,6 +450,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       guide: `${KIBANA_DOCS}maps.html`,
       importGeospatialPrivileges: `${KIBANA_DOCS}import-geospatial-data.html#import-geospatial-privileges`,
       gdalTutorial: `${ELASTIC_WEBSITE_URL}blog/how-to-ingest-geospatial-data-into-elasticsearch-with-gdal`,
+      termJoinsExample: `${KIBANA_DOCS}terms-join.html#_example_term_join`,
     },
     monitoring: {
       alertsKibana: `${KIBANA_DOCS}kibana-alerts.html`,
@@ -526,6 +534,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       azureRepo: `${ELASTICSEARCH_DOCS}repository-azure.html`,
       gcsRepo: `${ELASTICSEARCH_DOCS}repository-gcs.html`,
       hdfsRepo: `${PLUGIN_DOCS}repository-hdfs.html`,
+      ingestAttachment: `${PLUGIN_DOCS}ingest-attachment.html`,
       s3Repo: `${ELASTICSEARCH_DOCS}repository-s3.html`,
       snapshotRestoreRepos: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html`,
       mapperSize: `${PLUGIN_DOCS}mapper-size-usage.html`,
@@ -650,6 +659,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       resolveMigrationFailures: `${KIBANA_DOCS}resolve-migrations-failures.html`,
       repeatedTimeoutRequests: `${KIBANA_DOCS}resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail`,
       routingAllocationDisabled: `${KIBANA_DOCS}resolve-migrations-failures.html#routing-allocation-disabled`,
+      clusterShardLimitExceeded: `${KIBANA_DOCS}resolve-migrations-failures.html#cluster-shard-limit-exceeded`,
     },
   });
 };
