@@ -203,11 +203,13 @@ describe('MetricsService', () => {
 
     it('registers and reports ops metrics as an event to analytics at every interval', async () => {
       const firstMetrics = {
-        process: {
-          memory: { heap: { used_in_bytes: 100 } },
-          uptime_in_millis: 1500,
-          event_loop_delay: 50,
-        },
+        processes: [
+          {
+            memory: { heap: { used_in_bytes: 100 } },
+            uptime_in_millis: 1500,
+            event_loop_delay: 50,
+          },
+        ],
         os: {
           load: {
             '1m': 10,
@@ -217,11 +219,13 @@ describe('MetricsService', () => {
         },
       };
       const secondMetrics = {
-        process: {
-          memory: { heap: { used_in_bytes: 200 } },
-          uptime_in_millis: 3000,
-          event_loop_delay: 100,
-        },
+        processes: [
+          {
+            memory: { heap: { used_in_bytes: 200 } },
+            uptime_in_millis: 3000,
+            event_loop_delay: 100,
+          },
+        ],
         os: {
           load: {
             '1m': 20,

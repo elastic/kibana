@@ -16,8 +16,8 @@ import { OpsMetricsCollector } from './ops_metrics_collector';
 import { opsConfig, OpsConfigType } from './ops_config';
 import { getEcsOpsMetricsLog } from './logging';
 import type { AnalyticsServiceSetup } from '../analytics';
-import { opsMetricsEventSchema } from './ops_metrics_event_schema';
-import type { OpsMetricsEvent } from './ops_metrics_event_schema';
+import { convertToMetricEvent, opsMetricsEventSchema } from './metrics_service_analytics';
+import type { OpsMetricsEvent } from './metrics_service_analytics';
 
 export interface MetricsServiceSetupDeps {
   http: InternalHttpServiceSetup;
@@ -95,11 +95,6 @@ export class MetricsService
     this.subscription.unsubscribe();
   }
 
-  private convertToMetricEvent(metrics: OpsMetrics): OpsMetricsEvent {
-    const { process, ...rest } = metrics;
-    return rest;
-  }
-
   private setupOpsMetricsEventType(
     analytics: AnalyticsServiceSetup,
     metricsObservable: Observable<OpsMetrics>
@@ -110,7 +105,7 @@ export class MetricsService
     });
     this.subscription.add(
       metricsObservable.subscribe((metrics: OpsMetrics) => {
-        analytics.reportEvent('core-ops_metrics', { ...this.convertToMetricEvent(metrics) });
+        analytics.reportEvent('core-ops_metrics', { ...convertToMetricEvent(metrics) });
       })
     );
   }

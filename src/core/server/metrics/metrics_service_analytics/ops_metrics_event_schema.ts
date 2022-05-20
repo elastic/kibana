@@ -7,8 +7,12 @@
  */
 
 import type { RootSchema } from '@kbn/analytics-client';
-import type { OpsProcessMetrics, OpsOsMetrics, OpsServerMetrics } from './collectors';
-
+import type { OpsProcessMetrics, OpsOsMetrics, OpsServerMetrics } from '../collectors';
+/**
+ * Converts OpsMetrics into OpsMetricsEvent, dropping the deprecated 'process' field
+ * This contains metrics about the os/runtime, the kibana processes and the http server.
+ * @internal
+ */
 export interface OpsMetricsEvent {
   /** Time metrics were recorded at. */
   collected_at: Date;
@@ -24,6 +28,10 @@ export interface OpsMetricsEvent {
   concurrent_connections: OpsServerMetrics['concurrent_connections'];
 }
 
+/**
+ * Schema expected for a single process contained in ops metrics events 'processes' array.
+ * @internal
+ */
 const processSchema: RootSchema<OpsProcessMetrics> = {
   pid: {
     type: 'long',
@@ -135,6 +143,10 @@ const processSchema: RootSchema<OpsProcessMetrics> = {
   },
 };
 
+/**
+ * Schema expected for ops metrics events reported by the analytics service.
+ * @internal
+ */
 export const opsMetricsEventSchema: RootSchema<OpsMetricsEvent> = {
   collected_at: {
     type: 'date',
