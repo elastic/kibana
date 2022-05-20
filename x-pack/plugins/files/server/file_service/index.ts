@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-export { FILE_SO_TYPE, PLUGIN_ID, PLUGIN_NAME } from './constants';
-
-export type {
-  FileSavedObjectAttributes,
-  FileStatus,
-  File,
-  FileSavedObject,
-  UpdatableFileAttributes,
-} from './types';
+export { FileServiceFactory } from './file_service_factory';

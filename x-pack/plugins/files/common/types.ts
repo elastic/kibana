@@ -6,12 +6,13 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { SavedObjectAttributes } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
+import { Readable } from 'stream';
 
-export type FileStatus = 'AWAITING_UPLOAD' | 'UPLOADING' | 'READY' | 'ERROR';
+export type FileStatus = 'AWAITING_UPLOAD' | 'UPLOADING' | 'READY' | 'UPLOAD_ERROR';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type FileSavedObjectAttributes = {
+export type FileSavedObjectAttributes<Meta = unknown> = {
   created_at: string;
 
   updated_at: string;
@@ -62,5 +63,26 @@ export type FileSavedObjectAttributes = {
   /**
    * User-defined metadata
    */
-  meta?: SavedObjectAttributes;
+  meta?: Meta;
 };
+
+export type FileSavedObject<Meta = unknown> = SavedObject<FileSavedObjectAttributes<Meta>>;
+
+export type UpdatableFileAttributes = Pick<FileSavedObjectAttributes, 'meta' | 'alt' | 'name'>;
+
+export interface File<Meta = unknown> {
+  id: string;
+  fileKind: string;
+  name: string;
+  status: FileStatus;
+  /**
+   * User provided metadata
+   */
+  meta: Meta;
+  alt: undefined | string;
+
+  update(attr: Partial<UpdatableFileAttributes>): Promise<File>;
+  uploadContent(content: Readable): Promise<void>;
+  downloadContent(): Promise<Readable>;
+  delete(): Promise<void>;
+}
