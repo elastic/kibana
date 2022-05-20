@@ -46,6 +46,14 @@ const baselineStyle: LineAnnotationStyle = {
     fill: euiColorMediumShade,
     padding: 0,
   },
+  animations: {
+    enabled: false,
+    timeFunction: 'ease',
+    delay: 'fast',
+    duration: 'fast',
+    snapValues: [],
+    initialValue: undefined,
+  }
 };
 
 const axes: RecursivePartial<AxisStyle> = {
