@@ -18,33 +18,22 @@ describe('ALL - Discover', () => {
   });
 
   it('should be opened in new tab in results table', () => {
-    let newUrl = '';
-    cy.window().then((win) => {
-      cy.stub(win, 'open')
-        .as('windowOpen')
-        .callsFake((url) => {
-          newUrl = url;
-        });
-    });
     cy.contains('New live query').click();
     selectAllAgents();
     inputQuery('select * from uptime; ');
     submitQuery();
     checkResults();
-    // wait for the newUrl to be built
-    cy.wait(500);
     cy.contains('View in Lens').should('exist');
-    cy.contains('View in Discover').should('exist').click();
-
-    cy.window()
-      .its('open')
-      .then(() => {
-        cy.visit(newUrl);
+    cy.contains('View in Discover')
+      .should('exist')
+      .should('have.attr', 'href')
+      .then(($href) => {
+        // @ts-expect-error-next-line href string - check types
+        cy.visit($href);
+        cy.getBySel('breadcrumbs').contains('Discover').should('exist');
+        cy.getBySel('discoverDocTable', { timeout: 60000 }).contains(
+          'action_data.queryselect * from uptime'
+        );
       });
-
-    cy.getBySel('breadcrumbs').contains('Discover').should('exist');
-    cy.getBySel('discoverDocTable', { timeout: 60000 }).contains(
-      'action_data.queryselect * from uptime'
-    );
   });
 });

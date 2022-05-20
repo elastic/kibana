@@ -96,7 +96,7 @@ describe('ALL - Packs', () => {
       cy.contains('ID must be unique').should('exist');
       cy.react('EuiFlyoutFooter').react('EuiButtonEmpty').contains('Cancel').click();
     });
-    it('should open lens in new tab', () => {
+    it.only('should open lens in new tab', () => {
       let lensUrl = '';
       cy.window().then((win) => {
         cy.stub(win, 'open')
@@ -120,36 +120,26 @@ describe('ALL - Packs', () => {
       cy.getBySel('breadcrumbs').contains(`Action pack_${PACK_NAME}_${SAVED_QUERY_ID} results`);
     });
 
-    it('should open discover in new tab', () => {
-      let discoverUrl = '';
-      cy.window().then((win) => {
-        cy.stub(win, 'open')
-          .as('windowOpen')
-          .callsFake((url) => {
-            discoverUrl = url;
-          });
-      });
+    it.only('should open discover in new tab', () => {
       preparePack(PACK_NAME);
       cy.wait(1000);
       cy.react('CustomItemAction', {
         props: { index: 0, item: { id: SAVED_QUERY_ID } },
       })
         .should('exist')
-        .click();
-      cy.window()
-        .its('open')
-        .then(() => {
-          cy.visit(discoverUrl);
+        .should('have.attr', 'href')
+        .then(($href) => {
+          // @ts-expect-error-next-line href string - check types
+          cy.visit($href);
+          cy.get('nav').should('be.visible');
+          cy.contains('Discover');
+          cy.contains(`action_id: pack_${PACK_NAME}_${SAVED_QUERY_ID}`);
+          cy.getBySel('superDatePickerToggleQuickMenuButton').click();
+          cy.getBySel('superDatePickerCommonlyUsed_Today').click();
+          cy.getBySel('discoverDocTable', { timeout: 60000 }).contains(
+            `pack_${PACK_NAME}_${SAVED_QUERY_ID}`
+          );
         });
-
-      cy.get('nav').should('be.visible');
-      cy.contains('Discover');
-      cy.contains(`action_id: pack_${PACK_NAME}_${SAVED_QUERY_ID}`);
-      cy.getBySel('superDatePickerToggleQuickMenuButton').click();
-      cy.getBySel('superDatePickerCommonlyUsed_Today').click();
-      cy.getBySel('discoverDocTable', { timeout: 60000 }).contains(
-        `pack_${PACK_NAME}_${SAVED_QUERY_ID}`
-      );
     });
 
     // strange behaviour with modal
