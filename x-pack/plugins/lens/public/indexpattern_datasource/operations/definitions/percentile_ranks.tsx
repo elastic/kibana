@@ -204,7 +204,7 @@ export const percentileRanksOperation: OperationDefinition<
         label={i18n.translate('xpack.lens.indexPattern.percentile.percentileRanksValue', {
           defaultMessage: 'Percentile ranks value',
         })}
-        data-test-subj="lns-indexPattern-percentile-form"
+        data-test-subj="lns-indexPattern-percentile_ranks-form"
         display="rowCompressed"
         fullWidth
         isInvalid={!inputValueIsValid}

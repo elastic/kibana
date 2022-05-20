@@ -522,7 +522,7 @@ export interface OperationMetadata {
   // document and an aggregated metric which might be handy in some cases. Once we
   // introduce a raw document datasource, this should be considered here.
   isStaticValue?: boolean;
-  // There are some aggregation. such as the percentile ranks that accept multi values
+  // There are some aggregations, such as the percentile ranks, that accept multi values
   // and they need to be treated with a different way. This flag is used to identify these operations
   isMultiValuesAggregation?: boolean;
 }

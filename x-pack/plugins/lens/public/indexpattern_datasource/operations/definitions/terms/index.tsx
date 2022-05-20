@@ -247,6 +247,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       // for example for a percentile rank of 400 we need to pass the value such as ${index}.400
       if (
         orderColumn.isMultiValuesAggregation &&
+        !orderColumn.filter &&
         'params' in orderColumn &&
         orderColumn.params &&
         'value' in orderColumn.params

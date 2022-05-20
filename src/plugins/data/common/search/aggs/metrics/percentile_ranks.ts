@@ -95,5 +95,11 @@ export const getPercentileRanksMetricAgg = ({
     getValue(agg, bucket) {
       return getPercentileValue(agg, bucket) / 100;
     },
+    getValueBucketPath(aggConfig) {
+      if (aggConfig.key) {
+        return `${aggConfig.id}`;
+      }
+      return `${aggConfig.id}.${aggConfig.params.values[0]}`;
+    },
   });
 };
