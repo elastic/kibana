@@ -14,7 +14,6 @@ import { getValueOrEmpty, emptyLabel } from '../../../../common/empty_label';
 import { createTickFormatter } from './tick_formatter';
 import { getMetricsField } from './get_metrics_field';
 import { createFieldFormatter } from './create_field_formatter';
-import { labelDateFormatter } from './label_date_formatter';
 import moment from 'moment';
 import { getFieldsForTerms } from '../../../../common/fields_utils';
 
@@ -63,18 +62,6 @@ export const convertSeriesToVars = (series, model, getConfig = null, fieldFormat
 
         set(variables, varName, data);
         set(variables, `${label}.label`, rowLabel);
-
-        /**
-         * Handle the case when a field has "key_as_string" value.
-         * Common case is the value is a date string (e.x. "2020-08-21T20:36:58.000Z") or a boolean stringified value ("true"/"false").
-         * Try to convert the value into a moment object and format it with "dateFormat" from UI settings,
-         * if the "key_as_string" value is recognized by a known format in Moments.js https://momentjs.com/docs/#/parsing/string/ .
-         * If not, return a formatted value from elasticsearch
-         */
-        if (row.labelFormatted) {
-          const val = labelDateFormatter(row.labelFormatted, dateFormat);
-          set(variables, `${label}.formatted`, val);
-        }
       });
   });
   return variables;

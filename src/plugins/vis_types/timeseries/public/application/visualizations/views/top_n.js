@@ -9,7 +9,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { getLastValue, isEmptyValue } from '../../../../common/last_value_utils';
-import { labelDateFormatter } from '../../components/lib/label_date_formatter';
 import { getValueOrEmpty } from '../../../../common/empty_label';
 import reactcss from 'reactcss';
 
@@ -106,7 +105,7 @@ export class TopN extends Component {
       // For this it defaults to 0
       const width = 100 * (Math.abs(lastValueFormatted) / intervalLength) || 0;
       const widthWithUnit = isEmptyValue(lastValue) ? '1px' : `${width}%`;
-      const label = item.labelFormatted ? labelDateFormatter(item.labelFormatted) : item.label;
+      const label = item.label;
       const styles = reactcss(
         {
           default: {

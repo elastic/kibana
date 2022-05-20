@@ -13,6 +13,7 @@ import {
   FieldFormatsRegistry,
   FIELD_FORMAT_IDS,
 } from '@kbn/field-formats-plugin/common';
+
 import { FieldNotFoundError } from './errors';
 import type { FetchedIndexPattern, SanitizedFieldType } from './types';
 
@@ -78,14 +79,19 @@ export const createCachedFieldValueFormatter = (
   dataView?: DataView | null,
   fields?: SanitizedFieldType[],
   fieldFormatService?: FieldFormatsRegistry,
+  options?: { timezone?: string },
   excludedFieldFormatsIds: FIELD_FORMAT_IDS[] = []
 ) => {
   const cache = new Map<string, FieldFormat>();
 
   return (fieldName: string, value: string, contentType: 'text' | 'html' = 'text') => {
     const cachedFormatter = cache.get(fieldName);
+
+    const convert = (fieldFormat: FieldFormat) =>
+      fieldFormat.convert(value, contentType, options ? { timezone: options.timezone } : undefined);
+
     if (cachedFormatter) {
-      return cachedFormatter.convert(value, contentType);
+      return convert(cachedFormatter);
     }
 
     if (dataView && !excludedFieldFormatsIds.includes(dataView.fieldFormatMap?.[fieldName]?.id)) {
@@ -95,7 +101,7 @@ export const createCachedFieldValueFormatter = (
 
         if (formatter) {
           cache.set(fieldName, formatter);
-          return formatter.convert(value, contentType);
+          return convert(formatter);
         }
       }
     } else if (fieldFormatService && fields) {
@@ -106,7 +112,7 @@ export const createCachedFieldValueFormatter = (
 
         if (formatter) {
           cache.set(fieldName, formatter);
-          return formatter.convert(value, contentType);
+          return convert(formatter);
         }
       }
     }

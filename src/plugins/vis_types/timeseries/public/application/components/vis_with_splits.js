@@ -9,7 +9,6 @@
 import React, { useCallback } from 'react';
 import classNames from 'classnames';
 import { getDisplayName } from './lib/get_display_name';
-import { labelDateFormatter } from './lib/label_date_formatter';
 import { findIndex, first } from 'lodash';
 import { getValueOrEmpty } from '../../../common/empty_label';
 import { getSplitByTermsColor } from '../lib/get_split_by_terms_color';
@@ -59,7 +58,6 @@ export function visWithSplits(WrappedComponent) {
         acc[splitId] = {
           series: [],
           label: series.label.toString(),
-          labelFormatted: series.labelFormatted,
         };
       }
 
@@ -91,11 +89,9 @@ export function visWithSplits(WrappedComponent) {
 
     const rows = Object.keys(splitsVisData).map((key) => {
       const splitData = splitsVisData[key];
-      const { series, label, labelFormatted } = splitData;
-      let additionalLabel = label;
-      if (labelFormatted) {
-        additionalLabel = labelDateFormatter(labelFormatted);
-      }
+      const { series, label } = splitData;
+      const additionalLabel = label;
+
       const newSeries =
         indexOfNonSplit != null && indexOfNonSplit > 0
           ? [...series, nonSplitSeries]
