@@ -12,21 +12,23 @@ import { ReactWrapper } from 'enzyme';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EuiButton } from '@elastic/eui';
 
-import {
-  SharedUxServicesProvider,
-  SharedUxServices,
-  mockServicesFactory,
-} from '@kbn/shared-ux-services';
-import { NoDataViews } from './no_data_views';
+import { NoDataViewsPrompt } from './no_data_views';
+import { NoDataViewsPromptServices, NoDataViewsPromptProvider } from './services';
 
-describe('<NoDataViewsPageTest />', () => {
-  let services: SharedUxServices;
+const getServices = (canCreateNewDataView: boolean = true) => ({
+  canCreateNewDataView,
+  openDataViewEditor: jest.fn(),
+  dataViewsDocLink: 'some/link',
+});
+
+describe('<NoDataViewsPromptTest />', () => {
+  let services: NoDataViewsPromptServices;
   let mount: (element: JSX.Element) => ReactWrapper;
 
   beforeEach(() => {
-    services = mockServicesFactory();
+    services = getServices();
     mount = (element: JSX.Element) =>
-      mountWithIntl(<SharedUxServicesProvider {...services}>{element}</SharedUxServicesProvider>);
+      mountWithIntl(<NoDataViewsPromptProvider {...services}>{element}</NoDataViewsPromptProvider>);
   });
 
   afterEach(() => {
@@ -34,13 +36,13 @@ describe('<NoDataViewsPageTest />', () => {
   });
 
   test('on dataView created', () => {
-    const component = mount(<NoDataViews onDataViewCreated={jest.fn()} />);
+    const component = mount(<NoDataViewsPrompt onDataViewCreated={jest.fn()} />);
 
-    expect(services.editors.openDataViewEditor).not.toHaveBeenCalled();
+    expect(services.openDataViewEditor).not.toHaveBeenCalled();
     component.find(EuiButton).simulate('click');
 
     component.unmount();
 
-    expect(services.editors.openDataViewEditor).toHaveBeenCalled();
+    expect(services.openDataViewEditor).toHaveBeenCalled();
   });
 });
