@@ -7,11 +7,13 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
-import { PLUGIN_ID } from '../../../common';
+import { filter } from 'lodash/fp';
+import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { OSQUERY_INTEGRATION_NAME, PLUGIN_ID } from '../../../common';
 import { savedQuerySavedObjectType } from '../../../common/types';
 import { convertECSMappingToObject } from '../utils';
 
-export const readSavedQueryRoute = (router: IRouter) => {
+export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.get(
     {
       path: '/internal/osquery/saved_query/{id}',
@@ -28,13 +30,33 @@ export const readSavedQueryRoute = (router: IRouter) => {
 
       const savedQuery = await savedObjectsClient.get<{
         ecs_mapping: Array<{ key: string; value: Record<string, object> }>;
+        prebuilt?: boolean;
       }>(savedQuerySavedObjectType, request.params.id);
+
+      const installation = await osqueryContext.service
+        .getPackageService()
+        ?.asInternalUser?.getInstallation(OSQUERY_INTEGRATION_NAME);
+
+      let isInstalledWithIntegration;
+      if (installation) {
+        const installationSavedQueries = filter(
+          ['type', savedQuerySavedObjectType],
+          installation.installed_kibana
+        );
+        isInstalledWithIntegration = installationSavedQueries.find(
+          (item) => item.id === savedQuery.id
+        );
+      }
 
       if (savedQuery.attributes.ecs_mapping) {
         // @ts-expect-error update types
         savedQuery.attributes.ecs_mapping = convertECSMappingToObject(
           savedQuery.attributes.ecs_mapping
         );
+      }
+
+      if (isInstalledWithIntegration) {
+        savedQuery.attributes.prebuilt = true;
       }
 
       return response.ok({
