@@ -7,7 +7,6 @@
 */
 
 /* eslint-disable */
-
 export const agentEcs = {
   build: {
     original: {

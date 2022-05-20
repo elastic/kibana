@@ -6,15 +6,21 @@
  * Side Public License, v 1.
  */
 
-import util from 'util';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/utils';
 
 import { Group, Schema } from '../common/types';
 import { printSchema } from './printer';
-import * as write_file from './write_file';
 
 const DIR = path.resolve(REPO_ROOT, 'packages/kbn-ecs-schema/src/schemas');
+
+jest.mock('./file_writer');
+const mockAppend: jest.Mock = jest.requireMock('./file_writer').append;
+const mockWrite: jest.Mock = jest.requireMock('./file_writer').write;
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('printSchema', () => {
   test('printing top-level fields', () => {
@@ -42,15 +48,12 @@ describe('printSchema', () => {
     };
 
     const logSpy = jest.spyOn(console, 'log');
-    const writeSpy = jest.spyOn(write_file, 'write');
-    const appendSpy = jest.spyOn(write_file, 'append');
 
     printSchema(schema, DIR);
 
     expect(logSpy).toHaveBeenCalledTimes(0);
-    expect(writeSpy).toHaveBeenCalledTimes(0);
-
-    expect(appendSpy).toHaveBeenCalledTimes(1);
+    expect(mockWrite).toHaveBeenCalledTimes(0);
+    expect(mockAppend).toHaveBeenCalledTimes(2);
   });
 
   test('printing groups', () => {
@@ -76,19 +79,13 @@ describe('printSchema', () => {
     };
 
     const logSpy = jest.spyOn(console, 'log');
-    const writeSpy = jest.spyOn(write_file, 'write');
-    const appendSpy = jest.spyOn(write_file, 'append');
+    // const writeSpy = jest.spyOn(write_file, 'write');
+    // const appendSpy = jest.spyOn(write_file, 'append');
 
     printSchema(schema, DIR);
 
     expect(logSpy).toHaveBeenCalledWith(`Writing agent to ${DIR}/agent.ts`);
-
-    expect(writeSpy).toBeCalledTimes(1);
-
-    const agentFile = `export const agentEcs = ${util.inspect(agent, { depth: null })}`;
-    const outFile = `${DIR}/agent.ts`;
-    expect(writeSpy).toHaveBeenCalledWith(outFile, agentFile);
-
-    expect(appendSpy).toBeCalledTimes(3);
+    expect(mockWrite).toBeCalledTimes(1);
+    expect(mockAppend).toBeCalledTimes(3);
   });
 });

@@ -10,7 +10,7 @@ import util from 'util';
 
 import { Group, Schema, TOP_LEVEL_NAME } from '../common/types';
 import { snakeCaseToCamelCase } from './helpers';
-import { append, write } from './write_file';
+import { append, write } from './file_writer';
 
 export function printSchema(schema: Schema, outPath: string) {
   printGroupFiles(schema, outPath);
