@@ -7,6 +7,7 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import { ActionStatusRequestSchema, HostIsolationRequestSchema } from '../schema/actions';
+export type { EndpointActionLogRequestBody } from '../schema/actions';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 

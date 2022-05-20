@@ -31,6 +31,7 @@ import {
   MetadataListResponse,
 } from '../../../../../common/endpoint/types';
 import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
+import { getActivityLogResponse } from '../../../../common/lib/endpoint_activity_log';
 import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
 import { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../common/store';
 import { AppAction } from '../../../../common/store/actions';
@@ -657,11 +658,12 @@ async function endpointDetailsActivityLogChangedMiddleware({
 
   try {
     const { page, pageSize, startDate, endDate } = getActivityLogDataPaging(getState());
-    const route = resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, {
-      agent_id: selectedAgent(getState()),
-    });
-    const activityLog = await coreStart.http.get<ActivityLog>(route, {
-      query: { page, page_size: pageSize, start_date: startDate, end_date: endDate },
+    const activityLog = await getActivityLogResponse({
+      agent_ids: [selectedAgent(getState())],
+      page,
+      page_size: pageSize,
+      start_date: startDate,
+      end_date: endDate,
     });
     dispatch({
       type: 'endpointDetailsActivityLogChanged',
@@ -709,16 +711,13 @@ async function endpointDetailsActivityLogPagingMiddleware({
       type: 'endpointDetailsActivityLogChanged',
       payload: createLoadingResourceState(asStaleResourceState(getActivityLogData(getState()))),
     });
-    const route = resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, {
-      agent_id: selectedAgent(getState()),
-    });
-    const activityLog = await coreStart.http.get<ActivityLog>(route, {
-      query: {
-        page,
-        page_size: pageSize,
-        start_date: startDate,
-        end_date: endDate,
-      },
+
+    const activityLog = await getActivityLogResponse({
+      agent_ids: [selectedAgent(getState())],
+      page,
+      page_size: pageSize,
+      start_date: startDate,
+      end_date: endDate,
     });
 
     const lastLoadedLogData = getLastLoadedActivityLogData(getState());

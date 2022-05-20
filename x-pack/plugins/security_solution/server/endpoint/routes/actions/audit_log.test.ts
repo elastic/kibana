@@ -17,8 +17,7 @@ import {
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import {
-  EndpointActionLogRequestParams,
-  EndpointActionLogRequestQuery,
+  EndpointActionLogRequestBody,
   EndpointActionLogRequestSchema,
 } from '../../../../common/endpoint/schema/actions';
 import { ENDPOINT_ACTION_LOG_ROUTE } from '../../../../common/endpoint/constants';
@@ -44,58 +43,97 @@ import { EndpointActionGenerator } from '../../../../common/endpoint/data_genera
 
 describe('Action Log API', () => {
   describe('schema', () => {
+    const defaultRequestBody = {
+      page: 1,
+      page_size: 10,
+      start_date: 'now-1d',
+      end_date: 'now',
+    };
     it('should require at least 1 agent ID', () => {
       expect(() => {
-        EndpointActionLogRequestSchema.params.validate({}); // no agent_ids provided
+        EndpointActionLogRequestSchema.body.validate({ ...defaultRequestBody, agent_ids: [] }); // no agent_ids provided
       }).toThrow();
     });
 
     it('should accept a single agent ID', () => {
       expect(() => {
-        EndpointActionLogRequestSchema.params.validate({ agent_id: uuid.v4() });
+        EndpointActionLogRequestSchema.body.validate({
+          ...defaultRequestBody,
+          agent_ids: [uuid.v4()],
+        });
       }).not.toThrow();
     });
 
-    it('should not work when no params while requesting with query params', () => {
+    it('should accept multiple agent IDs', () => {
       expect(() => {
-        EndpointActionLogRequestSchema.query.validate({});
+        EndpointActionLogRequestSchema.body.validate({
+          ...defaultRequestBody,
+          agent_ids: [uuid.v4(), uuid.v4()],
+        });
+      }).not.toThrow();
+    });
+
+    it('should limit multiple agent IDs to max limit', () => {
+      expect(() => {
+        EndpointActionLogRequestSchema.body.validate({
+          ...defaultRequestBody,
+          agent_ids: Array(50).fill(uuid.v4()),
+        });
+      }).not.toThrow();
+    });
+
+    it('should not allow limit multiple agent IDs more than max limit', () => {
+      expect(() => {
+        EndpointActionLogRequestSchema.body.validate({
+          ...defaultRequestBody,
+          agent_ids: Array(51).fill(uuid.v4()),
+        });
       }).toThrow();
     });
 
-    it('should work with all required query params', () => {
+    it('should not work when no required keys while requesting', () => {
       expect(() => {
-        EndpointActionLogRequestSchema.query.validate({
+        EndpointActionLogRequestSchema.body.validate({ agent_id: [''] });
+      }).toThrow();
+    });
+
+    it('should work with all required keys within request body', () => {
+      expect(() => {
+        EndpointActionLogRequestSchema.body.validate({
           page: 10,
           page_size: 100,
           start_date: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // yesterday
           end_date: new Date().toISOString(), // today
+          agent_ids: [uuid.v4()],
         });
       }).not.toThrow();
     });
 
     it('should not work without endDate', () => {
       expect(() => {
-        EndpointActionLogRequestSchema.query.validate({
+        EndpointActionLogRequestSchema.body.validate({
           page: 1,
           page_size: 100,
           start_date: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // yesterday
+          agent_ids: [uuid.v4()],
         });
       }).toThrow();
     });
 
     it('should not work without startDate', () => {
       expect(() => {
-        EndpointActionLogRequestSchema.query.validate({
+        EndpointActionLogRequestSchema.body.validate({
           page: 1,
           page_size: 100,
           end_date: new Date().toISOString(), // today
+          agent_ids: [uuid.v4()],
         });
       }).toThrow();
     });
 
     it('should not work without allowed page and page_size params', () => {
       expect(() => {
-        EndpointActionLogRequestSchema.query.validate({ page_size: 101 });
+        EndpointActionLogRequestSchema.body.validate({ ...defaultRequestBody, page_size: 101 });
       }).toThrow();
     });
   });
@@ -108,8 +146,7 @@ describe('Action Log API', () => {
 
     // convenience for calling the route and handler for audit log
     let getActivityLog: (
-      params: EndpointActionLogRequestParams,
-      query?: EndpointActionLogRequestQuery
+      body: EndpointActionLogRequestBody
     ) => Promise<jest.Mocked<KibanaResponseFactory>>;
 
     // convenience for injecting mock action requests and responses
@@ -142,21 +179,23 @@ describe('Action Log API', () => {
         experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
       });
 
-      getActivityLog = async (
-        params: { agent_id: string },
-        query?: { page: number; page_size: number; start_date?: string; end_date?: string }
-      ): Promise<jest.Mocked<KibanaResponseFactory>> => {
+      getActivityLog = async (body: {
+        agent_ids: string[];
+        page: number;
+        page_size: number;
+        start_date?: string;
+        end_date?: string;
+      }): Promise<jest.Mocked<KibanaResponseFactory>> => {
         const req = httpServerMock.createKibanaRequest({
-          params,
-          query,
+          body,
         });
         const mockResponse = httpServerMock.createResponseFactory();
         const [, routeHandler]: [
           RouteConfig<any, any, any, any>,
           RequestHandler<
-            EndpointActionLogRequestParams,
-            EndpointActionLogRequestQuery,
             unknown,
+            unknown,
+            EndpointActionLogRequestBody,
             SecuritySolutionRequestHandlerContext
           >
         ] = routerMock.get.mock.calls.find(([{ path }]) =>
@@ -301,7 +340,13 @@ describe('Action Log API', () => {
     it('should return an empty array when nothing in audit log', async () => {
       mockActions({ numActions: 0 });
 
-      const response = await getActivityLog({ agent_id: mockAgentID });
+      const response = await getActivityLog({
+        agent_ids: [mockAgentID],
+        page: 1,
+        page_size: 10,
+        start_date: 'now-1d',
+        end_date: 'now',
+      });
       expect(response.ok).toBeCalled();
       expect((response.ok.mock.calls[0][0]?.body as ActivityLog).data).toHaveLength(0);
     });
@@ -314,7 +359,13 @@ describe('Action Log API', () => {
         hasResponses: true,
       });
 
-      const response = await getActivityLog({ agent_id: mockAgentID });
+      const response = await getActivityLog({
+        agent_ids: [mockAgentID],
+        page: 1,
+        page_size: 10,
+        start_date: 'now-1d',
+        end_date: 'now',
+      });
       const responseBody = response.ok.mock.calls[0][0]?.body as ActivityLog;
       expect(response.ok).toBeCalled();
       expect(responseBody.data).toHaveLength(6);
@@ -330,7 +381,13 @@ describe('Action Log API', () => {
     it('should return only fleet actions and no responses', async () => {
       mockActions({ numActions: 2, hasFleetActions: true });
 
-      const response = await getActivityLog({ agent_id: mockAgentID });
+      const response = await getActivityLog({
+        agent_ids: [mockAgentID],
+        page: 1,
+        page_size: 10,
+        start_date: 'now-1d',
+        end_date: 'now',
+      });
       const responseBody = response.ok.mock.calls[0][0]?.body as ActivityLog;
       expect(response.ok).toBeCalled();
       expect(responseBody.data).toHaveLength(2);
@@ -343,7 +400,13 @@ describe('Action Log API', () => {
     it('should only have fleet data', async () => {
       mockActions({ numActions: 2, hasFleetActions: true, hasFleetResponses: true });
 
-      const response = await getActivityLog({ agent_id: mockAgentID });
+      const response = await getActivityLog({
+        agent_ids: [mockAgentID],
+        page: 1,
+        page_size: 10,
+        start_date: 'now-1d',
+        end_date: 'now',
+      });
       const responseBody = response.ok.mock.calls[0][0]?.body as ActivityLog;
       expect(response.ok).toBeCalled();
       expect(responseBody.data).toHaveLength(4);
@@ -360,9 +423,15 @@ describe('Action Log API', () => {
       havingErrors();
 
       try {
-        await getActivityLog({ agent_id: mockAgentID });
+        await getActivityLog({
+          agent_ids: [mockAgentID],
+          page: 1,
+          page_size: 10,
+          start_date: 'now-1d',
+          end_date: 'now',
+        });
       } catch (error) {
-        expect(error.message).toEqual(`Error fetching actions log for agent_id ${mockAgentID}`);
+        expect(error.message).toEqual(`Error fetching actions log for agent_ids ${mockAgentID}`);
       }
     });
 
@@ -371,15 +440,13 @@ describe('Action Log API', () => {
 
       const startDate = new Date(new Date().setDate(new Date().getDate() - 1)).toISOString();
       const endDate = new Date().toISOString();
-      const response = await getActivityLog(
-        { agent_id: mockAgentID },
-        {
-          page: 1,
-          page_size: 50,
-          start_date: startDate,
-          end_date: endDate,
-        }
-      );
+      const response = await getActivityLog({
+        agent_ids: [mockAgentID],
+        page: 1,
+        page_size: 50,
+        start_date: startDate,
+        end_date: endDate,
+      });
       expect(response.ok).toBeCalled();
       expect((response.ok.mock.calls[0][0]?.body as ActivityLog).startDate).toEqual(startDate);
       expect((response.ok.mock.calls[0][0]?.body as ActivityLog).endDate).toEqual(endDate);

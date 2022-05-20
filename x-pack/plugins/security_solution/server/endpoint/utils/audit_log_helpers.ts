@@ -144,7 +144,7 @@ export const getTimeSortedData = (data: ActivityLog['data']): ActivityLog['data'
 export const getActionRequestsResult = async ({
   context,
   logger,
-  elasticAgentId,
+  elasticAgentIds,
   startDate,
   endDate,
   size,
@@ -152,7 +152,7 @@ export const getActionRequestsResult = async ({
 }: {
   context: SecuritySolutionRequestHandlerContext;
   logger: Logger;
-  elasticAgentId: string;
+  elasticAgentIds: string[];
   startDate: string;
   endDate: string;
   size: number;
@@ -163,7 +163,7 @@ export const getActionRequestsResult = async ({
 }> => {
   const dateFilters = getDateFilters({ startDate, endDate });
   const baseActionFilters = [
-    { term: { agents: elasticAgentId } },
+    { terms: { agents: elasticAgentIds } },
     { term: { input_type: 'endpoint' } },
     { term: { type: 'INPUT_ACTION' } },
   ];
@@ -215,21 +215,21 @@ export const getActionRequestsResult = async ({
 export const getActionResponsesResult = async ({
   context,
   logger,
-  elasticAgentId,
+  elasticAgentIds,
   actionIds,
   startDate,
   endDate,
 }: {
   context: SecuritySolutionRequestHandlerContext;
   logger: Logger;
-  elasticAgentId: string;
+  elasticAgentIds: string[];
   actionIds: string[];
   startDate: string;
   endDate: string;
 }): Promise<TransportResult<estypes.SearchResponse<unknown>, unknown>> => {
   const dateFilters = getDateFilters({ startDate, endDate });
   const baseResponsesFilter = [
-    { term: { agent_id: elasticAgentId } },
+    { terms: { agent_id: elasticAgentIds } },
     { terms: { action_id: actionIds } },
   ];
   const responsesFilters = [...baseResponsesFilter, ...dateFilters];

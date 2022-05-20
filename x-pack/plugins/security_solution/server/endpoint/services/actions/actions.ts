@@ -35,7 +35,7 @@ import { ACTIONS_SEARCH_PAGE_SIZE } from './constants';
 const PENDING_ACTION_RESPONSE_MAX_LAPSED_TIME = 300000; // 300k ms === 5 minutes
 
 export const getAuditLogResponse = async ({
-  elasticAgentId,
+  elasticAgentIds,
   page,
   pageSize,
   startDate,
@@ -43,7 +43,7 @@ export const getAuditLogResponse = async ({
   context,
   logger,
 }: {
-  elasticAgentId: string;
+  elasticAgentIds: string[];
   page: number;
   pageSize: number;
   startDate: string;
@@ -60,7 +60,7 @@ export const getAuditLogResponse = async ({
     size,
     startDate,
     endDate,
-    elasticAgentId,
+    elasticAgentIds,
     logger,
   });
 
@@ -79,11 +79,11 @@ const getActivityLog = async ({
   from,
   startDate,
   endDate,
-  elasticAgentId,
+  elasticAgentIds,
   logger,
 }: {
   context: SecuritySolutionRequestHandlerContext;
-  elasticAgentId: string;
+  elasticAgentIds: string[];
   size: number;
   from: number;
   startDate: string;
@@ -98,7 +98,7 @@ const getActivityLog = async ({
     const { actionIds, actionRequests } = await getActionRequestsResult({
       context,
       logger,
-      elasticAgentId,
+      elasticAgentIds,
       startDate,
       endDate,
       size,
@@ -111,7 +111,7 @@ const getActivityLog = async ({
       actionIds: [...new Set(actionIds)], // de-dupe `action_id`s
       context,
       logger,
-      elasticAgentId,
+      elasticAgentIds,
       startDate,
       endDate,
     });
@@ -120,8 +120,8 @@ const getActivityLog = async ({
     throw error;
   }
   if (actionsResult?.statusCode !== 200) {
-    logger.error(`Error fetching actions log for agent_id ${elasticAgentId}`);
-    throw new Error(`Error fetching actions log for agent_id ${elasticAgentId}`);
+    logger.error(`Error fetching actions log for agent_ids ${elasticAgentIds}`);
+    throw new Error(`Error fetching actions log for agent_ids ${elasticAgentIds}`);
   }
 
   // label record as `action`, `fleetAction`

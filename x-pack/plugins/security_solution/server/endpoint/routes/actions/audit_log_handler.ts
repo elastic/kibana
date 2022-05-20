@@ -6,10 +6,7 @@
  */
 
 import { RequestHandler } from '@kbn/core/server';
-import {
-  EndpointActionLogRequestParams,
-  EndpointActionLogRequestQuery,
-} from '../../../../common/endpoint/schema/actions';
+import { EndpointActionLogRequestBody } from '../../../../common/endpoint/schema/actions';
 import { getAuditLogResponse } from '../../services';
 import { SecuritySolutionRequestHandlerContext } from '../../../types';
 import { EndpointAppContext } from '../../types';
@@ -17,21 +14,24 @@ import { EndpointAppContext } from '../../types';
 export const actionsLogRequestHandler = (
   endpointContext: EndpointAppContext
 ): RequestHandler<
-  EndpointActionLogRequestParams,
-  EndpointActionLogRequestQuery,
   unknown,
+  unknown,
+  EndpointActionLogRequestBody,
   SecuritySolutionRequestHandlerContext
 > => {
   const logger = endpointContext.logFactory.get('audit_log');
 
   return async (context, req, res) => {
     const {
-      params: { agent_id: elasticAgentId },
-      query: { page, page_size: pageSize, start_date: startDate, end_date: endDate },
-    } = req;
+      agent_ids: elasticAgentIds,
+      page,
+      page_size: pageSize,
+      start_date: startDate,
+      end_date: endDate,
+    } = req.body;
 
     const body = await getAuditLogResponse({
-      elasticAgentId,
+      elasticAgentIds,
       page,
       pageSize,
       startDate,

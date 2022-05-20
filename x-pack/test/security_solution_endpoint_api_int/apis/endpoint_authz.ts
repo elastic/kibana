@@ -45,8 +45,14 @@ export default function ({ getService }: FtrProviderContext) {
       },
       {
         method: 'get',
-        path: '/api/endpoint/action_log/one?start_date=2021-12-01&end_date=2021-12-04',
-        body: undefined,
+        path: '/api/endpoint/action/log',
+        body: {
+          agent_ids: ['one'],
+          start_date: '2021-12-01',
+          end_date: '2021-12-04',
+          page: 1,
+          page_size: 10,
+        },
       },
       {
         method: 'get',

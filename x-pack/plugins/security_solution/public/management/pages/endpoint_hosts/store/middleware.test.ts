@@ -45,6 +45,7 @@ import {
 } from '../../../../common/lib/endpoint_isolation/mocks';
 import { endpointPageHttpMock, failedTransformStateMock } from '../mocks';
 import {
+  ENDPOINT_ACTION_LOG_ROUTE,
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
 } from '../../../../../common/endpoint/constants';
@@ -310,13 +311,14 @@ describe('endpoint list middleware', () => {
 
       const activityLogResponse = await loadedDispatched;
       expect(mockedApis.responseProvider.activityLogResponse).toHaveBeenCalledWith({
-        path: expect.any(String),
-        query: {
-          end_date: 'now',
-          start_date: 'now-1d',
+        path: ENDPOINT_ACTION_LOG_ROUTE,
+        body: JSON.stringify({
+          agent_ids: [agentId],
           page: 1,
           page_size: 50,
-        },
+          start_date: 'now-1d',
+          end_date: 'now',
+        }),
       });
       expect(activityLogResponse.payload.type).toEqual('LoadedResourceState');
     });
@@ -394,13 +396,14 @@ describe('endpoint list middleware', () => {
       await updatePagingDispatched;
 
       expect(mockedApis.responseProvider.activityLogResponse).toHaveBeenCalledWith({
-        path: expect.any(String),
-        query: {
+        path: ENDPOINT_ACTION_LOG_ROUTE,
+        body: JSON.stringify({
+          agent_ids: [''],
           page: 3,
           page_size: 50,
           start_date: 'now-1d',
           end_date: 'now',
-        },
+        }),
       });
     });
   });

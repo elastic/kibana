@@ -112,7 +112,7 @@ export const endpointActivityLogHttpMock =
     {
       id: 'activityLogResponse',
       path: ENDPOINT_ACTION_LOG_ROUTE,
-      method: 'get',
+      method: 'post',
       handler: () => {
         const generator = new EndpointDocGenerator('seed');
         const endpointMetadata = generator.generateHostMetadata();

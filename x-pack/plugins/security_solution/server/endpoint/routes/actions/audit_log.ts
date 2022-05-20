@@ -20,7 +20,7 @@ export function registerActionAuditLogRoutes(
   router: SecuritySolutionPluginRouter,
   endpointContext: EndpointAppContext
 ) {
-  router.get(
+  router.post(
     {
       path: ENDPOINT_ACTION_LOG_ROUTE,
       validate: EndpointActionLogRequestSchema,
