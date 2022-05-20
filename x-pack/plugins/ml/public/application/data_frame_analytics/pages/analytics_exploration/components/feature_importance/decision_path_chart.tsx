@@ -53,7 +53,7 @@ const baselineStyle: LineAnnotationStyle = {
     duration: 'fast',
     snapValues: [],
     initialValue: undefined,
-  }
+  },
 };
 
 const axes: RecursivePartial<AxisStyle> = {
