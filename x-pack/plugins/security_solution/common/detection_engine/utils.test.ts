@@ -11,7 +11,7 @@ import {
   isThreatMatchRule,
   normalizeMachineLearningJobIds,
   normalizeThresholdField,
-  isMlRule
+  isMlRule,
 } from './utils';
 
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';

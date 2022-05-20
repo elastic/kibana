@@ -1790,7 +1790,7 @@ describe('import rules schema', () => {
         index: [],
         interval: '5m',
       };
-  
+
       const decoded = importRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
@@ -1842,7 +1842,7 @@ describe('import rules schema', () => {
         index: ['auditbeat-*'],
         interval: '5m',
       };
-  
+
       const decoded = importRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
@@ -1883,12 +1883,14 @@ describe('import rules schema', () => {
         ...getImportRulesSchemaMock(),
         data_view_id: 5,
       };
-  
+
       const decoded = importRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to "data_view_id"']);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "5" supplied to "data_view_id"',
+      ]);
       expect(message.schema).toEqual({});
     });
-  })
+  });
 });

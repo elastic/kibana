@@ -457,7 +457,7 @@ const bulkActionEditPayloadTags = t.type({
 export type BulkActionEditPayloadTags = t.TypeOf<typeof bulkActionEditPayloadTags>;
 
 const bulkActionEditPayloadIndexPatterns = t.intersection([
-    t.type({
+  t.type({
     type: t.union([
       t.literal(BulkActionEditType.add_index_patterns),
       t.literal(BulkActionEditType.delete_index_patterns),
@@ -465,8 +465,8 @@ const bulkActionEditPayloadIndexPatterns = t.intersection([
     ]),
     value: index,
   }),
-  t.exact(t.partial({overwriteDataViews: t.boolean}))
-]);;
+  t.exact(t.partial({ overwriteDataViews: t.boolean })),
+]);
 
 export type BulkActionEditPayloadIndexPatterns = t.TypeOf<
   typeof bulkActionEditPayloadIndexPatterns
