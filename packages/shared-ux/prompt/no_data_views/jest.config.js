@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { KibanaNoDataPage } from './kibana_no_data_page';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/shared-ux/prompt/no_data_views'],
+};
