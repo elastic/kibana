@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
   EuiCallOut,
   EuiButton,
@@ -29,6 +29,7 @@ interface Props {
 
 interface UsePollingAgentCountOptions {
   noLowerTimeLimit?: boolean;
+  pollImmediately?: boolean;
 }
 
 const POLLING_INTERVAL_MS = 5 * 1000; // 5 sec
@@ -43,24 +44,34 @@ export const usePollingAgentCount = (policyId: string, opts?: UsePollingAgentCou
   const [agentIds, setAgentIds] = useState<string[]>([]);
   const timeout = useRef<number | undefined>(undefined);
 
-  const kuery =
-    `${AGENTS_PREFIX}.policy_id:"${policyId}" and not (_exists_:"${AGENTS_PREFIX}.unenrolled_at") ` +
-    (opts?.noLowerTimeLimit ? '' : `and ${AGENTS_PREFIX}.enrolled_at >= now-10m`);
+  const lowerTimeLimitKuery = opts?.noLowerTimeLimit
+    ? ''
+    : `and ${AGENTS_PREFIX}.enrolled_at >= now-10m`;
+  const kuery = `${AGENTS_PREFIX}.policy_id:"${policyId}" and not (_exists_:"${AGENTS_PREFIX}.unenrolled_at") ${lowerTimeLimitKuery}`;
+
+  const getNewAgentIds = useCallback(async () => {
+    const request = await sendGetAgents({
+      kuery,
+      showInactive: false,
+    });
+
+    const newAgentIds = request.data?.items.map((i) => i.id) ?? agentIds;
+    if (newAgentIds.some((id) => !agentIds.includes(id))) {
+      setAgentIds(newAgentIds);
+    }
+  }, [agentIds, kuery]);
+
+  // optionally poll once on first render
+  useEffect(() => {
+    if (opts?.pollImmediately) getNewAgentIds();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     let isAborted = false;
 
     const poll = () => {
       timeout.current = window.setTimeout(async () => {
-        const request = await sendGetAgents({
-          kuery,
-          showInactive: false,
-        });
-
-        const newAgentIds = request.data?.items.map((i) => i.id) ?? agentIds;
-        if (newAgentIds.some((id) => !agentIds.includes(id))) {
-          setAgentIds(newAgentIds);
-        }
+        getNewAgentIds();
         if (!isAborted) {
           poll();
         }
@@ -74,7 +85,7 @@ export const usePollingAgentCount = (policyId: string, opts?: UsePollingAgentCou
     return () => {
       isAborted = true;
     };
-  }, [agentIds, policyId, kuery]);
+  }, [agentIds, policyId, kuery, getNewAgentIds]);
   return agentIds;
 };
 
