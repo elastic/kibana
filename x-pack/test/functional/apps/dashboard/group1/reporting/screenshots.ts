@@ -47,7 +47,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           indices: [
             {
               names: ['ecommerce', 'kibana_sample_data_ecommerce'],
-              privileges: ['read', 'view_index_metadata'],
+              privileges: ['read'],
               field_security: { grant: ['*'], except: [] },
             },
           ],
