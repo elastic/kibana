@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useEffect } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { EuiHorizontalRule, EuiListGroupItem, EuiLoadingSpinner } from '@elastic/eui';
 import { SecurityPageName } from '../../../../app/types';
-import { excludeAppLink, getAncestorLinksInfo } from '../../../links';
+import { getAncestorLinksInfo } from '../../../links';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { SecuritySolutionLinkAnchor, useGetSecuritySolutionLinkProps } from '../../links';
 import { useAppNavLinks } from '../nav_links';
@@ -52,6 +52,7 @@ const GetStartedCustomLink = React.memo(GetStartedCustomLinkComponent);
  * Returns a function to format generic `NavLinkItem` array to the `SideNavItem` type
  */
 const useFormatSideNavItem = (): FormatSideNavItems => {
+  const hideHostIsolationExceptions = !useCanSeeHostIsolationExceptionsMenu();
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps(); // adds href and onClick props
 
   const formatSideNavItem: FormatSideNavItems = useCallback(
@@ -66,7 +67,14 @@ const useFormatSideNavItem = (): FormatSideNavItems => {
         ...(navItem.links && navItem.links.length > 0
           ? {
               items: navItem.links
-                .filter((link) => !link.disabled)
+                .filter(
+                  (link) =>
+                    !link.disabled &&
+                    !(
+                      link.id === SecurityPageName.hostIsolationExceptions &&
+                      hideHostIsolationExceptions
+                    )
+                )
                 .map((panelNavItem) => ({
                   id: panelNavItem.id,
                   label: panelNavItem.title,
@@ -89,7 +97,7 @@ const useFormatSideNavItem = (): FormatSideNavItems => {
       }
       return formatDefaultItem(navLinkItem);
     },
-    [getSecuritySolutionLinkProps]
+    [getSecuritySolutionLinkProps, hideHostIsolationExceptions]
   );
 
   return formatSideNavItem;
@@ -109,6 +117,7 @@ const useSideNavItems = () => {
       if (appNavLink.disabled) {
         return;
       }
+
       if (isFooterNavItem(appNavLink.id)) {
         footerNavItems.push(formatSideNavItem(appNavLink));
       } else {
@@ -138,14 +147,6 @@ const useSelectedId = (): SecurityPageName => {
 export const SecuritySideNav: React.FC = () => {
   const [items, footerItems] = useSideNavItems();
   const selectedId = useSelectedId();
-
-  // TODO: move this exclusion logic to getManagementLinkItems
-  const canSeeHostIsolationExceptions = useCanSeeHostIsolationExceptionsMenu();
-  useEffect(() => {
-    if (!canSeeHostIsolationExceptions) {
-      excludeAppLink(SecurityPageName.hostIsolationExceptions);
-    }
-  }, [canSeeHostIsolationExceptions]);
 
   if (items.length === 0 && footerItems.length === 0) {
     return <EuiLoadingSpinner size="m" data-test-subj="sideNavLoader" />;
