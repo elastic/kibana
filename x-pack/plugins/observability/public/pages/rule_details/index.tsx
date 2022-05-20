@@ -43,12 +43,7 @@ import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { DeleteModalConfirmation } from '../rules/components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from '../rules/components/center_justified_spinner';
 import { getHealthColor, OBSERVABILITY_SOLUTIONS } from '../rules/config';
-import {
-  RuleDetailsPathParams,
-  EVENT_ERROR_LOG_TAB,
-  EVENT_LOG_LIST_TAB,
-  ALERT_LIST_TAB,
-} from './types';
+import { RuleDetailsPathParams, EVENT_LOG_LIST_TAB, ALERT_LIST_TAB } from './types';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
@@ -188,14 +183,6 @@ export function RuleDetailsPage() {
       'data-test-subj': 'ruleAlertListTab',
       content: <EuiText>Alerts</EuiText>,
     },
-    {
-      id: EVENT_ERROR_LOG_TAB,
-      name: i18n.translate('xpack.observability.ruleDetails.rule.errorLogTabText', {
-        defaultMessage: 'Error log',
-      }),
-      'data-test-subj': 'errorLogTab',
-      content: <EuiText>Error log</EuiText>,
-    },
   ];
 
   if (isPageLoading || isRuleLoading) return <CenterJustifiedSpinner />;
@@ -329,6 +316,27 @@ export function RuleDetailsPage() {
                   extraSpace={false}
                   itemValue={moment(rule.executionStatus.lastExecutionDate).fromNow()}
                 />
+              </EuiFlexGroup>
+              <EuiSpacer size="m" />
+              <EuiFlexGroup>
+                <ItemTitleRuleSummary>
+                  {i18n.translate('xpack.observability.ruleDetails.ruleIs', {
+                    defaultMessage: 'Rule is',
+                  })}
+                </ItemTitleRuleSummary>
+                <EuiFlexItem>
+                  {getRuleStatusDropdown({
+                    rule,
+                    enableRule: async () => await enableRule({ http, id: rule.id }),
+                    disableRule: async () => await disableRule({ http, id: rule.id }),
+                    onRuleChanged: () => reloadRule(),
+                    isEditable: hasEditButton,
+                    snoozeRule: async (snoozeEndTime: string | -1) => {
+                      await snoozeRule({ http, id: rule.id, snoozeEndTime });
+                    },
+                    unsnoozeRule: async () => await unsnoozeRule({ http, id: rule.id }),
+                  })}
+                </EuiFlexItem>
               </EuiFlexGroup>
               <EuiHorizontalRule margin="s" />
               <EuiFlexGroup>
