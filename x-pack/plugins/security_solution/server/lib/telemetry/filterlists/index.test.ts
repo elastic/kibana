@@ -18,6 +18,13 @@ describe('Security Telemetry filters', () => {
       },
       'kibana.alert.ancestors': true,
       'kibana.alert.original_event.module': true,
+      'event.id': true,
+      'event.ingested': true,
+      'event.kind': true,
+      'event.module': true,
+      'event.outcome': true,
+      'event.provider': true,
+      'event.type': true
     };
 
     it('filters top level', () => {
