@@ -419,7 +419,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
       describe('when there are agent config metrics for this etag', () => {
         before(async () => {
           const start = new Date().getTime();
-          const end = moment(start).add(5, 'minutes').valueOf();
+          const end = moment(start).add(15, 'minutes').valueOf();
 
           await addAgentConfigMetrics({
             synthtraceEsClient,
