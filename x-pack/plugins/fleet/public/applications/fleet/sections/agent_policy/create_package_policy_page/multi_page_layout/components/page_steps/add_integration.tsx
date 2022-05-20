@@ -10,6 +10,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiCallOut, EuiLink, EuiButton, EuiSpacer } from '@elastic/eui';
 import { safeLoad } from 'js-yaml';
 
+import { i18n } from '@kbn/i18n';
+
 import type { MultiPageStepLayoutProps } from '../../types';
 import type { PackagePolicyFormState } from '../../../types';
 import type { NewPackagePolicy } from '../../../../../../types';
@@ -18,6 +20,7 @@ import {
   useStartServices,
   useGetPackageInfoByKey,
 } from '../../../../../../hooks';
+import type { RequestError } from '../../../../../../hooks';
 import { Loading, Error } from '../../../../../../components';
 import { sendGeneratePackagePolicy } from '../../hooks';
 import { CreatePackagePolicyBottomBar } from '..';
@@ -52,13 +55,30 @@ const StandaloneWarningCallout: React.FC<{
   );
 };
 
+const AddIntegrationError: React.FC<{ error: Error | string; title?: JSX.Element }> = ({
+  error,
+  title,
+}) => (
+  <Error
+    title={
+      title ? (
+        title
+      ) : (
+        <FormattedMessage
+          id={'xpack.fleet.addIntegration.errorTitle'}
+          defaultMessage={'Error adding integration'}
+        />
+      )
+    }
+    error={error}
+  />
+);
+
 export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props) => {
   const { onNext, onBack, isManaged, setIsManaged, packageInfo, integrationInfo, agentPolicy } =
     props;
-  if (!agentPolicy) {
-    // TODO: sort this
-    throw 'agent policy not provided'; // eslint-disable-line
-  }
+
+  const [basePolicyError, setBasePolicyError] = useState<RequestError>();
 
   // Fetch package info
   const {
@@ -157,6 +177,9 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
 
   useEffect(() => {
     const getBasePolicy = async () => {
+      if (!agentPolicy) {
+        return;
+      }
       const { packagePolicy: basePackagePolicy, error } = await sendGeneratePackagePolicy(
         agentPolicy.id,
         packageInfo,
@@ -164,15 +187,28 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
       );
 
       if (error) {
-        // TODO: do something
+        setBasePolicyError(error);
       }
       updatePackagePolicy(basePackagePolicy);
     };
     getBasePolicy();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  if (!agentPolicy) {
+    return (
+      <AddIntegrationError
+        error={i18n.translate('xpack.fleet.addIntegration.noAgentPolicy', {
+          defaultMessage: 'Error creating agent policy.',
+        })}
+      />
+    );
+  }
+
   if (packageInfoError) {
-    return <Error title={<>Oh no</>} error={packageInfoError} />; // TODO: make nice
+    return <AddIntegrationError error={packageInfoError} />;
+  }
+  if (basePolicyError) {
+    return <AddIntegrationError error={basePolicyError} />;
   }
 
   if (isPackageInfoLoading) {
