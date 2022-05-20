@@ -255,6 +255,7 @@ export const item: GetInfoResponse['item'] = {
       csp_rule_template: [],
       tag: [],
       osquery_pack_asset: [],
+      osquery_saved_query: [],
     },
     elasticsearch: {
       ingest_pipeline: [
@@ -663,6 +664,5 @@ export const item: GetInfoResponse['item'] = {
     github: 'elastic/integrations',
   },
   latestVersion: '0.7.0',
-  removable: true,
   status: 'not_installed',
 };

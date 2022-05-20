@@ -46,7 +46,7 @@ describe('mapFiltersToKql', () => {
         ruleStatusesFilter: ['enabled'],
       })
     ).toEqual([
-      'alert.attributes.enabled:(true) and not (alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)',
+      'alert.attributes.enabled:(true) and not (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)',
     ]);
 
     expect(
@@ -54,21 +54,21 @@ describe('mapFiltersToKql', () => {
         ruleStatusesFilter: ['disabled'],
       })
     ).toEqual([
-      'alert.attributes.enabled:(false) and not (alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)',
+      'alert.attributes.enabled:(false) and not (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)',
     ]);
 
     expect(
       mapFiltersToKql({
         ruleStatusesFilter: ['snoozed'],
       })
-    ).toEqual(['(alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)']);
+    ).toEqual(['(alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)']);
 
     expect(
       mapFiltersToKql({
         ruleStatusesFilter: ['enabled', 'snoozed'],
       })
     ).toEqual([
-      'alert.attributes.enabled:(true) or (alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)',
+      'alert.attributes.enabled:(true) or (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)',
     ]);
 
     expect(
@@ -76,7 +76,7 @@ describe('mapFiltersToKql', () => {
         ruleStatusesFilter: ['disabled', 'snoozed'],
       })
     ).toEqual([
-      'alert.attributes.enabled:(false) or (alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)',
+      'alert.attributes.enabled:(false) or (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)',
     ]);
 
     expect(
@@ -84,8 +84,16 @@ describe('mapFiltersToKql', () => {
         ruleStatusesFilter: ['enabled', 'disabled', 'snoozed'],
       })
     ).toEqual([
-      'alert.attributes.enabled:(true or false) or (alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)',
+      'alert.attributes.enabled:(true or false) or (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)',
     ]);
+  });
+
+  test('should handle tagsFilter', () => {
+    expect(
+      mapFiltersToKql({
+        tagsFilter: ['a', 'b', 'c'],
+      })
+    ).toEqual(['alert.attributes.tags:(a or b or c)']);
   });
 
   test('should handle typesFilter and actionTypesFilter', () => {
@@ -100,17 +108,19 @@ describe('mapFiltersToKql', () => {
     ]);
   });
 
-  test('should handle typesFilter, actionTypesFilter and ruleExecutionStatusesFilter', () => {
+  test('should handle typesFilter, actionTypesFilter, ruleExecutionStatusesFilter, and tagsFilter', () => {
     expect(
       mapFiltersToKql({
         typesFilter: ['type', 'filter'],
         actionTypesFilter: ['action', 'types', 'filter'],
         ruleExecutionStatusesFilter: ['alert', 'statuses', 'filter'],
+        tagsFilter: ['a', 'b', 'c'],
       })
     ).toEqual([
       'alert.attributes.alertTypeId:(type or filter)',
       '(alert.attributes.actions:{ actionTypeId:action } OR alert.attributes.actions:{ actionTypeId:types } OR alert.attributes.actions:{ actionTypeId:filter })',
       'alert.attributes.executionStatus.status:(alert or statuses or filter)',
+      'alert.attributes.tags:(a or b or c)',
     ]);
   });
 });

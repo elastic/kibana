@@ -13,15 +13,18 @@ describe('Data Frame Analytics: Analytics utils', () => {
     expect(getAnalysisType(outlierAnalysis)).toBe('outlier_detection');
 
     const regressionAnalysis = { regression: {} };
+    // @ts-expect-error incomplete regression analysis
     expect(getAnalysisType(regressionAnalysis)).toBe('regression');
 
     // test against a job type that does not exist yet.
     const otherAnalysis = { other: {} };
+    // @ts-expect-error unkown analysis type
     expect(getAnalysisType(otherAnalysis)).toBe('other');
 
     // if the analysis object has a shape that is not just a single property,
     // the job type will be returned as 'unknown'.
     const unknownAnalysis = { outlier_detection: {}, regression: {} };
+    // @ts-expect-error unkown analysis type
     expect(getAnalysisType(unknownAnalysis)).toBe('unknown');
   });
 

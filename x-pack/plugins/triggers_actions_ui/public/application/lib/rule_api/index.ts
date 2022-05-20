@@ -7,7 +7,7 @@
 
 export { alertingFrameworkHealth } from './health';
 export { mapFiltersToKql } from './map_filters_to_kql';
-export { loadRuleAggregations } from './aggregate';
+export { loadRuleAggregations, loadRuleTags } from './aggregate';
 export { createRule } from './create';
 export { deleteRules } from './delete';
 export { disableRule, disableRules } from './disable';
@@ -27,3 +27,4 @@ export { updateRule } from './update';
 export { resolveRule } from './resolve_rule';
 export { snoozeRule } from './snooze';
 export { unsnoozeRule } from './unsnooze';
+export { updateAPIKey } from './update_api_key';

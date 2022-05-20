@@ -10,7 +10,7 @@
 /** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.ImportDeclaration} ImportDeclaration */
 
 const ERROR_MSG =
-  'Using a trailing slash in package import statements causes issues with webpack and is inconsistent with the rest of the respository.';
+  'Using a trailing slash in package import statements causes issues with webpack and is inconsistent with the rest of the repository.';
 
 /** @type {Rule} */
 module.exports = {

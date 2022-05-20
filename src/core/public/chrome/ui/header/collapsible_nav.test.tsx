@@ -113,7 +113,7 @@ describe('CollapsibleNav', () => {
         customNavLink$={new BehaviorSubject(customNavLink)}
       />
     );
-    expect(component).toMatchSnapshot();
+    expect(component.render()).toMatchSnapshot();
   });
 
   it('remembers collapsible section state', () => {

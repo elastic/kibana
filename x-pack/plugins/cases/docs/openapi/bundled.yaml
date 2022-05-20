@@ -147,6 +147,8 @@ paths:
                     syncAlerts:
                       description: Turns alert syncing on or off.
                       type: boolean
+                severity:
+                  $ref: '#/components/schemas/severity'
                 tags:
                   description: >-
                     The words and phrases that help categorize cases. It can be
@@ -318,6 +320,13 @@ paths:
                       advertising cheap holidays for underpaid civil servants.
                       Operation bubblegum is active. Repeat - operation
                       bubblegum is now active
+                  duration:
+                    type: integer
+                    description: >-
+                      The elapsed time from the creation of the case to its
+                      closure (in seconds). If the case has not been closed, the
+                      duration is set to null.
+                    example: 120
                   external_service:
                     type: object
                     properties:
@@ -356,6 +365,8 @@ paths:
                       syncAlerts:
                         type: boolean
                         example: true
+                  severity:
+                    $ref: '#/components/schemas/severity'
                   status:
                     $ref: '#/components/schemas/status'
                   tags:
@@ -562,6 +573,8 @@ paths:
                           syncAlerts:
                             description: Turns alert syncing on or off.
                             type: boolean
+                      severity:
+                        $ref: '#/components/schemas/severity'
                       status:
                         $ref: '#/components/schemas/status'
                       tags:
@@ -732,6 +745,13 @@ paths:
                       advertising cheap holidays for underpaid civil servants.
                       Operation bubblegum is active. Repeat - operation
                       bubblegum is now active
+                  duration:
+                    type: integer
+                    description: >-
+                      The elapsed time from the creation of the case to its
+                      closure (in seconds). If the case has not been closed, the
+                      duration is set to null.
+                    example: 120
                   external_service:
                     type: object
                     properties:
@@ -770,6 +790,8 @@ paths:
                       syncAlerts:
                         type: boolean
                         example: true
+                  severity:
+                    $ref: '#/components/schemas/severity'
                   status:
                     $ref: '#/components/schemas/status'
                   tags:
@@ -946,6 +968,8 @@ paths:
                     syncAlerts:
                       description: Turns alert syncing on or off.
                       type: boolean
+                severity:
+                  $ref: '#/components/schemas/severity'
                 tags:
                   description: >-
                     The words and phrases that help categorize cases. It can be
@@ -1117,6 +1141,13 @@ paths:
                       advertising cheap holidays for underpaid civil servants.
                       Operation bubblegum is active. Repeat - operation
                       bubblegum is now active
+                  duration:
+                    type: integer
+                    description: >-
+                      The elapsed time from the creation of the case to its
+                      closure (in seconds). If the case has not been closed, the
+                      duration is set to null.
+                    example: 120
                   external_service:
                     type: object
                     properties:
@@ -1155,6 +1186,8 @@ paths:
                       syncAlerts:
                         type: boolean
                         example: true
+                  severity:
+                    $ref: '#/components/schemas/severity'
                   status:
                     $ref: '#/components/schemas/status'
                   tags:
@@ -1363,6 +1396,8 @@ paths:
                           syncAlerts:
                             description: Turns alert syncing on or off.
                             type: boolean
+                      severity:
+                        $ref: '#/components/schemas/severity'
                       status:
                         $ref: '#/components/schemas/status'
                       tags:
@@ -1533,6 +1568,13 @@ paths:
                       advertising cheap holidays for underpaid civil servants.
                       Operation bubblegum is active. Repeat - operation
                       bubblegum is now active
+                  duration:
+                    type: integer
+                    description: >-
+                      The elapsed time from the creation of the case to its
+                      closure (in seconds). If the case has not been closed, the
+                      duration is set to null.
+                    example: 120
                   external_service:
                     type: object
                     properties:
@@ -1571,6 +1613,8 @@ paths:
                       syncAlerts:
                         type: boolean
                         example: true
+                  severity:
+                    $ref: '#/components/schemas/severity'
                   status:
                     $ref: '#/components/schemas/status'
                   tags:
@@ -1658,6 +1702,15 @@ components:
         - cases
         - observability
         - securitySolution
+    severity:
+      type: string
+      description: The severity of the case.
+      enum:
+        - critical
+        - high
+        - low
+        - medium
+      default: low
     status:
       type: string
       description: The status of the case.
@@ -1709,6 +1762,8 @@ components:
           James Bond clicked on a highly suspicious email banner advertising
           cheap holidays for underpaid civil servants. Operation bubblegum is
           active. Repeat - operation bubblegum is now active
+        duration: null
+        severity: low
         closed_at: null
         closed_by: null
         created_at: '2022-05-13T09:16:17.416Z'
@@ -1774,6 +1829,8 @@ components:
             James Bond clicked on a highly suspicious email banner advertising
             cheap holidays for underpaid civil servants. Operation bubblegum is
             active. Repeat - operation bubblegum is now active!
+          duration: null
+          severity: low
           closed_at: null
           closed_by: null
           created_at: '2022-05-13T09:16:17.416Z'

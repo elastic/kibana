@@ -171,6 +171,10 @@ export const CasesFindRequestRt = rt.partial({
    */
   status: CaseStatusRt,
   /**
+   * The severity of the case
+   */
+  severity: CaseSeverityRt,
+  /**
    * The reporters to filter by
    */
   reporters: rt.union([rt.array(rt.string), rt.string]),
