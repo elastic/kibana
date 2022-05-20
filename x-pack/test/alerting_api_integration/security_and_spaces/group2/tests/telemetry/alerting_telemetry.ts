@@ -11,11 +11,11 @@ import {
   getUrlPrefix,
   getEventLog,
   getTestRuleData,
-  ObjectRemover,
   TaskManagerDoc,
   ESTestIndexTool,
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { setupSpacesAndUsers } from '../../../setup';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertingTelemetryTests({ getService }: FtrProviderContext) {
@@ -28,14 +28,13 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
 
   describe('alerting telemetry', () => {
     const alwaysFiringRuleId: { [key: string]: string } = {};
-    const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/event_log_telemetry');
+      await setupSpacesAndUsers(getService);
     });
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/event_log_telemetry');
-      objectRemover.removeAll();
     });
 
     beforeEach(async () => {
@@ -56,7 +55,6 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
           secrets: {},
         })
         .expect(200);
-      objectRemover.add(space, createdConnector.id, 'action', 'actions');
       return createdConnector.id;
     }
 
@@ -68,7 +66,6 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
         .auth(Superuser.username, Superuser.password)
         .send(getTestRuleData(ruleOverwrites));
       expect(ruleResponse.status).to.eql(200);
-      objectRemover.add(space, ruleResponse.body.id, 'rule', 'alerting');
       return ruleResponse.body.id;
     }
 
@@ -213,7 +210,7 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
           type: 'alert',
           id: alwaysFiringRuleId[Spaces[0].id],
           provider: 'alerting',
-          actions: new Map([['execute', { gte: 8 }]]),
+          actions: new Map([['execute', { gte: 10 }]]),
         });
       });
 

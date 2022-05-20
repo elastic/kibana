@@ -112,7 +112,6 @@ export function telemetryTaskRunner(
               dailyExecutionTimeoutCounts,
               dailyFailedAndUnrecognizedTasks,
             ]) => {
-              logger.info('alerting telemetry success!');
               return {
                 state: {
                   runs: (state.runs || 0) + 1,
@@ -170,5 +169,5 @@ export function telemetryTaskRunner(
 }
 
 function getNextMidnight() {
-  return moment().add(1, 'm').startOf('m').toDate();
+  return moment().add(1, 'd').startOf('d').toDate();
 }
