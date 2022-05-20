@@ -181,7 +181,8 @@
           "items": [
             { "id": "kibDevDocsOpsOptimizer" },
             { "id": "kibDevDocsOpsBabelPreset" },
-            { "id": "kibDevDocsOpsTypeSummarizer" }
+            { "id": "kibDevDocsOpsTypeSummarizer" },
+            { "id": "kibDevDocsOpsBabelPluginSyntheticPackages"}
           ]
         },
         {
@@ -197,9 +198,11 @@
           "label": "Utilities",
           "items": [
             { "id": "kibDevDocsToolingLog" },
-            { "id": "kibDevDocsOpsJestSerializers"},
+            { "id": "kibDevDocsOpsJestSerializers" },
             { "id": "kibDevDocsOpsExpect" },
-            { "id": "kibDevDocsOpsAmbientUiTypes" }
+            { "id": "kibDevDocsOpsAmbientStorybookTypes" },
+            { "id": "kibDevDocsOpsAmbientUiTypes" },
+            { "id": "kibDevDocsOpsTestSubjSelector"}
           ]
         }
       ]
