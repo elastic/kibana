@@ -7,10 +7,9 @@
  */
 
 import { validateAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { LayerTypes, REFERENCE_LINE_LAYER } from '../constants';
+import { LayerTypes, REFERENCE_LINE_LAYER, EXTENDED_Y_CONFIG } from '../constants';
 import { ReferenceLineLayerFn } from '../types';
 import { strings } from '../i18n';
-import { commonReferenceLineLayerArgs } from './common_reference_line_layer_args';
 
 export const referenceLineLayerFunction: ReferenceLineLayerFn = {
   name: REFERENCE_LINE_LAYER,
@@ -19,14 +18,31 @@ export const referenceLineLayerFunction: ReferenceLineLayerFn = {
   help: strings.getRLHelp(),
   inputTypes: ['datatable'],
   args: {
-    ...commonReferenceLineLayerArgs,
     accessors: {
-      types: ['string', 'vis_dimension'],
+      types: ['string'],
       help: strings.getRLAccessorsHelp(),
       multi: true,
     },
+    yConfig: {
+      types: [EXTENDED_Y_CONFIG],
+      help: strings.getRLYConfigHelp(),
+      multi: true,
+    },
+    columnToLabel: {
+      types: ['string'],
+      help: strings.getColumnToLabelHelp(),
+    },
+    table: {
+      types: ['datatable'],
+      help: strings.getTableHelp(),
+    },
+    layerId: {
+      types: ['string'],
+      help: strings.getLayerIdHelp(),
+    },
   },
-  fn(table, args) {
+  fn(input, args) {
+    const table = args.table ?? input;
     const accessors = args.accessors ?? [];
     accessors.forEach((accessor) => validateAccessor(accessor, table.columns));
 
@@ -34,8 +50,7 @@ export const referenceLineLayerFunction: ReferenceLineLayerFn = {
       type: REFERENCE_LINE_LAYER,
       ...args,
       layerType: LayerTypes.REFERENCELINE,
-      accessors,
-      table,
+      table: args.table ?? input,
     };
   },
 };

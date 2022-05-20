@@ -13,7 +13,7 @@ import {
 } from '@kbn/visualizations-plugin/common/utils';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
-import { LayerTypes, XY_VIS_RENDERER, DATA_LAYER } from '../constants';
+import { LayerTypes, XY_VIS_RENDERER, DATA_LAYER, REFERENCE_LINE } from '../constants';
 import { appendLayerIds, getAccessors, normalizeTable } from '../helpers';
 import { DataLayerConfigResult, XYLayerConfig, XyVisFn, XYArgs } from '../types';
 import { getLayerDimensions } from '../utils';
@@ -53,7 +53,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   validateAccessor(args.splitColumnAccessor, data.columns);
 
   const {
-    referenceLineLayers = [],
+    referenceLines = [],
     annotationLayers = [],
     // data_layer args
     seriesType,
@@ -81,7 +81,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
 
   const layers: XYLayerConfig[] = [
     ...appendLayerIds(dataLayers, 'dataLayers'),
-    ...appendLayerIds(referenceLineLayers, 'referenceLineLayers'),
+    ...appendLayerIds(referenceLines, 'referenceLines'),
     ...appendLayerIds(annotationLayers, 'annotationLayers'),
   ];
 
@@ -90,7 +90,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
     handlers.inspectorAdapters.tables.allowCsvExport = true;
 
     const layerDimensions = layers.reduce<Dimension[]>((dimensions, layer) => {
-      if (layer.layerType === LayerTypes.ANNOTATIONS) {
+      if (layer.layerType === LayerTypes.ANNOTATIONS || layer.type === REFERENCE_LINE) {
         return dimensions;
       }
 

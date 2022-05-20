@@ -93,9 +93,9 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.dataLayer.help', {
       defaultMessage: 'Data layer of visual series',
     }),
-  getReferenceLineLayerHelp: () =>
-    i18n.translate('expressionXY.xyVis.referenceLineLayer.help', {
-      defaultMessage: 'Reference line layer',
+  getReferenceLinesHelp: () =>
+    i18n.translate('expressionXY.xyVis.referenceLines.help', {
+      defaultMessage: 'Reference line',
     }),
   getAnnotationLayerHelp: () =>
     i18n.translate('expressionXY.xyVis.annotationLayer.help', {
@@ -236,5 +236,13 @@ export const strings = {
   getAnnotationLayerAnnotationsHelp: () =>
     i18n.translate('expressionXY.annotationLayer.annotations.help', {
       defaultMessage: 'Annotations',
+    }),
+  getReferenceLineNameHelp: () =>
+    i18n.translate('expressionXY.referenceLine.name.help', {
+      defaultMessage: 'Reference line name',
+    }),
+  getReferenceLineValueHelp: () =>
+    i18n.translate('expressionXY.referenceLine.Value.help', {
+      defaultMessage: 'Reference line value',
     }),
 };

@@ -7,7 +7,7 @@
  */
 
 import './annotations.scss';
-import './reference_lines.scss';
+import './reference_lines/reference_lines.scss';
 
 import React from 'react';
 import { snakeCase } from 'lodash';
