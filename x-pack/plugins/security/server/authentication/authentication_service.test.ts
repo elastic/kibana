@@ -69,7 +69,7 @@ describe('AuthenticationService', () => {
     clusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>;
     featureUsageService: jest.Mocked<SecurityFeatureUsageServiceStart>;
     session: jest.Mocked<PublicMethodsOf<Session>>;
-    applicationName: '.kibana,.kibana';
+    applicationName: 'kibana-.kibana';
   };
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
@@ -108,7 +108,7 @@ describe('AuthenticationService', () => {
       loggers: loggingSystemMock.create(),
       featureUsageService: securityFeatureUsageServiceMock.createStartContract(),
       session: sessionMock.create(),
-      applicationName: '.kibana,.kibana',
+      applicationName: 'kibana-.kibana',
     };
     (mockStartAuthenticationParams.http.basePath.get as jest.Mock).mockImplementation(
       () => mockStartAuthenticationParams.http.basePath.serverBasePath
