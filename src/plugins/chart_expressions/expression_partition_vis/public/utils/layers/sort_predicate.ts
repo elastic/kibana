@@ -34,8 +34,9 @@ const sortPredicateSaveSourceOrder: SortPredicatePureFn =
   () =>
   ([, node1], [, node2]) => {
     const [index1] = node1.inputIndex ?? [];
+    // Sorting for first group (we should respect the order, which is why we return 0)
     if (index1 !== undefined) {
-      return index1;
+      return 0;
     }
     return node2.value - node1.value;
   };
@@ -47,9 +48,9 @@ const sortPredicateMosaic: SortPredicateDefaultFn = (visData, columns) => {
   const sortingMap = columns[0]?.id ? extractUniqTermsMap(visData, columns[0].id) : {};
 
   return ([name1, node1], [, node2]) => {
-    // Sorting for first group
+    // Sorting for first group (we should respect the order, which is why we return 0)
     if (columns.length === 1 || (node1.children.length && name1 in sortingMap)) {
-      return sortingMap[name1];
+      return 0;
     }
 
     // Sorting for second group
