@@ -57,7 +57,7 @@ export const DataViewSelector = ({
       dataViewId != null &&
       dataViewId !== '' &&
       kibanaDataViewsDefined &&
-      !Object.keys(kibanaDataViews).includes(dataViewId),
+      !Object.hasOwn(kibanaDataViews, dataViewId),
     [kibanaDataViewsDefined, dataViewId, kibanaDataViews]
   );
   const [selectedOption, setSelectedOption] = useState<Array<EuiComboBoxOptionOption<string>>>(
@@ -93,14 +93,18 @@ export const DataViewSelector = ({
   const onChangeDataViews = (options: Array<EuiComboBoxOptionOption<string>>) => {
     const selectedDataViewOption = options;
 
+    setSelectedOption(selectedDataViewOption ?? []);
+
     if (
       selectedDataViewOption != null &&
       selectedDataViewOption.length > 0 &&
       selectedDataViewOption[0].id != null
     ) {
-      setSelectedOption(selectedDataViewOption);
       setSelectedDataView(kibanaDataViews[selectedDataViewOption[0].id]);
       field?.setValue(selectedDataViewOption[0].id);
+    } else {
+      setSelectedDataView(undefined);
+      field?.setValue(undefined);
     }
   };
 
