@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { Ensure, SerializableRecord } from '@kbn/utility-types';
+import type { Ensure, SerializableRecord, Values } from '@kbn/utility-types';
+
+export type LayoutId = Values<Pick<typeof LayoutTypes, 'PRESERVE_LAYOUT' | 'CANVAS' | 'PRINT'>>;
 
 /**
  * @internal
@@ -40,7 +42,7 @@ export interface LayoutSelectorDictionary {
 /**
  * Screenshot layout parameters.
  */
-export type LayoutParams<Id = string> = Ensure<
+export type LayoutParams<Id = LayoutId> = Ensure<
   {
     /**
      * Unique layout name.
