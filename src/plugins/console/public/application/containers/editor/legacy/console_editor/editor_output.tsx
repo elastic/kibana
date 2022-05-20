@@ -117,7 +117,7 @@ function EditorOutputUI() {
     } else {
       editor.update('');
     }
-  }, [readOnlySettings, data, error]);
+  }, [readOnlySettings, data, error, multiRequestOutputMode]);
 
   useEffect(() => {
     applyCurrentSettings(editorInstanceRef.current!, readOnlySettings);
