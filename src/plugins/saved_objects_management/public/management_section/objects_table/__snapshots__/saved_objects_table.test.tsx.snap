@@ -296,6 +296,12 @@ exports[`SavedObjectsTable should render normally 1`] = `
           "onSelectionChange": [Function],
         }
       }
+      sort={
+        Object {
+          "direction": "desc",
+          "field": "updated_at",
+        }
+      }
       totalItemCount={4}
     />
   </RedirectAppLinks>
