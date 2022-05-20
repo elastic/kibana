@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { renderHook, act } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/dom';
 import React from 'react';
 import { TestProviders } from '../common/mock';
 import { useGetFeatureIds } from './use_get_feature_ids';
 import * as api from './api';
+import { waitFor } from '@testing-library/dom';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
@@ -24,17 +23,20 @@ describe('useGetFeaturesIds', () => {
 
   it('inits with empty data', async () => {
     jest.spyOn(api, 'getFeatureIds').mockRejectedValue([]);
-    const { result } = renderHook<string, ValidFeatureId[]>(() => useGetFeatureIds(['context1']), {
+    const { result } = renderHook(() => useGetFeatureIds(['context1']), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
+
     act(() => {
-      expect(result.current).toEqual([]);
+      expect(result.current.alertFeatureIds).toEqual([]);
+      expect(result.current.isLoading).toEqual(true);
+      expect(result.current.isError).toEqual(false);
     });
   });
-
+  //
   it('fetches data and returns it correctly', async () => {
     const spy = jest.spyOn(api, 'getFeatureIds');
-    const { result } = renderHook<string, ValidFeatureId[]>(() => useGetFeatureIds(['context1']), {
+    const { result } = renderHook(() => useGetFeatureIds(['context1']), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
@@ -45,19 +47,23 @@ describe('useGetFeaturesIds', () => {
       );
     });
 
-    expect(result.current).toEqual(['siem', 'observability']);
+    expect(result.current.alertFeatureIds).toEqual(['siem', 'observability']);
+    expect(result.current.isLoading).toEqual(false);
+    expect(result.current.isError).toEqual(false);
   });
 
-  it('throws an error correctly', async () => {
+  it('sets isError to true when an error occurs', async () => {
     const spy = jest.spyOn(api, 'getFeatureIds');
     spy.mockImplementation(() => {
       throw new Error('Something went wrong');
     });
 
-    const { result } = renderHook<string, ValidFeatureId[]>(() => useGetFeatureIds(['context1']), {
+    const { result } = renderHook(() => useGetFeatureIds(['context1']), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    expect(result.current).toEqual([]);
+    expect(result.current.alertFeatureIds).toEqual([]);
+    expect(result.current.isLoading).toEqual(false);
+    expect(result.current.isError).toEqual(true);
   });
 });
