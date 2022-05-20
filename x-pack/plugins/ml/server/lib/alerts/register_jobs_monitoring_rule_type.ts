@@ -140,6 +140,7 @@ export function registerJobsMonitoringRuleType({
     producer: PLUGIN_ID,
     minimumLicenseRequired: MINIMUM_FULL_LICENSE,
     isExportable: true,
+    doesSetRecoveryContext: true,
     async executor(options) {
       const { services, name } = options;
 
