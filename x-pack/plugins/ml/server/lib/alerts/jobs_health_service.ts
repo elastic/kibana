@@ -379,7 +379,7 @@ export function jobsHealthServiceProvider(
             ok: okJobs,
           } = groupBy(response, 'memory_status');
 
-          const isHealthy = hardLimitJobs.length === 0 && softLimitJobs.length === 0;
+          const isHealthy = !hardLimitJobs?.length && !softLimitJobs?.length;
 
           let message = '';
 
