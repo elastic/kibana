@@ -225,7 +225,7 @@ export const EncryptedBrowserSimpleFieldsCodec = t.intersection([
 export const BrowserSensitiveSimpleFieldsCodec = t.intersection([
   t.interface({
     [ConfigKey.SOURCE_INLINE]: t.string,
-    [ConfigKey.SOURCE_PUSH]: t.string,
+    [ConfigKey.SOURCE_PROJECT_CONTENT]: t.string,
     [ConfigKey.SOURCE_ZIP_USERNAME]: t.string,
     [ConfigKey.SOURCE_ZIP_PASSWORD]: t.string,
     [ConfigKey.PARAMS]: t.string,

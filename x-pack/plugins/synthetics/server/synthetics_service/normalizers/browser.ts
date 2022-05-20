@@ -64,7 +64,8 @@ export const normalizeProjectMonitor = ({
     },
     [ConfigKey.PROJECT_ID]: projectId || defaultFields[ConfigKey.PROJECT_ID],
     [ConfigKey.JOURNEY_ID]: monitor.id || defaultFields[ConfigKey.JOURNEY_ID],
-    [ConfigKey.SOURCE_PUSH]: monitor.content || defaultFields[ConfigKey.SOURCE_PUSH],
+    [ConfigKey.SOURCE_PROJECT_CONTENT]:
+      monitor.content || defaultFields[ConfigKey.SOURCE_PROJECT_CONTENT],
     [ConfigKey.LOCATIONS]: monitor.locations
       ?.map((key) => {
         return locations.find((location) => location.id === key);

@@ -78,7 +78,7 @@ export const DEFAULT_BROWSER_SIMPLE_FIELDS: BrowserSimpleFields = {
     number: '10',
   },
   [ConfigKey.SOURCE_INLINE]: '',
-  [ConfigKey.SOURCE_PUSH]: '',
+  [ConfigKey.SOURCE_PROJECT_CONTENT]: '',
   [ConfigKey.SOURCE_ZIP_URL]: '',
   [ConfigKey.SOURCE_ZIP_USERNAME]: '',
   [ConfigKey.SOURCE_ZIP_PASSWORD]: '',

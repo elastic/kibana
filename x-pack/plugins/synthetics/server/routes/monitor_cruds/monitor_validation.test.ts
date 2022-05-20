@@ -166,7 +166,7 @@ describe('validateMonitor', () => {
       [ConfigKey.PROJECT_ID]: '',
       [ConfigKey.METADATA]: testMetaData,
       [ConfigKey.SOURCE_INLINE]: '',
-      [ConfigKey.SOURCE_PUSH]: '',
+      [ConfigKey.SOURCE_PROJECT_CONTENT]: '',
       [ConfigKey.SOURCE_ZIP_URL]: '',
       [ConfigKey.SOURCE_ZIP_FOLDER]: '',
       [ConfigKey.SOURCE_ZIP_USERNAME]: 'test-username',
