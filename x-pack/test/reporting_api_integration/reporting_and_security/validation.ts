@@ -53,7 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      it('fails if width or height are non-numeric: printablePdfV2', async () => {
+      it('fails if width or height are non-numeric', async () => {
         const downloadReportPath = await reportingAPI.postJobJSON(
           '/api/reporting/generate/printablePdfV2',
           { jobParams: createPdfV2Params('cucucachoo') }
@@ -67,10 +67,25 @@ export default function ({ getService }: FtrProviderContext) {
           expect(response.status).equal(500);
         });
       });
+
+      it('fails if there is an invalid layout ID', async () => {
+        const downloadReportPath = await reportingAPI.postJobJSON(
+          '/api/reporting/generate/printablePdfV2',
+          { jobParams: createPdfV2Params(1541, 'landscape') }
+        );
+        await retry.tryForTime(18000, async () => {
+          const response: supertest.Response = await supertestSvc
+            .get(downloadReportPath)
+            .responseType('blob')
+            .set('kbn-xsrf', 'xxx');
+
+          expect(response.status).equal(500);
+        });
+      });
     });
 
     describe('pngV2', () => {
-      it('fails if width or height are non-numeric: pngV2', async () => {
+      it('fails if width or height are non-numeric', async () => {
         const downloadReportPath = await reportingAPI.postJobJSON('/api/reporting/generate/pngV2', {
           jobParams: createPngV2Params('cucucachoo'),
         });
@@ -87,9 +102,9 @@ export default function ({ getService }: FtrProviderContext) {
   });
 }
 
-const createPdfV2Params = (testWidth: number | string) =>
+const createPdfV2Params = (testWidth: number | string, layoutId = 'preserve_layout') =>
   `(browserTimezone:UTC,layout:` +
-  `(dimensions:(height:1492,width:${testWidth}),id:preserve_layout),` +
+  `(dimensions:(height:1492,width:${testWidth}),id:${layoutId}),` +
   `locatorParams:\u0021((id:DASHBOARD_APP_LOCATOR,params:` +
   `(dashboardId:\'6c263e00-1c6d-11ea-a100-8589bb9d7c6b\',` +
   `preserveSavedFilters:\u0021t,` +
