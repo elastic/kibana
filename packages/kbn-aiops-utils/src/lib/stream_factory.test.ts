@@ -29,14 +29,14 @@ describe('streamFactory', () => {
   });
 
   it('should encode and receive an uncompressed stream', async () => {
-    const { DELIMITER, end, push, responseWithHeaders, stream } = streamFactory(mockLogger, {});
+    const { DELIMITER, end, push, responseWithHeaders } = streamFactory(mockLogger, {});
 
     push(mockItem1);
     push(mockItem2);
     end();
 
     let streamResult = '';
-    for await (const chunk of stream) {
+    for await (const chunk of responseWithHeaders.body) {
       streamResult += chunk.toString('utf8');
     }
 
@@ -62,7 +62,7 @@ describe('streamFactory', () => {
   // without the need for additional custom code.
   it('should encode and receive a compressed stream', (done) => {
     (async () => {
-      const { DELIMITER, end, push, responseWithHeaders, stream } = streamFactory(mockLogger, {
+      const { DELIMITER, end, push, responseWithHeaders } = streamFactory(mockLogger, {
         'accept-encoding': 'gzip',
       });
 
@@ -71,7 +71,7 @@ describe('streamFactory', () => {
       end();
 
       const chunks = [];
-      for await (const chunk of stream) {
+      for await (const chunk of responseWithHeaders.body) {
         chunks.push(chunk);
       }
 
