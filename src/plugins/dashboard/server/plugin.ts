@@ -58,7 +58,9 @@ export class DashboardPlugin
       })
     );
 
-    initializeDashboardTelemetryTask(this.logger, core, plugins.taskManager, plugins.embeddable);
+    if (plugins.taskManager) {
+      initializeDashboardTelemetryTask(this.logger, core, plugins.taskManager, plugins.embeddable);
+    }
     core.capabilities.registerProvider(capabilitiesProvider);
 
     if (plugins.usageCollection && plugins.taskManager) {

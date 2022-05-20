@@ -116,7 +116,7 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
         };
 
         const kibanaIndex = core.savedObjects.getKibanaIndex();
-        const pageSize = 2;
+        const pageSize = 50;
 
         const searchParams = {
           size: pageSize,
