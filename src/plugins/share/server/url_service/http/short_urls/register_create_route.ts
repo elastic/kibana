@@ -26,9 +26,6 @@ export const registerCreateRoute = (router: IRouter, url: ServerUrlService) => {
             minLength: 3,
             maxLength: 255,
           }),
-          humanReadableSlug: schema.boolean({
-            defaultValue: false,
-          }),
           params: schema.object({}, { unknowns: 'allow' }),
         }),
       },
@@ -36,7 +33,7 @@ export const registerCreateRoute = (router: IRouter, url: ServerUrlService) => {
     router.handleLegacyErrors(async (ctx, req, res) => {
       const savedObjects = (await ctx.core).savedObjects.client;
       const shortUrls = url.shortUrls.get({ savedObjects });
-      const { locatorId, params, slug, humanReadableSlug } = req.body;
+      const { locatorId, params, slug } = req.body;
       const locator = url.locators.get(locatorId);
 
       if (!locator) {
@@ -51,7 +48,6 @@ export const registerCreateRoute = (router: IRouter, url: ServerUrlService) => {
           locator,
           params,
           slug,
-          humanReadableSlug,
         });
 
         return res.ok({
