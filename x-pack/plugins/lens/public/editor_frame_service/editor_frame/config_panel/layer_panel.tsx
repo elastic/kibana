@@ -624,6 +624,7 @@ export function LayerPanel(
                 render={layerDatasource.renderDimensionEditor}
                 nativeProps={{
                   ...layerDatasourceConfigProps,
+                  activeData: props.framePublicAPI.activeData,
                   core: props.core,
                   columnId: activeId,
                   groupId: activeGroup.groupId,

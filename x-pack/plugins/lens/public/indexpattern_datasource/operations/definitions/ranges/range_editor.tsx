@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -19,13 +19,16 @@ import {
   EuiToolTip,
   EuiSwitch,
   EuiSpacer,
+  EuiFieldNumber,
+  EuiFormControlLayoutDelimited,
 } from '@elastic/eui';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { ExtendedBounds } from '@kbn/data-plugin/common';
 import { RangeColumnParams, UpdateParamsFnType, MODES_TYPES } from './ranges';
 import { AdvancedRangeEditor } from './advanced_editor';
-import { TYPING_DEBOUNCE_TIME, MODES, MIN_HISTOGRAM_BARS } from './constants';
-import { useDebounceWithOptions } from '../../../../shared_components';
+import { MODES, MIN_HISTOGRAM_BARS } from './constants';
+import { useDebouncedValue } from '../../../../shared_components';
 import { HelpPopover, HelpPopoverButton } from '../../../help_popover';
 
 const GranularityHelpPopover = () => {
@@ -79,6 +82,10 @@ const GranularityHelpPopover = () => {
   );
 };
 
+function boundsValidation(bounds?: { min?: number; max?: number }) {
+  return bounds?.min != null && bounds?.max != null && bounds?.min < bounds?.max;
+}
+
 const BaseRangeEditor = ({
   maxBars,
   step,
@@ -87,6 +94,9 @@ const BaseRangeEditor = ({
   onMaxBarsChange,
   includeEmptyRows,
   onChangeIncludeEmptyRows,
+  customBounds,
+  onChangeCustomBounds,
+  dataBounds,
 }: {
   maxBars: number;
   step: number;
@@ -95,17 +105,43 @@ const BaseRangeEditor = ({
   onMaxBarsChange: (newMaxBars: number) => void;
   onChangeIncludeEmptyRows: (includeEmptyRows: boolean) => void;
   includeEmptyRows?: boolean;
+  customBounds?: ExtendedBounds;
+  onChangeCustomBounds: (newBounds?: Required<ExtendedBounds>) => void;
+  dataBounds: { min: number; max: number } | undefined;
 }) => {
-  const [maxBarsValue, setMaxBarsValue] = useState(String(maxBars));
-
-  useDebounceWithOptions(
-    () => {
+  const onChangeMaxBars = useCallback(
+    (maxBarsValue: string) => {
       onMaxBarsChange(Number(maxBarsValue));
     },
-    { skipFirstRender: true },
-    TYPING_DEBOUNCE_TIME,
-    [maxBarsValue]
+    [onMaxBarsChange]
   );
+  const { inputValue: maxBarsValue, handleInputChange: setMaxBarsValue } =
+    useDebouncedValue<string>({
+      value: String(maxBars),
+      onChange: onChangeMaxBars,
+    });
+  const onChangeCustomBoundsWithValidation = useCallback(
+    (newBounds: { min?: number; max?: number } | undefined) => {
+      if (
+        newBounds &&
+        newBounds.min != null &&
+        newBounds.max != null &&
+        boundsValidation(newBounds)
+      ) {
+        const bounds = { min: newBounds.min, max: newBounds.max };
+
+        onChangeCustomBounds(bounds);
+      }
+    },
+    [onChangeCustomBounds]
+  );
+  const { inputValue: localBounds, handleInputChange: handleBoundsChange } = useDebouncedValue<
+    { min?: number; max?: number } | undefined
+  >({
+    onChange: onChangeCustomBoundsWithValidation,
+    value: customBounds,
+  });
+  const boundaryError = !boundsValidation(localBounds);
 
   const granularityLabel = i18n.translate('xpack.lens.indexPattern.ranges.granularity', {
     defaultMessage: 'Intervals granularity',
@@ -189,6 +225,79 @@ const BaseRangeEditor = ({
           compressed
         />
       </EuiFormRow>
+      <EuiFormRow display="rowCompressed" hasChildLabel={false}>
+        <EuiSwitch
+          label={i18n.translate('xpack.lens.indexPattern.ranges.customExtents', {
+            defaultMessage: 'Extend bounds',
+          })}
+          disabled={!includeEmptyRows}
+          checked={Boolean(localBounds && includeEmptyRows)}
+          onChange={({ target }) => {
+            handleBoundsChange(target.checked ? localBounds ?? dataBounds ?? {} : undefined);
+          }}
+          compressed
+        />
+      </EuiFormRow>
+      {localBounds && includeEmptyRows ? (
+        <EuiFormRow
+          display="rowCompressed"
+          fullWidth
+          isInvalid={boundaryError}
+          label={i18n.translate('xpack.lens.indexPattern.ranges.customExtentsLabel', {
+            defaultMessage: 'Custom bounds',
+          })}
+          error={
+            boundaryError
+              ? i18n.translate('xpack.lens.indexPattern.ranges.boundaryError', {
+                  defaultMessage: 'Lower bound has to be larger than upper bound',
+                })
+              : undefined
+          }
+          helpText={i18n.translate('xpack.lens.indexPattern.ranges.extendBoundsHelp', {
+            defaultMessage: 'Bounds that filter current data are ignored.',
+          })}
+        >
+          <EuiFormControlLayoutDelimited
+            data-test-subj="lns-indexPattern-range-custom-extents"
+            startControl={
+              <EuiFieldNumber
+                compressed
+                value={localBounds?.min ?? ''}
+                isInvalid={boundaryError}
+                data-test-subj="lns-indexPattern-range-lower-bound"
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  const shouldReset = e.target.value === '' || Number.isNaN(Number(val));
+                  handleBoundsChange({
+                    ...localBounds,
+                    min: shouldReset ? undefined : val,
+                  });
+                }}
+                step="any"
+                controlOnly
+              />
+            }
+            endControl={
+              <EuiFieldNumber
+                compressed
+                value={localBounds?.max ?? ''}
+                data-test-subj="lns-indexPattern-range-upper-bound"
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  const shouldReset = e.target.value === '' || Number.isNaN(Number(val));
+                  handleBoundsChange({
+                    ...localBounds,
+                    max: shouldReset ? undefined : val,
+                  });
+                }}
+                step="any"
+                controlOnly
+              />
+            }
+            compressed
+          />
+        </EuiFormRow>
+      ) : null}
     </>
   );
 };
@@ -201,6 +310,7 @@ export const RangeEditor = ({
   granularityStep,
   onChangeMode,
   rangeFormatter,
+  dataBounds,
 }: {
   params: RangeColumnParams;
   maxHistogramBars: number;
@@ -209,6 +319,7 @@ export const RangeEditor = ({
   setParam: UpdateParamsFnType;
   onChangeMode: (mode: MODES_TYPES) => void;
   rangeFormatter: IFieldFormat;
+  dataBounds: { min: number; max: number } | undefined;
 }) => {
   const [isAdvancedEditor, toggleAdvancedEditor] = useState(params.type === MODES.Range);
 
@@ -234,11 +345,16 @@ export const RangeEditor = ({
       maxBars={maxBars}
       step={granularityStep}
       maxHistogramBars={maxHistogramBars}
+      customBounds={params.customBounds}
+      dataBounds={dataBounds}
       onMaxBarsChange={(newMaxBars: number) => {
         setParam('maxBars', newMaxBars);
       }}
       onChangeIncludeEmptyRows={(includeEmptyRows: boolean) => {
         setParam('includeEmptyRows', includeEmptyRows);
+      }}
+      onChangeCustomBounds={(customBounds?: Required<ExtendedBounds>) => {
+        setParam('customBounds', customBounds);
       }}
       onToggleEditor={() => {
         onChangeMode(MODES.Range);

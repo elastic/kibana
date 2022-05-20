@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { AggFunctionsMapping, UI_SETTINGS } from '@kbn/data-plugin/public';
-import { extendedBoundsToAst, numericalRangeToAst } from '@kbn/data-plugin/common';
+import { ExtendedBounds, extendedBoundsToAst, numericalRangeToAst } from '@kbn/data-plugin/common';
 import { buildExpressionFunction, Range } from '@kbn/expressions-plugin/public';
 import { RangeEditor } from './range_editor';
 import { OperationDefinition } from '..';
@@ -39,6 +39,7 @@ export interface RangeIndexPatternColumn extends FieldBasedIndexPatternColumn {
     ranges: RangeTypeLens[];
     format?: { id: string; params?: { decimals: number } };
     includeEmptyRows?: boolean;
+    customBounds?: Required<ExtendedBounds>;
     parentFormat?: {
       id: string;
       params?: { id?: string; template?: string; replaceInfinity?: boolean };
@@ -170,10 +171,10 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
       field: sourceField,
       maxBars: params.maxBars === AUTO_BARS ? maxBarsDefaultValue : params.maxBars,
       interval: 'auto',
-      has_extended_bounds: false,
+      has_extended_bounds: Boolean(params.includeEmptyRows && params.customBounds),
       min_doc_count: Boolean(params.includeEmptyRows),
-      autoExtendBounds: Boolean(params.includeEmptyRows),
-      extended_bounds: extendedBoundsToAst({}),
+      autoExtendBounds: Boolean(params.includeEmptyRows && !params.customBounds),
+      extended_bounds: extendedBoundsToAst(params.customBounds ?? {}),
     }).toAst();
   },
   paramEditor: ({
@@ -184,6 +185,8 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
     indexPattern,
     uiSettings,
     data,
+    activeData,
+    layerId,
   }) => {
     const currentField = indexPattern.getFieldByName(currentColumn.sourceField);
     const numberFormat = currentColumn.params.format;
@@ -205,6 +208,17 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
     const MAX_HISTOGRAM_BARS = uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS);
     const granularityStep = (MAX_HISTOGRAM_BARS - MIN_HISTOGRAM_BARS) / SLICES;
     const maxBarsDefaultValue = (MAX_HISTOGRAM_BARS - MIN_HISTOGRAM_BARS) / 2;
+    // Try to infer current data bounds from current data if possible
+    const currentTable = activeData?.[layerId];
+    const firstBucket = currentTable?.rows[0];
+    const lastBucket = currentTable?.rows[currentTable?.rows.length - 1];
+    const dataBounds =
+      firstBucket != null && lastBucket != null
+        ? {
+            min: Number(firstBucket[columnId]),
+            max: Number(lastBucket[columnId]),
+          }
+        : undefined;
 
     // Used to change one param at the time
     const setParam: UpdateParamsFnType = (paramName, value) => {
@@ -258,6 +272,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
         onChangeMode={onChangeMode}
         maxHistogramBars={uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS)}
         rangeFormatter={rangeFormatter}
+        dataBounds={dataBounds}
       />
     );
   },

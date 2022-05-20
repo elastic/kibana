@@ -599,20 +599,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const customParamEditor = ParamEditor ? (
     <>
       <ParamEditor
-        layer={state.layers[layerId]}
-        layerId={layerId}
-        activeData={props.activeData}
+        {...paramEditorProps}
         updateLayer={temporaryStaticValue ? moveDefinetelyToStaticValueAndUpdate : setStateWrapper}
-        columnId={columnId}
-        currentColumn={state.layers[layerId].columns[columnId]}
-        dateRange={dateRange}
-        indexPattern={currentIndexPattern}
-        operationDefinitionMap={operationDefinitionMap}
-        toggleFullscreen={toggleFullscreen}
-        isFullscreen={isFullscreen}
-        setIsCloseable={setIsCloseable}
         paramEditorCustomProps={paramEditorCustomProps}
-        {...services}
       />
     </>
   ) : null;
