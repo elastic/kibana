@@ -45,6 +45,7 @@ describe('findThresholdSignals', () => {
       },
       buildRuleMessage,
       timestampOverride: undefined,
+      runtimeMappings: undefined,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -89,6 +90,7 @@ describe('findThresholdSignals', () => {
       },
       buildRuleMessage,
       timestampOverride: undefined,
+      runtimeMappings: undefined,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -132,6 +134,7 @@ describe('findThresholdSignals', () => {
       },
       buildRuleMessage,
       timestampOverride: undefined,
+      runtimeMappings: undefined,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -189,6 +192,7 @@ describe('findThresholdSignals', () => {
       },
       buildRuleMessage,
       timestampOverride: undefined,
+      runtimeMappings: undefined,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -260,6 +264,7 @@ describe('findThresholdSignals', () => {
       },
       buildRuleMessage,
       timestampOverride: undefined,
+      runtimeMappings: undefined,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({

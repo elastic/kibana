@@ -82,6 +82,7 @@ export const getEventCount = async ({
     size: 0,
     timestampOverride,
     searchAfterSortIds: undefined,
+    runtimeMappings: undefined,
   }).body.query;
   const response = await esClient.count({
     body: { query: eventSearchQueryBodyQuery },

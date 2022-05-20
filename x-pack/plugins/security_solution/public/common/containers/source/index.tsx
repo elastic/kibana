@@ -126,7 +126,6 @@ export const useFetchIndex = (
   indexNames: string[],
   onlyCheckIfIndicesExist: boolean = false
 ): [boolean, FetchIndexReturn, (indices: string[]) => void] => {
-  // console.error('indexNames', indexNames);
   const { data } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());

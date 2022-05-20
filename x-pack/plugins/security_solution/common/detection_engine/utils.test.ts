@@ -11,7 +11,7 @@ import {
   isThreatMatchRule,
   normalizeMachineLearningJobIds,
   normalizeThresholdField,
-  isMlRule
+  isMlRule,
 } from './utils';
 
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
@@ -126,11 +126,11 @@ describe('#hasNestedEntry', () => {
 });
 
 describe('isMlRule', () => {
-  test('it returns true if a threat match rule', () => {
+  test('it returns true if a ML rule', () => {
     expect(isMlRule('machine_learning')).toEqual(true);
   });
 
-  test('it returns false if not a threat match rule', () => {
+  test('it returns false if not a Ml rule', () => {
     expect(isMlRule('query')).toEqual(false);
   });
 });

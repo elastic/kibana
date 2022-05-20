@@ -80,7 +80,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           let runState = state;
           let hasError = false;
           let inputIndex: string[] = [];
-          let runtimeMappings: estypes.MappingRuntimeFields = {};
+          let runtimeMappings: estypes.MappingRuntimeFields | undefined;
           const { from, maxSignals, meta, ruleId, timestampOverride, to } = params;
           const {
             alertWithPersistence,
@@ -164,7 +164,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               });
 
               inputIndex = index ?? [];
-              runtimeMappings = dataViewRuntimeMappings ?? {};
+              runtimeMappings = dataViewRuntimeMappings;
             } catch (exc) {
               const errorMessage = buildRuleMessage(`Check for indices to search failed ${exc}`);
               logger.error(errorMessage);

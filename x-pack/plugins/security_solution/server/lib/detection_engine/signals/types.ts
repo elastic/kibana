@@ -34,8 +34,6 @@ import { ITelemetryEventsSender } from '../../telemetry/sender';
 import {
   CompleteRule,
   QueryRuleParams,
-  MachineLearningRuleParams,
-  ThresholdRuleParams,
   ThreatRuleParams,
   RuleParams,
   SavedQueryRuleParams,
@@ -312,9 +310,7 @@ export interface SearchAfterAndBulkCreateParams {
   completeRule:
     | CompleteRule<QueryRuleParams>
     | CompleteRule<SavedQueryRuleParams>
-    | CompleteRule<MachineLearningRuleParams>
-    | CompleteRule<ThreatRuleParams>
-    | CompleteRule<ThresholdRuleParams>;
+    | CompleteRule<ThreatRuleParams>;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   listClient: ListClient;
   exceptionsList: ExceptionListItemSchema[];
@@ -322,7 +318,7 @@ export interface SearchAfterAndBulkCreateParams {
   eventsTelemetry: ITelemetryEventsSender | undefined;
   id: string;
   inputIndexPattern: string[];
-  dataViewId?: string | null;
+  dataViewId?: string;
   pageSize: number;
   filter: estypes.QueryDslQueryContainer;
   buildRuleMessage: BuildRuleMessage;
@@ -332,7 +328,7 @@ export interface SearchAfterAndBulkCreateParams {
   wrapHits: WrapHits;
   trackTotalHits?: boolean;
   sortOrder?: estypes.SortOrder;
-  runtimeMappings?: estypes.MappingRuntimeFields | null;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
 
 export interface SearchAfterAndBulkCreateReturnType {

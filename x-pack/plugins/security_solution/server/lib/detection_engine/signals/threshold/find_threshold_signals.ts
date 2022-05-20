@@ -33,7 +33,7 @@ interface FindThresholdSignalsParams {
   threshold: ThresholdNormalized;
   buildRuleMessage: BuildRuleMessage;
   timestampOverride: TimestampOverrideOrUndefined;
-  runtimeMappings?: estypes.MappingRuntimeFields | null;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
 
 export const findThresholdSignals = async ({

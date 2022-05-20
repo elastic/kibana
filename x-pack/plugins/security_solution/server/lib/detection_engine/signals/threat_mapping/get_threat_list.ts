@@ -61,7 +61,7 @@ export const getThreatList = async ({
       ...threatListConfig,
       query: queryFilter,
       search_after: searchAfter,
-      runtime_mappings: runtimeMappings ?? {},
+      runtime_mappings: runtimeMappings,
       sort: ['_shard_doc', { '@timestamp': 'asc' }],
     },
     track_total_hits: false,
@@ -83,7 +83,6 @@ export const getThreatListCount = async ({
   threatFilters,
   index,
   exceptionItems,
-  runtimeMappings,
 }: ThreatListCountOptions): Promise<number> => {
   const queryFilter = getQueryFilter(
     query,

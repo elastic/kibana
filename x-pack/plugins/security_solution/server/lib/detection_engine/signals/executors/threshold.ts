@@ -61,7 +61,7 @@ export const thresholdExecutor = async ({
   ruleDataReader,
 }: {
   inputIndex: string[];
-  runtimeMappings: estypes.MappingRuntimeFields;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
   completeRule: CompleteRule<ThresholdRuleParams>;
   tuple: RuleRangeTuple;
   exceptionItems: ExceptionListItemSchema[];

@@ -18,6 +18,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: undefined,
       timestampOverride: undefined,
+      runtimeMappings: undefined,
     });
     expect(query).toEqual({
       allow_no_indices: true,
@@ -75,6 +76,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: undefined,
       timestampOverride: 'event.ingested',
+      runtimeMappings: undefined,
     });
     expect(query).toEqual({
       allow_no_indices: true,
@@ -174,6 +176,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: [fakeSortId],
       timestampOverride: undefined,
+      runtimeMappings: undefined,
     });
     expect(query).toEqual({
       allow_no_indices: true,
@@ -232,6 +235,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: [fakeSortIdNumber],
       timestampOverride: undefined,
+      runtimeMappings: undefined,
     });
     expect(query).toEqual({
       allow_no_indices: true,
@@ -289,6 +293,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: undefined,
       timestampOverride: undefined,
+      runtimeMappings: undefined,
     });
     expect(query).toEqual({
       allow_no_indices: true,
@@ -353,6 +358,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: undefined,
       timestampOverride: undefined,
+      runtimeMappings: undefined,
     });
     expect(query).toEqual({
       allow_no_indices: true,
@@ -418,6 +424,7 @@ describe('create_signals', () => {
       searchAfterSortIds: undefined,
       timestampOverride: undefined,
       trackTotalHits: false,
+      runtimeMappings: undefined,
     });
     expect(query.track_total_hits).toEqual(false);
   });
@@ -433,6 +440,7 @@ describe('create_signals', () => {
       timestampOverride: undefined,
       sortOrder: 'desc',
       trackTotalHits: false,
+      runtimeMappings: undefined,
     });
     expect(query.body.sort[0]).toEqual({
       '@timestamp': {
@@ -452,6 +460,7 @@ describe('create_signals', () => {
       searchAfterSortIds: undefined,
       timestampOverride: 'event.ingested',
       sortOrder: 'desc',
+      runtimeMappings: undefined,
     });
     expect(query.body.sort[0]).toEqual({
       'event.ingested': {
@@ -477,6 +486,7 @@ describe('create_signals', () => {
         100,
         undefined,
         [],
+        undefined,
         undefined
       );
       expect(request).toEqual({
@@ -524,7 +534,8 @@ describe('create_signals', () => {
         100,
         'event.ingested',
         [],
-        'event.other_category'
+        'event.other_category',
+        undefined
       );
       expect(request).toEqual({
         allow_no_indices: true,
@@ -607,6 +618,7 @@ describe('create_signals', () => {
         100,
         undefined,
         [getExceptionListItemSchemaMock()],
+        undefined,
         undefined
       );
       expect(request).toEqual({

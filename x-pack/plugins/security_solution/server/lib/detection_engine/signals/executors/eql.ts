@@ -51,7 +51,7 @@ export const eqlExecutor = async ({
   wrapSequences,
 }: {
   inputIndex: string[];
-  runtimeMappings?: estypes.MappingRuntimeFields | null;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
   completeRule: CompleteRule<EqlRuleParams>;
   tuple: RuleRangeTuple;
   exceptionItems: ExceptionListItemSchema[];

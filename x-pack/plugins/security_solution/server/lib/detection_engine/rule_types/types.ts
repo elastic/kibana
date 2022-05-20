@@ -68,7 +68,7 @@ export interface RunOpts<TParams extends RuleParams> {
   wrapSequences: WrapSequences;
   ruleDataReader: IRuleDataReader;
   inputIndex: string[];
-  runtimeMappings: estypes.MappingRuntimeFields;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
 
 export type SecurityAlertType<

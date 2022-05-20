@@ -7,12 +7,7 @@
 
 import { Logger, SavedObjectReference } from '@kbn/core/server';
 import { RuleParams } from '../../schemas/rule_schemas';
-import {
-  isEqlRuleParams,
-  isQueryRuleParams,
-  isThreatRuleParams,
-  isThresholdRuleParams,
-} from '../../schemas/utils';
+import { isMachineLearningParams } from '../utils';
 import { injectExceptionsReferences } from './inject_exceptions_list';
 import { injectDataViewReferences } from './inject_data_view';
 
@@ -55,12 +50,7 @@ export const injectReferences = <TParams extends RuleParams>({
     exceptionsList,
   };
 
-  if (
-    isEqlRuleParams(params) ||
-    isQueryRuleParams(params) ||
-    isThreatRuleParams(params) ||
-    isThresholdRuleParams(params)
-  ) {
+  if (!isMachineLearningParams(params)) {
     const dataView = injectDataViewReferences({
       logger,
       savedObjectReferences,

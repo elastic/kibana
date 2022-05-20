@@ -15,7 +15,7 @@ interface BuildEventsSearchQuery {
   from: string;
   to: string;
   filter: estypes.QueryDslQueryContainer;
-  runtimeMappings?: estypes.MappingRuntimeFields | null;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
   size: number;
   sortOrder?: estypes.SortOrder;
   searchAfterSortIds: estypes.SortResults | undefined;
@@ -180,7 +180,7 @@ export const buildEqlSearchRequest = (
   timestampOverride: TimestampOverrideOrUndefined,
   exceptionLists: ExceptionListItemSchema[],
   eventCategoryOverride: string | undefined,
-  runtimeMappings?: estypes.MappingRuntimeFields | null
+  runtimeMappings: estypes.MappingRuntimeFields | undefined
 ): estypes.EqlSearchRequest => {
   const defaultTimeFields = ['@timestamp'];
   const timestamps =
@@ -230,8 +230,7 @@ export const buildEqlSearchRequest = (
           filter: requestFilter,
         },
       },
-      // TODO: ensure null / undefined runtimeMappings doesn't blow anything up
-      runtime_mappings: runtimeMappings ?? {},
+      runtime_mappings: runtimeMappings,
       event_category_field: eventCategoryOverride,
       fields,
     },

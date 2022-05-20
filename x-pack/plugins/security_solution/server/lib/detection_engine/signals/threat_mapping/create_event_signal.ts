@@ -80,6 +80,7 @@ export const createEventSignal = async ({
       },
       pitId: threatPitId,
       reassignPitId: reassignThreatPitId,
+      runtimeMappings,
     });
 
     const signalMatches = getSignalMatchesFromThreatList(threatListHits);

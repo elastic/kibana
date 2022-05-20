@@ -25,7 +25,7 @@ interface Params {
   query: string;
   data: DataPublicPluginStart;
   signal: AbortSignal;
-  runtimeMappings: estypes.MappingRuntimeFields | {};
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
 
 export const validateEql = async ({

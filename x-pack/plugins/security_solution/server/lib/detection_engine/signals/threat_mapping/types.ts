@@ -67,7 +67,7 @@ export interface CreateThreatSignalsOptions {
   tuple: RuleRangeTuple;
   type: Type;
   wrapHits: WrapHits;
-  runtimeMappings: estypes.MappingRuntimeFields;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
 
 export interface CreateThreatSignalOptions {
@@ -94,7 +94,7 @@ export interface CreateThreatSignalOptions {
   tuple: RuleRangeTuple;
   type: Type;
   wrapHits: WrapHits;
-  runtimeMappings: estypes.MappingRuntimeFields;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
 
 export interface CreateEventSignalOptions {
@@ -129,7 +129,7 @@ export interface CreateEventSignalOptions {
   perPage?: number;
   threatPitId: OpenPointInTimeResponse['id'];
   reassignThreatPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
-  runtimeMappings: estypes.MappingRuntimeFields;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
 
 type EntryKey = 'field' | 'value';
@@ -193,7 +193,7 @@ export interface GetThreatListOptions {
   threatListConfig: ThreatListConfig;
   pitId: OpenPointInTimeResponse['id'];
   reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
-  runtimeMappings?: estypes.MappingRuntimeFields | null;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
 
 export interface ThreatListCountOptions {
@@ -203,7 +203,6 @@ export interface ThreatListCountOptions {
   language: ThreatLanguageOrUndefined;
   query: string;
   threatFilters: unknown[];
-  runtimeMappings?: estypes.MappingRuntimeFields | null;
 }
 
 export interface ThreatListDoc {
@@ -262,7 +261,7 @@ export interface EventsOptions {
   filters: unknown[];
   timestampOverride?: string;
   tuple: RuleRangeTuple;
-  runtimeMappings?: estypes.MappingRuntimeFields | null;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
 
 export interface EventDoc {

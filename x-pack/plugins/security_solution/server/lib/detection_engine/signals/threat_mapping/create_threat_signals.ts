@@ -252,6 +252,7 @@ export const createThreatSignals = async ({
           threatListConfig,
           pitId: threatPitId,
           reassignPitId: reassignThreatPitId,
+          runtimeMappings,
         }),
 
       createSignal: (slicedChunk) =>

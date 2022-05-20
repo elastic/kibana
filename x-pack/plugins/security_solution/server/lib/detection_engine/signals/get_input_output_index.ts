@@ -24,12 +24,12 @@ export interface GetInputIndex {
   logger: Logger;
   // the rule's rule_id
   ruleId: string;
-  dataViewId?: string | null;
+  dataViewId?: string;
 }
 
 export interface GetInputIndexReturn {
   index: string[] | null;
-  runtimeMappings: estypes.MappingRuntimeFields | null;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
   errorToWrite?: string;
   warningToWrite?: string;
 }

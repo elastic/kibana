@@ -43,7 +43,7 @@ export const queryExecutor = async ({
   wrapHits,
 }: {
   inputIndex: string[];
-  runtimeMappings?: estypes.MappingRuntimeFields | null;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
   completeRule: CompleteRule<QueryRuleParams> | CompleteRule<SavedQueryRuleParams>;
   tuple: RuleRangeTuple;
   listClient: ListClient;
