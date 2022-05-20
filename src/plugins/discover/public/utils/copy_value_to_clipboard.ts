@@ -21,7 +21,7 @@ export const copyValueToClipboard = ({
   columnId: string;
   services: DiscoverServices;
   valueToStringConverter: ValueToStringConverter;
-}) => {
+}): string => {
   const { toastNotifications } = services;
 
   const valueFormatted = valueToStringConverter(rowIndex, columnId, { allowMultiline: true });
@@ -33,6 +33,8 @@ export const copyValueToClipboard = ({
       defaultMessage: 'Copied to clipboard.',
     }),
   });
+
+  return valueFormatted;
 };
 
 export const copyColumnValuesToClipboard = async ({
@@ -45,7 +47,7 @@ export const copyColumnValuesToClipboard = async ({
   services: DiscoverServices;
   valueToStringConverter: ValueToStringConverter;
   rowsCount: number;
-}) => {
+}): Promise<string> => {
   const { toastNotifications } = services;
 
   const valuesFormatted = [...Array(rowsCount)].map((_, rowIndex) => {
@@ -69,6 +71,8 @@ export const copyColumnValuesToClipboard = async ({
       values: { column: columnId },
     }),
   });
+
+  return textToCopy;
 };
 
 export const copyColumnNameToClipboard = ({
@@ -77,14 +81,17 @@ export const copyColumnNameToClipboard = ({
 }: {
   columnId: string;
   services: DiscoverServices;
-}) => {
+}): string => {
   const { toastNotifications } = services;
 
-  copyToClipboard(columnId);
+  const textToCopy = columnId;
+  copyToClipboard(textToCopy);
 
   toastNotifications.addInfo({
     title: i18n.translate('discover.grid.copyColumnNameToClipboardToastTitle', {
       defaultMessage: 'Copied to clipboard.',
     }),
   });
+
+  return textToCopy;
 };

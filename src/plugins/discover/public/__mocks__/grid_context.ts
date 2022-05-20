@@ -47,7 +47,4 @@ const buildGridContext = (dataView: DataView, rows: ElasticSearchHit[]): GridCon
 
 export const discoverGridContextMock = buildGridContext(indexPatternMock, esHits);
 
-export const discoverGridContextWithVariousFieldTypesMock = buildGridContext(
-  dataViewComplexMock,
-  esHitsComplex
-);
+export const discoverGridContextComplexMock = buildGridContext(dataViewComplexMock, esHitsComplex);
