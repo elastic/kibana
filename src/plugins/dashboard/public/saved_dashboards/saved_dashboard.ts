@@ -162,7 +162,9 @@ export function createSavedDashboardClass(
             alias_target_id: aliasId,
             alias_purpose: aliasPurpose,
             saved_object: resp,
-          } = await savedObjectsClient.resolve(esType, id);
+          } = await savedObjectsClient.resolve(esType, id, {
+            eventMetadata: { registerEvent: true },
+          });
 
           const respMapped = {
             _id: resp.id,

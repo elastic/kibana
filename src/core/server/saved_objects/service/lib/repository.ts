@@ -352,7 +352,8 @@ export class SavedObjectsRepository {
           type,
           attributes,
         },
-      ]
+      ],
+      options
     ).catch((e) => {
       this._logger.error(e);
       return [{ attributes }];
@@ -436,7 +437,7 @@ export class SavedObjectsRepository {
       ...body,
     });
 
-    await this.runPostCreateHooks([result]).catch((e) => {
+    await this.runPostCreateHooks([result], options).catch((e) => {
       this._logger.error(e);
     });
 
@@ -458,11 +459,13 @@ export class SavedObjectsRepository {
   ): Promise<SavedObjectsBulkResponse<T>> {
     const updatedObjects = await this.runPreCreateHooks(
       [...this._hooks.preHooks.create],
-      objects
+      objects,
+      options
     ).catch((e) => {
       this._logger.error(e);
       return objects;
     });
+
     const { overwrite = false, refresh = DEFAULT_REFRESH_SETTING } = options;
     const namespace = normalizeNamespace(options.namespace);
     const time = getCurrentTime();
@@ -1116,21 +1119,31 @@ export class SavedObjectsRepository {
     objects: SavedObjectsBulkGetObject[] = [],
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
-    for (const preGetHook of this._hooks.preHooks.get) {
-      try {
-        await preGetHook(objects, options);
-      } catch (e) {
-        this._logger.error(e);
+    const { objectsToRegisterEventsFor, objectsToRegisterEventsForById } =
+      this.getObjectsToRegisterEventsFor(objects);
+
+    if (options.eventMetadata?.registerEvent !== false) {
+      for (const preGetHook of this._hooks.preHooks.get) {
+        try {
+          await preGetHook(objectsToRegisterEventsFor, options);
+        } catch (e) {
+          this._logger.error(e);
+        }
       }
     }
     const namespace = normalizeNamespace(options.namespace);
 
     const onResponse = async (result: Array<SavedObject<T>>) => {
-      for (const postGetHook of this._hooks.postHooks.get) {
-        try {
-          await postGetHook(result);
-        } catch (e) {
-          this._logger.error(e);
+      if (options.eventMetadata?.registerEvent !== false) {
+        for (const postGetHook of this._hooks.postHooks.get) {
+          try {
+            await postGetHook(
+              result.filter((obj) => objectsToRegisterEventsForById[obj.id]),
+              options
+            );
+          } catch (e) {
+            this._logger.error(e);
+          }
         }
       }
 
@@ -1253,11 +1266,16 @@ export class SavedObjectsRepository {
     objects: SavedObjectsBulkResolveObject[],
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsBulkResolveResponse<T>> {
-    for (const preGetHook of this._hooks.preHooks.get) {
-      try {
-        await preGetHook(objects, options);
-      } catch (e) {
-        this._logger.error(e);
+    const { objectsToRegisterEventsFor, objectsToRegisterEventsForById } =
+      this.getObjectsToRegisterEventsFor(objects);
+
+    if (options.eventMetadata?.registerEvent !== false) {
+      for (const preGetHook of this._hooks.preHooks.get) {
+        try {
+          await preGetHook(objectsToRegisterEventsFor, options);
+        } catch (e) {
+          this._logger.error(e);
+        }
       }
     }
 
@@ -1284,11 +1302,18 @@ export class SavedObjectsRepository {
       return result as SavedObjectsResolveResponse<T>;
     });
 
-    for (const postGetHook of this._hooks.postHooks.get) {
-      try {
-        await postGetHook(resolvedObjects.map(({ saved_object: savedObject }) => savedObject));
-      } catch (e) {
-        this._logger.error(e);
+    if (options.eventMetadata?.registerEvent !== false) {
+      for (const postGetHook of this._hooks.postHooks.get) {
+        try {
+          await postGetHook(
+            resolvedObjects
+              .filter((obj) => objectsToRegisterEventsForById[obj.saved_object.id])
+              .map(({ saved_object: savedObject }) => savedObject),
+            options
+          );
+        } catch (e) {
+          this._logger.error(e);
+        }
       }
     }
     return { resolved_objects: resolvedObjects };
@@ -1312,11 +1337,13 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    for (const preGetHook of this._hooks.preHooks.get) {
-      try {
-        await preGetHook([{ id, type }], options);
-      } catch (e) {
-        this._logger.error(e);
+    if (options.eventMetadata?.registerEvent) {
+      for (const preGetHook of this._hooks.preHooks.get) {
+        try {
+          await preGetHook([{ id, type }], options);
+        } catch (e) {
+          this._logger.error(e);
+        }
       }
     }
 
@@ -1345,11 +1372,13 @@ export class SavedObjectsRepository {
 
     const result = getSavedObjectFromSource<T>(this._registry, type, id, body);
 
-    for (const postGetHook of this._hooks.postHooks.get) {
-      try {
-        await postGetHook([result]);
-      } catch (e) {
-        this._logger.error(e);
+    if (options.eventMetadata?.registerEvent) {
+      for (const postGetHook of this._hooks.postHooks.get) {
+        try {
+          await postGetHook([result], options);
+        } catch (e) {
+          this._logger.error(e);
+        }
       }
     }
 
@@ -1370,11 +1399,13 @@ export class SavedObjectsRepository {
     id: string,
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsResolveResponse<T>> {
-    for (const preGetHook of this._hooks.preHooks.get) {
-      try {
-        await preGetHook([{ id, type }], options);
-      } catch (e) {
-        this._logger.error(e);
+    if (options.eventMetadata?.registerEvent) {
+      for (const preGetHook of this._hooks.preHooks.get) {
+        try {
+          await preGetHook([{ id, type }], options);
+        } catch (e) {
+          this._logger.error(e);
+        }
       }
     }
 
@@ -1393,11 +1424,13 @@ export class SavedObjectsRepository {
       throw (result as InternalBulkResolveError).error;
     }
 
-    for (const postGetHook of this._hooks.postHooks.get) {
-      try {
-        await postGetHook([(result as SavedObjectsResolveResponse<T>).saved_object]);
-      } catch (e) {
-        this._logger.error(e);
+    if (options.eventMetadata?.registerEvent) {
+      for (const postGetHook of this._hooks.postHooks.get) {
+        try {
+          await postGetHook([(result as SavedObjectsResolveResponse<T>).saved_object], options);
+        } catch (e) {
+          this._logger.error(e);
+        }
       }
     }
 
@@ -2445,13 +2478,43 @@ export class SavedObjectsRepository {
     }
   }
 
+  /**
+   * Filter down a list of saved object to those which have the eventMetadata.registerEvent flag
+   * set to "true".
+   *
+   * @param objects The initial list of saved objects
+   * @returns The list filtered to only contain saved objects we want to register metadata events or
+   */
+  private getObjectsToRegisterEventsFor = <
+    T extends {
+      id: string;
+      options?: {
+        eventMetadata?: SavedObjectsBaseOptions['eventMetadata'];
+      };
+    }
+  >(
+    objects: T[]
+  ) => {
+    const objectsToRegisterEventsForById: { [key: string]: boolean } = {};
+    const objectsToRegisterEventsFor = objects.filter((obj) => {
+      // The eventMetadata?.registerEvent **must** be set to "true" for the specific saved object
+      const doRegisterEvent = obj.options?.eventMetadata?.registerEvent === true;
+      objectsToRegisterEventsForById[obj.id] = doRegisterEvent;
+      return doRegisterEvent;
+    });
+
+    return { objectsToRegisterEventsFor, objectsToRegisterEventsForById };
+  };
+
   private runPreCreateHooks = async <T>(
     hooks: PreHooks['create'],
-    updatedObjects: Array<SavedObjectsBulkCreateObject<T>>
+    updatedObjects: Array<SavedObjectsBulkCreateObject<T>>,
+    options: SavedObjectsCreateOptions = {}
   ): Promise<Array<SavedObjectsBulkCreateObject<T>>> => {
-    if (hooks.length === 0) {
+    if (hooks.length === 0 || !options.eventMetadata?.registerEvent) {
       return updatedObjects;
     }
+
     // Recursively call the the "pre" create hooks passing the
     // updated saved objects
     const [preCreateHook, ...restOfHooks] = hooks;
@@ -2462,9 +2525,14 @@ export class SavedObjectsRepository {
     return result!;
   };
 
-  private runPostCreateHooks = async (objects: SavedObject[]) => {
-    for (const postCreateHook of this._hooks.postHooks.create) {
-      await postCreateHook(objects);
+  private runPostCreateHooks = async (
+    objects: SavedObject[],
+    options: SavedObjectsCreateOptions
+  ) => {
+    if (options.eventMetadata?.registerEvent) {
+      for (const postCreateHook of this._hooks.postHooks.create) {
+        await postCreateHook(objects);
+      }
     }
   };
 }

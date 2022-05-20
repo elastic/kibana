@@ -24,6 +24,15 @@ export const registerBulkResolveRoute = (router: IRouter, { coreUsageData }: Rou
           schema.object({
             type: schema.string(),
             id: schema.string(),
+            options: schema.maybe(
+              schema.object({
+                eventMetadata: schema.maybe(
+                  schema.object({
+                    registerEvent: schema.boolean(),
+                  })
+                ),
+              })
+            ),
           })
         ),
       },
