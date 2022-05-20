@@ -34,7 +34,7 @@ describe('xyVis', () => {
     const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
     const result = await xyVisFunction.fn(
       newData,
-      { ...rest, ...restLayerArgs, referenceLineLayers: [], annotationLayers: [] },
+      { ...rest, ...restLayerArgs, referenceLines: [], annotationLayers: [] },
       createMockExecutionContext()
     );
 
@@ -60,7 +60,7 @@ describe('xyVis', () => {
           ...rest,
           ...{ ...sampleLayer, markSizeAccessor: 'b' },
           markSizeRatio: 0,
-          referenceLineLayers: [],
+          referenceLines: [],
           annotationLayers: [],
         },
         createMockExecutionContext()
@@ -74,7 +74,7 @@ describe('xyVis', () => {
           ...rest,
           ...{ ...sampleLayer, markSizeAccessor: 'b' },
           markSizeRatio: 101,
-          referenceLineLayers: [],
+          referenceLines: [],
           annotationLayers: [],
         },
         createMockExecutionContext()
@@ -93,7 +93,7 @@ describe('xyVis', () => {
           ...rest,
           ...restLayerArgs,
           minTimeBarInterval: '1q',
-          referenceLineLayers: [],
+          referenceLines: [],
           annotationLayers: [],
         },
         createMockExecutionContext()
@@ -112,7 +112,7 @@ describe('xyVis', () => {
           ...rest,
           ...restLayerArgs,
           minTimeBarInterval: '1h',
-          referenceLineLayers: [],
+          referenceLines: [],
           annotationLayers: [],
         },
         createMockExecutionContext()
@@ -132,7 +132,7 @@ describe('xyVis', () => {
         {
           ...rest,
           ...restLayerArgs,
-          referenceLineLayers: [],
+          referenceLines: [],
           annotationLayers: [],
           splitRowAccessor,
         },
@@ -153,7 +153,7 @@ describe('xyVis', () => {
         {
           ...rest,
           ...restLayerArgs,
-          referenceLineLayers: [],
+          referenceLines: [],
           annotationLayers: [],
           splitColumnAccessor,
         },
@@ -173,7 +173,7 @@ describe('xyVis', () => {
         {
           ...rest,
           ...restLayerArgs,
-          referenceLineLayers: [],
+          referenceLines: [],
           annotationLayers: [],
           markSizeRatio: 5,
         },
