@@ -14,4 +14,4 @@ export const RESULTS_TABLE = 'osqueryResultsTable';
 export const RESULTS_TABLE_BUTTON = 'dataGridFullScreenButton';
 export const RESULTS_TABLE_CELL_WRRAPER = 'EuiDataGridHeaderCellWrapper';
 export const getSavedQueriesDropdown = () =>
-  cy.react('EuiComboBox', { props: { placeholder: 'Search for saved queries' } });
+  cy.react('EuiComboBox', { props: { placeholder: 'New query' } });
