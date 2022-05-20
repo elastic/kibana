@@ -53,14 +53,14 @@ Fleet::
 * Removes legacy component templates on package install {kibana-pull}130758[#130758]
 Lens & Visualizations::
 * Fixes time shift bug in *Lens* {kibana-pull}132000[#132000]
-* Removes the rule of color applying {kibana-pull}131128[#131128]
+* Fixes single color palette configuration {kibana-pull}131128[#131128]
 Machine Learning::
 * Removes alerting_rules from general job list items {kibana-pull}131936[#131936]
 * Fixes management app docs links {kibana-pull}130776[#130776]
 Management::
 * Restores data view management field type conflict detail modal {kibana-pull}132197[#132197]
 * Fixes test data for import and export between versions tests {kibana-pull}131470[#131470]
-* Fixes condition auto-completion for templates {kibana-pull}126881[#126881]
+* Fixes condition auto-completion for templates in Console {kibana-pull}126881[#126881]
 Maps::
 * Fixes background tiles in a map panel might not load in a screenshot report {kibana-pull}131185[#131185]
 Observability::
