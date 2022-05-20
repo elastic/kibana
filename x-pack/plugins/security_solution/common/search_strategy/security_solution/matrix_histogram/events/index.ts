@@ -19,7 +19,7 @@ export interface EventSource {
 }
 
 export interface EventsActionGroupData {
-  key: number;
+  key: number | string;
   events: {
     bucket: EventsMatrixHistogramData[];
   };

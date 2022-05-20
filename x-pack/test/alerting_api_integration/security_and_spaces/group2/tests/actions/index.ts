@@ -25,6 +25,7 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
     loadTestFile(require.resolve('./builtin_action_types/pagerduty'));
     loadTestFile(require.resolve('./builtin_action_types/swimlane'));
     loadTestFile(require.resolve('./builtin_action_types/server_log'));
+    loadTestFile(require.resolve('./builtin_action_types/oauth_access_token'));
     loadTestFile(require.resolve('./builtin_action_types/servicenow_itsm'));
     loadTestFile(require.resolve('./builtin_action_types/servicenow_sir'));
     loadTestFile(require.resolve('./builtin_action_types/servicenow_itom'));
@@ -40,5 +41,10 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./connector_types'));
     loadTestFile(require.resolve('./update'));
+
+    /**
+     * Sub action framework
+     */
+    loadTestFile(require.resolve('./sub_action_framework'));
   });
 }

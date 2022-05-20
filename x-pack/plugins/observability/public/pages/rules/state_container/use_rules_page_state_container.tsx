@@ -27,12 +27,14 @@ export function useRulesPageStateContainer() {
 
   useUrlStateSyncEffect(stateContainer);
 
-  const { setLastResponse } = stateContainer.transitions;
-  const { lastResponse } = useContainerSelector(stateContainer, (state) => state);
+  const { setLastResponse, setStatus } = stateContainer.transitions;
+  const { lastResponse, status } = useContainerSelector(stateContainer, (state) => state);
 
   return {
     lastResponse,
+    status,
     setLastResponse,
+    setStatus,
   };
 }
 

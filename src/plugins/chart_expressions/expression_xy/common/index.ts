@@ -29,7 +29,6 @@ export type {
   LegendConfig,
   IconPosition,
   DataLayerArgs,
-  LensMultiTable,
   ValueLabelMode,
   AxisExtentMode,
   DataLayerConfig,
@@ -59,6 +58,5 @@ export type {
   ReferenceLineLayerConfigResult,
   CommonXYReferenceLineLayerConfig,
   AxisTitlesVisibilityConfigResult,
-  ExtendedReferenceLineLayerConfigResult,
   CommonXYReferenceLineLayerConfigResult,
 } from './types';

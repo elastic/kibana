@@ -8,6 +8,7 @@
 
 import type { AnalyticsClient } from '@kbn/analytics-client';
 import { createAnalytics } from '@kbn/analytics-client';
+import { of } from 'rxjs';
 import type { CoreContext } from '../core_context';
 
 /**
@@ -43,6 +44,8 @@ export class AnalyticsService {
       //  For now, we are relying on whether it's a distributable or running from source.
       sendTo: core.env.packageInfo.dist ? 'production' : 'staging',
     });
+
+    this.registerBuildInfoAnalyticsContext(core);
   }
 
   public preboot(): AnalyticsServicePreboot {
@@ -74,7 +77,44 @@ export class AnalyticsService {
       telemetryCounter$: this.analyticsClient.telemetryCounter$,
     };
   }
+
   public stop() {
     this.analyticsClient.shutdown();
+  }
+
+  /**
+   * Enriches the event with the build information.
+   * @param core The core context.
+   * @private
+   */
+  private registerBuildInfoAnalyticsContext(core: CoreContext) {
+    this.analyticsClient.registerContextProvider({
+      name: 'build info',
+      context$: of({
+        isDev: core.env.mode.dev,
+        isDistributable: core.env.packageInfo.dist,
+        version: core.env.packageInfo.version,
+        branch: core.env.packageInfo.branch,
+        buildNum: core.env.packageInfo.buildNum,
+        buildSha: core.env.packageInfo.buildSha,
+      }),
+      schema: {
+        isDev: {
+          type: 'boolean',
+          _meta: { description: 'Is it running in development mode?' },
+        },
+        isDistributable: {
+          type: 'boolean',
+          _meta: { description: 'Is it running from a distributable?' },
+        },
+        version: { type: 'keyword', _meta: { description: 'Version of the Kibana instance.' } },
+        branch: {
+          type: 'keyword',
+          _meta: { description: 'Branch of source running Kibana from.' },
+        },
+        buildNum: { type: 'long', _meta: { description: 'Build number of the Kibana instance.' } },
+        buildSha: { type: 'keyword', _meta: { description: 'Build SHA of the Kibana instance.' } },
+      },
+    });
   }
 }

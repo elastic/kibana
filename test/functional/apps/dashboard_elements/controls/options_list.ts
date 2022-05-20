@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -14,6 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const queryBar = getService('queryBar');
   const pieChart = getService('pieChart');
+  const elasticChart = getService('elasticChart');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -32,6 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();
+      await elasticChart.setNewChartUiDebugFlag();
     });
 
     describe('Options List Control Editor selects relevant data views', async () => {
@@ -55,7 +58,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('selects the last used data view by default', async () => {
-        await dashboardControls.createOptionsListControl({
+        await dashboardControls.createControl({
+          controlType: OPTIONS_LIST_CONTROL,
           dataViewTitle: 'animals-*',
           fieldName: 'sound.keyword',
         });
@@ -68,7 +72,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Options List Control creation and editing experience', async () => {
       it('can add a new options list control from a blank state', async () => {
-        await dashboardControls.createOptionsListControl({
+        await dashboardControls.createControl({
+          controlType: OPTIONS_LIST_CONTROL,
           dataViewTitle: 'logstash-*',
           fieldName: 'machine.os.raw',
         });
@@ -76,7 +81,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('can add a second options list control with a non-default data view', async () => {
-        await dashboardControls.createOptionsListControl({
+        await dashboardControls.createControl({
+          controlType: OPTIONS_LIST_CONTROL,
           dataViewTitle: 'animals-*',
           fieldName: 'sound.keyword',
         });
@@ -104,7 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await saveButton.isEnabled()).to.be(true);
         await dashboardControls.controlsEditorSetDataView('animals-*');
         expect(await saveButton.isEnabled()).to.be(false);
-        await dashboardControls.controlsEditorSetfield('animal.keyword');
+        await dashboardControls.controlsEditorSetfield('animal.keyword', OPTIONS_LIST_CONTROL);
         await dashboardControls.controlEditorSave();
 
         // when creating a new filter, the ability to select a data view should be removed, because the dashboard now only has one data view
@@ -123,7 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.optionsListEnsurePopoverIsClosed(secondId);
 
         await dashboardControls.editExistingControl(secondId);
-        await dashboardControls.controlsEditorSetfield('animal.keyword');
+        await dashboardControls.controlsEditorSetfield('animal.keyword', OPTIONS_LIST_CONTROL);
         await dashboardControls.controlEditorSave();
 
         const selectionString = await dashboardControls.optionsListGetSelectionsString(secondId);
@@ -184,7 +190,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       before(async () => {
         await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
-        await dashboardControls.createOptionsListControl({
+        await dashboardControls.createControl({
+          controlType: OPTIONS_LIST_CONTROL,
           dataViewTitle: 'animals-*',
           fieldName: 'sound.keyword',
           title: 'Animal Sounds',
@@ -262,54 +269,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe('Does not apply query settings to controls', async () => {
-        before(async () => {
-          await dashboardControls.updateAllQuerySyncSettings(false);
-        });
-
-        after(async () => {
-          await dashboardControls.updateAllQuerySyncSettings(true);
-        });
-
-        it('Does not apply query to options list control', async () => {
-          await queryBar.setQuery('isDog : true ');
-          await queryBar.submitQuery();
-          await dashboard.waitForRenderComplete();
-          await header.waitUntilLoadingHasFinished();
-          await ensureAvailableOptionsEql(allAvailableOptions);
-          await queryBar.setQuery('');
-          await queryBar.submitQuery();
-        });
-
-        it('Does not apply filters to options list control', async () => {
-          await filterBar.addFilter('sound.keyword', 'is one of', ['bark', 'bow ow ow', 'ruff']);
-          await dashboard.waitForRenderComplete();
-          await header.waitUntilLoadingHasFinished();
-          await ensureAvailableOptionsEql(allAvailableOptions);
-          await filterBar.removeAllFilters();
-        });
-
-        it('Does not apply time range to options list control', async () => {
-          // set time range to time with no documents
-          await timePicker.setAbsoluteRange(
-            'Jan 1, 2017 @ 00:00:00.000',
-            'Jan 1, 2017 @ 00:00:00.000'
-          );
-          await dashboard.waitForRenderComplete();
-          await header.waitUntilLoadingHasFinished();
-          await ensureAvailableOptionsEql(allAvailableOptions);
-          await timePicker.setDefaultDataRange();
-        });
-      });
-
       describe('Selections made in control apply to dashboard', async () => {
         it('Shows available options in options list', async () => {
-          await ensureAvailableOptionsEql(allAvailableOptions);
+          await queryBar.setQuery('');
+          await queryBar.submitQuery();
+          await dashboard.waitForRenderComplete();
+          await header.waitUntilLoadingHasFinished();
+          await retry.try(async () => {
+            await ensureAvailableOptionsEql(allAvailableOptions);
+          });
         });
 
         it('Can search options list for available options', async () => {
           await dashboardControls.optionsListOpenPopover(controlId);
           await dashboardControls.optionsListPopoverSearchForOption('meo');
+          await ensureAvailableOptionsEql(['meow'], true);
+          await dashboardControls.optionsListPopoverClearSearch();
+          await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+        });
+
+        it('Can search options list for available options case insensitive', async () => {
+          await dashboardControls.optionsListOpenPopover(controlId);
+          await dashboardControls.optionsListPopoverSearchForOption('MEO');
           await ensureAvailableOptionsEql(['meow'], true);
           await dashboardControls.optionsListPopoverClearSearch();
           await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
@@ -342,9 +323,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           const selectionString = await dashboardControls.optionsListGetSelectionsString(controlId);
           expect(selectionString).to.be('hiss, grr');
-        });
 
-        after(async () => {
           await dashboardControls.optionsListOpenPopover(controlId);
           await dashboardControls.optionsListPopoverClearSelections();
           await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
@@ -406,6 +385,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('Options List dashboard no validation', async () => {
         before(async () => {
+          await filterBar.removeAllFilters();
+          await queryBar.clickQuerySubmitButton();
           await dashboardControls.optionsListOpenPopover(controlId);
           await dashboardControls.optionsListPopoverSelectOption('meow');
           await dashboardControls.optionsListPopoverSelectOption('bark');
@@ -431,6 +412,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       after(async () => {
         await filterBar.removeAllFilters();
+        await queryBar.clickQuerySubmitButton();
         await dashboardControls.clearAllControls();
       });
     });

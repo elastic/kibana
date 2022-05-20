@@ -60,6 +60,8 @@ export const locationRenderer = (
                 isDraggable={isDraggable ?? false}
                 field={fieldName}
                 value={locationValue}
+                isAggregatable={true}
+                fieldType={'keyword'}
               />
             </EuiFlexItem>
           </Fragment>
@@ -101,6 +103,8 @@ export const autonomousSystemRenderer = (
           isDraggable={false}
           field={`${flowTarget}.as.number`}
           value={`${as.number}`}
+          isAggregatable={true}
+          fieldType={'number'}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -133,6 +137,8 @@ export const hostIdRenderer = ({
           isDraggable={isDraggable}
           field="host.id"
           value={host.id[0]}
+          isAggregatable={true}
+          fieldType={'keyword'}
         >
           {noLink ? (
             <>{host.id}</>
@@ -166,6 +172,8 @@ export const hostNameRenderer = (
       isDraggable={isDraggable ?? false}
       field={'host.name'}
       value={host.name[0]}
+      isAggregatable={true}
+      fieldType={'keyword'}
     >
       <HostDetailsLink hostName={host.name[0]}>
         {host.name ? host.name : getEmptyTagValue()}
@@ -216,7 +224,14 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
             </>
           )}
           {typeof rowItem === 'string' && (
-            <DefaultDraggable id={id} isDraggable={isDraggable} field={attrName} value={rowItem}>
+            <DefaultDraggable
+              id={id}
+              isDraggable={isDraggable}
+              field={attrName}
+              value={rowItem}
+              isAggregatable={true}
+              fieldType={'keyword'}
+            >
               {render ? render(rowItem) : rowItem}
             </DefaultDraggable>
           )}
