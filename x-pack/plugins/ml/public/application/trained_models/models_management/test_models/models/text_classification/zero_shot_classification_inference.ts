@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { InferenceBase } from '../inference_base';
 import { processResponse } from './common';
@@ -56,7 +57,13 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
   }
 
   public getInputComponent(): JSX.Element {
-    return getZeroShotClassificationInput(this);
+    const placeholder = i18n.translate(
+      'xpack.ml.trainedModels.testModelsFlyout.zeroShotClassification.inputText',
+      {
+        defaultMessage: 'Enter a phrase to test',
+      }
+    );
+    return getZeroShotClassificationInput(this, placeholder);
   }
 
   public getOutputComponent(): JSX.Element {
