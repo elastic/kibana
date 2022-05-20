@@ -10,5 +10,5 @@
   "server": true,
   "ui": false,
   "requiredPlugins": [],
-  "optionalPlugins": []
+  "optionalPlugins": ["security"]
 }
