@@ -48,6 +48,7 @@ export async function saveSavedObject(
     confirmOverwrite = false,
     isTitleDuplicateConfirmed = false,
     onTitleDuplicate,
+    eventMetadata: { registerEvent } = { registerEvent: false },
   }: SavedObjectSaveOpts = {},
   services: SavedObjectKibanaServices
 ): Promise<string> {
@@ -87,14 +88,13 @@ export async function saveSavedObject(
           attributes,
           savedObject,
           esType,
-          savedObject.creationOpts({ references }),
+          { ...savedObject.creationOpts({ references }), eventMetadata: { registerEvent } },
           services
         )
-      : await savedObjectsClient.create(
-          esType,
-          attributes,
-          savedObject.creationOpts({ references, overwrite: true })
-        );
+      : await savedObjectsClient.create(esType, attributes, {
+          ...savedObject.creationOpts({ references, overwrite: true }),
+          eventMetadata: { registerEvent },
+        });
 
     savedObject.id = resp.id;
     if (savedObject.showInRecentlyAccessed && savedObject.getFullPath) {

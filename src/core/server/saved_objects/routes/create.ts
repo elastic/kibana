@@ -41,14 +41,29 @@ export const registerCreateRoute = (router: IRouter, { coreUsageData }: RouteDep
             )
           ),
           initialNamespaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+          options: schema.maybe(
+            schema.object({
+              eventMetadata: schema.maybe(
+                schema.object({
+                  registerEvent: schema.boolean(),
+                })
+              ),
+            })
+          ),
         }),
       },
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
       const { type, id } = req.params;
       const { overwrite } = req.query;
-      const { attributes, migrationVersion, coreMigrationVersion, references, initialNamespaces } =
-        req.body;
+      const {
+        attributes,
+        migrationVersion,
+        coreMigrationVersion,
+        references,
+        initialNamespaces,
+        options: createOptions,
+      } = req.body;
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsCreate({ request: req }).catch(() => {});
@@ -60,6 +75,9 @@ export const registerCreateRoute = (router: IRouter, { coreUsageData }: RouteDep
         coreMigrationVersion,
         references,
         initialNamespaces,
+        eventMetadata: {
+          registerEvent: createOptions?.eventMetadata?.registerEvent,
+        },
       };
       const { savedObjects } = await context.core;
       const result = await savedObjects.client.create(type, attributes, options);

@@ -86,7 +86,10 @@ export const saveDashboard = async ({
   savedDashboard.searchSource.setField('filter', unpinnedFilters);
 
   try {
-    const newId = await savedDashboard.save(saveOptions);
+    const newId = await savedDashboard.save({
+      ...saveOptions,
+      eventMetadata: { registerEvent: true },
+    });
     if (newId) {
       toasts.addSuccess({
         title: dashboardSaveToastStrings.getSuccessString(currentState.title),
