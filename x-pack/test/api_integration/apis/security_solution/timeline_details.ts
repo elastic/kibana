@@ -689,7 +689,6 @@ export default function ({ getService }: FtrProviderContext) {
         supertest,
         options: {
           factoryQueryType: TimelineEventsQueries.details,
-          docValueFields: [],
           indexName: INDEX_NAME,
           inspect: false,
           eventId: ID,
@@ -705,7 +704,6 @@ export default function ({ getService }: FtrProviderContext) {
           supertest,
           options: {
             factoryQueryType: TimelineEventsQueries.kpi,
-            docValueFields: [],
             indexName: INDEX_NAME,
             inspect: false,
             eventId: ID,
