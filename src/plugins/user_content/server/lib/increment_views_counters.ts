@@ -13,10 +13,12 @@ import { viewsCountRangeFields, VIEWS_TOTAL_FIELD } from '../../common';
 export const incrementViewsCounters = (
   contentType: string,
   savedObjectId: string,
-  repository: ISavedObjectsRepository
+  repository: ISavedObjectsRepository,
+  // Temp, just for the POC demo
+  incrementOnlyTotalCounter: boolean = false
 ) => {
   repository.incrementCounter(contentType, savedObjectId, [
     VIEWS_TOTAL_FIELD,
-    ...viewsCountRangeFields,
+    ...(incrementOnlyTotalCounter ? [] : viewsCountRangeFields),
   ]);
 };
