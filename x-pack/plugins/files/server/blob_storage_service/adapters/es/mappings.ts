@@ -14,7 +14,7 @@ export interface FileChunkDocument {
 
 export const mappings: MappingTypeMapping = {
   properties: {
-    content: { type: 'binary', index: false }, // Base64 encoded content
+    content: { type: 'binary' }, // Base64 encoded content
     head_chunk_id: { type: 'keyword' },
   },
 } as const;
