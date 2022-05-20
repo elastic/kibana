@@ -210,6 +210,17 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
                 password: 'somepassword',
               },
             },
+            'my-deprecated-servicenow-default': {
+              actionTypeId: '.servicenow',
+              name: 'ServiceNow#xyz',
+              config: {
+                apiUrl: 'https://ven04334.service-now.com',
+              },
+              secrets: {
+                username: 'elastic_integration',
+                password: 'somepassword',
+              },
+            },
             'custom-system-abc-connector': {
               actionTypeId: 'system-abc-action-type',
               name: 'SystemABC',
