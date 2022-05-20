@@ -409,7 +409,10 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
                                   defaultMessage: 'Annotations rectangle result',
                                 }
                               )}
-                              style={{ fill: euiTheme.euiColorDangerText, animations: { enabled: false } }}
+                              style={{
+                                fill: euiTheme.euiColorDangerText,
+                                animations: { enabled: false },
+                              }}
                             />
                           </>
                         ) : null}

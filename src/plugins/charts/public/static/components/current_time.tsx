@@ -29,7 +29,7 @@ export const CurrentTime: FC<CurrentTimeProps> = ({ isDarkMode, domainEnd }) => 
     },
     animations: {
       enabled: false,
-    }
+    },
   };
 
   // Domain end of 'now' will be milliseconds behind current time, so we extend time by 1 minute and check if

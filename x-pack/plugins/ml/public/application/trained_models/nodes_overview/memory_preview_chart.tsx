@@ -142,7 +142,7 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
         ]}
         marker={<EuiIcon type="arrowDown" />}
         markerPosition={Position.Top}
-        style={{ animations: { enabled: false }}}
+        style={{ animations: { enabled: false } }}
       />
 
       <BarSeries

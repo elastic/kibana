@@ -139,7 +139,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
 
   const onClickPoint: ElementClickListener = useCallback(
     (elements) => {
-        // casting to GeometryValue as we are using cartesian charts
+      // casting to GeometryValue as we are using cartesian charts
       const [[geometryValue]] = elements as XYChartElementEvent[];
       if (geometryValue && !Array.isArray(geometryValue)) {
         const { x: timestamp } = geometryValue;

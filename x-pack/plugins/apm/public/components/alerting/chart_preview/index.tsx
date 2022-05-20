@@ -60,7 +60,7 @@ export function ChartPreview({
     opacity: thresholdOpacity,
     animations: {
       enabled: false,
-    }
+    },
   };
 
   const rectDataValues: RectAnnotationDatum[] = [

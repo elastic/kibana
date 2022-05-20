@@ -228,7 +228,7 @@ export const TimeSeries = ({
           },
           animations: {
             enabled: false,
-          }
+          },
         };
         return (
           <LineAnnotation

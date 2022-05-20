@@ -305,7 +305,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
                   id={specId}
                   domainType={AnnotationDomainType.YDomain}
                   dataValues={[{ dataValue: threshold[thresholdIndex], details: specId }]}
-                  style={{ animations: { enabled: false }}}
+                  style={{ animations: { enabled: false } }}
                 />
               );
             })}
