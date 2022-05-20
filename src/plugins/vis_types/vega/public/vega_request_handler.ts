@@ -15,7 +15,7 @@ import { TimeCache } from './data_model/time_cache';
 
 import { VegaVisualizationDependencies } from './plugin';
 import { VisParams } from './vega_fn';
-import { getData, getInjectedMetadata, getDataViews } from './services';
+import { getData, getDataViews } from './services';
 import { VegaInspectorAdapters } from './vega_inspector';
 
 interface VegaRequestHandlerParams {
@@ -57,7 +57,6 @@ export function createVegaRequestHandler(
           uiSettings,
           search,
           indexPatterns: dataViews,
-          injectedMetadata: getInjectedMetadata(),
         },
         context.abortSignal,
         context.inspectorAdapters,
