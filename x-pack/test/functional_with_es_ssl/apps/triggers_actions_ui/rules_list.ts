@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const PageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const esArchiver = getService('esArchiver');
 

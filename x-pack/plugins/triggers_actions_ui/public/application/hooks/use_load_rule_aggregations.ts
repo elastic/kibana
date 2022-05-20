@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { RuleExecutionStatusValues } from '@kbn/alerting-plugin/common';
 import { loadRuleAggregations, LoadRuleAggregationsProps } from '../lib/rule_api';
 import { useKibana } from '../../common/lib/kibana';
@@ -27,12 +27,11 @@ export function useLoadRuleAggregations({
   const { http } = useKibana().services;
 
   const [rulesStatusesTotal, setRulesStatusesTotal] = useState<Record<string, number>>(
-    RuleExecutionStatusValues.reduce(
-      (prev: Record<string, number>, status: string) =>
-        ({
-          ...prev,
-          [status]: 0,
-        } as Record<string, number>),
+    RuleExecutionStatusValues.reduce<Record<string, number>>(
+      (prev: Record<string, number>, status: string) => ({
+        ...prev,
+        [status]: 0,
+      }),
       {}
     )
   );
@@ -73,9 +72,12 @@ export function useLoadRuleAggregations({
     setRulesStatusesTotal,
   ]);
 
-  return {
-    loadRuleAggregations: internalLoadRuleAggregations,
-    rulesStatusesTotal,
-    setRulesStatusesTotal,
-  };
+  return useMemo(
+    () => ({
+      loadRuleAggregations: internalLoadRuleAggregations,
+      rulesStatusesTotal,
+      setRulesStatusesTotal,
+    }),
+    [internalLoadRuleAggregations, rulesStatusesTotal, setRulesStatusesTotal]
+  );
 }

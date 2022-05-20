@@ -187,7 +187,6 @@ export const RulesList: React.FunctionComponent = () => {
     ruleStatusesFilter,
     tagsFilter,
     sort,
-    hasAnyAuthorizedRuleType,
     onPage: setPage,
     onError,
   });
@@ -215,13 +214,24 @@ export const RulesList: React.FunctionComponent = () => {
     ruleTypeRegistry.has(ruleTypeId) ? !ruleTypeRegistry.get(ruleTypeId).requiresAppContext : false;
 
   const loadData = useCallback(async () => {
+    if (!ruleTypesState || !hasAnyAuthorizedRuleType) {
+      return;
+    }
     await loadRules();
     await loadRuleAggregations();
     if (isRuleStatusFilterEnabled) {
       await loadTags();
     }
     setLastUpdate(moment().format());
-  }, [loadRules, loadTags, loadRuleAggregations, setLastUpdate, isRuleStatusFilterEnabled]);
+  }, [
+    loadRules,
+    loadTags,
+    loadRuleAggregations,
+    setLastUpdate,
+    isRuleStatusFilterEnabled,
+    hasAnyAuthorizedRuleType,
+    ruleTypesState,
+  ]);
 
   useEffect(() => {
     loadData();

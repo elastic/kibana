@@ -80,6 +80,10 @@ export const percentileFields = {
   [Percentiles.P99]: 'monitoring.execution.calculated_metrics.p99',
 };
 
+const EMPTY_OBJECT = {};
+const EMPTY_HANDLER = () => {};
+const EMPTY_RENDER = () => null;
+
 interface ConvertRulesToTableItemsOpts {
   rules: Rule[];
   ruleTypeIndex: RuleTypeIndex;
@@ -154,23 +158,23 @@ export const RulesListTable = (props: RulesListTableProps) => {
     sort,
     page,
     percentileOptions,
-    itemIdToExpandedRowMap = {},
-    onSort = () => {},
-    onPage = () => {},
-    onRuleClick = () => {},
-    onRuleEditClick = () => {},
-    onRuleDeleteClick = () => {},
-    onManageLicenseClick = () => {},
-    onSelectionChange = () => {},
-    onPercentileOptionsChange = () => {},
-    onRuleChanged = () => {},
-    onEnableRule = () => {},
-    onDisableRule = () => {},
-    onSnoozeRule = () => {},
-    onUnsnoozeRule = () => {},
-    renderCollapsedItemActions = () => null,
-    renderRuleError = () => null,
-    config = {},
+    itemIdToExpandedRowMap = EMPTY_OBJECT,
+    config = EMPTY_OBJECT as TriggersActionsUiConfig,
+    onSort = EMPTY_HANDLER,
+    onPage = EMPTY_HANDLER,
+    onRuleClick = EMPTY_HANDLER,
+    onRuleEditClick = EMPTY_HANDLER,
+    onRuleDeleteClick = EMPTY_HANDLER,
+    onManageLicenseClick = EMPTY_HANDLER,
+    onSelectionChange = EMPTY_HANDLER,
+    onPercentileOptionsChange = EMPTY_HANDLER,
+    onRuleChanged = EMPTY_HANDLER,
+    onEnableRule = EMPTY_HANDLER,
+    onDisableRule = EMPTY_HANDLER,
+    onSnoozeRule = EMPTY_HANDLER,
+    onUnsnoozeRule = EMPTY_HANDLER,
+    renderCollapsedItemActions = EMPTY_RENDER,
+    renderRuleError = EMPTY_RENDER,
   } = props;
 
   const [tagPopoverOpenIndex, setTagPopoverOpenIndex] = useState<number>(-1);

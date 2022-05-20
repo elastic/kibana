@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import moment from 'moment';
 import { EuiButton, EuiButtonIcon, EuiPopover, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { isRuleSnoozed } from './rule_status_dropdown';
 import { RuleTableItem } from '../../../../types';
 import {
@@ -27,6 +28,11 @@ export interface RulesListNotifyBadgeProps {
   snoozeRule: (snoozeEndTime: string | -1, interval: string | null) => Promise<void>;
   unsnoozeRule: () => Promise<void>;
 }
+
+const openSnoozePanelAriaLabel = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.openSnoozePanel',
+  { defaultMessage: 'Open snooze panel' }
+);
 
 export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeProps> = (props) => {
   const {
@@ -69,6 +75,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     if (isSnoozed || isScheduled) {
       return (
         <EuiButton
+          data-test-subj="rulesListNotifyBadge"
           title={formattedSnooze}
           style={{
             maxWidth: '85px',
@@ -90,6 +97,8 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     }
     return (
       <EuiButtonIcon
+        data-test-subj="rulesListNotifyBadge"
+        aria-label={openSnoozePanelAriaLabel}
         className={isOpen ? '' : 'ruleSidebarItem__action'}
         color="danger"
         iconType="bellSlash"

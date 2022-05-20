@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { loadRuleTags } from '../lib/rule_api';
 import { useKibana } from '../../common/lib/kibana';
 
@@ -34,9 +34,12 @@ export function useLoadTags(props: UseLoadTagsProps) {
     }
   }, [http, setTags, onError]);
 
-  return {
-    loadTags: internalLoadTags,
-    tags,
-    setTags,
-  };
+  return useMemo(
+    () => ({
+      tags,
+      loadTags: internalLoadTags,
+      setTags,
+    }),
+    [tags, internalLoadTags, setTags]
+  );
 }

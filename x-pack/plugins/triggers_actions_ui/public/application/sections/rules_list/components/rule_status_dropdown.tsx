@@ -412,7 +412,7 @@ export const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="xs">
+      <EuiFlexGroup data-test-subj="snoozePanel" gutterSize="xs">
         <EuiFlexItem>
           <EuiFieldNumber
             value={intervalValue}

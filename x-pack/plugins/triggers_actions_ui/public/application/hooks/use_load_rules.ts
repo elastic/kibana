@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { useMemo, useCallback, useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useState, useCallback } from 'react';
 import { isEmpty } from 'lodash';
 import { Rule, Pagination } from '../../types';
 import { loadRules, LoadRulesProps } from '../lib/rule_api';
@@ -18,9 +18,67 @@ interface RuleState {
 }
 
 type UseLoadRulesProps = Omit<LoadRulesProps, 'http'> & {
-  hasAnyAuthorizedRuleType: boolean;
   onPage: (pagination: Pagination) => void;
   onError: (message: string) => void;
+};
+
+interface UseLoadRulesState {
+  rulesState: RuleState;
+  noData: boolean;
+  initialLoad: boolean;
+}
+
+enum ActionTypes {
+  SET_RULE_STATE = 'SET_RULE_STATE',
+  SET_LOADING = 'SET_LOADING',
+  SET_INITIAL_LOAD = 'SET_INITIAL_LOAD',
+  SET_NO_DATA = 'SET_NO_DATA',
+}
+
+interface Action {
+  type: ActionTypes;
+  payload: boolean | RuleState;
+}
+
+const initialState: UseLoadRulesState = {
+  rulesState: {
+    isLoading: false,
+    data: [],
+    totalItemCount: 0,
+  },
+  noData: true,
+  initialLoad: true,
+};
+
+const reducer = (state: UseLoadRulesState, action: Action) => {
+  const { type, payload } = action;
+  switch (type) {
+    case ActionTypes.SET_RULE_STATE:
+      return {
+        ...state,
+        rulesState: payload as RuleState,
+      };
+    case ActionTypes.SET_LOADING:
+      return {
+        ...state,
+        rulesState: {
+          ...state.rulesState,
+          isLoading: payload as boolean,
+        },
+      };
+    case ActionTypes.SET_INITIAL_LOAD:
+      return {
+        ...state,
+        initialLoad: payload as boolean,
+      };
+    case ActionTypes.SET_NO_DATA:
+      return {
+        ...state,
+        noData: payload as boolean,
+      };
+    default:
+      return state;
+  }
 };
 
 export function useLoadRules({
@@ -32,26 +90,25 @@ export function useLoadRules({
   ruleStatusesFilter,
   tagsFilter,
   sort,
-  hasAnyAuthorizedRuleType,
   onPage,
   onError,
 }: UseLoadRulesProps) {
   const { http } = useKibana().services;
+  const [state, dispatch] = useReducer(reducer, initialState);
 
-  const [rulesState, setRulesState] = useState<RuleState>({
-    isLoading: false,
-    data: [],
-    totalItemCount: 0,
-  });
-
-  const [noData, setNoData] = useState<boolean>(true);
-  const [initialLoad, setInitialLoad] = useState<boolean>(true);
+  const setRulesState = useCallback(
+    (rulesState: RuleState) => {
+      dispatch({
+        type: ActionTypes.SET_RULE_STATE,
+        payload: rulesState,
+      });
+    },
+    [dispatch]
+  );
 
   const internalLoadRules = useCallback(async () => {
-    if (!hasAnyAuthorizedRuleType) {
-      return;
-    }
-    setRulesState((prevRuleState) => ({ ...prevRuleState, isLoading: true }));
+    dispatch({ type: ActionTypes.SET_LOADING, payload: true });
+
     try {
       const rulesResponse = await loadRules({
         http,
@@ -64,10 +121,14 @@ export function useLoadRules({
         tagsFilter,
         sort,
       });
-      setRulesState({
-        isLoading: false,
-        data: rulesResponse.data,
-        totalItemCount: rulesResponse.total,
+
+      dispatch({
+        type: ActionTypes.SET_RULE_STATE,
+        payload: {
+          isLoading: false,
+          data: rulesResponse.data,
+          totalItemCount: rulesResponse.total,
+        },
       });
 
       if (!rulesResponse.data?.length && page.index > 0) {
@@ -83,16 +144,19 @@ export function useLoadRules({
         isEmpty(tagsFilter)
       );
 
-      setNoData(rulesResponse.data.length === 0 && !isFilterApplied);
+      dispatch({
+        type: ActionTypes.SET_NO_DATA,
+        payload: rulesResponse.data.length === 0 && !isFilterApplied,
+      });
     } catch (e) {
       onError(
         i18n.translate('xpack.triggersActionsUI.sections.rulesList.unableToLoadRulesMessage', {
           defaultMessage: 'Unable to load rules',
         })
       );
-      setRulesState((prevRuleState) => ({ ...prevRuleState, isLoading: false }));
+      dispatch({ type: ActionTypes.SET_LOADING, payload: false });
     }
-    setInitialLoad(false);
+    dispatch({ type: ActionTypes.SET_INITIAL_LOAD, payload: false });
   }, [
     http,
     page,
@@ -103,19 +167,19 @@ export function useLoadRules({
     ruleStatusesFilter,
     tagsFilter,
     sort,
-    hasAnyAuthorizedRuleType,
-    setRulesState,
-    setNoData,
-    setInitialLoad,
+    dispatch,
     onPage,
     onError,
   ]);
 
-  return {
-    rulesState,
-    setRulesState,
-    loadRules: internalLoadRules,
-    noData,
-    initialLoad,
-  };
+  return useMemo(
+    () => ({
+      rulesState: state.rulesState,
+      noData: state.noData,
+      initialLoad: state.initialLoad,
+      loadRules: internalLoadRules,
+      setRulesState,
+    }),
+    [state, setRulesState, internalLoadRules]
+  );
 }

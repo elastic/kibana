@@ -5,26 +5,74 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiAutoRefreshButton } from '@elastic/eui';
 
 interface RulesListAutoRefreshProps {
   lastUpdate: string;
+  initialUpdateInterval?: number;
   onRefresh: () => void;
 }
 
+const flexGroupStyle = {
+  marginLeft: 'auto',
+};
+
+const getLastUpdateText = (lastUpdate: string) => {
+  if (!moment(lastUpdate).isValid()) {
+    return '';
+  }
+  return i18n.translate(
+    'xpack.triggersActionsUI.sections.rulesList.rulesListAutoRefresh.lastUpdateText',
+    {
+      defaultMessage: 'Updated {lastUpdateText}',
+      values: {
+        lastUpdateText: moment(lastUpdate).fromNow(),
+      },
+    }
+  );
+};
+
+const TEXT_UPDATE_INTERVAL = 60 * 1000;
+const DEFAULT_REFRESH_INTERVAL = 5 * 60 * 1000;
+const MIN_REFRESH_INTERVAL = 1000;
+
 export const RulesListAutoRefresh = (props: RulesListAutoRefreshProps) => {
-  const { lastUpdate, onRefresh } = props;
+  const { lastUpdate, initialUpdateInterval = DEFAULT_REFRESH_INTERVAL, onRefresh } = props;
 
   const [isPaused, setIsPaused] = useState<boolean>(false);
-  const [refreshInterval, setRefreshInterval] = useState<number>(5 * 60 * 1000);
+  const [refreshInterval, setRefreshInterval] = useState<number>(
+    Math.max(initialUpdateInterval, MIN_REFRESH_INTERVAL)
+  );
+  const [lastUpdateText, setLastUpdateText] = useState<string>('');
+
   const cachedOnRefresh = useRef<() => void>(() => {});
-  const timeout = useRef<number | undefined>(undefined);
+  const textUpdateTimeout = useRef<number | undefined>();
+  const refreshTimeout = useRef<number | undefined>();
 
   useEffect(() => {
     cachedOnRefresh.current = onRefresh;
   }, [onRefresh]);
+
+  useEffect(() => {
+    setLastUpdateText(getLastUpdateText(lastUpdate));
+
+    const poll = () => {
+      textUpdateTimeout.current = window.setTimeout(() => {
+        setLastUpdateText(getLastUpdateText(lastUpdate));
+        poll();
+      }, TEXT_UPDATE_INTERVAL);
+    };
+    poll();
+
+    return () => {
+      if (textUpdateTimeout.current) {
+        clearTimeout(textUpdateTimeout.current);
+      }
+    };
+  }, [lastUpdate, setLastUpdateText]);
 
   useEffect(() => {
     if (isPaused) {
@@ -32,26 +80,33 @@ export const RulesListAutoRefresh = (props: RulesListAutoRefreshProps) => {
     }
 
     const poll = () => {
-      timeout.current = window.setTimeout(() => {
+      refreshTimeout.current = window.setTimeout(() => {
         cachedOnRefresh.current();
         poll();
       }, refreshInterval);
     };
-
     poll();
 
     return () => {
-      if (timeout.current) {
-        clearTimeout(timeout.current);
+      if (refreshTimeout.current) {
+        clearTimeout(refreshTimeout.current);
       }
     };
   }, [isPaused, refreshInterval]);
 
+  const onRefreshChange = useCallback(
+    ({ isPaused: newIsPaused, refreshInterval: newRefreshInterval }) => {
+      setIsPaused(newIsPaused);
+      setRefreshInterval(newRefreshInterval);
+    },
+    [setIsPaused, setRefreshInterval]
+  );
+
   return (
-    <EuiFlexGroup alignItems="center">
-      <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
-        <EuiText size="s" color="subdued">
-          {lastUpdate && `Updated ${moment(lastUpdate).fromNow()}`}
+    <EuiFlexGroup data-test-subj="rulesListAutoRefresh" alignItems="center">
+      <EuiFlexItem grow={false} style={flexGroupStyle}>
+        <EuiText data-test-subj="rulesListAutoRefresh-lastUpdateText" size="s" color="subdued">
+          {lastUpdateText}
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -59,10 +114,7 @@ export const RulesListAutoRefresh = (props: RulesListAutoRefreshProps) => {
           isPaused={isPaused}
           shortHand
           refreshInterval={refreshInterval}
-          onRefreshChange={({ isPaused: newIsPaused, refreshInterval: newRefreshInterval }) => {
-            setIsPaused(newIsPaused);
-            setRefreshInterval(newRefreshInterval);
-          }}
+          onRefreshChange={onRefreshChange}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

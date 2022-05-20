@@ -425,7 +425,6 @@ describe('rules_list component with items', () => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
     wrapper = mountWithIntl(<RulesList />);
-
     await act(async () => {
       await nextTick();
       wrapper.update();
@@ -472,7 +471,7 @@ describe('rules_list component with items', () => {
       .simulate('mouseOver');
 
     // Run the timers so the EuiTooltip will be visible
-    jest.runAllTimers();
+    jest.runOnlyPendingTimers();
 
     wrapper.update();
     expect(wrapper.find('.euiToolTipPopover').text()).toBe('Start time of the last run.');
@@ -491,7 +490,7 @@ describe('rules_list component with items', () => {
     wrapper.find('[data-test-subj="ruleInterval-config-tooltip-0"]').first().simulate('mouseOver');
 
     // Run the timers so the EuiTooltip will be visible
-    jest.runAllTimers();
+    jest.runOnlyPendingTimers();
 
     wrapper.update();
     expect(wrapper.find('.euiToolTipPopover').text()).toBe(
@@ -516,7 +515,7 @@ describe('rules_list component with items', () => {
     wrapper.find('[data-test-subj="rulesTableCell-durationTooltip"]').first().simulate('mouseOver');
 
     // Run the timers so the EuiTooltip will be visible
-    jest.runAllTimers();
+    jest.runOnlyPendingTimers();
 
     wrapper.update();
     expect(wrapper.find('.euiToolTipPopover').text()).toBe(
@@ -538,7 +537,7 @@ describe('rules_list component with items', () => {
       wrapper.find('EuiButtonEmpty[data-test-subj="ruleStatus-error-license-fix"]').length
     ).toEqual(1);
 
-    expect(wrapper.find('[data-test-subj="refreshRulesButton"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="rulesListAutoRefresh"]').exists()).toBeTruthy();
 
     expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-error"]').first().text()).toEqual(
       'Error'
@@ -635,7 +634,7 @@ describe('rules_list component with items', () => {
       .first()
       .simulate('click');
 
-    jest.runAllTimers();
+    jest.runOnlyPendingTimers();
     wrapper.update();
 
     // Percentile Selection
@@ -651,7 +650,7 @@ describe('rules_list component with items', () => {
     // Select P95
     percentileOptions.at(1).simulate('click');
 
-    jest.runAllTimers();
+    jest.runOnlyPendingTimers();
     wrapper.update();
 
     expect(
@@ -706,18 +705,6 @@ describe('rules_list component with items', () => {
     jest.clearAllMocks();
   });
 
-  it('loads rules when refresh button is clicked', async () => {
-    await setup();
-    wrapper.find('[data-test-subj="refreshRulesButton"]').first().simulate('click');
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    expect(loadRules).toHaveBeenCalled();
-  });
-
   it('renders license errors and manage license modal on click', async () => {
     global.open = jest.fn();
     await setup();
@@ -765,7 +752,7 @@ describe('rules_list component with items', () => {
   it('sorts rules when clicking the status control column', async () => {
     await setup();
     wrapper
-      .find('[data-test-subj="tableHeaderCell_enabled_8"] .euiTableHeaderButton')
+      .find('[data-test-subj="tableHeaderCell_enabled_9"] .euiTableHeaderButton')
       .first()
       .simulate('click');
 
@@ -834,21 +821,37 @@ describe('rules_list component with items', () => {
     loadRules.mockReset();
     await setup();
 
-    expect(loadRules.mock.calls[0][0].ruleStatusesFilter).toEqual([]);
+    expect(loadRules).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        ruleStatusesFilter: [],
+      })
+    );
 
     wrapper.find('[data-test-subj="ruleStatusFilterButton"] button').simulate('click');
 
     wrapper.find('[data-test-subj="ruleStatusFilterOption-enabled"]').first().simulate('click');
 
-    expect(loadRules.mock.calls[1][0].ruleStatusesFilter).toEqual(['enabled']);
+    expect(loadRules).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        ruleStatusesFilter: ['enabled'],
+      })
+    );
 
     wrapper.find('[data-test-subj="ruleStatusFilterOption-snoozed"]').first().simulate('click');
 
-    expect(loadRules.mock.calls[2][0].ruleStatusesFilter).toEqual(['enabled', 'snoozed']);
+    expect(loadRules).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        ruleStatusesFilter: ['enabled', 'snoozed'],
+      })
+    );
 
     wrapper.find('[data-test-subj="ruleStatusFilterOption-snoozed"]').first().simulate('click');
 
-    expect(loadRules.mock.calls[3][0].ruleStatusesFilter).toEqual(['enabled']);
+    expect(loadRules).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        ruleStatusesFilter: ['enabled'],
+      })
+    );
   });
 
   it('does not render the tag filter is the feature flag is off', async () => {
@@ -867,7 +870,11 @@ describe('rules_list component with items', () => {
     loadRules.mockReset();
     await setup();
 
-    expect(loadRules.mock.calls[0][0].tagsFilter).toEqual([]);
+    expect(loadRules).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        tagsFilter: [],
+      })
+    );
 
     wrapper.find('[data-test-subj="ruleTagFilterButton"] button').simulate('click');
 
@@ -878,11 +885,19 @@ describe('rules_list component with items', () => {
 
     tagFilterListItems.at(0).simulate('click');
 
-    expect(loadRules.mock.calls[1][0].tagsFilter).toEqual(['a']);
+    expect(loadRules).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        tagsFilter: ['a'],
+      })
+    );
 
     tagFilterListItems.at(1).simulate('click');
 
-    expect(loadRules.mock.calls[2][0].tagsFilter).toEqual(['a', 'b']);
+    expect(loadRules).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        tagsFilter: ['a', 'b'],
+      })
+    );
   });
 });
 
@@ -1165,5 +1180,22 @@ describe('rules_list with disabled items', () => {
     expect(
       wrapper.find('EuiIconTip[data-test-subj="ruleDisabledByLicenseTooltip"]').props().content
     ).toEqual('This rule type requires a Platinum license.');
+  });
+
+  it('clicking the notify badge shows the snooze panel', async () => {
+    await setup();
+
+    expect(wrapper.find('[data-test-subj="snoozePanel"]').exists()).toBeFalsy();
+
+    wrapper
+      .find('[data-test-subj="rulesTableCell-rulesListNotify"]')
+      .first()
+      .simulate('mouseenter');
+
+    expect(wrapper.find('[data-test-subj="rulesListNotifyBadge"]').exists()).toBeTruthy();
+
+    wrapper.find('[data-test-subj="rulesListNotifyBadge"]').first().simulate('click');
+
+    expect(wrapper.find('[data-test-subj="snoozePanel"]').exists()).toBeTruthy();
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPopover, EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
 import { ActionType } from '../../../../types';
@@ -28,6 +28,20 @@ export const ActionTypeFilter: React.FunctionComponent<ActionTypeFilterProps> = 
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedValues]);
+
+  const onClick = useCallback(
+    (item: ActionType) => {
+      return () => {
+        const isPreviouslyChecked = selectedValues.includes(item.id);
+        if (isPreviouslyChecked) {
+          setSelectedValues(selectedValues.filter((val) => val !== item.id));
+        } else {
+          setSelectedValues(selectedValues.concat(item.id));
+        }
+      };
+    },
+    [selectedValues, setSelectedValues]
+  );
 
   return (
     <EuiPopover
@@ -53,14 +67,7 @@ export const ActionTypeFilter: React.FunctionComponent<ActionTypeFilterProps> = 
         {actionTypes.map((item) => (
           <EuiFilterSelectItem
             key={item.id}
-            onClick={() => {
-              const isPreviouslyChecked = selectedValues.includes(item.id);
-              if (isPreviouslyChecked) {
-                setSelectedValues(selectedValues.filter((val) => val !== item.id));
-              } else {
-                setSelectedValues(selectedValues.concat(item.id));
-              }
-            }}
+            onClick={onClick(item)}
             checked={selectedValues.includes(item.id) ? 'on' : undefined}
             data-test-subj={`actionType${item.id}FilterOption`}
           >
