@@ -26,7 +26,7 @@ export interface BlobStorage {
    * Generates a random file ID and returns it upon successfully uploading a
    * file.
    */
-  upload(content: Readable): Promise<{ id: string }>;
+  upload(content: Readable): Promise<{ id: string; size: number }>;
 
   /**
    * Download a file.
