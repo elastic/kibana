@@ -5,48 +5,58 @@
  * 2.0.
  */
 
-import { Readable, pipeline as _pipeline } from 'stream';
-import { promisify } from 'util';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import assert from 'assert';
 import { errors } from '@elastic/elasticsearch';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { pipeline as _pipeline, Readable } from 'stream';
+import { promisify } from 'util';
 import type { BlobStorage } from '../../types';
+import { getReadableContentStream, getWritableContentStream } from './content_stream';
 import { mappings } from './mappings';
-import { getWritableContentStream, getReadableContentStream } from './content_stream';
 
 const pipeline = promisify(_pipeline);
 
 /**
- * @internal
- *
  * Export this value for convenience to be used in tests. Do not use outside of
  * this adapter.
+ * @internal
  */
 export const BLOB_STORAGE_SYSTEM_INDEX_NAME = '.kibana_blob_storage';
 
 export class ElasticsearchBlobStorage implements BlobStorage {
-  constructor(private readonly esClient: ElasticsearchClient, private readonly logger: Logger) {}
+  constructor(
+    private readonly esClient: ElasticsearchClient,
+    private readonly index: string = BLOB_STORAGE_SYSTEM_INDEX_NAME,
+    private readonly logger: Logger
+  ) {
+    assert(
+      this.index.startsWith('.kibana'),
+      `Elasticsearch blob store index name must start with ".kibana", got ${this.index}.`
+    );
+  }
 
-  private readonly indexName = BLOB_STORAGE_SYSTEM_INDEX_NAME;
   private indexCreateCheckComplete = false;
 
   private async createIndexIfNotExists(): Promise<void> {
+    const index = this.index;
     if (this.indexCreateCheckComplete) {
       return;
     }
-    if (await this.esClient.indices.exists({ index: this.indexName })) {
-      this.logger.debug(`${this.indexName} already exists.`);
+    if (await this.esClient.indices.exists({ index })) {
+      this.logger.debug(`${index} already exists.`);
       this.indexCreateCheckComplete = true;
       return;
     }
 
-    this.logger.info(`Creating ${this.indexName} for Elasticsearch blob store.`);
+    this.logger.info(`Creating ${index} for Elasticsearch blob store.`);
 
     try {
       await this.esClient.indices.create({
-        index: this.indexName,
+        index,
         body: {
           settings: {
             number_of_shards: 1,
+            // TODO: Find out whether this is an appropriate setting
             auto_expand_replicas: '0-1',
           },
           mappings,
@@ -61,19 +71,14 @@ export class ElasticsearchBlobStorage implements BlobStorage {
     }
   }
 
-  async upload(src: Readable): Promise<{ id: string; size: number }> {
-    try {
-      await this.createIndexIfNotExists();
-    } catch (e) {
-      this.logger.error(`Could not create ${this.indexName}: ${e}`);
-      throw e;
-    }
+  public async upload(src: Readable): Promise<{ id: string; size: number }> {
+    await this.createIndexIfNotExists();
 
     try {
       const dest = getWritableContentStream({
         id: undefined, // We are creating a new file
         client: this.esClient,
-        index: this.indexName,
+        index: this.index,
         logger: this.logger.get('content-stream-upload'),
         parameters: {
           encoding: 'base64',
@@ -90,11 +95,11 @@ export class ElasticsearchBlobStorage implements BlobStorage {
     }
   }
 
-  async download({ id, size }: { id: string; size?: number }): Promise<Readable> {
+  public async download({ id, size }: { id: string; size?: number }): Promise<Readable> {
     return getReadableContentStream({
       id,
       client: this.esClient,
-      index: this.indexName,
+      index: this.index,
       logger: this.logger.get('content-stream-download'),
       parameters: {
         encoding: 'base64',
@@ -103,12 +108,12 @@ export class ElasticsearchBlobStorage implements BlobStorage {
     });
   }
 
-  async delete(id: string): Promise<void> {
+  public async delete(id: string): Promise<void> {
     try {
       const dest = getWritableContentStream({
         id,
         client: this.esClient,
-        index: this.indexName,
+        index: this.index,
         logger: this.logger.get('content-stream-delete'),
         parameters: {
           encoding: 'base64',
