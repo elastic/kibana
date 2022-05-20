@@ -208,4 +208,5 @@ export const getKibanaRoleSchema = (
     }
   );
 
+export type ElasticsearchPrivilegesType = TypeOf<typeof elasticsearchRoleSchema>;
 export type KibanaPrivilegesType = TypeOf<ReturnType<typeof getKibanaRoleSchema>>;

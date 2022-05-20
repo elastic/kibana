@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type { KibanaPrivilegesType } from './role_schema';
+export type { ElasticsearchPrivilegesType, KibanaPrivilegesType } from './role_schema';
 export { elasticsearchRoleSchema, getKibanaRoleSchema } from './role_schema';
 export {
   validateKibanaPrivileges,

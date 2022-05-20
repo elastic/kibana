@@ -8,8 +8,8 @@
 import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { OneOf } from '@kbn/utility-types';
 
-import type { Role } from '../../../common';
 import type { SecurityLicense } from '../../../common/licensing';
+import type { ElasticsearchPrivilegesType, KibanaPrivilegesType } from '../../lib';
 import { transformPrivilegesToElasticsearchPrivileges } from '../../lib/role_utils';
 import {
   BasicHTTPAuthorizationHeaderCredentials,
@@ -32,7 +32,10 @@ interface BaseCreateAPIKeyParams {
   expiration?: string;
   metadata?: Record<string, any>;
   role_descriptors: Record<string, any>;
-  kibana_role_descriptors?: Record<string, Pick<Role, 'elasticsearch' | 'kibana'>>;
+  kibana_role_descriptors?: Record<
+    string,
+    { elasticsearch: ElasticsearchPrivilegesType; kibana: KibanaPrivilegesType }
+  >;
 }
 
 /**

@@ -9,21 +9,8 @@ import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
+import { elasticsearchRoleSchema, getKibanaRoleSchema } from '../../lib';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
-
-const stringArray = schema.arrayOf(schema.string());
-
-const RoleIndexPrivilegeSchema = schema.object({
-  names: stringArray,
-  privileges: stringArray,
-  field_security: schema.maybe(
-    schema.object({
-      grant: schema.maybe(stringArray),
-      except: schema.maybe(stringArray),
-    })
-  ),
-  query: schema.maybe(schema.string()),
-});
 
 const bodySchema = schema.object({
   name: schema.string(),
@@ -34,38 +21,34 @@ const bodySchema = schema.object({
   metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
 
-const bodySchemaWithKibanaPrivileges = schema.object({
-  name: schema.string(),
-  expiration: schema.maybe(schema.string()),
-  kibana_role_descriptors: schema.recordOf(
-    schema.string(),
-    schema.object({
-      elasticsearch: schema.object(
-        {
-          cluster: stringArray,
-          indices: schema.arrayOf(RoleIndexPrivilegeSchema),
-          run_as: schema.arrayOf(schema.string()),
-        },
-        { unknowns: 'allow' }
-      ),
-      kibana: schema.arrayOf(
-        schema.object({
-          spaces: schema.arrayOf(schema.string()),
-          base: schema.arrayOf(schema.string()),
-          feature: schema.recordOf(schema.string(), stringArray),
-          _reserved: schema.maybe(schema.arrayOf(schema.string())),
-        })
-      ),
-    })
-  ),
-  metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-});
+const getBodySchemaWithKibanaPrivileges = (
+  getBasePrivilegeNames: () => { global: string[]; space: string[] }
+) =>
+  schema.object({
+    name: schema.string(),
+    expiration: schema.maybe(schema.string()),
+    kibana_role_descriptors: schema.recordOf(
+      schema.string(),
+      schema.object({
+        elasticsearch: elasticsearchRoleSchema.extends({}, { unknowns: 'allow' }),
+        kibana: getKibanaRoleSchema(getBasePrivilegeNames),
+      })
+    ),
+    metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  });
 
 export function defineCreateApiKeyRoutes({
   router,
   authz,
   getAuthenticationService,
 }: RouteDefinitionParams) {
+  const bodySchemaWithKibanaPrivileges = getBodySchemaWithKibanaPrivileges(() => {
+    const privileges = authz.privileges.get();
+    return {
+      global: Object.keys(privileges.global),
+      space: Object.keys(privileges.space),
+    };
+  });
   router.post(
     {
       path: '/internal/security/api_key',
