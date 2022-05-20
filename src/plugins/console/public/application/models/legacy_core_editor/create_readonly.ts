@@ -36,8 +36,7 @@ export function createReadOnlyAceEditor(element: HTMLElement): CustomAceEditor {
 
     const session = output.getSession();
 
-    // session.setMode(val ? mode || outputMode : 'ace/mode/text');
-    session.setMode(outputMode);
+    session.setMode(val ? mode || outputMode : 'ace/mode/text');
     session.setValue(val);
     if (typeof cb === 'function') {
       setTimeout(cb);

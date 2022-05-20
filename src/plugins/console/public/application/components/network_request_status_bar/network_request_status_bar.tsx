@@ -68,6 +68,7 @@ export const NetworkRequestStatusBar: FunctionComponent<Props> = ({
         </EuiBadge>
       </EuiFlexItem>
     );
+    // If multiple requests are sent, we do not need to render status badges since they are displayed in the editor output panel
   } else if (requestResult && !isMultipleRequest) {
     const { endpoint, method, statusCode, statusText, timeElapsedMs } = requestResult;
 
