@@ -1328,10 +1328,9 @@ instanceStateValue: true
     expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_searches).to.be(0);
     expect(event?.kibana?.alert?.rule?.execution?.metrics?.es_search_duration_ms).to.be(0);
     expect(event?.kibana?.alert?.rule?.execution?.metrics?.total_search_duration_ms).to.be(0);
-    expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_active_alerts).to.be(1);
-    expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_new_alerts).to.be(1);
-    expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_recovered_alerts).to.be(0);
-    expect(event?.kibana?.alert?.rule?.execution?.metrics?.total_number_of_alerts).to.be(1);
+    expect(event?.kibana?.alert?.rule?.execution?.metrics?.alert_counts?.active).to.be(1);
+    expect(event?.kibana?.alert?.rule?.execution?.metrics?.alert_counts?.new).to.be(1);
+    expect(event?.kibana?.alert?.rule?.execution?.metrics?.alert_counts?.recovered).to.be(0);
 
     expect(event?.rule).to.eql({
       id: alertId,
