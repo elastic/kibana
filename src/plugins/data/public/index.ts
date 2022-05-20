@@ -262,7 +262,6 @@ export {
   getQueryLog,
   mapAndFlattenFilters,
   QueryService,
-  QueryState$,
 } from './query';
 
 export { NowProvider } from './now_provider';
@@ -270,6 +269,7 @@ export type { NowProviderInternalContract } from './now_provider';
 
 export type {
   QueryState,
+  QueryState$,
   SavedQuery,
   SavedQueryService,
   SavedQueryTimeFilter,

@@ -73,8 +73,8 @@ export {
   getTime,
   isQuery,
   isTimeRange,
-  QueryState,
 } from './query';
+export type { QueryState } from './query';
 export * from './search';
 export type {
   RefreshInterval,
