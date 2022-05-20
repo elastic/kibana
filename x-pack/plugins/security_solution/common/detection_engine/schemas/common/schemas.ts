@@ -185,38 +185,11 @@ export type Name = t.TypeOf<typeof name>;
 export const nameOrUndefined = t.union([name, t.undefined]);
 export type NameOrUndefined = t.TypeOf<typeof nameOrUndefined>;
 
-export const related_integration = t.exact(
-  t.type({
-    package: t.string,
-    version: t.string,
-    integration: t.union([t.string, t.undefined]),
-  })
-);
-export type RelatedIntegration = t.TypeOf<typeof related_integration>;
-
-export const related_integrations = t.array(related_integration);
-export type RelatedIntegrations = t.TypeOf<typeof related_integrations>;
-
-export const required_field = t.exact(
-  t.type({
-    name: t.string,
-    type: t.string,
-    ecs: t.boolean,
-  })
-);
-export type RequiredField = t.TypeOf<typeof required_field>;
-
-export const required_fields = t.array(required_field);
-export type RequiredFields = t.TypeOf<typeof required_fields>;
-
 export const rule_name_override = t.string;
 export type RuleNameOverride = t.TypeOf<typeof rule_name_override>;
 
 export const ruleNameOverrideOrUndefined = t.union([rule_name_override, t.undefined]);
 export type RuleNameOverrideOrUndefined = t.TypeOf<typeof ruleNameOverrideOrUndefined>;
-
-export const setup = t.string;
-export type Setup = t.TypeOf<typeof setup>;
 
 export const status = t.keyof({
   open: null,

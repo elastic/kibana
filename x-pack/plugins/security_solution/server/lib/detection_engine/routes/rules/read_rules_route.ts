@@ -67,57 +67,6 @@ export const readRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
           if (transformed == null) {
             return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
           } else {
-            transformed.setup =
-              "## Config\n\nThe 'Audit Detailed File Share' audit policy must be configured (Success Failure).\nSteps to implement the logging policy with with Advanced Audit Configuration:\n\n```\nComputer Configuration > \nPolicies > \nWindows Settings > \nSecurity Settings > \nAdvanced Audit Policies Configuration > \nAudit Policies > \nObject Access > \nAudit Detailed File Share (Success,Failure)\n```\n\nThe 'Audit Directory Service Changes' audit policy must be configured (Success Failure).\nSteps to implement the logging policy with with Advanced Audit Configuration:\n\n```\nComputer Configuration > \nPolicies > \nWindows Settings > \nSecurity Settings > \nAdvanced Audit Policies Configuration > \nAudit Policies > \nDS Access > \nAudit Directory Service Changes (Success,Failure)\n```\n";
-            transformed.required_fields = [
-              {
-                name: 'event.code',
-                type: 'keyword',
-                ecs: true,
-              },
-              {
-                name: 'message',
-                type: 'match_only_text',
-                ecs: true,
-              },
-              {
-                name: 'winlog.event_data.AttributeLDAPDisplayName',
-                type: 'keyword',
-                ecs: false,
-              },
-              {
-                name: 'winlog.event_data.AttributeValue',
-                type: 'keyword',
-                ecs: false,
-              },
-              {
-                name: 'winlog.event_data.ShareName',
-                type: 'keyword',
-                ecs: false,
-              },
-              {
-                name: 'winlog.event_data.RelativeTargetName',
-                type: 'keyword',
-                ecs: false,
-              },
-              {
-                name: 'winlog.event_data.AccessList',
-                type: 'keyword',
-                ecs: false,
-              },
-            ];
-            transformed.related_integrations = [
-              {
-                package: 'system',
-                version: '1.6.4',
-                integration: undefined,
-              },
-              {
-                package: 'aws',
-                integration: 'cloudtrail',
-                version: '1.11.0',
-              },
-            ];
             return response.ok({ body: transformed ?? {} });
           }
         } else {

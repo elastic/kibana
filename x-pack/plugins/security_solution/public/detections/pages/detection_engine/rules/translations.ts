@@ -1085,3 +1085,40 @@ export const RULES_BULK_EDIT_FAILURE_DESCRIPTION = (rulesCount: number) =>
       defaultMessage: '{rulesCount, plural, =1 {# rule} other {# rules}} failed to update.',
     }
   );
+
+export const INTEGRATIONS_BADGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.integrations.badgeTitle',
+  {
+    defaultMessage: 'integrations',
+  }
+);
+
+export const INTEGRATIONS_POPOVER_TITLE = (integrationsCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.integrations.popoverTitle',
+    {
+      values: { integrationsCount },
+      defaultMessage:
+        'You have [{integrationsCount}] related {integrationsCount, plural, =1 {# integration} other {# integrations}} to your prebuilt rule',
+    }
+  );
+
+export const INTEGRATIONS_POPOVER_DESCRIPTION_INSTALLED = (installedCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.integrations.popoverTitle',
+    {
+      values: { installedCount },
+      defaultMessage:
+        'You have [{installedCount}] related {installedCount, plural, =1 {# integration} other {# integrations}} installed, click the link below to view the integration:',
+    }
+  );
+
+export const INTEGRATIONS_POPOVER_DESCRIPTION_UNINSTALLED = (uninstalledCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.integrations.popoverTitle',
+    {
+      values: { uninstalledCount },
+      defaultMessage:
+        'You have [{uninstalledCount}] related {uninstalledCount, plural, =1 {# integration} other {# integrations}} uninstalled, click the link to add integration:',
+    }
+  );

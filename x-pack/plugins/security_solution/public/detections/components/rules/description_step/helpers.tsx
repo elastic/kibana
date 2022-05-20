@@ -16,7 +16,6 @@ import {
   EuiText,
   EuiIcon,
   EuiToolTip,
-  EuiToken,
 } from '@elastic/eui';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import { capitalize } from 'lodash';
@@ -24,6 +23,7 @@ import { capitalize } from 'lodash';
 import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
+import { FieldIcon } from '@kbn/react-field';
 
 import { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { getDisplayValueFromFilter } from '@kbn/data-plugin/public';
@@ -32,11 +32,11 @@ import { MATCHES, AND, OR } from '../../../../common/components/threat_match/tra
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';
 import * as i18nRiskScore from '../risk_score_mapping/translations';
-import {
-  RelatedIntegrations,
-  RequiredFields,
+import type {
+  RelatedIntegrationArray,
+  RequiredFieldArray,
   Threshold,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
+} from '../../../../../common/detection_engine/schemas/common';
 import {
   subtechniquesOptions,
   tacticsOptions,
@@ -516,7 +516,7 @@ export const buildThreatMappingDescription = (
 
 export const buildRelatedIntegrationsDescription = (
   label: string,
-  relatedIntegrations: RelatedIntegrations
+  relatedIntegrations: RelatedIntegrationArray
 ): ListItems[] => {
   const badgeInstalledColor = '#E0E5EE'; // 'subdued' not working?
   const badgeUninstalledColor = 'accent';
@@ -550,18 +550,14 @@ export const buildRelatedIntegrationsDescription = (
 };
 
 const FieldTypeText = styled(EuiText)`
-  font-family: 'Roboto Mono', 'serif'; // const { euiTheme } = useEuiTheme(); // Use 'Inter' from designs
+  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
+  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
 `;
 
 export const buildRequiredFieldsDescription = (
   label: string,
-  requiredFields: RequiredFields
+  requiredFields: RequiredFieldArray
 ): ListItems[] => {
-  const typeToTokenMapping: Record<string, string> = {
-    keyword: 'keyword',
-    match_only_text: 'text',
-  };
-
   return [
     {
       title: label,
@@ -569,7 +565,7 @@ export const buildRequiredFieldsDescription = (
         <FieldTypeText grow={false} size={'s'}>
           {requiredFields.map((rF, index) => (
             <>
-              <EuiToken iconType={`token${capitalize(typeToTokenMapping[rF.type] ?? 'Null')}`} />
+              <FieldIcon data-test-subj="field-type-icon" type={rF.type} />
               {` ${rF.name}`}
               {index + 1 !== requiredFields.length && <>{', '}</>}
             </>

@@ -13,9 +13,9 @@ import styled from 'styled-components';
 import { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { DataViewBase, Filter, FilterStateStore } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
-import {
-  RelatedIntegrations,
-  RequiredFields,
+import type {
+  RelatedIntegrationArray,
+  RequiredFieldArray,
 } from '../../../../../common/detection_engine/schemas/common';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -200,10 +200,10 @@ export const getDescriptionItem = (
     const values: AboutStepSeverity = get(field, data);
     return buildSeverityDescription(values);
   } else if (field === 'requiredFields') {
-    const requiredFields = get(field, data) as RequiredFields;
+    const requiredFields: RequiredFieldArray = get(field, data);
     return buildRequiredFieldsDescription(label, requiredFields);
   } else if (field === 'relatedIntegrations') {
-    const relatedIntegrations = get(field, data) as RelatedIntegrations;
+    const relatedIntegrations: RelatedIntegrationArray = get(field, data);
     return buildRelatedIntegrationsDescription(label, relatedIntegrations);
   } else if (field === 'timeline') {
     const timeline = get(field, data) as FieldValueTimeline;
