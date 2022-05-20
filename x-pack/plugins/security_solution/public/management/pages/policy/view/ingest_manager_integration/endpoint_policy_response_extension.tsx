@@ -9,7 +9,6 @@ import React, { memo } from 'react';
 import styled from 'styled-components';
 import { PackagePolicyResponseExtensionComponentProps } from '@kbn/fleet-plugin/public';
 
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { PolicyResponseWrapper } from '../../../../components/policy_response';
 
 const Container = styled.div`
@@ -21,10 +20,6 @@ const Container = styled.div`
  */
 export const EndpointPolicyResponseExtension = memo<PackagePolicyResponseExtensionComponentProps>(
   ({ endpointId }) => {
-    const isPolicyResponseInFleetEnabled = useIsExperimentalFeatureEnabled(
-      'policyResponseInFleetEnabled'
-    );
-    if (!isPolicyResponseInFleetEnabled) return null;
     return (
       <Container>
         <PolicyResponseWrapper endpointId={endpointId} />

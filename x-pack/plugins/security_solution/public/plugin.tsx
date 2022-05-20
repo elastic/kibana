@@ -203,11 +203,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         Component: getLazyEndpointPolicyEditExtension(core, plugins),
       });
 
-      registerExtension({
-        package: 'endpoint',
-        view: 'package-policy-response',
-        Component: getLazyEndpointPolicyResponseExtension(core, plugins),
-      });
+      if (this.experimentalFeatures.policyResponseInFleetEnabled) {
+        registerExtension({
+          package: 'endpoint',
+          view: 'package-policy-response',
+          Component: getLazyEndpointPolicyResponseExtension(core, plugins),
+        });
+      }
 
       registerExtension({
         package: 'endpoint',
