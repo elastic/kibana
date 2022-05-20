@@ -63,10 +63,9 @@ export class File<M = unknown> implements IFile {
 
   public async uploadContent(content: Readable): Promise<void> {
     if (!this.canUpload()) {
-      this.logger.error('File content already uploaded.');
-      throw new Error('File content already uploaded');
+      throw new Error(`Already uploaded file [id = ${this.id}][name = ${this.name}].`);
     }
-    this.logger.debug('Uploading file contents...');
+    this.logger.debug(`Uploading file [id = ${this.id}][name = ${this.name}].`);
     await this.updateFileState({
       action: 'uploading',
     });
