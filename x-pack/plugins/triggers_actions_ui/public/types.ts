@@ -111,14 +111,6 @@ export type AlertsTableConfigurationRegistryContract = PublicMethodsOf<
   TypeRegistry<AlertsTableConfigurationRegistry>
 >;
 
-export type ActionConnectorFieldsCallbacks = {
-  beforeActionConnectorSave?: () => Promise<void>;
-  afterActionConnectorSave?: (connector: ActionConnector) => Promise<void>;
-} | null;
-export type ActionConnectorFieldsSetCallbacks = React.Dispatch<
-  React.SetStateAction<ActionConnectorFieldsCallbacks>
->;
-
 export interface ConnectorValidationError {
   message: ReactNode;
 }

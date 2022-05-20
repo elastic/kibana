@@ -30,6 +30,7 @@ import {
   ActionType,
   ActionTypeModel,
   ActionTypeRegistryContract,
+  ConnectorValidationError,
 } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { useKibana } from '../../../common/lib/kibana';
@@ -266,9 +267,10 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     if (isValid) {
       if (preSubmitValidator) {
         const validatorRes = await preSubmitValidator();
+        console.log(validatorRes);
 
         if (validatorRes) {
-          setPreSubmitValidationErrorMessage(validatorRes);
+          setPreSubmitValidationErrorMessage(validatorRes.message);
           return;
         }
       }

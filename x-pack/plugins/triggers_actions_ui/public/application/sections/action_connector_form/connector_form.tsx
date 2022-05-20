@@ -47,10 +47,9 @@ const ConnectorFormComponent: React.FC<Props> = ({
     null
   );
 
-  const registerPreSubmitValidator = useCallback(
-    (validator: ConnectorValidationFunc) => setPreSubmitValidator(validator),
-    []
-  );
+  const registerPreSubmitValidator = useCallback((validator: ConnectorValidationFunc) => {
+    setPreSubmitValidator(() => validator);
+  }, []);
 
   const isFormModified = useFormIsModified({
     form,

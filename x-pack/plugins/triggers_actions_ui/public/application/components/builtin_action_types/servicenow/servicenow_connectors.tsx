@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useState, useMemo } from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
 import { snExternalServiceConfig } from '@kbn/actions-plugin/common';
-import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -29,51 +29,45 @@ export { ServiceNowConnectorFields as default };
 
 const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
   readOnly,
-  setCallbacks,
+  registerPreSubmitValidator,
   isEdit,
 }) => {
   const {
     http,
     notifications: { toasts },
   } = useKibana().services;
-  const [{ id, name, isDeprecated, actionType, config, secrets }] = useFormData({
+  const [{ id, name, isDeprecated, actionTypeId, config, secrets }] = useFormData({
     watch: [
       'id',
       'isDeprecated',
-      'actionType',
+      'actionTypeId',
       'name',
       'config.apiUrl',
       'secrets.username',
       'secrets.password',
     ],
   });
+  console.log(actionTypeId);
 
-  const requiresNewApplication = !!isDeprecated;
+  const requiresNewApplication = isDeprecated ?? true;
   const action = useMemo(
     () => ({
       name,
-      actionTypeId: actionType.id,
+      actionTypeId,
       config,
       secrets,
     }),
-    [name, actionType.id, config, secrets]
+    [name, actionTypeId, config, secrets]
     // TODO: Do we need the cast?
   ) as ServiceNowActionConnector;
 
   const [showUpdateConnector, setShowUpdateConnector] = useState(false);
 
   const { fetchAppInfo, isLoading } = useGetAppInfo({
-    actionTypeId: actionType.id,
+    actionTypeId,
   });
 
-  const [showApplicationRequiredCallout, setShowApplicationRequiredCallout] =
-    useState<boolean>(false);
-  const [applicationInfoErrorMsg, setApplicationInfoErrorMsg] = useState<string | null>(null);
-
   const getApplicationInfo = useCallback(async () => {
-    setShowApplicationRequiredCallout(false);
-    setApplicationInfoErrorMsg(null);
-
     try {
       const res = await fetchAppInfo(action);
       if (isRESTApiError(res)) {
@@ -82,22 +76,30 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
 
       return res;
     } catch (e) {
-      setShowApplicationRequiredCallout(true);
-      setApplicationInfoErrorMsg(e.message);
-      // We need to throw here so the connector will be not be saved.
       throw e;
     }
   }, [action, fetchAppInfo]);
 
-  const beforeActionConnectorSave = useCallback(async () => {
+  const preSubmitValidator = useCallback(async () => {
     if (requiresNewApplication) {
-      await getApplicationInfo();
+      try {
+        await getApplicationInfo();
+      } catch (error) {
+        return {
+          message: (
+            <ApplicationRequiredCallout
+              appId={snExternalServiceConfig[actionTypeId]?.appId ?? ''}
+              message={error.message}
+            />
+          ),
+        };
+      }
     }
-  }, [getApplicationInfo, requiresNewApplication]);
+  }, [actionTypeId, getApplicationInfo, requiresNewApplication]);
 
   useEffect(
-    () => setCallbacks({ beforeActionConnectorSave }),
-    [beforeActionConnectorSave, setCallbacks]
+    () => registerPreSubmitValidator(preSubmitValidator),
+    [preSubmitValidator, registerPreSubmitValidator]
   );
 
   const onMigrateClick = useCallback(() => setShowUpdateConnector(true), []);
@@ -117,7 +119,6 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
         id,
       });
 
-      // editActionConfig('usesTableApi', false);
       setShowUpdateConnector(false);
 
       toasts.addSuccess({
@@ -134,23 +135,10 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
     }
   }, [getApplicationInfo, http, name, config, secrets, id, toasts, action.name]);
 
-  /**
-   * Defaults the usesTableApi attribute to false
-   * if it is not defined. The usesTableApi attribute
-   * will be undefined only at the creation of
-   * the connector.
-   */
-  // useEffect(() => {
-  //   if (usesTableApi == null) {
-  //     editActionConfig('usesTableApi', false);
-  //   }
-  // });
-
   return (
     <>
       {showUpdateConnector && (
         <UpdateConnector
-          applicationInfoErrorMsg={applicationInfoErrorMsg}
           readOnly={readOnly}
           isLoading={isLoading}
           onConfirm={onUpdateConnectorConfirm}
@@ -158,16 +146,19 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
         />
       )}
       {requiresNewApplication && (
-        <InstallationCallout appId={snExternalServiceConfig[action.actionTypeId].appId ?? ''} />
+        <InstallationCallout appId={snExternalServiceConfig[action.actionTypeId]?.appId ?? ''} />
       )}
       {!requiresNewApplication && <SpacedDeprecatedCallout onMigrate={onMigrateClick} />}
+      <UseField path={'config.usesTableApi'} config={{ defaultValue: false }}>
+        {(field) => {
+          /**
+           * This is a hidden field. We return null so we do not render
+           * any field on the form
+           */
+          return null;
+        }}
+      </UseField>
       <Credentials readOnly={readOnly} isLoading={isLoading} />
-      {showApplicationRequiredCallout && requiresNewApplication && (
-        <ApplicationRequiredCallout
-          message={applicationInfoErrorMsg}
-          appId={snExternalServiceConfig[action.actionTypeId].appId ?? ''}
-        />
-      )}
     </>
   );
 };

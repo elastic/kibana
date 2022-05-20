@@ -7,14 +7,11 @@
 
 import React, { memo } from 'react';
 import {
-  EuiButton,
-  EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiSteps,
   EuiTitle,
@@ -22,11 +19,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { snExternalServiceConfig } from '@kbn/actions-plugin/common';
-import { useForm, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { CredentialsApiUrl } from './credentials_api_url';
-import { ApplicationRequiredCallout } from './application_required_callout';
-import { SNStoreLink } from './sn_store_button';
 import { CredentialsAuth, OAuth } from './auth_types';
+import { SNStoreLink } from './sn_store_button';
 
 const title = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.updateFormTitle',
@@ -78,7 +74,6 @@ const warningMessage = i18n.translate(
 );
 
 export interface Props {
-  applicationInfoErrorMsg: string | null;
   isLoading: boolean;
   readOnly: boolean;
   onCancel: () => void;
@@ -86,16 +81,16 @@ export interface Props {
 }
 
 const UpdateConnectorComponent: React.FC<Props> = ({
-  applicationInfoErrorMsg,
   isLoading,
   readOnly,
   onCancel,
   onConfirm,
 }) => {
-  const { form } = useForm();
-  const [{ actionTypeId }] = useFormData({
-    watch: ['actionTypeId'],
+  const [{ actionTypeId, config }] = useFormData({
+    watch: ['actionTypeId', 'config.isOAuth'],
   });
+
+  const { isOAuth = false } = config ?? {};
 
   return (
     <EuiFlyout ownFocus onClose={onCancel} data-test-subj="updateConnectorForm">
@@ -138,19 +133,23 @@ const UpdateConnectorComponent: React.FC<Props> = ({
               },
               {
                 title: step3CredentialsTitle,
-                children: <CredentialsAuth readOnly={readOnly} isLoading={isLoading} />,
+                children: isOAuth ? (
+                  <OAuth readOnly={readOnly} isLoading={isLoading} />
+                ) : (
+                  <CredentialsAuth readOnly={readOnly} isLoading={isLoading} />
+                ),
               },
             ]}
           />
         </EuiFlexGroup>
         <EuiFlexGroup>
           <EuiFlexItem>
-            {applicationInfoErrorMsg && (
+            {/* {applicationInfoErrorMsg && (
               <ApplicationRequiredCallout
                 message={applicationInfoErrorMsg}
                 appId={snExternalServiceConfig[actionTypeId].appId ?? ''}
               />
-            )}
+            )} */}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutBody>

@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
@@ -44,6 +45,7 @@ const CredentialsApiUrlComponent: React.FC<Props> = ({ isLoading, readOnly }) =>
       <EuiSpacer size="l" />
       <UseField
         path="config.apiUrl"
+        component={TextField}
         config={{
           label: i18n.API_URL_LABEL,
           validations: [

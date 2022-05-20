@@ -8,6 +8,7 @@
 import React, { memo } from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { PasswordField } from '../../../password_field';
 import * as i18n from '../translations';
 
@@ -23,6 +24,7 @@ const CredentialsAuthComponent: React.FC<Props> = ({ isLoading, readOnly }) => {
     <>
       <UseField
         path="secrets.username"
+        component={TextField}
         config={{
           label: i18n.USERNAME_LABEL,
           validations: [

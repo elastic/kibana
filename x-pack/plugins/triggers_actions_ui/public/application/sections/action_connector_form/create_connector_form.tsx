@@ -60,6 +60,15 @@ const CreateConnectorFormComponent: React.FC<CreateConnectorFormProps> = ({
   const FieldsComponent = actionTypeModel?.actionConnectorFields ?? null;
   return (
     <>
+      <UseField path={'actionTypeId'}>
+        {(field) => {
+          /**
+           * This is a hidden field. We return null so we do not render
+           * any field on the form
+           */
+          return null;
+        }}
+      </UseField>
       <UseField
         path="name"
         config={nameConfig}

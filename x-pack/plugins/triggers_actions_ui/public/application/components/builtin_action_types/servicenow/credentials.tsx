@@ -7,6 +7,8 @@
 
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { ToggleField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import * as i18n from './translations';
 import { CredentialsApiUrl } from './credentials_api_url';
 import { CredentialsAuth, OAuth } from './auth_types';
@@ -17,6 +19,12 @@ interface Props {
 }
 
 const CredentialsComponent: React.FC<Props> = ({ readOnly, isLoading }) => {
+  const [{ config }] = useFormData({
+    watch: ['config.isOAuth'],
+  });
+
+  const { isOAuth = false } = config ?? {};
+
   return (
     <>
       <EuiFlexGroup direction="column">
@@ -36,15 +44,25 @@ const CredentialsComponent: React.FC<Props> = ({ readOnly, isLoading }) => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <EuiSwitch
-        label={i18n.IS_OAUTH}
-        disabled={readOnly}
-        checked={isOAuth || false}
-        onChange={switchIsOAuth}
+      <UseField
+        path="config.isOAuth"
+        component={ToggleField}
+        config={{ defaultValue: false }}
+        componentProps={{
+          hasEmptyLabelSpace: true,
+          euiFieldProps: {
+            label: i18n.IS_OAUTH,
+            disabled: readOnly,
+          },
+        }}
       />
       <EuiSpacer size="l" />
       <EuiFlexItem>
-        <CredentialsAuth readOnly={readOnly} isLoading={isLoading} />
+        {isOAuth ? (
+          <OAuth readOnly={readOnly} isLoading={isLoading} />
+        ) : (
+          <CredentialsAuth readOnly={readOnly} isLoading={isLoading} />
+        )}
       </EuiFlexItem>
     </>
   );
