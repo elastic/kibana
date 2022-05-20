@@ -9,6 +9,8 @@ import { tap } from 'rxjs/operators';
 import { omit } from 'lodash';
 import type { Observable } from 'rxjs';
 import { DataViewsService } from '@kbn/data-views-plugin/common';
+// @ts-expect-error
+import { setMaxListeners } from 'node:events';
 import { toSanitizedFieldType } from '../../../../common/fields_utils';
 
 import type { FetchedIndexPattern, TrackedEsSearches } from '../../../../common/types';
@@ -48,6 +50,8 @@ export abstract class AbstractSearchStrategy {
     const abortSignal = getRequestAbortedSignal(req.events.aborted$);
     const searchContext = await requestContext.search;
 
+    // Each search will attach 3 listeners to the abort signal - setting limit accordingly to catch memory leaks in case too many listeners are attached.
+    setMaxListeners(esRequests.length * 3, abortSignal);
     esRequests.forEach(({ body, index, trackingEsSearchMeta }) => {
       const startTime = Date.now();
       requests.push(
