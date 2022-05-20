@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -21,7 +21,6 @@ import {
   EuiIcon,
   EuiText,
 } from '@elastic/eui';
-import { FormConfig, FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { HttpSetup } from '@kbn/core/public';
@@ -231,6 +230,8 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
   const isMounted = useRef(false);
   const [actionType, setActionType] = useState<ActionType | null>(null);
+  const [preSubmitValidationErrorMessage, setPreSubmitValidationErrorMessage] =
+    useState<ReactNode>(null);
   const [hasActionsUpgradeableByTrial, setHasActionsUpgradeableByTrial] = useState<boolean>(false);
   const canSave = hasSaveActionsCapability(capabilities);
   const [formState, setFormState] = useState<CreateConnectorFormState>({
@@ -238,6 +239,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     isSubmitting: false,
     isValid: undefined,
     submit: async () => ({ isValid: false, data: {} as Connector }),
+    preSubmitValidator: null,
   });
 
   const initialConnector: InitialConnector<Record<string, unknown>, Record<string, unknown>> = {
@@ -246,7 +248,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     secrets: {},
   };
 
-  const { submit, isValid: isFormValid, isSubmitting } = formState;
+  const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
   const hasErrors = isFormValid === false;
   const isSaving = isSavingConnector || isSubmitting;
 
@@ -261,20 +263,17 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
       return;
     }
 
-    // if (isValid) {
-    //   const nameChange = field?.name !== data.name;
-    //   const typeChange = field?.type !== data.type;
+    if (isValid) {
+      if (preSubmitValidator) {
+        const validatorRes = await preSubmitValidator();
 
-    //   if (isEditingExistingField && (nameChange || typeChange)) {
-    //     setModalVisibility({
-    //       ...defaultModalVisibility,
-    //       confirmChangeNameOrType: true,
-    //     });
-    //   } else {
-    //     onSave(data);
-    //   }
-    // }
-  }, [submit]);
+        if (validatorRes) {
+          setPreSubmitValidationErrorMessage(validatorRes);
+          return;
+        }
+      }
+    }
+  }, [submit, preSubmitValidator]);
 
   const resetActionType = useCallback(() => setActionType(null), []);
 
@@ -309,12 +308,15 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
           />
         ) : null}
         {actionType != null ? (
-          <ConnectorForm
-            actionTypeModel={actionTypeModel}
-            connector={initialConnector}
-            isEdit={false}
-            onChange={setFormState}
-          />
+          <>
+            {preSubmitValidationErrorMessage}
+            <ConnectorForm
+              actionTypeModel={actionTypeModel}
+              connector={initialConnector}
+              isEdit={false}
+              onChange={setFormState}
+            />
+          </>
         ) : null}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

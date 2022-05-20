@@ -14,7 +14,7 @@ import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ActionTypeModel } from '../../../types';
+import { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { useKibana } from '../../../common/lib/kibana';
@@ -27,6 +27,7 @@ interface ConnectorFormData {
 interface CreateConnectorFormProps {
   actionTypeModel: ActionTypeModel | null;
   isEdit: boolean;
+  registerPreSubmitValidator: (validator: ConnectorValidationFunc) => void;
 }
 
 const { emptyField } = fieldValidators;
@@ -50,6 +51,7 @@ const nameConfig: FieldConfig<{ name: string }, ConnectorFormData> = {
 const CreateConnectorFormComponent: React.FC<CreateConnectorFormProps> = ({
   actionTypeModel,
   isEdit,
+  registerPreSubmitValidator,
 }) => {
   const {
     application: { capabilities },
@@ -89,7 +91,11 @@ const CreateConnectorFormComponent: React.FC<CreateConnectorFormProps> = ({
                 </SectionLoading>
               }
             >
-              <FieldsComponent readOnly={!canSave} isEdit={isEdit} />
+              <FieldsComponent
+                readOnly={!canSave}
+                isEdit={isEdit}
+                registerPreSubmitValidator={registerPreSubmitValidator}
+              />
             </Suspense>
           </EuiErrorBoundary>
         </>

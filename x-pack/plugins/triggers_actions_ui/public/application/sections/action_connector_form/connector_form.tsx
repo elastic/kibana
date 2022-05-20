@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Form,
   FormHook,
   useForm,
   useFormIsModified,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { ActionTypeModel } from '../../../types';
+import { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
 import { CreateConnectorForm } from './create_connector_form';
 import { Connector } from './types';
 
@@ -21,6 +21,7 @@ export interface CreateConnectorFormState {
   isSubmitted: boolean;
   isSubmitting: boolean;
   submit: FormHook<Connector>['submit'];
+  preSubmitValidator: ConnectorValidationFunc | null;
 }
 
 interface Props {
@@ -42,6 +43,14 @@ const ConnectorFormComponent: React.FC<Props> = ({
 }) => {
   const { form } = useForm({ defaultValue: connector });
   const { submit, isValid: isFormValid, isSubmitted, isSubmitting } = form;
+  const [preSubmitValidator, setPreSubmitValidator] = useState<ConnectorValidationFunc | null>(
+    null
+  );
+
+  const registerPreSubmitValidator = useCallback(
+    (validator: ConnectorValidationFunc) => setPreSubmitValidator(validator),
+    []
+  );
 
   const isFormModified = useFormIsModified({
     form,
@@ -50,9 +59,9 @@ const ConnectorFormComponent: React.FC<Props> = ({
 
   useEffect(() => {
     if (onChange) {
-      onChange({ isValid: isFormValid, isSubmitted, isSubmitting, submit });
+      onChange({ isValid: isFormValid, isSubmitted, isSubmitting, submit, preSubmitValidator });
     }
-  }, [onChange, isFormValid, isSubmitted, isSubmitting, submit]);
+  }, [onChange, isFormValid, isSubmitted, isSubmitting, submit, preSubmitValidator]);
 
   useEffect(() => {
     if (onFormModifiedChange) {
@@ -62,7 +71,11 @@ const ConnectorFormComponent: React.FC<Props> = ({
 
   return (
     <Form form={form}>
-      <CreateConnectorForm actionTypeModel={actionTypeModel} isEdit={isEdit} />
+      <CreateConnectorForm
+        actionTypeModel={actionTypeModel}
+        isEdit={isEdit}
+        registerPreSubmitValidator={registerPreSubmitValidator}
+      />
     </Form>
   );
 };

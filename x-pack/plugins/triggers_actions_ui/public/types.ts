@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { ComponentType, ReactNode } from 'react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart } from '@kbn/core/public';
-import type { ComponentType } from 'react';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -119,10 +119,15 @@ export type ActionConnectorFieldsSetCallbacks = React.Dispatch<
   React.SetStateAction<ActionConnectorFieldsCallbacks>
 >;
 
+export interface ConnectorValidationError {
+  message: ReactNode;
+}
+
+export type ConnectorValidationFunc = () => Promise<ConnectorValidationError | void | undefined>;
 export interface ActionConnectorFieldsProps {
   readOnly: boolean;
-  setCallbacks: ActionConnectorFieldsSetCallbacks;
   isEdit: boolean;
+  registerPreSubmitValidator: (validator: ConnectorValidationFunc) => void;
 }
 
 export enum RuleFlyoutCloseReason {
