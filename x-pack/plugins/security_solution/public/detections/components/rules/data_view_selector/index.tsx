@@ -90,7 +90,7 @@ export const DataViewSelector = ({
     fetchSingleDataView();
   }, [data.dataViews, selectedDataView, setIndexPattern]);
 
-  const onChangeDataViews = async (options: Array<EuiComboBoxOptionOption<string>>) => {
+  const onChangeDataViews = (options: Array<EuiComboBoxOptionOption<string>>) => {
     const selectedDataViewOption = options;
 
     if (

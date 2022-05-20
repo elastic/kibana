@@ -152,6 +152,7 @@ export const addFilterStateIfNotThere = (filters: Filter[]): Filter[] => {
 };
 
 /* eslint complexity: ["error", 21]*/
+// eslint-disable-next-line complexity
 export const getDescriptionItem = (
   field: string,
   label: string,
@@ -224,6 +225,8 @@ export const getDescriptionItem = (
   } else if (field === 'threatMapping') {
     const threatMap: ThreatMapping = get(field, data);
     return buildThreatMappingDescription(label, threatMap);
+  } else if (field === 'dataViewId') {
+    return [];
   }
 
   const description: string = get(field, data);

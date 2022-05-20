@@ -77,14 +77,17 @@ export const schema: FormSchema<DefineStepRule> = {
       },
     ],
   },
-  dataViewId: {
-    fieldsToValidateOnChange: ['dataViewId'],
+  dataViewTitle: {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.dataViewSelector',
       {
         defaultMessage: 'Data View',
       }
     ),
+    validations: [],
+  },
+  dataViewId: {
+    fieldsToValidateOnChange: ['dataViewId'],
     validations: [
       {
         validator: (

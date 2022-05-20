@@ -251,6 +251,16 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           defineRuleData: null,
           scheduleRuleData: null,
         };
+  const [dataViewTitle, setDataViewTitle] = useState<string>();
+  useEffect(() => {
+    const fetchDataViewTitle = async () => {
+      if (defineRuleData?.dataViewId != null && defineRuleData?.dataViewId !== '') {
+        const dataView = await data.dataViews.get(defineRuleData?.dataViewId);
+        setDataViewTitle(dataView.title);
+      }
+    };
+    fetchDataViewTitle();
+  }, [data.dataViews, defineRuleData?.dataViewId]);
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
   const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
   const mlCapabilities = useMlCapabilities();
@@ -766,7 +776,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                             descriptionColumns="singleSplit"
                             isReadOnlyView={true}
                             isLoading={false}
-                            defaultValues={defineRuleData}
+                            defaultValues={{ dataViewTitle, ...defineRuleData }}
                             kibanaDataViews={dataViewOptions}
                           />
                         )}

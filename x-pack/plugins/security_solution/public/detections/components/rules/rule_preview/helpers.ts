@@ -222,7 +222,8 @@ export const getIsRulePreviewDisabled = ({
   machineLearningJobId: string[];
   queryBar: FieldValueQueryBar;
 }) => {
-  if (!isQueryBarValid || (index.length === 0 && dataViewId == null)) return true;
+  if (!isQueryBarValid || ((index == null || index.length === 0) && dataViewId == null))
+    return true;
   if (ruleType === 'threat_match') {
     if (!isThreatQueryBarValid || !threatIndex.length || !threatMapping) return true;
     if (
