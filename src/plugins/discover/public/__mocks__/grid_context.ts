@@ -9,8 +9,9 @@
 import { flattenHit } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { indexPatternMock } from './index_pattern';
-import { dataViewWithVariousFieldTypesMock } from './data_view_with_various_field_types';
-import { esHits, esHitsWithVariousFieldTypes } from './es_hits';
+import { dataViewComplexMock } from './data_view_complex';
+import { esHits } from './es_hits';
+import { esHitsComplex } from './es_hits_complex';
 import { discoverServiceMock } from './services';
 import { GridContext } from '../components/discover_grid/discover_grid_context';
 import { convertValueToString } from '../utils/convert_value_to_string';
@@ -47,6 +48,6 @@ const buildGridContext = (dataView: DataView, rows: ElasticSearchHit[]): GridCon
 export const discoverGridContextMock = buildGridContext(indexPatternMock, esHits);
 
 export const discoverGridContextWithVariousFieldTypesMock = buildGridContext(
-  dataViewWithVariousFieldTypesMock,
-  esHitsWithVariousFieldTypes
+  dataViewComplexMock,
+  esHitsComplex
 );

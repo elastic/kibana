@@ -109,7 +109,7 @@ const fields = [
     },
   },
   {
-    count: 1,
+    count: 2,
     name: 'array_tags',
     type: 'string',
     esTypes: ['text'],
@@ -164,7 +164,7 @@ const fields = [
     readFromDocValues: true,
   },
   {
-    count: 1,
+    count: 2,
     name: 'flattened_labels',
     type: 'unknown',
     esTypes: ['flattened'],
@@ -280,7 +280,7 @@ const fields = [
     readFromDocValues: true,
   },
   {
-    count: 1,
+    count: 2,
     name: 'number_price',
     type: 'number',
     esTypes: ['float'],
@@ -349,10 +349,31 @@ const fields = [
     aggregatable: true,
     readFromDocValues: true,
   },
+  {
+    count: 1,
+    script: 'return "hi there"',
+    lang: 'painless',
+    name: 'scripted_string',
+    type: 'string',
+    scripted: true,
+    searchable: true,
+    aggregatable: true,
+    readFromDocValues: false,
+  },
+  {
+    count: 0,
+    name: 'runtime_number',
+    type: 'number',
+    esTypes: ['double'],
+    scripted: false,
+    searchable: true,
+    aggregatable: true,
+    readFromDocValues: false,
+  },
 ] as DataView['fields'];
 
-export const dataViewWithVariousFieldTypesMock = buildDataViewMock({
-  name: 'with-various-field-types',
+export const dataViewComplexMock = buildDataViewMock({
+  name: 'data-view-with-various-field-types',
   fields,
   timeFieldName: 'data',
 });

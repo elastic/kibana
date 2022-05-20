@@ -221,6 +221,32 @@ describe('convertValueToString', () => {
     expect(result).toBe('["elasticsearch","wow"]');
   });
 
+  it('should convert a runtime value to text', () => {
+    const result = convertValueToString({
+      rows: discoverGridContextWithVariousFieldTypesMock.rows,
+      rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
+      dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
+      services: discoverServiceMock,
+      columnId: 'runtime_number',
+      rowIndex: 0,
+    });
+
+    expect(result).toBe('[5.5]');
+  });
+
+  it('should convert a scripted value to text', () => {
+    const result = convertValueToString({
+      rows: discoverGridContextWithVariousFieldTypesMock.rows,
+      rowsFlattened: discoverGridContextWithVariousFieldTypesMock.rowsFlattened,
+      dataView: discoverGridContextWithVariousFieldTypesMock.indexPattern,
+      services: discoverServiceMock,
+      columnId: 'scripted_string',
+      rowIndex: 0,
+    });
+
+    expect(result).toBe('["hi there"]');
+  });
+
   it('should return an empty string and not fail', () => {
     const result = convertValueToString({
       rows: discoverGridContextWithVariousFieldTypesMock.rows,
