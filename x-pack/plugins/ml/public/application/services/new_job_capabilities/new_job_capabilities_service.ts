@@ -19,8 +19,8 @@ import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './ne
 const categoryFieldTypes = [
   ES_FIELD_TYPES.TEXT,
   ES_FIELD_TYPES.KEYWORD,
-  ES_FIELD_TYPES.VERSION,
   ES_FIELD_TYPES.IP,
+  ES_FIELD_TYPES.VERSION,
 ];
 
 class NewJobCapsService extends NewJobCapabilitiesServiceBase {
