@@ -216,6 +216,7 @@ export function DiscoverChart({
               savedSearchData$={savedSearchDataChart$}
               timefilterUpdateHandler={timefilterUpdateHandler}
               stateContainer={stateContainer}
+              dataView={indexPattern}
             />
           </section>
           <EuiSpacer size="s" />

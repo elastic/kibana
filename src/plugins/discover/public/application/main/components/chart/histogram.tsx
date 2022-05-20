@@ -20,9 +20,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import dateMath from '@kbn/datemath';
 import {
-  Axis,
-  BrushEndListener,
-  Chart,
   ElementClickListener,
   HistogramBarSeries,
   Position,
@@ -67,10 +64,9 @@ export function DiscoverHistogram({
   savedSearchData$,
   timefilterUpdateHandler,
   stateContainer,
+  dataView,
 }: DiscoverHistogramProps) {
   const { data, theme, uiSettings, fieldFormats, lens } = useDiscoverServices();
-  const chartTheme = theme.useChartsTheme();
-  const chartBaseTheme = theme.useChartsBaseTheme();
 
   const dataState: DataChartsMessage = useDataState(savedSearchData$);
 
@@ -268,6 +264,7 @@ export function DiscoverHistogram({
   }
 
   const LensComponent = lens.EmbeddableComponent;
+  console.log(dataView.id);
 
   return (
     <React.Fragment>
@@ -289,12 +286,12 @@ export function DiscoverHistogram({
             title: 'Prefilled from example app',
             references: [
               {
-                id: '8bfa4530-d4fa-11ec-b4ea-f396d4c13af0',
+                id: dataView.id,
                 name: 'indexpattern-datasource-current-indexpattern',
                 type: 'index-pattern',
               },
               {
-                id: '8bfa4530-d4fa-11ec-b4ea-f396d4c13af0',
+                id: dataView.id,
                 name: 'indexpattern-datasource-layer-layer1',
                 type: 'index-pattern',
               },
@@ -317,14 +314,14 @@ export function DiscoverHistogram({
                         col1: {
                           dataType: 'date',
                           isBucketed: true,
-                          label: '@timestamp',
+                          label: dataView.timeFieldName,
                           operationType: 'date_histogram',
                           params: {
                             interval:
                               stateContainer.appStateContainer.getState().interval || 'auto',
                           },
                           scale: 'interval',
-                          sourceField: '@timestamp',
+                          sourceField: dataView.timeFieldName,
                         },
                       },
                     },
