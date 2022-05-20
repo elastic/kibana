@@ -17,29 +17,29 @@ import {
 } from '../../common';
 import { File } from '../file';
 
-interface CreateFileArgs<Meta = unknown> {
+export interface CreateFileArgs<Meta = unknown> {
   name: string;
   fileKind: string;
   alt?: string;
   meta?: Meta;
 }
 
-interface UpdateFileArgs {
+export interface UpdateFileArgs {
   id: string;
   fileKind: string;
   attributes: UpdatableFileAttributes;
 }
 
-interface DeleteFileArgs {
+export interface DeleteFileArgs {
   id: string;
   fileKind: string;
 }
 
-interface ListFilesArgs {
+export interface ListFilesArgs {
   fileKind: string;
 }
 
-interface FindFileArgs {
+export interface FindFileArgs {
   id: string;
   fileKind: string;
 }
@@ -74,9 +74,9 @@ export class InternalFileService {
     }
   }
 
-  public async updateFile({ attributes, fileKind, id }: UpdateFileArgs): Promise<void> {
+  public async updateFile({ attributes, fileKind, id }: UpdateFileArgs): Promise<IFile> {
     const file = await this.find({ fileKind, id });
-    await file.update(attributes);
+    return await file.update(attributes);
   }
 
   public async deleteFile({ id, fileKind }: DeleteFileArgs): Promise<void> {
