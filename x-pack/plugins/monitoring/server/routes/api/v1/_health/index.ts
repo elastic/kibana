@@ -6,14 +6,31 @@
  */
 
 import { LegacyRequest, MonitoringCore } from '../../../../types';
+import { MonitoringConfig } from '../../../../config';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getHealthRequestQueryRT } from '../../../../../common/http_api/_health';
 import { TimeRange } from '../../../../../common/http_api/shared';
 
 import { fetchMonitoredClusters } from './monitored_clusters';
 
+const extractSettings = (config: MonitoringConfig) => {
+  return {
+    ccs: config.ui.ccs.enabled,
+    logsIndex: config.ui.logs.index,
+    metricbeatIndex: config.ui.metricbeat.index,
+  };
+};
+
 export function health(server: MonitoringCore) {
   const validateQuery = createValidationFunction(getHealthRequestQueryRT);
+  const settings = extractSettings(server.config);
+  const index = (() => {
+    let pattern = '.monitoring-*';
+    if (server.config.ui.ccs.enabled) {
+      pattern += ',*:.monitoring-*';
+    }
+    return pattern;
+  })();
 
   server.route({
     method: 'get',
@@ -22,7 +39,6 @@ export function health(server: MonitoringCore) {
       query: validateQuery,
     },
     async handler(req: LegacyRequest) {
-      const index = '*:.monitoring-*,.monitoring-*';
       const timeRange = {
         min: req.query.min || 'now-30m',
         max: req.query.max || 'now',
@@ -35,7 +51,7 @@ export function health(server: MonitoringCore) {
         search: (params: any) => callWithRequest(req, 'search', params),
       });
 
-      return { monitoredClusters };
+      return { monitoredClusters, settings };
     },
   });
 }
