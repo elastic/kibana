@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import url from 'url';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
@@ -18,6 +19,7 @@ import {
   SavedObject,
   KibanaRequest,
   SavedObjectsUtils,
+  Logger,
 } from '@kbn/core/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
 import { RunNowResult } from '@kbn/task-manager-plugin/server';
@@ -46,6 +48,22 @@ import {
 import { connectorAuditEvent, ConnectorAuditAction } from './lib/audit_events';
 import { trackLegacyRBACExemption } from './lib/track_legacy_rbac_exemption';
 import { isConnectorDeprecated } from './lib/is_conector_deprecated';
+import { ActionsConfigurationUtilities } from './actions_config';
+import {
+  OAuthClientCredentialsParams,
+  OAuthJwtParams,
+  OAuthParams,
+} from './routes/get_oauth_access_token';
+import {
+  getOAuthJwtAccessToken,
+  GetOAuthJwtConfig,
+  GetOAuthJwtSecrets,
+} from './builtin_action_types/lib/get_oauth_jwt_access_token';
+import {
+  getOAuthClientCredentialsAccessToken,
+  GetOAuthClientCredentialsConfig,
+  GetOAuthClientCredentialsSecrets,
+} from './builtin_action_types/lib/get_oauth_client_credentials_access_token';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 10000.
@@ -67,6 +85,7 @@ export interface CreateOptions {
 }
 
 interface ConstructorOptions {
+  logger: Logger;
   defaultKibanaIndex: string;
   scopedClusterClient: IScopedClusterClient;
   actionTypeRegistry: ActionTypeRegistry;
@@ -88,6 +107,7 @@ export interface UpdateOptions {
 }
 
 export class ActionsClient {
+  private readonly logger: Logger;
   private readonly defaultKibanaIndex: string;
   private readonly scopedClusterClient: IScopedClusterClient;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
@@ -103,6 +123,7 @@ export class ActionsClient {
   private readonly connectorTokenClient: ConnectorTokenClientContract;
 
   constructor({
+    logger,
     actionTypeRegistry,
     defaultKibanaIndex,
     scopedClusterClient,
@@ -117,6 +138,7 @@ export class ActionsClient {
     usageCounter,
     connectorTokenClient,
   }: ConstructorOptions) {
+    this.logger = logger;
     this.actionTypeRegistry = actionTypeRegistry;
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.scopedClusterClient = scopedClusterClient;
@@ -264,6 +286,14 @@ export class ActionsClient {
         isUndefined
       )
     );
+
+    try {
+      await this.connectorTokenClient.deleteConnectorTokens({ connectorId: id });
+    } catch (e) {
+      this.logger.error(
+        `Failed to delete auth tokens for connector "${id}" after update: ${e.message}`
+      );
+    }
 
     return {
       id,
@@ -448,6 +478,97 @@ export class ActionsClient {
     return actionResults;
   }
 
+  public async getOAuthAccessToken(
+    { type, options }: OAuthParams,
+    configurationUtilities: ActionsConfigurationUtilities
+  ) {
+    // Verify that user has edit access
+    await this.authorization.ensureAuthorized('update');
+
+    // Verify that token url is allowed by allowed hosts config
+    try {
+      configurationUtilities.ensureUriAllowed(options.tokenUrl);
+    } catch (err) {
+      throw Boom.badRequest(err.message);
+    }
+
+    // Verify that token url contains a hostname and uses https
+    const parsedUrl = url.parse(
+      options.tokenUrl,
+      false /* parseQueryString */,
+      true /* slashesDenoteHost */
+    );
+
+    if (!parsedUrl.hostname) {
+      throw Boom.badRequest(`Token URL must contain hostname`);
+    }
+
+    if (parsedUrl.protocol !== 'https:' && parsedUrl.protocol !== 'http:') {
+      throw Boom.badRequest(`Token URL must use http or https`);
+    }
+
+    let accessToken: string | null = null;
+    if (type === 'jwt') {
+      const tokenOpts = options as OAuthJwtParams;
+
+      try {
+        accessToken = await getOAuthJwtAccessToken({
+          logger: this.logger,
+          configurationUtilities,
+          credentials: {
+            config: tokenOpts.config as GetOAuthJwtConfig,
+            secrets: tokenOpts.secrets as GetOAuthJwtSecrets,
+          },
+          tokenUrl: tokenOpts.tokenUrl,
+        });
+
+        this.logger.debug(
+          `Successfully retrieved access token using JWT OAuth with tokenUrl ${
+            tokenOpts.tokenUrl
+          } and config ${JSON.stringify(tokenOpts.config)}`
+        );
+      } catch (err) {
+        this.logger.debug(
+          `Failed to retrieve access token using JWT OAuth with tokenUrl ${
+            tokenOpts.tokenUrl
+          } and config ${JSON.stringify(tokenOpts.config)} - ${err.message}`
+        );
+        throw Boom.badRequest(`Failed to retrieve access token`);
+      }
+    } else if (type === 'client') {
+      const tokenOpts = options as OAuthClientCredentialsParams;
+      try {
+        accessToken = await getOAuthClientCredentialsAccessToken({
+          logger: this.logger,
+          configurationUtilities,
+          credentials: {
+            config: tokenOpts.config as GetOAuthClientCredentialsConfig,
+            secrets: tokenOpts.secrets as GetOAuthClientCredentialsSecrets,
+          },
+          tokenUrl: tokenOpts.tokenUrl,
+          oAuthScope: tokenOpts.scope,
+        });
+
+        this.logger.debug(
+          `Successfully retrieved access token using Client Credentials OAuth with tokenUrl ${
+            tokenOpts.tokenUrl
+          }, scope ${tokenOpts.scope} and config ${JSON.stringify(tokenOpts.config)}`
+        );
+      } catch (err) {
+        this.logger.debug(
+          `Failed to retrieved access token using Client Credentials OAuth with tokenUrl ${
+            tokenOpts.tokenUrl
+          }, scope ${tokenOpts.scope} and config ${JSON.stringify(tokenOpts.config)} - ${
+            err.message
+          }`
+        );
+        throw Boom.badRequest(`Failed to retrieve access token`);
+      }
+    }
+
+    return { accessToken };
+  }
+
   /**
    * Delete action
    */
@@ -490,15 +611,12 @@ export class ActionsClient {
 
     try {
       await this.connectorTokenClient.deleteConnectorTokens({ connectorId: id });
-    } catch (error) {
-      this.auditLogger?.log(
-        connectorAuditEvent({
-          action: ConnectorAuditAction.DELETE,
-          savedObject: { type: 'action', id },
-          error,
-        })
+    } catch (e) {
+      this.logger.error(
+        `Failed to delete auth tokens for connector "${id}" after delete: ${e.message}`
       );
     }
+
     return await this.unsecuredSavedObjectsClient.delete('action', id);
   }
 

@@ -21,9 +21,7 @@ export function useSummaryArtifact(
     policies: string[];
   }> = DEFAULT_OPTIONS,
   searchableFields: MaybeImmutable<string[]> = DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS,
-  customQueryOptions: Partial<
-    UseQueryOptions<ExceptionListSummarySchema, HttpFetchError>
-  > = DEFAULT_OPTIONS
+  customQueryOptions: Partial<UseQueryOptions<ExceptionListSummarySchema, HttpFetchError>>
 ): QueryObserverResult<ExceptionListSummarySchema, HttpFetchError> {
   const { filter = '', policies = [] } = options;
 
@@ -37,12 +35,6 @@ export function useSummaryArtifact(
         })
       );
     },
-    {
-      refetchIntervalInBackground: false,
-      refetchOnWindowFocus: false,
-      refetchOnMount: true,
-      keepPreviousData: true,
-      ...customQueryOptions,
-    }
+    customQueryOptions
   );
 }

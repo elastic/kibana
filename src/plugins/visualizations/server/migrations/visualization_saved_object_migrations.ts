@@ -11,7 +11,11 @@ import type { SavedObjectMigrationFn, SavedObjectMigrationMap } from '@kbn/core/
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 import { MigrateFunctionsObject, MigrateFunction } from '@kbn/kibana-utils-plugin/common';
 
-import { DEFAULT_QUERY_LANGUAGE, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import {
+  DEFAULT_QUERY_LANGUAGE,
+  isSerializedSearchSource,
+  SerializedSearchSourceFields,
+} from '@kbn/data-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import {
   commonAddSupportOfDualIndexSelectionModeInTSVB,
@@ -24,6 +28,7 @@ import {
   commonAddDropLastBucketIntoTSVBModel714Above,
   commonRemoveMarkdownLessFromTSVB,
   commonUpdatePieVisApi,
+  commonPreserveOldLegendSizeDefault,
 } from './visualization_common_migrations';
 import { VisualizationSavedObjectAttributes } from '../../common';
 
@@ -1154,6 +1159,30 @@ export const updatePieVisApi: SavedObjectMigrationFn<any, any> = (doc) => {
   return doc;
 };
 
+const preserveOldLegendSizeDefault: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+
+    const newVisState = commonPreserveOldLegendSizeDefault(visState);
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        visState: JSON.stringify(newVisState),
+      },
+    };
+  }
+
+  return doc;
+};
+
 const visualizationSavedObjectTypeMigrations = {
   /**
    * We need to have this migration twice, once with a version prior to 7.0.0 once with a version
@@ -1210,32 +1239,37 @@ const visualizationSavedObjectTypeMigrations = {
   '7.17.0': flow(addDropLastBucketIntoTSVBModel714Above),
   '8.0.0': flow(removeMarkdownLessFromTSVB),
   '8.1.0': flow(updatePieVisApi),
+  '8.3.0': preserveOldLegendSizeDefault,
 };
 
 /**
  * This creates a migration map that applies search source migrations to legacy visualization SOs
  */
-const getVisualizationSearchSourceMigrations = (searchSourceMigrations: MigrateFunctionsObject) =>
+const getVisualizationSearchSourceMigrations = (
+  searchSourceMigrations: MigrateFunctionsObject
+): MigrateFunctionsObject =>
   mapValues<MigrateFunctionsObject, MigrateFunction>(
     searchSourceMigrations,
     (migrate: MigrateFunction<SerializedSearchSourceFields>): MigrateFunction =>
       (state) => {
-        const _state = state as unknown as { attributes: VisualizationSavedObjectAttributes };
+        const _state = state as { attributes: VisualizationSavedObjectAttributes };
 
-        const parsedSearchSourceJSON = _state.attributes.kibanaSavedObjectMeta.searchSourceJSON;
-
-        if (!parsedSearchSourceJSON) return _state;
-
-        return {
-          ..._state,
-          attributes: {
-            ..._state.attributes,
-            kibanaSavedObjectMeta: {
-              ..._state.attributes.kibanaSavedObjectMeta,
-              searchSourceJSON: JSON.stringify(migrate(JSON.parse(parsedSearchSourceJSON))),
+        const parsedSearchSourceJSON = JSON.parse(
+          _state.attributes.kibanaSavedObjectMeta.searchSourceJSON
+        );
+        if (isSerializedSearchSource(parsedSearchSourceJSON)) {
+          return {
+            ..._state,
+            attributes: {
+              ..._state.attributes,
+              kibanaSavedObjectMeta: {
+                ..._state.attributes.kibanaSavedObjectMeta,
+                searchSourceJSON: JSON.stringify(migrate(parsedSearchSourceJSON)),
+              },
             },
-          },
-        };
+          };
+        }
+        return _state;
       }
   );
 
@@ -1244,7 +1278,5 @@ export const getAllMigrations = (
 ): SavedObjectMigrationMap =>
   mergeSavedObjectMigrationMaps(
     visualizationSavedObjectTypeMigrations,
-    getVisualizationSearchSourceMigrations(
-      searchSourceMigrations
-    ) as unknown as SavedObjectMigrationMap
+    getVisualizationSearchSourceMigrations(searchSourceMigrations) as SavedObjectMigrationMap
   );

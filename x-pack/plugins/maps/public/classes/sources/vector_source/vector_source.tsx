@@ -9,6 +9,7 @@ import type { Query } from '@kbn/data-plugin/common';
 import { FeatureCollection, GeoJsonProperties, Geometry, Position } from 'geojson';
 import { Filter } from '@kbn/es-query';
 import { TimeRange } from '@kbn/data-plugin/public';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
 import { AbstractSource, ISource } from '../source';
@@ -42,6 +43,7 @@ export interface BoundsRequestMeta {
   sourceQuery?: Query;
   timeFilters: TimeRange;
   timeslice?: Timeslice;
+  isFeatureEditorOpenForLayer: boolean;
   joinKeyFilter?: Filter;
 }
 
@@ -56,7 +58,8 @@ export interface IVectorSource extends ISource {
     layerName: string,
     searchFilters: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void,
-    isRequestStillActive: () => boolean
+    isRequestStillActive: () => boolean,
+    inspectorAdapters: Adapters
   ): Promise<GeoJsonWithMeta>;
 
   getFields(): Promise<IField[]>;
@@ -139,7 +142,8 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     layerName: string,
     searchFilters: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void,
-    isRequestStillActive: () => boolean
+    isRequestStillActive: () => boolean,
+    inspectorAdapters: Adapters
   ): Promise<GeoJsonWithMeta> {
     throw new Error('Should implement VectorSource#getGeoJson');
   }

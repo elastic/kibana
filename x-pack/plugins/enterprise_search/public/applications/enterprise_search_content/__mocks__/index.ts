@@ -6,3 +6,4 @@
  */
 
 export { searchIndices } from './search_indices.mock';
+export { searchEngines } from './search_engines.mock';

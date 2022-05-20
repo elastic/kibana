@@ -13,12 +13,18 @@ import { useFindCspRules, useBulkUpdateCspRules, type RuleSavedObject } from './
 import * as TEST_SUBJECTS from './test_subjects';
 import { Chance } from 'chance';
 import { TestProvider } from '../../test/test_provider';
+import { useParams } from 'react-router-dom';
 
 const chance = new Chance();
 
 jest.mock('./use_csp_rules', () => ({
   useFindCspRules: jest.fn(),
   useBulkUpdateCspRules: jest.fn(),
+}));
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: jest.fn(),
 }));
 
 const queryClient = new QueryClient({
@@ -32,21 +38,58 @@ const getWrapper =
   ({ children }) =>
     <TestProvider>{children}</TestProvider>;
 
-const getRuleMock = ({ id = chance.guid(), enabled }: { id?: string; enabled: boolean }) =>
+const getRuleMock = ({
+  packagePolicyId = chance.guid(),
+  policyId = chance.guid(),
+  savedObjectId = chance.guid(),
+  id = chance.guid(),
+  enabled,
+}: {
+  packagePolicyId?: string;
+  policyId?: string;
+  savedObjectId?: string;
+  id?: string;
+  enabled: boolean;
+}) =>
   ({
-    id,
+    id: savedObjectId,
     updatedAt: chance.date().toISOString(),
     attributes: {
       id,
       name: chance.sentence(),
+      package_policy_id: packagePolicyId,
+      policy_id: policyId,
       enabled,
+      benchmark: {
+        name: chance.word(),
+        version: chance.sentence(),
+      },
     },
   } as RuleSavedObject);
+
+const getSavedObjectRuleEnable = (
+  rule: RuleSavedObject,
+  enabled: RuleSavedObject['attributes']['enabled']
+) => ({
+  ...rule,
+  attributes: {
+    ...rule.attributes,
+    enabled,
+  },
+});
+
+const params = {
+  policyId: chance.guid(),
+  packagePolicyId: chance.guid(),
+};
 
 describe('<RulesContainer />', () => {
   beforeEach(() => {
     queryClient.clear();
     jest.clearAllMocks();
+
+    (useParams as jest.Mock).mockReturnValue(params);
+
     (useBulkUpdateCspRules as jest.Mock).mockReturnValue({
       status: 'idle',
       mutate: jest.fn(),
@@ -102,6 +145,13 @@ describe('<RulesContainer />', () => {
     const switchId1 = TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule1.id);
     const switchId2 = TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule2.id);
 
+    expect(screen.getByTestId(switchId1).getAttribute('aria-checked')).toEqual(
+      rule1.attributes.enabled.toString()
+    );
+    expect(screen.getByTestId(switchId2).getAttribute('aria-checked')).toEqual(
+      rule2.attributes.enabled.toString()
+    );
+
     fireEvent.click(screen.getByTestId(switchId1));
     fireEvent.click(screen.getByTestId(switchId2));
 
@@ -154,6 +204,7 @@ describe('<RulesContainer />', () => {
 
   it('updates rules with local changes done by non-bulk toggles', () => {
     const Wrapper = getWrapper();
+
     const rule1 = getRuleMock({ enabled: false });
     const rule2 = getRuleMock({ enabled: true });
     const rule3 = getRuleMock({ enabled: true });
@@ -184,10 +235,13 @@ describe('<RulesContainer />', () => {
     fireEvent.click(screen.getByTestId(TEST_SUBJECTS.CSP_RULES_SAVE_BUTTON));
 
     expect(mutate).toHaveBeenCalledTimes(1);
-    expect(mutate).toHaveBeenCalledWith([
-      { ...rule1.attributes, enabled: !rule1.attributes.enabled },
-      { ...rule2.attributes, enabled: !rule2.attributes.enabled },
-    ]);
+    expect(mutate).toHaveBeenCalledWith({
+      packagePolicyId: params.packagePolicyId,
+      savedObjectRules: [
+        getSavedObjectRuleEnable(rule1, !rule1.attributes.enabled),
+        getSavedObjectRuleEnable(rule2, !rule2.attributes.enabled),
+      ],
+    });
   });
 
   it('updates rules with local changes done by bulk toggles', () => {
@@ -217,9 +271,10 @@ describe('<RulesContainer />', () => {
     fireEvent.click(screen.getByTestId(TEST_SUBJECTS.CSP_RULES_SAVE_BUTTON));
 
     expect(mutate).toHaveBeenCalledTimes(1);
-    expect(mutate).toHaveBeenCalledWith([
-      { ...rule1.attributes, enabled: !rule1.attributes.enabled },
-    ]);
+    expect(mutate).toHaveBeenCalledWith({
+      packagePolicyId: params.packagePolicyId,
+      savedObjectRules: [getSavedObjectRuleEnable(rule1, !rule1.attributes.enabled)],
+    });
   });
 
   it('only changes selected rules in bulk operations', () => {
@@ -254,11 +309,14 @@ describe('<RulesContainer />', () => {
     fireEvent.click(screen.getByTestId(TEST_SUBJECTS.CSP_RULES_SAVE_BUTTON));
 
     expect(mutate).toHaveBeenCalledTimes(1);
-    expect(mutate).toHaveBeenCalledWith([
-      { ...rule1.attributes, enabled: !rule1.attributes.enabled },
-      { ...rule4.attributes, enabled: !rule4.attributes.enabled },
-      { ...rule5.attributes, enabled: !rule5.attributes.enabled },
-    ]);
+    expect(mutate).toHaveBeenCalledWith({
+      packagePolicyId: params.packagePolicyId,
+      savedObjectRules: [
+        getSavedObjectRuleEnable(rule1, !rule1.attributes.enabled),
+        getSavedObjectRuleEnable(rule4, !rule4.attributes.enabled),
+        getSavedObjectRuleEnable(rule5, !rule5.attributes.enabled),
+      ],
+    });
   });
 
   it('updates rules with changes of both bulk/non-bulk toggles', () => {
@@ -295,11 +353,14 @@ describe('<RulesContainer />', () => {
     fireEvent.click(screen.getByTestId(TEST_SUBJECTS.CSP_RULES_SAVE_BUTTON));
 
     expect(mutate).toHaveBeenCalledTimes(1);
-    expect(mutate).toHaveBeenCalledWith([
-      { ...rule1.attributes, enabled: !rule1.attributes.enabled },
-      { ...rule4.attributes, enabled: !rule4.attributes.enabled },
-      { ...rule5.attributes, enabled: !rule5.attributes.enabled },
-    ]);
+    expect(mutate).toHaveBeenCalledWith({
+      packagePolicyId: params.packagePolicyId,
+      savedObjectRules: [
+        getSavedObjectRuleEnable(rule1, !rule1.attributes.enabled),
+        getSavedObjectRuleEnable(rule4, !rule4.attributes.enabled),
+        getSavedObjectRuleEnable(rule5, !rule5.attributes.enabled),
+      ],
+    });
   });
 
   it('selects and updates all rules', async () => {
@@ -329,12 +390,12 @@ describe('<RulesContainer />', () => {
     fireEvent.click(screen.getByTestId(TEST_SUBJECTS.CSP_RULES_SAVE_BUTTON));
 
     expect(mutate).toHaveBeenCalledTimes(1);
-    expect(mutate).toHaveBeenCalledWith(
-      rules.map((rule) => ({
-        ...rule.attributes,
-        enabled: !enabled,
-      }))
-    );
+    expect(mutate).toHaveBeenCalledWith({
+      packagePolicyId: params.packagePolicyId,
+      savedObjectRules: rules.map((rule) =>
+        getSavedObjectRuleEnable(rule, !rule.attributes.enabled)
+      ),
+    });
   });
 
   it('updates the rules from within the flyout', () => {
@@ -370,6 +431,9 @@ describe('<RulesContainer />', () => {
     const { mutate } = useBulkUpdateCspRules();
 
     expect(mutate).toHaveBeenCalledTimes(1);
-    expect(mutate).toHaveBeenCalledWith([{ ...rule.attributes, enabled: !enabled }]);
+    expect(mutate).toHaveBeenCalledWith({
+      packagePolicyId: params.packagePolicyId,
+      savedObjectRules: [getSavedObjectRuleEnable(rule, !rule.attributes.enabled)],
+    });
   });
 });

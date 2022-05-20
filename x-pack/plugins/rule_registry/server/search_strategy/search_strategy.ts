@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/core/server';
 import { from, of } from 'rxjs';
+import { isEmpty } from 'lodash';
 import { isValidFeatureId, AlertConsumers } from '@kbn/rule-data-utils';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
@@ -29,6 +30,8 @@ import { getIsKibanaRequest } from '../lib/get_is_kibana_request';
 export const EMPTY_RESPONSE: RuleRegistrySearchResponse = {
   rawResponse: {} as RuleRegistrySearchResponse['rawResponse'],
 };
+
+const EMPTY_FIELDS = [{ field: '*', include_unmapped: true }];
 
 export const RULE_SEARCH_STRATEGY_NAME = 'privateRuleRegistryAlertsSearchStrategy';
 
@@ -89,17 +92,16 @@ export const ruleRegistrySearchStrategyProvider = (
               );
               return accum;
             }
-
-            return [
-              ...accum,
-              ...ruleDataService
-                .findIndicesByFeature(featureId, Dataset.alerts)
-                .map((indexInfo) => {
-                  return featureId === 'siem'
-                    ? `${indexInfo.baseName}-${space?.id ?? ''}*`
-                    : `${indexInfo.baseName}*`;
-                }),
-            ];
+            const alertIndexInfo = ruleDataService.findIndexByFeature(featureId, Dataset.alerts);
+            if (alertIndexInfo) {
+              return [
+                ...accum,
+                featureId === 'siem'
+                  ? `${alertIndexInfo.baseName}-${space?.id ?? ''}*`
+                  : `${alertIndexInfo.baseName}*`,
+              ];
+            }
+            return accum;
           }, []);
 
           if (indices.length === 0) {
@@ -121,16 +123,21 @@ export const ruleRegistrySearchStrategyProvider = (
           const sort = request.sort ?? [];
 
           const query = {
-            bool: {
-              filter,
-            },
+            ...(request.query?.ids != null
+              ? { ids: request.query?.ids }
+              : {
+                  bool: {
+                    filter,
+                  },
+                }),
           };
           const size = request.pagination ? request.pagination.pageSize : MAX_ALERT_SEARCH_SIZE;
           const params = {
             index: indices,
             body: {
               _source: false,
-              fields: ['*'],
+              // TODO the fields need to come from the request
+              fields: !isEmpty(request?.fields) ? request?.fields : EMPTY_FIELDS,
               sort,
               size,
               from: request.pagination ? request.pagination.pageIndex * size : 0,

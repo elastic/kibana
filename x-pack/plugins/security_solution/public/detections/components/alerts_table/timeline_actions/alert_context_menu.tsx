@@ -28,7 +28,7 @@ import { TimelineId } from '../../../../../common/types';
 import { AlertData, EcsHit } from '../../../../common/components/exceptions/types';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
 import { useSignalIndex } from '../../../containers/detection_engine/alerts/use_signal_index';
-import { EventFiltersFlyout } from '../../../../management/pages/event_filters/view/components/flyout';
+import { EventFiltersFlyout } from '../../../../management/pages/event_filters/view/components/event_filters_flyout';
 import { useAlertsActions } from './use_alerts_actions';
 import { useExceptionFlyout } from './use_add_exception_flyout';
 import { useExceptionActions } from './use_add_exception_actions';
@@ -88,6 +88,13 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   const alertStatus = get(0, ecsRowData?.kibana?.alert?.workflow_status) as Status | undefined;
 
   const isEvent = useMemo(() => indexOf(ecsRowData.event?.kind, 'event') !== -1, [ecsRowData]);
+  const isAgentEndpoint = useMemo(() => ecsRowData.agent?.type?.includes('endpoint'), [ecsRowData]);
+
+  const isEndpointEvent = useMemo(() => isEvent && isAgentEndpoint, [isEvent, isAgentEndpoint]);
+  const timelineIdAllowsAddEndpointEventFilter = useMemo(
+    () => timelineId === TimelineId.hostsPageEvents || timelineId === TimelineId.usersPageEvents,
+    [timelineId]
+  );
 
   const onButtonClick = useCallback(() => {
     setPopover(!isPopoverOpen);
@@ -173,7 +180,11 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   });
   const { eventFilterActionItems } = useEventFilterAction({
     onAddEventFilterClick: handleOnAddEventFilterClick,
-    disabled: !isEvent || !canCreateEndpointEventFilters,
+    disabled:
+      !isEndpointEvent || !canCreateEndpointEventFilters || !timelineIdAllowsAddEndpointEventFilter,
+    tooltipMessage: !timelineIdAllowsAddEndpointEventFilter
+      ? i18n.ACTION_ADD_EVENT_FILTER_DISABLED_TOOLTIP
+      : undefined,
   });
   const items: React.ReactElement[] = useMemo(
     () =>

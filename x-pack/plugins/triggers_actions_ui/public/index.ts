@@ -18,6 +18,7 @@ export type {
   RuleType,
   RuleTypeIndex,
   RuleTypeModel,
+  RuleStatus,
   ActionType,
   ActionTypeRegistryContract,
   RuleTypeRegistryContract,
@@ -30,7 +31,12 @@ export type {
   RuleTypeParams,
   AsApiContract,
   RuleTableItem,
+  AlertsTableProps,
+  BulkActionsObjectProp,
+  RuleSummary,
+  AlertStatus,
   AlertsTableConfigurationRegistryContract,
+  RuleEventLogListProps,
 } from './types';
 
 export {
@@ -43,16 +49,36 @@ export type { ActionGroupWithCondition } from './application/sections';
 
 export { AlertConditions, AlertConditionsGroup } from './application/sections';
 
-export * from './common';
-
 export function plugin(context: PluginInitializerContext) {
   return new Plugin(context);
 }
+
+export type { AggregationType, Comparator } from './common';
+
+export {
+  WhenExpression,
+  OfExpression,
+  ForLastExpression,
+  ThresholdExpression,
+  ValueExpression,
+  builtInComparators,
+  builtInGroupByTypes,
+  builtInAggregationTypes,
+  getFields,
+  firstFieldOption,
+  getIndexOptions,
+  getTimeFieldOptions,
+  GroupByExpression,
+  COMPARATORS,
+} from './common';
 
 export { Plugin };
 export * from './plugin';
 // TODO remove this import when we expose the Rules tables as a component
 export { loadRules } from './application/lib/rule_api/rules';
+export { loadExecutionLogAggregations } from './application/lib/rule_api/load_execution_log_aggregations';
+export { loadRuleTypes } from './application/lib/rule_api';
+export { loadRuleSummary } from './application/lib/rule_api/rule_summary';
 export { deleteRules } from './application/lib/rule_api/delete';
 export { enableRule } from './application/lib/rule_api/enable';
 export { disableRule } from './application/lib/rule_api/disable';
@@ -60,11 +86,13 @@ export { muteRule } from './application/lib/rule_api/mute';
 export { unmuteRule } from './application/lib/rule_api/unmute';
 export { snoozeRule } from './application/lib/rule_api/snooze';
 export { unsnoozeRule } from './application/lib/rule_api/unsnooze';
-export { loadRuleAggregations } from './application/lib/rule_api/aggregate';
+export { loadRuleAggregations, loadRuleTags } from './application/lib/rule_api/aggregate';
 export { useLoadRuleTypes } from './application/hooks/use_load_rule_types';
-
+export { loadRule } from './application/lib/rule_api/get_rule';
+export { loadAllActions } from './application/lib/action_connector_api';
+export { suspendedComponentWithProps } from './application/lib/suspended_component_with_props';
 export { loadActionTypes } from './application/lib/action_connector_api/connector_types';
-
+export { NOTIFY_WHEN_OPTIONS } from './application/sections/rule_form/rule_notify_when';
 export type { TIME_UNITS } from './application/constants';
 export { getTimeUnitLabel } from './common/lib/get_time_unit_label';
 export type { TriggersAndActionsUiServices } from './application/app';

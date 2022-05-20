@@ -7,15 +7,20 @@
  */
 
 export const XY_VIS = 'xyVis';
+export const LAYERED_XY_VIS = 'layeredXyVis';
 export const Y_CONFIG = 'yConfig';
-export const MULTITABLE = 'lens_multitable';
+export const REFERENCE_LINE_Y_CONFIG = 'referenceLineYConfig';
+export const EXTENDED_Y_CONFIG = 'extendedYConfig';
 export const DATA_LAYER = 'dataLayer';
+export const EXTENDED_DATA_LAYER = 'extendedDataLayer';
 export const LEGEND_CONFIG = 'legendConfig';
 export const XY_VIS_RENDERER = 'xyVis';
 export const GRID_LINES_CONFIG = 'gridlinesConfig';
 export const ANNOTATION_LAYER = 'annotationLayer';
+export const EXTENDED_ANNOTATION_LAYER = 'extendedAnnotationLayer';
 export const TICK_LABELS_CONFIG = 'tickLabelsConfig';
 export const AXIS_EXTENT_CONFIG = 'axisExtentConfig';
+export const REFERENCE_LINE = 'referenceLine';
 export const REFERENCE_LINE_LAYER = 'referenceLineLayer';
 export const LABELS_ORIENTATION_CONFIG = 'labelsOrientationConfig';
 export const AXIS_TITLES_VISIBILITY_CONFIG = 'axisTitlesVisibilityConfig';
@@ -106,6 +111,23 @@ export const XYCurveTypes = {
 
 export const ValueLabelModes = {
   HIDE: 'hide',
-  INSIDE: 'inside',
-  OUTSIDE: 'outside',
+  SHOW: 'show',
+} as const;
+
+export const AvailableReferenceLineIcons = {
+  EMPTY: 'empty',
+  ASTERISK: 'asterisk',
+  ALERT: 'alert',
+  BELL: 'bell',
+  BOLT: 'bolt',
+  BUG: 'bug',
+  CIRCLE: 'circle',
+  EDITOR_COMMENT: 'editorComment',
+  FLAG: 'flag',
+  HEART: 'heart',
+  MAP_MARKER: 'mapMarker',
+  PIN_FILLED: 'pinFilled',
+  STAR_EMPTY: 'starEmpty',
+  TAG: 'tag',
+  TRIANGLE: 'triangle',
 } as const;
