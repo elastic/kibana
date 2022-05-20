@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import { Observable, firstValueFrom } from 'rxjs';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { CoreSetup, Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -28,6 +28,45 @@ import { APMUsage } from './types';
 import { apmSchema } from './schema';
 
 const APM_TELEMETRY_TASK_NAME = 'apm-telemetry-task';
+
+export async function getDataTelemetry({
+  esClient,
+  config,
+  logger,
+  savedObjectsClient,
+}) {
+  const indices = await getApmIndices({
+    config,
+    savedObjectsClient,
+  });
+
+  const search: CollectTelemetryParams['search'] = (params) =>
+    unwrapEsResponse(
+      esClient.asInternalUser.search(params, { meta: true })
+    ) as any;
+
+  const indicesStats: CollectTelemetryParams['indicesStats'] = (params) =>
+    unwrapEsResponse(
+      esClient.asInternalUser.indices.stats(params, { meta: true })
+    );
+
+  const transportRequest: CollectTelemetryParams['transportRequest'] = (
+    params
+  ) =>
+    unwrapEsResponse(
+      esClient.asInternalUser.transport.request(params, { meta: true })
+    );
+
+  const dataTelemetry = await collectDataTelemetry({
+    search,
+    indices,
+    logger,
+    indicesStats,
+    transportRequest,
+    savedObjectsClient,
+  });
+  return dataTelemetry;
+}
 
 export async function createApmTelemetry({
   core,
@@ -65,34 +104,10 @@ export async function createApmTelemetry({
     const [{ elasticsearch }] = await core.getStartServices();
     const esClient = elasticsearch.client;
 
-    const indices = await getApmIndices({
+    const dataTelemetry = await getDataTelemetry({
+      esClient,
       config,
-      savedObjectsClient,
-    });
-
-    const search: CollectTelemetryParams['search'] = (params) =>
-      unwrapEsResponse(
-        esClient.asInternalUser.search(params, { meta: true })
-      ) as any;
-
-    const indicesStats: CollectTelemetryParams['indicesStats'] = (params) =>
-      unwrapEsResponse(
-        esClient.asInternalUser.indices.stats(params, { meta: true })
-      );
-
-    const transportRequest: CollectTelemetryParams['transportRequest'] = (
-      params
-    ) =>
-      unwrapEsResponse(
-        esClient.asInternalUser.transport.request(params, { meta: true })
-      );
-
-    const dataTelemetry = await collectDataTelemetry({
-      search,
-      indices,
       logger,
-      indicesStats,
-      transportRequest,
       savedObjectsClient,
     });
 
