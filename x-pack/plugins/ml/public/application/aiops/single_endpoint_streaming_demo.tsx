@@ -7,30 +7,27 @@
 
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ExplainLogRateSpikes } from '@kbn/aiops-plugin/public';
-
-import { useMlContext } from '../contexts/ml';
-import { useMlKibana } from '../contexts/kibana';
+import { SingleEndpointStreamingDemo } from '@kbn/aiops-plugin/public';
+import { useMlKibana, useTimefilter } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
 
 import { MlPageHeader } from '../components/page_header';
 
-export const ExplainLogRateSpikesPage: FC = () => {
+export const SingleEndpointStreamingDemoPage: FC = () => {
+  useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
     services: { docLinks },
   } = useMlKibana();
-
-  const context = useMlContext();
 
   return (
     <>
       <MlPageHeader>
         <FormattedMessage
-          id="xpack.ml.explainLogRateSpikes.pageHeader"
-          defaultMessage="Explain log rate spikes"
+          id="xpack.ml.singleEndpointStreamingDemo.pageHeader"
+          defaultMessage="Single endpoint streaming demo"
         />
       </MlPageHeader>
-      <ExplainLogRateSpikes dataView={context.currentDataView} />
+      <SingleEndpointStreamingDemo />
       <HelpMenu docLink={docLinks.links.ml.guide} />
     </>
   );
