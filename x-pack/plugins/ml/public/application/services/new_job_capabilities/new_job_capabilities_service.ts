@@ -60,7 +60,10 @@ class NewJobCapsService extends NewJobCapabilitiesServiceBase {
       const { fieldsPreferringKeyword, fieldsPreferringText } =
         processTextAndKeywordFields(allFields);
       const catFields = fieldsPreferringText.filter(
-        (f) => f.type === ES_FIELD_TYPES.KEYWORD || f.type === ES_FIELD_TYPES.TEXT
+        (f) =>
+          f.type === ES_FIELD_TYPES.KEYWORD ||
+          f.type === ES_FIELD_TYPES.VERSION ||
+          f.type === ES_FIELD_TYPES.TEXT
       );
       const dateFields = fieldsPreferringText.filter((f) => f.type === ES_FIELD_TYPES.DATE);
       const fields = this._removeTextFields ? fieldsPreferringKeyword : allFields;

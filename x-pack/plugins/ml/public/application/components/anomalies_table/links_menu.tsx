@@ -452,7 +452,10 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
           // Build query using categorization regex (if keyword type) or terms (if text type).
           // Check for terms or regex in case categoryId represents an anomaly from the absence of the
           // categorization field in documents (usually indicated by a categoryId of -1).
-          if (categorizationFieldType === ES_FIELD_TYPES.KEYWORD) {
+          if (
+            categorizationFieldType === ES_FIELD_TYPES.KEYWORD ||
+            categorizationFieldType === ES_FIELD_TYPES.VERSION
+          ) {
             if (resp.regex) {
               query = {
                 language: SEARCH_QUERY_LANGUAGE.LUCENE,
