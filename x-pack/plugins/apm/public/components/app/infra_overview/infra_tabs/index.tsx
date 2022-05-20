@@ -95,7 +95,6 @@ export function InfraTabs() {
         tabs={tabs}
         initialSelectedTab={tabs[0]}
         autoFocus="selected"
-        onTabClick={(tab) => {}}
       />
     </>
   );

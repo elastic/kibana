@@ -28,7 +28,7 @@ interface InfraPlugin {
   start: () => Promise<InfraPluginStart>;
 }
 
-export const getHostNames = async ({
+const getHostNames = async ({
   esClient,
   containerIds,
   index,
