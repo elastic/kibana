@@ -9,53 +9,58 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { SecurityPageName } from '../../app/types';
 import { TestProviders } from '../../common/mock';
-import { LandingCategories } from './manage';
-import { NavLinkItem } from '../../common/links/types';
+import { ManagementCategories } from './manage';
+import { NavLinkItem } from '../../common/components/navigation/types';
 
 const RULES_ITEM_LABEL = 'elastic rules!';
 const EXCEPTIONS_ITEM_LABEL = 'exceptional!';
+const CATEGORY_1_LABEL = 'first tests category';
+const CATEGORY_2_LABEL = 'second tests category';
 
-const mockAppManageLink: NavLinkItem = {
+const defaultAppManageLink: NavLinkItem = {
   id: SecurityPageName.administration,
-  path: '',
   title: 'admin',
+  categories: [
+    {
+      label: CATEGORY_1_LABEL,
+      linkIds: [SecurityPageName.rules],
+    },
+    {
+      label: CATEGORY_2_LABEL,
+      linkIds: [SecurityPageName.exceptions],
+    },
+  ],
   links: [
     {
       id: SecurityPageName.rules,
       title: RULES_ITEM_LABEL,
       description: '',
       icon: 'testIcon1',
-      path: '',
     },
     {
       id: SecurityPageName.exceptions,
       title: EXCEPTIONS_ITEM_LABEL,
       description: '',
       icon: 'testIcon2',
-      path: '',
     },
   ],
 };
-jest.mock('../../common/components/navigation/nav_links', () => ({
-  useAppRootNavLink: jest.fn(() => mockAppManageLink),
+
+const mockedUseCanSeeHostIsolationExceptionsMenu = jest.fn();
+jest.mock('../../management/pages/host_isolation_exceptions/view/hooks', () => ({
+  useCanSeeHostIsolationExceptionsMenu: () => mockedUseCanSeeHostIsolationExceptionsMenu(),
 }));
 
-describe('LandingCategories', () => {
-  it('renders items', () => {
+const mockAppManageLink = jest.fn(() => defaultAppManageLink);
+jest.mock('../../common/components/navigation/nav_links', () => ({
+  useAppRootNavLink: () => mockAppManageLink(),
+}));
+
+describe('ManagementCategories', () => {
+  it('should render items', () => {
     const { queryByText } = render(
       <TestProviders>
-        <LandingCategories
-          categories={[
-            {
-              label: 'first tests category',
-              linkIds: [SecurityPageName.rules],
-            },
-            {
-              label: 'second tests category',
-              linkIds: [SecurityPageName.exceptions],
-            },
-          ]}
-        />
+        <ManagementCategories />
       </TestProviders>
     );
 
@@ -63,17 +68,19 @@ describe('LandingCategories', () => {
     expect(queryByText(EXCEPTIONS_ITEM_LABEL)).toBeInTheDocument();
   });
 
-  it('renders items in the same order as defined', () => {
+  it('should render items in the same order as defined', () => {
+    mockAppManageLink.mockReturnValueOnce({
+      ...defaultAppManageLink,
+      categories: [
+        {
+          label: '',
+          linkIds: [SecurityPageName.exceptions, SecurityPageName.rules],
+        },
+      ],
+    });
     const { queryAllByTestId } = render(
       <TestProviders>
-        <LandingCategories
-          categories={[
-            {
-              label: '',
-              linkIds: [SecurityPageName.exceptions, SecurityPageName.rules],
-            },
-          ]}
-        />
+        <ManagementCategories />
       </TestProviders>
     );
 
@@ -81,5 +88,110 @@ describe('LandingCategories', () => {
 
     expect(renderedItems[0]).toHaveTextContent(EXCEPTIONS_ITEM_LABEL);
     expect(renderedItems[1]).toHaveTextContent(RULES_ITEM_LABEL);
+  });
+
+  it('should not render category items filtered', () => {
+    mockAppManageLink.mockReturnValueOnce({
+      ...defaultAppManageLink,
+      categories: [
+        {
+          label: CATEGORY_1_LABEL,
+          linkIds: [SecurityPageName.rules, SecurityPageName.exceptions],
+        },
+      ],
+      links: [
+        {
+          id: SecurityPageName.rules,
+          title: RULES_ITEM_LABEL,
+          description: '',
+          icon: 'testIcon1',
+        },
+      ],
+    });
+    const { queryAllByTestId } = render(
+      <TestProviders>
+        <ManagementCategories />
+      </TestProviders>
+    );
+
+    const renderedItems = queryAllByTestId('LandingItem');
+
+    expect(renderedItems).toHaveLength(1);
+    expect(renderedItems[0]).toHaveTextContent(RULES_ITEM_LABEL);
+  });
+
+  it('should not render category if all items filtered', () => {
+    mockAppManageLink.mockReturnValueOnce({
+      ...defaultAppManageLink,
+      links: [],
+    });
+    const { queryByText } = render(
+      <TestProviders>
+        <ManagementCategories />
+      </TestProviders>
+    );
+
+    expect(queryByText(CATEGORY_1_LABEL)).not.toBeInTheDocument();
+    expect(queryByText(CATEGORY_2_LABEL)).not.toBeInTheDocument();
+  });
+
+  it('should not render hostIsolationExceptionsLink when useCanSeeHostIsolationExceptionsMenu is false', () => {
+    mockedUseCanSeeHostIsolationExceptionsMenu.mockReturnValueOnce(false);
+    mockAppManageLink.mockReturnValueOnce({
+      ...defaultAppManageLink,
+      categories: [
+        {
+          label: CATEGORY_1_LABEL,
+          linkIds: [SecurityPageName.hostIsolationExceptions],
+        },
+      ],
+      links: [
+        {
+          id: SecurityPageName.hostIsolationExceptions,
+          title: 'test hostIsolationExceptions title',
+          description: 'test hostIsolationExceptions description',
+          icon: 'testIcon1',
+        },
+      ],
+    });
+    const { queryByText } = render(
+      <TestProviders>
+        <ManagementCategories />
+      </TestProviders>
+    );
+
+    expect(queryByText(CATEGORY_1_LABEL)).not.toBeInTheDocument();
+  });
+
+  it('should render hostIsolationExceptionsLink when useCanSeeHostIsolationExceptionsMenu is true', () => {
+    const HOST_ISOLATION_EXCEPTIONS_ITEM_LABEL = 'test hostIsolationExceptions title';
+    mockedUseCanSeeHostIsolationExceptionsMenu.mockReturnValueOnce(true);
+    mockAppManageLink.mockReturnValueOnce({
+      ...defaultAppManageLink,
+      categories: [
+        {
+          label: CATEGORY_1_LABEL,
+          linkIds: [SecurityPageName.hostIsolationExceptions],
+        },
+      ],
+      links: [
+        {
+          id: SecurityPageName.hostIsolationExceptions,
+          title: HOST_ISOLATION_EXCEPTIONS_ITEM_LABEL,
+          description: 'test hostIsolationExceptions description',
+          icon: 'testIcon1',
+        },
+      ],
+    });
+    const { queryAllByTestId } = render(
+      <TestProviders>
+        <ManagementCategories />
+      </TestProviders>
+    );
+
+    const renderedItems = queryAllByTestId('LandingItem');
+
+    expect(renderedItems).toHaveLength(1);
+    expect(renderedItems[0]).toHaveTextContent(HOST_ISOLATION_EXCEPTIONS_ITEM_LABEL);
   });
 });

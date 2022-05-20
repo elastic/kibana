@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { IconType } from '@elastic/eui';
 import { UrlStateType } from '../url_state/constants';
 import { SecurityPageName } from '../../../app/types';
 import { UrlState } from '../url_state/types';
 import { SiemRouteType } from '../../utils/route/types';
+import { LinkCategories } from '../../links';
 
 export interface TabNavigationComponentProps {
   pageName: string;
@@ -76,10 +78,14 @@ export type GetUrlForApp = (
 ) => string;
 
 export type NavigateToUrl = (url: string) => void;
-
-export interface NavigationCategory {
-  label: string;
-  linkIds: readonly SecurityPageName[];
+export interface NavLinkItem {
+  categories?: LinkCategories;
+  description?: string;
+  disabled?: boolean;
+  icon?: IconType;
+  id: SecurityPageName;
+  links?: NavLinkItem[];
+  image?: string;
+  title: string;
+  skipUrlState?: boolean;
 }
-
-export type NavigationCategories = Readonly<NavigationCategory[]>;

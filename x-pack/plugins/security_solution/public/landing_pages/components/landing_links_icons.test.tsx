@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { SecurityPageName } from '../../app/types';
-import { NavLinkItem } from '../../common/links/types';
+import { NavLinkItem } from '../../common/components/navigation/types';
 import { TestProviders } from '../../common/mock';
 import { LandingLinksIcons } from './landing_links_icons';
 
@@ -17,7 +17,6 @@ const DEFAULT_NAV_ITEM: NavLinkItem = {
   title: 'TEST LABEL',
   description: 'TEST DESCRIPTION',
   icon: 'myTestIcon',
-  path: '',
 };
 
 const mockNavigateTo = jest.fn();

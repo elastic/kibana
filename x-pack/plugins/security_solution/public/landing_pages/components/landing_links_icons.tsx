@@ -12,7 +12,7 @@ import {
   SecuritySolutionLinkAnchor,
   withSecuritySolutionLink,
 } from '../../common/components/links';
-import { NavLinkItem } from '../../common/links/types';
+import { NavLinkItem } from '../../common/components/navigation/types';
 
 interface LandingLinksImagesProps {
   items: NavLinkItem[];
