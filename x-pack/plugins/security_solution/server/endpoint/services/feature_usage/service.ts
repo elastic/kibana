@@ -18,6 +18,7 @@ const FEATURES = {
   RANSOMWARE_PROTECTION: 'Ransomeware protection',
   MEMORY_THREAT_PROTECTION: 'Memory threat protection',
   BEHAVIOR_PROTECTION: 'Behavior protection',
+  RESPONSE_ACTIONS: 'Response actions',
 } as const;
 
 export type FeatureKeys = keyof typeof FEATURES;

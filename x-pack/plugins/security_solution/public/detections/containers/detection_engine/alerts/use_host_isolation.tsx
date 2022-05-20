@@ -7,8 +7,8 @@
 
 import { useCallback, useState } from 'react';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { HOST_ISOLATION_FAILURE } from './translations';
-import { createHostIsolation } from './api';
+import { HOST_ISOLATION_FAILURE, ENDPOINT_RESPONSE_ACTION_FAILURE } from './translations';
+import { createHostIsolation, createEndpointResponseAction } from './api';
 
 interface HostIsolationStatus {
   loading: boolean;
@@ -20,6 +20,20 @@ interface UseHostIsolationProps {
   endpointId: string;
   comment: string;
   caseIds?: string[];
+}
+
+interface UseEndpointResponseActionProps {
+  endpointId: string;
+  comment: string;
+  caseIds?: string[];
+  command: string;
+  parameters?: {};
+}
+
+interface EndpointResponseActionStatus {
+  loading: boolean;
+  /** Boolean return will indicate if isolation action was created successful */
+  executeResponseAction: () => Promise<boolean>;
 }
 
 export const useHostIsolation = ({
@@ -43,4 +57,29 @@ export const useHostIsolation = ({
     }
   }, [endpointId, comment, caseIds, addError]);
   return { loading, isolateHost };
+};
+
+export const useEndpointResponseAction = ({
+  endpointId,
+  comment,
+  caseIds,
+  command,
+  parameters,
+}: UseEndpointResponseActionProps): EndpointResponseActionStatus => {
+  const [loading, setLoading] = useState(false);
+  const { addError } = useAppToasts();
+
+  const executeResponseAction = useCallback(async () => {
+    try {
+      setLoading(true);
+      const responseActionStatus = await createEndpointResponseAction({ endpointId, comment, caseIds, command, parameters });
+      setLoading(false);
+      return responseActionStatus.action ? true : false;
+    } catch (error) {
+      setLoading(false);
+      addError(error.message, { title: ENDPOINT_RESPONSE_ACTION_FAILURE });
+      return false;
+    }
+  }, [endpointId, comment, caseIds, addError]);
+  return { loading, executeResponseAction };
 };

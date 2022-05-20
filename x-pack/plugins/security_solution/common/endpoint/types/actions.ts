@@ -6,9 +6,10 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { ActionStatusRequestSchema, HostIsolationRequestSchema } from '../schema/actions';
+import { ActionStatusRequestSchema, EndpointResponseActionRequestSchema, HostIsolationRequestSchema } from '../schema/actions';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
+export type ENDPOINT_RESPONSE_ACTIONS = 'kill_process';
 
 export const ActivityLogItemTypes = {
   ACTION: 'action' as const,
@@ -25,9 +26,13 @@ interface EcsError {
   type?: string;
 }
 
+interface KillProcessData {
+  pid: number;
+}
+
 interface EndpointActionFields {
   action_id: string;
-  data: EndpointActionData;
+  data: EndpointActionData & KillProcessData;
 }
 
 interface ActionRequestFields {
@@ -71,7 +76,7 @@ export interface LogsEndpointActionResponse {
 }
 
 export interface EndpointActionData {
-  command: ISOLATION_ACTIONS;
+  command: ISOLATION_ACTIONS & ENDPOINT_RESPONSE_ACTIONS;
   comment?: string;
 }
 
@@ -170,6 +175,12 @@ export interface ActivityLog {
 export type HostIsolationRequestBody = TypeOf<typeof HostIsolationRequestSchema.body>;
 
 export interface HostIsolationResponse {
+  action: string;
+}
+
+export type EndpointResponseActionRequestBody = TypeOf<typeof EndpointResponseActionRequestSchema.body>;
+
+export interface EndpointResponseActionResponse {
   action: string;
 }
 

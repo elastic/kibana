@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getCasesFromAlertsUrl } from '@kbn/cases-plugin/common';
-import { HostIsolationResponse, HostInfo } from '../../../../../common/endpoint/types';
+import { HostIsolationResponse, EndpointResponseActionResponse, HostInfo } from '../../../../../common/endpoint/types';
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
@@ -27,7 +27,7 @@ import {
   UpdateAlertStatusProps,
   CasesFromAlertsResponse,
 } from './types';
-import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
+import { isolateHost, unIsolateHost, endpointResponseAction } from '../../../../common/lib/endpoint_isolation';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 
 /**
@@ -188,6 +188,34 @@ export const createHostUnIsolation = async ({
     endpoint_ids: [endpointId],
     comment,
     case_ids: caseIds,
+  });
+  
+/**
+ * Endpoint response action
+ *
+ * @param agent id
+ * @param optional comment for the unisolation action
+ * @param optional case ids if associated with an alert on the host
+ *
+ * @throws An error if response is not OK
+ */
+ export const createEndpointResponseAction = async ({
+  endpointId,
+  comment = '',
+  caseIds,
+  command,
+}: {
+  endpointId: string;
+  comment?: string;
+  caseIds?: string[];
+  parameters?: {};
+  command: string;
+}): Promise<EndpointResponseActionResponse> =>
+endpointResponseAction({
+    endpoint_ids: [endpointId],
+    comment,
+    case_ids: caseIds,
+    command,
   });
 
 /**

@@ -19,6 +19,22 @@ export const HostIsolationRequestSchema = {
   }),
 };
 
+export const EndpointResponseActionRequestSchema = {
+  body: schema.object({
+    /** A list of endpoint IDs whose hosts will be isolated (Fleet Agent IDs will be retrieved for these) */
+    endpoint_ids: schema.arrayOf(schema.string(), { minSize: 1 }),
+    /** If defined, any case associated with the given IDs will be updated */
+    alert_ids: schema.maybe(schema.arrayOf(schema.string())),
+    /** Case IDs to be updated */
+    case_ids: schema.maybe(schema.arrayOf(schema.string())),
+    comment: schema.maybe(schema.string()),
+    parameters: schema.maybe(schema.object({
+      pid: schema.maybe(schema.number()),
+    })),
+    command: schema.maybe(schema.string()),
+  }),
+};
+
 export const EndpointActionLogRequestSchema = {
   query: schema.object({
     page: schema.number({ defaultValue: 1, min: 1 }),
