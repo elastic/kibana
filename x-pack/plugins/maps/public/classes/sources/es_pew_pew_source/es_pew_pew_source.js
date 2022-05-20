@@ -105,7 +105,13 @@ export class ESPewPewSource extends AbstractESAggSource {
     return Math.min(targetGeotileLevel, MAX_GEOTILE_LEVEL);
   }
 
-  async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
+  async getGeoJsonWithMeta(
+    layerName,
+    searchFilters,
+    registerCancelCallback,
+    isRequestStillActive,
+    inspectorAdapters
+  ) {
     const indexPattern = await this.getIndexPattern();
     const searchSource = await this.makeSearchSource(searchFilters, 0);
     searchSource.setField('trackTotalHits', false);
@@ -165,6 +171,7 @@ export class ESPewPewSource extends AbstractESAggSource {
       }),
       searchSessionId: searchFilters.searchSessionId,
       executionContext: makePublicExecutionContext('es_pew_pew_source:connections'),
+      requestsAdapter: inspectorAdapters.requests,
     });
 
     const { featureCollection } = convertToLines(esResponse);

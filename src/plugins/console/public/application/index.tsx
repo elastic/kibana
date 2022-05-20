@@ -19,7 +19,7 @@ import {
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { KibanaThemeProvider } from '../shared_imports';
-import { createStorage, createHistory, createSettings } from '../services';
+import { createStorage, createHistory, createSettings, AutocompleteInfo } from '../services';
 import { createUsageTracker } from '../services/tracker';
 import * as localStorageObjectClient from '../lib/local_storage_object_client';
 import { Main } from './containers';
@@ -35,6 +35,7 @@ export interface BootDependencies {
   element: HTMLElement;
   theme$: Observable<CoreTheme>;
   docLinks: DocLinksStart['links'];
+  autocompleteInfo: AutocompleteInfo;
 }
 
 export function renderApp({
@@ -46,6 +47,7 @@ export function renderApp({
   http,
   theme$,
   docLinks,
+  autocompleteInfo,
 }: BootDependencies) {
   const trackUiMetric = createUsageTracker(usageCollection);
   trackUiMetric.load('opened_app');
@@ -76,6 +78,7 @@ export function renderApp({
               trackUiMetric,
               objectStorageClient,
               http,
+              autocompleteInfo,
             },
             theme$,
           }}
