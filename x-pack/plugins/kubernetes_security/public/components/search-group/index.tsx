@@ -7,7 +7,11 @@
 
 import React from 'react';
 import { EuiComboBoxOptionOption, EuiComboBox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import * as i18n from '../../../common/translations';
+import {
+  SEARCH_GROUP_CLUSTER,
+  SEARCH_GROUP_GROUP_BY,
+  SEARCH_GROUP_SORT_BY,
+} from '@kbn/kubernetes-security-plugin/common/translations';
 // import { CSSObject } from '@emotion/react';
 
 export interface SearchFields {
@@ -51,7 +55,7 @@ export const SearchGroup = ({
     <EuiFlexGroup component="span" gutterSize="m">
       <EuiFlexItem component="span" grow={false}>
         <EuiComboBox
-          prepend={i18n.SEARCH_GROUP_CLUSTER}
+          prepend={SEARCH_GROUP_CLUSTER}
           singleSelection={{ asPlainText: true }}
           options={clusterOptions}
           selectedOptions={[searchFields.cluster]}
@@ -62,7 +66,7 @@ export const SearchGroup = ({
       <EuiFlexItem component="span" grow={false}>
         <EuiComboBox
           css={{ minWidth: '312px' }}
-          prepend={i18n.SEARCH_GROUP_GROUP_BY}
+          prepend={SEARCH_GROUP_GROUP_BY}
           singleSelection={{ asPlainText: true }}
           options={groupByOptions}
           selectedOptions={searchFields.groupBy ? [searchFields.groupBy] : []}
@@ -72,7 +76,7 @@ export const SearchGroup = ({
       </EuiFlexItem>
       <EuiFlexItem component="span" grow={false}>
         <EuiComboBox
-          prepend={i18n.SEARCH_GROUP_SORT_BY}
+          prepend={SEARCH_GROUP_SORT_BY}
           singleSelection={{ asPlainText: true }}
           options={sortByOptions}
           selectedOptions={[searchFields.sortBy]}
