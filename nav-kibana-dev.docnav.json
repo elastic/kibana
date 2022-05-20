@@ -181,7 +181,8 @@
           "items": [
             { "id": "kibDevDocsOpsOptimizer" },
             { "id": "kibDevDocsOpsBabelPreset" },
-            { "id": "kibDevDocsOpsTypeSummarizer" }
+            { "id": "kibDevDocsOpsTypeSummarizer" },
+            { "id": "kibDevDocsOpsBabelPluginSyntheticPackages"}
           ]
         },
         {
