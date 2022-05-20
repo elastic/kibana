@@ -65,6 +65,7 @@ describe('http resources service', () => {
         resources.register({ path: '/render-core', validate: false }, (context, req, res) =>
           res.renderAnonymousCoreApp({
             headers: {
+              'content-security-policy': "script-src 'unsafe-eval'",
               'x-kibana': '42',
             },
           })
@@ -152,6 +153,7 @@ describe('http resources service', () => {
           res.renderHtml({
             body: '<html><p>Hi</p></html>',
             headers: {
+              'content-security-policy': "script-src 'unsafe-eval'",
               'content-type': 'text/html',
               'x-kibana': '42',
             },

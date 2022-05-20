@@ -27,7 +27,7 @@ _Note: Not parsing of the template string until the first call to the "render" f
 
 The `handlebars` library exposes the API for both [generating the AST](https://github.com/handlebars-lang/handlebars.js/blob/master/docs/compiler-api.md#ast) and walking it by implementing the [Visitor API](https://github.com/handlebars-lang/handlebars.js/blob/master/docs/compiler-api.md#ast-visitor). We can leverage that to our advantage and create our own "render" function, which internally calls this API to generate the AST and then the API to walk the AST.
 
-The `@kbn/handlebars` implementation of the `Visitor` class implements all the nessecary methods called by the parent `Visitor` code when instructed to walk the AST. They all start with an upppercase letter, e.g. `MustacheStatement` or `SubExpression`. We call this class `ElasticHandlebarsVisitor`.
+The `@kbn/handlebars` implementation of the `Visitor` class implements all the necessary methods called by the parent `Visitor` code when instructed to walk the AST. They all start with an upppercase letter, e.g. `MustacheStatement` or `SubExpression`. We call this class `ElasticHandlebarsVisitor`.
 
 To parse the template string to an AST representation, we call `Handlebars.parse(templateString)`, which returns an AST object.
 
@@ -46,10 +46,10 @@ We keep state internally in the `ElasticHandlebarsVisitor` object using the foll
 
 ## Development
 
-Some of the tests have been copied from the upstream `handlebars` project and modified to fit our use-case, test-suite, and conding conventions. They are all located under the `packages/kbn-handlebars/src/upstream` directory. To check if any of the copied files have received updates upstream that we might want to include in our copies, you can run the following script:
+Some of the tests have been copied from the upstream `handlebars` project and modified to fit our use-case, test-suite, and coding conventions. They are all located under the `packages/kbn-handlebars/src/upstream` directory. To check if any of the copied files have received updates upstream that we might want to include in our copies, you can run the following script:
 
 ```sh
-./packages/kbn-handlebars/scripts/check-for-test-changes.sh
+./packages/kbn-handlebars/scripts/check_for_test_changes.sh
 ```
 
 If the script outputs a diff for a given file, it means that this file has been updated.
@@ -57,7 +57,7 @@ If the script outputs a diff for a given file, it means that this file has been 
 Once all updates have been manually merged with our versions of the files, run the following script to "lock" us into the new updates:
 
 ```sh
-./packages/kbn-handlebars/scripts/update-test-patches.sh
+./packages/kbn-handlebars/scripts/update_test_patches.sh
 ```
 
 This will update the `.patch` files inside the `packages/kbn-handlebars/.patches` directory. Make sure to commit those changes.
@@ -139,7 +139,7 @@ Output:
 
 ### Environment variables
 
-By default each test will run both the original `handlebars` code and the modified `@kbn/handlebars` code to compare if the output of the two are identical. When debugging, it can be beneficial to islate a test run to just one or the other. To control this, you can use the following environment variables:
+By default each test will run both the original `handlebars` code and the modified `@kbn/handlebars` code to compare if the output of the two are identical. When debugging, it can be beneficial to isolate a test run to just one or the other. To control this, you can use the following environment variables:
 
 - `EVAL=1` - Set to only run the original `handlebars` implementation that uses `eval`.
 - `AST=1` - Set to only run the modified `@kbn/handlebars` implementation that doesn't use `eval`.

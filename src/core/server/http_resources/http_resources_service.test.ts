@@ -85,6 +85,7 @@ describe('HttpResources service', () => {
             register(routeConfig, async (ctx, req, res) => {
               return res.renderCoreApp({
                 headers: {
+                  'content-security-policy': "script-src 'unsafe-eval'",
                   'x-kibana': '42',
                 },
               });
@@ -130,6 +131,7 @@ describe('HttpResources service', () => {
             register(routeConfig, async (ctx, req, res) => {
               return res.renderAnonymousCoreApp({
                 headers: {
+                  'content-security-policy': "script-src 'unsafe-eval'",
                   'x-kibana': '42',
                 },
               });
@@ -177,6 +179,7 @@ describe('HttpResources service', () => {
                 body: htmlBody,
                 headers: {
                   'content-type': 'text/html5',
+                  'content-security-policy': "script-src 'unsafe-eval'",
                   'x-kibana': '42',
                 },
               });
@@ -225,6 +228,7 @@ describe('HttpResources service', () => {
                 body: jsBody,
                 headers: {
                   'content-type': 'text/html',
+                  'content-security-policy': "script-src 'unsafe-eval'",
                   'x-kibana': '42',
                 },
               });

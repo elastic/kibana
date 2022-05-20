@@ -3,7 +3,7 @@ set -e
 rm -fr .tmp
 mkdir .tmp
 
-echo "Cloing handlebars repo..."
+echo "Cloning handlebars repo..."
 git clone -q --depth 1 https://github.com/handlebars-lang/handlebars.js.git -b 4.x .tmp/handlebars
 
 files=(packages/kbn-handlebars/src/upstream/index.*.test.ts)
