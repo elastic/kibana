@@ -7,13 +7,16 @@
 
 import { useGetEndpointPolicyResponse } from './use_get_endpoint_policy_response';
 import { HttpSetup } from '@kbn/core/public';
+import { useHttp } from '../../../common/lib/kibana';
 import { getFakeHttpService, renderQuery } from '../test_utils';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { BASE_POLICY_RESPONSE_ROUTE } from '../../../../common/endpoint/constants';
 
+jest.mock('../../../common/lib/kibana');
+
 describe('Get endpoint policy response hook', () => {
   let result: ReturnType<typeof useGetEndpointPolicyResponse>;
-
+  const useGetEndpointPolicyResponseMock = useHttp as jest.Mock;
   let fakeHttpServices: jest.Mocked<HttpSetup>;
 
   beforeEach(() => {
@@ -23,13 +26,15 @@ describe('Get endpoint policy response hook', () => {
   it('get endpoint policy response', async () => {
     const generator: EndpointDocGenerator = new EndpointDocGenerator();
     const policyResponse = generator.generatePolicyResponse();
+
+    useGetEndpointPolicyResponseMock.mockImplementation(() => fakeHttpServices);
     fakeHttpServices.get.mockResolvedValueOnce(policyResponse);
 
     const onSuccessMock: jest.Mock = jest.fn();
 
     result = await renderQuery(
       () =>
-        useGetEndpointPolicyResponse(fakeHttpServices, 'fakeId', {
+        useGetEndpointPolicyResponse('fakeId', {
           onSuccess: onSuccessMock,
           retry: false,
         }),
@@ -56,7 +61,7 @@ describe('Get endpoint policy response hook', () => {
 
     result = await renderQuery(
       () =>
-        useGetEndpointPolicyResponse(fakeHttpServices, 'fakeId', {
+        useGetEndpointPolicyResponse('fakeId', {
           onError: onErrorMock,
           retry: false,
         }),

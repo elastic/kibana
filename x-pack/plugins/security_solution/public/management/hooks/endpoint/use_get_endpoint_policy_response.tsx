@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpFetchError, HttpSetup } from '@kbn/core/public';
-import { QueryObserverResult, useQuery, UseQueryOptions } from 'react-query';
+import { HttpFetchError } from '@kbn/core/public';
+import { UseQueryResult, useQuery, UseQueryOptions } from 'react-query';
+import { useHttp } from '../../../common/lib/kibana';
 import { BASE_POLICY_RESPONSE_ROUTE } from '../../../../common/endpoint/constants';
 import { GetHostPolicyResponse } from '../../../../common/endpoint/types';
 
 export function useGetEndpointPolicyResponse(
-  http: HttpSetup,
   selectedEndpoint: string,
   customQueryOptions?: UseQueryOptions<GetHostPolicyResponse, HttpFetchError>
-): QueryObserverResult<GetHostPolicyResponse, HttpFetchError> {
+): UseQueryResult<GetHostPolicyResponse, HttpFetchError> {
+  const http = useHttp();
   return useQuery<GetHostPolicyResponse, HttpFetchError>(
     ['getEndpointPolicyResponse', selectedEndpoint],
     () => {
