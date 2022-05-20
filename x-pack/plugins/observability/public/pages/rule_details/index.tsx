@@ -68,6 +68,7 @@ export function RuleDetailsPage() {
       ruleTypeRegistry,
       getRuleStatusDropdown,
       getEditAlertFlyout,
+      actionTypeRegistry,
       getRuleEventLogList,
     },
     application: { capabilities, navigateToUrl },
@@ -481,7 +482,7 @@ export function RuleDetailsPage() {
                     })}
                   </ItemTitleRuleSummary>
                   <EuiFlexItem grow={3}>
-                    <Actions ruleActions={rule.actions} />
+                    <Actions ruleActions={rule.actions} actionTypeRegistry={actionTypeRegistry} />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
