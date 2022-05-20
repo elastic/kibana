@@ -7,10 +7,8 @@
  */
 
 export { reducerStreamReducer } from './reducer';
-export {
-  reducerStreamRequestBodySchema,
-  ReducerStreamRequestBodySchema,
-} from './request_body_schema';
+export { reducerStreamRequestBodySchema } from './request_body_schema';
+export type { ReducerStreamRequestBodySchema } from './request_body_schema';
 
 export const API_ACTION_NAME = {
   UPDATE_PROGRESS: 'update_progress',
