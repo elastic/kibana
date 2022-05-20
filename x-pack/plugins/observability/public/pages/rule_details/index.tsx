@@ -56,6 +56,7 @@ import { RULES_BREADCRUMB_TEXT } from '../rules/translations';
 import { PageTitle, ItemTitleRuleSummary, ItemValueRuleSummary, Actions } from './components';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchLast24hAlerts } from '../../hooks/use_fetch_last24h_alerts';
+import { useFetchLast24hRuleExecutionLog } from '../../hooks/use_fetch_last24h_rule_execution_log';
 import { formatInterval } from './utils';
 import { hasExecuteActionsCapability, hasAllPrivilege } from './config';
 import { paths } from '../../config/paths';
@@ -67,6 +68,7 @@ export function RuleDetailsPage() {
       ruleTypeRegistry,
       getRuleStatusDropdown,
       getEditAlertFlyout,
+      actionTypeRegistry,
       getRuleEventLogList,
     },
     application: { capabilities, navigateToUrl },
@@ -76,6 +78,7 @@ export function RuleDetailsPage() {
   const { ruleId } = useParams<RuleDetailsPathParams>();
   const { ObservabilityPageTemplate } = usePluginContext();
   const { isRuleLoading, rule, errorRule, reloadRule } = useFetchRule({ ruleId, http });
+  const { isLoadingExecutionLog, executionLog } = useFetchLast24hRuleExecutionLog({ http, ruleId });
   const { ruleTypes, ruleTypeIndex } = useLoadRuleTypes({
     filteredSolutions: OBSERVABILITY_SOLUTIONS,
   });
@@ -350,6 +353,29 @@ export function RuleDetailsPage() {
                   )}`}
                 />
               </EuiFlexGroup>
+              <EuiSpacer size="s" />
+              {isLoadingExecutionLog ? (
+                <EuiLoadingSpinner size="s" />
+              ) : (
+                <EuiFlexGroup>
+                  <ItemTitleRuleSummary>
+                    {i18n.translate('xpack.observability.ruleDetails.execution', {
+                      defaultMessage: 'Executions',
+                    })}
+                  </ItemTitleRuleSummary>
+
+                  <ItemValueRuleSummary
+                    extraSpace={false}
+                    itemValue={`
+                        ${String(executionLog.total)} ${i18n.translate(
+                      'xpack.observability.ruleDetails.last24h',
+                      {
+                        defaultMessage: '(last 24 h)',
+                      }
+                    )}`}
+                  />
+                </EuiFlexGroup>
+              )}
               <EuiSpacer size="l" />
               <EuiSpacer size="l" />
             </EuiFlexGroup>
@@ -456,7 +482,7 @@ export function RuleDetailsPage() {
                     })}
                   </ItemTitleRuleSummary>
                   <EuiFlexItem grow={3}>
-                    <Actions ruleActions={rule.actions} />
+                    <Actions ruleActions={rule.actions} actionTypeRegistry={actionTypeRegistry} />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
