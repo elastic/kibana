@@ -20,9 +20,9 @@ import {
 } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
 import { KUBERNETES_PATH } from '../../../common/constants';
-import { KubernetesWidget } from '../kubernetes-widget';
-import { AlertsList } from '../alerts-list';
-import { SearchFields, SearchGroup } from '../search-group';
+import { KubernetesWidget } from '../kubernetes_widget';
+import { AlertsList } from '../alerts_list';
+import { SearchFields, SearchGroup } from '../search_group';
 import { KubernetesSecurityDeps } from '../../types';
 
 const widgetBadge: CSSObject = {
