@@ -28,6 +28,7 @@ import {
   SumIndexPatternColumn,
   TermsIndexPatternColumn,
   CardinalityIndexPatternColumn,
+  FiltersIndexPatternColumn,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { PersistableFilter } from '@kbn/lens-plugin/common';
@@ -237,7 +238,13 @@ export class LensAttributes {
     });
   }
 
-  getFiltersColumn({ label, paramFilters }: { paramFilters: ParamFilter[]; label?: string }) {
+  getFiltersColumn({
+    label,
+    paramFilters,
+  }: {
+    paramFilters: ParamFilter[];
+    label?: string;
+  }): FiltersIndexPatternColumn {
     return {
       label: label ?? 'Filters',
       dataType: 'string',
@@ -433,7 +440,7 @@ export class LensAttributes {
     const { xAxisColumn } = layerConfig.seriesConfig;
 
     if (!xAxisColumn.sourceField) {
-      return xAxisColumn;
+      return xAxisColumn as LastValueIndexPatternColumn;
     }
 
     if (xAxisColumn?.sourceField === USE_BREAK_DOWN_COLUMN) {
