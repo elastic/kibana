@@ -164,11 +164,10 @@ export function getAlertType(
     },
     useSavedObjectReferences: {
       extractReferences: (params) => {
-        const [searchConfiguration, references] = extractReferences(params.searchConfiguration);
-
         if (isEsQueryAlert(params.searchType)) {
-          return { params: params as EsQueryAlertParamsExtractedParams, references };
+          return { params: params as EsQueryAlertParamsExtractedParams, references: [] };
         }
+        const [searchConfiguration, references] = extractReferences(params.searchConfiguration);
         const newParams = { ...params, searchConfiguration } as EsQueryAlertParamsExtractedParams;
         return { params: newParams, references };
       },
