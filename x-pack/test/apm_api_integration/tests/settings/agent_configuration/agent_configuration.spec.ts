@@ -411,13 +411,14 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
         after(async () => {
           await deleteConfiguration(testConfig);
+          await synthtraceEsClient.clean();
         });
 
         it(`should have 'applied_by_agent=false' when there are no agent config metrics for this etag`, async () => {
           expect(agentConfiguration?.applied_by_agent).to.be(false);
         });
 
-        describe.skip('when there are agent config metrics for this etag', () => {
+        describe('when there are agent config metrics for this etag', () => {
           before(async () => {
             const start = new Date().getTime();
             const end = moment(start).add(5, 'minutes').valueOf();
@@ -428,10 +429,6 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
               end,
               etag: agentConfiguration?.etag,
             });
-          });
-
-          after(() => {
-            synthtraceEsClient.clean();
           });
 
           it(`should have 'applied_by_agent=true' when getting a config from all configurations`, async () => {
