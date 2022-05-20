@@ -127,18 +127,20 @@ describe('ALL - Packs', () => {
         props: { index: 0, item: { id: SAVED_QUERY_ID } },
       })
         .should('exist')
-        .should('have.attr', 'href')
-        .then(($href) => {
-          // @ts-expect-error-next-line href string - check types
-          cy.visit($href);
-          cy.get('nav').should('be.visible');
-          cy.contains('Discover');
-          cy.contains(`action_id: pack_${PACK_NAME}_${SAVED_QUERY_ID}`);
-          cy.getBySel('superDatePickerToggleQuickMenuButton').click();
-          cy.getBySel('superDatePickerCommonlyUsed_Today').click();
-          cy.getBySel('discoverDocTable', { timeout: 60000 }).contains(
-            `pack_${PACK_NAME}_${SAVED_QUERY_ID}`
-          );
+        .within(() => {
+          cy.get('a')
+            .should('have.attr', 'href')
+            .then(($href) => {
+              // @ts-expect-error-next-line href string - check types
+              cy.visit($href);
+              cy.getBySel('breadcrumbs').contains('Discover').should('exist');
+              cy.contains(`action_id: pack_${PACK_NAME}_${SAVED_QUERY_ID}`);
+              cy.getBySel('superDatePickerToggleQuickMenuButton').click();
+              cy.getBySel('superDatePickerCommonlyUsed_Today').click();
+              cy.getBySel('discoverDocTable', { timeout: 60000 }).contains(
+                `pack_${PACK_NAME}_${SAVED_QUERY_ID}`
+              );
+            });
         });
     });
 

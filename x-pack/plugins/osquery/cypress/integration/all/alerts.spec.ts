@@ -59,7 +59,7 @@ describe('Alert Event Details', () => {
     cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
     cy.visit('/app/security/alerts');
     cy.wait(500);
-    cy.getBySel('expand-event').first().click();
+    cy.getBySel('expand-event').first().click({ force: true });
     cy.getBySel('take-action-dropdown-btn').click();
     cy.getBySel('osquery-action-item').click();
     cy.contains('1 agent selected.');
