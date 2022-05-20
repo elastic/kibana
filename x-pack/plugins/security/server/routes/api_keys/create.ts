@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '..';
+import { CreateApiKeyValidationError } from '../../authentication/api_keys';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { elasticsearchRoleSchema, getKibanaRoleSchema } from '../../lib';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
@@ -66,6 +67,9 @@ export function defineCreateApiKeyRoutes({
 
         return response.ok({ body: apiKey });
       } catch (error) {
+        if (error instanceof CreateApiKeyValidationError) {
+          return response.badRequest({ body: { message: error.message } });
+        }
         return response.customError(wrapIntoCustomErrorResponse(error));
       }
     })

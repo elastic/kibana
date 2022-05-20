@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type { OneOf } from '@kbn/utility-types';
 
 import type { SecurityLicense } from '../../../common/licensing';
 import type { ElasticsearchPrivilegesType, KibanaPrivilegesType } from '../../lib';
-import { transformPrivilegesToElasticsearchPrivileges } from '../../lib/role_utils';
+import { transformPrivilegesToElasticsearchPrivileges, validateKibanaPrivileges } from '../../lib';
 import {
   BasicHTTPAuthorizationHeaderCredentials,
   HTTPAuthorizationHeader,
@@ -25,6 +28,7 @@ export interface ConstructorOptions {
   clusterClient: IClusterClient;
   license: SecurityLicense;
   applicationName: string;
+  kibanaFeatures: KibanaFeature[];
 }
 
 interface BaseCreateAPIKeyParams {
@@ -32,7 +36,7 @@ interface BaseCreateAPIKeyParams {
   expiration?: string;
   metadata?: Record<string, any>;
   role_descriptors: Record<string, any>;
-  kibana_role_descriptors?: Record<
+  kibana_role_descriptors: Record<
     string,
     { elasticsearch: ElasticsearchPrivilegesType; kibana: KibanaPrivilegesType }
   >;
@@ -143,12 +147,20 @@ export class APIKeys {
   private readonly clusterClient: IClusterClient;
   private readonly license: SecurityLicense;
   private readonly applicationName: string;
+  private readonly kibanaFeatures: KibanaFeature[];
 
-  constructor({ logger, clusterClient, license, applicationName }: ConstructorOptions) {
+  constructor({
+    logger,
+    clusterClient,
+    license,
+    applicationName,
+    kibanaFeatures,
+  }: ConstructorOptions) {
     this.logger = logger;
     this.clusterClient = clusterClient;
     this.license = license;
     this.applicationName = applicationName;
+    this.kibanaFeatures = kibanaFeatures;
   }
 
   /**
@@ -365,8 +377,15 @@ export class APIKeys {
     roleDescriptors = {};
     const { kibana_role_descriptors: kibanaRoleDescriptors } = createParams;
 
+    const allValidationErrors: string[] = [];
     if (kibanaRoleDescriptors) {
       Object.entries(kibanaRoleDescriptors).forEach(([roleKey, roleDescriptor]) => {
+        const { validationErrors } = validateKibanaPrivileges(
+          this.kibanaFeatures,
+          roleDescriptor.kibana
+        );
+        allValidationErrors.push(...validationErrors);
+
         const applications = transformPrivilegesToElasticsearchPrivileges(
           this.applicationName,
           roleDescriptor.kibana
@@ -379,7 +398,18 @@ export class APIKeys {
         }
       });
     }
+    if (allValidationErrors.length) {
+      throw new CreateApiKeyValidationError(
+        `API key cannot be created due to validation errors: ${JSON.stringify(allValidationErrors)}`
+      );
+    }
 
-    return roleDescriptors!;
+    return roleDescriptors;
+  }
+}
+
+export class CreateApiKeyValidationError extends Error {
+  constructor(message: string) {
+    super(message);
   }
 }

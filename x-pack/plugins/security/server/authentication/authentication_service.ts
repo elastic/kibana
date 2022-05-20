@@ -14,6 +14,7 @@ import type {
   Logger,
   LoggerFactory,
 } from '@kbn/core/server';
+import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
@@ -50,6 +51,7 @@ interface AuthenticationServiceStartParams {
   session: PublicMethodsOf<Session>;
   loggers: LoggerFactory;
   applicationName: string;
+  kibanaFeatures: KibanaFeature[];
 }
 
 export interface InternalAuthenticationServiceStart extends AuthenticationServiceStart {
@@ -298,12 +300,14 @@ export class AuthenticationService {
     loggers,
     session,
     applicationName,
+    kibanaFeatures,
   }: AuthenticationServiceStartParams): InternalAuthenticationServiceStart {
     const apiKeys = new APIKeys({
       clusterClient,
       logger: this.logger.get('api-key'),
       license: this.license,
       applicationName,
+      kibanaFeatures,
     });
 
     /**

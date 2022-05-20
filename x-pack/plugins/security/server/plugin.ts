@@ -367,6 +367,7 @@ export class SecurityPlugin
       loggers: this.initializerContext.logger,
       session,
       applicationName: this.authorizationSetup!.applicationName,
+      kibanaFeatures: features.getKibanaFeatures(),
     });
 
     this.authorizationService.start({

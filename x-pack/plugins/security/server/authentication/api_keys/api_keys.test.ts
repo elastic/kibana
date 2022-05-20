@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+// eslint-disable-next-line import/order
+import { mockValidateKibanaPrivileges } from './api_keys.test.mock';
+
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -27,6 +30,8 @@ describe('API Keys', () => {
   let mockLicense: jest.Mocked<SecurityLicense>;
 
   beforeEach(() => {
+    mockValidateKibanaPrivileges.mockReset().mockReturnValue({ validationErrors: [] });
+
     mockClusterClient = elasticsearchServiceMock.createClusterClient();
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     mockClusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
@@ -39,6 +44,7 @@ describe('API Keys', () => {
       logger: loggingSystemMock.create().get('api-keys'),
       license: mockLicense,
       applicationName: 'kibana-.kibana',
+      kibanaFeatures: [],
     });
   });
 
@@ -137,6 +143,32 @@ describe('API Keys', () => {
         role_descriptors: {},
       });
       expect(result).toBeNull();
+      expect(mockValidateKibanaPrivileges).not.toHaveBeenCalled();
+      expect(mockScopedClusterClient.asCurrentUser.security.createApiKey).not.toHaveBeenCalled();
+    });
+
+    it('throws an error when kibana privilege validation fails', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      mockValidateKibanaPrivileges
+        .mockReturnValueOnce({ validationErrors: ['error1'] }) // for descriptor1
+        .mockReturnValueOnce({ validationErrors: [] }) // for descriptor2
+        .mockReturnValueOnce({ validationErrors: ['error2'] }); // for descriptor3
+
+      await expect(
+        apiKeys.create(httpServerMock.createKibanaRequest(), {
+          name: 'key-name',
+          kibana_role_descriptors: {
+            descriptor1: { elasticsearch: {}, kibana: [] },
+            descriptor2: { elasticsearch: {}, kibana: [] },
+            descriptor3: { elasticsearch: {}, kibana: [] },
+          },
+          expiration: '1d',
+        })
+      ).rejects.toEqual(
+        // The validation errors from descriptor1 and descriptor3 are concatenated into the final error message
+        new Error('API key cannot be created due to validation errors: ["error1","error2"]')
+      );
+      expect(mockValidateKibanaPrivileges).toHaveBeenCalledTimes(3);
       expect(mockScopedClusterClient.asCurrentUser.security.createApiKey).not.toHaveBeenCalled();
     });
 
@@ -161,6 +193,7 @@ describe('API Keys', () => {
         id: '123',
         name: 'key-name',
       });
+      expect(mockValidateKibanaPrivileges).not.toHaveBeenCalled(); // this is only called if kibana_role_descriptors is defined
       expect(mockScopedClusterClient.asCurrentUser.security.createApiKey).toHaveBeenCalledWith({
         body: {
           name: 'key-name',
@@ -179,7 +212,37 @@ describe('API Keys', () => {
         role_descriptors: {},
       });
       expect(result).toBeNull();
+      expect(mockValidateKibanaPrivileges).not.toHaveBeenCalled();
+      expect(mockClusterClient.asInternalUser.security.grantApiKey).not.toHaveBeenCalled();
+    });
 
+    it('throws an error when kibana privilege validation fails', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      mockValidateKibanaPrivileges
+        .mockReturnValueOnce({ validationErrors: ['error1'] }) // for descriptor1
+        .mockReturnValueOnce({ validationErrors: [] }) // for descriptor2
+        .mockReturnValueOnce({ validationErrors: ['error2'] }); // for descriptor3
+
+      await expect(
+        apiKeys.grantAsInternalUser(
+          httpServerMock.createKibanaRequest({
+            headers: { authorization: `Basic ${encodeToBase64('foo:bar')}` },
+          }),
+          {
+            name: 'key-name',
+            kibana_role_descriptors: {
+              descriptor1: { elasticsearch: {}, kibana: [] },
+              descriptor2: { elasticsearch: {}, kibana: [] },
+              descriptor3: { elasticsearch: {}, kibana: [] },
+            },
+            expiration: '1d',
+          }
+        )
+      ).rejects.toEqual(
+        // The validation errors from descriptor1 and descriptor3 are concatenated into the final error message
+        new Error('API key cannot be created due to validation errors: ["error1","error2"]')
+      );
+      expect(mockValidateKibanaPrivileges).toHaveBeenCalledTimes(3);
       expect(mockClusterClient.asInternalUser.security.grantApiKey).not.toHaveBeenCalled();
     });
 
@@ -194,9 +257,7 @@ describe('API Keys', () => {
       });
       const result = await apiKeys.grantAsInternalUser(
         httpServerMock.createKibanaRequest({
-          headers: {
-            authorization: `Basic ${encodeToBase64('foo:bar')}`,
-          },
+          headers: { authorization: `Basic ${encodeToBase64('foo:bar')}` },
         }),
         {
           name: 'test_api_key',
@@ -210,6 +271,7 @@ describe('API Keys', () => {
         name: 'key-name',
         expires: '1d',
       });
+      expect(mockValidateKibanaPrivileges).not.toHaveBeenCalled(); // this is only called if kibana_role_descriptors is defined
       expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
         body: {
           api_key: {
@@ -233,9 +295,7 @@ describe('API Keys', () => {
       });
       const result = await apiKeys.grantAsInternalUser(
         httpServerMock.createKibanaRequest({
-          headers: {
-            authorization: `Bearer foo-access-token`,
-          },
+          headers: { authorization: `Bearer foo-access-token` },
         }),
         {
           name: 'test_api_key',
@@ -248,6 +308,7 @@ describe('API Keys', () => {
         id: '123',
         name: 'key-name',
       });
+      expect(mockValidateKibanaPrivileges).not.toHaveBeenCalled(); // this is only called if kibana_role_descriptors is defined
       expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
         body: {
           api_key: {
@@ -279,6 +340,7 @@ describe('API Keys', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Unsupported scheme \\"Digest\\" for granting API Key"`
       );
+      expect(mockValidateKibanaPrivileges).not.toHaveBeenCalled();
       expect(mockClusterClient.asInternalUser.security.grantApiKey).not.toHaveBeenCalled();
     });
   });
