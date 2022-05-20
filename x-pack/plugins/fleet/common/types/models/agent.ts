@@ -93,6 +93,14 @@ export interface AgentSOAttributes extends AgentBase {
   packages?: string[];
 }
 
+export interface CurrentUpgrade {
+  actionId: string;
+  complete: boolean;
+  nbAgents: number;
+  nbAgentsAck: number;
+  version: string;
+}
+
 // Generated from FleetServer schema.json
 
 /**
