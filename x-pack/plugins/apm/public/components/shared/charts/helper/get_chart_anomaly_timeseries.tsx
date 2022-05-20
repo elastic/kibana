@@ -18,6 +18,12 @@ import {
 import { ServiceAnomalyTimeseries } from '../../../../../common/anomaly_detection/service_anomaly_timeseries';
 import { APMChartSpec } from '../../../../../typings/timeseries';
 
+export const expectedBoundsTitle = i18n.translate(
+  'xpack.apm.comparison.expectedBoundsTitle',
+  {
+    defaultMessage: 'Comparison: Expected bounds',
+  }
+);
 export function getChartAnomalyTimeseries({
   anomalyTimeseries,
   theme,
@@ -38,11 +44,9 @@ export function getChartAnomalyTimeseries({
 
   const boundaries = [
     {
-      title: i18n.translate('xpack.apm.comparison.expectedBoundsTitle', {
-        defaultMessage: 'Comparison: Expected bounds',
-      }),
+      title: expectedBoundsTitle,
       type: 'area',
-      fit: Fit.Linear,
+      fit: Fit.Nearest,
       hideLegend: false,
       hideTooltipValue: true,
       areaSeriesStyle: {
@@ -55,6 +59,7 @@ export function getChartAnomalyTimeseries({
       yAccessors: ['y1'],
       y0Accessors: ['y0'],
       data: anomalyTimeseries.bounds,
+      key: 'expected_bounds',
     },
   ];
 

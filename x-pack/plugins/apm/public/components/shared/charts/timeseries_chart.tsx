@@ -17,8 +17,10 @@ import {
   niceTimeFormatter,
   Position,
   ScaleType,
+  SeriesIdentifier,
   Settings,
   XYBrushEvent,
+  XYChartSeriesIdentifier,
   YDomainRange,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
@@ -38,7 +40,10 @@ import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
 import { unit } from '../../../utils/style';
 import { ChartContainer } from './chart_container';
-import { getChartAnomalyTimeseries } from './helper/get_chart_anomaly_timeseries';
+import {
+  expectedBoundsTitle,
+  getChartAnomalyTimeseries,
+} from './helper/get_chart_anomaly_timeseries';
 import { isTimeseriesEmpty, onBrushEnd } from './helper/helper';
 import { getTimeZone } from './helper/timezone';
 
@@ -104,17 +109,25 @@ export function TimeseriesChart({
   const xFormatter = niceTimeFormatter([min, max]);
   const isEmpty = isTimeseriesEmpty(timeseries);
   const annotationColor = theme.eui.euiColorSuccess;
+
+  const isComparingExpectedBounds =
+    comparisonEnabled && isExpectedBoundsComparison(offset);
   const allSeries = [
     ...timeseries,
-    ...(comparisonEnabled &&
-    isExpectedBoundsComparison(offset) &&
-    anomalyChartTimeseries?.boundaries
+    ...(isComparingExpectedBounds && anomalyChartTimeseries?.boundaries
       ? anomalyChartTimeseries?.boundaries
       : []),
     ...(anomalyChartTimeseries?.scores ?? []),
   ];
   const xDomain = isEmpty ? { min: 0, max: 1 } : { min, max };
 
+  const legendSort = (a: SeriesIdentifier, b: SeriesIdentifier) => {
+    if ((a as XYChartSeriesIdentifier)?.specId === expectedBoundsTitle)
+      return -1;
+    if ((b as XYChartSeriesIdentifier)?.specId === expectedBoundsTitle)
+      return -1;
+    return 1;
+  };
   return (
     <ChartContainer
       hasData={!isEmpty}
@@ -142,6 +155,7 @@ export function TimeseriesChart({
             tooltip: { visible: true },
           }}
           showLegend
+          legendSort={isComparingExpectedBounds ? legendSort : undefined}
           legendPosition={Position.Bottom}
           xDomain={xDomain}
           onLegendItemClick={(legend) => {
