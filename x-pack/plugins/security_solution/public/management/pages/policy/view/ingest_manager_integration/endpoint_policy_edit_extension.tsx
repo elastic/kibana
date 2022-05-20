@@ -35,7 +35,7 @@ import { useUserPrivileges } from '../../../../../common/components/user_privile
 import { FleetIntegrationArtifactsCard } from './endpoint_package_custom_extension/components/fleet_integration_artifacts_card';
 import { BlocklistsApiClient } from '../../../blocklist/services';
 import { HostIsolationExceptionsApiClient } from '../../../host_isolation_exceptions/host_isolation_exceptions_api_client';
-import { EventFiltersApiClient } from '../../../event_filters/service/event_filters_api_client';
+import { EventFiltersApiClient } from '../../../event_filters/service/api_client';
 import { TrustedAppsApiClient } from '../../../trusted_apps/service/api_client';
 import { SEARCHABLE_FIELDS as BLOCKLIST_SEARCHABLE_FIELDS } from '../../../blocklist/constants';
 import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../host_isolation_exceptions/constants';

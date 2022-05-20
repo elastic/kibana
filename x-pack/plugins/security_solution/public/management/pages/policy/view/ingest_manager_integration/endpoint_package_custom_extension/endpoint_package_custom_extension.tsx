@@ -11,7 +11,7 @@ import { PackageCustomExtensionComponentProps } from '@kbn/fleet-plugin/public';
 import { useHttp } from '../../../../../../common/lib/kibana';
 import { useCanSeeHostIsolationExceptionsMenu } from '../../../../host_isolation_exceptions/view/hooks';
 import { TrustedAppsApiClient } from '../../../../trusted_apps/service/api_client';
-import { EventFiltersApiClient } from '../../../../event_filters/service/event_filters_api_client';
+import { EventFiltersApiClient } from '../../../../event_filters/service/api_client';
 import { HostIsolationExceptionsApiClient } from '../../../../host_isolation_exceptions/host_isolation_exceptions_api_client';
 import { BlocklistsApiClient } from '../../../../blocklist/services';
 import { FleetArtifactsCard } from './components/fleet_artifacts_card';
