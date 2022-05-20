@@ -1105,7 +1105,7 @@ export const INTEGRATIONS_POPOVER_TITLE = (integrationsCount: number) =>
 
 export const INTEGRATIONS_POPOVER_DESCRIPTION_INSTALLED = (installedCount: number) =>
   i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.integrations.popoverTitle',
+    'xpack.securitySolution.detectionEngine.rules.allRules.integrations.popoverDescriptionInstalledTitle',
     {
       values: { installedCount },
       defaultMessage:
@@ -1115,7 +1115,7 @@ export const INTEGRATIONS_POPOVER_DESCRIPTION_INSTALLED = (installedCount: numbe
 
 export const INTEGRATIONS_POPOVER_DESCRIPTION_UNINSTALLED = (uninstalledCount: number) =>
   i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.integrations.popoverTitle',
+    'xpack.securitySolution.detectionEngine.rules.allRules.integrations.popoverDescriptionUninstalledTitle',
     {
       values: { uninstalledCount },
       defaultMessage:
