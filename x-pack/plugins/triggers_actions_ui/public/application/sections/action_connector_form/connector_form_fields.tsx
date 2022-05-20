@@ -25,7 +25,7 @@ interface ConnectorFormData {
   [key: string]: unknown;
 }
 
-interface CreateConnectorFormProps {
+interface ConnectorFormFieldsProps {
   actionTypeModel: ActionTypeModel | null;
   isEdit: boolean;
   registerPreSubmitValidator: (validator: ConnectorValidationFunc) => void;
@@ -49,7 +49,7 @@ const nameConfig: FieldConfig<{ name: string }, ConnectorFormData> = {
   ],
 };
 
-const CreateConnectorFormComponent: React.FC<CreateConnectorFormProps> = ({
+const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
   actionTypeModel,
   isEdit,
   registerPreSubmitValidator,
@@ -106,4 +106,4 @@ const CreateConnectorFormComponent: React.FC<CreateConnectorFormProps> = ({
   );
 };
 
-export const CreateConnectorForm = memo(CreateConnectorFormComponent);
+export const ConnectorFormFields = memo(ConnectorFormFieldsComponent);

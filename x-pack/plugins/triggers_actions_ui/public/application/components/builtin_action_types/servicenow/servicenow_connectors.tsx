@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useState, useMemo } from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
 import { snExternalServiceConfig } from '@kbn/actions-plugin/common';
-import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -37,20 +37,20 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
     http,
     notifications: { toasts },
   } = useKibana().services;
-  const [{ id, name, isDeprecated, actionTypeId, config, secrets }] = useFormData({
-    watch: [
-      'id',
-      'isDeprecated',
-      'actionTypeId',
-      'name',
-      'config.apiUrl',
-      'secrets.username',
-      'secrets.password',
-    ],
-  });
-  console.log(actionTypeId);
+  const [{ id, name, isDeprecated, actionTypeId, config, secrets }] =
+    useFormData<ServiceNowActionConnector>({
+      watch: [
+        'id',
+        'isDeprecated',
+        'actionTypeId',
+        'name',
+        'config.apiUrl',
+        'secrets.username',
+        'secrets.password',
+      ],
+    });
 
-  const requiresNewApplication = isDeprecated ?? true;
+  const requiresNewApplication = isDeprecated;
   const action = useMemo(
     () => ({
       name,
@@ -59,13 +59,13 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
       secrets,
     }),
     [name, actionTypeId, config, secrets]
-    // TODO: Do we need the cast?
   ) as ServiceNowActionConnector;
 
   const [showUpdateConnector, setShowUpdateConnector] = useState(false);
 
   const { fetchAppInfo, isLoading } = useGetAppInfo({
     actionTypeId,
+    http,
   });
 
   const getApplicationInfo = useCallback(async () => {

@@ -30,7 +30,6 @@ import {
   ActionType,
   ActionTypeModel,
   ActionTypeRegistryContract,
-  ConnectorValidationError,
 } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { useKibana } from '../../../common/lib/kibana';
@@ -267,12 +266,19 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     if (isValid) {
       if (preSubmitValidator) {
         const validatorRes = await preSubmitValidator();
-        console.log(validatorRes);
 
         if (validatorRes) {
           setPreSubmitValidationErrorMessage(validatorRes.message);
           return;
         }
+
+        /**
+         * At this point the form is valid
+         * and there are no pre submit error messages.
+         * For that reason, we clear the pre submit errors
+         * in case they were set in a previous run.
+         */
+        setPreSubmitValidationErrorMessage(null);
       }
     }
   }, [submit, preSubmitValidator]);

@@ -13,7 +13,7 @@ import {
   useFormIsModified,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
-import { CreateConnectorForm } from './create_connector_form';
+import { ConnectorFormFields } from './connector_form_fields';
 import { Connector } from './types';
 
 export interface CreateConnectorFormState {
@@ -70,7 +70,7 @@ const ConnectorFormComponent: React.FC<Props> = ({
 
   return (
     <Form form={form}>
-      <CreateConnectorForm
+      <ConnectorFormFields
         actionTypeModel={actionTypeModel}
         isEdit={isEdit}
         registerPreSubmitValidator={registerPreSubmitValidator}
