@@ -88,7 +88,7 @@ export const createThreatSignals = async ({
   logger.debug(`Total event count: ${eventCount}`);
 
   if (eventCount === 0) {
-    logger.debug(buildRuleMessage('Indicator matching rule has completed'));
+    logger.debug(buildRuleMessage('Indicator matching rule has completed '));
     return results;
   }
 
