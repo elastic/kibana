@@ -26,6 +26,18 @@ export const registerCreateRoute = (router: IRouter, url: ServerUrlService) => {
             minLength: 3,
             maxLength: 255,
           }),
+          /**
+           * @deprecated
+           * 
+           * This field is deprecated as the API does not support automatic
+           * human-readable slug generation.
+           * 
+           * @todo This field will be removed in a future version. It is left
+           * here for backwards compatibility.
+           */
+          humanReadableSlug: schema.boolean({
+            defaultValue: false,
+          }),
           params: schema.object({}, { unknowns: 'allow' }),
         }),
       },
