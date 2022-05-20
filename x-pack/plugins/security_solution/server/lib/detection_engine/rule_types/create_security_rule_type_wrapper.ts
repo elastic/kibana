@@ -21,6 +21,10 @@ import {
   hasReadIndexPrivileges,
   hasTimestampFields,
   isMachineLearningParams,
+  isEqlParams,
+  isQueryParams,
+  isThresholdParams,
+  isThreatParams,
 } from '../signals/utils';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import { CreateSecurityRuleTypeWrapper } from './types';
@@ -152,7 +156,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
            *    - Rule exits early if data view defined is not found (ie: it's been deleted)
            *  - If no data view defined, falls to using existing index logic
            */
-          if (!isMachineLearningParams(params)) {
+          if (
+            isEqlParams(params) ||
+            isQueryParams(params) ||
+            isThresholdParams(params) ||
+            isThreatParams(params)
+          ) {
             try {
               const { index, runtimeMappings: dataViewRuntimeMappings } = await getInputIndex({
                 index: params.index,

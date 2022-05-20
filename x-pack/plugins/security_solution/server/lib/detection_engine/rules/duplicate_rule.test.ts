@@ -48,6 +48,7 @@ describe('duplicateRule', () => {
           type: 'query',
           language: 'kuery',
           index: [],
+          dataViewId: undefined,
           query: 'process.args : "chmod"',
           filters: [],
           buildingBlockType: undefined,

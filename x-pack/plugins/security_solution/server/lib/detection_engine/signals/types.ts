@@ -318,7 +318,6 @@ export interface SearchAfterAndBulkCreateParams {
   eventsTelemetry: ITelemetryEventsSender | undefined;
   id: string;
   inputIndexPattern: string[];
-  dataViewId?: string;
   pageSize: number;
   filter: estypes.QueryDslQueryContainer;
   buildRuleMessage: BuildRuleMessage;

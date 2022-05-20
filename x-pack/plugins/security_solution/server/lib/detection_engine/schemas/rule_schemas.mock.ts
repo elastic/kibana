@@ -60,6 +60,7 @@ export const getThresholdRuleParams = (): ThresholdRuleParams => {
     type: 'threshold',
     language: 'kuery',
     index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+    dataViewId: undefined,
     query: 'user.name: root or user.name: admin',
     filters: undefined,
     savedId: undefined,
@@ -85,6 +86,7 @@ export const getEqlRuleParams = (): EqlRuleParams => {
     query: 'any where true',
     filters: undefined,
     eventCategoryOverride: undefined,
+    dataViewId: undefined,
   };
 };
 
@@ -104,6 +106,7 @@ export const getQueryRuleParams = (): QueryRuleParams => {
     language: 'kuery',
     query: 'user.name: root or user.name: admin',
     index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+    dataViewId: undefined,
     filters: [
       {
         query: {
@@ -124,6 +127,7 @@ export const getThreatRuleParams = (): ThreatRuleParams => {
     language: 'kuery',
     query: '*:*',
     index: ['some-index'],
+    dataViewId: undefined,
     filters: undefined,
     savedId: undefined,
     threatQuery: 'threat-query',

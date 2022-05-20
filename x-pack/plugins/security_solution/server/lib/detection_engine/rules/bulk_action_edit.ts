@@ -13,6 +13,7 @@ import {
 } from '../../../../common/detection_engine/schemas/common/schemas';
 
 import { invariant } from '../../../../common/utils/invariant';
+import { isEqlParams, isQueryParams, isThresholdParams, isThreatParams } from '../signals/utils';
 
 export const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>
   Array.from(new Set([...arr, ...items]));
@@ -22,6 +23,7 @@ export const deleteItemsFromArray = <T>(arr: T[], items: T[]): T[] => {
   return arr.filter((item) => !itemsSet.has(item));
 };
 
+// eslint-disable-next-line complexity
 export const applyBulkActionEditToRule = (
   existingRule: RuleAlertType,
   action: BulkActionEditPayload
@@ -51,14 +53,14 @@ export const applyBulkActionEditToRule = (
       );
 
       if (
-        !(rule.params.dataViewId != null && rule.params.dataViewId.trim() !== '') ||
-        (rule.params.dataViewId != null &&
-          rule.params.dataViewId.trim() !== '' &&
-          action.overwriteDataViews)
+        isEqlParams(rule.params) ||
+        isQueryParams(rule.params) ||
+        isThresholdParams(rule.params) ||
+        isThreatParams(rule.params)
       ) {
-        rule.params.index = addItemsToArray(rule.params.index ?? [], action.value);
         rule.params.dataViewId = undefined;
       }
+      rule.params.index = addItemsToArray(rule.params.index ?? [], action.value);
 
       break;
 
@@ -69,19 +71,19 @@ export const applyBulkActionEditToRule = (
       );
 
       if (
-        !(rule.params.dataViewId != null && rule.params.dataViewId.trim() !== '') ||
-        (rule.params.dataViewId != null &&
-          rule.params.dataViewId.trim() !== '' &&
-          action.overwriteDataViews)
+        isEqlParams(rule.params) ||
+        isQueryParams(rule.params) ||
+        isThresholdParams(rule.params) ||
+        isThreatParams(rule.params)
       ) {
-        rule.params.index = deleteItemsFromArray(rule.params.index ?? [], action.value);
         rule.params.dataViewId = undefined;
-
-        invariant(
-          rule.params.index.length !== 0,
-          "Can't delete all index patterns. At least one index pattern must be left"
-        );
       }
+      rule.params.index = deleteItemsFromArray(rule.params.index ?? [], action.value);
+
+      invariant(
+        rule.params.index.length !== 0,
+        "Can't delete all index patterns. At least one index pattern must be left"
+      );
 
       break;
 
@@ -93,14 +95,14 @@ export const applyBulkActionEditToRule = (
       invariant(action.value.length !== 0, "Index patterns can't be overwritten with empty list");
 
       if (
-        !(rule.params.dataViewId != null && rule.params.dataViewId.trim() !== '') ||
-        (rule.params.dataViewId != null &&
-          rule.params.dataViewId.trim() !== '' &&
-          action.overwriteDataViews)
+        isEqlParams(rule.params) ||
+        isQueryParams(rule.params) ||
+        isThresholdParams(rule.params) ||
+        isThreatParams(rule.params)
       ) {
-        rule.params.index = action.value;
         rule.params.dataViewId = undefined;
       }
+      rule.params.index = action.value;
 
       break;
 

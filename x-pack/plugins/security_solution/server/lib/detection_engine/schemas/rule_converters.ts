@@ -97,7 +97,6 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
         type: params.type,
         language: params.language ?? 'kuery',
         index: params.index,
-        dataViewId: params.data_view_id,
         query: params.query,
         filters: params.filters,
         savedId: params.saved_id,
