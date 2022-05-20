@@ -400,12 +400,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'local_metadata.elastic.agent.version',
-      width: '120px',
+      width: '135px',
       name: i18n.translate('xpack.fleet.agentList.versionTitle', {
         defaultMessage: 'Version',
       }),
       render: (version: string, agent: Agent) => (
-        <EuiFlexGroup gutterSize="s" alignItems="center" style={{ minWidth: 0 }}>
+        <EuiFlexGroup gutterSize="none" style={{ minWidth: 0 }} direction="column">
           <EuiFlexItem grow={false} className="eui-textNoWrap">
             {safeMetadata(version)}
           </EuiFlexItem>
@@ -505,7 +505,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               fetchData();
               refreshUpgrades();
             }}
-            version={kibanaVersion}
           />
         </EuiPortal>
       )}
