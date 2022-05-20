@@ -95,7 +95,7 @@ export class PivotNotSelectedForTableError extends UIError {
 export class DataViewNotFoundError extends UIError {
   constructor(dataViewId: string) {
     super(
-      i18n.translate('visualizations.missedDataView.errorMessage', {
+      i18n.translate('visTypeTimeseries.errors.dataViewNotFoundError', {
         defaultMessage: `Could not find the data view: {dataViewId}`,
         values: {
           dataViewId,
