@@ -52,14 +52,16 @@ export function ServiceGroupTemplate({
     query: { serviceGroup: serviceGroupId },
   } = useAnyOfApmParams('/services', '/service-map');
 
-  const { data } = useFetcher((callApmApi) => {
-    if (serviceGroupId) {
-      return callApmApi('GET /internal/apm/service-group', {
-        params: { query: { serviceGroup: serviceGroupId } },
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { data } = useFetcher(
+    (callApmApi) => {
+      if (serviceGroupId) {
+        return callApmApi('GET /internal/apm/service-group', {
+          params: { query: { serviceGroup: serviceGroupId } },
+        });
+      }
+    },
+    [serviceGroupId]
+  );
 
   const { data: serviceGroupsData, status: serviceGroupsStatus } = useFetcher(
     (callApmApi) => {
@@ -67,8 +69,7 @@ export function ServiceGroupTemplate({
         return callApmApi('GET /internal/apm/service-groups');
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [serviceGroupId, isServiceGroupsEnabled]
   );
 
   const serviceGroupName = data?.serviceGroup.groupName;
