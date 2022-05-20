@@ -90,6 +90,7 @@ export { loadRuleAggregations, loadRuleTags } from './application/lib/rule_api/a
 export { useLoadRuleTypes } from './application/hooks/use_load_rule_types';
 export { loadRule } from './application/lib/rule_api/get_rule';
 export { loadAllActions } from './application/lib/action_connector_api';
+export { suspendedComponentWithProps } from './application/lib/suspended_component_with_props';
 export { loadActionTypes } from './application/lib/action_connector_api/connector_types';
 export { NOTIFY_WHEN_OPTIONS } from './application/sections/rule_form/rule_notify_when';
 export type { TIME_UNITS } from './application/constants';
