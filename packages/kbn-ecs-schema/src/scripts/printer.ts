@@ -62,15 +62,17 @@ function header() {
 }
 
 function copyright(): string {
-  return '/*\n' +
-  '* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n' +
-  '* or more contributor license agreements. Licensed under the Elastic License\n' +
-  '* 2.0 and the Server Side Public License, v 1; you may not use this file except\n'+
-  '* in compliance with, at your election, the Elastic License 2.0 or the Server\n' +
-  '* Side Public License, v 1.\n' +
-  '*/\n\n';
+  return (
+    '/*\n' +
+    ' * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n' +
+    ' * or more contributor license agreements. Licensed under the Elastic License\n' +
+    ' * 2.0 and the Server Side Public License, v 1; you may not use this file except\n' +
+    ' * in compliance with, at your election, the Elastic License 2.0 or the Server\n' +
+    ' * Side Public License, v 1.\n' +
+    ' */\n\n'
+  );
 }
 
-function disableLinting() : string {
+function disableLinting(): string {
   return '/* eslint-disable */\n';
 }

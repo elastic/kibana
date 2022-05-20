@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { snakeCaseToCamelCase } from "./helpers";
+import { snakeCaseToCamelCase } from './helpers';
 
 describe('snakeCaseToCamelCase', () => {
-
   test('single word unchanged', () => {
     const word = 'agent';
     const result = snakeCaseToCamelCase(word);
@@ -19,7 +18,7 @@ describe('snakeCaseToCamelCase', () => {
 
   test('double word converted successfully', () => {
     const snake = 'user_agent';
-    const camel = 'userAgent'; 
+    const camel = 'userAgent';
     const result = snakeCaseToCamelCase(snake);
 
     expect(result).toBe(camel);
@@ -27,7 +26,7 @@ describe('snakeCaseToCamelCase', () => {
 
   test('really long example', () => {
     const snake = 'hello_this_is_my_test_case';
-    const camel = 'helloThisIsMyTestCase'; 
+    const camel = 'helloThisIsMyTestCase';
     const result = snakeCaseToCamelCase(snake);
 
     expect(result).toBe(camel);
