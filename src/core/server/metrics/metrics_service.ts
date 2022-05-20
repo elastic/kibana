@@ -34,7 +34,7 @@ export class MetricsService
   private collectInterval?: NodeJS.Timeout;
   private metrics$ = new ReplaySubject<OpsMetrics>(1);
   private service?: InternalMetricsServiceSetup;
-  private subscriptions: Subscription[] = [];
+  private subscription: Subscription = new Subscription();
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('metrics');
@@ -92,9 +92,7 @@ export class MetricsService
       clearInterval(this.collectInterval);
     }
     this.metrics$.complete();
-    this.subscriptions.forEach((subscription) => {
-      subscription.unsubscribe();
-    });
+    this.subscription.unsubscribe();
   }
 
   private convertToMetricEvent(metrics: OpsMetrics): OpsMetricsEvent {
@@ -115,7 +113,7 @@ export class MetricsService
       eventType: 'core-ops_metrics',
       schema: opsMetricsEventSchema,
     });
-    this.subscriptions.push(
+    this.subscription.add(
       metricsObservable.subscribe((metrics: OpsMetrics) => {
         analytics.reportEvent('core-ops_metrics', { ...this.convertToMetricEvent(metrics) });
       })
