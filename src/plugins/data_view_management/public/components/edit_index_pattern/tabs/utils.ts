@@ -73,7 +73,7 @@ function getTitle(type: string, filteredCount: Dictionary<number>, totalCount: D
   return title + count;
 }
 
-export function getTabs(indexPattern: DataView, fieldFilter: string) {
+export function getTabs(indexPattern: DataView, fieldFilter: string, relationshipCount = 0) {
   const totalCount = getCounts(indexPattern.fields.getAll(), indexPattern.getSourceFiltering());
   const filteredCount = getCounts(
     indexPattern.fields.getAll(),
@@ -104,7 +104,10 @@ export function getTabs(indexPattern: DataView, fieldFilter: string) {
   });
 
   tabs.push({
-    name: 'Relationships',
+    name: i18n.translate('indexPatternManagement.editIndexPattern.tabs.relationshipsHeader', {
+      defaultMessage: 'Relationships ({count})',
+      values: { count: relationshipCount },
+    }),
     id: TAB_RELATIONSHIPS,
     'data-test-subj': 'tab-relationships',
   });

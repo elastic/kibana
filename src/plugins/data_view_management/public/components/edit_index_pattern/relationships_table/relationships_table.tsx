@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   EuiInMemoryTable,
   HorizontalAlignment,
@@ -15,7 +15,6 @@ import {
   EuiTableDataType,
 } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 import { get } from 'lodash';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
@@ -49,24 +48,21 @@ export const RelationshipsTable = ({
   basePath,
   capabilities,
   id,
-  getAllowedTypes,
-  getRelationships,
   navigateToUrl,
   getDefaultTitle,
   getSavedObjectLabel,
+  relationships,
+  allowedTypes,
 }: {
   basePath: CoreStart['http']['basePath'];
   capabilities: CoreStart['application']['capabilities'];
   navigateToUrl: CoreStart['application']['navigateToUrl'];
   id: string;
-  getAllowedTypes: SavedObjectsManagementPluginStart['getAllowedTypes'];
-  getRelationships: SavedObjectsManagementPluginStart['getRelationships'];
   getDefaultTitle: SavedObjectsManagementPluginStart['getDefaultTitle'];
   getSavedObjectLabel: SavedObjectsManagementPluginStart['getSavedObjectLabel'];
+  relationships: SavedObjectRelation[];
+  allowedTypes: SavedObjectManagementTypeInfo[];
 }) => {
-  // todo move data access higher
-  const [relationships, setRelationships] = useState<SavedObjectRelation[]>([]);
-  const [allowedTypes, setAllowedTypes] = useState<SavedObjectManagementTypeInfo[]>([]);
   const [query, setQuery] = useState('');
 
   const handleOnChange = ({ queryText, error }: { queryText: string; error: unknown }) => {
@@ -74,22 +70,6 @@ export const RelationshipsTable = ({
       setQuery(queryText);
     }
   };
-
-  useEffect(() => {
-    getAllowedTypes().then((resp) => {
-      setAllowedTypes(resp);
-    });
-  }, [getAllowedTypes]);
-
-  useEffect(() => {
-    if (allowedTypes.length === 0) {
-      return;
-    }
-    const allowedAsString = allowedTypes.map((item) => item.name);
-    getRelationships(DATA_VIEW_SAVED_OBJECT_TYPE, id, allowedAsString).then((resp) => {
-      setRelationships(resp.relations);
-    });
-  }, [getRelationships, id, allowedTypes]);
 
   const columns = [
     {

@@ -30,6 +30,10 @@ import {
   DataViewsPublicPluginStart,
   META_FIELDS,
 } from '@kbn/data-views-plugin/public';
+import {
+  SavedObjectRelation,
+  SavedObjectManagementTypeInfo,
+} from '@kbn/saved-objects-management-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { IndexPatternManagmentContext } from '../../../types';
 import { createEditIndexPatternPageStateContainer } from '../edit_index_pattern_state_container';
@@ -51,6 +55,8 @@ interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
   fields: DataViewField[];
   saveIndexPattern: DataViewsPublicPluginStart['updateSavedObject'];
   refreshFields: () => void;
+  relationships: SavedObjectRelation[];
+  allowedTypes: SavedObjectManagementTypeInfo[];
 }
 
 interface FilterItems {
@@ -137,6 +143,8 @@ export function Tabs({
   history,
   location,
   refreshFields,
+  relationships,
+  allowedTypes,
 }: TabsProps) {
   const {
     uiSettings,
@@ -515,8 +523,8 @@ export function Tabs({
                 basePath={http.basePath}
                 id={indexPattern.id!}
                 capabilities={application.capabilities}
-                getAllowedTypes={savedObjectsManagement.getAllowedTypes}
-                getRelationships={savedObjectsManagement.getRelationships}
+                relationships={relationships}
+                allowedTypes={allowedTypes}
                 navigateToUrl={application.navigateToUrl}
                 getDefaultTitle={savedObjectsManagement.getDefaultTitle}
                 getSavedObjectLabel={savedObjectsManagement.getSavedObjectLabel}
@@ -547,18 +555,22 @@ export function Tabs({
       http,
       application,
       savedObjectsManagement,
+      allowedTypes,
+      relationships,
     ]
   );
 
   const euiTabs: EuiTabbedContentTab[] = useMemo(
     () =>
-      getTabs(indexPattern, fieldFilter).map((tab: Pick<EuiTabbedContentTab, 'name' | 'id'>) => {
-        return {
-          ...tab,
-          content: getContent(tab.id),
-        };
-      }),
-    [fieldFilter, getContent, indexPattern]
+      getTabs(indexPattern, fieldFilter, relationships.length).map(
+        (tab: Pick<EuiTabbedContentTab, 'name' | 'id'>) => {
+          return {
+            ...tab,
+            content: getContent(tab.id),
+          };
+        }
+      ),
+    [fieldFilter, getContent, indexPattern, relationships]
   );
 
   const [selectedTabId, setSelectedTabId] = useState(euiTabs[0].id);
