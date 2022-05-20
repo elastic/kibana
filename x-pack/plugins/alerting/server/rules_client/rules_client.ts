@@ -211,7 +211,7 @@ export interface FindOptions extends IndexType {
   filter?: string;
 }
 
-export type BulkEditFields = keyof Pick<Rule, 'actions' | 'tags'>;
+export type BulkEditFields = keyof Pick<Rule, 'actions' | 'tags' | 'schedule'>;
 
 export type BulkEditOperation =
   | {
@@ -223,6 +223,11 @@ export type BulkEditOperation =
       operation: 'add' | 'set';
       field: Extract<BulkEditFields, 'actions'>;
       value: NormalizedAlertAction[];
+    }
+  | {
+      operation: 'set';
+      field: Extract<BulkEditFields, 'schedule'>;
+      value: Rule['schedule'];
     };
 
 // schedule, throttle, notifyWhen is commented out before https://github.com/elastic/kibana/issues/124850 will be implemented
@@ -1493,6 +1498,32 @@ export class RulesClient {
         false
       );
     });
+
+    // update schedules only if schedule operation is present
+    const scheduleOperation = options.operations.find(
+      (op): op is Extract<BulkEditOperation, { field: Extract<BulkEditFields, 'schedule'> }> =>
+        op.field === 'schedule'
+    );
+
+    if (scheduleOperation?.value) {
+      const taskIds = updatedRules.reduce<string[]>((acc, rule) => {
+        if (rule.scheduledTaskId) {
+          acc.push(rule.scheduledTaskId);
+        }
+        return acc;
+      }, []);
+
+      try {
+        await this.taskManager.bulkUpdateSchedules(taskIds, scheduleOperation.value);
+      } catch (error) {
+        this.auditLogger?.log(
+          ruleAuditEvent({
+            action: RuleAuditAction.BULK_EDIT,
+            error,
+          })
+        );
+      }
+    }
 
     return { rules: updatedRules, errors, total };
   }

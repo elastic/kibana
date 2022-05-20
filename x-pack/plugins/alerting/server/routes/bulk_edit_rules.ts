@@ -12,6 +12,10 @@ import { ILicenseState, RuleTypeDisabledError } from '../lib';
 import { verifyAccessAndContext, rewriteRule, handleDisabledApiKeysError } from './lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 
+const scheduleSchema = schema.object({
+  interval: schema.string(),
+});
+
 const ruleActionSchema = schema.object({
   group: schema.string(),
   id: schema.string(),
@@ -33,6 +37,11 @@ const operationsSchema = schema.arrayOf(
       operation: schema.oneOf([schema.literal('add'), schema.literal('set')]),
       field: schema.literal('actions'),
       value: schema.arrayOf(ruleActionSchema),
+    }),
+    schema.object({
+      operation: schema.literal('set'),
+      field: schema.literal('schedule'),
+      value: scheduleSchema,
     }),
   ]),
   { minSize: 1 }

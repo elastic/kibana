@@ -6,15 +6,16 @@
  */
 
 import { filter, take } from 'rxjs/operators';
-
+import pMap from 'p-map';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, map as mapOptional, getOrElse, isSome } from 'fp-ts/lib/Option';
 
 import uuid from 'uuid';
-import { pick } from 'lodash';
+import { pick, chunk } from 'lodash';
 import { merge, Subject } from 'rxjs';
 import agent from 'elastic-apm-node';
 import { Logger } from '@kbn/core/server';
+import { mustBeAllOf } from './queries/query_clauses';
 import { asOk, either, map, mapErr, promiseResult, isErr } from './lib/result_type';
 import {
   isTaskRunEvent,
@@ -28,6 +29,7 @@ import {
   TaskClaimErrorType,
 } from './task_events';
 import { Middleware } from './lib/middleware';
+import { parseIntervalAsMillisecond } from './lib/intervals';
 import {
   ConcreteTaskInstance,
   TaskInstanceWithId,
@@ -36,8 +38,9 @@ import {
   TaskLifecycleResult,
   TaskStatus,
   EphemeralTask,
+  IntervalSchedule,
 } from './task';
-import { TaskStore } from './task_store';
+import { TaskStore, BulkUpdateResult } from './task_store';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
 import { TaskLifecycleEvent, TaskPollingLifecycle } from './polling_lifecycle';
 import { TaskTypeDictionary } from './task_type_dictionary';
@@ -109,6 +112,51 @@ export class TaskScheduling {
       ...modifiedTask,
       traceparent: traceparent || '',
     });
+  }
+
+  /**
+   * Bulk updates schedules for tasks by ids.
+   *
+   * @param taskIs - list of task ids
+   * @param schedule - new schedule
+   * @returns {Promise<ConcreteTaskInstance[]>}
+   */
+  public async bulkUpdateSchedules(
+    taskIds: string[],
+    schedule: IntervalSchedule
+  ): Promise<BulkUpdateResult[]> {
+    const tasks = await pMap(chunk(taskIds, 100), async (taskIdsChunk) =>
+      this.store.fetch({
+        query: mustBeAllOf(
+          {
+            terms: {
+              _id: taskIdsChunk.map((taskId) => `task:${taskId}`),
+            },
+          },
+          {
+            term: {
+              'task.status': 'idle',
+            },
+          }
+        ),
+        size: 100,
+      })
+    );
+
+    const updatedTasks = tasks
+      .flatMap(({ docs }) => docs)
+      .map((task) => {
+        const oldInterval = parseIntervalAsMillisecond(task.schedule?.interval ?? '0s');
+
+        const newRunAtInMs = Math.max(
+          Date.now(),
+          task.runAt.getTime() - oldInterval + parseIntervalAsMillisecond(schedule.interval)
+        );
+
+        return { ...task, schedule, runAt: new Date(newRunAtInMs) };
+      });
+
+    return this.store.bulkUpdate(updatedTasks);
   }
 
   /**
