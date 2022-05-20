@@ -17,6 +17,7 @@ import {
   CommonXYDataLayerConfigResult,
   ValueLabelMode,
   CommonXYDataLayerConfig,
+  ExtendedDataLayerConfigResult,
 } from '../types';
 import { isTimeChart } from '../helpers';
 
@@ -57,6 +58,10 @@ export const errors = {
   dataBoundsForNotLineChartError: () =>
     i18n.translate('expressionXY.reusable.function.xyVis.errors.dataBoundsForNotLineChartError', {
       defaultMessage: 'Only line charts can be fit to the data bounds',
+    }),
+  timeMarkerForNotTimeChartsError: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.timeMarkerForNotTimeChartsError', {
+      defaultMessage: 'Only time charts can have current time marker',
     }),
   isInvalidIntervalError: () =>
     i18n.translate('expressionXY.reusable.function.xyVis.errors.isInvalidIntervalError', {
@@ -132,6 +137,15 @@ export const validateValueLabels = (
 ) => {
   if ((!hasBar || !hasNotHistogramBars) && valueLabels !== ValueLabelModes.HIDE) {
     throw new Error(errors.valueLabelsForNotBarsOrHistogramBarsChartsError());
+  }
+};
+
+export const validateAddTimeMarker = (
+  dataLayers: Array<DataLayerConfigResult | ExtendedDataLayerConfigResult>,
+  addTimeMarker?: boolean
+) => {
+  if (addTimeMarker && !isTimeChart(dataLayers)) {
+    throw new Error(errors.timeMarkerForNotTimeChartsError());
   }
 };
 

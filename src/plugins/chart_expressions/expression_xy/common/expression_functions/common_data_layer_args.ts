@@ -36,7 +36,6 @@ export const commonDataLayerArgs: Omit<
   xScaleType: {
     options: [...Object.values(XScaleTypes)],
     help: strings.getXScaleTypeHelp(),
-    default: XScaleTypes.ORDINAL,
     strict: true,
   },
   isHistogram: {

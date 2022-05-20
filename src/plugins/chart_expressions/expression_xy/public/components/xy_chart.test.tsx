@@ -1967,17 +1967,10 @@ describe('XYChart component', () => {
   test('it should pass the formatter function to the axis', () => {
     const { args } = sampleArgs();
 
-    const instance = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
+    shallow(<XYChart {...defaultProps} args={{ ...args }} />);
 
-    const tickFormatter = instance.find(Axis).first().prop('tickFormat');
-
-    if (!tickFormatter) {
-      throw new Error('tickFormatter prop not found');
-    }
-
-    tickFormatter('I');
-
-    expect(convertSpy).toHaveBeenCalledWith('I');
+    expect(convertSpy).toHaveBeenCalledWith(1652034840000);
+    expect(convertSpy).toHaveBeenCalledWith(1652122440000);
   });
 
   test('it should set the tickLabel visibility on the x axis if the tick labels is hidden', () => {
