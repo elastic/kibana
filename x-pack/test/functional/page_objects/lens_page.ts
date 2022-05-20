@@ -128,10 +128,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         ? `lns-indexPatternDimension-${opts.operation} incompatible`
         : `lns-indexPatternDimension-${opts.operation}`;
       await retry.try(async () => {
-        await testSubjects.click(`lns-layerPanel-${layerIndex} > ${opts.dimension}`);
-        await testSubjects.existOrFail(operationSelector, {
-          timeout: 5000,
-        });
+        if (!(await testSubjects.exists(operationSelector))) {
+          await testSubjects.click(`lns-layerPanel-${layerIndex} > ${opts.dimension}`);
+        }
+        await testSubjects.existOrFail(operationSelector);
       });
 
       if (opts.operation === 'formula') {
