@@ -10,7 +10,6 @@ import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
 import { formatters } from '.';
 
 const UI_KEYS_TO_SKIP = [
-  ConfigKey.SOURCE_TYPE,
   ConfigKey.JOURNEY_ID,
   ConfigKey.PROJECT_ID,
   ConfigKey.METADATA,

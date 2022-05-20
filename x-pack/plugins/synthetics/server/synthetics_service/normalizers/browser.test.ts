@@ -106,7 +106,7 @@ describe('browser normalizers', () => {
           ...DEFAULT_FIELDS[DataStream.BROWSER],
           journey_id: 'test-id-1',
           ignore_https_errors: true,
-          source_type: 'project',
+          'monitor.source': 'project',
           locations: [
             {
               geo: {
@@ -145,7 +145,7 @@ describe('browser normalizers', () => {
           ...DEFAULT_FIELDS[DataStream.BROWSER],
           journey_id: 'test-id-2',
           ignore_https_errors: false,
-          source_type: 'project',
+          'monitor.source': 'project',
           locations: [
             {
               geo: {
@@ -195,7 +195,7 @@ describe('browser normalizers', () => {
           ...DEFAULT_FIELDS[DataStream.BROWSER],
           journey_id: 'test-id-3',
           ignore_https_errors: false,
-          source_type: 'project',
+          'monitor.source': 'project',
           locations: [
             {
               geo: {
