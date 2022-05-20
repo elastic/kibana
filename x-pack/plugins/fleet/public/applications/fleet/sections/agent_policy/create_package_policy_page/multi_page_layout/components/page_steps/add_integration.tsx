@@ -178,8 +178,6 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
     return <Loading />;
   }
 
-  // console.log('validation results:');
-  // console.log(validationResults);
   return (
     <>
       {isManaged ? null : <StandaloneWarningCallout setIsManaged={setIsManaged} />}
@@ -195,6 +193,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
         cancelClickHandler={onBack}
         onNext={onSubmit}
         isLoading={formState === 'LOADING'}
+        isDisabled={formState === 'INVALID'}
         actionMessage={
           <FormattedMessage
             id="xpack.fleet.createFirstPackagePolicy.confirm"

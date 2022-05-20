@@ -25,12 +25,21 @@ export const NotObscuredByBottomBar = styled('div')`
 
 export const CreatePackagePolicyBottomBar: React.FC<{
   isLoading?: boolean;
+  isDisabled?: boolean;
   cancelClickHandler: React.ReactEventHandler;
   cancelUrl?: string;
   actionMessage: React.ReactElement;
   onNext: () => void;
   noAnimation?: boolean;
-}> = ({ isLoading, onNext, cancelClickHandler, cancelUrl, actionMessage, noAnimation = false }) => {
+}> = ({
+  isLoading,
+  onNext,
+  cancelClickHandler,
+  cancelUrl,
+  actionMessage,
+  isDisabled = false,
+  noAnimation = false,
+}) => {
   const Bar = noAnimation ? NoAnimationCenteredRoundedBottomBar : CenteredRoundedBottomBar;
   return (
     <Bar>
@@ -47,7 +56,14 @@ export const CreatePackagePolicyBottomBar: React.FC<{
           </EuiFlexItem>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton color="primary" fill size="m" isLoading={isLoading} onClick={onNext}>
+          <EuiButton
+            color="primary"
+            fill
+            size="m"
+            isDisabled={isDisabled}
+            isLoading={!isDisabled && isLoading}
+            onClick={onNext}
+          >
             {isLoading ? (
               <FormattedMessage
                 id="xpack.fleet.createPackagePolicyBottomBar.loading"
