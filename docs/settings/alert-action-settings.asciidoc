@@ -38,7 +38,8 @@ You can configure the following settings in the `kibana.yml` file.
 [cols="2*<"]
 |===
 | `xpack.actions.enabled`
-  | Feature toggle that enables Actions in {kib}. Defaults to `true`.
+  | Feature toggle that enables Actions in {kib}.
+  If `false`, all features dependent on Actions are disabled, including the *Observability* and *Security* apps. Defaults to `true`.
 
 | `xpack.actions.allowedHosts` {ess-icon}
   | A list of hostnames that {kib} is allowed to connect to when built-in actions are triggered. It defaults to `[*]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly added to the allowed hosts. An empty list `[]` can be used to block built-in actions from making any external connections. +

@@ -6,7 +6,7 @@ There are a couple ways to easily get data ingested into {es}.
 [discrete]
 === Sample data packages available for one click installation
 
-The easiest is to install one or more of our vailable sample data packages. If you have no data, you should be 
+The easiest is to install one or more of our available sample data packages. If you have no data, you should be 
 prompted to install when running {kib} for the first time. You can also access and install the sample data packages
 by going to the home page and clicking "add sample data".
 

@@ -17,10 +17,9 @@ Consult your administrator if you do not have the appropriate access.
 [cols="50, 50"]
 |===
 
-| <<ingest-node-pipelines, Ingest Node Pipelines>>
-| Create and manage {es}
-pipelines that enable you to perform common transformations and
-enrichments on your data.
+| {ref}/ingest.html[Ingest Node Pipelines]
+| Create and manage ingest pipelines that let you perform common transformations
+and enrichments on your data.
 
 | {logstash-ref}/logstash-centralized-pipeline-management.html[Logstash Pipelines]
 | Create, edit, and delete your Logstash pipeline configurations.
@@ -186,8 +185,6 @@ include::{kib-repo-dir}/management/alerting/alert-details.asciidoc[]
 include::{kib-repo-dir}/management/alerting/connector-management.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-beats.asciidoc[]
-
-include::{kib-repo-dir}/management/ingest-pipelines/ingest-pipelines.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-fields.asciidoc[]
 

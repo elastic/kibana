@@ -6,6 +6,7 @@
 * <<enabling-ssl>>
 * <<load-balancing-es>>
 * <<load-balancing-kibana>>
+* <<accessing-load-balanced-kibana>>
 * <<high-availability>>
 * <<memory>>
 
@@ -145,6 +146,13 @@ bin/kibana -c config/instance2.yml
 --------
 
 [float]
+[[accessing-load-balanced-kibana]]
+=== Accessing multiple load-balanced {kib} clusters
+To be able to access multiple load-balanced {kib} clusters from the same browser, the setting `xpack.security.cookieName` must be set in the configuration to avoid having conflicts between cookies from the different {kib} instances.
+
+In each cluster, {kib} instances should have the same `cookieName` value in order to achieve seamless high availability and keep the session active in case of failure from the currently used instance.
+
+[float]
 [[high-availability]]
 === High availability across multiple {es} nodes
 Kibana can be configured to connect to multiple Elasticsearch nodes in the same cluster.  In situations where a node becomes unavailable,
@@ -165,10 +173,10 @@ These can be used to automatically update the list of hosts as a cluster is resi
 [float]
 [[memory]]
 === Memory
-Kibana has a default maximum memory limit of 1.4 GB, and in most cases, we recommend leaving this unconfigured.  In some scenarios, such as large reporting jobs,
+Kibana has a default memory limit that scales based on total memory available.  In some scenarios, such as large reporting jobs, 
 it may make sense to tweak limits to meet more specific requirements.
 
-You can modify this limit by setting `--max-old-space-size` in the `node.options` config file that can be found inside `kibana/config` folder or any other configured with the environment variable `KBN_PATH_CONF` (for example in debian based system would be `/etc/kibana`).
+A limit can be defined by setting `--max-old-space-size` in the `node.options` config file found inside the `kibana/config` folder or any other folder configured with the environment variable `KBN_PATH_CONF`. For example, in the Debian-based system, the folder is `/etc/kibana`.
 
 The option accepts a limit in MB:
 --------

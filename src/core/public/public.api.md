@@ -556,6 +556,7 @@ export interface DocLinksStart {
         readonly indexPatterns: {
             readonly loadingData: string;
             readonly introduction: string;
+            readonly fieldFormattersNumber: string;
         };
         readonly addData: string;
         readonly kibana: string;

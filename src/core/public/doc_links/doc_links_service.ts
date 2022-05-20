@@ -101,6 +101,7 @@ export class DocLinksService {
         indexPatterns: {
           loadingData: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/tutorial-load-dataset.html`,
           introduction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index-patterns.html`,
+          fieldFormattersNumber: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/numeral.html`,
         },
         addData: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/connect-to-elasticsearch.html`,
         kibana: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index.html`,
@@ -230,6 +231,7 @@ export interface DocLinksStart {
     readonly indexPatterns: {
       readonly loadingData: string;
       readonly introduction: string;
+      readonly fieldFormattersNumber: string;
     };
     readonly addData: string;
     readonly kibana: string;

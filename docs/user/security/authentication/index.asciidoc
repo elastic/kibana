@@ -55,6 +55,10 @@ image::user/security/images/kibana-login.png["Login Selector UI"]
 
 For more information, refer to <<authentication-security-settings, authentication security settings>>.
 
+TIP: If you have multiple authentication providers configured, you can use the `auth_provider_hint` URL query parameter to create a deep
+link to any provider and bypass the Login Selector UI. Using the `kibana.yml` above as an example, you can add `?auth_provider_hint=basic1`
+to the login page URL, which will take you directly to the basic login page.
+
 [[basic-authentication]]
 ==== Basic authentication
 
@@ -292,7 +296,11 @@ xpack.security.authc.providers:
     order: 1
 -----------------------------------------------
 
-Kibana uses SPNEGO, which wraps the Kerberos protocol for use with HTTP, extending it to web applications. At the end of the Kerberos handshake, Kibana will forward the service ticket to Elasticsearch. Elasticsearch will unpack it and it will respond with an access and refresh token which are then used for subsequent authentication.
+IMPORTANT: {kib} uses SPNEGO, which wraps the Kerberos protocol for use with HTTP, extending it to web applications. 
+At the end of the Kerberos handshake, {kib} forwards the service ticket to {es}, then {es} unpacks the service ticket and responds with an access and refresh token, which are used for subsequent authentication.
+On every {es} node that {kib} connects to, the keytab file should always contain the HTTP service principal for the {kib} host. 
+The HTTP service principal name must have the `HTTP/kibana.domain.local@KIBANA.DOMAIN.LOCAL` format.
+
 
 [[anonymous-authentication]]
 ==== Anonymous authentication
@@ -383,13 +391,7 @@ xpack.security.authc.providers:
 
 One of the most popular use cases for anonymous access is when you embed {kib} into other applications and don't want to force your users to log in to view it. If you configured {kib} to use anonymous access as the sole authentication mechanism, you don't need to do anything special while embedding {kib}.
 
-If you have multiple authentication providers enabled, and you want to automatically log in anonymous users when embedding dashboards and visualizations, then toggle *Public URL* in the *Share > Embed code* menu in  *Dashboard* or *Visualize*.
-
-You can also use the *Public URL* toggle when you're generating permanent links to dashboards, visualizations, and saved searches.
-
-NOTE:  The *Public URL* toggle is only available if anonymous access is properly configured and your anonymous service account has privileges to access what you want to embed or share.
-
-For more information, refer to <<embedding, Embed {kib} content in a web page>>.
+If you have multiple authentication providers enabled, and you want to automatically log in anonymous users when embedding, then you will need to manually modify the {kib} URL in the iframe code. For more information, refer to <<embedding, Embed {kib} content in a web page>>.
 
 [[http-authentication]]
 ==== HTTP authentication

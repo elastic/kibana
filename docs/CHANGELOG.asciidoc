@@ -10,6 +10,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-7.11.2>>
 * <<release-notes-7.11.1>>
 * <<release-notes-7.11.0>>
 * <<release-notes-7.10.2>>
@@ -55,7 +56,7 @@ This section summarizes the changes in each release.
 // TEMPLATE:
 
 [[release-notes-n.n.n]]
-== {kib} n.n.n 
+== {kib} n.n.n
 
 coming::[n.n.n]
 
@@ -91,10 +92,81 @@ For detailed information about the n.n.n release, review the following sections.
 
 --
 
+[[release-notes-7.11.2]]
+== {kib} 7.11.2
+
+The 7.11.2 release includes the following security update, known issue, and bug fixes. Before you upgrade, refer to the <<breaking-changes-7.11,Breaking changes in 7.11.0>> and <<known-issue-v7.11.0,Known issue in 7.11.0>>.
+
+[float]
+[[security-update-v7.11.2]]
+=== Security update
+
+When you use the following background API calls, {kib} extends your session and fails to log you out:
+
+* POST /api/ui_metric/report
+
+* POST /api/index_management/indices/reload
+
+* POST /api/index_lifecycle_management/policies?withIndices=true
+
+* GET /api/remote_clusters
+
+* GET /api/saved_objects_tagging/tags
+
+To avoid extending the session, use the `kbn-system-request` header, which indicates that the API call is not a user request.
+
+[float]
+[[known-issues-v7.11.2]]
+=== Known issue
+
+When upgrading from 7.11.0 or 7.11.1 to 7.11.2, certain connectors, including those that connect to Jira,
+ServiceNow, and IBM Resilient, are not properly migrated during the upgrade process, causing them to be
+deleted.
+
+Impacts include:
+
+* Kibana *Alerts and Actions* that have been configured to use the affected connectors will no
+longer create these actions.
+* Security detection rules that have been configured to use the affected connectors as part of their
+rule actions will no longer create these actions.
+* Security Case workflow users will need to recreate external connectors before cases can be pushed
+or updated via the affected connectors.
+* Open cases that were previously connected to third-party systems via the affected connectors will
+need to be re-connected after the connector(s) are recreated.
+
+If you use these affected connectors, it is recommended to consider delaying the upgrade to 7.11.2,
+and instead upgrade to 7.12.0 once it is released.
+
+[float]
+[[bug-v7.11.2]]
+=== Bug fixes
+Alerting::
+* For simplistic email servers, set `rejectUnauthorized` to `false` {kibana-pull}91760[#91760]
+APM::
+* Fixes an issue preventing metric-document only services from displaying in the Services overview list  {kibana-pull}92378[#92378]
+Canvas::
+* Removes custom plot plugins when *Canvas* is unmounted {kibana-pull}90722[#90722]
+Elastic Security::
+For the Elastic Security 7.11.2 bug fixes, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Lens and visualizations::
+* Fixes *TSVB* chart scroll when legend has many items {kibana-pull}91394[#91394]
+* Use timestamp on brush event instead of iso dates {kibana-pull}91483[#91483]
+Machine Learning::
+* Fixes geo_shape content causing *Data Visualizer* to not load correctly {kibana-pull}92052[#92052]
+* Fixes applying missing_bucket configuration to transform request payload {kibana-pull}91635[#91635]
+Management::
+* Fixes use of undefined value in JS import {kibana-pull}92791[#92791]
+* Fixes an issue where users were unable to configure replicas in the cold phase when searchable snapshots are enabled {kibana-pull}92782[#92782]
+Metrics::
+* Fixes `ignoreLookback` behavior for Snapshot API {kibana-pull}91169[#91169]
+Security::
+* Fixes an issue where `elasticsearch.sniffInterval`, `elasticsearch.sniffOnConnectionFault`, or `elasticsearch.sniffOnStart` causes an authentication issue when performing requests against the sniffed nodes {kibana-pull}91276[#91276]
+* Fixes session idle timeout {kibana-pull}91070[#91070]
+
 [[release-notes-7.11.1]]
 == {kib} 7.11.1
 
-The 7.11.1 release includes the following enhancements and bug fixes. For information on the breaking changes, refer to <<breaking-changes-7.11,Breaking changes in 7.11>>.
+The 7.11.1 release includes the following enhancements and bug fixes. Before you upgrade, refer to the <<breaking-changes-7.11,Breaking changes in 7.11.0>> and <<known-issue-v7.11.0,Known issue in 7.11.0>>.
 
 [float]
 [[enhancement-v7.11.1]]
@@ -128,10 +200,20 @@ Monitoring::
 
 
 [[release-notes-7.11.0]]
-== {kib} 7.11.0 
+== {kib} 7.11.0
 
-For detailed information about the 7.11.0 release, review the <<deprecation-v7.11.0,Deprecations>>, <<enhancement-v7.11.0,Enhancements>>, and <<bug-v7.11.0,Bug fixes>>. 
+For detailed information about the 7.11.0 release, review the <<known-issue-v7.11.0,Known issue>>, <<deprecation-v7.11.0,Deprecations>>, <<enhancement-v7.11.0,Enhancements>>, and <<bug-v7.11.0,Bug fixes>>.
+
 For the 7.11.0 breaking changes, refer to <<breaking-changes-7.11,breaking changes in 7.11>>.
+
+[float]
+[[known-issue-v7.11.0]]
+=== Known issue
+
+Dashboard:: 
+If you are using {kib} 7.9.x and earlier, and you upgrade to 7.10.0 to 7.17.2, all hidden panel titles now appear on your dashboards.
++
+To resolve the known issue, upgrade to {kib} 7.17.3 or later. 
 
 [float]
 [[deprecation-v7.11.0]]
@@ -518,7 +600,7 @@ Affected versions include 7.10.1 and earlier.
 Verify if you use *Vega* visualizations, then complete the following:
 
 * If you use *Vega* visualizations, upgrade to 7.10.2.
-* If you do not use *Vega* visualizations, open your kibana.yml file, then change `vega.enabled: true` to `vega.enabled: false`. 
+* If you do not use *Vega* visualizations, open your kibana.yml file, then change `vega.enabled: true` to `vega.enabled: false`.
 
 [float]
 [[bug-v7.10.2]]
@@ -624,7 +706,64 @@ Uptime::
 
 For detailed information about the 7.10.0 release, review the following sections.
 
-<<enhancement-v7.10.0,Enhancements>> | <<bug-v7.10.0,Bug fixes>> | <<deprecation-v7.10.0,Deprecations>> | <<breaking-v7.10.0,Breaking changes>>
+<<deprecation-v7.10.0,Deprecations>> | <<breaking-v7.10.0,Breaking changes>> | <<enhancement-v7.10.0,Enhancements>> | <<bug-v7.10.0,Bug fixes>>
+
+[float]
+[[deprecation-v7.10.0]]
+=== Deprecations
+Monitoring::
+* "Internal Monitoring" deprecation warning {kibana-pull}72020[#72020]
+Platform::
+* The /api/status endpoint response format is now deprecated and will change in 8.0 {kibana-pull}76054[#76054]
+* These two config keys have been renamed and the old names will no longer work as of 8.0: cpu.cgroup.path.override => ops.cGroupOverrides.cpuPath and cpuacct.cgroup.path.override => ops.cGroupOverrides.cpuAcctPath {kibana-pull}76730[#76730]
+Security::
+* Deprecates the `xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize` setting for SAML authentication {kibana-pull}68117[#68117]
+Visualizations::
+* In 7.0 and later, *Timelion* app is deprecated. In 8.0 and later, *Timelion* app is removed from {kib} {kibana-pull}74660[#74660]
++
+To prepare for the removal of *Timelion* app, you must migrate *Timelion* app worksheets to a dashboard.
++
+NOTE: Only *Timelion* app is deprecated. {kib} continues to support *Timelion*
+visualizations in *Dashboard*, *Visualize*, and *Canvas*.
++
+To migrate a *Timelion* worksheet to a dashboard:
+
+. Open the main menu, click *Dashboard*, then click *Create dashboard*.
+
+. For each *Timelion* app worksheet, complete the following steps.
+
+.. On the dashboard, click *Create New*, then click *Timelion* on the *New Visualization* window.
+
+.. Open a new tab, open the *Timelion* app, select the chart you want to copy, then copy the chart expression.
++
+[role="screenshot"]
+image::images/timelion-copy-expression.png[Timelion app chart]
+
+.. Go to *Timelion*, paste the chart expression in the *Timelion expression* field, then click *Update*.
++
+[role="screenshot"]
+image::images/timelion-vis-paste-expression.png[Timelion advanced editor UI]
+
+.. In the toolbar, click *Save*.
+
+.. On the *Save visualization* window, enter the visualization *Title*, then click *Save and return*.
++
+The Timelion visualization panel appears on the dashboard.
++
+[role="screenshot"]
+image::images/timelion-dashboard.png[Final dashboard with saved Timelion app worksheet]
+
+[float]
+[[breaking-v7.10.0]]
+=== Breaking changes
+Lens and visualizations::
+* Deprecates schema-less specs in Vega {kibana-pull}73805[#73805]
+Operations::
+* The bin/kibana-plugin CLI has been updated to work with the new Kibana Platform plugin format instead of the legacy plugin format {kibana-pull}74604[#74604]
+Platform::
+* The legacy plugin system and the legacy plugin API have been removed. It is no longer possible to use third parties legacy Kibana plugins. Legacy plugin owners should migrate their plugins to the Kibana Platform plugin API {kibana-pull}77599[#77599]
+
+For more information, refer to <<breaking-changes-7.10,breaking changes in 7.10>>.
 
 [float]
 [[enhancement-v7.10.0]]
@@ -1054,61 +1193,6 @@ Spaces::
 Uptime::
 * Ml anomaly alert edit {kibana-pull}76909[#76909]
 * Removes custom handling of license enabling {kibana-pull}82019[#82019]
-
-[float]
-[[deprecation-v7.10.0]]
-=== Deprecations
-Monitoring::
-* "Internal Monitoring" deprecation warning {kibana-pull}72020[#72020]
-Platform::
-* The /api/status endpoint response format is now deprecated and will change in 8.0. {kibana-pull}76054[#76054]
-* These two config keys have been renamed and the old names will no longer work as of 8.0: cpu.cgroup.path.override => ops.cGroupOverrides.cpuPath and cpuacct.cgroup.path.override => ops.cGroupOverrides.cpuAcctPath {kibana-pull}76730[#76730]
-Visualizations::
-* In 7.0 and later, *Timelion* app is deprecated. In 8.0 and later, *Timelion* app is removed from {kib}. {kibana-pull}74660[#74660]
-+
-To prepare for the removal of *Timelion* app, you must migrate *Timelion* app worksheets to a dashboard.
-+
-NOTE: Only *Timelion* app is deprecated. {kib} continues to support *Timelion*
-visualizations in *Dashboard*, *Visualize*, and *Canvas*.
-+
-To migrate a *Timelion* worksheet to a dashboard:
-
-. Open the main menu, click *Dashboard*, then click *Create dashboard*.
-
-. For each *Timelion* app worksheet, complete the following steps.
-
-.. On the dashboard, click *Create New*, then click *Timelion* on the *New Visualization* window.
-
-.. Open a new tab, open the *Timelion* app, select the chart you want to copy, then copy the chart expression.
-+
-[role="screenshot"]
-image::images/timelion-copy-expression.png[Timelion app chart]
-
-.. Go to *Timelion*, paste the chart expression in the *Timelion expression* field, then click *Update*.
-+
-[role="screenshot"]
-image::images/timelion-vis-paste-expression.png[Timelion advanced editor UI]
-
-.. In the toolbar, click *Save*.
-
-.. On the *Save visualization* window, enter the visualization *Title*, then click *Save and return*.
-+
-The Timelion visualization panel appears on the dashboard.
-+
-[role="screenshot"]
-image::images/timelion-dashboard.png[Final dashboard with saved Timelion app worksheet]
-
-[float]
-[[breaking-v7.10.0]]
-=== Breaking changes
-Lens and visualizations::
-* Deprecates schema-less specs in Vega {kibana-pull}73805[#73805]
-Operations::
-* The bin/kibana-plugin CLI has been updated to work with the new Kibana Platform plugin format instead of the legacy plugin format {kibana-pull}74604[#74604]
-Platform::
-* The legacy plugin system and the legacy plugin API have been removed. It is no longer possible to use third parties legacy Kibana plugins. Legacy plugin owners should migrate their plugins to the Kibana Platform plugin API {kibana-pull}77599[#77599]
-
-For more information, refer to <<breaking-changes-7.10,breaking changes in 7.10>>.
 
 [[release-notes-7.9.3]]
 == {kib} 7.9.3
@@ -1992,6 +2076,34 @@ could lead to an attacker executing code with the permissions of the {kib} proce
 By default, the Upgrade Assistant flaw is mitigated in all {kib} instances accessed through {ess}.
 +
 For all other installations, you must upgrade to 7.7.0. If you are unable to upgrade, set `metrics.enabled:false` in your kibana.yml file to disable TSVB.
+
+[float]
+[[deprecations-7.7.0]]
+=== Deprecations
+
+The following functionality is deprecated in 7.7.0, and will be removed in 8.0.0.
+Deprecated functionality does not have an immediate impact on your application, but we strongly recommend
+you make the necessary updates after you upgrade to 7.7.0.
+
+[discrete]
+[[deprecation-53010]]
+==== Deprecates authentication settings
+
+*Details* +
+
+Deprecates the `xpack.security.authc.saml.realm` and `xpack.security.authc.saml.maxRedirectURLSize` settings used for {kib} SAML authentication. 
+
+Deprecates the `xpack.security.authc.oidc.realm` settings used for {kib} OpenID Connect authentication. 
+
+For more information, refer to {kibana-pull}53010[#53010].
+
+*Impact* +
+
+* Instead of `xpack.security.authc.saml.realm`, use `xpack.security.authc.providers.saml.<provider-name>.realm`.
+
+* Instead of `xpack.security.authc.saml.maxRedirectURLSize`, use `xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize`.
+
+* Instead of `xpack.security.authc.oidc.realm`, use `xpack.security.authc.providers.oidc.<provider-name>.realm`.
 
 [float]
 [[known-issues-7.7.0]]
@@ -3665,6 +3777,29 @@ Machine Learning::
 * Data Frame: Remove format from date_histogram configs. {kib-pull}39811[#39811]
 Maps::
 * [Fixes #34662] Hide feature when it has no corresponding term join {kib-pull}36617[#36617]
+
+
+[float]
+[[deprecations-7.3.0]]
+=== Deprecation
+
+The following functionality is deprecated in 7.3.0, and will be removed in 8.0.0.
+Deprecated functionality does not have an immediate impact on your application, but we strongly recommend
+you make the necessary updates after you upgrade to 7.3.0.
+
+[discrete]
+[[deprecation-xpack-security-authProviders]]
+==== Deprecates `xpack.security.authProviders` and `xpack.security.public`
+
+*Details:* Deprecates the `xpack.security.authProviders` and `xpack.security.public` settings used for {kib} SAML authentication. For more information, refer to {pull}37346[#37346].
+
+*Impact:* 
+
+When you use the SAML authentication provider, use the following settings:
+
+* Instead of `xpack.security.authProviders`, use `xpack.security.authc.providers`.
+
+* Instead of `xpack.security.public`, use `xpack.security.authc.saml.realm`.
 
 [float]
 [[enhancement-7.3.0]]

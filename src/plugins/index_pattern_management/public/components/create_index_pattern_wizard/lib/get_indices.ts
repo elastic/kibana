@@ -9,10 +9,15 @@
 import { sortBy } from 'lodash';
 import { HttpStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { map, scan } from 'rxjs/operators';
+import { map, filter } from 'rxjs/operators';
 import { IndexPatternCreationConfig } from '../../../../../index_pattern_management/public';
 import { MatchedItem, ResolveIndexResponse, ResolveIndexResponseItemIndexAttrs } from '../types';
-import { DataPublicPluginStart, IEsSearchResponse } from '../../../../../data/public';
+import {
+  DataPublicPluginStart,
+  IEsSearchResponse,
+  isErrorResponse,
+  isCompleteResponse,
+} from '../../../../../data/public';
 import { MAX_SEARCH_SIZE } from '../constants';
 
 const aliasLabel = i18n.translate('indexPatternManagement.aliasLabel', { defaultMessage: 'Alias' });
@@ -86,8 +91,10 @@ export const getIndicesViaSearch = async ({
       },
     },
   })
-    .pipe(map(searchResponseToArray(getIndexTags, showAllIndices)))
-    .pipe(scan((accumulator = [], value) => accumulator.join(value)))
+    .pipe(
+      filter((resp) => isCompleteResponse(resp) || isErrorResponse(resp)),
+      map(searchResponseToArray(getIndexTags, showAllIndices))
+    )
     .toPromise()
     .catch(() => []);
 

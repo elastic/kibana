@@ -377,6 +377,37 @@ Clears the _context_, and returns `null`.
 
 
 [float]
+[[clog_fn]]
+=== `clog`
+
+It outputs the _context_ in the console. This function is for debug purpose.
+
+*Expression syntax*
+[source,js]
+----
+clog
+----
+
+*Code example*
+[source,text]
+----
+filters
+  | demodata
+  | clog 
+  | filterrows fn={getCell "age" | gt 70}
+  | clog 
+  | pointseries x="time" y="mean(price)"
+  | plot defaultStyle={seriesStyle lines=1 fill=1}
+  | render
+----
+This prints the `datatable` objects in the browser console before and after the `filterrows` function.
+
+*Accepts:* `any`
+
+*Returns:* `any`
+
+
+[float]
 [[columns_fn]]
 === `columns`
 

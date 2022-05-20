@@ -69,7 +69,7 @@ const ruleStatusServiceMock = {
   find: jest.fn(),
   goingToRun: jest.fn(),
   error: jest.fn(),
-  warning: jest.fn(),
+  partialFailure: jest.fn(),
 };
 
 describe('utils', () => {

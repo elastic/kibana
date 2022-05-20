@@ -116,7 +116,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(statusBody[body.id].current_status.status).to.eql('succeeded');
       });
 
-      it('should create a single rule with a rule_id and an index pattern that does not match anything available and warning for the rule', async () => {
+      it('should create a single rule with a rule_id and an index pattern that does not match anything available and partial failure for the rule', async () => {
         const simpleRule = getRuleForSignalTesting(['does-not-exist-*']);
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
@@ -124,7 +124,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send(simpleRule)
           .expect(200);
 
-        await waitForRuleSuccessOrStatus(supertest, body.id, 'warning');
+        await waitForRuleSuccessOrStatus(supertest, body.id, 'partial failure');
 
         const { body: statusBody } = await supertest
           .post(DETECTION_ENGINE_RULES_STATUS_URL)
@@ -132,7 +132,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send({ ids: [body.id] })
           .expect(200);
 
-        expect(statusBody[body.id].current_status.status).to.eql('warning');
+        expect(statusBody[body.id].current_status.status).to.eql('partial failure');
         expect(statusBody[body.id].current_status.last_success_message).to.eql(
           'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["does-not-exist-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated.'
         );
@@ -264,7 +264,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload('security_solution/timestamp_override');
       });
 
-      it('should create a single rule which has a timestamp override for an index pattern that does not exist and write a warning status', async () => {
+      it('should create a single rule which has a timestamp override for an index pattern that does not exist and write a partial failure status', async () => {
         // defaults to event.ingested timestamp override.
         // event.ingested is one of the timestamp fields set on the es archive data
         // inside of x-pack/test/functional/es_archives/security_solution/timestamp_override/data.json.gz
@@ -277,7 +277,7 @@ export default ({ getService }: FtrProviderContext) => {
         const bodyId = body.id;
 
         await waitForAlertToComplete(supertest, bodyId);
-        await waitForRuleSuccessOrStatus(supertest, bodyId, 'warning');
+        await waitForRuleSuccessOrStatus(supertest, bodyId, 'partial failure');
 
         const { body: statusBody } = await supertest
           .post(DETECTION_ENGINE_RULES_STATUS_URL)
@@ -285,7 +285,9 @@ export default ({ getService }: FtrProviderContext) => {
           .send({ ids: [bodyId] })
           .expect(200);
 
-        expect((statusBody as RuleStatusResponse)[bodyId].current_status?.status).to.eql('warning');
+        expect((statusBody as RuleStatusResponse)[bodyId].current_status?.status).to.eql(
+          'partial failure'
+        );
         expect(
           (statusBody as RuleStatusResponse)[bodyId].current_status?.last_success_message
         ).to.eql(
@@ -293,7 +295,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
-      it('should create a single rule which has a timestamp override and generates two signals with a "warning" status', async () => {
+      it('should create a single rule which has a timestamp override and generates two signals with a "partial failure" status', async () => {
         // defaults to event.ingested timestamp override.
         // event.ingested is one of the timestamp fields set on the es archive data
         // inside of x-pack/test/functional/es_archives/security_solution/timestamp_override/data.json.gz
@@ -305,7 +307,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
         const bodyId = body.id;
 
-        await waitForRuleSuccessOrStatus(supertest, bodyId, 'warning');
+        await waitForRuleSuccessOrStatus(supertest, bodyId, 'partial failure');
         await waitForSignalsToBePresent(supertest, 2, [bodyId]);
 
         const { body: statusBody } = await supertest
@@ -314,7 +316,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send({ ids: [bodyId] })
           .expect(200);
 
-        expect(statusBody[bodyId].current_status.status).to.eql('warning');
+        expect(statusBody[bodyId].current_status.status).to.eql('partial failure');
       });
     });
   });

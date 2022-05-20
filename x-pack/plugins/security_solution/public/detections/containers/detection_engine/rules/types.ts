@@ -254,7 +254,6 @@ export interface RuleStatus {
 }
 
 export type RuleStatusType =
-  | 'executing'
   | 'failed'
   | 'going to run'
   | 'succeeded'

@@ -14,38 +14,28 @@ See the {fleet-guide}/index.html[{fleet}] docs for more information.
 
 [[general-fleet-settings-kb]]
 ==== General {fleet} settings
+`xpack.fleet.enabled` {ess-icon}::
+Set to `true` (default) to enable {fleet}. 
 
-[cols="2*<"]
-|===
-| `xpack.fleet.enabled` {ess-icon}
-  | Set to `true` (default) to enable {fleet}. 
-| `xpack.fleet.agents.enabled` {ess-icon}
-  | Set to `true` (default) to enable {fleet}. 
-|===
+`xpack.fleet.agents.enabled` {ess-icon}::
+Set to `true` (default) to enable {fleet}. 
 
 [[fleet-data-visualizer-settings]]
 
 ==== {package-manager} settings
 
-[cols="2*<"]
-|===
-| `xpack.fleet.registryUrl`
-  | The address to use to reach {package-manager} registry.
-|===
+`xpack.fleet.registryUrl`::
+The address to use to reach {package-manager} registry.
 
 ==== {fleet} settings
 
-[cols="2*<"]
-|===
-| `xpack.fleet.agents.kibana.host`
-  | The hostname used by {agent} for accessing {kib}.
-| `xpack.fleet.agents.elasticsearch.host`
-  | The hostname used by {agent} for accessing {es}.
-| `xpack.fleet.agents.tlsCheckDisabled`
-  | Set to `true` to allow {fleet} to run on a {kib} instance without TLS enabled.
-|===
+`xpack.fleet.agents.kibana.host`::
+The hostname used by {agent} for accessing {kib}.
 
-[NOTE]
-====
-In {ecloud}, {fleet} flags are already configured.
-====
+`xpack.fleet.agents.elasticsearch.host`::
+The hostname used by {agent} for accessing {es}.
+
+`xpack.fleet.agents.tlsCheckDisabled`::
+Set to `true` to allow {fleet} to run on a {kib} instance without TLS enabled.
+
+NOTE: In {ecloud}, {fleet} flags are already configured.
