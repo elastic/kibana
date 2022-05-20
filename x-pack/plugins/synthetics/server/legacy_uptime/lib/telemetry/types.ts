@@ -6,6 +6,16 @@
  */
 import { ServiceLocationErrors } from '../../../../common/runtime_types/monitor_management';
 
+export interface MonitorSyncEvent {
+  totalMonitors: number;
+  totalTestRuns: number;
+  browserTestRunsPer24h: number;
+  httpTestRunsPer24h: number;
+  icmpTestRunsPer24h: number;
+  tcpTestRunsPer24h: number;
+  [key: string]: number;
+}
+
 export interface MonitorUpdateEvent {
   updatedAt?: string;
   lastUpdatedAt?: string;
@@ -27,6 +37,8 @@ export interface MonitorUpdateTelemetryChannelEvents {
   // channel name => event type
   'synthetics-monitor-update': MonitorUpdateEvent;
   'synthetics-monitor-current': MonitorUpdateEvent;
+  'synthetics-monitor-sync-state': MonitorSyncEvent;
+  'synthetics-monitor-sync-events': MonitorSyncEvent;
 }
 
 export type MonitorUpdateTelemetryChannel = keyof MonitorUpdateTelemetryChannelEvents;

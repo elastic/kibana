@@ -15,6 +15,7 @@ import {
   TaskManagerStartContract,
   TaskInstance,
 } from '@kbn/task-manager-plugin/server';
+import { sendSyncTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import { installSyntheticsIndexTemplates } from '../routes/synthetics_service/install_index_templates';
 import { SyntheticsServiceApiKey } from '../../common/runtime_types/synthetics_service_api_key';
@@ -252,10 +253,16 @@ export class SyntheticsService {
   }
 
   async pushConfigs(configs?: SyntheticsConfig[]) {
-    const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
+    const monitorConfigs = configs ?? (await this.getMonitorConfigs());
+    const monitors = this.formatConfigs(monitorConfigs);
     if (monitors.length === 0) {
       this.logger.debug('No monitor found which can be pushed to service.');
       return null;
+    }
+
+    if (!configs) {
+      const telemetry = this.getSyncTelemetry(monitorConfigs);
+      sendSyncTelemetryEvents(this.logger, this.server.telemetry, telemetry);
     }
 
     this.apiKey = await this.getApiKey();
@@ -410,6 +417,70 @@ export class SyntheticsService {
     return configs.map((config: Partial<MonitorFields>) =>
       formatMonitorConfig(Object.keys(config) as ConfigKey[], config)
     );
+  }
+
+  getSyncTelemetry(monitors: SyntheticsMonitorWithId[]) {
+    let totalRuns = 0;
+    let browserTestRuns = 0;
+    let httpTestRuns = 0;
+    let icmpTestRuns = 0;
+    let tcpTestRuns = 0;
+
+    const locationRuns: Record<string, number> = {};
+    const locationMonitors: Record<string, number> = {};
+
+    const testRunsInDay = (schedule: string) => {
+      return (24 * 60) / Number(schedule);
+    };
+
+    const monitorsByType: Record<string, number> = {
+      browserMonitors: 0,
+      httpMonitors: 0,
+      tcpMonitors: 0,
+      icmpMonitors: 0,
+    };
+
+    monitors.forEach((monitor) => {
+      if (monitor.schedule.number) {
+        totalRuns += testRunsInDay(monitor.schedule.number);
+      }
+      switch (monitor.type) {
+        case 'browser':
+          browserTestRuns += testRunsInDay(monitor.schedule.number);
+          break;
+        case 'http':
+          httpTestRuns += testRunsInDay(monitor.schedule.number);
+          break;
+        case 'icmp':
+          icmpTestRuns += testRunsInDay(monitor.schedule.number);
+          break;
+        case 'tcp':
+          tcpTestRuns += testRunsInDay(monitor.schedule.number);
+          break;
+        default:
+          break;
+      }
+
+      monitorsByType[monitor.type + 'Monitors'] = (monitorsByType[monitor.type] ?? 0) + 1;
+
+      monitor.locations.forEach(({ id }) => {
+        locationRuns[id + 'TestRuns'] =
+          (locationRuns[id + 'TestRuns'] ?? 0) + testRunsInDay(monitor.schedule.number);
+        locationMonitors[id + 'Monitors'] = (locationMonitors[id + 'Monitors'] ?? 0) + 1;
+      });
+    });
+
+    return {
+      totalMonitors: monitors.length,
+      totalTestRuns: totalRuns,
+      browserTestRunsPer24h: browserTestRuns,
+      httpTestRunsPer24h: httpTestRuns,
+      icmpTestRunsPer24h: icmpTestRuns,
+      tcpTestRunsPer24h: tcpTestRuns,
+      ...locationRuns,
+      ...locationMonitors,
+      ...monitorsByType,
+    };
   }
 }
 
