@@ -505,7 +505,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               fetchData();
               refreshUpgrades();
             }}
-            version={kibanaVersion}
           />
         </EuiPortal>
       )}

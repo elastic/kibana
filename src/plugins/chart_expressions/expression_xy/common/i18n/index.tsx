@@ -121,6 +121,10 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.ariaLabel.help', {
       defaultMessage: 'Specifies the aria label of the xy chart',
     }),
+  getAddTimeMakerHelp: () =>
+    i18n.translate('expressionXY.xyVis.addTimeMaker.help', {
+      defaultMessage: 'Show time marker',
+    }),
   getMarkSizeRatioHelp: () =>
     i18n.translate('expressionXY.xyVis.markSizeRatio.help', {
       defaultMessage: 'Specifies the ratio of the dots at the line and area charts',
