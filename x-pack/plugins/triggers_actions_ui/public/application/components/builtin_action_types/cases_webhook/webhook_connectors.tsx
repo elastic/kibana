@@ -44,8 +44,10 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
     createIncidentMethod,
     createIncidentResponseKey,
     createIncidentUrl,
+    getIncidentResponseCreatedDateKey,
     getIncidentResponseExternalTitleKey,
-    getIncidentViewUrl,
+    getIncidentResponseUpdatedDateKey,
+    incidentViewUrl,
     getIncidentUrl,
     hasAuth,
     headers,
@@ -487,18 +489,94 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow
-            id="getIncidentViewUrl"
+            id="getIncidentResponseCreatedDateKey"
             fullWidth
-            error={errors.getIncidentViewUrl}
-            isInvalid={isConfigKeyValueInvalid('getIncidentViewUrl')}
+            error={errors.getIncidentResponseCreatedDateKey}
+            isInvalid={isConfigKeyValueInvalid('getIncidentResponseCreatedDateKey')}
             label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentViewUrlTextFieldLabel',
+              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentResponseCreatedDateKeyTextFieldLabel',
               {
-                defaultMessage: 'Get External Incident View URL',
+                defaultMessage: 'Get Incident Response Created Date Key',
               }
             )}
             helpText={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentViewUrlTextFieldLabel',
+              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentResponseCreatedDateKeyTextFieldLabel',
+              {
+                defaultMessage:
+                  'JSON key in get incident response that contains the date the incident was created.',
+              }
+            )}
+          >
+            <EuiFieldText
+              name="getIncidentResponseCreatedDateKey"
+              isInvalid={isConfigKeyValueInvalid('getIncidentResponseCreatedDateKey')}
+              fullWidth
+              readOnly={readOnly}
+              value={getIncidentResponseCreatedDateKey || ''}
+              data-test-subj="getIncidentResponseCreatedDateKeyText"
+              onChange={(e) => {
+                editActionConfig('getIncidentResponseCreatedDateKey', e.target.value);
+              }}
+              onBlur={() => {
+                if (!getIncidentResponseCreatedDateKey) {
+                  editActionConfig('getIncidentResponseCreatedDateKey', '');
+                }
+              }}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id="getIncidentResponseUpdatedDateKey"
+            fullWidth
+            error={errors.getIncidentResponseUpdatedDateKey}
+            isInvalid={isConfigKeyValueInvalid('getIncidentResponseUpdatedDateKey')}
+            label={i18n.translate(
+              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentResponseUpdatedDateKeyTextFieldLabel',
+              {
+                defaultMessage: 'Get Incident Response Updated Date Key',
+              }
+            )}
+            helpText={i18n.translate(
+              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentResponseUpdatedDateKeyTextFieldLabel',
+              {
+                defaultMessage:
+                  'JSON key in get incident response that contains the date the incident was updated.',
+              }
+            )}
+          >
+            <EuiFieldText
+              name="getIncidentResponseUpdatedDateKey"
+              isInvalid={isConfigKeyValueInvalid('getIncidentResponseUpdatedDateKey')}
+              fullWidth
+              readOnly={readOnly}
+              value={getIncidentResponseUpdatedDateKey || ''}
+              data-test-subj="getIncidentResponseUpdatedDateKeyText"
+              onChange={(e) => {
+                editActionConfig('getIncidentResponseUpdatedDateKey', e.target.value);
+              }}
+              onBlur={() => {
+                if (!getIncidentResponseUpdatedDateKey) {
+                  editActionConfig('getIncidentResponseUpdatedDateKey', '');
+                }
+              }}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id="incidentViewUrl"
+            fullWidth
+            error={errors.incidentViewUrl}
+            isInvalid={isConfigKeyValueInvalid('incidentViewUrl')}
+            label={i18n.translate(
+              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.incidentViewUrlTextFieldLabel',
+              {
+                defaultMessage: 'External Incident View URL',
+              }
+            )}
+            helpText={i18n.translate(
+              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.incidentViewUrlTextFieldLabel',
               {
                 defaultMessage:
                   'URL to view incident in external system. Withold the ID from the URL as Kibana will dynamically insert the id based on the provided Create Incident Response Incident Key.',
@@ -506,18 +584,18 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
             )}
           >
             <EuiFieldText
-              name="getIncidentViewUrl"
-              isInvalid={isConfigKeyValueInvalid('getIncidentViewUrl')}
+              name="incidentViewUrl"
+              isInvalid={isConfigKeyValueInvalid('incidentViewUrl')}
               fullWidth
               readOnly={readOnly}
-              value={getIncidentViewUrl || ''}
-              data-test-subj="getIncidentViewUrlText"
+              value={incidentViewUrl || ''}
+              data-test-subj="incidentViewUrlText"
               onChange={(e) => {
-                editActionConfig('getIncidentViewUrl', e.target.value);
+                editActionConfig('incidentViewUrl', e.target.value);
               }}
               onBlur={() => {
-                if (!getIncidentViewUrl) {
-                  editActionConfig('getIncidentViewUrl', '');
+                if (!incidentViewUrl) {
+                  editActionConfig('incidentViewUrl', '');
                 }
               }}
             />

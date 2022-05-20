@@ -5,22 +5,27 @@
  * 2.0.
  */
 
-import axios, { AxiosError, AxiosResponse } from 'axios';
+import axios, { AxiosResponse } from 'axios';
 
 import { Logger } from '@kbn/core/server';
-import { isOk, promiseResult, Result } from '../lib/result_type';
+import {
+  createServiceError,
+  getObjectValueByKey,
+  getPushedDate,
+  throwIfResponseIsNotValidSpecial,
+} from './utils';
 import {
   CreateIncidentParams,
   ExternalServiceCredentials,
-  ResponseError,
   ExternalService,
   CasesWebhookPublicConfigurationType,
   CasesWebhookSecretConfigurationType,
   ExternalServiceIncidentResponse,
+  GetIncidentResponse,
 } from './types';
 
 import * as i18n from './translations';
-import { request, getErrorMessage, throwIfResponseIsNotValid } from '../lib/axios_utils';
+import { request } from '../lib/axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 
 export const createExternalService = (
@@ -29,67 +34,67 @@ export const createExternalService = (
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities
 ): ExternalService => {
-  const { createIncidentUrl, createIncidentJson } = config as CasesWebhookPublicConfigurationType;
+  const {
+    createIncidentResponseKey,
+    createIncidentUrl: createIncidentUrlConfig,
+    getIncidentUrl: getIncidentUrlConfig,
+    createIncidentJson,
+    getIncidentResponseCreatedDateKey,
+    getIncidentResponseExternalTitleKey,
+    getIncidentResponseUpdatedDateKey,
+    incidentViewUrl,
+  } = config as CasesWebhookPublicConfigurationType;
   const { password, user } = secrets as CasesWebhookSecretConfigurationType;
-  if (!createIncidentUrl || !password || !user) {
+  if (!getIncidentUrlConfig || !password || !user) {
     throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
   }
 
-  const incidentUrl = createIncidentUrl.endsWith('/')
-    ? createIncidentUrl.slice(0, -1)
-    : createIncidentUrl;
+  const createIncidentUrl = createIncidentUrlConfig.endsWith('/')
+    ? createIncidentUrlConfig.slice(0, -1)
+    : createIncidentUrlConfig;
+
+  const getIncidentUrl = getIncidentUrlConfig.endsWith('/')
+    ? getIncidentUrlConfig.slice(0, -1)
+    : getIncidentUrlConfig;
+
+  const getIncidentViewURL = (id: string) =>
+    `${
+      incidentViewUrl.endsWith('=')
+        ? incidentViewUrl
+        : incidentViewUrl.endsWith('/')
+        ? incidentViewUrl
+        : `${incidentViewUrl}/`
+    }${id}`;
 
   const axiosInstance = axios.create({
     auth: { username: user, password },
   });
 
-  const createErrorMessage = (errorResponse: ResponseError | null | undefined): string => {
-    if (errorResponse == null) {
-      return 'unknown: errorResponse was null';
-    }
-
-    const { errorMessages, errors } = errorResponse;
-
-    if (errors == null) {
-      return 'unknown: errorResponse.errors was null';
-    }
-
-    if (Array.isArray(errorMessages) && errorMessages.length > 0) {
-      return `${errorMessages.join(', ')}`;
-    }
-
-    return Object.entries(errors).reduce((errorMessage, [, value]) => {
-      const msg = errorMessage.length > 0 ? `${errorMessage} ${value}` : value;
-      return msg;
-    }, '');
-  };
-
-  const getIncident = async (id: string) => {
+  const getIncident = async (id: string): Promise<GetIncidentResponse> => {
     try {
       const res = await request({
         axios: axiosInstance,
-        url: `${incidentUrl}/${id}`,
+        url: `${getIncidentUrl}/${id}`,
         logger,
         configurationUtilities,
       });
 
-      throwIfResponseIsNotValid({
+      throwIfResponseIsNotValidSpecial({
         res,
-        requiredAttributesToBeInTheResponse: ['id', 'key'],
+        requiredAttributesToBeInTheResponse: [
+          getIncidentResponseCreatedDateKey,
+          getIncidentResponseExternalTitleKey,
+          getIncidentResponseUpdatedDateKey,
+        ],
       });
 
-      const { fields, id: incidentId, key } = res.data;
+      const title = getObjectValueByKey(res.data, getIncidentResponseExternalTitleKey) as string;
+      const created = getObjectValueByKey(res.data, getIncidentResponseCreatedDateKey) as string;
+      const updated = getObjectValueByKey(res.data, getIncidentResponseUpdatedDateKey) as string;
 
-      return { id: incidentId, key, created: fields.created, updated: fields.updated, ...fields };
+      return { id, title, created, updated };
     } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.NAME,
-          `Unable to get incident with id ${id}. Error: ${
-            error.message
-          } Reason: ${createErrorMessage(error.response?.data)}`
-        )
-      );
+      throw createServiceError(error, 'Unable to get incident');
     }
   };
 
@@ -104,59 +109,35 @@ export const createExternalService = (
     incident,
   }: CreateIncidentParams): Promise<ExternalServiceIncidentResponse> => {
     const { summary, description } = incident;
-    const data = replaceSumDesc(summary, description ?? '');
-    console.log('cases webhook data!!', {
-      data,
-    });
     try {
-      const result: Result<AxiosResponse, AxiosError> = await promiseResult(
-        request({
-          axios: axiosInstance,
-          url: `${incidentUrl}`,
-          logger,
-          method: 'post',
-          data,
-          configurationUtilities,
-        })
-      );
-      console.log('it happened!!!', result);
+      const res: AxiosResponse = await request({
+        axios: axiosInstance,
+        url: `${createIncidentUrl}`,
+        logger,
+        method: 'post',
+        data: replaceSumDesc(summary, description ?? ''),
+        configurationUtilities,
+      });
 
-      if (isOk(result)) {
-        const {
-          value: { status, statusText, data: data2 },
-        } = result;
-        console.log('DATA', data2);
-        logger.debug(`response from webhook action "${actionId}": [HTTP ${status}] ${statusText}`);
+      const { status, statusText, data } = res;
 
-        return data; // successResult(actionId, data);
-      } else {
-        const { error } = result;
-        if (error.response) {
-          const {
-            status,
-            statusText,
-            headers: responseHeaders,
-            data: { message: responseMessage },
-          } = error.response;
-          const responseMessageAsSuffix = responseMessage ? `: ${responseMessage}` : '';
-          const message = `[${status}] ${statusText}${responseMessageAsSuffix}`;
-          logger.error(`error on ${actionId} webhook event: ${message}`);
-          // The request was made and the server responded with a status code
-          // that falls out of the range of 2xx
-          // special handling for 5xx
-          return { actionId, message };
-        }
-      }
+      throwIfResponseIsNotValidSpecial({
+        res,
+        requiredAttributesToBeInTheResponse: [createIncidentResponseKey],
+      });
+      const incidentId = getObjectValueByKey(data, createIncidentResponseKey) as string;
+      const insertedIncident = await getIncident(incidentId);
+
+      logger.debug(`response from webhook action "${actionId}": [HTTP ${status}] ${statusText}`);
+
+      return {
+        id: incidentId,
+        title: insertedIncident.title,
+        url: getIncidentViewURL(incidentId),
+        pushedDate: getPushedDate(insertedIncident.created),
+      };
     } catch (error) {
-      console.log('ERROR', error.response);
-      throw new Error(
-        getErrorMessage(
-          i18n.NAME,
-          `Unable to create incident. Error: ${error.message}. Reason: ${createErrorMessage(
-            error.response?.data
-          )}`
-        )
-      );
+      throw createServiceError(error, 'Unable to create incident');
     }
   };
 
@@ -175,7 +156,7 @@ export const createExternalService = (
   //     const res = await request({
   //       axios: axiosInstance,
   //       method: 'put',
-  //       url: `${incidentUrl}/${incidentId}`,
+  //       url: `${createIncidentUrl}/${incidentId}`,
   //       logger,
   //       data: { fields },
   //       configurationUtilities,
@@ -425,7 +406,7 @@ export const createExternalService = (
   // };
   //
   // const getIssue = async (id: string) => {
-  //   const getIssueUrl = `${incidentUrl}/${id}`;
+  //   const getIssueUrl = `${createIncidentUrl}/${id}`;
   //   try {
   //     const res = await request({
   //       axios: axiosInstance,
@@ -454,7 +435,7 @@ export const createExternalService = (
 
   return {
     // getFields,
-    // getIncident,
+    getIncident,
     createIncident,
     // updateIncident,
     // createComment,

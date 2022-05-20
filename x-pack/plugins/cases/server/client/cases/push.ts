@@ -20,7 +20,6 @@ import {
   OWNER_FIELD,
   CommentType,
   CommentRequestAlertType,
-  ConnectorTypes,
 } from '../../../common/api';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
 
@@ -157,7 +156,7 @@ export const push = async (
       alerts,
       casesConnectors,
     });
-
+    console.log('externalServiceIncident', externalServiceIncident);
     const pushRes = await actionsClient.execute({
       actionId: connector?.id ?? '',
       params: {
@@ -165,6 +164,7 @@ export const push = async (
         subActionParams: externalServiceIncident,
       },
     });
+    console.log('pushRes', pushRes);
 
     if (pushRes.status === 'error') {
       throw Boom.failedDependency(
@@ -274,38 +274,30 @@ export const push = async (
 
     /* End of update case with push information */
 
-    const flattedCase = flattenCaseSavedObject({
-      savedObject: {
-        ...myCase,
-        ...updatedCase,
-        attributes: { ...myCase.attributes, ...updatedCase?.attributes },
-        references: myCase.references,
-      },
-      comments: comments.saved_objects.map((origComment) => {
-        const updatedComment = updatedComments.saved_objects.find((c) => c.id === origComment.id);
-        return {
-          ...origComment,
-          ...updatedComment,
-          attributes: {
-            ...origComment.attributes,
-            ...updatedComment?.attributes,
-            ...getCommentContextFromAttributes(origComment.attributes),
-          },
-          version: updatedComment?.version ?? origComment.version,
-          references: origComment?.references ?? [],
-        };
-      }),
-    });
-    if (flattedCase.connector.type === ConnectorTypes.casesWebhook) {
-      flattedCase.external_service = {
-        ...flattedCase.external_service,
-        external_id: 'replace_cases_webhook',
-        external_title: 'replace_cases_webhook',
-        external_url: 'replace_cases_webhook',
-      };
-    }
-
-    return CaseResponseRt.encode(flattedCase);
+    return CaseResponseRt.encode(
+      flattenCaseSavedObject({
+        savedObject: {
+          ...myCase,
+          ...updatedCase,
+          attributes: { ...myCase.attributes, ...updatedCase?.attributes },
+          references: myCase.references,
+        },
+        comments: comments.saved_objects.map((origComment) => {
+          const updatedComment = updatedComments.saved_objects.find((c) => c.id === origComment.id);
+          return {
+            ...origComment,
+            ...updatedComment,
+            attributes: {
+              ...origComment.attributes,
+              ...updatedComment?.attributes,
+              ...getCommentContextFromAttributes(origComment.attributes),
+            },
+            version: updatedComment?.version ?? origComment.version,
+            references: origComment?.references ?? [],
+          };
+        }),
+      })
+    );
   } catch (error) {
     throw createCaseError({ message: `Failed to push case: ${error}`, error, logger });
   }

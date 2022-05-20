@@ -47,17 +47,11 @@ const getLabelTitle = (action: UserActionResponse<PushedUserAction>, firstPush: 
           externalService?.connectorName
         }`}
       </EuiFlexItem>
-      {externalService?.externalUrl !== 'replace_cases_webhook' && (
-        <EuiFlexItem grow={false}>
-          <EuiLink
-            data-test-subj="pushed-value"
-            href={externalService?.externalUrl}
-            target="_blank"
-          >
-            {externalService?.externalTitle}
-          </EuiLink>
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false}>
+        <EuiLink data-test-subj="pushed-value" href={externalService?.externalUrl} target="_blank">
+          {externalService?.externalTitle}
+        </EuiLink>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

@@ -201,12 +201,5 @@ function transformESExternalService(
   return {
     ...externalService,
     connector_id: connectorIdRef?.id ?? NONE_CONNECTOR_ID,
-    ...(externalService.external_url == null
-      ? {
-          external_id: 'replace_cases_webhook',
-          external_title: 'replace_cases_webhook',
-          external_url: 'replace_cases_webhook',
-        }
-      : {}),
   };
 }

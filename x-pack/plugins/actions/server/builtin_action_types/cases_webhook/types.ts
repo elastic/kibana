@@ -34,7 +34,7 @@ export type CasesWebhookSecretConfigurationType = TypeOf<
 export type CasesWebhookActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
 
 export interface ExternalServiceCredentials {
-  config: Record<string, unknown>;
+  config: Record<keyof CasesWebhookPublicConfigurationType, unknown>;
   secrets: Record<string, unknown>;
 }
 
@@ -60,6 +60,7 @@ export type PushToServiceApiParams = ExecutorSubActionPushParams;
 
 // incident service
 export interface ExternalService {
+  getIncident: (id: string) => Promise<GetIncidentResponse>;
   createIncident: (params: CreateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
 }
 export interface CreateIncidentParams {
@@ -76,6 +77,13 @@ export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerAr
   logger: Logger;
 }
 export type PushToServiceResponse = ExternalServiceIncidentResponse;
+
+export interface GetIncidentResponse {
+  id: string;
+  title: string;
+  created: string;
+  updated: string;
+}
 
 export interface ExternalServiceApi {
   pushToService: (args: PushToServiceApiHandlerArgs) => Promise<PushToServiceResponse>;

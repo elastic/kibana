@@ -83,7 +83,19 @@ export const GET_INCIDENT_URL_REQUIRED = i18n.translate(
 export const GET_RESPONSE_EXTERNAL_TITLE_KEY_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.sections.addAction.casesWebhookAction.error.requiredGetIncidentResponseExternalTitleKeyText',
   {
-    defaultMessage: 'Get incident response external incident title key.',
+    defaultMessage: 'Get incident response external incident title key is re quired.',
+  }
+);
+export const GET_RESPONSE_EXTERNAL_CREATED_KEY_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.sections.addAction.casesWebhookAction.error.requiredGetIncidentResponseCreatedKeyText',
+  {
+    defaultMessage: 'Get incident response created date key is required.',
+  }
+);
+export const GET_RESPONSE_EXTERNAL_UPDATED_KEY_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.sections.addAction.casesWebhookAction.error.requiredGetIncidentResponseUpdatedKeyText',
+  {
+    defaultMessage: 'Get incident response updated date key is required.',
   }
 );
 export const GET_INCIDENT_VIEW_URL = i18n.translate(

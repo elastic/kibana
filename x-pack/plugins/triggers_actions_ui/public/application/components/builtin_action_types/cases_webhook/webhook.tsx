@@ -58,8 +58,10 @@ export function getActionType(): ActionTypeModel<
         createIncidentMethod: new Array<string>(),
         createIncidentResponseKey: new Array<string>(),
         createIncidentUrl: new Array<string>(),
+        getIncidentResponseCreatedDateKey: new Array<string>(),
         getIncidentResponseExternalTitleKey: new Array<string>(),
-        getIncidentViewUrl: new Array<string>(),
+        getIncidentResponseUpdatedDateKey: new Array<string>(),
+        incidentViewUrl: new Array<string>(),
         getIncidentUrl: new Array<string>(),
         updateIncidentJson: new Array<string>(),
         updateIncidentMethod: new Array<string>(),
@@ -99,8 +101,18 @@ export function getActionType(): ActionTypeModel<
           translations.GET_RESPONSE_EXTERNAL_TITLE_KEY_REQUIRED
         );
       }
-      if (!action.config.getIncidentViewUrl) {
-        configErrors.getIncidentViewUrl.push(translations.GET_INCIDENT_VIEW_URL);
+      if (!action.config.getIncidentResponseCreatedDateKey) {
+        configErrors.getIncidentResponseCreatedDateKey.push(
+          translations.GET_RESPONSE_EXTERNAL_CREATED_KEY_REQUIRED
+        );
+      }
+      if (!action.config.getIncidentResponseUpdatedDateKey) {
+        configErrors.getIncidentResponseUpdatedDateKey.push(
+          translations.GET_RESPONSE_EXTERNAL_UPDATED_KEY_REQUIRED
+        );
+      }
+      if (!action.config.incidentViewUrl) {
+        configErrors.incidentViewUrl.push(translations.GET_INCIDENT_VIEW_URL);
       }
       if (!action.config.updateIncidentUrl) {
         configErrors.updateIncidentUrl.push(translations.UPDATE_URL_REQUIRED);
