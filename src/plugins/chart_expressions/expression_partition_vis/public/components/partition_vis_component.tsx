@@ -17,7 +17,7 @@ import {
   RenderChangeListener,
   TooltipProps,
   TooltipType,
-  SeriesIdentifier,
+  SeriesIdentifier, PartitionElementEvent,
 } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
@@ -399,7 +399,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 showLegendExtra={visParams.showValuesInLegend}
                 onElementClick={(args) => {
                   handleSliceClick(
-                    args[0][0] as LayerValue[],
+                    (args[0] as PartitionElementEvent)[0],
                     bucketColumns,
                     visData,
                     splitChartDimension,

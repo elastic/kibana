@@ -24,7 +24,7 @@ import {
   DisplayValueStyle,
   RecursivePartial,
   AxisStyle,
-  Placement,
+  Placement, XYChartElementEvent,
 } from '@elastic/charts';
 import { IconType } from '@elastic/eui';
 import { PaletteRegistry } from '@kbn/coloring';
@@ -382,7 +382,8 @@ export function XYChart({
     valueLabels !== ValueLabelModes.HIDE &&
     getValueLabelsStyling(shouldRotate);
 
-  const clickHandler: ElementClickListener = ([[geometry, series]]) => {
+  const clickHandler: ElementClickListener = ([element]) => {
+    const [geometry, series] = element as XYChartElementEvent;
     // for xyChart series is always XYChartSeriesIdentifier and geometry is always type of GeometryValue
     const xySeries = series as XYChartSeriesIdentifier;
     const xyGeometry = geometry as GeometryValue;
