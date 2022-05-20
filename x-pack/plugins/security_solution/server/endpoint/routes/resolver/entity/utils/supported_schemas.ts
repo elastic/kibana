@@ -8,7 +8,6 @@
 import _ from 'lodash';
 import { ResolverSchema } from '../../../../../../common/endpoint/types';
 
-
 interface SupportedSchema {
   /**
    * A name for the schema being used
@@ -25,7 +24,7 @@ interface SupportedSchema {
    */
   schema: ResolverSchema;
 }
-  
+
 /**
  * This structure defines the preset supported schemas for a resolver graph. We'll probably want convert this
  * implementation to something similar to how row renderers is implemented.
@@ -65,7 +64,7 @@ export const supportedSchemas: SupportedSchema[] = [
     },
   },
 ];
-  
+
 export function getFieldAsString(doc: unknown, field: string): string | undefined {
   const value = _.get(doc, field);
   if (value === undefined) {
