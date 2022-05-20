@@ -271,7 +271,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
               dataValues={generateAnnotationData(
                 anomalies.map((a) => [a.startTime, a.influencers])
               )}
-              style={{ fill: '#D36086' }}
+              style={{ fill: '#D36086', animations: { enabled: false } }}
             />
           )}
           <MetricExplorerSeriesChart

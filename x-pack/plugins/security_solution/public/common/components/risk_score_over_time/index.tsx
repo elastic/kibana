@@ -177,6 +177,9 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
                           stroke: euiThemeVars.euiColorDanger,
                           opacity: 1,
                         },
+                        animations: {
+                          enabled: false,
+                        },
                       }}
                       marker={
                         <StyledEuiText color={euiThemeVars.euiColorDarkestShade}>

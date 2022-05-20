@@ -91,6 +91,9 @@ export function WaterfallChartMarkers() {
                 stroke: color,
                 opacity: 1,
               },
+              animations: {
+                enabled: false,
+              },
             }}
           />
         );

@@ -27,6 +27,9 @@ export const CurrentTime: FC<CurrentTimeProps> = ({ isDarkMode, domainEnd }) => 
       stroke: isDarkMode ? darkEuiTheme.euiColorDanger : lightEuiTheme.euiColorDanger,
       opacity: 0.7,
     },
+    animations: {
+      enabled: false,
+    }
   };
 
   // Domain end of 'now' will be milliseconds behind current time, so we extend time by 1 minute and check if

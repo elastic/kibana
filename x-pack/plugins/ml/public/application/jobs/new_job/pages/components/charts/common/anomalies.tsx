@@ -31,6 +31,9 @@ function getAnomalyStyle(threshold: number) {
       strokeWidth: 3,
       opacity: 1,
     },
+    animations: {
+      enabled: false,
+    },
   };
 }
 

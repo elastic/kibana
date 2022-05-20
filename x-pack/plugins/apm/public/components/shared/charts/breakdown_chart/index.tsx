@@ -141,6 +141,7 @@ export function BreakdownChart({
             }))}
             style={{
               line: { strokeWidth: 1, stroke: annotationColor, opacity: 1 },
+              animations: { enabled: false },
             }}
             marker={<EuiIcon type="dot" color={annotationColor} />}
             markerPosition={Position.Top}

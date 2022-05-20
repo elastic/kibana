@@ -41,6 +41,9 @@ export const XYThresholdLine: FC<XYThresholdLineProps> = ({
           opacity: 1,
           dash,
         },
+        animations: {
+          enabled: false,
+        },
       }}
     />
   );

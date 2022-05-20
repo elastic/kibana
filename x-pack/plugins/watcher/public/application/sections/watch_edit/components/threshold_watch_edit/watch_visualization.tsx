@@ -255,6 +255,7 @@ export const WatchVisualization = () => {
                   id={specId}
                   domainType={AnnotationDomainType.YDomain}
                   dataValues={[{ dataValue: watch.threshold[i], details: specId }]}
+                  style={{ animations: { enabled: false } }}
                 />
               );
             })}

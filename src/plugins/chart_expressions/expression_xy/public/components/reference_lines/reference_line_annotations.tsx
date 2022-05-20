@@ -110,7 +110,7 @@ export const ReferenceLineAnnotations: FC<Props> = ({
       domainType={
         axisMode === 'bottom' ? AnnotationDomainType.XDomain : AnnotationDomainType.YDomain
       }
-      style={{ line: { ...sharedStyle, opacity: 1 } }}
+      style={{ line: { ...sharedStyle, opacity: 1 }, animations: { enabled: false } }}
     />
   );
 

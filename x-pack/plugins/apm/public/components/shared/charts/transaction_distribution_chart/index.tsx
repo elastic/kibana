@@ -69,6 +69,9 @@ const getAnnotationsStyle = (color = 'gray'): LineAnnotationProps['style'] => ({
     fill: color,
     padding: 0,
   },
+  animations: {
+    enabled: false,
+  },
 });
 
 // TODO Revisit this approach since it actually manipulates the numbers
@@ -194,6 +197,9 @@ export function TransactionDistributionChart({
                 stroke: euiTheme.eui.euiColorLightShade,
                 fill: euiTheme.eui.euiColorLightShade,
                 opacity: 0.9,
+                animations: {
+                  enabled: false,
+                },
               }}
               hideTooltips={true}
             />

@@ -257,6 +257,9 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
                   stroke: colorTransformer(Color.color1),
                   opacity: 1,
                 },
+                animations: {
+                  enabled: false,
+                },
               }}
             />
           ) : null}
@@ -266,6 +269,9 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
               style={{
                 fill: colorTransformer(Color.color1),
                 opacity: THRESHOLD_OPACITY,
+                animations: {
+                  enabled: false,
+                },
               }}
               dataValues={[
                 {
@@ -285,6 +291,9 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
               style={{
                 fill: colorTransformer(Color.color1),
                 opacity: THRESHOLD_OPACITY,
+                animations: {
+                  enabled: false,
+                },
               }}
               dataValues={[
                 {

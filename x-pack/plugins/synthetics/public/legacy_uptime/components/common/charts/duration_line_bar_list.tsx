@@ -60,6 +60,7 @@ export const DurationAnomaliesBar = ({ anomalies, hiddenLegends }: Props) => {
       opacity: 1,
       strokeWidth: 2,
       stroke: color,
+      animations: { enabled: false },
     };
   };
 

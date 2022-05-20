@@ -368,6 +368,9 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
                                 stroke: euiTheme.euiColorVis1,
                                 opacity: 0.5,
                               },
+                              animations: {
+                                enabled: false,
+                              },
                             }}
                           />
                         ) : null}
@@ -391,6 +394,9 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
                                   stroke: euiTheme.euiColorDangerText,
                                   opacity: 0.5,
                                 },
+                                animations: {
+                                  enabled: false,
+                                },
                               }}
                             />
                             <RectAnnotation
@@ -403,7 +409,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
                                   defaultMessage: 'Annotations rectangle result',
                                 }
                               )}
-                              style={{ fill: euiTheme.euiColorDangerText }}
+                              style={{ fill: euiTheme.euiColorDangerText, animations: { enabled: false } }}
                             />
                           </>
                         ) : null}
@@ -426,6 +432,9 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
                                   strokeWidth: 3,
                                   stroke: euiTheme.euiColorAccent,
                                   opacity: 0.5,
+                                },
+                                animations: {
+                                  enabled: false,
                                 },
                               }}
                             />

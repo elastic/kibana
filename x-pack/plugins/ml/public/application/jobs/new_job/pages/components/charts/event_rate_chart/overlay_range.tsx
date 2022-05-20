@@ -39,6 +39,9 @@ export const OverlayRange: FC<Props> = ({ overlayKey, start, end, color, showMar
         style={{
           fill: color,
           strokeWidth: 0,
+          animations: {
+            enabled: false,
+          },
         }}
       />
       <LineAnnotation
@@ -50,6 +53,9 @@ export const OverlayRange: FC<Props> = ({ overlayKey, start, end, color, showMar
             strokeWidth: 1,
             stroke: '#343741',
             opacity: 0,
+          },
+          animations: {
+            enabled: false,
           },
         }}
         markerPosition={Position.Bottom}

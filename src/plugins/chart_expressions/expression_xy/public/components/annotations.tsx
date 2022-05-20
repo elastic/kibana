@@ -253,6 +253,9 @@ export const Annotations = ({
                     : undefined,
                 opacity: 1,
               },
+              animations: {
+                enabled: false,
+              },
             }}
           />
         );
@@ -285,7 +288,13 @@ export const Annotations = ({
                 details: label,
               },
             ]}
-            style={{ fill: color || defaultAnnotationRangeColor, opacity: 1 }}
+            style={{
+              fill: color || defaultAnnotationRangeColor,
+              opacity: 1,
+              animations: {
+                enabled: false,
+              },
+            }}
             outside={Boolean(outside)}
             outsideDimension={outsideDimension}
           />

@@ -38,6 +38,9 @@ export function PercentileAnnotations({ percentiles }: Props) {
       stroke: euiLightVars.euiColorSuccess,
       opacity: 1,
     },
+    animations: {
+      enabled: false,
+    },
   };
 
   function PercentileTooltip({

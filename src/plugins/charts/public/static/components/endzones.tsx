@@ -48,6 +48,7 @@ export const Endzones: FC<EndzonesProps> = ({
     strokeWidth: 0,
     opacity: isDarkMode ? 0.6 : 0.2,
     fill: isDarkMode ? darkEuiTheme.euiColorLightShade : lightEuiTheme.euiColorDarkShade,
+    animations: { enabled: false },
   };
 
   const rectAnnotations: RectAnnotationDatum[] = [];

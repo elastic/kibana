@@ -51,6 +51,9 @@ export const ThresholdAnnotations = ({
             stroke: colorTransformer(color),
             opacity: 1,
           },
+          animations: {
+            enabled: false,
+          },
         }}
       />
       {sortedThresholds.length === 2 && comparator === Comparator.BETWEEN ? (
@@ -61,6 +64,9 @@ export const ThresholdAnnotations = ({
             style={{
               fill: colorTransformer(color),
               opacity,
+              animations: {
+                enabled: false,
+              },
             }}
             dataValues={[
               {
@@ -83,6 +89,9 @@ export const ThresholdAnnotations = ({
             style={{
               fill: colorTransformer(color),
               opacity,
+              animations: {
+                enabled: false,
+              },
             }}
             dataValues={[
               {
@@ -101,6 +110,9 @@ export const ThresholdAnnotations = ({
             style={{
               fill: colorTransformer(color),
               opacity,
+              animations: {
+                enabled: false,
+              },
             }}
             dataValues={[
               {
@@ -122,6 +134,9 @@ export const ThresholdAnnotations = ({
           style={{
             fill: colorTransformer(color),
             opacity,
+            animations: {
+              enabled: false,
+            },
           }}
           dataValues={[
             {
@@ -142,6 +157,9 @@ export const ThresholdAnnotations = ({
           style={{
             fill: colorTransformer(color),
             opacity,
+            animations: {
+              enabled: false,
+            },
           }}
           dataValues={[
             {

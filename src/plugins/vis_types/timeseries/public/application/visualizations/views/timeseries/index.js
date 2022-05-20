@@ -222,8 +222,14 @@ export const TimeSeries = ({
 
       {annotations.map(({ id, data, icon, color }) => {
         const dataValues = generateAnnotationData(data, tooltipFormatter);
-        const style = { line: { stroke: color } };
-
+        const style = {
+          line: {
+            stroke: color,
+          },
+          animations: {
+            enabled: false,
+          }
+        };
         return (
           <LineAnnotation
             key={id}
