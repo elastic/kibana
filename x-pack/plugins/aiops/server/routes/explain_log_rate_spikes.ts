@@ -61,7 +61,6 @@ export const defineExplainLogRateSpikesRoute = (
       const fields = Object.keys(doc?._source ?? {});
 
       const { end, push, responseWithHeaders } = streamFactory<AiopsExplainLogRateSpikesApiAction>(
-        logger,
         request.headers
       );
 
