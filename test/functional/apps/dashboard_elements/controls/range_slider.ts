@@ -121,7 +121,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await saveButton.isEnabled()).to.be(true);
         await dashboardControls.controlsEditorSetDataView('kibana_sample_data_flights');
         expect(await saveButton.isEnabled()).to.be(false);
-        await dashboardControls.controlsEditorSetfield('dayOfWeek');
+        await dashboardControls.controlsEditorSetfield('dayOfWeek', RANGE_SLIDER_CONTROL);
         await dashboardControls.controlEditorSave();
         await dashboardControls.rangeSliderWaitForLoading();
         validateRange('placeholder', firstId, '0', '6');
@@ -164,7 +164,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('editing field clears selections', async () => {
         const secondId = (await dashboardControls.getAllControlIds())[1];
         await dashboardControls.editExistingControl(secondId);
-        await dashboardControls.controlsEditorSetfield('FlightDelayMin');
+        await dashboardControls.controlsEditorSetfield('FlightDelayMin', RANGE_SLIDER_CONTROL);
         await dashboardControls.controlEditorSave();
 
         await dashboardControls.rangeSliderWaitForLoading();

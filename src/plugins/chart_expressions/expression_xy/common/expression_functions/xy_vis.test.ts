@@ -7,7 +7,6 @@
  */
 
 import { xyVisFunction } from '.';
-import { Datatable } from '@kbn/expressions-plugin/common';
 import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
 import { sampleArgs, sampleLayer } from '../__mocks__';
 import { XY_VIS } from '../constants';
@@ -15,26 +14,11 @@ import { XY_VIS } from '../constants';
 describe('xyVis', () => {
   test('it renders with the specified data and args', async () => {
     const { data, args } = sampleArgs();
-    const newData = {
-      ...data,
-      type: 'datatable',
-
-      columns: data.columns.map((c) =>
-        c.id !== 'c'
-          ? c
-          : {
-              ...c,
-              meta: {
-                type: 'string',
-              },
-            }
-      ),
-    } as Datatable;
     const { layers, ...rest } = args;
     const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
     const result = await xyVisFunction.fn(
-      newData,
-      { ...rest, ...restLayerArgs, referenceLineLayers: [], annotationLayers: [] },
+      data,
+      { ...rest, ...restLayerArgs, referenceLines: [], annotationLayers: [] },
       createMockExecutionContext()
     );
 
@@ -44,7 +28,7 @@ describe('xyVis', () => {
       value: {
         args: {
           ...rest,
-          layers: [{ layerType, table: newData, layerId: 'dataLayers-0', type, ...restLayerArgs }],
+          layers: [{ layerType, table: data, layerId: 'dataLayers-0', type, ...restLayerArgs }],
         },
       },
     });
@@ -60,7 +44,7 @@ describe('xyVis', () => {
           ...rest,
           ...{ ...sampleLayer, markSizeAccessor: 'b' },
           markSizeRatio: 0,
-          referenceLineLayers: [],
+          referenceLines: [],
           annotationLayers: [],
         },
         createMockExecutionContext()
@@ -74,13 +58,14 @@ describe('xyVis', () => {
           ...rest,
           ...{ ...sampleLayer, markSizeAccessor: 'b' },
           markSizeRatio: 101,
-          referenceLineLayers: [],
+          referenceLines: [],
           annotationLayers: [],
         },
         createMockExecutionContext()
       )
     ).rejects.toThrowErrorMatchingSnapshot();
   });
+
   test('it should throw error if minTimeBarInterval is invalid', async () => {
     const { data, args } = sampleArgs();
     const { layers, ...rest } = args;
@@ -92,7 +77,7 @@ describe('xyVis', () => {
           ...rest,
           ...restLayerArgs,
           minTimeBarInterval: '1q',
-          referenceLineLayers: [],
+          referenceLines: [],
           annotationLayers: [],
         },
         createMockExecutionContext()
@@ -111,7 +96,26 @@ describe('xyVis', () => {
           ...rest,
           ...restLayerArgs,
           minTimeBarInterval: '1h',
-          referenceLineLayers: [],
+          referenceLines: [],
+          annotationLayers: [],
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  test('it should throw error if addTimeMarker applied for not time chart', async () => {
+    const { data, args } = sampleArgs();
+    const { layers, ...rest } = args;
+    const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
+    expect(
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          addTimeMarker: true,
+          referenceLines: [],
           annotationLayers: [],
         },
         createMockExecutionContext()
@@ -131,7 +135,7 @@ describe('xyVis', () => {
         {
           ...rest,
           ...restLayerArgs,
-          referenceLineLayers: [],
+          referenceLines: [],
           annotationLayers: [],
           splitRowAccessor,
         },
@@ -152,7 +156,7 @@ describe('xyVis', () => {
         {
           ...rest,
           ...restLayerArgs,
-          referenceLineLayers: [],
+          referenceLines: [],
           annotationLayers: [],
           splitColumnAccessor,
         },
@@ -172,7 +176,7 @@ describe('xyVis', () => {
         {
           ...rest,
           ...restLayerArgs,
-          referenceLineLayers: [],
+          referenceLines: [],
           annotationLayers: [],
           markSizeRatio: 5,
         },
