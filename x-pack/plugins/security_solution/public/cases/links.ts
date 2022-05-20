@@ -6,8 +6,8 @@
  */
 
 import { getCasesDeepLinks } from '@kbn/cases-plugin/public';
-import { CASES_PATH, SecurityPageName } from '../../common/constants';
-import { FEATURE, LinkItem } from '../common/links/types';
+import { CASES_FEATURE_ID, CASES_PATH, SecurityPageName } from '../../common/constants';
+import { LinkItem } from '../common/links/types';
 
 export const getCasesLinkItems = (): LinkItem => {
   const casesLinks = getCasesDeepLinks<LinkItem>({
@@ -16,15 +16,17 @@ export const getCasesLinkItems = (): LinkItem => {
       [SecurityPageName.case]: {
         globalNavEnabled: true,
         globalNavOrder: 9006,
-        features: [FEATURE.casesRead],
+        capabilities: [`${CASES_FEATURE_ID}.read_cases`],
       },
       [SecurityPageName.caseConfigure]: {
-        features: [FEATURE.casesCrud],
+        capabilities: [`${CASES_FEATURE_ID}.crud_cases`],
         licenseType: 'gold',
+        sideNavDisabled: true,
         hideTimeline: true,
       },
       [SecurityPageName.caseCreate]: {
-        features: [FEATURE.casesCrud],
+        capabilities: [`${CASES_FEATURE_ID}.crud_cases`],
+        sideNavDisabled: true,
         hideTimeline: true,
       },
     },
