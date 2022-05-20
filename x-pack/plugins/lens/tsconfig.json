@@ -12,7 +12,7 @@
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../task_manager/tsconfig.json" },
     { "path": "../global_search/tsconfig.json" },
-    { "path": "../ui_actions_enhanced/tsconfig.json" },
+    { "path": "../../../src/plugins/ui_actions_enhanced/tsconfig.json" },
     { "path": "../saved_objects_tagging/tsconfig.json" },
     { "path": "../../../src/plugins/data/tsconfig.json" },
     { "path": "../../../src/plugins/data_views/tsconfig.json" },
