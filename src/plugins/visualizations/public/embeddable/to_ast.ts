@@ -26,7 +26,13 @@ export const toExpressionAst: VisToExpressionAst = async (
     throw new Error('Visualization type definition should have toExpressionAst function defined');
   }
 
-  const { searchSource } = vis.data;
+  const searchSource = vis.data.searchSource?.createCopy();
+
+  if (vis.data.aggs) {
+    vis.data.aggs.hierarchical = vis.isHierarchical();
+    searchSource?.setField('aggs', vis.data.aggs);
+  }
+
   const visExpressionAst = await vis.type.toExpressionAst(vis, params);
   const searchSourceExpressionAst = searchSource?.toExpressionAst();
 
@@ -37,9 +43,7 @@ export const toExpressionAst: VisToExpressionAst = async (
       /**
        * @workaround Non-aggregating visualizations only accept the `kibana_context` on input.
        */
-      ...(searchSourceExpressionAst?.chain.filter(({ function: name }) =>
-        ['esaggs', 'esdsl'].includes(name)
-      ) ?? []),
+      ...(searchSourceExpressionAst?.chain.filter(({ function: name }) => name !== 'esdsl') ?? []),
       ...visExpressionAst.chain,
     ],
   };

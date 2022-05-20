@@ -32,7 +32,6 @@ import {
 } from './types';
 import { visName, VisTypeXyExpressionFunctionDefinition } from './expression_functions/xy_vis_fn';
 import { XyVisType } from '../common';
-import { getEsaggsFn } from './to_ast_esaggs';
 import { getSeriesParams } from './utils/get_series_params';
 import { getSafeId } from './utils/accessors';
 
@@ -238,7 +237,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     splitColumnDimension: dimensions.splitColumn?.map(prepareXYDimension),
   });
 
-  const ast = buildExpression([getEsaggsFn(vis), visTypeXy]);
+  const ast = buildExpression([visTypeXy]);
 
   return ast.toAst();
 };
