@@ -1081,6 +1081,7 @@ export const tasks: TelemetryTask[] = [
 
       return {
         cardinality: {
+          test: 1,
           client: {
             geo: {
               country_iso_code: {
@@ -1135,6 +1136,7 @@ export const tasks: TelemetryTask[] = [
 
       const queries = response.saved_objects.map(({ attributes }) => {
         const { kuery } = attributes;
+        // TODO getFields only
         if (kuery) {
           return kuery;
         }
