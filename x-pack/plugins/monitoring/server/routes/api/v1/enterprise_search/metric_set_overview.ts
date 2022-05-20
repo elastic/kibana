@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const metricSet = [
+import { MetricDescriptor } from '../../../../lib/details/get_metrics';
+
+export const metricSet: MetricDescriptor[] = [
   // Low level usage metrics
   {
     name: 'enterprise_search_heap',
