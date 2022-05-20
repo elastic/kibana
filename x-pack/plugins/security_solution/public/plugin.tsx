@@ -49,7 +49,7 @@ import {
 } from '../common/constants';
 
 import { getDeepLinks, registerDeepLinksUpdater } from './app/deep_links';
-import { updateAppLinks } from './common/links';
+import { AppLinkItems, subscribeAppLinks, updateAppLinks } from './common/links';
 import { getSubPluginRoutesByCapabilities, manageOldSiemRoutes } from './helpers';
 import { SecurityAppStore } from './common/store/store';
 import { licenseService } from './common/hooks/use_license';
@@ -172,7 +172,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       navLinkStatus: 3,
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
-        manageOldSiemRoutes(coreStart);
+
+        const subscription = subscribeAppLinks((links: AppLinkItems) => {
+          // It has to be called once after deep links are initialized
+          if (links.length > 0) {
+            manageOldSiemRoutes(coreStart);
+            subscription.unsubscribe();
+          }
+        });
+
         return () => true;
       },
     });
