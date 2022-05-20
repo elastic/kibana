@@ -48,16 +48,6 @@ import {
   registerOrgSourceValidateIndexingRulesRoute,
 } from './sources';
 
-const mockConfig = {
-  base_url: 'http://search',
-  client_id: 'asd',
-  client_secret: '234KKDFksdf22',
-  service_type: 'zendesk',
-  private_key: 'gsdfgsdfg',
-  public_key: 'gadfgsdfgss',
-  consumer_key: 'sf44argsr',
-};
-
 describe('sources routes', () => {
   describe('GET /internal/workplace_search/account/sources', () => {
     let mockRouter: MockRouter;
@@ -1188,13 +1178,6 @@ describe('sources routes', () => {
         path: '/ws/org/settings/connectors',
       });
     });
-
-    describe('validates', () => {
-      it('correctly', () => {
-        const request = { body: mockConfig };
-        mockRouter.shouldValidate(request);
-      });
-    });
   });
 
   describe('PUT /internal/workplace_search/org/settings/connectors', () => {
@@ -1216,13 +1199,6 @@ describe('sources routes', () => {
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/ws/org/settings/connectors',
-      });
-    });
-
-    describe('validates', () => {
-      it('correctly', () => {
-        const request = { body: mockConfig };
-        mockRouter.shouldValidate(request);
       });
     });
   });
@@ -1271,13 +1247,6 @@ describe('sources routes', () => {
         path: '/ws/org/settings/connectors/:serviceType',
       });
     });
-
-    describe('validates', () => {
-      it('correctly', () => {
-        const request = { body: mockConfig };
-        mockRouter.shouldValidate(request);
-      });
-    });
   });
 
   describe('PUT /internal/workplace_search/org/settings/connectors/{serviceType}', () => {
@@ -1299,13 +1268,6 @@ describe('sources routes', () => {
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/ws/org/settings/connectors/:serviceType',
-      });
-    });
-
-    describe('validates', () => {
-      it('correctly', () => {
-        const request = { body: mockConfig };
-        mockRouter.shouldValidate(request);
       });
     });
   });
