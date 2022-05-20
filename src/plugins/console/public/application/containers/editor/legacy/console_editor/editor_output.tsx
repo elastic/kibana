@@ -68,7 +68,6 @@ function EditorOutputUI() {
     lastResult: { data, error },
   } = useRequestReadContext();
   const inputId = 'ConAppOutputTextarea';
-  const multiRequestOutputMode = new OutputMode.Mode();
 
   useEffect(() => {
     editorInstanceRef.current = createReadOnlyAceEditor(editorRef.current!);
@@ -84,6 +83,7 @@ function EditorOutputUI() {
   }, [services.settings]);
 
   useEffect(() => {
+    const multiRequestOutputMode = new OutputMode.Mode();
     const editor = editorInstanceRef.current!;
     if (data) {
       const isMultipleRequest = data.length > 1;
@@ -117,7 +117,7 @@ function EditorOutputUI() {
     } else {
       editor.update('');
     }
-  }, [readOnlySettings, data, error, multiRequestOutputMode]);
+  }, [readOnlySettings, data, error]);
 
   useEffect(() => {
     applyCurrentSettings(editorInstanceRef.current!, readOnlySettings);
