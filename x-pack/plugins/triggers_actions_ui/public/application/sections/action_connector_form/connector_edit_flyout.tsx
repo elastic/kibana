@@ -34,7 +34,7 @@ import {
   ActionConnector,
   ConnectorEditFlyoutProps,
   IErrorObject,
-  EditConectorTabs,
+  EditConnectorTabs,
   UserConfiguredActionConnector,
   ActionConnectorFieldsCallbacks,
 } from '../../../types';
@@ -49,7 +49,7 @@ import { CenterJustifiedSpinner } from '../../components/center_justified_spinne
 const ConnectorEditFlyout = ({
   initialConnector,
   onClose,
-  tab = EditConectorTabs.Configuration,
+  tab = EditConnectorTabs.Configuration,
   reloadConnectors,
   consumer,
   actionTypeRegistry,
@@ -61,7 +61,6 @@ const ConnectorEditFlyout = ({
     docLinks,
     application: { capabilities },
   } = useKibana().services;
-  console.log(initialConnector);
   const getConnectorWithoutSecrets = () => ({
     ...(initialConnector as UserConfiguredActionConnector<
       Record<string, unknown>,
@@ -108,7 +107,7 @@ const ConnectorEditFlyout = ({
   }, [connector, actionTypeModel]);
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [selectedTab, setTab] = useState<EditConectorTabs>(tab);
+  const [selectedTab, setTab] = useState<EditConnectorTabs>(tab);
 
   const [hasChanges, setHasChanges] = useState<boolean>(false);
 
@@ -125,13 +124,13 @@ const ConnectorEditFlyout = ({
   const handleSetTab = useCallback(
     () =>
       setTab((prevTab) => {
-        if (prevTab === EditConectorTabs.Configuration) {
-          return EditConectorTabs.Test;
+        if (prevTab === EditConnectorTabs.Configuration) {
+          return EditConnectorTabs.Test;
         }
         if (testExecutionResult !== none) {
           setTestExecutionResult(none);
         }
-        return EditConectorTabs.Configuration;
+        return EditConnectorTabs.Configuration;
       }),
     [testExecutionResult]
   );
@@ -295,7 +294,7 @@ const ConnectorEditFlyout = ({
           <EuiTab
             onClick={handleSetTab}
             data-test-subj="configureConnectorTab"
-            isSelected={EditConectorTabs.Configuration === selectedTab}
+            isSelected={EditConnectorTabs.Configuration === selectedTab}
           >
             {i18n.translate('xpack.triggersActionsUI.sections.editConnectorForm.tabText', {
               defaultMessage: 'Configuration',
@@ -304,7 +303,7 @@ const ConnectorEditFlyout = ({
           <EuiTab
             onClick={handleSetTab}
             data-test-subj="testConnectorTab"
-            isSelected={EditConectorTabs.Test === selectedTab}
+            isSelected={EditConnectorTabs.Test === selectedTab}
           >
             {i18n.translate('xpack.triggersActionsUI.sections.testConnectorForm.tabText', {
               defaultMessage: 'Test',
@@ -313,7 +312,7 @@ const ConnectorEditFlyout = ({
         </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {selectedTab === EditConectorTabs.Configuration ? (
+        {selectedTab === EditConnectorTabs.Configuration ? (
           !connector.isPreconfigured ? (
             <>
               <ActionConnectorForm

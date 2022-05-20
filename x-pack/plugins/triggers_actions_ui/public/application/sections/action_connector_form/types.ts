@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UserConfiguredActionConnector } from '../../../types';
+import { ActionConnector, UserConfiguredActionConnector } from '../../../types';
 
 export type InitialConnector<Config, Secrets> = Partial<
   UserConfiguredActionConnector<Config, Secrets>
@@ -14,4 +14,4 @@ export type InitialConnector<Config, Secrets> = Partial<
 
 export type Connector<Config = Record<string, unknown>, Secrets = Record<string, unknown>> =
   | InitialConnector<Record<string, unknown>, Record<string, unknown>>
-  | UserConfiguredActionConnector<Config, Secrets>;
+  | ActionConnector<Config, Secrets>;

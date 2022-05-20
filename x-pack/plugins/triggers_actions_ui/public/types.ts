@@ -317,7 +317,7 @@ export interface ConnectorAddFlyoutProps {
   consumer?: string;
   actionTypeRegistry: ActionTypeRegistryContract;
 }
-export enum EditConectorTabs {
+export enum EditConnectorTabs {
   Configuration = 'configuration',
   Test = 'test',
 }
@@ -325,7 +325,7 @@ export enum EditConectorTabs {
 export interface ConnectorEditFlyoutProps {
   initialConnector: ActionConnector;
   onClose: () => void;
-  tab?: EditConectorTabs;
+  tab?: EditConnectorTabs;
   reloadConnectors?: () => Promise<ActionConnector[] | void>;
   consumer?: string;
   actionTypeRegistry: ActionTypeRegistryContract;
