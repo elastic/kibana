@@ -361,6 +361,7 @@ const RuleStatusMenu: React.FunctionComponent<RuleStatusMenuProps> = ({
 
 interface SnoozePanelProps {
   interval?: string;
+  isLoading?: boolean;
   applySnooze: (value: number | -1, unit?: SnoozeUnit) => void;
   showCancel: boolean;
   previousSnoozeInterval: string | null;
@@ -368,6 +369,7 @@ interface SnoozePanelProps {
 
 export const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
   interval = '3d',
+  isLoading = false,
   applySnooze,
   showCancel,
   previousSnoozeInterval,
@@ -453,7 +455,11 @@ export const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={onClickApplyButton} data-test-subj="ruleSnoozeApply">
+          <EuiButton
+            isLoading={isLoading}
+            onClick={onClickApplyButton}
+            data-test-subj="ruleSnoozeApply"
+          >
             {i18n.translate('xpack.triggersActionsUI.sections.rulesList.applySnooze', {
               defaultMessage: 'Apply',
             })}
@@ -496,7 +502,12 @@ export const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
           <EuiHorizontalRule margin="s" />
           <EuiFlexGroup>
             <EuiFlexItem grow>
-              <EuiButton color="danger" onClick={onCancelSnooze} data-test-subj="ruleSnoozeCancel">
+              <EuiButton
+                isLoading={isLoading}
+                color="danger"
+                onClick={onCancelSnooze}
+                data-test-subj="ruleSnoozeCancel"
+              >
                 Cancel snooze
               </EuiButton>
             </EuiFlexItem>

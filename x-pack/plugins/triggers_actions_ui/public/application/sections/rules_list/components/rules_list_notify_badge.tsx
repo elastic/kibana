@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import moment from 'moment';
 import { EuiButton, EuiButtonIcon, EuiPopover, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -46,11 +46,13 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     unsnoozeRule,
   } = props;
 
-  const { snoozeEndTime, muteAll } = rule;
+  const { isSnoozedUntil, muteAll } = rule;
 
   const [previousSnoozeInterval, setPreviousSnoozeInterval] = usePreviousSnoozeInterval(
     propsPreviousSnoozeInterval
   );
+
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const isSnoozed = useMemo(() => {
     return isRuleSnoozed(rule);
@@ -65,11 +67,11 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     if (muteAll) {
       return 'Indefinite';
     }
-    if (!snoozeEndTime) {
+    if (!isSnoozedUntil) {
       return '';
     }
-    return moment(snoozeEndTime).format('MMM D');
-  }, [snoozeEndTime, muteAll]);
+    return moment(isSnoozedUntil).format('MMM D');
+  }, [isSnoozedUntil, muteAll]);
 
   const button = useMemo(() => {
     if (isSnoozed || isScheduled) {
@@ -119,6 +121,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
 
   const onChangeSnooze = useCallback(
     async (value: number, unit?: SnoozeUnit) => {
+      setIsLoading(true);
       try {
         if (value === -1) {
           await snoozeRuleAndStoreInterval(-1, null);
@@ -129,16 +132,18 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         onRuleChanged();
       } finally {
         onClose();
+        setIsLoading(false);
       }
     },
-    [onRuleChanged, onClose, snoozeRuleAndStoreInterval, unsnoozeRule]
+    [onRuleChanged, onClose, snoozeRuleAndStoreInterval, unsnoozeRule, setIsLoading]
   );
 
   return (
     <EuiPopover isOpen={isOpen} closePopover={onClose} button={button}>
       <SnoozePanel
+        isLoading={isLoading}
         applySnooze={onChangeSnooze}
-        interval={futureTimeToInterval(snoozeEndTime)}
+        interval={futureTimeToInterval(isSnoozedUntil)}
         showCancel={isSnoozed}
         previousSnoozeInterval={previousSnoozeInterval}
       />
