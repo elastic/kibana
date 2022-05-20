@@ -120,7 +120,7 @@ export const RulesList: React.FunctionComponent = () => {
   } = useKibana().services;
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
 
-  const [config, setConfig] = useState<TriggersActionsUiConfig>({});
+  const [config, setConfig] = useState<TriggersActionsUiConfig>({ isUsingSecurity: false });
   const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
@@ -776,7 +776,7 @@ export const RulesList: React.FunctionComponent = () => {
         }}
         onUpdated={async () => {
           setRulesToUpdateAPIKey([]);
-          await loadRulesData();
+          await loadData();
         }}
       />
       <EuiSpacer size="xs" />

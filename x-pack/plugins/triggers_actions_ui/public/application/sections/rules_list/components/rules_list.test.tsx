@@ -365,7 +365,7 @@ describe('Update Api Key', () => {
       fireEvent.click(screen.getByText('Update'));
     });
     expect(updateAPIKey).toHaveBeenCalledWith(expect.objectContaining({ id: '2' }));
-    expect(loadRules).toHaveBeenCalledTimes(2);
+    expect(loadRules).toHaveBeenCalledTimes(3);
     expect(screen.queryByText("You can't recover the old API key")).not.toBeInTheDocument();
     expect(addSuccess).toHaveBeenCalledWith('API key has been updated');
   });
@@ -390,7 +390,7 @@ describe('Update Api Key', () => {
       fireEvent.click(screen.getByText('Update'));
     });
     expect(updateAPIKey).toHaveBeenCalledWith(expect.objectContaining({ id: '2' }));
-    expect(loadRules).toHaveBeenCalledTimes(2);
+    expect(loadRules).toHaveBeenCalledTimes(3);
     expect(
       screen.queryByText('You will not be able to recover the old API key')
     ).not.toBeInTheDocument();
