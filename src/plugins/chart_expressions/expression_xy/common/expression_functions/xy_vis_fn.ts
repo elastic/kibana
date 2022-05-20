@@ -25,6 +25,7 @@ import {
   validateFillOpacity,
   validateMarkSizeRatioLimits,
   validateValueLabels,
+  validateAddTimeMarker,
   validateMinTimeBarInterval,
   validateMarkSizeForChartType,
   validateMarkSizeRatioWithAccessor,
@@ -116,6 +117,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   validateExtent(args.yLeftExtent, hasBar || hasArea, dataLayers);
   validateExtent(args.yRightExtent, hasBar || hasArea, dataLayers);
   validateFillOpacity(args.fillOpacity, hasArea);
+  validateAddTimeMarker(dataLayers, args.addTimeMarker);
   validateMinTimeBarInterval(dataLayers, hasBar, args.minTimeBarInterval);
 
   const hasNotHistogramBars = !hasHistogramBarLayer(dataLayers);

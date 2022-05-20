@@ -42,6 +42,7 @@ import {
   LegendSizeToPixels,
 } from '@kbn/visualizations-plugin/common/constants';
 import type { FilterEvent, BrushEvent, FormatFactory } from '../types';
+import { isTimeChart } from '../../common/helpers';
 import type {
   CommonXYDataLayerConfig,
   ExtendedYConfig,
@@ -81,8 +82,10 @@ import {
   OUTSIDE_RECT_ANNOTATION_WIDTH,
   OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION,
 } from './annotations';
-import { AxisExtentModes, SeriesTypes, ValueLabelModes } from '../../common/constants';
+import { AxisExtentModes, SeriesTypes, ValueLabelModes, XScaleTypes } from '../../common/constants';
 import { DataLayers } from './data_layers';
+import { XYCurrentTime } from './xy_current_time';
+
 import './xy_chart.scss';
 
 declare global {
@@ -249,7 +252,10 @@ export function XYChart({
     filteredBarLayers.some((layer) => layer.accessors.length > 1) ||
     filteredBarLayers.some((layer) => isDataLayer(layer) && layer.splitAccessor);
 
-  const isTimeViz = Boolean(dataLayers.every((l) => l.xScaleType === 'time'));
+  const isTimeViz = isTimeChart(dataLayers);
+
+  const defaultXScaleType = isTimeViz ? XScaleTypes.TIME : XScaleTypes.ORDINAL;
+
   const isHistogramViz = dataLayers.every((l) => l.isHistogram);
 
   const { baseDomain: rawXDomain, extendedDomain: xDomain } = getXDomain(
@@ -604,6 +610,11 @@ export function XYChart({
         ariaLabel={args.ariaLabel}
         ariaUseDefaultSummary={!args.ariaLabel}
       />
+      <XYCurrentTime
+        enabled={Boolean(args.addTimeMarker && isTimeViz)}
+        isDarkMode={darkMode}
+        domain={rawXDomain}
+      />
 
       <Axis
         id="x"
@@ -679,6 +690,7 @@ export function XYChart({
           shouldShowValueLabels={shouldShowValueLabels}
           formattedDatatables={formattedDatatables}
           chartHasMoreThanOneBarSeries={chartHasMoreThanOneBarSeries}
+          defaultXScaleType={defaultXScaleType}
         />
       )}
       {referenceLineLayers.length ? (
