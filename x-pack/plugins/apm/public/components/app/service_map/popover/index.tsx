@@ -56,7 +56,11 @@ function getContentsComponent(
     return ResourceContents;
   }
 
-  if (selectedElementData.source && selectedElementData.target) {
+  if (
+    isTraceExplorerEnabled &&
+    selectedElementData.source &&
+    selectedElementData.target
+  ) {
     return EdgeContents;
   }
 
@@ -135,8 +139,10 @@ export function Popover({
       cy.on('unselect', 'node', deselect);
       cy.on('viewport', deselect);
       cy.on('drag', 'node', deselect);
-      cy.on('select', 'edge', selectHandler);
-      cy.on('unselect', 'edge', deselect);
+      if (isTraceExplorerEnabled) {
+        cy.on('select', 'edge', selectHandler);
+        cy.on('unselect', 'edge', deselect);
+      }
     }
 
     return () => {

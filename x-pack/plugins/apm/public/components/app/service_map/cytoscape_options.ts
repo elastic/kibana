@@ -214,16 +214,20 @@ const getStyle = (
         'target-arrow-color': theme.eui.euiColorDarkShade,
       },
     },
-    {
-      selector: 'edge.hover',
-      style: {
-        width: 4,
-        'z-index': zIndexEdgeHover,
-        'line-color': theme.eui.euiColorDarkShade,
-        'source-arrow-color': theme.eui.euiColorDarkShade,
-        'target-arrow-color': theme.eui.euiColorDarkShade,
-      },
-    },
+    ...(isTraceExplorerEnabled
+      ? [
+          {
+            selector: 'edge.hover',
+            style: {
+              width: 4,
+              'z-index': zIndexEdgeHover,
+              'line-color': theme.eui.euiColorDarkShade,
+              'source-arrow-color': theme.eui.euiColorDarkShade,
+              'target-arrow-color': theme.eui.euiColorDarkShade,
+            },
+          },
+        ]
+      : []),
     {
       selector: 'node.hover',
       style: {
