@@ -25,7 +25,7 @@ import { HttpFetchOptions, HttpSetup } from '../http';
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
 
 interface SavedObjectsBaseOptions {
-  eventMetadata: {
+  eventMetadata?: {
     registerEvent?: boolean;
   };
 }
@@ -38,7 +38,7 @@ type SavedObjectsFindOptions = Omit<
 type SavedObjectsFindResponse = Omit<PromiseType<ReturnType<SavedObjectsApi['find']>>, 'pit_id'>;
 
 /** @public */
-export interface SavedObjectsCreateOptions {
+export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
   /**
    * (Not recommended) Specify an id instead of having the saved objects service generate one for you.
    */
@@ -433,6 +433,9 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
         attributes,
         migrationVersion: options.migrationVersion,
         references: options.references,
+        options: {
+          eventMetadata: options.eventMetadata,
+        },
       }),
     });
 
