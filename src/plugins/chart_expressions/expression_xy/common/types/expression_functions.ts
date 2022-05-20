@@ -422,7 +422,7 @@ export type ReferenceLineLayerFn = ExpressionFunctionDefinition<
   typeof REFERENCE_LINE_LAYER,
   Datatable,
   ReferenceLineLayerArgs,
-  ReferenceLineLayerConfigResult
+  Promise<ReferenceLineLayerConfigResult>
 >;
 
 export type YConfigFn = ExpressionFunctionDefinition<typeof Y_CONFIG, null, YConfig, YConfigResult>;
