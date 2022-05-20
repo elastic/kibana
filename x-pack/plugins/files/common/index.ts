@@ -13,4 +13,5 @@ export type {
   File,
   FileSavedObject,
   UpdatableFileAttributes,
+  FileKind,
 } from './types';

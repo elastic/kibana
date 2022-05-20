@@ -9,6 +9,7 @@ import { Logger } from '@kbn/core/server';
 import { Readable } from 'stream';
 import {
   File as IFile,
+  FileKind,
   FileSavedObject,
   FileSavedObjectAttributes,
   FileStatus,
@@ -26,12 +27,15 @@ import { InternalFileService } from '../file_service/internal_file_service';
 /**
  * Public class that provides all data and functionality consumers will need at the
  * individual file level
+ *
+ * @note Instantiation should not happen outside of this plugin
  */
 export class File<M = unknown> implements IFile {
   private readonly logAuditEvent: InternalFileService['createAuditLog'];
 
   constructor(
     private fileSO: FileSavedObject,
+    private readonly fileKindDescriptor: FileKind,
     private readonly internalFileService: InternalFileService,
     private readonly blobStorageService: BlobStorageService,
     private readonly logger: Logger
@@ -71,7 +75,9 @@ export class File<M = unknown> implements IFile {
     });
 
     try {
-      const { id: contentRef, size } = await this.blobStorageService.upload(content);
+      const { id: contentRef, size } = await this.blobStorageService.upload(content, {
+        ...this.fileKindDescriptor.blobStoreSettings,
+      });
       await this.updateFileState({
         action: 'uploaded',
         payload: { content_ref: contentRef, size },
@@ -114,23 +120,31 @@ export class File<M = unknown> implements IFile {
    * in the same place.
    */
   public static async create(
-    { name, fileKind, alt, meta }: { name: string; fileKind: string; alt?: string; meta?: unknown },
+    {
+      name,
+      fileKind,
+      alt,
+      meta,
+    }: { name: string; fileKind: FileKind; alt?: string; meta?: unknown },
     internalFileService: InternalFileService
   ) {
     const fileSO = await internalFileService.createSO({
       ...createDefaultFileAttributes(),
-      file_kind: fileKind,
+      file_kind: fileKind.id,
       name,
       alt,
       meta,
     });
-    const file = internalFileService.toFile(fileSO);
+
+    const file = internalFileService.toFile(fileSO, fileKind);
+
     internalFileService.createAuditLog(
       createAuditEvent({
         action: 'create',
         message: `Created file "${file.name}" of kind "${file.fileKind}" and id "${file.id}"`,
       })
     );
+
     return file;
   }
 
@@ -143,7 +157,7 @@ export class File<M = unknown> implements IFile {
   }
 
   public get fileKind(): string {
-    return this.attributes.file_kind;
+    return this.fileKindDescriptor.id;
   }
 
   public get name(): string {

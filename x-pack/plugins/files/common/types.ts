@@ -92,3 +92,31 @@ export interface File<Meta = unknown> {
 
   delete(): Promise<void>;
 }
+
+export interface FileKind {
+  /**
+   * Unique file kind ID
+   */
+  id: string;
+  maxSizeBytes?: number;
+  allowedMimeTypes?: string[];
+  allowedExtensions?: string[];
+  blobStoreSettings?: {
+    es?: {
+      index: string;
+      ilmPolicy: {};
+    };
+    // Other blob store settings will go here once available
+  };
+  http: {
+    create?: {
+      tags: [];
+    };
+    update?: {
+      tags: [];
+    };
+    delete?: {
+      tags: [];
+    };
+  };
+}

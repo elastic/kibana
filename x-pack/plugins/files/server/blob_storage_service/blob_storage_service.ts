@@ -20,8 +20,8 @@ interface ElasticsearchBlobStorageSettings {
  * to the appropriate adapter. The key names must be IDs of the adapter so that it
  * can be correctly mapped.
  */
-interface BlobStorageSettings {
-  es: ElasticsearchBlobStorageSettings;
+export interface BlobStorageSettings {
+  es?: ElasticsearchBlobStorageSettings;
 }
 
 export class BlobStorageService {

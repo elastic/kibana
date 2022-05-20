@@ -15,6 +15,7 @@ import { Readable } from 'stream';
 
 import type { FileStatus, File } from '../../../common';
 
+import { fileKindsRegistry } from '../../file_kinds_registry';
 import { BlobStorageService } from '../../blob_storage_service';
 import { FileServiceFactory } from '..';
 import { FileServiceStart } from '../file_service';
@@ -39,6 +40,7 @@ describe('FileService', () => {
     await kbnRoot.preboot();
     coreSetup = await kbnRoot.setup();
     FileServiceFactory.setup(coreSetup.savedObjects);
+    fileKindsRegistry.register({ id: fileKind, http: {} });
     coreStart = await kbnRoot.start();
     esClient = coreStart.elasticsearch.client.asInternalUser;
   });
@@ -54,6 +56,7 @@ describe('FileService', () => {
       coreStart.savedObjects,
       blobStorageService,
       undefined, // skip security for these tests
+      fileKindsRegistry,
       kbnRoot.logger.get('test-file-service')
     );
     fileService = fileServiceFactory.asInternal();
