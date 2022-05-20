@@ -15,6 +15,5 @@ export const links: LinkItem = {
   globalNavEnabled: true,
   experimentalKey: 'kubernetesEnabled',
   globalSearchKeywords: ['Kubernetes'],
-  globalSearchEnabled: true,
   globalNavOrder: 9005,
 };

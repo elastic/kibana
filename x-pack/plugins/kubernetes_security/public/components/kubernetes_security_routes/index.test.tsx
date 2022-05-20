@@ -12,15 +12,15 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { KubernetesSecurityRoutes } from '.';
 
-jest.mock('../alerts-list', () => ({
+jest.mock('../alerts_list', () => ({
   AlertsList: () => <div>{'Mock alerts list'}</div>,
 }));
 
-jest.mock('../kubernetes-widget', () => ({
+jest.mock('../kubernetes_widget', () => ({
   KubernetesWidget: () => <div>{'Mock kubernetes widget'}</div>,
 }));
 
-jest.mock('../search-group', () => ({
+jest.mock('../search_group', () => ({
   SearchGroup: () => <div>{'Mock search group'}</div>,
 }));
 
