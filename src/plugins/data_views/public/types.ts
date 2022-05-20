@@ -56,6 +56,10 @@ export interface IndicesResponse {
   data_streams?: IndicesResponseItemDataStream[];
 }
 
+export interface IndicesViaSearchResponse {
+  total: number;
+}
+
 export interface HasDataViewsResponse {
   hasDataView: boolean;
   hasUserDataView: boolean;
