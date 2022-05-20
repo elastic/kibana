@@ -94,9 +94,9 @@ export function makeMbClampedNumberExpression({
   ];
 }
 
-export function getHasLabel(label: StaticTextProperty | DynamicTextProperty) {
+export function getHasLabel(label: StaticTextProperty | DynamicTextProperty): boolean {
   return label.isDynamic()
     ? label.isComplete()
     : (label as StaticTextProperty).getOptions().value != null &&
-        (label as StaticTextProperty).getOptions().value.length;
+        (label as StaticTextProperty).getOptions().value.length > 0;
 }
