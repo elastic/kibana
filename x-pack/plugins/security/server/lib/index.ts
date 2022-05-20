@@ -4,5 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { getPutPayloadSchema } from './role_schema';
-export { validateKibanaPrivileges } from './role_utils';
+
+export type { KibanaPrivilegesType } from './role_schema';
+export { elasticsearchRoleSchema, getKibanaRoleSchema } from './role_schema';
+export {
+  validateKibanaPrivileges,
+  transformPrivilegesToElasticsearchPrivileges,
+} from './role_utils';

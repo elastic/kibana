@@ -10,11 +10,11 @@ import type { KibanaFeature } from '@kbn/features-plugin/server';
 import { ALL_SPACES_ID, GLOBAL_RESOURCE } from '../../common/constants';
 import { PrivilegeSerializer } from '../authorization/privilege_serializer';
 import { ResourceSerializer } from '../authorization/resource_serializer';
-import type { KibanaPrivileges, RolePayloadSchemaType } from './role_schema';
+import type { KibanaPrivilegesType } from './role_schema';
 
 export const transformPrivilegesToElasticsearchPrivileges = (
   application: string,
-  kibanaPrivileges: KibanaPrivileges = []
+  kibanaPrivileges: KibanaPrivilegesType = []
 ) => {
   return kibanaPrivileges.map(({ base, feature, spaces }) => {
     if (spaces.length === 1 && spaces[0] === GLOBAL_RESOURCE) {
@@ -60,11 +60,12 @@ export const transformPrivilegesToElasticsearchPrivileges = (
     };
   });
 };
+
 export const validateKibanaPrivileges = (
   kibanaFeatures: KibanaFeature[],
-  kibanaPrivileges: RolePayloadSchemaType['kibana']
+  kibanaPrivileges: KibanaPrivilegesType = []
 ) => {
-  const validationErrors = (kibanaPrivileges ?? []).flatMap((priv) => {
+  const validationErrors = kibanaPrivileges.flatMap((priv) => {
     const forAllSpaces = priv.spaces.includes(ALL_SPACES_ID);
 
     return Object.entries(priv.feature ?? {}).flatMap(([featureId, feature]) => {
