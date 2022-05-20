@@ -282,7 +282,7 @@ const RuleStatusMenu: React.FunctionComponent<RuleStatusMenuProps> = ({
     [onClosePopover, onChangeSnooze]
   );
 
-  const showScheduler = () => {
+  const navigateToScheduler = () => {
     if (contextMenuRef.current) {
       contextMenuRef.current.updater.enqueueSetState(contextMenuRef.current, {
         outgoingPanelId: 1,
@@ -353,14 +353,14 @@ const RuleStatusMenu: React.FunctionComponent<RuleStatusMenuProps> = ({
           showCancel={isSnoozed}
           previousSnoozeInterval={previousSnoozeInterval}
           scheduledSnoozes={[]}
-          showScheduler={showScheduler}
+          navigateToScheduler={navigateToScheduler}
         />
       ),
     },
     {
       id: 2,
-      width: 360,
-      content: <RuleSnoozeScheduler onClose={exitScheduler} />,
+      width: 416,
+      content: <RuleSnoozeScheduler onClose={exitScheduler} onSaveSchedule={() => {}} />,
     },
   ];
   return (
@@ -381,6 +381,7 @@ interface SnoozePanelProps {
   showCancel: boolean;
   previousSnoozeInterval: string | null;
   scheduledSnoozes: string[];
+  navigateToScheduler: () => void;
 }
 
 const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
@@ -389,7 +390,7 @@ const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
   showCancel,
   previousSnoozeInterval,
   scheduledSnoozes,
-  showScheduler,
+  navigateToScheduler,
 }) => {
   const [intervalValue, setIntervalValue] = useState(parseInterval(interval).value);
   const [intervalUnit, setIntervalUnit] = useState(parseInterval(interval).unit);
@@ -519,7 +520,7 @@ const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
             <EuiFlexItem grow>
               <EuiButton
                 color="primary"
-                onClick={showScheduler}
+                onClick={navigateToScheduler}
                 data-test-subj="ruleAddSchedule"
                 iconType="calendar"
               >
