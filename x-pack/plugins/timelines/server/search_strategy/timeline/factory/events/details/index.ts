@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cloneDeep, merge } from 'lodash/fp';
+import { merge } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import {
@@ -39,7 +39,7 @@ export const timelineEventsDetails: TimelineFactory<TimelineEventsQueries.detail
     response: IEsSearchResponse<EventHit>
   ): Promise<TimelineEventsDetailsStrategyResponse> => {
     const { indexName, eventId, runtimeMappings = {} } = options;
-    const { fields, ...hitsData } = cloneDeep(response.rawResponse.hits.hits[0] ?? {});
+    const { fields, ...hitsData } = response.rawResponse.hits.hits[0] ?? {};
 
     const inspect = {
       dsl: [

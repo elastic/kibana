@@ -74,7 +74,7 @@ describe('buildTimelineEventsAllQuery', () => {
             Object {
               "@timestamp": Object {
                 "order": "asc",
-                "unmapped_type": "datetime",
+                "unmapped_type": "date",
               },
             },
           ],
