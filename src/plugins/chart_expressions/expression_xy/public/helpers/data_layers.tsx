@@ -53,6 +53,7 @@ type GetSeriesPropsFn = (config: {
   emphasizeFitting?: boolean;
   fillOpacity?: number;
   formattedDatatableInfo: DatatableWithFormatInfo;
+  defaultXScaleType: XScaleType;
 }) => SeriesSpec;
 
 type GetSeriesNameFn = (
@@ -280,6 +281,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   emphasizeFitting,
   fillOpacity,
   formattedDatatableInfo,
+  defaultXScaleType,
 }): SeriesSpec => {
   const { table, markSizeAccessor } = layer;
   const isStacked = layer.seriesType.includes('stacked');
@@ -342,7 +344,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     markSizeAccessor: markSizeColumnId,
     markFormat: (value) => markFormatter.convert(value),
     data: rows,
-    xScaleType: xColumnId ? layer.xScaleType : 'ordinal',
+    xScaleType: xColumnId ? layer.xScaleType ?? defaultXScaleType : 'ordinal',
     yScaleType:
       formatter?.id === 'bytes' && yAxis?.scale === ScaleType.Linear
         ? ScaleType.LinearBinary
