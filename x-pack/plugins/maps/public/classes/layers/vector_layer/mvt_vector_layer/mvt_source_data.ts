@@ -20,9 +20,11 @@ export interface MvtSourceData {
   tileMaxZoom: number;
   tileUrl: string;
   refreshToken: string;
+  hasLabels: boolean;
 }
 
 export async function syncMvtSourceData({
+  hasLabels,
   layerId,
   layerName,
   prevDataRequest,
@@ -30,6 +32,7 @@ export async function syncMvtSourceData({
   source,
   syncContext,
 }: {
+  hasLabels: boolean;
   layerId: string;
   layerName: string;
   prevDataRequest: DataRequest | undefined;
@@ -56,7 +59,10 @@ export async function syncMvtSourceData({
       },
     });
     const canSkip =
-      !syncContext.forceRefreshDueToDrawing && noChangesInSourceState && noChangesInSearchState;
+      !syncContext.forceRefreshDueToDrawing &&
+      noChangesInSourceState &&
+      noChangesInSearchState &&
+      prevData.hasLabels === hasLabels;
 
     if (canSkip) {
       return;
@@ -72,7 +78,7 @@ export async function syncMvtSourceData({
         ? uuid()
         : prevData.refreshToken;
 
-    const tileUrl = await source.getTileUrl(requestMeta, refreshToken);
+    const tileUrl = await source.getTileUrl(requestMeta, refreshToken, hasLabels);
     if (source.isESSource()) {
       syncContext.inspectorAdapters.vectorTiles.addLayer(layerId, layerName, tileUrl);
     }
@@ -82,6 +88,7 @@ export async function syncMvtSourceData({
       tileMinZoom: source.getMinZoom(),
       tileMaxZoom: source.getMaxZoom(),
       refreshToken,
+      hasLabels,
     };
     syncContext.stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, sourceData, {});
   } catch (error) {

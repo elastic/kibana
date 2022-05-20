@@ -25,7 +25,7 @@ export const staticGenericExternalSourceData: SourceDataItem = {
     isPublicKey: false,
     hasOauthRedirect: false,
     needsBaseUrl: false,
-    documentationUrl: docLinks.workplaceSearchCustomSources, // TODO Update this when we have a doclink
+    documentationUrl: docLinks.workplaceSearchCustomConnectorPackage,
     applicationPortalUrl: '',
   },
   objTypes: [],
@@ -107,7 +107,7 @@ export const staticSourceData: SourceDataItem[] = [
       isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: true,
-      documentationUrl: docLinks.workplaceSearchConfluenceCloud, // TODO Update this when we have a doclink
+      documentationUrl: docLinks.workplaceSearchConfluenceCloudConnectorPackage,
       applicationPortalUrl: 'https://developer.atlassian.com/console/myapps/',
     },
     objTypes: [
@@ -387,7 +387,7 @@ export const staticSourceData: SourceDataItem[] = [
       isPublicKey: false,
       hasOauthRedirect: false,
       needsBaseUrl: false,
-      documentationUrl: docLinks.workplaceSearchCustomSources, // TODO Update this when we have a doclink
+      documentationUrl: docLinks.workplaceSearchNetworkDrive,
       applicationPortalUrl: '',
       githubRepository: 'elastic/enterprise-search-network-drive-connector',
     },
@@ -433,7 +433,7 @@ export const staticSourceData: SourceDataItem[] = [
       isPublicKey: false,
       hasOauthRedirect: false,
       needsBaseUrl: false,
-      documentationUrl: docLinks.workplaceSearchCustomSources, // TODO Update this when we have a doclink
+      documentationUrl: docLinks.workplaceSearchOutlook,
       applicationPortalUrl: '',
       githubRepository: 'elastic/enterprise-search-outlook-connector',
     },
@@ -649,7 +649,7 @@ export const staticSourceData: SourceDataItem[] = [
       isPublicKey: false,
       hasOauthRedirect: false,
       needsBaseUrl: false,
-      documentationUrl: docLinks.workplaceSearchCustomSources, // TODO Update this when we have a doclink
+      documentationUrl: docLinks.workplaceSearchTeams,
       applicationPortalUrl: '',
       githubRepository: 'elastic/enterprise-search-teams-connector',
     },
@@ -691,7 +691,7 @@ export const staticSourceData: SourceDataItem[] = [
       isPublicKey: false,
       hasOauthRedirect: false,
       needsBaseUrl: false,
-      documentationUrl: docLinks.workplaceSearchCustomSources, // TODO Update this when we have a doclink
+      documentationUrl: docLinks.workplaceSearchZoom,
       applicationPortalUrl: '',
       githubRepository: 'elastic/enterprise-search-zoom-connector',
     },
