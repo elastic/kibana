@@ -8,7 +8,7 @@
 
 import { CspConfig } from './csp_config';
 import { config as cspConfig, CspConfigType } from './config';
-import { mockConfig, mockUnsafeEvalDefaultValue } from './csp_config.test.mocks';
+import { mockConfig } from './csp_config.test.mocks';
 
 // CSP rules aren't strictly additive, so any change can potentially expand or
 // restrict the policy in a way we consider a breaking change. For that reason,
@@ -140,10 +140,9 @@ describe('CspConfig', () => {
         );
       });
 
-      test('when "unsafe_eval" is not set, the `unsafe-eval` CSP should be set according to the default value', () => {
-        // The default value for `unsafe_eval` depends on whether Kibana is a distributable or not.
-        // To test both scenarios, we mock the config to randomly change the default value.
-        const mockedConfig = mockConfig.create().schema.validate({});
+      test('when "unsafe_eval" is not set, and the default value is "true", the `unsafe-eval` CSP should be set', () => {
+        // The default value for `unsafe_eval` depends on whether Kibana is a distributable or not. To test both scenarios, we mock the config.
+        const mockedConfig = mockConfig.create(true).schema.validate({});
 
         const config = new CspConfig({
           ...mockedConfig,
@@ -151,9 +150,23 @@ describe('CspConfig', () => {
         });
 
         expect(config.header).toEqual(
-          mockUnsafeEvalDefaultValue === true
-            ? `script-src 'self' 'unsafe-eval' foo bar; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
-            : `script-src 'self' foo bar; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+          `script-src 'self' 'unsafe-eval' foo bar; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+        );
+
+        mockConfig.reset();
+      });
+
+      test('when "unsafe_eval" is not set, and the default value is "false", the `unsafe-eval` CSP should not be set', () => {
+        // The default value for `unsafe_eval` depends on whether Kibana is a distributable or not. To test both scenarios, we mock the config.
+        const mockedConfig = mockConfig.create(false).schema.validate({});
+
+        const config = new CspConfig({
+          ...mockedConfig,
+          script_src: ['foo', 'bar'],
+        });
+
+        expect(config.header).toEqual(
+          `script-src 'self' foo bar; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
         );
 
         mockConfig.reset();
