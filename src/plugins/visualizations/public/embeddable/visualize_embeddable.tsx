@@ -468,11 +468,16 @@ export class VisualizeEmbeddable
     }
     this.abortController = new AbortController();
     const abortController = this.abortController;
-    this.expression = await toExpressionAst(this.vis, {
-      timefilter: this.timefilter,
-      timeRange: this.timeRange,
-      abortSignal: this.abortController!.signal,
-    });
+
+    try {
+      this.expression = await toExpressionAst(this.vis, {
+        timefilter: this.timefilter,
+        timeRange: this.timeRange,
+        abortSignal: this.abortController!.signal,
+      });
+    } catch (e) {
+      this.onContainerError(e);
+    }
 
     if (this.handler && !abortController.signal.aborted) {
       await this.handler.update(this.expression, expressionParams);
