@@ -27,7 +27,6 @@ import {
   ALL_AGENTS_LABEL,
   AGENT_POLICY_LABEL,
   AGENT_SELECTION_LABEL,
-  SELECT_AGENT_ROW_LABEL,
 } from './translations';
 
 import {
@@ -191,7 +190,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
 
   return (
     <div>
-      <EuiFormRow label={SELECT_AGENT_ROW_LABEL} fullWidth>
+      <EuiFormRow label={AGENT_SELECTION_LABEL} fullWidth>
         <EuiComboBox
           data-test-subj="agentSelection"
           placeholder={SELECT_AGENT_LABEL}
