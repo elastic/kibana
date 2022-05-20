@@ -13,6 +13,7 @@ import { HttpLogic } from '../../../shared/http';
 import { EngineLogic } from '../engine';
 
 import { Result } from '../result/types';
+import { flattenSearchResult } from '../../utils/results'
 
 interface SearchValues {
   searchDataLoading: boolean;
@@ -49,7 +50,7 @@ export const SearchLogic = kea<MakeLogicType<SearchValues, SearchActions>>({
     searchResults: [
       [],
       {
-        onSearch: (_, { results }) => results,
+        onSearch: (_, { results }) => results.map((res) => flattenSearchResult(res)),
       },
     ],
   }),
