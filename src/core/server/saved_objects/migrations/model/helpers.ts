@@ -7,7 +7,10 @@
  */
 
 import { gt, valid } from 'semver';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslBoolQuery,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { State } from '../state';
 import type { IndexMapping } from '../../mappings';
 import type { FetchIndexResponse } from '../actions';
@@ -69,51 +72,45 @@ export function indexBelongsToLaterVersion(indexName: string, kibanaVersion: str
   return version != null ? gt(version, kibanaVersion) : false;
 }
 
-export function addMustNotClausesToQuery(
-  query: QueryDslQueryContainer,
+/**
+ * Add new filter.must_not clauses to the given query
+ * in order to filter out the specified types
+ * @param boolQuery the bool query to be enriched
+ * @param types the types to be filtered out
+ * @returns a new query container with the enriched query
+ */
+export function addExcludedTypesToBoolQuery(
+  boolQuery: QueryDslBoolQuery | undefined,
+  types: string[]
+): QueryDslQueryContainer {
+  return addMustNotClausesToBoolQuery(
+    boolQuery,
+    types.map((type) => ({ term: { type } }))
+  );
+}
+
+/**
+ * Add the given clauses to the filter.must_not of the given query
+ * @param boolQuery the bool query to be enriched
+ * @param mustNotClauses the clauses to be added to a filter.must_not
+ * @returns a new query container with the enriched query
+ */
+export function addMustNotClausesToBoolQuery(
+  boolQuery: QueryDslBoolQuery | undefined,
   mustNotClauses: QueryDslQueryContainer[]
 ): QueryDslQueryContainer {
-  let filter: QueryDslQueryContainer[] | QueryDslQueryContainer = [];
+  let mustNot: QueryDslQueryContainer[] = [];
 
-  if (query.bool?.filter) {
-    if (Array.isArray(query.bool.filter)) {
-      filter = filter.concat(query.bool.filter);
-
-      filter.push({
-        bool: {
-          must_not: mustNotClauses,
-        },
-      });
-    } else {
-      let currentMustNot: QueryDslQueryContainer[] = [];
-
-      if (query.bool.filter.bool?.must_not) {
-        currentMustNot = currentMustNot.concat(query.bool.filter.bool.must_not);
-      }
-
-      currentMustNot.push(...mustNotClauses);
-
-      filter = {
-        ...query.bool.filter,
-        bool: {
-          ...query.bool.filter.bool,
-          must_not: currentMustNot,
-        },
-      };
-    }
-  } else {
-    filter = {
-      bool: {
-        must_not: mustNotClauses,
-      },
-    };
+  if (boolQuery?.must_not) {
+    mustNot = mustNot.concat(boolQuery.must_not);
   }
 
+  mustNot.push(...mustNotClauses);
+
   return {
-    ...query,
     bool: {
-      ...query.bool,
-      filter,
+      ...boolQuery,
+      must_not: mustNot,
     },
   };
 }

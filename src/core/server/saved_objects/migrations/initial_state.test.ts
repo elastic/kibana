@@ -361,6 +361,26 @@ describe('createInitialState', () => {
       `);
   });
 
+  it('initializes the `discardUnknownObjects` flag to false if the flag is not provided in the config', () => {
+    const logger = mockLogger.get();
+    const initialState = createInitialState({
+      kibanaVersion: '8.1.0',
+      targetMappings: {
+        dynamic: 'strict',
+        properties: { my_type: { properties: { title: { type: 'text' } } } },
+      },
+      migrationVersionPerType: {},
+      indexPrefix: '.kibana_task_manager',
+      migrationsConfig,
+      typeRegistry,
+      docLinks,
+      logger,
+    });
+
+    expect(logger.warn).not.toBeCalled();
+    expect(initialState.discardUnknownObjects).toEqual(false);
+  });
+
   it('initializes the `discardUnknownObjects` flag to false if the value provided in the config does not match the current kibana version', () => {
     const logger = mockLogger.get();
     const initialState = createInitialState({

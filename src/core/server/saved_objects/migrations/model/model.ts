@@ -28,7 +28,8 @@ import {
 } from './extract_errors';
 import type { ExcludeRetryableEsError } from './types';
 import {
-  addMustNotClausesToQuery,
+  addExcludedTypesToBoolQuery,
+  addMustNotClausesToBoolQuery,
   getAliases,
   indexBelongsToLaterVersion,
   indexVersion,
@@ -392,10 +393,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         { level: 'warning', message: extractIgnoredUnknownDocs(res.right.unknownDocs) },
       ];
 
-      const unknownTypes = [...new Set(res.right.unknownDocs.map(({ type }) => type))].map(
-        (type) => ({ term: { type } })
+      const unknownTypes = [...new Set(res.right.unknownDocs.map(({ type }) => type))];
+
+      excludeOnUpgradeQuery = addExcludedTypesToBoolQuery(
+        stateP.excludeOnUpgradeQuery?.bool,
+        unknownTypes
       );
-      excludeOnUpgradeQuery = addMustNotClausesToQuery(stateP.excludeOnUpgradeQuery, unknownTypes);
     }
 
     const source = stateP.sourceIndex;
@@ -438,8 +441,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
 
     if (Either.isRight(res)) {
-      const excludeOnUpgradeQuery = addMustNotClausesToQuery(
-        stateP.excludeOnUpgradeQuery,
+      const excludeOnUpgradeQuery = addMustNotClausesToBoolQuery(
+        stateP.excludeOnUpgradeQuery?.bool,
         res.right.mustNotClauses
       );
 

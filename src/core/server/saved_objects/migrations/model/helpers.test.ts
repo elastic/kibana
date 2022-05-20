@@ -6,322 +6,92 @@
  * Side Public License, v 1.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { addMustNotClausesToQuery } from './helpers';
+import { addExcludedTypesToBoolQuery, addMustNotClausesToBoolQuery } from './helpers';
 
-describe('addMustNotClausesToQuery', () => {
-  it('creates a valid query object if the existing query was not defined', () => {
-    const query: QueryDslQueryContainer = {};
-    const mustNotClauses = [{ term: { type: 'bar' } }, { term: { type: 'baz' } }];
+describe('addExcludedTypesToBoolQuery', () => {
+  it('generates a bool query which filters out the specified types', () => {
+    const boolQuery = { must_not: [] };
+    const types = ['type1', 'type2'];
+    const result = addExcludedTypesToBoolQuery(boolQuery, types);
+    expect(result).toEqual({
+      bool: {
+        must_not: [{ term: { type: 'type1' } }, { term: { type: 'type2' } }],
+      },
+    });
+  });
+});
 
-    expect(addMustNotClausesToQuery(query, mustNotClauses)).toMatchInlineSnapshot(`
-      Object {
-        "bool": Object {
-          "filter": Object {
-            "bool": Object {
-              "must_not": Array [
-                Object {
-                  "term": Object {
-                    "type": "bar",
-                  },
-                },
-                Object {
-                  "term": Object {
-                    "type": "baz",
-                  },
-                },
-              ],
-            },
-          },
-        },
-      }
-    `);
+describe('addMustNotClausesToBoolQuery', () => {
+  it('generates a new bool query when no query is provided', () => {
+    const boolQuery = undefined;
+    const types = [{ term: { type: 'type1' } }, { term: { type: 'type2' } }];
+    const result = addMustNotClausesToBoolQuery(boolQuery, types);
+    expect(result).toEqual({
+      bool: {
+        must_not: [{ term: { type: 'type1' } }, { term: { type: 'type2' } }],
+      },
+    });
   });
 
-  it('adds a new filter bool.filter clause if it did not exist', () => {
-    const query: QueryDslQueryContainer = {
+  it('adds a new must_not clause to the provided bool query, if it did not exist', () => {
+    const boolQuery = {
+      should: [
+        { match: { 'name.first': { query: 'shay', _name: 'first' } } },
+        { match: { 'name.last': { query: 'banon', _name: 'last' } } },
+      ],
+    };
+    const types = [{ term: { type: 'type1' } }, { term: { type: 'type2' } }];
+    const result = addMustNotClausesToBoolQuery(boolQuery, types);
+    expect(result).toEqual({
       bool: {
         should: [
           { match: { 'name.first': { query: 'shay', _name: 'first' } } },
           { match: { 'name.last': { query: 'banon', _name: 'last' } } },
         ],
+        must_not: [{ term: { type: 'type1' } }, { term: { type: 'type2' } }],
       },
-    };
-    const mustNotClauses = [{ term: { type: 'bar' } }, { term: { type: 'baz' } }];
-
-    expect(addMustNotClausesToQuery(query, mustNotClauses)).toMatchInlineSnapshot(`
-      Object {
-        "bool": Object {
-          "filter": Object {
-            "bool": Object {
-              "must_not": Array [
-                Object {
-                  "term": Object {
-                    "type": "bar",
-                  },
-                },
-                Object {
-                  "term": Object {
-                    "type": "baz",
-                  },
-                },
-              ],
-            },
-          },
-          "should": Array [
-            Object {
-              "match": Object {
-                "name.first": Object {
-                  "_name": "first",
-                  "query": "shay",
-                },
-              },
-            },
-            Object {
-              "match": Object {
-                "name.last": Object {
-                  "_name": "last",
-                  "query": "banon",
-                },
-              },
-            },
-          ],
-        },
-      }
-    `);
+    });
   });
 
-  it('updates the provided ES query by appending new term clauses to the existing bool.filter.bool.must_not', () => {
-    const query: QueryDslQueryContainer = {
-      bool: {
-        filter: {
-          bool: {
-            must_not: {
-              term: {
-                type: 'foo',
-              },
-            },
-          },
-        },
-      },
+  it('appends the given clauses to the existing must_not', () => {
+    const boolQuery = {
+      must_not: [
+        { match: { type: 'search-session' } },
+        { match: { 'search-session.persisted': false } },
+      ],
     };
-    const mustNotClauses = [{ term: { type: 'bar' } }, { term: { type: 'baz' } }];
 
-    expect(addMustNotClausesToQuery(query, mustNotClauses)).toMatchInlineSnapshot(`
-      Object {
-        "bool": Object {
-          "filter": Object {
-            "bool": Object {
-              "must_not": Array [
-                Object {
-                  "term": Object {
-                    "type": "foo",
-                  },
-                },
-                Object {
-                  "term": Object {
-                    "type": "bar",
-                  },
-                },
-                Object {
-                  "term": Object {
-                    "type": "baz",
-                  },
-                },
-              ],
-            },
-          },
-        },
-      }
-    `);
-  });
-
-  it('appends a new must_not clause to the existing filter, if it is an array', () => {
-    const query: QueryDslQueryContainer = {
+    const types = [{ term: { type: 'type1' } }, { term: { type: 'type2' } }];
+    const result = addMustNotClausesToBoolQuery(boolQuery, types);
+    expect(result).toEqual({
       bool: {
-        filter: [
-          {
-            bool: {
-              must_not: {
-                term: {
-                  type: 'foo',
-                },
-              },
-            },
-          },
+        must_not: [
+          { match: { type: 'search-session' } },
+          { match: { 'search-session.persisted': false } },
+          { term: { type: 'type1' } },
+          { term: { type: 'type2' } },
         ],
       },
-    };
-    const mustNotClauses = [{ term: { type: 'bar' } }, { term: { type: 'baz' } }];
-
-    expect(addMustNotClausesToQuery(query, mustNotClauses)).toMatchInlineSnapshot(`
-      Object {
-        "bool": Object {
-          "filter": Array [
-            Object {
-              "bool": Object {
-                "must_not": Object {
-                  "term": Object {
-                    "type": "foo",
-                  },
-                },
-              },
-            },
-            Object {
-              "bool": Object {
-                "must_not": Array [
-                  Object {
-                    "term": Object {
-                      "type": "bar",
-                    },
-                  },
-                  Object {
-                    "term": Object {
-                      "type": "baz",
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      }
-    `);
+    });
   });
 
-  it('appends elements to the existing bool.filter.bool.must_not, if it is an array', () => {
-    const query: QueryDslQueryContainer = {
-      bool: {
-        filter: {
-          bool: {
-            must_not: [
-              {
-                term: {
-                  type: 'foo',
-                },
-              },
-              {
-                bool: {
-                  must: [
-                    {
-                      match: {
-                        type: 'search-session',
-                      },
-                    },
-                    {
-                      match: {
-                        'search-session.persisted': false,
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
+  it('arrayifys the existing must_not clause if needed', () => {
+    const boolQuery = {
+      must_not: {
+        term: { type: 'type0' },
       },
     };
-    const mustNotClauses = [{ term: { type: 'bar' } }, { term: { type: 'baz' } }];
 
-    expect(addMustNotClausesToQuery(query, mustNotClauses)).toMatchInlineSnapshot(`
-      Object {
-        "bool": Object {
-          "filter": Object {
-            "bool": Object {
-              "must_not": Array [
-                Object {
-                  "term": Object {
-                    "type": "foo",
-                  },
-                },
-                Object {
-                  "bool": Object {
-                    "must": Array [
-                      Object {
-                        "match": Object {
-                          "type": "search-session",
-                        },
-                      },
-                      Object {
-                        "match": Object {
-                          "search-session.persisted": false,
-                        },
-                      },
-                    ],
-                  },
-                },
-                Object {
-                  "term": Object {
-                    "type": "bar",
-                  },
-                },
-                Object {
-                  "term": Object {
-                    "type": "baz",
-                  },
-                },
-              ],
-            },
-          },
-        },
-      }
-    `);
-  });
-
-  it('preserves other query properties', () => {
-    const query: QueryDslQueryContainer = {
+    const types = [{ term: { type: 'type1' } }, { term: { type: 'type2' } }];
+    const result = addMustNotClausesToBoolQuery(boolQuery, types);
+    expect(result).toEqual({
       bool: {
-        filter: {
-          bool: {
-            must: [
-              { match: { 'name.first': { query: 'shay', _name: 'first' } } },
-              { match: { 'name.last': { query: 'banon', _name: 'last' } } },
-            ],
-          },
-        },
+        must_not: [
+          { term: { type: 'type0' } },
+          { term: { type: 'type1' } },
+          { term: { type: 'type2' } },
+        ],
       },
-    };
-    const mustNotClauses = [{ term: { type: 'baz' } }, { term: { type: 'qux' } }];
-
-    expect(addMustNotClausesToQuery(query, mustNotClauses)).toMatchInlineSnapshot(`
-      Object {
-        "bool": Object {
-          "filter": Object {
-            "bool": Object {
-              "must": Array [
-                Object {
-                  "match": Object {
-                    "name.first": Object {
-                      "_name": "first",
-                      "query": "shay",
-                    },
-                  },
-                },
-                Object {
-                  "match": Object {
-                    "name.last": Object {
-                      "_name": "last",
-                      "query": "banon",
-                    },
-                  },
-                },
-              ],
-              "must_not": Array [
-                Object {
-                  "term": Object {
-                    "type": "baz",
-                  },
-                },
-                Object {
-                  "term": Object {
-                    "type": "qux",
-                  },
-                },
-              ],
-            },
-          },
-        },
-      }
-    `);
+    });
   });
 });

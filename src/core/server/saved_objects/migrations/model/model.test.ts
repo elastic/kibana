@@ -84,17 +84,13 @@ describe('migrations v2 model', () => {
     tempIndex: '.kibana_7.11.0_reindex_temp',
     excludeOnUpgradeQuery: {
       bool: {
-        filter: {
-          bool: {
-            must_not: [
-              {
-                term: {
-                  type: 'unused-fleet-agent-events',
-                },
-              },
-            ],
+        must_not: [
+          {
+            term: {
+              type: 'unused-fleet-agent-events',
+            },
           },
-        },
+        ],
       },
     },
     knownTypes: ['dashboard', 'config'],
@@ -883,33 +879,15 @@ describe('migrations v2 model', () => {
             targetIndex: '.kibana_7.11.0_001',
           });
 
-          expect(newState.excludeOnUpgradeQuery).toMatchInlineSnapshot(`
-            Object {
-              "bool": Object {
-                "filter": Object {
-                  "bool": Object {
-                    "must_not": Array [
-                      Object {
-                        "term": Object {
-                          "type": "unused-fleet-agent-events",
-                        },
-                      },
-                      Object {
-                        "term": Object {
-                          "type": "dashboard",
-                        },
-                      },
-                      Object {
-                        "term": Object {
-                          "type": "foo",
-                        },
-                      },
-                    ],
-                  },
-                },
-              },
-            }
-          `);
+          expect(newState.excludeOnUpgradeQuery).toEqual({
+            bool: {
+              must_not: [
+                { term: { type: 'unused-fleet-agent-events' } },
+                { term: { type: 'dashboard' } },
+                { term: { type: 'foo' } },
+              ],
+            },
+          });
 
           // we should have a warning in the logs about the ignored types
           expect(
@@ -1006,22 +984,18 @@ describe('migrations v2 model', () => {
         expect(newState.excludeOnUpgradeQuery).toEqual({
           // new filters should be added inside a must_not clause, enriching excludeOnUpgradeQuery
           bool: {
-            filter: {
-              bool: {
-                must_not: [
-                  {
-                    term: {
-                      type: 'unused-fleet-agent-events',
-                    },
-                  },
-                  {
-                    term: {
-                      fieldA: 'abc',
-                    },
-                  },
-                ],
+            must_not: [
+              {
+                term: {
+                  type: 'unused-fleet-agent-events',
+                },
               },
-            },
+              {
+                term: {
+                  fieldA: 'abc',
+                },
+              },
+            ],
           },
         });
         // Logs should be added for any errors encountered from excludeOnUpgrade hooks

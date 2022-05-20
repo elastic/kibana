@@ -43,33 +43,29 @@ export const REMOVED_TYPES: string[] = [
 // the upgraded index.
 export const excludeUnusedTypesQuery: QueryDslQueryContainer = {
   bool: {
-    filter: {
-      bool: {
-        must_not: [
-          ...REMOVED_TYPES.map((typeName) => ({
-            term: {
-              type: typeName,
+    must_not: [
+      ...REMOVED_TYPES.map((typeName) => ({
+        term: {
+          type: typeName,
+        },
+      })),
+      // https://github.com/elastic/kibana/issues/96131
+      {
+        bool: {
+          must: [
+            {
+              match: {
+                type: 'search-session',
+              },
             },
-          })),
-          // https://github.com/elastic/kibana/issues/96131
-          {
-            bool: {
-              must: [
-                {
-                  match: {
-                    type: 'search-session',
-                  },
-                },
-                {
-                  match: {
-                    'search-session.persisted': false,
-                  },
-                },
-              ],
+            {
+              match: {
+                'search-session.persisted': false,
+              },
             },
-          },
-        ],
+          ],
+        },
       },
-    },
+    ],
   },
 };
