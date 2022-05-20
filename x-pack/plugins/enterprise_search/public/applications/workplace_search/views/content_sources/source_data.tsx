@@ -107,7 +107,7 @@ export const staticSourceData: SourceDataItem[] = [
       isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: true,
-      documentationUrl: docLinks.workplaceSearchConfluenceCloud,
+      documentationUrl: docLinks.workplaceSearchConfluenceCloudConnectorPackage,
       applicationPortalUrl: 'https://developer.atlassian.com/console/myapps/',
     },
     objTypes: [

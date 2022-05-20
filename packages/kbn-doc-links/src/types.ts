@@ -111,6 +111,7 @@ export interface DocLinks {
     readonly apiKeys: string;
     readonly box: string;
     readonly confluenceCloud: string;
+    readonly confluenceCloudConnectorPackage: string;
     readonly confluenceServer: string;
     readonly customConnectorPackage: string;
     readonly customSources: string;

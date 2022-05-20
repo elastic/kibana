@@ -64,6 +64,7 @@ class DocLinks {
   public workplaceSearchApiKeys: string;
   public workplaceSearchBox: string;
   public workplaceSearchConfluenceCloud: string;
+  public workplaceSearchConfluenceCloudConnectorPackage: string;
   public workplaceSearchConfluenceServer: string;
   public workplaceSearchCustomConnectorPackage: string;
   public workplaceSearchCustomSources: string;
@@ -151,6 +152,7 @@ class DocLinks {
     this.workplaceSearchApiKeys = '';
     this.workplaceSearchBox = '';
     this.workplaceSearchConfluenceCloud = '';
+    this.workplaceSearchConfluenceCloudConnectorPackage = '';
     this.workplaceSearchConfluenceServer = '';
     this.workplaceSearchCustomConnectorPackage = '';
     this.workplaceSearchCustomSources = '';
@@ -240,6 +242,8 @@ class DocLinks {
     this.workplaceSearchApiKeys = docLinks.links.workplaceSearch.apiKeys;
     this.workplaceSearchBox = docLinks.links.workplaceSearch.box;
     this.workplaceSearchConfluenceCloud = docLinks.links.workplaceSearch.confluenceCloud;
+    this.workplaceSearchConfluenceCloudConnectorPackage =
+      docLinks.links.workplaceSearch.confluenceCloudConnectorPackage;
     this.workplaceSearchConfluenceServer = docLinks.links.workplaceSearch.confluenceServer;
     this.workplaceSearchCustomConnectorPackage =
       docLinks.links.workplaceSearch.customConnectorPackage;

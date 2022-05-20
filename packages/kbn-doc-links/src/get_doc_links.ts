@@ -125,6 +125,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       apiKeys: `${WORKPLACE_SEARCH_DOCS}workplace-search-api-authentication.html`,
       box: `${WORKPLACE_SEARCH_DOCS}workplace-search-box-connector.html`,
       confluenceCloud: `${WORKPLACE_SEARCH_DOCS}workplace-search-confluence-cloud-connector.html`,
+      confluenceCloudConnectorPackage: `${WORKPLACE_SEARCH_DOCS}confluence-cloud.html`,
       confluenceServer: `${WORKPLACE_SEARCH_DOCS}workplace-search-confluence-server-connector.html`,
       customConnectorPackage: `${WORKPLACE_SEARCH_DOCS}custom-connector-package.html`,
       customSources: `${WORKPLACE_SEARCH_DOCS}workplace-search-custom-api-sources.html`,
