@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { usePreviousPeriodLabel } from '../../../hooks/use_previous_period_text';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { ApmMlDetectorType } from '../../../../common/anomaly_detection/apm_ml_detectors';
 import { asExactTransactionRate } from '../../../../common/utils/formatters';
@@ -104,6 +105,7 @@ export function ServiceOverviewThroughputChart({
     ChartType.THROUGHPUT
   );
 
+  const previousPeriodLabel = usePreviousPeriodLabel();
   const timeseries = [
     {
       data: data.currentPeriod,
@@ -119,10 +121,7 @@ export function ServiceOverviewThroughputChart({
             data: data.previousPeriod,
             type: 'area',
             color: previousPeriodColor,
-            title: i18n.translate(
-              'xpack.apm.serviceOverview.throughtputChart.previousPeriodLabel',
-              { defaultMessage: 'Previous period' }
-            ),
+            title: previousPeriodLabel,
           },
         ]
       : []),

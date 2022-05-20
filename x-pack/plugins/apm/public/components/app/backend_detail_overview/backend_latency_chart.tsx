@@ -6,6 +6,7 @@
  */
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { usePreviousPeriodLabel } from '../../../hooks/use_previous_period_text';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { getDurationFormatter } from '../../../../common/utils/formatters';
 import { useFetcher } from '../../../hooks/use_fetcher';
@@ -69,6 +70,8 @@ export function BackendLatencyChart({ height }: { height: number }) {
     ChartType.LATENCY_AVG
   );
 
+  const previousPeriodLabel = usePreviousPeriodLabel();
+
   const timeseries = useMemo(() => {
     const specs: Array<TimeSeries<Coordinate>> = [];
 
@@ -88,15 +91,12 @@ export function BackendLatencyChart({ height }: { height: number }) {
         data: data.comparisonTimeseries,
         type: 'area',
         color: previousPeriodColor,
-        title: i18n.translate(
-          'xpack.apm.backendLatencyChart.previousPeriodLabel',
-          { defaultMessage: 'Previous period' }
-        ),
+        title: previousPeriodLabel,
       });
     }
 
     return specs;
-  }, [data, currentPeriodColor, previousPeriodColor]);
+  }, [data, currentPeriodColor, previousPeriodColor, previousPeriodLabel]);
 
   const maxY = getMaxY(timeseries);
   const latencyFormatter = getDurationFormatter(maxY);

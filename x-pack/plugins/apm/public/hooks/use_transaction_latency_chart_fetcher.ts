@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import { usePreviousPeriodLabel } from './use_previous_period_text';
 import { isTimeComparison } from '../components/shared/time_comparison/get_comparison_options';
 import { useFetcher } from './use_fetcher';
 import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
@@ -78,11 +79,13 @@ export function useTransactionLatencyChartsFetcher({
     ]
   );
 
+  const previousPeriodLabel = usePreviousPeriodLabel();
   const memoizedData = useMemo(
     () =>
       getLatencyChartSelector({
         latencyChart: data,
         latencyAggregationType,
+        previousPeriodLabel,
       }),
     // It should only update when the data has changed
     // eslint-disable-next-line react-hooks/exhaustive-deps
