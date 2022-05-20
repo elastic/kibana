@@ -27,6 +27,7 @@ import {
   sendPostAgentUpgrade,
   sendPostBulkAgentUpgrade,
   useStartServices,
+  useKibanaVersion,
 } from '../../../../hooks';
 
 import { FALLBACK_VERSIONS, MAINTAINANCE_VALUES } from './constants';
@@ -37,12 +38,15 @@ interface Props {
   agentCount: number;
 }
 
+const getVersion = (version: Array<EuiComboBoxOptionOption<string>>) => version[0].value as string;
+
 export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
   onClose,
   agents,
   agentCount,
 }) => {
   const { notifications } = useStartServices();
+  const kibanaVersion = useKibanaVersion();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<string | undefined>();
 
@@ -50,7 +54,8 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
   const isSmallBatch = Array.isArray(agents) && agents.length > 1 && agents.length <= 10;
   const isAllAgents = agents === '';
 
-  const fallbackVersions: Array<EuiComboBoxOptionOption<string>> = FALLBACK_VERSIONS.map(
+  const fallbackVersions = [kibanaVersion].concat(FALLBACK_VERSIONS);
+  const fallbackOptions: Array<EuiComboBoxOptionOption<string>> = fallbackVersions.map(
     (option) => ({
       label: option,
       value: option,
@@ -71,13 +76,10 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
       value: option === 0 ? 0 : option * 3600,
     })
   );
-  const [selectedVersion, setSelectedVersion] = useState([fallbackVersions[0]]);
+  const [selectedVersion, setSelectedVersion] = useState([fallbackOptions[0]]);
   const [selectedMantainanceWindow, setSelectedMantainanceWindow] = useState([
     maintainanceOptions[0],
   ]);
-
-  const getVersion = (version: Array<EuiComboBoxOptionOption<string>>) =>
-    version[0].value as string;
 
   async function onSubmit() {
     const version = getVersion(selectedVersion);
@@ -239,7 +241,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
           data-test-subj="agentUpgradeModal.VersionCombobox"
           fullWidth
           singleSelection={{ asPlainText: true }}
-          options={fallbackVersions}
+          options={fallbackOptions}
           selectedOptions={selectedVersion}
           onChange={(selected: Array<EuiComboBoxOptionOption<string>>) => {
             setSelectedVersion(selected);
