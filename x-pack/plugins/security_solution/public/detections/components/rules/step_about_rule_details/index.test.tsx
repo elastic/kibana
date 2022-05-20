@@ -37,6 +37,7 @@ describe('StepAboutRuleToggleDetails', () => {
         stepDataDetails={{
           note: mockRule.note,
           description: mockRule.description,
+          setup: '',
         }}
         stepData={mockRule}
       />
@@ -61,6 +62,7 @@ describe('StepAboutRuleToggleDetails', () => {
         stepDataDetails={{
           note: '',
           description: '',
+          setup: '',
         }}
         stepData={null}
       />
@@ -81,6 +83,7 @@ describe('StepAboutRuleToggleDetails', () => {
           stepDataDetails={{
             note: '',
             description: mockRule.description,
+            setup: '',
           }}
           stepData={mockAboutStepWithoutNote}
         />
@@ -101,6 +104,7 @@ describe('StepAboutRuleToggleDetails', () => {
             stepDataDetails={{
               note: mockRule.note,
               description: mockRule.description,
+              setup: '',
             }}
             stepData={mockRule}
           />
@@ -120,6 +124,7 @@ describe('StepAboutRuleToggleDetails', () => {
             stepDataDetails={{
               note: mockRule.note,
               description: mockRule.description,
+              setup: '',
             }}
             stepData={mockRule}
           />
@@ -147,6 +152,7 @@ describe('StepAboutRuleToggleDetails', () => {
             stepDataDetails={{
               note: mockRule.note,
               description: mockRule.description,
+              setup: '',
             }}
             stepData={mockRule}
           />
