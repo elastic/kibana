@@ -63,9 +63,9 @@ describe('8.3.0 Endpoint Package Policy migration', () => {
     const initialDoc = policyDoc({});
 
     const migratedDoc = policyDoc({
-      windowsAdvanced: { advanced: { eventFilters: false } },
-      macAdvanced: { advanced: { eventFilters: false } },
-      linuxAdvanced: { advanced: { eventFilters: false } },
+      windowsAdvanced: { advanced: { event_filters: { default: false } } },
+      macAdvanced: { advanced: { event_filters: { default: false } } },
+      linuxAdvanced: { advanced: { event_filters: { default: false } } },
     });
 
     expect(migration(initialDoc, {} as SavedObjectMigrationContext)).toEqual(migratedDoc);
@@ -79,9 +79,9 @@ describe('8.3.0 Endpoint Package Policy migration', () => {
     });
 
     const migratedDoc = policyDoc({
-      windowsAdvanced: { advanced: { eventFilters: false, existingAdvanced: true } },
-      macAdvanced: { advanced: { eventFilters: false, existingAdvanced: true } },
-      linuxAdvanced: { advanced: { eventFilters: false, existingAdvanced: true } },
+      windowsAdvanced: { advanced: { event_filters: { default: false }, existingAdvanced: true } },
+      macAdvanced: { advanced: { event_filters: { default: false }, existingAdvanced: true } },
+      linuxAdvanced: { advanced: { event_filters: { default: false }, existingAdvanced: true } },
     });
 
     expect(migration(initialDoc, {} as SavedObjectMigrationContext)).toEqual(migratedDoc);

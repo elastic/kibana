@@ -26,14 +26,14 @@ export const migratePackagePolicyToV830: SavedObjectMigrationFn<PackagePolicy, P
     const policy = input.config.policy.value;
 
     policy.windows.advanced = policy.windows.advanced
-      ? { ...policy.windows.advanced, eventFilters: false }
-      : { eventFilters: false };
+      ? { ...policy.windows.advanced, event_filters: { default: false } }
+      : { event_filters: { default: false } };
     policy.mac.advanced = policy.mac.advanced
-      ? { ...policy.mac.advanced, eventFilters: false }
-      : { eventFilters: false };
+      ? { ...policy.mac.advanced, event_filters: { default: false } }
+      : { event_filters: { default: false } };
     policy.linux.advanced = policy.linux.advanced
-      ? { ...policy.linux.advanced, eventFilters: false }
-      : { eventFilters: false };
+      ? { ...policy.linux.advanced, event_filters: { default: false } }
+      : { event_filters: { default: false } };
   }
 
   return updatedPackagePolicyDoc;
