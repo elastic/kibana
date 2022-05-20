@@ -18,6 +18,12 @@ export const ACTIONS_LOAD_ERROR = (errorMessage: string) =>
     values: { message: errorMessage },
   });
 
+export const EXECUTION_LOG_ERROR = (errorMessage: string) =>
+  i18n.translate('xpack.observability.ruleDetails.executionLogError', {
+    defaultMessage: 'Unable to load rule execution log. Reason: {message}',
+    values: { message: errorMessage },
+  });
+
 export const TAGS_TITLE = i18n.translate('xpack.observability.ruleDetails.tagsTitle', {
   defaultMessage: 'Tags',
 });

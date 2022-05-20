@@ -35,6 +35,11 @@ export interface FetchRuleActionsProps {
   http: HttpSetup;
 }
 
+export interface FetchRuleExecutionLogProps {
+  http: HttpSetup;
+  ruleId: string;
+}
+
 export interface FetchRuleSummary {
   isLoadingRuleSummary: boolean;
   ruleSummary?: RuleSummary;
