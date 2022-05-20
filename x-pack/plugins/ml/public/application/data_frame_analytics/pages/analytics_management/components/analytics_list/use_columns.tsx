@@ -43,6 +43,7 @@ enum TASK_STATE_COLOR {
   started = 'primary',
   starting = 'primary',
   stopped = 'hollow',
+  stopping = 'hollow',
 }
 
 export const getTaskStateBadge = (

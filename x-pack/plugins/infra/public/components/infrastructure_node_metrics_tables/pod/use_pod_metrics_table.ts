@@ -80,33 +80,77 @@ export function usePodMetricsTable({ timerange, filterClauseDsl }: UseNodeMetric
 
 function seriesToPodNodeMetricsRow(series: MetricsExplorerSeries): PodNodeMetricsRow {
   if (series.rows.length === 0) {
-    return {
-      name: series.id,
-      uptime: null,
-      averageCpuUsagePercent: null,
-      averageMemoryUsageMegabytes: null,
-    };
+    return rowWithoutMetrics(series.id);
   }
 
-  let uptime: number = 0;
-  let averageCpuUsagePercent: number = 0;
-  let averageMemoryUsagePercent: number = 0;
-  series.rows.forEach((row) => {
-    const metricValues = unpackMetrics(row);
-    uptime += metricValues.uptime ?? 0;
-    averageCpuUsagePercent += metricValues.averageCpuUsagePercent ?? 0;
-    averageMemoryUsagePercent += metricValues.averageMemoryUsageMegabytes ?? 0;
-  });
-
-  const bucketCount = series.rows.length;
-  const bytesPerMegabyte = 1000000;
   return {
     name: series.id,
-    uptime: uptime / bucketCount,
-    averageCpuUsagePercent: averageCpuUsagePercent / bucketCount,
-    averageMemoryUsageMegabytes: Math.floor(
-      averageMemoryUsagePercent / bucketCount / bytesPerMegabyte
-    ),
+    ...calculateMetricAverages(series.rows),
+  };
+}
+
+function rowWithoutMetrics(name: string) {
+  return {
+    name,
+    uptime: null,
+    averageCpuUsagePercent: null,
+    averageMemoryUsageMegabytes: null,
+  };
+}
+
+function calculateMetricAverages(rows: MetricsExplorerRow[]) {
+  const { uptimeValues, averageCpuUsagePercentValues, averageMemoryUsageMegabytesValues } =
+    collectMetricValues(rows);
+
+  let uptime = null;
+  if (uptimeValues.length !== 0) {
+    uptime = averageOfValues(uptimeValues);
+  }
+
+  let averageCpuUsagePercent = null;
+  if (averageCpuUsagePercentValues.length !== 0) {
+    averageCpuUsagePercent = averageOfValues(averageCpuUsagePercentValues);
+  }
+
+  let averageMemoryUsageMegabytes = null;
+  if (averageMemoryUsageMegabytesValues.length !== 0) {
+    const averageInBytes = averageOfValues(averageMemoryUsageMegabytesValues);
+    const bytesPerMegabyte = 1000000;
+    averageMemoryUsageMegabytes = Math.floor(averageInBytes / bytesPerMegabyte);
+  }
+
+  return {
+    uptime,
+    averageCpuUsagePercent,
+    averageMemoryUsageMegabytes,
+  };
+}
+
+function collectMetricValues(rows: MetricsExplorerRow[]) {
+  const uptimeValues: number[] = [];
+  const averageCpuUsagePercentValues: number[] = [];
+  const averageMemoryUsageMegabytesValues: number[] = [];
+
+  rows.forEach((row) => {
+    const { uptime, averageCpuUsagePercent, averageMemoryUsageMegabytes } = unpackMetrics(row);
+
+    if (uptime !== null) {
+      uptimeValues.push(uptime);
+    }
+
+    if (averageCpuUsagePercent !== null) {
+      averageCpuUsagePercentValues.push(averageCpuUsagePercent);
+    }
+
+    if (averageMemoryUsageMegabytes !== null) {
+      averageMemoryUsageMegabytesValues.push(averageMemoryUsageMegabytes);
+    }
+  });
+
+  return {
+    uptimeValues,
+    averageCpuUsagePercentValues,
+    averageMemoryUsageMegabytesValues,
   };
 }
 
@@ -120,4 +164,9 @@ function unpackMetrics(row: MetricsExplorerRow): Omit<PodNodeMetricsRow, 'name'>
       | number
       | null,
   };
+}
+
+function averageOfValues(values: number[]) {
+  const sum = values.reduce((acc, value) => acc + value, 0);
+  return sum / values.length;
 }
