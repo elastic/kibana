@@ -10,8 +10,8 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { asyncForEach } from '../helpers';
 
 const ACTIVE_ALERTS_CELL_COUNT = 78;
-const RECOVERED_ALERTS_CELL_COUNT = 150;
-const TOTAL_ALERTS_CELL_COUNT = 200;
+const RECOVERED_ALERTS_CELL_COUNT = 180;
+const TOTAL_ALERTS_CELL_COUNT = 240;
 
 const DISABLED_ALERTS_CHECKBOX = 6;
 const ENABLED_ALERTS_CHECKBOX = 4;
@@ -223,7 +223,9 @@ export default ({ getService }: FtrProviderContext) => {
           const actionsButton = await observability.alerts.common.getActionsButtonByIndex(0);
           await actionsButton.click();
           await observability.alerts.common.viewRuleDetailsButtonClick();
-          expect(await find.existsByCssSelector('[title="Rules and Connectors"]')).to.eql(true);
+          expect(
+            await (await find.byCssSelector('[data-test-subj="breadcrumb first"]')).getVisibleText()
+          ).to.eql('Observability');
         });
       });
 
