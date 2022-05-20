@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiText,
   EuiSpacer,
@@ -15,6 +15,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { intersectionBy } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { ActionsProps } from '../types';
 import { useFetchRuleActions } from '../../../hooks/use_fetch_rule_actions';
 import { useKibana } from '../../../utils/kibana_react';
@@ -37,7 +38,21 @@ export function Actions({ ruleActions }: ActionsProps) {
     notifications: { toasts },
   } = useKibana().services;
   const { isLoadingActions, allActions, errorActions } = useFetchRuleActions({ http });
-  if (ruleActions && ruleActions.length <= 0) return <EuiText size="s">0</EuiText>;
+  useEffect(() => {
+    if (errorActions) {
+      toasts.addDanger({ title: errorActions });
+    }
+  }, [errorActions, toasts]);
+  if (ruleActions && ruleActions.length <= 0)
+    return (
+      <EuiFlexItem>
+        <EuiText size="s">
+          {i18n.translate('xpack.observability.ruleDetails.noActions', {
+            defaultMessage: 'No actions',
+          })}
+        </EuiText>
+      </EuiFlexItem>
+    );
   const actions = intersectionBy(allActions, ruleActions, 'actionTypeId');
   if (isLoadingActions) return <EuiLoadingSpinner size="s" />;
   return (
@@ -55,7 +70,6 @@ export function Actions({ ruleActions }: ActionsProps) {
           <EuiSpacer size="s" />
         </>
       ))}
-      {errorActions && toasts.addDanger({ title: errorActions })}
     </EuiFlexGroup>
   );
 }
