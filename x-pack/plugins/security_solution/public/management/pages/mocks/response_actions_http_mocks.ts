@@ -9,6 +9,7 @@ import { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import {
   ACTION_DETAILS_ROUTE,
+  ACTION_STATUS_ROUTE,
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
 } from '../../../../common/endpoint/constants';
@@ -16,7 +17,11 @@ import {
   httpHandlerMockFactory,
   ResponseProvidersInterface,
 } from '../../../common/mock/endpoint/http_handler_mock_factory';
-import { ActionDetailsApiResponse, HostIsolationResponse } from '../../../../common/endpoint/types';
+import {
+  ActionDetailsApiResponse,
+  HostIsolationResponse,
+  PendingActionsResponse,
+} from '../../../../common/endpoint/types';
 
 export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
   isolateHost: () => HostIsolationResponse;
@@ -24,6 +29,8 @@ export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
   releaseHost: () => HostIsolationResponse;
 
   actionDetails: (options: HttpFetchOptionsWithPath) => ActionDetailsApiResponse;
+
+  agentPendingActionsSummary: (options: HttpFetchOptionsWithPath) => PendingActionsResponse;
 }>;
 
 export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHttpMocksInterface>([
@@ -54,6 +61,20 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
       response.id = path.substring(path.lastIndexOf('/') + 1) || response.id;
 
       return { data: response };
+    },
+  },
+  {
+    id: 'agentPendingActionsSummary',
+    path: ACTION_STATUS_ROUTE,
+    method: 'get',
+    handler: ({ query }): PendingActionsResponse => {
+      const generator = new EndpointActionGenerator('seed');
+
+      return {
+        data: (query as { agent_ids: string[] }).agent_ids.map((id) =>
+          generator.generateAgentPendingActionsSummary({ agent_id: id })
+        ),
+      };
     },
   },
 ]);

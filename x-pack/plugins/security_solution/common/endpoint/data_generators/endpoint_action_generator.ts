@@ -14,6 +14,7 @@ import {
   ActionDetails,
   ActivityLogItemTypes,
   EndpointActivityLogActionResponse,
+  EndpointPendingActions,
   ISOLATION_ACTIONS,
   LogsEndpointAction,
   LogsEndpointActionResponse,
@@ -189,6 +190,21 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         item: {
           id: this.seededUUIDv4(),
           data: this.generateResponse(),
+        },
+      },
+      overrides
+    );
+  }
+
+  generateAgentPendingActionsSummary(
+    overrides: Partial<EndpointPendingActions> = {}
+  ): EndpointPendingActions {
+    return merge(
+      {
+        agent_id: this.seededUUIDv4(),
+        pending_actions: {
+          isolate: 2,
+          unisolate: 0,
         },
       },
       overrides
