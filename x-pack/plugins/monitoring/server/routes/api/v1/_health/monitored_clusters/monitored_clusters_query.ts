@@ -11,6 +11,8 @@ import { TimeRange } from '../../../../../../common/http_api/shared';
  * returns a nested aggregation of the monitored products per cluster, standalone
  * included. each product aggregation retrieves the related metricsets and the
  * last time they were ingested.
+ * if a product requires multiple aggregations the key is suffixed with an identifer
+ * separated by an underscore. eg beats_state
  */
 export const monitoredClustersQuery = ({ min, max }: TimeRange) => {
   return {
@@ -32,9 +34,9 @@ export const monitoredClustersQuery = ({ min, max }: TimeRange) => {
       clusters: {
         terms: clusterUuidTerm,
         aggs: {
+          ...beatsAggregations,
           cluster: clusterAggregation,
           elasticsearch: esAggregation,
-          beats: beatsAggregation,
           kibana: kibanaAggregation,
           logstash: logstashAggregation,
         },
@@ -54,9 +56,11 @@ export const stableMetricsetsQuery = () => {
       clusters: {
         terms: clusterUuidTerm,
         aggs: {
+          ...logstashStableAggregations,
+
           elasticsearch: {
             terms: {
-              field: 'node_stats.node_id',
+              field: 'source_node.uuid',
               size: 10000,
             },
             aggs: {
@@ -66,39 +70,12 @@ export const stableMetricsetsQuery = () => {
                     should: [
                       {
                         term: {
-                          type: 'shard',
+                          type: 'shards',
                         },
                       },
                       {
                         term: {
                           'metricset.name': 'shard',
-                        },
-                      },
-                    ],
-                  },
-                },
-              }),
-            },
-          },
-
-          logstash: {
-            terms: {
-              field: 'logstash.node.id',
-              size: 10000,
-            },
-            aggs: {
-              node: lastSeenByIndex({
-                filter: {
-                  bool: {
-                    should: [
-                      {
-                        term: {
-                          type: 'node',
-                        },
-                      },
-                      {
-                        term: {
-                          'metricset.name': 'node',
                         },
                       },
                     ],
@@ -168,13 +145,32 @@ const clusterAggregation = {
       },
     }),
 
+    ccr: lastSeenByIndex({
+      filter: {
+        bool: {
+          should: [
+            {
+              term: {
+                type: 'ccr_stats',
+              },
+            },
+            {
+              term: {
+                'metricset.name': 'ccr',
+              },
+            },
+          ],
+        },
+      },
+    }),
+
     index: lastSeenByIndex({
       filter: {
         bool: {
           should: [
             {
               term: {
-                type: 'index',
+                type: 'index_stats',
               },
             },
             {
@@ -193,7 +189,7 @@ const clusterAggregation = {
           should: [
             {
               term: {
-                type: 'index_summary',
+                type: 'indices_stats',
               },
             },
             {
@@ -227,31 +223,13 @@ const clusterAggregation = {
   },
 };
 
+// ignore the enrich metricset since it's not used by stack monitoring
 const esAggregation = {
   terms: {
     field: 'node_stats.node_id',
     size: 10000,
   },
   aggs: {
-    enrich: lastSeenByIndex({
-      filter: {
-        bool: {
-          should: [
-            {
-              term: {
-                type: 'enrich',
-              },
-            },
-            {
-              term: {
-                'metricset.name': 'enrich',
-              },
-            },
-          ],
-        },
-      },
-    }),
-
     node_stats: lastSeenByIndex({
       filter: {
         bool: {
@@ -279,7 +257,7 @@ const kibanaAggregation = {
     size: 10000,
   },
   aggs: {
-    kibana_stats: lastSeenByIndex({
+    stats: lastSeenByIndex({
       filter: {
         bool: {
           should: [
@@ -306,25 +284,6 @@ const logstashAggregation = {
     size: 10000,
   },
   aggs: {
-    node: lastSeenByIndex({
-      filter: {
-        bool: {
-          should: [
-            {
-              term: {
-                type: 'node',
-              },
-            },
-            {
-              term: {
-                'metricset.name': 'node',
-              },
-            },
-          ],
-        },
-      },
-    }),
-
     node_stats: lastSeenByIndex({
       filter: {
         bool: {
@@ -346,29 +305,129 @@ const logstashAggregation = {
   },
 };
 
-const beatsAggregation = {
-  terms: {
-    field: 'beats_stats.beat.uuid',
-    size: 10000,
-  },
-  aggs: {
-    beats_stats: lastSeenByIndex({
-      filter: {
-        bool: {
-          should: [
-            {
-              term: {
-                type: 'beats_stats',
+// ideally we'd aggregate by pipeline identifer but this information
+// is only available in metricbeat 8. the pipeline ephemeral id could
+// be a working key but the cardinality may be important
+const logstashStableAggregations = {
+  logstash_state_v8: {
+    terms: {
+      field: 'logstash.node.id',
+      size: 10000,
+    },
+    aggs: {
+      node: lastSeenByIndex({
+        filter: {
+          bool: {
+            should: [
+              {
+                term: {
+                  'metricset.name': 'node',
+                },
               },
-            },
-            {
-              term: {
-                'metricset.name': 'stats',
-              },
-            },
-          ],
+            ],
+          },
         },
-      },
-    }),
+      }),
+    },
+  },
+
+  logstash_state_v7: {
+    terms: {
+      field: 'logstash_state.pipeline.id',
+      size: 10000,
+    },
+    aggs: {
+      node: lastSeenByIndex({
+        filter: {
+          bool: {
+            should: [
+              {
+                term: {
+                  type: 'logstash_state',
+                },
+              },
+            ],
+          },
+        },
+      }),
+    },
+  },
+
+  logstash_state_internal: {
+    terms: {
+      field: 'source_node.uuid',
+      size: 10000,
+    },
+    aggs: {
+      node: lastSeenByIndex({
+        filter: {
+          bool: {
+            should: [
+              {
+                term: {
+                  type: 'logstash_state',
+                },
+              },
+            ],
+          },
+        },
+      }),
+    },
+  },
+};
+
+const beatsAggregations = {
+  beats_stats: {
+    terms: {
+      field: 'beats_stats.beat.uuid',
+      size: 10000,
+    },
+    aggs: {
+      stats: lastSeenByIndex({
+        filter: {
+          bool: {
+            should: [
+              {
+                term: {
+                  type: 'beats_stats',
+                },
+              },
+              {
+                term: {
+                  'metricset.name': 'stats',
+                },
+              },
+            ],
+          },
+        },
+      }),
+    },
+  },
+
+  beats_state: {
+    terms: {
+      field: 'beats_state.beat.uuid',
+      size: 10000,
+    },
+    aggs: {
+      state: lastSeenByIndex({
+        filter: {
+          bool: {
+            should: [
+              {
+                term: {
+                  type: 'beats_state',
+                },
+              },
+              {
+                term: {
+                  'metricset.name': 'state',
+                },
+              },
+            ],
+          },
+        },
+      }),
+    },
   },
 };

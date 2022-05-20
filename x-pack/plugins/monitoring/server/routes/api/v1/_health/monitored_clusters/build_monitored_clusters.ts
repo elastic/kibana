@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mapValues } from 'lodash';
+import { isEmpty, mapValues, merge, reduce } from 'lodash';
 
 const reInternalMonitoring = /^\.monitoring-(es|kibana|beats|logstash)-7-[0-9]{4}\..*/;
 const reMetricbeatMonitoring7 = /^\.monitoring-(es|kibana|beats|logstash)-7-mb.*/;
@@ -55,13 +55,31 @@ export const buildMonitoredClusters = (clustersBuckets: any[]) => {
   return monitoredClusters;
 };
 
+/**
+ * some products may not have a common identifier for their entities across the
+ * metricsets and can create multiple aggregations. we make sure to merge these
+ * so the output only includes a single product entry
+ * we assume each aggregation is named as /productname(_aggsuffix)?/
+ */
 const buildMonitoredProducts = (clusterProducts: any) => {
-  return mapValues(clusterProducts, ({ buckets }: { buckets: any[] }) => {
+  const monitoredProducts = mapValues(clusterProducts, ({ buckets }: { buckets: any[] }) => {
     return buckets.reduce((entities, { key, doc_count: _, ...metricsets }) => {
       entities[key] = buildMonitoredMetricsets(metricsets);
       return entities;
     }, {});
   });
+
+  return reduce(
+    monitoredProducts,
+    (uniqProducts: any, metricsets: any, aggregationKey: string) => {
+      if (isEmpty(metricsets)) return uniqProducts;
+
+      const product = aggregationKey.split('_')[0];
+      uniqProducts[product] = merge(uniqProducts[product], metricsets);
+      return uniqProducts;
+    },
+    {}
+  );
 };
 
 const buildMonitoredMetricsets = (productMetricsets: any) => {
