@@ -61,5 +61,5 @@
   }],
   "namespace": "testnamespace",
   "revision": 1,
-  "source_type": "ui"
+  "monitor.source": "ui"
 }
