@@ -35,17 +35,21 @@ const TIMEZONE_OPTIONS = moment.tz.names().map((n) => ({ label: n }));
 
 export const RuleSnoozeScheduler: React.FunctionComponent<ComponentOpts> = ({
   onClose,
+  onSaveSchedule,
 }: ComponentOpts) => {
   // We have to use refs for these things because setting state in an onFocus call re-renders and then blurs an EuiDatePicker input field
 
   return (
     <EuiContextMenuPanel title="Add schedule" onClose={onClose}>
-      <RuleSnoozeSchedulerPanel />
+      <RuleSnoozeSchedulerPanel onSaveSchedule={onSaveSchedule} />
     </EuiContextMenuPanel>
   );
 };
 
-const RuleSnoozeSchedulerPanel: React.FunctionComponent = () => {
+interface PanelOpts {
+  onSaveSchedule: (x: any) => void;
+}
+const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({ onSaveSchedule }) => {
   // These two states form a state machine for whether or not the user's clicks on the datepicker apply to the start/end date or start/end time
   // - State A: After the user clicks a start date:
   //    - Next date click will change the end date and move to state B
@@ -120,6 +124,24 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent = () => {
     },
     [selectingEndDate, selectingEndTime, startDT, endDT, selectEndDT, selectStartDT]
   );
+
+  const onClickSaveSchedule = useCallback(() => {
+    if (!startDT || !endDT) return;
+    const recurrence =
+      isRecurring && recurrenceSchedule
+        ? recurrenceSchedule
+        : {
+            count: 1,
+          };
+    onSaveSchedule({
+      rRule: {
+        dtstart: startDT.toISOString(),
+        tzid: selectedTimezone[0].label ?? moment.tz.guess(),
+        ...recurrence,
+      },
+      duration: endDT.valueOf() - startDT.valueOf(),
+    });
+  }, [onSaveSchedule, endDT, startDT, selectedTimezone, isRecurring, recurrenceSchedule]);
 
   return (
     <EuiPanel paddingSize="s" hasShadow={false}>
@@ -214,7 +236,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent = () => {
         </>
       )}
       <EuiHorizontalRule margin="m" />
-      <EuiButton fill fullWidth disabled={!startDT || !endDT}>
+      <EuiButton fill fullWidth disabled={!startDT || !endDT} onClick={onClickSaveSchedule}>
         {i18n.translate('xpack.triggersActionsUi.ruleSnoozeScheduler.saveSchedule', {
           defaultMessage: 'Save schedule',
         })}

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { invert, mapValues } from 'lodash';
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import moment, { Moment } from 'moment';
 import { i18n } from '@kbn/i18n';
@@ -17,6 +18,7 @@ import {
   EuiFieldNumber,
   EuiFormControlLayout,
   EuiFormControlLayoutDelimited,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 
 enum RRuleFrequency {
@@ -125,13 +127,7 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
           text: i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.recurYearlyOnDay', {
             defaultMessage: 'Yearly on {date}',
             values: {
-              date: startDate
-                .format('LL')
-                // We want to produce the local equivalent of DD MMM (e.g. MMM DD in most non-US countries)
-                // but Moment doesn't let us format just DD MMM according to locale, only DD MM(,?) YYYY,
-                // so regex replace the year and any commas from the LL formatted string
-                .replace(new RegExp(`(${startDate.format('YYYY')}|,)`, 'g'), '')
-                .trim(),
+              date: i18nShortDate(startDate),
             },
           }),
           value: RRuleFrequency.YEARLY,
@@ -164,7 +160,7 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
     };
   }, [startDate]);
 
-  useEffect(() => {
+  const compiledRecurrenceSchedule: RecurrenceSchedule = useMemo(() => {
     const recurrenceEndProps =
       recurrenceEnds === 'ondate' && recurrenceEndDate
         ? {
@@ -176,23 +172,18 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
           }
         : {};
     if (frequency === 'CUSTOM') {
-      onChange({ ...customFrequency, ...recurrenceEndProps });
-    } else {
-      onChange({
-        freq: frequency,
-        ...rrulePresets[frequency],
-        ...recurrenceEndProps,
-      });
+      return { ...customFrequency, ...recurrenceEndProps };
     }
-  }, [
-    frequency,
-    rrulePresets,
-    recurrenceEnds,
-    customFrequency,
-    recurrenceEndDate,
-    occurrences,
-    onChange,
-  ]);
+    return {
+      freq: frequency,
+      ...rrulePresets[frequency],
+      ...recurrenceEndProps,
+    };
+  }, [frequency, rrulePresets, recurrenceEnds, customFrequency, recurrenceEndDate, occurrences]);
+
+  useEffect(() => {
+    onChange(compiledRecurrenceSchedule);
+  }, [compiledRecurrenceSchedule, onChange]);
 
   return (
     <EuiPanel hasShadow={false} hasBorder={true} paddingSize="none">
@@ -251,7 +242,7 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
             <EuiDatePicker
               selected={recurrenceEndDate}
               onChange={setRecurrenceEndDate}
-              minDate={moment()}
+              minDate={startDate ?? moment()}
             />
           </EuiFormRow>
         )}
@@ -285,6 +276,13 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
             </EuiFormControlLayout>
           </EuiFormRow>
         )}
+      </div>
+      <EuiHorizontalRule margin="none" />
+      <div style={{ padding: '16px' }}>
+        {i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.repeatsSummary', {
+          defaultMessage: 'Repeats {summary}',
+          values: { summary: recurrenceSummary(compiledRecurrenceSchedule) },
+        })}
       </div>
     </EuiPanel>
   );
@@ -472,6 +470,139 @@ const CustomRecurrenceScheduler: React.FC<CustomRecurrenceSchedulerProps> = ({
   );
 };
 
+export const recurrenceSummary = ({
+  freq,
+  interval,
+  until,
+  count,
+  byweekday,
+  bymonthday,
+  bymonth,
+}: RecurrenceSchedule) => {
+  const frequencySummary = i18nFreqSummary(interval)[freq];
+
+  // For weekday summaries
+  const firstWeekday = byweekday ? byweekday[0] : '';
+  const nthWeekday = !firstWeekday
+    ? null
+    : firstWeekday.startsWith('+')
+    ? Number(firstWeekday[1])
+    : firstWeekday.startsWith('-1')
+    ? 0
+    : null;
+  let byweekdaySummary =
+    byweekday && byweekday.length > 0
+      ? nthWeekday !== null
+        ? i18nNthWeekdayShort(rRuleWeekdayToWeekdayName(firstWeekday))[nthWeekday]
+        : i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.byweekdaySummary', {
+            defaultMessage: 'on {weekdays}',
+            values: {
+              weekdays: byweekday
+                .map((rRuleWeekday) => rRuleWeekdayToWeekdayName(rRuleWeekday))
+                .join(', '),
+            },
+          })
+      : null;
+  if (byweekdaySummary)
+    byweekdaySummary = byweekdaySummary[0].toLocaleLowerCase() + byweekdaySummary.slice(1);
+
+  const bymonthdaySummary =
+    bymonthday && bymonthday.length > 0
+      ? i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.bymonthdaySummary', {
+          defaultMessage: 'on day {monthday}',
+          values: {
+            monthday: bymonthday.join(', '),
+          },
+        })
+      : null;
+
+  const bymonthSummary =
+    bymonth && bymonth.length > 0 && bymonthday && bymonthday.length > 0
+      ? i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.bymonthSummary', {
+          defaultMessage: 'on {date}',
+          values: {
+            date: i18nShortDate(
+              moment()
+                .month(bymonth[0] - 1)
+                .date(bymonthday[0])
+            ),
+          },
+        })
+      : null;
+
+  const onSummary =
+    freq === RRuleFrequency.WEEKLY
+      ? byweekdaySummary
+      : freq === RRuleFrequency.MONTHLY
+      ? byweekdaySummary ?? bymonthdaySummary
+      : freq === RRuleFrequency.YEARLY
+      ? bymonthSummary
+      : null;
+
+  const untilSummary = until
+    ? i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.untilDateSummary', {
+        defaultMessage: 'until {date}',
+        values: { date: until.format('LL') },
+      })
+    : count
+    ? i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.occurrencesSummary', {
+        defaultMessage: 'for {count, plural, one {# occurrence} other {# occurrences}}',
+        values: { count },
+      })
+    : null;
+
+  const every = i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.recurrenceSummary', {
+    defaultMessage: 'every {frequencySummary}{on}{until}',
+    values: {
+      frequencySummary,
+      on: onSummary ? ` ${onSummary}` : '',
+      until: untilSummary ? ` ${untilSummary}` : '',
+    },
+  });
+
+  return every;
+};
+
+const i18nShortDate = (date: Moment) =>
+  date
+    .format('LL')
+    // We want to produce the local equivalent of DD MMM (e.g. MMM DD in most non-US countries)
+    // but Moment doesn't let us format just DD MMM according to locale, only DD MM(,?) YYYY,
+    // so regex replace the year and any commas from the LL formatted string
+    .replace(new RegExp(`(${date.format('YYYY')}|,)`, 'g'), '')
+    .trim();
+
+const i18nFreqSummary = (interval: number) => ({
+  [RRuleFrequency.DAILY]: i18n.translate(
+    'xpack.triggersActionsUI.ruleSnoozeScheduler.recurDaySummary',
+    {
+      defaultMessage: '{interval, plural, one {day} other {# days}}',
+      values: { interval },
+    }
+  ),
+  [RRuleFrequency.WEEKLY]: i18n.translate(
+    'xpack.triggersActionsUI.ruleSnoozeScheduler.recurWeekSummary',
+    {
+      defaultMessage: '{interval, plural, one {week} other {# weeks}}',
+      values: { interval },
+    }
+  ),
+  [RRuleFrequency.MONTHLY]: i18n.translate(
+    'xpack.triggersActionsUI.ruleSnoozeScheduler.recurMonthSummary',
+    {
+      defaultMessage: '{interval, plural, one {month} other {# months}}',
+      values: { interval },
+    }
+  ),
+  [RRuleFrequency.YEARLY]: i18n.translate(
+    'xpack.triggersActionsUI.ruleSnoozeScheduler.recurYearSummary',
+    {
+      defaultMessage: '{interval, plural, one {year} other {# years}}',
+      values: { interval },
+    }
+  ),
+});
+
 const getWeekdayInfo = (date: Moment) => {
   const dayOfWeek = date.format('dddd');
   const nthWeekdayOfMonth = Math.ceil(date.date() / 7);
@@ -613,4 +744,18 @@ const isoWeekdayToRRule: Record<number, string> = {
   5: 'FR',
   6: 'SA',
   7: 'SU',
+};
+
+const rRuleWeekdayToIsoWeekday = mapValues(invert(isoWeekdayToRRule), (v) => Number(v));
+
+const rRuleWeekdayToWeekdayName = (weekday: string) => {
+  console.log(
+    'weekday',
+    weekday,
+    weekday.slice(-2),
+    rRuleWeekdayToIsoWeekday[weekday.slice(-2)],
+    rRuleWeekdayToIsoWeekday,
+    moment().isoWeekday(rRuleWeekdayToIsoWeekday[weekday.slice(-2)])
+  );
+  return moment().isoWeekday(rRuleWeekdayToIsoWeekday[weekday.slice(-2)]).format('dddd');
 };

@@ -360,7 +360,16 @@ const RuleStatusMenu: React.FunctionComponent<RuleStatusMenuProps> = ({
     {
       id: 2,
       width: 416,
-      content: <RuleSnoozeScheduler onClose={exitScheduler} onSaveSchedule={() => {}} />,
+      content: (
+        <RuleSnoozeScheduler
+          onClose={exitScheduler}
+          onSaveSchedule={(sched) => {
+            console.log('******');
+            console.log('SCHEDULE', JSON.stringify(sched, null, 4));
+            console.log('******');
+          }}
+        />
+      ),
     },
   ];
   return (
