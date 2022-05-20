@@ -52,7 +52,7 @@ const bodySchemaWithKibanaPrivileges = schema.object({
         schema.object({
           spaces: schema.arrayOf(schema.string()),
           base: schema.arrayOf(schema.string()),
-          feature: schema.object({}, { unknowns: 'allow' }),
+          feature: schema.recordOf(schema.string(), stringArray),
           _reserved: schema.maybe(schema.arrayOf(schema.string())),
         })
       ),
@@ -63,6 +63,7 @@ const bodySchemaWithKibanaPrivileges = schema.object({
 
 export function defineCreateApiKeyRoutes({
   router,
+  authz,
   getAuthenticationService,
 }: RouteDefinitionParams) {
   router.post(

@@ -24,6 +24,7 @@ export interface ConstructorOptions {
   logger: Logger;
   clusterClient: IClusterClient;
   license: SecurityLicense;
+  applicationName: string;
 }
 
 interface BaseCreateAPIKeyParams {
@@ -138,11 +139,13 @@ export class APIKeys {
   private readonly logger: Logger;
   private readonly clusterClient: IClusterClient;
   private readonly license: SecurityLicense;
+  private readonly applicationName: string;
 
-  constructor({ logger, clusterClient, license }: ConstructorOptions) {
+  constructor({ logger, clusterClient, license, applicationName }: ConstructorOptions) {
     this.logger = logger;
     this.clusterClient = clusterClient;
     this.license = license;
+    this.applicationName = applicationName;
   }
 
   /**
@@ -362,7 +365,7 @@ export class APIKeys {
     if (kibanaRoleDescriptors) {
       Object.entries(kibanaRoleDescriptors).forEach(([roleKey, roleDescriptor]) => {
         const applications = transformPrivilegesToElasticsearchPrivileges(
-          'kibana-.kibana',
+          this.applicationName,
           roleDescriptor.kibana
         );
         if (applications.length > 0 && roleDescriptors) {

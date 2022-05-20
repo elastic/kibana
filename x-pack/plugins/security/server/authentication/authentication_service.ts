@@ -49,6 +49,7 @@ interface AuthenticationServiceStartParams {
   featureUsageService: SecurityFeatureUsageServiceStart;
   session: PublicMethodsOf<Session>;
   loggers: LoggerFactory;
+  applicationName: string;
 }
 
 export interface InternalAuthenticationServiceStart extends AuthenticationServiceStart {
@@ -296,11 +297,13 @@ export class AuthenticationService {
     http,
     loggers,
     session,
+    applicationName,
   }: AuthenticationServiceStartParams): InternalAuthenticationServiceStart {
     const apiKeys = new APIKeys({
       clusterClient,
       logger: this.logger.get('api-key'),
       license: this.license,
+      applicationName,
     });
 
     /**
