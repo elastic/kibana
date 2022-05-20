@@ -106,7 +106,6 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
       id="hostsDetailsQuery"
       indexNames={
         Array [
-          "-*elastic-cloud-logs-*",
           "apm-*-transaction*",
           "auditbeat-*",
           "endgame-*",
@@ -115,6 +114,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
           "packetbeat-*",
           "traces-apm*",
           "winlogbeat-*",
+          "-*elastic-cloud-logs-*",
         ]
       }
       isDraggable={false}

@@ -35,6 +35,7 @@ import {
   GETTING_STARTED,
   THREAT_HUNTING,
   DASHBOARDS,
+  CREATE_NEW_RULE,
 } from '../translations';
 import {
   OVERVIEW_PATH,
@@ -58,6 +59,8 @@ import {
   USERS_PATH,
   THREAT_HUNTING_PATH,
   DASHBOARDS_PATH,
+  MANAGE_PATH,
+  RULES_CREATE_PATH,
 } from '../../../common/constants';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 
@@ -182,6 +185,15 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
           }),
         ],
         searchable: true,
+        deepLinks: [
+          {
+            id: SecurityPageName.rulesCreate,
+            title: CREATE_NEW_RULE,
+            path: RULES_CREATE_PATH,
+            navLinkStatus: AppNavLinkStatus.hidden,
+            searchable: false,
+          },
+        ],
       },
       {
         id: SecurityPageName.exceptions,
@@ -433,7 +445,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
   {
     id: SecurityPageName.administration,
     title: MANAGE,
-    path: ENDPOINTS_PATH,
+    path: MANAGE_PATH,
     navLinkStatus: AppNavLinkStatus.hidden,
     features: [FEATURE.general],
     keywords: [
