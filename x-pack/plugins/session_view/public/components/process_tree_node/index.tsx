@@ -146,7 +146,7 @@ export function ProcessTreeNode({
         });
 
         // eslint-disable-next-line no-unsanitized/property
-        textRef.current.innerHTML = html;
+        textRef.current.innerHTML = '<span>' + html + '</span>';
       }
     }
   }, [searchMatched, styles.searchHighlight]);
