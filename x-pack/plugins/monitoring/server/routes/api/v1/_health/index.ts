@@ -53,7 +53,7 @@ export function health(server: MonitoringCore) {
         timeRange,
         search: (params: any) => callWithRequest(req, 'search', params),
       }).catch((err: Error) => {
-        logger.error(`_health: failed to retrieve monitored clusters: ${err}`);
+        logger.error(`_health: failed to retrieve monitored clusters:\n${err.stack}`);
         return { error: err.message };
       });
 
