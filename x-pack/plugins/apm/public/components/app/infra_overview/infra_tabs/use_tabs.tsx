@@ -8,6 +8,8 @@ import { EuiTabbedContentProps } from '@elastic/eui';
 import { useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { ApmPluginStartDeps } from '../../../../plugin';
 
 type Tab = NonNullable<EuiTabbedContentProps['tabs']>[0] & {
@@ -74,29 +76,47 @@ export function useTabs({
     [containerIds]
   );
 
+  const containerMetricsTable = (
+    <>
+      <EuiSpacer />
+      {ContainerMetricsTable &&
+        ContainerMetricsTable({ timerange, filterClauseDsl: containersFilter })}
+    </>
+  );
+
+  const podMetricsTable = (
+    <>
+      <EuiSpacer />
+      {PodMetricsTable &&
+        PodMetricsTable({ timerange, filterClauseDsl: podsFilter })}
+    </>
+  );
+
+  const hostMetricsTable = (
+    <>
+      <EuiSpacer />
+      {HostMetricsTable &&
+        HostMetricsTable({ timerange, filterClauseDsl: hostsFilter })}
+    </>
+  );
+
   const tabs: Tab[] = [
     {
       id: 'containers',
       name: 'Containers',
-      content:
-        ContainerMetricsTable &&
-        ContainerMetricsTable({ timerange, filterClauseDsl: containersFilter }),
+      content: containerMetricsTable,
       hidden: containerIds && containerIds.length <= 0,
     },
     {
       id: 'pods',
       name: 'Pods',
-      content:
-        PodMetricsTable &&
-        PodMetricsTable({ timerange, filterClauseDsl: podsFilter }),
+      content: podMetricsTable,
       hidden: podNames && podNames.length <= 0,
     },
     {
       id: 'hosts',
       name: 'Hosts',
-      content:
-        HostMetricsTable &&
-        HostMetricsTable({ timerange, filterClauseDsl: hostsFilter }),
+      content: hostMetricsTable,
     },
   ];
 

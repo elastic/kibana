@@ -63,7 +63,7 @@ export function InfraTabs() {
   if (status === FETCH_STATUS.LOADING) {
     return (
       <div style={{ textAlign: 'center' }}>
-        <EuiLoadingSpinner size="l" />
+        <EuiLoadingSpinner size="xl" />
       </div>
     );
   }
