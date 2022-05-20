@@ -6,7 +6,12 @@
  */
 
 import { API_BASE_PATH } from '../../../../common/constants';
-import { SlmPolicy, SlmPolicyPayload, PolicyIndicesResponse } from '../../../../common/types';
+import {
+  SlmPolicy,
+  SlmPolicyPayload,
+  PolicyIndicesResponse,
+  PolicyFeaturesResponse,
+} from '../../../../common/types';
 import {
   UIM_POLICY_EXECUTE,
   UIM_POLICY_DELETE,
@@ -44,6 +49,13 @@ export const useLoadPolicy = (name: SlmPolicy['name']) => {
 export const useLoadIndices = () => {
   return useRequest<PolicyIndicesResponse>({
     path: `${API_BASE_PATH}policies/indices`,
+    method: 'get',
+  });
+};
+
+export const useLoadFeatures = () => {
+  return useRequest<PolicyFeaturesResponse>({
+    path: `${API_BASE_PATH}policies/features`,
     method: 'get',
   });
 };
