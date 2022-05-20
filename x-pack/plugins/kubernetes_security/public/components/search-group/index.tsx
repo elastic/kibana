@@ -11,7 +11,7 @@ import {
   SEARCH_GROUP_CLUSTER,
   SEARCH_GROUP_GROUP_BY,
   SEARCH_GROUP_SORT_BY,
-} from '@kbn/kubernetes-security-plugin/common/translations';
+} from '../../../common/translations';
 // import { CSSObject } from '@emotion/react';
 
 export interface SearchFields {
