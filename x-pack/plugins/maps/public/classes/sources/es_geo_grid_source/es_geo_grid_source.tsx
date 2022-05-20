@@ -471,7 +471,11 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     return 'aggs';
   }
 
-  async getTileUrl(searchFilters: VectorSourceRequestMeta, refreshToken: string): Promise<string> {
+  async getTileUrl(
+    searchFilters: VectorSourceRequestMeta,
+    refreshToken: string,
+    hasLabels: boolean
+  ): Promise<string> {
     const indexPattern = await this.getIndexPattern();
     const searchSource = await this.makeSearchSource(searchFilters, 0);
     searchSource.setField('aggs', this.getValueAggsDsl(indexPattern));
@@ -484,6 +488,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
 ?geometryFieldName=${this._descriptor.geoField}\
 &index=${indexPattern.title}\
 &gridPrecision=${this._getGeoGridPrecisionResolutionDelta()}\
+&hasLabels=${hasLabels}\
 &requestBody=${encodeMvtResponseBody(searchSource.getSearchRequestBody())}\
 &renderAs=${this._descriptor.requestType}\
 &token=${refreshToken}`;

@@ -6,12 +6,12 @@
  */
 
 import React, { Fragment, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
-import { Filter } from '@kbn/es-query';
+import deepEqual from 'fast-deep-equal';
 import { firstValueFrom } from 'rxjs';
-import { debounce } from 'lodash';
+import { Filter } from '@kbn/es-query';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView, Query, ISearchSource, getTime } from '@kbn/data-plugin/common';
 import {
   ForLastExpression,
@@ -62,15 +62,6 @@ const isSearchSourceParam = (action: LocalStateAction): action is SearchSourcePa
   return action.type === 'filter' || action.type === 'index' || action.type === 'query';
 };
 
-/**
- * Improve user input experience, temporal solution.
- * Should be further fixed properly.
- */
-const withDebounce = debounce((execute: () => void) => execute(), 0, {
-  leading: false,
-  trailing: true,
-});
-
 export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProps) => {
   const { data } = useTriggersAndActionsUiDeps();
   const { searchSource, ruleParams, errors, initialSavedQuery, setParam } = props;
@@ -88,8 +79,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
           searchSource.setParent(undefined).setField(action.type, action.payload);
           setParam('searchConfiguration', searchSource.getSerializedFields());
         } else {
-          // debounce applied only to input params
-          withDebounce(() => setParam(action.type, action.payload));
+          setParam(action.type, action.payload);
         }
         return { ...currentState, [action.type]: action.payload };
       },
@@ -118,12 +108,22 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
 
   const onChangeQuery = useCallback(
     ({ query: newQuery }: { query?: Query }) => {
-      withDebounce(() => dispatch({ type: 'query', payload: newQuery || { ...query, query: '' } }));
+      if (!deepEqual(newQuery, query)) {
+        dispatch({ type: 'query', payload: newQuery || { ...query, query: '' } });
+      }
     },
     [query]
   );
 
-  const onSavedQueryUpdated = useCallback((newSavedQuery: SavedQuery) => {
+  // needs to change language mode only
+  const onQueryBarSubmit = ({ query: newQuery }: { query?: Query }) => {
+    if (newQuery?.language !== query.language) {
+      dispatch({ type: 'query', payload: { ...query, language: newQuery?.language } as Query });
+    }
+  };
+
+  // Saved query
+  const onSavedQuery = useCallback((newSavedQuery: SavedQuery) => {
     setSavedQuery(newSavedQuery);
     const newFilters = newSavedQuery.attributes.filters;
     if (newFilters) {
@@ -136,6 +136,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
     dispatch({ type: 'query', payload: { ...query, query: '' } });
   };
 
+  // window size
   const onChangeWindowUnit = useCallback(
     (selectedWindowUnit: string) => setParam('timeWindowUnit', selectedWindowUnit),
     [setParam]
@@ -147,6 +148,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
     []
   );
 
+  // threshold
   const onChangeSelectedThresholdComparator = useCallback(
     (selectedThresholdComparator?: string) =>
       setParam('thresholdComparator', selectedThresholdComparator),
@@ -197,6 +199,8 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       <EuiSpacer size="s" />
 
       <SearchBar
+        onQuerySubmit={onQueryBarSubmit}
+        onQueryChange={onChangeQuery}
         suggestionsSize="s"
         displayStyle="inPage"
         placeholder={i18n.translate('xpack.stackAlerts.searchSource.ui.searchQuery', {
@@ -204,12 +208,12 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         })}
         query={query}
         indexPatterns={dataViews}
-        onQueryChange={onChangeQuery}
         savedQuery={savedQuery}
         filters={filters}
         onFiltersUpdated={onUpdateFilters}
         onClearSavedQuery={onClearSavedQuery}
-        onSavedQueryUpdated={onSavedQueryUpdated}
+        onSavedQueryUpdated={onSavedQuery}
+        onSaved={onSavedQuery}
         showSaveQuery={true}
         showQueryBar={true}
         showQueryInput={true}

@@ -66,7 +66,6 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
       closePopover={closeDataViewPopover}
       ownFocus
       anchorPosition="downLeft"
-      zIndex={8000}
       display="block"
     >
       <div style={{ width: '450px' }} data-test-subj="chooseDataViewPopoverContent">
