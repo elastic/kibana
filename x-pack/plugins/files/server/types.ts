@@ -4,13 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
-export { FILE_SO_TYPE, PLUGIN_ID, PLUGIN_NAME } from './constants';
-
-export type {
-  FileSavedObjectAttributes,
-  FileStatus,
-  File,
-  FileSavedObject,
-  UpdatableFileAttributes,
-} from './types';
+export interface FilePluginSetup {
+  security?: SecurityPluginSetup;
+}
