@@ -73,7 +73,6 @@ export class SpacesPopoverList extends Component<Props, State> {
       title: i18n.translate('xpack.security.management.editRole.spacesPopoverList.popoverTitle', {
         defaultMessage: 'Spaces',
       }),
-      watchedItemProps: ['data-search-term'],
     };
 
     if (this.props.spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD) {

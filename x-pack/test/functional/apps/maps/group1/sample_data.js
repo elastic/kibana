@@ -165,8 +165,8 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
     describe('web logs', () => {
       before(async () => {
         await PageObjects.maps.loadSavedMap('[Logs] Total Requests and Bytes');
-        await PageObjects.maps.toggleLayerVisibility('Road map - desaturated');
         await PageObjects.maps.toggleLayerVisibility('Total Requests by Destination');
+        await PageObjects.maps.toggleLayerVisibility('Road map - desaturated');
         await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
         await PageObjects.maps.enterFullScreen();
         await PageObjects.maps.closeLegend();
