@@ -157,14 +157,14 @@ export const VisualizeEditorCommon = ({
           chartConfigToken={chartToken}
         />
       )}
-      {(hasLegacyChartsEnabled && deprecatedChartsNeedWarning && chartToken && chartName) ||
-        (visInstance?.vis?.type?.stage === 'deprecated' && (
-          <VizChartWarning
-            chartType={chartName as CHARTS_TO_BE_DEPRECATED}
-            chartConfigToken={chartToken ?? undefined}
-            mode="new"
-          />
-        ))}
+      {((hasLegacyChartsEnabled && deprecatedChartsNeedWarning && chartToken && chartName) ||
+        visInstance?.vis?.type?.stage === 'deprecated') && (
+        <VizChartWarning
+          chartType={chartName as CHARTS_TO_BE_DEPRECATED}
+          chartConfigToken={chartToken ?? undefined}
+          mode="new"
+        />
+      )}
       {visInstance?.vis?.type?.getInfoMessage?.(visInstance.vis)}
       {getLegacyUrlConflictCallout()}
       {visInstance && (
