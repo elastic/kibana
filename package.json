@@ -47,6 +47,7 @@
     "cover:report": "nyc report --temp-dir target/kibana-coverage/functional --report-dir target/coverage/report --reporter=lcov && open ./target/coverage/report/lcov-report/index.html",
     "debug": "node --nolazy --inspect scripts/kibana --dev",
     "debug-break": "node --nolazy --inspect-brk scripts/kibana --dev",
+    "dev-docs": "scripts/dev_docs.sh",
     "docs:acceptApiChanges": "node --max-old-space-size=6144 scripts/check_published_api_changes.js --accept",
     "es": "node scripts/es",
     "preinstall": "node ./preinstall_check",

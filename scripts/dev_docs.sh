@@ -12,22 +12,27 @@ DOCS_DIR="$WORKSPACE/docs.elastic.dev"
 DEV_DIR="$WORKSPACE/dev"
 TEAM_DIR="$WORKSPACE/kibana-team"
 
+cd "$KIBANA_DIR"
+origin=$(git remote get-url origin || true)
+GIT_PREFIX="git@github.com:"
+if [[ "$origin" == "https"* ]]; then
+  GIT_PREFIX="https://github.com/"
+fi
+
 mkdir -p "$WORKSPACE"
 cd "$WORKSPACE"
 
-if ! which nvm; then
-  if [[ ! -d "$NVM_DIR" ]]; then
-    echo "Installing a separate copy of nvm"
-    git clone https://github.com/nvm-sh/nvm.git "$NVM_DIR"
-    cd "$NVM_DIR"
-    git checkout "$(git describe --abbrev=0 --tags --match "v[0-9]*" "$(git rev-list --tags --max-count=1)")"
-  fi
-  source "$NVM_DIR/nvm.sh"
+if [[ ! -d "$NVM_DIR" ]]; then
+  echo "Installing a separate copy of nvm"
+  git clone https://github.com/nvm-sh/nvm.git "$NVM_DIR"
+  cd "$NVM_DIR"
+  git checkout "$(git describe --abbrev=0 --tags --match "v[0-9]*" "$(git rev-list --tags --max-count=1)")"
 fi
+source "$NVM_DIR/nvm.sh"
 
 if [[ ! -d "$DOCS_DIR" ]]; then
   echo "Cloning docs.elastic.dev repo..."
-  git clone --depth 1 git@github.com:elastic/docs.elastic.dev.git # TODO auto-detect ssh vs https
+  git clone --depth 1 "${GIT_PREFIX}elastic/docs.elastic.dev.git"
 else
   cd "$DOCS_DIR"
   git pull
@@ -36,7 +41,7 @@ fi
 
 if [[ ! -d "$DEV_DIR" ]]; then
   echo "Cloning dev repo..."
-  git clone --depth 1 git@github.com:elastic/dev.git
+  git clone --depth 1 "${GIT_PREFIX}elastic/dev.git"
 else
   cd "$DEV_DIR"
   git pull
@@ -45,7 +50,7 @@ fi
 
 if [[ ! -d "$TEAM_DIR" ]]; then
   echo "Cloning kibana-team repo..."
-  git clone --depth 1 git@github.com:elastic/kibana-team.git # TODO auto-detect ssh vs https
+  git clone --depth 1 "${GIT_PREFIX}elastic/kibana-team.git"
 else
   cd "$TEAM_DIR"
   git pull
