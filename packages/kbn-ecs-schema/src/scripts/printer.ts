@@ -50,7 +50,7 @@ function printIndex(topLevelFields: Group, groups: string[], outPath: string) {
   schema += baseFieldInfo;
   for (const group of groups) {
     const groupInCamel = snakeCaseToCamelCase(group);
-    schema += `  ${groupInCamel}Ecs\: {...${groupInCamel}Ecs},\n`;
+    schema += `  ${groupInCamel}\: {...${groupInCamel}Ecs},\n`;
   }
   schema += '};';
 
