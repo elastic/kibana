@@ -1,11 +1,12 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
+* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+* or more contributor license agreements. Licensed under the Elastic License
+* 2.0 and the Server Side Public License, v 1; you may not use this file except
+* in compliance with, at your election, the Elastic License 2.0 or the Server
+* Side Public License, v 1.
+*/
 
+/* eslint-disable */
 export const tlsEcs = {
   cipher: {
     dashed_name: 'tls-cipher',
@@ -17,13 +18,12 @@ export const tlsEcs = {
     name: 'cipher',
     normalize: [],
     short: 'String indicating the cipher used during the current connection.',
-    type: 'keyword',
+    type: 'keyword'
   },
   client: {
     certificate: {
       dashed_name: 'tls-client-certificate',
-      description:
-        'PEM-encoded stand-alone certificate offered by the client. This is usually mutually-exclusive of `client.certificate_chain` since this value also exists in that list.',
+      description: 'PEM-encoded stand-alone certificate offered by the client. This is usually mutually-exclusive of `client.certificate_chain` since this value also exists in that list.',
       example: 'MII...',
       flat_name: 'tls.client.certificate',
       ignore_above: 1024,
@@ -31,79 +31,69 @@ export const tlsEcs = {
       name: 'client.certificate',
       normalize: [],
       short: 'PEM-encoded stand-alone certificate offered by the client.',
-      type: 'keyword',
+      type: 'keyword'
     },
     certificate_chain: {
       dashed_name: 'tls-client-certificate-chain',
-      description:
-        'Array of PEM-encoded certificates that make up the certificate chain offered by the client. This is usually mutually-exclusive of `client.certificate` since that value should be the first certificate in the chain.',
+      description: 'Array of PEM-encoded certificates that make up the certificate chain offered by the client. This is usually mutually-exclusive of `client.certificate` since that value should be the first certificate in the chain.',
       example: '["MII...", "MII..."]',
       flat_name: 'tls.client.certificate_chain',
       ignore_above: 1024,
       level: 'extended',
       name: 'client.certificate_chain',
-      normalize: ['array'],
-      short:
-        'Array of PEM-encoded certificates that make up the certificate chain offered by the client.',
-      type: 'keyword',
+      normalize: [ 'array' ],
+      short: 'Array of PEM-encoded certificates that make up the certificate chain offered by the client.',
+      type: 'keyword'
     },
     hash: {
       md5: {
         dashed_name: 'tls-client-hash-md5',
-        description:
-          'Certificate fingerprint using the MD5 digest of DER-encoded version of certificate offered by the client. For consistency with other hash values, this value should be formatted as an uppercase hash.',
+        description: 'Certificate fingerprint using the MD5 digest of DER-encoded version of certificate offered by the client. For consistency with other hash values, this value should be formatted as an uppercase hash.',
         example: '0F76C7F2C55BFD7D8E8B8F4BFBF0C9EC',
         flat_name: 'tls.client.hash.md5',
         ignore_above: 1024,
         level: 'extended',
         name: 'client.hash.md5',
         normalize: [],
-        short:
-          'Certificate fingerprint using the MD5 digest of DER-encoded version of certificate offered by the client.',
-        type: 'keyword',
+        short: 'Certificate fingerprint using the MD5 digest of DER-encoded version of certificate offered by the client.',
+        type: 'keyword'
       },
       sha1: {
         dashed_name: 'tls-client-hash-sha1',
-        description:
-          'Certificate fingerprint using the SHA1 digest of DER-encoded version of certificate offered by the client. For consistency with other hash values, this value should be formatted as an uppercase hash.',
+        description: 'Certificate fingerprint using the SHA1 digest of DER-encoded version of certificate offered by the client. For consistency with other hash values, this value should be formatted as an uppercase hash.',
         example: '9E393D93138888D288266C2D915214D1D1CCEB2A',
         flat_name: 'tls.client.hash.sha1',
         ignore_above: 1024,
         level: 'extended',
         name: 'client.hash.sha1',
         normalize: [],
-        short:
-          'Certificate fingerprint using the SHA1 digest of DER-encoded version of certificate offered by the client.',
-        type: 'keyword',
+        short: 'Certificate fingerprint using the SHA1 digest of DER-encoded version of certificate offered by the client.',
+        type: 'keyword'
       },
       sha256: {
         dashed_name: 'tls-client-hash-sha256',
-        description:
-          'Certificate fingerprint using the SHA256 digest of DER-encoded version of certificate offered by the client. For consistency with other hash values, this value should be formatted as an uppercase hash.',
+        description: 'Certificate fingerprint using the SHA256 digest of DER-encoded version of certificate offered by the client. For consistency with other hash values, this value should be formatted as an uppercase hash.',
         example: '0687F666A054EF17A08E2F2162EAB4CBC0D265E1D7875BE74BF3C712CA92DAF0',
         flat_name: 'tls.client.hash.sha256',
         ignore_above: 1024,
         level: 'extended',
         name: 'client.hash.sha256',
         normalize: [],
-        short:
-          'Certificate fingerprint using the SHA256 digest of DER-encoded version of certificate offered by the client.',
-        type: 'keyword',
-      },
+        short: 'Certificate fingerprint using the SHA256 digest of DER-encoded version of certificate offered by the client.',
+        type: 'keyword'
+      }
     },
     issuer: {
       dashed_name: 'tls-client-issuer',
-      description:
-        'Distinguished name of subject of the issuer of the x.509 certificate presented by the client.',
+      description: 'Distinguished name of subject of the issuer of the x.509 certificate presented by the client.',
       example: 'CN=Example Root CA, OU=Infrastructure Team, DC=example, DC=com',
       flat_name: 'tls.client.issuer',
       ignore_above: 1024,
       level: 'extended',
       name: 'client.issuer',
       normalize: [],
-      short:
-        'Distinguished name of subject of the issuer of the x.509 certificate presented by the client.',
-      type: 'keyword',
+      short: 'Distinguished name of subject of the issuer of the x.509 certificate presented by the client.',
+      type: 'keyword'
     },
     ja3: {
       dashed_name: 'tls-client-ja3',
@@ -115,7 +105,7 @@ export const tlsEcs = {
       name: 'client.ja3',
       normalize: [],
       short: 'A hash that identifies clients based on how they perform an SSL/TLS handshake.',
-      type: 'keyword',
+      type: 'keyword'
     },
     not_after: {
       dashed_name: 'tls-client-not-after',
@@ -126,7 +116,7 @@ export const tlsEcs = {
       name: 'client.not_after',
       normalize: [],
       short: 'Date/Time indicating when client certificate is no longer considered valid.',
-      type: 'date',
+      type: 'date'
     },
     not_before: {
       dashed_name: 'tls-client-not-before',
@@ -137,12 +127,11 @@ export const tlsEcs = {
       name: 'client.not_before',
       normalize: [],
       short: 'Date/Time indicating when client certificate is first considered valid.',
-      type: 'date',
+      type: 'date'
     },
     server_name: {
       dashed_name: 'tls-client-server-name',
-      description:
-        'Also called an SNI, this tells the server which hostname to which the client is attempting to connect to. When this value is available, it should get copied to `destination.domain`.',
+      description: 'Also called an SNI, this tells the server which hostname to which the client is attempting to connect to. When this value is available, it should get copied to `destination.domain`.',
       example: 'www.elastic.co',
       flat_name: 'tls.client.server_name',
       ignore_above: 1024,
@@ -150,12 +139,11 @@ export const tlsEcs = {
       name: 'client.server_name',
       normalize: [],
       short: 'Hostname the client is trying to connect to. Also called the SNI.',
-      type: 'keyword',
+      type: 'keyword'
     },
     subject: {
       dashed_name: 'tls-client-subject',
-      description:
-        'Distinguished name of subject of the x.509 certificate presented by the client.',
+      description: 'Distinguished name of subject of the x.509 certificate presented by the client.',
       example: 'CN=myclient, OU=Documentation Team, DC=example, DC=com',
       flat_name: 'tls.client.subject',
       ignore_above: 1024,
@@ -163,35 +151,33 @@ export const tlsEcs = {
       name: 'client.subject',
       normalize: [],
       short: 'Distinguished name of subject of the x.509 certificate presented by the client.',
-      type: 'keyword',
+      type: 'keyword'
     },
     supported_ciphers: {
       dashed_name: 'tls-client-supported-ciphers',
       description: 'Array of ciphers offered by the client during the client hello.',
-      example:
-        '["TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384", "..."]',
+      example: '["TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384", "..."]',
       flat_name: 'tls.client.supported_ciphers',
       ignore_above: 1024,
       level: 'extended',
       name: 'client.supported_ciphers',
-      normalize: ['array'],
+      normalize: [ 'array' ],
       short: 'Array of ciphers offered by the client during the client hello.',
-      type: 'keyword',
+      type: 'keyword'
     },
     x509: {
       alternative_names: {
         dashed_name: 'tls-client-x509-alternative-names',
-        description:
-          'List of subject alternative names (SAN). Name types vary by certificate authority and certificate type but commonly contain IP addresses, DNS names (and wildcards), and email addresses.',
+        description: 'List of subject alternative names (SAN). Name types vary by certificate authority and certificate type but commonly contain IP addresses, DNS names (and wildcards), and email addresses.',
         example: '*.elastic.co',
         flat_name: 'tls.client.x509.alternative_names',
         ignore_above: 1024,
         level: 'extended',
         name: 'alternative_names',
-        normalize: ['array'],
+        normalize: [ 'array' ],
         original_fieldset: 'x509',
         short: 'List of subject alternative names (SAN).',
-        type: 'keyword',
+        type: 'keyword'
       },
       issuer: {
         common_name: {
@@ -202,10 +188,10 @@ export const tlsEcs = {
           ignore_above: 1024,
           level: 'extended',
           name: 'issuer.common_name',
-          normalize: ['array'],
+          normalize: [ 'array' ],
           original_fieldset: 'x509',
           short: 'List of common name (CN) of issuing certificate authority.',
-          type: 'keyword',
+          type: 'keyword'
         },
         country: {
           dashed_name: 'tls-client-x509-issuer-country',
@@ -215,16 +201,15 @@ export const tlsEcs = {
           ignore_above: 1024,
           level: 'extended',
           name: 'issuer.country',
-          normalize: ['array'],
+          normalize: [ 'array' ],
           original_fieldset: 'x509',
           short: 'List of country (C) codes',
-          type: 'keyword',
+          type: 'keyword'
         },
         distinguished_name: {
           dashed_name: 'tls-client-x509-issuer-distinguished-name',
           description: 'Distinguished name (DN) of issuing certificate authority.',
-          example:
-            'C=US, O=Example Inc, OU=www.example.com, CN=Example SHA2 High Assurance Server CA',
+          example: 'C=US, O=Example Inc, OU=www.example.com, CN=Example SHA2 High Assurance Server CA',
           flat_name: 'tls.client.x509.issuer.distinguished_name',
           ignore_above: 1024,
           level: 'extended',
@@ -232,7 +217,7 @@ export const tlsEcs = {
           normalize: [],
           original_fieldset: 'x509',
           short: 'Distinguished name (DN) of issuing certificate authority.',
-          type: 'keyword',
+          type: 'keyword'
         },
         locality: {
           dashed_name: 'tls-client-x509-issuer-locality',
@@ -242,10 +227,10 @@ export const tlsEcs = {
           ignore_above: 1024,
           level: 'extended',
           name: 'issuer.locality',
-          normalize: ['array'],
+          normalize: [ 'array' ],
           original_fieldset: 'x509',
           short: 'List of locality names (L)',
-          type: 'keyword',
+          type: 'keyword'
         },
         organization: {
           dashed_name: 'tls-client-x509-issuer-organization',
@@ -255,10 +240,10 @@ export const tlsEcs = {
           ignore_above: 1024,
           level: 'extended',
           name: 'issuer.organization',
-          normalize: ['array'],
+          normalize: [ 'array' ],
           original_fieldset: 'x509',
           short: 'List of organizations (O) of issuing certificate authority.',
-          type: 'keyword',
+          type: 'keyword'
         },
         organizational_unit: {
           dashed_name: 'tls-client-x509-issuer-organizational-unit',
@@ -268,10 +253,10 @@ export const tlsEcs = {
           ignore_above: 1024,
           level: 'extended',
           name: 'issuer.organizational_unit',
-          normalize: ['array'],
+          normalize: [ 'array' ],
           original_fieldset: 'x509',
           short: 'List of organizational units (OU) of issuing certificate authority.',
-          type: 'keyword',
+          type: 'keyword'
         },
         state_or_province: {
           dashed_name: 'tls-client-x509-issuer-state-or-province',
@@ -281,11 +266,11 @@ export const tlsEcs = {
           ignore_above: 1024,
           level: 'extended',
           name: 'issuer.state_or_province',
-          normalize: ['array'],
+          normalize: [ 'array' ],
           original_fieldset: 'x509',
           short: 'List of state or province names (ST, S, or P)',
-          type: 'keyword',
-        },
+          type: 'keyword'
+        }
       },
       not_after: {
         dashed_name: 'tls-client-x509-not-after',
@@ -297,7 +282,7 @@ export const tlsEcs = {
         normalize: [],
         original_fieldset: 'x509',
         short: 'Time at which the certificate is no longer considered valid.',
-        type: 'date',
+        type: 'date'
       },
       not_before: {
         dashed_name: 'tls-client-x509-not-before',
@@ -309,7 +294,7 @@ export const tlsEcs = {
         normalize: [],
         original_fieldset: 'x509',
         short: 'Time at which the certificate is first considered valid.',
-        type: 'date',
+        type: 'date'
       },
       public_key_algorithm: {
         dashed_name: 'tls-client-x509-public-key-algorithm',
@@ -322,12 +307,11 @@ export const tlsEcs = {
         normalize: [],
         original_fieldset: 'x509',
         short: 'Algorithm used to generate the public key.',
-        type: 'keyword',
+        type: 'keyword'
       },
       public_key_curve: {
         dashed_name: 'tls-client-x509-public-key-curve',
-        description:
-          'The curve used by the elliptic curve public key algorithm. This is algorithm specific.',
+        description: 'The curve used by the elliptic curve public key algorithm. This is algorithm specific.',
         example: 'nistp521',
         flat_name: 'tls.client.x509.public_key_curve',
         ignore_above: 1024,
@@ -335,9 +319,8 @@ export const tlsEcs = {
         name: 'public_key_curve',
         normalize: [],
         original_fieldset: 'x509',
-        short:
-          'The curve used by the elliptic curve public key algorithm. This is algorithm specific.',
-        type: 'keyword',
+        short: 'The curve used by the elliptic curve public key algorithm. This is algorithm specific.',
+        type: 'keyword'
       },
       public_key_exponent: {
         dashed_name: 'tls-client-x509-public-key-exponent',
@@ -351,7 +334,7 @@ export const tlsEcs = {
         normalize: [],
         original_fieldset: 'x509',
         short: 'Exponent used to derive the public key. This is algorithm specific.',
-        type: 'long',
+        type: 'long'
       },
       public_key_size: {
         dashed_name: 'tls-client-x509-public-key-size',
@@ -363,12 +346,11 @@ export const tlsEcs = {
         normalize: [],
         original_fieldset: 'x509',
         short: 'The size of the public key space in bits.',
-        type: 'long',
+        type: 'long'
       },
       serial_number: {
         dashed_name: 'tls-client-x509-serial-number',
-        description:
-          'Unique serial number issued by the certificate authority. For consistency, if this value is alphanumeric, it should be formatted without colons and uppercase characters.',
+        description: 'Unique serial number issued by the certificate authority. For consistency, if this value is alphanumeric, it should be formatted without colons and uppercase characters.',
         example: '55FBB9C7DEBF09809D12CCAA',
         flat_name: 'tls.client.x509.serial_number',
         ignore_above: 1024,
@@ -377,12 +359,11 @@ export const tlsEcs = {
         normalize: [],
         original_fieldset: 'x509',
         short: 'Unique serial number issued by the certificate authority.',
-        type: 'keyword',
+        type: 'keyword'
       },
       signature_algorithm: {
         dashed_name: 'tls-client-x509-signature-algorithm',
-        description:
-          'Identifier for certificate signature algorithm. We recommend using names found in Go Lang Crypto library. See https://github.com/golang/go/blob/go1.14/src/crypto/x509/x509.go#L337-L353.',
+        description: 'Identifier for certificate signature algorithm. We recommend using names found in Go Lang Crypto library. See https://github.com/golang/go/blob/go1.14/src/crypto/x509/x509.go#L337-L353.',
         example: 'SHA256-RSA',
         flat_name: 'tls.client.x509.signature_algorithm',
         ignore_above: 1024,
@@ -391,7 +372,7 @@ export const tlsEcs = {
         normalize: [],
         original_fieldset: 'x509',
         short: 'Identifier for certificate signature algorithm.',
-        type: 'keyword',
+        type: 'keyword'
       },
       subject: {
         common_name: {
@@ -402,10 +383,10 @@ export const tlsEcs = {
           ignore_above: 1024,
           level: 'extended',
           name: 'subject.common_name',
-          normalize: ['array'],
+          normalize: [ 'array' ],
           original_fieldset: 'x509',
           short: 'List of common names (CN) of subject.',
-          type: 'keyword',
+          type: 'keyword'
         },
         country: {
           dashed_name: 'tls-client-x509-subject-country',
@@ -415,16 +396,15 @@ export const tlsEcs = {
           ignore_above: 1024,
           level: 'extended',
           name: 'subject.country',
-          normalize: ['array'],
+          normalize: [ 'array' ],
           original_fieldset: 'x509',
           short: 'List of country (C) code',
-          type: 'keyword',
+          type: 'keyword'
         },
         distinguished_name: {
           dashed_name: 'tls-client-x509-subject-distinguished-name',
           description: 'Distinguished name (DN) of the certificate subject entity.',
-          example:
-            'C=US, ST=California, L=San Francisco, O=Example, Inc., CN=shared.global.example.net',
+          example: 'C=US, ST=California, L=San Francisco, O=Example, Inc., CN=shared.global.example.net',
           flat_name: 'tls.client.x509.subject.distinguished_name',
           ignore_above: 1024,
           level: 'extended',
@@ -432,7 +412,7 @@ export const tlsEcs = {
           normalize: [],
           original_fieldset: 'x509',
           short: 'Distinguished name (DN) of the certificate subject entity.',
-          type: 'keyword',
+          type: 'keyword'
         },
         locality: {
           dashed_name: 'tls-client-x509-subject-locality',
@@ -442,10 +422,10 @@ export const tlsEcs = {
           ignore_above: 1024,
           level: 'extended',
           name: 'subject.locality',
-          normalize: ['array'],
+          normalize: [ 'array' ],
           original_fieldset: 'x509',
           short: 'List of locality names (L)',
-          type: 'keyword',
+          type: 'keyword'
         },
         organization: {
           dashed_name: 'tls-client-x509-subject-organization',
@@ -455,10 +435,10 @@ export const tlsEcs = {
           ignore_above: 1024,
           level: 'extended',
           name: 'subject.organization',
-          normalize: ['array'],
+          normalize: [ 'array' ],
           original_fieldset: 'x509',
           short: 'List of organizations (O) of subject.',
-          type: 'keyword',
+          type: 'keyword'
         },
         organizational_unit: {
           dashed_name: 'tls-client-x509-subject-organizational-unit',
@@ -467,10 +447,10 @@ export const tlsEcs = {
           ignore_above: 1024,
           level: 'extended',
           name: 'subject.organizational_unit',
-          normalize: ['array'],
+          normalize: [ 'array' ],
           original_fieldset: 'x509',
           short: 'List of organizational units (OU) of subject.',
-          type: 'keyword',
+          type: 'keyword'
         },
         state_or_province: {
           dashed_name: 'tls-client-x509-subject-state-or-province',
@@ -480,11 +460,11 @@ export const tlsEcs = {
           ignore_above: 1024,
           level: 'extended',
           name: 'subject.state_or_province',
-          normalize: ['array'],
+          normalize: [ 'array' ],
           original_fieldset: 'x509',
           short: 'List of state or province names (ST, S, or P)',
-          type: 'keyword',
-        },
+          type: 'keyword'
+        }
       },
       version_number: {
         dashed_name: 'tls-client-x509-version-number',
@@ -497,9 +477,9 @@ export const tlsEcs = {
         normalize: [],
         original_fieldset: 'x509',
         short: 'Version of x509 format.',
-        type: 'keyword',
-      },
-    },
+        type: 'keyword'
+      }
+    }
   },
   curve: {
     dashed_name: 'tls-curve',
@@ -511,24 +491,21 @@ export const tlsEcs = {
     name: 'curve',
     normalize: [],
     short: 'String indicating the curve used for the given cipher, when applicable.',
-    type: 'keyword',
+    type: 'keyword'
   },
   established: {
     dashed_name: 'tls-established',
-    description:
-      'Boolean flag indicating if the TLS negotiation was successful and transitioned to an encrypted tunnel.',
+    description: 'Boolean flag indicating if the TLS negotiation was successful and transitioned to an encrypted tunnel.',
     flat_name: 'tls.established',
     level: 'extended',
     name: 'established',
     normalize: [],
-    short:
-      'Boolean flag indicating if the TLS negotiation was successful and transitioned to an encrypted tunnel.',
-    type: 'boolean',
+    short: 'Boolean flag indicating if the TLS negotiation was successful and transitioned to an encrypted tunnel.',
+    type: 'boolean'
   },
   next_protocol: {
     dashed_name: 'tls-next-protocol',
-    description:
-      'String indicating the protocol being tunneled. Per the values in the IANA registry (https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#alpn-protocol-ids), this string should be lower case.',
+    description: 'String indicating the protocol being tunneled. Per the values in the IANA registry (https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#alpn-protocol-ids), this string should be lower case.',
     example: 'http/1.1',
     flat_name: 'tls.next_protocol',
     ignore_above: 1024,
@@ -536,25 +513,22 @@ export const tlsEcs = {
     name: 'next_protocol',
     normalize: [],
     short: 'String indicating the protocol being tunneled.',
-    type: 'keyword',
+    type: 'keyword'
   },
   resumed: {
     dashed_name: 'tls-resumed',
-    description:
-      'Boolean flag indicating if this TLS connection was resumed from an existing TLS negotiation.',
+    description: 'Boolean flag indicating if this TLS connection was resumed from an existing TLS negotiation.',
     flat_name: 'tls.resumed',
     level: 'extended',
     name: 'resumed',
     normalize: [],
-    short:
-      'Boolean flag indicating if this TLS connection was resumed from an existing TLS negotiation.',
-    type: 'boolean',
+    short: 'Boolean flag indicating if this TLS connection was resumed from an existing TLS negotiation.',
+    type: 'boolean'
   },
   server: {
     certificate: {
       dashed_name: 'tls-server-certificate',
-      description:
-        'PEM-encoded stand-alone certificate offered by the server. This is usually mutually-exclusive of `server.certificate_chain` since this value also exists in that list.',
+      description: 'PEM-encoded stand-alone certificate offered by the server. This is usually mutually-exclusive of `server.certificate_chain` since this value also exists in that list.',
       example: 'MII...',
       flat_name: 'tls.server.certificate',
       ignore_above: 1024,
@@ -562,65 +536,57 @@ export const tlsEcs = {
       name: 'server.certificate',
       normalize: [],
       short: 'PEM-encoded stand-alone certificate offered by the server.',
-      type: 'keyword',
+      type: 'keyword'
     },
     certificate_chain: {
       dashed_name: 'tls-server-certificate-chain',
-      description:
-        'Array of PEM-encoded certificates that make up the certificate chain offered by the server. This is usually mutually-exclusive of `server.certificate` since that value should be the first certificate in the chain.',
+      description: 'Array of PEM-encoded certificates that make up the certificate chain offered by the server. This is usually mutually-exclusive of `server.certificate` since that value should be the first certificate in the chain.',
       example: '["MII...", "MII..."]',
       flat_name: 'tls.server.certificate_chain',
       ignore_above: 1024,
       level: 'extended',
       name: 'server.certificate_chain',
-      normalize: ['array'],
-      short:
-        'Array of PEM-encoded certificates that make up the certificate chain offered by the server.',
-      type: 'keyword',
+      normalize: [ 'array' ],
+      short: 'Array of PEM-encoded certificates that make up the certificate chain offered by the server.',
+      type: 'keyword'
     },
     hash: {
       md5: {
         dashed_name: 'tls-server-hash-md5',
-        description:
-          'Certificate fingerprint using the MD5 digest of DER-encoded version of certificate offered by the server. For consistency with other hash values, this value should be formatted as an uppercase hash.',
+        description: 'Certificate fingerprint using the MD5 digest of DER-encoded version of certificate offered by the server. For consistency with other hash values, this value should be formatted as an uppercase hash.',
         example: '0F76C7F2C55BFD7D8E8B8F4BFBF0C9EC',
         flat_name: 'tls.server.hash.md5',
         ignore_above: 1024,
         level: 'extended',
         name: 'server.hash.md5',
         normalize: [],
-        short:
-          'Certificate fingerprint using the MD5 digest of DER-encoded version of certificate offered by the server.',
-        type: 'keyword',
+        short: 'Certificate fingerprint using the MD5 digest of DER-encoded version of certificate offered by the server.',
+        type: 'keyword'
       },
       sha1: {
         dashed_name: 'tls-server-hash-sha1',
-        description:
-          'Certificate fingerprint using the SHA1 digest of DER-encoded version of certificate offered by the server. For consistency with other hash values, this value should be formatted as an uppercase hash.',
+        description: 'Certificate fingerprint using the SHA1 digest of DER-encoded version of certificate offered by the server. For consistency with other hash values, this value should be formatted as an uppercase hash.',
         example: '9E393D93138888D288266C2D915214D1D1CCEB2A',
         flat_name: 'tls.server.hash.sha1',
         ignore_above: 1024,
         level: 'extended',
         name: 'server.hash.sha1',
         normalize: [],
-        short:
-          'Certificate fingerprint using the SHA1 digest of DER-encoded version of certificate offered by the server.',
-        type: 'keyword',
+        short: 'Certificate fingerprint using the SHA1 digest of DER-encoded version of certificate offered by the server.',
+        type: 'keyword'
       },
       sha256: {
         dashed_name: 'tls-server-hash-sha256',
-        description:
-          'Certificate fingerprint using the SHA256 digest of DER-encoded version of certificate offered by the server. For consistency with other hash values, this value should be formatted as an uppercase hash.',
+        description: 'Certificate fingerprint using the SHA256 digest of DER-encoded version of certificate offered by the server. For consistency with other hash values, this value should be formatted as an uppercase hash.',
         example: '0687F666A054EF17A08E2F2162EAB4CBC0D265E1D7875BE74BF3C712CA92DAF0',
         flat_name: 'tls.server.hash.sha256',
         ignore_above: 1024,
         level: 'extended',
         name: 'server.hash.sha256',
         normalize: [],
-        short:
-          'Certificate fingerprint using the SHA256 digest of DER-encoded version of certificate offered by the server.',
-        type: 'keyword',
-      },
+        short: 'Certificate fingerprint using the SHA256 digest of DER-encoded version of certificate offered by the server.',
+        type: 'keyword'
+      }
     },
     issuer: {
       dashed_name: 'tls-server-issuer',
@@ -632,7 +598,7 @@ export const tlsEcs = {
       name: 'server.issuer',
       normalize: [],
       short: 'Subject of the issuer of the x.509 certificate presented by the server.',
-      type: 'keyword',
+      type: 'keyword'
     },
     ja3s: {
       dashed_name: 'tls-server-ja3s',
@@ -644,7 +610,7 @@ export const tlsEcs = {
       name: 'server.ja3s',
       normalize: [],
       short: 'A hash that identifies servers based on how they perform an SSL/TLS handshake.',
-      type: 'keyword',
+      type: 'keyword'
     },
     not_after: {
       dashed_name: 'tls-server-not-after',
@@ -655,7 +621,7 @@ export const tlsEcs = {
       name: 'server.not_after',
       normalize: [],
       short: 'Timestamp indicating when server certificate is no longer considered valid.',
-      type: 'date',
+      type: 'date'
     },
     not_before: {
       dashed_name: 'tls-server-not-before',
@@ -666,7 +632,7 @@ export const tlsEcs = {
       name: 'server.not_before',
       normalize: [],
       short: 'Timestamp indicating when server certificate is first considered valid.',
-      type: 'date',
+      type: 'date'
     },
     subject: {
       dashed_name: 'tls-server-subject',
@@ -678,22 +644,21 @@ export const tlsEcs = {
       name: 'server.subject',
       normalize: [],
       short: 'Subject of the x.509 certificate presented by the server.',
-      type: 'keyword',
+      type: 'keyword'
     },
     x509: {
       alternative_names: {
         dashed_name: 'tls-server-x509-alternative-names',
-        description:
-          'List of subject alternative names (SAN). Name types vary by certificate authority and certificate type but commonly contain IP addresses, DNS names (and wildcards), and email addresses.',
+        description: 'List of subject alternative names (SAN). Name types vary by certificate authority and certificate type but commonly contain IP addresses, DNS names (and wildcards), and email addresses.',
         example: '*.elastic.co',
         flat_name: 'tls.server.x509.alternative_names',
         ignore_above: 1024,
         level: 'extended',
         name: 'alternative_names',
-        normalize: ['array'],
+        normalize: [ 'array' ],
         original_fieldset: 'x509',
         short: 'List of subject alternative names (SAN).',
-        type: 'keyword',
+        type: 'keyword'
       },
       issuer: {
         common_name: {
@@ -704,10 +669,10 @@ export const tlsEcs = {
           ignore_above: 1024,
           level: 'extended',
           name: 'issuer.common_name',
-          normalize: ['array'],
+          normalize: [ 'array' ],
           original_fieldset: 'x509',
           short: 'List of common name (CN) of issuing certificate authority.',
-          type: 'keyword',
+          type: 'keyword'
         },
         country: {
           dashed_name: 'tls-server-x509-issuer-country',
@@ -717,16 +682,15 @@ export const tlsEcs = {
           ignore_above: 1024,
           level: 'extended',
           name: 'issuer.country',
-          normalize: ['array'],
+          normalize: [ 'array' ],
           original_fieldset: 'x509',
           short: 'List of country (C) codes',
-          type: 'keyword',
+          type: 'keyword'
         },
         distinguished_name: {
           dashed_name: 'tls-server-x509-issuer-distinguished-name',
           description: 'Distinguished name (DN) of issuing certificate authority.',
-          example:
-            'C=US, O=Example Inc, OU=www.example.com, CN=Example SHA2 High Assurance Server CA',
+          example: 'C=US, O=Example Inc, OU=www.example.com, CN=Example SHA2 High Assurance Server CA',
           flat_name: 'tls.server.x509.issuer.distinguished_name',
           ignore_above: 1024,
           level: 'extended',
@@ -734,7 +698,7 @@ export const tlsEcs = {
           normalize: [],
           original_fieldset: 'x509',
           short: 'Distinguished name (DN) of issuing certificate authority.',
-          type: 'keyword',
+          type: 'keyword'
         },
         locality: {
           dashed_name: 'tls-server-x509-issuer-locality',
@@ -744,10 +708,10 @@ export const tlsEcs = {
           ignore_above: 1024,
           level: 'extended',
           name: 'issuer.locality',
-          normalize: ['array'],
+          normalize: [ 'array' ],
           original_fieldset: 'x509',
           short: 'List of locality names (L)',
-          type: 'keyword',
+          type: 'keyword'
         },
         organization: {
           dashed_name: 'tls-server-x509-issuer-organization',
@@ -757,10 +721,10 @@ export const tlsEcs = {
           ignore_above: 1024,
           level: 'extended',
           name: 'issuer.organization',
-          normalize: ['array'],
+          normalize: [ 'array' ],
           original_fieldset: 'x509',
           short: 'List of organizations (O) of issuing certificate authority.',
-          type: 'keyword',
+          type: 'keyword'
         },
         organizational_unit: {
           dashed_name: 'tls-server-x509-issuer-organizational-unit',
@@ -770,10 +734,10 @@ export const tlsEcs = {
           ignore_above: 1024,
           level: 'extended',
           name: 'issuer.organizational_unit',
-          normalize: ['array'],
+          normalize: [ 'array' ],
           original_fieldset: 'x509',
           short: 'List of organizational units (OU) of issuing certificate authority.',
-          type: 'keyword',
+          type: 'keyword'
         },
         state_or_province: {
           dashed_name: 'tls-server-x509-issuer-state-or-province',
@@ -783,11 +747,11 @@ export const tlsEcs = {
           ignore_above: 1024,
           level: 'extended',
           name: 'issuer.state_or_province',
-          normalize: ['array'],
+          normalize: [ 'array' ],
           original_fieldset: 'x509',
           short: 'List of state or province names (ST, S, or P)',
-          type: 'keyword',
-        },
+          type: 'keyword'
+        }
       },
       not_after: {
         dashed_name: 'tls-server-x509-not-after',
@@ -799,7 +763,7 @@ export const tlsEcs = {
         normalize: [],
         original_fieldset: 'x509',
         short: 'Time at which the certificate is no longer considered valid.',
-        type: 'date',
+        type: 'date'
       },
       not_before: {
         dashed_name: 'tls-server-x509-not-before',
@@ -811,7 +775,7 @@ export const tlsEcs = {
         normalize: [],
         original_fieldset: 'x509',
         short: 'Time at which the certificate is first considered valid.',
-        type: 'date',
+        type: 'date'
       },
       public_key_algorithm: {
         dashed_name: 'tls-server-x509-public-key-algorithm',
@@ -824,12 +788,11 @@ export const tlsEcs = {
         normalize: [],
         original_fieldset: 'x509',
         short: 'Algorithm used to generate the public key.',
-        type: 'keyword',
+        type: 'keyword'
       },
       public_key_curve: {
         dashed_name: 'tls-server-x509-public-key-curve',
-        description:
-          'The curve used by the elliptic curve public key algorithm. This is algorithm specific.',
+        description: 'The curve used by the elliptic curve public key algorithm. This is algorithm specific.',
         example: 'nistp521',
         flat_name: 'tls.server.x509.public_key_curve',
         ignore_above: 1024,
@@ -837,9 +800,8 @@ export const tlsEcs = {
         name: 'public_key_curve',
         normalize: [],
         original_fieldset: 'x509',
-        short:
-          'The curve used by the elliptic curve public key algorithm. This is algorithm specific.',
-        type: 'keyword',
+        short: 'The curve used by the elliptic curve public key algorithm. This is algorithm specific.',
+        type: 'keyword'
       },
       public_key_exponent: {
         dashed_name: 'tls-server-x509-public-key-exponent',
@@ -853,7 +815,7 @@ export const tlsEcs = {
         normalize: [],
         original_fieldset: 'x509',
         short: 'Exponent used to derive the public key. This is algorithm specific.',
-        type: 'long',
+        type: 'long'
       },
       public_key_size: {
         dashed_name: 'tls-server-x509-public-key-size',
@@ -865,12 +827,11 @@ export const tlsEcs = {
         normalize: [],
         original_fieldset: 'x509',
         short: 'The size of the public key space in bits.',
-        type: 'long',
+        type: 'long'
       },
       serial_number: {
         dashed_name: 'tls-server-x509-serial-number',
-        description:
-          'Unique serial number issued by the certificate authority. For consistency, if this value is alphanumeric, it should be formatted without colons and uppercase characters.',
+        description: 'Unique serial number issued by the certificate authority. For consistency, if this value is alphanumeric, it should be formatted without colons and uppercase characters.',
         example: '55FBB9C7DEBF09809D12CCAA',
         flat_name: 'tls.server.x509.serial_number',
         ignore_above: 1024,
@@ -879,12 +840,11 @@ export const tlsEcs = {
         normalize: [],
         original_fieldset: 'x509',
         short: 'Unique serial number issued by the certificate authority.',
-        type: 'keyword',
+        type: 'keyword'
       },
       signature_algorithm: {
         dashed_name: 'tls-server-x509-signature-algorithm',
-        description:
-          'Identifier for certificate signature algorithm. We recommend using names found in Go Lang Crypto library. See https://github.com/golang/go/blob/go1.14/src/crypto/x509/x509.go#L337-L353.',
+        description: 'Identifier for certificate signature algorithm. We recommend using names found in Go Lang Crypto library. See https://github.com/golang/go/blob/go1.14/src/crypto/x509/x509.go#L337-L353.',
         example: 'SHA256-RSA',
         flat_name: 'tls.server.x509.signature_algorithm',
         ignore_above: 1024,
@@ -893,7 +853,7 @@ export const tlsEcs = {
         normalize: [],
         original_fieldset: 'x509',
         short: 'Identifier for certificate signature algorithm.',
-        type: 'keyword',
+        type: 'keyword'
       },
       subject: {
         common_name: {
@@ -904,10 +864,10 @@ export const tlsEcs = {
           ignore_above: 1024,
           level: 'extended',
           name: 'subject.common_name',
-          normalize: ['array'],
+          normalize: [ 'array' ],
           original_fieldset: 'x509',
           short: 'List of common names (CN) of subject.',
-          type: 'keyword',
+          type: 'keyword'
         },
         country: {
           dashed_name: 'tls-server-x509-subject-country',
@@ -917,16 +877,15 @@ export const tlsEcs = {
           ignore_above: 1024,
           level: 'extended',
           name: 'subject.country',
-          normalize: ['array'],
+          normalize: [ 'array' ],
           original_fieldset: 'x509',
           short: 'List of country (C) code',
-          type: 'keyword',
+          type: 'keyword'
         },
         distinguished_name: {
           dashed_name: 'tls-server-x509-subject-distinguished-name',
           description: 'Distinguished name (DN) of the certificate subject entity.',
-          example:
-            'C=US, ST=California, L=San Francisco, O=Example, Inc., CN=shared.global.example.net',
+          example: 'C=US, ST=California, L=San Francisco, O=Example, Inc., CN=shared.global.example.net',
           flat_name: 'tls.server.x509.subject.distinguished_name',
           ignore_above: 1024,
           level: 'extended',
@@ -934,7 +893,7 @@ export const tlsEcs = {
           normalize: [],
           original_fieldset: 'x509',
           short: 'Distinguished name (DN) of the certificate subject entity.',
-          type: 'keyword',
+          type: 'keyword'
         },
         locality: {
           dashed_name: 'tls-server-x509-subject-locality',
@@ -944,10 +903,10 @@ export const tlsEcs = {
           ignore_above: 1024,
           level: 'extended',
           name: 'subject.locality',
-          normalize: ['array'],
+          normalize: [ 'array' ],
           original_fieldset: 'x509',
           short: 'List of locality names (L)',
-          type: 'keyword',
+          type: 'keyword'
         },
         organization: {
           dashed_name: 'tls-server-x509-subject-organization',
@@ -957,10 +916,10 @@ export const tlsEcs = {
           ignore_above: 1024,
           level: 'extended',
           name: 'subject.organization',
-          normalize: ['array'],
+          normalize: [ 'array' ],
           original_fieldset: 'x509',
           short: 'List of organizations (O) of subject.',
-          type: 'keyword',
+          type: 'keyword'
         },
         organizational_unit: {
           dashed_name: 'tls-server-x509-subject-organizational-unit',
@@ -969,10 +928,10 @@ export const tlsEcs = {
           ignore_above: 1024,
           level: 'extended',
           name: 'subject.organizational_unit',
-          normalize: ['array'],
+          normalize: [ 'array' ],
           original_fieldset: 'x509',
           short: 'List of organizational units (OU) of subject.',
-          type: 'keyword',
+          type: 'keyword'
         },
         state_or_province: {
           dashed_name: 'tls-server-x509-subject-state-or-province',
@@ -982,11 +941,11 @@ export const tlsEcs = {
           ignore_above: 1024,
           level: 'extended',
           name: 'subject.state_or_province',
-          normalize: ['array'],
+          normalize: [ 'array' ],
           original_fieldset: 'x509',
           short: 'List of state or province names (ST, S, or P)',
-          type: 'keyword',
-        },
+          type: 'keyword'
+        }
       },
       version_number: {
         dashed_name: 'tls-server-x509-version-number',
@@ -999,9 +958,9 @@ export const tlsEcs = {
         normalize: [],
         original_fieldset: 'x509',
         short: 'Version of x509 format.',
-        type: 'keyword',
-      },
-    },
+        type: 'keyword'
+      }
+    }
   },
   version: {
     dashed_name: 'tls-version',
@@ -1013,7 +972,7 @@ export const tlsEcs = {
     name: 'version',
     normalize: [],
     short: 'Numeric part of the version parsed from the original string.',
-    type: 'keyword',
+    type: 'keyword'
   },
   version_protocol: {
     dashed_name: 'tls-version-protocol',
@@ -1025,6 +984,6 @@ export const tlsEcs = {
     name: 'version_protocol',
     normalize: [],
     short: 'Normalized lowercase protocol name parsed from original string.',
-    type: 'keyword',
-  },
-};
+    type: 'keyword'
+  }
+}

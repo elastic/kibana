@@ -1,11 +1,12 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
+* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+* or more contributor license agreements. Licensed under the Elastic License
+* 2.0 and the Server Side Public License, v 1; you may not use this file except
+* in compliance with, at your election, the Elastic License 2.0 or the Server
+* Side Public License, v 1.
+*/
 
+/* eslint-disable */
 export const hostEcs = {
   architecture: {
     dashed_name: 'host-architecture',
@@ -17,14 +18,13 @@ export const hostEcs = {
     name: 'architecture',
     normalize: [],
     short: 'Operating system architecture.',
-    type: 'keyword',
+    type: 'keyword'
   },
   boot: {
     id: {
       beta: 'This field is beta and subject to change.',
       dashed_name: 'host-boot-id',
-      description:
-        'Linux boot uuid taken from /proc/sys/kernel/random/boot_id. Note the boot_id value from /proc may or may not be the same in containers as on the host. Some container runtimes will bind mount a new boot_id value onto the proc file in each container.',
+      description: 'Linux boot uuid taken from /proc/sys/kernel/random/boot_id. Note the boot_id value from /proc may or may not be the same in containers as on the host. Some container runtimes will bind mount a new boot_id value onto the proc file in each container.',
       example: '88a1f0ed-5ae5-41ee-af6b-41921c311872',
       flat_name: 'host.boot.id',
       ignore_above: 1024,
@@ -32,14 +32,13 @@ export const hostEcs = {
       name: 'boot.id',
       normalize: [],
       short: 'Linux boot uuid taken from /proc/sys/kernel/random/boot_id',
-      type: 'keyword',
-    },
+      type: 'keyword'
+    }
   },
   cpu: {
     usage: {
       dashed_name: 'host-cpu-usage',
-      description:
-        'Percent CPU used which is normalized by the number of CPU cores and it ranges from 0 to 1.\n' +
+      description: 'Percent CPU used which is normalized by the number of CPU cores and it ranges from 0 to 1.\n' +
         'Scaling factor: 1000.\n' +
         'For example: For a two core host, this value should be the average of the two cores, between 0 and 1.',
       flat_name: 'host.cpu.usage',
@@ -48,41 +47,38 @@ export const hostEcs = {
       normalize: [],
       scaling_factor: 1000,
       short: 'Percent CPU used, between 0 and 1.',
-      type: 'scaled_float',
-    },
+      type: 'scaled_float'
+    }
   },
   disk: {
     read: {
       bytes: {
         dashed_name: 'host-disk-read-bytes',
-        description:
-          'The total number of bytes (gauge) read successfully (aggregated from all disks) since the last metric collection.',
+        description: 'The total number of bytes (gauge) read successfully (aggregated from all disks) since the last metric collection.',
         flat_name: 'host.disk.read.bytes',
         level: 'extended',
         name: 'disk.read.bytes',
         normalize: [],
         short: 'The number of bytes read by all disks.',
-        type: 'long',
-      },
+        type: 'long'
+      }
     },
     write: {
       bytes: {
         dashed_name: 'host-disk-write-bytes',
-        description:
-          'The total number of bytes (gauge) written successfully (aggregated from all disks) since the last metric collection.',
+        description: 'The total number of bytes (gauge) written successfully (aggregated from all disks) since the last metric collection.',
         flat_name: 'host.disk.write.bytes',
         level: 'extended',
         name: 'disk.write.bytes',
         normalize: [],
         short: 'The number of bytes written on all disks.',
-        type: 'long',
-      },
-    },
+        type: 'long'
+      }
+    }
   },
   domain: {
     dashed_name: 'host-domain',
-    description:
-      'Name of the domain of which the host is a member.\n' +
+    description: 'Name of the domain of which the host is a member.\n' +
       "For example, on Windows this could be the host's Active Directory domain or NetBIOS domain name. For Linux this could be the domain of the host's LDAP provider.",
     example: 'CONTOSO',
     flat_name: 'host.domain',
@@ -91,7 +87,7 @@ export const hostEcs = {
     name: 'domain',
     normalize: [],
     short: 'Name of the directory the group is a member of.',
-    type: 'keyword',
+    type: 'keyword'
   },
   geo: {
     city_name: {
@@ -105,7 +101,7 @@ export const hostEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'City name.',
-      type: 'keyword',
+      type: 'keyword'
     },
     continent_code: {
       dashed_name: 'host-geo-continent-code',
@@ -118,7 +114,7 @@ export const hostEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'Continent code.',
-      type: 'keyword',
+      type: 'keyword'
     },
     continent_name: {
       dashed_name: 'host-geo-continent-name',
@@ -131,7 +127,7 @@ export const hostEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'Name of the continent.',
-      type: 'keyword',
+      type: 'keyword'
     },
     country_iso_code: {
       dashed_name: 'host-geo-country-iso-code',
@@ -144,7 +140,7 @@ export const hostEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'Country ISO code.',
-      type: 'keyword',
+      type: 'keyword'
     },
     country_name: {
       dashed_name: 'host-geo-country-name',
@@ -157,7 +153,7 @@ export const hostEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'Country name.',
-      type: 'keyword',
+      type: 'keyword'
     },
     location: {
       dashed_name: 'host-geo-location',
@@ -169,12 +165,11 @@ export const hostEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'Longitude and latitude.',
-      type: 'geo_point',
+      type: 'geo_point'
     },
     name: {
       dashed_name: 'host-geo-name',
-      description:
-        'User-defined description of a location, at the level of granularity they care about.\n' +
+      description: 'User-defined description of a location, at the level of granularity they care about.\n' +
         'Could be the name of their data centers, the floor number, if this describes a local physical entity, city names.\n' +
         'Not typically used in automated geolocation.',
       example: 'boston-dc',
@@ -185,12 +180,11 @@ export const hostEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'User-defined description of a location.',
-      type: 'keyword',
+      type: 'keyword'
     },
     postal_code: {
       dashed_name: 'host-geo-postal-code',
-      description:
-        'Postal code associated with the location.\n' +
+      description: 'Postal code associated with the location.\n' +
         'Values appropriate for this field may also be known as a postcode or ZIP code and will vary widely from country to country.',
       example: 94040,
       flat_name: 'host.geo.postal_code',
@@ -200,7 +194,7 @@ export const hostEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'Postal code.',
-      type: 'keyword',
+      type: 'keyword'
     },
     region_iso_code: {
       dashed_name: 'host-geo-region-iso-code',
@@ -213,7 +207,7 @@ export const hostEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'Region ISO code.',
-      type: 'keyword',
+      type: 'keyword'
     },
     region_name: {
       dashed_name: 'host-geo-region-name',
@@ -226,7 +220,7 @@ export const hostEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'Region name.',
-      type: 'keyword',
+      type: 'keyword'
     },
     timezone: {
       dashed_name: 'host-geo-timezone',
@@ -239,13 +233,12 @@ export const hostEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'Time zone.',
-      type: 'keyword',
-    },
+      type: 'keyword'
+    }
   },
   hostname: {
     dashed_name: 'host-hostname',
-    description:
-      'Hostname of the host.\n' +
+    description: 'Hostname of the host.\n' +
       'It normally contains what the `hostname` command returns on the host machine.',
     flat_name: 'host.hostname',
     ignore_above: 1024,
@@ -253,12 +246,11 @@ export const hostEcs = {
     name: 'hostname',
     normalize: [],
     short: 'Hostname of the host.',
-    type: 'keyword',
+    type: 'keyword'
   },
   id: {
     dashed_name: 'host-id',
-    description:
-      'Unique host id.\n' +
+    description: 'Unique host id.\n' +
       'As hostname is not always unique, use values that are meaningful in your environment.\n' +
       'Example: The current usage of `beat.name`.',
     flat_name: 'host.id',
@@ -267,7 +259,7 @@ export const hostEcs = {
     name: 'id',
     normalize: [],
     short: 'Unique host id.',
-    type: 'keyword',
+    type: 'keyword'
   },
   ip: {
     dashed_name: 'host-ip',
@@ -275,29 +267,27 @@ export const hostEcs = {
     flat_name: 'host.ip',
     level: 'core',
     name: 'ip',
-    normalize: ['array'],
+    normalize: [ 'array' ],
     short: 'Host ip addresses.',
-    type: 'ip',
+    type: 'ip'
   },
   mac: {
     dashed_name: 'host-mac',
-    description:
-      'Host MAC addresses.\n' +
+    description: 'Host MAC addresses.\n' +
       'The notation format from RFC 7042 is suggested: Each octet (that is, 8-bit byte) is represented by two [uppercase] hexadecimal digits giving the value of the octet as an unsigned integer. Successive octets are separated by a hyphen.',
     example: '["00-00-5E-00-53-23", "00-00-5E-00-53-24"]',
     flat_name: 'host.mac',
     ignore_above: 1024,
     level: 'core',
     name: 'mac',
-    normalize: ['array'],
+    normalize: [ 'array' ],
     pattern: '^[A-F0-9]{2}(-[A-F0-9]{2}){5,}$',
     short: 'Host MAC addresses.',
-    type: 'keyword',
+    type: 'keyword'
   },
   name: {
     dashed_name: 'host-name',
-    description:
-      'Name of the host.\n' +
+    description: 'Name of the host.\n' +
       'It can contain what `hostname` returns on Unix systems, the fully qualified domain name, or a name specified by the user. The sender decides which value to use.',
     flat_name: 'host.name',
     ignore_above: 1024,
@@ -305,57 +295,53 @@ export const hostEcs = {
     name: 'name',
     normalize: [],
     short: 'Name of the host.',
-    type: 'keyword',
+    type: 'keyword'
   },
   network: {
     egress: {
       bytes: {
         dashed_name: 'host-network-egress-bytes',
-        description:
-          'The number of bytes (gauge) sent out on all network interfaces by the host since the last metric collection.',
+        description: 'The number of bytes (gauge) sent out on all network interfaces by the host since the last metric collection.',
         flat_name: 'host.network.egress.bytes',
         level: 'extended',
         name: 'network.egress.bytes',
         normalize: [],
         short: 'The number of bytes sent on all network interfaces.',
-        type: 'long',
+        type: 'long'
       },
       packets: {
         dashed_name: 'host-network-egress-packets',
-        description:
-          'The number of packets (gauge) sent out on all network interfaces by the host since the last metric collection.',
+        description: 'The number of packets (gauge) sent out on all network interfaces by the host since the last metric collection.',
         flat_name: 'host.network.egress.packets',
         level: 'extended',
         name: 'network.egress.packets',
         normalize: [],
         short: 'The number of packets sent on all network interfaces.',
-        type: 'long',
-      },
+        type: 'long'
+      }
     },
     ingress: {
       bytes: {
         dashed_name: 'host-network-ingress-bytes',
-        description:
-          'The number of bytes received (gauge) on all network interfaces by the host since the last metric collection.',
+        description: 'The number of bytes received (gauge) on all network interfaces by the host since the last metric collection.',
         flat_name: 'host.network.ingress.bytes',
         level: 'extended',
         name: 'network.ingress.bytes',
         normalize: [],
         short: 'The number of bytes received on all network interfaces.',
-        type: 'long',
+        type: 'long'
       },
       packets: {
         dashed_name: 'host-network-ingress-packets',
-        description:
-          'The number of packets (gauge) received on all network interfaces by the host since the last metric collection.',
+        description: 'The number of packets (gauge) received on all network interfaces by the host since the last metric collection.',
         flat_name: 'host.network.ingress.packets',
         level: 'extended',
         name: 'network.ingress.packets',
         normalize: [],
         short: 'The number of packets received on all network interfaces.',
-        type: 'long',
-      },
-    },
+        type: 'long'
+      }
+    }
   },
   os: {
     family: {
@@ -369,7 +355,7 @@ export const hostEcs = {
       normalize: [],
       original_fieldset: 'os',
       short: 'OS family (such as redhat, debian, freebsd, windows).',
-      type: 'keyword',
+      type: 'keyword'
     },
     full: {
       dashed_name: 'host-os-full',
@@ -382,14 +368,14 @@ export const hostEcs = {
         {
           flat_name: 'host.os.full.text',
           name: 'text',
-          type: 'match_only_text',
-        },
+          type: 'match_only_text'
+        }
       ],
       name: 'full',
       normalize: [],
       original_fieldset: 'os',
       short: 'Operating system name, including the version or code name.',
-      type: 'keyword',
+      type: 'keyword'
     },
     kernel: {
       dashed_name: 'host-os-kernel',
@@ -402,7 +388,7 @@ export const hostEcs = {
       normalize: [],
       original_fieldset: 'os',
       short: 'Operating system kernel version as a raw string.',
-      type: 'keyword',
+      type: 'keyword'
     },
     name: {
       dashed_name: 'host-os-name',
@@ -415,14 +401,14 @@ export const hostEcs = {
         {
           flat_name: 'host.os.name.text',
           name: 'text',
-          type: 'match_only_text',
-        },
+          type: 'match_only_text'
+        }
       ],
       name: 'name',
       normalize: [],
       original_fieldset: 'os',
       short: 'Operating system name, without the version.',
-      type: 'keyword',
+      type: 'keyword'
     },
     platform: {
       dashed_name: 'host-os-platform',
@@ -435,12 +421,11 @@ export const hostEcs = {
       normalize: [],
       original_fieldset: 'os',
       short: 'Operating system platform (such centos, ubuntu, windows).',
-      type: 'keyword',
+      type: 'keyword'
     },
     type: {
       dashed_name: 'host-os-type',
-      description:
-        'Use the `os.type` field to categorize the operating system into one of the broad commercial families.\n' +
+      description: 'Use the `os.type` field to categorize the operating system into one of the broad commercial families.\n' +
         'One of these following values should be used (lowercase): linux, macos, unix, windows.\n' +
         "If the OS you're dealing with is not in the list, the field should not be populated. Please let us know by opening an issue with ECS, to propose its addition.",
       example: 'macos',
@@ -451,7 +436,7 @@ export const hostEcs = {
       normalize: [],
       original_fieldset: 'os',
       short: 'Which commercial OS family (one of: linux, macos, unix or windows).',
-      type: 'keyword',
+      type: 'keyword'
     },
     version: {
       dashed_name: 'host-os-version',
@@ -464,14 +449,13 @@ export const hostEcs = {
       normalize: [],
       original_fieldset: 'os',
       short: 'Operating system version as a raw string.',
-      type: 'keyword',
-    },
+      type: 'keyword'
+    }
   },
   pid_ns_ino: {
     beta: 'This field is beta and subject to change.',
     dashed_name: 'host-pid-ns-ino',
-    description:
-      'This is the inode number of the namespace in the namespace file system (nsfs). Unsigned int inum in include/linux/ns_common.h.',
+    description: 'This is the inode number of the namespace in the namespace file system (nsfs). Unsigned int inum in include/linux/ns_common.h.',
     example: 256383,
     flat_name: 'host.pid_ns_ino',
     ignore_above: 1024,
@@ -479,12 +463,11 @@ export const hostEcs = {
     name: 'pid_ns_ino',
     normalize: [],
     short: 'Pid namespace inode',
-    type: 'keyword',
+    type: 'keyword'
   },
   type: {
     dashed_name: 'host-type',
-    description:
-      'Type of host.\n' +
+    description: 'Type of host.\n' +
       'For Cloud providers this can be the machine type like `t2.medium`. If vm, this could be the container, for example, or other information meaningful in your environment.',
     flat_name: 'host.type',
     ignore_above: 1024,
@@ -492,7 +475,7 @@ export const hostEcs = {
     name: 'type',
     normalize: [],
     short: 'Type of host.',
-    type: 'keyword',
+    type: 'keyword'
   },
   uptime: {
     dashed_name: 'host-uptime',
@@ -503,6 +486,6 @@ export const hostEcs = {
     name: 'uptime',
     normalize: [],
     short: 'Seconds the host has been up.',
-    type: 'long',
-  },
-};
+    type: 'long'
+  }
+}

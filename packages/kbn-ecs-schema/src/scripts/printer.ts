@@ -23,7 +23,7 @@ function printGroupFiles(schema: Schema, outPath: string) {
       // eslint-disable-next-line no-console
       console.log(`Writing ${group} to ${outPath}/${group.toLowerCase()}.ts`);
 
-      const details = `export const ${snakeCaseToCamelCase(group)}Ecs = ${util.inspect(
+      const details = `${header()}export const ${snakeCaseToCamelCase(group)}Ecs = ${util.inspect(
         schema[group],
         { depth: null }
       )}`;
@@ -35,6 +35,8 @@ function printGroupFiles(schema: Schema, outPath: string) {
 function printIndex(topLevelFields: Group, groups: string[], outPath: string) {
   /** The base fields belong at the top level, so remove them from the others for printing. */
   groups = groups.filter((item) => item !== TOP_LEVEL_NAME);
+
+  append(`${outPath}/index.ts`, header());
 
   /** Printing the imports. */
   for (const group of groups) {
@@ -53,4 +55,22 @@ function printIndex(topLevelFields: Group, groups: string[], outPath: string) {
   schema += '};';
 
   append(`${outPath}/index.ts`, schema);
+}
+
+function header() {
+  return `${copyright()}${disableLinting()}`;
+}
+
+function copyright(): string {
+  return '/*\n' +
+  '* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one\n' +
+  '* or more contributor license agreements. Licensed under the Elastic License\n' +
+  '* 2.0 and the Server Side Public License, v 1; you may not use this file except\n'+
+  '* in compliance with, at your election, the Elastic License 2.0 or the Server\n' +
+  '* Side Public License, v 1.\n' +
+  '*/\n\n';
+}
+
+function disableLinting() : string {
+  return '/* eslint-disable */\n';
 }

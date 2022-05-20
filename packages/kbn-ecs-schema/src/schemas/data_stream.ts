@@ -1,16 +1,16 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
+* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+* or more contributor license agreements. Licensed under the Elastic License
+* 2.0 and the Server Side Public License, v 1; you may not use this file except
+* in compliance with, at your election, the Elastic License 2.0 or the Server
+* Side Public License, v 1.
+*/
 
+/* eslint-disable */
 export const dataStreamEcs = {
   dataset: {
     dashed_name: 'data-stream-dataset',
-    description:
-      'The field can contain anything that makes sense to signify the source of the data.\n' +
+    description: 'The field can contain anything that makes sense to signify the source of the data.\n' +
       'Examples include `nginx.access`, `prometheus`, `endpoint` etc. For data streams that otherwise fit, but that do not have dataset set we use the value "generic" for the dataset value. `event.dataset` should have the same value as `data_stream.dataset`.\n' +
       'Beyond the Elasticsearch data stream naming criteria noted above, the `dataset` value has additional restrictions:\n' +
       '  * Must not contain `-`\n' +
@@ -21,12 +21,11 @@ export const dataStreamEcs = {
     name: 'dataset',
     normalize: [],
     short: 'The field can contain anything that makes sense to signify the source of the data.',
-    type: 'constant_keyword',
+    type: 'constant_keyword'
   },
   namespace: {
     dashed_name: 'data-stream-namespace',
-    description:
-      'A user defined namespace. Namespaces are useful to allow grouping of data.\n' +
+    description: 'A user defined namespace. Namespaces are useful to allow grouping of data.\n' +
       'Many users already organize their indices this way, and the data stream naming scheme now provides this best practice as a default. Many users will populate this field with `default`. If no value is used, it falls back to `default`.\n' +
       'Beyond the Elasticsearch index naming criteria noted above, `namespace` value has the additional restrictions:\n' +
       '  * Must not contain `-`\n' +
@@ -37,12 +36,11 @@ export const dataStreamEcs = {
     name: 'namespace',
     normalize: [],
     short: 'A user defined namespace. Namespaces are useful to allow grouping of data.',
-    type: 'constant_keyword',
+    type: 'constant_keyword'
   },
   type: {
     dashed_name: 'data-stream-type',
-    description:
-      'An overarching type for the data stream.\n' +
+    description: 'An overarching type for the data stream.\n' +
       'Currently allowed values are "logs" and "metrics". We expect to also add "traces" and "synthetics" in the near future.',
     example: 'logs',
     flat_name: 'data_stream.type',
@@ -50,6 +48,6 @@ export const dataStreamEcs = {
     name: 'type',
     normalize: [],
     short: 'An overarching type for the data stream.',
-    type: 'constant_keyword',
-  },
-};
+    type: 'constant_keyword'
+  }
+}

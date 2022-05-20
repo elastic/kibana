@@ -1,11 +1,12 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
+* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+* or more contributor license agreements. Licensed under the Elastic License
+* 2.0 and the Server Side Public License, v 1; you may not use this file except
+* in compliance with, at your election, the Elastic License 2.0 or the Server
+* Side Public License, v 1.
+*/
 
+/* eslint-disable */
 export const peEcs = {
   architecture: {
     dashed_name: 'pe-architecture',
@@ -17,7 +18,7 @@ export const peEcs = {
     name: 'architecture',
     normalize: [],
     short: 'CPU architecture target for the file.',
-    type: 'keyword',
+    type: 'keyword'
   },
   company: {
     dashed_name: 'pe-company',
@@ -29,7 +30,7 @@ export const peEcs = {
     name: 'company',
     normalize: [],
     short: 'Internal company name of the file, provided at compile-time.',
-    type: 'keyword',
+    type: 'keyword'
   },
   description: {
     dashed_name: 'pe-description',
@@ -41,7 +42,7 @@ export const peEcs = {
     name: 'description',
     normalize: [],
     short: 'Internal description of the file, provided at compile-time.',
-    type: 'keyword',
+    type: 'keyword'
   },
   file_version: {
     dashed_name: 'pe-file-version',
@@ -53,12 +54,11 @@ export const peEcs = {
     name: 'file_version',
     normalize: [],
     short: 'Process name.',
-    type: 'keyword',
+    type: 'keyword'
   },
   imphash: {
     dashed_name: 'pe-imphash',
-    description:
-      'A hash of the imports in a PE file. An imphash -- or import hash -- can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.\n' +
+    description: 'A hash of the imports in a PE file. An imphash -- or import hash -- can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.\n' +
       'Learn more at https://www.fireeye.com/blog/threat-research/2014/01/tracking-malware-import-hashing.html.',
     example: '0c6803c4e922103c4dca5963aad36ddf',
     flat_name: 'pe.imphash',
@@ -67,7 +67,7 @@ export const peEcs = {
     name: 'imphash',
     normalize: [],
     short: 'A hash of the imports in a PE file.',
-    type: 'keyword',
+    type: 'keyword'
   },
   original_file_name: {
     dashed_name: 'pe-original-file-name',
@@ -79,12 +79,11 @@ export const peEcs = {
     name: 'original_file_name',
     normalize: [],
     short: 'Internal name of the file, provided at compile-time.',
-    type: 'keyword',
+    type: 'keyword'
   },
   pehash: {
     dashed_name: 'pe-pehash',
-    description:
-      'A hash of the PE header and data from one or more PE sections. An pehash can be used to cluster files by transforming structural information about a file into a hash value.\n' +
+    description: 'A hash of the PE header and data from one or more PE sections. An pehash can be used to cluster files by transforming structural information about a file into a hash value.\n' +
       'Learn more at https://www.usenix.org/legacy/events/leet09/tech/full_papers/wicherski/wicherski_html/index.html.',
     example: '73ff189b63cd6be375a7ff25179a38d347651975',
     flat_name: 'pe.pehash',
@@ -93,7 +92,7 @@ export const peEcs = {
     name: 'pehash',
     normalize: [],
     short: 'A hash of the PE header and data from one or more PE sections.',
-    type: 'keyword',
+    type: 'keyword'
   },
   product: {
     dashed_name: 'pe-product',
@@ -105,6 +104,6 @@ export const peEcs = {
     name: 'product',
     normalize: [],
     short: 'Internal product name of the file, provided at compile-time.',
-    type: 'keyword',
-  },
-};
+    type: 'keyword'
+  }
+}

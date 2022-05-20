@@ -1,11 +1,12 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
+* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+* or more contributor license agreements. Licensed under the Elastic License
+* 2.0 and the Server Side Public License, v 1; you may not use this file except
+* in compliance with, at your election, the Elastic License 2.0 or the Server
+* Side Public License, v 1.
+*/
 
+/* eslint-disable */
 export const errorEcs = {
   code: {
     dashed_name: 'error-code',
@@ -16,7 +17,7 @@ export const errorEcs = {
     name: 'code',
     normalize: [],
     short: 'Error code describing the error.',
-    type: 'keyword',
+    type: 'keyword'
   },
   id: {
     dashed_name: 'error-id',
@@ -27,7 +28,7 @@ export const errorEcs = {
     name: 'id',
     normalize: [],
     short: 'Unique identifier for the error.',
-    type: 'keyword',
+    type: 'keyword'
   },
   message: {
     dashed_name: 'error-message',
@@ -37,7 +38,7 @@ export const errorEcs = {
     name: 'message',
     normalize: [],
     short: 'Error message.',
-    type: 'match_only_text',
+    type: 'match_only_text'
   },
   stack_trace: {
     dashed_name: 'error-stack-trace',
@@ -48,13 +49,13 @@ export const errorEcs = {
       {
         flat_name: 'error.stack_trace.text',
         name: 'text',
-        type: 'match_only_text',
-      },
+        type: 'match_only_text'
+      }
     ],
     name: 'stack_trace',
     normalize: [],
     short: 'The stack trace of this error in plain text.',
-    type: 'wildcard',
+    type: 'wildcard'
   },
   type: {
     dashed_name: 'error-type',
@@ -66,6 +67,6 @@ export const errorEcs = {
     name: 'type',
     normalize: [],
     short: 'The type of the error, for example the class name of the exception.',
-    type: 'keyword',
-  },
-};
+    type: 'keyword'
+  }
+}

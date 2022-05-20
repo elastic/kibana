@@ -1,24 +1,24 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
+* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+* or more contributor license agreements. Licensed under the Elastic License
+* 2.0 and the Server Side Public License, v 1; you may not use this file except
+* in compliance with, at your election, the Elastic License 2.0 or the Server
+* Side Public License, v 1.
+*/
 
+/* eslint-disable */
 export const x509Ecs = {
   alternative_names: {
     dashed_name: 'x509-alternative-names',
-    description:
-      'List of subject alternative names (SAN). Name types vary by certificate authority and certificate type but commonly contain IP addresses, DNS names (and wildcards), and email addresses.',
+    description: 'List of subject alternative names (SAN). Name types vary by certificate authority and certificate type but commonly contain IP addresses, DNS names (and wildcards), and email addresses.',
     example: '*.elastic.co',
     flat_name: 'x509.alternative_names',
     ignore_above: 1024,
     level: 'extended',
     name: 'alternative_names',
-    normalize: ['array'],
+    normalize: [ 'array' ],
     short: 'List of subject alternative names (SAN).',
-    type: 'keyword',
+    type: 'keyword'
   },
   issuer: {
     common_name: {
@@ -29,9 +29,9 @@ export const x509Ecs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'issuer.common_name',
-      normalize: ['array'],
+      normalize: [ 'array' ],
       short: 'List of common name (CN) of issuing certificate authority.',
-      type: 'keyword',
+      type: 'keyword'
     },
     country: {
       dashed_name: 'x509-issuer-country',
@@ -41,9 +41,9 @@ export const x509Ecs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'issuer.country',
-      normalize: ['array'],
+      normalize: [ 'array' ],
       short: 'List of country (C) codes',
-      type: 'keyword',
+      type: 'keyword'
     },
     distinguished_name: {
       dashed_name: 'x509-issuer-distinguished-name',
@@ -55,7 +55,7 @@ export const x509Ecs = {
       name: 'issuer.distinguished_name',
       normalize: [],
       short: 'Distinguished name (DN) of issuing certificate authority.',
-      type: 'keyword',
+      type: 'keyword'
     },
     locality: {
       dashed_name: 'x509-issuer-locality',
@@ -65,9 +65,9 @@ export const x509Ecs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'issuer.locality',
-      normalize: ['array'],
+      normalize: [ 'array' ],
       short: 'List of locality names (L)',
-      type: 'keyword',
+      type: 'keyword'
     },
     organization: {
       dashed_name: 'x509-issuer-organization',
@@ -77,9 +77,9 @@ export const x509Ecs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'issuer.organization',
-      normalize: ['array'],
+      normalize: [ 'array' ],
       short: 'List of organizations (O) of issuing certificate authority.',
-      type: 'keyword',
+      type: 'keyword'
     },
     organizational_unit: {
       dashed_name: 'x509-issuer-organizational-unit',
@@ -89,9 +89,9 @@ export const x509Ecs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'issuer.organizational_unit',
-      normalize: ['array'],
+      normalize: [ 'array' ],
       short: 'List of organizational units (OU) of issuing certificate authority.',
-      type: 'keyword',
+      type: 'keyword'
     },
     state_or_province: {
       dashed_name: 'x509-issuer-state-or-province',
@@ -101,10 +101,10 @@ export const x509Ecs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'issuer.state_or_province',
-      normalize: ['array'],
+      normalize: [ 'array' ],
       short: 'List of state or province names (ST, S, or P)',
-      type: 'keyword',
-    },
+      type: 'keyword'
+    }
   },
   not_after: {
     dashed_name: 'x509-not-after',
@@ -115,7 +115,7 @@ export const x509Ecs = {
     name: 'not_after',
     normalize: [],
     short: 'Time at which the certificate is no longer considered valid.',
-    type: 'date',
+    type: 'date'
   },
   not_before: {
     dashed_name: 'x509-not-before',
@@ -126,7 +126,7 @@ export const x509Ecs = {
     name: 'not_before',
     normalize: [],
     short: 'Time at which the certificate is first considered valid.',
-    type: 'date',
+    type: 'date'
   },
   public_key_algorithm: {
     dashed_name: 'x509-public-key-algorithm',
@@ -138,12 +138,11 @@ export const x509Ecs = {
     name: 'public_key_algorithm',
     normalize: [],
     short: 'Algorithm used to generate the public key.',
-    type: 'keyword',
+    type: 'keyword'
   },
   public_key_curve: {
     dashed_name: 'x509-public-key-curve',
-    description:
-      'The curve used by the elliptic curve public key algorithm. This is algorithm specific.',
+    description: 'The curve used by the elliptic curve public key algorithm. This is algorithm specific.',
     example: 'nistp521',
     flat_name: 'x509.public_key_curve',
     ignore_above: 1024,
@@ -151,7 +150,7 @@ export const x509Ecs = {
     name: 'public_key_curve',
     normalize: [],
     short: 'The curve used by the elliptic curve public key algorithm. This is algorithm specific.',
-    type: 'keyword',
+    type: 'keyword'
   },
   public_key_exponent: {
     dashed_name: 'x509-public-key-exponent',
@@ -164,7 +163,7 @@ export const x509Ecs = {
     name: 'public_key_exponent',
     normalize: [],
     short: 'Exponent used to derive the public key. This is algorithm specific.',
-    type: 'long',
+    type: 'long'
   },
   public_key_size: {
     dashed_name: 'x509-public-key-size',
@@ -175,12 +174,11 @@ export const x509Ecs = {
     name: 'public_key_size',
     normalize: [],
     short: 'The size of the public key space in bits.',
-    type: 'long',
+    type: 'long'
   },
   serial_number: {
     dashed_name: 'x509-serial-number',
-    description:
-      'Unique serial number issued by the certificate authority. For consistency, if this value is alphanumeric, it should be formatted without colons and uppercase characters.',
+    description: 'Unique serial number issued by the certificate authority. For consistency, if this value is alphanumeric, it should be formatted without colons and uppercase characters.',
     example: '55FBB9C7DEBF09809D12CCAA',
     flat_name: 'x509.serial_number',
     ignore_above: 1024,
@@ -188,12 +186,11 @@ export const x509Ecs = {
     name: 'serial_number',
     normalize: [],
     short: 'Unique serial number issued by the certificate authority.',
-    type: 'keyword',
+    type: 'keyword'
   },
   signature_algorithm: {
     dashed_name: 'x509-signature-algorithm',
-    description:
-      'Identifier for certificate signature algorithm. We recommend using names found in Go Lang Crypto library. See https://github.com/golang/go/blob/go1.14/src/crypto/x509/x509.go#L337-L353.',
+    description: 'Identifier for certificate signature algorithm. We recommend using names found in Go Lang Crypto library. See https://github.com/golang/go/blob/go1.14/src/crypto/x509/x509.go#L337-L353.',
     example: 'SHA256-RSA',
     flat_name: 'x509.signature_algorithm',
     ignore_above: 1024,
@@ -201,7 +198,7 @@ export const x509Ecs = {
     name: 'signature_algorithm',
     normalize: [],
     short: 'Identifier for certificate signature algorithm.',
-    type: 'keyword',
+    type: 'keyword'
   },
   subject: {
     common_name: {
@@ -212,9 +209,9 @@ export const x509Ecs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'subject.common_name',
-      normalize: ['array'],
+      normalize: [ 'array' ],
       short: 'List of common names (CN) of subject.',
-      type: 'keyword',
+      type: 'keyword'
     },
     country: {
       dashed_name: 'x509-subject-country',
@@ -224,22 +221,21 @@ export const x509Ecs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'subject.country',
-      normalize: ['array'],
+      normalize: [ 'array' ],
       short: 'List of country (C) code',
-      type: 'keyword',
+      type: 'keyword'
     },
     distinguished_name: {
       dashed_name: 'x509-subject-distinguished-name',
       description: 'Distinguished name (DN) of the certificate subject entity.',
-      example:
-        'C=US, ST=California, L=San Francisco, O=Example, Inc., CN=shared.global.example.net',
+      example: 'C=US, ST=California, L=San Francisco, O=Example, Inc., CN=shared.global.example.net',
       flat_name: 'x509.subject.distinguished_name',
       ignore_above: 1024,
       level: 'extended',
       name: 'subject.distinguished_name',
       normalize: [],
       short: 'Distinguished name (DN) of the certificate subject entity.',
-      type: 'keyword',
+      type: 'keyword'
     },
     locality: {
       dashed_name: 'x509-subject-locality',
@@ -249,9 +245,9 @@ export const x509Ecs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'subject.locality',
-      normalize: ['array'],
+      normalize: [ 'array' ],
       short: 'List of locality names (L)',
-      type: 'keyword',
+      type: 'keyword'
     },
     organization: {
       dashed_name: 'x509-subject-organization',
@@ -261,9 +257,9 @@ export const x509Ecs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'subject.organization',
-      normalize: ['array'],
+      normalize: [ 'array' ],
       short: 'List of organizations (O) of subject.',
-      type: 'keyword',
+      type: 'keyword'
     },
     organizational_unit: {
       dashed_name: 'x509-subject-organizational-unit',
@@ -272,9 +268,9 @@ export const x509Ecs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'subject.organizational_unit',
-      normalize: ['array'],
+      normalize: [ 'array' ],
       short: 'List of organizational units (OU) of subject.',
-      type: 'keyword',
+      type: 'keyword'
     },
     state_or_province: {
       dashed_name: 'x509-subject-state-or-province',
@@ -284,10 +280,10 @@ export const x509Ecs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'subject.state_or_province',
-      normalize: ['array'],
+      normalize: [ 'array' ],
       short: 'List of state or province names (ST, S, or P)',
-      type: 'keyword',
-    },
+      type: 'keyword'
+    }
   },
   version_number: {
     dashed_name: 'x509-version-number',
@@ -299,6 +295,6 @@ export const x509Ecs = {
     name: 'version_number',
     normalize: [],
     short: 'Version of x509 format.',
-    type: 'keyword',
-  },
-};
+    type: 'keyword'
+  }
+}

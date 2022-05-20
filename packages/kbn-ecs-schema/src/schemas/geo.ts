@@ -1,11 +1,12 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
+* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+* or more contributor license agreements. Licensed under the Elastic License
+* 2.0 and the Server Side Public License, v 1; you may not use this file except
+* in compliance with, at your election, the Elastic License 2.0 or the Server
+* Side Public License, v 1.
+*/
 
+/* eslint-disable */
 export const geoEcs = {
   city_name: {
     dashed_name: 'geo-city-name',
@@ -17,7 +18,7 @@ export const geoEcs = {
     name: 'city_name',
     normalize: [],
     short: 'City name.',
-    type: 'keyword',
+    type: 'keyword'
   },
   continent_code: {
     dashed_name: 'geo-continent-code',
@@ -29,7 +30,7 @@ export const geoEcs = {
     name: 'continent_code',
     normalize: [],
     short: 'Continent code.',
-    type: 'keyword',
+    type: 'keyword'
   },
   continent_name: {
     dashed_name: 'geo-continent-name',
@@ -41,7 +42,7 @@ export const geoEcs = {
     name: 'continent_name',
     normalize: [],
     short: 'Name of the continent.',
-    type: 'keyword',
+    type: 'keyword'
   },
   country_iso_code: {
     dashed_name: 'geo-country-iso-code',
@@ -53,7 +54,7 @@ export const geoEcs = {
     name: 'country_iso_code',
     normalize: [],
     short: 'Country ISO code.',
-    type: 'keyword',
+    type: 'keyword'
   },
   country_name: {
     dashed_name: 'geo-country-name',
@@ -65,7 +66,7 @@ export const geoEcs = {
     name: 'country_name',
     normalize: [],
     short: 'Country name.',
-    type: 'keyword',
+    type: 'keyword'
   },
   location: {
     dashed_name: 'geo-location',
@@ -76,12 +77,11 @@ export const geoEcs = {
     name: 'location',
     normalize: [],
     short: 'Longitude and latitude.',
-    type: 'geo_point',
+    type: 'geo_point'
   },
   name: {
     dashed_name: 'geo-name',
-    description:
-      'User-defined description of a location, at the level of granularity they care about.\n' +
+    description: 'User-defined description of a location, at the level of granularity they care about.\n' +
       'Could be the name of their data centers, the floor number, if this describes a local physical entity, city names.\n' +
       'Not typically used in automated geolocation.',
     example: 'boston-dc',
@@ -91,12 +91,11 @@ export const geoEcs = {
     name: 'name',
     normalize: [],
     short: 'User-defined description of a location.',
-    type: 'keyword',
+    type: 'keyword'
   },
   postal_code: {
     dashed_name: 'geo-postal-code',
-    description:
-      'Postal code associated with the location.\n' +
+    description: 'Postal code associated with the location.\n' +
       'Values appropriate for this field may also be known as a postcode or ZIP code and will vary widely from country to country.',
     example: 94040,
     flat_name: 'geo.postal_code',
@@ -105,7 +104,7 @@ export const geoEcs = {
     name: 'postal_code',
     normalize: [],
     short: 'Postal code.',
-    type: 'keyword',
+    type: 'keyword'
   },
   region_iso_code: {
     dashed_name: 'geo-region-iso-code',
@@ -117,7 +116,7 @@ export const geoEcs = {
     name: 'region_iso_code',
     normalize: [],
     short: 'Region ISO code.',
-    type: 'keyword',
+    type: 'keyword'
   },
   region_name: {
     dashed_name: 'geo-region-name',
@@ -129,7 +128,7 @@ export const geoEcs = {
     name: 'region_name',
     normalize: [],
     short: 'Region name.',
-    type: 'keyword',
+    type: 'keyword'
   },
   timezone: {
     dashed_name: 'geo-timezone',
@@ -141,6 +140,6 @@ export const geoEcs = {
     name: 'timezone',
     normalize: [],
     short: 'Time zone.',
-    type: 'keyword',
-  },
-};
+    type: 'keyword'
+  }
+}

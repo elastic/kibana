@@ -1,20 +1,20 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
+* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+* or more contributor license agreements. Licensed under the Elastic License
+* 2.0 and the Server Side Public License, v 1; you may not use this file except
+* in compliance with, at your election, the Elastic License 2.0 or the Server
+* Side Public License, v 1.
+*/
 
+/* eslint-disable */
 export const emailEcs = {
   attachments: {
     dashed_name: 'email-attachments',
-    description:
-      'A list of objects describing the attachment files sent along with an email message.',
+    description: 'A list of objects describing the attachment files sent along with an email message.',
     flat_name: 'email.attachments',
     level: 'extended',
     name: 'attachments',
-    normalize: ['array'],
+    normalize: [ 'array' ],
     short: 'List of objects describing the attachments.',
     type: 'nested',
     file: {
@@ -28,7 +28,7 @@ export const emailEcs = {
         name: 'attachments.file.extension',
         normalize: [],
         short: 'Attachment file extension.',
-        type: 'keyword',
+        type: 'keyword'
       },
       hash: {
         md5: {
@@ -41,7 +41,7 @@ export const emailEcs = {
           normalize: [],
           original_fieldset: 'hash',
           short: 'MD5 hash.',
-          type: 'keyword',
+          type: 'keyword'
         },
         sha1: {
           dashed_name: 'email-attachments-file-hash-sha1',
@@ -53,7 +53,7 @@ export const emailEcs = {
           normalize: [],
           original_fieldset: 'hash',
           short: 'SHA1 hash.',
-          type: 'keyword',
+          type: 'keyword'
         },
         sha256: {
           dashed_name: 'email-attachments-file-hash-sha256',
@@ -65,7 +65,7 @@ export const emailEcs = {
           normalize: [],
           original_fieldset: 'hash',
           short: 'SHA256 hash.',
-          type: 'keyword',
+          type: 'keyword'
         },
         sha384: {
           dashed_name: 'email-attachments-file-hash-sha384',
@@ -77,7 +77,7 @@ export const emailEcs = {
           normalize: [],
           original_fieldset: 'hash',
           short: 'SHA384 hash.',
-          type: 'keyword',
+          type: 'keyword'
         },
         sha512: {
           dashed_name: 'email-attachments-file-hash-sha512',
@@ -89,7 +89,7 @@ export const emailEcs = {
           normalize: [],
           original_fieldset: 'hash',
           short: 'SHA512 hash.',
-          type: 'keyword',
+          type: 'keyword'
         },
         ssdeep: {
           dashed_name: 'email-attachments-file-hash-ssdeep',
@@ -101,7 +101,7 @@ export const emailEcs = {
           normalize: [],
           original_fieldset: 'hash',
           short: 'SSDEEP hash.',
-          type: 'keyword',
+          type: 'keyword'
         },
         tlsh: {
           dashed_name: 'email-attachments-file-hash-tlsh',
@@ -113,13 +113,12 @@ export const emailEcs = {
           normalize: [],
           original_fieldset: 'hash',
           short: 'TLSH hash.',
-          type: 'keyword',
-        },
+          type: 'keyword'
+        }
       },
       mime_type: {
         dashed_name: 'email-attachments-file-mime-type',
-        description:
-          'The MIME media type of the attachment.\n' +
+        description: 'The MIME media type of the attachment.\n' +
           'This value will typically be extracted from the `Content-Type` MIME header field.',
         example: 'text/plain',
         flat_name: 'email.attachments.file.mime_type',
@@ -128,7 +127,7 @@ export const emailEcs = {
         name: 'attachments.file.mime_type',
         normalize: [],
         short: 'MIME type of the attachment file.',
-        type: 'keyword',
+        type: 'keyword'
       },
       name: {
         dashed_name: 'email-attachments-file-name',
@@ -140,7 +139,7 @@ export const emailEcs = {
         name: 'attachments.file.name',
         normalize: [],
         short: 'Name of the attachment file.',
-        type: 'keyword',
+        type: 'keyword'
       },
       size: {
         dashed_name: 'email-attachments-file-size',
@@ -151,9 +150,9 @@ export const emailEcs = {
         name: 'attachments.file.size',
         normalize: [],
         short: 'Attachment file size.',
-        type: 'long',
-      },
-    },
+        type: 'long'
+      }
+    }
   },
   bcc: {
     address: {
@@ -164,10 +163,10 @@ export const emailEcs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'bcc.address',
-      normalize: ['array'],
+      normalize: [ 'array' ],
       short: 'Email address of BCC recipient',
-      type: 'keyword',
-    },
+      type: 'keyword'
+    }
   },
   cc: {
     address: {
@@ -178,15 +177,15 @@ export const emailEcs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'cc.address',
-      normalize: ['array'],
+      normalize: [ 'array' ],
       short: 'Email address of CC recipient',
-      type: 'keyword',
-    },
+      type: 'keyword'
+    }
   },
   content_type: {
     dashed_name: 'email-content-type',
-    description:
-      'Information about how the message is to be displayed.\n' + 'Typically a MIME type.',
+    description: 'Information about how the message is to be displayed.\n' +
+      'Typically a MIME type.',
     example: 'text/plain',
     flat_name: 'email.content_type',
     ignore_above: 1024,
@@ -194,7 +193,7 @@ export const emailEcs = {
     name: 'content_type',
     normalize: [],
     short: 'MIME type of the email message.',
-    type: 'keyword',
+    type: 'keyword'
   },
   delivery_timestamp: {
     dashed_name: 'email-delivery-timestamp',
@@ -205,7 +204,7 @@ export const emailEcs = {
     name: 'delivery_timestamp',
     normalize: [],
     short: 'Date and time when message was delivered.',
-    type: 'date',
+    type: 'date'
   },
   direction: {
     dashed_name: 'email-direction',
@@ -217,27 +216,25 @@ export const emailEcs = {
     name: 'direction',
     normalize: [],
     short: 'Direction of the message.',
-    type: 'keyword',
+    type: 'keyword'
   },
   from: {
     address: {
       dashed_name: 'email-from-address',
-      description:
-        'The email address of the sender, typically from the RFC 5322 `From:` header field.',
+      description: 'The email address of the sender, typically from the RFC 5322 `From:` header field.',
       example: 'sender@example.com',
       flat_name: 'email.from.address',
       ignore_above: 1024,
       level: 'extended',
       name: 'from.address',
-      normalize: ['array'],
+      normalize: [ 'array' ],
       short: "The sender's email address.",
-      type: 'keyword',
-    },
+      type: 'keyword'
+    }
   },
   local_id: {
     dashed_name: 'email-local-id',
-    description:
-      'Unique identifier given to the email by the source that created the event.\n' +
+    description: 'Unique identifier given to the email by the source that created the event.\n' +
       'Identifier is not persistent across hops.',
     example: 'c26dbea0-80d5-463b-b93c-4e8b708219ce',
     flat_name: 'email.local_id',
@@ -246,60 +243,56 @@ export const emailEcs = {
     name: 'local_id',
     normalize: [],
     short: 'Unique identifier given by the source.',
-    type: 'keyword',
+    type: 'keyword'
   },
   message_id: {
     dashed_name: 'email-message-id',
-    description:
-      'Identifier from the RFC 5322 `Message-ID:` email header that refers to a particular email message.',
+    description: 'Identifier from the RFC 5322 `Message-ID:` email header that refers to a particular email message.',
     example: '81ce15$8r2j59@mail01.example.com',
     flat_name: 'email.message_id',
     level: 'extended',
     name: 'message_id',
     normalize: [],
     short: 'Value from the Message-ID header.',
-    type: 'wildcard',
+    type: 'wildcard'
   },
   origination_timestamp: {
     dashed_name: 'email-origination-timestamp',
-    description:
-      'The date and time the email message was composed. Many email clients will fill in this value automatically when the message is sent by a user.',
+    description: 'The date and time the email message was composed. Many email clients will fill in this value automatically when the message is sent by a user.',
     example: '2020-11-10T22:12:34.8196921Z',
     flat_name: 'email.origination_timestamp',
     level: 'extended',
     name: 'origination_timestamp',
     normalize: [],
     short: 'Date and time the email was composed.',
-    type: 'date',
+    type: 'date'
   },
   reply_to: {
     address: {
       dashed_name: 'email-reply-to-address',
-      description:
-        'The address that replies should be delivered to based on the value in the RFC 5322 `Reply-To:` header.',
+      description: 'The address that replies should be delivered to based on the value in the RFC 5322 `Reply-To:` header.',
       example: 'reply.here@example.com',
       flat_name: 'email.reply_to.address',
       ignore_above: 1024,
       level: 'extended',
       name: 'reply_to.address',
-      normalize: ['array'],
+      normalize: [ 'array' ],
       short: 'Address replies should be delivered to.',
-      type: 'keyword',
-    },
+      type: 'keyword'
+    }
   },
   sender: {
     address: {
       dashed_name: 'email-sender-address',
-      description:
-        'Per RFC 5322, specifies the address responsible for the actual transmission of the message.',
+      description: 'Per RFC 5322, specifies the address responsible for the actual transmission of the message.',
       flat_name: 'email.sender.address',
       ignore_above: 1024,
       level: 'extended',
       name: 'sender.address',
       normalize: [],
       short: 'Address of the message sender.',
-      type: 'keyword',
-    },
+      type: 'keyword'
+    }
   },
   subject: {
     dashed_name: 'email-subject',
@@ -312,13 +305,13 @@ export const emailEcs = {
       {
         flat_name: 'email.subject.text',
         name: 'text',
-        type: 'match_only_text',
-      },
+        type: 'match_only_text'
+      }
     ],
     name: 'subject',
     normalize: [],
     short: 'The subject of the email message.',
-    type: 'keyword',
+    type: 'keyword'
   },
   to: {
     address: {
@@ -329,15 +322,14 @@ export const emailEcs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'to.address',
-      normalize: ['array'],
+      normalize: [ 'array' ],
       short: 'Email address of recipient',
-      type: 'keyword',
-    },
+      type: 'keyword'
+    }
   },
   x_mailer: {
     dashed_name: 'email-x-mailer',
-    description:
-      'The name of the application that was used to draft and send the original email message.',
+    description: 'The name of the application that was used to draft and send the original email message.',
     example: 'Spambot v2.5',
     flat_name: 'email.x_mailer',
     ignore_above: 1024,
@@ -345,6 +337,6 @@ export const emailEcs = {
     name: 'x_mailer',
     normalize: [],
     short: 'Application that drafted email.',
-    type: 'keyword',
-  },
-};
+    type: 'keyword'
+  }
+}

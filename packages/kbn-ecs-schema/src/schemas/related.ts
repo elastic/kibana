@@ -1,35 +1,34 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
+* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+* or more contributor license agreements. Licensed under the Elastic License
+* 2.0 and the Server Side Public License, v 1; you may not use this file except
+* in compliance with, at your election, the Elastic License 2.0 or the Server
+* Side Public License, v 1.
+*/
 
+/* eslint-disable */
 export const relatedEcs = {
   hash: {
     dashed_name: 'related-hash',
-    description:
-      "All the hashes seen on your event. Populating this field, then using it to search for hashes can help in situations where you're unsure what the hash algorithm is (and therefore which key name to search).",
+    description: "All the hashes seen on your event. Populating this field, then using it to search for hashes can help in situations where you're unsure what the hash algorithm is (and therefore which key name to search).",
     flat_name: 'related.hash',
     ignore_above: 1024,
     level: 'extended',
     name: 'hash',
-    normalize: ['array'],
+    normalize: [ 'array' ],
     short: 'All the hashes seen on your event.',
-    type: 'keyword',
+    type: 'keyword'
   },
   hosts: {
     dashed_name: 'related-hosts',
-    description:
-      'All hostnames or other host identifiers seen on your event. Example identifiers include FQDNs, domain names, workstation names, or aliases.',
+    description: 'All hostnames or other host identifiers seen on your event. Example identifiers include FQDNs, domain names, workstation names, or aliases.',
     flat_name: 'related.hosts',
     ignore_above: 1024,
     level: 'extended',
     name: 'hosts',
-    normalize: ['array'],
+    normalize: [ 'array' ],
     short: 'All the host identifiers seen on your event.',
-    type: 'keyword',
+    type: 'keyword'
   },
   ip: {
     dashed_name: 'related-ip',
@@ -37,9 +36,9 @@ export const relatedEcs = {
     flat_name: 'related.ip',
     level: 'extended',
     name: 'ip',
-    normalize: ['array'],
+    normalize: [ 'array' ],
     short: 'All of the IPs seen on your event.',
-    type: 'ip',
+    type: 'ip'
   },
   user: {
     dashed_name: 'related-user',
@@ -48,8 +47,8 @@ export const relatedEcs = {
     ignore_above: 1024,
     level: 'extended',
     name: 'user',
-    normalize: ['array'],
+    normalize: [ 'array' ],
     short: 'All the user names or other user identifiers seen on the event.',
-    type: 'keyword',
-  },
-};
+    type: 'keyword'
+  }
+}

@@ -1,16 +1,16 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
+* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+* or more contributor license agreements. Licensed under the Elastic License
+* 2.0 and the Server Side Public License, v 1; you may not use this file except
+* in compliance with, at your election, the Elastic License 2.0 or the Server
+* Side Public License, v 1.
+*/
 
+/* eslint-disable */
 export const codeSignatureEcs = {
   digest_algorithm: {
     dashed_name: 'code-signature-digest-algorithm',
-    description:
-      'The hashing algorithm used to sign the process.\n' +
+    description: 'The hashing algorithm used to sign the process.\n' +
       'This value can distinguish signatures when a file is signed multiple times by the same signer but with a different digest algorithm.',
     example: 'sha256',
     flat_name: 'code_signature.digest_algorithm',
@@ -19,7 +19,7 @@ export const codeSignatureEcs = {
     name: 'digest_algorithm',
     normalize: [],
     short: 'Hashing algorithm used to sign the process.',
-    type: 'keyword',
+    type: 'keyword'
   },
   exists: {
     dashed_name: 'code-signature-exists',
@@ -30,12 +30,11 @@ export const codeSignatureEcs = {
     name: 'exists',
     normalize: [],
     short: 'Boolean to capture if a signature is present.',
-    type: 'boolean',
+    type: 'boolean'
   },
   signing_id: {
     dashed_name: 'code-signature-signing-id',
-    description:
-      'The identifier used to sign the process.\n' +
+    description: 'The identifier used to sign the process.\n' +
       'This is used to identify the application manufactured by a software vendor. The field is relevant to Apple *OS only.',
     example: 'com.apple.xpc.proxy',
     flat_name: 'code_signature.signing_id',
@@ -44,12 +43,11 @@ export const codeSignatureEcs = {
     name: 'signing_id',
     normalize: [],
     short: 'The identifier used to sign the process.',
-    type: 'keyword',
+    type: 'keyword'
   },
   status: {
     dashed_name: 'code-signature-status',
-    description:
-      'Additional information about the certificate status.\n' +
+    description: 'Additional information about the certificate status.\n' +
       'This is useful for logging cryptographic errors with the certificate validity or trust status. Leave unpopulated if the validity or trust of the certificate was unchecked.',
     example: 'ERROR_UNTRUSTED_ROOT',
     flat_name: 'code_signature.status',
@@ -58,7 +56,7 @@ export const codeSignatureEcs = {
     name: 'status',
     normalize: [],
     short: 'Additional information about the certificate status.',
-    type: 'keyword',
+    type: 'keyword'
   },
   subject_name: {
     dashed_name: 'code-signature-subject-name',
@@ -70,12 +68,11 @@ export const codeSignatureEcs = {
     name: 'subject_name',
     normalize: [],
     short: 'Subject name of the code signer',
-    type: 'keyword',
+    type: 'keyword'
   },
   team_id: {
     dashed_name: 'code-signature-team-id',
-    description:
-      'The team identifier used to sign the process.\n' +
+    description: 'The team identifier used to sign the process.\n' +
       'This is used to identify the team or vendor of a software product. The field is relevant to Apple *OS only.',
     example: 'EQHXZ8M8AV',
     flat_name: 'code_signature.team_id',
@@ -84,7 +81,7 @@ export const codeSignatureEcs = {
     name: 'team_id',
     normalize: [],
     short: 'The team identifier used to sign the process.',
-    type: 'keyword',
+    type: 'keyword'
   },
   timestamp: {
     dashed_name: 'code-signature-timestamp',
@@ -95,12 +92,11 @@ export const codeSignatureEcs = {
     name: 'timestamp',
     normalize: [],
     short: 'When the signature was generated and signed.',
-    type: 'date',
+    type: 'date'
   },
   trusted: {
     dashed_name: 'code-signature-trusted',
-    description:
-      'Stores the trust status of the certificate chain.\n' +
+    description: 'Stores the trust status of the certificate chain.\n' +
       'Validating the trust of the certificate chain may be complicated, and this field should only be populated by tools that actively check the status.',
     example: 'true',
     flat_name: 'code_signature.trusted',
@@ -108,12 +104,11 @@ export const codeSignatureEcs = {
     name: 'trusted',
     normalize: [],
     short: 'Stores the trust status of the certificate chain.',
-    type: 'boolean',
+    type: 'boolean'
   },
   valid: {
     dashed_name: 'code-signature-valid',
-    description:
-      'Boolean to capture if the digital signature is verified against the binary content.\n' +
+    description: 'Boolean to capture if the digital signature is verified against the binary content.\n' +
       'Leave unpopulated if a certificate was unchecked.',
     example: 'true',
     flat_name: 'code_signature.valid',
@@ -121,6 +116,6 @@ export const codeSignatureEcs = {
     name: 'valid',
     normalize: [],
     short: 'Boolean to capture if the digital signature is verified against the binary content.',
-    type: 'boolean',
-  },
-};
+    type: 'boolean'
+  }
+}

@@ -1,17 +1,17 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
+* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+* or more contributor license agreements. Licensed under the Elastic License
+* 2.0 and the Server Side Public License, v 1; you may not use this file except
+* in compliance with, at your election, the Elastic License 2.0 or the Server
+* Side Public License, v 1.
+*/
 
+/* eslint-disable */
 export const dllEcs = {
   code_signature: {
     digest_algorithm: {
       dashed_name: 'dll-code-signature-digest-algorithm',
-      description:
-        'The hashing algorithm used to sign the process.\n' +
+      description: 'The hashing algorithm used to sign the process.\n' +
         'This value can distinguish signatures when a file is signed multiple times by the same signer but with a different digest algorithm.',
       example: 'sha256',
       flat_name: 'dll.code_signature.digest_algorithm',
@@ -21,7 +21,7 @@ export const dllEcs = {
       normalize: [],
       original_fieldset: 'code_signature',
       short: 'Hashing algorithm used to sign the process.',
-      type: 'keyword',
+      type: 'keyword'
     },
     exists: {
       dashed_name: 'dll-code-signature-exists',
@@ -33,12 +33,11 @@ export const dllEcs = {
       normalize: [],
       original_fieldset: 'code_signature',
       short: 'Boolean to capture if a signature is present.',
-      type: 'boolean',
+      type: 'boolean'
     },
     signing_id: {
       dashed_name: 'dll-code-signature-signing-id',
-      description:
-        'The identifier used to sign the process.\n' +
+      description: 'The identifier used to sign the process.\n' +
         'This is used to identify the application manufactured by a software vendor. The field is relevant to Apple *OS only.',
       example: 'com.apple.xpc.proxy',
       flat_name: 'dll.code_signature.signing_id',
@@ -48,12 +47,11 @@ export const dllEcs = {
       normalize: [],
       original_fieldset: 'code_signature',
       short: 'The identifier used to sign the process.',
-      type: 'keyword',
+      type: 'keyword'
     },
     status: {
       dashed_name: 'dll-code-signature-status',
-      description:
-        'Additional information about the certificate status.\n' +
+      description: 'Additional information about the certificate status.\n' +
         'This is useful for logging cryptographic errors with the certificate validity or trust status. Leave unpopulated if the validity or trust of the certificate was unchecked.',
       example: 'ERROR_UNTRUSTED_ROOT',
       flat_name: 'dll.code_signature.status',
@@ -63,7 +61,7 @@ export const dllEcs = {
       normalize: [],
       original_fieldset: 'code_signature',
       short: 'Additional information about the certificate status.',
-      type: 'keyword',
+      type: 'keyword'
     },
     subject_name: {
       dashed_name: 'dll-code-signature-subject-name',
@@ -76,12 +74,11 @@ export const dllEcs = {
       normalize: [],
       original_fieldset: 'code_signature',
       short: 'Subject name of the code signer',
-      type: 'keyword',
+      type: 'keyword'
     },
     team_id: {
       dashed_name: 'dll-code-signature-team-id',
-      description:
-        'The team identifier used to sign the process.\n' +
+      description: 'The team identifier used to sign the process.\n' +
         'This is used to identify the team or vendor of a software product. The field is relevant to Apple *OS only.',
       example: 'EQHXZ8M8AV',
       flat_name: 'dll.code_signature.team_id',
@@ -91,7 +88,7 @@ export const dllEcs = {
       normalize: [],
       original_fieldset: 'code_signature',
       short: 'The team identifier used to sign the process.',
-      type: 'keyword',
+      type: 'keyword'
     },
     timestamp: {
       dashed_name: 'dll-code-signature-timestamp',
@@ -103,12 +100,11 @@ export const dllEcs = {
       normalize: [],
       original_fieldset: 'code_signature',
       short: 'When the signature was generated and signed.',
-      type: 'date',
+      type: 'date'
     },
     trusted: {
       dashed_name: 'dll-code-signature-trusted',
-      description:
-        'Stores the trust status of the certificate chain.\n' +
+      description: 'Stores the trust status of the certificate chain.\n' +
         'Validating the trust of the certificate chain may be complicated, and this field should only be populated by tools that actively check the status.',
       example: 'true',
       flat_name: 'dll.code_signature.trusted',
@@ -117,12 +113,11 @@ export const dllEcs = {
       normalize: [],
       original_fieldset: 'code_signature',
       short: 'Stores the trust status of the certificate chain.',
-      type: 'boolean',
+      type: 'boolean'
     },
     valid: {
       dashed_name: 'dll-code-signature-valid',
-      description:
-        'Boolean to capture if the digital signature is verified against the binary content.\n' +
+      description: 'Boolean to capture if the digital signature is verified against the binary content.\n' +
         'Leave unpopulated if a certificate was unchecked.',
       example: 'true',
       flat_name: 'dll.code_signature.valid',
@@ -131,8 +126,8 @@ export const dllEcs = {
       normalize: [],
       original_fieldset: 'code_signature',
       short: 'Boolean to capture if the digital signature is verified against the binary content.',
-      type: 'boolean',
-    },
+      type: 'boolean'
+    }
   },
   hash: {
     md5: {
@@ -145,7 +140,7 @@ export const dllEcs = {
       normalize: [],
       original_fieldset: 'hash',
       short: 'MD5 hash.',
-      type: 'keyword',
+      type: 'keyword'
     },
     sha1: {
       dashed_name: 'dll-hash-sha1',
@@ -157,7 +152,7 @@ export const dllEcs = {
       normalize: [],
       original_fieldset: 'hash',
       short: 'SHA1 hash.',
-      type: 'keyword',
+      type: 'keyword'
     },
     sha256: {
       dashed_name: 'dll-hash-sha256',
@@ -169,7 +164,7 @@ export const dllEcs = {
       normalize: [],
       original_fieldset: 'hash',
       short: 'SHA256 hash.',
-      type: 'keyword',
+      type: 'keyword'
     },
     sha384: {
       dashed_name: 'dll-hash-sha384',
@@ -181,7 +176,7 @@ export const dllEcs = {
       normalize: [],
       original_fieldset: 'hash',
       short: 'SHA384 hash.',
-      type: 'keyword',
+      type: 'keyword'
     },
     sha512: {
       dashed_name: 'dll-hash-sha512',
@@ -193,7 +188,7 @@ export const dllEcs = {
       normalize: [],
       original_fieldset: 'hash',
       short: 'SHA512 hash.',
-      type: 'keyword',
+      type: 'keyword'
     },
     ssdeep: {
       dashed_name: 'dll-hash-ssdeep',
@@ -205,7 +200,7 @@ export const dllEcs = {
       normalize: [],
       original_fieldset: 'hash',
       short: 'SSDEEP hash.',
-      type: 'keyword',
+      type: 'keyword'
     },
     tlsh: {
       dashed_name: 'dll-hash-tlsh',
@@ -217,12 +212,13 @@ export const dllEcs = {
       normalize: [],
       original_fieldset: 'hash',
       short: 'TLSH hash.',
-      type: 'keyword',
-    },
+      type: 'keyword'
+    }
   },
   name: {
     dashed_name: 'dll-name',
-    description: 'Name of the library.\n' + 'This generally maps to the name of the file on disk.',
+    description: 'Name of the library.\n' +
+      'This generally maps to the name of the file on disk.',
     example: 'kernel32.dll',
     flat_name: 'dll.name',
     ignore_above: 1024,
@@ -230,7 +226,7 @@ export const dllEcs = {
     name: 'name',
     normalize: [],
     short: 'Name of the library.',
-    type: 'keyword',
+    type: 'keyword'
   },
   path: {
     dashed_name: 'dll-path',
@@ -242,7 +238,7 @@ export const dllEcs = {
     name: 'path',
     normalize: [],
     short: 'Full file path of the library.',
-    type: 'keyword',
+    type: 'keyword'
   },
   pe: {
     architecture: {
@@ -256,7 +252,7 @@ export const dllEcs = {
       normalize: [],
       original_fieldset: 'pe',
       short: 'CPU architecture target for the file.',
-      type: 'keyword',
+      type: 'keyword'
     },
     company: {
       dashed_name: 'dll-pe-company',
@@ -269,7 +265,7 @@ export const dllEcs = {
       normalize: [],
       original_fieldset: 'pe',
       short: 'Internal company name of the file, provided at compile-time.',
-      type: 'keyword',
+      type: 'keyword'
     },
     description: {
       dashed_name: 'dll-pe-description',
@@ -282,7 +278,7 @@ export const dllEcs = {
       normalize: [],
       original_fieldset: 'pe',
       short: 'Internal description of the file, provided at compile-time.',
-      type: 'keyword',
+      type: 'keyword'
     },
     file_version: {
       dashed_name: 'dll-pe-file-version',
@@ -295,12 +291,11 @@ export const dllEcs = {
       normalize: [],
       original_fieldset: 'pe',
       short: 'Process name.',
-      type: 'keyword',
+      type: 'keyword'
     },
     imphash: {
       dashed_name: 'dll-pe-imphash',
-      description:
-        'A hash of the imports in a PE file. An imphash -- or import hash -- can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.\n' +
+      description: 'A hash of the imports in a PE file. An imphash -- or import hash -- can be used to fingerprint binaries even after recompilation or other code-level transformations have occurred, which would change more traditional hash values.\n' +
         'Learn more at https://www.fireeye.com/blog/threat-research/2014/01/tracking-malware-import-hashing.html.',
       example: '0c6803c4e922103c4dca5963aad36ddf',
       flat_name: 'dll.pe.imphash',
@@ -310,7 +305,7 @@ export const dllEcs = {
       normalize: [],
       original_fieldset: 'pe',
       short: 'A hash of the imports in a PE file.',
-      type: 'keyword',
+      type: 'keyword'
     },
     original_file_name: {
       dashed_name: 'dll-pe-original-file-name',
@@ -323,12 +318,11 @@ export const dllEcs = {
       normalize: [],
       original_fieldset: 'pe',
       short: 'Internal name of the file, provided at compile-time.',
-      type: 'keyword',
+      type: 'keyword'
     },
     pehash: {
       dashed_name: 'dll-pe-pehash',
-      description:
-        'A hash of the PE header and data from one or more PE sections. An pehash can be used to cluster files by transforming structural information about a file into a hash value.\n' +
+      description: 'A hash of the PE header and data from one or more PE sections. An pehash can be used to cluster files by transforming structural information about a file into a hash value.\n' +
         'Learn more at https://www.usenix.org/legacy/events/leet09/tech/full_papers/wicherski/wicherski_html/index.html.',
       example: '73ff189b63cd6be375a7ff25179a38d347651975',
       flat_name: 'dll.pe.pehash',
@@ -338,7 +332,7 @@ export const dllEcs = {
       normalize: [],
       original_fieldset: 'pe',
       short: 'A hash of the PE header and data from one or more PE sections.',
-      type: 'keyword',
+      type: 'keyword'
     },
     product: {
       dashed_name: 'dll-pe-product',
@@ -351,7 +345,7 @@ export const dllEcs = {
       normalize: [],
       original_fieldset: 'pe',
       short: 'Internal product name of the file, provided at compile-time.',
-      type: 'keyword',
-    },
-  },
-};
+      type: 'keyword'
+    }
+  }
+}

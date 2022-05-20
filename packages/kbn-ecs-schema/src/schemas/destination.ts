@@ -1,16 +1,16 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
+* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+* or more contributor license agreements. Licensed under the Elastic License
+* 2.0 and the Server Side Public License, v 1; you may not use this file except
+* in compliance with, at your election, the Elastic License 2.0 or the Server
+* Side Public License, v 1.
+*/
 
+/* eslint-disable */
 export const destinationEcs = {
   address: {
     dashed_name: 'destination-address',
-    description:
-      'Some event destination addresses are defined ambiguously. The event will sometimes list an IP, a domain or a unix socket.  You should always store the raw address in the `.address` field.\n' +
+    description: 'Some event destination addresses are defined ambiguously. The event will sometimes list an IP, a domain or a unix socket.  You should always store the raw address in the `.address` field.\n' +
       'Then it should be duplicated to `.ip` or `.domain`, depending on which one it is.',
     flat_name: 'destination.address',
     ignore_above: 1024,
@@ -18,13 +18,12 @@ export const destinationEcs = {
     name: 'address',
     normalize: [],
     short: 'Destination network address.',
-    type: 'keyword',
+    type: 'keyword'
   },
   as: {
     number: {
       dashed_name: 'destination-as-number',
-      description:
-        'Unique number allocated to the autonomous system. The autonomous system number (ASN) uniquely identifies each network on the Internet.',
+      description: 'Unique number allocated to the autonomous system. The autonomous system number (ASN) uniquely identifies each network on the Internet.',
       example: 15169,
       flat_name: 'destination.as.number',
       level: 'extended',
@@ -32,7 +31,7 @@ export const destinationEcs = {
       normalize: [],
       original_fieldset: 'as',
       short: 'Unique number allocated to the autonomous system.',
-      type: 'long',
+      type: 'long'
     },
     organization: {
       name: {
@@ -46,16 +45,16 @@ export const destinationEcs = {
           {
             flat_name: 'destination.as.organization.name.text',
             name: 'text',
-            type: 'match_only_text',
-          },
+            type: 'match_only_text'
+          }
         ],
         name: 'organization.name',
         normalize: [],
         original_fieldset: 'as',
         short: 'Organization name.',
-        type: 'keyword',
-      },
-    },
+        type: 'keyword'
+      }
+    }
   },
   bytes: {
     dashed_name: 'destination-bytes',
@@ -67,12 +66,11 @@ export const destinationEcs = {
     name: 'bytes',
     normalize: [],
     short: 'Bytes sent from the destination to the source.',
-    type: 'long',
+    type: 'long'
   },
   domain: {
     dashed_name: 'destination-domain',
-    description:
-      'The domain name of the destination system.\n' +
+    description: 'The domain name of the destination system.\n' +
       'This value may be a host name, a fully qualified domain name, or another host naming format. The value may derive from the original event or be added from enrichment.',
     example: 'foo.example.com',
     flat_name: 'destination.domain',
@@ -81,7 +79,7 @@ export const destinationEcs = {
     name: 'domain',
     normalize: [],
     short: 'The domain name of the destination.',
-    type: 'keyword',
+    type: 'keyword'
   },
   geo: {
     city_name: {
@@ -95,7 +93,7 @@ export const destinationEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'City name.',
-      type: 'keyword',
+      type: 'keyword'
     },
     continent_code: {
       dashed_name: 'destination-geo-continent-code',
@@ -108,7 +106,7 @@ export const destinationEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'Continent code.',
-      type: 'keyword',
+      type: 'keyword'
     },
     continent_name: {
       dashed_name: 'destination-geo-continent-name',
@@ -121,7 +119,7 @@ export const destinationEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'Name of the continent.',
-      type: 'keyword',
+      type: 'keyword'
     },
     country_iso_code: {
       dashed_name: 'destination-geo-country-iso-code',
@@ -134,7 +132,7 @@ export const destinationEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'Country ISO code.',
-      type: 'keyword',
+      type: 'keyword'
     },
     country_name: {
       dashed_name: 'destination-geo-country-name',
@@ -147,7 +145,7 @@ export const destinationEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'Country name.',
-      type: 'keyword',
+      type: 'keyword'
     },
     location: {
       dashed_name: 'destination-geo-location',
@@ -159,12 +157,11 @@ export const destinationEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'Longitude and latitude.',
-      type: 'geo_point',
+      type: 'geo_point'
     },
     name: {
       dashed_name: 'destination-geo-name',
-      description:
-        'User-defined description of a location, at the level of granularity they care about.\n' +
+      description: 'User-defined description of a location, at the level of granularity they care about.\n' +
         'Could be the name of their data centers, the floor number, if this describes a local physical entity, city names.\n' +
         'Not typically used in automated geolocation.',
       example: 'boston-dc',
@@ -175,12 +172,11 @@ export const destinationEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'User-defined description of a location.',
-      type: 'keyword',
+      type: 'keyword'
     },
     postal_code: {
       dashed_name: 'destination-geo-postal-code',
-      description:
-        'Postal code associated with the location.\n' +
+      description: 'Postal code associated with the location.\n' +
         'Values appropriate for this field may also be known as a postcode or ZIP code and will vary widely from country to country.',
       example: 94040,
       flat_name: 'destination.geo.postal_code',
@@ -190,7 +186,7 @@ export const destinationEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'Postal code.',
-      type: 'keyword',
+      type: 'keyword'
     },
     region_iso_code: {
       dashed_name: 'destination-geo-region-iso-code',
@@ -203,7 +199,7 @@ export const destinationEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'Region ISO code.',
-      type: 'keyword',
+      type: 'keyword'
     },
     region_name: {
       dashed_name: 'destination-geo-region-name',
@@ -216,7 +212,7 @@ export const destinationEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'Region name.',
-      type: 'keyword',
+      type: 'keyword'
     },
     timezone: {
       dashed_name: 'destination-geo-timezone',
@@ -229,8 +225,8 @@ export const destinationEcs = {
       normalize: [],
       original_fieldset: 'geo',
       short: 'Time zone.',
-      type: 'keyword',
-    },
+      type: 'keyword'
+    }
   },
   ip: {
     dashed_name: 'destination-ip',
@@ -240,12 +236,11 @@ export const destinationEcs = {
     name: 'ip',
     normalize: [],
     short: 'IP address of the destination.',
-    type: 'ip',
+    type: 'ip'
   },
   mac: {
     dashed_name: 'destination-mac',
-    description:
-      'MAC address of the destination.\n' +
+    description: 'MAC address of the destination.\n' +
       'The notation format from RFC 7042 is suggested: Each octet (that is, 8-bit byte) is represented by two [uppercase] hexadecimal digits giving the value of the octet as an unsigned integer. Successive octets are separated by a hyphen.',
     example: '00-00-5E-00-53-23',
     flat_name: 'destination.mac',
@@ -255,25 +250,23 @@ export const destinationEcs = {
     normalize: [],
     pattern: '^[A-F0-9]{2}(-[A-F0-9]{2}){5,}$',
     short: 'MAC address of the destination.',
-    type: 'keyword',
+    type: 'keyword'
   },
   nat: {
     ip: {
       dashed_name: 'destination-nat-ip',
-      description:
-        'Translated ip of destination based NAT sessions (e.g. internet to private DMZ)\n' +
+      description: 'Translated ip of destination based NAT sessions (e.g. internet to private DMZ)\n' +
         'Typically used with load balancers, firewalls, or routers.',
       flat_name: 'destination.nat.ip',
       level: 'extended',
       name: 'nat.ip',
       normalize: [],
       short: 'Destination NAT ip',
-      type: 'ip',
+      type: 'ip'
     },
     port: {
       dashed_name: 'destination-nat-port',
-      description:
-        'Port the source session is translated to by NAT Device.\n' +
+      description: 'Port the source session is translated to by NAT Device.\n' +
         'Typically used with load balancers, firewalls, or routers.',
       flat_name: 'destination.nat.port',
       format: 'string',
@@ -281,8 +274,8 @@ export const destinationEcs = {
       name: 'nat.port',
       normalize: [],
       short: 'Destination NAT Port',
-      type: 'long',
-    },
+      type: 'long'
+    }
   },
   packets: {
     dashed_name: 'destination-packets',
@@ -293,7 +286,7 @@ export const destinationEcs = {
     name: 'packets',
     normalize: [],
     short: 'Packets sent from the destination to the source.',
-    type: 'long',
+    type: 'long'
   },
   port: {
     dashed_name: 'destination-port',
@@ -304,12 +297,11 @@ export const destinationEcs = {
     name: 'port',
     normalize: [],
     short: 'Port of the destination.',
-    type: 'long',
+    type: 'long'
   },
   registered_domain: {
     dashed_name: 'destination-registered-domain',
-    description:
-      'The highest registered destination domain, stripped of the subdomain.\n' +
+    description: 'The highest registered destination domain, stripped of the subdomain.\n' +
       'For example, the registered domain for "foo.example.com" is "example.com".\n' +
       'This value can be determined precisely with a list like the public suffix list (http://publicsuffix.org). Trying to approximate this by simply taking the last two labels will not work well for TLDs such as "co.uk".',
     example: 'example.com',
@@ -319,12 +311,11 @@ export const destinationEcs = {
     name: 'registered_domain',
     normalize: [],
     short: 'The highest registered destination domain, stripped of the subdomain.',
-    type: 'keyword',
+    type: 'keyword'
   },
   subdomain: {
     dashed_name: 'destination-subdomain',
-    description:
-      'The subdomain portion of a fully qualified domain name includes all of the names except the host name under the registered_domain.  In a partially qualified domain, or if the the qualification level of the full name cannot be determined, subdomain contains all of the names below the registered domain.\n' +
+    description: 'The subdomain portion of a fully qualified domain name includes all of the names except the host name under the registered_domain.  In a partially qualified domain, or if the the qualification level of the full name cannot be determined, subdomain contains all of the names below the registered domain.\n' +
       'For example the subdomain portion of "www.east.mydomain.co.uk" is "east". If the domain has multiple levels of subdomain, such as "sub2.sub1.example.com", the subdomain field should contain "sub2.sub1", with no trailing period.',
     example: 'east',
     flat_name: 'destination.subdomain',
@@ -333,12 +324,11 @@ export const destinationEcs = {
     name: 'subdomain',
     normalize: [],
     short: 'The subdomain of the domain.',
-    type: 'keyword',
+    type: 'keyword'
   },
   top_level_domain: {
     dashed_name: 'destination-top-level-domain',
-    description:
-      'The effective top level domain (eTLD), also known as the domain suffix, is the last part of the domain name. For example, the top level domain for example.com is "com".\n' +
+    description: 'The effective top level domain (eTLD), also known as the domain suffix, is the last part of the domain name. For example, the top level domain for example.com is "com".\n' +
       'This value can be determined precisely with a list like the public suffix list (http://publicsuffix.org). Trying to approximate this by simply taking the last label will not work well for effective TLDs such as "co.uk".',
     example: 'co.uk',
     flat_name: 'destination.top_level_domain',
@@ -347,13 +337,12 @@ export const destinationEcs = {
     name: 'top_level_domain',
     normalize: [],
     short: 'The effective top level domain (com, org, net, co.uk).',
-    type: 'keyword',
+    type: 'keyword'
   },
   user: {
     domain: {
       dashed_name: 'destination-user-domain',
-      description:
-        'Name of the directory the user is a member of.\n' +
+      description: 'Name of the directory the user is a member of.\n' +
         'For example, an LDAP or Active Directory domain name.',
       flat_name: 'destination.user.domain',
       ignore_above: 1024,
@@ -362,7 +351,7 @@ export const destinationEcs = {
       normalize: [],
       original_fieldset: 'user',
       short: 'Name of the directory the user is a member of.',
-      type: 'keyword',
+      type: 'keyword'
     },
     email: {
       dashed_name: 'destination-user-email',
@@ -374,7 +363,7 @@ export const destinationEcs = {
       normalize: [],
       original_fieldset: 'user',
       short: 'User email address.',
-      type: 'keyword',
+      type: 'keyword'
     },
     full_name: {
       dashed_name: 'destination-user-full-name',
@@ -387,20 +376,19 @@ export const destinationEcs = {
         {
           flat_name: 'destination.user.full_name.text',
           name: 'text',
-          type: 'match_only_text',
-        },
+          type: 'match_only_text'
+        }
       ],
       name: 'full_name',
       normalize: [],
       original_fieldset: 'user',
       short: "User's full name, if available.",
-      type: 'keyword',
+      type: 'keyword'
     },
     group: {
       domain: {
         dashed_name: 'destination-user-group-domain',
-        description:
-          'Name of the directory the group is a member of.\n' +
+        description: 'Name of the directory the group is a member of.\n' +
           'For example, an LDAP or Active Directory domain name.',
         flat_name: 'destination.user.group.domain',
         ignore_above: 1024,
@@ -409,7 +397,7 @@ export const destinationEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Name of the directory the group is a member of.',
-        type: 'keyword',
+        type: 'keyword'
       },
       id: {
         dashed_name: 'destination-user-group-id',
@@ -421,7 +409,7 @@ export const destinationEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Unique identifier for the group on the system/platform.',
-        type: 'keyword',
+        type: 'keyword'
       },
       name: {
         dashed_name: 'destination-user-group-name',
@@ -433,13 +421,12 @@ export const destinationEcs = {
         normalize: [],
         original_fieldset: 'group',
         short: 'Name of the group.',
-        type: 'keyword',
-      },
+        type: 'keyword'
+      }
     },
     hash: {
       dashed_name: 'destination-user-hash',
-      description:
-        'Unique user hash to correlate information for a user in anonymized form.\n' +
+      description: 'Unique user hash to correlate information for a user in anonymized form.\n' +
         'Useful if `user.id` or `user.name` contain confidential information and cannot be used.',
       flat_name: 'destination.user.hash',
       ignore_above: 1024,
@@ -448,7 +435,7 @@ export const destinationEcs = {
       normalize: [],
       original_fieldset: 'user',
       short: 'Unique user hash to correlate information for a user in anonymized form.',
-      type: 'keyword',
+      type: 'keyword'
     },
     id: {
       dashed_name: 'destination-user-id',
@@ -461,7 +448,7 @@ export const destinationEcs = {
       normalize: [],
       original_fieldset: 'user',
       short: 'Unique identifier of the user.',
-      type: 'keyword',
+      type: 'keyword'
     },
     name: {
       dashed_name: 'destination-user-name',
@@ -474,14 +461,14 @@ export const destinationEcs = {
         {
           flat_name: 'destination.user.name.text',
           name: 'text',
-          type: 'match_only_text',
-        },
+          type: 'match_only_text'
+        }
       ],
       name: 'name',
       normalize: [],
       original_fieldset: 'user',
       short: 'Short name or login of the user.',
-      type: 'keyword',
+      type: 'keyword'
     },
     roles: {
       dashed_name: 'destination-user-roles',
@@ -491,10 +478,10 @@ export const destinationEcs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'roles',
-      normalize: ['array'],
+      normalize: [ 'array' ],
       original_fieldset: 'user',
       short: 'Array of user roles at the time of the event.',
-      type: 'keyword',
-    },
-  },
-};
+      type: 'keyword'
+    }
+  }
+}

@@ -1,11 +1,12 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
+* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+* or more contributor license agreements. Licensed under the Elastic License
+* 2.0 and the Server Side Public License, v 1; you may not use this file except
+* in compliance with, at your election, the Elastic License 2.0 or the Server
+* Side Public License, v 1.
+*/
 
+/* eslint-disable */
 export const hashEcs = {
   md5: {
     dashed_name: 'hash-md5',
@@ -16,7 +17,7 @@ export const hashEcs = {
     name: 'md5',
     normalize: [],
     short: 'MD5 hash.',
-    type: 'keyword',
+    type: 'keyword'
   },
   sha1: {
     dashed_name: 'hash-sha1',
@@ -27,7 +28,7 @@ export const hashEcs = {
     name: 'sha1',
     normalize: [],
     short: 'SHA1 hash.',
-    type: 'keyword',
+    type: 'keyword'
   },
   sha256: {
     dashed_name: 'hash-sha256',
@@ -38,7 +39,7 @@ export const hashEcs = {
     name: 'sha256',
     normalize: [],
     short: 'SHA256 hash.',
-    type: 'keyword',
+    type: 'keyword'
   },
   sha384: {
     dashed_name: 'hash-sha384',
@@ -49,7 +50,7 @@ export const hashEcs = {
     name: 'sha384',
     normalize: [],
     short: 'SHA384 hash.',
-    type: 'keyword',
+    type: 'keyword'
   },
   sha512: {
     dashed_name: 'hash-sha512',
@@ -60,7 +61,7 @@ export const hashEcs = {
     name: 'sha512',
     normalize: [],
     short: 'SHA512 hash.',
-    type: 'keyword',
+    type: 'keyword'
   },
   ssdeep: {
     dashed_name: 'hash-ssdeep',
@@ -71,7 +72,7 @@ export const hashEcs = {
     name: 'ssdeep',
     normalize: [],
     short: 'SSDEEP hash.',
-    type: 'keyword',
+    type: 'keyword'
   },
   tlsh: {
     dashed_name: 'hash-tlsh',
@@ -82,6 +83,6 @@ export const hashEcs = {
     name: 'tlsh',
     normalize: [],
     short: 'TLSH hash.',
-    type: 'keyword',
-  },
-};
+    type: 'keyword'
+  }
+}

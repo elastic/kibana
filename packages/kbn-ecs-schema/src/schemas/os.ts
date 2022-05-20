@@ -1,11 +1,12 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
+* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+* or more contributor license agreements. Licensed under the Elastic License
+* 2.0 and the Server Side Public License, v 1; you may not use this file except
+* in compliance with, at your election, the Elastic License 2.0 or the Server
+* Side Public License, v 1.
+*/
 
+/* eslint-disable */
 export const osEcs = {
   family: {
     dashed_name: 'os-family',
@@ -17,7 +18,7 @@ export const osEcs = {
     name: 'family',
     normalize: [],
     short: 'OS family (such as redhat, debian, freebsd, windows).',
-    type: 'keyword',
+    type: 'keyword'
   },
   full: {
     dashed_name: 'os-full',
@@ -30,13 +31,13 @@ export const osEcs = {
       {
         flat_name: 'os.full.text',
         name: 'text',
-        type: 'match_only_text',
-      },
+        type: 'match_only_text'
+      }
     ],
     name: 'full',
     normalize: [],
     short: 'Operating system name, including the version or code name.',
-    type: 'keyword',
+    type: 'keyword'
   },
   kernel: {
     dashed_name: 'os-kernel',
@@ -48,7 +49,7 @@ export const osEcs = {
     name: 'kernel',
     normalize: [],
     short: 'Operating system kernel version as a raw string.',
-    type: 'keyword',
+    type: 'keyword'
   },
   name: {
     dashed_name: 'os-name',
@@ -61,13 +62,13 @@ export const osEcs = {
       {
         flat_name: 'os.name.text',
         name: 'text',
-        type: 'match_only_text',
-      },
+        type: 'match_only_text'
+      }
     ],
     name: 'name',
     normalize: [],
     short: 'Operating system name, without the version.',
-    type: 'keyword',
+    type: 'keyword'
   },
   platform: {
     dashed_name: 'os-platform',
@@ -79,12 +80,11 @@ export const osEcs = {
     name: 'platform',
     normalize: [],
     short: 'Operating system platform (such centos, ubuntu, windows).',
-    type: 'keyword',
+    type: 'keyword'
   },
   type: {
     dashed_name: 'os-type',
-    description:
-      'Use the `os.type` field to categorize the operating system into one of the broad commercial families.\n' +
+    description: 'Use the `os.type` field to categorize the operating system into one of the broad commercial families.\n' +
       'One of these following values should be used (lowercase): linux, macos, unix, windows.\n' +
       "If the OS you're dealing with is not in the list, the field should not be populated. Please let us know by opening an issue with ECS, to propose its addition.",
     example: 'macos',
@@ -94,7 +94,7 @@ export const osEcs = {
     name: 'type',
     normalize: [],
     short: 'Which commercial OS family (one of: linux, macos, unix or windows).',
-    type: 'keyword',
+    type: 'keyword'
   },
   version: {
     dashed_name: 'os-version',
@@ -106,6 +106,6 @@ export const osEcs = {
     name: 'version',
     normalize: [],
     short: 'Operating system version as a raw string.',
-    type: 'keyword',
-  },
-};
+    type: 'keyword'
+  }
+}
