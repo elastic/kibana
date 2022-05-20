@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
+import type { DocLinks } from '@kbn/doc-links';
 import type { ConfigDeprecationContext } from './types';
 
 const createMockedContext = (): ConfigDeprecationContext => {
   return {
     branch: 'master',
     version: '8.0.0',
+    docLinks: {} as DocLinks,
   };
 };
 

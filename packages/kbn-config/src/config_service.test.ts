@@ -9,7 +9,12 @@
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first, take } from 'rxjs/operators';
 
-import { mockApplyDeprecations, mockedChangedPaths } from './config_service.test.mocks';
+import {
+  mockApplyDeprecations,
+  mockedChangedPaths,
+  docLinksMock,
+  getDocLinksMock,
+} from './config_service.test.mocks';
 import { rawConfigServiceMock } from './raw/raw_config_service.mock';
 
 import { schema } from '@kbn/config-schema';
@@ -39,6 +44,7 @@ const getRawConfigProvider = (rawConfig: Record<string, any>) =>
 beforeEach(() => {
   logger = loggerMock.create();
   mockApplyDeprecations.mockClear();
+  getDocLinksMock.mockClear();
 });
 
 test('returns config at path as observable', async () => {
@@ -469,6 +475,7 @@ test('calls `applyDeprecations` with the correct parameters', async () => {
   const context: ConfigDeprecationContext = {
     branch: defaultEnv.packageInfo.branch,
     version: defaultEnv.packageInfo.version,
+    docLinks: docLinksMock,
   };
 
   const deprecationA = jest.fn();
@@ -478,6 +485,8 @@ test('calls `applyDeprecations` with the correct parameters', async () => {
   configService.addDeprecationProvider('bar', () => [deprecationB]);
 
   await configService.validate();
+
+  expect(getDocLinksMock).toHaveBeenCalledTimes(1);
 
   expect(mockApplyDeprecations).toHaveBeenCalledTimes(1);
   expect(mockApplyDeprecations).toHaveBeenCalledWith(
