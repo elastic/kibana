@@ -157,8 +157,8 @@ describe('alert_form', () => {
 
     it('renders alert name', async () => {
       const alertNameField = wrapper.find('[data-test-subj="ruleNameInput"]');
-      expect(alertNameField.first().prop('value')).toBe('test');
       expect(alertNameField.exists()).toBeTruthy();
+      expect(alertNameField.first().prop('value')).toBe('test');
     });
 
     it('renders registered selected alert type', async () => {
