@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Logger, SavedObjectReference } from '@kbn/core/server';
+import { SavedObjectReference } from '@kbn/core/server';
+
 import {
   EqlRuleParams,
   QueryRuleParams,
@@ -14,19 +15,13 @@ import {
 } from '../../schemas/rule_schemas';
 
 /**
- * This extracts the "exceptionsList" "id" and returns it as a saved object reference.
- * NOTE: Due to rolling upgrades with migrations and a few bugs with migrations, I do an additional check for if "exceptionsList" exists or not. Once
- * those bugs are fixed, we can remove the "if (exceptionsList == null) {" check, but for the time being it is there to keep things running even
- * if exceptionsList has not been migrated.
- * @param logger The kibana injected logger
- * @param exceptionsList The exceptions list to get the id from and return it as a saved object reference.
- * @returns The saved object references from the exceptions list
+ * This extracts the "dataViewId" and returns it as a saved object reference.
+ * @param dataViewId The data view SO "id" to be returned as a saved object reference.
+ * @returns The saved object references from the specified data view
  */
 export const extractDataView = ({
-  logger,
   dataViewId,
 }: {
-  logger: Logger;
   dataViewId:
     | ThresholdRuleParams['dataViewId']
     | ThreatRuleParams['dataViewId']
@@ -35,7 +30,7 @@ export const extractDataView = ({
     | undefined
     | null;
 }): SavedObjectReference[] => {
-  if (dataViewId == null) {
+  if (dataViewId == null || dataViewId.trim() === '') {
     return [];
   } else {
     return [

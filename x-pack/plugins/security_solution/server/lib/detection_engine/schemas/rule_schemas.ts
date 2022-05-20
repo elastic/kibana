@@ -78,17 +78,6 @@ import { SERVER_APP_ID } from '../../../../common/constants';
 
 const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
 
-export const indexUndefOrDataViewUndef = t.intersection([
-  t.exact(
-    t.type({
-      index: indexOrUndefined,
-    })
-  ),
-  t.partial({ dataViewId: dataViewIdOrUndefined }),
-]);
-
-export type IndexUndefOrDataViewUndef = t.TypeOf<typeof indexUndefOrDataViewUndef>;
-
 export const baseRuleParams = t.exact(
   t.type({
     author,

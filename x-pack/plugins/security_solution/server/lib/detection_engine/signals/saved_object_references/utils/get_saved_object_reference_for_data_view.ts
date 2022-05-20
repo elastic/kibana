@@ -9,12 +9,11 @@ import { Logger, SavedObjectReference } from '@kbn/core/server';
 import { getSavedObjectReference } from './get_saved_object_reference';
 
 /**
- * Given an index and a saved object reference, this will return the specific "exceptionsList" saved object reference
+ * Given saved object references, this will return the data view saved object reference
  * even if it is mixed in with other reference objects. This is needed since a references array can contain multiple
- * types of saved objects in a single array, we have to use the "exceptionsList" name to get the value.
+ * types of saved objects in a single array
  * @param logger The kibana injected logger
- * @param index The index position to get for the exceptions list.
- * @param savedObjectReferences The saved object references which can contain "exceptionsList" mixed with other saved object types
+ * @param savedObjectReferences The saved object references which can contain "dataViewId" mixed with other saved object types
  * @returns The saved object reference if found, otherwise undefined
  */
 export const getSavedObjectReferenceForDataView = ({

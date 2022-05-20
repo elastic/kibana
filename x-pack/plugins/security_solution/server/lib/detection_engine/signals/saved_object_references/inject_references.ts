@@ -49,10 +49,12 @@ export const injectReferences = <TParams extends RuleParams>({
     exceptionsList: params.exceptionsList,
     savedObjectReferences,
   });
+
   let ruleParamsWithSavedObjectReferences: TParams = {
     ...params,
     exceptionsList,
   };
+
   if (
     isEqlRuleParams(params) ||
     isQueryRuleParams(params) ||

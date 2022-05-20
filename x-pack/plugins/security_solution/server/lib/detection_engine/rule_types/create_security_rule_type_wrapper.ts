@@ -144,10 +144,14 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             id: alertId,
           };
 
-          // Data views logic:
-          // All rules other than ML currently support data views OR
-          // index patterns. This checks for a few error states and also
-          // determines the index pattern to be used
+          /**
+           * Data Views Logic
+           * Use of data views is supported for all rules other than ML.
+           * Rules can define both a data view and index pattern, but on execution:
+           *  - Data view is used if it is defined
+           *    - Rule exits early if data view defined is not found (ie: it's been deleted)
+           *  - If no data view defined, falls to using existing index logic
+           */
           if (!isMachineLearningParams(params)) {
             try {
               const { index, runtimeMappings: dataViewRuntimeMappings } = await getInputIndex({

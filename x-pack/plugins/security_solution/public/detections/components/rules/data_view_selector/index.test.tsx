@@ -11,6 +11,8 @@ import { shallow } from 'enzyme';
 import { DataViewSelector } from '.';
 import { useFormFieldMock } from '../../../../common/mock';
 
+jest.mock('../../../../common/lib/kibana');
+
 describe('data_view_selector', () => {
   it('renders correctly', () => {
     const Component = () => {

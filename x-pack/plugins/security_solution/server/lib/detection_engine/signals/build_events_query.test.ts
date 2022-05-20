@@ -485,6 +485,7 @@ describe('create_signals', () => {
         body: {
           size: 100,
           query: 'process where true',
+          runtime_mappings: {},
           filter: {
             bool: {
               filter: [
@@ -532,6 +533,7 @@ describe('create_signals', () => {
           event_category_field: 'event.other_category',
           size: 100,
           query: 'process where true',
+          runtime_mappings: {},
           filter: {
             bool: {
               filter: [
@@ -613,6 +615,7 @@ describe('create_signals', () => {
         body: {
           size: 100,
           query: 'process where true',
+          runtime_mappings: {},
           filter: {
             bool: {
               filter: [

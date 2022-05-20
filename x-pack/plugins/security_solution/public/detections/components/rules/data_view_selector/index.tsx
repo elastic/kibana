@@ -66,6 +66,8 @@ export const DataViewSelector = ({
       : []
   );
 
+  const [selectedDataView, setSelectedDataView] = useState<DataViewListItem>();
+
   // TODO: optimize this, pass down array of data view ids
   // at the same time we grab the data views in the top level form component
   const dataViewOptions = useMemo(() => {
@@ -79,21 +81,26 @@ export const DataViewSelector = ({
 
   useEffect(() => {
     const fetchSingleDataView = async () => {
-      if (selectedOption != null) {
-        const dv = await data.dataViews.get(selectedOption.id);
+      if (selectedDataView != null) {
+        const dv = await data.dataViews.get(selectedDataView.id);
         setIndexPattern(dv);
       }
     };
 
     fetchSingleDataView();
-  }, [data.dataViews, selectedOption, setIndexPattern]);
+  }, [data.dataViews, selectedDataView, setIndexPattern]);
 
   const onChangeDataViews = async (options: Array<EuiComboBoxOptionOption<string>>) => {
-    const [selectedDataViewOption] = options;
+    const selectedDataViewOption = options;
 
-    if (selectedDataViewOption != null && selectedDataViewOption.id != null) {
-      setSelectedOption(options);
-      field?.setValue(selectedDataViewOption.id);
+    if (
+      selectedDataViewOption != null &&
+      selectedDataViewOption.length > 0 &&
+      selectedDataViewOption[0].id != null
+    ) {
+      setSelectedOption(selectedDataViewOption);
+      setSelectedDataView(kibanaDataViews[selectedDataViewOption[0].id]);
+      field?.setValue(selectedDataViewOption[0].id);
     }
   };
 

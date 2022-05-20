@@ -147,7 +147,6 @@ const baseParams = {
   },
   optional: {
     building_block_type,
-    data_view_id,
     note,
     license,
     outcome,
