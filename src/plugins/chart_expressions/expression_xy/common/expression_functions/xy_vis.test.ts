@@ -30,7 +30,7 @@ describe('xyVis', () => {
             }
       ),
     } as Datatable;
-    const { layers, markSizeRatio, ...rest } = args;
+    const { layers, ...rest } = args;
     const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
     const result = await xyVisFunction.fn(
       newData,

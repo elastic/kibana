@@ -14,7 +14,7 @@ import { XY_VIS } from '../constants';
 describe('layeredXyVis', () => {
   test('it renders with the specified data and args', async () => {
     const { data, args } = sampleArgs();
-    const { layers, markSizeRatio, ...rest } = args;
+    const { layers, ...rest } = args;
     const result = await layeredXyVisFunction.fn(
       data,
       { ...rest, layers: [sampleExtendedLayer] },
