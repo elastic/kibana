@@ -83,6 +83,7 @@ describe('syncMvtSourceData', () => {
       tileSourceLayer: 'aggs',
       tileUrl: 'https://example.com/{x}/{y}/{z}.pbf',
       refreshToken: '12345',
+      hasLabels: false,
     });
   });
 
