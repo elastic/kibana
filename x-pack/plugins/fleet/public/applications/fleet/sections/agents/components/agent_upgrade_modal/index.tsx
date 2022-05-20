@@ -190,7 +190,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
             />
           ) : isScheduled ? (
             <FormattedMessage
-              id="xpack.fleet.upgradeAgents.upgradeMultipleTitle"
+              id="xpack.fleet.upgradeAgents.scheduleUpgradeMultipleTitle"
               defaultMessage="Schedule upgrade for {count, plural, one {agent} other {{count} agents} =true {all selected agents}}"
               values={{ count: isAllAgents || agentCount }}
             />

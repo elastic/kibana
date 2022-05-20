@@ -49,7 +49,7 @@ export const CurrentBulkUpgradeCallout: React.FunctionComponent<CurrentBulkUpgra
 
   const calloutTitle = isScheduled ? (
     <FormattedMessage
-      id="xpack.fleet.currentUpgrade.calloutTitle"
+      id="xpack.fleet.currentUpgrade.scheduleCalloutTitle"
       defaultMessage="{nbAgents} agents scheduled to upgrade to version {version} on {date}"
       values={{
         nbAgents: currentUpgrade.nbAgents - currentUpgrade.nbAgentsAck,
