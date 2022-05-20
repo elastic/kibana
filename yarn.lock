@@ -41,6 +41,11 @@
     call-me-maybe "^1.0.1"
     z-schema "^5.0.1"
 
+"@appland/sql-parser@^1.5.1":
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/@appland/sql-parser/-/sql-parser-1.5.1.tgz#331d644364899858ba7aa6e884e2492596990626"
+  integrity sha512-R2FBHUOdzdBPUCCiL6WvXT9Fu+Xaj89exa1g+wMlatIe5z6vqitzLkY5a9zGDL3IByTiwbR0jiYuvFMfhp1Q+Q==
+
 "@babel/cli@^7.17.6":
   version "7.17.6"
   resolved "https://registry.yarnpkg.com/@babel/cli/-/cli-7.17.6.tgz#169e5935f1795f0b62ded5a2accafeedfe5c5363"
@@ -2986,6 +2991,18 @@
   uid ""
 
 "@kbn/datemath@link:bazel-bin/packages/kbn-datemath":
+  version "0.0.0"
+  uid ""
+
+"@kbn/dev-cli-errors@link:bazel-bin/packages/kbn-dev-cli-errors":
+  version "0.0.0"
+  uid ""
+
+"@kbn/dev-cli-runner@link:bazel-bin/packages/kbn-dev-cli-runner":
+  version "0.0.0"
+  uid ""
+
+"@kbn/dev-proc-runner@link:bazel-bin/packages/kbn-dev-proc-runner":
   version "0.0.0"
   uid ""
 
@@ -6105,6 +6122,18 @@
   uid ""
 
 "@types/kbn__datemath@link:bazel-bin/packages/kbn-datemath/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__dev-cli-errors@link:bazel-bin/packages/kbn-dev-cli-errors/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__dev-cli-runner@link:bazel-bin/packages/kbn-dev-cli-runner/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__dev-proc-runner@link:bazel-bin/packages/kbn-dev-proc-runner/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -10949,10 +10978,10 @@ core-js@^2.4.0, core-js@^2.5.0, core-js@^2.6.9:
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.6.9.tgz#6b4b214620c834152e179323727fc19741b084f2"
   integrity sha512-HOpZf6eXmnl7la+cUdMnLvUxKNqLUzJvgIziQ0DiF3JwSImNphIqdGqzj6hIKyX04MmV0poclQ7+wjWvxQyR2A==
 
-core-js@^3.0.4, core-js@^3.22.4, core-js@^3.6.5, core-js@^3.8.2, core-js@^3.8.3:
-  version "3.22.4"
-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.22.4.tgz#f4b3f108d45736935aa028444a69397e40d8c531"
-  integrity sha512-1uLykR+iOfYja+6Jn/57743gc9n73EWiOnSJJ4ba3B4fOEYDBv25MagmEZBxTp5cWq4b/KPx/l77zgsp28ju4w==
+core-js@^3.0.4, core-js@^3.22.5, core-js@^3.6.5, core-js@^3.8.2, core-js@^3.8.3:
+  version "3.22.5"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.22.5.tgz#a5f5a58e663d5c0ebb4e680cd7be37536fb2a9cf"
+  integrity sha512-VP/xYuvJ0MJWRAobcmQ8F2H6Bsn+s7zqAAjFaHGBMc5AQm7zaelhD1LGduFn2EehEcQcU+br6t+fwbpQ5d1ZWA==
 
 core-util-is@1.0.2, core-util-is@^1.0.2, core-util-is@~1.0.0:
   version "1.0.2"
@@ -18306,11 +18335,6 @@ js-sha3@0.8.0:
   version "0.8.0"
   resolved "https://registry.yarnpkg.com/js-sha3/-/js-sha3-0.8.0.tgz#b9b7a5da73afad7dedd0f8c463954cbde6818840"
   integrity sha512-gF1cRrHhIzNfToc802P800N8PpXS+evLLXfsVpowqmAFR9uwbi89WvXg2QspOmXL8QL86J4T1EpFu+yUkwJY3Q==
-
-js-sql-parser@^1.4.1:
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/js-sql-parser/-/js-sql-parser-1.4.1.tgz#775516b3187dd5872ecec04bef8ed4a430242fda"
-  integrity sha512-J8zi3+/yK4FWSnVvLOjS2HIGfJhR6v7ApwIF8gZ/SpaO/tFIDlsgugD6ZMn6flXiuMsCjJxvhE0+xBgbdzvDDw==
 
 js-string-escape@^1.0.1:
   version "1.0.1"
