@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { InferenceBase } from '../inference_base';
 import { processResponse } from './common';
 import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
