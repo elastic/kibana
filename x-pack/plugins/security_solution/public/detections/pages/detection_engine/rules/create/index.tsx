@@ -439,7 +439,7 @@ const CreateRulePageComponent: React.FC = () => {
         </EuiFlexGroup>
       </SecuritySolutionPageWrapper>
 
-      <SpyRoute pageName={SecurityPageName.rules} />
+      <SpyRoute pageName={SecurityPageName.rulesCreate} />
     </>
   );
 };
