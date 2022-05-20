@@ -28,10 +28,10 @@ export const registerCreateRoute = (router: IRouter, url: ServerUrlService) => {
           }),
           /**
            * @deprecated
-           * 
+           *
            * This field is deprecated as the API does not support automatic
            * human-readable slug generation.
-           * 
+           *
            * @todo This field will be removed in a future version. It is left
            * here for backwards compatibility.
            */
