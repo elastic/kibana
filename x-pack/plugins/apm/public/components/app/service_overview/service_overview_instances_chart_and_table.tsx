@@ -9,6 +9,7 @@ import { EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { orderBy } from 'lodash';
 import React, { useState } from 'react';
 import uuid from 'uuid';
+import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
@@ -109,7 +110,10 @@ export function ServiceOverviewInstancesChartAndTable({
               start,
               end,
               transactionType,
-              offset: comparisonEnabled ? offset : undefined,
+              offset:
+                comparisonEnabled && isTimeComparison(offset)
+                  ? offset
+                  : undefined,
             },
           },
         }
@@ -197,7 +201,10 @@ export function ServiceOverviewInstancesChartAndTable({
               serviceNodeIds: JSON.stringify(
                 currentPeriodOrderedItems.map((item) => item.serviceNodeName)
               ),
-              offset: comparisonEnabled ? offset : undefined,
+              offset:
+                comparisonEnabled && isTimeComparison(offset)
+                  ? offset
+                  : undefined,
             },
           },
         }

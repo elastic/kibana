@@ -6,6 +6,7 @@
  */
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { asTransactionRate } from '../../../../common/utils/formatters';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -47,7 +48,10 @@ export function BackendThroughputChart({ height }: { height: number }) {
             backendName,
             start,
             end,
-            offset: comparisonEnabled ? offset : undefined,
+            offset:
+              comparisonEnabled && isTimeComparison(offset)
+                ? offset
+                : undefined,
             kuery,
             environment,
           },

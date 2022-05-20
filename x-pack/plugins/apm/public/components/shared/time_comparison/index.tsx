@@ -11,13 +11,16 @@ import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useUiTracker } from '@kbn/observability-plugin/public';
-import { ML_EXPECTED_BOUNDS } from '../../../../common/comparison_rt';
+import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import * as urlHelpers from '../links/url_helpers';
-import { getComparisonOptions } from './get_comparison_options';
+import {
+  getComparisonOptions,
+  TimeRangeComparisonEnum,
+} from './get_comparison_options';
 
 const PrependContainer = euiStyled.div`
   display: flex;
@@ -33,33 +36,58 @@ export function TimeComparison() {
   const history = useHistory();
   const { isSmall } = useBreakpoints();
   const {
-    query: { rangeFrom, rangeTo, comparisonEnabled, offset },
+    query: { rangeFrom, rangeTo, comparisonEnabled, offset, environment },
   } = useAnyOfApmParams('/services', '/backends/*', '/services/{serviceName}');
+
+  const { anomalyDetectionJobsStatus, anomalyDetectionJobsData } =
+    useAnomalyDetectionJobsContext();
   const { core } = useApmPluginContext();
-  const canGetJobs = !!core.application.capabilities.ml?.canGetJobs;
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
+  const canGetJobs = !!core.application.capabilities.ml?.canGetJobs;
   const comparisonOptions = useMemo(() => {
     const timeComparisonOptions = getComparisonOptions({ start, end });
 
+    const hasMLJobsMatchingEnv =
+      canGetJobs &&
+      anomalyDetectionJobsStatus === 'success' &&
+      Array.isArray(anomalyDetectionJobsData?.jobs) &&
+      anomalyDetectionJobsData?.jobs.some((j) => j.environment === environment);
+
     if (canGetJobs) {
       timeComparisonOptions.push({
-        value: ML_EXPECTED_BOUNDS,
+        value: TimeRangeComparisonEnum.ExpectedBounds,
         text: i18n.translate('xpack.apm.comparison.mlExpectedBounds', {
           defaultMessage: 'Expected bounds',
         }),
+        disabled: !hasMLJobsMatchingEnv,
       });
     }
     return timeComparisonOptions;
-  }, [canGetJobs, start, end]);
+  }, [
+    canGetJobs,
+    anomalyDetectionJobsStatus,
+    anomalyDetectionJobsData?.jobs,
+    start,
+    end,
+    environment,
+  ]);
 
   const isSelectedComparisonTypeAvailable = comparisonOptions.some(
     ({ value }) => value === offset
   );
 
   // Replaces type when current one is no longer available in the select options
-  if (comparisonOptions.length !== 0 && !isSelectedComparisonTypeAvailable) {
+  if (
+    (comparisonOptions.length !== 0 && !isSelectedComparisonTypeAvailable) ||
+    // If user changes environment and there's no ML jobs that match the new environment
+    // then also default to first comparison option as well
+    (offset === TimeRangeComparisonEnum.ExpectedBounds &&
+      comparisonOptions.find(
+        (d) => d.value === TimeRangeComparisonEnum.ExpectedBounds
+      )?.disabled === true)
+  ) {
     urlHelpers.replace(history, {
       query: { offset: comparisonOptions[0].value },
     });
@@ -72,9 +100,7 @@ export function TimeComparison() {
       data-test-subj="comparisonSelect"
       disabled={comparisonEnabled === false}
       options={comparisonOptions}
-      value={
-        comparisonEnabled === ML_EXPECTED_BOUNDS ? ML_EXPECTED_BOUNDS : offset
-      }
+      value={offset}
       prepend={
         <PrependContainer>
           <EuiCheckbox
@@ -82,9 +108,7 @@ export function TimeComparison() {
             label={i18n.translate('xpack.apm.timeComparison.label', {
               defaultMessage: 'Comparison',
             })}
-            checked={
-              comparisonEnabled === true || comparisonEnabled === 'mlBounds'
-            }
+            checked={comparisonEnabled}
             onChange={() => {
               const nextComparisonEnabledValue = !comparisonEnabled;
               if (nextComparisonEnabledValue === false) {
@@ -107,20 +131,11 @@ export function TimeComparison() {
         trackApmEvent({
           metric: `time_comparison_type_change_${e.target.value}`,
         });
-        if (e.target.value === ML_EXPECTED_BOUNDS) {
-          urlHelpers.push(history, {
-            query: {
-              comparisonEnabled: ML_EXPECTED_BOUNDS,
-            },
-          });
-        } else {
-          urlHelpers.push(history, {
-            query: {
-              comparisonEnabled: 'true',
-              offset: e.target.value,
-            },
-          });
-        }
+        urlHelpers.push(history, {
+          query: {
+            offset: e.target.value,
+          },
+        });
       }}
     />
   );

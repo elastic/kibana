@@ -13,7 +13,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
 import { ActionMenu } from '@kbn/observability-plugin/public';
-import type { ComparisonEnabled } from '../../../../../common/comparison_rt';
+import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { isJavaAgentName } from '../../../../../common/agent_name';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import {
@@ -56,6 +56,7 @@ export function getColumns({
   itemIdToExpandedRowMap,
   toggleRowActionMenu,
   itemIdToOpenActionMenuRowMap,
+  offset,
   shouldShowSparkPlots = true,
 }: {
   serviceName: string;
@@ -64,7 +65,8 @@ export function getColumns({
   latencyAggregationType?: LatencyAggregationType;
   detailedStatsLoading: boolean;
   detailedStatsData?: ServiceInstanceDetailedStatistics;
-  comparisonEnabled?: ComparisonEnabled;
+  comparisonEnabled?: boolean;
+  offset?: string;
   toggleRowDetails: (selectedServiceNodeName: string) => void;
   itemIdToExpandedRowMap: Record<string, ReactNode>;
   toggleRowActionMenu: (selectedServiceNodeName: string) => void;
@@ -131,7 +133,9 @@ export function getColumns({
             isLoading={detailedStatsLoading}
             series={currentPeriodTimestamp}
             comparisonSeries={
-              comparisonEnabled ? previousPeriodTimestamp : undefined
+              comparisonEnabled && isTimeComparison(offset)
+                ? previousPeriodTimestamp
+                : undefined
             }
             comparisonSeriesColor={previousPeriodColor}
           />
@@ -165,7 +169,9 @@ export function getColumns({
             isLoading={detailedStatsLoading}
             series={currentPeriodTimestamp}
             comparisonSeries={
-              comparisonEnabled ? previousPeriodTimestamp : undefined
+              comparisonEnabled && isTimeComparison(offset)
+                ? previousPeriodTimestamp
+                : undefined
             }
             comparisonSeriesColor={previousPeriodColor}
           />
@@ -199,7 +205,9 @@ export function getColumns({
             isLoading={detailedStatsLoading}
             series={currentPeriodTimestamp}
             comparisonSeries={
-              comparisonEnabled ? previousPeriodTimestamp : undefined
+              comparisonEnabled && isTimeComparison(offset)
+                ? previousPeriodTimestamp
+                : undefined
             }
             comparisonSeriesColor={previousPeriodColor}
           />
@@ -233,7 +241,9 @@ export function getColumns({
             isLoading={detailedStatsLoading}
             series={currentPeriodTimestamp}
             comparisonSeries={
-              comparisonEnabled ? previousPeriodTimestamp : undefined
+              comparisonEnabled && isTimeComparison(offset)
+                ? previousPeriodTimestamp
+                : undefined
             }
             comparisonSeriesColor={previousPeriodColor}
           />
@@ -267,7 +277,9 @@ export function getColumns({
             isLoading={detailedStatsLoading}
             series={currentPeriodTimestamp}
             comparisonSeries={
-              comparisonEnabled ? previousPeriodTimestamp : undefined
+              comparisonEnabled && isTimeComparison(offset)
+                ? previousPeriodTimestamp
+                : undefined
             }
             comparisonSeriesColor={previousPeriodColor}
           />

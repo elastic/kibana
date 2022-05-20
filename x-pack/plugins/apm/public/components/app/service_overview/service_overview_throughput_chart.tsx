@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { ApmMlDetectorType } from '../../../../common/anomaly_detection/apm_ml_detectors';
 import { asExactTransactionRate } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -75,7 +76,10 @@ export function ServiceOverviewThroughputChart({
                 start,
                 end,
                 transactionType,
-                offset: comparisonEnabled ? offset : undefined,
+                offset:
+                  comparisonEnabled && isTimeComparison(offset)
+                    ? offset
+                    : undefined,
                 transactionName,
               },
             },

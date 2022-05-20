@@ -13,7 +13,14 @@ export enum TimeRangeComparisonEnum {
   WeekBefore = 'week',
   DayBefore = 'day',
   PeriodBefore = 'period',
+  ExpectedBounds = 'expected_bounds',
 }
+
+export const isTimeComparison = (v: string | undefined) =>
+  v !== TimeRangeComparisonEnum.ExpectedBounds;
+
+export const isExpectedBoundsComparison = (v: string | undefined) =>
+  v === TimeRangeComparisonEnum.ExpectedBounds;
 
 export const dayAndWeekBeforeToOffset = {
   [TimeRangeComparisonEnum.DayBefore]: '1d',
@@ -41,6 +48,10 @@ function formatDate({
   )} - ${previousPeriodEnd.format(dateFormat)}`;
 }
 
+function isDefined<T>(argument: T | undefined | null): argument is T {
+  return argument !== undefined && argument !== null;
+}
+
 function getSelectOptions({
   comparisonTypes,
   start,
@@ -51,45 +62,47 @@ function getSelectOptions({
   start: moment.Moment;
   end: moment.Moment;
   msDiff: number;
-}) {
-  return comparisonTypes.map((value) => {
-    switch (value) {
-      case TimeRangeComparisonEnum.DayBefore: {
-        return {
-          value: dayAndWeekBeforeToOffset[TimeRangeComparisonEnum.DayBefore],
-          text: i18n.translate('xpack.apm.timeComparison.select.dayBefore', {
-            defaultMessage: 'Day before',
-          }),
-        };
-      }
-      case TimeRangeComparisonEnum.WeekBefore: {
-        return {
-          value: dayAndWeekBeforeToOffset[TimeRangeComparisonEnum.WeekBefore],
-          text: i18n.translate('xpack.apm.timeComparison.select.weekBefore', {
-            defaultMessage: 'Week before',
-          }),
-        };
-      }
-      case TimeRangeComparisonEnum.PeriodBefore: {
-        const offset = `${msDiff}ms`;
+}): Array<{ value: string; text: string; disabled?: boolean }> {
+  return comparisonTypes
+    .map((value) => {
+      switch (value) {
+        case TimeRangeComparisonEnum.DayBefore: {
+          return {
+            value: dayAndWeekBeforeToOffset[TimeRangeComparisonEnum.DayBefore],
+            text: i18n.translate('xpack.apm.timeComparison.select.dayBefore', {
+              defaultMessage: 'Day before',
+            }),
+          };
+        }
+        case TimeRangeComparisonEnum.WeekBefore: {
+          return {
+            value: dayAndWeekBeforeToOffset[TimeRangeComparisonEnum.WeekBefore],
+            text: i18n.translate('xpack.apm.timeComparison.select.weekBefore', {
+              defaultMessage: 'Week before',
+            }),
+          };
+        }
+        case TimeRangeComparisonEnum.PeriodBefore: {
+          const offset = `${msDiff}ms`;
 
-        const { startWithOffset, endWithOffset } = getOffsetInMs({
-          start: start.valueOf(),
-          end: end.valueOf(),
-          offset,
-        });
+          const { startWithOffset, endWithOffset } = getOffsetInMs({
+            start: start.valueOf(),
+            end: end.valueOf(),
+            offset,
+          });
 
-        return {
-          value: offset,
-          text: formatDate({
-            currentPeriodEnd: end,
-            previousPeriodStart: moment(startWithOffset),
-            previousPeriodEnd: moment(endWithOffset),
-          }),
-        };
+          return {
+            value: offset,
+            text: formatDate({
+              currentPeriodEnd: end,
+              previousPeriodStart: moment(startWithOffset),
+              previousPeriodEnd: moment(endWithOffset),
+            }),
+          };
+        }
       }
-    }
-  });
+    })
+    .filter(isDefined);
 }
 
 export function getComparisonOptions({

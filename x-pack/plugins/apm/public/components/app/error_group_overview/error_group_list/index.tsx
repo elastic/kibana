@@ -14,7 +14,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import type { ComparisonEnabled } from '../../../../../common/comparison_rt';
+import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { asInteger } from '../../../../../common/utils/formatters';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
@@ -62,7 +62,7 @@ interface Props {
   serviceName: string;
   detailedStatisticsLoading: boolean;
   detailedStatistics: ErrorGroupDetailedStatistics;
-  comparisonEnabled?: ComparisonEnabled;
+  comparisonEnabled?: boolean;
 }
 
 function ErrorGroupList({
@@ -73,7 +73,7 @@ function ErrorGroupList({
   comparisonEnabled,
 }: Props) {
   const { query } = useApmParams('/services/{serviceName}/errors');
-
+  const { offset } = query;
   const columns = useMemo(() => {
     return [
       {
@@ -225,7 +225,9 @@ function ErrorGroupList({
                 }
               )}
               comparisonSeries={
-                comparisonEnabled ? previousPeriodTimeseries : undefined
+                comparisonEnabled && isTimeComparison(offset)
+                  ? previousPeriodTimeseries
+                  : undefined
               }
               comparisonSeriesColor={previousPeriodColor}
             />
@@ -239,6 +241,7 @@ function ErrorGroupList({
     detailedStatistics,
     comparisonEnabled,
     detailedStatisticsLoading,
+    offset,
   ]);
 
   return (

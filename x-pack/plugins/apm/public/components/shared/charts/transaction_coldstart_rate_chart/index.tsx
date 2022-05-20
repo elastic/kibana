@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { ComparisonEnabled } from '../../../../../common/comparison_rt';
+import { isTimeComparison } from '../../time_comparison/get_comparison_options';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { useFetcher } from '../../../../hooks/use_fetcher';
@@ -35,7 +35,7 @@ interface Props {
   kuery: string;
   environment: string;
   transactionName?: string;
-  comparisonEnabled?: ComparisonEnabled;
+  comparisonEnabled?: boolean;
   offset?: string;
 }
 
@@ -91,7 +91,10 @@ export function TransactionColdstartRateChart({
               start,
               end,
               transactionType,
-              offset: comparisonEnabled ? offset : undefined,
+              offset:
+                comparisonEnabled && isTimeComparison(offset)
+                  ? offset
+                  : undefined,
               ...(transactionName ? { transactionName } : {}),
             },
           },

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ComparisonEnabled } from '../../../common/comparison_rt';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 
 export interface UrlParams {
@@ -33,7 +32,7 @@ export interface UrlParams {
   searchTerm?: string;
   percentile?: number;
   latencyAggregationType?: LatencyAggregationType;
-  comparisonEnabled?: ComparisonEnabled;
+  comparisonEnabled?: boolean;
   offset?: string;
 }
 

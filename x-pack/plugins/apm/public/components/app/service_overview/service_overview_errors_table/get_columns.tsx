@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import type { ComparisonEnabled } from '../../../../../common/comparison_rt';
+import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { asInteger } from '../../../../../common/utils/formatters';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { truncate } from '../../../../utils/style';
@@ -44,9 +44,10 @@ export function getColumns({
   serviceName: string;
   errorGroupDetailedStatisticsLoading: boolean;
   errorGroupDetailedStatistics: ErrorGroupDetailedStatistics;
-  comparisonEnabled?: ComparisonEnabled;
+  comparisonEnabled?: boolean;
   query: TypeOf<ApmRoutes, '/services/{serviceName}/errors'>['query'];
 }): Array<EuiBasicTableColumn<ErrorGroupMainStatistics['errorGroups'][0]>> {
+  const { offset } = query;
   return [
     {
       name: i18n.translate('xpack.apm.errorsTable.typeColumnLabel', {
@@ -144,7 +145,9 @@ export function getColumns({
               }
             )}
             comparisonSeries={
-              comparisonEnabled ? previousPeriodTimeseries : undefined
+              comparisonEnabled && isTimeComparison(offset)
+                ? previousPeriodTimeseries
+                : undefined
             }
             comparisonSeriesColor={previousPeriodColor}
           />

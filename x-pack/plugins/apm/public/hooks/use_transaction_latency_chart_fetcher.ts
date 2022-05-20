@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import { isTimeComparison } from '../components/shared/time_comparison/get_comparison_options';
 import { useFetcher } from './use_fetcher';
 import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
@@ -53,7 +54,10 @@ export function useTransactionLatencyChartsFetcher({
                 transactionType,
                 transactionName,
                 latencyAggregationType,
-                offset: comparisonEnabled ? offset : undefined,
+                offset:
+                  comparisonEnabled && isTimeComparison(offset)
+                    ? offset
+                    : undefined,
               },
             },
           }

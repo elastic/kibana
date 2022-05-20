@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { getNodeName, NodeType } from '../../../../common/connections';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
@@ -43,7 +44,10 @@ export function BackendDetailDependenciesTable() {
             end,
             environment,
             numBuckets: 20,
-            offset: comparisonEnabled ? offset : undefined,
+            offset:
+              comparisonEnabled && isTimeComparison(offset)
+                ? offset
+                : undefined,
             kuery,
           },
         },

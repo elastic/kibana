@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { isTimeComparison } from '../../time_comparison/get_comparison_options';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
@@ -48,7 +49,7 @@ export function LatencyChart({ height, kuery }: Props) {
   const license = useLicenseContext();
 
   const {
-    query: { comparisonEnabled, latencyAggregationType },
+    query: { comparisonEnabled, latencyAggregationType, offset },
   } = useAnyOfApmParams(
     '/services/{serviceName}/overview',
     '/services/{serviceName}/transactions',
@@ -72,7 +73,7 @@ export function LatencyChart({ height, kuery }: Props) {
 
   const timeseries = [
     currentPeriod,
-    comparisonEnabled ? previousPeriod : undefined,
+    comparisonEnabled && isTimeComparison(offset) ? previousPeriod : undefined,
   ].filter(filterNil);
 
   const latencyMaxY = getMaxY(timeseries);
