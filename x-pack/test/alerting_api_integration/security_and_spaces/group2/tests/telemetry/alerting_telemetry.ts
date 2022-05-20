@@ -24,26 +24,19 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
   const retry = getService('retry');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
+  const esArchiver = getService('esArchiver');
 
   describe('alerting telemetry', () => {
     const alwaysFiringRuleId: { [key: string]: string } = {};
     const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {
-      // reset the state in the telemetry task
-      await es.update({
-        id: `task:Alerting-alerting_telemetry`,
-        index: '.kibana_task_manager',
-        body: {
-          doc: {
-            task: {
-              state: '{}',
-            },
-          },
-        },
-      });
+      await esArchiver.load('x-pack/test/functional/es_archives/event_log_telemetry');
     });
-    after(() => objectRemover.removeAll());
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/event_log_telemetry');
+      objectRemover.removeAll();
+    });
 
     beforeEach(async () => {
       await esTestIndexTool.destroy();
