@@ -214,12 +214,14 @@ export function jobsHealthServiceProvider(
      * @param jobs
      * @param timeInterval - Custom time interval provided by the user.
      * @param docsCount - The threshold for a number of missing documents to alert upon.
+     *
+     * @return {Promise<[DelayedDataResponse[], DelayedDataResponse[]]>} - Collections of annotations exceeded and not exceeded the docs threshold.
      */
     async getDelayedDataReport(
       jobs: MlJob[],
       timeInterval: string | null,
       docsCount: number | null
-    ): Promise<DelayedDataResponse[]> {
+    ): Promise<[DelayedDataResponse[], DelayedDataResponse[]]> {
       const jobIds = getJobIds(jobs);
       const datafeeds = await getDatafeeds(jobIds);
 
@@ -235,13 +237,14 @@ export function jobsHealthServiceProvider(
 
       const { dateFormatter } = await getFormatters();
 
-      return (
+      const annotationsData = (
         await annotationService.getDelayedDataAnnotations({
           jobIds: resultJobIds,
           earliestMs,
         })
       )
         .map((v) => {
+          // TODO Update when https://github.com/elastic/elasticsearch/issues/76088 is resolved.
           const match = v.annotation.match(/Datafeed has missed (\d+)\s/);
           const missedDocsCount = match ? parseInt(match[1], 10) : 0;
           return {
@@ -259,14 +262,12 @@ export function jobsHealthServiceProvider(
           const job = jobsMap[v.job_id];
           const datafeed = datafeedsMap[v.job_id];
 
-          const isDocCountExceededThreshold = docsCount ? v.missed_docs_count >= docsCount : true;
-
           const jobLookbackInterval = resolveLookbackInterval([job], [datafeed]);
 
           const isEndTimestampWithinRange =
             v.end_timestamp > getDelayedDataLookbackTimestamp(timeInterval, jobLookbackInterval);
 
-          return isDocCountExceededThreshold && isEndTimestampWithinRange;
+          return isEndTimestampWithinRange;
         })
         .map((v) => {
           return {
@@ -274,6 +275,11 @@ export function jobsHealthServiceProvider(
             end_timestamp: dateFormatter(v.end_timestamp),
           };
         });
+
+      return partition(annotationsData, (v) => {
+        const isDocCountExceededThreshold = docsCount ? v.missed_docs_count >= docsCount : true;
+        return isDocCountExceededThreshold;
+      });
     },
     /**
      * Retrieves a list of the latest errors per jobs.
@@ -430,33 +436,35 @@ export function jobsHealthServiceProvider(
       }
 
       if (config.delayedData.enabled) {
-        const response = await this.getDelayedDataReport(
-          jobs,
-          config.delayedData.timeInterval,
-          config.delayedData.docsCount
-        );
+        const [exceededThresholdAnnotations, withinThresholdAnnotations] =
+          await this.getDelayedDataReport(
+            jobs,
+            config.delayedData.timeInterval,
+            config.delayedData.docsCount
+          );
 
-        const { count, jobsString } = getJobsAlertingMessageValues(response);
+        const isHealthy = exceededThresholdAnnotations.length === 0;
+        const { count, jobsString } = getJobsAlertingMessageValues(exceededThresholdAnnotations);
 
-        if (response.length > 0) {
-          const isHealthy = false;
-
-          results.push({
-            isHealthy,
-            name: HEALTH_CHECK_NAMES.delayedData.name,
-            context: {
-              results: response,
-              message: i18n.translate(
-                'xpack.ml.alertTypes.jobsHealthAlertingRule.delayedDataMessage',
-                {
+        results.push({
+          isHealthy,
+          name: HEALTH_CHECK_NAMES.delayedData.name,
+          context: {
+            results: isHealthy ? withinThresholdAnnotations : exceededThresholdAnnotations,
+            message: isHealthy
+              ? i18n.translate(
+                  'xpack.ml.alertTypes.jobsHealthAlertingRule.delayedDataRecoveryMessage',
+                  {
+                    defaultMessage: 'No jobs are suffering from delayed data.',
+                  }
+                )
+              : i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.delayedDataMessage', {
                   defaultMessage:
                     '{count, plural, one {Job} other {Jobs}} {jobsString} {count, plural, one {is} other {are}} suffering from delayed data.',
                   values: { count, jobsString },
-                }
-              ),
-            },
-          });
-        }
+                }),
+          },
+        });
       }
 
       if (config.errorMessages.enabled && previousStartedAt) {
