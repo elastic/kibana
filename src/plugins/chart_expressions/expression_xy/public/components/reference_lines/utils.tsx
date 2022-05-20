@@ -10,7 +10,9 @@ import React from 'react';
 import { Position } from '@elastic/charts';
 import { euiLightVars } from '@kbn/ui-theme';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { IconPosition, YAxisMode } from '../../../common/types';
+import { groupBy, orderBy } from 'lodash';
+import { IconPosition, ReferenceLineConfig, YAxisMode, FillStyle } from '../../../common/types';
+import { FillStyles } from '../../../common/constants';
 import {
   LINES_MARKER_SIZE,
   mapVerticalToHorizontalPlacement,
@@ -141,3 +143,72 @@ export const getHorizontalRect = (
   header: headerLabel,
   details: formatter?.convert(currentValue) || currentValue.toString(),
 });
+
+const sortReferenceLinesByGroup = (referenceLines: ReferenceLineConfig[], group: FillStyle) => {
+  if (group === FillStyles.ABOVE || group === FillStyles.BELOW) {
+    const order = group === FillStyles.ABOVE ? 'asc' : 'desc';
+    return orderBy(referenceLines, ({ yConfig: [{ value }] }) => value, [order]);
+  }
+  return referenceLines;
+};
+
+export const getNextValuesForReferenceLines = (referenceLines: ReferenceLineConfig[]) => {
+  const grouppedReferenceLines = groupBy(referenceLines, ({ yConfig: [yConfig] }) => yConfig.fill);
+  const groups = Object.keys(grouppedReferenceLines) as FillStyle[];
+
+  return groups.reduce<Record<FillStyle, Record<string, number | undefined>>>(
+    (nextValueByDirection, group) => {
+      const sordedReferenceLines = sortReferenceLinesByGroup(grouppedReferenceLines[group], group);
+
+      const nv = sordedReferenceLines.reduce<Record<string, number | undefined>>(
+        (nextValues, referenceLine, index, lines) => {
+          let nextValue: number | undefined;
+          if (index < lines.length - 1) {
+            const [yConfig] = lines[index + 1].yConfig;
+            nextValue = yConfig.value;
+          }
+
+          return { ...nextValues, [referenceLine.layerId]: nextValue };
+        },
+        {}
+      );
+
+      return { ...nextValueByDirection, [group]: nv };
+    },
+    {} as Record<FillStyle, Record<string, number>>
+  );
+};
+
+export const computeChartMargins = (
+  referenceLinePaddings: Partial<Record<Position, number>>,
+  labelVisibility: Partial<Record<'x' | 'yLeft' | 'yRight', boolean>>,
+  titleVisibility: Partial<Record<'x' | 'yLeft' | 'yRight', boolean>>,
+  axesMap: Record<'left' | 'right', unknown>,
+  isHorizontal: boolean
+) => {
+  const result: Partial<Record<Position, number>> = {};
+  if (!labelVisibility?.x && !titleVisibility?.x && referenceLinePaddings.bottom) {
+    const placement = isHorizontal ? mapVerticalToHorizontalPlacement('bottom') : 'bottom';
+    result[placement] = referenceLinePaddings.bottom;
+  }
+  if (
+    referenceLinePaddings.left &&
+    (isHorizontal || (!labelVisibility?.yLeft && !titleVisibility?.yLeft))
+  ) {
+    const placement = isHorizontal ? mapVerticalToHorizontalPlacement('left') : 'left';
+    result[placement] = referenceLinePaddings.left;
+  }
+  if (
+    referenceLinePaddings.right &&
+    (isHorizontal || !axesMap.right || (!labelVisibility?.yRight && !titleVisibility?.yRight))
+  ) {
+    const placement = isHorizontal ? mapVerticalToHorizontalPlacement('right') : 'right';
+    result[placement] = referenceLinePaddings.right;
+  }
+  // there's no top axis, so just check if a margin has been computed
+  if (referenceLinePaddings.top) {
+    const placement = isHorizontal ? mapVerticalToHorizontalPlacement('top') : 'top';
+    result[placement] = referenceLinePaddings.top;
+  }
+  return result;
+};
