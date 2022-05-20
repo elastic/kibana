@@ -15,14 +15,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
-import { HostMetadata } from '../../../../../../common/endpoint/types';
 import { PreferenceFormattedDateFromPrimitive } from '../../../../../common/components/formatted_date';
 import { useToasts } from '../../../../../common/lib/kibana';
 import { getEndpointDetailsPath } from '../../../../common/routing';
 import {
   detailsData,
   detailsError,
-  getActivityLogData,
   hostStatusInfo,
   policyResponseActions,
   policyResponseAppliedRevision,
@@ -52,7 +50,6 @@ export const EndpointDetails = memo(() => {
   const toasts = useToasts();
   const queryParams = useEndpointSelector(uiQueryParams);
 
-  const activityLog = useEndpointSelector(getActivityLogData);
   const hostDetails = useEndpointSelector(detailsData);
   const hostDetailsError = useEndpointSelector(detailsError);
 
@@ -100,10 +97,15 @@ export const EndpointDetails = memo(() => {
           name: 'endpointActivityLog',
           selected_endpoint: id,
         }),
-        content: <EndpointActivityLog activityLog={activityLog} />,
+        content:
+          hostDetails === undefined ? (
+            ContentLoadingMarkup
+          ) : (
+            <EndpointActivityLog agentId={hostDetails.agent.id} />
+          ),
       },
     ],
-    [ContentLoadingMarkup, hostDetails, policyInfo, hostStatus, activityLog, queryParams]
+    [ContentLoadingMarkup, hostDetails, policyInfo, hostStatus, queryParams]
   );
 
   const showFlyoutFooter =
@@ -144,7 +146,7 @@ export const EndpointDetails = memo(() => {
             />
           )}
 
-          {show === 'policy_response' && <PolicyResponseFlyoutPanel hostMeta={hostDetails} />}
+          {show === 'policy_response' && <PolicyResponseFlyoutPanel />}
 
           {(show === 'isolate' || show === 'unisolate') && (
             <EndpointIsolationFlyoutPanel hostMeta={hostDetails} />
@@ -163,9 +165,7 @@ export const EndpointDetails = memo(() => {
 
 EndpointDetails.displayName = 'EndpointDetails';
 
-const PolicyResponseFlyoutPanel = memo<{
-  hostMeta: HostMetadata;
-}>(({ hostMeta }) => {
+const PolicyResponseFlyoutPanel = () => {
   const responseConfig = useEndpointSelector(policyResponseConfigurations);
   const responseActions = useEndpointSelector(policyResponseActions);
   const responseAttentionCount = useEndpointSelector(policyResponseFailedOrWarningActionCount);
@@ -221,6 +221,6 @@ const PolicyResponseFlyoutPanel = memo<{
       </EuiFlyoutBody>
     </>
   );
-});
+};
 
 PolicyResponseFlyoutPanel.displayName = 'PolicyResponseFlyoutPanel';

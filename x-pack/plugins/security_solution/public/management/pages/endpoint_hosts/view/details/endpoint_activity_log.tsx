@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import {
@@ -17,23 +17,13 @@ import {
   EuiEmptyPrompt,
   EuiSpacer,
 } from '@elastic/eui';
-import { useDispatch } from 'react-redux';
+
+import { useGetActivityLog } from '../../../../services/activity_log';
 import { LogEntry } from './components/log_entry';
 import { DateRangePicker } from './components/activity_log_date_range_picker';
 import * as i18 from '../translations';
-import { Immutable, ActivityLog } from '../../../../../../common/endpoint/types';
-import { AsyncResourceState } from '../../../../state';
+import { getActivityLogDataPaging } from '../../store/selectors';
 import { useEndpointSelector } from '../hooks';
-import { EndpointAction } from '../../store/action';
-import {
-  getActivityLogDataPaging,
-  getActivityLogError,
-  getActivityLogIterableData,
-  getActivityLogRequestLoaded,
-  getLastLoadedActivityLogData,
-  getActivityLogRequestLoading,
-  getActivityLogUninitialized,
-} from '../../store/selectors';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)<{ isShorter: boolean }>`
   height: ${({ isShorter }) => (isShorter ? '25vh' : '85vh')};
@@ -43,135 +33,127 @@ const LoadMoreTrigger = styled.div`
   width: ${(props) => props.theme.eui.fractions.single.percentage};
 `;
 
-export const EndpointActivityLog = memo(
-  ({ activityLog }: { activityLog: AsyncResourceState<Immutable<ActivityLog>> }) => {
-    const activityLogUninitialized = useEndpointSelector(getActivityLogUninitialized);
-    const activityLogLoading = useEndpointSelector(getActivityLogRequestLoading);
-    const activityLogLoaded = useEndpointSelector(getActivityLogRequestLoaded);
-    const activityLastLogData = useEndpointSelector(getLastLoadedActivityLogData);
-    const activityLogData = useEndpointSelector(getActivityLogIterableData);
-    const activityLogSize = activityLogData.length;
-    const activityLogError = useEndpointSelector(getActivityLogError);
-    const dispatch = useDispatch<(action: EndpointAction) => void>();
-    const {
-      page,
-      pageSize,
-      startDate,
-      endDate,
-      disabled: isPagingDisabled,
-    } = useEndpointSelector(getActivityLogDataPaging);
+export const EndpointActivityLog = memo(({ agentId }: { agentId: string }) => {
+  const [page, setPage] = useState(1);
+  const [isPagingDisabled, setIsPagingDisabled] = useState(false);
+  const { startDate, endDate } = useEndpointSelector(getActivityLogDataPaging);
 
-    const hasActiveDateRange = useMemo(() => !!startDate || !!endDate, [startDate, endDate]);
-    const showEmptyState = useMemo(
-      () => (activityLogLoaded && !activityLogSize && !hasActiveDateRange) || activityLogError,
-      [activityLogLoaded, activityLogSize, hasActiveDateRange, activityLogError]
-    );
-    const isShorter = useMemo(
-      () => !!(hasActiveDateRange && isPagingDisabled && !activityLogLoading && !activityLogSize),
-      [hasActiveDateRange, isPagingDisabled, activityLogLoading, activityLogSize]
-    );
+  const {
+    data: activityLogData,
+    isError,
+    isFetching,
+    isPreviousData,
+  } = useGetActivityLog({ agentId, options: { page, pageSize: 50, startDate, endDate } });
 
-    const doesNotHaveDataAlsoOnRefetch = useMemo(
-      () => !activityLastLogData?.data.length && !activityLogData.length,
-      [activityLastLogData, activityLogData]
-    );
+  const activityLogSize = useMemo(() => activityLogData?.data.length, [activityLogData]);
 
-    const showCallout = useMemo(
-      () =>
-        (!isPagingDisabled && activityLogLoaded && !activityLogData.length) ||
-        doesNotHaveDataAlsoOnRefetch,
-      [isPagingDisabled, activityLogLoaded, activityLogData, doesNotHaveDataAlsoOnRefetch]
-    );
+  const hasActiveDateRange = useMemo(
+    () => !!activityLogData && (!!activityLogData.startDate || !!activityLogData.endDate),
+    [activityLogData]
+  );
 
-    const loadMoreTrigger = useRef<HTMLInputElement | null>(null);
-    const getActivityLog = useCallback(
-      (entries: IntersectionObserverEntry[]) => {
-        const isTargetIntersecting = entries.some((entry) => entry.isIntersecting);
-        if (isTargetIntersecting && activityLogLoaded && !isPagingDisabled) {
-          dispatch({
-            type: 'endpointDetailsActivityLogUpdatePaging',
-            payload: {
-              page: page + 1,
-              pageSize,
-              startDate,
-              endDate,
-            },
-          });
+  const showEmptyState = useMemo(
+    () => (!isFetching && !activityLogSize && !hasActiveDateRange) || isError,
+    [isFetching, activityLogSize, hasActiveDateRange, isError]
+  );
+  const isShorter = useMemo(
+    () => !!(hasActiveDateRange && isPagingDisabled && !isFetching && !activityLogSize),
+    [hasActiveDateRange, isPagingDisabled, isFetching, activityLogSize]
+  );
+
+  const doesNotHaveDataAlsoOnRefetch = useMemo(() => !activityLogSize, [activityLogSize]);
+
+  const showCallout = useMemo(
+    () => (!isPagingDisabled && !isFetching && !activityLogSize) || doesNotHaveDataAlsoOnRefetch,
+    [isPagingDisabled, isFetching, activityLogSize, doesNotHaveDataAlsoOnRefetch]
+  );
+
+  const loadMoreTrigger = useRef<HTMLInputElement | null>(null);
+  const getActivityLogPaged = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      const isTargetIntersecting = entries.some((entry) => entry.isIntersecting);
+      if (isTargetIntersecting && !isFetching) {
+        if (!isPagingDisabled && !isPreviousData) {
+          setPage((p) => p + 1);
         }
-      },
-      [activityLogLoaded, dispatch, isPagingDisabled, page, pageSize, startDate, endDate]
-    );
-
-    useEffect(() => {
-      const observer = new IntersectionObserver(getActivityLog);
-      const element = loadMoreTrigger.current;
-      if (element) {
-        observer.observe(element);
       }
-      return () => {
-        observer.disconnect();
-      };
-    }, [getActivityLog]);
+      setIsPagingDisabled(true);
+      setPage((p) => (p > 2 ? p - 1 : p));
+    },
+    [isFetching, isPagingDisabled, isPreviousData]
+  );
 
-    return (
-      <>
-        <StyledEuiFlexGroup direction="column" responsive={false} isShorter={isShorter}>
-          {(activityLogLoading && !activityLastLogData?.data.length) || activityLogUninitialized ? (
-            <EuiLoadingContent lines={3} />
-          ) : showEmptyState ? (
-            <EuiFlexItem>
-              <EuiEmptyPrompt
-                iconType="editorUnorderedList"
-                titleSize="s"
-                title={<h2>{i18.ACTIVITY_LOG.LogEntry.emptyState.title}</h2>}
-                body={<p>{i18.ACTIVITY_LOG.LogEntry.emptyState.body}</p>}
-                data-test-subj="activityLogEmpty"
-              />
-            </EuiFlexItem>
-          ) : (
-            <>
-              <DateRangePicker />
-              <EuiFlexItem grow={true}>
-                {showCallout && (
-                  <>
-                    <EuiSpacer size="m" />
-                    <EuiCallOut
-                      data-test-subj="activityLogNoDataCallout"
-                      size="s"
-                      title={i18.ACTIVITY_LOG.LogEntry.dateRangeMessage}
-                      iconType="alert"
-                    />
-                  </>
-                )}
-                {activityLogLoaded &&
-                  activityLogData.map((logEntry) => (
-                    <LogEntry key={`${logEntry.item.id}`} logEntry={logEntry} />
-                  ))}
-                {activityLogLoading &&
-                  activityLastLogData?.data.map((logEntry) => (
-                    <LogEntry key={`${logEntry.item.id}`} logEntry={logEntry} />
-                  ))}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                {activityLogLoading && <EuiLoadingContent lines={3} />}
-                {(!activityLogLoading || !isPagingDisabled) && !showCallout && (
-                  <LoadMoreTrigger
-                    data-test-subj="activityLogLoadMoreTrigger"
-                    ref={loadMoreTrigger}
+  useEffect(() => {
+    const observer = new IntersectionObserver(getActivityLogPaged);
+    const element = loadMoreTrigger.current;
+    if (element) {
+      observer.observe(element);
+    }
+    return () => {
+      observer.disconnect();
+    };
+  }, [getActivityLogPaged]);
+
+  return (
+    <>
+      <StyledEuiFlexGroup direction="column" responsive={false} isShorter={isShorter}>
+        {(isFetching && !activityLogSize) || !activityLogData ? (
+          <EuiLoadingContent lines={3} />
+        ) : showEmptyState ? (
+          <EuiFlexItem>
+            <EuiEmptyPrompt
+              iconType="editorUnorderedList"
+              titleSize="s"
+              title={<h2>{i18.ACTIVITY_LOG.LogEntry.emptyState.title}</h2>}
+              body={<p>{i18.ACTIVITY_LOG.LogEntry.emptyState.body}</p>}
+              data-test-subj="activityLogEmpty"
+            />
+          </EuiFlexItem>
+        ) : (
+          <>
+            <DateRangePicker isLoading={isFetching} />
+            <EuiFlexItem grow={true}>
+              {showCallout && (
+                <>
+                  <EuiSpacer size="m" />
+                  <EuiCallOut
+                    data-test-subj="activityLogNoDataCallout"
+                    size="s"
+                    title={i18.ACTIVITY_LOG.LogEntry.dateRangeMessage}
+                    iconType="alert"
                   />
-                )}
-                {isPagingDisabled && !activityLogLoading && !showCallout && (
-                  <EuiText color="subdued" textAlign="center">
-                    <p>{i18.ACTIVITY_LOG.LogEntry.endOfLog}</p>
-                  </EuiText>
-                )}
-              </EuiFlexItem>
-            </>
-          )}
-        </StyledEuiFlexGroup>
-      </>
-    );
-  }
-);
+                </>
+              )}
+              {!isFetching &&
+                activityLogData &&
+                activityLogData.data.map((logEntry) => (
+                  <LogEntry key={`${logEntry.item.id}`} logEntry={logEntry} />
+                ))}
+              {isPreviousData &&
+                activityLogData &&
+                activityLogData.data.map((logEntry) => (
+                  <LogEntry key={`${logEntry.item.id}`} logEntry={logEntry} />
+                ))}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {isFetching && <EuiLoadingContent lines={3} />}
+              {(!isFetching || !isPagingDisabled) && !showCallout && (
+                <LoadMoreTrigger
+                  data-test-subj="activityLogLoadMoreTrigger"
+                  ref={loadMoreTrigger}
+                />
+              )}
+              {isPagingDisabled && !isFetching && !showCallout && (
+                <EuiText color="subdued" textAlign="center">
+                  <p>{i18.ACTIVITY_LOG.LogEntry.endOfLog}</p>
+                </EuiText>
+              )}
+            </EuiFlexItem>
+          </>
+        )}
+      </StyledEuiFlexGroup>
+    </>
+  );
+});
 
 EndpointActivityLog.displayName = 'EndpointActivityLog';

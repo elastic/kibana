@@ -17,10 +17,7 @@ import {
 } from '@elastic/eui';
 
 import { useEndpointSelector } from '../../../hooks';
-import {
-  getActivityLogDataPaging,
-  getActivityLogRequestLoading,
-} from '../../../../store/selectors';
+import { getActivityLogDataPaging } from '../../../../store/selectors';
 import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../../../../../common/constants';
 import { useUiSetting$ } from '../../../../../../../common/lib/kibana';
 
@@ -41,27 +38,22 @@ const StickyFlexItem = styled(EuiFlexItem)`
   padding: ${(props) => `${props.theme.eui.paddingSizes.m}`};
 `;
 
-export const DateRangePicker = memo(() => {
+export const DateRangePicker = memo(({ isLoading }: { isLoading: boolean }) => {
   const dispatch = useDispatch();
-  const { page, pageSize, startDate, endDate, autoRefreshOptions, recentlyUsedDateRanges } =
+  const { startDate, endDate, autoRefreshOptions, recentlyUsedDateRanges } =
     useEndpointSelector(getActivityLogDataPaging);
-
-  const activityLogLoading = useEndpointSelector(getActivityLogRequestLoading);
 
   const dispatchActionUpdateActivityLogPaging = useCallback(
     async ({ start, end }) => {
       dispatch({
         type: 'endpointDetailsActivityLogUpdatePaging',
         payload: {
-          disabled: false,
-          page,
-          pageSize,
           startDate: dateMath.parse(start)?.toISOString(),
           endDate: dateMath.parse(end)?.toISOString(),
         },
       });
     },
-    [dispatch, page, pageSize]
+    [dispatch]
   );
 
   const onRefreshChange = useCallback(
@@ -80,14 +72,11 @@ export const DateRangePicker = memo(() => {
     dispatch({
       type: 'endpointDetailsActivityLogUpdatePaging',
       payload: {
-        disabled: false,
-        page,
-        pageSize,
         startDate,
         endDate,
       },
     });
-  }, [dispatch, page, pageSize, startDate, endDate]);
+  }, [dispatch, startDate, endDate]);
 
   const onTimeChange = useCallback(
     ({ start: newStart, end: newEnd }) => {
@@ -125,7 +114,7 @@ export const DateRangePicker = memo(() => {
         <DatePickerWrapper data-test-subj="activityLogSuperDatePicker">
           <EuiFlexItem>
             <EuiSuperDatePicker
-              isLoading={activityLogLoading}
+              isLoading={isLoading}
               commonlyUsedRanges={commonlyUsedRanges}
               end={dateMath.parse(endDate)?.toISOString()}
               isPaused={!autoRefreshOptions.enabled}

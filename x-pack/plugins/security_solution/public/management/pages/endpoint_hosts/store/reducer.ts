@@ -6,7 +6,6 @@
  */
 
 import {
-  EndpointDetailsActivityLogChanged,
   EndpointPackageInfoStateChanged,
   EndpointPendingActionsStateChanged,
   MetadataTransformStatsChanged,
@@ -31,35 +30,6 @@ type CaseReducer<T extends AppAction> = (
   state: Immutable<EndpointState>,
   action: Immutable<T>
 ) => Immutable<EndpointState>;
-
-const handleEndpointDetailsActivityLogChanged: CaseReducer<EndpointDetailsActivityLogChanged> = (
-  state,
-  action
-) => {
-  const updatedActivityLog =
-    action.payload.type === 'LoadedResourceState'
-      ? {
-          ...state.endpointDetails.activityLog,
-          paging: {
-            ...state.endpointDetails.activityLog.paging,
-            page: action.payload.data.page,
-            pageSize: action.payload.data.pageSize,
-            startDate: action.payload.data.startDate,
-            endDate: action.payload.data.endDate,
-          },
-        }
-      : { ...state.endpointDetails.activityLog };
-  return {
-    ...state,
-    endpointDetails: {
-      ...state.endpointDetails,
-      activityLog: {
-        ...updatedActivityLog,
-        logData: action.payload,
-      },
-    },
-  };
-};
 
 const handleEndpointPendingActionsStateChanged: CaseReducer<EndpointPendingActionsStateChanged> = (
   state,
@@ -168,7 +138,6 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
     };
   } else if (
     action.type === 'endpointDetailsActivityLogUpdatePaging' ||
-    action.type === 'endpointDetailsActivityLogUpdateIsInvalidDateRange' ||
     action.type === 'userUpdatedActivityLogRefreshOptions'
   ) {
     return {
@@ -176,7 +145,6 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
       endpointDetails: {
         ...state.endpointDetails,
         activityLog: {
-          ...state.endpointDetails.activityLog,
           paging: {
             ...state.endpointDetails.activityLog.paging,
             ...action.payload,
@@ -198,8 +166,6 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
         },
       },
     };
-  } else if (action.type === 'endpointDetailsActivityLogChanged') {
-    return handleEndpointDetailsActivityLogChanged(state, action);
   } else if (action.type === 'endpointPendingActionsStateChanged') {
     return handleEndpointPendingActionsStateChanged(state, action);
   } else if (action.type === 'serverReturnedPoliciesForOnboarding') {
@@ -312,10 +278,6 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
     const activityLog = {
       logData: createUninitialisedResourceState(),
       paging: {
-        disabled: false,
-        isInvalidDateRange: false,
-        page: 1,
-        pageSize: 50,
         startDate: 'now-1d',
         endDate: 'now',
         autoRefreshOptions: {

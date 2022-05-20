@@ -147,10 +147,6 @@ export type EndpointIsolationRequestStateChange = Action<'endpointIsolationReque
   payload: EndpointState['isolationRequestState'];
 };
 
-export type EndpointDetailsActivityLogChanged = Action<'endpointDetailsActivityLogChanged'> & {
-  payload: EndpointState['endpointDetails']['activityLog']['logData'];
-};
-
 export type EndpointPendingActionsStateChanged = Action<'endpointPendingActionsStateChanged'> & {
   payload: EndpointState['endpointPendingActions'];
 };
@@ -158,10 +154,6 @@ export type EndpointPendingActionsStateChanged = Action<'endpointPendingActionsS
 export interface EndpointDetailsActivityLogUpdatePaging {
   type: 'endpointDetailsActivityLogUpdatePaging';
   payload: {
-    // disable paging when no more data after paging
-    disabled?: boolean;
-    page: number;
-    pageSize: number;
     startDate: string;
     endDate: string;
   };
@@ -186,13 +178,6 @@ export interface EndpointDetailsLoad {
   };
 }
 
-export interface EndpointDetailsActivityLogUpdateIsInvalidDateRange {
-  type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange';
-  payload: {
-    isInvalidDateRange?: boolean;
-  };
-}
-
 export type LoadMetadataTransformStats = Action<'loadMetadataTransformStats'>;
 
 export type MetadataTransformStatsChanged = Action<'metadataTransformStatsChanged'> & {
@@ -205,8 +190,6 @@ export type EndpointAction =
   | ServerReturnedEndpointDetails
   | ServerFailedToReturnEndpointDetails
   | EndpointDetailsActivityLogUpdatePaging
-  | EndpointDetailsActivityLogUpdateIsInvalidDateRange
-  | EndpointDetailsActivityLogChanged
   | UserUpdatedActivityLogRefreshOptions
   | UserUpdatedActivityLogRecentlyUsedDateRanges
   | EndpointDetailsLoad

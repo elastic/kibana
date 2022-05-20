@@ -7,11 +7,8 @@
 
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { EndpointList } from '.';
 import '../../../../common/mock/match_media';
-
-import { createUseUiSetting$Mock } from '../../../../common/lib/kibana/kibana_react.mock';
 
 import {
   mockEndpointDetailsApiResult,
@@ -20,7 +17,6 @@ import {
 } from '../store/mock_endpoint_result_list';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import {
-  ActivityLog,
   HostInfo,
   HostPolicyResponse,
   HostPolicyResponseActionStatus,
@@ -31,25 +27,17 @@ import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_da
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 import { mockPolicyResultList } from '../../policy/store/test_mock_utils';
 import { getEndpointDetailsPath } from '../../../common/routing';
-import { KibanaServices, useKibana, useToasts, useUiSetting$ } from '../../../../common/lib/kibana';
+import { KibanaServices, useKibana, useToasts } from '../../../../common/lib/kibana';
 import { hostIsolationHttpMocks } from '../../../../common/lib/endpoint_isolation/mocks';
 import {
-  createFailedResourceState,
-  createLoadedResourceState,
   isFailedResourceState,
   isLoadedResourceState,
   isUninitialisedResourceState,
 } from '../../../state';
 import { getCurrentIsolationRequestState } from '../store/selectors';
 import { licenseService } from '../../../../common/hooks/use_license';
-import { FleetActionGenerator } from '../../../../../common/endpoint/data_generators/fleet_action_generator';
-import { EndpointActionGenerator } from '../../../../../common/endpoint/data_generators/endpoint_action_generator';
-import {
-  APP_PATH,
-  MANAGEMENT_PATH,
-  DEFAULT_TIMEPICKER_QUICK_RANGES,
-  TRANSFORM_STATES,
-} from '../../../../../common/constants';
+
+import { APP_PATH, MANAGEMENT_PATH, TRANSFORM_STATES } from '../../../../../common/constants';
 import { TransformStats } from '../types';
 import {
   HOST_METADATA_LIST_ROUTE,
@@ -76,66 +64,13 @@ jest.mock('../../../services/policies/ingest', () => {
     sendGetEndpointSecurityPackage: () => Promise.resolve({}),
   };
 });
-const mockUseUiSetting$ = useUiSetting$ as jest.Mock;
-const timepickerRanges = [
-  {
-    from: 'now/d',
-    to: 'now/d',
-    display: 'Today',
-  },
-  {
-    from: 'now/w',
-    to: 'now/w',
-    display: 'This week',
-  },
-  {
-    from: 'now-15m',
-    to: 'now',
-    display: 'Last 15 minutes',
-  },
-  {
-    from: 'now-30m',
-    to: 'now',
-    display: 'Last 30 minutes',
-  },
-  {
-    from: 'now-1h',
-    to: 'now',
-    display: 'Last 1 hour',
-  },
-  {
-    from: 'now-24h',
-    to: 'now',
-    display: 'Last 24 hours',
-  },
-  {
-    from: 'now-7d',
-    to: 'now',
-    display: 'Last 7 days',
-  },
-  {
-    from: 'now-30d',
-    to: 'now',
-    display: 'Last 30 days',
-  },
-  {
-    from: 'now-90d',
-    to: 'now',
-    display: 'Last 90 days',
-  },
-  {
-    from: 'now-1y',
-    to: 'now',
-    display: 'Last 1 year',
-  },
-];
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_license');
 
 describe('when on the endpoint list page', () => {
   const docGenerator = new EndpointDocGenerator();
-  const { act, screen, fireEvent, waitFor } = reactTestingLibrary;
+  const { act, screen, fireEvent } = reactTestingLibrary;
 
   let render: () => ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
@@ -661,30 +596,6 @@ describe('when on the endpoint list page', () => {
       });
     };
 
-    const dispatchEndpointDetailsActivityLogChanged = (
-      dataState: 'failed' | 'success',
-      data: ActivityLog
-    ) => {
-      reactTestingLibrary.act(() => {
-        const getPayload = () => {
-          switch (dataState) {
-            case 'failed':
-              return createFailedResourceState({
-                statusCode: 500,
-                error: 'Internal Server Error',
-                message: 'An internal server error occurred.',
-              });
-            case 'success':
-              return createLoadedResourceState(data);
-          }
-        };
-        store.dispatch({
-          type: 'endpointDetailsActivityLogChanged',
-          payload: getPayload(),
-        });
-      });
-    };
-
     beforeEach(async () => {
       mockEndpointListApi();
 
@@ -787,352 +698,6 @@ describe('when on the endpoint list page', () => {
     it('should show the Take Action button', async () => {
       const renderResult = await renderAndWaitForData();
       expect(renderResult.getByTestId('endpointDetailsActionsButton')).not.toBeNull();
-    });
-
-    describe('when showing Activity Log panel', () => {
-      let renderResult: ReturnType<typeof render>;
-      const agentId = 'some_agent_id';
-
-      let getMockData: (option?: { hasLogsEndpointActionResponses?: boolean }) => ActivityLog;
-      beforeEach(async () => {
-        window.IntersectionObserver = jest.fn(() => ({
-          root: null,
-          rootMargin: '',
-          thresholds: [],
-          takeRecords: jest.fn(),
-          observe: jest.fn(),
-          unobserve: jest.fn(),
-          disconnect: jest.fn(),
-        }));
-
-        mockUseUiSetting$.mockImplementation((key, defaultValue) => {
-          const useUiSetting$Mock = createUseUiSetting$Mock();
-
-          return key === DEFAULT_TIMEPICKER_QUICK_RANGES
-            ? [timepickerRanges, jest.fn()]
-            : useUiSetting$Mock(key, defaultValue);
-        });
-
-        const fleetActionGenerator = new FleetActionGenerator('seed');
-        const endpointActionGenerator = new EndpointActionGenerator('seed');
-        const endpointResponseData = endpointActionGenerator.generateResponse({
-          agent: { id: agentId },
-        });
-        const fleetResponseData = fleetActionGenerator.generateResponse({
-          agent_id: agentId,
-        });
-
-        const fleetActionData = fleetActionGenerator.generate({
-          agents: [agentId],
-          data: {
-            comment: 'some comment',
-          },
-        });
-        const isolatedActionData = fleetActionGenerator.generateIsolateAction({
-          agents: [agentId],
-          data: {
-            comment: ' ', // has space for comment,
-          },
-        });
-
-        getMockData = (hasLogsEndpointActionResponses?: {
-          hasLogsEndpointActionResponses?: boolean;
-        }) => {
-          const response: ActivityLog = {
-            page: 1,
-            pageSize: 50,
-            startDate: 'now-1d',
-            endDate: 'now',
-            data: [
-              {
-                type: 'fleetResponse',
-                item: {
-                  id: 'some_id_1',
-                  data: fleetResponseData,
-                },
-              },
-              {
-                type: 'fleetAction',
-                item: {
-                  id: 'some_id_2',
-                  data: fleetActionData,
-                },
-              },
-              {
-                type: 'fleetAction',
-                item: {
-                  id: 'some_id_3',
-                  data: isolatedActionData,
-                },
-              },
-            ],
-          };
-          if (hasLogsEndpointActionResponses) {
-            response.data.unshift({
-              type: 'response',
-              item: {
-                id: 'some_id_0',
-                data: endpointResponseData,
-              },
-            });
-          }
-          return response;
-        };
-
-        renderResult = render();
-        await reactTestingLibrary.act(async () => {
-          await middlewareSpy.waitForAction('serverReturnedEndpointList');
-        });
-        const hostNameLinks = renderResult.getAllByTestId('hostnameCellLink');
-        userEvent.click(hostNameLinks[0]);
-      });
-
-      afterEach(reactTestingLibrary.cleanup);
-
-      it('should show the endpoint details flyout', async () => {
-        const activityLogTab = await renderResult.findByTestId('activity_log');
-        userEvent.click(activityLogTab);
-        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
-        reactTestingLibrary.act(() => {
-          dispatchEndpointDetailsActivityLogChanged('success', getMockData());
-        });
-        const endpointDetailsFlyout = renderResult.queryByTestId('endpointDetailsFlyoutBody');
-        expect(endpointDetailsFlyout).not.toBeNull();
-      });
-
-      it('should display log accurately', async () => {
-        const activityLogTab = await renderResult.findByTestId('activity_log');
-        userEvent.click(activityLogTab);
-        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
-        reactTestingLibrary.act(() => {
-          dispatchEndpointDetailsActivityLogChanged('success', getMockData());
-        });
-        const logEntries = renderResult.queryAllByTestId('timelineEntry');
-        expect(logEntries.length).toEqual(3);
-        expect(`${logEntries[0]} .euiCommentTimeline__icon--update`).not.toBe(null);
-        expect(`${logEntries[1]} .euiCommentTimeline__icon--regular`).not.toBe(null);
-      });
-
-      it('should display log accurately with endpoint responses', async () => {
-        const activityLogTab = await renderResult.findByTestId('activity_log');
-        userEvent.click(activityLogTab);
-        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
-        reactTestingLibrary.act(() => {
-          dispatchEndpointDetailsActivityLogChanged(
-            'success',
-            getMockData({ hasLogsEndpointActionResponses: true })
-          );
-        });
-        const logEntries = renderResult.queryAllByTestId('timelineEntry');
-        expect(logEntries.length).toEqual(4);
-        expect(`${logEntries[0]} .euiCommentTimeline__icon--update`).not.toBe(null);
-        expect(`${logEntries[1]} .euiCommentTimeline__icon--update`).not.toBe(null);
-        expect(`${logEntries[2]} .euiCommentTimeline__icon--regular`).not.toBe(null);
-      });
-
-      it('should display empty state when API call has failed', async () => {
-        const activityLogTab = await renderResult.findByTestId('activity_log');
-        userEvent.click(activityLogTab);
-        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
-        reactTestingLibrary.act(() => {
-          dispatchEndpointDetailsActivityLogChanged('failed', getMockData());
-        });
-        const emptyState = renderResult.queryByTestId('activityLogEmpty');
-        expect(emptyState).not.toBe(null);
-      });
-
-      it('should not display empty state when no log data', async () => {
-        const activityLogTab = await renderResult.findByTestId('activity_log');
-        userEvent.click(activityLogTab);
-        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
-        reactTestingLibrary.act(() => {
-          dispatchEndpointDetailsActivityLogChanged('success', {
-            page: 1,
-            pageSize: 50,
-            startDate: 'now-1d',
-            endDate: 'now',
-            data: [],
-          });
-        });
-
-        const emptyState = renderResult.queryByTestId('activityLogEmpty');
-        expect(emptyState).toBe(null);
-
-        const superDatePicker = renderResult.queryByTestId('activityLogSuperDatePicker');
-        expect(superDatePicker).not.toBe(null);
-      });
-
-      it('should display activity log when tab is loaded using the URL', async () => {
-        const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
-        reactTestingLibrary.act(() => {
-          history.push(
-            getEndpointDetailsPath({
-              page_index: '0',
-              page_size: '10',
-              name: 'endpointActivityLog',
-              selected_endpoint: '1',
-            })
-          );
-        });
-        const changedUrlAction = await userChangedUrlChecker;
-        expect(changedUrlAction.payload.search).toEqual(
-          '?page_index=0&page_size=10&selected_endpoint=1&show=activity_log'
-        );
-        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
-        reactTestingLibrary.act(() => {
-          dispatchEndpointDetailsActivityLogChanged('success', getMockData());
-        });
-        const logEntries = renderResult.queryAllByTestId('timelineEntry');
-        expect(logEntries.length).toEqual(3);
-      });
-
-      it('should display a callout message if no log data', async () => {
-        const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
-        reactTestingLibrary.act(() => {
-          history.push(
-            getEndpointDetailsPath({
-              page_index: '0',
-              page_size: '10',
-              name: 'endpointActivityLog',
-              selected_endpoint: '1',
-            })
-          );
-        });
-        const changedUrlAction = await userChangedUrlChecker;
-        expect(changedUrlAction.payload.search).toEqual(
-          '?page_index=0&page_size=10&selected_endpoint=1&show=activity_log'
-        );
-        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
-        reactTestingLibrary.act(() => {
-          dispatchEndpointDetailsActivityLogChanged('success', {
-            page: 1,
-            pageSize: 50,
-            startDate: 'now-1d',
-            endDate: 'now',
-            data: [],
-          });
-        });
-
-        const activityLogCallout = await renderResult.findByTestId('activityLogNoDataCallout');
-        expect(activityLogCallout).not.toBeNull();
-      });
-
-      it('should display a callout message if no log data also on refetch', async () => {
-        const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
-        reactTestingLibrary.act(() => {
-          history.push(
-            getEndpointDetailsPath({
-              page_index: '0',
-              page_size: '10',
-              name: 'endpointActivityLog',
-              selected_endpoint: '1',
-            })
-          );
-        });
-        const changedUrlAction = await userChangedUrlChecker;
-        expect(changedUrlAction.payload.search).toEqual(
-          '?page_index=0&page_size=10&selected_endpoint=1&show=activity_log'
-        );
-        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
-        reactTestingLibrary.act(() => {
-          dispatchEndpointDetailsActivityLogChanged('success', {
-            page: 1,
-            pageSize: 50,
-            startDate: 'now-1d',
-            endDate: 'now',
-            data: [],
-          });
-        });
-
-        const activityLogCallout = await renderResult.findByTestId('activityLogNoDataCallout');
-        expect(activityLogCallout).not.toBeNull();
-
-        // click refresh button
-        const refreshLogButton = await renderResult.findByTestId('superDatePickerApplyTimeButton');
-        userEvent.click(refreshLogButton);
-
-        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
-        reactTestingLibrary.act(() => {
-          dispatchEndpointDetailsActivityLogChanged('success', {
-            page: 1,
-            pageSize: 50,
-            startDate: 'now-1d',
-            endDate: 'now',
-            data: [],
-          });
-        });
-
-        const activityLogNoDataCallout = await renderResult.findByTestId(
-          'activityLogNoDataCallout'
-        );
-        expect(activityLogNoDataCallout).not.toBeNull();
-      });
-
-      it('should not display scroll trigger when showing callout message', async () => {
-        const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
-        reactTestingLibrary.act(() => {
-          history.push(
-            getEndpointDetailsPath({
-              page_index: '0',
-              page_size: '10',
-              name: 'endpointActivityLog',
-              selected_endpoint: '1',
-            })
-          );
-        });
-        const changedUrlAction = await userChangedUrlChecker;
-        expect(changedUrlAction.payload.search).toEqual(
-          '?page_index=0&page_size=10&selected_endpoint=1&show=activity_log'
-        );
-        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
-        reactTestingLibrary.act(() => {
-          dispatchEndpointDetailsActivityLogChanged('success', {
-            page: 1,
-            pageSize: 50,
-            startDate: 'now-1d',
-            endDate: 'now',
-            data: [],
-          });
-        });
-
-        const activityLogCallout = await renderResult.findByTestId('activityLogNoDataCallout');
-        expect(activityLogCallout).not.toBeNull();
-        // scroll to the bottom by pressing down arrow key
-        // and keep it pressed
-        userEvent.keyboard('ArrowDown>');
-        // end scrolling after 1s
-        await waitFor(() => {});
-        userEvent.keyboard('/ArrowDown');
-        expect(await renderResult.queryByTestId('activityLogLoadMoreTrigger')).toBeNull();
-      });
-
-      it('should correctly display non-empty comments only for actions', async () => {
-        const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
-        reactTestingLibrary.act(() => {
-          history.push(
-            getEndpointDetailsPath({
-              page_index: '0',
-              page_size: '10',
-              name: 'endpointActivityLog',
-              selected_endpoint: '1',
-            })
-          );
-        });
-        const changedUrlAction = await userChangedUrlChecker;
-        expect(changedUrlAction.payload.search).toEqual(
-          '?page_index=0&page_size=10&selected_endpoint=1&show=activity_log'
-        );
-        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
-        reactTestingLibrary.act(() => {
-          dispatchEndpointDetailsActivityLogChanged('success', getMockData());
-        });
-        const commentTexts = renderResult.queryAllByTestId('activityLogCommentText');
-        expect(commentTexts.length).toEqual(1);
-        expect(commentTexts[0].textContent).toEqual('some comment');
-        expect(commentTexts[0].parentElement?.parentElement?.className).toContain(
-          'euiCommentEvent--regular'
-        );
-      });
     });
 
     describe('when showing host Policy Response panel', () => {

@@ -17,7 +17,6 @@ import {
   HostPolicyResponseConfiguration,
   HostPolicyResponseActionStatus,
   HostStatus,
-  ActivityLog,
   HostMetadata,
 } from '../../../../../common/endpoint/types';
 import { EndpointState, EndpointIndexUIQueryParams } from '../types';
@@ -28,7 +27,6 @@ import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
 } from '../../../common/constants';
 import {
-  getLastLoadedResourceState,
   isFailedResourceState,
   isLoadedResourceState,
   isLoadingResourceState,
@@ -368,53 +366,6 @@ export const getActivityLogDataPaging = (
 ): Immutable<EndpointState['endpointDetails']['activityLog']['paging']> => {
   return state.endpointDetails.activityLog.paging;
 };
-
-export const getActivityLogData = (
-  state: Immutable<EndpointState>
-): Immutable<EndpointState['endpointDetails']['activityLog']['logData']> =>
-  state.endpointDetails.activityLog.logData;
-
-export const getLastLoadedActivityLogData: (
-  state: Immutable<EndpointState>
-) => Immutable<ActivityLog> | undefined = createSelector(getActivityLogData, (activityLog) => {
-  return getLastLoadedResourceState(activityLog)?.data;
-});
-
-export const getActivityLogUninitialized: (state: Immutable<EndpointState>) => boolean =
-  createSelector(getActivityLogData, (activityLog) => isUninitialisedResourceState(activityLog));
-
-export const getActivityLogRequestLoading: (state: Immutable<EndpointState>) => boolean =
-  createSelector(getActivityLogData, (activityLog) => isLoadingResourceState(activityLog));
-
-export const getActivityLogRequestLoaded: (state: Immutable<EndpointState>) => boolean =
-  createSelector(getActivityLogData, (activityLog) => isLoadedResourceState(activityLog));
-
-export const getActivityLogIterableData: (
-  state: Immutable<EndpointState>
-) => Immutable<ActivityLog['data']> = createSelector(getActivityLogData, (activityLog) => {
-  const emptyArray: ActivityLog['data'] = [];
-  return isLoadedResourceState(activityLog) ? activityLog.data.data : emptyArray;
-});
-
-export const getActivityLogError: (state: Immutable<EndpointState>) => ServerApiError | undefined =
-  createSelector(getActivityLogData, (activityLog) => {
-    if (isFailedResourceState(activityLog)) {
-      return activityLog.error;
-    }
-  });
-
-// returns a true if either lgo is uninitialised
-// or if it has failed an api call after having fetched a non empty log list earlier
-export const getActivityLogIsUninitializedOrHasSubsequentAPIError: (
-  state: Immutable<EndpointState>
-) => boolean = createSelector(
-  getActivityLogUninitialized,
-  getLastLoadedActivityLogData,
-  getActivityLogError,
-  (isUninitialized, lastLoadedLogData, isAPIError) => {
-    return isUninitialized || (!isAPIError && !!lastLoadedLogData?.data.length);
-  }
-);
 
 export const getIsEndpointHostIsolated = createSelector(detailsData, (details) => {
   return (details && isEndpointHostIsolated(details)) || false;
