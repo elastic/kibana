@@ -138,7 +138,7 @@ export const tinymathFunctions: Record<
     help: i18n.translate('xpack.lens.formula.addFunction.markdown', {
       defaultMessage: `
 Adds up two numbers.
-Also works with + symbol
+Also works with \`+\` symbol.
 
 Example: Calculate the sum of two fields
 
@@ -164,7 +164,7 @@ Example: Offset count by a static value
     help: i18n.translate('xpack.lens.formula.subtractFunction.markdown', {
       defaultMessage: `
 Subtracts the first number from the second number.
-Also works with \`-\` symbol
+Also works with \`-\` symbol.
 
 Example: Calculate the range of a field
 \`subtract(max(bytes), min(bytes))\`
@@ -486,17 +486,43 @@ Example: Calculate area based on side length
   },
   pick_max: {
     positionalArguments: [
-      { name: 'left', type: getTypeI18n('number') },
-      { name: 'right', type: getTypeI18n('number') },
+      {
+        name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
+        type: getTypeI18n('number'),
+      },
+      {
+        name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }),
+        type: getTypeI18n('number'),
+      },
     ],
-    help: '',
+    help: i18n.translate('xpack.lens.formula.maxFunction.markdown', {
+      defaultMessage: `
+Finds the maximum value between two numbers.
+    
+Example: Find the maximum between two fields averages
+\`pick_max(average(bytes), average(memory))\`
+        `,
+    }),
   },
   pick_min: {
     positionalArguments: [
-      { name: 'left', type: getTypeI18n('number') },
-      { name: 'right', type: getTypeI18n('number') },
+      {
+        name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
+        type: getTypeI18n('number'),
+      },
+      {
+        name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }),
+        type: getTypeI18n('number'),
+      },
     ],
-    help: '',
+    help: i18n.translate('xpack.lens.formula.minFunction.markdown', {
+      defaultMessage: `
+Finds the minimum value between two numbers.
+
+Example: Find the minimum between two fields averages
+\`pick_min(average(bytes), average(memory))\`
+    `,
+    }),
   },
 };
 
