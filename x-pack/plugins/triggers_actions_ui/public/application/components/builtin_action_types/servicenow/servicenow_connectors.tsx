@@ -23,6 +23,7 @@ import { updateActionConnector } from '../../../lib/action_connector_api';
 import { Credentials } from './credentials';
 import * as i18n from './translations';
 import { ServiceNowActionConnector } from './types';
+import { HiddenField } from '../../hidden_field';
 
 // eslint-disable-next-line import/no-default-export
 export { ServiceNowConnectorFields as default };
@@ -149,15 +150,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
         <InstallationCallout appId={snExternalServiceConfig[action.actionTypeId]?.appId ?? ''} />
       )}
       {!requiresNewApplication && <SpacedDeprecatedCallout onMigrate={onMigrateClick} />}
-      <UseField path={'config.usesTableApi'} config={{ defaultValue: false }}>
-        {(field) => {
-          /**
-           * This is a hidden field. We return null so we do not render
-           * any field on the form
-           */
-          return null;
-        }}
-      </UseField>
+      <HiddenField path={'config.usesTableApi'} config={{ defaultValue: false }} />
       <Credentials readOnly={readOnly} isLoading={isLoading} />
     </>
   );

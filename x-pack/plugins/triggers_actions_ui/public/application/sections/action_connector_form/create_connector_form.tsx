@@ -18,6 +18,7 @@ import { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { useKibana } from '../../../common/lib/kibana';
+import { HiddenField } from '../../components/hidden_field';
 
 interface ConnectorFormData {
   name: string;
@@ -60,15 +61,7 @@ const CreateConnectorFormComponent: React.FC<CreateConnectorFormProps> = ({
   const FieldsComponent = actionTypeModel?.actionConnectorFields ?? null;
   return (
     <>
-      <UseField path={'actionTypeId'}>
-        {(field) => {
-          /**
-           * This is a hidden field. We return null so we do not render
-           * any field on the form
-           */
-          return null;
-        }}
-      </UseField>
+      <HiddenField path={'actionTypeId'} />
       <UseField
         path="name"
         config={nameConfig}

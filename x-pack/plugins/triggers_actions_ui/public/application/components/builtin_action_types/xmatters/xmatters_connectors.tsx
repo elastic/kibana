@@ -21,6 +21,7 @@ import { XmattersAuthenticationType } from '../types';
 import { ButtonGroupField } from '../../button_group_field';
 import * as i18n from './translations';
 import { PasswordField } from '../../password_field';
+import { HiddenField } from '../../hidden_field';
 
 const { emptyField, urlField } = fieldValidators;
 
@@ -101,15 +102,7 @@ const XmattersActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
         legend={i18n.BASIC_AUTH_BUTTON_GROUP_LEGEND}
         options={authenticationButtons}
       />
-      <UseField path={'config.usesBasic'} config={{ defaultValue: true }}>
-        {(field) => {
-          /**
-           * This is a hidden field. We return null so we do not render
-           * any field on the form
-           */
-          return null;
-        }}
-      </UseField>
+      <HiddenField path={'config.usesBasic'} config={{ defaultValue: true }} />
       <EuiSpacer size="m" />
       {selectedAuth === XmattersAuthenticationType.URL ? (
         <EuiFlexGroup justifyContent="spaceBetween">
