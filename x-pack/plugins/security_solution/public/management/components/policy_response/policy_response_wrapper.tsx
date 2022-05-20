@@ -5,11 +5,10 @@
  * 2.0.
  */
 import React, { memo, useEffect, useState } from 'react';
-import { EuiEmptyPrompt, EuiLoadingContent, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { HostPolicyResponse } from '../../../../common/endpoint/types';
 import { PreferenceFormattedDateFromPrimitive } from '../../../common/components/formatted_date';
-import { useHttp } from '../../../common/lib/kibana';
 import { useGetEndpointPolicyResponse } from '../../hooks/endpoint/use_get_endpoint_policy_response';
 import { PolicyResponse } from './policy_response';
 import { getFailedOrWarningActionCountFromPolicyResponse } from '../../pages/endpoint_hosts/store/utils';
@@ -17,22 +16,21 @@ import { getFailedOrWarningActionCountFromPolicyResponse } from '../../pages/end
 export const PolicyResponseWrapper = memo<{
   endpointId: string;
 }>(({ endpointId }) => {
-  const http = useHttp();
-  const { data, isLoading, isFetching, isError } = useGetEndpointPolicyResponse(http, endpointId);
+  const { data, isLoading, isFetching, isError } = useGetEndpointPolicyResponse(endpointId);
 
-  const [responseConfig, setResponseConfig] =
+  const [policyResponseConfig, setPolicyResponseConfig] =
     useState<HostPolicyResponse['Endpoint']['policy']['applied']['response']['configurations']>();
-  const [responseActions, setResponseActions] =
+  const [policyResponseActions, setPolicyResponseActions] =
     useState<HostPolicyResponse['Endpoint']['policy']['applied']['actions']>();
-  const [responseAttentionCount, setResponseAttentionCount] = useState<Map<string, number>>(
-    new Map<string, number>()
-  );
+  const [policyResponseAttentionCount, setPolicyResponseAttentionCount] = useState<
+    Map<string, number>
+  >(new Map<string, number>());
 
   useEffect(() => {
     if (!!data && !isLoading && !isFetching && !isError) {
-      setResponseConfig(data.policy_response.Endpoint.policy.applied.response.configurations);
-      setResponseActions(data.policy_response.Endpoint.policy.applied.actions);
-      setResponseAttentionCount(
+      setPolicyResponseConfig(data.policy_response.Endpoint.policy.applied.response.configurations);
+      setPolicyResponseActions(data.policy_response.Endpoint.policy.applied.actions);
+      setPolicyResponseAttentionCount(
         getFailedOrWarningActionCountFromPolicyResponse(
           data.policy_response.Endpoint.policy.applied
         )
@@ -76,12 +74,12 @@ export const PolicyResponseWrapper = memo<{
           }
         />
       )}
-      {isLoading && <EuiLoadingContent lines={3} />}
-      {responseConfig !== undefined && responseActions !== undefined && (
+      {isLoading && <EuiLoadingSpinner size="m" />}
+      {policyResponseConfig !== undefined && policyResponseActions !== undefined && (
         <PolicyResponse
-          responseConfig={responseConfig}
-          responseActions={responseActions}
-          responseAttentionCount={responseAttentionCount}
+          policyResponseConfig={policyResponseConfig}
+          policyResponseActions={policyResponseActions}
+          policyResponseAttentionCount={policyResponseAttentionCount}
         />
       )}
     </>

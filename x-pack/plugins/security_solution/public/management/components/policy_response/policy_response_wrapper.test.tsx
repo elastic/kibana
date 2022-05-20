@@ -68,11 +68,15 @@ describe('when on the policy response', () => {
 
     return policyResponse;
   };
+
+  let commonPolicyResponse: HostPolicyResponse;
+
   const useGetEndpointPolicyResponseMock = useGetEndpointPolicyResponse as jest.Mock;
   let render: () => ReturnType<AppContextTestRender['render']>;
   const runMock = (customPolicyResponse?: HostPolicyResponse): void => {
+    commonPolicyResponse = customPolicyResponse ?? createPolicyResponse();
     useGetEndpointPolicyResponseMock.mockReturnValue({
-      data: { policy_response: customPolicyResponse ?? createPolicyResponse() },
+      data: { policy_response: commonPolicyResponse },
       isLoading: false,
       isFetching: false,
       isError: false,
@@ -102,7 +106,9 @@ describe('when on the policy response', () => {
     const configAccordions = await render().findAllByTestId(
       'endpointDetailsPolicyResponseConfigAccordion'
     );
-    expect(configAccordions).not.toBeNull();
+    expect(configAccordions).toHaveLength(
+      Object.keys(commonPolicyResponse.Endpoint.policy.applied.response.configurations).length
+    );
   });
 
   it('should show an actions section for each configuration', async () => {
@@ -113,10 +119,20 @@ describe('when on the policy response', () => {
     const action = await render().findAllByTestId('policyResponseAction');
     const statusHealth = await render().findAllByTestId('policyResponseStatusHealth');
     const message = await render().findAllByTestId('policyResponseMessage');
-    expect(actionAccordions).not.toBeNull();
-    expect(action).not.toBeNull();
-    expect(statusHealth).not.toBeNull();
-    expect(message).not.toBeNull();
+
+    let expectedActionAccordionCount = 0;
+    Object.keys(commonPolicyResponse.Endpoint.policy.applied.response.configurations).forEach(
+      (key) => {
+        expectedActionAccordionCount +=
+          commonPolicyResponse.Endpoint.policy.applied.response.configurations[
+            key as keyof HostPolicyResponse['Endpoint']['policy']['applied']['response']['configurations']
+          ].concerned_actions.length;
+      }
+    );
+    expect(actionAccordions).toHaveLength(expectedActionAccordionCount);
+    expect(action).toHaveLength(expectedActionAccordionCount * 2);
+    expect(statusHealth).toHaveLength(expectedActionAccordionCount * 3);
+    expect(message).toHaveLength(expectedActionAccordionCount * 4);
   });
 
   it('should not show any numbered badges if all actions are successful', () => {
@@ -137,7 +153,7 @@ describe('when on the policy response', () => {
     const attentionBadge = await render().findAllByTestId(
       'endpointDetailsPolicyResponseAttentionBadge'
     );
-    expect(attentionBadge).not.toBeNull();
+    expect(attentionBadge).not.toHaveLength(0);
   });
 
   it('should show a numbered badge if at least one action has a warning', async () => {
@@ -147,7 +163,7 @@ describe('when on the policy response', () => {
     const attentionBadge = await render().findAllByTestId(
       'endpointDetailsPolicyResponseAttentionBadge'
     );
-    expect(attentionBadge).not.toBeNull();
+    expect(attentionBadge).not.toHaveLength(0);
   });
 
   it('should format unknown policy action names', async () => {

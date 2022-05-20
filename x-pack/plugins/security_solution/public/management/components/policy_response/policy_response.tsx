@@ -72,7 +72,7 @@ const PolicyResponseConfigAccordion = styled(EuiAccordion)`
   }
 `;
 
-const ResponseActions = memo(
+const PolicyResponseActions = memo(
   ({
     actions,
     responseActions,
@@ -126,24 +126,28 @@ const ResponseActions = memo(
   }
 );
 
-ResponseActions.displayName = 'ResponseActions';
+PolicyResponseActions.displayName = 'PolicyResponseActions';
 
 interface PolicyResponseProps {
-  responseConfig: Immutable<HostPolicyResponseConfiguration>;
-  responseActions: Immutable<HostPolicyResponseAppliedAction[]>;
-  responseAttentionCount: Map<string, number>;
+  policyResponseConfig: Immutable<HostPolicyResponseConfiguration>;
+  policyResponseActions: Immutable<HostPolicyResponseAppliedAction[]>;
+  policyResponseAttentionCount: Map<string, number>;
 }
 
 /**
  * A policy response is returned by the endpoint and shown in the host details after a user modifies a policy
  */
 export const PolicyResponse = memo(
-  ({ responseConfig, responseActions, responseAttentionCount }: PolicyResponseProps) => {
+  ({
+    policyResponseConfig,
+    policyResponseActions,
+    policyResponseAttentionCount,
+  }: PolicyResponseProps) => {
     const generateId = useMemo(() => htmlIdGenerator(), []);
     return (
       <>
-        {Object.entries(responseConfig).map(([key, val]) => {
-          const attentionCount = responseAttentionCount.get(key);
+        {Object.entries(policyResponseConfig).map(([key, val]) => {
+          const attentionCount = policyResponseAttentionCount.get(key);
           return (
             <PolicyResponseConfigAccordion
               id={generateId(`id_${key}`)}
@@ -167,7 +171,10 @@ export const PolicyResponse = memo(
                 )
               }
             >
-              <ResponseActions actions={val.concerned_actions} responseActions={responseActions} />
+              <PolicyResponseActions
+                actions={val.concerned_actions}
+                responseActions={policyResponseActions}
+              />
             </PolicyResponseConfigAccordion>
           );
         })}
