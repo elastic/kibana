@@ -18,6 +18,7 @@ const extractSettings = (config: MonitoringConfig) => {
     ccs: config.ui.ccs.enabled,
     logsIndex: config.ui.logs.index,
     metricbeatIndex: config.ui.metricbeat.index,
+    hasRemoteClusterConfigured: (config.ui.elasticsearch.hosts || []).some(Boolean),
   };
 };
 
@@ -49,6 +50,8 @@ export function health(server: MonitoringCore) {
         index,
         timeRange,
         search: (params: any) => callWithRequest(req, 'search', params),
+      }).catch((err) => {
+        return { error: err.message };
       });
 
       return { monitoredClusters, settings };
