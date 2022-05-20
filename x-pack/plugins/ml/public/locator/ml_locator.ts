@@ -86,6 +86,8 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
       case ML_PAGES.DATA_VISUALIZER_INDEX_SELECT:
       case ML_PAGES.AIOPS:
       case ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES:
+      case ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT:
+      case ML_PAGES.AIOPS_SINGLE_ENDPOINT_STREAMING_DEMO:
       case ML_PAGES.OVERVIEW:
       case ML_PAGES.SETTINGS:
       case ML_PAGES.FILTER_LISTS_MANAGE:
