@@ -12,4 +12,6 @@ export type InitialConnector<Config, Secrets> = Partial<
 > &
   Pick<UserConfiguredActionConnector<Config, Secrets>, 'actionTypeId' | 'config' | 'secrets'>;
 
-export type Connector = InitialConnector<Record<string, unknown>, Record<string, unknown>>;
+export type Connector<Config = Record<string, unknown>, Secrets = Record<string, unknown>> =
+  | InitialConnector<Record<string, unknown>, Record<string, unknown>>
+  | UserConfiguredActionConnector<Config, Secrets>;

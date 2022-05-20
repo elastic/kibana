@@ -20,7 +20,7 @@ interface Props {
   isLoading: boolean;
 }
 
-const { emptyField } = fieldValidators;
+const { urlField } = fieldValidators;
 
 const CredentialsApiUrlComponent: React.FC<Props> = ({ isLoading, readOnly }) => {
   const { docLinks } = useKibana().services;
@@ -50,7 +50,7 @@ const CredentialsApiUrlComponent: React.FC<Props> = ({ isLoading, readOnly }) =>
           label: i18n.API_URL_LABEL,
           validations: [
             {
-              validator: emptyField(i18n.API_URL_REQUIRED),
+              validator: urlField(i18n.API_URL_REQUIRED),
             },
           ],
         }}

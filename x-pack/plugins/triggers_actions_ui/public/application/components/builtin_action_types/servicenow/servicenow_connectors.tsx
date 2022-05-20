@@ -22,8 +22,9 @@ import { UpdateConnector } from './update_connector';
 import { updateActionConnector } from '../../../lib/action_connector_api';
 import { Credentials } from './credentials';
 import * as i18n from './translations';
-import { ServiceNowActionConnector } from './types';
+import { ServiceNowActionConnector, ServiceNowConfig, ServiceNowSecrets } from './types';
 import { HiddenField } from '../../hidden_field';
+import { Connector } from '../../../sections/action_connector_form/types';
 
 // eslint-disable-next-line import/no-default-export
 export { ServiceNowConnectorFields as default };
@@ -37,20 +38,21 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
     http,
     notifications: { toasts },
   } = useKibana().services;
-  const [{ id, name, isDeprecated, actionTypeId, config, secrets }] =
-    useFormData<ServiceNowActionConnector>({
-      watch: [
-        'id',
-        'isDeprecated',
-        'actionTypeId',
-        'name',
-        'config.apiUrl',
-        'secrets.username',
-        'secrets.password',
-      ],
-    });
+  const [{ id, name, isDeprecated, actionTypeId, config, secrets }] = useFormData<
+    Connector<ServiceNowConfig, ServiceNowSecrets>
+  >({
+    watch: [
+      'id',
+      'isDeprecated',
+      'actionTypeId',
+      'name',
+      'config.apiUrl',
+      'secrets.username',
+      'secrets.password',
+    ],
+  });
 
-  const requiresNewApplication = isDeprecated;
+  const requiresNewApplication = isDeprecated ?? true;
   const action = useMemo(
     () => ({
       name,
@@ -113,11 +115,11 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
       await updateActionConnector({
         http,
         connector: {
-          name,
+          name: name ?? '',
           config: { apiUrl: config.apiUrl, usesTableApi: false },
           secrets: { username: secrets.username, password: secrets.password },
         },
-        id,
+        id: id ?? '',
       });
 
       setShowUpdateConnector(false);

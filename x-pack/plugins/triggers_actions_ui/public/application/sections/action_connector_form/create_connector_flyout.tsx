@@ -317,13 +317,13 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         ) : null}
         {actionType != null ? (
           <>
-            {preSubmitValidationErrorMessage}
             <ConnectorForm
               actionTypeModel={actionTypeModel}
               connector={initialConnector}
               isEdit={false}
               onChange={setFormState}
             />
+            {preSubmitValidationErrorMessage}
           </>
         ) : null}
       </EuiFlyoutBody>

@@ -16,17 +16,24 @@ import { i18n } from '@kbn/i18n';
 
 const { emptyField } = fieldValidators;
 
-const getFieldConfig = ({ label }: { label: string }) => ({
+const getFieldConfig = ({ label, validate }: { label: string; validate: boolean }) => ({
   label,
   validations: [
-    {
-      validator: emptyField(
-        i18n.translate('xpack.triggersActionsUI.components.passwordField.error.requiredNameText', {
-          values: { label },
-          defaultMessage: '{label} is required.',
-        })
-      ),
-    },
+    ...(validate
+      ? [
+          {
+            validator: emptyField(
+              i18n.translate(
+                'xpack.triggersActionsUI.components.passwordField.error.requiredNameText',
+                {
+                  values: { label },
+                  defaultMessage: '{label} is required.',
+                }
+              )
+            ),
+          },
+        ]
+      : []),
   ],
 });
 
@@ -34,6 +41,7 @@ interface PasswordFieldProps {
   path: string;
   label: string;
   helpText?: string | ReactNode;
+  validate?: boolean;
   [key: string]: any;
 }
 
@@ -41,10 +49,11 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = ({
   path,
   label,
   helpText,
+  validate = true,
   ...rest
 }) => {
   return (
-    <UseField<string> path={path} config={getFieldConfig({ label })}>
+    <UseField<string> path={path} config={getFieldConfig({ label, validate })}>
       {(field) => {
         const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 

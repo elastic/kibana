@@ -87,25 +87,6 @@ const OAuthComponent: React.FC<Props> = ({ isLoading, readOnly }) => {
         isLoading={isLoading}
       />
       <UseField
-        path="secrets.clientSecret"
-        component={TextField}
-        config={{
-          label: i18n.CLIENTSECRET_LABEL,
-          validations: [
-            {
-              validator: emptyField(i18n.CLIENTSECRET_REQUIRED),
-            },
-          ],
-        }}
-        componentProps={{
-          euiFieldProps: {
-            'data-test-subj': 'connector-servicenow-client-secret-form-input',
-            readOnly,
-            isLoading,
-          },
-        }}
-      />
-      <UseField
         path="secrets.privateKey"
         component={TextAreaField}
         config={{
@@ -128,6 +109,7 @@ const OAuthComponent: React.FC<Props> = ({ isLoading, readOnly }) => {
         path="secrets.privateKeyPassword"
         label={i18n.PRIVATE_KEY_PASSWORD_LABEL}
         helpText={i18n.PRIVATE_KEY_PASSWORD_HELPER_TEXT}
+        validate={false}
         data-test-subj="connector-servicenow-private-key-password-form-input"
         readOnly={readOnly}
         isLoading={isLoading}
