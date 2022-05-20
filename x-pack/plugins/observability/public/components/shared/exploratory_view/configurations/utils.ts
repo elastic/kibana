@@ -78,17 +78,17 @@ export function createExploratoryViewUrl(
   );
 }
 
-export function buildPhraseFilter(field: string, value: string, dataView: DataView) {
+export function buildPhraseFilter(field: string, value: string, dataView?: DataView) {
   const fieldMeta = dataView?.fields.find((fieldT) => fieldT.name === field);
-  if (fieldMeta) {
+  if (fieldMeta && dataView) {
     return [esBuildPhraseFilter(fieldMeta, value, dataView)];
   }
   return [];
 }
 
-export function getQueryFilter(field: string, value: string[], dataView: DataView) {
+export function getQueryFilter(field: string, value: string[], dataView?: DataView) {
   const fieldMeta = dataView?.fields.find((fieldT) => fieldT.name === field);
-  if (fieldMeta && dataView.id) {
+  if (fieldMeta && dataView) {
     return value.map((val) =>
       buildQueryFilter(
         {
@@ -106,9 +106,9 @@ export function getQueryFilter(field: string, value: string[], dataView: DataVie
   return [];
 }
 
-export function buildPhrasesFilter(field: string, value: string[], dataView: DataView) {
+export function buildPhrasesFilter(field: string, value: string[], dataView?: DataView) {
   const fieldMeta = dataView?.fields.find((fieldT) => fieldT.name === field);
-  if (fieldMeta) {
+  if (fieldMeta && dataView) {
     if (value.length === 1) {
       return [esBuildPhraseFilter(fieldMeta, value[0], dataView)];
     }
@@ -117,9 +117,9 @@ export function buildPhrasesFilter(field: string, value: string[], dataView: Dat
   return [];
 }
 
-export function buildExistsFilter(field: string, dataView: DataView) {
+export function buildExistsFilter(field: string, dataView?: DataView) {
   const fieldMeta = dataView?.fields.find((fieldT) => fieldT.name === field);
-  if (fieldMeta) {
+  if (fieldMeta && dataView) {
     return [esBuildExistsFilter(fieldMeta, dataView)];
   }
   return [];
