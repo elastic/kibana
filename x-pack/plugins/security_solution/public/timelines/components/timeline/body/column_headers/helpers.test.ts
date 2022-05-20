@@ -25,7 +25,7 @@ describe('helpers', () => {
   });
 
   describe('getRootCategory', () => {
-    const baseFields = ['@timestamp', '_id', 'message'];
+    const baseFields = ['@timestamp'];
 
     baseFields.forEach((field) => {
       test(`it returns the 'base' category for the ${field} field`, () => {
@@ -107,29 +107,31 @@ describe('helpers', () => {
       expect(getColumnHeaders(mockHeader, mockBrowserFields)).toEqual(expectedData);
     });
 
-    test('it should return the expected metadata for the `_id` field, which is one level deep, and belongs to the `base` category', () => {
+    test('it should return the expected metadata for the `@timestamp` field, which is one level deep, and belongs to the `base` category', () => {
       const headers: ColumnHeaderOptions[] = [
         {
           columnHeaderType: 'not-filtered',
-          id: '_id',
+          id: '@timestamp',
           initialWidth: 180,
         },
       ];
 
       expect(getColumnHeaders(headers, mockBrowserFields)).toEqual([
         {
-          aggregatable: false,
+          aggregatable: true,
           category: 'base',
           columnHeaderType: 'not-filtered',
-          description: 'Each document has an _id that uniquely identifies it',
-          esTypes: [],
-          example: 'Y-6TfmcB0WOhS6qyMv3s',
-          id: '_id',
+          description:
+            'Date/time when the event originated. For log events this is the date/time when the event was generated, and not when it was read. Required field for all events.',
+          esTypes: ['date'],
+          example: '2016-05-23T08:05:34.853Z',
+          format: '',
+          id: '@timestamp',
           indexes: ['auditbeat', 'filebeat', 'packetbeat'],
           initialWidth: 180,
-          name: '_id',
+          name: '@timestamp',
           searchable: true,
-          type: 'string',
+          type: 'date',
         },
       ]);
     });
@@ -164,7 +166,6 @@ describe('helpers', () => {
                 'winlogbeat-*',
               ],
               name: 'test_field_1',
-              readFromDocValues: true,
               searchable: true,
               type: 'string',
             },
@@ -194,7 +195,6 @@ describe('helpers', () => {
           ],
           initialWidth: 180,
           name: 'test_field_1',
-          readFromDocValues: true,
           searchable: true,
           type: 'string',
         },
@@ -231,7 +231,6 @@ describe('helpers', () => {
                 'winlogbeat-*',
               ],
               name: 'foo.bar',
-              readFromDocValues: true,
               searchable: true,
               type: 'string',
             },
@@ -261,7 +260,6 @@ describe('helpers', () => {
           ],
           initialWidth: 180,
           name: 'foo.bar',
-          readFromDocValues: true,
           searchable: true,
           type: 'string',
         },
