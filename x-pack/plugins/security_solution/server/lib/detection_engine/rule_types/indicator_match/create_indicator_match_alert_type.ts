@@ -33,9 +33,7 @@ export const createIndicatorMatchAlertType = (
           }
           return validated;
         },
-        validateMutatedParams: (mutatedOject: unknown) => {
-          const mutatedRuleParams = mutatedOject as ThreatRuleParams;
-
+        validateMutatedParams: (mutatedRuleParams) => {
           validateImmutable(mutatedRuleParams.immutable);
           validateIndexPatterns(mutatedRuleParams.index);
 

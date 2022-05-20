@@ -33,9 +33,7 @@ export const createMlAlertType = (
           }
           return validated;
         },
-        validateMutatedParams: (mutatedOject: unknown) => {
-          const mutatedRuleParams = mutatedOject as MachineLearningRuleParams;
-
+        validateMutatedParams: (mutatedRuleParams) => {
           validateImmutable(mutatedRuleParams.immutable);
 
           return incrementVersion(mutatedRuleParams);

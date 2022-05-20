@@ -36,9 +36,7 @@ export const createSavedQueryAlertType = (
           }
           return validated;
         },
-        validateMutatedParams: (mutatedOject: unknown) => {
-          const mutatedRuleParams = mutatedOject as SavedQueryRuleParams;
-
+        validateMutatedParams: (mutatedRuleParams) => {
           validateImmutable(mutatedRuleParams.immutable);
           validateIndexPatterns(mutatedRuleParams.index);
 

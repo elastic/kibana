@@ -32,9 +32,7 @@ export const createEqlAlertType = (
           }
           return validated;
         },
-        validateMutatedParams: (mutatedOject: unknown) => {
-          const mutatedRuleParams = mutatedOject as EqlRuleParams;
-
+        validateMutatedParams: (mutatedRuleParams) => {
           validateImmutable(mutatedRuleParams.immutable);
           validateIndexPatterns(mutatedRuleParams.index);
 

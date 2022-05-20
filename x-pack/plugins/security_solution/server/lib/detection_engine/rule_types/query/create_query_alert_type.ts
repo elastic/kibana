@@ -32,9 +32,7 @@ export const createQueryAlertType = (
           }
           return validated;
         },
-        validateMutatedParams: (mutatedOject: unknown) => {
-          const mutatedRuleParams = mutatedOject as QueryRuleParams;
-
+        validateMutatedParams: (mutatedRuleParams) => {
           validateImmutable(mutatedRuleParams.immutable);
           validateIndexPatterns(mutatedRuleParams.index);
 
