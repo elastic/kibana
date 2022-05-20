@@ -72,7 +72,10 @@ import {
   Author,
   event_category_override,
   namespace,
-} from '../common/schemas';
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+  SetupGuide,
+} from '../common';
 
 /**
  * Big differences between this schema and the createRulesSchema
@@ -117,8 +120,11 @@ export const addPrepackagedRulesSchema = t.intersection([
       meta, // defaults to "undefined" if not set during decode
       machine_learning_job_id, // defaults to "undefined" if not set during decode
       max_signals: DefaultMaxSignalsNumber, // defaults to DEFAULT_MAX_SIGNALS (100) if not set during decode
+      related_integrations: RelatedIntegrationArray, // defaults to "undefined" if not set during decode
+      required_fields: RequiredFieldArray, // defaults to "undefined" if not set during decode
       risk_score_mapping: DefaultRiskScoreMappingArray, // defaults to empty risk score mapping array if not set during decode
       rule_name_override, // defaults to "undefined" if not set during decode
+      setup: SetupGuide, // defaults to "undefined" if not set during decode
       severity_mapping: DefaultSeverityMappingArray, // defaults to empty actions array if not set during decode
       tags: DefaultStringArray, // defaults to empty string array if not set during decode
       to: DefaultToString, // defaults to "now" if not set during decode
