@@ -11,12 +11,9 @@ import type { KibanaFeature } from '@kbn/features-plugin/common';
 
 import type { RouteDefinitionParams } from '../..';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
+import { getPutPayloadSchema, validateKibanaPrivileges } from '../../../lib';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
-import {
-  getPutPayloadSchema,
-  transformPutPayloadToElasticsearchRole,
-  validateKibanaPrivileges,
-} from './model';
+import { transformPutPayloadToElasticsearchRole } from './model';
 
 const roleGrantsSubFeaturePrivileges = (
   features: KibanaFeature[],

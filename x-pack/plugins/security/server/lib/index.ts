@@ -4,7 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export type { ElasticsearchRole } from '../../../../authorization';
-export { transformElasticsearchRoleToRole } from '../../../../authorization';
-export { transformPutPayloadToElasticsearchRole } from './put_payload';
+export { getPutPayloadSchema } from './role_schema';
+export { validateKibanaPrivileges } from './role_utils';

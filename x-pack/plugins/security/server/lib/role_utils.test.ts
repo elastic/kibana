@@ -6,7 +6,7 @@
  */
 
 import { ALL_SPACES_ID } from '../../common/constants';
-import { transformPrivilegesToElasticsearchPrivileges } from './kbn_privileges_to_es_priviliges';
+import { transformPrivilegesToElasticsearchPrivileges } from './role_utils';
 
 describe('transformPrivilegesToElasticsearchPrivileges', () => {
   test('returns expected result', () => {

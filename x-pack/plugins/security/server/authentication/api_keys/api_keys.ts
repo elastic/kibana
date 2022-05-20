@@ -10,7 +10,7 @@ import type { OneOf } from '@kbn/utility-types';
 
 import type { Role } from '../../../common';
 import type { SecurityLicense } from '../../../common/licensing';
-import { transformPrivilegesToElasticsearchPrivileges } from '../../role_transform_utils/kbn_privileges_to_es_priviliges';
+import { transformPrivilegesToElasticsearchPrivileges } from '../../lib/role_utils';
 import {
   BasicHTTPAuthorizationHeaderCredentials,
   HTTPAuthorizationHeader,
