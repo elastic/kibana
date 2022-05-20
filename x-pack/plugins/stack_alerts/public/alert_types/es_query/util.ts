@@ -4,13 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { EsQueryAlertParams, SearchType } from './types';
 
-export interface TriggersAndActionsUiDeps {
-  data: DataPublicPluginStart;
-}
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { EsQueryAlertParams, SearchType, TriggersAndActionsUiDeps } from './types';
 
 export const isSearchSourceAlert = (
   ruleParams: EsQueryAlertParams

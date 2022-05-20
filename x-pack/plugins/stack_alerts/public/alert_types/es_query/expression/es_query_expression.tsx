@@ -9,8 +9,10 @@ import React, { useState, Fragment, useEffect, useCallback } from 'react';
 import { firstValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+
 import { XJsonMode } from '@kbn/ace';
 import 'brace/theme/github';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -124,15 +126,18 @@ export const EsQueryExpression = ({
     }
   };
 
-  const hasValidationErrors = () => {
+  const hasValidationErrors = useCallback(() => {
     const { errors: validationErrors } = validateExpression(currentAlertParams);
     return Object.keys(validationErrors).some(
       (key) => validationErrors[key] && validationErrors[key].length
     );
-  };
+  }, [currentAlertParams]);
 
   const onTestQuery = useCallback(async () => {
     const window = `${timeWindowSize}${timeWindowUnit}`;
+    if (hasValidationErrors()) {
+      return { nrOfDocs: 0, timeWindow: window };
+    }
     const timeWindow = parseDuration(window);
     const parsedQuery = JSON.parse(esQuery);
     const now = Date.now();
@@ -153,7 +158,7 @@ export const EsQueryExpression = ({
 
     const hits = rawResponse.hits;
     return { nrOfDocs: totalHitsToNumber(hits.total), timeWindow: window };
-  }, [data.search, esQuery, index, timeField, timeWindowSize, timeWindowUnit]);
+  }, [data.search, esQuery, index, timeField, timeWindowSize, timeWindowUnit, hasValidationErrors]);
 
   return (
     <Fragment>
