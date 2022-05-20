@@ -20,7 +20,7 @@ import {
   Filter,
   Query,
   waitUntilNextSessionCompletes$,
-  QueryState,
+  GlobalQueryStateFromUrl,
 } from '../../services/data';
 import { cleanFiltersForSerialize } from '.';
 
@@ -166,7 +166,7 @@ export const applyDashboardFilterState = ({
    * time range and refresh interval to the query service.
    */
   if (currentDashboardState.timeRestore) {
-    const globalQueryState = kbnUrlStateStorage.get<QueryState>('_g');
+    const globalQueryState = kbnUrlStateStorage.get<GlobalQueryStateFromUrl>('_g');
     if (!globalQueryState?.time) {
       if (savedDashboard.timeFrom && savedDashboard.timeTo) {
         timefilterService.setTime({
