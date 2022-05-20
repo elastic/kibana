@@ -9,7 +9,6 @@ import { isPlainObject } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   AggregationsCardinalityAggregate,
-  AggregationsCompositeBucket,
   AggregationsMaxAggregate,
   AggregationsMinAggregate,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -28,7 +27,7 @@ import { buildReasonMessageForThresholdAlert } from '../reason_formatters';
 import type { ThresholdSignalHistory, BulkCreate, WrapHits, SignalSource } from '../types';
 import { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { BaseFieldsLatest } from '../../../../../common/detection_engine/schemas/alerts';
-import { ThresholdBucket } from './types';
+import { ThresholdBucket, ThresholdCompositeBucket } from './types';
 
 interface BulkCreateThresholdSignalsParams {
   buckets: ThresholdBucket[];
@@ -53,7 +52,7 @@ const getTransformedHits = (
   threshold: ThresholdNormalized,
   ruleId: string
 ) => {
-  const isCompositeBucket = (bucket: ThresholdBucket): bucket is AggregationsCompositeBucket =>
+  const isCompositeBucket = (bucket: ThresholdBucket): bucket is ThresholdCompositeBucket =>
     isPlainObject(bucket.key);
 
   return buckets.map((bucket, i) => ({

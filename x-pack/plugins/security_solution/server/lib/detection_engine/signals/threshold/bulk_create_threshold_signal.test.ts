@@ -32,9 +32,11 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
           },
           doc_count: 12,
           max_timestamp: {
+            value: 1608222603,
             value_as_string: '2020-12-17T16:30:03.000Z',
           },
           min_timestamp: {
+            value: 1608222483,
             value_as_string: '2020-12-17T16:28:03.000Z',
           },
           cardinality_count: {
@@ -130,9 +132,11 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
           key: '',
           doc_count: 15,
           max_timestamp: {
+            value: 1608222603,
             value_as_string: '2020-12-17T16:30:03.000Z',
           },
           min_timestamp: {
+            value: 1608222483,
             value_as_string: '2020-12-17T16:28:03.000Z',
           },
           cardinality_count: {
