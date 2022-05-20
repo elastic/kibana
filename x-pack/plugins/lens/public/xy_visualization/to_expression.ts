@@ -356,7 +356,7 @@ const referenceLineLayerToExpression = (
     chain: [
       {
         type: 'function',
-        function: 'extendedReferenceLineLayer',
+        function: 'referenceLineLayer',
         arguments: {
           layerId: [layer.layerId],
           yConfig: layer.yConfig
