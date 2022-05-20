@@ -17,7 +17,8 @@ import {
   RenderChangeListener,
   TooltipProps,
   TooltipType,
-  SeriesIdentifier, PartitionElementEvent,
+  SeriesIdentifier,
+  PartitionElementEvent,
 } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';

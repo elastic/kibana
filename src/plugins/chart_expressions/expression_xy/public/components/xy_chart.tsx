@@ -24,7 +24,8 @@ import {
   DisplayValueStyle,
   RecursivePartial,
   AxisStyle,
-  Placement, XYChartElementEvent,
+  Placement,
+  XYChartElementEvent,
 } from '@elastic/charts';
 import { IconType } from '@elastic/eui';
 import { PaletteRegistry } from '@kbn/coloring';
