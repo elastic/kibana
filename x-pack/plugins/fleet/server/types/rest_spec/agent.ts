@@ -78,6 +78,12 @@ export const PostBulkAgentUpgradeRequestSchema = {
     version: schema.string(),
     force: schema.maybe(schema.boolean()),
     rollout_duration_seconds: schema.maybe(schema.number({ min: 600 })),
+    start_time: schema.maybe(
+      schema.string({
+        // TODO validate date
+        // validate: schema.
+      })
+    ),
   }),
 };
 

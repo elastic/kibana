@@ -84,6 +84,7 @@ export async function sendUpgradeAgentsActions(
     sourceUri?: string | undefined;
     force?: boolean;
     upgradeDurationSeconds?: number;
+    startTime?: string;
   }
 ) {
   // Full set of agents
@@ -166,9 +167,11 @@ export async function sendUpgradeAgentsActions(
 
   const rollingUpgradeOptions = options?.upgradeDurationSeconds
     ? {
-        start_time: now,
+        start_time: options.startTime ?? now,
         minimum_execution_duration: MINIMUM_EXECUTION_DURATION_SECONDS,
-        expiration: moment().add(options?.upgradeDurationSeconds, 'seconds').toISOString(),
+        expiration: moment(options.startTime ?? now)
+          .add(options?.upgradeDurationSeconds, 'seconds')
+          .toISOString(),
       }
     : {};
 

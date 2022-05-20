@@ -55,7 +55,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   // Actions states
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState<boolean>(false);
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState<boolean>(false);
-  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState<boolean>(false);
+  const [updateModalState, setUpgradeModalState] = useState({ isOpen: false, isScheduled: false });
 
   // Check if user is working with only inactive agents
   const atLeastOneActiveAgentSelected =
@@ -109,7 +109,22 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
           disabled: !atLeastOneActiveAgentSelected,
           onClick: () => {
             closeMenu();
-            setIsUpgradeModalOpen(true);
+            setUpgradeModalState({ isOpen: true, isScheduled: false });
+          },
+        },
+        {
+          name: (
+            <FormattedMessage
+              id="xpack.fleet.agentBulkActions.scheduleUpgradeAgents"
+              data-test-subj="agentBulkActionsScheduleUpgrade"
+              defaultMessage="Schedule upgrade for agents"
+            />
+          ),
+          icon: <EuiIcon type="timeRefresh" size="m" />,
+          disabled: !atLeastOneActiveAgentSelected,
+          onClick: () => {
+            closeMenu();
+            setUpgradeModalState({ isOpen: true, isScheduled: true });
           },
         },
       ],
@@ -145,13 +160,14 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
           />
         </EuiPortal>
       )}
-      {isUpgradeModalOpen && (
+      {updateModalState.isOpen && (
         <EuiPortal>
           <AgentUpgradeAgentModal
             agents={agents}
             agentCount={agentCount}
+            isScheduled={updateModalState.isScheduled}
             onClose={() => {
-              setIsUpgradeModalOpen(false);
+              setUpgradeModalState({ isOpen: false, isScheduled: false });
               refreshAgents();
             }}
           />
