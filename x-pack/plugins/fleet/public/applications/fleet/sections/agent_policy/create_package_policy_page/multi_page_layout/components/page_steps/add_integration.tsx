@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useEffect, useMemo } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiCallOut, EuiLink, EuiButton, EuiSpacer } from '@elastic/eui';
 import { safeLoad } from 'js-yaml';
@@ -15,13 +15,9 @@ import { i18n } from '@kbn/i18n';
 import type { MultiPageStepLayoutProps } from '../../types';
 import type { PackagePolicyFormState } from '../../../types';
 import type { NewPackagePolicy } from '../../../../../../types';
-import {
-  sendCreatePackagePolicy,
-  useStartServices,
-  useGetPackageInfoByKey,
-} from '../../../../../../hooks';
+import { sendCreatePackagePolicy, useStartServices } from '../../../../../../hooks';
 import type { RequestError } from '../../../../../../hooks';
-import { Loading, Error } from '../../../../../../components';
+import { Error } from '../../../../../../components';
 import { sendGeneratePackagePolicy } from '../../hooks';
 import { CreatePackagePolicyBottomBar } from '..';
 import type { PackagePolicyValidationResults } from '../../../services';
@@ -79,18 +75,6 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
     props;
 
   const [basePolicyError, setBasePolicyError] = useState<RequestError>();
-
-  // Fetch package info
-  const {
-    data: packageInfoData,
-    error: packageInfoError,
-    isLoading: isPackageInfoLoading,
-  } = useGetPackageInfoByKey(packageInfo.name, packageInfo.version); // TODO: is this needed?
-  const fullPackageInfo = useMemo(() => {
-    if (packageInfoData && packageInfoData.item) {
-      return packageInfoData.item;
-    }
-  }, [packageInfoData]);
 
   const { notifications } = useStartServices();
   const [formState, setFormState] = useState<PackagePolicyFormState>('VALID');
@@ -203,16 +187,8 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
       />
     );
   }
-
-  if (packageInfoError) {
-    return <AddIntegrationError error={packageInfoError} />;
-  }
   if (basePolicyError) {
     return <AddIntegrationError error={basePolicyError} />;
-  }
-
-  if (isPackageInfoLoading) {
-    return <Loading />;
   }
 
   return (
@@ -220,7 +196,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
       {isManaged ? null : <StandaloneWarningCallout setIsManaged={setIsManaged} />}
       <EuiSpacer size={'l'} />
       <StepConfigurePackagePolicy
-        packageInfo={fullPackageInfo!}
+        packageInfo={packageInfo}
         showOnlyIntegration={integrationInfo?.name}
         packagePolicy={packagePolicy}
         updatePackagePolicy={updatePackagePolicy}
