@@ -27,6 +27,7 @@ export class ElasticsearchBlobStorage implements BlobStorage {
   constructor(
     private readonly esClient: ElasticsearchClient,
     private readonly index: string = BLOB_STORAGE_SYSTEM_INDEX_NAME,
+    private readonly chunkSize: undefined | string,
     private readonly logger: Logger
   ) {
     assert(
@@ -35,16 +36,10 @@ export class ElasticsearchBlobStorage implements BlobStorage {
     );
   }
 
-  private indexCreateCheckComplete = false;
-
   private async createIndexIfNotExists(): Promise<void> {
     const index = this.index;
-    if (this.indexCreateCheckComplete) {
-      return;
-    }
     if (await this.esClient.indices.exists({ index })) {
       this.logger.debug(`${index} already exists.`);
-      this.indexCreateCheckComplete = true;
       return;
     }
 
@@ -62,7 +57,6 @@ export class ElasticsearchBlobStorage implements BlobStorage {
           mappings,
         },
       });
-      this.indexCreateCheckComplete = true;
     } catch (e) {
       if (e instanceof errors.ResponseError && e.statusCode === 400) {
         this.logger.warn('Unable to create blob storage index, it may have been created already.');
@@ -82,6 +76,7 @@ export class ElasticsearchBlobStorage implements BlobStorage {
         logger: this.logger.get('content-stream-upload'),
         parameters: {
           encoding: 'base64',
+          maxChunkSize: this.chunkSize,
         },
       });
       await pipeline(src, dest);
