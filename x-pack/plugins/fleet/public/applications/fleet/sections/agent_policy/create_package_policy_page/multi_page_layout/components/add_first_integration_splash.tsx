@@ -35,11 +35,18 @@ import { WithHeaderLayout } from '../../../../../layouts';
 import { useStartServices } from '../../../../../hooks';
 import type { RequestError } from '../../../../../hooks';
 
-const PaddedCentralTitle = styled('h1')`
+const CentralTitle = styled('h1')`
   text-align: center;
-  padding-top: 15px;
-  padding-bottom: 45px;
 `;
+const PaddedCentralTitle: React.FC = ({ children }) => (
+  <>
+    <EuiSpacer size={'s'} />
+    <EuiTitle size="l">
+      <CentralTitle>{children}</CentralTitle>
+    </EuiTitle>
+    <EuiSpacer size={'xl'} />
+  </>
+);
 
 const SubtitleText = styled(EuiText)`
   max-width: 250px;
@@ -290,14 +297,12 @@ export const AddFirstIntegrationSplashScreen: React.FC<{
     );
   }
   const topContent = (
-    <EuiTitle size="l">
-      <PaddedCentralTitle>
-        <FormattedMessage
-          id="xpack.fleet.addFirstIntegrationSplash.pageTitle"
-          defaultMessage="Ready to add your first integration?"
-        />
-      </PaddedCentralTitle>
-    </EuiTitle>
+    <PaddedCentralTitle>
+      <FormattedMessage
+        id="xpack.fleet.addFirstIntegrationSplash.pageTitle"
+        defaultMessage="Ready to add your first integration?"
+      />
+    </PaddedCentralTitle>
   );
   return (
     <WithHeaderLayout topContent={topContent}>
