@@ -10,6 +10,7 @@ import { validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { ExtendedDataLayerArgs, ExtendedDataLayerFn } from '../types';
 import { EXTENDED_DATA_LAYER, LayerTypes } from '../constants';
 import { getAccessors, normalizeTable } from '../helpers';
+import { validateMarkSizeForChartType } from './validate';
 
 export const extendedDataLayerFn: ExtendedDataLayerFn['fn'] = async (data, args, context) => {
   const table = args.table ?? data;
@@ -18,6 +19,8 @@ export const extendedDataLayerFn: ExtendedDataLayerFn['fn'] = async (data, args,
   validateAccessor(accessors.xAccessor, table.columns);
   validateAccessor(accessors.splitAccessor, table.columns);
   accessors.accessors.forEach((accessor) => validateAccessor(accessor, table.columns));
+  validateMarkSizeForChartType(args.markSizeAccessor, args.seriesType);
+  validateAccessor(args.markSizeAccessor, table.columns);
 
   const normalizedTable = normalizeTable(table, accessors.xAccessor);
 

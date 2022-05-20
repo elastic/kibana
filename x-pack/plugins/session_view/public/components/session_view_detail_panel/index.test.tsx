@@ -12,6 +12,10 @@ import {
 } from '../../../common/mocks/constants/session_view_process.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { SessionViewDetailPanel } from '.';
+import { useDateFormat } from '../../hooks';
+
+jest.mock('../../hooks/use_date_format');
+const mockUseDateFormat = useDateFormat as jest.Mock;
 
 describe('SessionView component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -34,6 +38,7 @@ describe('SessionView component', () => {
     props.onJumpToEvent.mockReset();
     props.onShowAlertDetails.mockReset();
     props.fetchNextPageAlerts.mockReset();
+    mockUseDateFormat.mockImplementation(() => 'MMM D, YYYY @ HH:mm:ss.SSS');
   });
 
   describe('When SessionViewDetailPanel is mounted', () => {
