@@ -10,7 +10,9 @@ import { ActionContext } from './action_context';
 import { EsQueryAlertParams, EsQueryAlertState } from './alert_type_params';
 import { ActionGroupId } from './constants';
 
-export type OnlyEsQueryAlertParams = Omit<EsQueryAlertParams, 'searchConfiguration' | 'searchType'>;
+export type OnlyEsQueryAlertParams = Omit<EsQueryAlertParams, 'searchConfiguration'> & {
+  searchType: 'esQuery';
+};
 
 export type OnlySearchSourceAlertParams = Omit<
   EsQueryAlertParams,

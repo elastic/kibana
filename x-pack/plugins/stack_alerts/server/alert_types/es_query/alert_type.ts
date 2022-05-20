@@ -7,10 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Logger } from '@kbn/core/server';
+import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
 import { RuleType } from '../../types';
 import { ActionContext } from './action_context';
 import {
   EsQueryAlertParams,
+  EsQueryAlertParamsExtractedParams,
   EsQueryAlertParamsSchema,
   EsQueryAlertState,
 } from './alert_type_params';
@@ -18,13 +20,14 @@ import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { ExecutorOptions } from './types';
 import { ActionGroupId, ES_QUERY_ID } from './constants';
 import { executor } from './executor';
+import { isEsQueryAlert } from './util';
 
 export function getAlertType(
   logger: Logger,
   core: CoreSetup
 ): RuleType<
   EsQueryAlertParams,
-  never, // Only use if defining useSavedObjectReferences hook
+  EsQueryAlertParamsExtractedParams,
   EsQueryAlertState,
   {},
   ActionContext,
@@ -158,6 +161,25 @@ export function getAlertType(
         { name: 'esQuery', description: actionVariableContextQueryLabel },
         { name: 'index', description: actionVariableContextIndexLabel },
       ],
+    },
+    useSavedObjectReferences: {
+      extractReferences: (params) => {
+        if (isEsQueryAlert(params.searchType)) {
+          return { params: params as EsQueryAlertParamsExtractedParams, references: [] };
+        }
+        const [searchConfiguration, references] = extractReferences(params.searchConfiguration);
+        const newParams = { ...params, searchConfiguration } as EsQueryAlertParamsExtractedParams;
+        return { params: newParams, references };
+      },
+      injectReferences: (params, references) => {
+        if (isEsQueryAlert(params.searchType)) {
+          return params;
+        }
+        return {
+          ...params,
+          searchConfiguration: injectReferences(params.searchConfiguration, references),
+        };
+      },
     },
     minimumLicenseRequired: 'basic',
     isExportable: true,

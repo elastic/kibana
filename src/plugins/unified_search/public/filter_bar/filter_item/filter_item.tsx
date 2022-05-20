@@ -42,7 +42,6 @@ export interface FilterItemProps {
   uiSettings: IUiSettingsClient;
   hiddenPanelOptions?: FilterPanelOption[];
   timeRangeForSuggestionsOverride?: boolean;
-  readonly?: boolean;
 }
 
 type FilterPopoverProps = HTMLAttributes<HTMLDivElement> & EuiPopoverProps;
@@ -364,7 +363,6 @@ export function FilterItem(props: FilterItemProps) {
     iconOnClick: handleIconClick,
     onClick: handleBadgeClick,
     'data-test-subj': getDataTestSubj(valueLabelConfig),
-    readonly: props.readonly,
   };
 
   const popoverProps: FilterPopoverProps = {
@@ -378,18 +376,6 @@ export function FilterItem(props: FilterItemProps) {
     button: <FilterView {...filterViewProps} />,
     panelPaddingSize: 'none',
   };
-
-  if (props.readonly) {
-    return (
-      <EuiPopover
-        panelClassName="globalFilterItem__readonlyPanel"
-        anchorPosition="upCenter"
-        {...popoverProps}
-      >
-        <FilterView {...filterViewProps} hideAlias />
-      </EuiPopover>
-    );
-  }
 
   return (
     <EuiPopover anchorPosition="downLeft" {...popoverProps}>

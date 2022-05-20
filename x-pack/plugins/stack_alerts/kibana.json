@@ -14,7 +14,8 @@
     "triggersActionsUi",
     "kibanaReact",
     "savedObjects",
-    "data"
+    "data",
+    "kibanaUtils"
   ],
   "configPath": ["xpack", "stack_alerts"],
   "requiredBundles": ["esUiShared"],

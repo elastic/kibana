@@ -28,6 +28,7 @@ const createStartContract = (): Start => {
     get: jest.fn().mockReturnValue(Promise.resolve({})),
     clearCache: jest.fn(),
     getCanSaveSync: jest.fn(),
+    getIdsWithTitle: jest.fn(),
   } as unknown as jest.Mocked<DataViewsContract>;
 };
 
