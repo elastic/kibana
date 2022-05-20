@@ -42,6 +42,9 @@ import { getChartAnomalyTimeseries } from './helper/get_chart_anomaly_timeseries
 import { isTimeseriesEmpty, onBrushEnd } from './helper/helper';
 import { getTimeZone } from './helper/timezone';
 
+interface AnomalyTimeseries extends ServiceAnomalyTimeseries {
+  color?: string;
+}
 interface Props {
   id: string;
   fetchStatus: FETCH_STATUS;
@@ -58,9 +61,9 @@ interface Props {
   yTickFormat?: (y: number) => string;
   showAnnotations?: boolean;
   yDomain?: YDomainRange;
-  anomalyTimeseries?: ServiceAnomalyTimeseries;
+  anomalyTimeseries?: AnomalyTimeseries;
   customTheme?: Record<string, unknown>;
-  comparisonColor?: string;
+  anomalyTimeseriesColor?: string;
 }
 export function TimeseriesChart({
   id,
@@ -73,7 +76,6 @@ export function TimeseriesChart({
   showAnnotations = true,
   yDomain,
   anomalyTimeseries,
-  comparisonColor,
   customTheme = {},
 }: Props) {
   const history = useHistory();
@@ -96,7 +98,7 @@ export function TimeseriesChart({
   const anomalyChartTimeseries = getChartAnomalyTimeseries({
     anomalyTimeseries,
     theme,
-    comparisonColor,
+    anomalyTimeseriesColor: anomalyTimeseries?.color,
   });
 
   const xFormatter = niceTimeFormatter([min, max]);

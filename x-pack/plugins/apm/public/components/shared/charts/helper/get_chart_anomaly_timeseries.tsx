@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Fit } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { rgba } from 'polished';
 import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { getSeverity } from '@kbn/ml-plugin/public';
+import { Fit } from '@elastic/charts';
 import { getSeverityColor } from '../../../../../common/anomaly_detection';
 import {
   ANOMALY_SEVERITY,
@@ -21,11 +21,11 @@ import { APMChartSpec } from '../../../../../typings/timeseries';
 export function getChartAnomalyTimeseries({
   anomalyTimeseries,
   theme,
-  comparisonColor,
+  anomalyTimeseriesColor,
 }: {
   anomalyTimeseries?: ServiceAnomalyTimeseries;
   theme: EuiTheme;
-  comparisonColor?: string;
+  anomalyTimeseriesColor?: string;
 }):
   | {
       boundaries: APMChartSpec[];
@@ -38,20 +38,22 @@ export function getChartAnomalyTimeseries({
 
   const boundaries = [
     {
-      title: 'model plot',
+      title: i18n.translate('xpack.apm.comparison.mlExpectedBounds', {
+        defaultMessage: 'Comparison: Expected bounds',
+      }),
       type: 'area',
-      fit: Fit.Lookahead,
-      hideLegend: true,
+      fit: Fit.Linear,
+      hideLegend: false,
       hideTooltipValue: true,
       areaSeriesStyle: {
         point: {
           opacity: 0,
         },
       },
-      color: rgba(comparisonColor ?? theme.eui.euiColorVis1, 0.5),
+      color: rgba(anomalyTimeseriesColor ?? theme.eui.euiColorVis1, 0.5),
       stackAccessors: ['x'],
-      yAccessors: ['y0'],
-      y0Accessors: ['y1'],
+      yAccessors: ['y1'],
+      y0Accessors: ['y0'],
       data: anomalyTimeseries.bounds,
     },
   ];

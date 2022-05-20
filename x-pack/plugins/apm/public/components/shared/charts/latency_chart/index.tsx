@@ -133,8 +133,14 @@ export function LatencyChart({ height, kuery }: Props) {
           customTheme={comparisonChartTheme}
           timeseries={timeseries}
           yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
-          anomalyTimeseries={preferredAnomalyTimeseries}
-          comparisonColor={previousPeriodColor}
+          anomalyTimeseries={
+            preferredAnomalyTimeseries
+              ? {
+                  ...preferredAnomalyTimeseries,
+                  color: previousPeriodColor,
+                }
+              : undefined
+          }
         />
       </EuiFlexItem>
     </EuiFlexGroup>
