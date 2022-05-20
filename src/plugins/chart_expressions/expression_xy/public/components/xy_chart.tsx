@@ -42,15 +42,25 @@ import {
   LegendSizeToPixels,
 } from '@kbn/visualizations-plugin/common/constants';
 import type { FilterEvent, BrushEvent, FormatFactory } from '../types';
-import type { CommonXYDataLayerConfig, SeriesType, XYChartProps } from '../../common/types';
 import { isTimeChart } from '../../common/helpers';
+import type {
+  CommonXYDataLayerConfig,
+  ExtendedYConfig,
+  ReferenceLineYConfig,
+  SeriesType,
+  XYChartProps,
+} from '../../common/types';
 import {
   isHorizontalChart,
   getAnnotationsLayers,
   getDataLayers,
   Series,
   getFormat,
+  isReferenceLineYConfig,
   getFormattedTablesByLayers,
+} from '../helpers';
+
+import {
   getFilteredLayers,
   getReferenceLayers,
   isDataLayer,
@@ -61,7 +71,7 @@ import {
 } from '../helpers';
 import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './legend_action';
-import { ReferenceLineAnnotations, computeChartMargins } from './reference_lines';
+import { ReferenceLines, computeChartMargins } from './reference_lines';
 import { visualizationDefinitions } from '../definitions';
 import { CommonXYLayerConfig } from '../../common/types';
 import { SplitChart } from './split_chart';
@@ -276,6 +286,7 @@ export function XYChart({
   };
 
   const referenceLineLayers = getReferenceLayers(layers);
+
   const annotationsLayers = getAnnotationsLayers(layers);
   const firstTable = dataLayers[0]?.table;
 
@@ -292,7 +303,9 @@ export function XYChart({
   const rangeAnnotations = getRangeAnnotations(annotationsLayers);
 
   const visualConfigs = [
-    ...referenceLineLayers.flatMap(({ yConfig }) => yConfig),
+    ...referenceLineLayers.flatMap<ExtendedYConfig | ReferenceLineYConfig | undefined>(
+      ({ yConfig }) => yConfig
+    ),
     ...groupedLineAnnotations,
   ].filter(Boolean);
 
@@ -370,9 +383,10 @@ export function XYChart({
           l.yConfig ? l.yConfig.map((yConfig) => ({ layerId: l.layerId, yConfig })) : []
         )
         .filter(({ yConfig }) => yConfig.axisMode === axis.groupId)
-        .map(
-          ({ layerId, yConfig }) =>
-            `${layerId}-${yConfig.forAccessor}-${yConfig.fill !== 'none' ? 'rect' : 'line'}`
+        .map(({ layerId, yConfig }) =>
+          isReferenceLineYConfig(yConfig)
+            ? `${layerId}-${yConfig.value}-${yConfig.fill !== 'none' ? 'rect' : 'line'}`
+            : `${layerId}-${yConfig.forAccessor}-${yConfig.fill !== 'none' ? 'rect' : 'line'}`
         ),
     };
   };
@@ -680,7 +694,7 @@ export function XYChart({
         />
       )}
       {referenceLineLayers.length ? (
-        <ReferenceLineAnnotations
+        <ReferenceLines
           layers={referenceLineLayers}
           formatters={{
             left: yAxesMap.left?.formatter,
