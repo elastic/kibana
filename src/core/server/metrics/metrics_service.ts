@@ -17,7 +17,7 @@ import { opsConfig, OpsConfigType } from './ops_config';
 import { getEcsOpsMetricsLog } from './logging';
 import type { AnalyticsServiceSetup } from '../analytics';
 import { opsMetricsEventSchema } from './ops_metrics_event_schema';
-import { OpsMetricsEvent } from './analytics';
+import type { OpsMetricsEvent } from './ops_metrics_event_schema';
 
 export interface MetricsServiceSetupDeps {
   http: InternalHttpServiceSetup;

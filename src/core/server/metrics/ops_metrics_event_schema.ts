@@ -7,8 +7,23 @@
  */
 
 import type { RootSchema } from '@kbn/analytics-client';
-import { OpsProcessMetrics } from '..';
-import { OpsMetricsEvent } from './analytics';
+import type { OpsProcessMetrics, OpsOsMetrics, OpsServerMetrics } from './collectors';
+
+export interface OpsMetricsEvent {
+  /** Time metrics were recorded at. */
+  collected_at: Date;
+  /** Process related metrics. */
+  single_process: OpsProcessMetrics;
+  /** OS related metrics */
+  os: OpsOsMetrics;
+  /** server response time stats */
+  response_times: OpsServerMetrics['response_times'];
+  /** server requests stats */
+  requests: OpsServerMetrics['requests'];
+  /** number of current concurrent connections to the server */
+  concurrent_connections: OpsServerMetrics['concurrent_connections'];
+}
+
 const processSchema: RootSchema<OpsProcessMetrics> = {
   pid: {
     type: 'long',
