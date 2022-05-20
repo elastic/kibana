@@ -31,7 +31,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     };
 
     const getActions = async (): Promise<Action[]> => {
-      return await browser.execute(() => window.__analyticsPluginA__.getLastActions());
+      return await browser.execute(() =>
+        window.__analyticsPluginA__.getActionsUntilReportTestPluginLifecycleEvent()
+      );
     };
 
     beforeEach(async () => {

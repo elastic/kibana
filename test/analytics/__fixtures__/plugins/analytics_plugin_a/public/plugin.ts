@@ -54,7 +54,7 @@ export class AnalyticsPluginA implements Plugin {
     });
     let found = false;
     window.__analyticsPluginA__ = {
-      getLastActions: async () =>
+      getActionsUntilReportTestPluginLifecycleEvent: async () =>
         firstValueFrom(
           this.actions$.pipe(
             takeWhile(() => !found),

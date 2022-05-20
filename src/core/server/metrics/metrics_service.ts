@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { firstValueFrom, Observable, ReplaySubject } from 'rxjs';
+import { firstValueFrom, Observable, ReplaySubject, Subscription } from 'rxjs';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
@@ -16,7 +16,8 @@ import { OpsMetricsCollector } from './ops_metrics_collector';
 import { opsConfig, OpsConfigType } from './ops_config';
 import { getEcsOpsMetricsLog } from './logging';
 import type { AnalyticsServiceSetup } from '../analytics';
-import { opsMetricsSchema } from './ops_metrics_event_schema';
+import { opsMetricsEventSchema } from './ops_metrics_event_schema';
+import { OpsMetricsEvent } from './analytics';
 
 export interface MetricsServiceSetupDeps {
   http: InternalHttpServiceSetup;
@@ -33,6 +34,7 @@ export class MetricsService
   private collectInterval?: NodeJS.Timeout;
   private metrics$ = new ReplaySubject<OpsMetrics>(1);
   private service?: InternalMetricsServiceSetup;
+  private subscriptions: Subscription[] = [];
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('metrics');
@@ -62,8 +64,6 @@ export class MetricsService
 
     this.setupOpsMetricsEventType(analytics, metricsObservable);
 
-    metricsObservable.subscribe();
-
     this.service = {
       collectionInterval: config.interval.asMilliseconds(),
       getOpsMetrics$: () => metricsObservable,
@@ -92,18 +92,33 @@ export class MetricsService
       clearInterval(this.collectInterval);
     }
     this.metrics$.complete();
+    this.subscriptions.forEach((subscription) => {
+      subscription.unsubscribe();
+    });
+  }
+
+  private convertToMetricEvent(metrics: OpsMetrics): OpsMetricsEvent {
+    const { processes, process, ...rest } = metrics;
+    const formattedMetrics =
+      metrics.processes && metrics.processes?.length > 0
+        ? { ...rest, single_process: metrics.processes[0] }
+        : { ...rest, single_process: metrics.process };
+    // single node process
+    return { ...formattedMetrics };
   }
 
   private setupOpsMetricsEventType(
     analytics: AnalyticsServiceSetup,
     metricsObservable: Observable<OpsMetrics>
   ) {
-    analytics.registerEventType<OpsMetrics>({
+    analytics.registerEventType<OpsMetricsEvent>({
       eventType: 'core-ops_metrics',
-      schema: opsMetricsSchema,
+      schema: opsMetricsEventSchema,
     });
-    metricsObservable.subscribe((metrics: OpsMetrics) => {
-      analytics.reportEvent('core-ops_metrics', { ...metrics });
-    });
+    this.subscriptions.push(
+      metricsObservable.subscribe((metrics: OpsMetrics) => {
+        analytics.reportEvent('core-ops_metrics', { ...this.convertToMetricEvent(metrics) });
+      })
+    );
   }
 }

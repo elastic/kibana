@@ -8,7 +8,8 @@
 
 import type { RootSchema } from '@kbn/analytics-client';
 import { OpsProcessMetrics } from '..';
-import { OpsMetricsEvent } from './analytics';
+import { OpsMetricsEvent } from './ops_metrics_events';
+
 const processSchema: RootSchema<OpsProcessMetrics> = {
   pid: {
     type: 'long',
