@@ -912,7 +912,7 @@ export async function getFailedAndUnrecognizedTasksPerDay(
     };
   } catch (err) {
     logger.warn(
-      `Error executing alerting telemetry task: getExecutionsTimeoutsPerDayCount - ${JSON.stringify(
+      `Error executing alerting telemetry task: getFailedAndUnrecognizedTasksPerDay - ${JSON.stringify(
         err
       )}`
     );
