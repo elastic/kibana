@@ -105,6 +105,16 @@ type QueryRuleFields<T> = Omit<
   | 'threatIndex'
   | 'threatQueryBar'
   | 'threatMapping'
+  | 'eqlOptions'
+>;
+type EqlQueryRuleFields<T> = Omit<
+  T,
+  | 'anomalyThreshold'
+  | 'machineLearningJobId'
+  | 'threshold'
+  | 'threatIndex'
+  | 'threatQueryBar'
+  | 'threatMapping'
 >;
 type ThresholdRuleFields<T> = Omit<
   T,
@@ -117,21 +127,50 @@ type MlRuleFields<T> = Omit<
 type ThreatMatchRuleFields<T> = Omit<T, 'anomalyThreshold' | 'machineLearningJobId' | 'threshold'>;
 
 const isMlFields = <T>(
-  fields: QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T> | ThreatMatchRuleFields<T>
+  fields:
+    | QueryRuleFields<T>
+    | EqlQueryRuleFields<T>
+    | MlRuleFields<T>
+    | ThresholdRuleFields<T>
+    | ThreatMatchRuleFields<T>
 ): fields is MlRuleFields<T> => has('anomalyThreshold', fields);
 
 const isThresholdFields = <T>(
-  fields: QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T> | ThreatMatchRuleFields<T>
+  fields:
+    | QueryRuleFields<T>
+    | EqlQueryRuleFields<T>
+    | MlRuleFields<T>
+    | ThresholdRuleFields<T>
+    | ThreatMatchRuleFields<T>
 ): fields is ThresholdRuleFields<T> => has('threshold', fields);
 
 const isThreatMatchFields = <T>(
-  fields: QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T> | ThreatMatchRuleFields<T>
+  fields:
+    | QueryRuleFields<T>
+    | EqlQueryRuleFields<T>
+    | MlRuleFields<T>
+    | ThresholdRuleFields<T>
+    | ThreatMatchRuleFields<T>
 ): fields is ThreatMatchRuleFields<T> => has('threatIndex', fields);
+
+const isEqlFields = <T>(
+  fields:
+    | QueryRuleFields<T>
+    | EqlQueryRuleFields<T>
+    | MlRuleFields<T>
+    | ThresholdRuleFields<T>
+    | ThreatMatchRuleFields<T>
+): fields is EqlQueryRuleFields<T> => has('eqlOptions', fields);
 
 export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
   fields: T,
   type: Type
-): QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T> | ThreatMatchRuleFields<T> => {
+):
+  | QueryRuleFields<T>
+  | EqlQueryRuleFields<T>
+  | MlRuleFields<T>
+  | ThresholdRuleFields<T>
+  | ThreatMatchRuleFields<T> => {
   switch (type) {
     case 'machine_learning':
       const {
@@ -259,6 +298,23 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         threat_mapping: ruleFields.threatMapping,
         threat_language: ruleFields.threatQueryBar?.query?.language,
       }
+    : isEqlFields(ruleFields)
+    ? {
+        index: ruleFields.index,
+        filters: ruleFields.queryBar?.filters,
+        language: ruleFields.queryBar?.query?.language,
+        query: ruleFields.queryBar?.query?.query as string,
+        saved_id: ruleFields.queryBar?.saved_id,
+        ...(ruleFields.eqlOptions?.timestampField && {
+          timestamp_field: ruleFields.eqlOptions.timestampField,
+        }),
+        ...(ruleFields.eqlOptions?.eventCategoryField && {
+          event_category_override: ruleFields.eqlOptions.eventCategoryField,
+        }),
+        ...(ruleFields.eqlOptions?.tiebreakerField && {
+          tiebreaker_field: ruleFields.eqlOptions.tiebreakerField,
+        }),
+      }
     : {
         index: ruleFields.index,
         filters: ruleFields.queryBar?.filters,
@@ -267,18 +323,6 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         saved_id: ruleFields.queryBar?.saved_id,
         ...(ruleType === 'query' &&
           ruleFields.queryBar?.saved_id && { type: 'saved_query' as Type }),
-        ...(ruleType === 'eql' &&
-          ruleFields.eqlOptions?.timestampField && {
-            timestamp_field: ruleFields.eqlOptions.timestampField,
-          }),
-        ...(ruleType === 'eql' &&
-          ruleFields.eqlOptions?.eventCategoryField && {
-            event_category_override: ruleFields.eqlOptions.eventCategoryField,
-          }),
-        ...(ruleType === 'eql' &&
-          ruleFields.eqlOptions?.tiebreakerField && {
-            tiebreaker_field: ruleFields.eqlOptions.tiebreakerField,
-          }),
       };
   return {
     ...baseFields,

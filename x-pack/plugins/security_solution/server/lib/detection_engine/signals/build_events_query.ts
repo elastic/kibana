@@ -227,9 +227,9 @@ export const buildEqlSearchRequest = (
           filter: requestFilter,
         },
       },
-      ...(timestampField && { timestamp_field: timestampField }),
-      ...(eventCategoryOverride && { event_category_field: eventCategoryOverride }),
-      ...(tiebreakerField && { tiebreaker_field: tiebreakerField }),
+      timestamp_field: timestampField,
+      event_category_field: eventCategoryOverride,
+      tiebreaker_field: tiebreakerField,
       fields,
     },
   };
