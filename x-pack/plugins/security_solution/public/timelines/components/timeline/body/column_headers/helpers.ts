@@ -35,19 +35,14 @@ export const getColumnHeaders = (
   return headers
     ? headers.map((header) => {
         const splitHeader = header.id.split('.'); // source.geo.city_name -> [source, geo, city_name]
+        const category =
+          splitHeader.length > 1
+            ? splitHeader[0]
+            : getRootCategory({ field: header.id, browserFields });
 
         return {
           ...header,
-          ...get(
-            [
-              splitHeader.length > 1
-                ? splitHeader[0]
-                : getRootCategory({ field: header.id, browserFields }),
-              'fields',
-              header.id,
-            ],
-            browserFields
-          ),
+          ...get([category, 'fields', header.id], browserFields),
         };
       })
     : [];
