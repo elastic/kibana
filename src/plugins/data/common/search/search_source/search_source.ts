@@ -76,7 +76,11 @@ import { buildEsQuery, Filter } from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
+import {
+  ExpressionAstExpression,
+  buildExpression,
+  buildExpressionFunction,
+} from '@kbn/expressions-plugin/common';
 import { normalizeSortRequest } from './normalize_sort_request';
 
 import { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
@@ -105,6 +109,7 @@ import {
   isPartialResponse,
   UI_SETTINGS,
 } from '../..';
+import { AggsStart } from '../aggs';
 import { extractReferences } from './extract_references';
 import {
   EsdslExpressionFunctionDefinition,
@@ -129,6 +134,7 @@ export const searchSourceRequiredUiSettings = [
 ];
 
 export interface SearchSourceDependencies extends FetchHandlers {
+  aggs: AggsStart;
   search: ISearchGeneric;
 }
 
@@ -930,24 +936,43 @@ export class SearchSource {
     return [filterField];
   }
 
-  toExpressionAst() {
+  toExpressionAst(): ExpressionAstExpression {
     const searchRequest = this.mergeProps();
     const { body, index, query } = searchRequest;
-    let { filters } = searchRequest;
-    if (typeof filters === 'function') {
-      filters = filters();
-    }
 
-    return buildExpression([
+    const filters = (
+      typeof searchRequest.filters === 'function' ? searchRequest.filters() : searchRequest.filters
+    ) as Filter[] | Filter | undefined;
+
+    const aggsField = this.getField('aggs');
+    const aggs = (typeof aggsField === 'function' ? aggsField() : aggsField) as
+      | AggConfigs
+      | AggConfigSerialized[]
+      | undefined;
+    const aggConfigs =
+      aggs instanceof AggConfigs
+        ? aggs
+        : index && aggs && this.dependencies.aggs.createAggConfigs(index, aggs);
+
+    const ast = buildExpression([
       buildExpressionFunction<ExpressionFunctionKibanaContext>('kibana_context', {
         q: query?.map(queryToAst),
         filters: filters && filtersToAst(filters),
       }),
-      buildExpressionFunction<EsdslExpressionFunctionDefinition>('esdsl', {
-        size: body?.size,
-        dsl: JSON.stringify({}),
-        index: index?.id,
-      }),
     ]).toAst();
+
+    if (aggConfigs) {
+      ast.chain.push(...aggConfigs.toExpressionAst().chain);
+    } else {
+      ast.chain.push(
+        buildExpressionFunction<EsdslExpressionFunctionDefinition>('esdsl', {
+          size: body?.size,
+          dsl: JSON.stringify({}),
+          index: index?.id,
+        }).toAst()
+      );
+    }
+
+    return ast;
   }
 }

@@ -9,12 +9,14 @@
 import { lastValueFrom, of, throwError } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { buildExpression, ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import type { MockedKeys } from '@kbn/utility-types/jest';
 import { SearchSource, SearchSourceDependencies, SortDirection } from '.';
 import { AggConfigs, AggTypesRegistryStart } from '../..';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import { RequestResponder } from '@kbn/inspector-plugin/common';
 import { switchMap } from 'rxjs/operators';
 import { Filter } from '@kbn/es-query';
+import { stubIndexPattern } from '../../stubs';
 
 const getComputedFields = () => ({
   storedFields: [],
@@ -64,10 +66,13 @@ const runtimeFieldDef = {
 
 describe('SearchSource', () => {
   let mockSearchMethod: any;
-  let searchSourceDependencies: SearchSourceDependencies;
+  let searchSourceDependencies: MockedKeys<SearchSourceDependencies>;
   let searchSource: SearchSource;
 
   beforeEach(() => {
+    const aggsMock = {
+      createAggConfigs: jest.fn(),
+    } as unknown as jest.Mocked<SearchSourceDependencies['aggs']>;
     const getConfigMock = jest
       .fn()
       .mockImplementation((param) => param === 'metaFields' && ['_type', '_source', '_id'])
@@ -83,6 +88,7 @@ describe('SearchSource', () => {
       );
 
     searchSourceDependencies = {
+      aggs: aggsMock,
       getConfig: getConfigMock,
       search: mockSearchMethod,
       onResponse: (req, res) => res,
@@ -1402,6 +1408,37 @@ describe('SearchSource', () => {
       expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
         "kibana_context
         | esdsl size=1000 dsl=\\"{}\\""
+      `);
+    });
+
+    test('should generate the `esaggs` function if there are aggregations', () => {
+      const typesRegistry = mockAggTypesRegistry();
+      const aggConfigs = new AggConfigs(
+        stubIndexPattern,
+        [{ enabled: true, type: 'avg', schema: 'metric', params: { field: 'bytes' } }],
+        { typesRegistry }
+      );
+      searchSource.setField('aggs', aggConfigs);
+
+      expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
+        "kibana_context
+        | esaggs index={indexPatternLoad id=\\"logstash-*\\"} aggs={aggAvg field=\\"bytes\\" id=\\"1\\" enabled=true schema=\\"metric\\"}"
+      `);
+    });
+
+    test('should generate the `esaggs` function if there are aggregations configs', () => {
+      const typesRegistry = mockAggTypesRegistry();
+      searchSourceDependencies.aggs.createAggConfigs.mockImplementationOnce(
+        (dataView, configs) => new AggConfigs(dataView, configs, { typesRegistry })
+      );
+      searchSource.setField('index', stubIndexPattern);
+      searchSource.setField('aggs', [
+        { enabled: true, type: 'avg', schema: 'metric', params: { field: 'bytes' } },
+      ]);
+
+      expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
+        "kibana_context
+        | esaggs index={indexPatternLoad id=\\"logstash-*\\"} aggs={aggAvg field=\\"bytes\\" id=\\"1\\" enabled=true schema=\\"metric\\"}"
       `);
     });
   });

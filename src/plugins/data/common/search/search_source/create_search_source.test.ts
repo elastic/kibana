@@ -19,6 +19,7 @@ describe('createSearchSource', () => {
 
   beforeEach(() => {
     dependencies = {
+      aggs: {} as SearchSourceDependencies['aggs'],
       getConfig: jest.fn(),
       search: jest.fn(),
       onResponse: (req, res) => res,

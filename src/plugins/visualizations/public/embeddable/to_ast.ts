@@ -37,7 +37,9 @@ export const toExpressionAst: VisToExpressionAst = async (
       /**
        * @workaround Non-aggregating visualizations only accept the `kibana_context` on input.
        */
-      ...(searchSourceExpressionAst?.chain.filter(({ function: name }) => name !== 'esdsl') ?? []),
+      ...(searchSourceExpressionAst?.chain.filter(({ function: name }) =>
+        ['esaggs', 'esdsl'].includes(name)
+      ) ?? []),
       ...visExpressionAst.chain,
     ],
   };
