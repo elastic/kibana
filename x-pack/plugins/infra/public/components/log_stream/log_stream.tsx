@@ -8,10 +8,14 @@
 import { buildEsQuery, Filter, Query } from '@kbn/es-query';
 import { JsonValue } from '@kbn/utility-types';
 import { noop } from 'lodash';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  createKibanaReactContext,
+  KibanaReactOverlays,
+  useKibana,
+} from '@kbn/kibana-react-plugin/public';
 import { LogEntryCursor } from '../../../common/log_entry';
 import { defaultLogViewsStaticConfig } from '../../../common/log_views';
 import { BuiltEsQuery, useLogStream } from '../../containers/logs/log_stream';
@@ -21,6 +25,7 @@ import { LogColumnRenderConfiguration } from '../../utils/log_column_render_conf
 import { useKibanaQuerySettings } from '../../utils/use_kibana_query_settings';
 import { ScrollableLogTextStreamView } from '../logging/log_text_stream';
 import { LogStreamErrorBoundary } from './log_stream_error_boundary';
+import { LogEntryFlyout } from '../logging/log_entry_flyout';
 
 interface LogStreamPluginDeps {
   data: DataPublicPluginStart;
@@ -72,6 +77,7 @@ interface LogStreamContentProps {
   center?: LogEntryCursor;
   highlight?: string;
   columns?: LogColumnDefinition[];
+  flyoutEnabled?: boolean;
 }
 
 export const LogStream: React.FC<LogStreamProps> = ({ height = 400, ...contentProps }) => {
@@ -93,14 +99,17 @@ export const LogStreamContent: React.FC<LogStreamContentProps> = ({
   center,
   highlight,
   columns,
+  flyoutEnabled = false,
 }) => {
+  const flyoutRef = useRef<ReturnType<KibanaReactOverlays['openFlyout']>>();
   const customColumns = useMemo(
     () => (columns ? convertLogColumnDefinitionToLogSourceColumnDefinition(columns) : undefined),
     [columns]
   );
 
   const {
-    services: { http, data },
+    services: { http, data, uiSettings, application },
+    overlays: { openFlyout },
   } = useKibana<LogStreamPluginDeps>();
   if (http == null || data == null) {
     throw new Error(
@@ -208,6 +217,35 @@ Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_reac
     [isLoadingMore, fetchPreviousEntries, fetchNextEntries]
   );
 
+  const handleCloseFlyout = () => {
+    if (flyoutRef.current) {
+      flyoutRef.current.close();
+    }
+  };
+
+  const handleOpenLogFlyoutClick = useCallback(
+    (logEntryId) => {
+      const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
+        http,
+        data,
+        uiSettings,
+        application,
+      });
+
+      flyoutRef.current = openFlyout(
+        <KibanaReactContextProvider>
+          <LogEntryFlyout
+            logEntryId={logEntryId}
+            onCloseFlyout={handleCloseFlyout}
+            onSetFieldFilter={undefined}
+            sourceId={sourceId}
+          />
+        </KibanaReactContextProvider>
+      );
+    },
+    [http, data, uiSettings, application, openFlyout, sourceId]
+  );
+
   return (
     <ScrollableLogTextStreamView
       target={center ? center : entries.length ? entries[entries.length - 1].cursor : null}
@@ -223,6 +261,7 @@ Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_reac
       jumpToTarget={noop}
       reportVisibleInterval={handlePagination}
       reloadItems={fetchEntries}
+      onOpenLogEntryFlyout={flyoutEnabled ? handleOpenLogFlyoutClick : undefined}
       highlightedItem={highlight ?? null}
       currentHighlightKey={null}
       startDateExpression={''}
