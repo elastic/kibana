@@ -650,6 +650,7 @@ export const RulesList: React.FunctionComponent = () => {
         sort={sort}
         page={page}
         percentileOptions={percentileOptions}
+        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         onSort={setSort}
         onPage={setPage}
         onRuleChanged={() => loadData()}
