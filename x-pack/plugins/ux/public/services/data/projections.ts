@@ -8,8 +8,8 @@ import { TRANSACTION_TYPE } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 import { SetupUX } from '../../../typings/ui_filters';
-import { getEsFilter } from './getEsFilter';
-import { rangeQuery } from './rangeQuery';
+import { getEsFilter } from './get_es_filter';
+import { rangeQuery } from './range_query';
 
 export function getRumPageLoadTransactionsProjection({
   setup,
