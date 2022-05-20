@@ -7,28 +7,30 @@
 
 import {
   AggregationsAggregationContainer,
+  AggregationsCardinalityAggregate,
   AggregationsCompositeAggregation,
   AggregationsCompositeBucket,
+  AggregationsMaxAggregate,
+  AggregationsMinAggregate,
   AggregationsMultiBucketAggregateBase,
   AggregationsStringTermsBucket,
   AggregationsTermsAggregation,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-export type ThresholdBucket = AggregationsStringTermsBucket | AggregationsCompositeBucket;
-// export type ThresholdBucket = AggregationsMultiBucketAggregateBase;
+export interface ThresholdLeafAggregates {
+  max_timestamp: AggregationsMaxAggregate;
+  min_timestamp: AggregationsMinAggregate;
+  cardinality_count?: AggregationsCardinalityAggregate;
+}
 
-// export type ThresholdAggregate = AggregationsCompositeAggregate | AggregationsStringTermsAggregate;
+export type ThresholdTermsBucket = AggregationsStringTermsBucket & ThresholdLeafAggregates;
+export type ThresholdCompositeBucket = AggregationsCompositeBucket & ThresholdLeafAggregates;
+
+export type ThresholdBucket = ThresholdTermsBucket | ThresholdCompositeBucket;
+
 export type ThresholdAggregate = AggregationsMultiBucketAggregateBase<ThresholdBucket>;
-/*
-export type ThresholdAggregate<TBucket extends ThresholdBucket | unknown = unknown> =
-  AggregationsMultiBucketAggregateBase<TBucket>;
-*/
 
 export interface ThresholdAggregateContainer {
-  // <
-  // TAggregate extends ThresholdAggregate | unknown = unknown
-  // TAggregate extends AggregationsMultiBucketAggregateBase<ThresholdBucket>
-  // > {
   thresholdTerms: ThresholdAggregate;
 }
 

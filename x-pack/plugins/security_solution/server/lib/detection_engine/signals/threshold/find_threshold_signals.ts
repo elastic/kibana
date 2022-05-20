@@ -212,12 +212,21 @@ export const findThresholdSignals = async ({
     ]);
   } while (sortKeys); // we have to iterate over everything in order to sort
 
+  const compareBuckets = (bucket1: ThresholdBucket, bucket2: ThresholdBucket) =>
+    shouldFilterByCardinality(threshold)
+      ? // cardinality - descending
+        (bucket2.cardinality_count?.value ?? 0) - (bucket1.cardinality_count?.value ?? 0)
+      : // max_timestamp - ascending
+        (bucket1.max_timestamp.value ?? 0) - (bucket2.max_timestamp.value ?? 0);
+
   // and then truncate to `maxSignals`
   if ((mergedSearchResults.hits.total ?? 0) > maxSignals) {
     mergedSearchResults.aggregations = {
       thresholdTerms: {
         buckets: (
-          (mergedSearchResults.aggregations?.thresholdTerms.buckets as ThresholdBucket[]) ?? []
+          (mergedSearchResults.aggregations?.thresholdTerms.buckets as ThresholdBucket[]).sort(
+            compareBuckets
+          ) ?? []
         ).slice(0, maxSignals),
       },
     };
