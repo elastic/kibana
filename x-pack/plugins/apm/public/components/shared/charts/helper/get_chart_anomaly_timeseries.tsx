@@ -38,7 +38,7 @@ export function getChartAnomalyTimeseries({
 
   const boundaries = [
     {
-      title: i18n.translate('xpack.apm.comparison.mlExpectedBounds', {
+      title: i18n.translate('xpack.apm.comparison.expectedBoundsTitle', {
         defaultMessage: 'Comparison: Expected bounds',
       }),
       type: 'area',
