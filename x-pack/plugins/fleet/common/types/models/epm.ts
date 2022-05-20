@@ -372,7 +372,6 @@ export interface EpmPackageAdditions {
   title: string;
   latestVersion: string;
   assets: AssetsGroupedByServiceByType;
-  removable?: boolean;
   notice?: string;
   keepPoliciesUpToDate?: boolean;
 }

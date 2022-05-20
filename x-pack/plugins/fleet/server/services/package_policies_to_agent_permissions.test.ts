@@ -391,7 +391,6 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         },
       ],
       latestVersion: '0.3.0',
-      removable: true,
       notice: undefined,
       status: 'not_installed',
       assets: {
