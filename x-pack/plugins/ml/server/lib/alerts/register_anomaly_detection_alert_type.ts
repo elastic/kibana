@@ -31,6 +31,7 @@ import { InfluencerAnomalyAlertDoc, RecordAnomalyAlertDoc } from '../../../commo
 export type AnomalyDetectionAlertBaseContext = AlertInstanceContext & {
   jobIds: string[];
   anomalyExplorerUrl: string;
+  message: string;
 };
 
 export type AnomalyDetectionAlertContext = AnomalyDetectionAlertBaseContext & {
@@ -167,6 +168,14 @@ export function registerAnomalyDetectionAlertType({
               to: 'now',
             },
             params.resultType
+          ),
+          message: i18n.translate(
+            'xpack.ml.alertTypes.anomalyDetectionAlertingRule.recoveredMessage',
+            {
+              defaultMessage:
+                'No anomalies have been found that exceeded the [{severity}] threshold.',
+              values: { severity: params.severity },
+            }
           ),
         } as AnomalyDetectionAlertContext);
       }
