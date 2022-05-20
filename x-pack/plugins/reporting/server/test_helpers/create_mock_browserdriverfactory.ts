@@ -60,6 +60,9 @@ mockBrowserEvaluate.mockImplementation(() => {
   const lastCallIndex = mockBrowserEvaluate.mock.calls.length - 1;
   const { context: mockCall } = mockBrowserEvaluate.mock.calls[lastCallIndex][1];
 
+  if (mockCall === contexts.CONTEXT_DEBUG) {
+    return Promise.resolve();
+  }
   if (mockCall === contexts.CONTEXT_SKIPTELEMETRY) {
     return Promise.resolve();
   }

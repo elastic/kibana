@@ -62,6 +62,7 @@ export const LAYOUT_TYPES = {
 export const DEFAULT_VIEWPORT = {
   width: 1950,
   height: 1200,
+  deviceScaleFactor: 1,
 };
 
 // Export Type Definitions
