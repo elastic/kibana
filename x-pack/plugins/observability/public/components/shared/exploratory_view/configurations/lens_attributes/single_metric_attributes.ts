@@ -53,7 +53,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
         columns: {
           [this.columnId]: {
             ...buildNumberColumn(sourceField),
-            label: columnLabel,
+            label: columnLabel ?? '',
             operationType: operationType ?? sourceField === 'Records' ? 'count' : 'median',
             filter: columnFilter,
           },
