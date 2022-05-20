@@ -34,7 +34,7 @@ import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '@kbn/features-plugin/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
-import { RouteConfig, RouteMethod } from '@kbn/core/server';
+import { RouteConfig, RouteMethod, Headers } from '@kbn/core/server';
 import { ElasticsearchModifiedSource } from '../common/types/es';
 import { RulesByType } from '../common/types/alerts';
 import { configSchema, MonitoringConfig } from './config';
@@ -124,6 +124,7 @@ export interface LegacyRequest<Params = any, Query = any, Body = any> {
   payload: Body;
   params: Params;
   query: Query;
+  headers: Headers;
   getKibanaStatsCollector: () => any;
   getUiSettingsService: () => any;
   getActionTypeRegistry: () => any;

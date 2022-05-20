@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { clusterSetupStatusRoute } from './cluster_setup_status';
-export { nodeSetupStatusRoute } from './node_setup_status';
-export { disableElasticsearchInternalCollectionRoute } from './disable_elasticsearch_internal_collection';
+export * from './post_cluster_setup_status';
+export * from './post_node_setup_status';
+export * from './post_disable_internal_collection';
