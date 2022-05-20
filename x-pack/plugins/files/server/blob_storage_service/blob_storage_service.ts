@@ -12,6 +12,7 @@ import { ElasticsearchBlobStorage } from './adapters';
 
 interface ElasticsearchBlobStorageSettings {
   index?: string;
+  chunkSize?: string;
 }
 
 /**
@@ -26,10 +27,11 @@ interface BlobStorageSettings {
 export class BlobStorageService {
   constructor(private readonly esClient: ElasticsearchClient, private readonly logger: Logger) {}
 
-  private createESBlobStorage(args: { index?: string }): BlobStorage {
+  private createESBlobStorage({ index, chunkSize }: ElasticsearchBlobStorageSettings): BlobStorage {
     return new ElasticsearchBlobStorage(
       this.esClient,
-      args.index,
+      index,
+      chunkSize,
       this.logger.get('elasticsearch-blob-storage')
     );
   }
@@ -38,14 +40,14 @@ export class BlobStorageService {
     content: Readable,
     args?: BlobStorageSettings
   ): Promise<{ id: string; size: number }> {
-    return this.createESBlobStorage({ index: args?.es.index }).upload(content);
+    return this.createESBlobStorage({ ...args?.es }).upload(content);
   }
 
   public async delete(id: string, args?: BlobStorageSettings): Promise<void> {
-    return this.createESBlobStorage({ index: args?.es.index }).delete(id);
+    return this.createESBlobStorage({ ...args?.es }).delete(id);
   }
 
   public async download(id: string, size?: number, args?: BlobStorageSettings): Promise<Readable> {
-    return this.createESBlobStorage({ index: args?.es.index }).download({ id, size });
+    return this.createESBlobStorage({ ...args?.es }).download({ id, size });
   }
 }
