@@ -11,7 +11,7 @@ import {
   AxisStyle,
   Chart,
   LineAnnotation,
-  LineAnnotationStyle,
+  LineAnnotationProps,
   LineAnnotationDatum,
   LineSeries,
   PartialTheme,
@@ -34,7 +34,7 @@ import {
 const { euiColorFullShade, euiColorMediumShade } = euiVars;
 const axisColor = euiColorMediumShade;
 
-const baselineStyle: LineAnnotationStyle = {
+const baselineStyle: LineAnnotationProps['style'] = {
   line: {
     strokeWidth: 1,
     stroke: euiColorFullShade,
@@ -45,14 +45,6 @@ const baselineStyle: LineAnnotationStyle = {
     fontSize: 10,
     fill: euiColorMediumShade,
     padding: 0,
-  },
-  animations: {
-    enabled: false,
-    timeFunction: 'ease',
-    delay: 'fast',
-    duration: 'fast',
-    snapValues: [],
-    initialValue: undefined,
   },
 };
 

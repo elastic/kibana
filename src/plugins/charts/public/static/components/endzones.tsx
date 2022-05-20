@@ -13,7 +13,7 @@ import {
   TooltipValue,
   RectAnnotation,
   RectAnnotationDatum,
-  RectAnnotationStyle,
+  RectAnnotationProps,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
@@ -43,7 +43,7 @@ export const Endzones: FC<EndzonesProps> = ({
   hideTooltips = true,
   isFullBin = false,
 }) => {
-  const rectAnnotationStyle: Partial<RectAnnotationStyle> = {
+  const rectAnnotationStyle: RectAnnotationProps['style'] = {
     stroke: isDarkMode ? darkEuiTheme.euiColorLightShade : lightEuiTheme.euiColorDarkShade,
     strokeWidth: 0,
     opacity: isDarkMode ? 0.6 : 0.2,

@@ -10,7 +10,7 @@ import {
   AnnotationDomainType,
   LineAnnotation,
   LineAnnotationDatum,
-  LineAnnotationStyle,
+  LineAnnotationProps,
   Position,
 } from '@elastic/charts';
 import { euiLightVars } from '@kbn/ui-theme';
@@ -32,7 +32,7 @@ function generateAnnotationData(
 export function PercentileAnnotations({ percentiles }: Props) {
   const dataValues = generateAnnotationData(percentiles) ?? [];
 
-  const style: Partial<LineAnnotationStyle> = {
+  const style: LineAnnotationProps['style'] = {
     line: {
       strokeWidth: 1,
       stroke: euiLightVars.euiColorSuccess,

@@ -17,7 +17,7 @@ import {
   CurveType,
   LineAnnotation,
   LineAnnotationDatum,
-  LineAnnotationStyle,
+  LineAnnotationProps,
   Position,
   RectAnnotation,
   ScaleType,
@@ -56,7 +56,7 @@ interface TransactionDistributionChartProps {
   status: FETCH_STATUS;
 }
 
-const getAnnotationsStyle = (color = 'gray'): LineAnnotationStyle => ({
+const getAnnotationsStyle = (color = 'gray'): LineAnnotationProps['style'] => ({
   line: {
     strokeWidth: 1,
     stroke: color,
