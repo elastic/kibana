@@ -100,6 +100,10 @@ export function validateProjectMonitor(
   const journeyIdError = !isJourneyIdValid
     ? `Journey id is invalid. Journey id: ${monitorFields.id}.`
     : '';
+  const locationsError =
+    monitorFields.locations && monitorFields.locations.length === 0
+      ? 'Invalid value "[]" supplied to field "locations"'
+      : '';
 
   if (!isProjectIdValid || !isJourneyIdValid) {
     return {
@@ -117,7 +121,18 @@ export function validateProjectMonitor(
     return {
       valid: false,
       reason: `Failed to save or update monitor. Configuration is not valid`,
-      details: formatErrors(decodedMonitor.left).join(' | '),
+      details: [...formatErrors(decodedMonitor.left), locationsError]
+        .filter((error) => error !== '')
+        .join(' | '),
+      payload: monitorFields,
+    };
+  }
+
+  if (locationsError) {
+    return {
+      valid: false,
+      reason: `Failed to save or update monitor. Configuration is not valid`,
+      details: locationsError,
       payload: monitorFields,
     };
   }

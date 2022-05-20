@@ -15,9 +15,14 @@ export const ProjectMonitorThrottlingConfigCodec = t.interface({
 });
 
 export const ProjectBrowserMonitorCodec = t.intersection([
-  t.interface({ id: t.string, name: t.string, schedule: t.number, content: t.string }),
-  t.partial({
+  t.interface({
+    id: t.string,
+    name: t.string,
+    schedule: t.number,
+    content: t.string,
     locations: t.array(t.string),
+  }),
+  t.partial({
     throttling: ProjectMonitorThrottlingConfigCodec,
     screenshots: ScreenshotOptionCodec,
     tags: t.array(t.string),
