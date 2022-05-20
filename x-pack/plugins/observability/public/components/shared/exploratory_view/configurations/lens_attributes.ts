@@ -61,6 +61,12 @@ export function buildNumberColumn(sourceField: string) {
   };
 }
 
+export function getPercentileParam(operationType: string) {
+  return {
+    percentile: Number(operationType.split('th')[0]),
+  };
+}
+
 export const parseCustomFieldName = (seriesConfig: SeriesConfig, selectedMetricField?: string) => {
   let columnType;
   let columnFilters;
@@ -401,7 +407,7 @@ export class LensAttributes {
         values: { sourceField: seriesConfig.labels[sourceField]?.toLowerCase(), percentileValue },
       }),
       operationType: 'percentile',
-      params: { percentile: Number(percentileValue.split('th')[0]) },
+      params: getPercentileParam(percentileValue),
     };
   }
 

@@ -14,11 +14,15 @@ export function getSingleMetricConfig({ dataView }: ConfigProps): SeriesConfig {
   return {
     defaultSeriesType: 'line',
     xAxisColumn: {},
-    yAxisColumns: [],
+    yAxisColumns: [
+      {
+        operationType: 'median',
+      },
+    ],
     breakdownFields: [],
     filterFields: [],
     seriesTypes: [],
-    hasOperationType: false,
+    hasOperationType: true,
     definitionFields: ['service.name'],
     reportType: 'single-metric',
     baseFilters: [

@@ -48,13 +48,31 @@ export class SingleMetricLensAttributes extends LensAttributes {
 
     const sourceField = getSourceField();
 
+    const isPercentileColumn = operationType?.includes('th');
+
+    if (isPercentileColumn) {
+      return {
+        layer0: {
+          columns: {
+            [this.columnId]: {
+              ...this.getPercentileNumberColumn(sourceField, operationType!, seriesConfig),
+              label: columnLabel ?? '',
+              filter: columnFilter,
+            },
+          },
+          columnOrder: [this.columnId],
+          incompleteColumns: {},
+        },
+      };
+    }
+
     return {
       layer0: {
         columns: {
           [this.columnId]: {
             ...buildNumberColumn(sourceField),
             label: columnLabel ?? '',
-            operationType: operationType ?? sourceField === 'Records' ? 'count' : 'median',
+            operationType: sourceField === 'Records' ? 'count' : operationType || 'median',
             filter: columnFilter,
           },
         },
