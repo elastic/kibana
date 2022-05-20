@@ -23,6 +23,7 @@ import { sendGeneratePackagePolicy } from '../../hooks';
 import { CreatePackagePolicyBottomBar } from '..';
 import type { PackagePolicyValidationResults } from '../../../services';
 import { validatePackagePolicy, validationHasErrors } from '../../../services';
+import { NotObscuredByBottomBar } from '..';
 import { StepConfigurePackagePolicy } from '../../../single_page_layout/step_configure_package';
 const StandaloneWarningCallout: React.FC<{
   setIsManaged: MultiPageStepLayoutProps['setIsManaged'];
@@ -181,6 +182,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
   return (
     <>
       {isManaged ? null : <StandaloneWarningCallout setIsManaged={setIsManaged} />}
+      <EuiSpacer size={'l'} />
       <StepConfigurePackagePolicy
         packageInfo={fullPackageInfo!}
         showOnlyIntegration={integrationInfo?.name}
@@ -188,7 +190,9 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
         updatePackagePolicy={updatePackagePolicy}
         validationResults={validationResults!}
         submitAttempted={formState === 'INVALID'}
+        noTopRule={true}
       />
+      <NotObscuredByBottomBar />
       <CreatePackagePolicyBottomBar
         cancelClickHandler={onBack}
         onNext={onSubmit}

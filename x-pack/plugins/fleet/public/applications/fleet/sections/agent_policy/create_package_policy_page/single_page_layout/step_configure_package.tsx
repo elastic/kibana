@@ -30,6 +30,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
   validationResults: PackagePolicyValidationResults;
   submitAttempted: boolean;
+  noTopRule?: boolean;
 }> = ({
   packageInfo,
   showOnlyIntegration,
@@ -37,6 +38,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   updatePackagePolicy,
   validationResults,
   submitAttempted,
+  noTopRule = false,
 }) => {
   const hasIntegrations = useMemo(() => doesPackageHaveIntegrations(packageInfo), [packageInfo]);
   const packagePolicyTemplates = useMemo(
@@ -52,7 +54,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   const renderConfigureInputs = () =>
     packagePolicyTemplates.length ? (
       <>
-        <EuiHorizontalRule margin="m" />
+        {!noTopRule && <EuiHorizontalRule margin="m" />}
         <EuiFlexGroup direction="column" gutterSize="none">
           {packagePolicyTemplates.map((policyTemplate) => {
             return (policyTemplate.inputs || []).map((packageInput) => {
