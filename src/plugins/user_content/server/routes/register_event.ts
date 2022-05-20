@@ -28,14 +28,16 @@ export const registerRegisterEventRoute = (
         body: schema.object({
           soId: schema.string(),
           soType: schema.string(),
+          '@timestamp': schema.maybe(schema.string()), // "2022-03-20T10:00:00.000Z"
         }),
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { body, params } = req;
 
-      await metadataEventsService.registerEvent({
+      const result = await metadataEventsService.registerEvent({
         type: params.eventType,
+        '@timestamp': body['@timestamp'],
         data: {
           so_id: body.soId,
           so_type: body.soType,
@@ -43,7 +45,7 @@ export const registerRegisterEventRoute = (
       });
 
       return res.ok({
-        body: 'ok',
+        body: result,
       });
     })
   );

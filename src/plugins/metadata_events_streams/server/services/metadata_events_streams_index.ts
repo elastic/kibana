@@ -16,9 +16,7 @@ interface Dependencies {
 
 const indexName = '.kibana-metadata-events-streams';
 
-const getTimestamp = () => {
-  return moment().toISOString();
-};
+const getTimestamp = () => moment().toISOString();
 
 export class MetadataEventsStreamsIndex {
   private esClient: ElasticsearchClient | undefined;
@@ -42,7 +40,8 @@ export class MetadataEventsStreamsIndex {
 
     const document: MetadataEventDoc = {
       ...event,
-      '@timestamp': getTimestamp(),
+      // @ts-ignore Temp for POC demo to be able to hack and add past events
+      '@timestamp': event['@timestamp'] ?? getTimestamp(),
       stream: streamName,
     };
 

@@ -15,6 +15,9 @@ export type MetadataEventType = typeof metadataEventTypes[number];
 
 /** The metadata event indexed in the stream */
 export interface UserContentMetadataEvent extends MetadataEvent<MetadataEventType> {
+  // Temp for POC to be able to add custom events in the past
+  // Final solution should not be able to "hack" and add a timestamp
+  '@timestamp'?: string;
   data: {
     /** The saved object id */
     so_id: string;

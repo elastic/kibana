@@ -36,11 +36,31 @@ export class MetadataEventsService {
     const { userContentEventsStream, savedObjectRepository } = await this
       .depsFromPluginStartPromise;
 
-    if (isViewedEvent(event)) {
-      incrementViewsCounters(event.data.so_type, event.data.so_id, savedObjectRepository);
-    }
+    const {
+      data: { so_type: soType, so_id: soId },
+    } = event;
 
-    return userContentEventsStream.registerEvent(event);
+    try {
+      // Make sure the SO exists, if not it will throw a 404 error that we catch below
+      await savedObjectRepository.get(soType, soId);
+
+      if (isViewedEvent(event)) {
+        // We add this second if **just** for the POC demo so we don't increment
+        // the counter when we manually create events in the past.
+        const incrementOnlyTotalCounter = event['@timestamp'] !== undefined;
+        incrementViewsCounters(
+          event.data.so_type,
+          event.data.so_id,
+          savedObjectRepository,
+          incrementOnlyTotalCounter
+        );
+      }
+
+      await userContentEventsStream.registerEvent(event);
+      return 'ok';
+    } catch (e) {
+      throw e;
+    }
   }
 
   async bulkRegisterEvents(events: UserContentMetadataEvent[]) {
