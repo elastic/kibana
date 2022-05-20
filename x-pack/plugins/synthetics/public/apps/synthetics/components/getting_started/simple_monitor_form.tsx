@@ -50,7 +50,12 @@ export const SimpleMonitorForm = () => {
   const hasURLError = !!errors?.[ConfigKey.URLS];
 
   return (
-    <EuiForm onSubmit={handleSubmit(onSubmit)} component="form" isInvalid={isSubmitted && !isValid}>
+    <EuiForm
+      onSubmit={handleSubmit(onSubmit)}
+      component="form"
+      isInvalid={isSubmitted && !isValid}
+      noValidate
+    >
       <EuiFormRow
         fullWidth
         label={WEBSITE_URL_LABEL}
