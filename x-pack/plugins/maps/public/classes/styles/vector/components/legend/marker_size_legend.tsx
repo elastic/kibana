@@ -6,7 +6,6 @@
  */
 
 import React, { Component } from 'react';
-import _ from 'lodash';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { DynamicSizeProperty } from '../../properties/dynamic_size_property';
@@ -51,7 +50,7 @@ export class MarkerSizeLegend extends Component<Props, State> {
       return;
     }
     const label = await field.getLabel();
-    if (this._isMounted && !_.isEqual(this.state.label, label)) {
+    if (this._isMounted && this.state.label !== label) {
       this.setState({ label });
     }
   }
