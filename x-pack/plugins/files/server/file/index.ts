@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-export { FILE_SO_TYPE, PLUGIN_ID, PLUGIN_NAME } from './constants';
+export { File } from './file';
 
-export type {
-  FileSavedObjectAttributes,
-  FileStatus,
-  File,
-  FileSavedObject,
-  UpdatableFileAttributes,
-} from './types';
+export { createDefaultFileAttributes, fileAttributesReducer } from './file_attributes_reducer';
+export type { Action } from './file_attributes_reducer';
