@@ -16,6 +16,8 @@ import { AGENT_STATUS_FIELD_NAME } from '../../../../timelines/components/timeli
 
 const FIELDS_WITHOUT_ACTIONS: { [field: string]: boolean } = { [AGENT_STATUS_FIELD_NAME]: true };
 
+const style = { flexGrow: 0 };
+
 export const SummaryValueCell: React.FC<AlertSummaryRow['description']> = ({
   data,
   eventId,
@@ -25,32 +27,36 @@ export const SummaryValueCell: React.FC<AlertSummaryRow['description']> = ({
   timelineId,
   values,
   isReadOnly,
-}) => (
-  <>
-    <FieldValueCell
-      contextId={timelineId}
-      data={data}
-      eventId={eventId}
-      fieldFromBrowserField={fieldFromBrowserField}
-      linkValue={linkValue}
-      isDraggable={isDraggable}
-      style={{ flexGrow: 0 }}
-      values={values}
-    />
-    {timelineId !== TimelineId.active && !isReadOnly && !FIELDS_WITHOUT_ACTIONS[data.field] && (
-      <ActionCell
+}) => {
+  const hoverActionsEnabled = !FIELDS_WITHOUT_ACTIONS[data.field];
+
+  return (
+    <>
+      <FieldValueCell
         contextId={timelineId}
         data={data}
         eventId={eventId}
         fieldFromBrowserField={fieldFromBrowserField}
         linkValue={linkValue}
-        timelineId={timelineId}
+        isDraggable={isDraggable}
+        style={style}
         values={values}
-        applyWidthAndPadding={false}
-        hideAddToTimeline={false}
       />
-    )}
-  </>
-);
+      {timelineId !== TimelineId.active && !isReadOnly && hoverActionsEnabled && (
+        <ActionCell
+          contextId={timelineId}
+          data={data}
+          eventId={eventId}
+          fieldFromBrowserField={fieldFromBrowserField}
+          linkValue={linkValue}
+          timelineId={timelineId}
+          values={values}
+          applyWidthAndPadding={false}
+          hideAddToTimeline={false}
+        />
+      )}
+    </>
+  );
+};
 
 SummaryValueCell.displayName = 'SummaryValueCell';
