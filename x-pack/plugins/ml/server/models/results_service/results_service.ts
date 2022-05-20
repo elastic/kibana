@@ -725,7 +725,9 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     };
 
     if (client) {
-      const { aggregations } = await client.asCurrentUser.search(esSearchRequest);
+      const { aggregations } = await client.asCurrentUser.search(esSearchRequest, {
+        maxRetries: 0,
+      });
 
       finalResults.datafeedResults =
         // @ts-expect-error incorrect search response type

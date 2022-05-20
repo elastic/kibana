@@ -204,16 +204,19 @@ const getAggIntervals = async (
     return aggs;
   }, {} as Record<string, object>);
 
-  const body = await asCurrentUser.search({
-    index: indexPattern,
-    size: 0,
-    body: {
-      query,
-      aggs: buildSamplerAggregation(minMaxAggs, samplerShardSize),
+  const body = await asCurrentUser.search(
+    {
+      index: indexPattern,
       size: 0,
-      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+      body: {
+        query,
+        aggs: buildSamplerAggregation(minMaxAggs, samplerShardSize),
+        size: 0,
+        ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+      },
     },
-  });
+    { maxRetries: 0 }
+  );
 
   const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
   const aggregations = aggsPath.length > 0 ? get(body.aggregations, aggsPath) : body.aggregations;
@@ -290,16 +293,19 @@ export const getHistogramsForFields = async (
     return [];
   }
 
-  const body = await asCurrentUser.search({
-    index: indexPattern,
-    size: 0,
-    body: {
-      query,
-      aggs: buildSamplerAggregation(chartDataAggs, samplerShardSize),
+  const body = await asCurrentUser.search(
+    {
+      index: indexPattern,
       size: 0,
-      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+      body: {
+        query,
+        aggs: buildSamplerAggregation(chartDataAggs, samplerShardSize),
+        size: 0,
+        ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+      },
     },
-  });
+    { maxRetries: 0 }
+  );
 
   const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
   const aggregations = aggsPath.length > 0 ? get(body.aggregations, aggsPath) : body.aggregations;
@@ -666,12 +672,15 @@ export class DataVisualizer {
         : {}),
     };
 
-    const body = await this._asCurrentUser.search({
-      index,
-      track_total_hits: true,
-      size,
-      body: searchBody,
-    });
+    const body = await this._asCurrentUser.search(
+      {
+        index,
+        track_total_hits: true,
+        size,
+        body: searchBody,
+      },
+      { maxRetries: 0 }
+    );
 
     const aggregations = body.aggregations;
     // @ts-expect-error incorrect search response type
@@ -757,11 +766,14 @@ export class DataVisualizer {
     };
     filterCriteria.push({ exists: { field } });
 
-    const body = await this._asCurrentUser.search({
-      index,
-      size,
-      body: searchBody,
-    });
+    const body = await this._asCurrentUser.search(
+      {
+        index,
+        size,
+        body: searchBody,
+      },
+      { maxRetries: 0 }
+    );
     // @ts-expect-error incorrect search response type
     return body.hits.total.value > 0;
   }
@@ -802,11 +814,14 @@ export class DataVisualizer {
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
-    const body = await this._asCurrentUser.search({
-      index,
-      size,
-      body: searchBody,
-    });
+    const body = await this._asCurrentUser.search(
+      {
+        index,
+        size,
+        body: searchBody,
+      },
+      { maxRetries: 0 }
+    );
 
     const buckets: { [key: string]: number } = {};
     const dataByTimeBucket: Array<{ key: string; doc_count: number }> = get(
@@ -907,11 +922,14 @@ export class DataVisualizer {
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
-    const body = await this._asCurrentUser.search({
-      index,
-      size,
-      body: searchBody,
-    });
+    const body = await this._asCurrentUser.search(
+      {
+        index,
+        size,
+        body: searchBody,
+      },
+      { maxRetries: 0 }
+    );
     const aggregations = body.aggregations;
     const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
     const batchStats: NumericFieldStats[] = [];
@@ -1030,11 +1048,14 @@ export class DataVisualizer {
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
-    const body = await this._asCurrentUser.search({
-      index,
-      size,
-      body: searchBody,
-    });
+    const body = await this._asCurrentUser.search(
+      {
+        index,
+        size,
+        body: searchBody,
+      },
+      { maxRetries: 0 }
+    );
     const aggregations = body.aggregations;
     const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
     const batchStats: StringFieldStats[] = [];
@@ -1106,11 +1127,14 @@ export class DataVisualizer {
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
-    const body = await this._asCurrentUser.search({
-      index,
-      size,
-      body: searchBody,
-    });
+    const body = await this._asCurrentUser.search(
+      {
+        index,
+        size,
+        body: searchBody,
+      },
+      { maxRetries: 0 }
+    );
     const aggregations = body.aggregations;
     const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
     const batchStats: DateFieldStats[] = [];
@@ -1175,11 +1199,14 @@ export class DataVisualizer {
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
-    const body = await this._asCurrentUser.search({
-      index,
-      size,
-      body: searchBody,
-    });
+    const body = await this._asCurrentUser.search(
+      {
+        index,
+        size,
+        body: searchBody,
+      },
+      { maxRetries: 0 }
+    );
     const aggregations = body.aggregations;
     const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
     const batchStats: BooleanFieldStats[] = [];
@@ -1240,11 +1267,14 @@ export class DataVisualizer {
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
-    const body = await this._asCurrentUser.search({
-      index,
-      size,
-      body: searchBody,
-    });
+    const body = await this._asCurrentUser.search(
+      {
+        index,
+        size,
+        body: searchBody,
+      },
+      { maxRetries: 0 }
+    );
     const stats = {
       fieldName: field,
       examples: [] as any[],
