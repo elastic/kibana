@@ -24,8 +24,8 @@ import {
   gridlinesConfigFunction,
   axisExtentConfigFunction,
   tickLabelsConfigFunction,
+  referenceLineFunction,
   referenceLineLayerFunction,
-  extendedReferenceLineLayerFunction,
   annotationLayerFunction,
   labelsOrientationConfigFunction,
   axisTitlesVisibilityConfigFunction,
@@ -64,8 +64,8 @@ export class ExpressionXyPlugin {
     expressions.registerFunction(annotationLayerFunction);
     expressions.registerFunction(extendedAnnotationLayerFunction);
     expressions.registerFunction(labelsOrientationConfigFunction);
+    expressions.registerFunction(referenceLineFunction);
     expressions.registerFunction(referenceLineLayerFunction);
-    expressions.registerFunction(extendedReferenceLineLayerFunction);
     expressions.registerFunction(axisTitlesVisibilityConfigFunction);
     expressions.registerFunction(xyVisFunction);
     expressions.registerFunction(layeredXyVisFunction);
