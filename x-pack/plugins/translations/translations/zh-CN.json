@@ -13202,8 +13202,6 @@
     "xpack.fleet.upgradeAgents.cancelButtonLabel": "取消",
     "xpack.fleet.upgradeAgents.confirmMultipleButtonLabel": "升级{count, plural, one {代理} other { {count} 个代理} =true {所有选定代理}}",
     "xpack.fleet.upgradeAgents.confirmSingleButtonLabel": "升级代理",
-    "xpack.fleet.upgradeAgents.experimentalLabel": "实验性",
-    "xpack.fleet.upgradeAgents.experimentalLabelTooltip": "在未来的版本中可能会更改或移除升级代理，其不受支持 SLA 的约束。",
     "xpack.fleet.upgradeAgents.fatalErrorNotificationTitle": "升级{count, plural, one {代理} other { {count} 个代理} =true {所有选定代理}}时出错",
     "xpack.fleet.upgradeAgents.successMultiNotificationTitle": "已升级{isMixed, select, true { {success} 个（共 {total} 个）} other {{isAllAgents, select, true {所有选定} other { {success} 个} }}}代理",
     "xpack.fleet.upgradeAgents.successSingleNotificationTitle": "已升级 {count} 个代理",
