@@ -23,6 +23,7 @@ import { useUpgradeSecurityPackages } from '../../common/hooks/use_upgrade_secur
 import { GlobalHeader } from './global_header';
 import { SecuritySolutionTemplateWrapper } from './template_wrapper';
 import { ConsoleManager } from '../../management/components/console/components/console_manager';
+import { TourContextProvider } from '../../common/components/guided_onboarding';
 
 interface HomePageProps {
   children: React.ReactNode;
@@ -53,9 +54,11 @@ const HomePageComponent: React.FC<HomePageProps> = ({
         <GlobalHeader setHeaderActionMenu={setHeaderActionMenu} />
         <DragDropContextWrapper browserFields={browserFields}>
           <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
-          <SecuritySolutionTemplateWrapper onAppLeave={onAppLeave}>
-            {children}
-          </SecuritySolutionTemplateWrapper>
+          <TourContextProvider>
+            <SecuritySolutionTemplateWrapper onAppLeave={onAppLeave}>
+              {children}
+            </SecuritySolutionTemplateWrapper>
+          </TourContextProvider>
         </DragDropContextWrapper>
         <HelpMenu />
       </ConsoleManager>

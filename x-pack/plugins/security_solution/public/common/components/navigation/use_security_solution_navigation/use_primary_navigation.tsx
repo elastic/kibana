@@ -13,6 +13,7 @@ import { PrimaryNavigationProps } from './types';
 import { usePrimaryNavigationItems } from './use_navigation_items';
 import { useIsGroupedNavigationEnabled } from '../helpers';
 import { SecuritySideNav } from '../security_side_nav';
+import { useTourContext } from '../../guided_onboarding';
 
 const translatedNavTitle = i18n.translate('xpack.securitySolution.navigation.mainLabel', {
   defaultMessage: 'Security',
@@ -37,6 +38,8 @@ export const usePrimaryNavigation = ({
 
   const [selectedTabId, setSelectedTabId] = useState(mapLocationToTab());
 
+  const { isTourActive } = useTourContext();
+
   useEffect(() => {
     const currentTabSelected = mapLocationToTab();
 
@@ -59,6 +62,7 @@ export const usePrimaryNavigation = ({
   });
 
   return {
+    isForceOpenOnDesktop: isTourActive,
     name: translatedNavTitle,
     icon: 'logoSecurity',
     ...(isGroupedNavigationEnabled
