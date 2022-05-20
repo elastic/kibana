@@ -24,7 +24,6 @@ export const links: LinkItem = {
       defaultMessage: 'Hosts',
     }),
   ],
-  globalSearchEnabled: true,
   globalNavOrder: 9002,
   links: [
     {
