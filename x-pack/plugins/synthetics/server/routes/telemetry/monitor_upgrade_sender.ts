@@ -155,7 +155,7 @@ function getScriptType(
       return 'recorder';
     case Boolean(isInlineScript):
       return 'inline';
-    case attributes[ConfigKey.SOURCE_TYPE] === SourceType.PROJECT:
+    case attributes[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT:
       return 'project';
     default:
       return undefined;

@@ -161,7 +161,7 @@ describe('validateMonitor', () => {
     testBrowserSimpleFields = {
       ...testZipUrlTLSFields,
       ...testCommonFields,
-      [ConfigKey.SOURCE_TYPE]: SourceType.PROJECT,
+      [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
       [ConfigKey.JOURNEY_ID]: '',
       [ConfigKey.PROJECT_ID]: '',
       [ConfigKey.METADATA]: testMetaData,

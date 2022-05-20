@@ -77,7 +77,7 @@ export const CommonFieldsCodec = t.intersection([
   t.partial({
     [ConfigKey.TIMEOUT]: t.union([t.string, t.null]),
     [ConfigKey.REVISION]: t.number,
-    [ConfigKey.SOURCE_TYPE]: SourceTypeCodec,
+    [ConfigKey.MONITOR_SOURCE_TYPE]: SourceTypeCodec,
   }),
 ]);
 

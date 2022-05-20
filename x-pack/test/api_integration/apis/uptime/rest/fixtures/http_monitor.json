@@ -61,5 +61,5 @@
   }],
   "namespace": "testnamespace",
   "revision": 1,
-  "monitor.source": "ui"
+  "monitor.origin": "ui"
 }

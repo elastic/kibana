@@ -56,7 +56,7 @@ export const normalizeProjectMonitor = ({
   const defaultFields = DEFAULT_FIELDS[DataStream.BROWSER];
   const normalizedFields: NormalizedPublicFields = {
     [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
-    [ConfigKey.SOURCE_TYPE]: SourceType.PROJECT,
+    [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
     [ConfigKey.NAME]: monitor.name || '',
     [ConfigKey.SCHEDULE]: {
       number: `${monitor.schedule}`,

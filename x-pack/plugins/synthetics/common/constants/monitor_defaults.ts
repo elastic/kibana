@@ -42,7 +42,7 @@ export const DEFAULT_COMMON_FIELDS: CommonFields = {
   [ConfigKey.NAME]: '',
   [ConfigKey.LOCATIONS]: [],
   [ConfigKey.NAMESPACE]: DEFAULT_NAMESPACE_STRING,
-  [ConfigKey.SOURCE_TYPE]: SourceType.UI,
+  [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.UI,
 };
 
 export const DEFAULT_BROWSER_ADVANCED_FIELDS: BrowserAdvancedFields = {
