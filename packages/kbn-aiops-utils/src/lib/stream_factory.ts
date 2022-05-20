@@ -9,8 +9,6 @@
 import { Stream } from 'stream';
 import zlib from 'zlib';
 
-import type { Logger } from '@kbn/logging';
-
 // TODO: Replace these with kbn packaged versions once we have those available to us
 // These originally came from this location below before moving them to this hacked "any" types:
 // import type { Headers } from '@kbn/core/server';
@@ -34,12 +32,14 @@ const DELIMITER = '\n';
  * @param headers - Request headers.
  * @returns An object with stream attributes and methods.
  */
-export function streamFactory<T = unknown>(logger: Logger, headers: Headers, ndjson = true) {
+export function streamFactory<T = unknown>(headers: Headers, ndjson = true) {
   const isCompressed = acceptCompression(headers);
 
   const stream = isCompressed ? zlib.createGzip() : new ResponseStream();
 
-  stream.emit('error', 'ERROR CAN HAZ?');
+  function error(errorText: string) {
+    stream.emit('error', new Error(errorText));
+  }
 
   function push(d: T) {
     try {
@@ -51,9 +51,8 @@ export function streamFactory<T = unknown>(logger: Logger, headers: Headers, ndj
       if (isCompressed) {
         stream.flush();
       }
-    } catch (error) {
-      logger.error('Could not serialize or stream a message.');
-      logger.error(error);
+    } catch (e) {
+      error('Could not serialize or stream a message.');
     }
   }
 
@@ -68,5 +67,5 @@ export function streamFactory<T = unknown>(logger: Logger, headers: Headers, ndj
       : {}),
   };
 
-  return { DELIMITER, end: stream.end, push, responseWithHeaders };
+  return { DELIMITER, end: stream.end, error, push, responseWithHeaders };
 }

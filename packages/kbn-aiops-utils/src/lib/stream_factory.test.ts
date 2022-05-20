@@ -8,8 +8,6 @@
 
 import zlib from 'zlib';
 
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
-
 import { streamFactory } from './stream_factory';
 
 const mockItem1 = {
@@ -22,14 +20,8 @@ const mockItem2 = {
 };
 
 describe('streamFactory', () => {
-  let mockLogger: MockedLogger;
-
-  beforeEach(() => {
-    mockLogger = loggerMock.create();
-  });
-
   it('should encode and receive an uncompressed stream', async () => {
-    const { DELIMITER, end, push, responseWithHeaders } = streamFactory(mockLogger, {});
+    const { DELIMITER, end, push, responseWithHeaders } = streamFactory({});
 
     push(mockItem1);
     push(mockItem2);
@@ -62,7 +54,7 @@ describe('streamFactory', () => {
   // without the need for additional custom code.
   it('should encode and receive a compressed stream', (done) => {
     (async () => {
-      const { DELIMITER, end, push, responseWithHeaders } = streamFactory(mockLogger, {
+      const { DELIMITER, end, push, responseWithHeaders } = streamFactory({
         'accept-encoding': 'gzip',
       });
 

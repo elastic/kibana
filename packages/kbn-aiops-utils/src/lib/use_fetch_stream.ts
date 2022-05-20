@@ -86,12 +86,12 @@ export function useFetchStream<I extends UseFetchStreamParamsDefault, BasePath e
 
     abortCtrl.current = new AbortController();
 
-    for await (const [fetchError, actions] of fetchStream<
+    for await (const [fetchStreamError, actions] of fetchStream<
       UseFetchStreamCustomReducerParams,
       BasePath
     >(endpoint, abortCtrl, body, options !== undefined)) {
-      if (fetchError) {
-        setError(fetchError);
+      if (fetchStreamError) {
+        setError(fetchStreamError);
       } else if (actions.length > 0) {
         dispatch(actions as ReducerAction<I['reducer']>);
       }

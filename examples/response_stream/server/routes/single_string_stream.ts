@@ -58,7 +58,10 @@ export const defineSimpleStringStreamRoute = (router: IRouter, logger: Logger) =
           if (token !== undefined) {
             push(`${token} `);
             await timeout(Math.floor(Math.random() * maxTimeoutMs));
-            pushStreamUpdate();
+
+            if (!shouldStop) {
+              pushStreamUpdate();
+            }
           } else {
             end();
           }
