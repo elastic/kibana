@@ -32,11 +32,11 @@ export type {
   AsApiContract,
   RuleTableItem,
   AlertsTableProps,
-  AlertsData,
   BulkActionsObjectProp,
   RuleSummary,
   AlertStatus,
   AlertsTableConfigurationRegistryContract,
+  RuleEventLogListProps,
 } from './types';
 
 export {
@@ -49,11 +49,28 @@ export type { ActionGroupWithCondition } from './application/sections';
 
 export { AlertConditions, AlertConditionsGroup } from './application/sections';
 
-export * from './common';
-
 export function plugin(context: PluginInitializerContext) {
   return new Plugin(context);
 }
+
+export type { AggregationType, Comparator } from './common';
+
+export {
+  WhenExpression,
+  OfExpression,
+  ForLastExpression,
+  ThresholdExpression,
+  ValueExpression,
+  builtInComparators,
+  builtInGroupByTypes,
+  builtInAggregationTypes,
+  getFields,
+  firstFieldOption,
+  getIndexOptions,
+  getTimeFieldOptions,
+  GroupByExpression,
+  COMPARATORS,
+} from './common';
 
 export { Plugin };
 export * from './plugin';
@@ -72,9 +89,8 @@ export { loadRuleAggregations, loadRuleTags } from './application/lib/rule_api/a
 export { useLoadRuleTypes } from './application/hooks/use_load_rule_types';
 export { loadRule } from './application/lib/rule_api/get_rule';
 export { loadAllActions } from './application/lib/action_connector_api';
-
 export { loadActionTypes } from './application/lib/action_connector_api/connector_types';
-
+export { NOTIFY_WHEN_OPTIONS } from './application/sections/rule_form/rule_notify_when';
 export type { TIME_UNITS } from './application/constants';
 export { getTimeUnitLabel } from './common/lib/get_time_unit_label';
 export type { TriggersAndActionsUiServices } from './application/app';
