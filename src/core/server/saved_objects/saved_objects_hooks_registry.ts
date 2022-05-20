@@ -12,7 +12,10 @@ import { SavedObjectsClient, SavedObjectsBulkCreateObject } from '.';
 /** Handler to execute before fetching one or multiple saved object(s) */
 type PreGetHook = (...args: Parameters<SavedObjectsClient['bulkGet']>) => Promise<void>;
 /** Handler to execute after fetching one or multiple saved object(s) */
-type PostGetHook = (objects: SavedObject[]) => Promise<void>;
+type PostGetHook = (
+  objects: SavedObject[],
+  options: Parameters<SavedObjectsClient['bulkGet']>[1]
+) => Promise<void>;
 
 /** Handler to execute before creating one or multiple saved object(s) */
 type PreCreateHook = (
@@ -63,6 +66,7 @@ export class SavedObjectsHooksRegistry {
   public post<K extends keyof PostHooks, H extends PostHooks[K][number]>(method: K, handler: H) {
     const hooksArray: PostHooks[K] = this._postHooks[method];
     if (hooksArray) {
+      // @ts-expect-error "H" is correctly typed but for some reason it fails when used on this line
       hooksArray.push(handler);
     }
   }

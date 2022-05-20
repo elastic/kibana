@@ -24,6 +24,12 @@ import { HttpFetchOptions, HttpSetup } from '../http';
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
 
+interface SavedObjectsBaseOptions {
+  eventMetadata: {
+    registerEvent?: boolean;
+  };
+}
+
 type SavedObjectsFindOptions = Omit<
   SavedObjectFindOptionsServer,
   'pit' | 'rootSearchFields' | 'searchAfter' | 'sortOrder' | 'typeToNamespacesMap'
@@ -119,6 +125,7 @@ export interface SavedObjectsFindResponsePublic<T = unknown, A = unknown>
 interface BatchGetQueueEntry {
   type: string;
   id: string;
+  options?: SavedObjectsBaseOptions;
   resolve: <T = unknown>(value: SimpleSavedObject<T> | SavedObject<T>) => void;
   reject: (reason?: any) => void;
 }
@@ -126,6 +133,7 @@ interface BatchGetQueueEntry {
 interface BatchResolveQueueEntry {
   type: string;
   id: string;
+  options?: SavedObjectsBaseOptions;
   resolve: <T = unknown>(value: ResolvedSimpleSavedObject<T>) => void;
   reject: (reason?: any) => void;
 }
@@ -299,15 +307,15 @@ const getObjectsToFetch = (queue: BatchGetQueueEntry[]): ObjectTypeAndId[] => {
 
 const getObjectsToResolve = (queue: BatchResolveQueueEntry[]) => {
   const responseIndices: number[] = [];
-  const objectsToResolve: ObjectTypeAndId[] = [];
+  const objectsToResolve: Array<ObjectTypeAndId & { options?: SavedObjectsBaseOptions }> = [];
   const inserted = new Map<string, number>();
-  queue.forEach(({ id, type }) => {
+  queue.forEach(({ id, type, options }) => {
     const key = `${type}|${id}`;
     const indexForTypeAndId = inserted.get(key);
     if (indexForTypeAndId === undefined) {
       inserted.set(key, objectsToResolve.length);
       responseIndices.push(objectsToResolve.length);
-      objectsToResolve.push({ id, type });
+      objectsToResolve.push({ id, type, options });
     } else {
       responseIndices.push(indexForTypeAndId);
     }
@@ -536,19 +544,25 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     });
   };
 
-  public get = <T = unknown>(type: string, id: string): Promise<SimpleSavedObject<T>> => {
+  public get = <T = unknown>(
+    type: string,
+    id: string,
+    options?: SavedObjectsBaseOptions
+  ): Promise<SimpleSavedObject<T>> => {
     if (!type || !id) {
       return Promise.reject(new Error('requires type and id'));
     }
 
     return new Promise((resolve, reject) => {
-      this.batchGetQueue.push({ type, id, resolve, reject } as BatchGetQueueEntry);
+      this.batchGetQueue.push({ type, id, resolve, reject, options } as BatchGetQueueEntry);
       this.processBatchGetQueue();
     });
   };
 
-  public bulkGet = (objects: Array<{ id: string; type: string }> = []) => {
-    const filteredObjects = objects.map((obj) => pick(obj, ['id', 'type']));
+  public bulkGet = (
+    objects: Array<{ id: string; type: string; options?: SavedObjectsBaseOptions }> = []
+  ) => {
+    const filteredObjects = objects.map((obj) => ({ ...pick(obj, ['id', 'type', 'options']) }));
     return this.performBulkGet(filteredObjects).then((resp) => {
       resp.saved_objects = resp.saved_objects.map((d) => this.createSavedObject(d));
       return renameKeys<
@@ -569,20 +583,23 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
 
   public resolve = <T = unknown>(
     type: string,
-    id: string
+    id: string,
+    options?: SavedObjectsBaseOptions
   ): Promise<ResolvedSimpleSavedObject<T>> => {
     if (!type || !id) {
       return Promise.reject(new Error('requires type and id'));
     }
 
     return new Promise((resolve, reject) => {
-      this.batchResolveQueue.push({ type, id, resolve, reject } as BatchResolveQueueEntry);
+      this.batchResolveQueue.push({ type, id, resolve, reject, options } as BatchResolveQueueEntry);
       this.processBatchResolveQueue();
     });
   };
 
-  public bulkResolve = async <T = unknown>(objects: Array<{ id: string; type: string }> = []) => {
-    const filteredObjects = objects.map(({ type, id }) => ({ type, id }));
+  public bulkResolve = async <T = unknown>(
+    objects: Array<{ id: string; type: string; options?: SavedObjectsBaseOptions }> = []
+  ) => {
+    const filteredObjects = objects.map(({ type, id, options }) => ({ type, id, options }));
     const response = await this.performBulkResolve<T>(filteredObjects);
     return {
       resolved_objects: response.resolved_objects.map((resolveResponse) =>

@@ -164,6 +164,19 @@ export interface SavedObjectsFindOptions {
 export interface SavedObjectsBaseOptions {
   /** Specify the namespace for this operation */
   namespace?: string;
+  /**
+   * Optionally register an event with metadata for the current API call.
+   * Events can be registered for "get", "bulkGet", "resolve", "bulkResolve"
+   * "create" and "bulkCreate"
+   */
+  eventMetadata?: {
+    /** Flag to indicate if pre/post events should be registered for the API call. */
+    registerEvent?: boolean;
+    /** If "registerEvent" is set to "true" then a context.origin must be defined */
+    context?: {
+      origin: 'kibana' | 'api';
+    };
+  };
 }
 
 /**
