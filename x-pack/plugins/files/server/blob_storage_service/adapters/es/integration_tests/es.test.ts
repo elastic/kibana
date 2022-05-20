@@ -39,6 +39,7 @@ describe('Elasticsearch blob storage', () => {
   beforeEach(() => {
     esBlobStorage = new ElasticsearchBlobStorage(
       esClient,
+      undefined,
       manageKbn.root.logger.get('es-blob-test')
     );
     sandbox.spy(esClient, 'get');

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import assert from 'assert';
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { pipeline as _pipeline, Readable } from 'stream';
@@ -23,26 +24,35 @@ const pipeline = promisify(_pipeline);
 export const BLOB_STORAGE_SYSTEM_INDEX_NAME = '.kibana_blob_storage';
 
 export class ElasticsearchBlobStorage implements BlobStorage {
-  constructor(private readonly esClient: ElasticsearchClient, private readonly logger: Logger) {}
+  constructor(
+    private readonly esClient: ElasticsearchClient,
+    private readonly index: string = BLOB_STORAGE_SYSTEM_INDEX_NAME,
+    private readonly logger: Logger
+  ) {
+    assert(
+      this.index.startsWith('.kibana'),
+      `Elasticsearch blob store index name must start with ".kibana", got ${this.index}.`
+    );
+  }
 
-  private readonly indexName = BLOB_STORAGE_SYSTEM_INDEX_NAME;
   private indexCreateCheckComplete = false;
 
   private async createIndexIfNotExists(): Promise<void> {
+    const index = this.index;
     if (this.indexCreateCheckComplete) {
       return;
     }
-    if (await this.esClient.indices.exists({ index: this.indexName })) {
-      this.logger.debug(`${this.indexName} already exists.`);
+    if (await this.esClient.indices.exists({ index })) {
+      this.logger.debug(`${index} already exists.`);
       this.indexCreateCheckComplete = true;
       return;
     }
 
-    this.logger.info(`Creating ${this.indexName} for Elasticsearch blob store.`);
+    this.logger.info(`Creating ${index} for Elasticsearch blob store.`);
 
     try {
       await this.esClient.indices.create({
-        index: this.indexName,
+        index,
         body: {
           settings: {
             number_of_shards: 1,
@@ -62,18 +72,13 @@ export class ElasticsearchBlobStorage implements BlobStorage {
   }
 
   public async upload(src: Readable): Promise<{ id: string; size: number }> {
-    try {
-      await this.createIndexIfNotExists();
-    } catch (e) {
-      this.logger.error(`Could not create ${this.indexName}: ${e}`);
-      throw e;
-    }
+    await this.createIndexIfNotExists();
 
     try {
       const dest = getWritableContentStream({
         id: undefined, // We are creating a new file
         client: this.esClient,
-        index: this.indexName,
+        index: this.index,
         logger: this.logger.get('content-stream-upload'),
         parameters: {
           encoding: 'base64',
@@ -94,7 +99,7 @@ export class ElasticsearchBlobStorage implements BlobStorage {
     return getReadableContentStream({
       id,
       client: this.esClient,
-      index: this.indexName,
+      index: this.index,
       logger: this.logger.get('content-stream-download'),
       parameters: {
         encoding: 'base64',
@@ -108,7 +113,7 @@ export class ElasticsearchBlobStorage implements BlobStorage {
       const dest = getWritableContentStream({
         id,
         client: this.esClient,
-        index: this.indexName,
+        index: this.index,
         logger: this.logger.get('content-stream-delete'),
         parameters: {
           encoding: 'base64',

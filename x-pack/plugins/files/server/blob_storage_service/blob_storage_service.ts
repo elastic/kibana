@@ -10,26 +10,42 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { BlobStorage } from './types';
 import { ElasticsearchBlobStorage } from './adapters';
 
+interface ElasticsearchBlobStorageSettings {
+  index?: string;
+}
+
+/**
+ * This object maps command-specific settings, like the index to use for ES uploading,
+ * to the appropriate adapter. The key names must be IDs of the adapter so that it
+ * can be correctly mapped.
+ */
+interface BlobStorageSettings {
+  es: ElasticsearchBlobStorageSettings;
+}
+
 export class BlobStorageService {
-  private readonly adapters: { es: BlobStorage };
+  constructor(private readonly esClient: ElasticsearchClient, private readonly logger: Logger) {}
 
-  constructor(private readonly esClient: ElasticsearchClient, private readonly logger: Logger) {
-    this.adapters = {
-      es: new ElasticsearchBlobStorage(
-        this.esClient,
-        this.logger.get('elasticsearch-blob-storage')
-      ),
-    };
-  }
-  public async upload(content: Readable): Promise<{ id: string; size: number }> {
-    return this.adapters.es.upload(content);
+  private createESBlobStorage(args: { index?: string }): BlobStorage {
+    return new ElasticsearchBlobStorage(
+      this.esClient,
+      args.index,
+      this.logger.get('elasticsearch-blob-storage')
+    );
   }
 
-  public async delete(id: string): Promise<void> {
-    return this.adapters.es.delete(id);
+  public async upload(
+    content: Readable,
+    args?: BlobStorageSettings
+  ): Promise<{ id: string; size: number }> {
+    return this.createESBlobStorage({ index: args?.es.index }).upload(content);
   }
 
-  public async download(id: string, size?: number): Promise<Readable> {
-    return this.adapters.es.download({ id, size });
+  public async delete(id: string, args?: BlobStorageSettings): Promise<void> {
+    return this.createESBlobStorage({ index: args?.es.index }).delete(id);
+  }
+
+  public async download(id: string, size?: number, args?: BlobStorageSettings): Promise<Readable> {
+    return this.createESBlobStorage({ index: args?.es.index }).download({ id, size });
   }
 }
