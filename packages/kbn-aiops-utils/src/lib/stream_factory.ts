@@ -28,8 +28,8 @@ const DELIMITER = '\n';
  * Sets up a response stream with support for gzip compression depending on provided
  * request headers.
  *
- * @param logger - Kibana provided logger.
  * @param headers - Request headers.
+ * @param ndjson - Boolean to define whether to use newline delimited JSON as the response format.
  * @returns An object with stream attributes and methods.
  */
 export function streamFactory<T = unknown>(headers: Headers, ndjson = true) {

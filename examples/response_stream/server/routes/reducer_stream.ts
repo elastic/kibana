@@ -39,7 +39,6 @@ export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
       });
 
       const { error, push, responseWithHeaders } = streamFactory<ReducerStreamApiAction>(
-        logger,
         request.headers
       );
 
