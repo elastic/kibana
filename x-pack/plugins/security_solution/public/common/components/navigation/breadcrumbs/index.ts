@@ -152,9 +152,8 @@ const isAdminRoutes = (spyState: RouteSpyState): spyState is AdministrationRoute
   spyState.pageName === SecurityPageName.administration;
 
 const isRulesRoutes = (spyState: RouteSpyState): spyState is AdministrationRouteSpyState =>
-  spyState != null &&
-  (spyState.pageName === SecurityPageName.rules ||
-    spyState.pageName === SecurityPageName.rulesCreate);
+  spyState.pageName === SecurityPageName.rules ||
+  spyState.pageName === SecurityPageName.rulesCreate;
 
 const emptyLastBreadcrumbUrl = (breadcrumbs: ChromeBreadcrumb[]) => {
   const leadingBreadCrumbs = breadcrumbs.slice(0, -1);

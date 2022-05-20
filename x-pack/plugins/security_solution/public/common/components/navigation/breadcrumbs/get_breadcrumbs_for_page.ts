@@ -38,5 +38,5 @@ export const getLeadingBreadcrumbsForSecurityPage = (
     };
   });
 
-  return breadcrumbs.length === 0 ? [siemRootBreadcrumb] : [siemRootBreadcrumb, ...breadcrumbs];
+  return [siemRootBreadcrumb, ...breadcrumbs];
 };
