@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { discoverGridContextComplexMock } from '../__mocks__/grid_context';
+import { discoverGridContextComplexMock, discoverGridContextMock } from '../__mocks__/grid_context';
 import { discoverServiceMock } from '../__mocks__/services';
 import { convertValueToString } from './convert_value_to_string';
 
@@ -19,6 +19,9 @@ describe('convertValueToString', () => {
       services: discoverServiceMock,
       columnId: 'keyword_key',
       rowIndex: 0,
+      options: {
+        allowMultiline: false,
+      },
     });
 
     expect(result).toBe('["abcd1"]');
@@ -32,6 +35,9 @@ describe('convertValueToString', () => {
       services: discoverServiceMock,
       columnId: 'text_message',
       rowIndex: 0,
+      options: {
+        allowMultiline: false,
+      },
     });
 
     expect(result).toBe('["Hi there! I am a sample string."]');
@@ -45,6 +51,9 @@ describe('convertValueToString', () => {
       services: discoverServiceMock,
       columnId: 'number_price',
       rowIndex: 0,
+      options: {
+        allowMultiline: false,
+      },
     });
 
     expect(result).toBe('[10.99]');
@@ -58,6 +67,9 @@ describe('convertValueToString', () => {
       services: discoverServiceMock,
       columnId: 'date',
       rowIndex: 0,
+      options: {
+        allowMultiline: false,
+      },
     });
 
     expect(result).toBe('["2015-01-01T12:10:30.000Z"]');
@@ -71,6 +83,9 @@ describe('convertValueToString', () => {
       services: discoverServiceMock,
       columnId: 'bool_enabled',
       rowIndex: 0,
+      options: {
+        allowMultiline: false,
+      },
     });
 
     expect(result).toBe('[false]');
@@ -84,6 +99,9 @@ describe('convertValueToString', () => {
       services: discoverServiceMock,
       columnId: 'binary_blob',
       rowIndex: 0,
+      options: {
+        allowMultiline: false,
+      },
     });
 
     expect(result).toBe('["U29tZSBiaW5hcnkgYmxvYg=="]');
@@ -97,6 +115,9 @@ describe('convertValueToString', () => {
       services: discoverServiceMock,
       columnId: 'object_user.first',
       rowIndex: 0,
+      options: {
+        allowMultiline: false,
+      },
     });
 
     expect(result).toBe('["John"]');
@@ -110,6 +131,9 @@ describe('convertValueToString', () => {
       services: discoverServiceMock,
       columnId: 'nested_user',
       rowIndex: 0,
+      options: {
+        allowMultiline: false,
+      },
     });
 
     expect(result).toBe(
@@ -125,6 +149,9 @@ describe('convertValueToString', () => {
       services: discoverServiceMock,
       columnId: 'flattened_labels',
       rowIndex: 0,
+      options: {
+        allowMultiline: false,
+      },
     });
 
     expect(result).toBe('[{"release":["v1.2.5","v1.3.0"],"priority":"urgent"}]');
@@ -138,6 +165,9 @@ describe('convertValueToString', () => {
       services: discoverServiceMock,
       columnId: 'range_time_frame',
       rowIndex: 0,
+      options: {
+        allowMultiline: false,
+      },
     });
 
     expect(result).toBe('[{"gte":"2015-10-31 12:00:00","lte":"2015-11-01 00:00:00"}]');
@@ -151,6 +181,9 @@ describe('convertValueToString', () => {
       services: discoverServiceMock,
       columnId: 'ip_addr',
       rowIndex: 0,
+      options: {
+        allowMultiline: false,
+      },
     });
 
     expect(result).toBe('["192.168.1.1"]');
@@ -164,6 +197,9 @@ describe('convertValueToString', () => {
       services: discoverServiceMock,
       columnId: 'version',
       rowIndex: 0,
+      options: {
+        allowMultiline: false,
+      },
     });
 
     expect(result).toBe('["1.2.3"]');
@@ -177,6 +213,9 @@ describe('convertValueToString', () => {
       services: discoverServiceMock,
       columnId: 'vector',
       rowIndex: 0,
+      options: {
+        allowMultiline: false,
+      },
     });
 
     expect(result).toBe('[0.5,10,6]');
@@ -190,6 +229,9 @@ describe('convertValueToString', () => {
       services: discoverServiceMock,
       columnId: 'geo_point',
       rowIndex: 0,
+      options: {
+        allowMultiline: false,
+      },
     });
 
     expect(result).toBe('[{"coordinates":[-71.34,41.12],"type":"Point"}]');
@@ -203,6 +245,9 @@ describe('convertValueToString', () => {
       services: discoverServiceMock,
       columnId: 'geo_point',
       rowIndex: 1,
+      options: {
+        allowMultiline: false,
+      },
     });
 
     expect(result).toBe('[{"coordinates":[-71.34,41.12],"type":"Point"}]');
@@ -216,6 +261,9 @@ describe('convertValueToString', () => {
       services: discoverServiceMock,
       columnId: 'array_tags',
       rowIndex: 0,
+      options: {
+        allowMultiline: false,
+      },
     });
 
     expect(result).toBe('["elasticsearch","wow"]');
@@ -229,6 +277,9 @@ describe('convertValueToString', () => {
       services: discoverServiceMock,
       columnId: 'runtime_number',
       rowIndex: 0,
+      options: {
+        allowMultiline: false,
+      },
     });
 
     expect(result).toBe('[5.5]');
@@ -242,6 +293,9 @@ describe('convertValueToString', () => {
       services: discoverServiceMock,
       columnId: 'scripted_string',
       rowIndex: 0,
+      options: {
+        allowMultiline: false,
+      },
     });
 
     expect(result).toBe('["hi there"]');
@@ -255,8 +309,50 @@ describe('convertValueToString', () => {
       services: discoverServiceMock,
       columnId: 'unknown',
       rowIndex: 0,
+      options: {
+        allowMultiline: false,
+      },
     });
 
     expect(result).toBe('');
+  });
+
+  it('should return _source value', () => {
+    const result = convertValueToString({
+      rows: discoverGridContextMock.rows,
+      rowsFlattened: discoverGridContextMock.rowsFlattened,
+      dataView: discoverGridContextMock.indexPattern,
+      services: discoverServiceMock,
+      columnId: '_source',
+      rowIndex: 0,
+    });
+
+    expect(result).toBe(
+      '{\n' +
+        '  "bytes": 20,\n' +
+        '  "date": "2020-20-01T12:12:12.123",\n' +
+        '  "message": "test1",\n' +
+        '  "_index": "i",\n' +
+        '  "_score": 1\n' +
+        '}'
+    );
+  });
+
+  it('should return a formatted _source value', () => {
+    const result = convertValueToString({
+      rows: discoverGridContextMock.rows,
+      rowsFlattened: discoverGridContextMock.rowsFlattened,
+      dataView: discoverGridContextMock.indexPattern,
+      services: discoverServiceMock,
+      columnId: '_source',
+      rowIndex: 0,
+      options: {
+        allowMultiline: false,
+      },
+    });
+
+    expect(result).toBe(
+      '{"bytes":20,"date":"2020-20-01T12:12:12.123","message":"test1","_index":"i","_score":1}'
+    );
   });
 });

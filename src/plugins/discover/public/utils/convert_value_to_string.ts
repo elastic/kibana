@@ -45,8 +45,8 @@ export const convertValueToString = ({
   }
 
   return (
-    (options?.allowMultiline
-      ? JSON.stringify(formattedValue, null, 2)
-      : JSON.stringify(formattedValue)) || ''
+    (options?.allowMultiline === false
+      ? JSON.stringify(formattedValue)
+      : JSON.stringify(formattedValue, null, 2)) || ''
   );
 };
