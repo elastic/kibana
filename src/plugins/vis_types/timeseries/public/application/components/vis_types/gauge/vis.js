@@ -13,10 +13,10 @@ import { getMetricsField } from '../../lib/get_metrics_field';
 import { createTickFormatter } from '../../lib/tick_formatter';
 import { createFieldFormatter } from '../../lib/create_field_formatter';
 import { get, isUndefined, assign, includes } from 'lodash';
-import { Gauge } from '../../../visualizations/views/gauge';
 import { getLastValue } from '../../../../../common/last_value_utils';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { getOperator, shouldOperate } from '../../../../../common/operators_utils';
+import {Chart, DARK_THEME, Metric, Settings} from "@elastic/charts";
 
 function getColors(props) {
   const { model, visData } = props;
@@ -80,10 +80,28 @@ function GaugeVisualization(props) {
   if (model.gauge_inner_color) params.innerColor = model.gauge_inner_color;
   if (model.gauge_inner_width) params.innerLine = model.gauge_inner_width;
   if (model.gauge_max != null) params.max = model.gauge_max;
-
+  console.log({params})
   return (
     <div className="tvbVis" style={style}>
-      <Gauge {...params} />
+      <Chart>
+        <Settings theme={DARK_THEME} />
+        <Metric
+          id="1"
+          progressBarMode={'small'}
+          progressBarOrientation={'vertical'}
+          data={[
+            [
+              {
+                value: params.metric.data[params.metric.data.length -1][1],
+                domain: [0, 1],
+                valueFormatter: params.metric.formatter,
+                color:  params.metric.color,
+                title: params.metric.label,
+              }
+            ]
+          ]}
+        />
+      </Chart>
     </div>
   );
 }

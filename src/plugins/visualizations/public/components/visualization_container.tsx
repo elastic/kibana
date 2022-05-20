@@ -41,7 +41,7 @@ export const VisualizationContainer = ({
   );
 
   return (
-    <div data-test-subj={dataTestSubj} className={classes}>
+    <div data-test-subj={dataTestSubj} className={classes} style={{padding: 0, borderRadius: '6px'}}>
       <Suspense fallback={fallBack}>
         {error ? (
           <VisualizationError onInit={() => handlers.done()} error={error} />

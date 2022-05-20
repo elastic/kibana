@@ -64,44 +64,15 @@ function getWrappedComponentProps<T>(props: T) {
 
 export function withAutoScale<T>(WrappedComponent: ComponentType<T>) {
   return (props: T & AutoScaleProps) => {
-    // An initial scale of 0 means we always redraw
-    // at least once, which is sub-optimal, but it
-    // prevents an annoying flicker.
-    const { autoScaleParams } = props;
+
     const restProps = getWrappedComponentProps(props);
-    const [scale, setScale] = useState(0);
     const parentRef = useRef<HTMLDivElement>(null);
     const childrenRef = useRef<HTMLDivElement>(null);
-    const parentDimensions = useResizeObserver(parentRef.current);
-
-    const scaleFn = useMemo(
-      () =>
-        throttle(() => {
-          const newScale = computeScale(
-            { clientHeight: parentDimensions.height, clientWidth: parentDimensions.width },
-            childrenRef.current,
-            autoScaleParams?.minScale
-          );
-
-          // Prevent an infinite render loop
-          if (scale !== newScale) {
-            setScale(newScale);
-          }
-        }),
-      [parentDimensions, setScale, scale, autoScaleParams]
-    );
-
-    useEffect(() => {
-      scaleFn();
-    }, [scaleFn]);
 
     return (
-      <div ref={parentRef} style={autoScaleParams?.containerStyles} css={autoScaleWrapperStyle}>
+      <div ref={parentRef} >
         <div
           ref={childrenRef}
-          style={{
-            transform: `scale(${scale || 0})`,
-          }}
         >
           <WrappedComponent {...(restProps as T)} />
         </div>

@@ -69,22 +69,30 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
         const metrics = table.rows.map((row, rowIndex) => {
           let title = column!.name;
           let value: number = row[column!.id];
+          console.log(palette)
           const color = palette ? this.getColor(value, palette) : undefined;
 
           if (isPercentageMode && stops.length) {
             value = (value - min) / (max - min);
           }
-
+          console.log(formatter);
           const formattedValue = formatValue(value, formatter, 'html');
           if (bucketColumnId) {
             const bucketValue = formatValue(row[bucketColumnId], bucketFormatter);
             title = `${bucketValue} - ${title}`;
           }
+          const domain = palette ? [
+            Number.isFinite(palette.rangeMin) ? palette.rangeMin : palette.stops[0],
+            Number.isFinite(palette.rangeMax) ? palette.rangeMax : palette.stops[palette.stops.length -1]
+          ] : undefined;
 
           const shouldBrush = stops.length > 1 && shouldApplyColor(color ?? '');
           return {
             label: title,
-            value: formattedValue,
+            value: value,
+            formatter: (value: number) => formatValue(value, formatter, 'text'),
+            domain: formatter.type.id === 'percent' ? [0,100]: domain,
+            unit: formatter.type.id,
             color: shouldBrush && (style.labelColor ?? false) ? color : undefined,
             bgColor: shouldBrush && (style.bgColor ?? false) ? color : undefined,
             lightText: shouldBrush && (style.bgColor ?? false) && needsLightText(color),
@@ -130,17 +138,17 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
 
     return (
       <MetricComponent
-        autoScaleParams={
-          this.isAutoScaleWithColorizingContainer()
-            ? {
-                containerStyles: {
-                  backgroundColor: metric.bgColor,
-                  minHeight: '100%',
-                  minWidth: '100%',
-                },
-              }
-            : undefined
-        }
+        // autoScaleParams={
+        //   this.isAutoScaleWithColorizingContainer()
+        //     ? {
+        //         containerStyles: {
+        //           // backgroundColor: metric.bgColor,
+        //           minHeight: '100%',
+        //           minWidth: '100%',
+        //         },
+        //       }
+        //     : undefined
+        // }
         key={index}
         metric={metric}
         style={this.props.visParams.metric.style}

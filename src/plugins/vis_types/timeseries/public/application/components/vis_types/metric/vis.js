@@ -13,11 +13,11 @@ import { getMetricsField } from '../../lib/get_metrics_field';
 import { createTickFormatter } from '../../lib/tick_formatter';
 import { createFieldFormatter } from '../../lib/create_field_formatter';
 import { get, isUndefined, assign, includes, pick } from 'lodash';
-import { Metric } from '../../../visualizations/views/metric';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { getLastValue } from '../../../../../common/last_value_utils';
 import { isBackgroundInverted } from '../../../lib/set_is_reversed';
 import { getOperator, shouldOperate } from '../../../../../common/operators_utils';
+import { Chart, Metric, DARK_THEME, Settings } from '@elastic/charts';
 
 function getColors(props) {
   const { model, visData } = props;
@@ -73,10 +73,29 @@ function MetricVisualization(props) {
   if (series[1]) {
     params.secondary = series[1];
   }
-
+  console.log(params);
   return (
     <div className="tvbVis" style={style}>
-      <Metric {...params} />
+      <Chart>
+        <Settings theme={DARK_THEME} />
+        <Metric
+          id="1"
+          progressBarMode={'small'}
+          progressBarOrientation={'vertical'}
+          data={[
+            [
+              {
+                value: params.metric.data[params.metric.data.length -1][1],
+                valueFormatter: params.metric.formatter,
+                trend: params.metric.data.length > 1 ? params.metric.data.map(d => ({x: d[0], y: d[1]})) : undefined,
+                color: '#1D1E25',//'#6DCCB1',
+                title: params.metric.label,
+                extra: params.secondary.label ? <span>{params.secondary.label} <b>{params.secondary.formatter(params.secondary.data[params.secondary.data.length -1][1])}</b></span> : undefined
+              }
+            ]
+          ]}
+        />
+      </Chart>
     </div>
   );
 }

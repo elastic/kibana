@@ -49,7 +49,9 @@ export interface VisParams {
 }
 
 export interface MetricOptions {
-  value: string;
+  value: number;
+  domain?: [number, number];
+  formatter: (d: number) => string;
   label: string;
   color?: string;
   bgColor?: string;
