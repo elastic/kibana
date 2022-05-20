@@ -78,7 +78,6 @@ export class AnalyticsManager {
   async setJobStats() {
     try {
       const jobStats = await this.getAnalyticsStats();
-      // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
       this.jobStats = jobStats;
     } catch (error) {
       // eslint-disable-next-line

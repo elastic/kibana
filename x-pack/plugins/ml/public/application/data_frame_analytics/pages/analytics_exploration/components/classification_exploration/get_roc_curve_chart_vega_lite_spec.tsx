@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 
 import { LEGEND_TYPES } from '../../../../../components/vega_chart/common';
 
-import { RocCurveItem } from '../../../../common/analytics';
+import { RocCurveItem } from '../../../../../../../common/types/data_frame_analytics';
 
 const GRAY = euiPaletteGray(1)[0];
 const BASELINE = 'baseline';

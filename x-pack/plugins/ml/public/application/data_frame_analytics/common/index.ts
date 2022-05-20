@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-export type {
-  UpdateDataFrameAnalyticsConfig,
-  IndexPattern,
-  RegressionEvaluateResponse,
-  Eval,
-  SearchQuery,
-} from './analytics';
+export type { IndexPattern, RegressionEvaluateResponse, Eval, SearchQuery } from './analytics';
 export {
   getAnalysisType,
   getDependentVar,
