@@ -10,6 +10,7 @@ import { MonitoringConfig } from '../../../../config';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getHealthRequestQueryRT } from '../../../../../common/http_api/_health';
 import { TimeRange } from '../../../../../common/http_api/shared';
+import { INDEX_PATTERN } from '../../../../../common/constants';
 
 import { fetchMonitoredClusters } from './monitored_clusters';
 
@@ -26,9 +27,9 @@ export function health(server: MonitoringCore) {
   const validateQuery = createValidationFunction(getHealthRequestQueryRT);
   const settings = extractSettings(server.config);
   const index = (() => {
-    let pattern = '.monitoring-*';
+    let pattern = INDEX_PATTERN;
     if (server.config.ui.ccs.enabled) {
-      pattern += ',*:.monitoring-*';
+      pattern += `,*:${INDEX_PATTERN}`;
     }
     return pattern;
   })();
@@ -40,6 +41,7 @@ export function health(server: MonitoringCore) {
       query: validateQuery,
     },
     async handler(req: LegacyRequest) {
+      const logger = req.getLogger();
       const timeRange = {
         min: req.query.min || 'now-30m',
         max: req.query.max || 'now',
@@ -50,7 +52,8 @@ export function health(server: MonitoringCore) {
         index,
         timeRange,
         search: (params: any) => callWithRequest(req, 'search', params),
-      }).catch((err) => {
+      }).catch((err: Error) => {
+        logger.error(`_health: failed to retrieve monitored clusters: ${err}`);
         return { error: err.message };
       });
 
