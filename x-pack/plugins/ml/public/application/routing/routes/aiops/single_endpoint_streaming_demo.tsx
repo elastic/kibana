@@ -16,29 +16,29 @@ import { NavigateToPath } from '../../../contexts/kibana';
 
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
-import { ExplainLogRateSpikesPage as Page } from '../../../aiops/explain_log_rate_spikes';
+import { SingleEndpointStreamingDemoPage as Page } from '../../../aiops/single_endpoint_streaming_demo';
 
 import { checkBasicLicense } from '../../../license';
 import { checkGetJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
 import { cacheDataViewsContract } from '../../../util/index_utils';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
-export const explainLogRateSpikesRouteFactory = (
+export const singleEndpointStreamingDemoRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  id: 'explain_log_rate_spikes',
-  path: '/aiops/explain_log_rate_spikes',
-  title: i18n.translate('xpack.ml.aiops.explainLogRateSpikes.docTitle', {
-    defaultMessage: 'Explain log rate spikes',
+  id: 'single_endpoint_streaming_demo',
+  path: '/aiops/single_endpoint_streaming_demo',
+  title: i18n.translate('xpack.ml.aiops.singleEndpointStreamingDemo.docTitle', {
+    defaultMessage: 'Single endpoint streaming demo',
   }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB', navigateToPath, basePath),
     {
-      text: i18n.translate('xpack.ml.aiopsBreadcrumbs.explainLogRateSpikesLabel', {
-        defaultMessage: 'Explain log rate spikes',
+      text: i18n.translate('xpack.ml.aiopsBreadcrumbs.singleEndpointStreamingDemoLabel', {
+        defaultMessage: 'Single endpoint streaming demo',
       }),
     },
   ],

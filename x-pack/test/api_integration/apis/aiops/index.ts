@@ -12,5 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     this.tags(['ml']);
 
     loadTestFile(require.resolve('./example_stream'));
+    loadTestFile(require.resolve('./explain_log_rate_spikes'));
   });
 }

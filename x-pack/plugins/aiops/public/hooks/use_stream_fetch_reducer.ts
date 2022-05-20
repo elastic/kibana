@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { useReducer, useRef, useState, Reducer, ReducerAction, ReducerState } from 'react';
+import {
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+  Reducer,
+  ReducerAction,
+  ReducerState,
+} from 'react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
@@ -13,11 +21,11 @@ import type { ApiEndpoint, ApiEndpointOptions } from '../../common/api';
 
 import { streamFetch } from './stream_fetch';
 
-export const useStreamFetchReducer = <R extends Reducer<any, any>, E = ApiEndpoint>(
+export const useStreamFetchReducer = <R extends Reducer<any, any>, E extends ApiEndpoint>(
   endpoint: E,
   reducer: R,
   initialState: ReducerState<R>,
-  options: ApiEndpointOptions[ApiEndpoint]
+  options: ApiEndpointOptions[E]
 ) => {
   const kibana = useKibana();
 
@@ -44,7 +52,9 @@ export const useStreamFetchReducer = <R extends Reducer<any, any>, E = ApiEndpoi
       options,
       kibana.services.http?.basePath.get()
     )) {
-      dispatch(actions as ReducerAction<R>);
+      if (actions.length > 0) {
+        dispatch(actions as ReducerAction<R>);
+      }
     }
 
     setIsRunning(false);
@@ -55,6 +65,11 @@ export const useStreamFetchReducer = <R extends Reducer<any, any>, E = ApiEndpoi
     setIsCancelled(true);
     setIsRunning(false);
   };
+
+  // If components using this custom hook get unmounted, cancel any ongoing request.
+  useEffect(() => {
+    return () => abortCtrl.current.abort();
+  }, []);
 
   return {
     cancel,

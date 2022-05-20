@@ -229,12 +229,21 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
         items: [
           {
             id: 'explainlogratespikes',
-            pathId: ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES,
+            pathId: ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT,
             name: i18n.translate('xpack.ml.navMenu.explainLogRateSpikesLinkText', {
               defaultMessage: 'Explain log rate spikes',
             }),
             disabled: disableLinks,
             testSubj: 'mlMainTab explainLogRateSpikes',
+          },
+          {
+            id: 'singleEndpointStreamingDemo',
+            pathId: ML_PAGES.AIOPS_SINGLE_ENDPOINT_STREAMING_DEMO,
+            name: i18n.translate('xpack.ml.navMenu.singleEndpointStreamingDemoLinkText', {
+              defaultMessage: 'Single endpoint streaming demo',
+            }),
+            disabled: disableLinks,
+            testSubj: 'mlMainTab singleEndpointStreamingDemo',
           },
         ],
       });

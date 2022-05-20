@@ -7,14 +7,19 @@
 
 import type React from 'react';
 
-import type { ApiEndpoint, ApiEndpointOptions } from '../../common/api';
+import type { ApiEndpoint, ApiEndpointActions, ApiEndpointOptions } from '../../common/api';
 
-export async function* streamFetch<A = unknown, E = ApiEndpoint>(
+interface ErrorAction {
+  type: 'error';
+  payload: string;
+}
+
+export async function* streamFetch<E extends ApiEndpoint>(
   endpoint: E,
   abortCtrl: React.MutableRefObject<AbortController>,
-  options: ApiEndpointOptions[ApiEndpoint],
+  options: ApiEndpointOptions[E],
   basePath = ''
-) {
+): AsyncGenerator<Array<ApiEndpointActions[E] | ErrorAction>> {
   const stream = await fetch(`${basePath}${endpoint}`, {
     signal: abortCtrl.current.signal,
     method: 'POST',
@@ -36,7 +41,7 @@ export async function* streamFetch<A = unknown, E = ApiEndpoint>(
 
     const bufferBounce = 100;
     let partial = '';
-    let actionBuffer: A[] = [];
+    let actionBuffer: Array<ApiEndpointActions[E]> = [];
     let lastCall = 0;
 
     while (true) {
@@ -52,7 +57,7 @@ export async function* streamFetch<A = unknown, E = ApiEndpoint>(
 
         partial = last ?? '';
 
-        const actions = parts.map((p) => JSON.parse(p));
+        const actions = parts.map((p) => JSON.parse(p)) as Array<ApiEndpointActions[E]>;
         actionBuffer.push(...actions);
 
         const now = Date.now();
@@ -61,10 +66,26 @@ export async function* streamFetch<A = unknown, E = ApiEndpoint>(
           yield actionBuffer;
           actionBuffer = [];
           lastCall = now;
+
+          // In cases where the next chunk takes longer to be received than the `bufferBounce` timeout,
+          // we trigger this client side timeout to clear a potential intermediate buffer state.
+          // Since `yield` cannot be passed on to other scopes like callbacks,
+          // this pattern using a Promise is used to wait for the timeout.
+          yield new Promise<Array<ApiEndpointActions[E]>>((resolve) => {
+            setTimeout(() => {
+              if (actionBuffer.length > 0) {
+                resolve(actionBuffer);
+                actionBuffer = [];
+                lastCall = now;
+              } else {
+                resolve([]);
+              }
+            }, bufferBounce + 10);
+          });
         }
       } catch (error) {
         if (error.name !== 'AbortError') {
-          yield { type: 'error', payload: error.toString() };
+          yield [{ type: 'error', payload: error.toString() }];
         }
         break;
       }

@@ -19,13 +19,49 @@ export default ({ getService }: FtrProviderContext) => {
   const config = getService('config');
   const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
 
-  describe('POST /internal/aiops/example_stream', () => {
+  const expectedFields = [
+    'category',
+    'currency',
+    'customer_first_name',
+    'customer_full_name',
+    'customer_gender',
+    'customer_id',
+    'customer_last_name',
+    'customer_phone',
+    'day_of_week',
+    'day_of_week_i',
+    'email',
+    'geoip',
+    'manufacturer',
+    'order_date',
+    'order_id',
+    'products',
+    'sku',
+    'taxful_total_price',
+    'taxless_total_price',
+    'total_quantity',
+    'total_unique_products',
+    'type',
+    'user',
+  ];
+
+  describe('POST /internal/aiops/explain_log_rate_spikes', () => {
+    const esArchiver = getService('esArchiver');
+
+    before(async () => {
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
+    });
+
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/ml/ecommerce');
+    });
+
     it('should return full data without streaming', async () => {
       const resp = await supertest
-        .post(`/internal/aiops/example_stream`)
+        .post(`/internal/aiops/explain_log_rate_spikes`)
         .set('kbn-xsrf', 'kibana')
         .send({
-          timeout: 1,
+          index: 'ft_ecommerce',
         })
         .expect(200);
 
@@ -33,7 +69,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       const chunks: string[] = resp.body.toString().split('\n');
 
-      expect(chunks.length).to.be(201);
+      expect(chunks.length).to.be(24);
 
       const lastChunk = chunks.pop();
       expect(lastChunk).to.be('');
@@ -48,20 +84,22 @@ export default ({ getService }: FtrProviderContext) => {
         expect(typeof d.type).to.be('string');
       });
 
-      const progressData = data.filter((d) => d.type === 'update_progress');
-      expect(progressData.length).to.be(100);
-      expect(progressData[0].payload).to.be(1);
-      expect(progressData[progressData.length - 1].payload).to.be(100);
+      const fields = data.map((d) => d.payload[0]).sort();
+
+      expect(fields.length).to.equal(expectedFields.length);
+      fields.forEach((f) => {
+        expect(expectedFields.includes(f));
+      });
     });
 
     it('should return data in chunks with streaming', async () => {
-      const response = await fetch(`${kibanaServerUrl}/internal/aiops/example_stream`, {
+      const response = await fetch(`${kibanaServerUrl}/internal/aiops/explain_log_rate_spikes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'kbn-xsrf': 'stream',
         },
-        body: JSON.stringify({ timeout: 1 }),
+        body: JSON.stringify({ index: 'ft_ecommerce' }),
       });
 
       const stream = response.body;
@@ -69,18 +107,19 @@ export default ({ getService }: FtrProviderContext) => {
       expect(stream).not.to.be(null);
 
       if (stream !== null) {
-        const progressData: any[] = [];
+        const data: any[] = [];
 
         for await (const action of parseStream(stream)) {
           expect(action.type).not.to.be('error');
-          if (action.type === 'update_progress') {
-            progressData.push(action);
-          }
+          data.push(action);
         }
 
-        expect(progressData.length).to.be(100);
-        expect(progressData[0].payload).to.be(1);
-        expect(progressData[progressData.length - 1].payload).to.be(100);
+        const fields = data.map((d) => d.payload[0]).sort();
+
+        expect(fields.length).to.equal(expectedFields.length);
+        fields.forEach((f) => {
+          expect(expectedFields.includes(f));
+        });
       }
     });
   });

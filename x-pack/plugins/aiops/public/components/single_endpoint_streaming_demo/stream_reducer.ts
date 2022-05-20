@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApiAction, API_ACTION_NAME } from '../../common/api/example_stream';
+import { AiopsExampleStreamApiAction, API_ACTION_NAME } from '../../../common/api/example_stream';
 
 export const UI_ACTION_NAME = {
   ERROR: 'error',
@@ -37,7 +37,7 @@ export function resetStream(): UiActionResetStream {
 }
 
 type UiAction = UiActionResetStream | UiActionError;
-export type ReducerAction = ApiAction | UiAction;
+export type ReducerAction = AiopsExampleStreamApiAction | UiAction;
 export function streamReducer(
   state: StreamState,
   action: ReducerAction | ReducerAction[]

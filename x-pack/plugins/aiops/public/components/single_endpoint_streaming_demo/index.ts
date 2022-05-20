@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export type { ExplainLogRateSpikesSpec } from '../../components/explain_log_rate_spikes';
-export { ExplainLogRateSpikes } from '../../components/explain_log_rate_spikes';
+import { SingleEndpointStreamingDemo } from './single_endpoint_streaming_demo';
+
+// required for dynamic import using React.lazy()
+// eslint-disable-next-line import/no-default-export
+export default SingleEndpointStreamingDemo;
