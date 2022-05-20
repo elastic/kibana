@@ -13,10 +13,17 @@ import {
 } from '@kbn/core/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
-import type { FileSavedObjectAttributes } from '../../common';
+import type { File, FileSavedObjectAttributes } from '../../common';
 import { fileObjectType } from '../saved_objects';
 import { BlobStorageService } from '../blob_storage_service';
-import { InternalFileService } from './internal_file_service';
+import {
+  CreateFileArgs,
+  FindFileArgs,
+  InternalFileService,
+  ListFilesArgs,
+  UpdateFileArgs,
+} from './internal_file_service';
+import { FileServiceStart } from './file_service';
 
 export class FileServiceFactory {
   constructor(
@@ -28,8 +35,7 @@ export class FileServiceFactory {
 
   private readonly savedObjectType = fileObjectType.name;
 
-  // TODO: This should probably not returnt he InternalFileService directly rather a FileService designed for public
-  private createFileService(req?: KibanaRequest): InternalFileService {
+  private createFileService(req?: KibanaRequest): FileServiceStart {
     const soClient = req
       ? this.savedObjectsService.getScopedClient(req, {
           includedHiddenTypes: [this.savedObjectType],
@@ -40,19 +46,37 @@ export class FileServiceFactory {
       ? this.security?.audit.asScoped(req)
       : this.security?.audit.withoutRequest;
 
-    return new InternalFileService(
+    const internalFileService = new InternalFileService(
       this.savedObjectType,
       soClient,
       this.blobStorageService,
       auditLogger,
       this.logger
     );
+
+    return {
+      async create<M>(args: CreateFileArgs<M>) {
+        return internalFileService.createFile(args) as Promise<File<M>>;
+      },
+      async update<M>(args: UpdateFileArgs) {
+        return internalFileService.updateFile(args) as Promise<File<M>>;
+      },
+      async delete(args) {
+        return internalFileService.deleteFile(args);
+      },
+      async find<M>(args: FindFileArgs) {
+        return internalFileService.find(args) as Promise<File<M>>;
+      },
+      async list<M>(args: ListFilesArgs) {
+        return internalFileService.list(args) as Promise<Array<File<M>>>;
+      },
+    };
   }
 
   /**
    * Get a file service instance that is scoped to the current user request.
    */
-  public asScoped(req: KibanaRequest): InternalFileService {
+  public asScoped(req: KibanaRequest): FileServiceStart {
     return this.createFileService(req);
   }
 
@@ -63,7 +87,7 @@ export class FileServiceFactory {
    * Do not use this to drive interactions with files that are initiated by a
    * user.
    */
-  public asInternal(): InternalFileService {
+  public asInternal(): FileServiceStart {
     return this.createFileService();
   }
 

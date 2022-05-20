@@ -68,7 +68,10 @@ export type FileSavedObjectAttributes<Meta = unknown> = {
 
 export type FileSavedObject<Meta = unknown> = SavedObject<FileSavedObjectAttributes<Meta>>;
 
-export type UpdatableFileAttributes = Pick<FileSavedObjectAttributes, 'meta' | 'alt' | 'name'>;
+export type UpdatableFileAttributes<Meta = unknown> = Pick<
+  FileSavedObjectAttributes<Meta>,
+  'meta' | 'alt' | 'name'
+>;
 
 export interface File<Meta = unknown> {
   id: string;
@@ -81,8 +84,11 @@ export interface File<Meta = unknown> {
   meta: Meta;
   alt: undefined | string;
 
-  update(attr: Partial<UpdatableFileAttributes>): Promise<File>;
+  update(attr: Partial<UpdatableFileAttributes<Meta>>): Promise<File<Meta>>;
+
   uploadContent(content: Readable): Promise<void>;
+
   downloadContent(): Promise<Readable>;
+
   delete(): Promise<void>;
 }
