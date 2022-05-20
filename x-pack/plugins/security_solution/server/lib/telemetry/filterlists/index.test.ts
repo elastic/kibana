@@ -142,5 +142,27 @@ describe('Security Telemetry filters', () => {
         'kibana.alert.original_event.module': 'b',
       });
     });
+
+    it("copies alert event fields for cross timeline reference", () => {
+      const event = {
+        'not_event': 'much data, much wow',
+        'event.id': '36857486973080746231799376445175633955031786243637182487',
+        'event.ingested': 'May 17, 2022 @ 00:22:07.000',
+        'event.kind': 'signal',
+        'event.module': 'aws',
+        'event.outcome': 'success',
+        'event.provider': 'iam.amazonaws.com',
+        'event.type': ['user', 'creation']
+      };
+      expect(copyAllowlistedFields(allowlist, event)).toStrictEqual({
+        'event.id': '36857486973080746231799376445175633955031786243637182487',
+        'event.ingested': 'May 17, 2022 @ 00:22:07.000',
+        'event.kind': 'signal',
+        'event.module': 'aws',
+        'event.outcome': 'success',
+        'event.provider': 'iam.amazonaws.com',
+        'event.type': ['user', 'creation']
+      });
+    });
   });
 });
