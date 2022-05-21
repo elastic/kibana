@@ -526,6 +526,10 @@ export const buildRelatedIntegrationsDescription = (
   const uninstalledText = 'Uninstalled';
   const installedPackages = ['aws']; // TODO: Use hook const { data } = useInstalledIntegrations({ packages: [] });
 
+  if (relatedIntegrations == null) {
+    return [];
+  }
+
   return relatedIntegrations.map((rI, index) => {
     const isInstalled = installedPackages.includes(rI.package);
     const badgeColor = isInstalled ? badgeInstalledColor : badgeUninstalledColor;
@@ -558,6 +562,10 @@ export const buildRequiredFieldsDescription = (
   label: string,
   requiredFields: RequiredFieldArray
 ): ListItems[] => {
+  if (requiredFields == null) {
+    return [];
+  }
+
   return [
     {
       title: label,

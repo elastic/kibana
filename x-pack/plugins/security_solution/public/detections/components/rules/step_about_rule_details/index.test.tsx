@@ -91,6 +91,7 @@ describe('StepAboutRuleToggleDetails', () => {
 
       expect(wrapper.find('[data-test-subj="stepAboutDetailsToggle"]').exists()).toBeFalsy();
       expect(wrapper.find('[data-test-subj="stepAboutDetailsNoteContent"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="stepAboutDetailsSetupContent"]').exists()).toBeFalsy();
       expect(wrapper.find('[data-test-subj="stepAboutDetailsContent"]').exists()).toBeTruthy();
     });
   });

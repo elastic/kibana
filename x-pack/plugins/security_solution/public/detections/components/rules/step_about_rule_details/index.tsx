@@ -16,7 +16,8 @@ import {
   EuiFlexGroup,
   EuiResizeObserver,
 } from '@elastic/eui';
-import React, { memo, useCallback, useState } from 'react';
+import { isEmpty } from 'lodash';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { HeaderSection } from '../../../../common/components/header_section';
@@ -47,23 +48,21 @@ const AboutContent = styled.div`
   height: 100%;
 `;
 
-const toggleOptions: EuiButtonGroupOptionProps[] = [
-  {
-    id: 'details',
-    label: i18n.ABOUT_PANEL_DETAILS_TAB,
-    'data-test-subj': 'stepAboutDetailsToggle-details',
-  },
-  {
-    id: 'notes',
-    label: i18n.ABOUT_PANEL_NOTES_TAB,
-    'data-test-subj': 'stepAboutDetailsToggle-notes',
-  },
-  {
-    id: 'setup',
-    label: i18n.ABOUT_PANEL_SETUP_TAB,
-    'data-test-subj': 'stepAboutDetailsToggle-setup',
-  },
-];
+const detailsOption: EuiButtonGroupOptionProps = {
+  id: 'details',
+  label: i18n.ABOUT_PANEL_DETAILS_TAB,
+  'data-test-subj': 'stepAboutDetailsToggle-details',
+};
+const notesOption: EuiButtonGroupOptionProps = {
+  id: 'notes',
+  label: i18n.ABOUT_PANEL_NOTES_TAB,
+  'data-test-subj': 'stepAboutDetailsToggle-notes',
+};
+const setupOption: EuiButtonGroupOptionProps = {
+  id: 'setup',
+  label: i18n.ABOUT_PANEL_SETUP_TAB,
+  'data-test-subj': 'stepAboutDetailsToggle-setup',
+};
 
 interface StepPanelProps {
   stepData: AboutStepRule | null;
@@ -86,6 +85,16 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
     [setAboutPanelHeight]
   );
 
+  const toggleOptions: EuiButtonGroupOptionProps[] = useMemo(() => {
+    const notesExist = !isEmpty(stepDataDetails?.note) && stepDataDetails?.note.trim() !== '';
+    const setupExists = !isEmpty(stepDataDetails?.setup) && stepDataDetails?.setup.trim() !== '';
+    return [
+      ...(notesExist || setupExists ? [detailsOption] : []),
+      ...(notesExist ? [notesOption] : []),
+      ...(setupExists ? [setupOption] : []),
+    ];
+  }, [stepDataDetails]);
+
   return (
     <MyPanel hasBorder>
       {loading && (
@@ -98,15 +107,17 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
         <FlexGroupFullHeight gutterSize="xs" direction="column">
           <EuiFlexItem grow={false} key="header">
             <HeaderSection title={i18n.ABOUT_TEXT}>
-              <EuiButtonGroup
-                options={toggleOptions}
-                idSelected={selectedToggleOption}
-                onChange={(val) => {
-                  setToggleOption(val);
-                }}
-                data-test-subj="stepAboutDetailsToggle"
-                legend={i18n.ABOUT_CONTROL_LEGEND}
-              />
+              {toggleOptions.length > 0 && (
+                <EuiButtonGroup
+                  options={toggleOptions}
+                  idSelected={selectedToggleOption}
+                  onChange={(val) => {
+                    setToggleOption(val);
+                  }}
+                  data-test-subj="stepAboutDetailsToggle"
+                  legend={i18n.ABOUT_CONTROL_LEGEND}
+                />
+              )}
             </HeaderSection>
           </EuiFlexItem>
           <EuiFlexItem key="details">
@@ -135,7 +146,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
                 )}
               </EuiResizeObserver>
             )}
-            {selectedToggleOption === 'note' && (
+            {selectedToggleOption === 'notes' && (
               <VerticalOverflowContainer
                 data-test-subj="stepAboutDetailsNoteContent"
                 maxHeight={aboutPanelHeight}

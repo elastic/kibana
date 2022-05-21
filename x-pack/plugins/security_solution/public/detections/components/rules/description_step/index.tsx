@@ -26,7 +26,7 @@ import { ListItems } from './types';
 import {
   buildQueryBarDescription,
   buildSeverityDescription,
-  // buildStringArrayDescription,
+  buildStringArrayDescription,
   buildThreatDescription,
   buildUnorderedListArrayDescription,
   buildUrlsDescription,
@@ -189,10 +189,6 @@ export const getDescriptionItem = (
   } else if (field === 'falsePositives') {
     const values: string[] = get(field, data);
     return buildUnorderedListArrayDescription(label, field, values);
-    // TODO: lol 😭
-    // } else if (Array.isArray(get(field, data)) && field !== 'threatMapping') {
-    //   const values: string[] = get(field, data);
-    //   return buildStringArrayDescription(label, field, values);
   } else if (field === 'riskScore') {
     const values: AboutStepRiskScore = get(field, data);
     return buildRiskScoreDescription(values);
@@ -237,6 +233,9 @@ export const getDescriptionItem = (
   } else if (field === 'threatMapping') {
     const threatMap: ThreatMapping = get(field, data);
     return buildThreatMappingDescription(label, threatMap);
+  } else if (Array.isArray(get(field, data)) && field !== 'threatMapping') {
+    const values: string[] = get(field, data);
+    return buildStringArrayDescription(label, field, values);
   }
 
   const description: string = get(field, data);
