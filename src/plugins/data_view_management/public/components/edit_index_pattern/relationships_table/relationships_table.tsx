@@ -129,13 +129,11 @@ export const RelationshipsTable = ({
   );
 
   const search = {
-    query,
-    onChange: handleOnChange,
+    // query,
+    // onChange: handleOnChange,
     box: {
       incremental: true,
-      schema: {
-        fields: { 'meta.title': { type: 'string' } },
-      },
+      schema: true,
     },
     filters: [
       {
