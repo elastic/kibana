@@ -16,6 +16,7 @@ import {
   EuiText,
   EuiIcon,
   EuiToolTip,
+  EuiFlexGrid,
 } from '@elastic/eui';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import { capitalize } from 'lodash';
@@ -520,10 +521,10 @@ export const buildRelatedIntegrationsDescription = (
 ): ListItems[] => {
   const badgeInstalledColor = '#E0E5EE'; // 'subdued' not working?
   const badgeUninstalledColor = 'accent';
-  const basePath = 'http://localhost:5601/kbn'; // const { basePath } = useBasePath();
+  const basePath = 'http://localhost:5601/kbn'; // const basePath = useBasePath();
   const installedText = 'Installed';
   const uninstalledText = 'Uninstalled';
-  const installedPackages = ['aws'];
+  const installedPackages = ['aws']; // TODO: Use hook const { data } = useInstalledIntegrations({ packages: [] });
 
   return relatedIntegrations.map((rI, index) => {
     const isInstalled = installedPackages.includes(rI.package);
@@ -538,9 +539,7 @@ export const buildRelatedIntegrationsDescription = (
       description: (
         <>
           <EuiLink href={integrationURL} target="_blank">
-            {rI.integration
-              ? `${capitalize(rI.integration)} ${capitalize(rI.integration)}`
-              : capitalize(rI.package)}
+            {`${capitalize(rI.package)} ${capitalize(rI.integration)}`}
           </EuiLink>{' '}
           <EuiBadge color={badgeColor}>{badgeText}</EuiBadge>
         </>
@@ -552,6 +551,7 @@ export const buildRelatedIntegrationsDescription = (
 const FieldTypeText = styled(EuiText)`
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
+  display: inline;
 `;
 
 export const buildRequiredFieldsDescription = (
@@ -562,15 +562,22 @@ export const buildRequiredFieldsDescription = (
     {
       title: label,
       description: (
-        <FieldTypeText grow={false} size={'s'}>
+        <EuiFlexGrid gutterSize={'s'}>
           {requiredFields.map((rF, index) => (
-            <>
-              <FieldIcon data-test-subj="field-type-icon" type={rF.type} />
-              {` ${rF.name}`}
-              {index + 1 !== requiredFields.length && <>{', '}</>}
-            </>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize={'xs'}>
+                <EuiFlexItem grow={false}>
+                  <FieldIcon data-test-subj="field-type-icon" type={rF.type} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <FieldTypeText grow={false} size={'s'}>
+                    {` ${rF.name}${index + 1 !== requiredFields.length ? ', ' : ''}`}
+                  </FieldTypeText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
           ))}
-        </FieldTypeText>
+        </EuiFlexGrid>
       ),
     },
   ];

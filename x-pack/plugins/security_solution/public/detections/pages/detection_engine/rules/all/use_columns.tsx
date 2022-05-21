@@ -167,7 +167,7 @@ const INTEGRATIONS_COLUMN: TableColumn = {
       return null;
     }
 
-    return <IntegrationsPopover integrations={integrations} installedIntegrations={[]} />;
+    return <IntegrationsPopover integrations={integrations} />;
   },
   width: '143px',
   truncateText: true,

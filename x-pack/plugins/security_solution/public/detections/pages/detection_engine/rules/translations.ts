@@ -1099,7 +1099,7 @@ export const INTEGRATIONS_POPOVER_TITLE = (integrationsCount: number) =>
     {
       values: { integrationsCount },
       defaultMessage:
-        'You have [{integrationsCount}] related {integrationsCount, plural, =1 {# integration} other {# integrations}} to your prebuilt rule',
+        'You have [{integrationsCount}] related {integrationsCount, plural, =1 {integration} other {integrations}} to your prebuilt rule',
     }
   );
 
@@ -1109,7 +1109,7 @@ export const INTEGRATIONS_POPOVER_DESCRIPTION_INSTALLED = (installedCount: numbe
     {
       values: { installedCount },
       defaultMessage:
-        'You have [{installedCount}] related {installedCount, plural, =1 {# integration} other {# integrations}} installed, click the link below to view the integration:',
+        'You have [{installedCount}] related {installedCount, plural, =1 {integration} other {integrations}} installed, click the link below to view the integration:',
     }
   );
 
@@ -1119,6 +1119,6 @@ export const INTEGRATIONS_POPOVER_DESCRIPTION_UNINSTALLED = (uninstalledCount: n
     {
       values: { uninstalledCount },
       defaultMessage:
-        'You have [{uninstalledCount}] related {uninstalledCount, plural, =1 {# integration} other {# integrations}} uninstalled, click the link to add integration:',
+        'You have [{uninstalledCount}] related {uninstalledCount, plural, =1 {integration} other {integrations}} uninstalled, click the link to add integration:',
     }
   );

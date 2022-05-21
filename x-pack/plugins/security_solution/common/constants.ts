@@ -237,6 +237,8 @@ export const DETECTION_ENGINE_PREPACKAGED_URL =
   `${DETECTION_ENGINE_RULES_URL}/prepackaged` as const;
 export const DETECTION_ENGINE_PRIVILEGES_URL = `${DETECTION_ENGINE_URL}/privileges` as const;
 export const DETECTION_ENGINE_INDEX_URL = `${DETECTION_ENGINE_URL}/index` as const;
+export const DETECTION_ENGINE_INSTALLED_INTEGRATIONS_URL =
+  `${DETECTION_ENGINE_URL}/installed_integrations` as const;
 export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags` as const;
 export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL =
   `${DETECTION_ENGINE_RULES_URL}/prepackaged/_status` as const;

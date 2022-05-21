@@ -13,16 +13,20 @@ import {
   EuiPopoverTitle,
   EuiFlexGroup,
   EuiText,
-  EuiLink,
 } from '@elastic/eui';
 import styled from 'styled-components';
-import type { RelatedIntegrationArray } from '../../../../common/detection_engine/schemas/common';
+import { useBasePath } from '../../lib/kibana';
+import { getIntegrationLink } from './helpers';
+import { useInstalledIntegrations } from '../../../detections/containers/detection_engine/rules/use_installed_integrations';
+import type {
+  RelatedIntegration,
+  RelatedIntegrationArray,
+} from '../../../../common/detection_engine/schemas/common';
 
 import * as i18n from '../../../detections/pages/detection_engine/rules/translations';
 
 export interface IntegrationsPopoverProps {
   integrations: RelatedIntegrationArray;
-  installedIntegrations: RelatedIntegrationArray;
 }
 
 const IntegrationsPopoverWrapper = styled(EuiFlexGroup)`
@@ -36,18 +40,40 @@ const PopoverWrapper = styled(EuiBadgeGroup)`
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
 `;
 
+const IntegrationListItem = styled('li')`
+  list-style-type: disc;
+  margin-left: 25px;
+`;
 /**
  * Component to render installed and available integrations
- * @param integrations - array of items to render
- * @param installedIntegrations - array of items to render
+ * @param integrations - array of integrations to display
  */
-const IntegrationsPopoverComponent = ({
-  integrations,
-  installedIntegrations,
-}: IntegrationsPopoverProps) => {
+const IntegrationsPopoverComponent = ({ integrations }: IntegrationsPopoverProps) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
+  const { data } = useInstalledIntegrations({ packages: [] });
+  // const data = undefined; // To test with installed_integrations endpoint not implemented
+  const basePath = useBasePath();
 
-  const integrationsTitle = `${installedIntegrations.length}/${integrations.length} ${i18n.INTEGRATIONS_BADGE}`;
+  const allInstalledIntegrations: RelatedIntegrationArray = data ?? [];
+  const availableIntegrations: RelatedIntegrationArray = [];
+  const installedIntegrations: RelatedIntegrationArray = [];
+
+  integrations.forEach((i: RelatedIntegration) => {
+    const match = allInstalledIntegrations.find(
+      (installed) => installed.package === i.package && installed?.integration === i?.integration
+    );
+    if (match != null) {
+      // TODO: Do version check
+      installedIntegrations.push(match);
+    } else {
+      availableIntegrations.push(i);
+    }
+  });
+
+  const badgeTitle =
+    data != null
+      ? `${installedIntegrations.length}/${integrations.length} ${i18n.INTEGRATIONS_BADGE}`
+      : `${integrations.length} ${i18n.INTEGRATIONS_BADGE}`;
 
   return (
     <IntegrationsPopoverWrapper
@@ -64,9 +90,9 @@ const IntegrationsPopoverComponent = ({
             color="hollow"
             data-test-subj={'IntegrationsDisplayPopoverButton'}
             onClick={() => setPopoverOpen(!isPopoverOpen)}
-            onClickAriaLabel={integrationsTitle}
+            onClickAriaLabel={badgeTitle}
           >
-            {integrationsTitle}
+            {badgeTitle}
           </EuiBadge>
         }
         isOpen={isPopoverOpen}
@@ -74,25 +100,38 @@ const IntegrationsPopoverComponent = ({
         repositionOnScroll
       >
         <EuiPopoverTitle data-test-subj={'IntegrationsDisplayPopoverTitle'}>
-          {i18n.INTEGRATIONS_POPOVER_TITLE(3)}
+          {i18n.INTEGRATIONS_POPOVER_TITLE(integrations.length)}
         </EuiPopoverTitle>
 
         <PopoverWrapper data-test-subj={'IntegrationsDisplayPopoverWrapper'}>
-          <EuiText size={'s'}>{i18n.INTEGRATIONS_POPOVER_DESCRIPTION_INSTALLED(1)}</EuiText>
-          <EuiLink href={'integrationURL'} target="_blank">
-            {'AWS CloudTrail'}
-          </EuiLink>
-          <EuiText size={'s'}>{i18n.INTEGRATIONS_POPOVER_DESCRIPTION_UNINSTALLED(2)}</EuiText>
-          <div>
-            <EuiLink href={'integrationURL'} target="_blank">
-              {'Endpoint Security'}
-            </EuiLink>
-          </div>
-          <div>
-            <EuiLink href={'integrationURL'} target="_blank">
-              {'\nModSecurity Audit'}
-            </EuiLink>
-          </div>
+          {data != null && (
+            <>
+              <EuiText size={'s'}>
+                {i18n.INTEGRATIONS_POPOVER_DESCRIPTION_INSTALLED(installedIntegrations.length)}
+              </EuiText>
+              <ul>
+                {installedIntegrations.map((integration, index) => (
+                  <IntegrationListItem key={index}>
+                    {getIntegrationLink(integration, basePath)}
+                  </IntegrationListItem>
+                ))}
+              </ul>
+            </>
+          )}
+          {availableIntegrations.length > 0 && (
+            <>
+              <EuiText size={'s'}>
+                {i18n.INTEGRATIONS_POPOVER_DESCRIPTION_UNINSTALLED(availableIntegrations.length)}
+              </EuiText>
+              <ul>
+                {availableIntegrations.map((integration, index) => (
+                  <IntegrationListItem key={index}>
+                    {getIntegrationLink(integration, basePath)}
+                  </IntegrationListItem>
+                ))}
+              </ul>
+            </>
+          )}
         </PopoverWrapper>
       </EuiPopover>
     </IntegrationsPopoverWrapper>
