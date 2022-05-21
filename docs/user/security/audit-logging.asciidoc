@@ -18,7 +18,7 @@ Audit logs are **disabled** by default. To enable this functionality, you must
 set `xpack.security.audit.enabled` to `true` in `kibana.yml`.
 
 You can optionally configure audit logs location, file/rolling file appenders and 
-ignore filters using {ref}/security-settings-kb.html#audit-logging-settings[audit logging settings].
+ignore filters using <<audit-logging-settings>>.
 ============================================================================
 
 [[xpack-security-ecs-audit-logging]]
