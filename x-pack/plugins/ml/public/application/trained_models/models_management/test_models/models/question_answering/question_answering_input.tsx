@@ -9,7 +9,7 @@ import React, { FC, useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 
-import { EuiSpacer, EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiSpacer, EuiFieldText, EuiFormRow, EuiText } from '@elastic/eui';
 
 import { TextInput } from '../text_input';
 import { QuestionAnsweringInference } from './question_answering_inference';
@@ -52,6 +52,10 @@ export const getQuestionAnsweringInput = (
   placeholder?: string
 ) => (
   <>
+    <EuiText grow={false}>
+      <h4>Extract an answer to your question from the provided text</h4>
+    </EuiText>
+    <EuiSpacer size="m" />
     <TextInput placeholder={placeholder} inferrer={inferrer} />
     <EuiSpacer />
     <QuestionInput inferrer={inferrer} />

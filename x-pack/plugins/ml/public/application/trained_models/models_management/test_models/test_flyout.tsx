@@ -28,14 +28,12 @@ export const TestTrainedModelFlyout: FC<Props> = ({ model, onClose }) => {
                 id="xpack.ml.trainedModels.testModelsFlyout.headerLabel"
                 defaultMessage="Test trained model"
               />
+              <EuiSpacer size="m" />
+              {model.model_id}
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <EuiTitle size="xs">
-            <h4>{model.model_id}</h4>
-          </EuiTitle>
-
           <EuiSpacer size="m" />
 
           <SelectedModel model={model} />
