@@ -210,7 +210,7 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
           type: 'alert',
           id: alwaysFiringRuleId[Spaces[0].id],
           provider: 'alerting',
-          actions: new Map([['execute', { gte: 10 }]]),
+          actions: new Map([['execute', { gte: 8 }]]),
         });
       });
 
