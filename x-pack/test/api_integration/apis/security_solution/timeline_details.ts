@@ -389,20 +389,6 @@ const EXPECTED_DATA = [
   },
   {
     category: 'source',
-    field: 'source.geo.location.lat',
-    values: ['47.6103'],
-    originalValue: ['47.6103'],
-    isObjectArray: false,
-  },
-  {
-    category: 'source',
-    field: 'source.geo.location.lon',
-    values: ['-122.3341'],
-    originalValue: ['-122.3341'],
-    isObjectArray: false,
-  },
-  {
-    category: 'source',
     field: 'source.geo.region_iso_code',
     values: ['US-WA'],
     originalValue: ['US-WA'],
