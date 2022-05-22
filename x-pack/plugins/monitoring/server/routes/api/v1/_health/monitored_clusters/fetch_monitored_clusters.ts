@@ -31,7 +31,7 @@ export const fetchMonitoredClusters = async ({
       ignore_unavailable: true,
       body: monitoredClustersQuery(timeRange),
     })
-      .then((response: ElasticsearchResponse) => response.aggregations?.clusters?.buckets ?? [])
+      .then(({ aggregations }) => aggregations?.clusters?.buckets ?? [])
       .then(buildMonitoredClusters),
 
     search({
@@ -40,7 +40,7 @@ export const fetchMonitoredClusters = async ({
       ignore_unavailable: true,
       body: stableMetricsetsQuery(),
     })
-      .then((response: ElasticsearchResponse) => response.aggregations?.clusters?.buckets ?? [])
+      .then(({ aggregations }) => aggregations?.clusters?.buckets ?? [])
       .then(buildMonitoredClusters),
   ]);
 
