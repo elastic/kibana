@@ -104,7 +104,7 @@ describe(__filename, () => {
         },
       };
 
-      const stableMetricsetsResponse = {
+      const persistentMetricsetsResponse = {
         aggregations: {
           clusters: {
             meta: {},
@@ -152,7 +152,7 @@ describe(__filename, () => {
       const searchFn = jest
         .fn()
         .mockResolvedValueOnce(mainMetricsetsResponse)
-        .mockResolvedValueOnce(stableMetricsetsResponse);
+        .mockResolvedValueOnce(persistentMetricsetsResponse);
 
       const monitoredClusters = await fetchMonitoredClusters({
         index: 'foo',

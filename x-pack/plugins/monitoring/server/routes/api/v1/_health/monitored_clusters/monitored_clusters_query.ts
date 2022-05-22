@@ -50,7 +50,7 @@ export const monitoredClustersQuery = ({ min, max }: TimeRange) => {
  * the documents in the index. we query those metricsets separately without
  * a time range filter
  */
-export const stableMetricsetsQuery = () => {
+export const persistentMetricsetsQuery = () => {
   const metricsetsAggregations = {
     elasticsearch: {
       terms: {
