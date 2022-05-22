@@ -62,6 +62,10 @@ filters the objects in the response.
 (Optional, string or array of strings) The fields to perform the
 `simple_query_string` parsed query against.
 
+`severity`::
+(Optional,string) The severity of the case. Valid values are: `critical`, `high`,
+`low`, and `medium`.
+
 `sortField`::
 (Optional, string) Determines which field is used to sort the results,
 `createdAt` or `updatedAt`. Defaults to `createdAt`.
@@ -126,6 +130,7 @@ The API returns a JSON object listing the retrieved cases. For example:
       },
       "owner": "securitySolution",
       "duration": null,
+      "severity": "low",
       "closed_at": null,
       "closed_by": null,
       "created_at": "2022-03-29T13:03:23.533Z",
