@@ -20,7 +20,9 @@ import { TelemetryEventsSender } from '../../legacy_uptime/lib/telemetry/sender'
 import {
   MONITOR_UPDATE_CHANNEL,
   MONITOR_CURRENT_CHANNEL,
+  MONITOR_ERROR_EVENT_CHANNEL,
 } from '../../legacy_uptime/lib/telemetry/constants';
+import { MonitorErrorEvent } from '../../legacy_uptime/lib/telemetry/types';
 
 export interface UpgradeError {
   key?: string;
@@ -41,6 +43,22 @@ export function sendTelemetryEvents(
     eventsTelemetry.queueTelemetryEvents(MONITOR_CURRENT_CHANNEL, [updateEvent]);
   } catch (exc) {
     logger.error(`queing telemetry events failed ${exc}`);
+  }
+}
+
+export function sendErrorTelemetryEvents(
+  logger: Logger,
+  eventsTelemetry: TelemetryEventsSender | undefined,
+  updateEvent: MonitorErrorEvent
+) {
+  if (eventsTelemetry === undefined) {
+    return;
+  }
+
+  try {
+    eventsTelemetry.queueTelemetryEvents(MONITOR_ERROR_EVENT_CHANNEL, [updateEvent]);
+  } catch (exc) {
+    logger.error(`queuing telemetry events failed ${exc}`);
   }
 }
 

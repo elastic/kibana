@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { ServiceLocationErrors } from '../../../../common/runtime_types/monitor_management';
+import { MONITOR_ERROR_EVENT_CHANNEL } from './constants';
 
 export interface MonitorUpdateEvent {
   updatedAt?: string;
@@ -23,10 +24,20 @@ export interface MonitorUpdateEvent {
   configId: string;
 }
 
+export interface MonitorErrorEvent {
+  type: string;
+  message: string;
+  reason?: string;
+  code?: string;
+  status?: number;
+  url?: string;
+}
+
 export interface MonitorUpdateTelemetryChannelEvents {
   // channel name => event type
   'synthetics-monitor-update': MonitorUpdateEvent;
   'synthetics-monitor-current': MonitorUpdateEvent;
+  [MONITOR_ERROR_EVENT_CHANNEL]: MonitorErrorEvent;
 }
 
 export type MonitorUpdateTelemetryChannel = keyof MonitorUpdateTelemetryChannelEvents;
