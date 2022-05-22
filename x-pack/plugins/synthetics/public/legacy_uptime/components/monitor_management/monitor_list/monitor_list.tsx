@@ -25,6 +25,7 @@ import {
   ServiceLocations,
   EncryptedSyntheticsMonitorWithId,
   TCPSimpleFields,
+  BrowserFields,
 } from '../../../../../common/runtime_types';
 import { UptimeSettingsContext } from '../../../contexts';
 import { useBreakpoints } from '../../../../hooks/use_breakpoints';
@@ -119,8 +120,14 @@ export const MonitorManagementList = ({
         defaultMessage: 'Monitor name',
       }),
       sortable: true,
-      render: (name: string, { id }: EncryptedSyntheticsMonitorWithId) => (
-        <EuiLink href={`${basePath}/app/uptime/monitor/${btoa(id)}`}>{name}</EuiLink>
+      render: (name: string, monitor: EncryptedSyntheticsMonitorWithId) => (
+        <EuiLink
+          href={`${basePath}/app/uptime/monitor/${btoa(
+            (monitor as unknown as BrowserFields)[ConfigKey.CUSTOM_HEARTBEAT_ID] || monitor.id
+          )}`}
+        >
+          {name}
+        </EuiLink>
       ),
     },
     {

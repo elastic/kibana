@@ -50,7 +50,7 @@ export const syntheticsMonitor: SavedObjectsType = {
       project_id: {
         type: 'keyword',
       },
-      'monitor.source': {
+      'monitor.origin': {
         type: 'keyword',
       },
     },
