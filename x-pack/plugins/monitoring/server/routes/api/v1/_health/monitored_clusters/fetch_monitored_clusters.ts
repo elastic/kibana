@@ -11,7 +11,11 @@ import { ElasticsearchResponse } from '../../../../../../common/types/es';
 import { TimeRange } from '../../../../../../common/http_api/shared';
 
 import { buildMonitoredClusters } from './build_monitored_clusters';
-import { monitoredClustersQuery, stableMetricsetsQuery } from './monitored_clusters_query';
+import {
+  enterpriseSearchQuery,
+  monitoredClustersQuery,
+  persistentMetricsetsQuery,
+} from './monitored_clusters_query';
 
 type SearchFn = (params: any) => Promise<ElasticsearchResponse>;
 
