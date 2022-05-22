@@ -24,6 +24,8 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { docLinks } from '../../../../../shared/doc_links';
+
 import { EuiButtonTo } from '../../../../../shared/react_router_helpers';
 import { AppLogic } from '../../../../app_logic';
 import connectionIllustration from '../../../../assets/connection_illustration.svg';
@@ -86,23 +88,12 @@ export const AddSourceBYOIntro: React.FC = () => {
                         {i18n.translate(
                           'xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.steps.title',
                           {
-                            defaultMessage: 'How to build and deploy a Custom Connector Package',
+                            defaultMessage:
+                              'Build and deploy a custom connector package to add data from custom content sources, or modify the behavior of first party content sources',
                           }
                         )}
                       </h2>
                     </EuiTitle>
-                    <EuiSpacer size="m" />
-                    <EuiText color="subdued" grow={false}>
-                      <p>
-                        {i18n.translate(
-                          'xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.steps.text',
-                          {
-                            defaultMessage:
-                              'We give you all you need to help you build your own Connector to bring data into Enterprise Search from your favorite content sources.',
-                          }
-                        )}
-                      </p>
-                    </EuiText>
                     <EuiSpacer size="l" />
                   </EuiFlexItem>
                   <EuiFlexItem>
@@ -116,9 +107,9 @@ export const AddSourceBYOIntro: React.FC = () => {
                           <EuiTitle size="xs">
                             <h3>
                               {i18n.translate(
-                                'xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.option1.heading',
+                                'xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.step1.heading',
                                 {
-                                  defaultMessage: 'Option 1',
+                                  defaultMessage: 'Step 1',
                                 }
                               )}
                             </h3>
@@ -129,15 +120,28 @@ export const AddSourceBYOIntro: React.FC = () => {
                         <EuiText size="m" grow={false}>
                           <h4>
                             <FormattedMessage
-                              id="xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.option1.title"
-                              defaultMessage="Start with our source code"
+                              id="xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.step1.title"
+                              defaultMessage="Build or modify the code"
                             />
                           </h4>
                           <p>
                             <FormattedMessage
-                              id="xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.option1.text"
-                              defaultMessage="Check out our repository on github {link}"
-                              values={{ link: <EuiLink>here</EuiLink> }}
+                              id="xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.step1.text"
+                              defaultMessage="In the Connector Package {repositoryLink}, there’s everything you need to understand the connector framework and get set up with your coding environment."
+                              values={{
+                                repositoryLink: (
+                                  <EuiLink
+                                    external
+                                    target="_blank"
+                                    href="https://github.com/elastic/connectors"
+                                  >
+                                    {i18n.translate(
+                                      'xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.step1.repositoryLinkLabel',
+                                      { defaultMessage: 'repository' }
+                                    )}
+                                  </EuiLink>
+                                ),
+                              }}
                             />
                           </p>
                         </EuiText>
@@ -155,9 +159,9 @@ export const AddSourceBYOIntro: React.FC = () => {
                           <EuiTitle size="xs">
                             <h4>
                               {i18n.translate(
-                                'xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.option2.heading',
+                                'xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.step2.heading',
                                 {
-                                  defaultMessage: 'Option 2',
+                                  defaultMessage: 'Step 2',
                                 }
                               )}
                             </h4>
@@ -168,17 +172,28 @@ export const AddSourceBYOIntro: React.FC = () => {
                         <EuiText size="m" grow={false}>
                           <h4>
                             <FormattedMessage
-                              id="xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.option2.title"
-                              defaultMessage="Use our docs and tools to write your own"
+                              id="xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.step2.title"
+                              defaultMessage="Deploy your custom connector package"
                             />
                           </h4>
                           <p>
                             <FormattedMessage
-                              id="xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.option2.text"
-                              defaultMessage="Check out our helpful docs {link}"
-                              values={
-                                { link: <EuiLink>here</EuiLink> } // TODO Update this when we have a doclink
-                              }
+                              id="xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.step2.text"
+                              defaultMessage="Connector packages are self managed on the infrastructure you deploy. Review the {documentationLink} for prerequisites to get started with your deployment."
+                              values={{
+                                documentationLink: (
+                                  <EuiLink
+                                    external
+                                    target="_blank"
+                                    href={docLinks.workplaceSearchCustomConnectorPackage}
+                                  >
+                                    {i18n.translate(
+                                      'xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.step2.documentationLinkLabel',
+                                      { defaultMessage: 'documentation' }
+                                    )}
+                                  </EuiLink>
+                                ),
+                              }}
                             />
                           </p>
                         </EuiText>
@@ -189,8 +204,8 @@ export const AddSourceBYOIntro: React.FC = () => {
                     <EuiText size="m" grow={false}>
                       <p>
                         <FormattedMessage
-                          id="xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.step2.text"
-                          defaultMessage="Once you've built and deployed your connector, come back here to register your connector, connect to your content source, and start ingesting documents."
+                          id="xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.step3.text"
+                          defaultMessage="Once you’ve built and deployed your connector package, come back here to register your connector package deployment, finalize configuration and connect to your content sources."
                         />
                       </p>
                     </EuiText>
