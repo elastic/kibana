@@ -51,31 +51,127 @@ export const monitoredClustersQuery = ({ min, max }: TimeRange) => {
  * a time range filter
  */
 export const stableMetricsetsQuery = () => {
+  const metricsetsAggregations = {
+    elasticsearch: {
+      terms: {
+        field: 'source_node.uuid',
+        size: 1000,
+      },
+      aggs: {
+        shard: lastSeenByIndex({
+          filter: {
+            bool: {
+              should: [
+                {
+                  term: {
+                    type: 'shards',
+                  },
+                },
+                {
+                  term: {
+                    'metricset.name': 'shard',
+                  },
+                },
+              ],
+            },
+          },
+        }),
+      },
+    },
+
+    logstash: {
+      terms: {
+        field: 'logstash_state.pipeline.id',
+        size: 1000,
+      },
+      aggs: {
+        node: lastSeenByIndex({
+          filter: {
+            bool: {
+              should: [
+                {
+                  term: {
+                    type: 'logstash_state',
+                  },
+                },
+                {
+                  term: {
+                    'metricset.name': 'node',
+                  },
+                },
+              ],
+            },
+          },
+        }),
+      },
+    },
+  };
+
   return {
     aggs: {
       clusters: {
         terms: clusterUuidTerm,
-        aggs: {
-          ...logstashStableAggregations,
+        aggs: metricsetsAggregations,
+      },
+    },
+  };
+};
 
-          elasticsearch: {
+export const enterpriseSearchQuery = ({ min, max }: TimeRange) => {
+  return {
+    query: {
+      bool: {
+        filter: [
+          {
+            range: {
+              timestamp: {
+                gte: min,
+                lte: max,
+              },
+            },
+          },
+          {
+            term: {
+              'event.module': {
+                value: 'enterprisesearch',
+              },
+            },
+          },
+        ],
+      },
+    },
+    aggs: {
+      clusters: {
+        terms: {
+          field: 'enterprisesearch.cluster_uuid',
+        },
+        aggs: {
+          enterpriseSearch: {
             terms: {
-              field: 'source_node.uuid',
-              size: 10000,
+              field: 'agent.hostname',
             },
             aggs: {
-              shard: lastSeenByIndex({
+              health: lastSeenByIndex({
                 filter: {
                   bool: {
                     should: [
                       {
                         term: {
-                          type: 'shards',
+                          'metricset.name': 'health',
                         },
                       },
+                    ],
+                  },
+                },
+              }),
+
+              stats: lastSeenByIndex({
+                filter: {
+                  bool: {
+                    should: [
                       {
                         term: {
-                          'metricset.name': 'shard',
+                          'metricset.name': 'stats',
                         },
                       },
                     ],
@@ -90,15 +186,7 @@ export const stableMetricsetsQuery = () => {
   };
 };
 
-const clusterUuidTerm = {
-  script: `
-    if (doc['cluster_uuid'].size() == 0 || doc['cluster_uuid'].empty) {
-      return 'standalone';
-    } else {
-      return doc['cluster_uuid'].value;
-    }
-  `,
-};
+const clusterUuidTerm = { field: 'cluster_uuid', missing: 'standalone', size: 100 };
 
 const lastSeenByIndex = (aggregation: { filter: any }) => {
   return {
@@ -123,7 +211,7 @@ const lastSeenByIndex = (aggregation: { filter: any }) => {
 const clusterAggregation = {
   terms: {
     field: 'cluster_uuid',
-    size: 10000,
+    size: 100,
   },
   aggs: {
     cluster_stats: lastSeenByIndex({
@@ -302,77 +390,6 @@ const logstashAggregation = {
         },
       },
     }),
-  },
-};
-
-// ideally we'd aggregate by pipeline identifer but this information
-// is only available in metricbeat 8. the pipeline ephemeral id could
-// be a working key but the cardinality may be important
-const logstashStableAggregations = {
-  logstash_state_v8: {
-    terms: {
-      field: 'logstash.node.id',
-      size: 10000,
-    },
-    aggs: {
-      node: lastSeenByIndex({
-        filter: {
-          bool: {
-            should: [
-              {
-                term: {
-                  'metricset.name': 'node',
-                },
-              },
-            ],
-          },
-        },
-      }),
-    },
-  },
-
-  logstash_state_v7: {
-    terms: {
-      field: 'logstash_state.pipeline.id',
-      size: 10000,
-    },
-    aggs: {
-      node: lastSeenByIndex({
-        filter: {
-          bool: {
-            should: [
-              {
-                term: {
-                  type: 'logstash_state',
-                },
-              },
-            ],
-          },
-        },
-      }),
-    },
-  },
-
-  logstash_state_internal: {
-    terms: {
-      field: 'source_node.uuid',
-      size: 10000,
-    },
-    aggs: {
-      node: lastSeenByIndex({
-        filter: {
-          bool: {
-            should: [
-              {
-                term: {
-                  type: 'logstash_state',
-                },
-              },
-            ],
-          },
-        },
-      }),
-    },
   },
 };
 
