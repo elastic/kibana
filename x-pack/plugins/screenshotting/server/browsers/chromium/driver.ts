@@ -17,6 +17,7 @@ import {
 import { ConfigType } from '../../config';
 import { allowRequest } from '../network_policy';
 import { stripUnsafeHeaders } from './strip_unsafe_headers';
+import { getFooterTemplate, getHeaderTemplate } from './templates';
 
 export type Context = Record<string, unknown>;
 
@@ -32,12 +33,6 @@ export interface ElementPosition {
     x: number;
     y: number;
   };
-}
-
-export interface Viewport {
-  zoom: number;
-  width: number;
-  height: number;
 }
 
 interface OpenOptions {
@@ -155,8 +150,54 @@ export class HeadlessChromiumDriver {
     return !this.page.isClosed();
   }
 
+  /**
+   * Despite having "preserveDrawingBuffer": "true" for WebGL driven canvas elements
+   * we may still get a blank canvas in PDFs. As a further mitigation
+   * we convert WebGL backed canvases to images and inline replace the canvas element.
+   * The visual result is identical.
+   *
+   * The drawback is that we are mutating the page and so if anything were to interact
+   * with it after we ran this function it may lead to issues. Ideally, once Chromium
+   * fixes how PDFs are generated we can remove this code. See:
+   *
+   * https://bugs.chromium.org/p/chromium/issues/detail?id=809065
+   * https://bugs.chromium.org/p/chromium/issues/detail?id=137576
+   *
+   * Idea adapted from: https://github.com/puppeteer/puppeteer/issues/1731#issuecomment-864345938
+   */
+  private async workaroundWebGLDrivenCanvases() {
+    const canvases = await this.page.$$('canvas');
+    for (const canvas of canvases) {
+      await canvas.evaluate((thisCanvas: Element) => {
+        if (
+          (thisCanvas as HTMLCanvasElement).getContext('webgl') ||
+          (thisCanvas as HTMLCanvasElement).getContext('webgl2')
+        ) {
+          const newDiv = document.createElement('div');
+          const img = document.createElement('img');
+          img.src = (thisCanvas as HTMLCanvasElement).toDataURL('image/png');
+          newDiv.appendChild(img);
+          thisCanvas.parentNode!.replaceChild(newDiv, thisCanvas);
+        }
+      });
+    }
+  }
+
+  async printA4Pdf({ title, logo }: { title: string; logo?: string }): Promise<Buffer> {
+    await this.workaroundWebGLDrivenCanvases();
+    return this.page.pdf({
+      format: 'a4',
+      preferCSSPageSize: true,
+      scale: 1,
+      landscape: false,
+      displayHeaderFooter: true,
+      headerTemplate: await getHeaderTemplate({ title }),
+      footerTemplate: await getFooterTemplate({ logo }),
+    });
+  }
+
   /*
-   * Call Page.screenshot and return a base64-encoded string of the image
+   * Receive a PNG buffer of the page screenshot from Chromium
    */
   async screenshot(elementPosition: ElementPosition): Promise<Buffer | undefined> {
     const { boundingClientRect, scroll } = elementPosition;
@@ -167,6 +208,7 @@ export class HeadlessChromiumDriver {
         height: boundingClientRect.height,
         width: boundingClientRect.width,
       },
+      captureBeyondViewport: false, // workaround for an internal resize. See: https://github.com/puppeteer/puppeteer/issues/7043
     });
 
     if (Buffer.isBuffer(screenshot)) {
@@ -216,14 +258,18 @@ export class HeadlessChromiumDriver {
     await this.page.waitForFunction(fn, { timeout, polling: WAIT_FOR_DELAY_MS }, ...args);
   }
 
+  /**
+   * Setting the viewport is required to ensure that all capture elements are visible: anything not in the
+   * viewport can not be captured.
+   */
   async setViewport(
-    { width: _width, height: _height, zoom }: Viewport,
+    { width: _width, height: _height, zoom }: { zoom: number; width: number; height: number },
     logger: Logger
   ): Promise<void> {
     const width = Math.floor(_width);
     const height = Math.floor(_height);
 
-    logger.debug(`Setting viewport to: width=${width} height=${height} zoom=${zoom}`);
+    logger.debug(`Setting viewport to: width=${width} height=${height} scaleFactor=${zoom}`);
 
     await this.page.setViewport({
       width,
@@ -359,7 +405,7 @@ export class HeadlessChromiumDriver {
 
     // `port` is null in URLs that don't explicitly state it,
     // however we can derive the port from the protocol (http/https)
-    // IE: https://feeds-staging.elastic.co/kibana/v8.0.0.json
+    // IE: https://feeds.elastic.co/kibana/v8.0.0.json
     const derivedPort = (protocol: string | null, port: string | null, url: string) => {
       if (port) {
         return port;

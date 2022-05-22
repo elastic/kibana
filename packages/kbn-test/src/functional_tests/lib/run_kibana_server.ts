@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ProcRunner } from '@kbn/dev-utils';
+import type { ProcRunner } from '@kbn/dev-proc-runner';
 import { resolve, relative } from 'path';
 import { KIBANA_ROOT, KIBANA_EXEC, KIBANA_EXEC_PATH } from './paths';
 import type { Config } from '../../functional_test_runner';
@@ -31,10 +31,12 @@ export async function runKibanaServer({
   procs,
   config,
   options,
+  onEarlyExit,
 }: {
   procs: ProcRunner;
   config: Config;
   options: { installDir?: string; extraKbnOpts?: string[] };
+  onEarlyExit?: (msg: string) => void;
 }) {
   const runOptions = config.get('kbnTestServer.runOptions');
   const installDir = runOptions.alwaysUseSource ? undefined : options.installDir;
@@ -51,6 +53,7 @@ export async function runKibanaServer({
     },
     cwd: installDir || KIBANA_ROOT,
     wait: runOptions.wait,
+    onEarlyExit,
   });
 }
 

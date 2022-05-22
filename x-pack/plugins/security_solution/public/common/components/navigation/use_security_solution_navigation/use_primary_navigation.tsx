@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
 import { PrimaryNavigationProps } from './types';
 import { usePrimaryNavigationItems } from './use_navigation_items';
+import { useIsGroupedNavigationEnabled } from '../helpers';
+import { SecuritySideNav } from '../security_side_nav';
 
 const translatedNavTitle = i18n.translate('xpack.securitySolution.navigation.mainLabel', {
   defaultMessage: 'Security',
@@ -27,6 +29,7 @@ export const usePrimaryNavigation = ({
   timeline,
   timerange,
 }: PrimaryNavigationProps): KibanaPageTemplateProps['solutionNav'] => {
+  const isGroupedNavigationEnabled = useIsGroupedNavigationEnabled();
   const mapLocationToTab = useCallback(
     (): string => ((tabName && navTabs[tabName]) || navTabs[pageName])?.id ?? '',
     [pageName, tabName, navTabs]
@@ -58,6 +61,11 @@ export const usePrimaryNavigation = ({
   return {
     name: translatedNavTitle,
     icon: 'logoSecurity',
-    items: navItems,
+    ...(isGroupedNavigationEnabled
+      ? {
+          children: <SecuritySideNav />,
+          closeFlyoutButtonPosition: 'inside',
+        }
+      : { items: navItems }),
   };
 };

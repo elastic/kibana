@@ -16,13 +16,14 @@ import { fetchEsQuery } from './lib/fetch_es_query';
 import { EsQueryAlertParams } from './alert_type_params';
 import { fetchSearchSourceQuery } from './lib/fetch_search_source_query';
 import { Comparator } from '../../../common/comparator_types';
+import { isEsQueryAlert } from './util';
 
 export async function executor(
   logger: Logger,
   core: CoreSetup,
   options: ExecutorOptions<EsQueryAlertParams>
 ) {
-  const esQueryAlert = isEsQueryAlert(options);
+  const esQueryAlert = isEsQueryAlert(options.params.searchType);
   const { alertId, name, services, params, state } = options;
   const { alertFactory, scopedClusterClient, searchSourceClient } = services;
   const currentTimestamp = new Date().toISOString();
@@ -51,10 +52,7 @@ export async function executor(
         alertId,
         params as OnlySearchSourceAlertParams,
         latestTimestamp,
-        {
-          searchSourceClient,
-          logger,
-        }
+        { searchSourceClient, logger }
       );
 
   // apply the alert condition
@@ -163,10 +161,6 @@ export function tryToParseAsDate(sortValue?: string | number | null): undefined 
   if (sortDate && !isNaN(sortDate)) {
     return new Date(sortDate).toISOString();
   }
-}
-
-export function isEsQueryAlert(options: ExecutorOptions<EsQueryAlertParams>) {
-  return options.params.searchType !== 'searchSource';
 }
 
 export function getChecksum(params: EsQueryAlertParams) {
