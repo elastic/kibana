@@ -11922,8 +11922,6 @@
     "xpack.enterpriseSearch.workplaceSearch.integrations.confluenceCloudName": "Confluence Cloud",
     "xpack.enterpriseSearch.workplaceSearch.integrations.confluenceServerDescription": "通过 Workplace Search 搜索 Confluence Server 上的组织内容。",
     "xpack.enterpriseSearch.workplaceSearch.integrations.confluenceServerName": "Confluence Server",
-    "xpack.enterpriseSearch.workplaceSearch.integrations.customApiSourceDescription": "通过使用 Workplace Search 构建自己的集成来搜索任何内容。",
-    "xpack.enterpriseSearch.workplaceSearch.integrations.customApiSourceName": "定制 API 源",
     "xpack.enterpriseSearch.workplaceSearch.integrations.dropboxDescription": "通过 Workplace Search 搜索存储在 Dropbox 上的文件和文件夹。",
     "xpack.enterpriseSearch.workplaceSearch.integrations.dropboxName": "Dropbox",
     "xpack.enterpriseSearch.workplaceSearch.integrations.githubDescription": "通过 Workplace Search 搜索 GitHub 上的项目和存储库。",
