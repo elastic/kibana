@@ -10,7 +10,7 @@ import { MonitoringConfig } from '../../../../config';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getHealthRequestQueryRT } from '../../../../../common/http_api/_health';
 import { TimeRange } from '../../../../../common/http_api/shared';
-import { INDEX_PATTERN } from '../../../../../common/constants';
+import { INDEX_PATTERN, INDEX_PATTERN_ENTERPRISE_SEARCH } from '../../../../../common/constants';
 
 import { fetchMonitoredClusters } from './monitored_clusters';
 
@@ -26,13 +26,13 @@ const extractSettings = (config: MonitoringConfig) => {
 export function health(server: MonitoringCore) {
   const validateQuery = createValidationFunction(getHealthRequestQueryRT);
   const settings = extractSettings(server.config);
-  const index = (() => {
-    let pattern = INDEX_PATTERN;
+
+  const withCCS = (indexPattern: string) => {
     if (server.config.ui.ccs.enabled) {
-      pattern += `,*:${INDEX_PATTERN}`;
+      return `${indexPattern},*:${indexPattern}`;
     }
-    return pattern;
-  })();
+    return indexPattern;
+  };
 
   server.route({
     method: 'get',
@@ -49,8 +49,9 @@ export function health(server: MonitoringCore) {
       const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
 
       const monitoredClusters = await fetchMonitoredClusters({
-        index,
         timeRange,
+        monitoringIndex: withCCS(INDEX_PATTERN),
+        entSearchIndex: withCCS(INDEX_PATTERN_ENTERPRISE_SEARCH),
         search: (params: any) => callWithRequest(req, 'search', params),
       }).catch((err: Error) => {
         logger.error(`_health: failed to retrieve monitored clusters:\n${err.stack}`);

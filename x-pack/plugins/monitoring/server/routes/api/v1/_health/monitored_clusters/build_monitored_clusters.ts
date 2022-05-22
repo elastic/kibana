@@ -8,8 +8,8 @@
 import { isEmpty, mapValues, merge, reduce } from 'lodash';
 
 const reInternalMonitoring = /^\.monitoring-(es|kibana|beats|logstash)-7-[0-9]{4}\..*/;
-const reMetricbeatMonitoring7 = /^\.monitoring-(es|kibana|beats|logstash)-7-mb.*/;
-const reMetricbeatMonitoring8 = /^\.ds-\.monitoring-(es|kibana|beats|logstash)-8-mb.*/;
+const reMetricbeatMonitoring7 = /^\.monitoring-(es|kibana|beats|logstash|ent-search)-7.*-mb.*/;
+const reMetricbeatMonitoring8 = /^\.ds-\.monitoring-(es|kibana|beats|logstash|ent-search)-8-mb.*/;
 
 const getCollectionMode = (index: string) => {
   if (reInternalMonitoring.test(index)) return 'Internal monitoring';
