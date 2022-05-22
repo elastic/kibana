@@ -9,19 +9,23 @@
 import { search } from '@kbn/data-plugin/public';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { XYChartProps } from '../../common';
+import { isTimeChart } from '../../common/helpers';
 import { getFilteredLayers } from './layers';
-import { isDataLayer } from './visualization';
+import { isDataLayer, getDataLayers } from './visualization';
 
-export function calculateMinInterval({ args: { layers } }: XYChartProps) {
+export function calculateMinInterval({ args: { layers, minTimeBarInterval } }: XYChartProps) {
   const filteredLayers = getFilteredLayers(layers);
   if (filteredLayers.length === 0) return;
-  const isTimeViz = filteredLayers.every((l) => isDataLayer(l) && l.xScaleType === 'time');
+  const isTimeViz = isTimeChart(getDataLayers(filteredLayers));
   const xColumn =
     isDataLayer(filteredLayers[0]) &&
     filteredLayers[0].xAccessor &&
     getColumnByAccessor(filteredLayers[0].xAccessor, filteredLayers[0].table.columns);
 
   if (!xColumn) return;
+  if (minTimeBarInterval) {
+    return search.aggs.parseInterval(minTimeBarInterval)?.as('milliseconds');
+  }
   if (!isTimeViz) {
     const histogramInterval = search.aggs.getNumberHistogramIntervalByDatatableColumn(xColumn);
     if (typeof histogramInterval === 'number') {
