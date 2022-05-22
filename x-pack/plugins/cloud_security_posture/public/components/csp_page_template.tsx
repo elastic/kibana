@@ -202,7 +202,9 @@ export const CspPageTemplate = <TData, TError>({
       template={getTemplate()}
       noDataConfig={cisKubernetesPackageInfo.isSuccess ? getNoDataConfig() : undefined}
     >
-      <EuiErrorBoundary>{render()}</EuiErrorBoundary>
+      <EuiErrorBoundary>
+        <>{render()}</>
+      </EuiErrorBoundary>
     </KibanaPageTemplate>
   );
 };

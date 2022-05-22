@@ -40,15 +40,16 @@ export const ComplianceDashboard = () => {
   });
   useCspBreadcrumbs([allNavigationItems.dashboard]);
 
-  if (getFindingsStatus.data?.status !== 'applicable') {
-    return <CspPageTemplate noDataConfig={getNoDataConfig(getFindingsStatus.refetch)} />;
-  }
-
   return (
     <CspPageTemplate
       pageHeader={{ pageTitle: CLOUD_POSTURE }}
       restrictWidth={1600}
       query={getDashboardData}
+      noDataConfig={
+        getFindingsStatus.data?.status !== 'applicable'
+          ? getNoDataConfig(getFindingsStatus.refetch)
+          : undefined
+      }
     >
       {getDashboardData.data && (
         <>
