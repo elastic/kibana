@@ -8,7 +8,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { latestFindingsTransform } from './latest_findings_transform';
-import { benchmarkScoreTransform } from './benchmark_score_transform';
+// import { benchmarkScoreTransform } from './benchmark_score_transform';
 
 // TODO: Move transforms to integration package
 export const initializeCspTransforms = async (
@@ -17,7 +17,7 @@ export const initializeCspTransforms = async (
 ): Promise<void> => {
   await Promise.all([
     initializeTransform(esClient, latestFindingsTransform, logger),
-    initializeTransform(esClient, benchmarkScoreTransform, logger),
+    // initializeTransform(esClient, benchmarkScoreTransform, logger),
   ]);
 };
 

@@ -35,7 +35,7 @@ import {
 } from './fleet_integration/fleet_integration';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 
-import { initializeScoreTask, scheduleIndexScoreTask } from './task_manager/foo';
+import { initializeScoreTask, scheduleIndexScoreTask } from './task_manager/setup_score_task';
 export interface CspAppContext {
   logger: Logger;
   service: CspAppService;
