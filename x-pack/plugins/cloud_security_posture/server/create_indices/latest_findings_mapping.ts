@@ -55,6 +55,11 @@ export const latestFindingsMapping: MappingTypeMapping = {
         id: {
           type: 'keyword',
           ignore_above: 1024,
+          fields: {
+            text: {
+              type: 'text',
+            },
+          },
         },
         name: {
           type: 'keyword',
