@@ -191,7 +191,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
   [apmTraceExplorerTab]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.apmTraceExplorerTab', {
-      defaultMessage: 'Enable APM Trace Explorer',
+      defaultMessage: 'APM Trace Explorer',
     }),
     description: i18n.translate('xpack.observability.apmTraceExplorerTabDescription', {
       defaultMessage:
