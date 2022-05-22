@@ -61,7 +61,7 @@ import {
   rule_name_override,
   timestamp_override,
   event_category_override,
-} from '../common/schemas';
+} from '../common';
 
 /**
  * All of the patch elements should default to undefined if not set
