@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { postDisableInternalCollectionRequestParamsRT } from '../../../../../common/http_api/setup';
+import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { verifyMonitoringAuth } from '../../../../lib/elasticsearch/verify_monitoring_auth';
-import { handleError } from '../../../../lib/errors';
 import { setCollectionDisabled } from '../../../../lib/elasticsearch_settings/set/collection_disabled';
+import { handleError } from '../../../../lib/errors';
+import { MonitoringCore } from '../../../../types';
 
-export function disableElasticsearchInternalCollectionRoute(server) {
+export function disableElasticsearchInternalCollectionRoute(server: MonitoringCore) {
   server.route({
-    method: 'POST',
+    method: 'post',
     path: '/api/monitoring/v1/setup/collection/{clusterUuid}/disable_internal_collection',
-    config: {
-      validate: {
-        params: schema.object({
-          clusterUuid: schema.string(),
-        }),
-      },
+    validate: {
+      params: createValidationFunction(postDisableInternalCollectionRequestParamsRT),
     },
     handler: async (req) => {
       // NOTE using try/catch because checkMonitoringAuth is expected to throw
