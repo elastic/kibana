@@ -78,7 +78,7 @@ export class CspPlugin
     //   elasticsearch: coreServices.elasticsearch,
     // }));
     const coreStartServices = core.getStartServices();
-    initializeScoreTask(plugins.taskManager, coreStartServices);
+    initializeScoreTask(plugins.taskManager, coreStartServices, this.logger);
     return {};
   }
 

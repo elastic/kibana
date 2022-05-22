@@ -6,11 +6,7 @@
  */
 
 // import { ElasticSearchHit } from "@kbn/discover-plugin/public/types";
-import {
-  AggregationsAggregationContainer,
-  SearchRequest,
-  AggregationsMultiBucketAggregateBase as Aggregation,
-} from '@elastic/elasticsearch/lib/api/types';
+import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { CoreStart, ElasticsearchClient } from '@kbn/core/server';
 import {
   RunContext,
@@ -31,24 +27,27 @@ import { CspServerPluginStart, CspServerPluginStartDeps } from '../types';
 
 export function initializeScoreTask(
   taskManager: TaskManagerSetupContract,
-  coreStartServices: Promise<[CoreStart, CspServerPluginStartDeps, CspServerPluginStart]>
+  coreStartServices: Promise<[CoreStart, CspServerPluginStartDeps, CspServerPluginStart]>,
+  logger: Logger
 ) {
-  registerScoreTask(taskManager, coreStartServices);
+  registerScoreTask(taskManager, coreStartServices, logger);
 }
 export function registerScoreTask(
   taskManager: TaskManagerSetupContract,
-  coreStartServices: Promise<[CoreStart, CspServerPluginStartDeps, CspServerPluginStart]>
+  coreStartServices: Promise<[CoreStart, CspServerPluginStartDeps, CspServerPluginStart]>,
+  logger: Logger
 ) {
   taskManager.registerTaskDefinitions({
     [INDEX_SCORE_TASK_ID]: {
       title: 'Aggregate latest findings index for score calculation',
-      createTaskRunner: scoreTaskTaskRunner(coreStartServices),
+      createTaskRunner: scoreTaskTaskRunner(coreStartServices, logger),
     },
   });
 }
 
 export function scoreTaskTaskRunner(
-  coreStartServices: Promise<[CoreStart, CspServerPluginStartDeps, CspServerPluginStart]>
+  coreStartServices: Promise<[CoreStart, CspServerPluginStartDeps, CspServerPluginStart]>,
+  logger: Logger
 ) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
@@ -56,11 +55,9 @@ export function scoreTaskTaskRunner(
       async run() {
         try {
           const esClient = (await coreStartServices)[0].elasticsearch.client.asInternalUser;
-          console.log('%%%%%');
           return await indexScore(esClient, state.runs);
         } catch (errMsg) {
-          // logger.warn(`Error executing alerting health check task: ${errMsg}`);
-          console.log(`Error executing alerting health check task: ${errMsg}`);
+          logger.warn(`Error executing alerting health check task: ${errMsg}`);
           return {
             state: {
               runs: (state.runs || 0) + 1,
@@ -75,38 +72,37 @@ export function scoreTaskTaskRunner(
 
 const indexScore = async (esClient: ElasticsearchClient, stateRuns?: number) => {
   try {
-    const evaluationsQueryResult = await esClient.search<unknown, ScoreAggResult>(getScoreQuery());
-    const clustersStats = evaluationsQueryResult.aggregations.score_by_cluster_id.buckets.map(
-      (clusterStats: {}) => {
-        return {
-          [clusterStats.key]: {
-            failed_findings: clusterStats.failed_findings.doc_count,
-            passed_findings: clusterStats.passed_findings.doc_count,
-            total_findings: clusterStats.total_findings.value,
-          },
-        };
-      }
-    );
+    const evaluationsQueryResult = await esClient.search<unknown, ScoreBucket>(getScoreQuery());
+    if (evaluationsQueryResult.aggregations) {
+      const clustersStats = evaluationsQueryResult.aggregations.score_by_cluster_id.buckets.map(
+        (clusterStats: AggregatedFindingsByCluster) => {
+          return {
+            [clusterStats.key]: {
+              failed_findings: clusterStats.failed_findings.doc_count,
+              passed_findings: clusterStats.passed_findings.doc_count,
+              total_findings: clusterStats.total_findings.value,
+            },
+          };
+        }
+      );
 
-    console.log('11111111');
-    await esClient.index({
-      index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-      document: {
-        failed_findings: evaluationsQueryResult.aggregations.failed_findings.doc_count,
-        passed_findings: evaluationsQueryResult.aggregations.passed_findings.doc_count,
-        total_findings: evaluationsQueryResult.aggregations.total_findings.doc_count,
-        score_by_cluster_id: clustersStats,
-      },
-    });
-    console.log('22222');
-    return {
-      state: {
-        runs: (stateRuns || 0) + 1,
-        health_status: HealthStatus.OK,
-      },
-    };
+      await esClient.index({
+        index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+        document: {
+          failed_findings: evaluationsQueryResult.aggregations.failed_findings.doc_count,
+          passed_findings: evaluationsQueryResult.aggregations.passed_findings.doc_count,
+          total_findings: evaluationsQueryResult.aggregations.total_findings.doc_count,
+          score_by_cluster_id: clustersStats,
+        },
+      });
+      return {
+        state: {
+          runs: (stateRuns || 0) + 1,
+          health_status: HealthStatus.OK,
+        },
+      };
+    }
   } catch (err) {
-    console.log('33333');
     console.log(err);
     return {
       state: {
@@ -116,20 +112,21 @@ const indexScore = async (esClient: ElasticsearchClient, stateRuns?: number) => 
     };
   }
 };
-export interface ScoreBucket {
-  score_by_cluster_id: {
-    doc_count_error_upper_bound: number;
-    sum_other_doc_count: number;
-    // buckets: [key: number,  total_findings: number;
-    //     passed_findings: { doc_count: number };
-    //     failed_findings: { doc_count: number }];
-  };
-  total_findings: number;
+
+export interface AggregatedFindings {
   passed_findings: { doc_count: number };
   failed_findings: { doc_count: number };
 }
-interface ScoreAggResult {
-  aggs_by_cluster_id: Aggregation<ScoreBucket>;
+
+export interface AggregatedFindingsByCluster extends AggregatedFindings {
+  key: string;
+  total_findings: { value: number };
+}
+export interface ScoreBucket extends AggregatedFindings {
+  score_by_cluster_id: {
+    buckets: AggregatedFindingsByCluster[];
+  };
+  total_findings: { doc_count: number };
 }
 
 const getScoreQuery = (): SearchRequest => ({
