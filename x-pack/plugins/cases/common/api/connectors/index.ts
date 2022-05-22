@@ -7,7 +7,15 @@
 
 import * as rt from 'io-ts';
 
-import { ActionResult, ActionType } from '@kbn/actions-plugin/common';
+import type { ActionType } from '@kbn/actions-plugin/common';
+/**
+ * ActionResult type from the common folder is outdated.
+ * The type from server is not exported properly so we
+ * disable the linting for the moment
+ */
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { ActionResult } from '@kbn/actions-plugin/server/types';
 import { JiraFieldsRT } from './jira';
 import { ResilientFieldsRT } from './resilient';
 import { ServiceNowITSMFieldsRT } from './servicenow_itsm';
