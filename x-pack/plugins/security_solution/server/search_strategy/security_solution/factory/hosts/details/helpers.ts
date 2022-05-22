@@ -42,6 +42,7 @@ export const HOST_DETAILS_FIELDS = [
   'endpoint.policyStatus',
   'endpoint.sensorVersion',
   'agent.type',
+  'agent.id',
   'endpoint.id',
 ];
 
@@ -128,6 +129,8 @@ const getHostFieldValue = (fieldName: string, bucket: HostAggEsItem): string | s
 
   if (has(`${aggField}.buckets`, bucket)) {
     return getFirstItem(get(`${aggField}`, bucket));
+  } else if (fieldName === 'endpoint.id') {
+    return get('endpoint_id.value.buckets[0].key', bucket) || null;
   } else if (has(aggField, bucket)) {
     const valueObj: HostValue = get(aggField, bucket);
     return valueObj.value_as_string;

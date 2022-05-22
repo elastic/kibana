@@ -60,7 +60,6 @@ export const buildHostDetailsQuery = ({
       query: { bool: { filter } },
       _source: false,
       fields: [
-        'agent.id',
         ...esFields,
         {
           field: '@timestamp',
