@@ -7,7 +7,7 @@
 
 import { CommonFields, ConfigKey, MonitorFields, SourceType } from '../../../common/runtime_types';
 
-export type FormattedValue = boolean | string | string[] | Record<string, string> | null;
+export type FormattedValue = boolean | string | string[] | Record<string, unknown> | null;
 
 export type Formatter = null | ((fields: Partial<MonitorFields>) => FormattedValue);
 

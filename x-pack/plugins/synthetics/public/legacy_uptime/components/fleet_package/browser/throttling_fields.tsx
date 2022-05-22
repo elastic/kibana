@@ -166,8 +166,7 @@ export const ThrottlingFields = memo<Props>(
           }
           labelAppend={<OptionalLabel />}
           isInvalid={
-            (validate ? !!validate[ConfigKey.DOWNLOAD_SPEED]?.(fields) : false) ||
-            exceedsUploadLimits
+            (validate ? !!validate[ConfigKey.UPLOAD_SPEED]?.(fields) : false) || exceedsUploadLimits
           }
           error={
             exceedsUploadLimits ? (
@@ -208,7 +207,7 @@ export const ThrottlingFields = memo<Props>(
             />
           }
           labelAppend={<OptionalLabel />}
-          isInvalid={validate ? !!validate[ConfigKey.DOWNLOAD_SPEED]?.(fields) : false}
+          isInvalid={validate ? !!validate[ConfigKey.LATENCY]?.(fields) : false}
           error={
             <FormattedMessage
               id="xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.latency.error"
