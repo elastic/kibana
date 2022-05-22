@@ -12,6 +12,7 @@ import { isEqual } from 'lodash';
 import { BehaviorSubject, combineLatest, firstValueFrom, Observable } from 'rxjs';
 import { distinctUntilChanged, first, map, shareReplay, tap } from 'rxjs/operators';
 import { Logger, LoggerFactory } from '@kbn/logging';
+import { getDocLinks, DocLinks } from '@kbn/doc-links';
 
 import { Config, ConfigPath, Env } from '.';
 import { hasConfigPathIntersection } from './config';
@@ -42,6 +43,7 @@ export interface ConfigValidateParameters {
 export class ConfigService {
   private readonly log: Logger;
   private readonly deprecationLog: Logger;
+  private readonly docLinks: DocLinks;
 
   private validated = false;
   private readonly config$: Observable<Config>;
@@ -67,6 +69,7 @@ export class ConfigService {
   ) {
     this.log = logger.get('config');
     this.deprecationLog = logger.get('config', 'deprecation');
+    this.docLinks = getDocLinks({ kibanaBranch: env.packageInfo.branch });
 
     this.config$ = combineLatest([this.rawConfigProvider.getConfig$(), this.deprecations]).pipe(
       map(([rawConfig, deprecations]) => {
@@ -104,7 +107,7 @@ export class ConfigService {
       ...provider(configDeprecationFactory).map((deprecation) => ({
         deprecation,
         path: flatPath,
-        context: createDeprecationContext(this.env),
+        context: this.createDeprecationContext(),
       })),
     ]);
   }
@@ -262,6 +265,14 @@ export class ConfigService {
     handledDeprecatedConfig.push(config);
     this.handledDeprecatedConfigs.set(domainId, handledDeprecatedConfig);
   }
+
+  private createDeprecationContext(): ConfigDeprecationContext {
+    return {
+      branch: this.env.packageInfo.branch,
+      version: this.env.packageInfo.version,
+      docLinks: this.docLinks,
+    };
+  }
 }
 
 const pathToString = (path: ConfigPath) => (Array.isArray(path) ? path.join('.') : path);
@@ -272,10 +283,3 @@ const pathToString = (path: ConfigPath) => (Array.isArray(path) ? path.join('.')
  */
 const isPathHandled = (path: string, handledPaths: string[]) =>
   handledPaths.some((handledPath) => hasConfigPathIntersection(path, handledPath));
-
-const createDeprecationContext = (env: Env): ConfigDeprecationContext => {
-  return {
-    branch: env.packageInfo.branch,
-    version: env.packageInfo.version,
-  };
-};
