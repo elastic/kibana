@@ -20,32 +20,25 @@ import {
 type SearchFn = (params: any) => Promise<ElasticsearchResponse>;
 
 export const fetchMonitoredClusters = async ({
-  index,
+  monitoringIndex,
+  entSearchIndex,
   timeRange,
   search,
 }: {
-  index: string;
+  monitoringIndex: string;
+  entSearchIndex: string;
   timeRange: TimeRange;
   search: SearchFn;
 }) => {
-  const results = await Promise.all([
-    search({
-      index,
-      size: 0,
-      ignore_unavailable: true,
-      body: monitoredClustersQuery(timeRange),
-    })
+  const getMonitoredClusters = (index: string, body: any) =>
+    search({ index, body, size: 0, ignore_unavailable: true })
       .then(({ aggregations }) => aggregations?.clusters?.buckets ?? [])
-      .then(buildMonitoredClusters),
+      .then(buildMonitoredClusters);
 
-    search({
-      index,
-      size: 0,
-      ignore_unavailable: true,
-      body: stableMetricsetsQuery(),
-    })
-      .then(({ aggregations }) => aggregations?.clusters?.buckets ?? [])
-      .then(buildMonitoredClusters),
+  const results = await Promise.all([
+    getMonitoredClusters(monitoringIndex, monitoredClustersQuery(timeRange)),
+    getMonitoredClusters(monitoringIndex, persistentMetricsetsQuery()),
+    getMonitoredClusters(entSearchIndex, enterpriseSearchQuery(timeRange)),
   ]);
 
   return merge(...results);
