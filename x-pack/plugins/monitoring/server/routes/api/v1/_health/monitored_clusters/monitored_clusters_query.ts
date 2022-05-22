@@ -118,22 +118,17 @@ export const persistentMetricsetsQuery = () => {
 };
 
 export const enterpriseSearchQuery = ({ min, max }: TimeRange) => {
+  const timestampField = '@timestamp';
+
   return {
     query: {
       bool: {
         filter: [
           {
             range: {
-              timestamp: {
+              [timestampField]: {
                 gte: min,
                 lte: max,
-              },
-            },
-          },
-          {
-            term: {
-              'event.module': {
-                value: 'enterprisesearch',
               },
             },
           },
@@ -148,36 +143,42 @@ export const enterpriseSearchQuery = ({ min, max }: TimeRange) => {
         aggs: {
           enterpriseSearch: {
             terms: {
-              field: 'agent.hostname',
+              field: 'agent.id',
             },
             aggs: {
-              health: lastSeenByIndex({
-                filter: {
-                  bool: {
-                    should: [
-                      {
-                        term: {
-                          'metricset.name': 'health',
+              health: lastSeenByIndex(
+                {
+                  filter: {
+                    bool: {
+                      should: [
+                        {
+                          term: {
+                            'metricset.name': 'health',
+                          },
                         },
-                      },
-                    ],
+                      ],
+                    },
                   },
                 },
-              }),
+                timestampField
+              ),
 
-              stats: lastSeenByIndex({
-                filter: {
-                  bool: {
-                    should: [
-                      {
-                        term: {
-                          'metricset.name': 'stats',
+              stats: lastSeenByIndex(
+                {
+                  filter: {
+                    bool: {
+                      should: [
+                        {
+                          term: {
+                            'metricset.name': 'stats',
+                          },
                         },
-                      },
-                    ],
+                      ],
+                    },
                   },
                 },
-              }),
+                timestampField
+              ),
             },
           },
         },
@@ -188,7 +189,7 @@ export const enterpriseSearchQuery = ({ min, max }: TimeRange) => {
 
 const clusterUuidTerm = { field: 'cluster_uuid', missing: 'standalone', size: 100 };
 
-const lastSeenByIndex = (aggregation: { filter: any }) => {
+const lastSeenByIndex = (aggregation: { filter: any }, timestampField = 'timestamp') => {
   return {
     ...aggregation,
     aggs: {
@@ -199,7 +200,7 @@ const lastSeenByIndex = (aggregation: { filter: any }) => {
         aggs: {
           last_seen: {
             max: {
-              field: 'timestamp',
+              field: timestampField,
             },
           },
         },
