@@ -9,6 +9,10 @@ import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 
 import type { RouteMethod, KibanaResponseFactory, RequestHandler, IRouter } from '@kbn/core/server';
 
@@ -22,6 +26,7 @@ export interface CspServerPluginStart {}
 export interface CspServerPluginSetupDeps {
   // required
   data: DataPluginSetup;
+  taskManager: TaskManagerSetupContract;
 
   // optional
 }
@@ -30,6 +35,7 @@ export interface CspServerPluginStartDeps {
   // required
   data: DataPluginStart;
   fleet: FleetStartContract;
+  taskManager: TaskManagerStartContract;
 }
 
 export type CspRequestHandlerContext = FleetRequestHandlerContext;

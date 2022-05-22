@@ -34,6 +34,7 @@ import {
   onPackagePolicyDeleteCallback,
 } from './fleet_integration/fleet_integration';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
+import { ScoreCalculationService } from './task_manager/score_service';
 
 export interface CspAppContext {
   logger: Logger;
@@ -53,7 +54,9 @@ export class CspPlugin
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.scoreManagementService = new ScoreCalculationService(this.logger);
   }
+  private readonly scoreManagementService: ScoreCalculationService;
 
   private readonly CspAppService = new CspAppService();
 
@@ -74,6 +77,7 @@ export class CspPlugin
     // Register server side APIs
     defineRoutes(router, cspAppContext);
 
+    this.scoreManagementService.setup(plugins.taskManager);
     return {};
   }
 
@@ -123,6 +127,11 @@ export class CspPlugin
             }
           }
         }
+      );
+
+      this.scoreManagementService.start(
+        core.elasticsearch.client.asInternalUser,
+        plugins.taskManager
       );
     });
 
