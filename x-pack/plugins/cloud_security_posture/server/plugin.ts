@@ -51,12 +51,12 @@ export class CspPlugin
     >
 {
   private readonly logger: Logger;
+  private readonly scoreManagementService: ScoreCalculationService;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.scoreManagementService = new ScoreCalculationService(this.logger);
   }
-  private readonly scoreManagementService: ScoreCalculationService;
 
   private readonly CspAppService = new CspAppService();
 

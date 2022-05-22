@@ -17,14 +17,13 @@ const TASK_ID = 'calc_score';
 
 export class ScoreCalculationService {
   private runScoreTask!: RunScoreTask;
-  constructor(private readonly logger: Logger) {}
+  constructor(private readonly logger: Logger) {
+    this.runScoreTask = new RunScoreTask(logger);
+  }
 
   setup(taskManager: TaskManagerSetupContract) {
-    // this.config = config;
-
     // Register task that will run periodic
-    console.log('1111111');
-    taskManager.registerTaskDefinitions({
+    const foo = taskManager.registerTaskDefinitions({
       [TASK_ID]: {
         title: 'Aggregate Latest Findings Index',
         createTaskRunner: () => ({
@@ -37,20 +36,10 @@ export class ScoreCalculationService {
   async start(esClient: ElasticsearchClient, taskManager: TaskManagerStartContract) {
     new RunScoreTask(this.logger, esClient);
     await this.scheduleScoreTask(taskManager);
-
-    // return {
-    //   session: new Session({
-    //     logger: this.logger,
-    //     sessionCookie: this.sessionCookie,
-    //     sessionIndex: this.sessionIndex,
-    //     config: this.config,
-    //   }),
-    // };
   }
 
   async scheduleScoreTask(taskManager: TaskManagerStartContract) {
     try {
-      console.log('22222');
       await taskManager.ensureScheduled({
         id: TASK_ID,
         taskType: TASK_ID,

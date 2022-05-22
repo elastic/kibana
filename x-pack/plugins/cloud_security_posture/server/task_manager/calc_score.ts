@@ -17,16 +17,19 @@ import {
 } from '../../common/constants';
 
 export class RunScoreTask {
-  constructor(private logger: Logger, private esClient: ElasticsearchClient) {}
+  readonly esClient: ElasticsearchClient | undefined;
+  constructor(private logger: Logger, esClient: ElasticsearchClient) {
+    this.esClient = esClient;
+  }
   // constructor(private readonly logger: Logger, private runScoreTask: RunScoreTask) {}
   async start() {}
   async aggregateLatestFindings() {
     try {
       console.log('@@@@@@@@@@@@@@@@@@@@');
-      const evaluationsQueryResult = await this.esClient.search(this.getScoreQuery());
-      this.logger.debug('foo');
+      const evaluationsQueryResult = await this.esClient?.search(this.getScoreQuery());
       console.log({ evaluationsQueryResult });
     } catch (existErr) {
+      this.logger.error('Failed to fetch CSP latest Findings');
       //   return false;
     }
   }
