@@ -378,18 +378,24 @@ export const SOURCE_CATEGORIES = {
       defaultMessage: 'Code repository',
     }
   ),
-  COMMUNICATIONS: i18n.translate(
-    'xpack.enterpriseSearch.workplaceSearch.sources.categories.communications',
+  COMMUNICATION: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.communication',
     {
-      defaultMessage: 'Communications',
+      defaultMessage: 'Communication',
     }
   ),
+  EMAIL: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.email', {
+    defaultMessage: 'Email',
+  }),
   FILE_SHARING: i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.sources.categories.fileSharing',
     {
       defaultMessage: 'File Sharing',
     }
   ),
+  GOOGLE: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.google', {
+    defaultMessage: 'Google',
+  }),
   INTRANET: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.intranet', {
     defaultMessage: 'Intranet',
   }),

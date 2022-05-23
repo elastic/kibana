@@ -290,6 +290,11 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.GMAIL,
     serviceType: 'gmail',
+    categories: [
+      SOURCE_CATEGORIES.COMMUNICATION,
+      SOURCE_CATEGORIES.EMAIL,
+      SOURCE_CATEGORIES.GOOGLE,
+    ],
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: true,
@@ -446,7 +451,7 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.OUTLOOK,
     categories: [
-      SOURCE_CATEGORIES.COMMUNICATIONS,
+      SOURCE_CATEGORIES.COMMUNICATION,
       SOURCE_CATEGORIES.PRODUCTIVITY,
       SOURCE_CATEGORIES.MICROSOFT,
     ],
@@ -662,7 +667,7 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.TEAMS,
     categories: [
-      SOURCE_CATEGORIES.COMMUNICATIONS,
+      SOURCE_CATEGORIES.COMMUNICATION,
       SOURCE_CATEGORIES.PRODUCTIVITY,
       SOURCE_CATEGORIES.MICROSOFT,
     ],
@@ -707,7 +712,7 @@ export const staticSourceData: SourceDataItem[] = [
   },
   {
     name: SOURCE_NAMES.ZOOM,
-    categories: [SOURCE_CATEGORIES.COMMUNICATIONS, SOURCE_CATEGORIES.PRODUCTIVITY],
+    categories: [SOURCE_CATEGORIES.COMMUNICATION, SOURCE_CATEGORIES.PRODUCTIVITY],
     serviceType: 'custom',
     baseServiceType: 'zoom',
     configuration: {
