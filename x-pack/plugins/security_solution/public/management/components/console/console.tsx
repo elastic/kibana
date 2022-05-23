@@ -15,20 +15,17 @@ import { ConsoleStateProvider } from './components/console_state';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 import { useWithManagedConsole } from './components/console_manager/console_manager';
 
-// FIXME:PT implement dark mode for the console or light mode switch
-
 const ConsoleWindow = styled.div`
   height: 100%;
 
-  // FIXME: IMPORTANT - this should NOT be used in production
-  // dark mode on light theme / light mode on dark theme
-  filter: invert(100%);
+  background-color: ${({ theme: { eui } }) => eui.euiPageBackgroundColor};
 
   .ui-panel {
     min-width: ${({ theme }) => theme.eui.euiBreakpoints.s};
     height: 100%;
     min-height: 300px;
     overflow-y: auto;
+    background-color: inherit;
   }
 
   .descriptionList-20_80 {
@@ -89,8 +86,10 @@ export const Console = memo<ConsoleProps>(
               className="ui-panel"
               panelRef={consoleWindowRef}
               data-test-subj={getTestId('mainPanel')}
+              hasShadow={false}
             >
               <EuiFlexGroup direction="column">
+                <EuiFlexItem grow={false}>{'header here'}</EuiFlexItem>
                 <EuiFlexItem grow={true}>
                   <HistoryOutput />
                 </EuiFlexItem>
