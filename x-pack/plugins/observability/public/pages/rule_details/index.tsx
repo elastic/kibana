@@ -208,6 +208,20 @@ export function RuleDetailsPage() {
         />
       </EuiPanel>
     );
+
+  const getRuleStatusComponent = () =>
+    getRuleStatusDropdown({
+      rule,
+      enableRule: async () => await enableRule({ http, id: rule.id }),
+      disableRule: async () => await disableRule({ http, id: rule.id }),
+      onRuleChanged: () => reloadRule(),
+      isEditable: hasEditButton,
+      snoozeRule: async (snoozeEndTime: string | -1) => {
+        await snoozeRule({ http, id: rule.id, snoozeEndTime });
+      },
+      unsnoozeRule: async () => await unsnoozeRule({ http, id: rule.id }),
+    });
+
   const getNotifyText = () =>
     NOTIFY_WHEN_OPTIONS.find((option) => option.value === rule?.notifyWhen)?.inputDisplay ||
     rule.notifyWhen;
@@ -270,17 +284,7 @@ export function RuleDetailsPage() {
                     </EuiFlexItem>
                   </EuiTitle>
 
-                  {getRuleStatusDropdown({
-                    rule,
-                    enableRule: async () => await enableRule({ http, id: rule.id }),
-                    disableRule: async () => await disableRule({ http, id: rule.id }),
-                    onRuleChanged: () => reloadRule(),
-                    isEditable: hasEditButton,
-                    snoozeRule: async (snoozeEndTime: string | -1) => {
-                      await snoozeRule({ http, id: rule.id, snoozeEndTime });
-                    },
-                    unsnoozeRule: async () => await unsnoozeRule({ http, id: rule.id }),
-                  })}
+                  {getRuleStatusComponent()}
                 </EuiFlexItem>
               </EuiFlexGroup>,
             ]
@@ -310,19 +314,7 @@ export function RuleDetailsPage() {
                     defaultMessage: 'Rule is',
                   })}
                 </ItemTitleRuleSummary>
-                <EuiFlexItem>
-                  {getRuleStatusDropdown({
-                    rule,
-                    enableRule: async () => await enableRule({ http, id: rule.id }),
-                    disableRule: async () => await disableRule({ http, id: rule.id }),
-                    onRuleChanged: () => reloadRule(),
-                    isEditable: hasEditButton,
-                    snoozeRule: async (snoozeEndTime: string | -1) => {
-                      await snoozeRule({ http, id: rule.id, snoozeEndTime });
-                    },
-                    unsnoozeRule: async () => await unsnoozeRule({ http, id: rule.id }),
-                  })}
-                </EuiFlexItem>
+                <EuiFlexItem>{getRuleStatusComponent()}</EuiFlexItem>
               </EuiFlexGroup>
               <EuiHorizontalRule margin="s" />
               <EuiFlexGroup>
