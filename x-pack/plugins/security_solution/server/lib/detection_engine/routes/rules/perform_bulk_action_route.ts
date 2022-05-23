@@ -330,8 +330,10 @@ export const performBulkActionRoute = (
           });
 
           return buildBulkResponse(response, {
-            updated: migrationOutcome.results.map(({ result }) => result),
-            errors,
+            updated: migrationOutcome.results
+              .filter(({ result }) => result)
+              .map(({ result }) => result),
+            errors: [...errors, ...migrationOutcome.errors],
           });
         }
 
