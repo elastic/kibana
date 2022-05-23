@@ -164,7 +164,7 @@ export const ChangePasswordModal: FunctionComponent<ChangePasswordModalProps> = 
                 <EuiCallOut
                   title={i18n.translate(
                     'xpack.security.management.users.changePasswordForm.systemUserTitle',
-                    { defaultMessage: 'This is extremely important!' }
+                    { defaultMessage: 'Kibana will lose connection to Elasticsearch' }
                   )}
                   color="danger"
                   iconType="alert"
@@ -173,13 +173,14 @@ export const ChangePasswordModal: FunctionComponent<ChangePasswordModalProps> = 
                   <p>
                     <FormattedMessage
                       id="xpack.security.management.users.changePasswordForm.systemUserWarning"
-                      defaultMessage="Changing this password will prevent Kibana from communicating with Elasticsearch."
+                      defaultMessage="After changing the password for the {username} user, Kibana will be unusable."
+                      values={{ username }}
                     />
                   </p>
                   <p>
                     <FormattedMessage
                       id="xpack.security.management.users.changePasswordForm.systemUserDescription"
-                      defaultMessage="Once changed, you must manually update your config file with the new password and restart Kibana."
+                      defaultMessage="To regain access, update your config file with the new password and restart Kibana."
                     />
                   </p>
                 </EuiCallOut>
