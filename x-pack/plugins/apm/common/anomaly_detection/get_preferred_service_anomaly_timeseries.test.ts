@@ -63,7 +63,7 @@ describe('getPreferredServiceAnomalyTimeseries', () => {
 
     describe('with one environment', () => {
       describe('and all being selected', () => {
-        const preferredEnvironment = ENVIRONMENT_ALL.value;
+        const preferredEnvironment = PROD;
         it('returns the series for prod', () => {
           expect(
             getPreferredServiceAnomalyTimeseries({
@@ -135,7 +135,7 @@ describe('getPreferredServiceAnomalyTimeseries', () => {
       }),
     ];
 
-    const preferredEnvironment = ENVIRONMENT_ALL.value;
+    const preferredEnvironment = PROD;
 
     it('selects the most recent version when transaction metrics are being used', () => {
       const series = getPreferredServiceAnomalyTimeseries({
