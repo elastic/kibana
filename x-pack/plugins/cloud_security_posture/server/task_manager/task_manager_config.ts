@@ -10,7 +10,7 @@ import { TaskInstance } from '@kbn/task-manager-plugin/server';
 export const findingsAggregationConfig: TaskInstance = {
   id: 'CSP_findings_aggregation',
   taskType: 'CSP_findings_aggregation',
-  schedule: { interval: '1m' },
+  schedule: { interval: '5m' },
   state: {},
   params: {},
 };
