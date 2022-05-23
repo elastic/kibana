@@ -6,17 +6,9 @@
  */
 
 import moment from 'moment';
-import {
-  AggregationsAggregate,
-  SearchResponse,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { EnhancedAlertEvent } from '../types';
 import type { ResolverNode } from '../../../../common/endpoint/types';
 
-export const stubEndpointAlertResponse = (): SearchResponse<
-  EnhancedAlertEvent,
-  Record<string, AggregationsAggregate>
-> => {
+export const stubEndpointAlertResponse = () => {
   return {
     took: 0,
     timed_out: false,
