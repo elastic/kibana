@@ -176,7 +176,7 @@ export interface IncomingDataList {
 }
 export interface GetAgentIncomingDataResponse {
   items: IncomingDataList[];
-  data: any[];
+  dataPreview: any[];
 }
 
 export interface GetCurrentUpgradesResponse {

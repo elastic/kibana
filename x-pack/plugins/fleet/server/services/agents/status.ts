@@ -166,13 +166,13 @@ export async function getIncomingDataByAgentsId(
       (bucket: any) => bucket.key as string
     );
 
-    const data = searchResult.hits?.hits || [];
+    const dataPreview = searchResult.hits?.hits || [];
 
     const items = agentsIds.map((id) =>
       agentIdsWithData.includes(id) ? { [id]: { data: true } } : { [id]: { data: false } }
     );
 
-    return { items, data };
+    return { items, dataPreview };
   } catch (e) {
     throw new Error(e);
   }

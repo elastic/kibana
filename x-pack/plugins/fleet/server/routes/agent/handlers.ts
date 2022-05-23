@@ -239,13 +239,13 @@ export const getAgentDataHandler: RequestHandler<
       ? request.query.agentsIds
       : [request.query.agentsIds];
 
-    const { items, data } = await AgentService.getIncomingDataByAgentsId(
+    const { items, dataPreview } = await AgentService.getIncomingDataByAgentsId(
       esClient,
       agentIds,
       returnDataPreview
     );
 
-    const body = { items, data };
+    const body = { items, dataPreview };
 
     return response.ok({ body });
   } catch (error) {
