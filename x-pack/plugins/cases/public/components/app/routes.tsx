@@ -47,33 +47,33 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   );
 
   return (
-    <Switch>
-      <Route strict exact path={basePath}>
-        <AllCases />
-      </Route>
+    <QueryClientProvider client={casesQueryClient}>
+      <Switch>
+        <Route strict exact path={basePath}>
+          <AllCases />
+        </Route>
 
-      <Route path={getCreateCasePath(basePath)}>
-        {userCanCrud ? (
-          <CreateCase
-            onSuccess={onCreateCaseSuccess}
-            onCancel={navigateToAllCases}
-            timelineIntegration={timelineIntegration}
-          />
-        ) : (
-          <NoPrivilegesPage pageName={i18n.CREATE_CASE_PAGE_NAME} />
-        )}
-      </Route>
+        <Route path={getCreateCasePath(basePath)}>
+          {userCanCrud ? (
+            <CreateCase
+              onSuccess={onCreateCaseSuccess}
+              onCancel={navigateToAllCases}
+              timelineIntegration={timelineIntegration}
+            />
+          ) : (
+            <NoPrivilegesPage pageName={i18n.CREATE_CASE_PAGE_NAME} />
+          )}
+        </Route>
 
-      <Route path={getCasesConfigurePath(basePath)}>
-        {userCanCrud ? (
-          <ConfigureCases />
-        ) : (
-          <NoPrivilegesPage pageName={i18n.CONFIGURE_CASES_PAGE_NAME} />
-        )}
-      </Route>
+        <Route path={getCasesConfigurePath(basePath)}>
+          {userCanCrud ? (
+            <ConfigureCases />
+          ) : (
+            <NoPrivilegesPage pageName={i18n.CONFIGURE_CASES_PAGE_NAME} />
+          )}
+        </Route>
 
-      <Route exact path={[getCaseViewWithCommentPath(basePath), getCaseViewPath(basePath)]}>
-        <QueryClientProvider client={casesQueryClient}>
+        <Route exact path={[getCaseViewWithCommentPath(basePath), getCaseViewPath(basePath)]}>
           <CaseView
             onComponentInitialized={onComponentInitialized}
             actionsNavigation={actionsNavigation}
@@ -83,13 +83,13 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
             refreshRef={refreshRef}
             timelineIntegration={timelineIntegration}
           />
-        </QueryClientProvider>
-      </Route>
+        </Route>
 
-      <Route path={basePath}>
-        <Redirect to={basePath} />
-      </Route>
-    </Switch>
+        <Route path={basePath}>
+          <Redirect to={basePath} />
+        </Route>
+      </Switch>
+    </QueryClientProvider>
   );
 };
 CasesRoutesComponent.displayName = 'CasesRoutes';
