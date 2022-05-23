@@ -378,7 +378,7 @@ export const SOURCE_CATEGORIES = {
   BUG_TRACKING: i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.sources.categories.bugTracking',
     {
-      defaultMessage: 'Bug Tracking',
+      defaultMessage: 'Bug tracking',
     }
   ),
   CHAT: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.chat', {
@@ -426,7 +426,7 @@ export const SOURCE_CATEGORIES = {
   FILE_SHARING: i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.sources.categories.fileSharing',
     {
-      defaultMessage: 'File Sharing',
+      defaultMessage: 'File sharing',
     }
   ),
   GOOGLE: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.google', {
