@@ -15,7 +15,7 @@ import {
 } from '../../../../common/detection_engine/schemas/common';
 
 /**
- * Returns and `EuiLink` that will link to a given package/integration/version page within fleet
+ * Returns an `EuiLink` that will link to a given package/integration/version page within fleet
  * @param integration
  * @param basePath
  */
