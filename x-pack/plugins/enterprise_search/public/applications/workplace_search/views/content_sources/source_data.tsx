@@ -349,6 +349,12 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.JIRA,
     serviceType: 'jira_cloud',
+    categories: [
+      SOURCE_CATEGORIES.SOFTWARE,
+      SOURCE_CATEGORIES.BUG_TRACKING,
+      SOURCE_CATEGORIES.ATLASSIAN,
+      SOURCE_CATEGORIES.PROJECT_MANAGEMENT,
+    ],
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: true,

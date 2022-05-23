@@ -369,6 +369,12 @@ export const SOURCE_CATEGORIES = {
   ATLASSIAN: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.atlassian', {
     defaultMessage: 'Atlassian',
   }),
+  BUG_TRACKING: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.bugTracking',
+    {
+      defaultMessage: 'Bug Tracking',
+    }
+  ),
   CLOUD: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.cloud', {
     defaultMessage: 'Cloud',
   }),
@@ -412,6 +418,12 @@ export const SOURCE_CATEGORIES = {
     'xpack.enterpriseSearch.workplaceSearch.sources.categories.productivity',
     {
       defaultMessage: 'Productivity',
+    }
+  ),
+  PROJECT_MANAGEMENT: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.projectManagement',
+    {
+      defaultMessage: 'Project management',
     }
   ),
   SOFTWARE: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.software', {
