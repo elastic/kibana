@@ -5,49 +5,50 @@
  * 2.0.
  */
 
-import { getCollectionStatus } from '.';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import { infraPluginMock } from '@kbn/infra-plugin/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
+import { configSchema, createConfig } from '../../../config';
+import { monitoringPluginMock } from '../../../mocks';
+import { LegacyRequest } from '../../../types';
 import { getIndexPatterns } from '../../cluster/get_index_patterns';
+import { getCollectionStatus } from './get_collection_status';
 
 const liveClusterUuid = 'a12';
 const mockReq = (
-  searchResult = {},
-  securityEnabled = true,
-  userHasPermissions = true,
-  securityErrorMessage = null
-) => {
+  searchResult: object = {},
+  securityEnabled: boolean = true,
+  userHasPermissions: boolean = true,
+  securityErrorMessage: string | null = null
+): LegacyRequest => {
+  const usageCollectionSetup = usageCollectionPluginMock.createSetupContract();
+  const licenseService = monitoringPluginMock.createLicenseServiceMock();
+  licenseService.getSecurityFeature.mockReturnValue({
+    isAvailable: securityEnabled,
+    isEnabled: securityEnabled,
+  });
+  const logger = loggerMock.create();
+
   return {
     server: {
       instanceUuid: 'kibana-1234',
       newPlatform: {
         setup: {
           plugins: {
-            usageCollection: {
-              getCollectorByType: () => ({
-                isReady: () => false,
-              }),
-            },
+            usageCollection: usageCollectionSetup,
+            features: featuresPluginMock.createSetup(),
+            infra: infraPluginMock.createSetupContract(),
           },
         },
       },
-      config: { ui: { ccs: { enabled: false } } },
-      usage: {
-        collectorSet: {
-          getCollectorByType: () => ({
-            isReady: () => false,
-          }),
-        },
-      },
+      config: createConfig(configSchema.validate({ ui: { ccs: { enabled: false } } })),
+      log: logger,
+      route: jest.fn(),
       plugins: {
         monitoring: {
           info: {
-            getLicenseService: () => ({
-              getSecurityFeature: () => {
-                return {
-                  isAvailable: securityEnabled,
-                  isEnabled: securityEnabled,
-                };
-              },
-            }),
+            getLicenseService: () => licenseService,
           },
         },
         elasticsearch: {
@@ -86,6 +87,17 @@ const mockReq = (
         },
       },
     },
+    logger,
+    getLogger: () => logger,
+    params: {},
+    payload: {},
+    query: {},
+    headers: {},
+    getKibanaStatsCollector: () => null,
+    getUiSettingsService: () => null,
+    getActionTypeRegistry: () => null,
+    getRulesClient: () => null,
+    getActionsClient: () => null,
   };
 };
 
@@ -124,7 +136,7 @@ describe('getCollectionStatus', () => {
       },
     });
 
-    const result = await getCollectionStatus(req, getIndexPatterns(req.server));
+    const result = await getCollectionStatus(req, getIndexPatterns(req.server.config));
 
     expect(result.kibana.totalUniqueInstanceCount).toBe(1);
     expect(result.kibana.totalUniqueFullyMigratedCount).toBe(0);
@@ -173,7 +185,7 @@ describe('getCollectionStatus', () => {
       },
     });
 
-    const result = await getCollectionStatus(req, getIndexPatterns(req.server));
+    const result = await getCollectionStatus(req, getIndexPatterns(req.server.config));
 
     expect(result.kibana.totalUniqueInstanceCount).toBe(1);
     expect(result.kibana.totalUniqueFullyMigratedCount).toBe(1);
@@ -229,7 +241,7 @@ describe('getCollectionStatus', () => {
       },
     });
 
-    const result = await getCollectionStatus(req, getIndexPatterns(req.server));
+    const result = await getCollectionStatus(req, getIndexPatterns(req.server.config));
 
     expect(result.kibana.totalUniqueInstanceCount).toBe(2);
     expect(result.kibana.totalUniqueFullyMigratedCount).toBe(1);
@@ -251,7 +263,11 @@ describe('getCollectionStatus', () => {
 
   it('should detect products based on other indices', async () => {
     const req = mockReq({ hits: { total: { value: 1 } } });
-    const result = await getCollectionStatus(req, getIndexPatterns(req.server), liveClusterUuid);
+    const result = await getCollectionStatus(
+      req,
+      getIndexPatterns(req.server.config),
+      liveClusterUuid
+    );
 
     expect(result.kibana.detected.doesExist).toBe(true);
     expect(result.elasticsearch.detected.doesExist).toBe(true);
@@ -261,13 +277,21 @@ describe('getCollectionStatus', () => {
 
   it('should work properly when security is disabled', async () => {
     const req = mockReq({ hits: { total: { value: 1 } } }, false);
-    const result = await getCollectionStatus(req, getIndexPatterns(req.server), liveClusterUuid);
+    const result = await getCollectionStatus(
+      req,
+      getIndexPatterns(req.server.config),
+      liveClusterUuid
+    );
     expect(result.kibana.detected.doesExist).toBe(true);
   });
 
   it('should work properly with an unknown security message', async () => {
     const req = mockReq({ hits: { total: { value: 1 } } }, true, true, 'foobar');
-    const result = await getCollectionStatus(req, getIndexPatterns(req.server), liveClusterUuid);
+    const result = await getCollectionStatus(
+      req,
+      getIndexPatterns(req.server.config),
+      liveClusterUuid
+    );
     expect(result._meta.hasPermissions).toBe(false);
   });
 
@@ -278,7 +302,11 @@ describe('getCollectionStatus', () => {
       true,
       'no handler found for uri [/_security/user/_has_privileges] and method [POST]'
     );
-    const result = await getCollectionStatus(req, getIndexPatterns(req.server), liveClusterUuid);
+    const result = await getCollectionStatus(
+      req,
+      getIndexPatterns(req.server.config),
+      liveClusterUuid
+    );
     expect(result.kibana.detected.doesExist).toBe(true);
   });
 
@@ -289,13 +317,21 @@ describe('getCollectionStatus', () => {
       true,
       'Invalid index name [_security]'
     );
-    const result = await getCollectionStatus(req, getIndexPatterns(req.server), liveClusterUuid);
+    const result = await getCollectionStatus(
+      req,
+      getIndexPatterns(req.server.config),
+      liveClusterUuid
+    );
     expect(result.kibana.detected.doesExist).toBe(true);
   });
 
   it('should not work if the user does not have the necessary permissions', async () => {
     const req = mockReq({ hits: { total: { value: 1 } } }, true, false);
-    const result = await getCollectionStatus(req, getIndexPatterns(req.server), liveClusterUuid);
+    const result = await getCollectionStatus(
+      req,
+      getIndexPatterns(req.server.config),
+      liveClusterUuid
+    );
     expect(result._meta.hasPermissions).toBe(false);
   });
 });

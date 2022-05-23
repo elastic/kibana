@@ -65,6 +65,7 @@ describe('xyVis', () => {
       )
     ).rejects.toThrowErrorMatchingSnapshot();
   });
+
   test('it should throw error if minTimeBarInterval is invalid', async () => {
     const { data, args } = sampleArgs();
     const { layers, ...rest } = args;
