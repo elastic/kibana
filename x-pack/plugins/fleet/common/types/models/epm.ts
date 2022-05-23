@@ -45,11 +45,7 @@ export interface DefaultPackagesInstallationError {
 export type InstallType = 'reinstall' | 'reupdate' | 'rollback' | 'update' | 'install' | 'unknown';
 export type InstallSource = 'registry' | 'upload' | 'bundled';
 
-export type EpmPackageInstallStatus =
-  | 'installed'
-  | 'installing'
-  | 'install_failed'
-  | 'installed_bundled';
+export type EpmPackageInstallStatus = 'installed' | 'installing' | 'install_failed';
 
 export type DetailViewPanelName = 'overview' | 'policies' | 'assets' | 'settings' | 'custom';
 export type ServiceName = 'kibana' | 'elasticsearch';
@@ -76,6 +72,7 @@ export enum KibanaAssetType {
   mlModule = 'ml_module',
   tag = 'tag',
   osqueryPackAsset = 'osquery_pack_asset',
+  osquerySavedQuery = 'osquery_saved_query',
 }
 
 /*
@@ -93,6 +90,7 @@ export enum KibanaSavedObjectType {
   cloudSecurityPostureRuleTemplate = 'csp-rule-template',
   tag = 'tag',
   osqueryPackAsset = 'osquery-pack-asset',
+  osquerySavedQuery = 'osquery-saved-query',
 }
 
 export enum ElasticsearchAssetType {
@@ -374,7 +372,6 @@ export interface EpmPackageAdditions {
   title: string;
   latestVersion: string;
   assets: AssetsGroupedByServiceByType;
-  removable?: boolean;
   notice?: string;
   keepPoliciesUpToDate?: boolean;
 }
@@ -431,8 +428,7 @@ export type Installable<T> =
   | InstalledRegistry<T>
   | Installing<T>
   | NotInstalled<T>
-  | InstallFailed<T>
-  | InstalledBundled<T>;
+  | InstallFailed<T>;
 
 export type InstallStatusExcluded<T = {}> = T & {
   status: undefined;
@@ -441,10 +437,6 @@ export type InstallStatusExcluded<T = {}> = T & {
 export type InstalledRegistry<T = {}> = T & {
   status: InstallationStatus['Installed'];
   savedObject: SavedObject<Installation>;
-};
-
-export type InstalledBundled<T = {}> = T & {
-  status: InstallationStatus['InstalledBundled'];
 };
 
 export type Installing<T = {}> = T & {

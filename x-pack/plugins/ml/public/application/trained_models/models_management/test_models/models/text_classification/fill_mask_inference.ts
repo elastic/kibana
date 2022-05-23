@@ -11,20 +11,20 @@ import type { TextClassificationResponse, RawTextClassificationResponse } from '
 import { processResponse } from './common';
 import { getGeneralInputComponent } from '../text_input';
 import { getFillMaskOutputComponent } from './fill_mask_output';
+import { SUPPORTED_PYTORCH_TASKS } from '../../../../../../../common/constants/trained_models';
 
 const MASK = '[MASK]';
 
 export class FillMaskInference extends InferenceBase<TextClassificationResponse> {
-  // @ts-expect-error model type is wrong
-  private numTopClasses = this.model.inference_config?.fill_mask?.num_top_classes || 5;
+  protected inferenceType = SUPPORTED_PYTORCH_TASKS.FILL_MASK;
 
   public async infer() {
     try {
       this.setRunning();
-      const inputText = this.inputText$.value;
+      const inputText = this.inputText$.getValue();
       const payload = {
-        docs: { [this.inputField]: inputText },
-        inference_config: { fill_mask: { num_top_classes: this.numTopClasses } },
+        docs: [{ [this.inputField]: inputText }],
+        ...this.getNumTopClassesConfig(),
       };
       const resp = (await this.trainedModelsApi.inferTrainedModel(
         this.model.model_id,
@@ -55,9 +55,10 @@ export class FillMaskInference extends InferenceBase<TextClassificationResponse>
 
   public getInputComponent(): JSX.Element {
     const placeholder = i18n.translate(
-      'xpack.ml.trainedModels.testModelsFlyout.langIdent.inputText',
+      'xpack.ml.trainedModels.testModelsFlyout.fillMask.inputText',
       {
-        defaultMessage: 'Mask token: [MASK]. e.g. Paris is the [MASK] of France.',
+        defaultMessage:
+          'Enter a phrase to test. Use [MASK] as a placeholder for the missing words.',
       }
     );
 

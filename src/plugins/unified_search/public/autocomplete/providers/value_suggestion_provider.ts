@@ -8,14 +8,11 @@
 
 import { CoreSetup } from '@kbn/core/public';
 import dateMath from '@kbn/datemath';
-import { buildQueryFromFilters } from '@kbn/es-query';
 import { memoize } from 'lodash';
-import {
-  IIndexPattern,
-  IFieldType,
-  UI_SETTINGS,
-  ValueSuggestionsMethod,
-} from '@kbn/data-plugin/common';
+import { UI_SETTINGS, ValueSuggestionsMethod } from '@kbn/data-plugin/common';
+// for replace IIndexPattern => DataView and IFieldType => DataViewField
+// need to fix the issue https://github.com/elastic/kibana/issues/131292
+import type { IIndexPattern, IFieldType } from '@kbn/data-views-plugin/common';
 import type { TimefilterSetup } from '@kbn/data-plugin/public';
 import { AutocompleteUsageCollector } from '../collectors';
 
@@ -124,6 +121,7 @@ export const setupValueSuggestionProvider = (
     const timeFilter = useTimeRange
       ? getAutocompleteTimefilter(timefilter, indexPattern)
       : undefined;
+    const { buildQueryFromFilters } = await import('@kbn/es-query');
     const filterQuery = timeFilter ? buildQueryFromFilters([timeFilter], indexPattern).filter : [];
     const filters = [...(boolFilter ? boolFilter : []), ...filterQuery];
     try {

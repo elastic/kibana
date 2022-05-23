@@ -92,34 +92,34 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await waitTableIsLoaded();
       await testSubjects.click('expandColumnCellOpenFlyoutButton-0');
       await waitFlyoutOpen();
+      await waitFlyoutIsLoaded();
 
-      expect(await testSubjects.getVisibleText('alertsFlyoutTitle')).to.be(
+      expect(await testSubjects.getVisibleText('alertsFlyoutName')).to.be(
         'APM Failed Transaction Rate (one)'
       );
       expect(await testSubjects.getVisibleText('alertsFlyoutReason')).to.be(
         'Failed transactions rate is greater than 5.0% (current value is 31%) for elastic-co-frontend'
       );
 
-      await testSubjects.click('alertsFlyoutPaginateNext');
+      await testSubjects.click('alertsFlyoutPagination > pagination-button-next');
 
-      expect(await testSubjects.getVisibleText('alertsFlyoutTitle')).to.be(
+      expect(await testSubjects.getVisibleText('alertsFlyoutName')).to.be(
         'APM Failed Transaction Rate (one)'
       );
       expect(await testSubjects.getVisibleText('alertsFlyoutReason')).to.be(
         'Failed transactions rate is greater than 5.0% (current value is 35%) for opbeans-python'
       );
 
-      await testSubjects.click('alertsFlyoutPaginatePrevious');
-      await testSubjects.click('alertsFlyoutPaginatePrevious');
+      await testSubjects.click('alertsFlyoutPagination > pagination-button-previous');
 
       await waitTableIsLoaded();
 
       const rows = await getRows();
-      expect(rows[0].status).to.be('close');
-      expect(rows[0].lastUpdated).to.be('2021-10-19T14:55:14.503Z');
-      expect(rows[0].duration).to.be('252002000');
+      expect(rows[0].status).to.be('active');
+      expect(rows[0].lastUpdated).to.be('2021-10-19T15:20:38.749Z');
+      expect(rows[0].duration).to.be('1197194000');
       expect(rows[0].reason).to.be(
-        'CPU usage is greater than a threshold of 40 (current value is 56.7%) for gke-edge-oblt-default-pool-350b44de-c3dd'
+        'Failed transactions rate is greater than 5.0% (current value is 31%) for elastic-co-frontend'
       );
     });
 
@@ -134,6 +134,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       return await retry.try(async () => {
         const exists = await testSubjects.exists('alertsFlyout');
         if (!exists) throw new Error('Still loading...');
+      });
+    }
+
+    async function waitFlyoutIsLoaded() {
+      return await retry.try(async () => {
+        const exists = await testSubjects.exists('alertsFlyoutLoading');
+        if (exists) throw new Error('Still loading...');
       });
     }
 

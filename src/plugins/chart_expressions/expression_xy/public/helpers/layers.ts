@@ -6,24 +6,48 @@
  * Side Public License, v 1.
  */
 
-import { LensMultiTable } from '../../common';
-import { DataLayerConfigResult, XYLayerConfigResult } from '../../common/types';
-import { getDataLayers } from './visualization';
+import { Datatable } from '@kbn/expressions-plugin/common';
+import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
+import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
+import {
+  CommonXYDataLayerConfig,
+  CommonXYLayerConfig,
+  ReferenceLineLayerConfig,
+} from '../../common/types';
+import { isDataLayer, isReferenceLayer } from './visualization';
 
-export function getFilteredLayers(layers: XYLayerConfigResult[], data: LensMultiTable) {
-  return getDataLayers(layers).filter<DataLayerConfigResult>(
-    (layer): layer is DataLayerConfigResult => {
-      const { layerId, xAccessor, accessors, splitAccessor } = layer;
+export function getFilteredLayers(layers: CommonXYLayerConfig[]) {
+  return layers.filter<ReferenceLineLayerConfig | CommonXYDataLayerConfig>(
+    (layer): layer is ReferenceLineLayerConfig | CommonXYDataLayerConfig => {
+      let table: Datatable | undefined;
+      let accessors: Array<ExpressionValueVisDimension | string> = [];
+      let xAccessor: undefined | string | number;
+      let splitAccessor: undefined | string | number;
+
+      if (isDataLayer(layer) || isReferenceLayer(layer)) {
+        table = layer.table;
+        accessors = layer.accessors;
+      }
+
+      if (isDataLayer(layer)) {
+        xAccessor =
+          layer.xAccessor && table && getAccessorByDimension(layer.xAccessor, table.columns);
+        splitAccessor =
+          layer.splitAccessor &&
+          table &&
+          getAccessorByDimension(layer.splitAccessor, table.columns);
+      }
+
       return !(
         !accessors.length ||
-        !data.tables[layerId] ||
-        data.tables[layerId].rows.length === 0 ||
+        !table ||
+        table.rows.length === 0 ||
         (xAccessor &&
-          data.tables[layerId].rows.every((row) => typeof row[xAccessor] === 'undefined')) ||
+          table.rows.every((row) => xAccessor && typeof row[xAccessor] === 'undefined')) ||
         // stacked percentage bars have no xAccessors but splitAccessor with undefined values in them when empty
         (!xAccessor &&
           splitAccessor &&
-          data.tables[layerId].rows.every((row) => typeof row[splitAccessor] === 'undefined'))
+          table.rows.every((row) => splitAccessor && typeof row[splitAccessor] === 'undefined'))
       );
     }
   );

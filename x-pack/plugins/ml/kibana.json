@@ -7,6 +7,7 @@
     "ml"
   ],
   "requiredPlugins": [
+    "aiops",
     "cloud",
     "data",
     "dataViews",
@@ -27,6 +28,7 @@
     "charts",
     "dashboard",
     "home",
+    "lens",
     "licenseManagement",
     "management",
     "maps",
@@ -43,6 +45,7 @@
     "fieldFormats",
     "kibanaReact",
     "kibanaUtils",
+    "lens",
     "maps",
     "savedObjects",
     "usageCollection",

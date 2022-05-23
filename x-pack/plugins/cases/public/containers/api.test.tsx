@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { httpServiceMock } from '@kbn/core/public/mocks';
+import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import { KibanaServices } from '../common/lib/kibana';
 
-import { ConnectorTypes, CommentType, CaseStatuses } from '../../common/api';
+import { ConnectorTypes, CommentType, CaseStatuses, CaseSeverity } from '../../common/api';
 import {
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
@@ -20,7 +22,6 @@ import {
   getActionLicense,
   getCase,
   getCases,
-  getCasesStatus,
   getCaseUserActions,
   getReporters,
   getTags,
@@ -31,6 +32,7 @@ import {
   createAttachments,
   pushCase,
   resolveCase,
+  getFeatureIds,
 } from './api';
 
 import {
@@ -54,6 +56,7 @@ import {
 } from './mock';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
+import { getCasesStatus } from '../api';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
@@ -205,6 +208,47 @@ describe('Case Configuration API', () => {
       });
     });
 
+    test('should apply the severity field correctly (with severity value)', async () => {
+      await getCases({
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          severity: CaseSeverity.HIGH,
+        },
+        queryParams: DEFAULT_QUERY_PARAMS,
+        signal: abortCtrl.signal,
+      });
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
+        method: 'GET',
+        query: {
+          ...DEFAULT_QUERY_PARAMS,
+          reporters: [],
+          tags: [],
+          severity: CaseSeverity.HIGH,
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('should not send the severity field with "all" severity value', async () => {
+      await getCases({
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          severity: 'all',
+        },
+        queryParams: DEFAULT_QUERY_PARAMS,
+        signal: abortCtrl.signal,
+      });
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
+        method: 'GET',
+        query: {
+          ...DEFAULT_QUERY_PARAMS,
+          reporters: [],
+          tags: [],
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
     test('should handle tags with weird chars', async () => {
       const weirdTags: string[] = ['(', '"double"'];
 
@@ -246,21 +290,33 @@ describe('Case Configuration API', () => {
   });
 
   describe('getCasesStatus', () => {
+    const http = httpServiceMock.createStartContract({ basePath: '' });
+    http.get.mockResolvedValue(casesStatusSnake);
+
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(casesStatusSnake);
     });
+
     test('should be called with correct check url, method, signal', async () => {
-      await getCasesStatus(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/status`, {
-        method: 'GET',
+      await getCasesStatus({
+        http,
+        signal: abortCtrl.signal,
+        query: { owner: [SECURITY_SOLUTION_OWNER] },
+      });
+
+      expect(http.get).toHaveBeenCalledWith(`${CASES_URL}/status`, {
         signal: abortCtrl.signal,
         query: { owner: [SECURITY_SOLUTION_OWNER] },
       });
     });
 
     test('should return correct response', async () => {
-      const resp = await getCasesStatus(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
+      const resp = await getCasesStatus({
+        http,
+        signal: abortCtrl.signal,
+        query: { owner: SECURITY_SOLUTION_OWNER },
+      });
+
       expect(resp).toEqual(casesStatus);
     });
   });
@@ -549,6 +605,27 @@ describe('Case Configuration API', () => {
         signal: abortCtrl.signal,
       });
       expect(resp).toBe(undefined);
+    });
+  });
+
+  describe('getFeatureIds', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(['siem', 'observability']);
+    });
+
+    test('should be called with correct check url, method, signal', async () => {
+      const resp = await getFeatureIds(
+        { registrationContext: ['security', 'observability.logs'] },
+        abortCtrl.signal
+      );
+
+      expect(fetchMock).toHaveBeenCalledWith(`${BASE_RAC_ALERTS_API_PATH}/_feature_ids`, {
+        query: { registrationContext: ['security', 'observability.logs'] },
+        signal: abortCtrl.signal,
+      });
+
+      expect(resp).toEqual(['siem', 'observability']);
     });
   });
 });

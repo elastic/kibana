@@ -17,10 +17,12 @@ import { dedot } from './utils/dedot';
 import { ApmElasticsearchOutputWriteTargets } from './apm/utils/get_apm_write_targets';
 import { Logger } from './utils/create_logger';
 import { Fields } from './entity';
+import { StreamAggregator } from './stream_aggregator';
 
 export interface StreamProcessorOptions<TFields extends Fields = ApmFields> {
   version?: string;
-  processors: Array<(events: TFields[]) => TFields[]>;
+  processors?: Array<(events: TFields[]) => TFields[]>;
+  streamAggregators?: Array<StreamAggregator<TFields>>;
   flushInterval?: string;
   // defaults to 10k
   maxBufferSize?: number;
@@ -39,6 +41,8 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
     getBreakdownMetrics,
   ];
   public static defaultFlushInterval: number = 10000;
+  private readonly processors: Array<(events: TFields[]) => TFields[]>;
+  private readonly streamAggregators: Array<StreamAggregator<TFields>>;
 
   constructor(private readonly options: StreamProcessorOptions<TFields>) {
     [this.intervalAmount, this.intervalUnit] = this.options.flushInterval
@@ -47,6 +51,8 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
     this.name = this.options?.name ?? 'StreamProcessor';
     this.version = this.options.version ?? '8.0.0';
     this.versionMajor = Number.parseInt(this.version.split('.')[0], 10);
+    this.processors = options.processors ?? [];
+    this.streamAggregators = options.streamAggregators ?? [];
   }
   private readonly intervalAmount: number;
   private readonly intervalUnit: any;
@@ -73,6 +79,15 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
 
         yield StreamProcessor.enrich(event, this.version, this.versionMajor);
         sourceEventsYielded++;
+        for (const aggregator of this.streamAggregators) {
+          const aggregatedEvents = aggregator.process(event);
+          if (aggregatedEvents) {
+            yield* aggregatedEvents.map((d) =>
+              StreamProcessor.enrich(d, this.version, this.versionMajor)
+            );
+          }
+        }
+
         if (sourceEventsYielded % maxBufferSize === 0) {
           if (this.options?.processedCallback) {
             this.options.processedCallback(maxBufferSize);
@@ -96,7 +111,7 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
           this.options.logger?.debug(
             `${this.name} flush ${localBuffer.length} documents ${order}: ${e} => ${f}`
           );
-          for (const processor of this.options.processors) {
+          for (const processor of this.processors) {
             yield* processor(localBuffer).map((d) =>
               StreamProcessor.enrich(d, this.version, this.versionMajor)
             );
@@ -116,12 +131,15 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
       this.options.logger?.info(
         `${this.name} processing remaining buffer: ${localBuffer.length} items left`
       );
-      for (const processor of this.options.processors) {
+      for (const processor of this.processors) {
         yield* processor(localBuffer).map((d) =>
           StreamProcessor.enrich(d, this.version, this.versionMajor)
         );
       }
       this.options.processedCallback?.apply(this, [localBuffer.length]);
+    }
+    for (const aggregator of this.streamAggregators) {
+      yield* aggregator.flush();
     }
   }
 
@@ -186,22 +204,28 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
     return newDoc;
   }
 
-  static getDataStreamForEvent(
-    d: Record<string, any>,
-    writeTargets: ApmElasticsearchOutputWriteTargets
-  ) {
+  getDataStreamForEvent(d: Record<string, any>, writeTargets: ApmElasticsearchOutputWriteTargets) {
     if (!d.processor?.event) {
       throw Error("'processor.event' is not set on document, can not determine target index");
     }
     const eventType = d.processor.event as keyof ApmElasticsearchOutputWriteTargets;
     let dataStream = writeTargets[eventType];
     if (eventType === 'metric') {
-      if (!d.service?.name) {
+      if (d.metricset?.name === 'agent_config') {
+        dataStream = 'metrics-apm.internal-default';
+      } else if (!d.service?.name) {
         dataStream = 'metrics-apm.app-default';
       } else {
         if (!d.transaction && !d.span) {
           dataStream = 'metrics-apm.app-default';
         }
+      }
+    }
+    for (const aggregator of this.streamAggregators) {
+      const target = aggregator.getWriteTarget(d);
+      if (target) {
+        dataStream = target;
+        break;
       }
     }
     return dataStream;

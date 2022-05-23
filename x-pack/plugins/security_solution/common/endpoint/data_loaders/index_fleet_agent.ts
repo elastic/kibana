@@ -23,7 +23,7 @@ import { wrapErrorAndRejectPromise } from './utils';
 const defaultFleetAgentGenerator = new FleetAgentGenerator();
 
 export interface IndexedFleetAgentResponse {
-  agents: Agent[];
+  agents: Array<Agent & FleetServerAgent>;
   fleetAgentsIndex: string;
 }
 
@@ -47,6 +47,7 @@ export const indexFleetAgentForHost = async (
   fleetAgentGenerator: FleetAgentGenerator = defaultFleetAgentGenerator
 ): Promise<IndexedFleetAgentResponse> => {
   const agentDoc = fleetAgentGenerator.generateEsHit({
+    _id: endpointHost.agent.id,
     _source: {
       agent: {
         id: endpointHost.agent.id,
@@ -75,6 +76,7 @@ export const indexFleetAgentForHost = async (
       id: agentDoc._id,
       body: agentDoc._source,
       op_type: 'create',
+      refresh: 'wait_for',
     })
     .catch(wrapErrorAndRejectPromise);
 

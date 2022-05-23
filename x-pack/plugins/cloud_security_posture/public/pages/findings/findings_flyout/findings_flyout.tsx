@@ -6,81 +6,73 @@
  */
 import React, { useState } from 'react';
 import {
-  EuiCodeBlock,
   EuiFlexItem,
   EuiSpacer,
-  EuiDescriptionList,
   EuiTextColor,
   EuiFlyout,
   EuiFlyoutHeader,
   EuiTitle,
   EuiFlyoutBody,
-  EuiBadge,
   EuiTabs,
   EuiTab,
-  EuiFlexGrid,
-  EuiCard,
   EuiFlexGroup,
+  PropsOf,
+  EuiCodeBlock,
+  EuiMarkdownFormat,
   EuiIcon,
-  type PropsOf,
 } from '@elastic/eui';
 import { assertNever } from '@kbn/std';
+import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
 import type { CspFinding } from '../types';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import * as TEXT from '../translations';
-import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
-import k8sLogoIcon from '../../../assets/icons/k8s_logo.svg';
 import { ResourceTab } from './resource_tab';
 import { JsonTab } from './json_tab';
+import { OverviewTab } from './overview_tab';
+import { RuleTab } from './rule_tab';
+import k8sLogoIcon from '../../../assets/icons/k8s_logo.svg';
 
-const tabs = ['remediation', 'resource', 'general', 'json'] as const;
-
-const CodeBlock: React.FC<PropsOf<typeof EuiCodeBlock>> = (props) => (
-  <EuiCodeBlock {...props} isCopyable paddingSize="s" />
-);
+const tabs = [
+  { title: TEXT.OVERVIEW, id: 'overview' },
+  { title: TEXT.RULE, id: 'rule' },
+  { title: TEXT.RESOURCE, id: 'resource' },
+  { title: TEXT.JSON, id: 'json' },
+] as const;
 
 type FindingsTab = typeof tabs[number];
-
-type EuiListItemsProps = NonNullable<PropsOf<typeof EuiDescriptionList>['listItems']>[number];
-
-interface Card {
-  title: string;
-  listItems: Array<[EuiListItemsProps['title'], EuiListItemsProps['description']]>;
-}
 
 interface FindingFlyoutProps {
   onClose(): void;
   findings: CspFinding;
 }
 
-const Cards = ({ data }: { data: Card[] }) => (
-  <EuiFlexGrid direction="column" gutterSize={'l'}>
-    {data.map((card) => (
-      <EuiFlexItem key={card.title} style={{ display: 'block' }}>
-        <EuiCard textAlign="left" title={card.title} hasBorder>
-          <EuiDescriptionList
-            compressed={false}
-            type="column"
-            listItems={card.listItems.map((v) => ({ title: v[0], description: v[1] }))}
-            style={{ flexFlow: 'column' }}
-            descriptionProps={{
-              style: { width: '100%' },
-            }}
-          />
-        </EuiCard>
-      </EuiFlexItem>
-    ))}
-  </EuiFlexGrid>
+export const CodeBlock: React.FC<PropsOf<typeof EuiCodeBlock>> = (props) => (
+  <EuiCodeBlock isCopyable paddingSize="s" overflowHeight={300} {...props} />
+);
+
+export const Markdown: React.FC<PropsOf<typeof EuiMarkdownFormat>> = (props) => (
+  <EuiMarkdownFormat textSize="s" {...props} />
+);
+
+export const CisKubernetesIcons = () => (
+  <EuiFlexGroup gutterSize="s">
+    <EuiFlexItem grow={false}>
+      <EuiIcon type={cisLogoIcon} size="xxl" />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiIcon type={k8sLogoIcon} size="xxl" />
+    </EuiFlexItem>
+  </EuiFlexGroup>
 );
 
 const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab }) => {
-  switch (tab) {
-    case 'remediation':
-      return <Cards data={getRemediationCards(findings)} />;
+  switch (tab.id) {
+    case 'overview':
+      return <OverviewTab data={findings} />;
+    case 'rule':
+      return <RuleTab data={findings} />;
     case 'resource':
       return <ResourceTab data={findings} />;
-    case 'general':
-      return <Cards data={getGeneralCards(findings)} />;
     case 'json':
       return <JsonTab data={findings} />;
     default:
@@ -89,7 +81,7 @@ const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab
 };
 
 export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) => {
-  const [tab, setTab] = useState<FindingsTab>('remediation');
+  const [tab, setTab] = useState<FindingsTab>(tabs[0]);
 
   return (
     <EuiFlyout onClose={onClose}>
@@ -109,13 +101,8 @@ export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) =>
         <EuiSpacer />
         <EuiTabs>
           {tabs.map((v) => (
-            <EuiTab
-              key={v}
-              isSelected={tab === v}
-              onClick={() => setTab(v)}
-              style={{ textTransform: 'capitalize' }}
-            >
-              {v}
+            <EuiTab key={v.id} isSelected={tab.id === v.id} onClick={() => setTab(v)}>
+              {v.title}
             </EuiTab>
           ))}
         </EuiTabs>
@@ -126,59 +113,3 @@ export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) =>
     </EuiFlyout>
   );
 };
-
-const getGeneralCards = ({ rule }: CspFinding): Card[] => [
-  {
-    title: TEXT.RULE,
-    listItems: [
-      [TEXT.SEVERITY, ''],
-      [TEXT.INDEX, ''],
-      [TEXT.RULE_EVALUATED_AT, ''],
-      [
-        TEXT.FRAMEWORK_SOURCES,
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type={cisLogoIcon} size="xxl" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type={k8sLogoIcon} size="xxl" />
-          </EuiFlexItem>
-        </EuiFlexGroup>,
-      ],
-      [TEXT.SECTION, ''],
-      [TEXT.PROFILE_APPLICABILITY, ''],
-      [TEXT.AUDIT, ''],
-      [TEXT.BENCHMARK, rule.benchmark.name],
-      [TEXT.NAME, rule.name],
-      [TEXT.DESCRIPTION, rule.description],
-      [
-        TEXT.TAGS,
-        rule.tags.map((t) => (
-          <EuiBadge key={t} color="default">
-            {t}
-          </EuiBadge>
-        )),
-      ],
-    ],
-  },
-];
-
-const getRemediationCards = ({ result, ...rest }: CspFinding): Card[] => [
-  {
-    title: TEXT.RESULT_DETAILS,
-    listItems: [
-      [TEXT.EXPECTED, ''],
-      [TEXT.EVIDENCE, <CodeBlock>{JSON.stringify(result.evidence, null, 2)}</CodeBlock>],
-      [TEXT.TIMESTAMP, <CodeBlock>{rest['@timestamp']}</CodeBlock>],
-    ],
-  },
-  {
-    title: TEXT.REMEDIATION,
-    listItems: [
-      ['', <CodeBlock>{rest.rule.remediation}</CodeBlock>],
-      [TEXT.IMPACT, rest.rule.impact],
-      [TEXT.DEFAULT_VALUE, ''],
-      [TEXT.RATIONALE, ''],
-    ],
-  },
-];

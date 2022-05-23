@@ -7,23 +7,14 @@
 import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { SecurityPageName } from '../../app/types';
 import { withSecuritySolutionLink } from '../../common/components/links';
-import * as i18n from './translations';
+import { NavLinkItem } from '../../common/components/navigation/types';
 
 interface LandingLinksImagesProps {
-  items: NavItem[];
+  items: NavLinkItem[];
 }
 
-export interface NavItem {
-  id: SecurityPageName;
-  label: string;
-  image: string;
-  description: string;
-  path?: string;
-}
-
-const PrimatyEuiTitle = styled(EuiTitle)`
+const PrimaryEuiTitle = styled(EuiTitle)`
   color: ${(props) => props.theme.eui.euiColorPrimary};
 `;
 
@@ -48,19 +39,27 @@ const Content = styled(EuiFlexItem)`
 
 export const LandingLinksImages: React.FC<LandingLinksImagesProps> = ({ items }) => (
   <EuiFlexGroup direction="column">
-    {items.map(({ label, description, path, image, id }) => (
-      <EuiFlexItem key={id}>
-        <SecuritySolutionLink deepLinkId={id} path={path}>
+    {items.map(({ title, description, image, id }) => (
+      <EuiFlexItem key={id} data-test-subj="LandingItem">
+        <SecuritySolutionLink deepLinkId={id} tabIndex={-1}>
           {/* Empty onClick is to force hover style on `EuiPanel` */}
           <EuiPanel hasBorder hasShadow={false} paddingSize="m" onClick={() => {}}>
             <EuiFlexGroup>
               <StyledFlexItem grow={false}>
-                <EuiImage size="l" alt={i18n.SCREENSHOT_IMAGE_ALT(label)} src={image} />
+                {image && (
+                  <EuiImage
+                    data-test-subj="LandingLinksImage"
+                    size="l"
+                    role="presentation"
+                    alt=""
+                    src={image}
+                  />
+                )}
               </StyledFlexItem>
               <Content>
-                <PrimatyEuiTitle size="s">
-                  <h2>{label}</h2>
-                </PrimatyEuiTitle>
+                <PrimaryEuiTitle size="s">
+                  <h2>{title}</h2>
+                </PrimaryEuiTitle>
                 <LandingLinksDescripton size="s" color="text">
                   {description}
                 </LandingLinksDescripton>

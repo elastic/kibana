@@ -10,12 +10,12 @@ import { EuiFieldNumber, EuiFieldText, EuiSelect } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
-import { IFieldType } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { validateParams } from './lib/filter_editor_utils';
 
 interface Props {
   value?: string | number;
-  field: IFieldType;
+  field: DataViewField;
   onChange: (value: string | number | boolean) => void;
   onBlur?: (value: string | number | boolean) => void;
   placeholder: string;
@@ -23,9 +23,18 @@ interface Props {
   controlOnly?: boolean;
   className?: string;
   fullWidth?: boolean;
+  isInvalid?: boolean;
 }
 
 class ValueInputTypeUI extends Component<Props> {
+  private getValueForNumberField = (value?: string | number): string | number | undefined => {
+    if (typeof value === 'string') {
+      const parsedValue = parseFloat(value);
+      return isNaN(parsedValue) ? value : parsedValue;
+    }
+    return value;
+  };
+
   public render() {
     const value = this.props.value;
     const type = this.props.field.type;
@@ -50,7 +59,7 @@ class ValueInputTypeUI extends Component<Props> {
           <EuiFieldNumber
             fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
-            value={typeof value === 'string' ? parseFloat(value) : value}
+            value={this.getValueForNumberField(value)}
             onChange={this.onChange}
             controlOnly={this.props.controlOnly}
             className={this.props.className}
@@ -66,7 +75,7 @@ class ValueInputTypeUI extends Component<Props> {
             value={value}
             onChange={this.onChange}
             onBlur={this.onBlur}
-            isInvalid={!isEmpty(value) && !validateParams(value, this.props.field)}
+            isInvalid={this.props.isInvalid}
             controlOnly={this.props.controlOnly}
             className={this.props.className}
           />

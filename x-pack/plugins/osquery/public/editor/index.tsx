@@ -35,9 +35,7 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
 }) => {
   const [editorValue, setEditorValue] = useState(defaultValue ?? '');
 
-  useDebounce(() => onChange(editorValue.replaceAll('\n', ' ').replaceAll('  ', ' ')), 500, [
-    editorValue,
-  ]);
+  useDebounce(() => onChange(editorValue), 500, [editorValue]);
 
   useEffect(() => setEditorValue(defaultValue), [defaultValue]);
 

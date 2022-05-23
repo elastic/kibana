@@ -8,10 +8,11 @@
 
 import { uniq, mapValues } from 'lodash';
 import { euiLightVars } from '@kbn/ui-theme';
-import type { Datatable } from '@kbn/expressions-plugin';
+import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import { FormatFactory } from '../types';
 import { isDataLayer } from './visualization';
-import { DataLayerConfigResult, XYLayerConfigResult } from '../../common';
+import { CommonXYDataLayerConfig, CommonXYLayerConfig } from '../../common';
+import { getFormat } from './format';
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
 
@@ -21,40 +22,42 @@ export type ColorAssignments = Record<
   string,
   {
     totalSeriesCount: number;
-    getRank(sortedLayer: DataLayerConfigResult, seriesKey: string, yAccessor: string): number;
+    getRank(sortedLayer: CommonXYDataLayerConfig, seriesKey: string, yAccessor: string): number;
   }
 >;
 
 export function getColorAssignments(
-  layers: XYLayerConfigResult[],
-  data: { tables: Record<string, Datatable> },
+  layers: CommonXYLayerConfig[],
   formatFactory: FormatFactory
 ): ColorAssignments {
-  const layersPerPalette: Record<string, DataLayerConfigResult[]> = {};
+  const layersPerPalette: Record<string, CommonXYDataLayerConfig[]> = {};
 
-  layers
-    .filter((layer): layer is DataLayerConfigResult => isDataLayer(layer))
-    .forEach((layer) => {
-      const palette = layer.palette?.name || 'default';
-      if (!layersPerPalette[palette]) {
-        layersPerPalette[palette] = [];
-      }
-      layersPerPalette[palette].push(layer);
-    });
+  layers.forEach((layer) => {
+    if (!isDataLayer(layer)) {
+      return;
+    }
+
+    const palette = layer.palette?.name || 'default';
+    if (!layersPerPalette[palette]) {
+      layersPerPalette[palette] = [];
+    }
+    layersPerPalette[palette].push(layer);
+  });
 
   return mapValues(layersPerPalette, (paletteLayers) => {
-    const seriesPerLayer = paletteLayers.map((layer, layerIndex) => {
+    const seriesPerLayer = paletteLayers.map((layer) => {
       if (!layer.splitAccessor) {
         return { numberOfSeries: layer.accessors.length, splits: [] };
       }
-      const splitAccessor = layer.splitAccessor;
-      const column = data.tables[layer.layerId]?.columns.find(({ id }) => id === splitAccessor);
-      const columnFormatter = column && formatFactory(column.meta.params);
+      const splitAccessor = getAccessorByDimension(layer.splitAccessor, layer.table.columns);
+      const column = layer.table.columns?.find(({ id }) => id === splitAccessor);
+      const columnFormatter =
+        column && formatFactory(getFormat(layer.table.columns, layer.splitAccessor));
       const splits =
-        !column || !data.tables[layer.layerId]
+        !column || !layer.table
           ? []
           : uniq(
-              data.tables[layer.layerId].rows.map((row) => {
+              layer.table.rows.map((row) => {
                 let value = row[splitAccessor];
                 if (value && !isPrimitive(value)) {
                   value = columnFormatter?.convert(value) ?? value;
@@ -72,8 +75,10 @@ export function getColorAssignments(
     );
     return {
       totalSeriesCount,
-      getRank(sortedLayer: DataLayerConfigResult, seriesKey: string, yAccessor: string) {
-        const layerIndex = paletteLayers.findIndex((l) => sortedLayer.layerId === l.layerId);
+      getRank(sortedLayer: CommonXYDataLayerConfig, seriesKey: string, yAccessor: string) {
+        const layerIndex = paletteLayers.findIndex(
+          (layer) => sortedLayer.layerId === layer.layerId
+        );
         const currentSeriesPerLayer = seriesPerLayer[layerIndex];
         const splitRank = currentSeriesPerLayer.splits.indexOf(seriesKey);
         return (
@@ -85,7 +90,9 @@ export function getColorAssignments(
           (sortedLayer.splitAccessor && splitRank !== -1
             ? splitRank * sortedLayer.accessors.length
             : 0) +
-          sortedLayer.accessors.indexOf(yAccessor)
+          sortedLayer.accessors.findIndex(
+            (accessor) => getAccessorByDimension(accessor, sortedLayer.table.columns) === yAccessor
+          )
         );
       },
     };
