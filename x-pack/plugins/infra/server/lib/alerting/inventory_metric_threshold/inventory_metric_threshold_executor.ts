@@ -222,6 +222,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       );
       const context = {
         group: recoveredAlertId,
+        alertState: stateToAlertMessage[AlertStates.OK],
         timestamp: startedAt.toISOString(),
         viewInAppUrl,
         threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
