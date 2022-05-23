@@ -642,6 +642,13 @@ export const staticSourceData: SourceDataItem[] = [
     name: SOURCE_NAMES.SHAREPOINT_CONNECTOR_PACKAGE,
     serviceType: 'external',
     baseServiceType: 'share_point',
+    categories: [
+      SOURCE_CATEGORIES.FILE_SHARING,
+      SOURCE_CATEGORIES.STORAGE,
+      SOURCE_CATEGORIES.CLOUD,
+      SOURCE_CATEGORIES.MICROSOFT,
+      SOURCE_CATEGORIES.OFFICE_365,
+    ],
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: true,
