@@ -239,14 +239,16 @@ async function getValidationCheckMessages(
   let analysisFieldsEmpty = false;
 
   const fieldLimit =
-    analyzedFields.length <= MINIMUM_NUM_FIELD_FOR_CHECK
+    Array.isArray(analyzedFields) && analyzedFields.length <= MINIMUM_NUM_FIELD_FOR_CHECK
       ? analyzedFields.length
       : MINIMUM_NUM_FIELD_FOR_CHECK;
 
-  let aggs = analyzedFields.slice(0, fieldLimit).reduce((acc, curr) => {
-    acc[curr] = { missing: { field: curr } };
-    return acc;
-  }, {} as any);
+  let aggs = Array.isArray(analyzedFields)
+    ? analyzedFields.slice(0, fieldLimit).reduce((acc, curr) => {
+        acc[curr] = { missing: { field: curr } };
+        return acc;
+      }, {} as any)
+    : {};
 
   if (depVar !== '') {
     const depVarAgg = {
@@ -344,10 +346,18 @@ async function getValidationCheckMessages(
     );
     messages.push(...regressionAndClassificationMessages);
 
-    if (analyzedFields.length && analyzedFields.length > INCLUDED_FIELDS_THRESHOLD) {
+    if (
+      Array.isArray(analyzedFields) &&
+      analyzedFields.length &&
+      analyzedFields.length > INCLUDED_FIELDS_THRESHOLD
+    ) {
       analysisFieldsNumHigh = true;
     } else {
-      if (analysisType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION && analyzedFields.length < 1) {
+      if (
+        analysisType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION &&
+        Array.isArray(analyzedFields) &&
+        analyzedFields.length < 1
+      ) {
         lowFieldCountWarningMessage.text = i18n.translate(
           'xpack.ml.models.dfaValidation.messages.lowFieldCountOutlierWarningText',
           {
@@ -358,6 +368,7 @@ async function getValidationCheckMessages(
         messages.push(lowFieldCountWarningMessage);
       } else if (
         analysisType !== ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION &&
+        Array.isArray(analyzedFields) &&
         analyzedFields.length < 2
       ) {
         lowFieldCountWarningMessage.text = i18n.translate(
@@ -446,9 +457,12 @@ export async function validateAnalyticsJob(
   client: IScopedClusterClient,
   job: DataFrameAnalyticsConfig
 ) {
+  const includedFields = (
+    Array.isArray(job?.analyzed_fields?.includes) ? job?.analyzed_fields?.includes : []
+  ) as string[];
   const messages = await getValidationCheckMessages(
     client.asCurrentUser,
-    job?.analyzed_fields?.includes || [],
+    includedFields,
     job.analysis,
     job.source
   );

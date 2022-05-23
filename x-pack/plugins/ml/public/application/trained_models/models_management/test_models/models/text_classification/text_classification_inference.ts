@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { InferenceBase } from '../inference_base';
 import { processResponse } from './common';
 import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
@@ -45,7 +46,13 @@ export class TextClassificationInference extends InferenceBase<TextClassificatio
   }
 
   public getInputComponent(): JSX.Element {
-    return getGeneralInputComponent(this);
+    const placeholder = i18n.translate(
+      'xpack.ml.trainedModels.testModelsFlyout.textClassification.inputText',
+      {
+        defaultMessage: 'Enter a phrase to test',
+      }
+    );
+    return getGeneralInputComponent(this, placeholder);
   }
 
   public getOutputComponent(): JSX.Element {
