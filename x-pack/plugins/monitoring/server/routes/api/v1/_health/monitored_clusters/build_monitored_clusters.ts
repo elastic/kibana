@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, mapValues, merge, reduce } from 'lodash';
+import { isEmpty, mapValues, merge, omitBy, reduce } from 'lodash';
 
 const reInternalMonitoring = /^\.monitoring-(es|kibana|beats|logstash)-7-[0-9]{4}\..*/;
 const reMetricbeatMonitoring7 = /^\.monitoring-(es|kibana|beats|logstash|ent-search)-7.*-mb.*/;
@@ -44,15 +44,10 @@ const getCollectionMode = (index: string) => {
  * }
  */
 export const buildMonitoredClusters = (clustersBuckets: any[]) => {
-  const monitoredClusters = clustersBuckets.reduce(
-    (clusters, { key, meta, doc_count: _, ...products }) => {
-      clusters[key] = buildMonitoredProducts(products);
-      return clusters;
-    },
-    {}
-  );
-
-  return monitoredClusters;
+  return clustersBuckets.reduce((clusters, { key, doc_count: _, ...products }) => {
+    clusters[key] = buildMonitoredProducts(products);
+    return clusters;
+  }, {} as any);
 };
 
 /**
@@ -61,35 +56,44 @@ export const buildMonitoredClusters = (clustersBuckets: any[]) => {
  * so the output only includes a single product entry
  * we assume each aggregation is named as /productname(_aggsuffix)?/
  */
-const buildMonitoredProducts = (clusterProducts: any) => {
-  const monitoredProducts = mapValues(clusterProducts, ({ buckets }: { buckets: any[] }) => {
-    return buckets.reduce((entities, { key, doc_count: _, ...metricsets }) => {
-      entities[key] = buildMonitoredMetricsets(metricsets);
-      return entities;
-    }, {});
+const buildMonitoredProducts = (rawProducts: any) => {
+  const products = mapValues(rawProducts, ({ buckets }) => {
+    return buildMonitoredEntities(buckets);
   });
 
   return reduce(
-    monitoredProducts,
-    (uniqProducts: any, metricsets: any, aggregationKey: string) => {
-      if (isEmpty(metricsets)) return uniqProducts;
+    products,
+    (uniqProducts: any, entities: any, aggregationKey: string) => {
+      if (isEmpty(entities)) return uniqProducts;
 
       const product = aggregationKey.split('_')[0];
-      uniqProducts[product] = merge(uniqProducts[product], metricsets);
+      uniqProducts[product] = merge(uniqProducts[product], entities);
       return uniqProducts;
     },
     {}
   );
 };
 
-const buildMonitoredMetricsets = (productMetricsets: any) => {
-  return mapValues(productMetricsets, ({ by_index: byIndex }: { by_index: { buckets: any[] } }) => {
-    return byIndex.buckets.reduce((metricsets, { key, last_seen: lastSeen }) => {
-      metricsets[getCollectionMode(key)] = {
-        index: key,
-        lastSeen: lastSeen.value_as_string,
-      };
-      return metricsets;
-    }, {});
-  });
+const buildMonitoredEntities = (entitiesBuckets: any[]) => {
+  return entitiesBuckets.reduce((entities, { key, doc_count: _, ...metricsets }) => {
+    entities[key] = buildMonitoredMetricsets(metricsets);
+    return entities;
+  }, {} as any);
+};
+
+const buildMonitoredMetricsets = (rawMetricsets: any) => {
+  const monitoredMetricsets = mapValues(
+    rawMetricsets,
+    ({ by_index: byIndex }: { by_index: { buckets: any[] } }) => {
+      return byIndex.buckets.reduce((metricsets, { key, last_seen: lastSeen }) => {
+        metricsets[getCollectionMode(key)] = {
+          index: key,
+          lastSeen: lastSeen.value_as_string,
+        };
+        return metricsets;
+      }, {} as any);
+    }
+  );
+
+  return omitBy(monitoredMetricsets, isEmpty);
 };
