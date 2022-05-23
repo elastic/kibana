@@ -181,7 +181,7 @@ describe('getCommands', () => {
         ELASTIC_APM = {
         # Set the required service name. Allowed characters:
         # a-z, A-Z, 0-9, -, _, and space
-        'SERVICE_NAME': 'my_python_service',
+        #'SERVICE_NAME': 'unknown-python-service',
 
         # Use if APM Server requires a secret token
         'SECRET_TOKEN': '',
@@ -219,7 +219,7 @@ describe('getCommands', () => {
         ELASTIC_APM = {
         # Set the required service name. Allowed characters:
         # a-z, A-Z, 0-9, -, _, and space
-        'SERVICE_NAME': 'my_python_service',
+        #'SERVICE_NAME': 'unknown-python-service',
 
         # Use if APM Server requires a secret token
         'SECRET_TOKEN': 'foobar',
@@ -257,7 +257,7 @@ describe('getCommands', () => {
         app.config['ELASTIC_APM'] = {
         # Set the required service name. Allowed characters:
         # a-z, A-Z, 0-9, -, _, and space
-        'SERVICE_NAME': 'my_python_service',
+        #'SERVICE_NAME': 'unknown-python-service',
 
         # Use if APM Server requires a secret token
         'SECRET_TOKEN': '',
@@ -292,7 +292,7 @@ describe('getCommands', () => {
         app.config['ELASTIC_APM'] = {
         # Set the required service name. Allowed characters:
         # a-z, A-Z, 0-9, -, _, and space
-        'SERVICE_NAME': 'my_python_service',
+        #'SERVICE_NAME': 'unknown-python-service',
 
         # Use if APM Server requires a secret token
         'SECRET_TOKEN': 'foobar',

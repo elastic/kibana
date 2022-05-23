@@ -17,28 +17,22 @@ import {
 } from '../../constants';
 import { FeatureIds, SourceDataItem } from '../../types';
 
-// TODO remove Sharepoint-specific content after BYO connector support
 export const staticGenericExternalSourceData: SourceDataItem = {
-  name: SOURCE_NAMES.SHAREPOINT,
-  categories: [],
+  name: SOURCE_NAMES.CUSTOM_CONNECTOR_PACKAGE,
+  categories: ['API', 'Custom'],
   serviceType: 'external',
   configuration: {
     isPublicKey: false,
-    hasOauthRedirect: true,
+    hasOauthRedirect: false,
     needsBaseUrl: false,
-    documentationUrl: docLinks.workplaceSearchExternalSharePointOnline,
-    applicationPortalUrl: 'https://portal.azure.com/',
+    documentationUrl: docLinks.workplaceSearchCustomConnectorPackage,
+    applicationPortalUrl: '',
   },
-  objTypes: [SOURCE_OBJ_TYPES.ALL_STORED_FILES],
+  objTypes: [],
   features: {
-    basicOrgContext: [
-      FeatureIds.SyncFrequency,
-      FeatureIds.SyncedItems,
-      FeatureIds.GlobalAccessPermissions,
-    ],
-    basicOrgContextExcludedFeatures: [FeatureIds.DocumentLevelPermissions],
-    platinumOrgContext: [FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
-    platinumPrivateContext: [FeatureIds.Private, FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
+    basicOrgContext: [FeatureIds.SyncFrequency, FeatureIds.GlobalAccessPermissions],
+    platinumOrgContext: [],
+    platinumPrivateContext: [],
   },
   accountContextOnly: false,
   isBeta: true,
@@ -48,6 +42,11 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.BOX,
     serviceType: 'box',
+    categories: [
+      SOURCE_CATEGORIES.FILE_SHARING,
+      SOURCE_CATEGORIES.STORAGE,
+      SOURCE_CATEGORIES.CLOUD,
+    ],
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: true,
@@ -75,6 +74,7 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.CONFLUENCE,
     serviceType: 'confluence_cloud',
+    categories: [SOURCE_CATEGORIES.WIKI, SOURCE_CATEGORIES.ATLASSIAN, SOURCE_CATEGORIES.INTRANET],
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: true,
@@ -104,9 +104,46 @@ export const staticSourceData: SourceDataItem[] = [
     },
     accountContextOnly: false,
   },
+
+  {
+    name: SOURCE_NAMES.CONFLUENCE_CONNECTOR_PACKAGE,
+    serviceType: 'external',
+    baseServiceType: 'confluence_cloud',
+    categories: [SOURCE_CATEGORIES.WIKI, SOURCE_CATEGORIES.ATLASSIAN, SOURCE_CATEGORIES.INTRANET],
+    configuration: {
+      isPublicKey: false,
+      hasOauthRedirect: true,
+      needsBaseUrl: true,
+      documentationUrl: docLinks.workplaceSearchConfluenceCloudConnectorPackage,
+      applicationPortalUrl: 'https://developer.atlassian.com/console/myapps/',
+    },
+    objTypes: [
+      SOURCE_OBJ_TYPES.PAGES,
+      SOURCE_OBJ_TYPES.ATTACHMENTS,
+      SOURCE_OBJ_TYPES.BLOG_POSTS,
+      SOURCE_OBJ_TYPES.SPACES,
+    ],
+    features: {
+      basicOrgContext: [
+        FeatureIds.SyncFrequency,
+        FeatureIds.SyncedItems,
+        FeatureIds.GlobalAccessPermissions,
+      ],
+      basicOrgContextExcludedFeatures: [FeatureIds.DocumentLevelPermissions],
+      platinumOrgContext: [FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
+      platinumPrivateContext: [
+        FeatureIds.Private,
+        FeatureIds.SyncFrequency,
+        FeatureIds.SyncedItems,
+      ],
+    },
+    accountContextOnly: false,
+    isBeta: true,
+  },
   {
     name: SOURCE_NAMES.CONFLUENCE_SERVER,
     serviceType: 'confluence_server',
+    categories: [SOURCE_CATEGORIES.WIKI, SOURCE_CATEGORIES.ATLASSIAN, SOURCE_CATEGORIES.INTRANET],
     configuration: {
       isPublicKey: true,
       hasOauthRedirect: true,
@@ -137,6 +174,11 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.DROPBOX,
     serviceType: 'dropbox',
+    categories: [
+      SOURCE_CATEGORIES.FILE_SHARING,
+      SOURCE_CATEGORIES.STORAGE,
+      SOURCE_CATEGORIES.CLOUD,
+    ],
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: true,
@@ -164,6 +206,11 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.GITHUB,
     serviceType: 'github',
+    categories: [
+      SOURCE_CATEGORIES.SOFTWARE,
+      SOURCE_CATEGORIES.VERSION_CONTROL,
+      SOURCE_CATEGORIES.CODE_REPOSITORY,
+    ],
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: true,
@@ -198,6 +245,11 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.GITHUB_ENTERPRISE,
     serviceType: 'github_enterprise_server',
+    categories: [
+      SOURCE_CATEGORIES.SOFTWARE,
+      SOURCE_CATEGORIES.VERSION_CONTROL,
+      SOURCE_CATEGORIES.CODE_REPOSITORY,
+    ],
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: true,
@@ -238,6 +290,11 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.GMAIL,
     serviceType: 'gmail',
+    categories: [
+      SOURCE_CATEGORIES.COMMUNICATION,
+      SOURCE_CATEGORIES.EMAIL,
+      SOURCE_CATEGORIES.GOOGLE,
+    ],
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: true,
@@ -254,6 +311,13 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.GOOGLE_DRIVE,
     serviceType: 'google_drive',
+    categories: [
+      SOURCE_CATEGORIES.FILE_SHARING,
+      SOURCE_CATEGORIES.STORAGE,
+      SOURCE_CATEGORIES.CLOUD,
+      SOURCE_CATEGORIES.PRODUCTIVITY,
+      SOURCE_CATEGORIES.GSUITE,
+    ],
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: true,
@@ -285,6 +349,12 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.JIRA,
     serviceType: 'jira_cloud',
+    categories: [
+      SOURCE_CATEGORIES.SOFTWARE,
+      SOURCE_CATEGORIES.BUG_TRACKING,
+      SOURCE_CATEGORIES.ATLASSIAN,
+      SOURCE_CATEGORIES.PROJECT_MANAGEMENT,
+    ],
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: true,
@@ -319,6 +389,12 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.JIRA_SERVER,
     serviceType: 'jira_server',
+    categories: [
+      SOURCE_CATEGORIES.SOFTWARE,
+      SOURCE_CATEGORIES.BUG_TRACKING,
+      SOURCE_CATEGORIES.ATLASSIAN,
+      SOURCE_CATEGORIES.PROJECT_MANAGEMENT,
+    ],
     configuration: {
       isPublicKey: true,
       hasOauthRedirect: true,
@@ -358,7 +434,7 @@ export const staticSourceData: SourceDataItem[] = [
       isPublicKey: false,
       hasOauthRedirect: false,
       needsBaseUrl: false,
-      documentationUrl: docLinks.workplaceSearchCustomSources, // TODO Update this when we have a doclink
+      documentationUrl: docLinks.workplaceSearchNetworkDrive,
       applicationPortalUrl: '',
       githubRepository: 'elastic/enterprise-search-network-drive-connector',
     },
@@ -367,6 +443,13 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.ONEDRIVE,
     serviceType: 'one_drive',
+    categories: [
+      SOURCE_CATEGORIES.FILE_SHARING,
+      SOURCE_CATEGORIES.CLOUD,
+      SOURCE_CATEGORIES.STORAGE,
+      SOURCE_CATEGORIES.MICROSOFT,
+      SOURCE_CATEGORIES.OFFICE_365,
+    ],
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: true,
@@ -394,7 +477,7 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.OUTLOOK,
     categories: [
-      SOURCE_CATEGORIES.COMMUNICATIONS,
+      SOURCE_CATEGORIES.COMMUNICATION,
       SOURCE_CATEGORIES.PRODUCTIVITY,
       SOURCE_CATEGORIES.MICROSOFT,
     ],
@@ -404,7 +487,7 @@ export const staticSourceData: SourceDataItem[] = [
       isPublicKey: false,
       hasOauthRedirect: false,
       needsBaseUrl: false,
-      documentationUrl: docLinks.workplaceSearchCustomSources, // TODO Update this when we have a doclink
+      documentationUrl: docLinks.workplaceSearchOutlook,
       applicationPortalUrl: '',
       githubRepository: 'elastic/enterprise-search-outlook-connector',
     },
@@ -413,6 +496,11 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.SALESFORCE,
     serviceType: 'salesforce',
+    categories: [
+      SOURCE_CATEGORIES.CRM,
+      SOURCE_CATEGORIES.CUSTOMER_RELATIONSHIP_MANAGEMENT,
+      SOURCE_CATEGORIES.ACCOUNT_MANAGEMENT,
+    ],
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: true,
@@ -447,6 +535,11 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.SALESFORCE_SANDBOX,
     serviceType: 'salesforce_sandbox',
+    categories: [
+      SOURCE_CATEGORIES.CRM,
+      SOURCE_CATEGORIES.CUSTOMER_RELATIONSHIP_MANAGEMENT,
+      SOURCE_CATEGORIES.ACCOUNT_MANAGEMENT,
+    ],
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: true,
@@ -481,10 +574,12 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.SERVICENOW,
     serviceType: 'service_now',
+    categories: [SOURCE_CATEGORIES.WORKFLOW],
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: false,
       needsBaseUrl: true,
+      needsCredentials: true,
       documentationUrl: docLinks.workplaceSearchServiceNow,
       applicationPortalUrl: 'https://www.servicenow.com/my-account/sign-in.html',
     },
@@ -512,6 +607,13 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.SHAREPOINT,
     serviceType: 'share_point',
+    categories: [
+      SOURCE_CATEGORIES.FILE_SHARING,
+      SOURCE_CATEGORIES.STORAGE,
+      SOURCE_CATEGORIES.CLOUD,
+      SOURCE_CATEGORIES.MICROSOFT,
+      SOURCE_CATEGORIES.OFFICE_365,
+    ],
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: true,
@@ -537,10 +639,16 @@ export const staticSourceData: SourceDataItem[] = [
     accountContextOnly: false,
   },
   {
-    name: SOURCE_NAMES.SHAREPOINT,
-    categories: [],
+    name: SOURCE_NAMES.SHAREPOINT_CONNECTOR_PACKAGE,
     serviceType: 'external',
     baseServiceType: 'share_point',
+    categories: [
+      SOURCE_CATEGORIES.FILE_SHARING,
+      SOURCE_CATEGORIES.STORAGE,
+      SOURCE_CATEGORIES.CLOUD,
+      SOURCE_CATEGORIES.MICROSOFT,
+      SOURCE_CATEGORIES.OFFICE_365,
+    ],
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: true,
@@ -590,6 +698,12 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.SLACK,
     serviceType: 'slack',
+    categories: [
+      SOURCE_CATEGORIES.COLLABORATION,
+      SOURCE_CATEGORIES.COMMUNICATION,
+      SOURCE_CATEGORIES.INSTANT_MESSAGING,
+      SOURCE_CATEGORIES.CHAT,
+    ],
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: true,
@@ -610,7 +724,7 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.TEAMS,
     categories: [
-      SOURCE_CATEGORIES.COMMUNICATIONS,
+      SOURCE_CATEGORIES.COMMUNICATION,
       SOURCE_CATEGORIES.PRODUCTIVITY,
       SOURCE_CATEGORIES.MICROSOFT,
     ],
@@ -620,7 +734,7 @@ export const staticSourceData: SourceDataItem[] = [
       isPublicKey: false,
       hasOauthRedirect: false,
       needsBaseUrl: false,
-      documentationUrl: docLinks.workplaceSearchCustomSources, // TODO Update this when we have a doclink
+      documentationUrl: docLinks.workplaceSearchTeams,
       applicationPortalUrl: '',
       githubRepository: 'elastic/enterprise-search-teams-connector',
     },
@@ -629,6 +743,13 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.ZENDESK,
     serviceType: 'zendesk',
+    categories: [
+      SOURCE_CATEGORIES.HELP,
+      SOURCE_CATEGORIES.CUSTOMER_SERVICE,
+      SOURCE_CATEGORIES.CUSTOMER_RELATIONSHIP_MANAGEMENT,
+      SOURCE_CATEGORIES.TICKETING,
+      SOURCE_CATEGORIES.HELPDESK,
+    ],
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: true,
@@ -655,14 +776,14 @@ export const staticSourceData: SourceDataItem[] = [
   },
   {
     name: SOURCE_NAMES.ZOOM,
-    categories: [SOURCE_CATEGORIES.COMMUNICATIONS, SOURCE_CATEGORIES.PRODUCTIVITY],
+    categories: [SOURCE_CATEGORIES.COMMUNICATION, SOURCE_CATEGORIES.PRODUCTIVITY],
     serviceType: 'custom',
     baseServiceType: 'zoom',
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: false,
       needsBaseUrl: false,
-      documentationUrl: docLinks.workplaceSearchCustomSources, // TODO Update this when we have a doclink
+      documentationUrl: docLinks.workplaceSearchZoom,
       applicationPortalUrl: '',
       githubRepository: 'elastic/enterprise-search-zoom-connector',
     },

@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { FILTERS } from '@kbn/es-query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { IFieldType } from '@kbn/data-views-plugin/common';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 
 export interface Operator {
   message: string;
@@ -25,7 +25,7 @@ export interface Operator {
    * A filter predicate for a field,
    * takes precedence over {@link fieldTypes}
    */
-  field?: (field: IFieldType) => boolean;
+  field?: (field: DataViewField) => boolean;
 }
 
 export const isOperator = {
@@ -68,7 +68,7 @@ export const isBetweenOperator = {
   }),
   type: FILTERS.RANGE,
   negate: false,
-  field: (field: IFieldType) => {
+  field: (field: DataViewField) => {
     if (['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'].includes(field.type))
       return true;
 
@@ -84,7 +84,7 @@ export const isNotBetweenOperator = {
   }),
   type: FILTERS.RANGE,
   negate: true,
-  field: (field: IFieldType) => {
+  field: (field: DataViewField) => {
     if (['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'].includes(field.type))
       return true;
 
