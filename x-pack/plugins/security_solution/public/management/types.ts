@@ -9,7 +9,6 @@ import { CombinedState } from 'redux';
 import { SecurityPageName } from '../app/types';
 import { PolicyDetailsState } from './pages/policy/types';
 import { EndpointState } from './pages/endpoint_hosts/types';
-import { EventFiltersListPageState } from './pages/event_filters/types';
 
 /**
  * The type for the management store global namespace. Used mostly internally to reference
@@ -20,7 +19,6 @@ export type ManagementStoreGlobalNamespace = 'management';
 export type ManagementState = CombinedState<{
   policyDetails: PolicyDetailsState;
   endpoints: EndpointState;
-  eventFilters: EventFiltersListPageState;
 }>;
 
 /**
