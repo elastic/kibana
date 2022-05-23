@@ -27,8 +27,20 @@ export interface ScoreTrendDoc {
 
 export const getTrendsQuery = () => ({
   index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-  size: 5,
+  size: 99,
   sort: '@timestamp:desc',
+  query: {
+    bool: {
+      must: {
+        range: {
+          '@timestamp': {
+            gte: 'now-1d',
+            lte: 'now',
+          },
+        },
+      },
+    },
+  },
 });
 
 export type Trends = Array<{
