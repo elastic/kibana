@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { kueryRt, rangeRt } from '../default_api_types';
@@ -81,20 +82,22 @@ const serviceGroupSaveRoute = createApmServerRoute({
   handler: async (resources): Promise<void> => {
     const { context, params } = resources;
     const { start, end, serviceGroupId } = params.query;
-    const [core, setup] = await Promise.all([
-      context.core,
-      setupRequest(resources),
-    ]);
     const {
       savedObjects: { client: savedObjectsClient },
       uiSettings: { client: uiSettingsClient },
-    } = core;
+    } = await context.core;
+    const [setup, maxNumberOfServices] = await Promise.all([
+      setupRequest(resources),
+      uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
+    ]);
+
     const items = await lookupServices({
       setup,
       uiSettingsClient,
       kuery: params.body.kuery,
       start,
       end,
+      maxNumberOfServices,
     });
     const serviceNames = items.map(({ serviceName }): string => serviceName);
     const serviceGroup: ServiceGroup = {
@@ -141,19 +144,20 @@ const serviceGroupServicesRoute = createApmServerRoute({
   ): Promise<{ items: Awaited<ReturnType<typeof lookupServices>> }> => {
     const { params, context } = resources;
     const { kuery = '', start, end } = params.query;
-    const [core, setup] = await Promise.all([
-      context.core,
-      setupRequest(resources),
-    ]);
     const {
       uiSettings: { client: uiSettingsClient },
-    } = core;
+    } = await context.core;
+    const [setup, maxNumberOfServices] = await Promise.all([
+      setupRequest(resources),
+      uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
+    ]);
     const items = await lookupServices({
       setup,
       uiSettingsClient,
       kuery,
       start,
       end,
+      maxNumberOfServices,
     });
     return { items };
   },
