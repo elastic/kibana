@@ -382,7 +382,7 @@ describe('JobsHealthService', () => {
             },
           ],
           message:
-            'Job test_job_01 reached the hard model memory limit. Assign the job more memory and restore from a snapshot from prior to reaching the hard limit.',
+            'Job test_job_01 reached the hard model memory limit. Assign more memory to the job and restore it from a snapshot taken prior to reaching the hard limit.',
         },
       },
       {
