@@ -8,11 +8,7 @@
 
 import { Stream } from 'stream';
 import zlib from 'zlib';
-
-// TODO: Replace these with kbn packaged versions once we have those available to us
-// These originally came from this location below before moving them to this hacked "any" types:
-// import type { Headers } from '@kbn/core/server';
-type Headers = Record<string, unknown>;
+import { IncomingHttpHeaders } from 'http';
 
 import { acceptCompression } from './accept_compression';
 
@@ -33,10 +29,18 @@ interface StreamFactoryReturnType<T = unknown> {
   push: (d: T) => void;
   responseWithHeaders: {
     body: zlib.Gzip | ResponseStream;
-    headers?: Headers;
+    headers?: IncomingHttpHeaders;
   };
 }
 
+/**
+ * Overload to set up a string based response stream with support
+ * for gzip compression depending on provided request headers.
+ *
+ * @param headers - Request headers.
+ * @returns An object with stream attributes and methods.
+ */
+export function streamFactory<T = string>(headers: IncomingHttpHeaders): StreamFactoryReturnType<T>;
 /**
  * Sets up a response stream with support for gzip compression depending on provided
  * request headers. Any non-string data pushed to the stream will be stream as NDJSON.
@@ -44,8 +48,9 @@ interface StreamFactoryReturnType<T = unknown> {
  * @param headers - Request headers.
  * @returns An object with stream attributes and methods.
  */
-export function streamFactory<T = string>(headers: Headers): StreamFactoryReturnType<T>;
-export function streamFactory<T = unknown>(headers: Headers): StreamFactoryReturnType<T> {
+export function streamFactory<T = unknown>(
+  headers: IncomingHttpHeaders
+): StreamFactoryReturnType<T> {
   let streamType: StreamType;
   const isCompressed = acceptCompression(headers);
 

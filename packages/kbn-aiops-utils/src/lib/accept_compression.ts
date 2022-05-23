@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-// TODO: Replace these with kbn packaged versions once we have those available to us
-// These originally came from this location below before moving them to this hacked "any" types:
-// import type { Headers } from '@kbn/core/server';
-type Headers = Record<string, unknown>;
+import { IncomingHttpHeaders } from 'http';
 
 /**
  * Returns whether request headers accept a response using gzip compression.
@@ -17,7 +14,7 @@ type Headers = Record<string, unknown>;
  * @param headers - Request headers.
  * @returns boolean
  */
-export function acceptCompression(headers: Headers) {
+export function acceptCompression(headers: IncomingHttpHeaders) {
   let compressed = false;
 
   Object.keys(headers).forEach((key) => {

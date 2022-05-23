@@ -20,12 +20,18 @@ import {
 import { fetchStream } from './fetch_stream';
 import { stringReducer, StringReducer } from './string_reducer';
 
+/**
+ * Custom hook type definition of the base params for an NDJSON stream with custom reducer.
+ */
 export interface UseFetchStreamCustomReducerParams {
   endpoint: string;
   body: object;
   reducer: Reducer<any, any>;
 }
 
+/**
+ * Custom hook type definition of the base params for a string base stream without a custom reducer.
+ */
 export interface UseFetchStreamParamsDefault {
   endpoint: string;
   body: object;
@@ -58,6 +64,14 @@ export function useFetchStream<
   options: { reducer: I['reducer']; initialState: ReducerState<I['reducer']> }
 ): UseFetchStreamReturnType<ReducerState<I['reducer']>, ReducerAction<I['reducer']>>;
 
+/**
+ * Custom hook to receive streaming data.
+ *
+ * @param endpoint - API endpoint including Kibana base path.
+ * @param body - API request body.
+ * @param options - Optional custom reducer and initial state.
+ * @returns An object with streaming data and methods act on the stream.
+ */
 export function useFetchStream<I extends UseFetchStreamParamsDefault, BasePath extends string>(
   endpoint: `${BasePath}${I['endpoint']}`,
   body: I['body'],
