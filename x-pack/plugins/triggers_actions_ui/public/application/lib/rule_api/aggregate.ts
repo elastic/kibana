@@ -44,6 +44,16 @@ export async function loadRuleTags({ http }: { http: HttpSetup }): Promise<RuleT
   return rewriteTagsBodyRes(res);
 }
 
+export interface LoadRuleAggregationsProps {
+  http: HttpSetup;
+  searchText?: string;
+  typesFilter?: string[];
+  actionTypesFilter?: string[];
+  ruleExecutionStatusesFilter?: string[];
+  ruleStatusesFilter?: RuleStatus[];
+  tagsFilter?: string[];
+}
+
 export async function loadRuleAggregations({
   http,
   searchText,
@@ -52,15 +62,7 @@ export async function loadRuleAggregations({
   ruleExecutionStatusesFilter,
   ruleStatusesFilter,
   tagsFilter,
-}: {
-  http: HttpSetup;
-  searchText?: string;
-  typesFilter?: string[];
-  actionTypesFilter?: string[];
-  ruleExecutionStatusesFilter?: string[];
-  ruleStatusesFilter?: RuleStatus[];
-  tagsFilter?: string[];
-}): Promise<RuleAggregations> {
+}: LoadRuleAggregationsProps): Promise<RuleAggregations> {
   const filters = mapFiltersToKql({
     typesFilter,
     actionTypesFilter,

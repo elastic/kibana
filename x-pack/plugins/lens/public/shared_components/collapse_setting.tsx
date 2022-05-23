@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiFormRow, EuiIcon, EuiSelect, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -26,7 +26,22 @@ export function CollapseSetting({
 }) {
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.lens.collapse.label', { defaultMessage: 'Collapse by' })}
+      label={
+        <EuiToolTip
+          delay="long"
+          position="top"
+          content={i18n.translate('xpack.lens.collapse.infoIcon', {
+            defaultMessage:
+              'Do not show this dimension in the visualization and aggregate all metric values which have the same value for this dimension into a single number.',
+          })}
+        >
+          <span>
+            {i18n.translate('xpack.lens.collapse.label', { defaultMessage: 'Collapse by' })}
+            {''}
+            <EuiIcon type="questionInCircle" color="subdued" size="s" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      }
       display="columnCompressed"
       fullWidth
     >
