@@ -7,9 +7,14 @@
  */
 
 import { SavedObjectReference } from '@kbn/core/types';
-import { MigrateFunctionsObject, VersionedState } from '@kbn/kibana-utils-plugin/common';
+import {
+  mergeMigrationFunctionMaps,
+  MigrateFunctionsObject,
+  VersionedState,
+} from '@kbn/kibana-utils-plugin/common';
 import type { QueryState } from './query_state';
 import * as filtersPersistableState from './filters/persistable_state';
+import { mapValues } from 'lodash';
 
 export const extract = (queryState: QueryState) => {
   const references: SavedObjectReference[] = [];
@@ -56,5 +61,17 @@ export const migrateToLatest = ({ state, version }: VersionedState<QueryState>) 
 };
 
 export const getAllMigrations = (): MigrateFunctionsObject => {
-  return {};
+  const queryMigrations: MigrateFunctionsObject = {};
+
+  const filterMigrations: MigrateFunctionsObject = mapValues(
+    filtersPersistableState.getAllMigrations(),
+    (migrate) => {
+      return (state: QueryState) => ({
+        ...state,
+        filters: migrate(state.filters ?? []),
+      });
+    }
+  );
+
+  return mergeMigrationFunctionMaps(queryMigrations, filterMigrations);
 };

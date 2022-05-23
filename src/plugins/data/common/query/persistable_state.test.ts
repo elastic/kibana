@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { extract, inject } from './persistable_state';
+import { extract, inject, getAllMigrations } from './persistable_state';
 import { Filter } from '@kbn/es-query';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { QueryState } from './query_state';
@@ -54,6 +54,12 @@ describe('query service persistable state tests', () => {
       expect(state.query).toEqual(queryState.query);
       expect(state.time).toEqual(queryState.time);
       expect(state.refreshInterval).toEqual(queryState.refreshInterval);
+    });
+  });
+
+  describe('migrations', () => {
+    test('getAllMigrations', () => {
+      expect(getAllMigrations()).toEqual({});
     });
   });
 });
