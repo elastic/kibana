@@ -1,6 +1,23 @@
 # @kbn/handlebars
 
-A custom version of the handlebars package which, to improve security, does not use `eval` or `new Function`. This means that templates can't be compiled in advance and hence, rendering the templates is a lot slower.
+A custom version of the handlebars package which, to improve security, does not use `eval` or `new Function`. This means that templates can't be compiled into JavaScript functions in advance and hence, rendering the templates is a lot slower.
+
+## Limitations
+
+- Only the following compile options are supported:
+  - `knownHelpers`
+  - `knownHelpersOnly`
+  - `strict`
+  - `assumeObjects`
+  - `noEscape`
+  - `data`
+
+- Only the following runtime options are supported:
+  - `helpers`
+  - `blockParams`
+  - `data`
+
+The [Inline partials](https://handlebarsjs.com/guide/partials.html#inline-partials) handlebars template feature is currently not supported by `@kbn/handlebars`.
 
 ## Implementation differences
 
@@ -31,7 +48,7 @@ The `@kbn/handlebars` implementation of the `Visitor` class implements all the n
 
 To parse the template string to an AST representation, we call `Handlebars.parse(templateString)`, which returns an AST object.
 
-The AST object contains a bunch of nodes, one for each element of the template string, all arranged in a tree-like structure. The root of the AST object is a node of type `Program`. This is a special node, which we do not need to worry about, but each of its direct children has a type named like the method which will be called when the walking algorithm reaching that node, e.g. `ContentStatement` or `BlockStatement`. These are the methods that our `Visitor` implementation implements.
+The AST object contains a bunch of nodes, one for each element of the template string, all arranged in a tree-like structure. The root of the AST object is a node of type `Program`. This is a special node, which we do not need to worry about, but each of its direct children has a type named like the method which will be called when the walking algorithm reaches that node, e.g. `ContentStatement` or `BlockStatement`. These are the methods that our `Visitor` implementation implements.
 
 To instruct our `ElasticHandlebarsVisitor` class to start walking the AST object, we call the `accept()` method inherited from the parent `Visitor` class with the main AST object. The `Visitor` will walk each node in turn that is directly attached to the root `Program` node. For each node it traverses, it will call the matching method in our `ElasticHandlebarsVisitor` class.
 
@@ -61,6 +78,8 @@ Once all updates have been manually merged with our versions of the files, run t
 ```
 
 This will update the `.patch` files inside the `packages/kbn-handlebars/.patches` directory. Make sure to commit those changes.
+
+_Note: If we manually make changes to our test files in the `upstream` directory, we need to run the `update_test_patches.sh` script as well._
 
 ## Debugging
 
