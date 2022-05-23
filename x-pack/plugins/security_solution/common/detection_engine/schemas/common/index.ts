@@ -6,4 +6,5 @@
  */
 
 export * from './rule_monitoring';
+export * from './rule_params';
 export * from './schemas';
