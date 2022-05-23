@@ -12,6 +12,7 @@ import {
   createServiceError,
   getObjectValueByKey,
   getPushedDate,
+  makeIncidentUrl,
   removeSlash,
   replaceComment,
   replaceSumDesc,
@@ -42,7 +43,7 @@ export const createExternalService = (
   const {
     createCommentJson,
     createCommentMethod,
-    createCommentUrl: createCommentUrlConfig,
+    createCommentUrl,
     createIncidentJson,
     createIncidentMethod,
     createIncidentResponseKey,
@@ -50,30 +51,18 @@ export const createExternalService = (
     getIncidentResponseCreatedDateKey,
     getIncidentResponseExternalTitleKey,
     getIncidentResponseUpdatedDateKey,
-    getIncidentUrl: getIncidentUrlConfig,
+    getIncidentUrl,
     incidentViewUrl,
     updateIncidentJson,
     updateIncidentMethod,
-    updateIncidentUrl: updateIncidentUrlConfig,
+    updateIncidentUrl,
   } = config as CasesWebhookPublicConfigurationType;
   const { password, user } = secrets as CasesWebhookSecretConfigurationType;
-  if (!getIncidentUrlConfig || !password || !user) {
+  if (!getIncidentUrl || !password || !user) {
     throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
   }
 
-  const createCommentUrl = removeSlash(createCommentUrlConfig);
   const createIncidentUrl = removeSlash(createIncidentUrlConfig);
-  const getIncidentUrl = removeSlash(getIncidentUrlConfig);
-  const updateIncidentUrl = removeSlash(updateIncidentUrlConfig);
-
-  const getIncidentViewURL = (id: string) =>
-    `${
-      incidentViewUrl.endsWith('=')
-        ? incidentViewUrl
-        : incidentViewUrl.endsWith('/')
-        ? incidentViewUrl
-        : `${incidentViewUrl}/`
-    }${id}`;
 
   const axiosInstance = axios.create({
     auth: { username: user, password },
@@ -83,11 +72,16 @@ export const createExternalService = (
     try {
       const res = await request({
         axios: axiosInstance,
-        url: `${getIncidentUrl}/${id}`,
+        url: makeIncidentUrl(getIncidentUrl, id),
         logger,
         configurationUtilities,
       });
-
+      console.log({
+        getIncidentResponseCreatedDateKey,
+        getIncidentResponseExternalTitleKey,
+        getIncidentResponseUpdatedDateKey,
+      });
+      // console.log(res);
       throwIfResponseIsNotValidSpecial({
         res,
         requiredAttributesToBeInTheResponse: [
@@ -100,7 +94,7 @@ export const createExternalService = (
       const title = getObjectValueByKey(res.data, getIncidentResponseExternalTitleKey);
       const created = getObjectValueByKey(res.data, getIncidentResponseCreatedDateKey);
       const updated = getObjectValueByKey(res.data, getIncidentResponseUpdatedDateKey);
-
+      console.log('GET RESPONSE', { id, title, created, updated });
       return { id, title, created, updated };
     } catch (error) {
       throw createServiceError(error, 'Unable to get incident');
@@ -135,7 +129,7 @@ export const createExternalService = (
       return {
         id: incidentId,
         title: insertedIncident.title,
-        url: getIncidentViewURL(incidentId),
+        url: makeIncidentUrl(incidentViewUrl, incidentId, insertedIncident.title),
         pushedDate: getPushedDate(insertedIncident.created),
       };
     } catch (error) {
@@ -151,7 +145,7 @@ export const createExternalService = (
       const res = await request({
         axios: axiosInstance,
         method: updateIncidentMethod,
-        url: `${updateIncidentUrl}/${incidentId}`,
+        url: makeIncidentUrl(updateIncidentUrl, incidentId),
         logger,
         data: replaceSumDesc(updateIncidentJson, incident.summary, incident.description),
         configurationUtilities,
@@ -166,7 +160,7 @@ export const createExternalService = (
       return {
         id: incidentId,
         title: updatedIncident.title,
-        url: getIncidentViewURL(incidentId),
+        url: makeIncidentUrl(incidentViewUrl, incidentId, updatedIncident.title),
         pushedDate: getPushedDate(updatedIncident.updated),
       };
     } catch (error) {
@@ -179,7 +173,7 @@ export const createExternalService = (
       const res = await request({
         axios: axiosInstance,
         method: createCommentMethod,
-        url: `${createCommentUrl}/${incidentId}`,
+        url: makeIncidentUrl(createCommentUrl, incidentId),
         logger,
         data: replaceComment(createCommentJson, comment.comment),
         configurationUtilities,

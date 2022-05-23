@@ -19,9 +19,12 @@ export const createServiceError = (error: any, message: string) =>
   );
 export const getPushedDate = (timestamp?: string) => {
   if (timestamp != null) {
-    return new Date(addTimeZoneToDate(timestamp)).toISOString();
+    try {
+      return new Date(timestamp).toISOString();
+    } catch (e) {
+      return new Date(addTimeZoneToDate(timestamp)).toISOString();
+    }
   }
-
   return new Date().toISOString();
 };
 
@@ -113,6 +116,15 @@ export const replaceSumDesc = (stringifiedJson: string, sum?: string, desc?: str
     str = str.replace('$DESC', desc);
   }
   return JSON.parse(str);
+};
+
+export const makeIncidentUrl = (url: string, id: string, title?: string) => {
+  let str = url;
+  str = str.replace('$ID', id);
+  if (title != null) {
+    str = str.replace('$TITLE', title);
+  }
+  return str;
 };
 
 export const replaceComment = (stringifiedJson: string, comment: string) => {

@@ -427,7 +427,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
               'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentUrlTextFieldLabel',
               {
                 defaultMessage:
-                  'API URL to GET incident details JSON from external system. Withold the ID from the URL as Kibana will dynamically insert the id based on the provided Create Incident Response Incident Key.',
+                  'API URL to GET incident details JSON from external system. Use $ID and Kibana will dynamically update the url with the external incident id.',
               }
             )}
           >
@@ -579,7 +579,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
               'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.incidentViewUrlTextFieldLabel',
               {
                 defaultMessage:
-                  'URL to view incident in external system. Withold the ID from the URL as Kibana will dynamically insert the id based on the provided Create Incident Response Incident Key.',
+                  'URL to view incident in external system. Use $ID or $TITLE and Kibana will dynamically update the url with the external incident id or external incident title.',
               }
             )}
           >
@@ -642,7 +642,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
               'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.updateIncidentUrlTextFieldLabel',
               {
                 defaultMessage:
-                  'API URL to update incident. Withold the ID from the URL as Kibana will dynamically insert the id based on the provided Create Incident Response Incident Key.',
+                  'API URL to update incident. Use $ID and Kibana will dynamically update the url with the external incident id.',
               }
             )}
           >
@@ -753,7 +753,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
               'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.createCommentUrlTextFieldLabel',
               {
                 defaultMessage:
-                  'API URL to add comment to incident. Withold the ID from the URL as Kibana will dynamically insert the id based on the provided Create Incident Response Incident Key.',
+                  'API URL to add comment to incident. Use $ID and Kibana will dynamically update the url with the external incident id.',
               }
             )}
           >
