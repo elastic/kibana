@@ -6,6 +6,7 @@
   "requiredPlugins": [
     "data",
     "expressions",
+    "fieldFormats",
     "uiActions",
     "urlForwarding",
     "navigation",

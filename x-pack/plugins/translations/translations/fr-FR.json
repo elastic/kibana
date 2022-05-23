@@ -6821,7 +6821,6 @@
     "visualizations.function.xyDimension.params.help": "Paramètres",
     "visualizations.function.xyDimension.visDimension.help": "Configuration de l'objet dimension",
     "visualizations.helpMenu.appName": "Bibliothèque Visualize",
-    "visualizations.initializeWithoutIndexPatternErrorMessage": "Tentative d'initialisation des agrégations sans modèle d'indexation",
     "visualizations.legacyCharts.conditionalMessage.noPermissions": "Contactez votre administrateur système pour passer à l'ancienne bibliothèque.",
     "visualizations.legacyUrlConflict.objectNoun": "Visualisation {visName}",
     "visualizations.linkedToSearch.unlinkSuccessNotificationText": "Dissocié de la recherche enregistrée \"{searchTitle}\"",

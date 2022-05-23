@@ -6934,7 +6934,6 @@
     "visualizations.function.xyDimension.params.help": "参数",
     "visualizations.function.xyDimension.visDimension.help": "维度对象配置",
     "visualizations.helpMenu.appName": "Visualize 库",
-    "visualizations.initializeWithoutIndexPatternErrorMessage": "正在尝试在不使用索引模式的情况下初始化聚合",
     "visualizations.legacyCharts.conditionalMessage.noPermissions": "请联系您的系统管理员以切换到旧库。",
     "visualizations.legacyUrlConflict.objectNoun": "{visName} 可视化",
     "visualizations.linkedToSearch.unlinkSuccessNotificationText": "已取消与已保存搜索“{searchTitle}”的链接",
