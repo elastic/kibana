@@ -6,7 +6,8 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
 
 import { UsersTabsProps } from './types';
 import { UsersTableType } from '../store/model';
