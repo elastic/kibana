@@ -25,7 +25,7 @@ import {
 import { NoPrivilegesPage } from '../no_privileges';
 import * as i18n from './translations';
 import { useReadonlyHeader } from './use_readonly_header';
-import { casesQueryClient } from '../cases_context';
+import { casesQueryClient } from '../cases_context/query_client';
 
 const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   onComponentInitialized,

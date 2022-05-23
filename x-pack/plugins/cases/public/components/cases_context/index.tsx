@@ -7,7 +7,6 @@
 
 import React, { useState, useEffect, useReducer, Dispatch } from 'react';
 import { merge } from 'lodash';
-import { QueryClient } from 'react-query';
 import { DEFAULT_FEATURES } from '../../../common/constants';
 import { DEFAULT_BASE_PATH } from '../../common/navigation';
 import { useApplication } from './use_application';
@@ -45,8 +44,6 @@ export interface CasesContextStateValue extends Omit<CasesContextValue, 'appId' 
   appId?: string;
   appTitle?: string;
 }
-
-export const casesQueryClient = new QueryClient();
 
 export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
   children,
