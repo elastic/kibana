@@ -29,7 +29,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
       await PageObjects.home.addSampleDataSet('ecommerce');
       await PageObjects.home.addSampleDataSet('flights');
       await PageObjects.home.addSampleDataSet('logs');
-      
+
       // Sample data is shifted to be relative to current time
       // This means that a static timerange will return different documents
       // Setting the time range to a window larger than the sample data set
