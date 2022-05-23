@@ -17,6 +17,11 @@ describe('isConnectorDeprecated', () => {
     isPreconfigured: false as const,
   };
 
+  it('returns false if the config is not defined', () => {
+    // @ts-expect-error
+    expect(isConnectorDeprecated({})).toBe(false);
+  });
+
   it('returns false if the connector is not ITSM or SecOps', () => {
     expect(isConnectorDeprecated(connector)).toBe(false);
   });
@@ -45,6 +50,26 @@ describe('isConnectorDeprecated', () => {
         ...connector,
         actionTypeId: '.servicenow-sir',
         config: { ...connector.config, usesTableApi: true },
+      })
+    ).toBe(true);
+  });
+
+  it('returns true if the connector is .servicenow and the usesTableApi is omitted', () => {
+    expect(
+      isConnectorDeprecated({
+        ...connector,
+        actionTypeId: '.servicenow',
+        config: { apiUrl: 'http://example.com' },
+      })
+    ).toBe(true);
+  });
+
+  it('returns true if the connector is .servicenow-sir and the usesTableApi is omitted', () => {
+    expect(
+      isConnectorDeprecated({
+        ...connector,
+        actionTypeId: '.servicenow-sir',
+        config: { apiUrl: 'http://example.com' },
       })
     ).toBe(true);
   });
