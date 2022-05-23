@@ -34,7 +34,7 @@ export const createIndicatorMatchAlertType = (
           return validated;
         },
         /**
-         * validate rule params when rule is updated (for created in future as well)
+         * validate rule params when rule is bulk edited (update and created in future as well)
          * returned params can be modified (useful in case of version increment)
          * @param mutatedRuleParams
          * @returns mutatedRuleParams
