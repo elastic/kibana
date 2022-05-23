@@ -6,9 +6,14 @@
  * Side Public License, v 1.
  */
 
+import type { IncomingHttpHeaders } from 'http';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs/operators';
-import { SqlGetAsyncRequest, SqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
+import {
+  SqlGetAsyncRequest,
+  SqlQueryRequest,
+  SqlQueryResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type {
@@ -46,6 +51,9 @@ export const sqlSearchStrategyProvider = (
     const sessionConfig = null;
 
     const search = async () => {
+      let body: SqlQueryResponse;
+      let headers: IncomingHttpHeaders;
+
       if (id) {
         const params: SqlGetAsyncRequest = {
           format: request.params?.format ?? 'json',
@@ -53,12 +61,10 @@ export const sqlSearchStrategyProvider = (
           id,
         };
 
-        const { body, headers } = await client.sql.getAsync(params, {
+        ({ body, headers } = await client.sql.getAsync(params, {
           signal: options.abortSignal,
           meta: true,
-        });
-
-        return toAsyncKibanaSearchResponse(body, headers?.warning);
+        }));
       } else {
         const params: SqlQueryRequest = {
           format: request.params?.format ?? 'json',
@@ -66,13 +72,23 @@ export const sqlSearchStrategyProvider = (
           ...request.params,
         };
 
-        const { headers, body } = await client.sql.query(params, {
+        ({ headers, body } = await client.sql.query(params, {
           signal: options.abortSignal,
           meta: true,
-        });
-
-        return toAsyncKibanaSearchResponse(body, headers?.warning);
+        }));
       }
+
+      if (!body.is_partial && !body.is_running && body.cursor) {
+        try {
+          await client.sql.clearCursor({ cursor: body.cursor });
+        } catch (error) {
+          logger.warn(
+            `sql search: failed to clear cursor=${body.cursor} for async_search_id=${id}: ${error.message}`
+          );
+        }
+      }
+
+      return toAsyncKibanaSearchResponse(body, headers?.warning);
     };
 
     const cancel = async () => {
