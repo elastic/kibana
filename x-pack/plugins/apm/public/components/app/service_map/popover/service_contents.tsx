@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { NodeDataDefinition } from 'cytoscape';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import type { ContentsProps } from '.';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
@@ -34,10 +35,11 @@ const INITIAL_STATE: ServiceNodeReturn = {
 
 export function ServiceContents({
   onFocusClick,
-  nodeData,
+  elementData,
   environment,
   kuery,
 }: ContentsProps) {
+  const nodeData = elementData as NodeDataDefinition;
   const apmRouter = useApmRouter();
 
   const { query } = useApmParams('/*');
