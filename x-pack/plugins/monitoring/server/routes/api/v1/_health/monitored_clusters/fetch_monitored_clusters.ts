@@ -27,6 +27,11 @@ interface MonitoredClustersResponse {
   };
 }
 
+/**
+ * executes multiple search requests to build a representation of the monitoring
+ * documents. the queries aggregations are built with a similar hierarchy so
+ * we can merge them to a single output
+ */
 export const fetchMonitoredClusters = async ({
   timeout,
   monitoringIndex,
