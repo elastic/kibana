@@ -20,6 +20,7 @@ describe('ActionContext', () => {
       timeWindowUnit: 'm',
       thresholdComparator: '>',
       threshold: [4],
+      searchType: 'esQuery',
     }) as OnlyEsQueryAlertParams;
     const base: EsQueryAlertActionContext = {
       date: '2020-01-01T00:00:00.000Z',
@@ -50,6 +51,7 @@ describe('ActionContext', () => {
       timeWindowUnit: 'm',
       thresholdComparator: 'between',
       threshold: [4, 5],
+      searchType: 'esQuery',
     }) as OnlyEsQueryAlertParams;
     const base: EsQueryAlertActionContext = {
       date: '2020-01-01T00:00:00.000Z',

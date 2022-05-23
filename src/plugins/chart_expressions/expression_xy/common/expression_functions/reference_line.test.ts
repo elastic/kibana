@@ -14,6 +14,7 @@ describe('referenceLine', () => {
   test('produces the correct arguments for minimum arguments', async () => {
     const args: ReferenceLineArgs = {
       value: 100,
+      fill: 'above',
     };
 
     const result = referenceLineFunction.fn(null, args, createMockExecutionContext());
@@ -67,6 +68,7 @@ describe('referenceLine', () => {
     const args: ReferenceLineArgs = {
       name: 'some name',
       value: 100,
+      fill: 'none',
     };
 
     const result = referenceLineFunction.fn(null, args, createMockExecutionContext());
@@ -90,6 +92,7 @@ describe('referenceLine', () => {
     const args: ReferenceLineArgs = {
       value: 100,
       textVisibility: true,
+      fill: 'none',
     };
 
     const result = referenceLineFunction.fn(null, args, createMockExecutionContext());
@@ -115,6 +118,7 @@ describe('referenceLine', () => {
         value: 100,
         name: 'some text',
         textVisibility,
+        fill: 'none',
       };
 
       const result = referenceLineFunction.fn(null, args, createMockExecutionContext());

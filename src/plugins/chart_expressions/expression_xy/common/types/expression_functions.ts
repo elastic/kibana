@@ -297,9 +297,10 @@ export type ExtendedAnnotationLayerConfigResult = ExtendedAnnotationLayerArgs & 
   layerType: typeof LayerTypes.ANNOTATIONS;
 };
 
-export interface ReferenceLineArgs extends Omit<ExtendedYConfig, 'forAccessor'> {
+export interface ReferenceLineArgs extends Omit<ExtendedYConfig, 'forAccessor' | 'fill'> {
   name?: string;
   value: number;
+  fill: FillStyle;
 }
 
 export interface ReferenceLineLayerArgs {
