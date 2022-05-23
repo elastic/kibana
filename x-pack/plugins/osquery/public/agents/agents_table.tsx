@@ -7,7 +7,7 @@
 
 import { find } from 'lodash/fp';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { EuiComboBox, EuiHealth, EuiHighlight, EuiSpacer } from '@elastic/eui';
+import { EuiComboBox, EuiHealth, EuiFormRow, EuiHighlight, EuiSpacer } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 
 import useDebounce from 'react-use/lib/useDebounce';
@@ -190,18 +190,20 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
 
   return (
     <div>
-      <EuiComboBox
-        data-test-subj="agentSelection"
-        placeholder={SELECT_AGENT_LABEL}
-        isLoading={modifyingSearch || groupsLoading || agentsLoading}
-        options={options}
-        isClearable={true}
-        fullWidth={true}
-        onSearchChange={onSearchChange}
-        selectedOptions={selectedOptions}
-        onChange={onSelection}
-        renderOption={renderOption}
-      />
+      <EuiFormRow label={AGENT_SELECTION_LABEL} fullWidth>
+        <EuiComboBox
+          data-test-subj="agentSelection"
+          placeholder={SELECT_AGENT_LABEL}
+          isLoading={modifyingSearch || groupsLoading || agentsLoading}
+          options={options}
+          isClearable={true}
+          fullWidth={true}
+          onSearchChange={onSearchChange}
+          selectedOptions={selectedOptions}
+          onChange={onSelection}
+          renderOption={renderOption}
+        />
+      </EuiFormRow>
       <EuiSpacer size="xs" />
       {numAgentsSelected > 0 ? <span>{generateSelectedAgentsMessage(numAgentsSelected)}</span> : ''}
     </div>

@@ -13,7 +13,7 @@ export const BIG_QUERY = 'select * from processes, users limit 200;';
 export const selectAllAgents = () => {
   cy.react('AgentsTable').find('input').should('not.be.disabled');
   cy.react('AgentsTable EuiComboBox', {
-    props: { placeholder: 'Select agents or groups' },
+    props: { placeholder: 'Select agents or groups to query' },
   }).click();
   cy.react('EuiFilterSelectItem').contains('All agents').should('exist');
   cy.react('AgentsTable EuiComboBox').type('{downArrow}{enter}{esc}');

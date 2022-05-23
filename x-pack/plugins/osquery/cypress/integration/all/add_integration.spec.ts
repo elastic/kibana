@@ -101,7 +101,9 @@ describe('ALL - Add Integration', () => {
     findFormFieldByRowsLabelAndType('Name', 'Integration');
     findFormFieldByRowsLabelAndType('Scheduled agent policies (optional)', '{downArrow} {enter}');
     findAndClickButton('Add query');
-    cy.react('EuiComboBox', { props: { placeholder: 'Search for saved queries' } })
+    cy.react('EuiComboBox', {
+      props: { placeholder: 'Search for a query to run, or write a new query below' },
+    })
       .click()
       .type('{downArrow} {enter}');
     cy.contains(/^Save$/).click();

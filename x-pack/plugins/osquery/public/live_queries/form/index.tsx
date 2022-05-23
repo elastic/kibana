@@ -254,7 +254,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
                   disabled={isSavedQueryDisabled}
                   onChange={handleSavedQueryChange}
                 />
-                <EuiSpacer />
               </>
             )}
             <UseField
