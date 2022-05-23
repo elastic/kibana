@@ -23,7 +23,7 @@ export const InstallStandaloneAgentStep = ({
 }: {
   installCommand: CommandsByPlatform;
   isK8s?: K8sMode;
-  isComplete: boolean;
+  isComplete?: boolean;
 }): EuiContainedStepProps => {
   return {
     title: i18n.translate('xpack.fleet.agentEnrollment.stepEnrollAndRunAgentTitle', {
