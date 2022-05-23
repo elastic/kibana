@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React from 'react';
 import type { AppDataType } from '../../../shared/exploratory_view/types';
 import { SectionContainer } from '..';
 import { getDataHandler } from '../../../../data_handler';
@@ -17,6 +17,7 @@ import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import CoreVitals from '../../../shared/core_web_vitals';
 import { BucketSize } from '../../../../pages/overview';
 import { getExploratoryViewEmbeddable } from '../../../shared/exploratory_view/embeddable';
+import { AllSeries } from '../../../shared/exploratory_view/hooks/use_series_storage';
 
 interface Props {
   bucketSize: BucketSize;
@@ -30,12 +31,9 @@ export function UXSection({ bucketSize }: Props) {
   const uxHasDataResponse = hasDataMap.ux;
   const serviceName = uxHasDataResponse?.serviceName as string;
 
-  const ExploratoryViewEmbeddable = useMemo(
-    () => getExploratoryViewEmbeddable(core, plugins),
-    [core, plugins]
-  );
+  const ExploratoryViewEmbeddable = getExploratoryViewEmbeddable(core, plugins);
 
-  const seriesList = [
+  const seriesList: AllSeries = [
     {
       name: PAGE_LOAD_DISTRIBUTION_TITLE,
       time: {
