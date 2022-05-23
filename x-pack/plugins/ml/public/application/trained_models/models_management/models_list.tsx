@@ -274,10 +274,12 @@ export const ModelsList: FC<Props> = ({
       acc.add(item.model_type);
       return acc;
     }, new Set<string>());
-    return [...result].map((v) => ({
-      value: v,
-      name: v,
-    }));
+    return [...result]
+      .sort((a, b) => a.localeCompare(b))
+      .map((v) => ({
+        value: v,
+        name: v,
+      }));
   }, [items]);
 
   /**
