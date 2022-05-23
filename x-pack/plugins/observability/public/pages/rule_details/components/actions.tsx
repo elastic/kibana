@@ -15,24 +15,13 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { intersectionBy } from 'lodash';
+import { suspendedComponentWithProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { ActionsProps } from '../types';
 import { useFetchRuleActions } from '../../../hooks/use_fetch_rule_actions';
 import { useKibana } from '../../../utils/kibana_react';
 
-interface MapActionTypeIcon {
-  [key: string]: string | IconType;
-}
-const mapActionTypeIcon: MapActionTypeIcon = {
-  /* TODO:  Add the rest of the application logs (SVGs ones) */
-  '.server-log': 'logsApp',
-  '.email': 'email',
-  '.pagerduty': 'apps',
-  '.index': 'indexOpen',
-  '.slack': 'logoSlack',
-  '.webhook': 'logoWebhook',
-};
-export function Actions({ ruleActions }: ActionsProps) {
+export function Actions({ ruleActions, actionTypeRegistry }: ActionsProps) {
   const {
     http,
     notifications: { toasts },
@@ -53,22 +42,31 @@ export function Actions({ ruleActions }: ActionsProps) {
         </EuiText>
       </EuiFlexItem>
     );
+
+  function getActionIconClass(actionGroupId?: string): IconType | undefined {
+    const actionGroup = actionTypeRegistry.list().find((group) => group.id === actionGroupId);
+    return typeof actionGroup?.iconClass === 'string'
+      ? actionGroup?.iconClass
+      : suspendedComponentWithProps(actionGroup?.iconClass as React.ComponentType);
+  }
   const actions = intersectionBy(allActions, ruleActions, 'actionTypeId');
   if (isLoadingActions) return <EuiLoadingSpinner size="s" />;
   return (
     <EuiFlexGroup direction="column">
-      {actions.map((action) => (
-        <>
-          <EuiFlexGroup alignItems="baseline">
+      {actions.map(({ actionTypeId, name }) => (
+        <React.Fragment key={actionTypeId}>
+          <EuiFlexGroup alignItems="center" gutterSize="s" component="span">
             <EuiFlexItem grow={false}>
-              <EuiIcon size="m" type={mapActionTypeIcon[action.actionTypeId] ?? 'apps'} />
+              <EuiIcon size="m" type={getActionIconClass(actionTypeId) ?? 'apps'} />
             </EuiFlexItem>
-            <EuiFlexItem style={{ margin: '0px' }}>
-              <EuiText size="s">{action.name}</EuiText>
+            <EuiFlexItem>
+              <EuiText data-test-subj={`actionConnectorName-${name}`} size="s">
+                {name}
+              </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="s" />
-        </>
+        </React.Fragment>
       ))}
     </EuiFlexGroup>
   );

@@ -15,7 +15,8 @@ import { createAddToQueryLog } from './lib';
 import { TimefilterService } from './timefilter';
 import type { TimefilterSetup } from './timefilter';
 import { createSavedQueryService } from './saved_query/saved_query_service';
-import { createQueryStateObservable } from './state_sync/create_global_query_observable';
+import { createQueryStateObservable } from './state_sync/create_query_state_observable';
+import { getQueryState } from './query_state';
 import type { QueryStringContract } from './query_string';
 import { QueryStringManager } from './query_string';
 import { getEsQueryConfig, TimeRange } from '../../common';
@@ -69,6 +70,7 @@ export class QueryService {
       timefilter: this.timefilter,
       queryString: this.queryStringManager,
       state$: this.state$,
+      getState: () => this.getQueryState(),
     };
   }
 
@@ -82,6 +84,7 @@ export class QueryService {
       queryString: this.queryStringManager,
       savedQueries: createSavedQueryService(http),
       state$: this.state$,
+      getState: () => this.getQueryState(),
       timefilter: this.timefilter,
       getEsQuery: (indexPattern: IndexPattern, timeRange?: TimeRange) => {
         const timeFilter = this.timefilter.timefilter.createFilter(indexPattern, timeRange);
@@ -98,6 +101,14 @@ export class QueryService {
 
   public stop() {
     // nothing to do here yet
+  }
+
+  private getQueryState() {
+    return getQueryState({
+      timefilter: this.timefilter,
+      queryString: this.queryStringManager,
+      filterManager: this.filterManager,
+    });
   }
 }
 

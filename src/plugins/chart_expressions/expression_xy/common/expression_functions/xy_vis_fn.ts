@@ -25,9 +25,13 @@ import {
   validateFillOpacity,
   validateMarkSizeRatioLimits,
   validateValueLabels,
+  validateAddTimeMarker,
   validateMinTimeBarInterval,
   validateMarkSizeForChartType,
   validateMarkSizeRatioWithAccessor,
+  validateShowPointsForChartType,
+  validateLineWidthForChartType,
+  validatePointsRadiusForChartType,
 } from './validate';
 
 const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult => {
@@ -42,6 +46,9 @@ const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult 
     isHistogram: args.isHistogram,
     palette: args.palette,
     yConfig: args.yConfig,
+    showPoints: args.showPoints,
+    pointsRadius: args.pointsRadius,
+    lineWidth: args.lineWidth,
     layerType: LayerTypes.DATA,
     table: normalizedTable,
     ...accessors,
@@ -67,6 +74,9 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
     yConfig,
     palette,
     markSizeAccessor,
+    showPoints,
+    pointsRadius,
+    lineWidth,
     ...restArgs
   } = args;
 
@@ -107,6 +117,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   validateExtent(args.yLeftExtent, hasBar || hasArea, dataLayers);
   validateExtent(args.yRightExtent, hasBar || hasArea, dataLayers);
   validateFillOpacity(args.fillOpacity, hasArea);
+  validateAddTimeMarker(dataLayers, args.addTimeMarker);
   validateMinTimeBarInterval(dataLayers, hasBar, args.minTimeBarInterval);
 
   const hasNotHistogramBars = !hasHistogramBarLayer(dataLayers);
@@ -114,6 +125,9 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   validateValueLabels(args.valueLabels, hasBar, hasNotHistogramBars);
   validateMarkSizeRatioWithAccessor(args.markSizeRatio, dataLayers[0].markSizeAccessor);
   validateMarkSizeRatioLimits(args.markSizeRatio);
+  validateLineWidthForChartType(lineWidth, args.seriesType);
+  validateShowPointsForChartType(showPoints, args.seriesType);
+  validatePointsRadiusForChartType(pointsRadius, args.seriesType);
 
   return {
     type: 'render',

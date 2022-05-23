@@ -9,15 +9,15 @@ import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { SecurityPageName } from '../../../../app/types';
 import { TestProviders } from '../../../mock';
-import { NavItem } from './solution_grouped_nav_item';
 import { SolutionGroupedNav, SolutionGroupedNavProps } from './solution_grouped_nav';
+import { SideNavItem } from './types';
 
 const mockUseShowTimeline = jest.fn((): [boolean] => [false]);
 jest.mock('../../../utils/timeline/use_show_timeline', () => ({
   useShowTimeline: () => mockUseShowTimeline(),
 }));
 
-const mockItems: NavItem[] = [
+const mockItems: SideNavItem[] = [
   {
     id: SecurityPageName.dashboardsLanding,
     label: 'Dashboards',
