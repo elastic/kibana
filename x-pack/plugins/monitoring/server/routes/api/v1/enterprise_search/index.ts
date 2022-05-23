@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-// these are the remaining routes not yet converted to TypeScript
-// all others are registered through index.ts
+import { MonitoringCore } from '../../../../types';
+import { entSearchOverviewRoute } from './overview';
 
-// @ts-expect-error
-export { kibanaInstanceRoute, kibanaInstancesRoute, kibanaOverviewRoute } from './kibana';
+export function registerV1EnterpriseSearchRoutes(server: MonitoringCore) {
+  entSearchOverviewRoute(server);
+}
