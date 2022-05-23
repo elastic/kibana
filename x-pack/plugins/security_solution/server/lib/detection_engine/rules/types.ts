@@ -93,6 +93,9 @@ import {
   RuleNameOverrideOrUndefined,
   EventCategoryOverrideOrUndefined,
   NamespaceOrUndefined,
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+  SetupGuide,
 } from '../../../../common/detection_engine/schemas/common';
 
 import { PartialFilter } from '../types';
@@ -161,11 +164,14 @@ export interface CreateRulesOptions {
   interval: Interval;
   license: LicenseOrUndefined;
   maxSignals: MaxSignals;
+  relatedIntegrations: RelatedIntegrationArray | undefined;
+  requiredFields: RequiredFieldArray | undefined;
   riskScore: RiskScore;
   riskScoreMapping: RiskScoreMapping;
   ruleNameOverride: RuleNameOverrideOrUndefined;
   outputIndex: OutputIndex;
   name: Name;
+  setup: SetupGuide | undefined;
   severity: Severity;
   severityMapping: SeverityMapping;
   tags: Tags;
@@ -225,11 +231,14 @@ interface PatchRulesFieldsOptions {
   interval: IntervalOrUndefined;
   license: LicenseOrUndefined;
   maxSignals: MaxSignalsOrUndefined;
+  relatedIntegrations: RelatedIntegrationArray | undefined;
+  requiredFields: RequiredFieldArray | undefined;
   riskScore: RiskScoreOrUndefined;
   riskScoreMapping: RiskScoreMappingOrUndefined;
   ruleNameOverride: RuleNameOverrideOrUndefined;
   outputIndex: OutputIndexOrUndefined;
   name: NameOrUndefined;
+  setup: SetupGuide | undefined;
   severity: SeverityOrUndefined;
   severityMapping: SeverityMappingOrUndefined;
   tags: TagsOrUndefined;
