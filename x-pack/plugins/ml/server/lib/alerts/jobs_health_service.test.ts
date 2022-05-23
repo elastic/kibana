@@ -251,7 +251,7 @@ describe('JobsHealthService', () => {
     expect(executionResult).toEqual([
       {
         context: {
-          message: 'Jobs  contain no errors in the messages.',
+          message: 'No errors in the jobs messages.',
           results: [],
         },
         isHealthy: true,
@@ -412,7 +412,7 @@ describe('JobsHealthService', () => {
         isHealthy: true,
         name: 'Errors in job messages',
         context: {
-          message: 'Jobs  contain no errors in the messages.',
+          message: 'No errors in the jobs messages.',
           results: [],
         },
       },

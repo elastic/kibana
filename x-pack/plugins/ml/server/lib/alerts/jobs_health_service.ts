@@ -482,7 +482,7 @@ export function jobsHealthServiceProvider(
                   'xpack.ml.alertTypes.jobsHealthAlertingRule.errorMessagesRecoveredMessage',
                   {
                     defaultMessage:
-                      '{count, plural, one {Job} other {Jobs}} {jobsString} {count, plural, one {contains} other {contain}} no errors in the messages.',
+                      'No errors in the {count, plural, one {job} other {jobs}} messages.',
                     values: { count, jobsString },
                   }
                 )
