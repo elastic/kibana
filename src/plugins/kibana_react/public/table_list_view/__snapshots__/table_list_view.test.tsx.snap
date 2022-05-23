@@ -129,6 +129,7 @@ exports[`TableListView render list view 1`] = `
         }
       />
     }
+    onChange={[Function]}
     pagination={
       Object {
         "initialPageIndex": 0,
@@ -155,7 +156,11 @@ exports[`TableListView render list view 1`] = `
         "toolsLeft": undefined,
       }
     }
-    sorting={true}
+    sorting={
+      Object {
+        "sort": undefined,
+      }
+    }
     tableCaption="test caption"
     tableLayout="fixed"
   />

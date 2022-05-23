@@ -96,7 +96,7 @@ export const sortExplorationResultsFields = (
 
   if (isClassificationAnalysis(jobConfig.analysis) || isRegressionAnalysis(jobConfig.analysis)) {
     const dependentVariable = getDependentVar(jobConfig.analysis);
-    const predictedField = getPredictedFieldName(resultsField, jobConfig.analysis, true);
+    const predictedField = getPredictedFieldName(resultsField!, jobConfig.analysis, true);
 
     if (a === `${resultsField}.is_training`) {
       return -1;

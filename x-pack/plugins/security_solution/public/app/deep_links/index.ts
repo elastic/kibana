@@ -10,7 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { getCasesDeepLinks } from '@kbn/cases-plugin/public';
-import { AppDeepLink, AppNavLinkStatus, Capabilities } from '@kbn/core/public';
+import { AppDeepLink, AppNavLinkStatus, AppUpdater, Capabilities } from '@kbn/core/public';
+import { Subject } from 'rxjs';
 import { SecurityPageName } from '../types';
 import {
   OVERVIEW,
@@ -63,6 +64,8 @@ import {
   RULES_CREATE_PATH,
 } from '../../../common/constants';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
+import { subscribeAppLinks } from '../../common/links';
+import { AppLinkItems } from '../../common/links/types';
 
 const FEATURE = {
   general: `${SERVER_APP_ID}.show`,
@@ -553,3 +556,37 @@ export function isPremiumLicense(licenseType?: LicenseType): boolean {
     licenseType === 'trial'
   );
 }
+
+/**
+ * New deep links code starts here.
+ * All the code above will be removed once the appLinks migration is over.
+ * The code below manages the new implementation using the unified appLinks.
+ */
+
+const formatDeepLinks = (appLinks: AppLinkItems): AppDeepLink[] =>
+  appLinks.map((appLink) => ({
+    id: appLink.id,
+    path: appLink.path,
+    title: appLink.title,
+    navLinkStatus: appLink.globalNavEnabled ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
+    searchable: !appLink.globalSearchDisabled,
+    ...(appLink.globalSearchKeywords != null ? { keywords: appLink.globalSearchKeywords } : {}),
+    ...(appLink.globalNavOrder != null ? { order: appLink.globalNavOrder } : {}),
+    ...(appLink.links && appLink.links?.length
+      ? {
+          deepLinks: formatDeepLinks(appLink.links),
+        }
+      : {}),
+  }));
+
+/**
+ * Registers any change in appLinks to be updated in app deepLinks
+ */
+export const registerDeepLinksUpdater = (appUpdater$: Subject<AppUpdater>) => {
+  subscribeAppLinks((appLinks) => {
+    appUpdater$.next(() => ({
+      navLinkStatus: AppNavLinkStatus.hidden, // needed to prevent main security link to switch to visible after update
+      deepLinks: formatDeepLinks(appLinks),
+    }));
+  });
+};
