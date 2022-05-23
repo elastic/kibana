@@ -87,7 +87,7 @@ export const normalizeProjectMonitor = ({
       monitor.apmServiceName || defaultFields[ConfigKey.APM_SERVICE_NAME],
     [ConfigKey.IGNORE_HTTPS_ERRORS]:
       monitor.ignoreHTTPSErrors || defaultFields[ConfigKey.IGNORE_HTTPS_ERRORS],
-    [ConfigKey.SCREENSHOTS]: monitor.screenshots || defaultFields[ConfigKey.SCREENSHOTS],
+    [ConfigKey.SCREENSHOTS]: monitor.screenshot || defaultFields[ConfigKey.SCREENSHOTS],
     [ConfigKey.TAGS]: monitor.tags || defaultFields[ConfigKey.TAGS],
     [ConfigKey.PLAYWRIGHT_OPTIONS]: Object.keys(monitor.playwrightOptions || {}).length
       ? JSON.stringify(monitor.playwrightOptions)

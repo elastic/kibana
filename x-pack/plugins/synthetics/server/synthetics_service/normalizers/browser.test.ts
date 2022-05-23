@@ -42,7 +42,7 @@ describe('browser normalizers', () => {
     const monitors: ProjectBrowserMonitor[] = [
       {
         id: 'test-id-1',
-        screenshots: ScreenshotOption.OFF,
+        screenshot: ScreenshotOption.OFF,
         name: 'test-name-1',
         content: 'test content 1',
         schedule: 3,
@@ -58,7 +58,7 @@ describe('browser normalizers', () => {
       },
       {
         id: 'test-id-2',
-        screenshots: ScreenshotOption.ON,
+        screenshot: ScreenshotOption.ON,
         name: 'test-name-2',
         content: 'test content 2',
         schedule: 10,
@@ -76,7 +76,7 @@ describe('browser normalizers', () => {
       },
       {
         id: 'test-id-3',
-        screenshots: ScreenshotOption.ON,
+        screenshot: ScreenshotOption.ON,
         name: 'test-name-3',
         content: 'test content 3',
         schedule: 10,

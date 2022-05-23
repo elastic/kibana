@@ -24,7 +24,7 @@ export const ProjectBrowserMonitorCodec = t.intersection([
   }),
   t.partial({
     throttling: ProjectMonitorThrottlingConfigCodec,
-    screenshots: ScreenshotOptionCodec,
+    screenshot: ScreenshotOptionCodec,
     tags: t.array(t.string),
     ignoreHTTPSErrors: t.boolean,
     apmServiceName: t.string,
