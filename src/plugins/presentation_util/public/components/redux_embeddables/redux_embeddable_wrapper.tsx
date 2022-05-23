@@ -140,6 +140,7 @@ export const ReduxEmbeddableWrapper = <InputType extends EmbeddableInput = Embed
         // if the store already has reducers set up for this embeddable type & id, update the existing state.
         const updateExistingState = (slice.actions as ReduxEmbeddableContextServices['actions'])
           .updateEmbeddableReduxState;
+        // @ts-expect-error update types
         store.dispatch(updateExistingState(initialState));
       } else {
         store.injectReducer({
