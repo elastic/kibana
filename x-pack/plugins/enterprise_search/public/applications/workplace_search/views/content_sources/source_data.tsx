@@ -535,6 +535,11 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.SALESFORCE_SANDBOX,
     serviceType: 'salesforce_sandbox',
+    categories: [
+      SOURCE_CATEGORIES.CRM,
+      SOURCE_CATEGORIES.CUSTOMER_RELATIONSHIP_MANAGEMENT,
+      SOURCE_CATEGORIES.ACCOUNT_MANAGEMENT,
+    ],
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: true,
