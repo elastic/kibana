@@ -305,15 +305,9 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         language: ruleFields.queryBar?.query?.language,
         query: ruleFields.queryBar?.query?.query as string,
         saved_id: ruleFields.queryBar?.saved_id,
-        ...(ruleFields.eqlOptions?.timestampField && {
-          timestamp_field: ruleFields.eqlOptions.timestampField,
-        }),
-        ...(ruleFields.eqlOptions?.eventCategoryField && {
-          event_category_override: ruleFields.eqlOptions.eventCategoryField,
-        }),
-        ...(ruleFields.eqlOptions?.tiebreakerField && {
-          tiebreaker_field: ruleFields.eqlOptions.tiebreakerField,
-        }),
+        timestamp_field: ruleFields.eqlOptions?.timestampField,
+        event_category_override: ruleFields.eqlOptions?.eventCategoryField,
+        tiebreaker_field: ruleFields.eqlOptions?.tiebreakerField,
       }
     : {
         index: ruleFields.index,
