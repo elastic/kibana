@@ -73,8 +73,6 @@ const createBenchmarkScoreIndex = async (
       createScoreIndexSettings,
       logger
     );
-  } else {
-    logger.error(`Index ${indexPattern} not created`);
   }
 };
 
