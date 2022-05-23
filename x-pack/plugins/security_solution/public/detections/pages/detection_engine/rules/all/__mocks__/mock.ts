@@ -195,6 +195,8 @@ export const mockDefineStepRule = (): DefineStepRule => ({
   index: ['filebeat-'],
   queryBar: mockQueryBar,
   threatQueryBar: mockQueryBar,
+  requiredFields: [],
+  relatedIntegrations: [],
   threatMapping: [],
   timeline: {
     id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
