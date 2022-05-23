@@ -11,16 +11,16 @@ import { EuiText, EuiLink, EuiSteps, EuiSpacer } from '@elastic/eui';
 
 import { Error } from '../../../../../../../components';
 import { useKibanaVersion, useStartServices } from '../../../../../../../../../hooks';
-import type { MultiPageStepLayoutProps } from '../../../types';
 import { CreatePackagePolicyBottomBar, NotObscuredByBottomBar } from '../..';
 import {
   InstallManagedAgentStep,
   AgentEnrollmentConfirmationStep,
 } from '../../../../../../../../../components/agent_enrollment_flyout/steps';
-import { usePollingAgentCount } from '../../../../../../../../../components/agent_enrollment_flyout/confirm_agent_enrollment';
 import { ManualInstructions } from '../../../../../../../../../components/enrollment_instructions';
 
-export const InstallElasticAgentManagedPageStep: React.FC<MultiPageStepLayoutProps> = (props) => {
+import type { InstallAgentPageProps } from './types';
+
+export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps> = (props) => {
   const {
     cancelUrl,
     onNext,
@@ -29,15 +29,12 @@ export const InstallElasticAgentManagedPageStep: React.FC<MultiPageStepLayoutPro
     agentPolicy,
     enrollmentAPIKey,
     settings,
+    enrolledAgentIds,
   } = props;
   const core = useStartServices();
   const kibanaVersion = useKibanaVersion();
   const { docLinks } = core;
   const link = docLinks.links.fleet.troubleshooting;
-  const enrolledAgentIds = usePollingAgentCount(agentPolicy?.id || '', {
-    noLowerTimeLimit: true,
-    pollImmediately: true,
-  });
   const fleetServerHosts = useMemo(() => {
     return settings?.fleet_server_hosts || [];
   }, [settings]);

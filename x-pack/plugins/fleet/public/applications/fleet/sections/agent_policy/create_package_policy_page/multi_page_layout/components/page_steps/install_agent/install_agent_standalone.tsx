@@ -12,7 +12,6 @@ import { safeDump } from 'js-yaml';
 
 import type { FullAgentPolicy } from '../../../../../../../../../../common/types/models/agent_policy';
 
-import type { MultiPageStepLayoutProps } from '../../../types';
 import {
   CreatePackagePolicyBottomBar,
   StandaloneModeWarningCallout,
@@ -34,22 +33,19 @@ import {
   AgentEnrollmentConfirmationStep,
   ConfigureStandaloneAgentStep,
 } from '../../../../../../../../../components/agent_enrollment_flyout/steps';
-import { usePollingAgentCount } from '../../../../../../../../../components/agent_enrollment_flyout/confirm_agent_enrollment';
 import { StandaloneInstructions } from '../../../../../../../../../components/enrollment_instructions';
 
-export const InstallElasticAgentStandalonePageStep: React.FC<MultiPageStepLayoutProps> = (
-  props
-) => {
-  const { cancelUrl, onNext, cancelClickHandler, setIsManaged, agentPolicy } = props;
+import type { InstallAgentPageProps } from './types';
+
+export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPageProps> = (props) => {
+  const { cancelUrl, onNext, cancelClickHandler, setIsManaged, agentPolicy, enrolledAgentIds } =
+    props;
   const core = useStartServices();
   const kibanaVersion = useKibanaVersion();
   const { docLinks } = core;
   const [yaml, setYaml] = useState<any | undefined>('');
   const link = docLinks.links.fleet.troubleshooting;
-  const enrolledAgentIds = usePollingAgentCount(agentPolicy?.id || '', {
-    noLowerTimeLimit: true,
-    pollImmediately: true,
-  });
+
   const [fullAgentPolicy, setFullAgentPolicy] = useState<FullAgentPolicy | undefined>();
 
   useEffect(() => {
