@@ -9,6 +9,8 @@ import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
+import { CoreStart } from '@kbn/core/public';
+import { ObservabilityPublicPluginsStart } from '../../plugin';
 import { RulesPage } from '.';
 import { RulesTable } from './components/rules_table';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
@@ -52,6 +54,8 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   ObservabilityPageTemplate: KibanaPageTemplate,
   kibanaFeatures: [],
+  core: {} as CoreStart,
+  plugins: {} as ObservabilityPublicPluginsStart,
 }));
 
 const { useFetchRules } = jest.requireMock('../../hooks/use_fetch_rules');
