@@ -7,7 +7,7 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { KueryNode } from '@kbn/data-plugin/public';
+import type { KueryNode } from '@kbn/es-query';
 import { setupGetConjunctionSuggestions } from './conjunction';
 import { QuerySuggestionGetFnArgs } from '../query_suggestion_provider';
 

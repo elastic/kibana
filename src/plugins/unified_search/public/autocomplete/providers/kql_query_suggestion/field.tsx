@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+// for replace IFieldType => DataViewField need to fix the issue https://github.com/elastic/kibana/issues/131292
 import { IFieldType, indexPatterns as indexPatternsUtils } from '@kbn/data-plugin/public';
 import { flatten } from 'lodash';
 import { sortPrefixFirst } from './sort_prefix_first';
