@@ -25,6 +25,52 @@ Review important information about the {kib} 8.x releases.
 
 --
 
+[[release-notes-8.2.1]]
+== {kib} 8.2.1
+
+coming::[8.2.1]
+
+The 8.2.1 release includes the following bug fixes.
+
+[float]
+[[enhancement-v8.2.1]]
+=== Enhancements
+Elastic Security::
+For the Elastic Security 8.2.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Monitoring::
+* Adds the ability collect Telemetry {kibana-pull}130498[#130498]
+* Adds the ability to report panels in dashboards by type {kibana-pull}130166[#130166]
+
+[float]
+[[fixes-v8.2.1]]
+=== Bug fixes
+Discover::
+* Fixes Document Explorer infinite height growth {kibana-pull}131723[#131723]
+* Fixes links in helper callouts {kibana-pull}130873[#130873]
+Elastic Security::
+For the Elastic Security 8.2.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+* Removes legacy component templates on package install {kibana-pull}130758[#130758]
+Lens & Visualizations::
+* Fixes time shift bug in *Lens* {kibana-pull}132000[#132000]
+* Fixes single color palette configuration {kibana-pull}131128[#131128]
+Machine Learning::
+* Removes alerting_rules from general job list items {kibana-pull}131936[#131936]
+* Fixes management app docs links {kibana-pull}130776[#130776]
+Management::
+* Restores data view management field type conflict detail modal {kibana-pull}132197[#132197]
+* Fixes test data for import and export between versions tests {kibana-pull}131470[#131470]
+* Fixes condition auto-completion for templates in Console {kibana-pull}126881[#126881]
+Maps::
+* Fixes background tiles in a map panel might not load in a screenshot report {kibana-pull}131185[#131185]
+Observability::
+* Services without application metrics display an error {kibana-pull}131347[#131347]
+* Correctly interprets the `resetting` and `reverting` job states {kibana-pull}129570[#129570]
+Platform::
+* Migrations incorrectly detects cluster routing allocation setting as incompatible {kibana-pull}131712[#131712]
+* Fixes resetting image values {kibana-pull}131610[#131610]
+* Fixes a bug causing the newsfeed to not be properly displayed in locales other than english {kibana-pull}131315[#131315]
+
 [[release-notes-8.2.0]]
 == {kib} 8.2.0
 
