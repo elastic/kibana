@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiButtonEmpty, EuiFormRow, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTestQuery } from './use_test_query';
 
@@ -16,19 +16,21 @@ export function TestQueryRow({
   fetch: () => Promise<{ nrOfDocs: number; timeWindow: string }>;
   hasValidationErrors: boolean;
 }) {
-  const { onTestQuery, testQueryResult, testQueryError } = useTestQuery(fetch);
+  const { onTestQuery, testQueryResult, testQueryError, testQueryLoading } = useTestQuery(fetch);
 
   return (
     <>
+      <EuiSpacer size="xs" />
       <EuiFormRow>
         <EuiButtonEmpty
           data-test-subj="testQuery"
-          color={'primary'}
-          iconSide={'left'}
-          flush={'left'}
-          iconType={'play'}
+          color="primary"
+          iconSide="left"
+          flush="left"
+          iconType="play"
           onClick={onTestQuery}
           disabled={hasValidationErrors}
+          isLoading={testQueryLoading}
         >
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.testQuery"
@@ -36,6 +38,18 @@ export function TestQueryRow({
           />
         </EuiButtonEmpty>
       </EuiFormRow>
+      {testQueryLoading && (
+        <EuiFormRow>
+          <EuiText color="subdued" size="s">
+            <p>
+              <FormattedMessage
+                id="xpack.stackAlerts.esQuery.ui.testQuery"
+                defaultMessage="Query is executed."
+              />
+            </p>
+          </EuiText>
+        </EuiFormRow>
+      )}
       {testQueryResult && (
         <EuiFormRow>
           <EuiText data-test-subj="testQuerySuccess" color="subdued" size="s">

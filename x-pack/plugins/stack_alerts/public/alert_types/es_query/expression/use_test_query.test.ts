@@ -17,6 +17,7 @@ describe('useTestQuery', () => {
     await act(async () => {
       await result.current.onTestQuery();
     });
+    expect(result.current.testQueryLoading).toBe(false);
     expect(result.current.testQueryError).toBe(null);
     expect(result.current.testQueryResult).toContain('1s');
     expect(result.current.testQueryResult).toContain('1 document');
@@ -29,6 +30,7 @@ describe('useTestQuery', () => {
     await act(async () => {
       await result.current.onTestQuery();
     });
+    expect(result.current.testQueryLoading).toBe(false);
     expect(result.current.testQueryError).toContain(errorMsg);
     expect(result.current.testQueryResult).toBe(null);
   });

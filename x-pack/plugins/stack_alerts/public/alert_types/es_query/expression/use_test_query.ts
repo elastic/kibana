@@ -16,8 +16,10 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 export function useTestQuery(fetch: () => Promise<{ nrOfDocs: number; timeWindow: string }>) {
   const [testQueryResult, setTestQueryResult] = useState<string | null>(null);
   const [testQueryError, setTestQueryError] = useState<string | null>(null);
+  const [testQueryLoading, setTestQueryLoading] = useState<boolean>(false);
 
   const onTestQuery = useCallback(async () => {
+    setTestQueryLoading(true);
     setTestQueryError(null);
     setTestQueryResult(null);
     try {
@@ -37,6 +39,8 @@ export function useTestQuery(fetch: () => Promise<{ nrOfDocs: number; timeWindow
           values: { message: message ? `${err.message}: ${message}` : err.message },
         })
       );
+    } finally {
+      setTestQueryLoading(false);
     }
   }, [fetch]);
 
@@ -44,6 +48,7 @@ export function useTestQuery(fetch: () => Promise<{ nrOfDocs: number; timeWindow
     onTestQuery,
     testQueryResult,
     testQueryError,
+    testQueryLoading,
   };
 }
 
