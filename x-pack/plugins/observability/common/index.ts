@@ -18,6 +18,7 @@ export {
   apmServiceInventoryOptimizedSorting,
   apmProgressiveLoading,
   apmServiceGroupMaxNumberOfServices,
+  apmTraceExplorerTab,
 } from './ui_settings_keys';
 
 export {
