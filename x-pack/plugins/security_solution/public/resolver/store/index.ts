@@ -6,7 +6,7 @@
  */
 
 import { createStore, applyMiddleware, Store } from 'redux';
-import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
+import { composeWithDevToolsDevelopmentOnly } from '@redux-devtools/extension';
 import { ResolverState, DataAccessLayer } from '../types';
 import { resolverReducer } from './reducer';
 import { resolverMiddlewareFactory } from './middleware';
@@ -16,7 +16,7 @@ export const resolverStoreFactory = (
   dataAccessLayer: DataAccessLayer
 ): Store<ResolverState, ResolverAction> => {
   const actionsDenylist: Array<ResolverAction['type']> = ['userMovedPointer'];
-  const composeEnhancers = composeWithDevTools({
+  const composeEnhancers = composeWithDevToolsDevelopmentOnly({
     name: 'Resolver',
     actionsBlacklist: actionsDenylist,
   });
