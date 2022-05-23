@@ -187,7 +187,7 @@ export function RuleDetailsPage() {
       AlertsTable,
       'xl'
     )({
-      items: alertsList,
+      items: alertsList ?? [],
     });
   };
   const tabs = [
@@ -533,15 +533,14 @@ export function RuleDetailsPage() {
   );
 }
 
-const ACTIVE_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleDetails.rulesList.status.active',
-  { defaultMessage: 'Active' }
-);
+// *** Alert table ***/
+const ACTIVE_LABEL = i18n.translate('xpack.observability.ruleDetails.rulesList.status.active', {
+  defaultMessage: 'Active',
+});
 
-const INACTIVE_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleDetails.rulesList.status.inactive',
-  { defaultMessage: 'Recovered' }
-);
+const INACTIVE_LABEL = i18n.translate('xpack.observability.ruleDetails.rulesList.status.inactive', {
+  defaultMessage: 'Recovered',
+});
 function getActionGroupName(ruleType: RuleType, actionGroupId?: string): string | undefined {
   actionGroupId = actionGroupId || ruleType.defaultActionGroupId;
   const actionGroup = ruleType?.actionGroups?.find(
