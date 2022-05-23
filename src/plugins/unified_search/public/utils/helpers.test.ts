@@ -7,11 +7,11 @@
  */
 
 import { getFieldValidityAndErrorMessage } from './helpers';
-import { IFieldType } from '@kbn/data-views-plugin/common';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 
 const mockField = {
   type: 'date',
-} as IFieldType;
+} as DataViewField;
 
 describe('Check field validity and error message', () => {
   it('should return a message that the entered date is not incorrect', () => {
