@@ -6,6 +6,8 @@ source .buildkite/scripts/common/util.sh
 source .buildkite/scripts/common/env.sh
 source .buildkite/scripts/common/setup_node.sh
 
+export FORCE_BOOTSTRAP_REMOTE_CACHE=true
+
 yarn kbn bootstrap
 
 for version in $(cat versions.json | jq -r '.versions[].version'); do
