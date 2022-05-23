@@ -7,10 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ElasticsearchClient } from '@kbn/core/server';
-import {
-  FINDINGS_STATUS_ROUTE_PATH,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
-} from '../../../common/constants';
+import { INFO_ROUTE_PATH, LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../common/constants';
 import { CspAppContext } from '../../plugin';
 import { CspRouter } from '../../types';
 import { Info } from '../../../common/types';
@@ -37,7 +34,7 @@ const getLatestFindingsStatus = async (
 export const defineGetInfo = (router: CspRouter, cspContext: CspAppContext): void =>
   router.get(
     {
-      path: FINDINGS_STATUS_ROUTE_PATH,
+      path: INFO_ROUTE_PATH,
       validate: false,
     },
     async (context, _, response) => {
