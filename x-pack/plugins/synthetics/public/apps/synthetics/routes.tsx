@@ -43,12 +43,9 @@ const baseTitle = i18n.translate('xpack.synthetics.routes.baseTitle', {
   defaultMessage: 'Synthetics - Kibana',
 });
 
-export const MONITOR_MANAGEMENT_LABEL = i18n.translate(
-  'xpack.synthetics.monitorManagement.heading',
-  {
-    defaultMessage: 'Monitor Management',
-  }
-);
+const MONITORS_LABEL = i18n.translate('xpack.synthetics.monitorManagement.heading', {
+  defaultMessage: 'Monitor Management',
+});
 
 const getRoutes = (): RouteProps[] => {
   return [
@@ -107,8 +104,8 @@ const getRoutes = (): RouteProps[] => {
           <EuiFlexGroup alignItems="center" gutterSize="xs">
             <EuiFlexItem grow={false}>
               <FormattedMessage
-                id="xpack.synthetics.monitorManagement.pageHeader.title"
-                defaultMessage="Monitor Management"
+                id="xpack.synthetics.monitors.pageHeader.title"
+                defaultMessage="Monitors"
               />
             </EuiFlexItem>
           </EuiFlexGroup>

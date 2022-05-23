@@ -33,7 +33,7 @@ export const SimpleMonitorForm = () => {
     handleSubmit,
     formState: { errors, isValid, isSubmitted },
   } = useFormWrapped({
-    mode: 'onBlur',
+    mode: 'onSubmit',
     reValidateMode: 'onChange',
     shouldFocusError: true,
     defaultValues: { urls: '', locations: [] as ServiceLocations },
@@ -69,7 +69,6 @@ export const SimpleMonitorForm = () => {
           {...register(ConfigKey.URLS, { required: true })}
           isInvalid={!!errors?.[ConfigKey.URLS]}
           data-test-subj={`${ConfigKey.URLS}-input`}
-          autoFocus={true}
           tabIndex={0}
         />
       </EuiFormRow>

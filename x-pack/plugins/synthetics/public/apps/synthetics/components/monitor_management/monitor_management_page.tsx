@@ -33,7 +33,7 @@ export const MonitorManagementPage: React.FC = () => {
 
   return (
     <>
-      <p>Monitor Management List page (Monitor Management Page)</p>
+      <p>This page is under construction and will be updated in a future release</p>
     </>
   );
 };
