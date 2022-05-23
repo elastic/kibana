@@ -92,16 +92,19 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
           monitor.type === 'browser' ? { ...formattedMonitor, urls: '' } : formattedMonitor
         );
 
-      const errors = await syntheticsService.pushConfigs([
-        {
-          ...editedMonitor,
-          id: updatedMonitor.id,
-          fields: {
-            config_id: updatedMonitor.id,
+      const errors = await syntheticsService.pushConfigs(
+        [
+          {
+            ...editedMonitor,
+            id: updatedMonitor.id,
+            fields: {
+              config_id: updatedMonitor.id,
+            },
+            fields_under_root: true,
           },
-          fields_under_root: true,
-        },
-      ]);
+        ],
+        true
+      );
 
       sendTelemetryEvents(
         logger,
