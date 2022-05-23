@@ -664,6 +664,5 @@ export const item: GetInfoResponse['item'] = {
     github: 'elastic/integrations',
   },
   latestVersion: '0.7.0',
-  removable: true,
   status: 'not_installed',
 };
