@@ -9,6 +9,4 @@
 // all others are registered through index.ts
 
 // @ts-expect-error
-export { kibanaInstanceRoute, kibanaInstancesRoute, kibanaOverviewRoute } from './kibana';
-// @ts-expect-error
 export { entSearchOverviewRoute } from './enterprise_search';

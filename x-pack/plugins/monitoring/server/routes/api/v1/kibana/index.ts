@@ -5,6 +5,13 @@
  * 2.0.
  */
 
-export { kibanaInstanceRoute } from './instance';
-export { kibanaInstancesRoute } from './instances';
-export { kibanaOverviewRoute } from './overview';
+import { MonitoringCore } from '../../../../types';
+import { kibanaInstanceRoute } from './instance';
+import { kibanaInstancesRoute } from './instances';
+import { kibanaOverviewRoute } from './overview';
+
+export function registerV1KibanaRoutes(server: MonitoringCore) {
+  kibanaInstanceRoute(server);
+  kibanaInstancesRoute(server);
+  kibanaOverviewRoute(server);
+}
