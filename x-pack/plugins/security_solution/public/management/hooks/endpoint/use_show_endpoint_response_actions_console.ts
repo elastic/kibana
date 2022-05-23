@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { getEndpointResponseActionsConsoleCommands } from '../../components/endpoint_console/endoint_response_actions_console_commands';
+import { getEndpointResponseActionsConsoleCommands } from '../../components/endpoint_console/endpoint_response_actions_console_commands';
 import { useConsoleManager } from '../../components/console';
 import type { HostMetadata } from '../../../../common/endpoint/types';
 

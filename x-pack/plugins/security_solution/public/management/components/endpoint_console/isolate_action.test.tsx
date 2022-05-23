@@ -11,7 +11,7 @@ import {
   getConsoleManagerMockRenderResultQueriesAndActions,
 } from '../console/components/console_manager/mocks';
 import React from 'react';
-import { getEndpointResponseActionsConsoleCommands } from './endoint_response_actions_console_commands';
+import { getEndpointResponseActionsConsoleCommands } from './endpoint_response_actions_console_commands';
 import { responseActionsHttpMocks } from '../../pages/mocks/response_actions_http_mocks';
 import { enterConsoleCommand } from '../console/mocks';
 import { waitFor } from '@testing-library/react';
