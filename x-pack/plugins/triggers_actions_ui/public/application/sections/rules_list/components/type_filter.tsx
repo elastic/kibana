@@ -7,13 +7,7 @@
 
 import React, { Fragment, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiFilterGroup,
-  EuiPopover,
-  EuiFilterButton,
-  EuiFilterSelectItem,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiPopover, EuiFilterButton, EuiFilterSelectItem, EuiTitle } from '@elastic/eui';
 
 interface TypeFilterProps {
   options: Array<{
@@ -41,53 +35,51 @@ export const TypeFilter: React.FunctionComponent<TypeFilterProps> = ({
   }, [selectedValues]);
 
   return (
-    <EuiFilterGroup>
-      <EuiPopover
-        isOpen={isPopoverOpen}
-        closePopover={() => setIsPopoverOpen(false)}
-        button={
-          <EuiFilterButton
-            iconType="arrowDown"
-            hasActiveFilters={selectedValues.length > 0}
-            numActiveFilters={selectedValues.length}
-            numFilters={selectedValues.length}
-            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-            data-test-subj="ruleTypeFilterButton"
-          >
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.rulesList.typeFilterLabel"
-              defaultMessage="Type"
-            />
-          </EuiFilterButton>
-        }
-      >
-        <div className="euiFilterSelect__items">
-          {options.map((groupItem, groupIndex) => (
-            <Fragment key={`group${groupIndex}`}>
-              <EuiTitle data-test-subj={`ruleType${groupIndex}Group`} size="xxs">
-                <h3>{groupItem.groupName}</h3>
-              </EuiTitle>
-              {groupItem.subOptions.map((item, index) => (
-                <EuiFilterSelectItem
-                  key={index}
-                  onClick={() => {
-                    const isPreviouslyChecked = selectedValues.includes(item.value);
-                    if (isPreviouslyChecked) {
-                      setSelectedValues(selectedValues.filter((val) => val !== item.value));
-                    } else {
-                      setSelectedValues(selectedValues.concat(item.value));
-                    }
-                  }}
-                  checked={selectedValues.includes(item.value) ? 'on' : undefined}
-                  data-test-subj={`ruleType${item.value}FilterOption`}
-                >
-                  {item.name}
-                </EuiFilterSelectItem>
-              ))}
-            </Fragment>
-          ))}
-        </div>
-      </EuiPopover>
-    </EuiFilterGroup>
+    <EuiPopover
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopoverOpen(false)}
+      button={
+        <EuiFilterButton
+          iconType="arrowDown"
+          hasActiveFilters={selectedValues.length > 0}
+          numActiveFilters={selectedValues.length}
+          numFilters={selectedValues.length}
+          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+          data-test-subj="ruleTypeFilterButton"
+        >
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.rulesList.typeFilterLabel"
+            defaultMessage="Type"
+          />
+        </EuiFilterButton>
+      }
+    >
+      <div className="euiFilterSelect__items">
+        {options.map((groupItem, groupIndex) => (
+          <Fragment key={`group${groupIndex}`}>
+            <EuiTitle data-test-subj={`ruleType${groupIndex}Group`} size="xxs">
+              <h3>{groupItem.groupName}</h3>
+            </EuiTitle>
+            {groupItem.subOptions.map((item, index) => (
+              <EuiFilterSelectItem
+                key={index}
+                onClick={() => {
+                  const isPreviouslyChecked = selectedValues.includes(item.value);
+                  if (isPreviouslyChecked) {
+                    setSelectedValues(selectedValues.filter((val) => val !== item.value));
+                  } else {
+                    setSelectedValues(selectedValues.concat(item.value));
+                  }
+                }}
+                checked={selectedValues.includes(item.value) ? 'on' : undefined}
+                data-test-subj={`ruleType${item.value}FilterOption`}
+              >
+                {item.name}
+              </EuiFilterSelectItem>
+            ))}
+          </Fragment>
+        ))}
+      </div>
+    </EuiPopover>
   );
 };

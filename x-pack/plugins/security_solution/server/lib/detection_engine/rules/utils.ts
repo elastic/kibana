@@ -56,7 +56,10 @@ import {
   TimestampOverrideOrUndefined,
   EventCategoryOverrideOrUndefined,
   NamespaceOrUndefined,
-} from '../../../../common/detection_engine/schemas/common/schemas';
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+  SetupGuide,
+} from '../../../../common/detection_engine/schemas/common';
 import { PartialFilter } from '../types';
 import { RuleParams } from '../schemas/rule_schemas';
 import {
@@ -107,11 +110,14 @@ export interface UpdateProperties {
   index: IndexOrUndefined;
   interval: IntervalOrUndefined;
   maxSignals: MaxSignalsOrUndefined;
+  relatedIntegrations: RelatedIntegrationArray | undefined;
+  requiredFields: RequiredFieldArray | undefined;
   riskScore: RiskScoreOrUndefined;
   riskScoreMapping: RiskScoreMappingOrUndefined;
   ruleNameOverride: RuleNameOverrideOrUndefined;
   outputIndex: OutputIndexOrUndefined;
   name: NameOrUndefined;
+  setup: SetupGuide | undefined;
   severity: SeverityOrUndefined;
   severityMapping: SeverityMappingOrUndefined;
   tags: TagsOrUndefined;
