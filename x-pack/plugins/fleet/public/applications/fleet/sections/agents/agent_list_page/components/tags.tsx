@@ -9,7 +9,7 @@ import { EuiToolTip } from '@elastic/eui';
 import { take } from 'lodash';
 import React from 'react';
 
-import { truncateTag } from '../utils';
+import { truncateTag, MAX_TAG_DISPLAY_LENGTH } from '../utils';
 
 interface Props {
   tags: string[];
@@ -30,7 +30,20 @@ export const Tags: React.FunctionComponent<Props> = ({ tags }) => {
           </EuiToolTip>
         </>
       ) : (
-        <span data-test-subj="agentTags">{tags.map(truncateTag).join(', ')}</span>
+        <span data-test-subj="agentTags">
+          {tags.map((tag, index) => (
+            <>
+              {index > 0 && ', '}
+              {tag.length > MAX_TAG_DISPLAY_LENGTH ? (
+                <EuiToolTip content={<span>{tag}</span>} key={tag}>
+                  <span>{truncateTag(tag)}</span>
+                </EuiToolTip>
+              ) : (
+                <span key={tag}>{tag}</span>
+              )}
+            </>
+          ))}
+        </span>
       )}
     </>
   );

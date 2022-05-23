@@ -8,6 +8,7 @@
 
 import { ApplicationStart, IBasePath } from '@kbn/core/public';
 import React, { PureComponent, Fragment } from 'react';
+import moment from 'moment';
 import {
   EuiSearchBar,
   EuiBasicTable,
@@ -24,9 +25,10 @@ import {
   EuiTableFieldDataColumnType,
   EuiTableActionsColumnType,
   QueryType,
+  CriteriaWithPagination,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
@@ -55,6 +57,7 @@ export interface TableProps {
   goInspectObject: (obj: SavedObjectWithMetadata) => void;
   pageIndex: number;
   pageSize: number;
+  sort: CriteriaWithPagination<SavedObjectWithMetadata>['sort'];
   items: SavedObjectWithMetadata[];
   itemId: string | (() => string);
   totalItemCount: number;
@@ -128,10 +131,59 @@ export class Table extends PureComponent<TableProps, TableState> {
     this.setState({ isExportPopoverOpen: false });
   };
 
+  getUpdatedAtColumn = () => {
+    const renderUpdatedAt = (dateTime?: string) => {
+      if (!dateTime) {
+        return (
+          <EuiToolTip
+            content={i18n.translate(
+              'savedObjectsManagement.objectsTable.table.updatedDateUnknownLabel',
+              {
+                defaultMessage: 'Last updated unknown',
+              }
+            )}
+          >
+            <span>-</span>
+          </EuiToolTip>
+        );
+      }
+      const updatedAt = moment(dateTime);
+
+      if (updatedAt.diff(moment(), 'days') > -7) {
+        return (
+          <FormattedRelative value={new Date(dateTime).getTime()}>
+            {(formattedDate: string) => (
+              <EuiToolTip content={updatedAt.format('LL LT')}>
+                <span>{formattedDate}</span>
+              </EuiToolTip>
+            )}
+          </FormattedRelative>
+        );
+      }
+      return (
+        <EuiToolTip content={updatedAt.format('LL LT')}>
+          <span>{updatedAt.format('LL')}</span>
+        </EuiToolTip>
+      );
+    };
+
+    return {
+      field: 'updated_at',
+      name: i18n.translate('savedObjectsManagement.objectsTable.table.lastUpdatedColumnTitle', {
+        defaultMessage: 'Last updated',
+      }),
+      render: (field: string, record: { updated_at?: string }) =>
+        renderUpdatedAt(record.updated_at),
+      sortable: true,
+      width: '150px',
+    };
+  };
+
   render() {
     const {
       pageIndex,
       pageSize,
+      sort,
       itemId,
       items,
       totalItemCount,
@@ -186,7 +238,7 @@ export class Table extends PureComponent<TableProps, TableState> {
           'savedObjectsManagement.objectsTable.table.columnTypeDescription',
           { defaultMessage: 'Type of the saved object' }
         ),
-        sortable: false,
+        sortable: true,
         'data-test-subj': 'savedObjectsTableRowType',
         render: (type: string, object: SavedObjectWithMetadata) => {
           const typeLabel = getSavedObjectLabel(type, allowedTypes);
@@ -239,6 +291,7 @@ export class Table extends PureComponent<TableProps, TableState> {
           'data-test-subj': `savedObjectsTableColumn-${column.id}`,
         };
       }),
+      this.getUpdatedAtColumn(),
       {
         name: i18n.translate('savedObjectsManagement.objectsTable.table.columnActionsName', {
           defaultMessage: 'Actions',
@@ -422,6 +475,7 @@ export class Table extends PureComponent<TableProps, TableState> {
             items={items}
             columns={columns as any}
             pagination={pagination}
+            sorting={{ sort }}
             selection={selection}
             onChange={onTableChange}
             rowProps={(item) => ({

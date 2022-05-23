@@ -748,14 +748,5 @@ const isoWeekdayToRRule: Record<number, string> = {
 
 const rRuleWeekdayToIsoWeekday = mapValues(invert(isoWeekdayToRRule), (v) => Number(v));
 
-const rRuleWeekdayToWeekdayName = (weekday: string) => {
-  console.log(
-    'weekday',
-    weekday,
-    weekday.slice(-2),
-    rRuleWeekdayToIsoWeekday[weekday.slice(-2)],
-    rRuleWeekdayToIsoWeekday,
-    moment().isoWeekday(rRuleWeekdayToIsoWeekday[weekday.slice(-2)])
-  );
-  return moment().isoWeekday(rRuleWeekdayToIsoWeekday[weekday.slice(-2)]).format('dddd');
-};
+const rRuleWeekdayToWeekdayName = (weekday: string) =>
+  moment().isoWeekday(rRuleWeekdayToIsoWeekday[weekday.slice(-2)]).format('dddd');
