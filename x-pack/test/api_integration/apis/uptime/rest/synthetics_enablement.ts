@@ -39,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
               ],
               elasticsearch: {
                 cluster: [privilege, ...serviceApiKeyPrivileges.cluster],
-                indices: serviceApiKeyPrivileges.index,
+                indices: serviceApiKeyPrivileges.indices,
               },
             });
 
@@ -125,7 +125,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             elasticsearch: {
               cluster: ['manage_security', ...serviceApiKeyPrivileges.cluster],
-              indices: serviceApiKeyPrivileges.index,
+              indices: serviceApiKeyPrivileges.indices,
             },
           });
 
@@ -224,7 +224,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             elasticsearch: {
               cluster: ['manage_security', ...serviceApiKeyPrivileges.cluster],
-              indices: serviceApiKeyPrivileges.index,
+              indices: serviceApiKeyPrivileges.indices,
             },
           });
 
@@ -332,7 +332,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             elasticsearch: {
               cluster: ['manage_security', ...serviceApiKeyPrivileges.cluster],
-              indices: serviceApiKeyPrivileges.index,
+              indices: serviceApiKeyPrivileges.indices,
             },
           });
 
