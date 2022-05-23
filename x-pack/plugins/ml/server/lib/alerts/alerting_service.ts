@@ -72,7 +72,7 @@ const TIME_RANGE_PADDING = 10;
  */
 export function buildExplorerUrl(
   jobIds: string[],
-  timeRange: { from: string; to: string },
+  timeRange: { from: string; to: string; mode?: string },
   type: AnomalyResultType,
   r?: AlertExecutionResult
 ): string {
@@ -91,7 +91,7 @@ export function buildExplorerUrl(
     time: {
       from: timeRange.from,
       to: timeRange.to,
-      mode: 'absolute',
+      mode: timeRange.mode ?? 'absolute',
     },
   };
 
@@ -798,8 +798,9 @@ export function alertingServiceProvider(
           anomalyExplorerUrl: buildExplorerUrl(
             queryParams.jobIds,
             {
-              from: queryParams.lookBackTimeInterval,
+              from: `now-${queryParams.lookBackTimeInterval}`,
               to: 'now',
+              mode: 'relative',
             },
             queryParams.resultType
           ),

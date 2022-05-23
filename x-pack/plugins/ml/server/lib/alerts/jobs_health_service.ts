@@ -483,7 +483,7 @@ export function jobsHealthServiceProvider(
                   {
                     defaultMessage:
                       'No errors in the {count, plural, one {job} other {jobs}} messages.',
-                    values: { count, jobsString },
+                    values: { count },
                   }
                 )
               : i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.errorMessagesMessage', {
