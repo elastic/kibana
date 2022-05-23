@@ -7,9 +7,11 @@
 
 import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { act } from '@testing-library/react';
-import { SlackActionConnector } from '../types';
 import SlackActionFields from './slack_connectors';
+import { FormTestProvider } from '../test_utils';
+
 jest.mock('../../../../common/lib/kibana');
 
 describe('SlackActionFields renders', () => {
@@ -19,20 +21,21 @@ describe('SlackActionFields renders', () => {
         webhookUrl: 'http:\\test',
       },
       id: 'test',
-      actionTypeId: '.email',
-      name: 'email',
+      actionTypeId: '.slack',
+      name: 'slack',
       config: {},
-    } as SlackActionConnector;
+    };
+
     const wrapper = mountWithIntl(
-      <SlackActionFields
-        action={actionConnector}
-        errors={{ index: [], webhookUrl: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
+      <FormTestProvider connector={actionConnector}>
+        {(registerPreSubmitValidator: ActionConnectorFieldsProps['registerPreSubmitValidator']) => (
+          <SlackActionFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={registerPreSubmitValidator}
+          />
+        )}
+      </FormTestProvider>
     );
 
     await act(async () => {
@@ -43,72 +46,5 @@ describe('SlackActionFields renders', () => {
     expect(wrapper.find('[data-test-subj="slackWebhookUrlInput"]').first().prop('value')).toBe(
       'http:\\test'
     );
-  });
-
-  test('should display a message on create to remember credentials', () => {
-    const actionConnector = {
-      actionTypeId: '.email',
-      config: {},
-      secrets: {},
-    } as SlackActionConnector;
-    const wrapper = mountWithIntl(
-      <SlackActionFields
-        action={actionConnector}
-        errors={{ index: [], webhookUrl: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toBeGreaterThan(0);
-    expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toEqual(0);
-  });
-
-  test('should display a message for missing secrets after import', () => {
-    const actionConnector = {
-      actionTypeId: '.email',
-      isMissingSecrets: true,
-      config: {},
-      secrets: {},
-    } as SlackActionConnector;
-    const wrapper = mountWithIntl(
-      <SlackActionFields
-        action={actionConnector}
-        errors={{ index: [], webhookUrl: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="missingSecretsMessage"]').length).toBeGreaterThan(0);
-  });
-
-  test('should display a message on edit to re-enter credentials', () => {
-    const actionConnector = {
-      secrets: {
-        webhookUrl: 'http:\\test',
-      },
-      id: 'test',
-      actionTypeId: '.email',
-      name: 'email',
-      config: {},
-    } as SlackActionConnector;
-    const wrapper = mountWithIntl(
-      <SlackActionFields
-        action={actionConnector}
-        errors={{ index: [], webhookUrl: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);
-    expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toEqual(0);
   });
 });
