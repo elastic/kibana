@@ -398,7 +398,7 @@ export function jobsHealthServiceProvider(
 
             if (hardLimitCount > 0) {
               message = i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.mmlMessage', {
-                defaultMessage: `{count, plural, one {Job} other {Jobs}} {jobsString} reached the hard model memory limit. Assign the job more memory and restore from a snapshot from prior to reaching the hard limit.`,
+                defaultMessage: `{count, plural, one {Job} other {Jobs}} {jobsString} reached the hard model memory limit. Assign more memory to the job and restore it from a snapshot taken prior to reaching the hard limit.`,
                 values: {
                   count: hardLimitCount,
                   jobsString: hardLimitJobsString,
@@ -414,7 +414,7 @@ export function jobsHealthServiceProvider(
                 'xpack.ml.alertTypes.jobsHealthAlertingRule.mmlSoftLimitMessage',
                 {
                   defaultMessage:
-                    '{count, plural, one {Job} other {Jobs}} {jobsString} reached the soft model memory limit. Assign the job more memory or edit the datafeed filter to limit scope of analysis.',
+                    '{count, plural, one {Job} other {Jobs}} {jobsString} reached the soft model memory limit. Assign more memory to the job or edit the datafeed filter to limit the scope of analysis.',
                   values: {
                     count: softLimitCount,
                     jobsString: softLimitJobsString,
