@@ -1077,7 +1077,6 @@ export const tasks: TelemetryTask[] = [
 
       return {
         cardinality: {
-          test: 1,
           client: {
             geo: {
               country_iso_code: {
