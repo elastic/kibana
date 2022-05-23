@@ -63,7 +63,7 @@ import {
   timestamp_field,
   event_category_override,
   tiebreaker_field,
-} from '../common/schemas';
+} from '../common';
 
 /**
  * All of the patch elements should default to undefined if not set

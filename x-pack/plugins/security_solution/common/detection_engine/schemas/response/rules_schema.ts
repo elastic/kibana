@@ -76,6 +76,9 @@ import {
   timestamp_override,
   namespace,
   ruleExecutionSummary,
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+  SetupGuide,
 } from '../common';
 
 import { typeAndTimelineOnlySchema, TypeAndTimelineOnly } from './type_timeline_only_schema';
@@ -113,6 +116,9 @@ export const requiredRulesSchema = t.type({
   created_by,
   version,
   exceptions_list: DefaultListArray,
+  related_integrations: RelatedIntegrationArray,
+  required_fields: RequiredFieldArray,
+  setup: SetupGuide,
 });
 
 export type RequiredRulesSchema = t.TypeOf<typeof requiredRulesSchema>;

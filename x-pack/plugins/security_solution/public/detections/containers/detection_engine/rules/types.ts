@@ -37,6 +37,9 @@ import {
   BulkAction,
   BulkActionEditPayload,
   ruleExecutionSummary,
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+  SetupGuide,
 } from '../../../../../common/detection_engine/schemas/common';
 
 import {
@@ -105,11 +108,14 @@ export const RuleSchema = t.intersection([
     name: t.string,
     max_signals: t.number,
     references: t.array(t.string),
+    related_integrations: RelatedIntegrationArray,
+    required_fields: RequiredFieldArray,
     risk_score: t.number,
     risk_score_mapping,
     rule_id: t.string,
     severity,
     severity_mapping,
+    setup: SetupGuide,
     tags: t.array(t.string),
     type,
     to: t.string,

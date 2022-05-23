@@ -366,21 +366,90 @@ export const SOURCE_OBJ_TYPES = {
 };
 
 export const SOURCE_CATEGORIES = {
+  ACCOUNT_MANAGEMENT: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.accountManagement',
+    {
+      defaultMessage: 'Account management',
+    }
+  ),
+  ATLASSIAN: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.atlassian', {
+    defaultMessage: 'Atlassian',
+  }),
+  BUG_TRACKING: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.bugTracking',
+    {
+      defaultMessage: 'Bug tracking',
+    }
+  ),
+  CHAT: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.chat', {
+    defaultMessage: 'Chat',
+  }),
   CLOUD: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.cloud', {
     defaultMessage: 'Cloud',
   }),
-  COMMUNICATIONS: i18n.translate(
-    'xpack.enterpriseSearch.workplaceSearch.sources.categories.communications',
+  CODE_REPOSITORY: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.codeRepository',
     {
-      defaultMessage: 'Communications',
+      defaultMessage: 'Code repository',
     }
   ),
+  COLLABORATION: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.collaboration',
+    {
+      defaultMessage: 'Collaboration',
+    }
+  ),
+  COMMUNICATION: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.communication',
+    {
+      defaultMessage: 'Communication',
+    }
+  ),
+  CRM: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.crm', {
+    defaultMessage: 'CRM',
+  }),
+  CUSTOMER_RELATIONSHIP_MANAGEMENT: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.customerRelationshipManagement',
+    {
+      defaultMessage: 'Customer relationship management',
+    }
+  ),
+  CUSTOMER_SERVICE: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.customerService',
+    {
+      defaultMessage: 'Customer service',
+    }
+  ),
+  EMAIL: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.email', {
+    defaultMessage: 'Email',
+  }),
   FILE_SHARING: i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.sources.categories.fileSharing',
     {
-      defaultMessage: 'File Sharing',
+      defaultMessage: 'File sharing',
     }
   ),
+  GOOGLE: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.google', {
+    defaultMessage: 'Google',
+  }),
+  GSUITE: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.gsuite', {
+    defaultMessage: 'GSuite',
+  }),
+  HELP: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.help', {
+    defaultMessage: 'Help',
+  }),
+  HELPDESK: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.helpdesk', {
+    defaultMessage: 'Helpdesk',
+  }),
+  INSTANT_MESSAGING: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.instantMessaging',
+    {
+      defaultMessage: 'Instant messaging',
+    }
+  ),
+  INTRANET: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.intranet', {
+    defaultMessage: 'Intranet',
+  }),
   MICROSOFT: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.microsoft', {
     defaultMessage: 'Microsoft',
   }),
@@ -393,8 +462,32 @@ export const SOURCE_CATEGORIES = {
       defaultMessage: 'Productivity',
     }
   ),
+  PROJECT_MANAGEMENT: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.projectManagement',
+    {
+      defaultMessage: 'Project management',
+    }
+  ),
+  SOFTWARE: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.software', {
+    defaultMessage: 'Software',
+  }),
   STORAGE: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.storage', {
     defaultMessage: 'Storage',
+  }),
+  TICKETING: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.ticketing', {
+    defaultMessage: 'Ticketing',
+  }),
+  VERSION_CONTROL: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.versionControl',
+    {
+      defaultMessage: 'Version control',
+    }
+  ),
+  WIKI: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.wiki', {
+    defaultMessage: 'Wiki',
+  }),
+  WORKFLOW: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.workflow', {
+    defaultMessage: 'Workflow',
   }),
 };
 

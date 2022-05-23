@@ -51,6 +51,9 @@ const getBaseRuleParams = (): BaseRuleParams => {
     threat: getThreatMock(),
     version: 1,
     exceptionsList: getListArrayMock(),
+    relatedIntegrations: [],
+    requiredFields: [],
+    setup: '',
   };
 };
 
