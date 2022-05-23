@@ -338,7 +338,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   }, [flyoutContext]);
 
   // Current upgrades
-  const { abortUpgrade, currentUpgrades, refreshUpgrades } = useCurrentUpgrades();
+  const { abortUpgrade, currentUpgrades, refreshUpgrades } = useCurrentUpgrades(fetchData);
 
   const columns = [
     {
@@ -545,7 +545,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         selectionMode={selectionMode}
         currentQuery={kuery}
         selectedAgents={selectedAgents}
-        refreshAgents={() => fetchData()}
+        refreshAgents={() => Promise.all([fetchData(), refreshUpgrades()])}
       />
       <EuiSpacer size="m" />
       {/* Agent total, bulk actions and status bar */}
