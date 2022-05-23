@@ -6,9 +6,8 @@
  */
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+
 /**
- * Checks if a transform exists, And if not creates it
- *
  * @param pipelineId - the pipeline id to create. If a pipeline with the same pipelineId already exists, nothing is created or updated.
  *
  * @return true if the pipeline exits or created, false otherwise.
@@ -24,7 +23,7 @@ export const createPipelineIfNotExists = async (
       try {
         await esClient.ingest.putPipeline({
           id: pipelineId,
-          description: 'Pipeline for adding event timestamp to score transform',
+          description: 'Pipeline for adding event timestamp',
           processors: [
             {
               set: {

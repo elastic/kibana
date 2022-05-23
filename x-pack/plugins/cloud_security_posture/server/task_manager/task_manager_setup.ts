@@ -13,6 +13,7 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { Logger } from '@kbn/core/server';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import { HealthStatus } from '../../common/types';
 import {
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
@@ -30,7 +31,8 @@ export function initializeFindingsAggregationTask(
     registerTask(taskManager, taskId, coreStartServices, logger);
     logger.debug(`task: ${taskId} registered successfully`);
   } catch (errMsg) {
-    logger.error(`Failed to register task: ${taskId}, ${errMsg}`);
+    const error = transformError(errMsg);
+    logger.error(`Failed to register task: ${taskId}, ${error.message}`);
   }
 }
 export function registerTask(
@@ -59,7 +61,8 @@ export function taskRunner(
           const esClient = (await coreStartServices)[0].elasticsearch.client.asInternalUser;
           return await aggregateLatestFindings(esClient, state.runs, logger);
         } catch (errMsg) {
-          logger.warn(`Error executing alerting health check task: ${errMsg}`);
+          const error = transformError(errMsg);
+          logger.warn(`Error executing alerting health check task: ${error.message}`);
           return {
             state: {
               runs: (state.runs || 0) + 1,
@@ -110,7 +113,8 @@ const aggregateLatestFindings = async (
     }
     logger.warn(`No data found in latest findings index`);
   } catch (errMsg) {
-    logger.error(`failed to aggregate latest findings: ${errMsg}`);
+    const error = transformError(errMsg);
+    logger.error(`failed to aggregate latest findings: ${error.message}`);
     return {
       state: {
         runs: (stateRuns || 0) + 1,
@@ -205,6 +209,7 @@ export async function scheduleIndexScoreTask(
       params: {},
     });
   } catch (errMsg) {
-    logger.debug(`Error scheduling task, received ${errMsg.message}`);
+    const error = transformError(errMsg);
+    logger.debug(`Error scheduling task, received ${error.message}`);
   }
 }
