@@ -1159,7 +1159,11 @@ const serviceAnomalyChartsRoute = createApmServerRoute({
     path: t.type({
       serviceName: t.string,
     }),
-    query: t.intersection([rangeRt, t.type({ transactionType: t.string })]),
+    query: t.intersection([
+      rangeRt,
+      environmentRt,
+      t.type({ transactionType: t.string }),
+    ]),
   }),
   options: {
     tags: ['access:apm'],
@@ -1179,7 +1183,7 @@ const serviceAnomalyChartsRoute = createApmServerRoute({
 
     const {
       path: { serviceName },
-      query: { start, end, transactionType },
+      query: { start, end, transactionType, environment },
     } = resources.params;
 
     try {
@@ -1190,6 +1194,7 @@ const serviceAnomalyChartsRoute = createApmServerRoute({
         end,
         mlSetup: setup.ml,
         logger: resources.logger,
+        environment,
       });
 
       return {
