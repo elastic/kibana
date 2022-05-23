@@ -60,7 +60,7 @@ const formatHostEcs = (data: Record<string, unknown> | null): HostEcs | null => 
 
 export const getNetworkDetailsHostAgg = (hostDetailsHit: NetworkDetailsHostHit | {}) => {
   const hostFields: HostEcs | null = formatHostEcs(
-    getOr(null, `results.hits.hits[0].fields.host`, hostDetailsHit)
+    getOr(null, `results.hits.hits[0].fields`, hostDetailsHit)
   );
   return {
     host: {

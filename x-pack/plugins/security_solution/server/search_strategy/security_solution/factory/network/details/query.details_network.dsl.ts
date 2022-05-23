@@ -116,10 +116,10 @@ export const buildNetworkDetailsQuery = ({ defaultIndex, ip }: NetworkDetailsReq
       size: 0,
       _source: false,
       fields: [
-        'source.as',
-        'source.geo',
-        'destination.as',
-        'destination.geo',
+        'source.as*',
+        'source.geo*',
+        'destination.as*',
+        'destination.geo*',
         'host*',
         {
           field: '@timestamp',
