@@ -49,10 +49,13 @@ export class Fetcher {
    *
    * @param options the options for retrieving the structure of the tree.
    */
-  public async tree(options: TreeOptions): Promise<ResolverNode[]> {
+  public async tree(
+    options: TreeOptions,
+    isInternalRequest: boolean = false
+  ): Promise<ResolverNode[]> {
     const treeParts = await Promise.all([
-      this.retrieveAncestors(options),
-      this.retrieveDescendants(options),
+      this.retrieveAncestors(options, isInternalRequest),
+      this.retrieveDescendants(options, isInternalRequest),
     ]);
 
     const tree = treeParts.reduce((results, partArray) => {
@@ -60,12 +63,13 @@ export class Fetcher {
       return results;
     }, []);
 
-    return this.formatResponse(tree, options);
+    return this.formatResponse(tree, options, isInternalRequest);
   }
 
   private async formatResponse(
     treeNodes: FieldsObject[],
-    options: TreeOptions
+    options: TreeOptions,
+    isInternalRequest: boolean
   ): Promise<ResolverNode[]> {
     const statsIDs: NodeID[] = [];
     for (const node of treeNodes) {
@@ -79,6 +83,7 @@ export class Fetcher {
       indexPatterns: options.indexPatterns,
       schema: options.schema,
       timeRange: options.timeRange,
+      isInternalRequest,
     });
 
     const eventStats = await query.search(this.client, statsIDs);
@@ -133,12 +138,16 @@ export class Fetcher {
     return nodes;
   }
 
-  private async retrieveAncestors(options: TreeOptions): Promise<FieldsObject[]> {
+  private async retrieveAncestors(
+    options: TreeOptions,
+    isInternalRequest: boolean
+  ): Promise<FieldsObject[]> {
     const ancestors: FieldsObject[] = [];
     const query = new LifecycleQuery({
       schema: options.schema,
       indexPatterns: options.indexPatterns,
       timeRange: options.timeRange,
+      isInternalRequest,
     });
 
     let nodes = options.nodes;
@@ -179,12 +188,16 @@ export class Fetcher {
     return ancestors;
   }
 
-  private async retrieveDescendants(options: TreeOptions): Promise<FieldsObject[]> {
+  private async retrieveDescendants(
+    options: TreeOptions,
+    isInternalRequest: boolean
+  ): Promise<FieldsObject[]> {
     const descendants: FieldsObject[] = [];
     const query = new DescendantsQuery({
       schema: options.schema,
       indexPatterns: options.indexPatterns,
       timeRange: options.timeRange,
+      isInternalRequest,
     });
 
     let nodes: NodeID[] = options.nodes;
