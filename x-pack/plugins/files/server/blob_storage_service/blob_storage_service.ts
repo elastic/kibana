@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Readable } from 'stream';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { BlobStorageSettings } from '../../common';
 import { BlobStorage } from './types';
@@ -28,18 +27,7 @@ export class BlobStorageService {
     );
   }
 
-  public async upload(
-    content: Readable,
-    args?: BlobStorageSettings
-  ): Promise<{ id: string; size: number }> {
-    return this.createESBlobStorage({ ...args?.esSingleIndex }).upload(content);
-  }
-
-  public async delete(id: string, args?: BlobStorageSettings): Promise<void> {
-    return this.createESBlobStorage({ ...args?.esSingleIndex }).delete(id);
-  }
-
-  public async download(id: string, size?: number, args?: BlobStorageSettings): Promise<Readable> {
-    return this.createESBlobStorage({ ...args?.esSingleIndex }).download({ id, size });
+  public createBlobStore(args?: BlobStorageSettings) {
+    return this.createESBlobStorage({ ...args?.esSingleIndex });
   }
 }

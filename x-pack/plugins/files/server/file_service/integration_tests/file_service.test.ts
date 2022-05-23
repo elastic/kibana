@@ -23,6 +23,8 @@ import { CreateFileArgs } from '../internal_file_service';
 
 describe('FileService', () => {
   const fileKind: string = 'test';
+  const fileKindNonDefault: string = 'test-non-default';
+  const nonDefaultIndex = '.kibana-test-files';
 
   let manageES: TestElasticsearchUtils;
   let kbnRoot: ReturnType<typeof createRootWithCorePlugins>;
@@ -40,7 +42,15 @@ describe('FileService', () => {
     await kbnRoot.preboot();
     coreSetup = await kbnRoot.setup();
     FileServiceFactory.setup(coreSetup.savedObjects);
-    fileKindsRegistry.register({ id: fileKind, http: {} });
+    fileKindsRegistry.register({
+      id: fileKind,
+      http: {},
+    });
+    fileKindsRegistry.register({
+      id: fileKindNonDefault,
+      http: {},
+      blobStoreSettings: { esSingleIndex: { index: nonDefaultIndex } },
+    });
     coreStart = await kbnRoot.start();
     esClient = coreStart.elasticsearch.client.asInternalUser;
   });
@@ -142,5 +152,14 @@ describe('FileService', () => {
     expect(updatedFile2.meta.some).toBe(updatableFields.meta.some);
     expect(updatedFile2.name).toBe(updatableFields.name);
     expect(updatedFile2.alt).toBe(updatableFields.alt);
+  });
+
+  describe('ES blob integration and file kinds', () => {
+    it('passes blob store settings', async () => {
+      const file = await createDisposableFile({ fileKind: fileKindNonDefault, name: 'test' });
+      expect(await esClient.indices.exists({ index: nonDefaultIndex })).toBe(false);
+      await file.uploadContent(Readable.from(['test']));
+      expect(await esClient.indices.exists({ index: nonDefaultIndex })).toBe(true);
+    });
   });
 });

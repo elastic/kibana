@@ -23,6 +23,7 @@ import {
 } from './file_attributes_reducer';
 import { createAuditEvent } from '../audit_events';
 import { InternalFileService } from '../file_service/internal_file_service';
+import { BlobStorage } from '../blob_storage_service/types';
 
 /**
  * Public class that provides all data and functionality consumers will need at the
@@ -32,6 +33,7 @@ import { InternalFileService } from '../file_service/internal_file_service';
  */
 export class File<M = unknown> implements IFile {
   private readonly logAuditEvent: InternalFileService['createAuditLog'];
+  private readonly blobStorage: BlobStorage;
 
   constructor(
     private fileSO: FileSavedObject,
@@ -41,6 +43,9 @@ export class File<M = unknown> implements IFile {
     private readonly logger: Logger
   ) {
     this.logAuditEvent = this.internalFileService.createAuditLog.bind(this.internalFileService);
+    this.blobStorage = this.blobStorageService.createBlobStore(
+      fileKindDescriptor.blobStoreSettings
+    );
   }
 
   private async updateFileState(action: Action) {
@@ -75,9 +80,7 @@ export class File<M = unknown> implements IFile {
     });
 
     try {
-      const { id: contentRef, size } = await this.blobStorageService.upload(content, {
-        ...this.fileKindDescriptor.blobStoreSettings,
-      });
+      const { id: contentRef, size } = await this.blobStorage.upload(content);
       await this.updateFileState({
         action: 'uploaded',
         payload: { content_ref: contentRef, size },
@@ -94,7 +97,7 @@ export class File<M = unknown> implements IFile {
     if (!id) {
       throw new Error('No content to download');
     }
-    return this.blobStorageService.download(id, size);
+    return this.blobStorage.download({ id, size });
   }
 
   public async delete(): Promise<void> {
@@ -103,7 +106,7 @@ export class File<M = unknown> implements IFile {
       action: 'delete',
     });
     if (attributes.content_ref) {
-      await this.blobStorageService.delete(attributes.content_ref);
+      await this.blobStorage.delete(attributes.content_ref);
     }
     await this.internalFileService.deleteSO(id);
     this.logAuditEvent(
