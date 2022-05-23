@@ -26,7 +26,7 @@ const extractSettings = (config: MonitoringConfig) => {
 const DEFAULT_QUERY_TIMERANGE = { min: 'now-15m', max: 'now' };
 const DEFAULT_QUERY_TIMEOUT_SECONDS = 15;
 
-export function health(server: MonitoringCore) {
+export function registerV1HealthRoute(server: MonitoringCore) {
   const validateQuery = createValidationFunction(getHealthRequestQueryRT);
   const settings = extractSettings(server.config);
 
