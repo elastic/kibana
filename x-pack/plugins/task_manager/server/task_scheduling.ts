@@ -125,32 +125,35 @@ export class TaskScheduling {
     taskIds: string[],
     schedule: IntervalSchedule
   ): Promise<BulkUpdateResult[]> {
-    const tasks = await pMap(chunk(taskIds, 100), async (taskIdsChunk) =>
-      this.store.fetch({
-        query: mustBeAllOf(
-          {
-            terms: {
-              _id: taskIdsChunk.map((taskId) => `task:${taskId}`),
+    const tasks = await pMap(
+      chunk(taskIds, 100),
+      async (taskIdsChunk) =>
+        this.store.fetch({
+          query: mustBeAllOf(
+            {
+              terms: {
+                _id: taskIdsChunk.map((taskId) => `task:${taskId}`),
+              },
             },
-          },
-          {
-            term: {
-              'task.status': 'idle',
-            },
-          }
-        ),
-        size: 100,
-      })
+            {
+              term: {
+                'task.status': 'idle',
+              },
+            }
+          ),
+          size: 100,
+        }),
+      { concurrency: 10 }
     );
 
     const updatedTasks = tasks
       .flatMap(({ docs }) => docs)
       .map((task) => {
-        const oldInterval = parseIntervalAsMillisecond(task.schedule?.interval ?? '0s');
+        const oldIntervalInMs = parseIntervalAsMillisecond(task.schedule?.interval ?? '0s');
 
         const newRunAtInMs = Math.max(
           Date.now(),
-          task.runAt.getTime() - oldInterval + parseIntervalAsMillisecond(schedule.interval)
+          task.runAt.getTime() - oldIntervalInMs + parseIntervalAsMillisecond(schedule.interval)
         );
 
         return { ...task, schedule, runAt: new Date(newRunAtInMs) };
