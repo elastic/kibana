@@ -19,7 +19,7 @@ import {
   FILTERS,
 } from '@kbn/es-query';
 
-import { IFieldType, IIndexPattern } from '../../../../common';
+import { IFieldType } from '../../../../common';
 import { FilterManager } from '../filter_manager';
 
 function getExistingFilter(
