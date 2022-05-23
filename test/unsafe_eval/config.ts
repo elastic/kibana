@@ -18,7 +18,7 @@ export default async ({ readConfigFile }: FtrConfigProviderContext) => {
 
     kbnTestServer: {
       ...baseConfig.get('kbnTestServer'),
-      serverArgs: [...baseConfig.get('kbnTestServer.serverArgs'), '--csp.unsafe_eval=true'],
+      serverArgs: [...baseConfig.get('kbnTestServer.serverArgs'), '--csp.disableUnsafeEval=false'],
     },
   };
 };

@@ -12,10 +12,10 @@ import { config } from './config';
 const origSchema = config.schema;
 
 export const mockConfig = {
-  create(defaultUnsafeEval: boolean) {
+  create(defaultDisableUnsafeEval: boolean) {
     // @ts-expect-error: Property 'extends' does not exist on type??
     config.schema = config.schema.extends({
-      unsafe_eval: schema.boolean({ defaultValue: defaultUnsafeEval }),
+      disableUnsafeEval: schema.boolean({ defaultValue: defaultDisableUnsafeEval }),
     });
     return config;
   },

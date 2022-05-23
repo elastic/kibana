@@ -12,7 +12,7 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
 
   // This test is copied from `test/api_integration/apis/general/csp.js` which
-  // runs with `--csp.unsafe_eval=false`, whereas this test runs with `--csp.unsafe_eval=true`
+  // runs with `--csp.disableUnsafeEval=true`, whereas this test runs with `--csp.disableUnsafeEval=false`
   describe('csp smoke test 2', () => {
     it('app response sends content security policy headers', async () => {
       const response = await supertest.get('/app/kibana');

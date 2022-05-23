@@ -115,11 +115,11 @@ describe('CspConfig', () => {
       );
     });
 
-    describe('unsafe_eval', () => {
-      test('when "unsafe_eval" is set to `false`, the `unsafe-eval` CSP should not be set', () => {
+    describe('disableUnsafeEval', () => {
+      test('when "disableUnsafeEval" is set to `true`, the `unsafe-eval` CSP should not be set', () => {
         const config = new CspConfig({
           ...defaultConfig,
-          unsafe_eval: false,
+          disableUnsafeEval: true,
           script_src: ['foo', 'bar'],
         });
 
@@ -128,10 +128,10 @@ describe('CspConfig', () => {
         );
       });
 
-      test('when "unsafe_eval" is set to `true`, the `unsafe-eval` CSP should be set', () => {
+      test('when "disableUnsafeEval" is set to `false`, the `unsafe-eval` CSP should be set', () => {
         const config = new CspConfig({
           ...defaultConfig,
-          unsafe_eval: true,
+          disableUnsafeEval: false,
           script_src: ['foo', 'bar'],
         });
 
@@ -140,9 +140,9 @@ describe('CspConfig', () => {
         );
       });
 
-      test('when "unsafe_eval" is not set, and the default value is "true", the `unsafe-eval` CSP should be set', () => {
-        // The default value for `unsafe_eval` depends on whether Kibana is a distributable or not. To test both scenarios, we mock the config.
-        const mockedConfig = mockConfig.create(true).schema.validate({});
+      test('when "disableUnsafeEval" is not set, and the default value is "false", the `unsafe-eval` CSP should be set', () => {
+        // The default value for `disableUnsafeEval` depends on whether Kibana is a distributable or not. To test both scenarios, we mock the config.
+        const mockedConfig = mockConfig.create(false).schema.validate({});
 
         const config = new CspConfig({
           ...mockedConfig,
@@ -156,9 +156,9 @@ describe('CspConfig', () => {
         mockConfig.reset();
       });
 
-      test('when "unsafe_eval" is not set, and the default value is "false", the `unsafe-eval` CSP should not be set', () => {
-        // The default value for `unsafe_eval` depends on whether Kibana is a distributable or not. To test both scenarios, we mock the config.
-        const mockedConfig = mockConfig.create(false).schema.validate({});
+      test('when "disableUnsafeEval" is not set, and the default value is "true", the `unsafe-eval` CSP should not be set', () => {
+        // The default value for `disableUnsafeEval` depends on whether Kibana is a distributable or not. To test both scenarios, we mock the config.
+        const mockedConfig = mockConfig.create(true).schema.validate({});
 
         const config = new CspConfig({
           ...mockedConfig,

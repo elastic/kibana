@@ -39,12 +39,12 @@ const getDirectiveValueValidator = ({ allowNone, allowNonce }: DirectiveValidati
 
 const configSchema = schema.object(
   {
-    unsafe_eval: schema.conditional(
-      // Default unsafe_eval to false if it's not a distributable release
+    disableUnsafeEval: schema.conditional(
+      // Default disableUnsafeEval to false if it's not a distributable release
       schema.contextRef('dist'),
       true,
-      schema.boolean({ defaultValue: true }),
-      schema.boolean({ defaultValue: false })
+      schema.boolean({ defaultValue: false }),
+      schema.boolean({ defaultValue: true })
     ),
     script_src: schema.arrayOf(schema.string(), {
       defaultValue: [],
