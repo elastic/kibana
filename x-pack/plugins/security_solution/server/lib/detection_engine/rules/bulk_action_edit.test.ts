@@ -44,7 +44,7 @@ describe('bulk_action_edit', () => {
   describe('applyBulkActionEditToRule', () => {
     const getRuleMock = (params = {}) => ({
       tags: ['tag1', 'tag2'],
-      params: { index: ['initial-index-*'], ...params },
+      params: { type: 'query', index: ['initial-index-*'], ...params },
     });
     describe('tags', () => {
       test('should add new tags to rule', () => {
@@ -192,7 +192,7 @@ describe('bulk_action_edit', () => {
         });
 
         describe('overwriteDataViews is false', () => {
-          test('should NOT add new index pattern to rule', () => {
+          test('should NOT remove dataViewId from rule if adding index pattern', () => {
             const editedRule = applyBulkActionEditToRule(
               getRuleMock({ dataViewId: 'logs-*', index: [] }) as RuleAlertType,
               {
@@ -201,11 +201,10 @@ describe('bulk_action_edit', () => {
                 overwriteDataViews: false,
               }
             );
-            expect(editedRule.params).toHaveProperty('index', []);
             expect(editedRule.params).toHaveProperty('dataViewId', 'logs-*');
           });
 
-          test('should NOT remove index pattern from rule', () => {
+          test('should NOT remove dataViewId from rule if deleting index pattern', () => {
             const editedRule = applyBulkActionEditToRule(
               getRuleMock({ dataViewId: 'logs-*', index: ['index', 'index-2-*'] }) as RuleAlertType,
               {
@@ -214,11 +213,10 @@ describe('bulk_action_edit', () => {
                 overwriteDataViews: false,
               }
             );
-            expect(editedRule.params).toHaveProperty('index', ['index', 'index-2-*']);
             expect(editedRule.params).toHaveProperty('dataViewId', 'logs-*');
           });
 
-          test('should NOT rewrite index  pattern in rule', () => {
+          test('should NOT remove dataViewId from rule if setting index pattern', () => {
             const editedRule = applyBulkActionEditToRule(
               getRuleMock({ dataViewId: 'logs-*', index: [] }) as RuleAlertType,
               {
@@ -227,7 +225,6 @@ describe('bulk_action_edit', () => {
                 overwriteDataViews: false,
               }
             );
-            expect(editedRule.params).toHaveProperty('index', []);
             expect(editedRule.params).toHaveProperty('dataViewId', 'logs-*');
           });
         });

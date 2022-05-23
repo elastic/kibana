@@ -37,7 +37,6 @@ export const useBulkEditFormFlyout = () => {
 
   const handleBulkEditFormConfirm = useCallback(
     (data: BulkActionEditPayload) => {
-      console.log({ data });
       dataFormRef.current = data;
       onConfirm();
     },

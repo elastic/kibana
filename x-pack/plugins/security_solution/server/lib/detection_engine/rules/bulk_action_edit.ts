@@ -53,10 +53,11 @@ export const applyBulkActionEditToRule = (
       );
 
       if (
-        isEqlParams(rule.params) ||
-        isQueryParams(rule.params) ||
-        isThresholdParams(rule.params) ||
-        isThreatParams(rule.params)
+        (isEqlParams(rule.params) ||
+          isQueryParams(rule.params) ||
+          isThresholdParams(rule.params) ||
+          isThreatParams(rule.params)) &&
+        action.overwriteDataViews
       ) {
         rule.params.dataViewId = undefined;
       }
@@ -71,10 +72,11 @@ export const applyBulkActionEditToRule = (
       );
 
       if (
-        isEqlParams(rule.params) ||
-        isQueryParams(rule.params) ||
-        isThresholdParams(rule.params) ||
-        isThreatParams(rule.params)
+        (isEqlParams(rule.params) ||
+          isQueryParams(rule.params) ||
+          isThresholdParams(rule.params) ||
+          isThreatParams(rule.params)) &&
+        action.overwriteDataViews
       ) {
         rule.params.dataViewId = undefined;
       }
@@ -95,10 +97,11 @@ export const applyBulkActionEditToRule = (
       invariant(action.value.length !== 0, "Index patterns can't be overwritten with empty list");
 
       if (
-        isEqlParams(rule.params) ||
-        isQueryParams(rule.params) ||
-        isThresholdParams(rule.params) ||
-        isThreatParams(rule.params)
+        (isEqlParams(rule.params) ||
+          isQueryParams(rule.params) ||
+          isThresholdParams(rule.params) ||
+          isThreatParams(rule.params)) &&
+        action.overwriteDataViews
       ) {
         rule.params.dataViewId = undefined;
       }
