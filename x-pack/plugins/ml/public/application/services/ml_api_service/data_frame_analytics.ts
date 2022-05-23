@@ -10,12 +10,10 @@ import { http } from '../http_service';
 import { basePath } from '.';
 import type { DataFrameAnalyticsStats } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import type { ValidateAnalyticsJobResponse } from '../../../../common/constants/validation';
-import type {
-  DataFrameAnalyticsConfig,
-  UpdateDataFrameAnalyticsConfig,
-} from '../../data_frame_analytics/common';
+import type { DataFrameAnalyticsConfig } from '../../data_frame_analytics/common';
 import type { DeepPartial } from '../../../../common/types/common';
 import type { NewJobCapsResponse } from '../../../../common/types/fields';
+import type { UpdateDataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
 import type { JobMessage } from '../../../../common/types/audit_message';
 import type {
   DeleteDataFrameAnalyticsWithIndexStatus,

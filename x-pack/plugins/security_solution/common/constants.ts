@@ -89,7 +89,6 @@ export enum SecurityPageName {
   endpoints = 'endpoints',
   eventFilters = 'event_filters',
   exceptions = 'exceptions',
-  explore = 'explore',
   hostIsolationExceptions = 'host_isolation_exceptions',
   hosts = 'hosts',
   hostsAnomalies = 'hosts-anomalies',
@@ -108,6 +107,7 @@ export enum SecurityPageName {
   overview = 'overview',
   policies = 'policy',
   rules = 'rules',
+  rulesCreate = 'rules-create',
   timelines = 'timelines',
   timelinesTemplates = 'timelines-templates',
   trustedApps = 'trusted_apps',
@@ -119,11 +119,11 @@ export enum SecurityPageName {
   sessions = 'sessions',
   usersEvents = 'users-events',
   usersExternalAlerts = 'users-external_alerts',
-  threatHuntingLanding = 'threat-hunting',
+  exploreLanding = 'explore',
   dashboardsLanding = 'dashboards',
 }
 
-export const THREAT_HUNTING_PATH = '/threat_hunting' as const;
+export const EXPLORE_PATH = '/explore' as const;
 export const DASHBOARDS_PATH = '/dashboards' as const;
 export const MANAGE_PATH = '/manage' as const;
 export const TIMELINES_PATH = '/timelines' as const;
@@ -134,6 +134,7 @@ export const DETECTION_RESPONSE_PATH = '/detection_response' as const;
 export const DETECTIONS_PATH = '/detections' as const;
 export const ALERTS_PATH = '/alerts' as const;
 export const RULES_PATH = '/rules' as const;
+export const RULES_CREATE_PATH = `${RULES_PATH}/create` as const;
 export const EXCEPTIONS_PATH = '/exceptions' as const;
 export const HOSTS_PATH = '/hosts' as const;
 export const USERS_PATH = '/users' as const;
@@ -151,7 +152,7 @@ export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}` as const;
 export const APP_LANDING_PATH = `${APP_PATH}${LANDING_PATH}` as const;
 export const APP_DETECTION_RESPONSE_PATH = `${APP_PATH}${DETECTION_RESPONSE_PATH}` as const;
 export const APP_MANAGEMENT_PATH = `${APP_PATH}${MANAGEMENT_PATH}` as const;
-export const APP_THREAT_HUNTING_PATH = `${APP_PATH}${THREAT_HUNTING_PATH}` as const;
+export const APP_EXPLORE_PATH = `${APP_PATH}${EXPLORE_PATH}` as const;
 export const APP_DASHBOARDS_PATH = `${APP_PATH}${DASHBOARDS_PATH}` as const;
 
 export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;

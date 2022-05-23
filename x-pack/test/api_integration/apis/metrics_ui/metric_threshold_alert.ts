@@ -20,11 +20,14 @@ import {
 } from '@kbn/infra-plugin/server/lib/alerting/metric_threshold/lib/evaluate_rule';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
+import { createFakeLogger } from './create_fake_logger';
 
 const { gauge, rate } = DATES['alert-test-data'];
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
+  const log = getService('log');
+  const logger = createFakeLogger(log);
 
   const baseParams: EvaluatedRuleParams = {
     groupBy: void 0,
@@ -104,6 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
             config,
             10000,
             true,
+            logger,
             void 0,
             timeFrame
           );
@@ -152,6 +156,7 @@ export default function ({ getService }: FtrProviderContext) {
             config,
             10000,
             true,
+            logger,
             void 0,
             timeFrame
           );
@@ -198,6 +203,7 @@ export default function ({ getService }: FtrProviderContext) {
             config,
             10000,
             true,
+            logger,
             void 0,
             timeFrame,
             ['middleware']
@@ -257,6 +263,7 @@ export default function ({ getService }: FtrProviderContext) {
             configuration,
             10000,
             true,
+            logger,
             void 0,
             timeFrame
           );
@@ -287,6 +294,7 @@ export default function ({ getService }: FtrProviderContext) {
             configuration,
             10000,
             true,
+            logger,
             void 0,
             timeFrame
           );
@@ -332,6 +340,7 @@ export default function ({ getService }: FtrProviderContext) {
               configuration,
               10000,
               true,
+              logger,
               void 0,
               timeFrame
             );
@@ -376,6 +385,7 @@ export default function ({ getService }: FtrProviderContext) {
               configuration,
               10000,
               true,
+              logger,
               void 0,
               timeFrame,
               ['web', 'prod']
@@ -452,6 +462,7 @@ export default function ({ getService }: FtrProviderContext) {
             configuration,
             10000,
             true,
+            logger,
             void 0,
             timeFrame
           );
@@ -493,6 +504,7 @@ export default function ({ getService }: FtrProviderContext) {
             configuration,
             10000,
             true,
+            logger,
             void 0,
             timeFrame
           );
@@ -523,6 +535,7 @@ export default function ({ getService }: FtrProviderContext) {
             configuration,
             10000,
             true,
+            logger,
             void 0,
             timeFrame
           );
@@ -567,6 +580,7 @@ export default function ({ getService }: FtrProviderContext) {
             configuration,
             10000,
             true,
+            logger,
             void 0,
             timeFrame
           );
@@ -613,6 +627,7 @@ export default function ({ getService }: FtrProviderContext) {
             configuration,
             10000,
             true,
+            logger,
             void 0,
             timeFrame
           );
@@ -647,6 +662,7 @@ export default function ({ getService }: FtrProviderContext) {
             configuration,
             10000,
             true,
+            logger,
             void 0,
             timeFrame,
             ['dev']
@@ -692,6 +708,7 @@ export default function ({ getService }: FtrProviderContext) {
             configuration,
             10000,
             true,
+            logger,
             moment(gauge.midpoint).subtract(1, 'm').valueOf(),
             timeFrame,
             ['dev']
@@ -711,6 +728,7 @@ export default function ({ getService }: FtrProviderContext) {
             configuration,
             10000,
             true,
+            logger,
             gauge.max,
             timeFrame
           );
@@ -772,6 +790,7 @@ export default function ({ getService }: FtrProviderContext) {
             configuration,
             10000,
             true,
+            logger,
             void 0,
             timeFrame
           );
@@ -819,6 +838,7 @@ export default function ({ getService }: FtrProviderContext) {
             configuration,
             10000,
             true,
+            logger,
             void 0,
             timeFrame
           );

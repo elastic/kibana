@@ -58,7 +58,7 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
               values={{
                 solution,
                 link: (
-                  <EuiLink href={docsLink}>
+                  <EuiLink href={docsLink} target="_blank">
                     <FormattedMessage
                       id="sharedUXComponents.noDataPage.intro.link"
                       defaultMessage="learn more"
