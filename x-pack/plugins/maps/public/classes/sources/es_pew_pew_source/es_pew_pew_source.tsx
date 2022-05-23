@@ -8,17 +8,35 @@
 import React from 'react';
 import turfBbox from '@turf/bbox';
 import { multiPoint } from '@turf/helpers';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { type Filter, buildExistsFilter } from '@kbn/es-query';
+import { lastValueFrom } from 'rxjs';
+import type {
+  AggregationsGeoBoundsAggregate,
+  LatLonGeoLocation,
+  TopLeftBottomRightGeoBounds,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { UpdateSourceEditor } from './update_source_editor';
 import { i18n } from '@kbn/i18n';
+// @ts-expect-error
+import { UpdateSourceEditor } from './update_source_editor';
 import { SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
+// @ts-expect-error
 import { convertToLines } from './convert_to_lines';
 import { AbstractESAggSource } from '../es_agg_source';
 import { registerSource } from '../source_registry';
 import { turfBboxToBounds } from '../../../../common/elasticsearch_util';
 import { DataRequestAbortError } from '../../util/data_request';
 import { makePublicExecutionContext } from '../../../util';
+import { SourceEditorArgs } from '../source';
+import {
+  ESPewPewSourceDescriptor,
+  MapExtent,
+  VectorSourceRequestMeta,
+} from '../../../../common/descriptor_types';
+import { isValidStringConfig } from '../../util/valid_string_config';
+import { BoundsRequestMeta, GeoJsonWithMeta } from '../vector_source';
 
 const MAX_GEOTILE_LEVEL = 29;
 
@@ -27,20 +45,30 @@ export const sourceTitle = i18n.translate('xpack.maps.source.pewPewTitle', {
 });
 
 export class ESPewPewSource extends AbstractESAggSource {
-  static type = SOURCE_TYPES.ES_PEW_PEW;
+  readonly _descriptor: ESPewPewSourceDescriptor;
 
-  static createDescriptor(descriptor) {
+  static createDescriptor(descriptor: Partial<ESPewPewSourceDescriptor>): ESPewPewSourceDescriptor {
     const normalizedDescriptor = AbstractESAggSource.createDescriptor(descriptor);
+    if (!isValidStringConfig(descriptor.sourceGeoField)) {
+      throw new Error('Cannot create ESPewPewSourceDescriptor, sourceGeoField is not provided');
+    }
+    if (!isValidStringConfig(descriptor.destGeoField)) {
+      throw new Error('Cannot create ESPewPewSourceDescriptor, destGeoField is not provided');
+    }
     return {
       ...normalizedDescriptor,
-      type: ESPewPewSource.type,
-      indexPatternId: descriptor.indexPatternId,
-      sourceGeoField: descriptor.sourceGeoField,
-      destGeoField: descriptor.destGeoField,
+      type: SOURCE_TYPES.ES_PEW_PEW,
+      sourceGeoField: descriptor.sourceGeoField!,
+      destGeoField: descriptor.destGeoField!,
     };
   }
 
-  renderSourceSettingsEditor({ onChange }) {
+  constructor(descriptor: ESPewPewSourceDescriptor) {
+    super(descriptor);
+    this._descriptor = descriptor;
+  }
+
+  renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {
     return (
       <UpdateSourceEditor
         indexPatternId={this.getIndexPatternId()}
@@ -100,18 +128,18 @@ export class ESPewPewSource extends AbstractESAggSource {
     ];
   }
 
-  getGeoGridPrecision(zoom) {
+  getGeoGridPrecision(zoom: number) {
     const targetGeotileLevel = Math.ceil(zoom) + 2;
     return Math.min(targetGeotileLevel, MAX_GEOTILE_LEVEL);
   }
 
   async getGeoJsonWithMeta(
-    layerName,
-    searchFilters,
-    registerCancelCallback,
-    isRequestStillActive,
-    inspectorAdapters
-  ) {
+    layerName: string,
+    searchFilters: VectorSourceRequestMeta,
+    registerCancelCallback: (callback: () => void) => void,
+    isRequestStillActive: () => boolean,
+    inspectorAdapters: Adapters
+  ): Promise<GeoJsonWithMeta> {
     const indexPattern = await this.getIndexPattern();
     const searchSource = await this.makeSearchSource(searchFilters, 0);
     searchSource.setField('trackTotalHits', false);
@@ -151,14 +179,10 @@ export class ESPewPewSource extends AbstractESAggSource {
     // Some underlying indices may not contain geo fields
     // Filter out documents without geo fields to avoid shard failures for those indices
     searchSource.setField('filter', [
-      ...searchSource.getField('filter'),
+      ...(searchSource.getField('filter') as Filter[]),
       // destGeoField exists ensured by buffer filter
       // so only need additional check for sourceGeoField
-      {
-        exists: {
-          field: this._descriptor.sourceGeoField,
-        },
-      },
+      buildExistsFilter({ name: this._descriptor.sourceGeoField, type: 'geo_point' }, indexPattern),
     ]);
 
     const esResponse = await this._runEsQuery({
@@ -188,7 +212,10 @@ export class ESPewPewSource extends AbstractESAggSource {
     return this._descriptor.destGeoField;
   }
 
-  async getBoundsForFilters(boundsFilters, registerCancelCallback) {
+  async getBoundsForFilters(
+    boundsFilters: BoundsRequestMeta,
+    registerCancelCallback: (callback: () => void) => void
+  ): Promise<MapExtent | null> {
     const searchSource = await this.makeSearchSource(boundsFilters, 0);
     searchSource.setField('trackTotalHits', false);
     searchSource.setField('aggs', {
@@ -208,31 +235,36 @@ export class ESPewPewSource extends AbstractESAggSource {
     try {
       const abortController = new AbortController();
       registerCancelCallback(() => abortController.abort());
-      const { rawResponse: esResp } = await searchSource
-        .fetch$({
+      const { rawResponse: esResp } = await lastValueFrom(
+        searchSource.fetch$({
           abortSignal: abortController.signal,
           legacyHitsTotal: false,
           executionContext: makePublicExecutionContext('es_pew_pew_source:bounds'),
         })
-        .toPromise();
-      if (esResp.aggregations.destFitToBounds.bounds) {
+      );
+      const destBounds = (esResp.aggregations?.destFitToBounds as AggregationsGeoBoundsAggregate)
+        .bounds as TopLeftBottomRightGeoBounds;
+      if (destBounds) {
         corners.push([
-          esResp.aggregations.destFitToBounds.bounds.top_left.lon,
-          esResp.aggregations.destFitToBounds.bounds.top_left.lat,
+          (destBounds.top_left as LatLonGeoLocation).lon,
+          (destBounds.top_left as LatLonGeoLocation).lat,
         ]);
         corners.push([
-          esResp.aggregations.destFitToBounds.bounds.bottom_right.lon,
-          esResp.aggregations.destFitToBounds.bounds.bottom_right.lat,
+          (destBounds.bottom_right as LatLonGeoLocation).lon,
+          (destBounds.bottom_right as LatLonGeoLocation).lat,
         ]);
       }
-      if (esResp.aggregations.sourceFitToBounds.bounds) {
+      const sourceBounds = (
+        esResp.aggregations?.sourceFitToBounds as AggregationsGeoBoundsAggregate
+      ).bounds as TopLeftBottomRightGeoBounds;
+      if (sourceBounds) {
         corners.push([
-          esResp.aggregations.sourceFitToBounds.bounds.top_left.lon,
-          esResp.aggregations.sourceFitToBounds.bounds.top_left.lat,
+          (sourceBounds.top_left as LatLonGeoLocation).lon,
+          (sourceBounds.top_left as LatLonGeoLocation).lat,
         ]);
         corners.push([
-          esResp.aggregations.sourceFitToBounds.bounds.bottom_right.lon,
-          esResp.aggregations.sourceFitToBounds.bounds.bottom_right.lat,
+          (sourceBounds.bottom_right as LatLonGeoLocation).lon,
+          (sourceBounds.bottom_right as LatLonGeoLocation).lat,
         ]);
       }
     } catch (error) {
