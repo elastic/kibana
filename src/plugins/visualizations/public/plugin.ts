@@ -53,6 +53,7 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
 import { visualizeEditorTrigger } from './triggers';
@@ -118,6 +119,7 @@ export interface VisualizationsSetupDeps {
 export interface VisualizationsStartDeps {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  dataViewEditor: DataViewEditorStart;
   expressions: ExpressionsStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
@@ -239,9 +241,6 @@ export class VisualizationsPlugin
 
         // make sure the index pattern list is up to date
         pluginsStart.dataViews.clearCache();
-        // make sure a default index pattern exists
-        // if not, the page will be redirected to management and visualize won't be rendered
-        await pluginsStart.dataViews.ensureDefaultDataView();
 
         appMounted();
 
@@ -269,6 +268,8 @@ export class VisualizationsPlugin
           pluginInitializerContext: this.initializerContext,
           chrome: coreStart.chrome,
           data: pluginsStart.data,
+          core: coreStart,
+          dataViewEditor: pluginsStart.dataViewEditor,
           dataViews: pluginsStart.dataViews,
           localStorage: new Storage(localStorage),
           navigation: pluginsStart.navigation,

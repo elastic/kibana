@@ -12,6 +12,8 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+import { parseStream } from './parse_stream';
+
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const config = getService('config');
@@ -67,33 +69,14 @@ export default ({ getService }: FtrProviderContext) => {
       expect(stream).not.to.be(null);
 
       if (stream !== null) {
-        let partial = '';
-        let threw = false;
         const progressData: any[] = [];
 
-        try {
-          for await (const value of stream) {
-            const full = `${partial}${value}`;
-            const parts = full.split('\n');
-            const last = parts.pop();
-
-            partial = last ?? '';
-
-            const actions = parts.map((p) => JSON.parse(p));
-
-            actions.forEach((action) => {
-              expect(typeof action.type).to.be('string');
-
-              if (action.type === 'update_progress') {
-                progressData.push(action);
-              }
-            });
+        for await (const action of parseStream(stream)) {
+          expect(action.type).not.to.be('error');
+          if (action.type === 'update_progress') {
+            progressData.push(action);
           }
-        } catch (e) {
-          threw = true;
         }
-
-        expect(threw).to.be(false);
 
         expect(progressData.length).to.be(100);
         expect(progressData[0].payload).to.be(1);

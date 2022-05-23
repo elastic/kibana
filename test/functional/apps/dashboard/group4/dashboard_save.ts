@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const esArchiver = getService('esArchiver');
 
   describe('dashboard save', function describeIndexTests() {
     this.tags('includeFirefox');
@@ -125,6 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Does not show dashboard save modal when on quick save', async function () {
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.saveDashboard('test quick save');
