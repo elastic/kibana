@@ -50,7 +50,7 @@ import { SecurityPageName } from '../../../app/types';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { LandingPageComponent } from '../../../common/components/landing_page';
-export { getBreadcrumbs } from './utils';
+export { getTrailingBreadcrumbs } from './utils';
 
 const NetworkDetailsManage = manageQuery(IpOverview);
 

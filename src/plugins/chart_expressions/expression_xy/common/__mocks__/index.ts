@@ -35,7 +35,7 @@ export const createSampleDatatableWithRows = (rows: DatatableRow[]): Datatable =
       id: 'c',
       name: 'c',
       meta: {
-        type: 'string',
+        type: 'date',
         field: 'order_date',
         sourceParams: { type: 'date-histogram', params: { interval: 'auto' } },
         params: { id: 'string' },
@@ -128,8 +128,8 @@ export const createArgsWithLayers = (
 
 export function sampleArgs() {
   const data = createSampleDatatableWithRows([
-    { a: 1, b: 2, c: 'I', d: 'Foo' },
-    { a: 1, b: 5, c: 'J', d: 'Bar' },
+    { a: 1, b: 2, c: 1652034840000, d: 'Foo' },
+    { a: 1, b: 5, c: 1652122440000, d: 'Bar' },
   ]);
 
   return {
