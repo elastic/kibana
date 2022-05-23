@@ -16,7 +16,7 @@ const DEPRECATED_HIDDEN_TIMELINE_ROUTES: readonly string[] = [
   '/administration',
   '/rules/create',
   '/get_started',
-  '/threat_hunting',
+  '/explore',
   '/dashboards',
   '/manage',
 ];
