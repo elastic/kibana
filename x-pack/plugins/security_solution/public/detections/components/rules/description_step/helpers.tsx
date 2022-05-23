@@ -137,7 +137,7 @@ export const buildEqlOptionsDescription = (eqlOptions: EqlOptionsSelected): List
       ...items,
       {
         title: <>{i18n.EQL_TIEBREAKER_FIELD_LABEL}</>,
-        description: <Query>{eqlOptions.tiebreakerField}</Query>,
+        description: <>{eqlOptions.tiebreakerField}</>,
       },
     ];
   }
