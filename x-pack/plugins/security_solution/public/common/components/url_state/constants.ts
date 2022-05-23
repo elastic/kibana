@@ -38,5 +38,5 @@ export type UrlStateType =
   | 'overview'
   | 'rules'
   | 'timeline'
-  | 'threat_hunting'
+  | 'explore'
   | 'dashboards';

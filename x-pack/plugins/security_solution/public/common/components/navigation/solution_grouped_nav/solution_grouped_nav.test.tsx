@@ -74,14 +74,14 @@ describe('SolutionGroupedNav', () => {
       const items = [
         ...mockItems,
         {
-          id: SecurityPageName.threatHuntingLanding,
-          label: 'Threat Hunting',
-          href: '/threat_hunting',
+          id: SecurityPageName.exploreLanding,
+          label: 'Explore',
+          href: '/explore',
           onClick: mockOnClick,
         },
       ];
       const result = renderNav({ items });
-      result.getByTestId(`groupedNavItemLink-${SecurityPageName.threatHuntingLanding}`).click();
+      result.getByTestId(`groupedNavItemLink-${SecurityPageName.exploreLanding}`).click();
       expect(mockOnClick).toHaveBeenCalled();
     });
   });
@@ -122,9 +122,9 @@ describe('SolutionGroupedNav', () => {
       const items = [
         ...mockItems,
         {
-          id: SecurityPageName.threatHuntingLanding,
-          label: 'Threat Hunting',
-          href: '/threat_hunting',
+          id: SecurityPageName.exploreLanding,
+          label: 'Explore',
+          href: '/explore',
           items: [
             {
               id: SecurityPageName.users,
@@ -141,7 +141,7 @@ describe('SolutionGroupedNav', () => {
       expect(result.getByTestId('groupedNavPanel')).toBeInTheDocument();
       expect(result.getByText('Overview')).toBeInTheDocument();
 
-      result.getByTestId(`groupedNavItemButton-${SecurityPageName.threatHuntingLanding}`).click();
+      result.getByTestId(`groupedNavItemButton-${SecurityPageName.exploreLanding}`).click();
       expect(result.queryByTestId('groupedNavPanel')).toBeInTheDocument();
       expect(result.getByText('Users')).toBeInTheDocument();
     });
