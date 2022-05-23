@@ -736,7 +736,10 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       }
     }
 
+    const isSourceGeoJson = !this.getSource().isMvt();
     const filterExpr = getPointFilterExpression(
+      isSourceGeoJson,
+      this.getSource().isESSource(),
       this._getJoinFilterExpression(),
       timesliceMaskConfig
     );
@@ -843,6 +846,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     const isSourceGeoJson = !this.getSource().isMvt();
     const filterExpr = getLabelFilterExpression(
       isSourceGeoJson,
+      this.getSource().isESSource(),
       this._getJoinFilterExpression(),
       timesliceMaskConfig
     );

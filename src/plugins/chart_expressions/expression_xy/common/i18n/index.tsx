@@ -181,6 +181,18 @@ export const strings = {
     i18n.translate('expressionXY.dataLayer.markSizeAccessor.help', {
       defaultMessage: 'Mark size accessor',
     }),
+  getLineWidthHelp: () =>
+    i18n.translate('expressionXY.dataLayer.lineWidth.help', {
+      defaultMessage: 'Line width',
+    }),
+  getShowPointsHelp: () =>
+    i18n.translate('expressionXY.dataLayer.showPoints.help', {
+      defaultMessage: 'Show points',
+    }),
+  getPointsRadiusHelp: () =>
+    i18n.translate('expressionXY.dataLayer.pointsRadius.help', {
+      defaultMessage: 'Points radius',
+    }),
   getYConfigHelp: () =>
     i18n.translate('expressionXY.dataLayer.yConfig.help', {
       defaultMessage: 'Additional configuration for y axes',
