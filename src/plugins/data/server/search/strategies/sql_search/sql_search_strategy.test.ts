@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { merge, set } from 'lodash';
+import { merge } from 'lodash';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { errors } from '@elastic/elasticsearch';
 import * as indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
@@ -237,7 +237,9 @@ describe('SQL search strategy', () => {
 
     it('does not close the cursor if the search is incomplete', async () => {
       mockSqlGetAsync.mockResolvedValueOnce(
-        merge(mockSqlResponse, { body: { is_partial: false, is_running: true, cursor: 'cursor' } })
+        merge({}, mockSqlResponse, {
+          body: { is_partial: false, is_running: true, cursor: 'cursor' },
+        })
       );
 
       const esSearch = await sqlSearchStrategyProvider(mockLogger);
@@ -246,8 +248,23 @@ describe('SQL search strategy', () => {
       expect(mockSqlClearCursor).not.toHaveBeenCalled();
     });
 
+    it('does not close the cursor if there is a request parameter to keep it', async () => {
+      mockSqlGetAsync.mockResolvedValueOnce(
+        merge({}, mockSqlResponse, { body: { cursor: 'cursor' } })
+      );
+
+      const esSearch = await sqlSearchStrategyProvider(mockLogger);
+      await esSearch
+        .search({ id: 'foo', params: { query: 'query', keep_cursor: true } }, {}, mockDeps)
+        .toPromise();
+
+      expect(mockSqlClearCursor).not.toHaveBeenCalled();
+    });
+
     it('closes the cursor when the search is complete', async () => {
-      mockSqlGetAsync.mockResolvedValueOnce(set(mockSqlResponse, 'body.cursor', 'cursor'));
+      mockSqlGetAsync.mockResolvedValueOnce(
+        merge({}, mockSqlResponse, { body: { cursor: 'cursor' } })
+      );
 
       const esSearch = await sqlSearchStrategyProvider(mockLogger);
       await esSearch.search({ id: 'foo', params: { query: 'query' } }, {}, mockDeps).toPromise();

@@ -9,11 +9,7 @@
 import type { IncomingHttpHeaders } from 'http';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs/operators';
-import {
-  SqlGetAsyncRequest,
-  SqlQueryRequest,
-  SqlQueryResponse,
-} from '@elastic/elasticsearch/lib/api/types';
+import { SqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type {
@@ -51,34 +47,37 @@ export const sqlSearchStrategyProvider = (
     const sessionConfig = null;
 
     const search = async () => {
+      const { keep_cursor: keepCursor, ...params } = request.params ?? {};
       let body: SqlQueryResponse;
       let headers: IncomingHttpHeaders;
 
       if (id) {
-        const params: SqlGetAsyncRequest = {
-          format: request.params?.format ?? 'json',
-          ...getDefaultAsyncGetParams(sessionConfig, options),
-          id,
-        };
-
-        ({ body, headers } = await client.sql.getAsync(params, {
-          signal: options.abortSignal,
-          meta: true,
-        }));
+        ({ body, headers } = await client.sql.getAsync(
+          {
+            format: params?.format ?? 'json',
+            ...getDefaultAsyncGetParams(sessionConfig, options),
+            id,
+          },
+          {
+            signal: options.abortSignal,
+            meta: true,
+          }
+        ));
       } else {
-        const params: SqlQueryRequest = {
-          format: request.params?.format ?? 'json',
-          ...getDefaultAsyncSubmitParams(sessionConfig, options),
-          ...request.params,
-        };
-
-        ({ headers, body } = await client.sql.query(params, {
-          signal: options.abortSignal,
-          meta: true,
-        }));
+        ({ headers, body } = await client.sql.query(
+          {
+            format: params.format ?? 'json',
+            ...getDefaultAsyncSubmitParams(sessionConfig, options),
+            ...params,
+          },
+          {
+            signal: options.abortSignal,
+            meta: true,
+          }
+        ));
       }
 
-      if (!body.is_partial && !body.is_running && body.cursor) {
+      if (!body.is_partial && !body.is_running && body.cursor && !keepCursor) {
         try {
           await client.sql.clearCursor({ cursor: body.cursor });
         } catch (error) {
