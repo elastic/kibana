@@ -192,7 +192,7 @@ interface DefaultFieldRendererProps {
   idPrefix: string;
   isDraggable?: boolean;
   moreMaxHeight?: string;
-  render?: (item: RowItemTypes) => React.ReactNode;
+  render?: (item: string) => React.ReactNode;
   rowItems: string[] | null | undefined;
 }
 
@@ -262,15 +262,13 @@ export const DefaultFieldRenderer = React.memo(DefaultFieldRendererComponent);
 
 DefaultFieldRenderer.displayName = 'DefaultFieldRenderer';
 
-type RowItemTypes = string | string[];
-
 interface DefaultFieldRendererOverflowProps {
   attrName?: string;
   fieldType?: string;
   rowItems: string[];
   idPrefix: string;
   isAggregatable?: boolean;
-  render?: (item: RowItemTypes) => React.ReactNode;
+  render?: (item: string) => React.ReactNode;
   overflowIndexStart?: number;
   moreMaxHeight: string;
 }
@@ -283,8 +281,8 @@ interface MoreContainerProps {
   isAggregatable?: boolean;
   moreMaxHeight: string;
   overflowIndexStart: number;
-  render?: (item: RowItemTypes) => React.ReactNode;
-  rowItems: RowItemTypes[];
+  render?: (item: string) => React.ReactNode;
+  rowItems: string[];
 }
 
 /** A container (with overflow) for showing "More" items in a popover */
