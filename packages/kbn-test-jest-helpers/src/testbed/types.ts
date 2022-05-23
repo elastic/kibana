@@ -8,7 +8,7 @@
 
 import { Store } from 'redux';
 import { ReactWrapper as GenericReactWrapper } from 'enzyme';
-import { LocationDescriptor } from 'history';
+import { InitialEntry } from 'history';
 
 export type AsyncSetupFunc<T> = (props?: any) => Promise<TestBed<T>>;
 export type SyncSetupFunc<T> = (props?: any) => TestBed<T>;
@@ -156,11 +156,11 @@ export interface MemoryRouterConfig {
   /** Flag to add or not the `MemoryRouter`. If set to `false`, there won't be any router and the component won't be wrapped on a `<Route />`. */
   wrapComponent?: boolean;
   /** The React Router **initial entries** setting ([see documentation](https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/MemoryRouter.md)) */
-  initialEntries?: LocationDescriptor[];
+  initialEntries?: InitialEntry[];
   /** The React Router **initial index** setting ([see documentation](https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/MemoryRouter.md)) */
   initialIndex?: number;
   /** The route **path** for the mounted component (defaults to `"/"`) */
-  componentRoutePath?: LocationDescriptor | LocationDescriptor[];
+  componentRoutePath?: InitialEntry | InitialEntry[];
   /** A callBack that will be called with the React Router instance once mounted  */
   onRouter?: (router: any) => void;
 }

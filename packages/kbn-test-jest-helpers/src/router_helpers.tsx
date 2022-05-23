@@ -8,9 +8,9 @@
 
 import React, { Component, ComponentType } from 'react';
 import { MemoryRouter, Route, withRouter } from 'react-router-dom';
-import { History, LocationDescriptor } from 'history';
+import { History, Location, To, InitialEntry } from 'history';
 
-const stringifyPath = (path: LocationDescriptor): string => {
+const stringifyPath = (path: To): string => {
   if (typeof path === 'string') {
     return path;
   }
@@ -18,11 +18,9 @@ const stringifyPath = (path: LocationDescriptor): string => {
   return path.pathname || '/';
 };
 
-const locationDescriptorToRoutePath = (
-  paths: LocationDescriptor | LocationDescriptor[]
-): string | string[] => {
+const locationDescriptorToRoutePath = (paths: To | To[]): string | string[] => {
   if (Array.isArray(paths)) {
-    return paths.map((path: LocationDescriptor) => {
+    return paths.map((path: To) => {
       return stringifyPath(path);
     });
   }
@@ -31,7 +29,7 @@ const locationDescriptorToRoutePath = (
 };
 
 export const WithMemoryRouter =
-  (initialEntries: LocationDescriptor[] = ['/'], initialIndex: number = 0) =>
+  (initialEntries: InitialEntry[] = ['/'], initialIndex: number = 0) =>
   (WrappedComponent: ComponentType) =>
   (props: any) =>
     (
@@ -41,10 +39,7 @@ export const WithMemoryRouter =
     );
 
 export const WithRoute =
-  (
-    componentRoutePath: LocationDescriptor | LocationDescriptor[] = ['/'],
-    onRouter = (router: any) => {}
-  ) =>
+  (componentRoutePath: InitialEntry | InitialEntry[] = ['/'], onRouter = (router: any) => {}) =>
   (WrappedComponent: ComponentType) => {
     // Create a class component that will catch the router
     // and forward it to our "onRouter()" handler.
@@ -73,26 +68,28 @@ export const WithRoute =
 interface Router {
   history: Partial<History>;
   route: {
-    location: LocationDescriptor;
+    location: Location;
   };
 }
 
 export const reactRouterMock: Router = {
   history: {
     push: () => {},
-    createHref: (location) => location.pathname!,
+    createHref: (location) => (typeof location === 'string' ? location : location.pathname!),
     location: {
+      key: 'default',
       pathname: '',
       search: '',
-      state: '',
+      state: {},
       hash: '',
     },
   },
   route: {
     location: {
+      key: 'default',
       pathname: '',
       search: '',
-      state: '',
+      state: {},
       hash: '',
     },
   },
