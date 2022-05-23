@@ -14,7 +14,7 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { pluginServices } from '../../services';
 import { ControlEditor } from './control_editor';
 import { ControlGroupStrings } from '../control_group_strings';
-import { ControlWidth, ControlInput, IEditableControlFactory } from '../../types';
+import { ControlWidth, ControlInput, IEditableControlFactory, DataControlInput } from '../../types';
 import {
   DEFAULT_CONTROL_WIDTH,
   DEFAULT_CONTROL_GROW,
@@ -59,7 +59,7 @@ export const CreateControlButton = ({
     const PresentationUtilProvider = pluginServices.getContextProvider();
 
     const initialInputPromise = new Promise<CreateControlResult>((resolve, reject) => {
-      let inputToReturn: Partial<ControlInput> = {};
+      let inputToReturn: Partial<DataControlInput> = {};
 
       const onCancel = (ref: OverlayRef) => {
         if (Object.keys(inputToReturn).length === 0) {
@@ -80,6 +80,21 @@ export const CreateControlButton = ({
         });
       };
 
+      const onSave = (ref: OverlayRef, type?: string) => {
+        if (!type) {
+          reject();
+          ref.close();
+          return;
+        }
+
+        const factory = getControlFactory(type) as IEditableControlFactory;
+        if (factory.presaveTransformFunction) {
+          inputToReturn = factory.presaveTransformFunction(inputToReturn);
+        }
+        resolve({ type, controlInput: inputToReturn });
+        ref.close();
+      };
+
       const flyoutInstance = openFlyout(
         toMountPoint(
           <PresentationUtilProvider>
@@ -92,14 +107,7 @@ export const CreateControlButton = ({
               updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
               updateWidth={updateDefaultWidth}
               updateGrow={updateDefaultGrow}
-              onSave={(type: string) => {
-                const factory = getControlFactory(type) as IEditableControlFactory;
-                if (factory.presaveTransformFunction) {
-                  inputToReturn = factory.presaveTransformFunction(inputToReturn);
-                }
-                resolve({ type, controlInput: inputToReturn });
-                flyoutInstance.close();
-              }}
+              onSave={(type) => onSave(flyoutInstance, type)}
               onCancel={() => onCancel(flyoutInstance)}
               onTypeEditorChange={(partialInput) =>
                 (inputToReturn = { ...inputToReturn, ...partialInput })

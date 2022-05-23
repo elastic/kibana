@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { SecurityPageName } from '../../app/types';
-import { NavLinkItem } from '../../common/links/types';
+import { NavLinkItem } from '../../common/components/navigation/types';
 import { TestProviders } from '../../common/mock';
 import { LandingLinksImages } from './landing_links_images';
 
@@ -17,7 +17,6 @@ const DEFAULT_NAV_ITEM: NavLinkItem = {
   title: 'TEST LABEL',
   description: 'TEST DESCRIPTION',
   image: 'TEST_IMAGE.png',
-  path: '',
 };
 
 jest.mock('../../common/lib/kibana/kibana_react', () => {

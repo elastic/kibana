@@ -2228,8 +2228,6 @@ components:
           type: string
         path:
           type: string
-        removable:
-          type: boolean
       required:
         - name
         - title
