@@ -49,6 +49,7 @@ import {
   Pagination,
   Percentiles,
   TriggersActionsUiConfig,
+  SnoozeSchedule,
 } from '../../../../types';
 import { RuleAdd, RuleEdit } from '../../rule_form';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
@@ -403,8 +404,8 @@ export const RulesList: React.FunctionComponent = () => {
     return enableRule({ http, id: rule.id });
   };
 
-  const onSnoozeRule = (rule: RuleTableItem, snoozeEndTime: string | -1) => {
-    return snoozeRule({ http, id: rule.id, snoozeEndTime });
+  const onSnoozeRule = (rule: RuleTableItem, snoozeSchedule: SnoozeSchedule) => {
+    return snoozeRule({ http, id: rule.id, snoozeSchedule });
   };
 
   const onUnsnoozeRule = (rule: RuleTableItem) => {

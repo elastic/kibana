@@ -45,6 +45,7 @@ import {
   Percentiles,
   TriggersActionsUiConfig,
   RuleTypeRegistryContract,
+  SnoozeSchedule,
 } from '../../../../types';
 import { shouldShowDurationWarning } from '../../../lib/execution_duration_utils';
 import { PercentileSelectablePopover } from './percentile_selectable_popover';
@@ -115,7 +116,7 @@ export interface RulesListTableProps {
   onRuleChanged: () => void;
   onEnableRule: (rule: RuleTableItem) => Promise<void>;
   onDisableRule: (rule: RuleTableItem) => Promise<void>;
-  onSnoozeRule: (rule: RuleTableItem, snoozeEndTime: string | -1) => Promise<void>;
+  onSnoozeRule: (rule: RuleTableItem, snoozeEndTime: SnoozeSchedule) => Promise<void>;
   onUnsnoozeRule: (rule: RuleTableItem) => Promise<void>;
   renderCollapsedItemActions?: (rule: RuleTableItem) => React.ReactNode;
   renderRuleError?: (rule: RuleTableItem) => React.ReactNode;
@@ -405,8 +406,8 @@ export const RulesListTable = (props: RulesListTableProps) => {
               onClick={() => setCurrentlyOpenNotify(rule.id)}
               onClose={() => setCurrentlyOpenNotify('')}
               onRuleChanged={onRuleChanged}
-              snoozeRule={async (snoozeEndTime: string | -1, interval: string | null) => {
-                await onSnoozeRule(rule, snoozeEndTime);
+              snoozeRule={async (snoozeSchedule) => {
+                await onSnoozeRule(rule, snoozeSchedule);
               }}
               unsnoozeRule={async () => await onUnsnoozeRule(rule)}
             />

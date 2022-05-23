@@ -55,6 +55,7 @@ import {
   SanitizedRuleWithLegacyId,
   PartialRuleWithLegacyId,
   RuleSnooze,
+  RuleSnoozeSchedule,
   RawAlertInstance as RawAlert,
 } from '../types';
 import {
@@ -192,7 +193,7 @@ export interface MuteOptions extends IndexType {
 }
 
 export interface SnoozeOptions extends IndexType {
-  snoozeEndTime: string | -1;
+  snoozeSchedule: RuleSnoozeSchedule;
 }
 
 export interface FindOptions extends IndexType {
@@ -2065,29 +2066,35 @@ export class RulesClient {
 
   public async snooze({
     id,
-    snoozeEndTime,
+    snoozeSchedule,
   }: {
     id: string;
-    snoozeEndTime: string | -1;
+    snoozeSchedule: RuleSnoozeSchedule;
   }): Promise<void> {
-    if (typeof snoozeEndTime === 'string') {
-      const snoozeDateValidationMsg = validateSnoozeDate(snoozeEndTime);
-      if (snoozeDateValidationMsg) {
-        throw new RuleMutedError(snoozeDateValidationMsg);
-      }
+    const snoozeDateValidationMsg = validateSnoozeDate(snoozeSchedule.rRule.dtstart);
+    if (snoozeDateValidationMsg) {
+      throw new RuleMutedError(snoozeDateValidationMsg);
     }
+
     return await retryIfConflicts(
       this.logger,
-      `rulesClient.snooze('${id}', ${snoozeEndTime})`,
-      async () => await this.snoozeWithOCC({ id, snoozeEndTime })
+      `rulesClient.snooze('${id}', ${JSON.stringify(snoozeSchedule, null, 4)})`,
+      async () => await this.snoozeWithOCC({ id, snoozeSchedule })
     );
   }
 
-  private async snoozeWithOCC({ id, snoozeEndTime }: { id: string; snoozeEndTime: string | -1 }) {
+  private async snoozeWithOCC({
+    id,
+    snoozeSchedule,
+  }: {
+    id: string;
+    snoozeSchedule: RuleSnoozeSchedule;
+  }) {
     const { attributes, version } = await this.unsecuredSavedObjectsClient.get<RawRule>(
       'alert',
       id
     );
+    const { id: snoozeId, duration } = snoozeSchedule;
 
     try {
       await this.authorization.ensureAuthorized({
@@ -2121,22 +2128,18 @@ export class RulesClient {
 
     this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
-    // If snoozeEndTime is -1, instead mute all
+    // If duration is -1, instead mute all
     const newAttrs =
-      snoozeEndTime === -1
+      duration === -1
         ? {
             muteAll: true,
             snoozeSchedule: clearUnscheduledSnooze(attributes),
           }
         : {
-            snoozeSchedule: clearUnscheduledSnooze(attributes).concat({
-              duration: Date.parse(snoozeEndTime) - Date.now(),
-              rRule: {
-                dtstart: new Date().toISOString(),
-                tzid: 'UTC',
-                count: 1,
-              },
-            }),
+            snoozeSchedule: (snoozeId
+              ? clearScheduledSnoozeById(attributes, snoozeId)
+              : clearUnscheduledSnooze(attributes)
+            ).concat(snoozeSchedule),
             muteAll: false,
           };
 
@@ -2850,4 +2853,8 @@ function clearUnscheduledSnooze(attributes: { snoozeSchedule?: RuleSnooze }) {
   return attributes.snoozeSchedule
     ? attributes.snoozeSchedule.filter((s) => typeof s.id !== 'undefined')
     : [];
+}
+
+function clearScheduledSnoozeById(attributes: { snoozeSchedule?: RuleSnooze }, id: string) {
+  return attributes.snoozeSchedule ? attributes.snoozeSchedule.filter((s) => s.id !== id) : [];
 }

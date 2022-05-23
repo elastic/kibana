@@ -20,25 +20,9 @@ import {
   EuiFormControlLayoutDelimited,
   EuiHorizontalRule,
 } from '@elastic/eui';
-
-enum RRuleFrequency {
-  YEARLY = 0,
-  MONTHLY = 1,
-  WEEKLY = 2,
-  DAILY = 3,
-}
+import { RRuleFrequency, RecurrenceSchedule } from '../../../../types';
 
 const ISO_WEEKDAYS = [1, 2, 3, 4, 5, 6, 7];
-
-export interface RecurrenceSchedule {
-  freq: RRuleFrequency;
-  interval: number;
-  until?: Moment;
-  count?: number;
-  byweekday?: string[];
-  bymonthday?: number[];
-  bymonth?: number[];
-}
 
 interface ComponentOpts {
   startDate: Moment | null;

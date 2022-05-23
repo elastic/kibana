@@ -8,6 +8,7 @@
 import React, { useState, useCallback } from 'react';
 import moment, { Moment } from 'moment';
 import { i18n } from '@kbn/i18n';
+import uuid from 'uuid';
 import {
   EuiDatePicker,
   EuiDatePickerRange,
@@ -22,13 +23,14 @@ import {
   EuiSpacer,
   EuiButton,
 } from '@elastic/eui';
-import { RecurrenceScheduler, RecurrenceSchedule } from './recurrence_scheduler';
+import { RecurrenceSchedule, SnoozeSchedule } from '../../../../types';
+import { RecurrenceScheduler } from './recurrence_scheduler';
 
 import './rule_snooze_scheduler.scss';
 
 export interface ComponentOpts {
   onClose: () => void;
-  onSaveSchedule: () => void;
+  onSaveSchedule: (sched: SnoozeSchedule) => void;
 }
 
 const TIMEZONE_OPTIONS = moment.tz.names().map((n) => ({ label: n }));
@@ -47,7 +49,7 @@ export const RuleSnoozeScheduler: React.FunctionComponent<ComponentOpts> = ({
 };
 
 interface PanelOpts {
-  onSaveSchedule: (x: any) => void;
+  onSaveSchedule: (sched: SnoozeSchedule) => void;
 }
 const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({ onSaveSchedule }) => {
   // These two states form a state machine for whether or not the user's clicks on the datepicker apply to the start/end date or start/end time
@@ -134,6 +136,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({ onSaveSc
             count: 1,
           };
     onSaveSchedule({
+      id: uuid.v4(),
       rRule: {
         dtstart: startDT.toISOString(),
         tzid: selectedTimezone[0].label ?? moment.tz.guess(),

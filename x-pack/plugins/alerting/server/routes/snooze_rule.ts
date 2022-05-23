@@ -18,16 +18,29 @@ const paramSchema = schema.object({
 });
 
 const bodySchema = schema.object({
-  snooze_end_time: schema.oneOf([
-    schema.string({
-      validate: validateSnoozeDate,
+  snooze_schedule: schema.object({
+    id: schema.maybe(schema.string()),
+    duration: schema.number(),
+    rRule: schema.object({
+      dtstart: schema.string({ validate: validateSnoozeDate }),
+      tzid: schema.string(),
+      freq: schema.maybe(
+        schema.oneOf([schema.literal(0), schema.literal(1), schema.literal(2), schema.literal(3)])
+      ),
+      interval: schema.maybe(schema.number()),
+      until: schema.maybe(schema.string({ validate: validateSnoozeDate })),
+      count: schema.maybe(schema.number()),
+      byweekday: schema.maybe(schema.arrayOf(schema.string())),
+      bymonthday: schema.maybe(schema.arrayOf(schema.number())),
+      bymonth: schema.maybe(schema.arrayOf(schema.number())),
     }),
-    schema.literal(-1),
-  ]),
+  }),
 });
 
-const rewriteBodyReq: RewriteRequestCase<SnoozeOptions> = ({ snooze_end_time: snoozeEndTime }) => ({
-  snoozeEndTime,
+const rewriteBodyReq: RewriteRequestCase<SnoozeOptions> = ({
+  snooze_schedule: snoozeSchedule,
+}) => ({
+  snoozeSchedule,
 });
 
 export const snoozeRuleRoute = (

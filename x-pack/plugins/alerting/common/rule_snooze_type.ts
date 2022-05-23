@@ -7,12 +7,14 @@
 
 import type { WeekdayStr } from 'rrule';
 
-export type RuleSnooze = Array<{
+export type RuleSnooze = RuleSnoozeSchedule[];
+
+export type RuleSnoozeSchedule = {
   duration: number;
   rRule: Partial<RRuleRecord> & Pick<RRuleRecord, 'dtstart' | 'tzid'>;
   // For scheduled/recurring snoozes, `id` uniquely identifies them so that they can be displayed, modified, and deleted individually
   id?: string;
-}>;
+};
 
 // An iCal RRULE  to define a recurrence schedule, see https://github.com/jakubroztocil/rrule for the spec
 export interface RRuleRecord {
@@ -26,7 +28,7 @@ export interface RRuleRecord {
   byweekday?: Array<string | number>;
   bymonth?: number[];
   bysetpos?: number[];
-  bymonthday: number;
+  bymonthday: number[];
   byyearday: number[];
   byweekno: number[];
   byhour: number[];
