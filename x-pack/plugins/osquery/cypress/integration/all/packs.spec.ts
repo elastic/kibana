@@ -59,7 +59,7 @@ describe('ALL - Packs', () => {
       cy.react('EuiFormRow', { props: { label: 'Interval (s)' } })
         .click()
         .clear()
-        .type('500');
+        .type('10');
       cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
       cy.react('EuiTableRow').contains(SAVED_QUERY_ID);
       findAndClickButton('Save pack');
@@ -96,21 +96,7 @@ describe('ALL - Packs', () => {
       cy.contains('ID must be unique').should('exist');
       cy.react('EuiFlyoutFooter').react('EuiButtonEmpty').contains('Cancel').click();
     });
-    // THIS TESTS TAKES TOO LONG FOR NOW - LET ME THINK IT THROUGH
-    it.skip('to click the icon and visit discover', () => {
-      preparePack(PACK_NAME);
-      cy.react('CustomItemAction', {
-        props: { index: 0, item: { id: SAVED_QUERY_ID } },
-      }).click();
-      cy.getBySel('superDatePickerToggleQuickMenuButton').click();
-      cy.getBySel('superDatePickerToggleRefreshButton').click();
-      cy.getBySel('superDatePickerRefreshIntervalInput').clear().type('10');
-      cy.get('button').contains('Apply').click();
-      cy.getBySel('discoverDocTable', { timeout: 60000 }).contains(
-        `pack_${PACK_NAME}_${SAVED_QUERY_ID}`
-      );
-    });
-    it.skip('by clicking in Lens button', () => {
+    it('should open lens in new tab', () => {
       let lensUrl = '';
       cy.window().then((win) => {
         cy.stub(win, 'open')
@@ -122,17 +108,43 @@ describe('ALL - Packs', () => {
       preparePack(PACK_NAME);
       cy.react('CustomItemAction', {
         props: { index: 1, item: { id: SAVED_QUERY_ID } },
-      }).click();
+      })
+        .should('exist')
+        .click();
       cy.window()
         .its('open')
         .then(() => {
           cy.visit(lensUrl);
         });
-      cy.getBySel('lnsWorkspace');
+      cy.getBySel('lnsWorkspace').should('exist');
       cy.getBySel('breadcrumbs').contains(`Action pack_${PACK_NAME}_${SAVED_QUERY_ID} results`);
     });
 
-    // strange behaviour with modal
+    // TODO extremely strange behaviour with Cypress not finding Discover's page elements
+    // it('should open discover in new tab', () => {
+    //   preparePack(PACK_NAME);
+    //   cy.wait(1000);
+    //   cy.react('CustomItemAction', {
+    //     props: { index: 0, item: { id: SAVED_QUERY_ID } },
+    //   })
+    //     .should('exist')
+    //     .within(() => {
+    //       cy.get('a')
+    //         .should('have.attr', 'href')
+    //         .then(($href) => {
+    //           // @ts-expect-error-next-line href string - check types
+    //           cy.visit($href);
+    //           cy.getBySel('breadcrumbs').contains('Discover').should('exist');
+    //           cy.contains(`action_id: pack_${PACK_NAME}_${SAVED_QUERY_ID}`);
+    //           cy.getBySel('superDatePickerToggleQuickMenuButton').click();
+    //           cy.getBySel('superDatePickerCommonlyUsed_Today').click();
+    //           cy.getBySel('discoverDocTable', { timeout: 60000 }).contains(
+    //             `pack_${PACK_NAME}_${SAVED_QUERY_ID}`
+    //           );
+    //         });
+    //     });
+    // });
+
     it('activate and deactive pack', () => {
       cy.contains('Packs').click();
       cy.react('ActiveStateSwitchComponent', {
