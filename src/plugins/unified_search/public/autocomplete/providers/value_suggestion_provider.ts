@@ -9,12 +9,10 @@
 import { CoreSetup } from '@kbn/core/public';
 import dateMath from '@kbn/datemath';
 import { memoize } from 'lodash';
-import {
-  IIndexPattern,
-  IFieldType,
-  UI_SETTINGS,
-  ValueSuggestionsMethod,
-} from '@kbn/data-plugin/common';
+import { UI_SETTINGS, ValueSuggestionsMethod } from '@kbn/data-plugin/common';
+// for replace IIndexPattern => DataView and IFieldType => DataViewField
+// need to fix the issue https://github.com/elastic/kibana/issues/131292
+import type { IIndexPattern, IFieldType } from '@kbn/data-views-plugin/common';
 import type { TimefilterSetup } from '@kbn/data-plugin/public';
 import { AutocompleteUsageCollector } from '../collectors';
 
