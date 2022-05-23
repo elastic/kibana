@@ -9,7 +9,8 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import { TestProviders, mockTimelineModel, mockTimelineData } from '../../../../../common/mock';
-import { Actions } from '.';
+import { Actions, isAlert } from '.';
+import { Ecs } from '../../../../../../common/ecs';
 import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
@@ -219,6 +220,32 @@ describe('Actions', () => {
       );
 
       expect(wrapper.find('[data-test-subj="view-in-analyzer"]').exists()).toBe(false);
+    });
+  });
+
+  describe('isAlert', () => {
+    test('it returns true when the ecsData is an alert', () => {
+      const ecsData: Ecs = {
+        ...mockTimelineData[0].ecs,
+        kibana: {
+          alert: {
+            rule: {
+              parameters: {},
+              uuid: ['CBDCAB79-BEDC-4A08-8AC2-29D7500063B9'],
+            },
+          },
+        },
+      };
+
+      expect(isAlert(ecsData)).toBe(true);
+    });
+
+    test('it returns false when ecsData is NOT an alert', () => {
+      const ecsData: Ecs = {
+        ...mockTimelineData[0].ecs,
+      };
+
+      expect(isAlert(ecsData)).toBe(false);
     });
   });
 });
