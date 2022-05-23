@@ -146,7 +146,7 @@ export const buildEqlOptionsDescription = (eqlOptions: EqlOptionsSelected): List
       ...items,
       {
         title: <>{i18n.EQL_TIMESTAMP_FIELD_LABEL}</>,
-        description: <Query>{eqlOptions.timestampField}</Query>,
+        description: <>{eqlOptions.timestampField}</>,
       },
     ];
   }
