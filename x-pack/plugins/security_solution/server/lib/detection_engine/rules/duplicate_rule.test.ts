@@ -89,6 +89,7 @@ describe('duplicateRule', () => {
         "params": Object {
           "author": Array [],
           "buildingBlockType": undefined,
+          "dataViewId": undefined,
           "description": "test",
           "exceptionsList": Array [],
           "falsePositives": Array [],
