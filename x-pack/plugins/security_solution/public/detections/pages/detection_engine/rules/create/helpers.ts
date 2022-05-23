@@ -95,6 +95,7 @@ export interface RuleFields {
   threatQueryBar?: unknown;
   threatMapping?: unknown;
   threatLanguage?: unknown;
+  eqlOptions: unknown;
 }
 
 type QueryRuleFields<T> = Omit<
@@ -118,13 +119,27 @@ type EqlQueryRuleFields<T> = Omit<
 >;
 type ThresholdRuleFields<T> = Omit<
   T,
-  'anomalyThreshold' | 'machineLearningJobId' | 'threatIndex' | 'threatQueryBar' | 'threatMapping'
+  | 'anomalyThreshold'
+  | 'machineLearningJobId'
+  | 'threatIndex'
+  | 'threatQueryBar'
+  | 'threatMapping'
+  | 'eqlOptions'
 >;
 type MlRuleFields<T> = Omit<
   T,
-  'queryBar' | 'index' | 'threshold' | 'threatIndex' | 'threatQueryBar' | 'threatMapping'
+  | 'queryBar'
+  | 'index'
+  | 'threshold'
+  | 'threatIndex'
+  | 'threatQueryBar'
+  | 'threatMapping'
+  | 'eqlOptions'
 >;
-type ThreatMatchRuleFields<T> = Omit<T, 'anomalyThreshold' | 'machineLearningJobId' | 'threshold'>;
+type ThreatMatchRuleFields<T> = Omit<
+  T,
+  'anomalyThreshold' | 'machineLearningJobId' | 'threshold' | 'eqlOptions'
+>;
 
 const isMlFields = <T>(
   fields:
@@ -180,6 +195,7 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         threatIndex,
         threatQueryBar,
         threatMapping,
+        eqlOptions,
         ...mlRuleFields
       } = fields;
       return mlRuleFields;
@@ -190,6 +206,7 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         threatIndex: _removedThreatIndex,
         threatQueryBar: _removedThreatQueryBar,
         threatMapping: _removedThreatMapping,
+        eqlOptions: _eqlOptions,
         ...thresholdRuleFields
       } = fields;
       return thresholdRuleFields;
@@ -198,12 +215,12 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         anomalyThreshold: _removedAnomalyThreshold,
         machineLearningJobId: _removedMachineLearningJobId,
         threshold: _removedThreshold,
+        eqlOptions: __eqlOptions,
         ...threatMatchRuleFields
       } = fields;
       return threatMatchRuleFields;
     case 'query':
     case 'saved_query':
-    case 'eql':
       const {
         anomalyThreshold: _a,
         machineLearningJobId: _m,
@@ -211,9 +228,21 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         threatIndex: __removedThreatIndex,
         threatQueryBar: __removedThreatQueryBar,
         threatMapping: __removedThreatMapping,
+        eqlOptions: ___eqlOptions,
         ...queryRuleFields
       } = fields;
       return queryRuleFields;
+    case 'eql':
+      const {
+        anomalyThreshold: __a,
+        machineLearningJobId: __m,
+        threshold: __t,
+        threatIndex: ___removedThreatIndex,
+        threatQueryBar: ___removedThreatQueryBar,
+        threatMapping: ___removedThreatMapping,
+        ...eqlRuleFields
+      } = fields;
+      return eqlRuleFields;
   }
   assertUnreachable(type);
 };
