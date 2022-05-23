@@ -20,12 +20,13 @@ describe(__filename, () => {
       });
 
       await fetchMonitoredClusters({
-        index: 'foo',
+        monitoringIndex: 'foo',
+        entSearchIndex: 'foo',
         timeRange: { min: 1652979091217, max: 11652979091217 },
         search: searchFn,
       });
 
-      assert.equal(searchFn.mock.calls.length, 2);
+      assert.equal(searchFn.mock.calls.length, 3);
     });
 
     test('it should merge the query results', async () => {
@@ -149,13 +150,60 @@ describe(__filename, () => {
         },
       };
 
+      const entsearchMetricsetsResponse = {
+        aggregations: {
+          clusters: {
+            meta: {},
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              {
+                key: 'cluster-id.1',
+                doc_count: 11874,
+                enterpriseSearch: {
+                  meta: {},
+                  doc_count_error_upper_bound: 0,
+                  sum_other_doc_count: 0,
+                  buckets: [
+                    {
+                      key: 'ent-search-node-id.1',
+                      doc_count: 540,
+                      health: {
+                        meta: {},
+                        doc_count: 180,
+                        by_index: {
+                          doc_count_error_upper_bound: 0,
+                          sum_other_doc_count: 0,
+                          buckets: [
+                            {
+                              key: '.ds-.monitoring-ent-search-8-mb-2022.05.19-000001',
+                              doc_count: 180,
+                              last_seen: {
+                                value: 1652975511716,
+                                value_as_string: '2022-05-19T15:51:51.716Z',
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      };
+
       const searchFn = jest
         .fn()
         .mockResolvedValueOnce(mainMetricsetsResponse)
-        .mockResolvedValueOnce(persistentMetricsetsResponse);
+        .mockResolvedValueOnce(persistentMetricsetsResponse)
+        .mockResolvedValueOnce(entsearchMetricsetsResponse);
 
       const monitoredClusters = await fetchMonitoredClusters({
-        index: 'foo',
+        monitoringIndex: 'foo',
+        entSearchIndex: 'foo',
         timeRange: { min: 1652979091217, max: 11652979091217 },
         search: searchFn,
       });
@@ -185,6 +233,17 @@ describe(__filename, () => {
                 'Metricbeat 8': {
                   index: '.ds-.monitoring-kibana-8-mb-2022.05.19-000001',
                   lastSeen: '2022-05-19T15:51:53.680Z',
+                },
+              },
+            },
+          },
+
+          enterpriseSearch: {
+            'ent-search-node-id.1': {
+              health: {
+                'Metricbeat 8': {
+                  index: '.ds-.monitoring-ent-search-8-mb-2022.05.19-000001',
+                  lastSeen: '2022-05-19T15:51:51.716Z',
                 },
               },
             },
