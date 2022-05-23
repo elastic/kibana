@@ -12,7 +12,7 @@ source .buildkite/scripts/common/util.sh
 # If cached snapshots are baked into the agent, copy them into our workspace first
 # We are doing this rather than simply changing the ES base path because many workers
 #   run with the workspace mounted in memory or on a local ssd
-cacheDir="$ES_CACHE_DIR"
+cacheDir="$ES_CACHE_DIR/cache"
 if [[ -d "$cacheDir" ]]; then
   mkdir -p .es/cache
   echo "--- Copying ES snapshot cache"
