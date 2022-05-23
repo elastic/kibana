@@ -254,6 +254,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       const viewInAppUrl = getViewInAppUrl(libs.basePath, LINK_TO_METRICS_EXPLORER);
       const context = {
         group: recoveredAlertId,
+        alertState: stateToAlertMessage[AlertStates.OK],
         timestamp: startedAt.toISOString(),
         viewInAppUrl,
         threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
