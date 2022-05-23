@@ -27,23 +27,19 @@ and uploads it to the telemetry cluster.
 Once uploaded to the telemetry cluster, the data telemetry is stored in
 `stack_stats.kibana.plugins.apm` in the xpack-phone-home index.
 
-### Generating sample data
+### Collect a new telemetry field
 
-The script in `scripts/upload_telemetry_data` can generate sample telemetry data and upload it to a cluster of your choosing.
+In order to collect a new telemetry field you need to add a task which performs the query that collects the data from the cluster.
 
-You'll need to set the `GITHUB_TOKEN` environment variable to a token that has `repo` scope so it can read from the
-[elastic/telemetry](https://github.com/elastic/telemetry) repository. (You probably have a token that works for this in
-~/.backport/config.json.)
+All the available tasks are [here](../server/lib/apm_telemetry/collect_data_telemetry/tasks.ts)
 
-The script will run as the `elastic` user using the elasticsearch hosts and password settings from the config/kibana.yml
-and/or config/kibana.dev.yml files.
+### Debug telemetry
 
-Running the script with `--clear` will delete the index first.
+The following endpoint will run the `apm-telemetry-task` which is responsible for collecting the telemetry data and once it's completed it will return the telemetry attributes.
 
-If you're using an Elasticsearch instance without TLS verification (if you have `elasticsearch.ssl.verificationMode: none` set in your kibana.yml)
-you can run the script with `env NODE_TLS_REJECT_UNAUTHORIZED=0` to avoid TLS connection errors.
-
-After running the script you should see sample telemetry data in the "xpack-phone-home" index.
+```
+GET /internal/apm/debug-telemetry
+```
 
 ### Updating Data Telemetry Mappings
 
