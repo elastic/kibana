@@ -1122,3 +1122,16 @@ export const INTEGRATIONS_POPOVER_DESCRIPTION_UNINSTALLED = (uninstalledCount: n
         'You have [{uninstalledCount}] related {uninstalledCount, plural, =1 {integration} other {integrations}} uninstalled, click the link to add integration:',
     }
   );
+
+export const INTEGRATIONS_INSTALLED_VERSION_TOOLTIP = (
+  installedVersion: string,
+  targetVersion: string
+) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.integrations.popoverDescriptionInstalledVersionTooltip',
+    {
+      values: { installedVersion, targetVersion },
+      defaultMessage:
+        'Version mismatch -- please resolve! Installed version `{installedVersion}` when target version `{targetVersion}`',
+    }
+  );

@@ -8,20 +8,17 @@
 import React, { useState } from 'react';
 import {
   EuiPopover,
-  EuiBadgeGroup,
   EuiBadge,
   EuiPopoverTitle,
   EuiFlexGroup,
   EuiText,
+  EuiIconTip,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { useBasePath } from '../../lib/kibana';
-import { getIntegrationLink } from './helpers';
+import { getInstalledRelatedIntegrations, getIntegrationLink } from './helpers';
 import { useInstalledIntegrations } from '../../../detections/containers/detection_engine/rules/use_installed_integrations';
-import type {
-  RelatedIntegration,
-  RelatedIntegrationArray,
-} from '../../../../common/detection_engine/schemas/common';
+import type { RelatedIntegrationArray } from '../../../../common/detection_engine/schemas/common';
 
 import * as i18n from '../../../detections/pages/detection_engine/rules/translations';
 
@@ -33,7 +30,7 @@ const IntegrationsPopoverWrapper = styled(EuiFlexGroup)`
   width: 100%;
 `;
 
-const PopoverWrapper = styled(EuiBadgeGroup)`
+const PopoverContentWrapper = styled('div')`
   max-height: 400px;
   max-width: 368px;
   overflow: auto;
@@ -51,28 +48,17 @@ const IntegrationListItem = styled('li')`
 const IntegrationsPopoverComponent = ({ integrations }: IntegrationsPopoverProps) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const { data } = useInstalledIntegrations({ packages: [] });
-  // const data = undefined; // To test with installed_integrations endpoint not implemented
   const basePath = useBasePath();
 
   const allInstalledIntegrations: RelatedIntegrationArray = data ?? [];
-  const availableIntegrations: RelatedIntegrationArray = [];
-  const installedIntegrations: RelatedIntegrationArray = [];
-
-  integrations.forEach((i: RelatedIntegration) => {
-    const match = allInstalledIntegrations.find(
-      (installed) => installed.package === i.package && installed?.integration === i?.integration
-    );
-    if (match != null) {
-      // TODO: Do version check
-      installedIntegrations.push(match);
-    } else {
-      availableIntegrations.push(i);
-    }
-  });
+  const { availableIntegrations, installedRelatedIntegrations } = getInstalledRelatedIntegrations(
+    integrations,
+    allInstalledIntegrations
+  );
 
   const badgeTitle =
     data != null
-      ? `${installedIntegrations.length}/${integrations.length} ${i18n.INTEGRATIONS_BADGE}`
+      ? `${installedRelatedIntegrations.length}/${integrations.length} ${i18n.INTEGRATIONS_BADGE}`
       : `${integrations.length} ${i18n.INTEGRATIONS_BADGE}`;
 
   return (
@@ -99,20 +85,32 @@ const IntegrationsPopoverComponent = ({ integrations }: IntegrationsPopoverProps
         closePopover={() => setPopoverOpen(!isPopoverOpen)}
         repositionOnScroll
       >
-        <EuiPopoverTitle data-test-subj={'IntegrationsDisplayPopoverTitle'}>
+        <EuiPopoverTitle data-test-subj={'IntegrationsPopoverTitle'}>
           {i18n.INTEGRATIONS_POPOVER_TITLE(integrations.length)}
         </EuiPopoverTitle>
 
-        <PopoverWrapper data-test-subj={'IntegrationsDisplayPopoverWrapper'}>
+        <PopoverContentWrapper data-test-subj={'IntegrationsPopoverContentWrapper'}>
           {data != null && (
             <>
               <EuiText size={'s'}>
-                {i18n.INTEGRATIONS_POPOVER_DESCRIPTION_INSTALLED(installedIntegrations.length)}
+                {i18n.INTEGRATIONS_POPOVER_DESCRIPTION_INSTALLED(
+                  installedRelatedIntegrations.length
+                )}
               </EuiText>
               <ul>
-                {installedIntegrations.map((integration, index) => (
+                {installedRelatedIntegrations.map((integration, index) => (
                   <IntegrationListItem key={index}>
                     {getIntegrationLink(integration, basePath)}
+                    {!integration?.versionSatisfied && (
+                      <EuiIconTip
+                        type="alert"
+                        content={i18n.INTEGRATIONS_INSTALLED_VERSION_TOOLTIP(
+                          integration.version,
+                          integration.targetVersion
+                        )}
+                        position="right"
+                      />
+                    )}
                   </IntegrationListItem>
                 ))}
               </ul>
@@ -132,7 +130,7 @@ const IntegrationsPopoverComponent = ({ integrations }: IntegrationsPopoverProps
               </ul>
             </>
           )}
-        </PopoverWrapper>
+        </PopoverContentWrapper>
       </EuiPopover>
     </IntegrationsPopoverWrapper>
   );

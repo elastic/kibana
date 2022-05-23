@@ -97,3 +97,17 @@ export const THRESHOLD_RESULTS_AGGREGATED_BY = i18n.translate(
     defaultMessage: 'Results aggregated by',
   }
 );
+
+export const RELATED_INTEGRATIONS_INSTALLED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrationsInstalledDescription',
+  {
+    defaultMessage: 'Installed',
+  }
+);
+
+export const RELATED_INTEGRATIONS_UNINSTALLED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrationsUninstalledDescription',
+  {
+    defaultMessage: 'Uninstalled',
+  }
+);

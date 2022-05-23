@@ -13,6 +13,7 @@ import styled from 'styled-components';
 import { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { DataViewBase, Filter, FilterStateStore } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
+import { buildRelatedIntegrationsDescription } from './required_integrations_description';
 import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
@@ -35,7 +36,6 @@ import {
   buildRuleTypeDescription,
   buildThresholdDescription,
   buildThreatMappingDescription,
-  buildRelatedIntegrationsDescription,
   buildRequiredFieldsDescription,
 } from './helpers';
 import { buildMlJobsDescription } from './ml_job_description';

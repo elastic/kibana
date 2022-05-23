@@ -172,4 +172,107 @@ describe('StepAboutRuleToggleDetails', () => {
       );
     });
   });
+
+  describe('setup value is empty string', () => {
+    test('it does render toggle buttons if note is not empty', () => {
+      const wrapper = mount(
+        <ThemeProvider theme={mockTheme}>
+          <StepAboutRuleToggleDetails
+            loading={false}
+            stepDataDetails={{
+              note: mockRule.note,
+              description: mockRule.description,
+              setup: '',
+            }}
+            stepData={mockRule}
+          />
+        </ThemeProvider>
+      );
+
+      expect(wrapper.find(EuiButtonGroup).exists()).toBeTruthy();
+      expect(wrapper.find('#details').at(0).prop('isSelected')).toBeTruthy();
+      expect(wrapper.find('#notes').at(0).prop('isSelected')).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="stepAboutDetailsSetupContent"]').exists()).toBeFalsy();
+    });
+  });
+
+  describe('setup value does exist', () => {
+    test('it renders toggle buttons, defaulted to "details"', () => {
+      const wrapper = mount(
+        <ThemeProvider theme={mockTheme}>
+          <StepAboutRuleToggleDetails
+            loading={false}
+            stepDataDetails={{
+              note: mockRule.note,
+              description: mockRule.description,
+              setup: mockRule.note, // TODO: Update to mockRule.setup once supported in UI (and mock can be updated)
+            }}
+            stepData={mockRule}
+          />
+        </ThemeProvider>
+      );
+
+      expect(wrapper.find(EuiButtonGroup).exists()).toBeTruthy();
+      expect(wrapper.find('#details').at(0).prop('isSelected')).toBeTruthy();
+      expect(wrapper.find('#notes').at(0).prop('isSelected')).toBeFalsy();
+      expect(wrapper.find('#setup').at(0).prop('isSelected')).toBeFalsy();
+    });
+
+    test('it allows users to toggle between "details" and "setup"', () => {
+      const wrapper = mount(
+        <ThemeProvider theme={mockTheme}>
+          <StepAboutRuleToggleDetails
+            loading={false}
+            stepDataDetails={{
+              note: mockRule.note,
+              description: mockRule.description,
+              setup: mockRule.note, // TODO: Update to mockRule.setup once supported in UI (and mock can be updated)
+            }}
+            stepData={mockRule}
+          />
+        </ThemeProvider>
+      );
+
+      expect(wrapper.find('[idSelected="details"]').exists()).toBeTruthy();
+      expect(wrapper.find('[idSelected="notes"]').exists()).toBeFalsy();
+      expect(wrapper.find('[idSelected="setup"]').exists()).toBeFalsy();
+
+      wrapper
+        .find('[title="Setup guide"]')
+        .at(0)
+        .find('input')
+        .simulate('change', { target: { value: 'setup' } });
+
+      expect(wrapper.find('[idSelected="details"]').exists()).toBeFalsy();
+      expect(wrapper.find('[idSelected="notes"]').exists()).toBeFalsy();
+      expect(wrapper.find('[idSelected="setup"]').exists()).toBeTruthy();
+    });
+
+    test('it displays notes markdown when user toggles to "setup"', () => {
+      const wrapper = mount(
+        <ThemeProvider theme={mockTheme}>
+          <StepAboutRuleToggleDetails
+            loading={false}
+            stepDataDetails={{
+              note: mockRule.note,
+              description: mockRule.description,
+              setup: mockRule.note, // TODO: Update to mockRule.setup once supported in UI (and mock can be updated)
+            }}
+            stepData={mockRule}
+          />
+        </ThemeProvider>
+      );
+
+      wrapper
+        .find('[title="Setup guide"]')
+        .at(0)
+        .find('input')
+        .simulate('change', { target: { value: 'setup' } });
+
+      expect(wrapper.find('EuiButtonGroup[idSelected="setup"]').exists()).toBeTruthy();
+      expect(wrapper.find('div.euiMarkdownFormat').text()).toEqual(
+        'this is some markdown documentation'
+      );
+    });
+  });
 });

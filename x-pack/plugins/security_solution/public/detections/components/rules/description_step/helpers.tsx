@@ -19,7 +19,6 @@ import {
   EuiFlexGrid,
 } from '@elastic/eui';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
-import { capitalize } from 'lodash';
 
 import { isEmpty } from 'lodash/fp';
 import React from 'react';
@@ -34,7 +33,6 @@ import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';
 import * as i18nRiskScore from '../risk_score_mapping/translations';
 import type {
-  RelatedIntegrationArray,
   RequiredFieldArray,
   Threshold,
 } from '../../../../../common/detection_engine/schemas/common';
@@ -513,43 +511,6 @@ export const buildThreatMappingDescription = (
       description,
     },
   ];
-};
-
-export const buildRelatedIntegrationsDescription = (
-  label: string,
-  relatedIntegrations: RelatedIntegrationArray
-): ListItems[] => {
-  const badgeInstalledColor = '#E0E5EE'; // 'subdued' not working?
-  const badgeUninstalledColor = 'accent';
-  const basePath = 'http://localhost:5601/kbn'; // const basePath = useBasePath();
-  const installedText = 'Installed';
-  const uninstalledText = 'Uninstalled';
-  const installedPackages = ['aws']; // TODO: Use hook const { data } = useInstalledIntegrations({ packages: [] });
-
-  if (relatedIntegrations == null) {
-    return [];
-  }
-
-  return relatedIntegrations.map((rI, index) => {
-    const isInstalled = installedPackages.includes(rI.package);
-    const badgeColor = isInstalled ? badgeInstalledColor : badgeUninstalledColor;
-    const badgeText = isInstalled ? installedText : uninstalledText;
-    const integrationURL = `${basePath}/app/integrations/detail/${rI.package}-${
-      rI.version
-    }/overview${rI.integration ? `?integration=${rI.integration}` : ''}`;
-
-    return {
-      title: index === 0 ? label : '',
-      description: (
-        <>
-          <EuiLink href={integrationURL} target="_blank">
-            {`${capitalize(rI.package)} ${capitalize(rI.integration)}`}
-          </EuiLink>{' '}
-          <EuiBadge color={badgeColor}>{badgeText}</EuiBadge>
-        </>
-      ),
-    };
-  });
 };
 
 const FieldTypeText = styled(EuiText)`
