@@ -89,7 +89,8 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
           'ecommerce_map',
           updateBaselines
         );
-        expect(percentDifference).to.be.lessThan(0.02);
+        //expect(percentDifference).to.be.lessThan(0.02);
+        expect(percentDifference).to.be.lessThan(0);
       });
     });
 
@@ -113,7 +114,8 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
           'flights_map',
           updateBaselines
         );
-        expect(percentDifference).to.be.lessThan(0.02);
+        //expect(percentDifference).to.be.lessThan(0.02);
+        expect(percentDifference).to.be.lessThan(0);
       });
     });
 
@@ -138,7 +140,8 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
           'web_logs_map',
           updateBaselines
         );
-        expect(percentDifference).to.be.lessThan(0.02);
+        //expect(percentDifference).to.be.lessThan(0.02);
+        expect(percentDifference).to.be.lessThan(0);
       });
     });
   });
