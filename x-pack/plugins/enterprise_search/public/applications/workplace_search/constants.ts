@@ -381,6 +381,9 @@ export const SOURCE_CATEGORIES = {
       defaultMessage: 'Bug Tracking',
     }
   ),
+  CHAT: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.chat', {
+    defaultMessage: 'Chat',
+  }),
   CLOUD: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.cloud', {
     defaultMessage: 'Cloud',
   }),
@@ -388,6 +391,12 @@ export const SOURCE_CATEGORIES = {
     'xpack.enterpriseSearch.workplaceSearch.sources.categories.codeRepository',
     {
       defaultMessage: 'Code repository',
+    }
+  ),
+  COLLABORATION: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.collaboration',
+    {
+      defaultMessage: 'Collaboration',
     }
   ),
   COMMUNICATION: i18n.translate(
@@ -420,6 +429,12 @@ export const SOURCE_CATEGORIES = {
   GSUITE: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.gsuite', {
     defaultMessage: 'GSuite',
   }),
+  INSTANT_MESSAGING: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.instantMessaging',
+    {
+      defaultMessage: 'Instant messaging',
+    }
+  ),
   INTRANET: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.intranet', {
     defaultMessage: 'Intranet',
   }),

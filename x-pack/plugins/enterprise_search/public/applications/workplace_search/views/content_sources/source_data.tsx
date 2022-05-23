@@ -698,6 +698,12 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.SLACK,
     serviceType: 'slack',
+    categories: [
+      SOURCE_CATEGORIES.COLLABORATION,
+      SOURCE_CATEGORIES.COMMUNICATION,
+      SOURCE_CATEGORIES.INSTANT_MESSAGING,
+      SOURCE_CATEGORIES.CHAT,
+    ],
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: true,
