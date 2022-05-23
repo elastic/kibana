@@ -11,6 +11,7 @@ import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useUiTracker } from '@kbn/observability-plugin/public';
+import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
@@ -36,42 +37,35 @@ export function TimeComparison() {
   const history = useHistory();
   const { isSmall } = useBreakpoints();
   const {
-    query: { rangeFrom, rangeTo, comparisonEnabled, offset, environment },
+    query: { rangeFrom, rangeTo, comparisonEnabled, offset },
   } = useAnyOfApmParams('/services', '/backends/*', '/services/{serviceName}');
 
   const { anomalyDetectionJobsStatus, anomalyDetectionJobsData } =
     useAnomalyDetectionJobsContext();
   const { core } = useApmPluginContext();
+  const { preferredEnvironment } = useEnvironmentsContext();
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const canGetJobs = !!core.application.capabilities.ml?.canGetJobs;
   const comparisonOptions = useMemo(() => {
-    const timeComparisonOptions = getComparisonOptions({ start, end });
+    const timeComparisonOptions = getComparisonOptions({
+      start,
+      end,
+      canGetJobs,
+      anomalyDetectionJobsStatus,
+      anomalyDetectionJobsData,
+      preferredEnvironment,
+    });
 
-    const hasMLJobsMatchingEnv =
-      canGetJobs &&
-      anomalyDetectionJobsStatus === 'success' &&
-      Array.isArray(anomalyDetectionJobsData?.jobs) &&
-      anomalyDetectionJobsData?.jobs.some((j) => j.environment === environment);
-
-    if (canGetJobs) {
-      timeComparisonOptions.push({
-        value: TimeRangeComparisonEnum.ExpectedBounds,
-        text: i18n.translate('xpack.apm.comparison.mlExpectedBounds', {
-          defaultMessage: 'Expected bounds',
-        }),
-        disabled: !hasMLJobsMatchingEnv,
-      });
-    }
     return timeComparisonOptions;
   }, [
     canGetJobs,
     anomalyDetectionJobsStatus,
-    anomalyDetectionJobsData?.jobs,
+    anomalyDetectionJobsData,
     start,
     end,
-    environment,
+    preferredEnvironment,
   ]);
 
   const isSelectedComparisonTypeAvailable = comparisonOptions.some(

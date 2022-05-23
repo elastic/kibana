@@ -7,6 +7,8 @@
 
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import { Environment } from '../../../../common/environment_rt';
+import { AnomalyDetectionJobsContextValue } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 
 export enum TimeRangeComparisonEnum {
@@ -108,7 +110,15 @@ function getSelectOptions({
 export function getComparisonOptions({
   start,
   end,
+  canGetJobs,
+  anomalyDetectionJobsStatus,
+  anomalyDetectionJobsData,
+  preferredEnvironment,
 }: {
+  canGetJobs?: boolean;
+  anomalyDetectionJobsStatus?: AnomalyDetectionJobsContextValue['anomalyDetectionJobsStatus'];
+  anomalyDetectionJobsData?: AnomalyDetectionJobsContextValue['anomalyDetectionJobsData'];
+  preferredEnvironment?: Environment;
   start?: string;
   end?: string;
 }) {
@@ -133,10 +143,29 @@ export function getComparisonOptions({
     comparisonTypes = [TimeRangeComparisonEnum.PeriodBefore];
   }
 
-  return getSelectOptions({
+  const hasMLJobsMatchingEnv =
+    canGetJobs &&
+    anomalyDetectionJobsStatus === 'success' &&
+    Array.isArray(anomalyDetectionJobsData?.jobs) &&
+    anomalyDetectionJobsData?.jobs.some(
+      (j) => j.environment === preferredEnvironment
+    );
+
+  const comparisonOptions = getSelectOptions({
     comparisonTypes,
     start: momentStart,
     end: momentEnd,
     msDiff,
   });
+  if (canGetJobs) {
+    comparisonOptions.push({
+      value: TimeRangeComparisonEnum.ExpectedBounds,
+      text: i18n.translate('xpack.apm.comparison.mlExpectedBounds', {
+        defaultMessage: 'Expected bounds',
+      }),
+      disabled: !hasMLJobsMatchingEnv,
+    });
+  }
+
+  return comparisonOptions;
 }
