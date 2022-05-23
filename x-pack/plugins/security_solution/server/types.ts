@@ -9,6 +9,7 @@ import type {
   IRouter,
   CustomRequestHandlerContext,
   CoreRequestHandlerContext,
+  KibanaRequest,
 } from '@kbn/core/server';
 import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
@@ -22,6 +23,10 @@ import { ConfigType } from './config';
 import { IRuleExecutionLogForRoutes } from './lib/detection_engine/rule_execution_log';
 import { FrameworkRequest } from './lib/framework';
 import { EndpointAuthz } from '../common/endpoint/types/authz';
+import {
+  EndpointInternalFleetServicesInterface,
+  EndpointScopedFleetServicesInterface,
+} from './endpoint/services/fleet';
 
 export { AppClient };
 
@@ -35,6 +40,8 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getRuleDataService: () => IRuleDataService;
   getRuleExecutionLog: () => IRuleExecutionLogForRoutes;
   getExceptionListClient: () => ExceptionListClient | null;
+  getInternalFleetServices: () => EndpointInternalFleetServicesInterface;
+  getScopedFleetServices: (req: KibanaRequest) => EndpointScopedFleetServicesInterface;
 }
 
 export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{

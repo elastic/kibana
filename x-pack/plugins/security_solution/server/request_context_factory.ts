@@ -30,6 +30,7 @@ import {
   getEndpointAuthzInitialState,
 } from '../common/endpoint/service/authz';
 import { licenseService } from './lib/license';
+import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 
 export interface IRequestContextFactory {
   create(
@@ -43,6 +44,7 @@ interface ConstructorOptions {
   logger: Logger;
   core: SecuritySolutionPluginCoreSetupDependencies;
   plugins: SecuritySolutionPluginSetupDependencies;
+  endpointAppContextService: EndpointAppContextService;
 }
 
 export class RequestContextFactory implements IRequestContextFactory {
@@ -57,7 +59,7 @@ export class RequestContextFactory implements IRequestContextFactory {
     request: KibanaRequest
   ): Promise<SecuritySolutionApiRequestHandlerContext> {
     const { options, appClientFactory } = this;
-    const { config, logger, core, plugins } = options;
+    const { config, logger, core, plugins, endpointAppContextService } = options;
     const { lists, ruleRegistry, security } = plugins;
 
     const [, startPlugins] = await core.getStartServices();
@@ -122,6 +124,12 @@ export class RequestContextFactory implements IRequestContextFactory {
         const username = security?.authc.getCurrentUser(request)?.username || 'elastic';
         return lists.getExceptionListClient(coreContext.savedObjects.client, username);
       },
+
+      getInternalFleetServices: memoize(() => endpointAppContextService.getInternalFleetServices()),
+
+      getScopedFleetServices: memoize((req: KibanaRequest) =>
+        endpointAppContextService.getScopedFleetServices(req)
+      ),
     };
   }
 }
