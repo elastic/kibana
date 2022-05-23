@@ -55,7 +55,7 @@ export const ISOLATE_HOST_ROUTE = `${BASE_ENDPOINT_ROUTE}/isolate`;
 export const UNISOLATE_HOST_ROUTE = `${BASE_ENDPOINT_ROUTE}/unisolate`;
 
 /** Endpoint Response Action Routes */
-export const ENDPOINT_RESPONSE_ACTION = `${BASE_ENDPOINT_ROUTE}/response_action`;
+export const ENDPOINT_RESPONSE_ACTION_ROUTE = `${BASE_ENDPOINT_ROUTE}/response_action`;
 
 /** Endpoint Actions Routes */
 export const ENDPOINT_ACTION_LOG_ROUTE = `/api/endpoint/action_log/{agent_id}`;

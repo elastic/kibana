@@ -14,7 +14,7 @@ import {
   EndpointUnisolateForm,
   ActionCompletionReturnButton,
 } from '../../../common/components/endpoint/host_isolation';
-import { useHostUnisolation } from '../../containers/detection_engine/alerts/use_host_unisolation';
+import { useEndpointResponseAction } from '../../containers/detection_engine/alerts/use_host_isolation';
 import { CasesFromAlertsResponse } from '../../containers/detection_engine/alerts/types';
 
 export const UnisolateHost = React.memo(
@@ -38,16 +38,21 @@ export const UnisolateHost = React.memo(
       return caseInfo.id;
     });
 
-    const { loading, unIsolateHost } = useHostUnisolation({ endpointId, comment, caseIds });
+    const { loading, executeResponseAction } = useEndpointResponseAction({
+      endpointId,
+      comment,
+      caseIds,
+      command: 'unisolate',
+    });
 
     const confirmHostUnIsolation = useCallback(async () => {
-      const hostUnIsolated = await unIsolateHost();
+      const hostUnIsolated = await executeResponseAction();
       setIsUnIsolated(hostUnIsolated);
 
       if (hostUnIsolated && successCallback) {
         successCallback();
       }
-    }, [successCallback, unIsolateHost]);
+    }, [successCallback, executeResponseAction]);
 
     const backToAlertDetails = useCallback(() => cancelCallback(), [cancelCallback]);
 
