@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiButtonEmpty, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFormRow, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTestQuery } from './use_test_query';
 
@@ -20,7 +20,6 @@ export function TestQueryRow({
 
   return (
     <>
-      <EuiSpacer size="xs" />
       <EuiFormRow>
         <EuiButtonEmpty
           data-test-subj="testQuery"
