@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { find, mapKeys } from 'lodash';
+import { find, reduce } from 'lodash';
+import { KibanaAssetReference } from '@kbn/fleet-plugin/common';
+
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { savedQuerySavedObjectType } from '../../../common/types';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -18,11 +20,16 @@ const getInstallation = async (osqueryContext: OsqueryAppContext) =>
 export const getInstalledSavedQueriesMap = async (osqueryContext: OsqueryAppContext) => {
   const installation = await getInstallation(osqueryContext);
   if (installation) {
-    return mapKeys(installation.installed_kibana, (value) => {
-      if (value.type === savedQuerySavedObjectType) {
-        return value.id;
-      }
-    });
+    return reduce(
+      installation.installed_kibana,
+      // @ts-expect-error not sure why it shouts, but still it's properly typed
+      (acc: Record<string, KibanaAssetReference>, item: KibanaAssetReference) => {
+        if (item.type === savedQuerySavedObjectType) {
+          return { ...acc, [item.id]: item };
+        }
+      },
+      {}
+    );
   }
 
   return {};

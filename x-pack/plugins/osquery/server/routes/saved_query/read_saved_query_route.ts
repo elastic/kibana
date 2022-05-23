@@ -33,8 +33,6 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
         prebuilt: boolean;
       }>(savedQuerySavedObjectType, request.params.id);
 
-      const isPrebuilt: boolean = await isSavedQueryPrebuilt(osqueryContext, savedQuery.id);
-
       if (savedQuery.attributes.ecs_mapping) {
         // @ts-expect-error update types
         savedQuery.attributes.ecs_mapping = convertECSMappingToObject(
@@ -42,7 +40,7 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
         );
       }
 
-      savedQuery.attributes.prebuilt = isPrebuilt;
+      savedQuery.attributes.prebuilt = await isSavedQueryPrebuilt(osqueryContext, savedQuery.id);
 
       return response.ok({
         body: savedQuery,
