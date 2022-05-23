@@ -145,7 +145,6 @@ export function getComparisonOptions({
 
   const hasMLJobsMatchingEnv =
     canGetJobs &&
-    anomalyDetectionJobsStatus === 'success' &&
     Array.isArray(anomalyDetectionJobsData?.jobs) &&
     anomalyDetectionJobsData?.jobs.some(
       (j) => j.environment === preferredEnvironment
@@ -157,13 +156,15 @@ export function getComparisonOptions({
     end: momentEnd,
     msDiff,
   });
+
   if (canGetJobs) {
     comparisonOptions.push({
       value: TimeRangeComparisonEnum.ExpectedBounds,
       text: i18n.translate('xpack.apm.comparison.mlExpectedBounds', {
         defaultMessage: 'Expected bounds',
       }),
-      disabled: !hasMLJobsMatchingEnv,
+      disabled:
+        anomalyDetectionJobsStatus === 'success' && !hasMLJobsMatchingEnv,
     });
   }
 
