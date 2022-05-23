@@ -722,6 +722,75 @@ describe('XYChart component', () => {
     expect(lineArea.prop('lineSeriesStyle')).toEqual(expectedSeriesStyle);
   });
 
+  test('applies the line width to the chart', () => {
+    const { args } = sampleArgs();
+    const lineWidthArg = { lineWidth: 10 };
+    const component = shallow(
+      <XYChart
+        {...defaultProps}
+        args={{ ...args, layers: [{ ...args.layers[0], ...lineWidthArg }] }}
+      />
+    );
+    const dataLayers = component.find(DataLayers).dive();
+    const lineArea = dataLayers.find(LineSeries).at(0);
+    const expectedSeriesStyle = expect.objectContaining({
+      line: { strokeWidth: lineWidthArg.lineWidth },
+    });
+
+    expect(lineArea.prop('areaSeriesStyle')).toEqual(expectedSeriesStyle);
+    expect(lineArea.prop('lineSeriesStyle')).toEqual(expectedSeriesStyle);
+  });
+
+  test('applies showPoints to the chart', () => {
+    const checkIfPointsVisibilityIsApplied = (showPoints: boolean) => {
+      const { args } = sampleArgs();
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            layers: [{ ...(args.layers[0] as DataLayerConfig), showPoints }],
+          }}
+        />
+      );
+      const dataLayers = component.find(DataLayers).dive();
+      const lineArea = dataLayers.find(LineSeries).at(0);
+      const expectedSeriesStyle = expect.objectContaining({
+        point: expect.objectContaining({
+          visible: showPoints,
+        }),
+      });
+      expect(lineArea.prop('areaSeriesStyle')).toEqual(expectedSeriesStyle);
+      expect(lineArea.prop('lineSeriesStyle')).toEqual(expectedSeriesStyle);
+    };
+
+    checkIfPointsVisibilityIsApplied(true);
+    checkIfPointsVisibilityIsApplied(false);
+  });
+
+  test('applies point radius to the chart', () => {
+    const pointsRadius = 10;
+    const { args } = sampleArgs();
+    const component = shallow(
+      <XYChart
+        {...defaultProps}
+        args={{
+          ...args,
+          layers: [{ ...(args.layers[0] as DataLayerConfig), pointsRadius }],
+        }}
+      />
+    );
+    const dataLayers = component.find(DataLayers).dive();
+    const lineArea = dataLayers.find(LineSeries).at(0);
+    const expectedSeriesStyle = expect.objectContaining({
+      point: expect.objectContaining({
+        radius: pointsRadius,
+      }),
+    });
+    expect(lineArea.prop('areaSeriesStyle')).toEqual(expectedSeriesStyle);
+    expect(lineArea.prop('lineSeriesStyle')).toEqual(expectedSeriesStyle);
+  });
+
   test('it renders bar', () => {
     const { args } = sampleArgs();
     const component = shallow(

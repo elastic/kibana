@@ -18,7 +18,6 @@ import {
   EuiButtonIcon,
   EuiPanel,
   EuiTitle,
-  EuiHealth,
   EuiPopover,
   EuiHorizontalRule,
   EuiTabbedContent,
@@ -42,13 +41,8 @@ import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 
 import { DeleteModalConfirmation } from '../rules/components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from '../rules/components/center_justified_spinner';
-import { getHealthColor, OBSERVABILITY_SOLUTIONS } from '../rules/config';
-import {
-  RuleDetailsPathParams,
-  EVENT_ERROR_LOG_TAB,
-  EVENT_LOG_LIST_TAB,
-  ALERT_LIST_TAB,
-} from './types';
+import { OBSERVABILITY_SOLUTIONS } from '../rules/config';
+import { RuleDetailsPathParams, EVENT_LOG_LIST_TAB, ALERT_LIST_TAB } from './types';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
@@ -188,14 +182,6 @@ export function RuleDetailsPage() {
       'data-test-subj': 'ruleAlertListTab',
       content: <EuiText>Alerts</EuiText>,
     },
-    {
-      id: EVENT_ERROR_LOG_TAB,
-      name: i18n.translate('xpack.observability.ruleDetails.rule.errorLogTabText', {
-        defaultMessage: 'Error log',
-      }),
-      'data-test-subj': 'errorLogTab',
-      content: <EuiText>Error log</EuiText>,
-    },
   ];
 
   if (isPageLoading || isRuleLoading) return <CenterJustifiedSpinner />;
@@ -222,6 +208,20 @@ export function RuleDetailsPage() {
         />
       </EuiPanel>
     );
+
+  const getRuleStatusComponent = () =>
+    getRuleStatusDropdown({
+      rule,
+      enableRule: async () => await enableRule({ http, id: rule.id }),
+      disableRule: async () => await disableRule({ http, id: rule.id }),
+      onRuleChanged: () => reloadRule(),
+      isEditable: hasEditButton,
+      snoozeRule: async (snoozeEndTime: string | -1) => {
+        await snoozeRule({ http, id: rule.id, snoozeEndTime });
+      },
+      unsnoozeRule: async () => await unsnoozeRule({ http, id: rule.id }),
+    });
+
   const getNotifyText = () =>
     NOTIFY_WHEN_OPTIONS.find((option) => option.value === rule?.notifyWhen)?.inputDisplay ||
     rule.notifyWhen;
@@ -284,41 +284,18 @@ export function RuleDetailsPage() {
                     </EuiFlexItem>
                   </EuiTitle>
 
-                  {getRuleStatusDropdown({
-                    rule,
-                    enableRule: async () => await enableRule({ http, id: rule.id }),
-                    disableRule: async () => await disableRule({ http, id: rule.id }),
-                    onRuleChanged: () => reloadRule(),
-                    isEditable: hasEditButton,
-                    snoozeRule: async (snoozeEndTime: string | -1) => {
-                      await snoozeRule({ http, id: rule.id, snoozeEndTime });
-                    },
-                    unsnoozeRule: async () => await unsnoozeRule({ http, id: rule.id }),
-                  })}
+                  {getRuleStatusComponent()}
                 </EuiFlexItem>
               </EuiFlexGroup>,
             ]
           : [],
       }}
     >
-      <EuiFlexGroup wrap={true}>
+      <EuiFlexGroup wrap={true} gutterSize="m">
         {/* Left side of Rule Summary */}
         <EuiFlexItem grow={1}>
-          <EuiPanel
-            color={getHealthColor(rule.executionStatus.status)}
-            hasBorder={false}
-            paddingSize={'l'}
-          >
-            <EuiFlexGroup direction="column">
-              <EuiFlexItem>
-                <EuiTitle size="s">
-                  <EuiHealth textSize="inherit" color={getHealthColor(rule.executionStatus.status)}>
-                    {rule.executionStatus.status.charAt(0).toUpperCase() +
-                      rule.executionStatus.status.slice(1)}
-                  </EuiHealth>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiSpacer size="l" />
+          <EuiPanel color="subdued" hasBorder={false} paddingSize={'m'}>
+            <EuiFlexGroup direction="column" gutterSize="xs">
               <EuiFlexGroup>
                 <ItemTitleRuleSummary>
                   {i18n.translate('xpack.observability.ruleDetails.lastRun', {
@@ -330,11 +307,16 @@ export function RuleDetailsPage() {
                   itemValue={moment(rule.executionStatus.lastExecutionDate).fromNow()}
                 />
               </EuiFlexGroup>
-              <EuiSpacer size="xl" />
-
-              <EuiHorizontalRule margin="none" />
-              <EuiSpacer size="s" />
-
+              <EuiSpacer size="m" />
+              <EuiFlexGroup>
+                <ItemTitleRuleSummary>
+                  {i18n.translate('xpack.observability.ruleDetails.ruleIs', {
+                    defaultMessage: 'Rule is',
+                  })}
+                </ItemTitleRuleSummary>
+                <EuiFlexItem>{getRuleStatusComponent()}</EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiHorizontalRule margin="s" />
               <EuiFlexGroup>
                 <ItemTitleRuleSummary>
                   {i18n.translate('xpack.observability.ruleDetails.alerts', {
@@ -376,8 +358,6 @@ export function RuleDetailsPage() {
                   />
                 </EuiFlexGroup>
               )}
-              <EuiSpacer size="l" />
-              <EuiSpacer size="l" />
             </EuiFlexGroup>
           </EuiPanel>
         </EuiFlexItem>
@@ -385,7 +365,7 @@ export function RuleDetailsPage() {
         {/* Right side of Rule Summary */}
 
         <EuiFlexItem grow={3}>
-          <EuiPanel color="subdued" hasBorder={false} paddingSize={'l'}>
+          <EuiPanel color="subdued" hasBorder={false} paddingSize={'m'}>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiTitle size="s">
                 <EuiFlexItem grow={false}>
@@ -401,7 +381,7 @@ export function RuleDetailsPage() {
               )}
             </EuiFlexGroup>
 
-            <EuiSpacer size="l" />
+            <EuiSpacer size="m" />
 
             <EuiFlexGroup alignItems="baseline">
               <EuiFlexItem>
@@ -416,9 +396,9 @@ export function RuleDetailsPage() {
                   />
                 </EuiFlexGroup>
 
-                <EuiSpacer size="l" />
+                <EuiSpacer size="m" />
 
-                <EuiFlexGroup alignItems="flexStart">
+                <EuiFlexGroup alignItems="flexStart" responsive={false}>
                   <ItemTitleRuleSummary>
                     {i18n.translate('xpack.observability.ruleDetails.description', {
                       defaultMessage: 'Description',
@@ -429,7 +409,7 @@ export function RuleDetailsPage() {
                   />
                 </EuiFlexGroup>
 
-                <EuiSpacer size="l" />
+                <EuiSpacer size="m" />
 
                 <EuiFlexGroup>
                   <ItemTitleRuleSummary>
@@ -449,8 +429,6 @@ export function RuleDetailsPage() {
                     </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-
-                <EuiSpacer size="l" />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFlexGroup>
@@ -463,7 +441,7 @@ export function RuleDetailsPage() {
                   <ItemValueRuleSummary itemValue={formatInterval(rule.schedule.interval)} />
                 </EuiFlexGroup>
 
-                <EuiSpacer size="l" />
+                <EuiSpacer size="m" />
 
                 <EuiFlexGroup>
                   <ItemTitleRuleSummary>
@@ -474,7 +452,7 @@ export function RuleDetailsPage() {
                   <ItemValueRuleSummary itemValue={String(getNotifyText())} />
                 </EuiFlexGroup>
 
-                <EuiSpacer size="l" />
+                <EuiSpacer size="m" />
                 <EuiFlexGroup alignItems="baseline">
                   <ItemTitleRuleSummary>
                     {i18n.translate('xpack.observability.ruleDetails.actions', {
