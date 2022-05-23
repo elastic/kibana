@@ -101,7 +101,6 @@ enabled:
   - test/server_integration/http/ssl_with_p12/config.js
   - test/server_integration/http/ssl/config.js
   - test/ui_capabilities/newsfeed_err/config.ts
-  - test/unsafe_eval/config.ts
   - x-pack/test/accessibility/config.ts
   - x-pack/test/alerting_api_integration/basic/config.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group1/config.ts
