@@ -34,7 +34,9 @@ describe('EnterpriseSearchElasticsearchPageTemplate', () => {
 
   describe('page chrome', () => {
     it('takes a breadcrumb array & renders a product-specific page chrome', () => {
-      const wrapper = shallow(<EnterpriseSearchElasticsearchPageTemplate pageChrome={['Some page']} />);
+      const wrapper = shallow(
+        <EnterpriseSearchElasticsearchPageTemplate pageChrome={['Some page']} />
+      );
       const setPageChrome = wrapper
         .find(EnterpriseSearchPageTemplateWrapper)
         .prop('setPageChrome') as any;

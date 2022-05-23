@@ -19,7 +19,12 @@ import {
   useWorkplaceSearchBreadcrumbs,
   BreadcrumbTrail,
 } from './generate_breadcrumbs';
-import { enterpriseSearchTitle, elasticsearchTitle, appSearchTitle, workplaceSearchTitle } from './generate_title';
+import {
+  enterpriseSearchTitle,
+  elasticsearchTitle,
+  appSearchTitle,
+  workplaceSearchTitle,
+} from './generate_title';
 
 /**
  * Helpers for setting Kibana chrome (breadcrumbs, doc titles) on React view mount

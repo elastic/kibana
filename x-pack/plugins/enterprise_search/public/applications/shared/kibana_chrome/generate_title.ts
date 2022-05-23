@@ -8,7 +8,7 @@
 import {
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   APP_SEARCH_PLUGIN,
-  WORKPLACE_SEARCH_PLUGIN
+  WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
 
 /**

@@ -144,10 +144,7 @@ export const GettingStartedSteps: React.FC<GettingStartedStepsProps> = ({ step =
                       </EuiPopover>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiLinkTo
-                        shouldNotCreateHref
-                        to={ELASTICSEARCH_PLUGIN.URL}
-                      >
+                      <EuiLinkTo shouldNotCreateHref to={ELASTICSEARCH_PLUGIN.URL}>
                         <EuiIcon type="iInCircle" />
                         &nbsp;
                         {i18n.translate(

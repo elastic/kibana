@@ -11,9 +11,9 @@ import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, EuiSpacer } fro
 
 import { i18n } from '@kbn/i18n';
 
+import { ELASTICSEARCH_PLUGIN } from '../../../../../common/constants';
 import { ElasticsearchResources } from '../../../shared/elasticsearch_resources';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
-import { ELASTICSEARCH_PLUGIN } from '../../../../../common/constants';
 
 export const ElasticsearchCard: React.FC = () => {
   return (

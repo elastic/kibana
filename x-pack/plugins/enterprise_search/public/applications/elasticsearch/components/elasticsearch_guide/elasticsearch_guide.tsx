@@ -23,10 +23,9 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { SetElasticsearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-
 import { docLinks } from '../../../shared/doc_links';
 import { ElasticsearchResources } from '../../../shared/elasticsearch_resources';
+import { SetElasticsearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 
 import { ElasticsearchClientInstructions } from '../elasticsearch_client_instructions';
 import { ElasticsearchCloudId } from '../elasticsearch_cloud_id';

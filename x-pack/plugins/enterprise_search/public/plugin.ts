@@ -128,9 +128,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         const pluginData = this.getPluginData();
 
         const { renderApp } = await import('./applications');
-        const { Elasticsearch } = await import(
-          './applications/elasticsearch'
-        );
+        const { Elasticsearch } = await import('./applications/elasticsearch');
 
         return renderApp(Elasticsearch, kibanaDeps, pluginData);
       },
