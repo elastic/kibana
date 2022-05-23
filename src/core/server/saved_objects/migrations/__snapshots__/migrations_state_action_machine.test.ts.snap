@@ -24,103 +24,99 @@ Object {
               "excludeFromUpgradeFilterHooks": Object {},
               "excludeOnUpgradeQuery": Object {
                 "bool": Object {
-                  "filter": Object {
-                    "bool": Object {
-                      "must_not": Array [
-                        Object {
-                          "term": Object {
-                            "type": "apm-services-telemetry",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "background-session",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "cases-sub-case",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "file-upload-telemetry",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "fleet-agent-actions",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "fleet-agent-events",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "fleet-agents",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "fleet-enrollment-api-keys",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "ml-telemetry",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "osquery-usage-metric",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "server",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "siem-detection-engine-rule-status",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "timelion-sheet",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "tsvb-validation-telemetry",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "ui-counter",
-                          },
-                        },
-                        Object {
-                          "bool": Object {
-                            "must": Array [
-                              Object {
-                                "match": Object {
-                                  "type": "search-session",
-                                },
-                              },
-                              Object {
-                                "match": Object {
-                                  "search-session.persisted": false,
-                                },
-                              },
-                            ],
-                          },
-                        },
-                      ],
+                  "must_not": Array [
+                    Object {
+                      "term": Object {
+                        "type": "apm-services-telemetry",
+                      },
                     },
-                  },
+                    Object {
+                      "term": Object {
+                        "type": "background-session",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "cases-sub-case",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "file-upload-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-agent-actions",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-agent-events",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-agents",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-enrollment-api-keys",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "ml-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "osquery-usage-metric",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "server",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "siem-detection-engine-rule-status",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "timelion-sheet",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "tsvb-validation-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "ui-counter",
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "must": Array [
+                          Object {
+                            "match": Object {
+                              "type": "search-session",
+                            },
+                          },
+                          Object {
+                            "match": Object {
+                              "search-session.persisted": false,
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
                 },
               },
               "indexPrefix": ".my-so-index",
@@ -197,103 +193,99 @@ Object {
               "excludeFromUpgradeFilterHooks": Object {},
               "excludeOnUpgradeQuery": Object {
                 "bool": Object {
-                  "filter": Object {
-                    "bool": Object {
-                      "must_not": Array [
-                        Object {
-                          "term": Object {
-                            "type": "apm-services-telemetry",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "background-session",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "cases-sub-case",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "file-upload-telemetry",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "fleet-agent-actions",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "fleet-agent-events",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "fleet-agents",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "fleet-enrollment-api-keys",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "ml-telemetry",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "osquery-usage-metric",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "server",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "siem-detection-engine-rule-status",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "timelion-sheet",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "tsvb-validation-telemetry",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "ui-counter",
-                          },
-                        },
-                        Object {
-                          "bool": Object {
-                            "must": Array [
-                              Object {
-                                "match": Object {
-                                  "type": "search-session",
-                                },
-                              },
-                              Object {
-                                "match": Object {
-                                  "search-session.persisted": false,
-                                },
-                              },
-                            ],
-                          },
-                        },
-                      ],
+                  "must_not": Array [
+                    Object {
+                      "term": Object {
+                        "type": "apm-services-telemetry",
+                      },
                     },
-                  },
+                    Object {
+                      "term": Object {
+                        "type": "background-session",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "cases-sub-case",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "file-upload-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-agent-actions",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-agent-events",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-agents",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-enrollment-api-keys",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "ml-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "osquery-usage-metric",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "server",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "siem-detection-engine-rule-status",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "timelion-sheet",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "tsvb-validation-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "ui-counter",
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "must": Array [
+                          Object {
+                            "match": Object {
+                              "type": "search-session",
+                            },
+                          },
+                          Object {
+                            "match": Object {
+                              "search-session.persisted": false,
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
                 },
               },
               "indexPrefix": ".my-so-index",
@@ -374,103 +366,99 @@ Object {
               "excludeFromUpgradeFilterHooks": Object {},
               "excludeOnUpgradeQuery": Object {
                 "bool": Object {
-                  "filter": Object {
-                    "bool": Object {
-                      "must_not": Array [
-                        Object {
-                          "term": Object {
-                            "type": "apm-services-telemetry",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "background-session",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "cases-sub-case",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "file-upload-telemetry",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "fleet-agent-actions",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "fleet-agent-events",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "fleet-agents",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "fleet-enrollment-api-keys",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "ml-telemetry",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "osquery-usage-metric",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "server",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "siem-detection-engine-rule-status",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "timelion-sheet",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "tsvb-validation-telemetry",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "ui-counter",
-                          },
-                        },
-                        Object {
-                          "bool": Object {
-                            "must": Array [
-                              Object {
-                                "match": Object {
-                                  "type": "search-session",
-                                },
-                              },
-                              Object {
-                                "match": Object {
-                                  "search-session.persisted": false,
-                                },
-                              },
-                            ],
-                          },
-                        },
-                      ],
+                  "must_not": Array [
+                    Object {
+                      "term": Object {
+                        "type": "apm-services-telemetry",
+                      },
                     },
-                  },
+                    Object {
+                      "term": Object {
+                        "type": "background-session",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "cases-sub-case",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "file-upload-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-agent-actions",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-agent-events",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-agents",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-enrollment-api-keys",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "ml-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "osquery-usage-metric",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "server",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "siem-detection-engine-rule-status",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "timelion-sheet",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "tsvb-validation-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "ui-counter",
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "must": Array [
+                          Object {
+                            "match": Object {
+                              "type": "search-session",
+                            },
+                          },
+                          Object {
+                            "match": Object {
+                              "search-session.persisted": false,
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
                 },
               },
               "indexPrefix": ".my-so-index",
@@ -555,103 +543,99 @@ Object {
               "excludeFromUpgradeFilterHooks": Object {},
               "excludeOnUpgradeQuery": Object {
                 "bool": Object {
-                  "filter": Object {
-                    "bool": Object {
-                      "must_not": Array [
-                        Object {
-                          "term": Object {
-                            "type": "apm-services-telemetry",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "background-session",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "cases-sub-case",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "file-upload-telemetry",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "fleet-agent-actions",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "fleet-agent-events",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "fleet-agents",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "fleet-enrollment-api-keys",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "ml-telemetry",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "osquery-usage-metric",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "server",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "siem-detection-engine-rule-status",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "timelion-sheet",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "tsvb-validation-telemetry",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "ui-counter",
-                          },
-                        },
-                        Object {
-                          "bool": Object {
-                            "must": Array [
-                              Object {
-                                "match": Object {
-                                  "type": "search-session",
-                                },
-                              },
-                              Object {
-                                "match": Object {
-                                  "search-session.persisted": false,
-                                },
-                              },
-                            ],
-                          },
-                        },
-                      ],
+                  "must_not": Array [
+                    Object {
+                      "term": Object {
+                        "type": "apm-services-telemetry",
+                      },
                     },
-                  },
+                    Object {
+                      "term": Object {
+                        "type": "background-session",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "cases-sub-case",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "file-upload-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-agent-actions",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-agent-events",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-agents",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-enrollment-api-keys",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "ml-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "osquery-usage-metric",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "server",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "siem-detection-engine-rule-status",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "timelion-sheet",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "tsvb-validation-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "ui-counter",
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "must": Array [
+                          Object {
+                            "match": Object {
+                              "type": "search-session",
+                            },
+                          },
+                          Object {
+                            "match": Object {
+                              "search-session.persisted": false,
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
                 },
               },
               "indexPrefix": ".my-so-index",
@@ -778,103 +762,99 @@ Object {
               "excludeFromUpgradeFilterHooks": Object {},
               "excludeOnUpgradeQuery": Object {
                 "bool": Object {
-                  "filter": Object {
-                    "bool": Object {
-                      "must_not": Array [
-                        Object {
-                          "term": Object {
-                            "type": "apm-services-telemetry",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "background-session",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "cases-sub-case",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "file-upload-telemetry",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "fleet-agent-actions",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "fleet-agent-events",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "fleet-agents",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "fleet-enrollment-api-keys",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "ml-telemetry",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "osquery-usage-metric",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "server",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "siem-detection-engine-rule-status",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "timelion-sheet",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "tsvb-validation-telemetry",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "ui-counter",
-                          },
-                        },
-                        Object {
-                          "bool": Object {
-                            "must": Array [
-                              Object {
-                                "match": Object {
-                                  "type": "search-session",
-                                },
-                              },
-                              Object {
-                                "match": Object {
-                                  "search-session.persisted": false,
-                                },
-                              },
-                            ],
-                          },
-                        },
-                      ],
+                  "must_not": Array [
+                    Object {
+                      "term": Object {
+                        "type": "apm-services-telemetry",
+                      },
                     },
-                  },
+                    Object {
+                      "term": Object {
+                        "type": "background-session",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "cases-sub-case",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "file-upload-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-agent-actions",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-agent-events",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-agents",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-enrollment-api-keys",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "ml-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "osquery-usage-metric",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "server",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "siem-detection-engine-rule-status",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "timelion-sheet",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "tsvb-validation-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "ui-counter",
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "must": Array [
+                          Object {
+                            "match": Object {
+                              "type": "search-session",
+                            },
+                          },
+                          Object {
+                            "match": Object {
+                              "search-session.persisted": false,
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
                 },
               },
               "indexPrefix": ".my-so-index",
@@ -962,103 +942,99 @@ Object {
               "excludeFromUpgradeFilterHooks": Object {},
               "excludeOnUpgradeQuery": Object {
                 "bool": Object {
-                  "filter": Object {
-                    "bool": Object {
-                      "must_not": Array [
-                        Object {
-                          "term": Object {
-                            "type": "apm-services-telemetry",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "background-session",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "cases-sub-case",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "file-upload-telemetry",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "fleet-agent-actions",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "fleet-agent-events",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "fleet-agents",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "fleet-enrollment-api-keys",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "ml-telemetry",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "osquery-usage-metric",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "server",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "siem-detection-engine-rule-status",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "timelion-sheet",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "tsvb-validation-telemetry",
-                          },
-                        },
-                        Object {
-                          "term": Object {
-                            "type": "ui-counter",
-                          },
-                        },
-                        Object {
-                          "bool": Object {
-                            "must": Array [
-                              Object {
-                                "match": Object {
-                                  "type": "search-session",
-                                },
-                              },
-                              Object {
-                                "match": Object {
-                                  "search-session.persisted": false,
-                                },
-                              },
-                            ],
-                          },
-                        },
-                      ],
+                  "must_not": Array [
+                    Object {
+                      "term": Object {
+                        "type": "apm-services-telemetry",
+                      },
                     },
-                  },
+                    Object {
+                      "term": Object {
+                        "type": "background-session",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "cases-sub-case",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "file-upload-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-agent-actions",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-agent-events",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-agents",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "fleet-enrollment-api-keys",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "ml-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "osquery-usage-metric",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "server",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "siem-detection-engine-rule-status",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "timelion-sheet",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "tsvb-validation-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "ui-counter",
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "must": Array [
+                          Object {
+                            "match": Object {
+                              "type": "search-session",
+                            },
+                          },
+                          Object {
+                            "match": Object {
+                              "search-session.persisted": false,
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
                 },
               },
               "indexPrefix": ".my-so-index",
