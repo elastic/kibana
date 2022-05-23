@@ -263,6 +263,5 @@ export const item: GetInfoResponse['item'] = {
     github: 'elastic/security-external-integrations',
   },
   latestVersion: '1.2.0',
-  removable: true,
   status: 'not_installed',
 };
