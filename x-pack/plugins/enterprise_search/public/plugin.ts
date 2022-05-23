@@ -202,6 +202,16 @@ export class EnterpriseSearchPlugin implements Plugin {
       });
 
       plugins.home.featureCatalogue.register({
+        id: ELASTICSEARCH_PLUGIN.ID,
+        title: ELASTICSEARCH_PLUGIN.NAME,
+        icon: 'appElasticsearch',
+        description: ELASTICSEARCH_PLUGIN.DESCRIPTION,
+        path: ELASTICSEARCH_PLUGIN.URL,
+        category: 'data',
+        showOnHomePage: false,
+      });
+
+      plugins.home.featureCatalogue.register({
         id: WORKPLACE_SEARCH_PLUGIN.ID,
         title: WORKPLACE_SEARCH_PLUGIN.NAME,
         icon: 'workplaceSearchApp',

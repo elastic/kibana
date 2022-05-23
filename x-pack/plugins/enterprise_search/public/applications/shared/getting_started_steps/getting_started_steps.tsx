@@ -21,8 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { ENTERPRISE_SEARCH_OVERVIEW_PLUGIN } from '../../../../common/constants';
-import { ELASTICSEARCH_GUIDE_PATH } from '../../enterprise_search_overview/routes';
+import { ELASTICSEARCH_PLUGIN } from '../../../../common/constants';
 
 import { EuiLinkTo } from '../react_router_helpers';
 
@@ -147,7 +146,7 @@ export const GettingStartedSteps: React.FC<GettingStartedStepsProps> = ({ step =
                     <EuiFlexItem grow={false}>
                       <EuiLinkTo
                         shouldNotCreateHref
-                        to={ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL + ELASTICSEARCH_GUIDE_PATH}
+                        to={ELASTICSEARCH_PLUGIN.URL}
                       >
                         <EuiIcon type="iInCircle" />
                         &nbsp;

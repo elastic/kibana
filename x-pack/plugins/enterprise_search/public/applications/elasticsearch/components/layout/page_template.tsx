@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { ELASTICSEARCH_PLUGIN } from '../../../../../common/constants';
-import { SetEnterpriseSearchChrome } from '../../../shared/kibana_chrome';
+import { SetElasticsearchChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 
@@ -27,7 +27,7 @@ export const EnterpriseSearchElasticsearchPageTemplate: React.FC<PageTemplatePro
         name: ELASTICSEARCH_PLUGIN.NAME,
         items: useEnterpriseSearchElasticsearchNav(),
       }}
-      setPageChrome={pageChrome && <SetEnterpriseSearchChrome trail={pageChrome} />}
+      setPageChrome={pageChrome && <SetElasticsearchChrome trail={pageChrome} />}
     >
       {pageViewTelemetry && (
         <SendEnterpriseSearchTelemetry action="viewed" metric={pageViewTelemetry} />

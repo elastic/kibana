@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 
 import { ElasticsearchResources } from '../../../shared/elasticsearch_resources';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
-import { ELASTICSEARCH_GUIDE_PATH } from '../../routes';
+import { ELASTICSEARCH_PLUGIN } from '../../../../../common/constants';
 
 export const ElasticsearchCard: React.FC = () => {
   return (
@@ -38,7 +38,7 @@ export const ElasticsearchCard: React.FC = () => {
           <EuiSpacer size="xs" />
           {/* div is needed to prevent button from stretching */}
           <div>
-            <EuiButtonTo to={ELASTICSEARCH_GUIDE_PATH}>
+            <EuiButtonTo to={ELASTICSEARCH_PLUGIN.URL} shouldNotCreateHref>
               {i18n.translate('xpack.enterpriseSearch.overview.elasticsearchCard.button', {
                 defaultMessage: 'Get started',
               })}

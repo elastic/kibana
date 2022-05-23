@@ -12,7 +12,7 @@ import { EuiBreadcrumb } from '@elastic/eui';
 import {
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   APP_SEARCH_PLUGIN,
-  WORKPLACE_SEARCH_PLUGIN,
+  WORKPLACE_SEARCH_PLUGIN
 } from '../../../../common/constants';
 
 import { stripLeadingSlash } from '../../../../common/strip_slashes';
@@ -103,6 +103,9 @@ export const useEnterpriseSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
     },
     ...breadcrumbs,
   ]);
+
+export const useElasticsearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
+  useEnterpriseSearchBreadcrumbs([{ text: 'Getting started with Elasticsearch', path: '/' }, ...breadcrumbs]);
 
 export const useAppSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useEnterpriseSearchBreadcrumbs([{ text: APP_SEARCH_PLUGIN.NAME, path: '/' }, ...breadcrumbs]);
