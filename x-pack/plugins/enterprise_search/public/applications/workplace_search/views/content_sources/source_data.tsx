@@ -311,6 +311,13 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.GOOGLE_DRIVE,
     serviceType: 'google_drive',
+    categories: [
+      SOURCE_CATEGORIES.FILE_SHARING,
+      SOURCE_CATEGORIES.STORAGE,
+      SOURCE_CATEGORIES.CLOUD,
+      SOURCE_CATEGORIES.PRODUCTIVITY,
+      SOURCE_CATEGORIES.GSUITE,
+    ],
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: true,

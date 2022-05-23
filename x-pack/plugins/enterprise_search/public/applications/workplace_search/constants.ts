@@ -396,6 +396,9 @@ export const SOURCE_CATEGORIES = {
   GOOGLE: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.google', {
     defaultMessage: 'Google',
   }),
+  GSUITE: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.gsuite', {
+    defaultMessage: 'GSuite',
+  }),
   INTRANET: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.intranet', {
     defaultMessage: 'Intranet',
   }),
