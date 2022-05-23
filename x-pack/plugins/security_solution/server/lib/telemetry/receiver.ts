@@ -113,6 +113,13 @@ export interface ITelemetryReceiver {
 
   fetchEndpointList(listId: string): Promise<GetEndpointListResponse>;
 
+  fetchDetectionRules(): Promise<
+    TransportResult<
+      SearchResponse<RuleSearchResult, Record<string, AggregationsAggregate>>,
+      unknown
+    >
+  >;
+
   fetchDetectionExceptionList(
     listId: string,
     ruleVersion: number
