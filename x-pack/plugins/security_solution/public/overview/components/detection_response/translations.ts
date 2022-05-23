@@ -92,14 +92,14 @@ export const RULE_ALERTS_SECTION_TITLE = i18n.translate(
 export const HOST_ALERTS_SECTION_TITLE = i18n.translate(
   'xpack.securitySolution.detectionResponse.hostAlertsSectionTitle',
   {
-    defaultMessage: 'Vulnerable hosts by severity',
+    defaultMessage: 'Hosts by alert severity',
   }
 );
 
 export const USER_ALERTS_SECTION_TITLE = i18n.translate(
   'xpack.securitySolution.detectionResponse.userAlertsSectionTitle',
   {
-    defaultMessage: 'Vulnerable users by severity',
+    defaultMessage: 'Users by alert severity',
   }
 );
 
@@ -241,5 +241,19 @@ export const ERROR_MESSAGE_CASES = i18n.translate(
   'xpack.securitySolution.detectionResponse.errorMessage',
   {
     defaultMessage: 'Error fetching case data',
+  }
+);
+
+export const HOST_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionResponse.hostSectionTooltip',
+  {
+    defaultMessage: 'Maximum of 100 hosts. Please consult Alerts page for further information.',
+  }
+);
+
+export const USER_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionResponse.userSectionTooltip',
+  {
+    defaultMessage: 'Maximum of 100 users. Please consult Alerts page for further information.',
   }
 );
