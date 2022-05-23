@@ -100,7 +100,7 @@ export function UXSection({ bucketSize }: Props) {
           attributes={seriesList}
           reportType="data-distribution"
           title={PAGE_LOAD_DISTRIBUTION_TITLE}
-          withActions={['save', 'explore']}
+          withActions={false}
         />
       </div>
 
