@@ -7,14 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  DASHBOARDS_PATH,
   DETECTION_RESPONSE_PATH,
   LANDING_PATH,
   OVERVIEW_PATH,
   SecurityPageName,
+  SERVER_APP_ID,
 } from '../../common/constants';
-import { DASHBOARDS, DETECTION_RESPONSE, GETTING_STARTED, OVERVIEW } from '../app/translations';
-import { FEATURE, LinkItem } from '../common/links/types';
+import { DETECTION_RESPONSE, GETTING_STARTED, OVERVIEW } from '../app/translations';
+import { LinkItem } from '../common/links/types';
 import overviewPageImg from '../common/images/overview_page.png';
 import detectionResponsePageImg from '../common/images/detection_response_page.png';
 
@@ -27,7 +27,7 @@ export const overviewLinks: LinkItem = {
   }),
   path: OVERVIEW_PATH,
   globalNavEnabled: true,
-  features: [FEATURE.general],
+  capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.overview', {
       defaultMessage: 'Overview',
@@ -41,7 +41,7 @@ export const gettingStartedLinks: LinkItem = {
   title: GETTING_STARTED,
   path: LANDING_PATH,
   globalNavEnabled: false,
-  features: [FEATURE.general],
+  capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.getStarted', {
       defaultMessage: 'Getting started',
@@ -62,26 +62,10 @@ export const detectionResponseLinks: LinkItem = {
   path: DETECTION_RESPONSE_PATH,
   globalNavEnabled: false,
   experimentalKey: 'detectionResponseEnabled',
-  features: [FEATURE.general],
+  capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.detectionAndResponse', {
       defaultMessage: 'Detection & Response',
     }),
   ],
-};
-
-export const dashboardsLandingLinks: LinkItem = {
-  id: SecurityPageName.dashboardsLanding,
-  title: DASHBOARDS,
-  path: DASHBOARDS_PATH,
-  globalNavEnabled: false,
-  features: [FEATURE.general],
-  globalSearchKeywords: [
-    i18n.translate('xpack.securitySolution.appLinks.dashboards', {
-      defaultMessage: 'Dashboards',
-    }),
-  ],
-  links: [overviewLinks, detectionResponseLinks],
-  skipUrlState: true,
-  hideTimeline: true,
 };
