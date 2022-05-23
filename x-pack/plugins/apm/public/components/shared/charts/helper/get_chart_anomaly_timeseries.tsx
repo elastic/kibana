@@ -54,7 +54,7 @@ export function getChartAnomalyTimeseries({
           opacity: 0,
         },
       },
-      color: rgba(anomalyTimeseriesColor ?? theme.eui.euiColorVis1, 0.5),
+      color: anomalyTimeseriesColor ?? rgba(theme.eui.euiColorVis1, 0.5),
       stackAccessors: ['x'],
       yAccessors: ['y1'],
       y0Accessors: ['y0'],
