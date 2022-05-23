@@ -23,40 +23,55 @@ interface FindingsAggs extends estypes.AggregationsMultiBucketAggregateBase {
   };
 }
 
-export const getFindingsCountAggQuery = ({ index, query }: FindingsBaseEsQuery) => ({
-  index,
+interface UseFindingsCounterData {
+  passed: number;
+  failed: number;
+  newPitId: string;
+}
+
+export const getFindingsCountAggQuery = ({
+  query,
+  pitIdRef,
+}: Omit<FindingsBaseEsQuery, 'setPitId'>) => ({
   size: 0,
   track_total_hits: true,
   body: {
     query,
     aggs: { count: { terms: { field: 'result.evaluation.keyword' } } },
+    pit: { id: pitIdRef.current },
   },
+  ignore_unavailable: false,
 });
 
-export const useFindingsCounter = ({ index, query }: FindingsBaseEsQuery) => {
+export const useFindingsCounter = ({ query, pitIdRef, setPitId }: FindingsBaseEsQuery) => {
   const {
     data,
     notifications: { toasts },
   } = useKibana().services;
 
-  return useQuery(
-    ['csp_findings_counts', { index, query }],
+  return useQuery<FindingsAggResponse, unknown, UseFindingsCounterData>(
+    ['csp_findings_counts', { query, pitId: pitIdRef.current }],
     () =>
       lastValueFrom(
         data.search.search<FindingsAggRequest, FindingsAggResponse>({
-          params: getFindingsCountAggQuery({ index, query }),
+          params: getFindingsCountAggQuery({ query, pitIdRef }),
         })
       ),
     {
       keepPreviousData: true,
       onError: (err) => showErrorToast(toasts, err),
-      select: (response) =>
-        Object.fromEntries(
+      select: (response) => ({
+        ...(Object.fromEntries(
           response.rawResponse.aggregations!.count.buckets.map((bucket) => [
             bucket.key,
             bucket.doc_count,
           ])!
-        ) as Record<'passed' | 'failed', number>,
+        ) as { passed: number; failed: number }),
+        newPitId: response.rawResponse.pit_id!,
+      }),
+      onSuccess: ({ newPitId }) => {
+        setPitId(newPitId);
+      },
     }
   );
 };

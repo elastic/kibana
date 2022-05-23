@@ -47,6 +47,9 @@ describe('<LatestFindingsContainer />', () => {
       search: encodeQuery(query as unknown as RisonObject),
     });
 
+    const setPitId = jest.fn();
+    const pitIdRef = { current: '' };
+
     render(
       <TestProvider
         deps={{
@@ -54,13 +57,13 @@ describe('<LatestFindingsContainer />', () => {
           unifiedSearch: unifiedSearchPluginMock.createStartContract(),
         }}
       >
-        <LatestFindingsContainer dataView={dataView} />
+        <LatestFindingsContainer dataView={dataView} pitIdRef={pitIdRef} setPitId={setPitId} />
       </TestProvider>
     );
 
     const baseQuery = {
-      index: dataView.title,
       query: buildEsQuery(dataView, query.query, query.filters),
+      pitIdRef,
     };
 
     expect(dataMock.search.search).toHaveBeenNthCalledWith(1, {

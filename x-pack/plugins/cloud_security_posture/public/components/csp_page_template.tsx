@@ -191,7 +191,7 @@ export const CspPageTemplate = <TData, TError>({
   };
 
   const render = () => {
-    if (query?.isLoading) return loadingRender();
+    if (query?.isLoading || query?.isIdle) return loadingRender();
     if (query?.isError) return errorRender(query.error);
     if (query?.isSuccess) return children;
 

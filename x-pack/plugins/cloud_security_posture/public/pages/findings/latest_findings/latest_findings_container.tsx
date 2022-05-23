@@ -6,9 +6,9 @@
  */
 import React, { useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import type { DataView } from '@kbn/data-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { number } from 'io-ts';
+import type { FindingsBaseProps } from '../types';
 import { FindingsTable } from './latest_findings_table';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
 import * as TEST_SUBJECTS from '../test_subjects';
@@ -32,13 +32,20 @@ export const getDefaultQuery = (): FindingsBaseURLQuery & FindingsGroupByNoneQue
   pageSize: 10,
 });
 
-export const LatestFindingsContainer = ({ dataView }: { dataView: DataView }) => {
+export const LatestFindingsContainer = ({ dataView, pitIdRef, setPitId }: FindingsBaseProps) => {
   useCspBreadcrumbs([findingsNavigation.findings_default]);
   const { urlQuery, setUrlQuery } = useUrlQuery(getDefaultQuery);
 
   const baseEsQuery = useMemo(
-    () => getBaseQuery({ dataView, filters: urlQuery.filters, query: urlQuery.query }),
-    [dataView, urlQuery.filters, urlQuery.query]
+    () =>
+      getBaseQuery({
+        dataView,
+        filters: urlQuery.filters,
+        query: urlQuery.query,
+        pitIdRef,
+        setPitId,
+      }),
+    [dataView, urlQuery.filters, urlQuery.query, pitIdRef, setPitId]
   );
 
   const findingsCount = useFindingsCounter(baseEsQuery);
@@ -46,6 +53,8 @@ export const LatestFindingsContainer = ({ dataView }: { dataView: DataView }) =>
     ...baseEsQuery,
     ...getPaginationQuery({ pageIndex: urlQuery.pageIndex, pageSize: urlQuery.pageSize }),
     sort: urlQuery.sort,
+    pitIdRef,
+    setPitId,
   });
 
   const findingsDistribution = getFindingsDistribution({

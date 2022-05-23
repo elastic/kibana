@@ -6,20 +6,23 @@
  */
 
 import { buildEsQuery } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-plugin/common';
 import { EuiBasicTableProps, Pagination } from '@elastic/eui';
+import { FindingsBaseProps } from './types';
 import type { FindingsBaseEsQuery, FindingsBaseURLQuery } from './types';
 
 export const getBaseQuery = ({
   dataView,
   query,
   filters,
-}: FindingsBaseURLQuery & { dataView: DataView }): FindingsBaseEsQuery => ({
-  index: dataView.title,
+  pitIdRef,
+  setPitId,
+}: FindingsBaseURLQuery & FindingsBaseProps): FindingsBaseEsQuery => ({
   // TODO: this will throw for malformed query
   // page will display an error boundary with the JS error
   // will be accounted for before releasing the feature
   query: buildEsQuery(dataView, query, filters),
+  pitIdRef,
+  setPitId,
 });
 
 type TablePagination = NonNullable<EuiBasicTableProps<unknown>['pagination']>;

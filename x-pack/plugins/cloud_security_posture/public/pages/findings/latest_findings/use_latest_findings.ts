@@ -13,9 +13,11 @@ import type { Criteria, Pagination } from '@elastic/eui';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { extractErrorMessage } from '../../../../common/utils/helpers';
 import * as TEXT from '../translations';
+import type { CspFindingsQueryData } from '../types';
 import type { CspFinding, FindingsQueryResult } from '../types';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import type { FindingsBaseEsQuery } from '../types';
+import { FINDINGS_REFETCH_INTERVAL_MS } from '../constants';
 
 interface UseFindingsOptions extends FindingsBaseEsQuery {
   from: NonNullable<estypes.SearchRequest['from']>;
@@ -31,12 +33,7 @@ export interface FindingsGroupByNoneQuery {
   sort: Sort;
 }
 
-interface CspFindingsData {
-  page: CspFinding[];
-  total: number;
-}
-
-export type CspFindingsResult = FindingsQueryResult<CspFindingsData | undefined, unknown>;
+export type CspFindingsResult = FindingsQueryResult<CspFindingsQueryData | undefined, unknown>;
 
 const FIELDS_WITHOUT_KEYWORD_MAPPING = new Set(['@timestamp']);
 
@@ -52,35 +49,56 @@ export const showErrorToast = (
   else toasts.addDanger(extractErrorMessage(error, TEXT.SEARCH_FAILED));
 };
 
-export const getFindingsQuery = ({ index, query, size, from, sort }: UseFindingsOptions) => ({
-  index,
+export const getFindingsQuery = ({
+  query,
+  size,
+  from,
+  sort,
+  pitIdRef,
+}: Omit<UseFindingsOptions, 'setPitId'>) => ({
   query,
   size,
   from,
   sort: [{ [getSortKey(sort.field)]: sort.direction }],
+  pit: { id: pitIdRef.current },
+  ignore_unavailable: false,
 });
 
-export const useLatestFindings = ({ index, query, sort, from, size }: UseFindingsOptions) => {
+export const useLatestFindings = ({
+  query,
+  sort,
+  from,
+  size,
+  pitIdRef,
+  setPitId,
+}: UseFindingsOptions) => {
   const {
     data,
     notifications: { toasts },
   } = useKibana().services;
 
-  return useQuery(
-    ['csp_findings', { index, query, sort, from, size }],
+  return useQuery<IEsSearchResponse<CspFinding>, unknown, CspFindingsQueryData>(
+    ['csp_findings', { query, sort, from, size, pitId: pitIdRef.current }],
     () =>
       lastValueFrom<IEsSearchResponse<CspFinding>>(
         data.search.search({
-          params: getFindingsQuery({ index, query, sort, from, size }),
+          params: getFindingsQuery({ query, sort, from, size, pitIdRef }),
         })
       ),
     {
       keepPreviousData: true,
-      select: ({ rawResponse: { hits } }) => ({
+      select: ({ rawResponse: { hits, pit_id: newPitId } }) => ({
         page: hits.hits.map((hit) => hit._source!),
         total: number.is(hits.total) ? hits.total : 0,
+        newPitId: newPitId!,
       }),
       onError: (err) => showErrorToast(toasts, err),
+      onSuccess: ({ newPitId }) => {
+        setPitId(newPitId);
+      },
+      // Refetching on an interval to ensure the PIT window stays open
+      refetchInterval: FINDINGS_REFETCH_INTERVAL_MS,
+      refetchIntervalInBackground: true,
     }
   );
 };
