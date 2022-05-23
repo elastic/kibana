@@ -9,3 +9,4 @@ export { PageTitle } from './page_title';
 export { ItemTitleRuleSummary } from './item_title_rule_summary';
 export { ItemValueRuleSummary } from './item_value_rule_summary';
 export { Actions } from './actions';
+export { AlertsTable } from './alerts_table';

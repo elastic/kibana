@@ -35,25 +35,38 @@ import {
   RuleType,
   NOTIFY_WHEN_OPTIONS,
   RuleEventLogListProps,
+  suspendedComponentWithProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 // TODO: use a Delete modal from triggersActionUI when it's sharable
-import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import {
+  ActionGroup,
+  AlertStatus,
+  AlertStatusValues,
+  ALERTS_FEATURE_ID,
+} from '@kbn/alerting-plugin/common';
 
 import { DeleteModalConfirmation } from '../rules/components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from '../rules/components/center_justified_spinner';
 import { OBSERVABILITY_SOLUTIONS } from '../rules/config';
-import { RuleDetailsPathParams, EVENT_LOG_LIST_TAB, ALERT_LIST_TAB } from './types';
+import { RuleDetailsPathParams, EVENT_LOG_LIST_TAB, ALERT_LIST_TAB, AlertListItem } from './types';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { RULES_BREADCRUMB_TEXT } from '../rules/translations';
-import { PageTitle, ItemTitleRuleSummary, ItemValueRuleSummary, Actions } from './components';
+import {
+  PageTitle,
+  ItemTitleRuleSummary,
+  ItemValueRuleSummary,
+  Actions,
+  AlertsTable,
+} from './components';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchLast24hAlerts } from '../../hooks/use_fetch_last24h_alerts';
 import { useFetchLast24hRuleExecutionLog } from '../../hooks/use_fetch_last24h_rule_execution_log';
 import { formatInterval } from './utils';
 import { hasExecuteActionsCapability, hasAllPrivilege } from './config';
 import { paths } from '../../config/paths';
+import { useFetchRuleSummary } from '../../hooks/use_fetch_rule_summary';
 
 export function RuleDetailsPage() {
   const {
@@ -76,11 +89,13 @@ export function RuleDetailsPage() {
   const { ruleTypes, ruleTypeIndex } = useLoadRuleTypes({
     filteredSolutions: OBSERVABILITY_SOLUTIONS,
   });
-
   const [features, setFeatures] = useState<string>('');
   const [ruleType, setRuleType] = useState<RuleType<string, string>>();
   const [ruleToDelete, setRuleToDelete] = useState<string[]>([]);
   const [isPageLoading, setIsPageLoading] = useState(false);
+  const { ruleSummary } = useFetchRuleSummary({ ruleId, http });
+  const [alertsList, setAlertsList] = useState<AlertListItem[]>();
+
   const { last24hAlerts } = useFetchLast24hAlerts({
     http,
     features,
@@ -115,6 +130,14 @@ export function RuleDetailsPage() {
     }
   }, [rule, ruleTypes]);
 
+  useEffect(() => {
+    if (ruleSummary && ruleType) {
+      const alerts = Object.entries(ruleSummary?.alerts)
+        .map(([alertId, alert]) => alertToListItem(Date.now(), ruleType, alertId, alert))
+        .sort((leftAlert, rightAlert) => leftAlert.sortPriority - rightAlert.sortPriority);
+      setAlertsList(alerts);
+    }
+  }, [ruleSummary, ruleType]);
   useBreadcrumbs([
     {
       text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
@@ -159,6 +182,14 @@ export function RuleDetailsPage() {
     );
   };
 
+  const renderRuleAlertList = () => {
+    return suspendedComponentWithProps(
+      AlertsTable,
+      'xl'
+    )({
+      items: alertsList,
+    });
+  };
   const tabs = [
     {
       id: EVENT_LOG_LIST_TAB,
@@ -180,7 +211,7 @@ export function RuleDetailsPage() {
         defaultMessage: 'Alerts',
       }),
       'data-test-subj': 'ruleAlertListTab',
-      content: <EuiText>Alerts</EuiText>,
+      content: renderRuleAlertList(),
     },
   ];
 
@@ -500,4 +531,59 @@ export function RuleDetailsPage() {
       {errorRule && toasts.addDanger({ title: errorRule })}
     </ObservabilityPageTemplate>
   );
+}
+
+const ACTIVE_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleDetails.rulesList.status.active',
+  { defaultMessage: 'Active' }
+);
+
+const INACTIVE_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleDetails.rulesList.status.inactive',
+  { defaultMessage: 'Recovered' }
+);
+function getActionGroupName(ruleType: RuleType, actionGroupId?: string): string | undefined {
+  actionGroupId = actionGroupId || ruleType.defaultActionGroupId;
+  const actionGroup = ruleType?.actionGroups?.find(
+    (group: ActionGroup<string>) => group.id === actionGroupId
+  );
+  return actionGroup?.name;
+}
+
+export function alertToListItem(
+  durationEpoch: number,
+  ruleType: RuleType,
+  alertId: string,
+  alert: AlertStatus
+): AlertListItem {
+  const isMuted = !!alert?.muted;
+  const status =
+    alert?.status === 'Active'
+      ? {
+          label: ACTIVE_LABEL,
+          actionGroup: getActionGroupName(ruleType, alert?.actionGroupId),
+          healthColor: 'primary',
+        }
+      : { label: INACTIVE_LABEL, healthColor: 'subdued' };
+  const start = alert?.activeStartDate ? new Date(alert.activeStartDate) : undefined;
+  const duration = start ? durationEpoch - start.valueOf() : 0;
+  const sortPriority = getSortPriorityByStatus(alert?.status);
+  return {
+    alert: alertId,
+    status,
+    start,
+    duration,
+    isMuted,
+    sortPriority,
+  };
+}
+
+function getSortPriorityByStatus(status?: AlertStatusValues): number {
+  switch (status) {
+    case 'Active':
+      return 0;
+    case 'OK':
+      return 1;
+  }
+  return 2;
 }
