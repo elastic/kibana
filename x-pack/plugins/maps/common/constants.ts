@@ -298,6 +298,8 @@ export const MAPS_NEW_VECTOR_LAYER_META_CREATED_BY = 'maps-new-vector-layer';
 
 export const MAX_DRAWING_SIZE_BYTES = 10485760; // 10MB
 
+export const NO_EMS_LOCALE = 'none';
+export const AUTOSELECT_EMS_LOCALE = 'autoselect';
 export const emsWorldLayerId = 'world_countries';
 
 export enum WIZARD_ID {
