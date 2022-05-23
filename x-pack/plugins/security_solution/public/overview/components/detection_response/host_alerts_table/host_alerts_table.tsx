@@ -26,7 +26,7 @@ import { HostDetailsLink } from '../../../../common/components/links';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
 import * as i18n from '../translations';
-import { LastUpdatedAt, SEVERITY_COLOR } from '../utils';
+import { ITEMS_PER_PAGE, LastUpdatedAt, SEVERITY_COLOR } from '../utils';
 import { HostAlertsItem, useHostAlertsItems } from './use_host_alerts_items';
 
 interface HostAlertsTableProps {
@@ -80,7 +80,7 @@ export const HostAlertsTable = React.memo(({ signalIndexName }: HostAlertsTableP
               <EuiTablePagination
                 data-test-subj="hostTablePaginator"
                 activePage={pagination.currentPage}
-                itemsPerPage={4}
+                itemsPerPage={ITEMS_PER_PAGE}
                 pageCount={pagination.pageCount}
                 onChangePage={pagination.setPage}
                 showPerPageOptions={false}
@@ -109,7 +109,7 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.ALERTS_TEXT,
     'data-test-subj': 'hostSeverityAlertsTable-totalAlerts',
     render: (totalAlerts: number, { hostName }) => (
-      <EuiLink onClick={() => handleClick({ hostName })}>
+      <EuiLink disabled={totalAlerts === 0} onClick={() => handleClick({ hostName })}>
         <FormattedCount count={totalAlerts} />
       </EuiLink>
     ),

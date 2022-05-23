@@ -26,7 +26,7 @@ import { UserDetailsLink } from '../../../../common/components/links';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
 import * as i18n from '../translations';
-import { LastUpdatedAt, SEVERITY_COLOR } from '../utils';
+import { ITEMS_PER_PAGE, LastUpdatedAt, SEVERITY_COLOR } from '../utils';
 import { UserAlertsItem, useUserAlertsItems } from './use_user_alerts_items';
 
 interface UserAlertsTableProps {
@@ -80,7 +80,7 @@ export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableP
               <EuiTablePagination
                 data-test-subj="userTablePaginator"
                 activePage={pagination.currentPage}
-                itemsPerPage={4}
+                itemsPerPage={ITEMS_PER_PAGE}
                 pageCount={pagination.pageCount}
                 onChangePage={pagination.setPage}
                 showPerPageOptions={false}
@@ -109,7 +109,7 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.ALERTS_TEXT,
     'data-test-subj': 'userSeverityAlertsTable-totalAlerts',
     render: (totalAlerts: number, { userName }) => (
-      <EuiLink onClick={() => handleClick({ userName })}>
+      <EuiLink disabled={totalAlerts === 0} onClick={() => handleClick({ userName })}>
         <FormattedCount count={totalAlerts} />
       </EuiLink>
     ),
