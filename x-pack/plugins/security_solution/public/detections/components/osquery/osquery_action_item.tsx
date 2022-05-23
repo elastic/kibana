@@ -13,14 +13,12 @@ interface IProps {
   handleClick: () => void;
 }
 
-export const OsqueryActionItem = ({ handleClick }: IProps) => {
-  return (
-    <EuiContextMenuItem
-      key="osquery-action-item"
-      data-test-subj="osquery-action-item"
-      onClick={handleClick}
-    >
-      {ACTION_OSQUERY}
-    </EuiContextMenuItem>
-  );
-};
+export const OsqueryActionItem = ({ handleClick }: IProps) => (
+  <EuiContextMenuItem
+    key="osquery-action-item"
+    data-test-subj="osquery-action-item"
+    onClick={handleClick}
+  >
+    {ACTION_OSQUERY}
+  </EuiContextMenuItem>
+);
