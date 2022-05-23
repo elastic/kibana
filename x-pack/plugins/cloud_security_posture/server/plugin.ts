@@ -16,6 +16,7 @@ import type {
 } from '@kbn/core/server';
 import { DeepReadonly } from 'utility-types';
 import { DeletePackagePoliciesResponse, PackagePolicy } from '@kbn/fleet-plugin/common';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { CspAppService } from './lib/csp_app_services';
 import type {
   CspServerPluginSetup,
@@ -35,7 +36,11 @@ import {
 } from './fleet_integration/fleet_integration';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 
-import { initializeScoreTask, scheduleIndexScoreTask } from './task_manager/setup_score_task';
+import {
+  initializeFindingsAggregationTask,
+  scheduleIndexScoreTask,
+} from './task_manager/task_manager_setup';
+import { findingsAggregationConfig } from './task_manager/task_manager_config';
 export interface CspAppContext {
   logger: Logger;
   service: CspAppService;
@@ -74,11 +79,14 @@ export class CspPlugin
 
     // Register server side APIs
     defineRoutes(router, cspAppContext);
-    // const coreStartServices = core.getStartServices().then(([coreServices]) => ({
-    //   elasticsearch: coreServices.elasticsearch,
-    // }));
+
     const coreStartServices = core.getStartServices();
-    initializeScoreTask(plugins.taskManager, coreStartServices, this.logger);
+    initializeFindingsAggregationTask(
+      plugins.taskManager,
+      findingsAggregationConfig.id!,
+      coreStartServices,
+      this.logger
+    );
     return {};
   }
 
@@ -95,7 +103,7 @@ export class CspPlugin
       // If package is installed we want to make sure all needed assets are installed
       if (packageInfo) {
         // noinspection ES6MissingAwait
-        this.initialize(core);
+        this.initialize(core, plugins.taskManager);
       }
 
       plugins.fleet.registerExternalCallback(
@@ -106,7 +114,8 @@ export class CspPlugin
           _: KibanaRequest
         ): Promise<PackagePolicy> => {
           if (packagePolicy.package?.name === CLOUD_SECURITY_POSTURE_PACKAGE_NAME) {
-            await this.initialize(core);
+            await this.initialize(core, plugins.taskManager);
+
             const soClient = (await context.core).savedObjects.client;
             await onPackagePolicyPostCreateCallback(this.logger, packagePolicy, soClient);
           }
@@ -129,8 +138,6 @@ export class CspPlugin
           }
         }
       );
-
-      scheduleIndexScoreTask(plugins.taskManager, this.logger);
     });
 
     return {};
@@ -138,9 +145,10 @@ export class CspPlugin
 
   public stop() {}
 
-  async initialize(core: CoreStart): Promise<void> {
+  async initialize(core: CoreStart, taskManager: TaskManagerStartContract): Promise<void> {
     this.logger.debug('initialize');
     await initializeCspTransformsIndices(core.elasticsearch.client.asInternalUser, this.logger);
     await initializeCspTransforms(core.elasticsearch.client.asInternalUser, this.logger);
+    scheduleIndexScoreTask(taskManager, findingsAggregationConfig, this.logger);
   }
 }

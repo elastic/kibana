@@ -4,48 +4,50 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-// import { ElasticSearchHit } from "@kbn/discover-plugin/public/types";
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { CoreStart, ElasticsearchClient } from '@kbn/core/server';
 import {
   RunContext,
+  TaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-  //   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { Logger } from '@kbn/core/server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { HealthStatus } from '@kbn/task-manager-plugin/server/monitoring';
+import { HealthStatus } from '../../common/types';
 import {
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-  INDEX_SCORE_TASK_ID,
-  INDEX_SCORE_TASK_INTERVAL,
 } from '../../common/constants';
 import { CspServerPluginStart, CspServerPluginStartDeps } from '../types';
 
-export function initializeScoreTask(
+export function initializeFindingsAggregationTask(
   taskManager: TaskManagerSetupContract,
+  taskId: string,
   coreStartServices: Promise<[CoreStart, CspServerPluginStartDeps, CspServerPluginStart]>,
   logger: Logger
 ) {
-  registerScoreTask(taskManager, coreStartServices, logger);
+  try {
+    registerTask(taskManager, taskId, coreStartServices, logger);
+    logger.debug(`task: ${taskId} registered successfully`);
+  } catch (errMsg) {
+    logger.error(`Failed to register task: ${taskId}, ${errMsg}`);
+  }
 }
-export function registerScoreTask(
+export function registerTask(
   taskManager: TaskManagerSetupContract,
+  taskId: string,
   coreStartServices: Promise<[CoreStart, CspServerPluginStartDeps, CspServerPluginStart]>,
   logger: Logger
 ) {
   taskManager.registerTaskDefinitions({
-    [INDEX_SCORE_TASK_ID]: {
+    [taskId]: {
       title: 'Aggregate latest findings index for score calculation',
-      createTaskRunner: scoreTaskTaskRunner(coreStartServices, logger),
+      createTaskRunner: taskRunner(coreStartServices, logger),
     },
   });
 }
 
-export function scoreTaskTaskRunner(
+export function taskRunner(
   coreStartServices: Promise<[CoreStart, CspServerPluginStartDeps, CspServerPluginStart]>,
   logger: Logger
 ) {
@@ -55,7 +57,7 @@ export function scoreTaskTaskRunner(
       async run() {
         try {
           const esClient = (await coreStartServices)[0].elasticsearch.client.asInternalUser;
-          return await indexScore(esClient, state.runs);
+          return await aggregateLatestFindings(esClient, state.runs, logger);
         } catch (errMsg) {
           logger.warn(`Error executing alerting health check task: ${errMsg}`);
           return {
@@ -70,7 +72,11 @@ export function scoreTaskTaskRunner(
   };
 }
 
-const indexScore = async (esClient: ElasticsearchClient, stateRuns?: number) => {
+const aggregateLatestFindings = async (
+  esClient: ElasticsearchClient,
+  stateRuns: number,
+  logger: Logger
+) => {
   try {
     const evaluationsQueryResult = await esClient.search<unknown, ScoreBucket>(getScoreQuery());
     if (evaluationsQueryResult.aggregations) {
@@ -102,8 +108,9 @@ const indexScore = async (esClient: ElasticsearchClient, stateRuns?: number) => 
         },
       };
     }
-  } catch (err) {
-    console.log(err);
+    logger.warn(`No data found in latest findings index`);
+  } catch (errMsg) {
+    logger.error(`failed to aggregate latest findings: ${errMsg}`);
     return {
       state: {
         runs: (stateRuns || 0) + 1,
@@ -186,18 +193,18 @@ const getScoreQuery = (): SearchRequest => ({
 
 export async function scheduleIndexScoreTask(
   taskManager: TaskManagerStartContract,
+  taskConfig: TaskInstance,
   logger: Logger
 ) {
   try {
-    // const interval = config.healthCheck.interval;
     await taskManager.ensureScheduled({
-      id: INDEX_SCORE_TASK_ID,
-      taskType: INDEX_SCORE_TASK_ID,
-      schedule: { interval: INDEX_SCORE_TASK_INTERVAL },
+      id: taskConfig.id!,
+      taskType: taskConfig.taskType,
+      schedule: taskConfig.schedule,
       state: {},
       params: {},
     });
-  } catch (e) {
-    logger.debug(`Error scheduling task, received ${e.message}`);
+  } catch (errMsg) {
+    logger.debug(`Error scheduling task, received ${errMsg.message}`);
   }
 }

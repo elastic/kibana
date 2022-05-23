@@ -23,8 +23,6 @@ export const BENCHMARK_SCORE_INDEX_NAME = 'cloud_security_posture.scores';
 export const BENCHMARK_SCORE_INDEX_DEFAULT_NS = 'logs-' + BENCHMARK_SCORE_INDEX_NAME + '-default';
 
 export const CSP_INGEST_TIMESTAMP_PIPELINE = 'cloud_security_posture_add_ingest_timestamp_pipeline';
-export const INDEX_SCORE_TASK_ID = 'index_csp_score';
-export const INDEX_SCORE_TASK_INTERVAL = '1m';
 
 export const RULE_PASSED = `passed`;
 export const RULE_FAILED = `failed`;
