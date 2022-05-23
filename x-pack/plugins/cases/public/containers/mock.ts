@@ -91,6 +91,25 @@ export const alertComment: AlertComment = {
   version: 'WzQ3LDFc',
 };
 
+export const alertCommentWithIndices: AlertComment = {
+  alertId: 'alert-id-1',
+  index: '.alerts-matchme.alerts',
+  type: CommentType.alert,
+  id: 'alert-comment-id',
+  createdAt: basicCreatedAt,
+  createdBy: elasticUser,
+  owner: SECURITY_SOLUTION_OWNER,
+  pushedAt: null,
+  pushedBy: null,
+  rule: {
+    id: 'rule-id-1',
+    name: 'Awesome rule',
+  },
+  updatedAt: null,
+  updatedBy: null,
+  version: 'WzQ3LDFc',
+};
+
 export const hostIsolationComment: () => Comment = () => {
   return {
     type: CommentType.actions,

@@ -13,6 +13,7 @@ import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
@@ -58,6 +59,7 @@ const createInstance = async () => {
     plugin.start(coreMock.createStart(), {
       data: dataPluginMock.createStartContract(),
       dataViews: dataViewPluginMocks.createStartContract(),
+      dataViewEditor: indexPatternEditorPluginMock.createStartContract(),
       expressions: expressionsPluginMock.createStartContract(),
       inspector: inspectorPluginMock.createStartContract(),
       uiActions: uiActionsPluginMock.createStartContract(),

@@ -18,6 +18,7 @@ describe('es_query executor', () => {
     esQuery: '{ "query": "test-query" }',
     index: ['test-index'],
     timeField: '',
+    searchType: 'esQuery',
   };
   describe('tryToParseAsDate', () => {
     it.each<[string | number]>([['2019-01-01T00:00:00.000Z'], [1546300800000]])(

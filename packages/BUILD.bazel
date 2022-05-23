@@ -36,6 +36,9 @@ filegroup(
     "//packages/kbn-config:build",
     "//packages/kbn-crypto:build",
     "//packages/kbn-datemath:build",
+    "//packages/kbn-dev-cli-errors:build",
+    "//packages/kbn-dev-cli-runner:build",
+    "//packages/kbn-dev-proc-runner:build",
     "//packages/kbn-dev-utils:build",
     "//packages/kbn-doc-links:build",
     "//packages/kbn-docs-utils:build",
@@ -114,6 +117,7 @@ filegroup(
     "//packages/shared-ux/button/exit_full_screen:build",
     "//packages/shared-ux/link/redirect_app:build",
     "//packages/shared-ux/page/analytics_no_data:build",
+    "//packages/shared-ux/prompt/no_data_views:build",
   ],
 )
 
@@ -144,6 +148,9 @@ filegroup(
     "//packages/kbn-config:build_types",
     "//packages/kbn-crypto:build_types",
     "//packages/kbn-datemath:build_types",
+    "//packages/kbn-dev-cli-errors:build_types",
+    "//packages/kbn-dev-cli-runner:build_types",
+    "//packages/kbn-dev-proc-runner:build_types",
     "//packages/kbn-dev-utils:build_types",
     "//packages/kbn-doc-links:build_types",
     "//packages/kbn-docs-utils:build_types",
@@ -211,6 +218,7 @@ filegroup(
     "//packages/shared-ux/button/exit_full_screen:build_types",
     "//packages/shared-ux/link/redirect_app:build_types",
     "//packages/shared-ux/page/analytics_no_data:build_types",
+    "//packages/shared-ux/prompt/no_data_views:build_types",
   ],
 )
 

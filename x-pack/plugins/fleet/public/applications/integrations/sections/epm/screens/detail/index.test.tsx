@@ -509,7 +509,6 @@ const mockApiCalls = (
       ],
       owner: { github: 'elastic/integrations-services' },
       latestVersion: '0.3.7',
-      removable: true,
       status: 'installed',
     },
   } as GetInfoResponse;

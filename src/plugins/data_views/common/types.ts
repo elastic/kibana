@@ -123,8 +123,8 @@ export interface FieldAttrSet {
   count?: number;
 }
 
-export type OnNotification = (toastInputFields: ToastInputFields) => void;
-export type OnError = (error: Error, toastInputFields: ErrorToastOptions) => void;
+export type OnNotification = (toastInputFields: ToastInputFields, key: string) => void;
+export type OnError = (error: Error, toastInputFields: ErrorToastOptions, key: string) => void;
 
 export interface UiSettingsCommon {
   get: <T = any>(key: string) => Promise<T>;

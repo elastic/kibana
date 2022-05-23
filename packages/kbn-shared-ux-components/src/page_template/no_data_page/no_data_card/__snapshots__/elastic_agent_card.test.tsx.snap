@@ -182,7 +182,21 @@ exports[`ElasticAgentCard renders 1`] = `
                 <NoDataCard
                   description="Use Elastic Agent for a simple, unified way to collect data from your machines."
                   href="/app/integrations/browse"
-                  image="test-file-stub"
+                  image={
+                    <EuiImage
+                      alt=""
+                      size="fullWidth"
+                      style={
+                        Object {
+                          "background": "aliceblue",
+                          "height": 240,
+                          "objectFit": "cover",
+                          "width": "max(100%, 360px)",
+                        }
+                      }
+                      url="test-file-stub"
+                    />
+                  }
                   title="Add Elastic Agent"
                 >
                   <EuiCard
@@ -201,7 +215,21 @@ exports[`ElasticAgentCard renders 1`] = `
                       </EuiButton>
                     }
                     href="/app/integrations/browse"
-                    image="test-file-stub"
+                    image={
+                      <EuiImage
+                        alt=""
+                        size="fullWidth"
+                        style={
+                          Object {
+                            "background": "aliceblue",
+                            "height": 240,
+                            "objectFit": "cover",
+                            "width": "max(100%, 360px)",
+                          }
+                        }
+                        url="test-file-stub"
+                      />
+                    }
                     paddingSize="l"
                     title="Add Elastic Agent"
                   >
@@ -287,10 +315,37 @@ exports[`ElasticAgentCard renders 1`] = `
                             <div
                               className="euiCard__image"
                             >
-                              <img
+                              <EuiImage
                                 alt=""
-                                src="test-file-stub"
-                              />
+                                size="fullWidth"
+                                style={
+                                  Object {
+                                    "background": "aliceblue",
+                                    "height": 240,
+                                    "objectFit": "cover",
+                                    "width": "max(100%, 360px)",
+                                  }
+                                }
+                                url="test-file-stub"
+                              >
+                                <figure
+                                  className="euiImage euiImage--fullWidth"
+                                >
+                                  <img
+                                    alt=""
+                                    className="euiImage__img"
+                                    src="test-file-stub"
+                                    style={
+                                      Object {
+                                        "background": "aliceblue",
+                                        "height": 240,
+                                        "objectFit": "cover",
+                                        "width": "max(100%, 360px)",
+                                      }
+                                    }
+                                  />
+                                </figure>
+                              </EuiImage>
                             </div>
                           </div>
                           <div

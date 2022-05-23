@@ -12561,6 +12561,12 @@
           "_meta": {
             "description": "The session cleanup interval that is configured, in minutes (0 if disabled)."
           }
+        },
+        "anonymousCredentialType": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The credential type that is configured for the anonymous authentication provider."
+          }
         }
       }
     },
