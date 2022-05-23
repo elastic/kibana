@@ -202,12 +202,12 @@ export class ContentStream extends Duplex {
     if (!this.id) {
       this.id = this.puid.generate();
     }
-    return this.id;
+    return `0.${this.id}`;
   }
 
   private getChunkId(chunkNumber = 0) {
     const id = this.getHeadChunkId();
-    return chunkNumber === 0 ? id : `${id}.${chunkNumber}`;
+    return chunkNumber === 0 ? id : `${chunkNumber}.${id}`;
   }
 
   private async writeChunk(content: string) {
