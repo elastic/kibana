@@ -6,7 +6,7 @@
  */
 
 import type { Map as MbMap, LayerSpecification, StyleSpecification } from '@kbn/mapbox-gl';
-import { TMSService } from '@elastic/ems-client';
+import { type EmsSpriteSheet, TMSService } from '@elastic/ems-client';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 // @ts-expect-error
@@ -28,20 +28,6 @@ import { TileStyle } from '../../styles/tile/tile_style';
 
 interface SourceRequestMeta {
   tileLayerId: string;
-}
-
-// TODO remove once ems_client exports EmsSpriteSheet and EmsSprite type
-interface EmsSprite {
-  height: number;
-  pixelRatio: number;
-  sdf?: boolean;
-  width: number;
-  x: number;
-  y: number;
-}
-
-export interface EmsSpriteSheet {
-  [spriteName: string]: EmsSprite;
 }
 
 interface SourceRequestData {
