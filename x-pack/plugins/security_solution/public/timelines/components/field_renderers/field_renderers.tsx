@@ -192,16 +192,14 @@ export const reputationRenderer = (ip: string): React.ReactElement => (
 );
 
 interface DefaultFieldRendererProps {
-  rowItems: string[] | null | undefined;
   attrName: string;
+  displayCount?: number;
   idPrefix: string;
   isDraggable?: boolean;
-  render?: (item: string) => JSX.Element;
-  displayCount?: number;
   moreMaxHeight?: string;
+  render?: (item: RowItemTypes) => React.ReactNode;
+  rowItems: string[] | null | undefined;
 }
-
-type OverflowRenderer = (item: string | ReputationLinkSetting) => JSX.Element;
 
 export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> = ({
   attrName,
@@ -252,7 +250,7 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
             isAggregatable={true}
             moreMaxHeight={moreMaxHeight}
             overflowIndexStart={displayCount}
-            render={render as OverflowRenderer}
+            render={render}
             rowItems={rowItems}
           />
         </EuiFlexItem>
