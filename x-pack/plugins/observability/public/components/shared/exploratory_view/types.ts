@@ -109,7 +109,14 @@ export interface ConfigProps {
   series?: SeriesUrl;
 }
 
-export type AppDataType = 'synthetics' | 'ux' | 'infra_logs' | 'infra_metrics' | 'apm' | 'mobile';
+export enum AppDataType {
+  synthetics = 'synthetics',
+  ux = 'ux',
+  infra_logs = 'infra_logs',
+  infra_metrics = 'infra_metrics',
+  apm = 'apm',
+  mobile = 'mobile',
+}
 
 type FormatType = 'duration' | 'number' | 'bytes' | 'percent';
 type InputFormat = 'microseconds' | 'milliseconds' | 'seconds';

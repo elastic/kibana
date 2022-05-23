@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { AppDataType } from '../../../shared/exploratory_view/types';
+import { AppDataType } from '../../../shared/exploratory_view/types';
 import { SectionContainer } from '..';
 import { getDataHandler } from '../../../../data_handler';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -18,6 +18,10 @@ import CoreVitals from '../../../shared/core_web_vitals';
 import { BucketSize } from '../../../../pages/overview';
 import { getExploratoryViewEmbeddable } from '../../../shared/exploratory_view/embeddable';
 import { AllSeries } from '../../../shared/exploratory_view/hooks/use_series_storage';
+import {
+  SERVICE_NAME,
+  TRANSACTION_DURATION,
+} from '../../../shared/exploratory_view/configurations/constants/elasticsearch_fieldnames';
 
 interface Props {
   bucketSize: BucketSize;
@@ -41,11 +45,11 @@ export function UXSection({ bucketSize }: Props) {
         to: relativeEnd,
       },
       reportDefinitions: {
-        'service.name': ['ALL_VALUES'],
+        [SERVICE_NAME]: ['ALL_VALUES'],
       },
-      breakdown: 'service.name',
-      dataType: 'ux' as AppDataType,
-      selectedMetricField: 'transaction.duration.us',
+      breakdown: SERVICE_NAME,
+      dataType: AppDataType.ux,
+      selectedMetricField: TRANSACTION_DURATION,
     },
   ];
 
