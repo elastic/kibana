@@ -64,10 +64,12 @@ export function mapHitSource(
     attributes,
     id,
     references,
+    updatedAt,
   }: {
     attributes: SavedObjectAttributes;
     id: string;
     references: SavedObjectReference[];
+    updatedAt?: string;
   }
 ) {
   const newAttributes: {
@@ -76,6 +78,7 @@ export function mapHitSource(
     url: string;
     savedObjectType?: string;
     editUrl?: string;
+    updatedAt?: string;
     type?: BaseVisType;
     icon?: BaseVisType['icon'];
     image?: BaseVisType['image'];
@@ -85,6 +88,7 @@ export function mapHitSource(
     id,
     references,
     url: urlFor(id),
+    updatedAt,
     ...attributes,
   };
 

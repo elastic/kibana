@@ -26,6 +26,9 @@ const sortFieldSchema = schema.oneOf([
   schema.object({ schedule_delay: schema.object({ order: sortOrderSchema }) }),
   schema.object({ num_triggered_actions: schema.object({ order: sortOrderSchema }) }),
   schema.object({ num_generated_actions: schema.object({ order: sortOrderSchema }) }),
+  schema.object({ num_active_alerts: schema.object({ order: sortOrderSchema }) }),
+  schema.object({ num_recovered_alerts: schema.object({ order: sortOrderSchema }) }),
+  schema.object({ num_new_alerts: schema.object({ order: sortOrderSchema }) }),
 ]);
 
 const sortFieldsSchema = schema.arrayOf(sortFieldSchema, {

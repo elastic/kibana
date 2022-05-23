@@ -8,7 +8,10 @@
 import { useState, useEffect } from 'react';
 import { matchPath, useLocation } from 'react-router-dom';
 
-const HIDDEN_TIMELINE_ROUTES: readonly string[] = [
+import { getLinksWithHiddenTimeline } from '../../links';
+import { useIsGroupedNavigationEnabled } from '../../components/navigation/helpers';
+
+const DEPRECATED_HIDDEN_TIMELINE_ROUTES: readonly string[] = [
   `/cases/configure`,
   '/administration',
   '/rules/create',
@@ -18,17 +21,27 @@ const HIDDEN_TIMELINE_ROUTES: readonly string[] = [
   '/manage',
 ];
 
-const isHiddenTimelinePath = (currentPath: string): boolean => {
-  return !!HIDDEN_TIMELINE_ROUTES.find((route) => matchPath(currentPath, route));
+const isTimelineHidden = (currentPath: string, isGroupedNavigationEnabled: boolean): boolean => {
+  const groupLinksWithHiddenTimelinePaths = getLinksWithHiddenTimeline().map((l) => l.path);
+
+  const hiddenTimelineRoutes = isGroupedNavigationEnabled
+    ? groupLinksWithHiddenTimelinePaths
+    : DEPRECATED_HIDDEN_TIMELINE_ROUTES;
+
+  return !!hiddenTimelineRoutes.find((route) => matchPath(currentPath, route));
 };
 
 export const useShowTimeline = () => {
+  const isGroupedNavigationEnabled = useIsGroupedNavigationEnabled();
   const { pathname } = useLocation();
-  const [showTimeline, setShowTimeline] = useState(!isHiddenTimelinePath(pathname));
+
+  const [showTimeline, setShowTimeline] = useState(
+    !isTimelineHidden(pathname, isGroupedNavigationEnabled)
+  );
 
   useEffect(() => {
-    setShowTimeline(!isHiddenTimelinePath(pathname));
-  }, [pathname]);
+    setShowTimeline(!isTimelineHidden(pathname, isGroupedNavigationEnabled));
+  }, [pathname, isGroupedNavigationEnabled]);
 
   return [showTimeline];
 };

@@ -8,7 +8,7 @@
 import { makeDecorator } from '@storybook/addons';
 import { storiesOf } from '@storybook/react';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { createKibanaReactContext, KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
@@ -37,7 +37,7 @@ const sampleAPMIndices = { transaction: 'apm-*' } as ApmIndicesConfig;
 const withCore = makeDecorator({
   name: 'withCore',
   parameterName: 'core',
-  wrapper: (storyFn, context, { options: { theme, ...options } }) => {
+  wrapper: (storyFn, context) => {
     unregisterAll();
     const KibanaReactContext = createKibanaReactContext({
       application: {
@@ -93,7 +93,7 @@ const withCore = makeDecorator({
               kibanaFeatures: [],
             }}
           >
-            <HasDataContextProvider>{storyFn(context)}</HasDataContextProvider>
+            <HasDataContextProvider>{storyFn(context) as ReactNode}</HasDataContextProvider>
           </PluginContext.Provider>
         </KibanaReactContext.Provider>
       </MemoryRouter>

@@ -39,13 +39,34 @@ type Params = Pick<NoDataPageProps, 'solution' | 'logo'> & DataServiceFactoryCon
 
 export const PureComponent = (params: Params) => {
   const { solution, logo, hasESData, hasUserDataView } = params;
+
   const serviceParams = { hasESData, hasUserDataView, hasDataViews: false };
-  const services = servicesFactory(serviceParams);
+  const services = servicesFactory({ ...serviceParams, hasESData, hasUserDataView });
   return (
     <SharedUxServicesProvider {...services}>
       <KibanaNoDataPage
         onDataViewCreated={action('onDataViewCreated')}
         noDataConfig={{ ...noDataConfig, solution, logo }}
+      />
+    </SharedUxServicesProvider>
+  );
+};
+
+export const PureComponentLoadingState = () => {
+  const dataCheck = () => new Promise<boolean>((resolve, reject) => {});
+  const services = {
+    ...servicesFactory({ hasESData: false, hasUserDataView: false, hasDataViews: false }),
+    data: {
+      hasESData: dataCheck,
+      hasUserDataView: dataCheck,
+      hasDataView: dataCheck,
+    },
+  };
+  return (
+    <SharedUxServicesProvider {...services}>
+      <KibanaNoDataPage
+        onDataViewCreated={action('onDataViewCreated')}
+        noDataConfig={noDataConfig}
       />
     </SharedUxServicesProvider>
   );
