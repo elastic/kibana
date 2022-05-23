@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { SavedObject } from '@kbn/core/server';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
+import type { ES_SINGLE_INDEX_BLOB_STORE } from './constants';
 
 export type FileStatus = 'AWAITING_UPLOAD' | 'UPLOADING' | 'READY' | 'UPLOAD_ERROR' | 'DELETED';
 
@@ -75,8 +75,17 @@ export type UpdatableFileAttributes<Meta = unknown> = Pick<
 
 export interface File<Meta = unknown> {
   id: string;
+
+  /**
+   * The ID of a {@link FileKind}.
+   */
   fileKind: string;
+
+  /**
+   * The user-facing file name.
+   */
   name: string;
+
   status: FileStatus;
   /**
    * User provided metadata
@@ -93,30 +102,50 @@ export interface File<Meta = unknown> {
   delete(): Promise<void>;
 }
 
+/**
+ * Defines all the settings for supported blob stores.
+ *
+ * Key names map to unique blob store implementations and so must not be changed
+ * without a migration
+ */
+export interface BlobStorageSettings {
+  /**
+   * Single index that supports up to 50GB of blobs
+   */
+  [ES_SINGLE_INDEX_BLOB_STORE]?: {
+    index: string;
+  };
+  // Other blob store settings will go here once available
+}
+
 export interface FileKind {
   /**
    * Unique file kind ID
    */
   id: string;
   maxSizeBytes?: number;
+
+  /**
+   * The MIME type of the file content.
+   *
+   * @default accept all mime types
+   */
   allowedMimeTypes?: string[];
-  allowedExtensions?: string[];
-  blobStoreSettings?: {
-    es?: {
-      index: string;
-      ilmPolicy: {};
-    };
-    // Other blob store settings will go here once available
-  };
+
+  blobStoreSettings?: BlobStorageSettings;
+
+  /**
+   * Optionally specify which routes to create for the file kind
+   */
   http: {
     create?: {
-      tags: [];
+      tags: string[];
     };
     update?: {
-      tags: [];
+      tags: string[];
     };
     delete?: {
-      tags: [];
+      tags: string[];
     };
   };
 }
