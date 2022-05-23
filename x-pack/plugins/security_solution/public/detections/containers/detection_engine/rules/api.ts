@@ -18,10 +18,12 @@ import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_PREVIEW,
   detectionEngineRuleExecutionEventsUrl,
+  DETECTION_ENGINE_INSTALLED_INTEGRATIONS_URL,
 } from '../../../../../common/constants';
 import {
   AggregateRuleExecutionEvent,
   BulkAction,
+  RelatedIntegrationArray,
   RuleExecutionStatus,
 } from '../../../../../common/detection_engine/schemas/common';
 import {
@@ -405,6 +407,32 @@ export const getPrePackagedRulesStatus = async ({
     DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL,
     {
       method: 'GET',
+      signal,
+    }
+  );
+
+/**
+ * Fetch all installed integrations
+ *
+ * @param packages array of packages to filter for
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const fetchInstalledIntegrations = async ({
+  packages,
+  signal,
+}: {
+  packages?: string[];
+  signal?: AbortSignal;
+}): Promise<RelatedIntegrationArray> =>
+  KibanaServices.get().http.fetch<RelatedIntegrationArray>(
+    DETECTION_ENGINE_INSTALLED_INTEGRATIONS_URL,
+    {
+      method: 'GET',
+      query: {
+        packages: packages?.sort()?.join(','),
+      },
       signal,
     }
   );

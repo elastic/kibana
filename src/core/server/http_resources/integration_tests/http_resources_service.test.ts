@@ -11,11 +11,20 @@ import * as kbnTestServer from '../../../test_helpers/kbn_server';
 
 describe('http resources service', () => {
   describe('register', () => {
+    applyTestsWithDisableUnsafeEvalSetTo(true);
+    applyTestsWithDisableUnsafeEvalSetTo(false);
+  });
+});
+
+function applyTestsWithDisableUnsafeEvalSetTo(disableUnsafeEval: boolean) {
+  describe(`with disableUnsafeEval=${disableUnsafeEval}`, () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
-    const defaultCspRules =
-      "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'";
+    const defaultCspRules = disableUnsafeEval
+      ? `script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+      : `script-src 'self' 'unsafe-eval'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`;
     beforeEach(async () => {
       root = kbnTestServer.createRoot({
+        csp: { disableUnsafeEval },
         plugins: { initialize: false },
         elasticsearch: { skipStartupConnectionCheck: true },
       });
@@ -191,4 +200,4 @@ describe('http resources service', () => {
       });
     });
   });
-});
+}
