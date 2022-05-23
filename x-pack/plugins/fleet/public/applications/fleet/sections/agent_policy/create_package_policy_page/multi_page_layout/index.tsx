@@ -59,6 +59,7 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({ from }
   const [onSplash, setOnSplash] = useState(true);
   const [currentStep, setCurrentStep] = useState(0);
   const [isManaged, setIsManaged] = useState(true);
+  const [enrolledAgentIds, setEnrolledAgentIds] = useState<string[]>([]);
   const toggleIsManaged = (newIsManaged: boolean) => {
     setIsManaged(newIsManaged);
     setCurrentStep(0);
@@ -145,6 +146,8 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({ from }
       onBack={stepsBack}
       isManaged={isManaged}
       setIsManaged={toggleIsManaged}
+      setEnrolledAgentIds={setEnrolledAgentIds}
+      enrolledAgentIds={enrolledAgentIds}
     />
   );
 };

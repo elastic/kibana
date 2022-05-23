@@ -118,7 +118,7 @@ export async function getIncomingDataByAgentsId(
     const searchResult = await esClient.search({
       index: DATA_STREAM_INDEX_PATTERN,
       allow_partial_search_results: true,
-      _source: false,
+      _source: returnDataPreview,
       timeout: '5s',
       size: returnDataPreview ? MAX_AGENT_DATA_PREVIEW_SIZE : 0,
       body: {

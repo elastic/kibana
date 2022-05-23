@@ -35,4 +35,6 @@ export interface MultiPageStepLayoutProps {
   onNext: () => void;
   setIsManaged: (isManaged: boolean) => void;
   isManaged: boolean;
+  setEnrolledAgentIds: (agentIds: string[]) => void;
+  enrolledAgentIds: string[];
 }

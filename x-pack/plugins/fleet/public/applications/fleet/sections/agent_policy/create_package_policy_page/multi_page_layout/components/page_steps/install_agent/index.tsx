@@ -22,9 +22,14 @@ export const InstallElasticAgentPageStep: React.FC<MultiPageStepLayoutProps> = (
     noLowerTimeLimit: true,
     pollImmediately: true,
   });
+  const onNext = () => {
+    props.setEnrolledAgentIds(enrolledAgentIds);
+    props.onNext();
+  };
 
   const managedPageProps = {
     ...props,
+    onNext,
     enrolledAgentIds,
     setIsManaged: useLocalState ? setLocalIsManaged : props.setIsManaged,
   };
@@ -33,6 +38,7 @@ export const InstallElasticAgentPageStep: React.FC<MultiPageStepLayoutProps> = (
   }
   const standalonePageProps = {
     ...props,
+    onNext,
     enrolledAgentIds,
     setIsManaged: (newIsManaged: boolean) => {
       if (newIsManaged) {
