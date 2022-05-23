@@ -372,6 +372,12 @@ export const SOURCE_CATEGORIES = {
   CLOUD: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.cloud', {
     defaultMessage: 'Cloud',
   }),
+  CODE_REPOSITORY: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.codeRepository',
+    {
+      defaultMessage: 'Code repository',
+    }
+  ),
   COMMUNICATIONS: i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.sources.categories.communications',
     {
@@ -399,9 +405,18 @@ export const SOURCE_CATEGORIES = {
       defaultMessage: 'Productivity',
     }
   ),
+  SOFTWARE: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.software', {
+    defaultMessage: 'Software',
+  }),
   STORAGE: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.storage', {
     defaultMessage: 'Storage',
   }),
+  VERSION_CONTROL: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.versionControl',
+    {
+      defaultMessage: 'Version control',
+    }
+  ),
   WIKI: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.wiki', {
     defaultMessage: 'Wiki',
   }),
