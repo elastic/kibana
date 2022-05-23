@@ -22,7 +22,7 @@ import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 
 export const serviceApiKeyPrivileges = {
   cluster: ['monitor', 'read_ilm', 'read_pipeline'] as SecurityClusterPrivilege[],
-  index: [
+  indices: [
     {
       names: ['synthetics-*'],
       privileges: [
@@ -32,6 +32,7 @@ export const serviceApiKeyPrivileges = {
       ] as SecurityIndexPrivilege[],
     },
   ],
+  run_as: [],
 };
 
 export const getAPIKeyForSyntheticsService = async ({
@@ -137,7 +138,7 @@ export const getSyntheticsEnablement = async ({
           'manage_own_api_key',
           ...serviceApiKeyPrivileges.cluster,
         ],
-        index: serviceApiKeyPrivileges.index,
+        index: serviceApiKeyPrivileges.indices,
       },
     }),
     security.authc.apiKeys.areAPIKeysEnabled(),
