@@ -48,6 +48,7 @@ import type {
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { enableServiceGroups } from '@kbn/observability-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { registerApmAlerts } from './components/alerting/register_apm_alerts';
 import {
   getApmEnrollmentFlyoutData,
@@ -91,6 +92,8 @@ export interface ApmPluginStartDeps {
   fleet?: FleetStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
+  dataViews: DataViewsPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
