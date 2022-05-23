@@ -6,12 +6,11 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { getUseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { i18n } from '@kbn/i18n';
-import { getEncryptedFieldNotifyLabel } from './get_encrypted_field_notify_label';
 import { PasswordField } from './password_field';
 
 export interface CommonFieldSchema {
@@ -135,25 +134,6 @@ const SimpleConnectorFormComponent: React.FC<SimpleConnectorFormProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFormRow fullWidth>
-            {getEncryptedFieldNotifyLabel(
-              !isEdit,
-              secretsFormSchema.length,
-              // TODO: Pass isMissingSecrets from connector
-              false,
-              i18n.translate(
-                'xpack.triggersActionsUI.components.simpleConnectorForm.secrets.reenterValuesLabel',
-                {
-                  defaultMessage:
-                    'Authentication credentials are encrypted. Please reenter values for these fields.',
-                }
-              )
-            )}
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
       {secretsFormSchema.map(({ id, ...restSecretsSchema }, index) => (
         <>
           <FormRow id={`secrets.${id}`} {...restSecretsSchema} readOnly={readOnly} />

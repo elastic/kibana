@@ -15,6 +15,7 @@ import {
 import { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
 import { ConnectorFormFields } from './connector_form_fields';
 import { Connector } from './types';
+import { EncryptedFieldsCallout } from './encrypted_fields_callout';
 
 export interface ConnectorFormState {
   isValid: boolean | undefined;
@@ -75,6 +76,7 @@ const ConnectorFormComponent: React.FC<Props> = ({
         isEdit={isEdit}
         registerPreSubmitValidator={registerPreSubmitValidator}
       />
+      <EncryptedFieldsCallout isEdit={isEdit} isMissingSecrets={connector.isMissingSecrets} />
     </Form>
   );
 };

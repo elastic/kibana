@@ -15,7 +15,6 @@ import { DocLinksStart } from '@kbn/core/public';
 
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
-import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 import * as i18n from './translations';
 
 const { emptyField } = fieldValidators;
@@ -44,27 +43,18 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps> = (
   const { docLinks } = useKibana().services;
 
   return (
-    <>
-      {getEncryptedFieldNotifyLabel(
-        !isEdit,
-        1,
-        // TODO: Get isMissingSecrets
-        false,
-        i18n.WEBHOOK_URL_ENC_MSG
-      )}
-      <UseField
-        path="secrets.webhookUrl"
-        config={getWebhookUrlConfig(docLinks)}
-        component={Field}
-        componentProps={{
-          euiFieldProps: {
-            readOnly,
-            'data-test-subj': 'slackWebhookUrlInput',
-            fullWidth: true,
-          },
-        }}
-      />
-    </>
+    <UseField
+      path="secrets.webhookUrl"
+      config={getWebhookUrlConfig(docLinks)}
+      component={Field}
+      componentProps={{
+        euiFieldProps: {
+          readOnly,
+          'data-test-subj': 'slackWebhookUrlInput',
+          fullWidth: true,
+        },
+      }}
+    />
   );
 };
 

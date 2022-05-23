@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-import { CreateConnectorSchema } from '../../../types';
-
-export type Connector = CreateConnectorSchema & { isMissingSecrets?: boolean | undefined };
+const createMockForm = () => {};

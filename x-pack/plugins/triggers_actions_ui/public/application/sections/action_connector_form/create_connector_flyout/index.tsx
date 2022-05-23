@@ -63,6 +63,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     name: '',
     config: {},
     secrets: {},
+    isMissingSecrets: false,
   };
 
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
@@ -77,9 +78,6 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     setPreSubmitValidationErrorMessage(null);
 
     const { isValid, data } = await submit();
-    console.log('isValid', isValid);
-    console.log('Form data:', data);
-
     if (!isMounted.current) {
       // User has closed the flyout meanwhile submitting the form
       return;

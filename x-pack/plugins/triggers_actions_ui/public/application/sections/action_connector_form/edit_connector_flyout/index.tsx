@@ -123,9 +123,6 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
       setPreSubmitValidationErrorMessage(null);
 
       const { isValid, data } = await submit();
-      console.log('isValid', isValid);
-      console.log('Form data:', data);
-
       if (!isMounted.current) {
         // User has closed the flyout meanwhile submitting the form
         return;
@@ -239,7 +236,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
               <ConnectorForm
                 actionTypeModel={actionTypeModel}
                 connector={getConnectorWithoutSecrets(connector)}
-                isEdit={false}
+                isEdit={true}
                 onChange={setFormState}
                 onFormModifiedChange={onFormModifiedChange}
               />

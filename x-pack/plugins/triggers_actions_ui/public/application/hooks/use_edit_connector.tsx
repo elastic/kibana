@@ -7,7 +7,7 @@
 
 import { useRef, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ActionConnector, UpdateConnectorSchema, UserConfiguredActionConnector } from '../../types';
+import { ActionConnector, UpdateConnectorSchema } from '../../types';
 import { updateActionConnector } from '../lib/action_connector_api';
 import { useKibana } from '../../common/lib/kibana';
 

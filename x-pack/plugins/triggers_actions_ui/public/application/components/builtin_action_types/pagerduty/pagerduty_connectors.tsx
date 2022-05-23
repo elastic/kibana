@@ -14,7 +14,6 @@ import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { DocLinksStart } from '@kbn/core/public';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
-import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 import * as i18n from './translations';
 
 const { emptyField } = fieldValidators;
@@ -60,13 +59,6 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
           },
         }}
       />
-      {getEncryptedFieldNotifyLabel(
-        !isEdit,
-        1,
-        // TODO: Get isMissingSecrets
-        false,
-        i18n.ENC_MSG
-      )}
       <UseField
         path="secrets.routingKey"
         config={getRoutingKeyConfig(docLinks)}

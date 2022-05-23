@@ -80,8 +80,6 @@ const ConnectorAddModal = ({
     setPreSubmitValidationErrorMessage(null);
 
     const { isValid, data } = await submit();
-    console.log('isValid', isValid);
-    console.log('Form data:', data);
 
     if (!isMounted.current) {
       // User has closed the modal meanwhile submitting the form
