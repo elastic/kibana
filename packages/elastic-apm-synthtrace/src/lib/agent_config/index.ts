@@ -6,15 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { Serializable } from '../serializable';
-import { Fields } from '../entity';
-
-export class Metricset<TFields extends Fields> extends Serializable<TFields> {
-  constructor(fields: TFields) {
-    super({
-      'processor.event': 'metric',
-      'processor.name': 'metric',
-      ...fields,
-    });
-  }
-}
+export { observer } from './observer';
