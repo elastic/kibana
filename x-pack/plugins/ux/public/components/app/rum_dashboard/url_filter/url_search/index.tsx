@@ -182,7 +182,7 @@ export function URLSearch({
 
   return (
     <SelectableUrlList
-      loading={!!loading}
+      loading={loading ?? true}
       onInputChange={onInputChange}
       data={{ items, total: data?.total ?? 0 }}
       onSelectionChange={onChange}
