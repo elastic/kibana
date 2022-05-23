@@ -24,7 +24,7 @@ export function createTelemetryTimelineTaskConfig() {
   return {
     type: 'security:telemetry-timelines',
     title: 'Security Solution Timeline telemetry',
-    interval: '1m',
+    interval: '3h',
     timeout: '10m',
     version: '1.0.0',
     runTask: async (
@@ -35,6 +35,8 @@ export function createTelemetryTimelineTaskConfig() {
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
       let counter = 0;
+
+      logger.debug(`Running task: ${taskId}`);
 
       const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
         receiver.fetchClusterInfo(),
@@ -64,9 +66,10 @@ export function createTelemetryTimelineTaskConfig() {
 
       // Fetch EP Alerts
 
-      const endpointAlerts = await receiver.fetchTimelineEndpointAlerts(10);
+      const endpointAlerts = await receiver.fetchTimelineEndpointAlerts(3);
 
       // No EP Alerts -> Nothing to do
+
       if (
         endpointAlerts.hits.hits?.length === 0 ||
         endpointAlerts.hits.hits?.length === undefined
@@ -101,6 +104,7 @@ export function createTelemetryTimelineTaskConfig() {
         // Fetch event lineage
 
         const timelineEvents = await receiver.fetchTimelineEvents(nodeIds);
+
         const eventsStore = new Map<string, SafeEndpointEvent>();
         for (const event of timelineEvents.hits.hits) {
           const doc = event._source;
