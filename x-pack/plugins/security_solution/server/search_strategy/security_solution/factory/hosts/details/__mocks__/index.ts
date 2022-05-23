@@ -827,6 +827,7 @@ export const expectedDsl = {
     _source: false,
     fields: [
       'agent.id',
+      'agent.type',
       'host.architecture',
       'host.id',
       'host.ip',

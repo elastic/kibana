@@ -61,6 +61,8 @@ export const buildHostDetailsQuery = ({
       _source: false,
       fields: [
         ...esFields,
+        'agent.type',
+        'agent.id',
         {
           field: '@timestamp',
           format: 'strict_date_optional_time',
