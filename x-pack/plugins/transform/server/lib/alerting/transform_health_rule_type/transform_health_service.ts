@@ -243,26 +243,32 @@ export function transformHealthServiceProvider(
 
       if (testsConfig.errorMessages.enabled) {
         const response = await this.getErrorMessagesReport(transformIds);
-        if (response.length > 0) {
-          const count = response.length;
-          const transformsString = response.map((t) => t.transform_id).join(', ');
 
-          result.push({
-            isHealthy: false,
-            name: TRANSFORM_HEALTH_CHECK_NAMES.errorMessages.name,
-            context: {
-              results: response,
-              message: i18n.translate(
-                'xpack.transform.alertTypes.transformHealth.errorMessagesMessage',
-                {
+        const isHealthy = response.length === 0;
+        const count = response.length;
+        const transformsString = response.map((t) => t.transform_id).join(', ');
+
+        result.push({
+          isHealthy,
+          name: TRANSFORM_HEALTH_CHECK_NAMES.errorMessages.name,
+          context: {
+            results: isHealthy ? [] : response,
+            message: isHealthy
+              ? i18n.translate(
+                  'xpack.transform.alertTypes.transformHealth.errorMessagesRecoveryMessage',
+                  {
+                    defaultMessage:
+                      'No errors in the {count, plural, one {transform} other {transforms}} messages.',
+                    values: { count: transformIds.length },
+                  }
+                )
+              : i18n.translate('xpack.transform.alertTypes.transformHealth.errorMessagesMessage', {
                   defaultMessage:
                     '{count, plural, one {Transform} other {Transforms}} {transformsString} {count, plural, one {contains} other {contain}} error messages.',
                   values: { count, transformsString },
-                }
-              ),
-            },
-          });
-        }
+                }),
+          },
+        });
       }
 
       return result;
