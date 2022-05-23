@@ -355,7 +355,7 @@ export const AvailablePackages: React.FC = memo(() => {
               })}
               description={i18n.translate('xpack.fleet.featuredSecurityDesc', {
                 defaultMessage:
-                  'Protect your hosts with threat prevention, detection, and deep security data visibility. AND CLOUD!!!',
+                  'Protect your hosts and cloud workloads with threat prevention, detection, and deep security data visibility.',
               })}
             />
           </TrackApplicationView>
