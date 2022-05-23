@@ -29,7 +29,7 @@ export function initializeFindingsAggregationTask(
 ) {
   try {
     registerTask(taskManager, taskId, coreStartServices, logger);
-    logger.debug(`task: ${taskId} registered successfully`);
+    logger.info(`task: ${taskId} registered successfully`);
   } catch (errMsg) {
     const error = transformError(errMsg);
     logger.error(`Failed to register task: ${taskId}, ${error.message}`);
@@ -82,14 +82,14 @@ const aggregateLatestFindings = async (
 ) => {
   try {
     const evaluationsQueryResult = await esClient.search<unknown, ScoreBucket>(getScoreQuery());
-    if (evaluationsQueryResult.aggregations) {
+    if (evaluationsQueryResult.hits && evaluationsQueryResult.aggregations) {
       const clustersStats = evaluationsQueryResult.aggregations.score_by_cluster_id.buckets.map(
         (clusterStats: AggregatedFindingsByCluster) => {
           return {
             [clusterStats.key]: {
-              failed_findings: clusterStats.failed_findings.doc_count,
-              passed_findings: clusterStats.passed_findings.doc_count,
               total_findings: clusterStats.total_findings.value,
+              passed_findings: clusterStats.passed_findings.doc_count,
+              failed_findings: clusterStats.failed_findings.doc_count,
             },
           };
         }
@@ -98,9 +98,9 @@ const aggregateLatestFindings = async (
       await esClient.index({
         index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
         document: {
-          failed_findings: evaluationsQueryResult.aggregations.failed_findings.doc_count,
           passed_findings: evaluationsQueryResult.aggregations.passed_findings.doc_count,
-          total_findings: evaluationsQueryResult.aggregations.total_findings.doc_count,
+          failed_findings: evaluationsQueryResult.aggregations.failed_findings.doc_count,
+          total_findings: evaluationsQueryResult.aggregations.total_findings.value,
           score_by_cluster_id: clustersStats,
         },
       });
@@ -127,17 +127,16 @@ const aggregateLatestFindings = async (
 export interface AggregatedFindings {
   passed_findings: { doc_count: number };
   failed_findings: { doc_count: number };
+  total_findings: { value: number };
 }
 
 export interface AggregatedFindingsByCluster extends AggregatedFindings {
   key: string;
-  total_findings: { value: number };
 }
 export interface ScoreBucket extends AggregatedFindings {
   score_by_cluster_id: {
     buckets: AggregatedFindingsByCluster[];
   };
-  total_findings: { doc_count: number };
 }
 
 const getScoreQuery = (): SearchRequest => ({
@@ -210,6 +209,6 @@ export async function scheduleIndexScoreTask(
     });
   } catch (errMsg) {
     const error = transformError(errMsg);
-    logger.debug(`Error scheduling task, received ${error.message}`);
+    logger.error(`Error scheduling task, received ${error.message}`);
   }
 }
