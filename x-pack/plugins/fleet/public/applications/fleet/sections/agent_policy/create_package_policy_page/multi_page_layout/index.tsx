@@ -19,6 +19,7 @@ import {
   MultiPageStepsLayout,
   InstallElasticAgentPageStep,
   AddIntegrationPageStep,
+  ConfirmDataPageStep,
 } from './components';
 
 const fleetManagedSteps = [
@@ -32,7 +33,7 @@ const fleetManagedSteps = [
   },
   {
     title: 'Confirm incoming data',
-    component: AddIntegrationPageStep,
+    component: ConfirmDataPageStep,
   },
 ];
 
@@ -47,7 +48,7 @@ const standaloneSteps = [
   },
   {
     title: 'Confirm incoming data',
-    component: AddIntegrationPageStep,
+    component: ConfirmDataPageStep,
   },
 ];
 
