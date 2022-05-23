@@ -99,29 +99,6 @@ export const ProjectBrowserReadonlyFields = ({ minColumnWidth }: { minColumnWidt
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.synthetics.browser.project.monitorIntegrationSettingsSection.APMServiceName.label"
-              defaultMessage="APM service name"
-            />
-          }
-          helpText={
-            <FormattedMessage
-              id="xpack.synthetics.browser.project.monitorIntegrationSettingsSection.APMServiceName.helpText"
-              defaultMessage="APM service name for this monitor. Corresponds to the service.name ECS field. Set this when monitoring an app that is also using APM to enable integrations between Uptime and APM data in Kibana."
-            />
-          }
-          labelAppend={<OptionalLabel />}
-        >
-          <EuiFieldText
-            value={fields[ConfigKey.APM_SERVICE_NAME]}
-            onChange={noop}
-            onBlur={noop}
-            data-test-subj="syntheticsAPMServiceName"
-            readOnly={true}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={
-            <FormattedMessage
               id="xpack.synthetics.browser.project.monitorIntegrationSettingsSection.tags.label"
               defaultMessage="Tags"
             />
@@ -169,31 +146,6 @@ export const ProjectBrowserReadonlyFields = ({ minColumnWidth }: { minColumnWidt
         >
           <EuiSpacer size="s" />
           <EuiFormRow
-            helpText={
-              <>
-                <FormattedMessage
-                  id="xpack.synthetics.browser.project.browserAdvancedSettings.ignoreHttpsErrors.helpText"
-                  defaultMessage="Set this option to true to disable TLS/SSL validation in the synthetics browser. This is useful for testing sites that use self-signed certs."
-                />
-              </>
-            }
-            data-test-subj="syntheticsBrowserIgnoreHttpsErrors"
-          >
-            <EuiCheckbox
-              id="syntheticsBrowserIgnoreHttpsErrorsCheckbox"
-              checked={advancedFields[ConfigKey.IGNORE_HTTPS_ERRORS]}
-              label={
-                <FormattedMessage
-                  id="xpack.synthetics.browser.project.browserAdvancedSettings.ignoreHttpsErrors.label"
-                  defaultMessage="Ignore HTTPS errors"
-                />
-              }
-              onChange={noop}
-              disabled={true}
-            />
-          </EuiFormRow>
-
-          <EuiFormRow
             label={
               <FormattedMessage
                 id="xpack.synthetics.browser.project.browserAdvancedSettings.screenshots.label"
@@ -211,28 +163,6 @@ export const ProjectBrowserReadonlyFields = ({ minColumnWidth }: { minColumnWidt
               value={advancedFields[ConfigKey.SCREENSHOTS]}
               onChange={noop}
               data-test-subj="syntheticsBrowserScreenshots"
-              readOnly={true}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.synthetics.browser.project.browserAdvancedSettings.syntheticsArgs.label"
-                defaultMessage="Synthetics args"
-              />
-            }
-            helpText={
-              <FormattedMessage
-                id="xpack.synthetics.browser.project.browserAdvancedSettings.syntheticsArgs.helpText"
-                defaultMessage="Extra arguments to pass to the synthetics agent package. Takes a list of strings. This is useful in rare scenarios, and should not ordinarily need to be set."
-              />
-            }
-            labelAppend={<OptionalLabel />}
-          >
-            <ComboBox
-              selectedOptions={advancedFields[ConfigKey.SYNTHETICS_ARGS]}
-              onChange={noop}
-              data-test-subj="syntheticsBrowserSyntheticsArgs"
               readOnly={true}
             />
           </EuiFormRow>

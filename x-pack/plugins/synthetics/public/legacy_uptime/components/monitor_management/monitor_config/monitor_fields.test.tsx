@@ -114,10 +114,10 @@ describe('<MonitorFields />', () => {
   });
 
   it('is reradonly when source type is project', async () => {
-    const apmServiceName = 'service name';
+    const name = 'monitor name';
     const browserFields = {
       ...defaultBrowserConfig,
-      [ConfigKey.APM_SERVICE_NAME]: apmServiceName,
+      [ConfigKey.NAME]: name,
     };
     const { getByText, getByTestId } = render(
       <WrappedComponent
@@ -128,7 +128,7 @@ describe('<MonitorFields />', () => {
     );
 
     expect(getByText('Read only')).toBeInTheDocument();
-    const input = getByTestId('syntheticsAPMServiceName') as HTMLInputElement;
-    expect(input).toHaveValue(apmServiceName);
+    const input = getByTestId('monitorManagementMonitorName') as HTMLInputElement;
+    expect(input).toHaveValue(name);
   });
 });
