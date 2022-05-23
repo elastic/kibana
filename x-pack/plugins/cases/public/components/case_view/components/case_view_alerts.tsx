@@ -43,6 +43,7 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
       : AlertsTableFlyoutState.external,
     featureIds: alertFeatureIds,
     query: alertIdsQuery,
+    showExpandToDetails: alertFeatureIds.includes('siem'),
   };
 
   return <>{triggersActionsUi.getAlertsStateTable(alertStateProps)}</>;

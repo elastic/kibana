@@ -13,12 +13,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { IconType } from '@elastic/eui';
-import {
-  EuiDataGridColumn,
-  EuiDataGridControlColumn,
-  EuiDataGridCellValueElementProps,
-  EuiDataGridSorting,
-} from '@elastic/eui';
+import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
 import {
   ActionType,
   AlertHistoryEsIndexConnectorId,
@@ -47,7 +42,7 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-
+import type { CellValueElementProps } from '@kbn/timelines-plugin/common';
 import { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TypeRegistry } from './application/type_registry';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
@@ -421,18 +416,19 @@ export interface AlertsTableProps {
   pageSize: number;
   pageSizeOptions: number[];
   leadingControlColumns: EuiDataGridControlColumn[];
-  renderCellValue: (props: RenderCellValueProps) => React.ReactNode;
   showCheckboxes: boolean;
+  showExpandToDetails: boolean;
   trailingControlColumns: EuiDataGridControlColumn[];
   useFetchAlertsData: () => FetchAlertData;
   'data-test-subj': string;
   flyoutState: AlertsTableFlyoutState;
 }
 
-export type RenderCellValueProps = EuiDataGridCellValueElementProps & {
-  alert: EcsFieldsResponse;
-  field: string;
-};
+export type GetRenderCellValue = ({
+  setFlyoutAlert,
+}: {
+  setFlyoutAlert?: (data: any) => void;
+}) => (props: CellValueElementProps) => React.ReactNode;
 
 export interface AlertsTableConfigurationRegistry {
   id: string;
@@ -460,6 +456,7 @@ export interface AlertsTableConfigurationRegistry {
       | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>;
   };
   sort?: SortCombinations[];
+  getRenderCellValue: GetRenderCellValue;
 }
 
 export interface AlertsTableFlyoutBaseProps {

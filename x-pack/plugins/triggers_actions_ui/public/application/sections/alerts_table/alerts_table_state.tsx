@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useState, useCallback, useRef, useMemo } from 'react';
-import { get, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 import {
   EuiDataGridColumn,
   EuiDataGridControlColumn,
@@ -22,11 +22,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useFetchAlerts } from './hooks/use_fetch_alerts';
 import { AlertsTable } from './alerts_table';
-import {
-  AlertsTableConfigurationRegistry,
-  AlertsTableFlyoutState,
-  RenderCellValueProps,
-} from '../../../types';
+import { AlertsTableConfigurationRegistry, AlertsTableFlyoutState } from '../../../types';
 import { ALERTS_TABLE_CONF_ERROR_MESSAGE, ALERTS_TABLE_CONF_ERROR_TITLE } from './translations';
 import { TypeRegistry } from '../../type_registry';
 
@@ -42,6 +38,7 @@ export interface AlertsTableStateProps {
   featureIds: ValidFeatureId[];
   flyoutState: AlertsTableFlyoutState;
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
+  showExpandToDetails: boolean;
 }
 
 interface AlertsTableStorage {
@@ -63,6 +60,7 @@ const EmptyConfiguration = {
     body: () => null,
     footer: () => null,
   },
+  getRenderCellValue: () => () => null,
 };
 
 const AlertsTableState = ({
@@ -72,6 +70,7 @@ const AlertsTableState = ({
   featureIds,
   flyoutState,
   query,
+  showExpandToDetails,
 }: AlertsTableStateProps) => {
   const hasAlertsTableConfiguration =
     alertsTableConfigurationRegistry?.has(configurationId) ?? false;
@@ -187,12 +186,8 @@ const AlertsTableState = ({
       pageSize: pagination.pageSize,
       pageSizeOptions: [1, 2, 5, 10, 20, 50, 100],
       leadingControlColumns: [],
-      renderCellValue: ({ alert, field }: RenderCellValueProps) => {
-        // any is required here to improve typescript performance
-        const value = get(alert as any, field, [])[0] as string;
-        return value ?? 'N/A';
-      },
       showCheckboxes,
+      showExpandToDetails,
       trailingControlColumns: [],
       useFetchAlertsData,
       'data-test-subj': 'internalAlertsState',
@@ -203,6 +198,7 @@ const AlertsTableState = ({
       flyoutState,
       pagination.pageSize,
       showCheckboxes,
+      showExpandToDetails,
       useFetchAlertsData,
     ]
   );

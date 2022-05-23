@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { ALERT_UUID } from '@kbn/rule-data-utils';
+import type { CellValueElementProps, TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import React, { useState, Suspense, lazy, useCallback, useMemo, useEffect } from 'react';
 import {
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
-  EuiDataGridCellValueProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
   EuiButtonIcon,
   EuiDataGridStyle,
+  EuiDataGridCellValueProps,
 } from '@elastic/eui';
 import { useSorting, usePagination } from './hooks';
 import { AlertsTableProps } from '../../../types';
@@ -61,43 +63,47 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
   const leadingControlColumns = useMemo(() => {
     return [
-      {
-        id: 'expandColumn',
-        width: 50,
-        headerCellRender: () => {
-          return (
-            <span data-test-subj="expandColumnHeaderLabel">
-              {ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL}
-            </span>
-          );
-        },
-        rowCellRender: (cveProps: EuiDataGridCellValueElementProps) => {
-          const { visibleRowIndex } = cveProps as EuiDataGridCellValueElementProps & {
-            visibleRowIndex: number;
-          };
-          return (
-            <EuiFlexGroup gutterSize="none" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip content={ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL}>
-                  <EuiButtonIcon
-                    size="s"
-                    iconType="expand"
-                    color="text"
-                    onClick={() => {
-                      setFlyoutAlertIndex(visibleRowIndex);
-                    }}
-                    data-test-subj={`expandColumnCellOpenFlyoutButton-${visibleRowIndex}`}
-                    aria-label={ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
-        },
-      },
+      ...(props.showExpandToDetails
+        ? [
+            {
+              id: 'expandColumn',
+              width: 50,
+              headerCellRender: () => {
+                return (
+                  <span data-test-subj="expandColumnHeaderLabel">
+                    {ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL}
+                  </span>
+                );
+              },
+              rowCellRender: (cveProps: EuiDataGridCellValueElementProps) => {
+                const { visibleRowIndex } = cveProps as EuiDataGridCellValueElementProps & {
+                  visibleRowIndex: number;
+                };
+                return (
+                  <EuiFlexGroup gutterSize="none" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip content={ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL}>
+                        <EuiButtonIcon
+                          size="s"
+                          iconType="expand"
+                          color="text"
+                          onClick={() => {
+                            setFlyoutAlertIndex(visibleRowIndex);
+                          }}
+                          data-test-subj={`expandColumnCellOpenFlyoutButton-${visibleRowIndex}`}
+                          aria-label={ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL}
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                );
+              },
+            },
+          ]
+        : []),
       ...props.leadingControlColumns,
     ];
-  }, [props.leadingControlColumns, setFlyoutAlertIndex]);
+  }, [props.leadingControlColumns, props.showExpandToDetails, setFlyoutAlertIndex]);
 
   useEffect(() => {
     // Row classes do not deal with visible row indices so we need to handle page offset
@@ -109,17 +115,34 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
   const handleFlyoutClose = useCallback(() => setFlyoutAlertIndex(-1), [setFlyoutAlertIndex]);
 
+  // TODO when every solution is using this table, we will be bale to simplify it by just passing the alert index
+  const handleFlyoutAlert = useCallback(
+    (alert) => {
+      const idx = alerts.findIndex((a) =>
+        (a as any)[ALERT_UUID].includes(alert.fields[ALERT_UUID])
+      );
+      setFlyoutAlertIndex(idx);
+    },
+    [alerts, setFlyoutAlertIndex]
+  );
+
   const handleRenderCellValue = useCallback(
     (improper: EuiDataGridCellValueElementProps) => {
       const rcvProps = improper as EuiDataGridCellValueElementProps & EuiDataGridCellValueProps;
       const alert = alerts[rcvProps.visibleRowIndex];
-      return props.renderCellValue({
-        ...rcvProps,
-        alert,
-        field: rcvProps.columnId,
+      const renderCellValue = props.alertsTableConfiguration.getRenderCellValue({
+        setFlyoutAlert: handleFlyoutAlert,
       });
+      const data: TimelineNonEcsData[] = [];
+      Object.entries(alert ?? {}).forEach(([key, value]) => {
+        data.push({ field: key, value });
+      });
+      return renderCellValue({
+        ...rcvProps,
+        data,
+      } as unknown as CellValueElementProps);
     },
-    [alerts, props]
+    [alerts, handleFlyoutAlert, props.alertsTableConfiguration]
   );
 
   return (

@@ -16,7 +16,7 @@ export default function AlertsFlyoutFooter({ alert, isInApp }: FlyoutProps & { i
   const { http } = services;
   const prepend = http?.basePath.prepend;
 
-  if (!alert.link || isInApp) return;
+  if (!alert.link || isInApp) return <></>;
   return (
     <EuiFlexGroup justifyContent="flexEnd">
       <EuiFlexItem grow={false}>

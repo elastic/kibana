@@ -9,6 +9,7 @@ import { AlertsTableConfigurationRegistryContract } from '@kbn/triggers-actions-
 import { lazy } from 'react';
 
 import { observabilityFeatureId } from '../../common';
+import { getRenderCellValue } from '../pages/alerts/components/render_cell_value';
 import { columns as alertO11yColumns } from '../pages/alerts/containers/alerts_table_t_grid/alerts_table_t_grid';
 
 const AlertsPageFlyoutHeaderLazy = lazy(
@@ -33,6 +34,7 @@ const registerAlertsTableConfiguration = (registry: AlertsTableConfigurationRegi
       body: AlertsPageFlyoutBodyLazy,
       footer: AlertsFlyoutFooterLazy,
     },
+    getRenderCellValue,
   });
 };
 
