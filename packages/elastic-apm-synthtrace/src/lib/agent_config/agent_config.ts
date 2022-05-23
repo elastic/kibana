@@ -6,15 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { Serializable } from '../serializable';
-import { Fields } from '../entity';
+import { AgentConfigFields } from './agent_config_fields';
+import { Metricset } from '../apm/metricset';
 
-export class Metricset<TFields extends Fields> extends Serializable<TFields> {
-  constructor(fields: TFields) {
+export class AgentConfig extends Metricset<AgentConfigFields> {
+  constructor() {
     super({
-      'processor.event': 'metric',
-      'processor.name': 'metric',
-      ...fields,
+      'metricset.name': 'agent_config',
+      agent_config_applied: 1,
     });
+  }
+
+  etag(etag: string) {
+    this.fields['labels.etag'] = etag;
+    return this;
   }
 }
