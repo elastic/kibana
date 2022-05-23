@@ -45,8 +45,7 @@ export const ELASTICSEARCH_PLUGIN = {
     defaultMessage: 'Elasticsearch',
   }),
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.elasticsearch.productDescription', {
-    defaultMessage:
-      'Low-level tools for creating performant and relevant search experiences.',
+    defaultMessage: 'Low-level tools for creating performant and relevant search experiences.',
   }),
   CARD_DESCRIPTION: i18n.translate('xpack.enterpriseSearch.elasticsearch.productCardDescription', {
     defaultMessage:

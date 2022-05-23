@@ -14,9 +14,7 @@ import { VersionMismatchPage } from '../shared/version_mismatch';
 
 import { ElasticsearchGuide } from './components/elasticsearch_guide';
 
-import {
-  ROOT_PATH
-} from './routes';
+import { ROOT_PATH } from './routes';
 
 export const Elasticsearch: React.FC<InitialAppData> = (props) => {
   const { enterpriseSearchVersion, kibanaVersion } = props;
