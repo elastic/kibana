@@ -74,6 +74,7 @@ export {
   isQuery,
   isTimeRange,
 } from './query';
+export type { QueryState } from './query';
 export * from './search';
 export type {
   RefreshInterval,

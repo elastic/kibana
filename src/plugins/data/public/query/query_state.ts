@@ -6,21 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { Filter } from '@kbn/es-query';
+import type { QueryState } from '../../common';
 import type { TimefilterSetup } from './timefilter';
 import type { FilterManager } from './filter_manager';
 import type { QueryStringContract } from './query_string';
-import type { RefreshInterval, TimeRange, Query } from '../../common';
 
-/**
- * All query state service state
- */
-export interface QueryState {
-  time?: TimeRange;
-  refreshInterval?: RefreshInterval;
-  filters?: Filter[];
-  query?: Query;
-}
+export type { QueryState };
 
 export function getQueryState({
   timefilter: { timefilter },

@@ -20,7 +20,7 @@ import {
   SerializedSearchSourceFields,
 } from '.';
 import { IndexPatternsContract } from '../..';
-import { getAllMigrations as filtersGetAllMigrations } from '../../query/persistable_state';
+import { getAllMigrations as filtersGetAllMigrations } from '../../query/filters/persistable_state';
 
 const getAllMigrations = (): MigrateFunctionsObject => {
   const searchSourceMigrations = {};
