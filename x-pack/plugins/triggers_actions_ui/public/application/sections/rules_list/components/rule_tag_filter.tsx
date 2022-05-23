@@ -9,7 +9,6 @@ import React, { useMemo, useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiSelectable,
-  EuiFilterGroup,
   EuiFilterButton,
   EuiPopover,
   EuiSelectableProps,
@@ -103,29 +102,32 @@ export const RuleTagFilter = (props: RuleTagFilterProps) => {
   };
 
   return (
-    <EuiFilterGroup data-test-subj={dataTestSubj}>
-      <EuiPopover isOpen={isPopoverOpen} closePopover={onClosePopover} button={renderButton()}>
-        <EuiSelectable
-          searchable
-          data-test-subj={selectableDataTestSubj}
-          isLoading={isLoading}
-          options={options}
-          loadingMessage={loadingMessage}
-          noMatchesMessage={noMatchesMessage}
-          emptyMessage={emptyMessage}
-          errorMessage={errorMessage}
-          onChange={onChangeInternal}
-        >
-          {(list, search) => (
-            <>
-              {search}
-              <EuiSpacer size="xs" />
-              {list}
-            </>
-          )}
-        </EuiSelectable>
-      </EuiPopover>
-    </EuiFilterGroup>
+    <EuiPopover
+      data-test-subj={dataTestSubj}
+      isOpen={isPopoverOpen}
+      closePopover={onClosePopover}
+      button={renderButton()}
+    >
+      <EuiSelectable
+        searchable
+        data-test-subj={selectableDataTestSubj}
+        isLoading={isLoading}
+        options={options}
+        loadingMessage={loadingMessage}
+        noMatchesMessage={noMatchesMessage}
+        emptyMessage={emptyMessage}
+        errorMessage={errorMessage}
+        onChange={onChangeInternal}
+      >
+        {(list, search) => (
+          <>
+            {search}
+            <EuiSpacer size="xs" />
+            {list}
+          </>
+        )}
+      </EuiSelectable>
+    </EuiPopover>
   );
 };
 

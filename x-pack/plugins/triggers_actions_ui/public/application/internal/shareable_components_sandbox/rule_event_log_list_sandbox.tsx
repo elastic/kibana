@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { getRuleEventLogListLazy } from '../../../common/get_rule_event_log_list';
 
 export const RuleEventLogListSandbox = () => {
@@ -39,5 +40,5 @@ export const RuleEventLogListSandbox = () => {
     }),
   };
 
-  return getRuleEventLogListLazy(props);
+  return <div style={{ height: '400px' }}>{getRuleEventLogListLazy(props)}</div>;
 };
