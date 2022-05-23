@@ -21,12 +21,7 @@ import { escapeDataProviderId } from '../../../common/components/drag_and_drop/h
 import { DefaultDraggable } from '../../../common/components/draggables';
 import { defaultToEmptyTag, getEmptyTagValue } from '../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
-import {
-  HostDetailsLink,
-  ReputationLink,
-  WhoIsLink,
-  ReputationLinkSetting,
-} from '../../../common/components/links';
+import { HostDetailsLink, ReputationLink, WhoIsLink } from '../../../common/components/links';
 import { Spacer } from '../../../common/components/page';
 import * as i18n from '../../../network/components/details/translations';
 import { IS_OPERATOR, QueryOperator } from '../../../../common/types';
@@ -267,12 +262,12 @@ export const DefaultFieldRenderer = React.memo(DefaultFieldRendererComponent);
 
 DefaultFieldRenderer.displayName = 'DefaultFieldRenderer';
 
-type RowItemTypes = string | ReputationLinkSetting;
+type RowItemTypes = string | string[];
 
 interface DefaultFieldRendererOverflowProps {
   attrName?: string;
   fieldType?: string;
-  rowItems: string[] | ReputationLinkSetting[];
+  rowItems: string[];
   idPrefix: string;
   isAggregatable?: boolean;
   render?: (item: RowItemTypes) => React.ReactNode;
@@ -291,9 +286,6 @@ interface MoreContainerProps {
   render?: (item: RowItemTypes) => React.ReactNode;
   rowItems: RowItemTypes[];
 }
-
-const isReputationLink = (item: RowItemTypes): item is ReputationLinkSetting =>
-  typeof item !== 'string';
 
 /** A container (with overflow) for showing "More" items in a popover */
 export const MoreContainer = React.memo<MoreContainerProps>(
@@ -330,7 +322,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
                 }
               : undefined;
 
-          if (!isReputationLink(rowItem) && dataProvider != null) {
+          if (dataProvider != null) {
             acc.push(
               <EuiFlexItem key={`${idPrefix}-${id}`}>
                 <DraggableWrapper
