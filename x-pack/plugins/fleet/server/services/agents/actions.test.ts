@@ -8,6 +8,11 @@
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { cancelAgentAction } from './actions';
+import { bulkUpdateAgents } from './crud';
+
+jest.mock('./crud');
+
+const mockedBulkUpdateAgents = bulkUpdateAgents as jest.Mock;
 
 describe('Agent actions', () => {
   describe('cancelAgentAction', () => {
@@ -66,6 +71,31 @@ describe('Agent actions', () => {
           }),
         })
       );
+    });
+
+    it('should cancel UPGRADE action', async () => {
+      const esClient = elasticsearchServiceMock.createInternalClient();
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _source: {
+                type: 'UPGRADE',
+                action_id: 'action1',
+                agents: ['agent1', 'agent2'],
+                expiration: '2022-05-12T18:16:18.019Z',
+              },
+            },
+          ],
+        },
+      } as any);
+      await cancelAgentAction(esClient, 'action1');
+
+      expect(mockedBulkUpdateAgents).toBeCalled();
+      expect(mockedBulkUpdateAgents).toBeCalledWith(expect.anything(), [
+        expect.objectContaining({ agentId: 'agent1' }),
+        expect.objectContaining({ agentId: 'agent2' }),
+      ]);
     });
   });
 });
