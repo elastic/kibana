@@ -46,9 +46,11 @@ export function health(server: MonitoringCore) {
         min: req.query.min || 'now-30m',
         max: req.query.max || 'now',
       } as TimeRange;
+      const timeout = req.query.timeout || 15;
       const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
 
       const monitoredClusters = await fetchMonitoredClusters({
+        timeout,
         timeRange,
         monitoringIndex: withCCS(INDEX_PATTERN),
         entSearchIndex: withCCS(INDEX_PATTERN_ENTERPRISE_SEARCH),

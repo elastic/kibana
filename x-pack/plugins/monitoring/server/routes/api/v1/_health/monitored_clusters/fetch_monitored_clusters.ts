@@ -12,34 +12,78 @@ import { TimeRange } from '../../../../../../common/http_api/shared';
 
 import { buildMonitoredClusters } from './build_monitored_clusters';
 import {
-  enterpriseSearchQuery,
   monitoredClustersQuery,
   persistentMetricsetsQuery,
+  enterpriseSearchQuery,
 } from './monitored_clusters_query';
 
 type SearchFn = (params: any) => Promise<ElasticsearchResponse>;
 
+type MonitoredClustersResponse = {
+  clusters?: any;
+  execution: {
+    timedOut?: boolean;
+    errors?: string[];
+  };
+};
+
 export const fetchMonitoredClusters = async ({
+  timeout,
   monitoringIndex,
   entSearchIndex,
   timeRange,
   search,
 }: {
+  timeout: number;
+  timeRange: TimeRange;
   monitoringIndex: string;
   entSearchIndex: string;
-  timeRange: TimeRange;
   search: SearchFn;
-}) => {
-  const getMonitoredClusters = (index: string, body: any) =>
-    search({ index, body, size: 0, ignore_unavailable: true })
-      .then(({ aggregations }) => aggregations?.clusters?.buckets ?? [])
-      .then(buildMonitoredClusters);
+}): Promise<MonitoredClustersResponse> => {
+  const getMonitoredClusters = async (
+    index: string,
+    body: any
+  ): Promise<MonitoredClustersResponse> => {
+    try {
+      const { aggregations, timed_out: timedOut } = await search({
+        index,
+        body,
+        size: 0,
+        ignore_unavailable: true,
+      });
+
+      const buckets = aggregations?.clusters?.buckets ?? [];
+      return {
+        clusters: buildMonitoredClusters(buckets),
+        execution: { timedOut },
+      };
+    } catch (err) {
+      return { execution: { errors: [err.message] } };
+    }
+  };
 
   const results = await Promise.all([
-    getMonitoredClusters(monitoringIndex, monitoredClustersQuery(timeRange)),
-    getMonitoredClusters(monitoringIndex, persistentMetricsetsQuery()),
-    getMonitoredClusters(entSearchIndex, enterpriseSearchQuery(timeRange)),
+    getMonitoredClusters(monitoringIndex, monitoredClustersQuery({ timeRange, timeout })),
+    getMonitoredClusters(monitoringIndex, persistentMetricsetsQuery({ timeout })),
+    getMonitoredClusters(entSearchIndex, enterpriseSearchQuery({ timeRange, timeout })),
   ]);
 
-  return merge(...results);
+  return {
+    clusters: merge({}, ...results.map(({ clusters }) => clusters)),
+
+    execution: results
+      .map(({ execution }) => execution)
+      .reduce(
+        (acc, execution) => {
+          return {
+            timedOut: Boolean(acc.timedOut || execution.timedOut),
+            errors: acc.errors!.concat(execution.errors || []),
+          };
+        },
+        {
+          timedOut: false,
+          errors: [],
+        }
+      ),
+  };
 };
