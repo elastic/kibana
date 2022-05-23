@@ -32,7 +32,7 @@ describe('When using the EndpointAgentAndIsolationStatus component', () => {
     };
   });
 
-  it('should display only host status when `isIsolated` is undefined', () => {
+  it('should display host status only when `isIsolated` is undefined', () => {
     render();
 
     expect(renderResult.queryByTestId('test-isolationStatus')).toBeNull();

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { CommandDefinition } from '../console';
 import { IsolateActionResult } from './isolate_action';
 import { EndpointStatusActionResult } from './status_action';
@@ -15,7 +16,9 @@ export const getEndpointResponseActionsConsoleCommands = (
   return [
     {
       name: 'isolate',
-      about: 'Isolate the host',
+      about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.isolate.about', {
+        defaultMessage: 'Isolate the host',
+      }),
       RenderComponent: IsolateActionResult,
       meta: {
         endpointId: endpointAgentId,
@@ -24,13 +27,18 @@ export const getEndpointResponseActionsConsoleCommands = (
         comment: {
           required: false,
           allowMultiples: false,
-          about: 'A comment to go along with the action',
+          about: i18n.translate(
+            'xpack.securitySolution.endpointConsoleCommands.isolate.arg.command',
+            { defaultMessage: 'A comment to go along with the action' }
+          ),
         },
       },
     },
     {
       name: 'status',
-      about: 'Display the latest status information for the Endpoint',
+      about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.status.about', {
+        defaultMessage: 'Display the latest status information for the Endpoint',
+      }),
       RenderComponent: EndpointStatusActionResult,
       meta: {
         endpointId: endpointAgentId,

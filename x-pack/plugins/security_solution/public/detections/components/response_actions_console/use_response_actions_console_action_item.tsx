@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { isAlertFromEndpointEvent } from '../../../common/utils/endpoint_alert_check';
 import { ResponseActionsConsoleContextMenuItem } from './response_actions_console_context_menu_item';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
@@ -19,6 +20,8 @@ export const useResponseActionsConsoleActionItem = (
   const isResponseActionsConsoleEnabled = useIsExperimentalFeatureEnabled(
     'responseActionsConsoleEnabled'
   );
+  const { loading: isAuthzLoading, canAccessEndpointManagement } =
+    useUserPrivileges().endpointPrivileges;
 
   const isEndpointAlert = useMemo(() => {
     return isAlertFromEndpointEvent({ data: eventDetailsData || [] });
@@ -32,7 +35,7 @@ export const useResponseActionsConsoleActionItem = (
   return useMemo(() => {
     const actions: JSX.Element[] = [];
 
-    if (isResponseActionsConsoleEnabled) {
+    if (isResponseActionsConsoleEnabled && !isAuthzLoading && canAccessEndpointManagement) {
       actions.push(
         <ResponseActionsConsoleContextMenuItem
           endpointId={isEndpointAlert ? endpointId : ''}
@@ -42,5 +45,12 @@ export const useResponseActionsConsoleActionItem = (
     }
 
     return actions;
-  }, [endpointId, isEndpointAlert, isResponseActionsConsoleEnabled, onClick]);
+  }, [
+    canAccessEndpointManagement,
+    endpointId,
+    isAuthzLoading,
+    isEndpointAlert,
+    isResponseActionsConsoleEnabled,
+    onClick,
+  ]);
 };

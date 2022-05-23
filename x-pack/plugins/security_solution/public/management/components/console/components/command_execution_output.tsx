@@ -8,7 +8,7 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import styled from 'styled-components';
-import { CommandExecutionComponentProps } from '../types';
+import type { CommandExecutionComponentProps } from '../types';
 import type { CommandExecutionState, CommandHistoryItem } from './console_state/types';
 import { UserCommandInput } from './user_command_input';
 import { useConsoleStateDispatch } from '../hooks/state_selectors/use_console_state_dispatch';

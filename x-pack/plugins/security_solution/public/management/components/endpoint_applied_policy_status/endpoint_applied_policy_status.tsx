@@ -17,7 +17,7 @@ import { HostMetadata } from '../../../../common/endpoint/types';
 /**
  * Displays the status of an applied policy on the Endpoint (using the information provided
  * by the endpoint in the Metadata document `Endpoint.policy.applied`.
- * By default, the policy status is displayed as plain text, however, that can be overriden
+ * By default, the policy status is displayed as plain text, however, that can be overridden
  * by defining the `children` prop or passing a child component to this one.
  */
 export type EndpointAppliedPolicyStatusProps = PropsWithChildren<{
