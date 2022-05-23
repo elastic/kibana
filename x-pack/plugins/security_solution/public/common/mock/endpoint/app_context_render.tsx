@@ -19,9 +19,9 @@ import {
   RenderHookResult,
 } from '@testing-library/react-hooks';
 import { ReactHooksRenderer, WrapperComponent } from '@testing-library/react-hooks/src/types/react';
-import types{ UseBaseQueryResult } from 'react-query/types/react/types';
+import type { UseBaseQueryResult } from 'react-query/types/react/types';
 import { ConsoleManager } from '../../../management/components/console';
-import { StartPlugins, StartServices } from '../../../types';
+import type { StartPlugins, StartServices } from '../../../types';
 import { depsStartMock } from './dependencies_start_mock';
 import { MiddlewareActionSpyHelper, createSpyMiddleware } from '../../store/test_utils';
 import { kibanaObservable } from '../test_providers';
