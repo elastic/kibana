@@ -37,6 +37,10 @@ export interface EditIndexPatternProps extends RouteComponentProps {
   indexPattern: DataView;
 }
 
+export interface SavedObjectRelationWithTitle extends SavedObjectRelation {
+  title: string;
+}
+
 const mappingAPILink = i18n.translate(
   'indexPatternManagement.editIndexPattern.timeFilterLabel.mappingAPILink',
   {
@@ -70,7 +74,7 @@ export const EditIndexPattern = withRouter(
     );
     const [defaultIndex, setDefaultIndex] = useState<string>(uiSettings.get('defaultIndex'));
     const [tags, setTags] = useState<any[]>([]);
-    const [relationships, setRelationships] = useState<SavedObjectRelation[]>([]);
+    const [relationships, setRelationships] = useState<SavedObjectRelationWithTitle[]>([]);
     const [allowedTypes, setAllowedTypes] = useState<SavedObjectManagementTypeInfo[]>([]);
 
     useEffect(() => {
@@ -87,7 +91,7 @@ export const EditIndexPattern = withRouter(
       savedObjectsManagement
         .getRelationships(DATA_VIEW_SAVED_OBJECT_TYPE, indexPattern.id!, allowedAsString)
         .then((resp) => {
-          setRelationships(resp.relations);
+          setRelationships(resp.relations.map((r) => ({ ...r, title: r.meta.title! })));
         });
     }, [savedObjectsManagement, indexPattern, allowedTypes]);
 

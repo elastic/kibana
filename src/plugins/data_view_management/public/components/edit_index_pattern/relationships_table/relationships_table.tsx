@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   EuiInMemoryTable,
   HorizontalAlignment,
@@ -63,14 +63,6 @@ export const RelationshipsTable = ({
   relationships: SavedObjectRelation[];
   allowedTypes: SavedObjectManagementTypeInfo[];
 }) => {
-  const [query, setQuery] = useState('');
-
-  const handleOnChange = ({ queryText, error }: { queryText: string; error: unknown }) => {
-    if (!error) {
-      setQuery(queryText);
-    }
-  };
-
   const columns = [
     {
       field: 'type',
@@ -94,7 +86,7 @@ export const RelationshipsTable = ({
       },
     },
     {
-      field: 'meta.title',
+      field: 'title',
       name: titleFieldName,
       description: titleFieldDescription,
       dataType: 'string' as EuiTableDataType,
