@@ -54,7 +54,7 @@ export const DeleteModalConfirmation = ({
     'xpack.triggersActionsUI.deleteSelectedIdsConfirmModal.descriptionText',
     {
       defaultMessage:
-        "You can't recover {numIdsToDelete, plural, one {a deleted {singleTitle}} other {deleted {multipleTitle}}}.",
+        "You won't be able to recover {numIdsToDelete, plural, one {a deleted {singleTitle}} other {deleted {multipleTitle}}}.",
       values: { numIdsToDelete, singleTitle, multipleTitle },
     }
   );

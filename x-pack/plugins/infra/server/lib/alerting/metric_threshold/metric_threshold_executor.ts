@@ -26,7 +26,7 @@ import {
   // buildRecoveredAlertReason,
   stateToAlertMessage,
 } from '../common/messages';
-import { UNGROUPED_FACTORY_KEY, getViewInAppUrl } from '../common/utils';
+import { UNGROUPED_FACTORY_KEY, getViewInAppUrl, createScopedLogger } from '../common/utils';
 import { LINK_TO_METRICS_EXPLORER } from '../../../../common/alerting/metrics';
 
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
@@ -66,9 +66,11 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     MetricThresholdAlertContext,
     MetricThresholdAllowedActionGroups
   >(async function (options) {
-    const { services, params, state, startedAt } = options;
+    const startTime = Date.now();
+    const { services, params, state, startedAt, alertId, executionId } = options;
     const { criteria } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
+    const logger = createScopedLogger(libs.logger, 'metricThresholdRule', { alertId, executionId });
     const { alertWithLifecycle, savedObjectsClient } = services;
     const alertFactory: MetricThresholdAlertFactory = (id, reason) =>
       alertWithLifecycle({
@@ -93,6 +95,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         const { fromKueryExpression } = await import('@kbn/es-query');
         fromKueryExpression(params.filterQueryText);
       } catch (e) {
+        logger.error(e.message);
         const timestamp = startedAt.toISOString();
         const actionGroupId = FIRED_ACTIONS.id; // Change this to an Error action group when able
         const reason = buildInvalidQueryAlertReason(params.filterQueryText);
@@ -136,6 +139,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       config,
       compositeSize,
       alertOnGroupDisappear,
+      logger,
       state.lastRunTimestamp,
       { end: startedAt.valueOf() },
       previousMissingGroups
@@ -151,6 +155,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     const groups = [...resultGroupSet];
     const nextMissingGroups = new Set<string>();
     const hasGroups = !isEqual(groups, [UNGROUPED_FACTORY_KEY]);
+    let scheduledActionsCount = 0;
 
     for (const group of groups) {
       // AND logic; all criteria must be across the threshold
@@ -222,6 +227,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
             ? WARNING_ACTIONS.id
             : FIRED_ACTIONS.id;
         const alert = alertFactory(`${group}`, reason);
+        scheduledActionsCount++;
         alert.scheduleActions(actionGroupId, {
           group,
           alertState: stateToAlertMessage[nextState],
@@ -240,6 +246,8 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         });
       }
     }
+    const stopTime = Date.now();
+    logger.debug(`Scheduled ${scheduledActionsCount} actions in ${stopTime - startTime}ms`);
     return {
       lastRunTimestamp: startedAt.valueOf(),
       missingGroups: [...nextMissingGroups],

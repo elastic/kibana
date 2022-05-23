@@ -164,7 +164,6 @@ describe('when on the package policy create page', () => {
             },
           ],
           latestVersion: '1.3.0',
-          removable: true,
           keepPoliciesUpToDate: false,
           status: 'not_installed',
         },
