@@ -81,12 +81,14 @@ const serviceGroupSaveRoute = createApmServerRoute({
   handler: async (resources): Promise<void> => {
     const { context, params } = resources;
     const { start, end, serviceGroupId } = params.query;
+    const [core, setup] = await Promise.all([
+      context.core,
+      setupRequest(resources),
+    ]);
     const {
       savedObjects: { client: savedObjectsClient },
       uiSettings: { client: uiSettingsClient },
-    } = await context.core;
-
-    const setup = await setupRequest(resources);
+    } = core;
     const items = await lookupServices({
       setup,
       uiSettingsClient,
@@ -139,10 +141,13 @@ const serviceGroupServicesRoute = createApmServerRoute({
   ): Promise<{ items: Awaited<ReturnType<typeof lookupServices>> }> => {
     const { params, context } = resources;
     const { kuery = '', start, end } = params.query;
+    const [core, setup] = await Promise.all([
+      context.core,
+      setupRequest(resources),
+    ]);
     const {
       uiSettings: { client: uiSettingsClient },
-    } = await context.core;
-    const setup = await setupRequest(resources);
+    } = core;
     const items = await lookupServices({
       setup,
       uiSettingsClient,
