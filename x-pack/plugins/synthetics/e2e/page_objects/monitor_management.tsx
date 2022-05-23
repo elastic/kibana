@@ -189,6 +189,7 @@ export function monitorManagementPageProvider({
       apmServiceName: string;
       locations: string[];
     }) {
+      await this.selectMonitorType('http');
       await this.createBasicMonitorDetails({ name, apmServiceName, locations });
       await this.fillByTestSubj('syntheticsUrlField', url);
     },
