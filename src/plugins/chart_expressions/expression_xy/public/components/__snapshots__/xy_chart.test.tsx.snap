@@ -38,6 +38,9 @@ exports[`XYChart component annotations should render basic line annotation 1`] =
   markerPosition="top"
   style={
     Object {
+      "animations": Object {
+        "enabled": false,
+      },
       "line": Object {
         "dash": undefined,
         "opacity": 1,
@@ -58,6 +61,9 @@ Array [
     id="__endzones__"
     style={
       Object {
+        "animations": Object {
+          "enabled": false,
+        },
         "fill": "#69707d",
         "opacity": 0.2,
         "stroke": "#69707d",
@@ -85,6 +91,9 @@ Array [
     outsideDimension={4}
     style={
       Object {
+        "animations": Object {
+          "enabled": false,
+        },
         "fill": "#F04E981A",
         "opacity": 1,
       }
@@ -138,6 +147,9 @@ exports[`XYChart component annotations should render grouped line annotations pr
   markerPosition="top"
   style={
     Object {
+      "animations": Object {
+        "enabled": false,
+      },
       "line": Object {
         "dash": Array [
           9,
@@ -197,6 +209,9 @@ exports[`XYChart component annotations should render grouped line annotations wi
   markerPosition="top"
   style={
     Object {
+      "animations": Object {
+        "enabled": false,
+      },
       "line": Object {
         "dash": undefined,
         "opacity": 1,
@@ -225,6 +240,9 @@ exports[`XYChart component annotations should render simplified annotations when
   markerPosition="top"
   style={
     Object {
+      "animations": Object {
+        "enabled": false,
+      },
       "line": Object {
         "dash": undefined,
         "opacity": 1,
@@ -245,6 +263,9 @@ Array [
     id="__endzones__"
     style={
       Object {
+        "animations": Object {
+          "enabled": false,
+        },
         "fill": "#69707d",
         "opacity": 0.2,
         "stroke": "#69707d",
@@ -272,6 +293,9 @@ Array [
     outsideDimension={2}
     style={
       Object {
+        "animations": Object {
+          "enabled": false,
+        },
         "fill": "#F04E981A",
         "opacity": 1,
       }
