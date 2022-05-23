@@ -235,7 +235,7 @@ const RESTRICTED_IMPORTS = [
 module.exports = {
   root: true,
 
-  extends: ['@elastic/eslint-config-kibana', 'plugin:@elastic/eui/recommended'],
+  extends: ['plugin:@elastic/eui/recommended', '@kbn/eslint-config'],
 
   overrides: [
     /**
@@ -316,7 +316,7 @@ module.exports = {
     {
       files: [
         'packages/elastic-datemath/**/*.{js,mjs,ts,tsx}',
-        'packages/elastic-eslint-config-kibana/**/*.{js,mjs,ts,tsx}',
+        'packages/kbn-eslint-config/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         '@kbn/eslint/require-license-header': [

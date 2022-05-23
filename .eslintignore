@@ -29,7 +29,7 @@ snapshots.js
 /x-pack/plugins/reporting/server/export_types/printable_pdf_v2/server/lib/pdf/assets/**
 
 # package overrides
-/packages/elastic-eslint-config-kibana
+/packages/kbn-eslint-config
 /packages/kbn-plugin-generator/template
 /packages/kbn-pm/dist
 /packages/kbn-test/src/functional_test_runner/__tests__/fixtures/

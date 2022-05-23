@@ -21,6 +21,7 @@ export const mocksSource = {
       name: '@timestamp',
       searchable: true,
       type: 'date',
+      esTypes: ['date'],
       aggregatable: true,
     },
     {
@@ -33,6 +34,7 @@ export const mocksSource = {
       name: 'agent.ephemeral_id',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -44,6 +46,7 @@ export const mocksSource = {
       name: 'agent.hostname',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -56,6 +59,7 @@ export const mocksSource = {
       name: 'agent.id',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -68,6 +72,7 @@ export const mocksSource = {
       name: 'agent.name',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -79,6 +84,7 @@ export const mocksSource = {
       name: 'auditd.data.a0',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -90,6 +96,7 @@ export const mocksSource = {
       name: 'auditd.data.a1',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -101,6 +108,7 @@ export const mocksSource = {
       name: 'auditd.data.a2',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -113,6 +121,7 @@ export const mocksSource = {
       name: 'client.address',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -124,6 +133,7 @@ export const mocksSource = {
       name: 'client.bytes',
       searchable: true,
       type: 'number',
+      esTypes: ['long'],
       aggregatable: true,
     },
     {
@@ -135,6 +145,7 @@ export const mocksSource = {
       name: 'client.domain',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -146,6 +157,7 @@ export const mocksSource = {
       name: 'client.geo.country_iso_code',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -158,6 +170,7 @@ export const mocksSource = {
       name: 'cloud.account.id',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -169,6 +182,7 @@ export const mocksSource = {
       name: 'cloud.availability_zone',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -180,6 +194,7 @@ export const mocksSource = {
       name: 'container.id',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -191,6 +206,7 @@ export const mocksSource = {
       name: 'container.image.name',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -202,6 +218,7 @@ export const mocksSource = {
       name: 'container.image.tag',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -214,6 +231,7 @@ export const mocksSource = {
       name: 'destination.address',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -225,6 +243,7 @@ export const mocksSource = {
       name: 'destination.bytes',
       searchable: true,
       type: 'number',
+      esTypes: ['long'],
       aggregatable: true,
     },
     {
@@ -236,6 +255,7 @@ export const mocksSource = {
       name: 'destination.domain',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -248,6 +268,7 @@ export const mocksSource = {
       name: 'destination.ip',
       searchable: true,
       type: 'ip',
+      esTypes: ['ip'],
     },
     {
       aggregatable: true,
@@ -258,7 +279,8 @@ export const mocksSource = {
       indexes: ['auditbeat', 'filebeat', 'packetbeat'],
       name: 'destination.port',
       searchable: true,
-      type: 'long',
+      type: 'number',
+      esTypes: ['long'],
     },
     {
       aggregatable: true,
@@ -270,6 +292,7 @@ export const mocksSource = {
       name: 'source.ip',
       searchable: true,
       type: 'ip',
+      esTypes: ['ip'],
     },
     {
       aggregatable: true,
@@ -280,7 +303,8 @@ export const mocksSource = {
       indexes: ['auditbeat', 'filebeat', 'packetbeat'],
       name: 'source.port',
       searchable: true,
-      type: 'long',
+      type: 'number',
+      esTypes: ['long'],
     },
     {
       aggregatable: true,
@@ -293,6 +317,7 @@ export const mocksSource = {
       name: 'event.end',
       searchable: true,
       type: 'date',
+      esTypes: ['date'],
     },
     {
       aggregatable: false,
@@ -371,6 +396,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'agent.ephemeral_id',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
       'agent.hostname': {
         aggregatable: true,
@@ -382,6 +408,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'agent.hostname',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
       'agent.id': {
         aggregatable: true,
@@ -394,6 +421,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'agent.id',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
       'agent.name': {
         aggregatable: true,
@@ -406,6 +434,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'agent.name',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
     },
   },
@@ -421,6 +450,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'auditd.data.a0',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
       'auditd.data.a1': {
         aggregatable: true,
@@ -432,6 +462,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'auditd.data.a1',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
       'auditd.data.a2': {
         aggregatable: true,
@@ -443,6 +474,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'auditd.data.a2',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
     },
   },
@@ -459,6 +491,7 @@ export const mockBrowserFields: BrowserFields = {
         name: '@timestamp',
         searchable: true,
         type: 'date',
+        esTypes: ['date'],
       },
     },
   },
@@ -475,6 +508,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'client.address',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
       'client.bytes': {
         aggregatable: true,
@@ -486,6 +520,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'client.bytes',
         searchable: true,
         type: 'number',
+        esTypes: ['long'],
       },
       'client.domain': {
         aggregatable: true,
@@ -497,6 +532,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'client.domain',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
       'client.geo.country_iso_code': {
         aggregatable: true,
@@ -508,6 +544,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'client.geo.country_iso_code',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
     },
   },
@@ -524,6 +561,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'cloud.account.id',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
       'cloud.availability_zone': {
         aggregatable: true,
@@ -535,6 +573,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'cloud.availability_zone',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
     },
   },
@@ -550,6 +589,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'container.id',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
       'container.image.name': {
         aggregatable: true,
@@ -561,6 +601,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'container.image.name',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
       'container.image.tag': {
         aggregatable: true,
@@ -572,6 +613,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'container.image.tag',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
     },
   },
@@ -588,6 +630,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'destination.address',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
       'destination.bytes': {
         aggregatable: true,
@@ -599,6 +642,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'destination.bytes',
         searchable: true,
         type: 'number',
+        esTypes: ['long'],
       },
       'destination.domain': {
         aggregatable: true,
@@ -610,6 +654,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'destination.domain',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
       'destination.ip': {
         aggregatable: true,
@@ -622,6 +667,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'destination.ip',
         searchable: true,
         type: 'ip',
+        esTypes: ['ip'],
       },
       'destination.port': {
         aggregatable: true,
@@ -632,7 +678,8 @@ export const mockBrowserFields: BrowserFields = {
         indexes: ['auditbeat', 'filebeat', 'packetbeat'],
         name: 'destination.port',
         searchable: true,
-        type: 'long',
+        type: 'number',
+        esTypes: ['long'],
       },
     },
   },
@@ -648,6 +695,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'event.end',
         searchable: true,
         type: 'date',
+        esTypes: ['date'],
         aggregatable: true,
       },
     },
@@ -664,6 +712,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'source.ip',
         searchable: true,
         type: 'ip',
+        esTypes: ['ip'],
       },
       'source.port': {
         aggregatable: true,
@@ -674,7 +723,8 @@ export const mockBrowserFields: BrowserFields = {
         indexes: ['auditbeat', 'filebeat', 'packetbeat'],
         name: 'source.port',
         searchable: true,
-        type: 'long',
+        type: 'number',
+        esTypes: ['long'],
       },
     },
   },

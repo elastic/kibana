@@ -175,6 +175,7 @@ export class HeadlessChromiumDriver {
         height: boundingClientRect.height,
         width: boundingClientRect.width,
       },
+      captureBeyondViewport: false, // workaround for an internal resize. See: https://github.com/puppeteer/puppeteer/issues/7043
     });
 
     if (Buffer.isBuffer(screenshot)) {
@@ -255,7 +256,7 @@ export class HeadlessChromiumDriver {
     const width = Math.floor(_width);
     const height = Math.floor(_height);
 
-    logger.debug(`Setting viewport to: width=${width} height=${height} zoom=${zoom}`);
+    logger.debug(`Setting viewport to: width=${width} height=${height} scaleFactor=${zoom}`);
 
     await this.page.setViewport({
       width,

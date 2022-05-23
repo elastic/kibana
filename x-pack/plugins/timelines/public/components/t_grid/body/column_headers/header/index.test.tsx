@@ -159,6 +159,7 @@ describe('Header', () => {
             {
               columnId: columnHeader.id,
               columnType: columnHeader.type ?? 'number',
+              esTypes: ['date'],
               sortDirection: Direction.asc, // (because the previous state was Direction.desc)
             },
           ],

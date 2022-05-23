@@ -4,7 +4,6 @@ filegroup(
   srcs = [
       "//packages/elastic-apm-synthtrace:build",
       "//packages/elastic-datemath:build",
-      "//packages/elastic-eslint-config-kibana:build",
       "//packages/elastic-safer-lodash-set:build",
       "//packages/kbn-ace:build",
       "//packages/kbn-alerts:build",
@@ -22,6 +21,7 @@ filegroup(
       "//packages/kbn-es:build",
       "//packages/kbn-es-archiver:build",
       "//packages/kbn-es-query:build",
+      "//packages/kbn-eslint-config:build",
       "//packages/kbn-eslint-import-resolver-kibana:build",
       "//packages/kbn-eslint-plugin-eslint:build",
       "//packages/kbn-expect:build",

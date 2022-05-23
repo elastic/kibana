@@ -127,7 +127,8 @@ const basicTimeline: TimelineModel = {
   sort: [
     {
       columnId: '@timestamp',
-      columnType: 'number',
+      columnType: 'date',
+      esTypes: ['date'],
       sortDirection: Direction.desc,
     },
   ],
@@ -953,6 +954,7 @@ describe('Timeline', () => {
           {
             columnId: 'some column',
             columnType: 'text',
+            esTypes: ['keyword'],
             sortDirection: Direction.desc,
           },
         ],
@@ -965,7 +967,12 @@ describe('Timeline', () => {
 
     test('should update the sort attribute', () => {
       expect(update.foo.sort).toEqual([
-        { columnId: 'some column', columnType: 'text', sortDirection: Direction.desc },
+        {
+          columnId: 'some column',
+          columnType: 'text',
+          esTypes: ['keyword'],
+          sortDirection: Direction.desc,
+        },
       ]);
     });
   });

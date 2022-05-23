@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { AxiosError } from 'axios';
-
 import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import {
@@ -15,6 +13,7 @@ import {
   getPushedDate,
   throwIfSubActionIsNotSupported,
 } from './utils';
+import type { ResponseError } from './types';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -53,7 +52,7 @@ describe('utils', () => {
       const axiosError = {
         message: 'An error occurred',
         response: { data: { error: { message: 'Denied', detail: 'no access' } } },
-      } as AxiosError;
+      } as ResponseError;
 
       expect(createServiceError(axiosError, 'Unable to do action').message).toBe(
         '[Action][ServiceNow]: Unable to do action. Error: An error occurred Reason: Denied: no access'
@@ -64,7 +63,7 @@ describe('utils', () => {
       const axiosError = {
         message: 'An error occurred',
         response: { data: { error: null } },
-      } as AxiosError;
+      } as ResponseError;
 
       expect(createServiceError(axiosError, 'Unable to do action').message).toBe(
         '[Action][ServiceNow]: Unable to do action. Error: An error occurred Reason: unknown: no error in error response'

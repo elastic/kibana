@@ -19,7 +19,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('export transforms', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/131834
+  describe.skip('export transforms', () => {
     describe('root objects export transforms', () => {
       before(async () => {
         await esArchiver.load(

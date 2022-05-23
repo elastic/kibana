@@ -73,7 +73,8 @@ describe('PinnedTabContent', () => {
   const sort: Sort[] = [
     {
       columnId: '@timestamp',
-      columnType: 'number',
+      columnType: 'date',
+      esTypes: ['date'],
       sortDirection: Direction.desc,
     },
   ];
