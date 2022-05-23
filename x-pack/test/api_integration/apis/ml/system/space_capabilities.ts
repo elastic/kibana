@@ -119,6 +119,7 @@ export default ({ getService }: FtrProviderContext) => {
           canCreateTrainedModels: false,
           canDeleteTrainedModels: false,
           canStartStopTrainedModels: false,
+          canTestTrainedModels: false,
         });
       });
 
@@ -161,6 +162,7 @@ export default ({ getService }: FtrProviderContext) => {
           canCreateTrainedModels: false,
           canDeleteTrainedModels: false,
           canStartStopTrainedModels: false,
+          canTestTrainedModels: false,
         });
       });
 
@@ -203,6 +205,7 @@ export default ({ getService }: FtrProviderContext) => {
           canCreateTrainedModels: true,
           canDeleteTrainedModels: true,
           canStartStopTrainedModels: true,
+          canTestTrainedModels: true,
         });
       });
 
@@ -245,6 +248,7 @@ export default ({ getService }: FtrProviderContext) => {
           canCreateTrainedModels: false,
           canDeleteTrainedModels: false,
           canStartStopTrainedModels: false,
+          canTestTrainedModels: false,
         });
       });
     });

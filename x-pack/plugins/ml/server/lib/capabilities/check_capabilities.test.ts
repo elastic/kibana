@@ -102,6 +102,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateTrainedModels).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
+      expect(capabilities.canTestTrainedModels).toBe(false);
     });
 
     test('full capabilities', async () => {
@@ -154,6 +155,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateTrainedModels).toBe(true);
       expect(capabilities.canDeleteTrainedModels).toBe(true);
       expect(capabilities.canStartStopTrainedModels).toBe(true);
+      expect(capabilities.canTestTrainedModels).toBe(true);
     });
 
     test('upgrade in progress with full capabilities', async () => {
@@ -206,6 +208,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateTrainedModels).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
+      expect(capabilities.canTestTrainedModels).toBe(false);
     });
 
     test('upgrade in progress with partial capabilities', async () => {
@@ -258,6 +261,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateTrainedModels).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
+      expect(capabilities.canTestTrainedModels).toBe(false);
     });
 
     test('full capabilities, ml disabled in space', async () => {
@@ -310,6 +314,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateTrainedModels).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
+      expect(capabilities.canTestTrainedModels).toBe(false);
     });
   });
 
@@ -364,5 +369,6 @@ describe('check_capabilities', () => {
     expect(capabilities.canCreateTrainedModels).toBe(false);
     expect(capabilities.canDeleteTrainedModels).toBe(false);
     expect(capabilities.canStartStopTrainedModels).toBe(false);
+    expect(capabilities.canTestTrainedModels).toBe(false);
   });
 });

@@ -76,6 +76,7 @@ export const adminMlCapabilities = {
   canCreateTrainedModels: false,
   canDeleteTrainedModels: false,
   canStartStopTrainedModels: false,
+  canTestTrainedModels: false,
 };
 
 export type UserMlCapabilities = typeof userMlCapabilities;
