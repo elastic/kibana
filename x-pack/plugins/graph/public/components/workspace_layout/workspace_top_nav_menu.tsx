@@ -12,7 +12,7 @@ import { AppMountParameters, Capabilities, CoreStart } from '@kbn/core/public';
 import { useHistory, useLocation } from 'react-router-dom';
 import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
-import { datasourceSelector, hasFieldsSelector } from '../../state_management';
+import { datasourceSelector, GraphState, hasFieldsSelector } from '../../state_management';
 import { GraphSavePolicy, GraphWorkspaceSavedObject, Workspace } from '../../types';
 import { AsObservable, Settings, SettingsWorkspaceProps } from '../settings';
 import { asSyncedObservable } from '../../helpers/as_observable';
@@ -36,7 +36,7 @@ interface WorkspaceTopNavMenuProps {
 }
 
 export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
-  const store = useStore();
+  const store = useStore<GraphState>();
   const location = useLocation();
   const history = useHistory();
   const allSavingDisabled = props.graphSavePolicy === 'none';

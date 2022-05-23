@@ -7,7 +7,7 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
-import { createSelector } from 'reselect';
+import { createSelector } from '@reduxjs/toolkit';
 import { GraphState } from './store';
 import { reset } from './global';
 

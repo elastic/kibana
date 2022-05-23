@@ -6,7 +6,7 @@
  */
 
 import { matchPath } from 'react-router-dom';
-import { createSelector } from 'reselect';
+import { createSelector } from '@reduxjs/toolkit';
 import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { unsetPolicyFeaturesAccordingToLicenseLevel } from '../../../../../../../common/license/policy_config';
 import { PolicyDetailsState } from '../../../types';

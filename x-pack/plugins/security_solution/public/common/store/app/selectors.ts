@@ -7,7 +7,7 @@
 
 import { keys, values } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import { createSelector } from 'reselect';
+import { createSelector } from '@reduxjs/toolkit';
 import { Note } from '../../lib/note';
 import { ErrorModel, NotesById } from './model';
 import { State } from '../types';

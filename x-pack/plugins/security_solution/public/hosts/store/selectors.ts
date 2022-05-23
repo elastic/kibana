@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash/fp';
-import { createSelector } from 'reselect';
+import { createSelector } from '@reduxjs/toolkit';
 
 import { State } from '../../common/store/types';
 

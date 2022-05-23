@@ -7,7 +7,7 @@
 
 // eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';
-import { createSelector } from 'reselect';
+import { createSelector } from '@reduxjs/toolkit';
 import { matchPath } from 'react-router-dom';
 import { decode } from 'rison-node';
 import { Query } from '@kbn/es-query';

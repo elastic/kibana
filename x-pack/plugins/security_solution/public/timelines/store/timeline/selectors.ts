@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
+import { createSelector } from '@reduxjs/toolkit';
 
 export { getManageTimelineById } from '@kbn/timelines-plugin/public';
 import { State } from '../../../common/store/types';

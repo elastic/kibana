@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
+import { createSelector } from '@reduxjs/toolkit';
 
 import { TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
 import { timelineSelectors } from '../../store/timeline';

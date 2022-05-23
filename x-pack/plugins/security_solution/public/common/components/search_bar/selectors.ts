@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
+import { createSelector } from '@reduxjs/toolkit';
 import type { Query } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { InputsRange } from '../../store/inputs/model';

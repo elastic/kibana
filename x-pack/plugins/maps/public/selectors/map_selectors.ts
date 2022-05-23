@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
+import { createSelector } from '@reduxjs/toolkit';
 import { FeatureCollection } from 'geojson';
 import _ from 'lodash';
 import type { Query } from '@kbn/data-plugin/common';

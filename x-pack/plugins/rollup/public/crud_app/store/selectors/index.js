@@ -7,7 +7,7 @@
 
 import { Pager } from '@elastic/eui';
 
-import { createSelector } from 'reselect';
+import { createSelector } from '@reduxjs/toolkit';
 import { filterItems, sortTable } from '../../services';
 
 export const getJobs = (state) => state.jobs.byId;
