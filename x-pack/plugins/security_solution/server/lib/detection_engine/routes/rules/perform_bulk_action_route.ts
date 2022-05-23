@@ -302,6 +302,8 @@ export const performBulkActionRoute = (
 
         const query = body.query !== '' ? body.query : undefined;
 
+        // handling this action before switch statement as bulkEditRules fetch rules within
+        // rulesClient method, hence there is no need to use fetchRulesByQueryOrIds utility
         if (body.action === BulkAction.edit) {
           const { rules, errors } = await bulkEditRules({
             rulesClient,
