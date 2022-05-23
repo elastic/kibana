@@ -23,7 +23,7 @@ import { CreatePackagePolicyBottomBar } from '..';
 import type { PackagePolicyValidationResults } from '../../../services';
 import { validatePackagePolicy, validationHasErrors } from '../../../services';
 import { NotObscuredByBottomBar } from '..';
-import { StepConfigurePackagePolicy } from '../../../single_page_layout/step_configure_package';
+import { StepConfigurePackagePolicy } from '../../../components';
 const StandaloneWarningCallout: React.FC<{
   setIsManaged: MultiPageStepLayoutProps['setIsManaged'];
 }> = ({ setIsManaged }) => {

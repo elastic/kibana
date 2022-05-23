@@ -6,20 +6,26 @@
  */
 
 import React, { useState, Fragment, memo, useMemo } from 'react';
+import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSwitch,
   EuiText,
   EuiSpacer,
   EuiButtonEmpty,
 } from '@elastic/eui';
 
-import type { NewPackagePolicyInput, RegistryVarsEntry } from '../../../../../types';
-import type { PackagePolicyConfigValidationResults } from '../../services';
-import { isAdvancedVar, validationHasErrors } from '../../services';
+import type {
+  NewPackagePolicyInputStream,
+  RegistryStream,
+  RegistryVarsEntry,
+} from '../../../../../../types';
+import type { PackagePolicyConfigValidationResults } from '../../../services';
+import { isAdvancedVar, validationHasErrors } from '../../../services';
 
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 
@@ -27,34 +33,32 @@ const FlexItemWithMaxWidth = styled(EuiFlexItem)`
   max-width: calc(50% - ${(props) => props.theme.eui.euiSizeL});
 `;
 
-export const PackagePolicyInputConfig: React.FunctionComponent<{
-  hasInputStreams: boolean;
-  packageInputVars?: RegistryVarsEntry[];
-  packagePolicyInput: NewPackagePolicyInput;
-  updatePackagePolicyInput: (updatedInput: Partial<NewPackagePolicyInput>) => void;
-  inputVarsValidationResults: PackagePolicyConfigValidationResults;
+export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
+  packageInputStream: RegistryStream;
+  packagePolicyInputStream: NewPackagePolicyInputStream;
+  updatePackagePolicyInputStream: (updatedStream: Partial<NewPackagePolicyInputStream>) => void;
+  inputStreamValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
 }> = memo(
   ({
-    hasInputStreams,
-    packageInputVars,
-    packagePolicyInput,
-    updatePackagePolicyInput,
-    inputVarsValidationResults,
+    packageInputStream,
+    packagePolicyInputStream,
+    updatePackagePolicyInputStream,
+    inputStreamValidationResults,
     forceShowErrors,
   }) => {
     // Showing advanced options toggle state
-    const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
+    const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>();
 
     // Errors state
-    const hasErrors = forceShowErrors && validationHasErrors(inputVarsValidationResults);
+    const hasErrors = forceShowErrors && validationHasErrors(inputStreamValidationResults);
 
     const requiredVars: RegistryVarsEntry[] = [];
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const advancedVars: RegistryVarsEntry[] = [];
 
-    if (packageInputVars) {
-      packageInputVars.forEach((varDef) => {
+    if (packageInputStream.vars && packageInputStream.vars.length) {
+      packageInputStream.vars.forEach((varDef) => {
         if (isAdvancedVar(varDef)) {
           advancedVars.push(varDef);
         } else {
@@ -66,9 +70,9 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
     const advancedVarsWithErrorsCount: number = useMemo(
       () =>
         advancedVars.filter(
-          ({ name: varName }) => inputVarsValidationResults.vars?.[varName]?.length
+          ({ name: varName }) => inputStreamValidationResults?.vars?.[varName]?.length
         ).length,
-      [advancedVars, inputVarsValidationResults.vars]
+      [advancedVars, inputStreamValidationResults?.vars]
     );
 
     return (
@@ -77,26 +81,24 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
           <EuiFlexGroup gutterSize="none" alignItems="flexStart">
             <EuiFlexItem grow={1} />
             <EuiFlexItem grow={5}>
-              <EuiText>
-                <h4>
-                  <FormattedMessage
-                    id="xpack.fleet.createPackagePolicy.stepConfigure.inputSettingsTitle"
-                    defaultMessage="Settings"
-                  />
-                </h4>
-              </EuiText>
-              {hasInputStreams ? (
-                <>
+              <EuiSwitch
+                label={packageInputStream.title}
+                disabled={packagePolicyInputStream.keep_enabled}
+                checked={packagePolicyInputStream.enabled}
+                onChange={(e) => {
+                  const enabled = e.target.checked;
+                  updatePackagePolicyInputStream({
+                    enabled,
+                  });
+                }}
+              />
+              {packageInputStream.description ? (
+                <Fragment>
                   <EuiSpacer size="s" />
-                  <EuiText color="subdued" size="s">
-                    <p>
-                      <FormattedMessage
-                        id="xpack.fleet.createPackagePolicy.stepConfigure.inputSettingsDescription"
-                        defaultMessage="The following settings are applicable to all inputs below."
-                      />
-                    </p>
+                  <EuiText size="s" color="subdued">
+                    <ReactMarkdown source={packageInputStream.description} />
                   </EuiText>
-                </>
+                </Fragment>
               ) : null}
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -104,9 +106,12 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
         <FlexItemWithMaxWidth>
           <EuiFlexGroup direction="column" gutterSize="m">
             {requiredVars.map((varDef) => {
+              if (!packagePolicyInputStream?.vars) return null;
               const { name: varName, type: varType } = varDef;
-              if (!packagePolicyInput.vars) return;
-              const { value, frozen } = packagePolicyInput.vars[varName];
+              const varConfigEntry = packagePolicyInputStream.vars?.[varName];
+              const value = varConfigEntry?.value;
+              const frozen = varConfigEntry?.frozen ?? false;
+
               return (
                 <EuiFlexItem key={varName}>
                   <PackagePolicyInputVarField
@@ -114,9 +119,9 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                     value={value}
                     frozen={frozen}
                     onChange={(newValue: any) => {
-                      updatePackagePolicyInput({
+                      updatePackagePolicyInputStream({
                         vars: {
-                          ...packagePolicyInput.vars,
+                          ...packagePolicyInputStream.vars,
                           [varName]: {
                             type: varType,
                             value: newValue,
@@ -124,7 +129,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                         },
                       });
                     }}
-                    errors={inputVarsValidationResults.vars![varName]}
+                    errors={inputStreamValidationResults?.vars![varName]}
                     forceShowErrors={forceShowErrors}
                   />
                 </EuiFlexItem>
@@ -133,7 +138,6 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
             {advancedVars.length ? (
               <Fragment>
                 <EuiFlexItem>
-                  {/* Wrapper div to prevent button from going full width */}
                   <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
@@ -163,17 +167,19 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                 </EuiFlexItem>
                 {isShowingAdvanced
                   ? advancedVars.map((varDef) => {
+                      if (!packagePolicyInputStream.vars) return null;
                       const { name: varName, type: varType } = varDef;
-                      const value = packagePolicyInput.vars?.[varName]?.value;
+                      const value = packagePolicyInputStream.vars?.[varName]?.value;
+
                       return (
                         <EuiFlexItem key={varName}>
                           <PackagePolicyInputVarField
                             varDef={varDef}
                             value={value}
                             onChange={(newValue: any) => {
-                              updatePackagePolicyInput({
+                              updatePackagePolicyInputStream({
                                 vars: {
-                                  ...packagePolicyInput.vars,
+                                  ...packagePolicyInputStream.vars,
                                   [varName]: {
                                     type: varType,
                                     value: newValue,
@@ -181,7 +187,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                                 },
                               });
                             }}
-                            errors={inputVarsValidationResults.vars![varName]}
+                            errors={inputStreamValidationResults?.vars![varName]}
                             forceShowErrors={forceShowErrors}
                           />
                         </EuiFlexItem>

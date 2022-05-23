@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export { CreatePackagePolicyPageLayout } from './layout';
-export { PackagePolicyInputPanel } from './package_policy_input_panel';
-export { PackagePolicyInputVarField } from './package_policy_input_var_field';
+export { CreatePackagePolicySinglePageLayout } from './layout';
 export { PostInstallAddAgentModal } from './post_install_add_agent_modal';

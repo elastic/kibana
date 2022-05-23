@@ -29,10 +29,14 @@ import { IntegrationBreadcrumb } from '../components';
 import type { PackagePolicyValidationResults } from '../services';
 import { validatePackagePolicy, validationHasErrors } from '../services';
 
+import {
+  StepConfigurePackagePolicy,
+  StepDefinePackagePolicy,
+  SelectedPolicyTab,
+  StepSelectHosts,
+} from '../components';
+
 import { CreatePackagePolicySinglePageLayout, PostInstallAddAgentModal } from './components';
-import { StepConfigurePackagePolicy } from './step_configure_package';
-import { StepDefinePackagePolicy } from './step_define_package_policy';
-import { SelectedPolicyTab, StepSelectHosts } from './step_select_hosts';
 
 const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {

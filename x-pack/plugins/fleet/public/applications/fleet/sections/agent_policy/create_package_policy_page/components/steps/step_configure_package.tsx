@@ -15,11 +15,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { PackageInfo, NewPackagePolicy, NewPackagePolicyInput } from '../../../../types';
-import { Loading } from '../../../../components';
-import { getStreamsForInputType, doesPackageHaveIntegrations } from '../../../../services';
+import type { PackageInfo, NewPackagePolicy, NewPackagePolicyInput } from '../../../../../types';
+import { Loading } from '../../../../../components';
+import { getStreamsForInputType, doesPackageHaveIntegrations } from '../../../../../services';
 
-import type { PackagePolicyValidationResults } from '../services';
+import type { PackagePolicyValidationResults } from '../../services';
 
 import { PackagePolicyInputPanel } from './components';
 

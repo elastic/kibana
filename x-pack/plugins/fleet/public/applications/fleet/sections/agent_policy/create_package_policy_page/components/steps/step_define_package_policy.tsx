@@ -27,15 +27,15 @@ import type {
   PackageInfo,
   NewPackagePolicy,
   RegistryVarsEntry,
-} from '../../../../types';
-import { packageToPackagePolicy, pkgKeyFromPackageInfo } from '../../../../services';
-import { Loading } from '../../../../components';
-import { useStartServices, useGetPackagePolicies } from '../../../../hooks';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../constants';
-import { SO_SEARCH_LIMIT, getMaxPackageName } from '../../../../../../../common';
+} from '../../../../../types';
+import { packageToPackagePolicy, pkgKeyFromPackageInfo } from '../../../../../services';
+import { Loading } from '../../../../../components';
+import { useStartServices, useGetPackagePolicies } from '../../../../../hooks';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../../constants';
+import { SO_SEARCH_LIMIT, getMaxPackageName } from '../../../../../../../../common';
 
-import { isAdvancedVar } from '../services';
-import type { PackagePolicyValidationResults } from '../services';
+import { isAdvancedVar } from '../../services';
+import type { PackagePolicyValidationResults } from '../../services';
 
 import { PackagePolicyInputVarField } from './components';
 

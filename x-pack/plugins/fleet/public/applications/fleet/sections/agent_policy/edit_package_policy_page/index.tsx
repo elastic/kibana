@@ -56,8 +56,10 @@ import type {
   PackagePolicyFormState,
   EditPackagePolicyFrom,
 } from '../create_package_policy_page/types';
-import { StepConfigurePackagePolicy } from '../create_package_policy_page/single_page_layout/step_configure_package';
-import { StepDefinePackagePolicy } from '../create_package_policy_page/single_page_layout/step_define_package_policy';
+import {
+  StepConfigurePackagePolicy,
+  StepDefinePackagePolicy,
+} from '../create_package_policy_page/components';
 import type {
   GetOnePackagePolicyResponse,
   UpgradePackagePolicyDryRunResponse,
