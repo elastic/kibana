@@ -316,5 +316,14 @@ describe('CaseView', () => {
         refreshCase: expect.any(Function),
       });
     });
+
+    it('should refresh actions and comments', async () => {
+      refreshRef!.current!.refreshCase();
+      await waitFor(() => {
+        expect(fetchCaseUserActions).toBeCalledWith('basic-case-id', 'resilient-2');
+        expect(fetchCaseMetrics).toBeCalledWith(true);
+        expect(refetchCase).toHaveBeenCalled();
+      });
+    });
   });
 });
