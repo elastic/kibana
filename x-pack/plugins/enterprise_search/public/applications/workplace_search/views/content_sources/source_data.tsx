@@ -174,6 +174,11 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.DROPBOX,
     serviceType: 'dropbox',
+    categories: [
+      SOURCE_CATEGORIES.FILE_SHARING,
+      SOURCE_CATEGORIES.STORAGE,
+      SOURCE_CATEGORIES.CLOUD,
+    ],
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: true,
