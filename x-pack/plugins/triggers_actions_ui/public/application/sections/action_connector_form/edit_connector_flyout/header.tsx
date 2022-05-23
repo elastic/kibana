@@ -6,6 +6,7 @@
  */
 
 import React, { memo } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiTitle,
   EuiFlexGroup,
@@ -17,6 +18,7 @@ import {
   EuiBetaBadge,
   EuiTab,
   EuiTabs,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -30,6 +32,8 @@ const FlyoutHeaderComponent: React.FC<{
   setTab: () => void;
   icon?: IconType | null;
 }> = ({ icon, isPreconfigured, connectorName, connectorTypeDesc, selectedTab, setTab }) => {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <EuiFlyoutHeader hasBorder>
       <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -81,7 +85,13 @@ const FlyoutHeaderComponent: React.FC<{
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiTabs className="connectorEditFlyoutTabs">
+      <EuiTabs
+        className="connectorEditFlyoutTabs"
+        bottomBorder={false}
+        css={css`
+          margin-bottom: -${euiTheme.size.l};
+        `}
+      >
         <EuiTab
           onClick={setTab}
           data-test-subj="configureConnectorTab"

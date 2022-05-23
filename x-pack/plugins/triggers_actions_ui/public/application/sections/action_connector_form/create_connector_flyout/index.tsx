@@ -24,7 +24,7 @@ import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './foooter';
 import { UpgradeLicenseCallOut } from './upgrade_license_callout';
 
-interface CreateConnectorFlyoutProps {
+export interface CreateConnectorFlyoutProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   onClose: () => void;
   onConnectorCreated?: (connector: ActionConnector) => void;
@@ -185,3 +185,6 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 };
 
 export const CreateConnectorFlyout = memo(CreateConnectorFlyoutComponent);
+
+// eslint-disable-next-line import/no-default-export
+export { CreateConnectorFlyout as default };

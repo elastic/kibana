@@ -19,7 +19,7 @@ import {
   UserConfiguredActionConnector,
 } from '../../../../types';
 import { ConnectorForm, ConnectorFormState } from '../connector_form';
-import { Connector } from '../types';
+import type { Connector } from '../types';
 import { useUpdateConnector } from '../../../hooks/use_edit_connector';
 import { useKibana } from '../../../../common/lib/kibana';
 import { hasSaveActionsCapability } from '../../../lib/capabilities';
@@ -28,7 +28,7 @@ import { useExecuteConnector } from '../../../hooks/use_execute_connector';
 import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './foooter';
 
-interface EditConnectorFlyoutProps {
+export interface EditConnectorFlyoutProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   connector: ActionConnector;
   onClose: () => void;
@@ -274,3 +274,6 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
 };
 
 export const EditConnectorFlyout = memo(EditConnectorFlyoutComponent);
+
+// eslint-disable-next-line import/no-default-export
+export { EditConnectorFlyout as default };
