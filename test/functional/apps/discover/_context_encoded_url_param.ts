@@ -17,7 +17,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const es = getService('es');
 
-  describe('encoded URL params in context page', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/132553
+  describe.skip('encoded URL params in context page', () => {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'context_encoded_param']);
       await PageObjects.common.navigateToApp('settings');
