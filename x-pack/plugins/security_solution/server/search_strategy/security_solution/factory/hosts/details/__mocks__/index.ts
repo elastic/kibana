@@ -545,8 +545,8 @@ export const formattedSearchStrategyResponse = {
               'cloud.machine.type',
               'cloud.provider',
               'cloud.region',
-              'agent.id',
               'agent.type',
+              'agent.id',
               {
                 field: '@timestamp',
                 format: 'strict_date_optional_time',
@@ -840,8 +840,8 @@ export const expectedDsl = {
       'cloud.machine.type',
       'cloud.provider',
       'cloud.region',
-      'agent.id',
       'agent.type',
+      'agent.id',
       {
         field: '@timestamp',
         format: 'strict_date_optional_time',
