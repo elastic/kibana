@@ -78,7 +78,7 @@ const RelatedIntegrationsDescription: React.FC<{ integrations: RelatedIntegratio
   integrations,
 }) => (
   <>
-    {integrations.map((integration, index) => (
+    {integrations?.map((integration, index) => (
       <IntegrationDescription key={`${integration.package}-${index}`} integration={integration} />
     ))}
   </>
