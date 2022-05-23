@@ -235,6 +235,7 @@ describe('perform_bulk_action', () => {
                   name: 'Detect Root/Admin Users',
                 },
               ],
+              status_code: 500,
             },
             {
               message: 'test failure',
@@ -244,6 +245,7 @@ describe('perform_bulk_action', () => {
                   name: 'Detect Root/Admin Users',
                 },
               ],
+              status_code: 500,
             },
           ],
           results: someBulkActionResults(),
