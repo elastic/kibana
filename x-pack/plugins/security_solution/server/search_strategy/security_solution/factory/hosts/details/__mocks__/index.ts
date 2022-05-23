@@ -532,7 +532,6 @@ export const formattedSearchStrategyResponse = {
             },
             _source: false,
             fields: [
-              'agent.id',
               'host.architecture',
               'host.id',
               'host.ip',
@@ -546,6 +545,8 @@ export const formattedSearchStrategyResponse = {
               'cloud.machine.type',
               'cloud.provider',
               'cloud.region',
+              'agent.id',
+              'agent.type',
               {
                 field: '@timestamp',
                 format: 'strict_date_optional_time',
@@ -826,8 +827,6 @@ export const expectedDsl = {
     },
     _source: false,
     fields: [
-      'agent.id',
-      'agent.type',
       'host.architecture',
       'host.id',
       'host.ip',
@@ -841,6 +840,8 @@ export const expectedDsl = {
       'cloud.machine.type',
       'cloud.provider',
       'cloud.region',
+      'agent.id',
+      'agent.type',
       {
         field: '@timestamp',
         format: 'strict_date_optional_time',
