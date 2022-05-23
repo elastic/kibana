@@ -45,6 +45,7 @@ export default function ({ getPageObjects, getService }) {
 
       expect(searchParams).to.eql({
         geometryFieldName: 'geo.coordinates',
+        hasLabels: 'false',
         index: 'logstash-*',
         gridPrecision: 8,
         renderAs: 'grid',

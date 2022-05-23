@@ -7,15 +7,16 @@
  */
 
 import { XY_VIS_RENDERER } from '../constants';
-import { appendLayerIds, getDataLayers } from '../helpers';
 import { LayeredXyVisFn } from '../types';
 import { logDatatables } from '../utils';
 import {
   validateMarkSizeRatioLimits,
+  validateAddTimeMarker,
   validateMinTimeBarInterval,
   hasBarLayer,
   errors,
 } from './validate';
+import { appendLayerIds, getDataLayers } from '../helpers';
 
 export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers) => {
   const layers = appendLayerIds(args.layers ?? [], 'layers');
@@ -24,6 +25,7 @@ export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers)
 
   const dataLayers = getDataLayers(layers);
   const hasBar = hasBarLayer(dataLayers);
+  validateAddTimeMarker(dataLayers, args.addTimeMarker);
   validateMarkSizeRatioLimits(args.markSizeRatio);
   validateMinTimeBarInterval(dataLayers, hasBar, args.minTimeBarInterval);
   const hasMarkSizeAccessors =
