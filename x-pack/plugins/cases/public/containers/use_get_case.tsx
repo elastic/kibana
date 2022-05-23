@@ -12,7 +12,7 @@ import { useToasts } from '../common/lib/kibana';
 import { resolveCase } from './api';
 import { ServerError } from '../types';
 
-export const useFetchCase = (caseId: string) => {
+export const useGetCase = (caseId: string) => {
   const toasts = useToasts();
   return useQuery<ResolvedCase, ServerError>(
     ['case', caseId],
@@ -35,4 +35,4 @@ export const useFetchCase = (caseId: string) => {
   );
 };
 
-export type UseFetchCase = ReturnType<typeof useFetchCase>;
+export type UseGetCase = ReturnType<typeof useGetCase>;

@@ -23,7 +23,7 @@ import {
 import { TestProviders } from '../../common/mock';
 import { SpacesApi } from '@kbn/spaces-plugin/public';
 import { useUpdateCase } from '../../containers/use_update_case';
-import { UseFetchCase, useFetchCase } from '../../containers/use_get_case';
+import { UseGetCase, useGetCase } from '../../containers/use_get_case';
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 
@@ -43,7 +43,7 @@ jest.mock('../user_actions/timestamp');
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
 
-const useFetchCaseMock = useFetchCase as jest.Mock;
+const useFetchCaseMock = useGetCase as jest.Mock;
 const useGetCaseMetricsMock = useGetCaseMetrics as jest.Mock;
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
@@ -159,7 +159,7 @@ describe('CaseView', () => {
     participants: [caseData.createdBy],
   };
 
-  const mockGetCase = (props: Partial<UseFetchCase> = {}) => {
+  const mockGetCase = (props: Partial<UseGetCase> = {}) => {
     const data = {
       ...defaultGetCase.data,
       ...props.data,

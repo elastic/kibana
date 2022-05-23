@@ -9,7 +9,7 @@ import React, { useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
-import { useFetchCase } from '../../containers/use_get_case';
+import { useGetCase } from '../../containers/use_get_case';
 import * as i18n from './translations';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
 import { DoesNotExist } from './does_not_exist';
@@ -46,7 +46,7 @@ export const CaseView = React.memo(
     const { detailName: caseId } = useCaseViewParams();
     const { basePath } = useCasesContext();
 
-    const { data, isLoading, isError, refetch } = useFetchCase(caseId);
+    const { data, isLoading, isError, refetch } = useGetCase(caseId);
 
     const updateCase = (_newCase: Case) => {
       refetch();
