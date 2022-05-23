@@ -5,4 +5,11 @@
  * 2.0.
  */
 
-export const APM_STATIC_INDEX_PATTERN_ID = 'apm_static_index_pattern_id';
+export const EQL_MODE_NAME = 'ace/mode/eql';
+export const EQL_THEME_NAME = 'ace/theme/eql';
+
+export enum EQLCodeEditorSuggestionType {
+  EventType = 'eventType',
+  Field = 'field',
+  Value = 'value',
+}
