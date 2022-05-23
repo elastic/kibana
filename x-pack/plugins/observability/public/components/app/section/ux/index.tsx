@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { AppDataType } from '../../../shared/exploratory_view/types';
+import type { AppDataType } from '../../../shared/exploratory_view/types';
 import { SectionContainer } from '..';
 import { getDataHandler } from '../../../../data_handler';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -48,7 +48,7 @@ export function UXSection({ bucketSize }: Props) {
         [SERVICE_NAME]: ['ALL_VALUES'],
       },
       breakdown: SERVICE_NAME,
-      dataType: AppDataType.ux,
+      dataType: 'ux' as AppDataType,
       selectedMetricField: TRANSACTION_DURATION,
     },
   ];
