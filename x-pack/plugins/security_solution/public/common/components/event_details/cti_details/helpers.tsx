@@ -24,7 +24,7 @@ import type {
 } from '../../../../../common/search_strategy/security_solution/cti';
 import { isValidEventField } from '../../../../../common/search_strategy/security_solution/cti';
 import { getFirstElement } from '../../../../../common/utils/data_retrieval';
-import { getDataFromFieldsHits } from '../../../../../common/utils/field_formatters';
+import { getDataFromSourceHits } from '../../../../../common/utils/field_formatters';
 
 export const isInvestigationTimeEnrichment = (type: string | undefined) =>
   type === ENRICHMENT_TYPES.InvestigationTime;
@@ -45,7 +45,7 @@ export const parseExistingEnrichments = (
   return enrichmentStrings.reduce<TimelineEventsDetailsItem[][]>(
     (enrichments, enrichmentString) => {
       try {
-        const enrichment = getDataFromFieldsHits(originalValue, enrichmentString);
+        const enrichment = getDataFromSourceHits(JSON.parse(enrichmentString));
         enrichments.push(enrichment);
       } catch (e) {
         // omit failed parse
