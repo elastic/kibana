@@ -133,7 +133,9 @@ export class CspPlugin
               await onPackagePolicyDeleteCallback(
                 this.logger,
                 deletedPackagePolicy,
-                core.savedObjects.createInternalRepository()
+                core.savedObjects.createInternalRepository(),
+                plugins.taskManager,
+                findingsAggregationConfig.id!
               );
             }
           }

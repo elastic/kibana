@@ -13,6 +13,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { PackagePolicy, DeletePackagePoliciesResponse } from '@kbn/fleet-plugin/common';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
   cloudSecurityPostureRuleTemplateSavedObjectType,
   CloudSecurityPostureRuleTemplateSchema,
@@ -22,6 +23,7 @@ import {
   cspRuleAssetSavedObjectType,
 } from '../../common/constants';
 import { CspRuleSchema } from '../../common/schemas/csp_rule';
+import { removeTask } from '../task_manager/task_manager_setup';
 
 type ArrayElement<ArrayType extends readonly unknown[]> = ArrayType extends ReadonlyArray<
   infer ElementType
@@ -79,17 +81,28 @@ export const onPackagePolicyPostCreateCallback = async (
 export const onPackagePolicyDeleteCallback = async (
   logger: Logger,
   deletedPackagePolicy: ArrayElement<DeletePackagePoliciesResponse>,
-  soClient: ISavedObjectsRepository
+  soClient: ISavedObjectsRepository,
+  taskManager: TaskManagerStartContract,
+  taskId: string
 ): Promise<void> => {
   try {
     const { saved_objects: cspRules }: SavedObjectsFindResponse<CspRuleSchema> =
       await soClient.find({
         type: cspRuleAssetSavedObjectType,
         filter: `${cspRuleAssetSavedObjectType}.attributes.package_policy_id: ${deletedPackagePolicy.id} AND ${cspRuleAssetSavedObjectType}.attributes.policy_id: ${deletedPackagePolicy.policy_id}`,
+        perPage: 10000,
       });
     await Promise.all(
       cspRules.map((rule) => soClient.delete(cspRuleAssetSavedObjectType, rule.id))
     );
+    const { saved_objects: postDeleteRules }: SavedObjectsFindResponse<CspRuleSchema> =
+      await soClient.find({
+        type: cspRuleAssetSavedObjectType,
+      });
+
+    if (!postDeleteRules.length) {
+      removeTask(taskManager, taskId, logger);
+    }
   } catch (e) {
     logger.error(`Failed to delete CSP rules after delete package ${deletedPackagePolicy.id}`);
     logger.error(e);

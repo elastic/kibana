@@ -213,8 +213,22 @@ export async function scheduleIndexScoreTask(
       state: {},
       params: {},
     });
+    logger.info(`task: ${taskConfig.id} is scheduled`);
   } catch (errMsg) {
     const error = transformError(errMsg);
     logger.error(`Error scheduling task, received ${error.message}`);
+  }
+}
+
+export async function removeTask(
+  taskManager: TaskManagerStartContract,
+  taskId: string,
+  logger: Logger
+) {
+  try {
+    await taskManager.remove(taskId);
+    logger.info(`Task: ${taskId} removed`);
+  } catch (errMsg) {
+    logger.error(`Failed to remove task: ${taskId}`);
   }
 }
