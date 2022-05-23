@@ -181,14 +181,7 @@ export const createExternalService: ServiceFactory = ({
   const createIncident = async ({ incident }: ExternalServiceParamsCreate) => {
     try {
       await checkIfApplicationIsInstalled();
-      console.log('SN args', {
-        axios: axiosInstance,
-        url: getCreateIncidentUrl(),
-        logger,
-        method: 'post',
-        data: prepareIncident(useTableApi, incident),
-        configurationUtilities,
-      });
+
       const res = await request({
         axios: axiosInstance,
         url: getCreateIncidentUrl(),

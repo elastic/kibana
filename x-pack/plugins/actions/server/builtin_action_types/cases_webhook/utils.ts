@@ -101,3 +101,23 @@ export const throwIfResponseIsNotValidSpecial = ({
     });
   }
 };
+
+export const removeSlash = (url: string) => (url.endsWith('/') ? url.slice(0, -1) : url);
+
+export const replaceSumDesc = (stringifiedJson: string, sum?: string, desc?: string | null) => {
+  let str = stringifiedJson;
+  if (sum != null) {
+    str = str.replace('$SUM', sum);
+  }
+  if (desc != null) {
+    str = str.replace('$DESC', desc);
+  }
+  return JSON.parse(str);
+};
+
+export const replaceComment = (stringifiedJson: string, comment: string) => {
+  let str = stringifiedJson;
+  str = str.replace('$COMMENT', comment);
+
+  return JSON.parse(str);
+};

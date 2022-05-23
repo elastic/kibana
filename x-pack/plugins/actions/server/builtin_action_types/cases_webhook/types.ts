@@ -60,11 +60,26 @@ export type PushToServiceApiParams = ExecutorSubActionPushParams;
 
 // incident service
 export interface ExternalService {
-  getIncident: (id: string) => Promise<GetIncidentResponse>;
+  createComment: (params: CreateCommentParams) => Promise<unknown>;
   createIncident: (params: CreateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
+  getIncident: (id: string) => Promise<GetIncidentResponse>;
+  updateIncident: (params: UpdateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
 }
 export interface CreateIncidentParams {
   incident: Incident;
+}
+export interface UpdateIncidentParams {
+  incidentId: string;
+  incident: Partial<Incident>;
+}
+export interface SimpleComment {
+  comment: string;
+  commentId: string;
+}
+
+export interface CreateCommentParams {
+  incidentId: string;
+  comment: SimpleComment;
 }
 
 export interface ExternalServiceApiHandlerArgs {
@@ -76,7 +91,15 @@ export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerAr
   params: PushToServiceApiParams;
   logger: Logger;
 }
-export type PushToServiceResponse = ExternalServiceIncidentResponse;
+export interface PushToServiceResponse extends ExternalServiceIncidentResponse {
+  comments?: ExternalServiceCommentResponse[];
+}
+
+export interface ExternalServiceCommentResponse {
+  commentId: string;
+  pushedDate: string;
+  externalCommentId?: string;
+}
 
 export interface GetIncidentResponse {
   id: string;

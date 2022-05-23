@@ -18,41 +18,40 @@ const pushToServiceHandler = async ({
 }: PushToServiceApiHandlerArgs): Promise<PushToServiceResponse> => {
   // const { comments } = params;
   const { externalId, ...rest } = params.incident;
+  const { comments } = params;
   const incident: Incident = rest;
-  const res: PushToServiceResponse = await externalService.createIncident({
-    incident,
-  });
+  let res: PushToServiceResponse;
 
-  // if (externalId != null) {
-  //   res = await externalService.updateIncident({
-  //     incidentId: externalId,
-  //     incident,
-  //   });
-  // } else {
-  //   res = await externalService.createIncident({
-  //     incident,
-  //   });
-  // }
+  if (externalId != null) {
+    res = await externalService.updateIncident({
+      incidentId: externalId,
+      incident,
+    });
+  } else {
+    res = await externalService.createIncident({
+      incident,
+    });
+  }
 
-  // if (comments && Array.isArray(comments) && comments.length > 0) {
-  //   res.comments = [];
-  //   for (const currentComment of comments) {
-  //     if (!currentComment.comment) {
-  //       continue;
-  //     }
-  //     const comment = await externalService.createComment({
-  //       incidentId: res.id,
-  //       comment: currentComment,
-  //     });
-  //     res.comments = [
-  //       ...(res.comments ?? []),
-  //       {
-  //         commentId: comment.commentId,
-  //         pushedDate: comment.pushedDate,
-  //       },
-  //     ];
-  //   }
-  // }
+  if (comments && Array.isArray(comments) && comments.length > 0) {
+    res.comments = [];
+    for (const currentComment of comments) {
+      if (!currentComment.comment) {
+        continue;
+      }
+      await externalService.createComment({
+        incidentId: res.id,
+        comment: currentComment,
+      });
+      res.comments = [
+        ...(res.comments ?? []),
+        {
+          commentId: currentComment.commentId,
+          pushedDate: res.pushedDate,
+        },
+      ];
+    }
+  }
 
   return res;
 };

@@ -12,6 +12,9 @@ import {
   createServiceError,
   getObjectValueByKey,
   getPushedDate,
+  removeSlash,
+  replaceComment,
+  replaceSumDesc,
   throwIfResponseIsNotValidSpecial,
 } from './utils';
 import {
@@ -22,6 +25,8 @@ import {
   CasesWebhookSecretConfigurationType,
   ExternalServiceIncidentResponse,
   GetIncidentResponse,
+  UpdateIncidentParams,
+  CreateCommentParams,
 } from './types';
 
 import * as i18n from './translations';
@@ -35,27 +40,31 @@ export const createExternalService = (
   configurationUtilities: ActionsConfigurationUtilities
 ): ExternalService => {
   const {
+    createCommentJson,
+    createCommentMethod,
+    createCommentUrl: createCommentUrlConfig,
+    createIncidentJson,
+    createIncidentMethod,
     createIncidentResponseKey,
     createIncidentUrl: createIncidentUrlConfig,
-    getIncidentUrl: getIncidentUrlConfig,
-    createIncidentJson,
     getIncidentResponseCreatedDateKey,
     getIncidentResponseExternalTitleKey,
     getIncidentResponseUpdatedDateKey,
+    getIncidentUrl: getIncidentUrlConfig,
     incidentViewUrl,
+    updateIncidentJson,
+    updateIncidentMethod,
+    updateIncidentUrl: updateIncidentUrlConfig,
   } = config as CasesWebhookPublicConfigurationType;
   const { password, user } = secrets as CasesWebhookSecretConfigurationType;
   if (!getIncidentUrlConfig || !password || !user) {
     throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
   }
 
-  const createIncidentUrl = createIncidentUrlConfig.endsWith('/')
-    ? createIncidentUrlConfig.slice(0, -1)
-    : createIncidentUrlConfig;
-
-  const getIncidentUrl = getIncidentUrlConfig.endsWith('/')
-    ? getIncidentUrlConfig.slice(0, -1)
-    : getIncidentUrlConfig;
+  const createCommentUrl = removeSlash(createCommentUrlConfig);
+  const createIncidentUrl = removeSlash(createIncidentUrlConfig);
+  const getIncidentUrl = removeSlash(getIncidentUrlConfig);
+  const updateIncidentUrl = removeSlash(updateIncidentUrlConfig);
 
   const getIncidentViewURL = (id: string) =>
     `${
@@ -98,13 +107,6 @@ export const createExternalService = (
     }
   };
 
-  const replaceSumDesc = (sum: string, desc: string) => {
-    let str = createIncidentJson; // incident is stringified object
-    str = str.replace('$SUM', sum);
-    str = str.replace('$DESC', desc);
-    return JSON.parse(str);
-  };
-
   const createIncident = async ({
     incident,
   }: CreateIncidentParams): Promise<ExternalServiceIncidentResponse> => {
@@ -114,8 +116,8 @@ export const createExternalService = (
         axios: axiosInstance,
         url: `${createIncidentUrl}`,
         logger,
-        method: 'post',
-        data: replaceSumDesc(summary, description ?? ''),
+        method: createIncidentMethod,
+        data: replaceSumDesc(createIncidentJson, summary, description ?? ''),
         configurationUtilities,
       });
 
@@ -141,91 +143,62 @@ export const createExternalService = (
     }
   };
 
-  // const updateIncident = async ({
-  //   incidentId,
-  //   incident,
-  // }: UpdateIncidentParams): Promise<ExternalServiceIncidentResponse> => {
-  //   const incidentWithoutNullValues = Object.entries(incident).reduce(
-  //     (obj, [key, value]) => (value != null ? { ...obj, [key]: value } : obj),
-  //     {} as Incident
-  //   );
-  //
-  //   const fields = createFields(projectKey, incidentWithoutNullValues);
-  //
-  //   try {
-  //     const res = await request({
-  //       axios: axiosInstance,
-  //       method: 'put',
-  //       url: `${createIncidentUrl}/${incidentId}`,
-  //       logger,
-  //       data: { fields },
-  //       configurationUtilities,
-  //     });
-  //
-  //     throwIfResponseIsNotValid({
-  //       res,
-  //     });
-  //
-  //     const updatedIncident = await getIncident(incidentId as string);
-  //
-  //     return {
-  //       title: updatedIncident.key,
-  //       id: updatedIncident.id,
-  //       pushedDate: new Date(updatedIncident.updated).toISOString(),
-  //       url: getIncidentViewURL(updatedIncident.key),
-  //     };
-  //   } catch (error) {
-  //     throw new Error(
-  //       getErrorMessage(
-  //         i18n.NAME,
-  //         `Unable to update incident with id ${incidentId}. Error: ${
-  //           error.message
-  //         }. Reason: ${createErrorMessage(error.response?.data)}`
-  //       )
-  //     );
-  //   }
-  // };
-  //
-  // const createComment = async ({
-  //   incidentId,
-  //   comment,
-  // }: CreateCommentParams): Promise<ExternalServiceCommentResponse> => {
-  //   try {
-  //     const res = await request({
-  //       axios: axiosInstance,
-  //       method: 'post',
-  //       url: getCommentsURL(incidentId),
-  //       logger,
-  //       data: { body: comment.comment },
-  //       configurationUtilities,
-  //     });
-  //
-  //     throwIfResponseIsNotValid({
-  //       res,
-  //       requiredAttributesToBeInTheResponse: ['id', 'created'],
-  //     });
-  //
-  //     return {
-  //       commentId: comment.commentId,
-  //       externalCommentId: res.data.id,
-  //       pushedDate: new Date(res.data.created).toISOString(),
-  //     };
-  //   } catch (error) {
-  //     throw new Error(
-  //       getErrorMessage(
-  //         i18n.NAME,
-  //         `Unable to create comment at incident with id ${incidentId}. Error: ${
-  //           error.message
-  //         }. Reason: ${createErrorMessage(error.response?.data)}`
-  //       )
-  //     );
-  //   }
-  // };
+  const updateIncident = async ({
+    incidentId,
+    incident,
+  }: UpdateIncidentParams): Promise<ExternalServiceIncidentResponse> => {
+    try {
+      const res = await request({
+        axios: axiosInstance,
+        method: updateIncidentMethod,
+        url: `${updateIncidentUrl}/${incidentId}`,
+        logger,
+        data: replaceSumDesc(updateIncidentJson, incident.summary, incident.description),
+        configurationUtilities,
+      });
+
+      throwIfResponseIsNotValidSpecial({
+        res,
+      });
+
+      const updatedIncident = await getIncident(incidentId as string);
+
+      return {
+        id: incidentId,
+        title: updatedIncident.title,
+        url: getIncidentViewURL(incidentId),
+        pushedDate: getPushedDate(updatedIncident.updated),
+      };
+    } catch (error) {
+      throw createServiceError(error, 'Unable to update incident');
+    }
+  };
+
+  const createComment = async ({ incidentId, comment }: CreateCommentParams): Promise<unknown> => {
+    try {
+      const res = await request({
+        axios: axiosInstance,
+        method: createCommentMethod,
+        url: `${createCommentUrl}/${incidentId}`,
+        logger,
+        data: replaceComment(createCommentJson, comment.comment),
+        configurationUtilities,
+      });
+
+      throwIfResponseIsNotValidSpecial({
+        res,
+      });
+
+      return res;
+    } catch (error) {
+      throw createServiceError(error, 'Unable to post comment');
+    }
+  };
 
   return {
-    getIncident,
+    createComment,
     createIncident,
-    // updateIncident,
-    // createComment,
+    getIncident,
+    updateIncident,
   };
 };
