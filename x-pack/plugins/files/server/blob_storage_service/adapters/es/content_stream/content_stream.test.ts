@@ -46,7 +46,7 @@ describe('ContentStream', () => {
 
       const [[request]] = client.get.mock.calls;
       expect(request).toHaveProperty('index', 'somewhere');
-      expect(request).toHaveProperty('id', 'something');
+      expect(request).toHaveProperty('id', '0.something');
     });
 
     it('should read the document contents', async () => {
@@ -101,11 +101,11 @@ describe('ContentStream', () => {
       const [[request1], [request2], [request3]] = client.get.mock.calls;
 
       expect(request1).toHaveProperty('index', 'somewhere');
-      expect(request1).toHaveProperty('id', 'something');
+      expect(request1).toHaveProperty('id', '0.something');
       expect(request2).toHaveProperty('index', 'somewhere');
-      expect(request2).toHaveProperty('id', 'something.1');
+      expect(request2).toHaveProperty('id', '1.something');
       expect(request3).toHaveProperty('index', 'somewhere');
-      expect(request3).toHaveProperty('id', 'something.2');
+      expect(request3).toHaveProperty('id', '2.something');
     });
 
     it('should stop reading on empty chunk', async () => {
@@ -186,7 +186,7 @@ describe('ContentStream', () => {
 
       const [[request]] = client.index.mock.calls;
 
-      expect(request).toHaveProperty('id', 'something');
+      expect(request).toHaveProperty('id', '0.something');
       expect(request).toHaveProperty('index', 'somewhere');
       expect(request).toHaveProperty('document.content', '123456');
     });
@@ -218,8 +218,8 @@ describe('ContentStream', () => {
       const [[request]] = client.deleteByQuery.mock.calls;
 
       expect(request).toHaveProperty('index', 'somewhere');
-      expect(request).toHaveProperty('query.bool.should.0.match.head_chunk_id', 'something');
-      expect(request).toHaveProperty('query.bool.should.1.match._id', 'something');
+      expect(request).toHaveProperty('query.bool.should.0.match.head_chunk_id', '0.something');
+      expect(request).toHaveProperty('query.bool.should.1.match._id', '0.something');
     });
 
     it('should split raw data into chunks', async () => {
@@ -235,10 +235,10 @@ describe('ContentStream', () => {
       expect(client.index).toHaveBeenNthCalledWith(
         2,
         expect.objectContaining({
-          id: 'something.1',
+          id: '1.something',
           index: 'somewhere',
           document: {
-            head_chunk_id: 'something',
+            head_chunk_id: '0.something',
             content: '34',
           },
         })
@@ -246,10 +246,10 @@ describe('ContentStream', () => {
       expect(client.index).toHaveBeenNthCalledWith(
         3,
         expect.objectContaining({
-          id: 'something.2',
+          id: '2.something',
           index: 'somewhere',
           document: {
-            head_chunk_id: 'something',
+            head_chunk_id: '0.something',
             content: '56',
           },
         })
@@ -269,22 +269,22 @@ describe('ContentStream', () => {
       expect(client.index).toHaveBeenNthCalledWith(
         2,
         expect.objectContaining({
-          id: 'something.1',
+          id: '1.something',
           index: 'somewhere',
           document: {
             content: Buffer.from('456').toString('base64'),
-            head_chunk_id: 'something',
+            head_chunk_id: '0.something',
           },
         })
       );
       expect(client.index).toHaveBeenNthCalledWith(
         3,
         expect.objectContaining({
-          id: 'something.2',
+          id: '2.something',
           index: 'somewhere',
           document: {
             content: Buffer.from('78').toString('base64'),
-            head_chunk_id: 'something',
+            head_chunk_id: '0.something',
           },
         })
       );
@@ -299,8 +299,11 @@ describe('ContentStream', () => {
 
       const [[deleteRequest]] = client.deleteByQuery.mock.calls;
 
-      expect(deleteRequest).toHaveProperty('query.bool.should.0.match.head_chunk_id', 'something');
-      expect(deleteRequest).toHaveProperty('query.bool.should.1.match._id', 'something');
+      expect(deleteRequest).toHaveProperty(
+        'query.bool.should.0.match.head_chunk_id',
+        '0.something'
+      );
+      expect(deleteRequest).toHaveProperty('query.bool.should.1.match._id', '0.something');
     });
   });
 });
