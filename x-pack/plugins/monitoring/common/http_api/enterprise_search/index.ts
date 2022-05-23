@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const APM_STATIC_INDEX_PATTERN_ID = 'apm_static_index_pattern_id';
+export * from './post_enterprise_search_overview';

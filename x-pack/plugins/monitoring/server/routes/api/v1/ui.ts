@@ -10,5 +10,3 @@
 
 // @ts-expect-error
 export { kibanaInstanceRoute, kibanaInstancesRoute, kibanaOverviewRoute } from './kibana';
-// @ts-expect-error
-export { entSearchOverviewRoute } from './enterprise_search';

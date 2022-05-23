@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { entSearchOverviewRoute } from './overview';
+import { MonitoringCore } from '../../../../types';
+import { entSearchOverviewRoute } from './overview';
+
+export function registerV1EnterpriseSearchRoutes(server: MonitoringCore) {
+  entSearchOverviewRoute(server);
+}
