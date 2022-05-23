@@ -21,14 +21,17 @@ import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { FieldValueQueryBar } from '../../../components/rules/query_bar';
 import { FieldValueTimeline } from '../../../components/rules/pick_timeline';
 import { FieldValueThreshold } from '../../../components/rules/threshold_input';
-import {
+import type {
   Author,
   BuildingBlockType,
   License,
+  RelatedIntegrationArray,
+  RequiredFieldArray,
   RuleNameOverride,
   SortOrder,
+  SetupGuide,
   TimestampOverride,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
+} from '../../../../../common/detection_engine/schemas/common';
 import { EqlOptionsSelected } from '../../../../../common/search_strategy';
 
 export interface EuiBasicTableSortTypes {
@@ -110,6 +113,7 @@ export interface AboutStepRule {
 export interface AboutStepRuleDetails {
   note: string;
   description: string;
+  setup: SetupGuide;
 }
 
 export interface AboutStepSeverity {
@@ -129,6 +133,8 @@ export interface DefineStepRule {
   index: string[];
   machineLearningJobId: string[];
   queryBar: FieldValueQueryBar;
+  relatedIntegrations: RelatedIntegrationArray;
+  requiredFields: RequiredFieldArray;
   ruleType: Type;
   timeline: FieldValueTimeline;
   threshold: FieldValueThreshold;

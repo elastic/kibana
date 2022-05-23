@@ -81,6 +81,8 @@ describe('rule helpers', () => {
           ],
           saved_id: 'test123',
         },
+        relatedIntegrations: [],
+        requiredFields: [],
         threshold: {
           field: ['host.name'],
           value: '50',
@@ -136,6 +138,7 @@ describe('rule helpers', () => {
       const aboutRuleDataDetailsData = {
         note: '# this is some markdown documentation',
         description: '24/7',
+        setup: '',
       };
 
       expect(defineRuleData).toEqual(defineRuleStepData);
@@ -219,6 +222,8 @@ describe('rule helpers', () => {
           filters: [],
           saved_id: "Garrett's IP",
         },
+        relatedIntegrations: [],
+        requiredFields: [],
         threshold: {
           field: [],
           value: '100',
@@ -266,6 +271,8 @@ describe('rule helpers', () => {
           filters: [],
           saved_id: undefined,
         },
+        relatedIntegrations: [],
+        requiredFields: [],
         threshold: {
           field: [],
           value: '100',
@@ -403,6 +410,7 @@ describe('rule helpers', () => {
       const aboutRuleDataDetailsData = {
         note: '# this is some markdown documentation',
         description: '24/7',
+        setup: '',
       };
 
       expect(result).toEqual(aboutRuleDataDetailsData);
@@ -412,7 +420,11 @@ describe('rule helpers', () => {
       const { note, ...mockRuleWithoutNote } = { ...mockRuleWithEverything('test-id') };
       const result: AboutStepRuleDetails = getModifiedAboutDetailsData(mockRuleWithoutNote);
 
-      const aboutRuleDetailsData = { note: '', description: mockRuleWithoutNote.description };
+      const aboutRuleDetailsData = {
+        note: '',
+        description: mockRuleWithoutNote.description,
+        setup: '',
+      };
 
       expect(result).toEqual(aboutRuleDetailsData);
     });
