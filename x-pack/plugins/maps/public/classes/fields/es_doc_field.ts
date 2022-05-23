@@ -9,6 +9,7 @@ import type { IndexPatternField } from '@kbn/data-plugin/public';
 import { indexPatterns } from '@kbn/data-plugin/public';
 import type {
   AggregationsExtendedStatsAggregation,
+  AggregationsPercentilesAggregation,
   AggregationsTermsAggregation,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FIELD_ORIGIN } from '../../../common/constants';
@@ -82,7 +83,10 @@ export class ESDocField extends AbstractField implements IField {
       : super.getLabel();
   }
 
-  async getExtendedStatsFieldMetaRequest(): Promise<unknown | null> {
+  async getExtendedStatsFieldMetaRequest(): Promise<Record<
+    string,
+    { extended_stats: AggregationsExtendedStatsAggregation }
+  > | null> {
     const indexPatternField = await this._getIndexPatternField();
 
     if (
@@ -108,17 +112,19 @@ export class ESDocField extends AbstractField implements IField {
     };
   }
 
-  async getPercentilesFieldMetaRequest(percentiles: number[]): Promise<unknown | null> {
+  async getPercentilesFieldMetaRequest(
+    percentiles: number[]
+  ): Promise<Record<string, { percentiles: AggregationsPercentilesAggregation }> | null> {
     const indexPatternField = await this._getIndexPatternField();
 
     if (!indexPatternField || indexPatternField.type !== 'number') {
       return null;
     }
 
-    const metricAggConfig: { script?: unknown; field?: string; percents: number[] } = {
+    const metricAggConfig: AggregationsPercentilesAggregation = {
       percents: [0, ...percentiles],
     };
-    if (indexPatternField.scripted) {
+    if (indexPatternField.scripted && indexPatternField.script) {
       metricAggConfig.script = {
         source: indexPatternField.script,
         lang: indexPatternField.lang,
@@ -133,7 +139,9 @@ export class ESDocField extends AbstractField implements IField {
     };
   }
 
-  async getCategoricalFieldMetaRequest(size: number): Promise<unknown> {
+  async getCategoricalFieldMetaRequest(
+    size: number
+  ): Promise<Record<string, { terms: AggregationsTermsAggregation }> | null> {
     const indexPatternField = await this._getIndexPatternField();
     if (!indexPatternField || size <= 0) {
       return null;
