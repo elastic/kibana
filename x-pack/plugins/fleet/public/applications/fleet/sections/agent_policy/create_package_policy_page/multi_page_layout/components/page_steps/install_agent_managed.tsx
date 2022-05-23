@@ -13,9 +13,11 @@ import { Error } from '../../../../../../components';
 import { useKibanaVersion, useStartServices } from '../../../../../../../../hooks';
 import type { MultiPageStepLayoutProps } from '../../types';
 import { CreatePackagePolicyBottomBar, NotObscuredByBottomBar } from '..';
-import { InstallManagedAgentStep } from '../../../../../../../../components/agent_enrollment_flyout/steps';
+import {
+  InstallManagedAgentStep,
+  AgentEnrollmentConfirmationStep,
+} from '../../../../../../../../components/agent_enrollment_flyout/steps';
 import { usePollingAgentCount } from '../../../../../../../../components/agent_enrollment_flyout/confirm_agent_enrollment';
-import { AgentEnrollmentConfirmationStep } from '../../../../../../../../components/agent_enrollment_flyout/steps';
 import { ManualInstructions } from '../../../../../../../../components/enrollment_instructions';
 
 export const InstallElasticAgentManagedPageStep: React.FC<MultiPageStepLayoutProps> = (props) => {
@@ -76,7 +78,7 @@ export const InstallElasticAgentManagedPageStep: React.FC<MultiPageStepLayoutPro
   ];
 
   return (
-    <div>
+    <>
       <EuiText>
         <FormattedMessage
           id="xpack.fleet.addIntegration.installAgentStepTitle"
@@ -105,6 +107,6 @@ export const InstallElasticAgentManagedPageStep: React.FC<MultiPageStepLayoutPro
           />
         </>
       )}
-    </div>
+    </>
   );
 };

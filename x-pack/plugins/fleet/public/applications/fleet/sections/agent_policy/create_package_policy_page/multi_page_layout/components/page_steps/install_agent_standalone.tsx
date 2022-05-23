@@ -5,40 +5,142 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-// import { EuiText, EuiLink } from '@elastic/eui';
+import { EuiSteps, EuiSpacer } from '@elastic/eui';
+import { safeDump } from 'js-yaml';
+
+import type { FullAgentPolicy } from '../../../../../../../../../common/types/models/agent_policy';
 
 import type { MultiPageStepLayoutProps } from '../../types';
-import { CreatePackagePolicyBottomBar } from '..';
+import {
+  CreatePackagePolicyBottomBar,
+  StandaloneModeWarningCallout,
+  NotObscuredByBottomBar,
+} from '..';
+import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../../../../../../services';
+
+import { Error as FleetError } from '../../../../../../components';
+import {
+  useKibanaVersion,
+  useStartServices,
+  sendGetOneAgentPolicyFull,
+} from '../../../../../../../../hooks';
+import {
+  InstallStandaloneAgentStep,
+  AgentEnrollmentConfirmationStep,
+  ConfigureStandaloneAgentStep,
+} from '../../../../../../../../components/agent_enrollment_flyout/steps';
+import { usePollingAgentCount } from '../../../../../../../../components/agent_enrollment_flyout/confirm_agent_enrollment';
+import { StandaloneInstructions } from '../../../../../../../../components/enrollment_instructions';
+
 export const InstallElasticAgentStandalonePageStep: React.FC<MultiPageStepLayoutProps> = (
   props
 ) => {
-  const { cancelUrl, onNext, cancelClickHandler, setIsManaged } = props;
-  return (
-    <div>
-      <>standalone </>
-      {/* <EuiText>
-        <FormattedMessage
-          id="xpack.fleet.addIntegration.installAgentStepTitle"
-          defaultMessage="These steps configure and enroll the Elastic Agent in Fleet to automatically deploy updates and
-          centrally manage the agent. As an alternative to Fleet, advanced users can run agents in {standaloneLink}."
-          values={{
-            standaloneLink: <EuiLink onClick={() => setIsManaged(false)}>standalone mode</EuiLink>,
-          }}
-        />
-      </EuiText> */}
-      <CreatePackagePolicyBottomBar
-        cancelUrl={cancelUrl}
-        cancelClickHandler={cancelClickHandler}
-        onNext={onNext}
-        actionMessage={
+  const { cancelUrl, onNext, cancelClickHandler, setIsManaged, agentPolicy } = props;
+  const core = useStartServices();
+  const kibanaVersion = useKibanaVersion();
+  const { docLinks } = core;
+  const [yaml, setYaml] = useState<any | undefined>('');
+  const link = docLinks.links.fleet.troubleshooting;
+  const enrolledAgentIds = usePollingAgentCount(agentPolicy?.id || '', {
+    noLowerTimeLimit: true,
+    pollImmediately: true,
+  });
+  const [fullAgentPolicy, setFullAgentPolicy] = useState<FullAgentPolicy | undefined>();
+
+  useEffect(() => {
+    async function fetchFullPolicy() {
+      try {
+        if (!agentPolicy?.id) {
+          return;
+        }
+        const query = { standalone: true, kubernetes: false };
+        const res = await sendGetOneAgentPolicyFull(agentPolicy?.id, query);
+        if (res.error) {
+          throw res.error;
+        }
+
+        if (!res.data) {
+          throw new Error('No data while fetching full agent policy');
+        }
+        setFullAgentPolicy(res.data.item);
+      } catch (error) {
+        core.notifications.toasts.addError(error, {
+          title: 'Error',
+        });
+      }
+    }
+    fetchFullPolicy();
+  }, [core.http.basePath, agentPolicy?.id, core.notifications.toasts]);
+
+  useEffect(() => {
+    if (!fullAgentPolicy) {
+      return;
+    }
+
+    setYaml(fullAgentPolicyToYaml(fullAgentPolicy, safeDump));
+  }, [fullAgentPolicy]);
+
+  if (!agentPolicy) {
+    return (
+      <FleetError
+        title={
           <FormattedMessage
-            id="xpack.fleet.addFirstIntegrationSplash.installAgentButton"
-            defaultMessage="Add the integration"
+            id="xpack.fleet.createPackagePolicy.errorLoadingPackageTitle"
+            defaultMessage="Error loading package information"
           />
         }
+        error={'Agent policy not provided'}
       />
-    </div>
+    );
+  }
+
+  const installManagedCommands = StandaloneInstructions(kibanaVersion);
+
+  const downloadLink = core.http.basePath.prepend(
+    `${agentPolicyRouteService.getInfoFullDownloadPath(agentPolicy?.id)}?standalone=true`
+  );
+  const steps = [
+    ConfigureStandaloneAgentStep({
+      selectedPolicyId: agentPolicy?.id,
+      yaml,
+      downloadLink,
+      isComplete: !!enrolledAgentIds.length,
+    }),
+    InstallStandaloneAgentStep({
+      installCommand: installManagedCommands,
+      isComplete: !!enrolledAgentIds.length,
+    }),
+    AgentEnrollmentConfirmationStep({
+      selectedPolicyId: agentPolicy?.id,
+      troubleshootLink: link,
+      agentCount: enrolledAgentIds.length,
+      showLoading: true,
+    }),
+  ];
+
+  return (
+    <>
+      <StandaloneModeWarningCallout setIsManaged={setIsManaged} />
+      <EuiSpacer size={'xl'} />
+      <EuiSteps steps={steps} />
+      {!!enrolledAgentIds.length && (
+        <>
+          <NotObscuredByBottomBar />
+          <CreatePackagePolicyBottomBar
+            cancelUrl={cancelUrl}
+            cancelClickHandler={cancelClickHandler}
+            onNext={onNext}
+            actionMessage={
+              <FormattedMessage
+                id="xpack.fleet.createFirstPackagePolicy.confirmIncomingDataButton"
+                defaultMessage="Confirm incoming data"
+              />
+            }
+          />
+        </>
+      )}
+    </>
   );
 };

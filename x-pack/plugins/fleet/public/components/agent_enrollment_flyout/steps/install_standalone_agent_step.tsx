@@ -19,14 +19,17 @@ import type { K8sMode } from '../types';
 export const InstallStandaloneAgentStep = ({
   installCommand,
   isK8s,
+  isComplete,
 }: {
   installCommand: CommandsByPlatform;
   isK8s?: K8sMode;
+  isComplete: boolean;
 }): EuiContainedStepProps => {
   return {
     title: i18n.translate('xpack.fleet.agentEnrollment.stepEnrollAndRunAgentTitle', {
       defaultMessage: 'Install Elastic Agent on your host',
     }),
     children: <InstallSection installCommand={installCommand} isK8s={isK8s} />,
+    status: isComplete ? 'complete' : undefined,
   };
 };

@@ -7,7 +7,7 @@
 
 import React, { useCallback, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiText, EuiCallOut, EuiLink, EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { safeLoad } from 'js-yaml';
 
 import { i18n } from '@kbn/i18n';
@@ -19,37 +19,11 @@ import { sendCreatePackagePolicy, useStartServices } from '../../../../../../hoo
 import type { RequestError } from '../../../../../../hooks';
 import { Error } from '../../../../../../components';
 import { sendGeneratePackagePolicy } from '../../hooks';
-import { CreatePackagePolicyBottomBar } from '..';
+import { CreatePackagePolicyBottomBar, StandaloneModeWarningCallout } from '..';
 import type { PackagePolicyValidationResults } from '../../../services';
 import { validatePackagePolicy, validationHasErrors } from '../../../services';
 import { NotObscuredByBottomBar } from '..';
 import { StepConfigurePackagePolicy } from '../../../components';
-const StandaloneWarningCallout: React.FC<{
-  setIsManaged: MultiPageStepLayoutProps['setIsManaged'];
-}> = ({ setIsManaged }) => {
-  return (
-    <EuiCallOut
-      title="Setting up to run Elastic Agent in standalone mode"
-      color="primary"
-      iconType="iInCircle"
-    >
-      <EuiText>
-        <FormattedMessage
-          id="xpack.fleet.addIntegration.standaloneWarning"
-          defaultMessage="Setting up integrations by running Elastic Agent in standalone mode is advanced. When possible, we recommend using {link} instead. "
-          values={{ link: <EuiLink href="#">Fleet-managed agents</EuiLink> }}
-        />
-      </EuiText>
-      <EuiSpacer size="m" />
-      <EuiButton onClick={() => setIsManaged(true)} color="primary">
-        <FormattedMessage
-          id="xpack.fleet.addIntegration.switchToManagedButton"
-          defaultMessage="Enroll in Fleet instead (recommended)"
-        />
-      </EuiButton>
-    </EuiCallOut>
-  );
-};
 
 const AddIntegrationError: React.FC<{ error: Error | string; title?: JSX.Element }> = ({
   error,
@@ -193,7 +167,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
 
   return (
     <>
-      {isManaged ? null : <StandaloneWarningCallout setIsManaged={setIsManaged} />}
+      {isManaged ? null : <StandaloneModeWarningCallout setIsManaged={setIsManaged} />}
       <EuiSpacer size={'l'} />
       <StepConfigurePackagePolicy
         packageInfo={packageInfo}
@@ -211,10 +185,17 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
         isLoading={formState === 'LOADING'}
         isDisabled={formState === 'INVALID'}
         actionMessage={
-          <FormattedMessage
-            id="xpack.fleet.createFirstPackagePolicy.confirm"
-            defaultMessage="Confirm incoming data"
-          />
+          isManaged ? (
+            <FormattedMessage
+              id="xpack.fleet.createFirstPackagePolicy.confirmIncomingDataButton"
+              defaultMessage="Confirm incoming data"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.fleet.createFirstPackagePolicy.installAgentButton"
+              defaultMessage="Install Elastic agent"
+            />
+          )
         }
       />
     </>
