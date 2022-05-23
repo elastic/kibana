@@ -14,6 +14,7 @@ import {
   DocLinksStart,
   HttpSetup,
   ApplicationStart,
+  ThemeServiceStart,
 } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { ManagementAppMountParams } from '../../management/public';
@@ -42,6 +43,7 @@ export interface IndexPatternManagmentContext {
   IndexPatternEditor: DataViewEditorStart['IndexPatternEditorComponent'];
   fieldFormats: FieldFormatsStart;
   spaces?: SpacesPluginStart;
+  theme: ThemeServiceStart;
 }
 
 export type IndexPatternManagmentContextValue =

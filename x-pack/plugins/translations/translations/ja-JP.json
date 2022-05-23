@@ -13330,7 +13330,6 @@
     "xpack.fleet.serverError.enrollmentKeyDuplicate": "エージェントポリシーの{agentPolicyId}登録キー{providedKeyName}はすでに存在します",
     "xpack.fleet.serverError.returnedIncorrectKey": "find enrollmentKeyByIdで正しくないキーが返されました",
     "xpack.fleet.serverError.unableToCreateEnrollmentKey": "登録APIキーを作成できません",
-    "xpack.fleet.serverPlugin.integrationsPrivilegesTooltip": "すべての統合アクセスには、すべてのSpacesが必要です。",
     "xpack.fleet.serverPlugin.privilegesTooltip": "Fleetアクセスには、すべてのSpacesが必要です。",
     "xpack.fleet.settings.confirmModal.cancelButtonText": "キャンセル",
     "xpack.fleet.settings.confirmModal.confirmButtonText": "保存してデプロイ",

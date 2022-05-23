@@ -284,18 +284,11 @@ export class FleetPlugin
         category: DEFAULT_APP_CATEGORIES.management,
         app: [INTEGRATIONS_PLUGIN_ID],
         catalogue: ['fleet'],
-        privilegesTooltip: i18n.translate(
-          'xpack.fleet.serverPlugin.integrationsPrivilegesTooltip',
-          {
-            defaultMessage: 'All Spaces is required for All Integrations access.',
-          }
-        ),
         privileges: {
           all: {
             api: [`${INTEGRATIONS_PLUGIN_ID}-read`, `${INTEGRATIONS_PLUGIN_ID}-all`],
             app: [INTEGRATIONS_PLUGIN_ID],
             catalogue: ['fleet'],
-            requireAllSpaces: true,
             savedObject: {
               all: allSavedObjectTypes,
               read: [],

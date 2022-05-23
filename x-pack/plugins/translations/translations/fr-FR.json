@@ -13211,7 +13211,6 @@
     "xpack.fleet.serverError.enrollmentKeyDuplicate": "Une clé d'enregistrement nommée {providedKeyName} existe déjà pour la stratégie d'agent {agentPolicyId}",
     "xpack.fleet.serverError.returnedIncorrectKey": "La commande find enrollmentKeyById a renvoyé une clé erronée",
     "xpack.fleet.serverError.unableToCreateEnrollmentKey": "Impossible de créer une clé d'API d'enregistrement",
-    "xpack.fleet.serverPlugin.integrationsPrivilegesTooltip": "Tous les espaces sont requis pour l’accès à toutes les intégrations.",
     "xpack.fleet.serverPlugin.privilegesTooltip": "Tous les espaces sont requis pour l’accès à Fleet.",
     "xpack.fleet.settings.confirmModal.cancelButtonText": "Annuler",
     "xpack.fleet.settings.confirmModal.confirmButtonText": "Enregistrer et déployer",

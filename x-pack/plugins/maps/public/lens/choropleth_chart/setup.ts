@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FileLayer } from '@elastic/ems-client';
 import type { ExpressionsSetup } from 'src/plugins/expressions/public';
 import type { CoreSetup, CoreStart } from 'src/core/public';
 import type { LensPublicSetup } from '../../../../lens/public';
@@ -28,9 +29,17 @@ export function setupLensChoroplethChart(
       await coreSetup.getStartServices();
     const { getEmsFileLayers } = await import('../../util');
     const { getVisualization } = await import('./visualization');
+
+    let emsFileLayers: FileLayer[] = [];
+    try {
+      emsFileLayers = await getEmsFileLayers();
+    } catch (error) {
+      // ignore error, lack of EMS file layers will be surfaced in dimension editor
+    }
+
     return getVisualization({
       theme: coreStart.theme,
-      emsFileLayers: await getEmsFileLayers(),
+      emsFileLayers,
       paletteService: await plugins.charts.palettes.getPalettes(),
     });
   });

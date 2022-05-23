@@ -596,9 +596,12 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
     Array [
       Object {
         "columnHeaderType": "not-filtered",
+        "esTypes": Array [
+          "date",
+        ],
         "id": "@timestamp",
         "initialWidth": 190,
-        "type": "number",
+        "type": "date",
       },
       Object {
         "columnHeaderType": "not-filtered",

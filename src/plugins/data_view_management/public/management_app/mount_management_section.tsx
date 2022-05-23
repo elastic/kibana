@@ -66,6 +66,7 @@ export async function mountManagementSection(
     IndexPatternEditor: dataViewEditor.IndexPatternEditorComponent,
     fieldFormats,
     spaces,
+    theme,
   };
 
   ReactDOM.render(
