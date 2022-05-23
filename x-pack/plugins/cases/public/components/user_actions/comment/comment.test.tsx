@@ -21,9 +21,12 @@ import {
 import { TestProviders } from '../../../common/mock';
 import { createCommentUserActionBuilder } from './comment';
 import { getMockBuilderArgs } from '../mock';
+import { useCaseViewParams } from '../../../common/navigation';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/navigation/hooks');
+
+const useCaseViewParamsMock = useCaseViewParams as jest.Mock;
 
 describe('createCommentUserActionBuilder', () => {
   const builderArgs = getMockBuilderArgs();
@@ -113,7 +116,8 @@ describe('createCommentUserActionBuilder', () => {
   });
 
   describe('Multiple alerts', () => {
-    it('renders correctly multiple alerts', async () => {
+    it('renders correctly multiple alerts with a link to the alerts table', async () => {
+      useCaseViewParamsMock.mockReturnValue({ detailName: '1234' });
       const userAction = getAlertUserAction();
 
       const builder = createCommentUserActionBuilder({
@@ -141,6 +145,7 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByTestId('multiple-alerts-user-action-alert-action-id')).toHaveTextContent(
         'added 2 alerts from Awesome rule'
       );
+      expect(screen.getByTestId('comment-action-show-alerts-1234'));
     });
   });
 

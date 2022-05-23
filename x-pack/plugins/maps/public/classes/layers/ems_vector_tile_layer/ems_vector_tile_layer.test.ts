@@ -55,6 +55,26 @@ describe('EmsVectorTileLayer', () => {
     expect(actualErrorMessage).toStrictEqual('network error');
   });
 
+  describe('getLocale', () => {
+    test('should set locale to none for existing layers where locale is not defined', () => {
+      const layer = new EmsVectorTileLayer({
+        source: {} as unknown as EMSTMSSource,
+        layerDescriptor: {} as unknown as LayerDescriptor,
+      });
+      expect(layer.getLocale()).toBe('none');
+    });
+
+    test('should set locale for new layers', () => {
+      const layer = new EmsVectorTileLayer({
+        source: {} as unknown as EMSTMSSource,
+        layerDescriptor: {
+          locale: 'xx',
+        } as unknown as LayerDescriptor,
+      });
+      expect(layer.getLocale()).toBe('xx');
+    });
+  });
+
   describe('isInitialDataLoadComplete', () => {
     test('should return false when tile loading has not started', () => {
       const layer = new EmsVectorTileLayer({

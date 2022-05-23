@@ -12,10 +12,10 @@ import { act } from 'react-dom/test-utils';
 import { EuiLoadingElastic } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { SharedUxServicesProvider, mockServicesFactory } from '@kbn/shared-ux-services';
+import { NoDataViewsPrompt } from '@kbn/shared-ux-prompt-no-data-views';
 
 import { KibanaNoDataPage } from './kibana_no_data_page';
 import { NoDataConfigPage } from '../page_template';
-import { NoDataViews } from './no_data_views';
 
 describe('Kibana No Data Page', () => {
   const noDataConfig = {
@@ -52,7 +52,7 @@ describe('Kibana No Data Page', () => {
     component.update();
 
     expect(component.find(NoDataConfigPage).length).toBe(1);
-    expect(component.find(NoDataViews).length).toBe(0);
+    expect(component.find(NoDataViewsPrompt).length).toBe(0);
   });
 
   test('renders NoDataViews', async () => {
@@ -66,7 +66,7 @@ describe('Kibana No Data Page', () => {
     await act(() => new Promise(setImmediate));
     component.update();
 
-    expect(component.find(NoDataViews).length).toBe(1);
+    expect(component.find(NoDataViewsPrompt).length).toBe(1);
     expect(component.find(NoDataConfigPage).length).toBe(0);
   });
 
@@ -90,7 +90,7 @@ describe('Kibana No Data Page', () => {
     component.update();
 
     expect(component.find(EuiLoadingElastic).length).toBe(1);
-    expect(component.find(NoDataViews).length).toBe(0);
+    expect(component.find(NoDataViewsPrompt).length).toBe(0);
     expect(component.find(NoDataConfigPage).length).toBe(0);
   });
 });
