@@ -19,13 +19,13 @@ import {
 
 type SearchFn = (params: any) => Promise<ElasticsearchResponse>;
 
-type MonitoredClustersResponse = {
+interface MonitoredClustersResponse {
   clusters?: any;
   execution: {
     timedOut?: boolean;
     errors?: string[];
   };
-};
+}
 
 export const fetchMonitoredClusters = async ({
   timeout,

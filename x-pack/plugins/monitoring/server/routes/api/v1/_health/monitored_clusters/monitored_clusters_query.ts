@@ -7,10 +7,10 @@
 
 import { TimeRange } from '../../../../../../common/http_api/shared';
 
-type QueryOptions = {
+interface QueryOptions {
   timeRange?: TimeRange;
   timeout: number; // in seconds
-};
+}
 
 /**
  * returns a nested aggregation of the monitored products per cluster, standalone
