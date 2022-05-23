@@ -156,12 +156,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
            *    - Rule exits early if data view defined is not found (ie: it's been deleted)
            *  - If no data view defined, falls to using existing index logic
            */
-          if (
-            isEqlParams(params) ||
-            isQueryParams(params) ||
-            isThresholdParams(params) ||
-            isThreatParams(params)
-          ) {
+          if (!isMachineLearningParams(params)) {
             try {
               const { index, runtimeMappings: dataViewRuntimeMappings } = await getInputIndex({
                 index: params.index,
@@ -169,7 +164,13 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 version,
                 logger,
                 ruleId: params.ruleId,
-                dataViewId: params.dataViewId,
+                dataViewId:
+                  isEqlParams(params) ||
+                  isQueryParams(params) ||
+                  isThresholdParams(params) ||
+                  isThreatParams(params)
+                    ? params.dataViewId
+                    : undefined,
               });
 
               inputIndex = index ?? [];

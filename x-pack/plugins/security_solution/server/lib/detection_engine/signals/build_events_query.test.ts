@@ -495,7 +495,7 @@ describe('create_signals', () => {
         body: {
           size: 100,
           query: 'process where true',
-          runtime_mappings: {},
+          runtime_mappings: undefined,
           filter: {
             bool: {
               filter: [
@@ -544,7 +544,7 @@ describe('create_signals', () => {
           event_category_field: 'event.other_category',
           size: 100,
           query: 'process where true',
-          runtime_mappings: {},
+          runtime_mappings: undefined,
           filter: {
             bool: {
               filter: [
@@ -627,7 +627,7 @@ describe('create_signals', () => {
         body: {
           size: 100,
           query: 'process where true',
-          runtime_mappings: {},
+          runtime_mappings: undefined,
           filter: {
             bool: {
               filter: [
