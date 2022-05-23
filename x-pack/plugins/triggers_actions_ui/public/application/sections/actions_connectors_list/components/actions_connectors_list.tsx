@@ -459,7 +459,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
             setAddFlyoutVisibility(false);
           }}
           onTestConnector={(connector) => editItem(connector, EditConnectorTabs.Test)}
-          // reloadConnectors={loadActions}
+          onConnectorCreated={loadActions}
           actionTypeRegistry={actionTypeRegistry}
         />
       ) : null}
@@ -473,7 +473,10 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
           onClose={() => {
             setEditConnectorProps(omit(editConnectorProps, 'initialConnector'));
           }}
-          reloadConnectors={loadActions}
+          onConnectorCreated={(connector) => {
+            setEditConnectorProps({ initialConnector: connector });
+            loadActions();
+          }}
           actionTypeRegistry={actionTypeRegistry}
         />
       ) : null}

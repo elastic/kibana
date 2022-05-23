@@ -220,6 +220,16 @@ export type ActionConnectorWithoutId<
   Secrets = Record<string, unknown>
 > = Omit<UserConfiguredActionConnector<Config, Secrets>, 'id'>;
 
+export interface UpdateConnectorSchema {
+  id: string;
+  name: string;
+  config: Record<string, unknown>;
+  secrets: Record<string, unknown>;
+}
+export interface CreateConnectorSchema extends Omit<UpdateConnectorSchema, 'id'> {
+  actionTypeId: string;
+}
+
 export type ActionConnectorTableItem = ActionConnector & {
   actionType: ActionType['name'];
 };

@@ -21,8 +21,8 @@ interface Props {
   showButtons: boolean;
   disabled: boolean;
   onCancel: () => void;
-  onSubmit: () => Promise<void>;
-  onSubmitAndClose: () => Promise<void>;
+  onSubmit: () => void;
+  onSubmitAndClose: () => void;
 }
 
 const FlyoutFooterComponent: React.FC<Props> = ({

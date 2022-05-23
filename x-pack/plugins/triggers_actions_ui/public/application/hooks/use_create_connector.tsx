@@ -7,11 +7,10 @@
 
 import { useRef, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ActionConnector, ActionConnectorWithoutId } from '../../types';
+import { ActionConnector } from '../../types';
 import { createActionConnector } from '../lib/action_connector_api';
 import { useKibana } from '../../common/lib/kibana';
-
-type Connector = Omit<ActionConnectorWithoutId, 'referencedByCount'>;
+import { Connector } from '../sections/action_connector_form/types';
 
 interface UseCreateConnectorReturnValue {
   isLoading: boolean;
@@ -39,6 +38,18 @@ export const useCreateConnector = (): UseCreateConnectorReturnValue => {
 
       if (isMounted.current) {
         setIsLoading(false);
+
+        toasts.addSuccess(
+          i18n.translate(
+            'xpack.triggersActionsUI.sections.addConnectorForm.updateSuccessNotificationText',
+            {
+              defaultMessage: "Created '{connectorName}'",
+              values: {
+                connectorName: res.name,
+              },
+            }
+          )
+        );
       }
 
       return res;

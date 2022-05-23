@@ -7,15 +7,13 @@
 
 import { useRef, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ActionConnector, UserConfiguredActionConnector } from '../../types';
+import { ActionConnector, UpdateConnectorSchema, UserConfiguredActionConnector } from '../../types';
 import { updateActionConnector } from '../lib/action_connector_api';
 import { useKibana } from '../../common/lib/kibana';
 
-type Connector = UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>;
-
 interface UseUpdateConnectorReturnValue {
   isLoading: boolean;
-  updateConnector: (connector: Connector) => Promise<ActionConnector | undefined>;
+  updateConnector: (connector: UpdateConnectorSchema) => Promise<ActionConnector | undefined>;
 }
 
 export const useUpdateConnector = (): UseUpdateConnectorReturnValue => {
@@ -28,7 +26,7 @@ export const useUpdateConnector = (): UseUpdateConnectorReturnValue => {
   const abortCtrlRef = useRef(new AbortController());
   const isMounted = useRef(false);
 
-  async function updateConnector(connector: Connector) {
+  async function updateConnector(connector: UpdateConnectorSchema) {
     setIsLoading(true);
     isMounted.current = true;
     abortCtrlRef.current.abort();

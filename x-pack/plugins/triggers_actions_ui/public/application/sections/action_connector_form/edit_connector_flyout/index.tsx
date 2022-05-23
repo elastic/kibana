@@ -6,23 +6,7 @@
  */
 
 import React, { memo, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
-import {
-  EuiFlyout,
-  EuiBetaBadge,
-  EuiText,
-  EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyoutHeader,
-  EuiIcon,
-  EuiTab,
-  EuiTabs,
-  EuiFlyoutBody,
-  EuiLink,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlyoutFooter,
-} from '@elastic/eui';
+import { EuiFlyout, EuiText, EuiFlyoutBody, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeExecutorResult, isActionTypeExecutorResult } from '@kbn/actions-plugin/common';
@@ -34,7 +18,7 @@ import {
   EditConnectorTabs,
   UserConfiguredActionConnector,
 } from '../../../../types';
-import { ConnectorForm, CreateConnectorFormState } from '../connector_form';
+import { ConnectorForm, ConnectorFormState } from '../connector_form';
 import { Connector } from '../types';
 import { useUpdateConnector } from '../../../hooks/use_edit_connector';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -49,7 +33,7 @@ interface EditConnectorFlyoutProps {
   connector: ActionConnector;
   onClose: () => void;
   tab?: EditConnectorTabs;
-  reloadConnectors?: () => Promise<ActionConnector[] | void>;
+  onConnectorCreated?: (connector: ActionConnector) => void;
 }
 
 const getConnectorWithoutSecrets = (
@@ -58,53 +42,6 @@ const getConnectorWithoutSecrets = (
   ...connector,
   secrets: {},
 });
-
-const FlyoutHeaderTitle: React.FC<{
-  isPreconfigured: boolean;
-  connectorName: string;
-  connectorTypeDesc: string;
-}> = ({ isPreconfigured, connectorTypeDesc, connectorName }) => {
-  return isPreconfigured ? (
-    <>
-      <EuiTitle size="s">
-        <h3 id="flyoutTitle">
-          <FormattedMessage
-            defaultMessage="{connectorName}"
-            id="xpack.triggersActionsUI.sections.preconfiguredConnectorForm.flyoutTitle"
-            values={{ connectorName }}
-          />
-          &emsp;
-          <EuiBetaBadge
-            label="Preconfigured"
-            data-test-subj="preconfiguredBadge"
-            tooltipContent={i18n.translate(
-              'xpack.triggersActionsUI.sections.preconfiguredConnectorForm.tooltipContent',
-              {
-                defaultMessage: 'This connector is preconfigured and cannot be edited',
-              }
-            )}
-          />
-        </h3>
-      </EuiTitle>
-      <EuiText size="s">
-        <FormattedMessage
-          defaultMessage="{connectorTypeDesc}"
-          id="xpack.triggersActionsUI.sections.editConnectorForm.actionTypeDescription"
-          values={{ connectorTypeDesc }}
-        />
-      </EuiText>
-    </>
-  ) : (
-    <EuiTitle size="s">
-      <h3 id="flyoutTitle">
-        <FormattedMessage
-          defaultMessage="Edit connector"
-          id="xpack.triggersActionsUI.sections.editConnectorForm.flyoutPreconfiguredTitle"
-        />
-      </h3>
-    </EuiTitle>
-  );
-};
 
 const ReadOnlyConnectorMessage: React.FC<{ href: string }> = ({ href }) => {
   return (
@@ -129,8 +66,9 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   connector,
   onClose,
   tab = EditConnectorTabs.Configuration,
-  reloadConnectors,
+  onConnectorCreated,
 }) => {
+  console.log(connector);
   const {
     docLinks,
     application: { capabilities },
@@ -143,7 +81,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const [preSubmitValidationErrorMessage, setPreSubmitValidationErrorMessage] =
     useState<ReactNode>(null);
 
-  const [formState, setFormState] = useState<CreateConnectorFormState>({
+  const [formState, setFormState] = useState<ConnectorFormState>({
     isSubmitted: false,
     isSubmitting: false,
     isValid: undefined,
@@ -152,7 +90,21 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   });
 
   const [selectedTab, setTab] = useState<EditConnectorTabs>(tab);
-  const handleSetTab = useCallback((tabId: EditConnectorTabs) => setTab(tabId), []);
+  const handleSetTab = useCallback(
+    () =>
+      setTab((prevTab) => {
+        if (prevTab === EditConnectorTabs.Configuration) {
+          return EditConnectorTabs.Test;
+        }
+
+        if (testExecutionResult !== none) {
+          setTestExecutionResult(none);
+        }
+
+        return EditConnectorTabs.Configuration;
+      }),
+    []
+  );
 
   const [isFormModified, setIsFormModified] = useState<boolean>(false);
 
@@ -168,10 +120,11 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
 
   const onClickSave = useCallback(
     async (closeAfterSave: boolean = true) => {
+      setPreSubmitValidationErrorMessage(null);
+
       const { isValid, data } = await submit();
       console.log('isValid', isValid);
       console.log('Form data:', data);
-      // const { isValid, data } = await submit();
 
       if (!isMounted.current) {
         // User has closed the flyout meanwhile submitting the form
@@ -191,33 +144,45 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
         /**
          * At this point the form is valid
          * and there are no pre submit error messages.
-         * For that reason, we clear the pre submit errors
-         * in case they were set in a previous run.
          */
-        setPreSubmitValidationErrorMessage(null);
 
-        if (closeAfterSave) {
-          closeFlyout();
+        const { name, config, secrets } = data;
+        const validConnector = { id: connector.id, name, config, secrets };
+
+        const updatedConnector = await updateConnector(validConnector);
+
+        if (updatedConnector) {
+          /**
+           * Connector has been saved.
+           * Set the from to clean state.
+           */
+          onFormModifiedChange(false);
+
+          if (onConnectorCreated && updatedConnector) {
+            onConnectorCreated(updatedConnector);
+          }
+
+          if (closeAfterSave) {
+            closeFlyout();
+          }
         }
 
-        if (reloadConnectors) {
-          reloadConnectors();
-        }
+        return updatedConnector;
       }
     },
-    [submit, preSubmitValidator, reloadConnectors, closeFlyout]
+    [submit, preSubmitValidator, closeFlyout, onConnectorCreated]
   );
 
   const onFormModifiedChange = useCallback(
-    (formModified) => {
+    (formModified: boolean) => {
       setIsFormModified(formModified);
       setTestExecutionResult(none);
     },
     [setIsFormModified]
   );
 
-  const onSubmit = useCallback(() => onClickSave(false), []);
-  const onSubmitAndClose = useCallback(() => onClickSave(true), []);
+  const onSubmit = useCallback(() => onClickSave(false), [onClickSave]);
+  const onSubmitAndClose = useCallback(() => onClickSave(true), [onClickSave]);
 
   /**
    * Test connector

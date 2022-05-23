@@ -16,7 +16,7 @@ import { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
 import { ConnectorFormFields } from './connector_form_fields';
 import { Connector } from './types';
 
-export interface CreateConnectorFormState {
+export interface ConnectorFormState {
   isValid: boolean | undefined;
   isSubmitted: boolean;
   isSubmitting: boolean;
@@ -29,7 +29,7 @@ interface Props {
   connector: Connector;
   isEdit: boolean;
   /** Handler to receive state changes updates */
-  onChange?: (state: CreateConnectorFormState) => void;
+  onChange?: (state: ConnectorFormState) => void;
   /** Handler to receive update on the form "isModified" state */
   onFormModifiedChange?: (isModified: boolean) => void;
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo } from 'react';
 import {
   EuiTitle,
   EuiFlexGroup,
@@ -27,17 +27,9 @@ const FlyoutHeaderComponent: React.FC<{
   connectorName: string;
   connectorTypeDesc: string;
   selectedTab: EditConnectorTabs;
-  setTab: (tab: EditConnectorTabs) => void;
+  setTab: () => void;
   icon?: IconType | null;
 }> = ({ icon, isPreconfigured, connectorName, connectorTypeDesc, selectedTab, setTab }) => {
-  const handleSetTab = useCallback(() => {
-    if (selectedTab === EditConnectorTabs.Configuration) {
-      setTab(EditConnectorTabs.Test);
-    }
-
-    setTab(EditConnectorTabs.Configuration);
-  }, [selectedTab]);
-
   return (
     <EuiFlyoutHeader hasBorder>
       <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -91,7 +83,7 @@ const FlyoutHeaderComponent: React.FC<{
       </EuiFlexGroup>
       <EuiTabs className="connectorEditFlyoutTabs">
         <EuiTab
-          onClick={handleSetTab}
+          onClick={setTab}
           data-test-subj="configureConnectorTab"
           isSelected={EditConnectorTabs.Configuration === selectedTab}
         >
@@ -100,7 +92,7 @@ const FlyoutHeaderComponent: React.FC<{
           })}
         </EuiTab>
         <EuiTab
-          onClick={handleSetTab}
+          onClick={setTab}
           data-test-subj="testConnectorTab"
           isSelected={EditConnectorTabs.Test === selectedTab}
         >

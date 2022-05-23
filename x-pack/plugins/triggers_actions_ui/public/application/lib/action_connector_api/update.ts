@@ -7,11 +7,7 @@
 import { HttpSetup } from '@kbn/core/public';
 import { RewriteRequestCase } from '@kbn/actions-plugin/common';
 import { BASE_ACTION_API_PATH } from '../../constants';
-import type {
-  ActionConnector,
-  ActionConnectorProps,
-  ActionConnectorWithoutId,
-} from '../../../types';
+import type { ActionConnector, ActionConnectorProps, UpdateConnectorSchema } from '../../../types';
 
 const rewriteBodyRes: RewriteRequestCase<
   ActionConnectorProps<Record<string, unknown>, Record<string, unknown>>
@@ -35,7 +31,7 @@ export async function updateActionConnector({
   id,
 }: {
   http: HttpSetup;
-  connector: Pick<ActionConnectorWithoutId, 'name' | 'config' | 'secrets'>;
+  connector: UpdateConnectorSchema;
   id: string;
 }): Promise<ActionConnector> {
   const res = await http.put<Parameters<typeof rewriteBodyRes>[0]>(

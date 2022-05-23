@@ -7,19 +7,14 @@
 import { HttpSetup } from '@kbn/core/public';
 import { RewriteRequestCase, RewriteResponseCase } from '@kbn/actions-plugin/common';
 import { BASE_ACTION_API_PATH } from '../../constants';
-import type {
-  ActionConnector,
-  ActionConnectorProps,
-  ActionConnectorWithoutId,
-} from '../../../types';
+import type { ActionConnector, ActionConnectorProps, CreateConnectorSchema } from '../../../types';
 
-const rewriteBodyRequest: RewriteResponseCase<
-  Omit<ActionConnectorWithoutId, 'referencedByCount' | 'isMissingSecrets'>
-> = ({ actionTypeId, isPreconfigured, isDeprecated, ...res }) => ({
+const rewriteBodyRequest: RewriteResponseCase<CreateConnectorSchema> = ({
+  actionTypeId,
+  ...res
+}) => ({
   ...res,
   connector_type_id: actionTypeId,
-  is_preconfigured: isPreconfigured,
-  is_deprecated: isDeprecated,
 });
 
 const rewriteBodyRes: RewriteRequestCase<
@@ -43,7 +38,7 @@ export async function createActionConnector({
   connector,
 }: {
   http: HttpSetup;
-  connector: Omit<ActionConnectorWithoutId, 'referencedByCount'>;
+  connector: CreateConnectorSchema;
 }): Promise<ActionConnector> {
   const res = await http.post<Parameters<typeof rewriteBodyRes>[0]>(
     `${BASE_ACTION_API_PATH}/connector`,

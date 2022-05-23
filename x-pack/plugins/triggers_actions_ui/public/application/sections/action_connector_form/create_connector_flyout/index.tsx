@@ -18,8 +18,7 @@ import { hasSaveActionsCapability } from '../../../lib/capabilities';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionTypeMenu } from '../action_type_menu';
 import { useCreateConnector } from '../../../hooks/use_create_connector';
-import { ConnectorForm, CreateConnectorFormState } from '../connector_form';
-import { InitialConnector } from '../connector_reducer';
+import { ConnectorForm, ConnectorFormState } from '../connector_form';
 import { Connector } from '../types';
 import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './foooter';
@@ -28,12 +27,14 @@ import { UpgradeLicenseCallOut } from './upgrade_license_callout';
 interface CreateConnectorFlyoutProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   onClose: () => void;
+  onConnectorCreated?: (connector: ActionConnector) => void;
   onTestConnector?: (connector: ActionConnector) => void;
 }
 
 const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   actionTypeRegistry,
   onClose,
+  onConnectorCreated,
   onTestConnector,
 }) => {
   const {
@@ -49,7 +50,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const [preSubmitValidationErrorMessage, setPreSubmitValidationErrorMessage] =
     useState<ReactNode>(null);
 
-  const [formState, setFormState] = useState<CreateConnectorFormState>({
+  const [formState, setFormState] = useState<ConnectorFormState>({
     isSubmitted: false,
     isSubmitting: false,
     isValid: undefined,
@@ -57,8 +58,9 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     preSubmitValidator: null,
   });
 
-  const initialConnector: InitialConnector<Record<string, unknown>, Record<string, unknown>> = {
+  const initialConnector = {
     actionTypeId: actionType?.id ?? '',
+    name: '',
     config: {},
     secrets: {},
   };
@@ -71,7 +73,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const actionTypeModel: ActionTypeModel | null =
     actionType != null ? actionTypeRegistry.get(actionType.id) : null;
 
-  const onClickSave = useCallback(async () => {
+  const validateAndCreateConnector = useCallback(async () => {
     setPreSubmitValidationErrorMessage(null);
 
     const { isValid, data } = await submit();
@@ -98,13 +100,39 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
        * and there are no pre submit error messages.
        */
 
-      // const createdConnector = await createConnector();
+      const { actionTypeId, name, config, secrets } = data;
+      const validConnector = { actionTypeId, name, config, secrets };
+
+      const createdConnector = await createConnector(validConnector);
+      return createdConnector;
     }
   }, [submit, preSubmitValidator]);
 
   const resetActionType = useCallback(() => setActionType(null), []);
 
-  const testConnector = useCallback(() => {}, []);
+  const testConnector = useCallback(async () => {
+    const createdConnector = await validateAndCreateConnector();
+    onClose();
+
+    if (createdConnector) {
+      if (onConnectorCreated) {
+        onConnectorCreated(createdConnector);
+      }
+
+      if (onTestConnector) {
+        onTestConnector(createdConnector);
+      }
+    }
+  }, [validateAndCreateConnector, onConnectorCreated]);
+
+  const onSubmit = useCallback(async () => {
+    const createdConnector = await validateAndCreateConnector();
+    onClose();
+
+    if (onConnectorCreated && createdConnector) {
+      onConnectorCreated(createdConnector);
+    }
+  }, [validateAndCreateConnector, onConnectorCreated]);
 
   useEffect(() => {
     isMounted.current = true;
@@ -149,7 +177,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         onCancel={onClose}
         disabled={hasErrors || !canSave}
         isSaving={isSaving}
-        onSubmit={onClickSave}
+        onSubmit={onSubmit}
         onTestConnector={testConnector}
       />
     </EuiFlyout>

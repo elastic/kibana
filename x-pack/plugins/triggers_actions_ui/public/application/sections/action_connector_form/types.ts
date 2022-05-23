@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { ActionConnector, UserConfiguredActionConnector } from '../../../types';
+import { CreateConnectorSchema } from '../../../types';
 
-export type InitialConnector<Config, Secrets> = Partial<
-  UserConfiguredActionConnector<Config, Secrets>
-> &
-  Pick<UserConfiguredActionConnector<Config, Secrets>, 'actionTypeId' | 'config' | 'secrets'>;
+export interface InitialConnector {
+  actionTypeId: string;
+  config: Record<string, unknown>;
+  secrets: Record<string, unknown>;
+}
 
-export type Connector<Config = Record<string, unknown>, Secrets = Record<string, unknown>> =
-  | InitialConnector<Record<string, unknown>, Record<string, unknown>>
-  | ActionConnector<Config, Secrets>;
+export type Connector = CreateConnectorSchema;
