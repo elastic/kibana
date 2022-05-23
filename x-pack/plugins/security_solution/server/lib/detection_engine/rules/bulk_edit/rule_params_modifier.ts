@@ -81,8 +81,13 @@ export const ruleParamsModifier = (
   existingRuleParams: RuleAlertType['params'],
   actions: BulkActionEditForRuleParams[]
 ) => {
-  return actions.reduce(
+  const modifiedParams = actions.reduce(
     (acc, action) => ({ ...acc, ...applyBulkActionEditToRuleParams(acc, action) }),
     existingRuleParams
   );
+
+  // increment version even if actions are empty, as attributes can be modified as well outside of ruleParamsModifier
+  modifiedParams.version += 1;
+
+  return modifiedParams;
 };
