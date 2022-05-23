@@ -33,14 +33,16 @@ import {
   ActionTypeRegistryContract,
   EditConnectorTabs,
   UserConfiguredActionConnector,
-} from '../../../types';
-import { ConnectorForm, CreateConnectorFormState } from './connector_form';
-import { Connector } from './types';
-import { useUpdateConnector } from '../../hooks/use_edit_connector';
-import { useKibana } from '../../../common/lib/kibana';
-import { hasSaveActionsCapability } from '../../lib/capabilities';
-import TestConnectorForm from './test_connector_form';
-import { useExecuteConnector } from '../../hooks/use_execute_connector';
+} from '../../../../types';
+import { ConnectorForm, CreateConnectorFormState } from '../connector_form';
+import { Connector } from '../types';
+import { useUpdateConnector } from '../../../hooks/use_edit_connector';
+import { useKibana } from '../../../../common/lib/kibana';
+import { hasSaveActionsCapability } from '../../../lib/capabilities';
+import TestConnectorForm from '../test_connector_form';
+import { useExecuteConnector } from '../../../hooks/use_execute_connector';
+import { FlyoutHeader } from './header';
+import { FlyoutFooter } from './foooter';
 
 interface EditConnectorFlyoutProps {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -150,25 +152,15 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   });
 
   const [selectedTab, setTab] = useState<EditConnectorTabs>(tab);
-  const handleSetTab = useCallback(
-    () =>
-      setTab((prevTab) => {
-        if (prevTab === EditConnectorTabs.Configuration) {
-          return EditConnectorTabs.Test;
-        }
-
-        return EditConnectorTabs.Configuration;
-      }),
-    []
-  );
+  const handleSetTab = useCallback((tabId: EditConnectorTabs) => setTab(tabId), []);
 
   const [isFormModified, setIsFormModified] = useState<boolean>(false);
 
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
   const hasErrors = isFormValid === false;
   const isSaving = isUpdatingConnector || isSubmitting || isExecutingConnector;
-
   const actionTypeModel: ActionTypeModel | null = actionTypeRegistry.get(connector.actionTypeId);
+  const showButtons = canSave && actionTypeModel && !connector.isPreconfigured;
 
   const closeFlyout = useCallback(() => {
     onClose();
@@ -224,6 +216,9 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     [setIsFormModified]
   );
 
+  const onSubmit = useCallback(() => onClickSave(false), []);
+  const onSubmitAndClose = useCallback(() => onClickSave(true), []);
+
   /**
    * Test connector
    */
@@ -264,42 +259,14 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
 
   return (
     <EuiFlyout onClose={closeFlyout} aria-labelledby="flyoutActionEditTitle" size="m">
-      <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          {actionTypeModel ? (
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={actionTypeModel.iconClass} size="m" />
-            </EuiFlexItem>
-          ) : null}
-          <EuiFlexItem>
-            <FlyoutHeaderTitle
-              isPreconfigured={connector.isPreconfigured}
-              connectorName={connector.name}
-              connectorTypeDesc={actionTypeModel.selectMessage}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiTabs className="connectorEditFlyoutTabs">
-          <EuiTab
-            onClick={handleSetTab}
-            data-test-subj="configureConnectorTab"
-            isSelected={EditConnectorTabs.Configuration === selectedTab}
-          >
-            {i18n.translate('xpack.triggersActionsUI.sections.editConnectorForm.tabText', {
-              defaultMessage: 'Configuration',
-            })}
-          </EuiTab>
-          <EuiTab
-            onClick={handleSetTab}
-            data-test-subj="testConnectorTab"
-            isSelected={EditConnectorTabs.Test === selectedTab}
-          >
-            {i18n.translate('xpack.triggersActionsUI.sections.testConnectorForm.tabText', {
-              defaultMessage: 'Test',
-            })}
-          </EuiTab>
-        </EuiTabs>
-      </EuiFlyoutHeader>
+      <FlyoutHeader
+        isPreconfigured={connector.isPreconfigured}
+        connectorName={connector.name}
+        connectorTypeDesc={actionTypeModel.selectMessage}
+        setTab={handleSetTab}
+        selectedTab={selectedTab}
+        icon={actionTypeModel?.iconClass}
+      />
       <EuiFlyoutBody>
         {selectedTab === EditConnectorTabs.Configuration ? (
           !connector.isPreconfigured ? (
@@ -329,58 +296,14 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
           />
         )}
       </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={closeFlyout} data-test-subj="cancelSaveEditedConnectorButton">
-              {i18n.translate(
-                'xpack.triggersActionsUI.sections.editConnectorForm.cancelButtonLabel',
-                {
-                  defaultMessage: 'Cancel',
-                }
-              )}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              {canSave && actionTypeModel && !connector.isPreconfigured ? (
-                <>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      color="success"
-                      data-test-subj="saveEditedActionButton"
-                      isLoading={isSaving}
-                      onClick={() => onClickSave(false)}
-                      disabled={hasErrors || isSaving}
-                    >
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.editConnectorForm.saveButtonLabel"
-                        defaultMessage="Save"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      fill
-                      color="success"
-                      data-test-subj="saveAndCloseEditedActionButton"
-                      type="submit"
-                      isLoading={isSaving}
-                      onClick={() => onClickSave(true)}
-                      disabled={hasErrors || isSaving}
-                    >
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.editConnectorForm.saveAndCloseButtonLabel"
-                        defaultMessage="Save & close"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                </>
-              ) : null}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
+      <FlyoutFooter
+        isSaving={isSaving}
+        disabled={hasErrors || isSaving}
+        showButtons={showButtons}
+        onCancel={closeFlyout}
+        onSubmit={onSubmit}
+        onSubmitAndClose={onSubmitAndClose}
+      />
     </EuiFlyout>
   );
 };
