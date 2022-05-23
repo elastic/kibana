@@ -18,6 +18,25 @@ describe('flattenField', () => {
       ['country', { raw: 'United States' }],
     ]);
   });
+  it('can flatten multiple levels', () => {
+    const data = {
+      name: { raw: 'Bubba Gump' },
+      address: {
+        street: { raw: 'South St' },
+        country: {
+          code: { raw: 'US' },
+          name: { raw: 'United States' },
+        },
+      },
+    };
+    const expected = [
+      ['customer.name', { raw: 'Bubba Gump' }],
+      ['customer.address.street', { raw: 'South St' }],
+      ['customer.address.country.code', { raw: 'US' }],
+      ['customer.address.country.name', { raw: 'United States' }],
+    ];
+    expect(flattenField('customer', data)).toEqual(expected);
+  });
 });
 
 describe('flattenSearchResult', () => {

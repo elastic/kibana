@@ -11,7 +11,9 @@ export const flattenField = (fieldName: string, fieldValue: object): Array<[stri
 
   if (typeof fieldValue === 'object' && !Object.keys(fieldValue).includes('raw')) {
     Object.entries(fieldValue).map(([propName, value]) => {
-      flattened.push([fieldName + '.' + propName, value]);
+      flattenField(fieldName + '.' + propName, value).map(([flatKey, flatVal]) => {
+        flattened.push([flatKey, flatVal]);
+      });
     });
   } else {
     flattened.push([fieldName, fieldValue]);
