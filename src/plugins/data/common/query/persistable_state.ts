@@ -7,6 +7,7 @@
  */
 
 import { SavedObjectReference } from '@kbn/core/types';
+import { mapValues } from 'lodash';
 import {
   mergeMigrationFunctionMaps,
   MigrateFunctionsObject,
@@ -14,7 +15,6 @@ import {
 } from '@kbn/kibana-utils-plugin/common';
 import type { QueryState } from './query_state';
 import * as filtersPersistableState from './filters/persistable_state';
-import { mapValues } from 'lodash';
 
 export const extract = (queryState: QueryState) => {
   const references: SavedObjectReference[] = [];
