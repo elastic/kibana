@@ -7,12 +7,12 @@
 
 import { useQuery } from 'react-query';
 import { useKibana } from '../hooks/use_kibana';
-import { FindingsStatus } from '../../../common/types';
-import { FINDINGS_STATUS_ROUTE_PATH } from '../../../common/constants';
+import { Info } from '../../../common/types';
+import { INFO_ROUTE_PATH } from '../../../common/constants';
 
-const getStatsKey = 'csp_findings_status';
+const getInfoQueryKey = 'csp_info_key';
 
-export const useFindingsStatusApi = () => {
+export const useInfoApi = () => {
   const { http } = useKibana().services;
-  return useQuery([getStatsKey], () => http.get<FindingsStatus>(FINDINGS_STATUS_ROUTE_PATH));
+  return useQuery([getInfoQueryKey], () => http.get<Info>(INFO_ROUTE_PATH));
 };

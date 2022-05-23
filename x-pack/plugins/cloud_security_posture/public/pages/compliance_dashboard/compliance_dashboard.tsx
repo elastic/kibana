@@ -15,7 +15,7 @@ import { BenchmarksSection } from './dashboard_sections/benchmarks_section';
 import { useComplianceDashboardDataApi } from '../../common/api';
 import { CspPageTemplate } from '../../components/csp_page_template';
 import { CLOUD_POSTURE, NO_DATA_CONFIG_TEXT } from './translations';
-import { useFindingsStatusApi } from '../../common/api/use_findings_status_api';
+import { useInfoApi } from '../../common/api/use_info_api';
 
 const getNoDataConfig = (onClick: () => void): KibanaPageTemplateProps['noDataConfig'] => ({
   pageTitle: NO_DATA_CONFIG_TEXT.PAGE_TITLE,
@@ -34,22 +34,31 @@ const getNoDataConfig = (onClick: () => void): KibanaPageTemplateProps['noDataCo
 });
 
 export const ComplianceDashboard = () => {
-  const getFindingsStatus = useFindingsStatusApi();
+  const getInfo = useInfoApi();
   const getDashboardData = useComplianceDashboardDataApi({
-    enabled: getFindingsStatus.data?.status === 'applicable',
+    enabled: getInfo.data?.latestFindingsIndexStatus === 'applicable',
   });
   useCspBreadcrumbs([allNavigationItems.dashboard]);
+
+  // if (!getInfo.isSuccess)
+  if (false)
+    return (
+      <CspPageTemplate
+        pageHeader={{ pageTitle: CLOUD_POSTURE }}
+        query={getInfo}
+        noDataConfig={
+          getInfo.data?.latestFindingsIndexStatus !== 'applicable'
+            ? getNoDataConfig(getInfo.refetch)
+            : undefined
+        }
+      />
+    );
 
   return (
     <CspPageTemplate
       pageHeader={{ pageTitle: CLOUD_POSTURE }}
       restrictWidth={1600}
       query={getDashboardData}
-      noDataConfig={
-        getFindingsStatus.data?.status !== 'applicable'
-          ? getNoDataConfig(getFindingsStatus.refetch)
-          : undefined
-      }
     >
       {getDashboardData.data && (
         <>

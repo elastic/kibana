@@ -13,11 +13,11 @@ import {
 } from '../../../common/constants';
 import { CspAppContext } from '../../plugin';
 import { CspRouter } from '../../types';
-import { FindingsStatus } from '../../../common/types';
+import { Info } from '../../../common/types';
 
 const getLatestFindingsStatus = async (
   esClient: ElasticsearchClient
-): Promise<FindingsStatus['status']> => {
+): Promise<Info['latestFindingsIndexStatus']> => {
   try {
     const queryResult = await esClient.search({
       index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
@@ -34,7 +34,7 @@ const getLatestFindingsStatus = async (
   }
 };
 
-export const defineGetFindingsStatus = (router: CspRouter, cspContext: CspAppContext): void =>
+export const defineGetInfo = (router: CspRouter, cspContext: CspAppContext): void =>
   router.get(
     {
       path: FINDINGS_STATUS_ROUTE_PATH,
@@ -45,8 +45,8 @@ export const defineGetFindingsStatus = (router: CspRouter, cspContext: CspAppCon
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
         const latestFindingsIndexStatus = await getLatestFindingsStatus(esClient);
 
-        const body: FindingsStatus = {
-          status: latestFindingsIndexStatus,
+        const body: Info = {
+          latestFindingsIndexStatus,
         };
 
         return response.ok({

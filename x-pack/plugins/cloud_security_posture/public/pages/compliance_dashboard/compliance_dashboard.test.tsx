@@ -10,15 +10,159 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { render, screen } from '@testing-library/react';
 import { TestProvider } from '../../test/test_provider';
 import { ComplianceDashboard } from '..';
-import { useFindingsStatusApi } from '../../common/api/use_findings_status_api';
+import { useInfoApi } from '../../common/api/use_info_api';
 import { NO_DATA_CONFIG_TEXT } from './translations';
 import { useCisKubernetesIntegration } from '../../common/api/use_cis_kubernetes_integration';
 import * as TEXT from './translations';
 import { useComplianceDashboardDataApi } from '../../common/api/use_compliance_dashboard_data_api';
 
-jest.mock('../../common/api/use_findings_status_api');
+jest.mock('../../common/api/use_info_api');
 jest.mock('../../common/api/use_cis_kubernetes_integration');
 jest.mock('../../common/api/use_compliance_dashboard_data_api');
+
+const mockDashboardData = {
+  stats: {
+    totalFailed: 17,
+    totalPassed: 155,
+    totalFindings: 172,
+    postureScore: 90.1,
+  },
+  groupedFindingsEvaluation: [
+    {
+      name: 'RBAC and Service Accounts',
+      totalFindings: 104,
+      totalFailed: 0,
+      totalPassed: 104,
+    },
+    {
+      name: 'API Server',
+      totalFindings: 27,
+      totalFailed: 11,
+      totalPassed: 16,
+    },
+    {
+      name: 'Master Node Configuration Files',
+      totalFindings: 17,
+      totalFailed: 1,
+      totalPassed: 16,
+    },
+    {
+      name: 'Kubelet',
+      totalFindings: 11,
+      totalFailed: 4,
+      totalPassed: 7,
+    },
+    {
+      name: 'etcd',
+      totalFindings: 6,
+      totalFailed: 0,
+      totalPassed: 6,
+    },
+    {
+      name: 'Worker Node Configuration Files',
+      totalFindings: 5,
+      totalFailed: 0,
+      totalPassed: 5,
+    },
+    {
+      name: 'Scheduler',
+      totalFindings: 2,
+      totalFailed: 1,
+      totalPassed: 1,
+    },
+  ],
+  clusters: [
+    {
+      meta: {
+        clusterId: '8f9c5b98-cc02-4827-8c82-316e2cc25870',
+        benchmarkName: 'CIS Kubernetes V1.20',
+        lastUpdate: 1653218903921,
+      },
+      stats: {
+        totalFailed: 17,
+        totalPassed: 155,
+        totalFindings: 172,
+        postureScore: 90.1,
+      },
+      groupedFindingsEvaluation: [
+        {
+          name: 'RBAC and Service Accounts',
+          totalFindings: 104,
+          totalFailed: 0,
+          totalPassed: 104,
+        },
+        {
+          name: 'API Server',
+          totalFindings: 27,
+          totalFailed: 11,
+          totalPassed: 16,
+        },
+        {
+          name: 'Master Node Configuration Files',
+          totalFindings: 17,
+          totalFailed: 1,
+          totalPassed: 16,
+        },
+        {
+          name: 'Kubelet',
+          totalFindings: 11,
+          totalFailed: 4,
+          totalPassed: 7,
+        },
+        {
+          name: 'etcd',
+          totalFindings: 6,
+          totalFailed: 0,
+          totalPassed: 6,
+        },
+        {
+          name: 'Worker Node Configuration Files',
+          totalFindings: 5,
+          totalFailed: 0,
+          totalPassed: 5,
+        },
+        {
+          name: 'Scheduler',
+          totalFindings: 2,
+          totalFailed: 1,
+          totalPassed: 1,
+        },
+      ],
+      trend: [
+        {
+          timestamp: '2022-05-22T11:03:00.000Z',
+          totalFindings: 172,
+          totalFailed: 17,
+          totalPassed: 155,
+          postureScore: 90.1,
+        },
+        {
+          timestamp: '2022-05-22T10:25:00.000Z',
+          totalFindings: 172,
+          totalFailed: 17,
+          totalPassed: 155,
+          postureScore: 90.1,
+        },
+      ],
+    },
+  ],
+  trend: [
+    {
+      timestamp: '2022-05-22T11:03:00.000Z',
+      totalFindings: 172,
+      totalFailed: 17,
+      totalPassed: 155,
+      postureScore: 90.1,
+    },
+    {
+      timestamp: '2022-05-22T10:25:00.000Z',
+      totalFindings: 172,
+      totalFailed: 17,
+      totalPassed: 155,
+      postureScore: 90.1,
+    },
+  ],
+};
 
 describe('<ComplianceDashboard />', () => {
   beforeEach(() => {
@@ -52,9 +196,9 @@ describe('<ComplianceDashboard />', () => {
     );
   };
 
-  it('shows noDataConfig when findings status is inapplicable', () => {
-    (useFindingsStatusApi as jest.Mock).mockImplementation(() => ({
-      data: { status: 'inapplicable' },
+  it('shows noDataConfig when latestFindingsIndexStatus is inapplicable', () => {
+    (useInfoApi as jest.Mock).mockImplementation(() => ({
+      data: { latestFindingsIndexStatus: 'inapplicable' },
     }));
     (useComplianceDashboardDataApi as jest.Mock).mockImplementation(() => ({
       data: undefined,
@@ -68,159 +212,17 @@ describe('<ComplianceDashboard />', () => {
     expect(screen.queryByText(TEXT.CLOUD_POSTURE_SCORE)).not.toBeInTheDocument();
   });
 
-  it('shows dashboard when findings status is applicable', () => {
-    (useFindingsStatusApi as jest.Mock).mockImplementation(() => ({
+  it('shows dashboard when latestFindingsIndexStatus is applicable', () => {
+    (useInfoApi as jest.Mock).mockImplementation(() => ({
       isLoading: false,
       isSuccess: true,
-      data: { status: 'applicable' },
+      data: { latestFindingsIndexStatus: 'applicable' },
     }));
 
     (useComplianceDashboardDataApi as jest.Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
-      data: {
-        stats: {
-          totalFailed: 17,
-          totalPassed: 155,
-          totalFindings: 172,
-          postureScore: 90.1,
-        },
-        groupedFindingsEvaluation: [
-          {
-            name: 'RBAC and Service Accounts',
-            totalFindings: 104,
-            totalFailed: 0,
-            totalPassed: 104,
-          },
-          {
-            name: 'API Server',
-            totalFindings: 27,
-            totalFailed: 11,
-            totalPassed: 16,
-          },
-          {
-            name: 'Master Node Configuration Files',
-            totalFindings: 17,
-            totalFailed: 1,
-            totalPassed: 16,
-          },
-          {
-            name: 'Kubelet',
-            totalFindings: 11,
-            totalFailed: 4,
-            totalPassed: 7,
-          },
-          {
-            name: 'etcd',
-            totalFindings: 6,
-            totalFailed: 0,
-            totalPassed: 6,
-          },
-          {
-            name: 'Worker Node Configuration Files',
-            totalFindings: 5,
-            totalFailed: 0,
-            totalPassed: 5,
-          },
-          {
-            name: 'Scheduler',
-            totalFindings: 2,
-            totalFailed: 1,
-            totalPassed: 1,
-          },
-        ],
-        clusters: [
-          {
-            meta: {
-              clusterId: '8f9c5b98-cc02-4827-8c82-316e2cc25870',
-              benchmarkName: 'CIS Kubernetes V1.20',
-              lastUpdate: 1653218903921,
-            },
-            stats: {
-              totalFailed: 17,
-              totalPassed: 155,
-              totalFindings: 172,
-              postureScore: 90.1,
-            },
-            groupedFindingsEvaluation: [
-              {
-                name: 'RBAC and Service Accounts',
-                totalFindings: 104,
-                totalFailed: 0,
-                totalPassed: 104,
-              },
-              {
-                name: 'API Server',
-                totalFindings: 27,
-                totalFailed: 11,
-                totalPassed: 16,
-              },
-              {
-                name: 'Master Node Configuration Files',
-                totalFindings: 17,
-                totalFailed: 1,
-                totalPassed: 16,
-              },
-              {
-                name: 'Kubelet',
-                totalFindings: 11,
-                totalFailed: 4,
-                totalPassed: 7,
-              },
-              {
-                name: 'etcd',
-                totalFindings: 6,
-                totalFailed: 0,
-                totalPassed: 6,
-              },
-              {
-                name: 'Worker Node Configuration Files',
-                totalFindings: 5,
-                totalFailed: 0,
-                totalPassed: 5,
-              },
-              {
-                name: 'Scheduler',
-                totalFindings: 2,
-                totalFailed: 1,
-                totalPassed: 1,
-              },
-            ],
-            trend: [
-              {
-                timestamp: '2022-05-22T11:03:00.000Z',
-                totalFindings: 172,
-                totalFailed: 17,
-                totalPassed: 155,
-                postureScore: 90.1,
-              },
-              {
-                timestamp: '2022-05-22T10:25:00.000Z',
-                totalFindings: 172,
-                totalFailed: 17,
-                totalPassed: 155,
-                postureScore: 90.1,
-              },
-            ],
-          },
-        ],
-        trend: [
-          {
-            timestamp: '2022-05-22T11:03:00.000Z',
-            totalFindings: 172,
-            totalFailed: 17,
-            totalPassed: 155,
-            postureScore: 90.1,
-          },
-          {
-            timestamp: '2022-05-22T10:25:00.000Z',
-            totalFindings: 172,
-            totalFailed: 17,
-            totalPassed: 155,
-            postureScore: 90.1,
-          },
-        ],
-      },
+      data: mockDashboardData,
     }));
 
     renderComplianceDashboardPage();
