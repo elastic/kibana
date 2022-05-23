@@ -8,10 +8,12 @@
 import React, { useMemo } from 'react';
 
 import { AlertsTableFlyoutState } from '@kbn/triggers-actions-ui-plugin/public';
+import { EuiFlexItem, EuiFlexGroup, EuiProgress } from '@elastic/eui';
 import { Case } from '../../../../common';
 import { useKibana } from '../../../common/lib/kibana';
 import { getManualAlertIds, getRegistrationContextFromAlerts } from './helpers';
 import { useGetFeatureIds } from '../../../containers/use_get_feature_ids';
+import { CaseViewAlertsEmpty } from './case_view_alerts_empty';
 
 interface CaseViewAlertsProps {
   caseData: Case;
@@ -32,7 +34,8 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
     [caseData.comments]
   );
 
-  const alertFeatureIds = useGetFeatureIds(alertRegistrationContexts);
+  const { isLoading: isLoadingAlertFeatureIds, alertFeatureIds } =
+    useGetFeatureIds(alertRegistrationContexts);
 
   const alertStateProps = {
     alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
@@ -46,6 +49,18 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
     showExpandToDetails: alertFeatureIds.includes('siem'),
   };
 
-  return <>{triggersActionsUi.getAlertsStateTable(alertStateProps)}</>;
+  if (alertIdsQuery.ids.values.length === 0) {
+    return <CaseViewAlertsEmpty />;
+  }
+
+  return isLoadingAlertFeatureIds ? (
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiProgress size="xs" color="primary" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  ) : (
+    triggersActionsUi.getAlertsStateTable(alertStateProps)
+  );
 };
 CaseViewAlerts.displayName = 'CaseViewAlerts';

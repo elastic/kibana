@@ -15,8 +15,8 @@ export const allowedExperimentalValues = Object.freeze({
   rulesListDatagrid: true,
   internalAlertsTable: true,
   internalShareableComponentsSandbox: false,
-  ruleTagFilter: false,
-  ruleStatusFilter: false,
+  ruleTagFilter: true,
+  ruleStatusFilter: true,
   rulesDetailLogs: true,
 });
 

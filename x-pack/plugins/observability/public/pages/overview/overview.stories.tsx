@@ -8,12 +8,13 @@
 import { makeDecorator } from '@storybook/addons';
 import { storiesOf } from '@storybook/react';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { createKibanaReactContext, KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
 import { HasDataContextProvider } from '../../context/has_data_context';
 import { PluginContext } from '../../context/plugin_context';
+import { ObservabilityPublicPluginsStart } from '../../plugin';
 import { registerDataHandler, unregisterDataHandler } from '../../data_handler';
 import { OverviewPage } from '.';
 import { alertsFetchData } from './mock/alerts.mock';
@@ -37,7 +38,7 @@ const sampleAPMIndices = { transaction: 'apm-*' } as ApmIndicesConfig;
 const withCore = makeDecorator({
   name: 'withCore',
   parameterName: 'core',
-  wrapper: (storyFn, context, { options: { theme, ...options } }) => {
+  wrapper: (storyFn, context) => {
     unregisterAll();
     const KibanaReactContext = createKibanaReactContext({
       application: {
@@ -88,12 +89,14 @@ const withCore = makeDecorator({
                   rules: { enabled: true },
                 },
               },
+              core: {} as CoreStart,
+              plugins: {} as ObservabilityPublicPluginsStart,
               observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
               ObservabilityPageTemplate: KibanaPageTemplate,
               kibanaFeatures: [],
             }}
           >
-            <HasDataContextProvider>{storyFn(context)}</HasDataContextProvider>
+            <HasDataContextProvider>{storyFn(context) as ReactNode}</HasDataContextProvider>
           </PluginContext.Provider>
         </KibanaReactContext.Provider>
       </MemoryRouter>
