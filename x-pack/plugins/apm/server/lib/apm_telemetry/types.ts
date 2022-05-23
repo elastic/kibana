@@ -130,9 +130,6 @@ export interface APMUsage {
       };
     };
   };
-  service_groups: {
-    queries: string[];
-  };
   tasks: Record<
     | 'aggregated_transactions'
     | 'cloud'
@@ -146,8 +143,7 @@ export interface APMUsage {
     | 'agents'
     | 'indices_stats'
     | 'cardinality'
-    | 'environments'
-    | 'service_groups',
+    | 'environments',
     { took: { ms: number } }
   >;
 }
