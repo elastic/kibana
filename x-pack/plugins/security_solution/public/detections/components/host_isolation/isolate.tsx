@@ -8,7 +8,7 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useHostIsolation, useEndpointResponseAction } from '../../containers/detection_engine/alerts/use_host_isolation';
+import { useEndpointResponseAction } from '../../containers/detection_engine/alerts/use_host_isolation';
 import { CASES_ASSOCIATED_WITH_ALERT, RETURN_TO_ALERT_DETAILS } from './translations';
 import {
   EndpointIsolatedFormProps,
@@ -38,7 +38,12 @@ export const IsolateHost = React.memo(
       return caseInfo.id;
     });
 
-    const { loading, executeResponseAction } = useEndpointResponseAction({ endpointId, comment, caseIds, command: 'isolate' });
+    const { loading, executeResponseAction } = useEndpointResponseAction({
+      endpointId,
+      comment,
+      caseIds,
+      command: 'isolate',
+    });
 
     const confirmHostIsolation = useCallback(async () => {
       const hostIsolated = await executeResponseAction();

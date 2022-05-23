@@ -12,7 +12,10 @@ import { TypeOf } from '@kbn/config-schema';
 import { CommentType } from '@kbn/cases-plugin/common';
 import { CasesByAlertId } from '@kbn/cases-plugin/common/api/cases/case';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
-import { HostIsolationRequestSchema, EndpointResponseActionRequestSchema } from '../../../../common/endpoint/schema/actions';
+import {
+  HostIsolationRequestSchema,
+  EndpointResponseActionRequestSchema,
+} from '../../../../common/endpoint/schema/actions';
 import {
   ENDPOINT_ACTIONS_DS,
   ENDPOINT_ACTION_RESPONSES_DS,
@@ -116,7 +119,7 @@ const createFailedActionResponseEntry = async ({
 };
 
 export const endpointResponseActionRequestHandler = function (
-  endpointContext: EndpointAppContext,
+  endpointContext: EndpointAppContext
 ): RequestHandler<
   unknown,
   unknown,

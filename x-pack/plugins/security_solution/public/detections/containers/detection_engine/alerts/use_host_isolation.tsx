@@ -72,7 +72,13 @@ export const useEndpointResponseAction = ({
   const executeResponseAction = useCallback(async () => {
     try {
       setLoading(true);
-      const responseActionStatus = await createEndpointResponseAction({ endpointId, comment, caseIds, command, parameters });
+      const responseActionStatus = await createEndpointResponseAction({
+        endpointId,
+        comment,
+        caseIds,
+        command,
+        parameters,
+      });
       setLoading(false);
       return responseActionStatus.action ? true : false;
     } catch (error) {

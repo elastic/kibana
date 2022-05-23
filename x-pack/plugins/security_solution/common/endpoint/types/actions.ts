@@ -6,7 +6,11 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { ActionStatusRequestSchema, EndpointResponseActionRequestSchema, HostIsolationRequestSchema } from '../schema/actions';
+import {
+  ActionStatusRequestSchema,
+  EndpointResponseActionRequestSchema,
+  HostIsolationRequestSchema,
+} from '../schema/actions';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 export type ENDPOINT_RESPONSE_ACTIONS = 'kill_process';
@@ -178,7 +182,9 @@ export interface HostIsolationResponse {
   action: string;
 }
 
-export type EndpointResponseActionRequestBody = TypeOf<typeof EndpointResponseActionRequestSchema.body>;
+export type EndpointResponseActionRequestBody = TypeOf<
+  typeof EndpointResponseActionRequestSchema.body
+>;
 
 export interface EndpointResponseActionResponse {
   action: string;

@@ -28,9 +28,11 @@ export const EndpointResponseActionRequestSchema = {
     /** Case IDs to be updated */
     case_ids: schema.maybe(schema.arrayOf(schema.string())),
     comment: schema.maybe(schema.string()),
-    parameters: schema.maybe(schema.object({
-      pid: schema.maybe(schema.number()),
-    })),
+    parameters: schema.maybe(
+      schema.object({
+        pid: schema.maybe(schema.number()),
+      })
+    ),
     command: schema.maybe(schema.string()),
   }),
 };

@@ -7,7 +7,11 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getCasesFromAlertsUrl } from '@kbn/cases-plugin/common';
-import { HostIsolationResponse, EndpointResponseActionResponse, HostInfo } from '../../../../../common/endpoint/types';
+import {
+  HostIsolationResponse,
+  EndpointResponseActionResponse,
+  HostInfo,
+} from '../../../../../common/endpoint/types';
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
@@ -27,7 +31,11 @@ import {
   UpdateAlertStatusProps,
   CasesFromAlertsResponse,
 } from './types';
-import { isolateHost, unIsolateHost, endpointResponseAction } from '../../../../common/lib/endpoint_isolation';
+import {
+  isolateHost,
+  unIsolateHost,
+  endpointResponseAction,
+} from '../../../../common/lib/endpoint_isolation';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 
 /**
@@ -189,7 +197,7 @@ export const createHostUnIsolation = async ({
     comment,
     case_ids: caseIds,
   });
-  
+
 /**
  * Endpoint response action
  *
@@ -199,7 +207,7 @@ export const createHostUnIsolation = async ({
  *
  * @throws An error if response is not OK
  */
- export const createEndpointResponseAction = async ({
+export const createEndpointResponseAction = async ({
   endpointId,
   comment = '',
   caseIds,
@@ -211,7 +219,7 @@ export const createHostUnIsolation = async ({
   parameters?: {};
   command: string;
 }): Promise<EndpointResponseActionResponse> =>
-endpointResponseAction({
+  endpointResponseAction({
     endpoint_ids: [endpointId],
     comment,
     case_ids: caseIds,
