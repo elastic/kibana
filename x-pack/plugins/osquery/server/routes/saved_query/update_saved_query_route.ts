@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { filter } from 'lodash';
+import { filter, find } from 'lodash';
 import { schema } from '@kbn/config-schema';
 
 import { IRouter } from '@kbn/core/server';
-import { PLUGIN_ID } from '../../../common';
+import { OSQUERY_INTEGRATION_NAME, PLUGIN_ID } from '../../../common';
 import { savedQuerySavedObjectType } from '../../../common/types';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
@@ -62,6 +62,20 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
         // eslint-disable-next-line @typescript-eslint/naming-convention
         ecs_mapping,
       } = request.body;
+
+      const installation = await osqueryContext.service
+        .getPackageService()
+        ?.asInternalUser?.getInstallation(OSQUERY_INTEGRATION_NAME);
+
+      if (installation) {
+        const installationSavedQueries = find(
+          installation.installed_kibana,
+          (item) => item.type === savedQuerySavedObjectType && item.id === request.params.id
+        );
+        if (installationSavedQueries) {
+          return response.conflict({ body: `Elastic prebuilt Saved query cannot be updated.` });
+        }
+      }
 
       const conflictingEntries = await savedObjectsClient.find<{ id: string }>({
         type: savedQuerySavedObjectType,

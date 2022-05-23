@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import { filter } from 'lodash/fp';
+import { mapKeys } from 'lodash';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { OSQUERY_INTEGRATION_NAME, PLUGIN_ID } from '../../../common';
 import { savedQuerySavedObjectType } from '../../../common/types';
@@ -55,10 +56,7 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
           ['type', savedQuerySavedObjectType],
           installation.installed_kibana
         );
-        installedWithIntegrationMap = installationSavedQueries.reduce(
-          (acc, item) => ({ ...acc, [item.id]: item }),
-          {}
-        );
+        installedWithIntegrationMap = mapKeys(installationSavedQueries, (value) => value.id);
       }
 
       const savedObjects = savedQueries.saved_objects.map((savedObject) => {

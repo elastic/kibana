@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
-import { filter } from 'lodash/fp';
+import { find } from 'lodash';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { OSQUERY_INTEGRATION_NAME, PLUGIN_ID } from '../../../common';
 import { savedQuerySavedObjectType } from '../../../common/types';
@@ -37,14 +37,11 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
         .getPackageService()
         ?.asInternalUser?.getInstallation(OSQUERY_INTEGRATION_NAME);
 
-      let isInstalledWithIntegration;
+      let installationSavedQueries;
       if (installation) {
-        const installationSavedQueries = filter(
-          ['type', savedQuerySavedObjectType],
-          installation.installed_kibana
-        );
-        isInstalledWithIntegration = installationSavedQueries.find(
-          (item) => item.id === savedQuery.id
+        installationSavedQueries = find(
+          installation.installed_kibana,
+          (item) => item.type === savedQuerySavedObjectType && item.id === savedQuery.id
         );
       }
 
@@ -55,7 +52,7 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
         );
       }
 
-      if (isInstalledWithIntegration) {
+      if (installationSavedQueries) {
         savedQuery.attributes.prebuilt = true;
       }
 
