@@ -10,7 +10,7 @@ import { setupGetValueSuggestions } from './value';
 import indexPatternResponse from './__fixtures__/index_pattern_response.json';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { KueryNode } from '@kbn/data-plugin/public';
+import type { KueryNode } from '@kbn/es-query';
 import { QuerySuggestionGetFnArgs } from '../query_suggestion_provider';
 
 const mockKueryNode = (kueryNode: Partial<KueryNode>) => kueryNode as unknown as KueryNode;

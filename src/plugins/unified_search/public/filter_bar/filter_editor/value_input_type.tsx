@@ -10,12 +10,12 @@ import { EuiFieldNumber, EuiFieldText, EuiSelect } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
-import { IFieldType } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { validateParams } from './lib/filter_editor_utils';
 
 interface Props {
   value?: string | number;
-  field: IFieldType;
+  field: DataViewField;
   onChange: (value: string | number | boolean) => void;
   onBlur?: (value: string | number | boolean) => void;
   placeholder: string;
