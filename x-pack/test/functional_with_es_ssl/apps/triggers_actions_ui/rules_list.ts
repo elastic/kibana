@@ -13,7 +13,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const esArchiver = getService('esArchiver');
 
-  describe('Rule tag filter', () => {
+  describe('Rules list', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
       await PageObjects.common.navigateToUrlWithBrowserHistory(
@@ -26,8 +26,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('shoud load from shareable lazy loader', async () => {
-      await testSubjects.find('ruleTagFilter');
-      const exists = await testSubjects.exists('ruleTagFilter');
+      await testSubjects.find('rulesList');
+      const exists = await testSubjects.exists('rulesList');
       expect(exists).to.be(true);
     });
   });
