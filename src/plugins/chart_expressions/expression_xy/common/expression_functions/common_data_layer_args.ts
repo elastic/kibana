@@ -55,22 +55,6 @@ export const commonDataLayerArgs: Omit<
     types: ['number'],
     help: strings.getPointsRadiusHelp(),
   },
-  markSizeAccessor: {
-    types: ['string'],
-    help: strings.getMarkSizeAccessorHelp(),
-  },
-  lineWidth: {
-    types: ['number'],
-    help: strings.getLineWidthHelp(),
-  },
-  showPoints: {
-    types: ['boolean'],
-    help: strings.getShowPointsHelp(),
-  },
-  pointsRadius: {
-    types: ['number'],
-    help: strings.getPointsRadiusHelp(),
-  },
   showLines: {
     types: ['boolean'],
     help: strings.getShowLinesHelp(),
