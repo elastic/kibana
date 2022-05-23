@@ -255,6 +255,7 @@ export {
   createSavedQueryService,
   connectToQueryState,
   syncQueryStateWithUrl,
+  syncGlobalQueryStateWithUrl,
   getDefaultQuery,
   FilterManager,
   TimeHistory,
@@ -280,6 +281,7 @@ export type {
   QueryStringContract,
   QuerySetup,
   TimefilterSetup,
+  GlobalQueryStateFromUrl,
 } from './query';
 
 export type { AggsStart } from './search/aggs';

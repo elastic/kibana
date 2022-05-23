@@ -17,6 +17,7 @@ import {
   CommonXYDataLayerConfigResult,
   ValueLabelMode,
   CommonXYDataLayerConfig,
+  ExtendedDataLayerConfigResult,
 } from '../types';
 import { isTimeChart } from '../helpers';
 
@@ -33,6 +34,27 @@ export const errors = {
     i18n.translate('expressionXY.reusable.function.xyVis.errors.markSizeLimitsError', {
       defaultMessage: 'Mark size ratio must be greater or equal to 1 and less or equal to 100',
     }),
+  lineWidthForNonLineOrAreaChartError: () =>
+    i18n.translate(
+      'expressionXY.reusable.function.xyVis.errors.lineWidthForNonLineOrAreaChartError',
+      {
+        defaultMessage: '`lineWidth` can be applied only for line or area charts',
+      }
+    ),
+  showPointsForNonLineOrAreaChartError: () =>
+    i18n.translate(
+      'expressionXY.reusable.function.xyVis.errors.showPointsForNonLineOrAreaChartError',
+      {
+        defaultMessage: '`showPoints` can be applied only for line or area charts',
+      }
+    ),
+  pointsRadiusForNonLineOrAreaChartError: () =>
+    i18n.translate(
+      'expressionXY.reusable.function.xyVis.errors.pointsRadiusForNonLineOrAreaChartError',
+      {
+        defaultMessage: '`pointsRadius` can be applied only for line or area charts',
+      }
+    ),
   markSizeRatioWithoutAccessor: () =>
     i18n.translate('expressionXY.reusable.function.xyVis.errors.markSizeRatioWithoutAccessor', {
       defaultMessage: 'Mark size ratio can be applied only with `markSizeAccessor`',
@@ -57,6 +79,10 @@ export const errors = {
   dataBoundsForNotLineChartError: () =>
     i18n.translate('expressionXY.reusable.function.xyVis.errors.dataBoundsForNotLineChartError', {
       defaultMessage: 'Only line charts can be fit to the data bounds',
+    }),
+  timeMarkerForNotTimeChartsError: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.timeMarkerForNotTimeChartsError', {
+      defaultMessage: 'Only time charts can have current time marker',
     }),
   isInvalidIntervalError: () =>
     i18n.translate('expressionXY.reusable.function.xyVis.errors.isInvalidIntervalError', {
@@ -135,6 +161,18 @@ export const validateValueLabels = (
   }
 };
 
+const isAreaOrLineChart = (seriesType: SeriesType) =>
+  seriesType.includes('line') || seriesType.includes('area');
+
+export const validateAddTimeMarker = (
+  dataLayers: Array<DataLayerConfigResult | ExtendedDataLayerConfigResult>,
+  addTimeMarker?: boolean
+) => {
+  if (addTimeMarker && !isTimeChart(dataLayers)) {
+    throw new Error(errors.timeMarkerForNotTimeChartsError());
+  }
+};
+
 export const validateMarkSizeForChartType = (
   markSizeAccessor: ExpressionValueVisDimension | string | undefined,
   seriesType: SeriesType
@@ -147,6 +185,33 @@ export const validateMarkSizeForChartType = (
 export const validateMarkSizeRatioLimits = (markSizeRatio?: number) => {
   if (markSizeRatio !== undefined && (markSizeRatio < 1 || markSizeRatio > 100)) {
     throw new Error(errors.markSizeRatioLimitsError());
+  }
+};
+
+export const validateLineWidthForChartType = (
+  lineWidth: number | undefined,
+  seriesType: SeriesType
+) => {
+  if (lineWidth !== undefined && !isAreaOrLineChart(seriesType)) {
+    throw new Error(errors.lineWidthForNonLineOrAreaChartError());
+  }
+};
+
+export const validateShowPointsForChartType = (
+  showPoints: boolean | undefined,
+  seriesType: SeriesType
+) => {
+  if (showPoints !== undefined && !isAreaOrLineChart(seriesType)) {
+    throw new Error(errors.showPointsForNonLineOrAreaChartError());
+  }
+};
+
+export const validatePointsRadiusForChartType = (
+  pointsRadius: number | undefined,
+  seriesType: SeriesType
+) => {
+  if (pointsRadius !== undefined && !isAreaOrLineChart(seriesType)) {
+    throw new Error(errors.pointsRadiusForNonLineOrAreaChartError());
   }
 };
 
