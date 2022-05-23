@@ -42,7 +42,7 @@ export function TestQueryRow({
           <EuiText color="subdued" size="s">
             <p>
               <FormattedMessage
-                id="xpack.stackAlerts.esQuery.ui.testQuery"
+                id="xpack.stackAlerts.esQuery.ui.testQueryIsExecuted"
                 defaultMessage="Query is executed."
               />
             </p>
