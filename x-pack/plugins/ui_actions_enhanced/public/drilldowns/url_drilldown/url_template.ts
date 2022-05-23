@@ -10,13 +10,12 @@ export async function compile(
   context: object,
   doEncode: boolean = true
 ): Promise<string> {
-  const handlebarsTemplate = (await import('./handlebars').then((m) => m.handlebars)).compile(
-    urlTemplate,
-    {
-      strict: true,
-      noEscape: true,
-    }
-  );
+  const { handlebars } = await import('./handlebars');
+  const { compileFnName } = await import('@kbn/handlebars');
+  const handlebarsTemplate = handlebars[compileFnName](urlTemplate, {
+    strict: true,
+    noEscape: true,
+  });
 
   let processedUrl: string = handlebarsTemplate(context);
 

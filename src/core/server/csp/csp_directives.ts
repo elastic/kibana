@@ -25,7 +25,7 @@ export type CspDirectiveName =
  * The default directives rules that are always applied
  */
 export const defaultRules: Partial<Record<CspDirectiveName, string[]>> = {
-  'script-src': [`'unsafe-eval'`, `'self'`],
+  'script-src': [`'self'`],
   'worker-src': [`blob:`, `'self'`],
   'style-src': [`'unsafe-inline'`, `'self'`],
 };
@@ -93,6 +93,9 @@ const parseConfigDirectives = (cspConfig: CspConfigType): Map<CspDirectiveName, 
 
   if (cspConfig.script_src?.length) {
     map.set('script-src', cspConfig.script_src);
+  }
+  if (cspConfig.disableUnsafeEval !== true) {
+    map.set('script-src', ["'unsafe-eval'", ...(map.get('script-src') ?? [])]);
   }
   if (cspConfig.worker_src?.length) {
     map.set('worker-src', cspConfig.worker_src);
