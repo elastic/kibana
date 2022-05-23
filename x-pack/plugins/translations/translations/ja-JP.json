@@ -11900,8 +11900,6 @@
     "xpack.enterpriseSearch.workplaceSearch.integrations.confluenceCloudName": "Confluence Cloud",
     "xpack.enterpriseSearch.workplaceSearch.integrations.confluenceServerDescription": "Workplace Searchを使用して、Confluence Serverの組織コンテンツを検索します。",
     "xpack.enterpriseSearch.workplaceSearch.integrations.confluenceServerName": "Confluence Server",
-    "xpack.enterpriseSearch.workplaceSearch.integrations.customApiSourceDescription": "Workplace Searchを使用して、独自の統合を構築し、項目を検索します。",
-    "xpack.enterpriseSearch.workplaceSearch.integrations.customApiSourceName": "カスタムAPIソース",
     "xpack.enterpriseSearch.workplaceSearch.integrations.dropboxDescription": "Workplace Searchを使用して、Dropboxに保存されたファイルとフォルダーを検索します。",
     "xpack.enterpriseSearch.workplaceSearch.integrations.dropboxName": "Dropbox",
     "xpack.enterpriseSearch.workplaceSearch.integrations.githubDescription": "Workplace Searchを使用して、GitHubのプロジェクトとリポジトリを検索します。",
