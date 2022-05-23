@@ -26,11 +26,11 @@ export const API_ENDPOINT = {
 export interface ApiReducerStream extends UseFetchStreamCustomReducerParams {
   endpoint: typeof API_ENDPOINT.REDUCER_STREAM;
   reducer: typeof reducerStreamReducer;
-  options: ReducerStreamRequestBodySchema;
+  body: ReducerStreamRequestBodySchema;
   actions: ReducerStreamApiAction;
 }
 
 export interface ApiSimpleStringStream extends UseFetchStreamParamsDefault {
   endpoint: typeof API_ENDPOINT.SIMPLE_STRING_STREAM;
-  options: SimpleStringStreamRequestBodySchema;
+  body: SimpleStringStreamRequestBodySchema;
 }

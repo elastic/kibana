@@ -24,39 +24,68 @@ class ResponseStream extends Stream.PassThrough {
 
 const DELIMITER = '\n';
 
+type StreamType = 'string' | 'ndjson';
+
+interface StreamFactoryReturnType<T = unknown> {
+  DELIMITER: string;
+  end: () => void;
+  error: (errorText: string) => void;
+  push: (d: T) => void;
+  responseWithHeaders: {
+    body: zlib.Gzip | ResponseStream;
+    headers?: Headers;
+  };
+}
+
 /**
  * Sets up a response stream with support for gzip compression depending on provided
- * request headers.
+ * request headers. Any non-string data pushed to the stream will be stream as NDJSON.
  *
  * @param headers - Request headers.
- * @param ndjson - Boolean to define whether to use newline delimited JSON as the response format.
  * @returns An object with stream attributes and methods.
  */
-export function streamFactory<T = unknown>(headers: Headers, ndjson = true) {
+export function streamFactory<T = string>(headers: Headers): StreamFactoryReturnType<T>;
+export function streamFactory<T = unknown>(headers: Headers): StreamFactoryReturnType<T> {
+  let streamType: StreamType;
   const isCompressed = acceptCompression(headers);
 
   const stream = isCompressed ? zlib.createGzip() : new ResponseStream();
 
   function error(errorText: string) {
-    stream.emit('error', new Error(errorText));
+    stream.emit('error', errorText);
+  }
+
+  function end() {
+    stream.end();
   }
 
   function push(d: T) {
-    try {
-      const line = ndjson ? `${JSON.stringify(d)}${DELIMITER}` : d;
-      stream.write(line);
+    // Initialize the stream type with the first push to the stream,
+    // otherwise check the integrity of the data to be pushed.
+    if (streamType === undefined) {
+      streamType = typeof d === 'string' ? 'string' : 'ndjson';
+    } else if (streamType === 'string' && typeof d !== 'string') {
+      error('Must not push non-string chunks to a string based stream.');
+      return;
+    } else if (streamType === 'ndjson' && typeof d === 'string') {
+      error('Must not push raw string chunks to an NDJSON based stream.');
+    }
 
-      // Calling .flush() on a compression stream will
-      // make zlib return as much output as currently possible.
-      if (isCompressed) {
-        stream.flush();
-      }
+    try {
+      const line = typeof d !== 'string' ? `${JSON.stringify(d)}${DELIMITER}` : d;
+      stream.write(line);
     } catch (e) {
-      error('Could not serialize or stream a message.');
+      error(`Could not serialize or stream data chunk: ${e.toString()}`);
+    }
+
+    // Calling .flush() on a compression stream will
+    // make zlib return as much output as currently possible.
+    if (isCompressed) {
+      stream.flush();
     }
   }
 
-  const responseWithHeaders = {
+  const responseWithHeaders: StreamFactoryReturnType['responseWithHeaders'] = {
     body: stream,
     ...(isCompressed
       ? {
@@ -67,5 +96,5 @@ export function streamFactory<T = unknown>(headers: Headers, ndjson = true) {
       : {}),
   };
 
-  return { DELIMITER, end: stream.end, error, push, responseWithHeaders };
+  return { DELIMITER, end, error, push, responseWithHeaders };
 }

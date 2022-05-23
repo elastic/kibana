@@ -38,7 +38,7 @@ export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
         shouldStop = true;
       });
 
-      const { error, push, responseWithHeaders } = streamFactory<ReducerStreamApiAction>(
+      const { end, error, push, responseWithHeaders } = streamFactory<ReducerStreamApiAction>(
         request.headers
       );
 
@@ -68,6 +68,7 @@ export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
             progress++;
 
             if (progress > 100 || shouldStop) {
+              end();
               return;
             }
 
