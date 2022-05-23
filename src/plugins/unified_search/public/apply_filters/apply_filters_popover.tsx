@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { Filter } from '@kbn/data-plugin/common';
+import type { Filter } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/common';
 
 type CancelFnType = () => void;

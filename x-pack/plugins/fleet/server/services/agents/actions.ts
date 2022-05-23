@@ -17,6 +17,8 @@ import type {
 import { AGENT_ACTIONS_INDEX, SO_SEARCH_LIMIT } from '../../../common/constants';
 import { AgentActionNotFoundError } from '../../errors';
 
+import { bulkUpdateAgents } from './crud';
+
 const ONE_MONTH_IN_MS = 2592000000;
 
 export async function createAgentAction(
@@ -131,6 +133,18 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
       created_at: now,
       expiration: hit._source.expiration,
     });
+    if (hit._source.type === 'UPGRADE') {
+      await bulkUpdateAgents(
+        esClient,
+        hit._source.agents.map((agentId) => ({
+          agentId,
+          data: {
+            upgraded_at: null,
+            upgrade_started_at: null,
+          },
+        }))
+      );
+    }
   }
 
   return {
