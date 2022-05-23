@@ -143,6 +143,7 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.CONFLUENCE_SERVER,
     serviceType: 'confluence_server',
+    categories: [SOURCE_CATEGORIES.WIKI, SOURCE_CATEGORIES.ATLASSIAN, SOURCE_CATEGORIES.INTRANET],
     configuration: {
       isPublicKey: true,
       hasOauthRedirect: true,
