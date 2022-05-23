@@ -8,16 +8,16 @@
 
 import { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
-import { isFilterPinned } from '@kbn/es-query';
+import { COMPARE_ALL_OPTIONS, compareFilters, isFilterPinned } from '@kbn/es-query';
 import { createStateContainer } from '@kbn/kibana-utils-plugin/public';
 import type { TimefilterSetup } from '../timefilter';
 import { FilterManager } from '../filter_manager';
-import { QueryState, QueryStateChange } from '.';
-import { compareFilters, COMPARE_ALL_OPTIONS } from '../../../common';
+import { getQueryState, QueryState } from '../query_state';
+import { QueryStateChange } from './types';
 import type { QueryStringContract } from '../query_string';
 
 export function createQueryStateObservable({
-  timefilter: { timefilter },
+  timefilter,
   filterManager,
   queryString,
 }: {
@@ -25,27 +25,24 @@ export function createQueryStateObservable({
   filterManager: FilterManager;
   queryString: QueryStringContract;
 }): Observable<{ changes: QueryStateChange; state: QueryState }> {
-  return new Observable((subscriber) => {
-    const state = createStateContainer<QueryState>({
-      time: timefilter.getTime(),
-      refreshInterval: timefilter.getRefreshInterval(),
-      filters: filterManager.getFilters(),
-      query: queryString.getQuery(),
-    });
+  const state = createStateContainer<QueryState>(
+    getQueryState({ timefilter, filterManager, queryString })
+  );
 
+  return new Observable((subscriber) => {
     let currentChange: QueryStateChange = {};
     const subs: Subscription[] = [
       queryString.getUpdates$().subscribe(() => {
         currentChange.query = true;
         state.set({ ...state.get(), query: queryString.getQuery() });
       }),
-      timefilter.getTimeUpdate$().subscribe(() => {
+      timefilter.timefilter.getTimeUpdate$().subscribe(() => {
         currentChange.time = true;
-        state.set({ ...state.get(), time: timefilter.getTime() });
+        state.set({ ...state.get(), time: timefilter.timefilter.getTime() });
       }),
-      timefilter.getRefreshIntervalUpdate$().subscribe(() => {
+      timefilter.timefilter.getRefreshIntervalUpdate$().subscribe(() => {
         currentChange.refreshInterval = true;
-        state.set({ ...state.get(), refreshInterval: timefilter.getRefreshInterval() });
+        state.set({ ...state.get(), refreshInterval: timefilter.timefilter.getRefreshInterval() });
       }),
       filterManager.getUpdates$().subscribe(() => {
         currentChange.filters = true;
