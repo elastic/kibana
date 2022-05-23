@@ -25,7 +25,7 @@ const allAlertTypeIds = `(alert.attributes.alertTypeId: ${EQL_RULE_TYPE_ID}
 
 describe('enrichFilterWithRuleTypeMapping', () => {
   test('it returns a full filter with an AND if sent down', () => {
-    expect(enrichFilterWithRuleTypeMapping('alert.attributes.enabled: true')).toEqual(
+    expect(enrichFilterWithRuleTypeMapping('alert.attributes.enabled: trues')).toEqual(
       `${allAlertTypeIds} AND alert.attributes.enabled: true`
     );
   });
