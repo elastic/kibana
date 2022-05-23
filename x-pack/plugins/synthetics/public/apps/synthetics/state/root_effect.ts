@@ -6,8 +6,13 @@
  */
 
 import { all, fork } from 'redux-saga/effects';
+import { fetchMonitorListEffect, fetchServiceLocationsEffect } from './monitor_management/effects';
 import { fetchIndexStatusEffect } from './index_status';
 
 export const rootEffect = function* root(): Generator {
-  yield all([fork(fetchIndexStatusEffect)]);
+  yield all([
+    fork(fetchIndexStatusEffect),
+    fork(fetchServiceLocationsEffect),
+    fork(fetchMonitorListEffect),
+  ]);
 };

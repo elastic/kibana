@@ -12,27 +12,27 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
+import { GettingStartedPage } from './components/getting_started/getting_started_page';
 import { MonitorAddEditPage } from './components/monitor_add_edit/monitor_add_edit_page';
 import { OverviewPage } from './components/overview/overview_page';
 import { SyntheticsPageTemplateComponent } from './components/common/pages/synthetics_page_template';
 import { NotFoundPage } from './components/common/pages/not_found';
 import { ServiceAllowedWrapper } from './components/common/wrappers/service_allowed_wrapper';
 import {
+  GETTING_STARTED_ROUTE,
   MONITOR_ADD_ROUTE,
   MONITOR_MANAGEMENT_ROUTE,
   OVERVIEW_ROUTE,
 } from '../../../common/constants';
 import { MonitorManagementPage } from './components/monitor_management/monitor_management_page';
 import { apiService } from '../../utils/api_service';
-import { SyntheticsPage, useSyntheticsTelemetry } from './hooks/use_telemetry';
 
 type RouteProps = {
   path: string;
   component: React.FC;
   dataTestSubj: string;
   title: string;
-  telemetryId: SyntheticsPage;
-  pageHeader: {
+  pageHeader?: {
     pageTitle: string | JSX.Element;
     children?: JSX.Element;
     rightSideItems?: JSX.Element[];
@@ -43,15 +43,22 @@ const baseTitle = i18n.translate('xpack.synthetics.routes.baseTitle', {
   defaultMessage: 'Synthetics - Kibana',
 });
 
-export const MONITOR_MANAGEMENT_LABEL = i18n.translate(
-  'xpack.synthetics.monitorManagement.heading',
-  {
-    defaultMessage: 'Monitor Management',
-  }
-);
-
 const getRoutes = (): RouteProps[] => {
   return [
+    {
+      title: i18n.translate('xpack.synthetics.gettingStartedRoute.title', {
+        defaultMessage: 'Synthetics Getting Started | {baseTitle}',
+        values: { baseTitle },
+      }),
+      path: GETTING_STARTED_ROUTE,
+      component: () => <GettingStartedPage />,
+      dataTestSubj: 'syntheticsGettingStartedPage',
+      template: 'centeredBody',
+      pageContentProps: {
+        paddingSize: 'none',
+        hasShadow: false,
+      },
+    },
     {
       title: i18n.translate('xpack.synthetics.overviewRoute.title', {
         defaultMessage: 'Synthetics Overview | {baseTitle}',
@@ -60,7 +67,6 @@ const getRoutes = (): RouteProps[] => {
       path: OVERVIEW_ROUTE,
       component: () => <OverviewPage />,
       dataTestSubj: 'syntheticsOverviewPage',
-      telemetryId: SyntheticsPage.Overview,
       pageHeader: {
         pageTitle: (
           <EuiFlexGroup alignItems="center" gutterSize="xs">
@@ -89,14 +95,13 @@ const getRoutes = (): RouteProps[] => {
         </ServiceAllowedWrapper>
       ),
       dataTestSubj: 'syntheticsMonitorManagementPage',
-      telemetryId: SyntheticsPage.MonitorManagement,
       pageHeader: {
         pageTitle: (
           <EuiFlexGroup alignItems="center" gutterSize="xs">
             <EuiFlexItem grow={false}>
               <FormattedMessage
-                id="xpack.synthetics.monitorManagement.pageHeader.title"
-                defaultMessage="Monitor Management"
+                id="xpack.synthetics.monitors.pageHeader.title"
+                defaultMessage="Monitors"
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -118,7 +123,6 @@ const getRoutes = (): RouteProps[] => {
         </ServiceAllowedWrapper>
       ),
       dataTestSubj: 'syntheticsMonitorAddPage',
-      telemetryId: SyntheticsPage.MonitorAdd,
       pageHeader: {
         pageTitle: (
           <FormattedMessage
@@ -133,12 +137,7 @@ const getRoutes = (): RouteProps[] => {
   ];
 };
 
-const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title' | 'telemetryId'>> = ({
-  path,
-  title,
-  telemetryId,
-}) => {
-  useSyntheticsTelemetry(telemetryId);
+const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title'>> = ({ path, title }) => {
   useEffect(() => {
     document.title = title;
   }, [path, title]);
@@ -159,14 +158,12 @@ export const PageRouter: FC = () => {
           path,
           component: RouteComponent,
           dataTestSubj,
-          telemetryId,
           pageHeader,
           ...pageTemplateProps
         }) => (
-          <Route path={path} key={telemetryId} exact={true}>
+          <Route path={path} key={dataTestSubj} exact={true}>
             <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
-              {/* <SyntheticsCallout /> TODO: See if the callout is needed for Synthetics App as well */}
-              <RouteInit title={title} path={path} telemetryId={telemetryId} />
+              <RouteInit title={title} path={path} />
               <SyntheticsPageTemplateComponent
                 path={path}
                 pageHeader={pageHeader}
