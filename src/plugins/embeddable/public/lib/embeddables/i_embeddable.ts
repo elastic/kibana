@@ -7,15 +7,12 @@
  */
 
 import { Observable } from 'rxjs';
+import { ErrorLike } from '@kbn/expressions-plugin';
 import { Adapters } from '../types';
 import { IContainer } from '../containers/i_container';
 import { EmbeddableInput } from '../../../common/types';
 
-export interface EmbeddableError {
-  name: string;
-  message: string;
-}
-
+export type EmbeddableError = ErrorLike;
 export type { EmbeddableInput };
 
 export interface EmbeddableOutput {

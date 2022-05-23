@@ -8,6 +8,7 @@
 
 import { uniq } from 'lodash';
 import { DataViewsService } from '@kbn/data-views-plugin/common';
+import { DataViewNotFoundError } from './errors';
 import type { Panel, IndexPatternValue, FetchedIndexPattern } from './types';
 
 export const isStringTypeIndexPattern = (
@@ -70,7 +71,11 @@ export const fetchIndexPattern = async (
 
       indexPatternString = indexPatternValue;
     } else if (indexPatternValue.id) {
-      indexPattern = await indexPatternsService.get(indexPatternValue.id);
+      try {
+        indexPattern = await indexPatternsService.get(indexPatternValue.id);
+      } catch (e) {
+        throw new DataViewNotFoundError(indexPatternValue.id);
+      }
     }
   }
 

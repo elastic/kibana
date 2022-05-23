@@ -14,7 +14,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
-  const browser = getService('browser');
 
   /**
    * Common test suite for testing exception scenarious within dashboard
@@ -53,23 +52,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // wrapping into own describe to make sure new tab is cleaned up even if test failed
     // see: https://github.com/elastic/kibana/pull/67280#discussion_r430528122
     describe('recreate index pattern link works', () => {
-      let tabsCount = 1;
       it('recreate index pattern link works', async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.loadSavedDashboard('dashboard with missing index pattern');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        const errorEmbeddable = await testSubjects.find('embeddableStackError');
-        await (await errorEmbeddable.findByTagName('a')).click();
-        await browser.switchTab(1);
-        tabsCount++;
-        await testSubjects.existOrFail('createIndexPatternButton');
-      });
+        const errorEmbeddable = await testSubjects.find('visualization-missed-data-view-error');
 
-      after(async () => {
-        if (tabsCount > 1) {
-          await browser.closeCurrentWindow();
-          await browser.switchTab(0);
-        }
+        expect(await errorEmbeddable.isDisplayed()).to.be(true);
       });
     });
   });

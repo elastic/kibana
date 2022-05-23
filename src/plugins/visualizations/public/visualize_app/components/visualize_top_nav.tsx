@@ -20,7 +20,7 @@ import type {
   VisualizeEditorVisInstance,
 } from '../types';
 import { VISUALIZE_APP_NAME } from '../../../common/constants';
-import { getTopNavConfig } from '../utils';
+import { getTopNavConfig, isFallbackDataView } from '../utils';
 import type { NavigateToLensContext } from '../..';
 
 const LOCAL_STORAGE_EDIT_IN_LENS_BADGE = 'EDIT_IN_LENS_BADGE_VISIBLE';
@@ -305,12 +305,13 @@ const TopNav = ({
       showQueryInput={showQueryInput}
       showSaveQuery={Boolean(services.visualizeCapabilities.saveQuery)}
       dataViewPickerComponentProps={
-        shouldShowDataViewPicker
+        shouldShowDataViewPicker && vis.data.indexPattern
           ? {
-              currentDataViewId: vis.data.indexPattern!.id,
+              currentDataViewId: vis.data.indexPattern.id,
               trigger: {
-                label: vis.data.indexPattern!.title,
+                label: vis.data.indexPattern.title,
               },
+              isMissingCurrent: isFallbackDataView(vis.data.indexPattern),
               onChangeDataView,
               showNewMenuTour: false,
             }
