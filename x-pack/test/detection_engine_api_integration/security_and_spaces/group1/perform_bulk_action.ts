@@ -656,6 +656,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
         expect(body.attributes.errors[0]).to.eql({
           message: "Mutated params invalid: Elastic rule can't be edited",
+          status_code: 500,
           rules: [
             {
               id: immutableRule.id,
@@ -685,6 +686,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.attributes.errors[0]).to.eql({
           message:
             "Index patterns can't be added. Machine learning rule doesn't have index patterns property",
+          status_code: 500,
           rules: [
             {
               id: mlRule.id,
@@ -716,6 +718,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
         expect(body.attributes.errors[0]).to.eql({
           message: "Mutated params invalid: Index patterns can't be empty",
+          status_code: 500,
           rules: [
             {
               id: rule.id,
