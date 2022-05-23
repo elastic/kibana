@@ -138,7 +138,7 @@ describe('helpers', () => {
       ]);
     });
 
-    test('it defaults to a `columnType` of empty string when a column does NOT has a corresponding entry in `columnHeaders`', () => {
+    test('it defaults to a `columnType` of empty string when a column does NOT have a corresponding entry in `columnHeaders`', () => {
       const withUnknownColumn: Array<{
         id: string;
         direction: 'asc' | 'desc';

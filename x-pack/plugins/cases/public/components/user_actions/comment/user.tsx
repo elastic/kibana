@@ -65,6 +65,7 @@ export const createUserAttachmentUserActionBuilder = ({
       }),
       children: (
         <UserActionMarkdown
+          key={isEdit ? comment.id : undefined}
           ref={(element) => (commentRefs.current[comment.id] = element)}
           id={comment.id}
           content={comment.comment}
