@@ -16,25 +16,18 @@ type APMDataStream = Overwrite<DataStream, { package: 'apm' }>;
 const isAPMIntegration = (datastream: DataStream): datastream is APMDataStream =>
   Boolean(datastream.package === 'apm');
 
-const hasServiceDetails = (
-  datastream: DataStream
-): datastream is Overwrite<
-  DataStream,
-  { package: 'apm'; serviceDetails: NonNullable<DataStream['serviceDetails']> }
-> => Boolean(datastream.serviceDetails);
-
 export const useAPMServiceDetailHref = (datastream: DataStream) => {
   const apmLocator = useLocator(LOCATORS_IDS.APM_LOCATOR);
 
   const { error, loading, value } = useAsync(() => {
     if (!isAPMIntegration(datastream) || !apmLocator) return Promise.resolve();
 
-    if (hasServiceDetails(datastream)) {
+    if (datastream.serviceDetails) {
       const { serviceName, environment } = datastream.serviceDetails;
 
       return apmLocator.getUrl({
         serviceName,
-        serviceOverviewTab: datastream.isErrorOnlyLogsStream ? 'errors' : datastream.type,
+        serviceOverviewTab: datastream.type === 'logs' ? 'errors' : datastream.type,
         query: {
           environment,
         },

@@ -73,12 +73,6 @@ export async function getMetadataFromAggregations({
             missing: 'ENVIRONMENT_NOT_DEFINED',
           },
         },
-        processorEvent: {
-          terms: {
-            field: 'processor.event',
-            size: 2,
-          },
-        },
       },
     },
   });
@@ -87,11 +81,10 @@ export async function getMetadataFromAggregations({
     string,
     estypes.AggregationsRateAggregate
   >;
-  const { dataset, namespace, type, serviceName, environment, processorEvent } =
-    dataStreamAggs as Record<
-      string,
-      estypes.AggregationsMultiBucketAggregateBase<{ key?: string; value?: number }>
-    >;
+  const { dataset, namespace, type, serviceName, environment } = dataStreamAggs as Record<
+    string,
+    estypes.AggregationsMultiBucketAggregateBase<{ key?: string; value?: number }>
+  >;
 
   const maxIngested = maxIngestedTimestamp?.value;
 
@@ -100,8 +93,7 @@ export async function getMetadataFromAggregations({
     dataset: (dataset.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '',
     namespace: (namespace.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '',
     type: (type.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '',
-    serviceNames: map(serviceName.buckets, 'key'),
-    environments: map(environment.buckets, 'key'),
-    processorEventTypes: map(processorEvent.buckets, 'key'),
+    serviceNames: map(serviceName.buckets, 'key') as string[],
+    environments: map(environment.buckets, 'key') as string[],
   };
 }

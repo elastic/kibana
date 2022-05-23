@@ -23,5 +23,4 @@ export interface DataStream {
     environment: string;
     serviceName: string;
   } | null;
-  isErrorOnlyLogsStream: boolean;
 }

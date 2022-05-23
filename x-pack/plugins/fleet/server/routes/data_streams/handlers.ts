@@ -42,9 +42,6 @@ interface ESDataStreamInfo {
   hidden: boolean;
 }
 
-const hasASingleBucket = (buckets: Array<string | undefined>): buckets is [string] =>
-  Array.isArray(buckets) && buckets.length === 1 && Boolean(buckets[0]);
-
 export const getListHandler: RequestHandler = async (context, request, response) => {
   // Query datastreams as the current user as the Kibana internal user may not have all the required permission
   const { savedObjects, elasticsearch } = await context.core;
@@ -138,18 +135,9 @@ export const getListHandler: RequestHandler = async (context, request, response)
         size_in_bytes_formatted: dataStream.store_size || `${dataStream.store_size_bytes}b`,
         dashboards: [],
         serviceDetails: null,
-        isErrorOnlyLogsStream: false,
       };
 
-      const {
-        maxIngested,
-        namespace,
-        dataset,
-        type,
-        serviceNames,
-        environments,
-        processorEventTypes,
-      } = useTermsEnum
+      const { maxIngested, namespace, dataset, type, serviceNames, environments } = useTermsEnum
         ? await getMetadataFromTermsEnum({ dataStreamName: dataStream.name, esClient })
         : await getMetadataFromAggregations({ dataStreamName: dataStream.name, esClient });
 
@@ -158,17 +146,14 @@ export const getListHandler: RequestHandler = async (context, request, response)
         dataStreamResponse.last_activity_ms = maxIngested;
       }
 
-      if (hasASingleBucket(serviceNames)) {
+      if (serviceNames?.length === 1) {
         const serviceDetails = {
           serviceName: serviceNames[0],
-          environment: hasASingleBucket(environments) ? environments[0] : 'ENVIRONMENT_ALL',
+          environment: environments?.length === 1 ? environments[0] : 'ENVIRONMENT_ALL',
         };
         dataStreamResponse.serviceDetails = serviceDetails;
       }
 
-      dataStreamResponse.isErrorOnlyLogsStream = Boolean(
-        hasASingleBucket(processorEventTypes) && processorEventTypes[0] === 'error'
-      );
       dataStreamResponse.dataset = dataset;
       dataStreamResponse.namespace = namespace;
       dataStreamResponse.type = type;

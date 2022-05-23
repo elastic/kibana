@@ -20,7 +20,6 @@ export async function getMetadataFromTermsEnum({
     typeResponse,
     serviceNameResponse,
     environmentResponse,
-    processorEventResponse,
   ] = await Promise.all([
     esClient.search({
       size: 1,
@@ -54,10 +53,6 @@ export async function getMetadataFromTermsEnum({
       field: 'service.environment',
       size: 2,
     }),
-    esClient.termsEnum({
-      index: dataStreamName,
-      field: 'processor.event',
-    }),
   ]);
 
   const maxIngested = new Date(
@@ -70,7 +65,6 @@ export async function getMetadataFromTermsEnum({
   const serviceNames = serviceNameResponse.terms;
   const environments =
     environmentResponse.terms.length > 0 ? environmentResponse.terms : ['ENVIRONMENT_NOT_DEFINED'];
-  const processorEventTypes = processorEventResponse.terms;
 
   return {
     maxIngested,
@@ -79,6 +73,5 @@ export async function getMetadataFromTermsEnum({
     type,
     serviceNames,
     environments,
-    processorEventTypes,
   };
 }

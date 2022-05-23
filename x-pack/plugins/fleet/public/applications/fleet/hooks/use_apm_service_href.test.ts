@@ -47,7 +47,7 @@ describe('useApmServiceHref hook', () => {
     [
       {
         package: 'apm',
-        type: 'logs',
+        type: 'metrics',
         serviceDetails: {
           serviceName: 'example-app',
           environment: 'example-environment',
@@ -55,7 +55,7 @@ describe('useApmServiceHref hook', () => {
       },
       {
         serviceName: 'example-app',
-        serviceOverviewTab: 'logs',
+        serviceOverviewTab: 'metrics',
         query: {
           environment: 'example-environment',
         },
@@ -65,7 +65,6 @@ describe('useApmServiceHref hook', () => {
       {
         package: 'apm',
         type: 'logs',
-        isErrorOnlyLogsStream: true,
         serviceDetails: {
           serviceName: 'example-app',
           environment: 'example-environment',
