@@ -11801,8 +11801,6 @@
     "xpack.enterpriseSearch.workplaceSearch.integrations.confluenceCloudName": "Cloud Confluence",
     "xpack.enterpriseSearch.workplaceSearch.integrations.confluenceServerDescription": "Effectuez des recherches sur le contenu de votre organisation sur le serveur Confluence avec Workplace Search.",
     "xpack.enterpriseSearch.workplaceSearch.integrations.confluenceServerName": "Serveur Confluence",
-    "xpack.enterpriseSearch.workplaceSearch.integrations.customApiSourceDescription": "Effectuez n'importe quelle recherche en créant votre propre intégration avec Workplace Search.",
-    "xpack.enterpriseSearch.workplaceSearch.integrations.customApiSourceName": "Source d'API personnalisée",
     "xpack.enterpriseSearch.workplaceSearch.integrations.dropboxDescription": "Effectuez des recherches dans vos fichiers et dossiers stockés sur Dropbox avec Workplace Search.",
     "xpack.enterpriseSearch.workplaceSearch.integrations.dropboxName": "Dropbox",
     "xpack.enterpriseSearch.workplaceSearch.integrations.githubDescription": "Effectuez des recherches sur vos projets et référentiels sur GitHub avec Workplace Search.",
