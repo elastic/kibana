@@ -54,6 +54,7 @@ describe('color_assignment', () => {
       type: 'dataLayer',
       showLines: true,
       isHistogram: true,
+      xScaleType: 'linear',
       seriesType: 'bar',
       palette: { type: 'palette', name: 'palette1' },
       layerType: LayerTypes.DATA,

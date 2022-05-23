@@ -11,6 +11,7 @@ import { ExtendedDataLayerArgs, ExtendedDataLayerFn } from '../types';
 import { EXTENDED_DATA_LAYER, LayerTypes } from '../constants';
 import { getAccessors, normalizeTable, getShowLines } from '../helpers';
 import {
+  validateLinesVisibilityForChartType,
   validateLineWidthForChartType,
   validateMarkSizeForChartType,
   validatePointsRadiusForChartType,
@@ -29,7 +30,8 @@ export const extendedDataLayerFn: ExtendedDataLayerFn['fn'] = async (data, args,
   validateLineWidthForChartType(args.lineWidth, args.seriesType);
   validateShowPointsForChartType(args.showPoints, args.seriesType);
   validatePointsRadiusForChartType(args.pointsRadius, args.seriesType);
-
+  validateLinesVisibilityForChartType(args.showLines, args.seriesType);
+  
   const normalizedTable = normalizeTable(table, accessors.xAccessor);
 
   const showLines = getShowLines(args);
