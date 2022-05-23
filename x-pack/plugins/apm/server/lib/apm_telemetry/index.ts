@@ -28,45 +28,6 @@ import { apmSchema } from './schema';
 
 export const APM_TELEMETRY_TASK_NAME = 'apm-telemetry-task';
 
-export async function getDataTelemetry({
-  esClient,
-  config,
-  logger,
-  savedObjectsClient,
-}) {
-  const indices = await getApmIndices({
-    config,
-    savedObjectsClient,
-  });
-
-  const search: CollectTelemetryParams['search'] = (params) =>
-    unwrapEsResponse(
-      esClient.asInternalUser.search(params, { meta: true })
-    ) as any;
-
-  const indicesStats: CollectTelemetryParams['indicesStats'] = (params) =>
-    unwrapEsResponse(
-      esClient.asInternalUser.indices.stats(params, { meta: true })
-    );
-
-  const transportRequest: CollectTelemetryParams['transportRequest'] = (
-    params
-  ) =>
-    unwrapEsResponse(
-      esClient.asInternalUser.transport.request(params, { meta: true })
-    );
-
-  const dataTelemetry = await collectDataTelemetry({
-    search,
-    indices,
-    logger,
-    indicesStats,
-    transportRequest,
-    savedObjectsClient,
-  });
-  return dataTelemetry;
-}
-
 export async function createApmTelemetry({
   core,
   config$,
@@ -103,10 +64,34 @@ export async function createApmTelemetry({
     const [{ elasticsearch }] = await core.getStartServices();
     const esClient = elasticsearch.client;
 
-    const dataTelemetry = await getDataTelemetry({
-      esClient,
+    const indices = await getApmIndices({
       config,
+      savedObjectsClient,
+    });
+
+    const search: CollectTelemetryParams['search'] = (params) =>
+      unwrapEsResponse(
+        esClient.asInternalUser.search(params, { meta: true })
+      ) as any;
+
+    const indicesStats: CollectTelemetryParams['indicesStats'] = (params) =>
+      unwrapEsResponse(
+        esClient.asInternalUser.indices.stats(params, { meta: true })
+      );
+
+    const transportRequest: CollectTelemetryParams['transportRequest'] = (
+      params
+    ) =>
+      unwrapEsResponse(
+        esClient.asInternalUser.transport.request(params, { meta: true })
+      );
+
+    const dataTelemetry = await collectDataTelemetry({
+      search,
+      indices,
       logger,
+      indicesStats,
+      transportRequest,
       savedObjectsClient,
     });
 
