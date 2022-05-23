@@ -1,7 +1,7 @@
 {
   "id": "security_windows_v3",
   "title": "Security: Windows",
-  "description": "Anomaly detection jobs for Windows host based threat hunting and detection.",
+  "description": "Anomaly detection jobs for Windows host-based threat hunting and detection.",
   "type": "windows data",
   "logoFile": "logo.json",
   "defaultIndexPattern": "winlogbeat-*,logs-*",

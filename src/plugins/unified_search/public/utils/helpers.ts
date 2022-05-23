@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { IFieldType } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { isEmpty } from 'lodash';
 import { validateParams } from '../filter_bar/filter_editor/lib/filter_editor_utils';
 
 export const getFieldValidityAndErrorMessage = (
-  field: IFieldType,
+  field: DataViewField,
   value?: string | undefined
 ): { isInvalid: boolean; errorMessage?: string } => {
   const type = field.type;

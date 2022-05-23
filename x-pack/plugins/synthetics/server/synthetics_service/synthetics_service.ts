@@ -48,7 +48,7 @@ const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID = 'UPTIME:SyntheticsService:sync-task';
 const SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT = '5m';
 
-type SyntheticsConfig = SyntheticsMonitorWithId & {
+export type SyntheticsConfig = SyntheticsMonitorWithId & {
   fields_under_root?: boolean;
   fields?: { config_id: string; run_once?: boolean; test_run_id?: string };
 };
@@ -56,7 +56,7 @@ type SyntheticsConfig = SyntheticsMonitorWithId & {
 export class SyntheticsService {
   private logger: Logger;
   private readonly server: UptimeServerSetup;
-  private apiClient: ServiceAPIClient;
+  public apiClient: ServiceAPIClient;
 
   private readonly config: ServiceConfig;
   private readonly esHosts: string[];
