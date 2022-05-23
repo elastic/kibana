@@ -9,8 +9,8 @@ import { mount, ReactWrapper } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
 import { TakeActionDropdown, TakeActionDropdownProps } from '.';
-import { mockAlertDetailsData } from '../../../common/components/event_details/__mocks__';
-import { mockEcsDataWithAlert } from '../../../common/mock/mock_detection_alerts';
+import { generateAlertDetailsDataMock } from '../../../common/components/event_details/__mocks__';
+import { getDetectionAlertMock } from '../../../common/mock/mock_detection_alerts';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { TimelineId } from '../../../../common/types';
 import { TestProviders } from '../../../common/mock';
@@ -89,8 +89,8 @@ describe('take action dropdown', () => {
 
   beforeEach(() => {
     defaultProps = {
-      detailsData: cloneDeep(mockAlertDetailsData) as TimelineEventsDetailsItem[],
-      ecsData: cloneDeep(mockEcsDataWithAlert),
+      detailsData: generateAlertDetailsDataMock() as TimelineEventsDetailsItem[],
+      ecsData: getDetectionAlertMock(),
       handleOnEventClosed: jest.fn(),
       indexName: 'index',
       isHostIsolationPanelOpen: false,
@@ -420,7 +420,9 @@ describe('take action dropdown', () => {
       it('should disable the button if alert NOT from a host running endpoint', async () => {
         setTypeOnEcsDataWithAgentType('filebeat');
         if (defaultProps.detailsData) {
-          defaultProps.detailsData = cloneDeep(mockAlertDetailsData) as TimelineEventsDetailsItem[];
+          defaultProps.detailsData = cloneDeep(
+            generateAlertDetailsDataMock()
+          ) as TimelineEventsDetailsItem[];
         }
         render();
 

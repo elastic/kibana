@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const mockAlertDetailsData = [
+export const generateAlertDetailsDataMock = () => [
   { category: 'process', field: 'process.name', values: ['-'], originalValue: '-' },
   { category: 'process', field: 'process.pid', values: [0], originalValue: 0 },
   { category: 'process', field: 'process.executable', values: ['-'], originalValue: '-' },
@@ -648,3 +648,5 @@ export const mockAlertDetailsData = [
     originalValue: ['dummy.exe'],
   },
 ];
+
+export const mockAlertDetailsData = generateAlertDetailsDataMock();
