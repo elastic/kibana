@@ -9,7 +9,8 @@ import { useHistory } from 'react-router-dom';
 import { Query } from '@kbn/es-query';
 import { findingsNavigation } from '../navigation/constants';
 import { encodeQuery } from '../navigation/query_utils';
-import { FindingsBaseURLQuery } from '../../pages/findings/types';
+import type { FindingsBaseURLQuery } from '../../pages/findings/types';
+import { getDefaultQuery } from '../../pages/findings/latest_findings/latest_findings_container';
 
 const getFindingsQuery = (queryValue: Query['query']): Pick<FindingsBaseURLQuery, 'query'> => {
   const query =
@@ -38,7 +39,12 @@ export const useNavigateFindings = () => {
   return (query?: Query['query']) => {
     history.push({
       pathname: findingsNavigation.findings_default.path,
-      ...(query && { search: encodeQuery(getFindingsQuery(query)) }),
+      ...(query && {
+        search: encodeQuery({
+          ...getDefaultQuery(),
+          ...getFindingsQuery(query),
+        }),
+      }),
     });
   };
 };

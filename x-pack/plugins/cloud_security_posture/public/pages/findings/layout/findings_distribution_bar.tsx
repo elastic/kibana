@@ -9,8 +9,8 @@ import { css } from '@emotion/react';
 import {
   EuiHealth,
   EuiBadge,
-  EuiTextColor,
   EuiSpacer,
+  EuiTextColor,
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
@@ -33,21 +33,22 @@ export const FindingsDistributionBar = (props: Props) => (
   <div>
     <Counters {...props} />
     <EuiSpacer size="s" />
-    <DistributionBar {...props} />
+    {<DistributionBar {...props} />}
+    <EuiSpacer />
   </div>
 );
 
-const Counters = ({ pageStart, pageEnd, total, failed, passed }: Props) => (
+const Counters = (props: Props) => (
   <EuiFlexGroup justifyContent="spaceBetween">
     <EuiFlexItem>
-      <CurrentPageOfTotal pageStart={pageStart} pageEnd={pageEnd} total={total} />
+      <CurrentPageOfTotal {...props} />
     </EuiFlexItem>
     <EuiFlexItem
       css={css`
         align-items: flex-end;
       `}
     >
-      <PassedFailedCounters passed={passed} failed={failed} />
+      {<PassedFailedCounters {...props} />}
     </EuiFlexItem>
   </EuiFlexGroup>
 );
@@ -100,6 +101,7 @@ const CurrentPageOfTotal = ({
 
 const DistributionBar: React.FC<Omit<Props, 'pageEnd' | 'pageStart'>> = ({ passed, failed }) => {
   const { euiTheme } = useEuiTheme();
+
   return (
     <EuiFlexGroup
       gutterSize="none"

@@ -7,19 +7,30 @@
 
 import { buildEsQuery } from '@kbn/es-query';
 import { EuiBasicTableProps, Pagination } from '@elastic/eui';
-import { FindingsBaseProps } from './types';
-import type { FindingsBaseEsQuery, FindingsBaseURLQuery } from './types';
+import { useEffect, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import type { FindingsBaseProps, FindingsBaseURLQuery } from './types';
+import { useKibana } from '../../common/hooks/use_kibana';
 
-export const getBaseQuery = ({
-  dataView,
-  query,
-  filters,
-}: FindingsBaseURLQuery & FindingsBaseProps): FindingsBaseEsQuery => ({
-  // TODO: this will throw for malformed query
-  // page will display an error boundary with the JS error
-  // will be accounted for before releasing the feature
-  query: buildEsQuery(dataView, query, filters),
+export const getDefaultUrlQuery = (): FindingsBaseURLQuery => ({
+  query: { language: 'kuery', query: '' },
+  filters: [],
 });
+
+const getBaseQuery = ({ dataView, query, filters }: FindingsBaseURLQuery & FindingsBaseProps) => {
+  try {
+    return {
+      index: dataView.title,
+      query: buildEsQuery(dataView, query, filters), // will throw for malformed query
+    };
+  } catch (error) {
+    return {
+      index: dataView.title,
+      query: undefined,
+      error: error instanceof Error ? error : new Error('Unknown Error'),
+    };
+  }
+};
 
 type TablePagination = NonNullable<EuiBasicTableProps<unknown>['pagination']>;
 
@@ -40,3 +51,34 @@ export const getPaginationQuery = ({
   from: pageIndex * pageSize,
   size: pageSize,
 });
+
+export const useBaseEsQuery = ({
+  dataView,
+  filters,
+  query,
+}: FindingsBaseURLQuery & FindingsBaseProps) => {
+  const {
+    notifications: { toasts },
+  } = useKibana().services;
+
+  const baseEsQuery = useMemo(
+    () => getBaseQuery({ dataView, filters, query }),
+    [dataView, filters, query]
+  );
+
+  const handleMalformedQueryError = () => {
+    const error = baseEsQuery.error;
+    if (error) {
+      toasts.addError(error, {
+        title: i18n.translate('xpack.csp.findings.search.queryErrorToastMessage', {
+          defaultMessage: 'Query Error',
+        }),
+        toastLifeTimeMs: 1000 * 5,
+      });
+    }
+  };
+
+  useEffect(handleMalformedQueryError, [baseEsQuery.error, toasts]);
+
+  return baseEsQuery;
+};

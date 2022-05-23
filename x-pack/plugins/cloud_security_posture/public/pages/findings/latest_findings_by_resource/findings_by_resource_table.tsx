@@ -19,20 +19,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
 import { Link, generatePath } from 'react-router-dom';
 import { ColumnNameWithTooltip } from '../../../components/column_name_with_tooltip';
-import { extractErrorMessage } from '../../../../common/utils/helpers';
 import * as TEST_SUBJECTS from '../test_subjects';
 import * as TEXT from '../translations';
-import type { CspFindingsByResourceResult } from './use_findings_by_resource';
+import type { CspFindingsByResource } from './use_findings_by_resource';
 import { findingsNavigation } from '../../../common/navigation/constants';
 
 export const formatNumber = (value: number) =>
   value < 1000 ? value : numeral(value).format('0.0a');
 
-export type CspFindingsByResource = NonNullable<
-  CspFindingsByResourceResult['data']
->['page'][number];
-
-interface Props extends CspFindingsByResourceResult {
+interface Props {
+  items: CspFindingsByResource[];
+  loading: boolean;
   pagination: Pagination;
   setTableOptions(options: CriteriaWithPagination<CspFindingsByResource>): void;
 }
@@ -41,8 +38,7 @@ export const getResourceId = (resource: CspFindingsByResource) =>
   [resource.resource_id, ...resource.cis_sections].join('/');
 
 const FindingsByResourceTableComponent = ({
-  error,
-  data,
+  items,
   loading,
   pagination,
   setTableOptions,
@@ -51,14 +47,13 @@ const FindingsByResourceTableComponent = ({
     'data-test-subj': TEST_SUBJECTS.getFindingsByResourceTableRowTestId(getResourceId(row)),
   });
 
-  if (!loading && !data?.page.length)
+  if (!loading && !items.length)
     return <EuiEmptyPrompt iconType="logoKibana" title={<h2>{TEXT.NO_FINDINGS}</h2>} />;
 
   return (
     <EuiBasicTable
       loading={loading}
-      error={error ? extractErrorMessage(error) : undefined}
-      items={data?.page || []}
+      items={items}
       columns={columns}
       rowProps={getRowProps}
       pagination={pagination}

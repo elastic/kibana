@@ -11,8 +11,7 @@ import { decodeQuery, encodeQuery } from '../navigation/query_utils';
 
 /**
  * @description uses 'rison' to encode/decode a url query
- * @todo replace getDefaultQuery with schema. validate after decoded from URL, use defaultValues
- * @note shallow-merges default, current and next query
+ * @todo replace with kibanaUtils state containers and storage sync
  */
 export const useUrlQuery = <T extends object>(getDefaultQuery: () => T) => {
   const { push, replace } = useHistory();
@@ -20,15 +19,15 @@ export const useUrlQuery = <T extends object>(getDefaultQuery: () => T) => {
 
   const urlQuery = useMemo(
     () => ({ ...getDefaultQuery(), ...decodeQuery<T>(search) }),
-    [getDefaultQuery, search]
+    [search, getDefaultQuery]
   );
 
   const setUrlQuery = useCallback(
     (query: Partial<T>) =>
       push({
-        search: encodeQuery({ ...getDefaultQuery(), ...urlQuery, ...query }),
+        search: encodeQuery({ ...urlQuery, ...query }),
       }),
-    [getDefaultQuery, urlQuery, push]
+    [urlQuery, push]
   );
 
   // Set initial query

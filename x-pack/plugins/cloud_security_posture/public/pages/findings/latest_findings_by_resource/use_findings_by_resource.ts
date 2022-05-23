@@ -14,7 +14,13 @@ import { FindingsEsPitContext } from '../es_pit/findings_es_pit_context';
 import { FINDINGS_REFETCH_INTERVAL_MS } from '../constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { showErrorToast } from '../latest_findings/use_latest_findings';
-import type { FindingsBaseEsQuery, FindingsQueryResult } from '../types';
+import type { FindingsBaseEsQuery } from '../types';
+
+interface UseFindingsByResourceOptions extends FindingsBaseEsQuery {
+  from: NonNullable<estypes.SearchRequest['from']>;
+  size: NonNullable<estypes.SearchRequest['size']>;
+  enabled: boolean;
+}
 
 // Maximum number of grouped findings, default limit in elasticsearch is set to 65,536 (ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/search-settings.html#search-settings-max-buckets)
 const MAX_BUCKETS = 60 * 1000;
@@ -52,10 +58,10 @@ interface UseFindingsByResourceData {
   total: number;
 }
 
-export type CspFindingsByResourceResult = FindingsQueryResult<
-  UseFindingsByResourceData | undefined,
-  unknown
->;
+// export type CspFindingsByResourceResult = FindingsQueryResult<
+//   UseFindingsByResourceData | undefined,
+//   unknown
+// >;
 
 interface FindingsByResourceAggs {
   resource_total: estypes.AggregationsCardinalityAggregate;
@@ -120,7 +126,7 @@ export const getFindingsByResourceAggQuery = ({
   ignore_unavailable: false,
 });
 
-export const useFindingsByResource = ({ query, from, size }: UseResourceFindingsOptions) => {
+export const useFindingsByResource = (options: UseFindingsByResourceOptions) => {
   const {
     data,
     notifications: { toasts },
@@ -129,26 +135,30 @@ export const useFindingsByResource = ({ query, from, size }: UseResourceFindings
   const { pitIdRef, setPitId } = useContext(FindingsEsPitContext);
   const pitId = pitIdRef.current;
 
-  return useQuery<UseFindingsByResourceData & { newPitId: string }>(
-    ['csp_findings_resource', { query, size, from, pitId }],
-    () =>
-      lastValueFrom(
+  return useQuery(
+    ['csp_findings_resource', { options }],
+    async () => {
+      const {
+        rawResponse: { aggregations, pit_id: newPitId },
+      } = await lastValueFrom(
         data.search.search<FindingsAggRequest, FindingsAggResponse>({
-          params: getFindingsByResourceAggQuery({ query, from, size, pitId }),
+          params: getFindingsByResourceAggQuery({ ...options, pitId }),
         })
-      ).then(({ rawResponse: { aggregations, pit_id: newPitId } }) => {
-        if (!aggregations) throw new Error('expected aggregations to be defined');
+      );
 
-        if (!Array.isArray(aggregations.resources.buckets))
-          throw new Error('expected resources buckets to be an array');
+      if (!aggregations) throw new Error('expected aggregations to be defined');
 
-        return {
-          page: aggregations.resources.buckets.map(createFindingsByResource),
-          total: aggregations.resource_total.value,
-          newPitId: newPitId!,
-        };
-      }),
+      if (!Array.isArray(aggregations.resources.buckets))
+        throw new Error('expected buckets to be an array');
+
+      return {
+        page: aggregations.resources.buckets.map(createFindingsByResource),
+        total: aggregations.resource_total.value,
+        newPitId: newPitId!,
+      };
+    },
     {
+      enabled: options.enabled,
       keepPreviousData: true,
       onError: (err) => showErrorToast(toasts, err),
       onSuccess: ({ newPitId }) => {
