@@ -109,6 +109,7 @@ export const staticSourceData: SourceDataItem[] = [
     name: SOURCE_NAMES.CONFLUENCE_CONNECTOR_PACKAGE,
     serviceType: 'external',
     baseServiceType: 'confluence_cloud',
+    categories: [SOURCE_CATEGORIES.WIKI, SOURCE_CATEGORIES.ATLASSIAN, SOURCE_CATEGORIES.INTRANET],
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: true,
