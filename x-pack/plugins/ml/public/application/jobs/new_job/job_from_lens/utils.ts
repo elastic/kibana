@@ -16,6 +16,7 @@ import type {
   TermsIndexPatternColumn,
   SeriesType,
   XYLayerConfig,
+  DataType,
 } from '@kbn/lens-plugin/public';
 import { layerTypes } from '@kbn/lens-plugin/public';
 
@@ -34,6 +35,8 @@ export const COMPATIBLE_SERIES_TYPES: SeriesType[] = [
 export const COMPATIBLE_LAYER_TYPE: XYDataLayerConfig['layerType'] = layerTypes.DATA;
 
 export const COMPATIBLE_VISUALIZATION = 'lnsXY';
+
+export const SUPPORTED_SPLIT_FIELD_TYPES: DataType[] = ['string', 'ip'];
 
 export function getJobsItemsFromEmbeddable(embeddable: Embeddable) {
   const { query, filters, timeRange } = embeddable.getInput();
@@ -167,8 +170,8 @@ export function isTermsField(column: GenericIndexPatternColumn): column is Terms
   return column.operationType === 'terms' && 'params' in column;
 }
 
-export function isStringField(column: GenericIndexPatternColumn) {
-  return column.dataType === 'string';
+export function isSupportedSplitFieldType(column: GenericIndexPatternColumn) {
+  return SUPPORTED_SPLIT_FIELD_TYPES.includes(column.dataType);
 }
 
 export function hasIncompatibleProperties(column: GenericIndexPatternColumn) {
