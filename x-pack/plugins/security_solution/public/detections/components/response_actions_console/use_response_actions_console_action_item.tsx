@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { isAlertFromEndpointEvent } from '../../../common/utils/endpoint_alert_check';
 import { ResponseActionsConsoleContextMenuItem } from './response_actions_console_context_menu_item';

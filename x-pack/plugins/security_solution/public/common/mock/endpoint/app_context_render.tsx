@@ -19,7 +19,7 @@ import {
   RenderHookResult,
 } from '@testing-library/react-hooks';
 import { ReactHooksRenderer, WrapperComponent } from '@testing-library/react-hooks/src/types/react';
-import { UseBaseQueryResult } from 'react-query/types/react/types';
+import types{ UseBaseQueryResult } from 'react-query/types/react/types';
 import { ConsoleManager } from '../../../management/components/console';
 import { StartPlugins, StartServices } from '../../../types';
 import { depsStartMock } from './dependencies_start_mock';
