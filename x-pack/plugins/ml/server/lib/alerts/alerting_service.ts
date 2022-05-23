@@ -809,8 +809,11 @@ export function alertingServiceProvider(
             'xpack.ml.alertTypes.anomalyDetectionAlertingRule.recoveredMessage',
             {
               defaultMessage:
-                'No anomalies have been found that exceeded the [{severity}] threshold.',
-              values: { severity: queryParams.anomalyScoreThreshold },
+                'No anomalies have been found in the past {lookbackInterval} that exceed the severity threshold of {severity}.',
+              values: {
+                severity: queryParams.anomalyScoreThreshold,
+                lookbackInterval: queryParams.lookBackTimeInterval,
+              },
             }
           ),
         } as AnomalyDetectionAlertContext,
