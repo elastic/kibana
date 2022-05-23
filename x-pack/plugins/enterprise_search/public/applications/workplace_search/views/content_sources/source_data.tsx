@@ -42,6 +42,11 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.BOX,
     serviceType: 'box',
+    categories: [
+      SOURCE_CATEGORIES.FILE_SHARING,
+      SOURCE_CATEGORIES.STORAGE,
+      SOURCE_CATEGORIES.CLOUD,
+    ],
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: true,
