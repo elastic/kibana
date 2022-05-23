@@ -87,9 +87,12 @@ export class InternalFileService {
   public async find({ fileKind, id }: FindFileArgs): Promise<IFile> {
     try {
       const result = await this.soClient.get<FileSavedObjectAttributes>(this.savedObjectType, id);
-      const actualFileKind = result.attributes.file_kind;
+      const { file_kind: actualFileKind, status } = result.attributes;
       if (actualFileKind !== fileKind) {
         throw new Error(`Unexpected file kind "${actualFileKind}", expected "${fileKind}".`);
+      }
+      if (status === 'DELETED') {
+        throw new Error('File has been deleted');
       }
       return this.toFile(result);
     } catch (e) {
@@ -101,7 +104,7 @@ export class InternalFileService {
   public async list({ fileKind }: ListFilesArgs): Promise<IFile[]> {
     const result = await this.soClient.find<FileSavedObjectAttributes>({
       type: this.savedObjectType,
-      filter: `${this.savedObjectType}.attributes.file_kind: ${fileKind}`,
+      filter: `${this.savedObjectType}.attributes.file_kind: ${fileKind} AND NOT ${this.savedObjectType}.attributes.status: DELETED`,
     });
 
     return result.saved_objects.map(this.toFile.bind(this));

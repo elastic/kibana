@@ -92,6 +92,9 @@ export class File<M = unknown> implements IFile {
 
   public async delete(): Promise<void> {
     const { attributes, id } = this.fileSO;
+    await this.updateFileState({
+      action: 'delete',
+    });
     if (attributes.content_ref) {
       await this.blobStorageService.delete(attributes.content_ref);
     }
