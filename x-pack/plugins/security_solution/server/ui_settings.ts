@@ -160,7 +160,7 @@ export const initUiSettings = (
               }
             ),
             category: [APP_ID],
-            requiresPageReload: false,
+            requiresPageReload: true,
             schema: schema.boolean(),
           },
         }
