@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { SyntheticsAppState } from '../root_reducer';
 
-export { store, storage } from './store';
+export const monitorListSelector = (state: SyntheticsAppState) => state.monitorList.data;
 
-export type { SyntheticsAppState as AppState } from './root_reducer';
-
-export * from './ui';
-export * from './index_status';
+export const serviceLocationsSelector = (state: SyntheticsAppState) =>
+  state.serviceLocations.locations;
