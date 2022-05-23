@@ -25,6 +25,11 @@ import { UrlStateContainerPropTypes } from './types';
 import { useUrlStateHooks } from './use_url_state';
 import { waitFor } from '@testing-library/react';
 import { useLocation } from 'react-router-dom';
+import { updateAppLinks } from '../../links';
+import { getAppLinks } from '../../links/app_links';
+import { StartPlugins } from '../../../types';
+import { allowedExperimentalValues } from '../../../../common/experimental_features';
+import { coreMock } from '@kbn/core/public/mocks';
 
 let mockProps: UrlStateContainerPropTypes;
 
@@ -78,10 +83,36 @@ jest.mock('react-router-dom', () => {
   };
 });
 
+const mockedUseIsGroupedNavigationEnabled = jest.fn();
+jest.mock('../navigation/helpers', () => ({
+  useIsGroupedNavigationEnabled: () => mockedUseIsGroupedNavigationEnabled(),
+}));
+
 describe('UrlStateContainer', () => {
+  beforeAll(async () => {
+    mockedUseIsGroupedNavigationEnabled.mockReturnValue(false);
+
+    const appLinks = await getAppLinks(coreMock.createStart(), {} as StartPlugins);
+    updateAppLinks(appLinks, {
+      experimentalFeatures: allowedExperimentalValues,
+      capabilities: {
+        navLinks: {},
+        management: {},
+        catalogue: {},
+        actions: { show: true, crud: true },
+        siem: {
+          show: true,
+          crud: true,
+        },
+      },
+    });
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
+    mockedUseIsGroupedNavigationEnabled.mockReturnValue(false);
   });
+
   describe('handleInitialize', () => {
     describe('URL state updates redux', () => {
       describe('relative timerange actions are called with correct data on component mount', () => {
@@ -224,6 +255,44 @@ describe('UrlStateContainer', () => {
       mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
 
       expect(mockHistory.replace).not.toHaveBeenCalled();
+    });
+
+    it("it doesn't update URL state when on admin page and grouped nav disabled", () => {
+      mockedUseIsGroupedNavigationEnabled.mockReturnValue(false);
+      mockProps = getMockPropsObj({
+        page: CONSTANTS.unknown,
+        examplePath: '/administration',
+        namespaceLower: 'administration',
+        pageName: SecurityPageName.administration,
+        detailName: undefined,
+      }).noSearch.undefinedQuery;
+
+      (useLocation as jest.Mock).mockReturnValue({
+        pathname: mockProps.pathName,
+      });
+
+      mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
+
+      expect(mockHistory.replace.mock.calls[0][0].search).toBe('?');
+    });
+
+    it("it doesn't update URL state when on admin page and grouped nav enabled", () => {
+      mockedUseIsGroupedNavigationEnabled.mockReturnValue(true);
+      mockProps = getMockPropsObj({
+        page: CONSTANTS.unknown,
+        examplePath: '/dashboards',
+        namespaceLower: 'dashboards',
+        pageName: SecurityPageName.dashboardsLanding,
+        detailName: undefined,
+      }).noSearch.undefinedQuery;
+
+      (useLocation as jest.Mock).mockReturnValue({
+        pathname: mockProps.pathName,
+      });
+
+      mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
+
+      expect(mockHistory.replace.mock.calls[0][0].search).toBe('?');
     });
 
     it('it removes empty AppQuery state from URL', () => {
