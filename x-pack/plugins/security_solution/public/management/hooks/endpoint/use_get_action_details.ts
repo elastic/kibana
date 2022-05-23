@@ -24,7 +24,7 @@ export const useGetActionDetails = (
     ...options,
     queryFn: () => {
       return http.get<ActionDetailsApiResponse>(
-        resolvePathVariables(ACTION_DETAILS_ROUTE, { action_id: actionId || 'undefined' })
+        resolvePathVariables(ACTION_DETAILS_ROUTE, { action_id: actionId.trim() || 'undefined' })
       );
     },
   });

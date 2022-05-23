@@ -28,7 +28,7 @@ export const useGetEndpointDetails = (
     ...options,
     queryFn: () => {
       return http.get<HostInfo>(
-        resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: endpointId || 'undefined' })
+        resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: endpointId.trim() || 'undefined' })
       );
     },
   });

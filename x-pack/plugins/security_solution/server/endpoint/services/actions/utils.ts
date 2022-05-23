@@ -206,11 +206,11 @@ const mapActionResponsesByAgentId = (
           // a Response from endpoint, thus mark the Action as completed and use the Fleet Message's
           // timestamp for the complete data/time.
           thisAgentActionResponses.fleetResponse &&
-          thisAgentActionResponses.fleetResponse?.item.data.error
+          thisAgentActionResponses.fleetResponse.item.data.error
         ) {
           thisAgentActionResponses.isCompleted = true;
           thisAgentActionResponses.completedAt =
-            thisAgentActionResponses.fleetResponse?.item.data['@timestamp'];
+            thisAgentActionResponses.fleetResponse.item.data['@timestamp'];
         }
 
         const errors: NormalizedAgentActionResponse['errors'] = [];
