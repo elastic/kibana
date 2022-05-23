@@ -204,7 +204,7 @@ export function DiscoverMainRoute() {
   }
 
   if (!indexPattern || !savedSearch) {
-    return <LoadingIndicator />;
+    return <LoadingIndicator type="elastic" />;
   }
 
   return <DiscoverMainAppMemoized indexPatternList={indexPatternList} savedSearch={savedSearch} />;
