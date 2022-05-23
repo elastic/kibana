@@ -93,7 +93,6 @@ const serviceGroupSaveRoute = createApmServerRoute({
 
     const items = await lookupServices({
       setup,
-      uiSettingsClient,
       kuery: params.body.kuery,
       start,
       end,
@@ -153,7 +152,6 @@ const serviceGroupServicesRoute = createApmServerRoute({
     ]);
     const items = await lookupServices({
       setup,
-      uiSettingsClient,
       kuery,
       start,
       end,

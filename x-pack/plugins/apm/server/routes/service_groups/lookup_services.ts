@@ -6,7 +6,6 @@
  */
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { IUiSettingsClient } from '@kbn/core/server';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import {
   AGENT_NAME,
@@ -18,14 +17,12 @@ import { Setup } from '../../lib/helpers/setup_request';
 
 export async function lookupServices({
   setup,
-  uiSettingsClient,
   kuery,
   start,
   end,
   maxNumberOfServices,
 }: {
   setup: Setup;
-  uiSettingsClient: IUiSettingsClient;
   kuery: string;
   start: number;
   end: number;
