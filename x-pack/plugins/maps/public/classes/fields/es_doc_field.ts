@@ -7,6 +7,10 @@
 
 import type { IndexPatternField } from '@kbn/data-plugin/public';
 import { indexPatterns } from '@kbn/data-plugin/public';
+import type {
+  AggregationsExtendedStatsAggregation,
+  AggregationsTermsAggregation,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FIELD_ORIGIN } from '../../../common/constants';
 import { ESTooltipProperty } from '../tooltips/es_tooltip_property';
 import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
@@ -88,10 +92,8 @@ export class ESDocField extends AbstractField implements IField {
       return null;
     }
 
-    // TODO remove local typing once Kibana has figured out a core place for Elasticsearch aggregation request types
-    // https://github.com/elastic/kibana/issues/60102
-    const metricAggConfig: { script?: unknown; field?: string } = {};
-    if (indexPatternField.scripted) {
+    const metricAggConfig: AggregationsExtendedStatsAggregation = {};
+    if (indexPatternField.scripted && indexPatternField.script) {
       metricAggConfig.script = {
         source: indexPatternField.script,
         lang: indexPatternField.lang,
@@ -137,12 +139,10 @@ export class ESDocField extends AbstractField implements IField {
       return null;
     }
 
-    // TODO remove local typing once Kibana has figured out a core place for Elasticsearch aggregation request types
-    // https://github.com/elastic/kibana/issues/60102
-    const topTerms: { size: number; script?: unknown; field?: string } = {
+    const topTerms: AggregationsTermsAggregation = {
       size: size - 1, // need additional color for the "other"-value
     };
-    if (indexPatternField.scripted) {
+    if (indexPatternField.scripted && indexPatternField.script) {
       topTerms.script = {
         source: indexPatternField.script,
         lang: indexPatternField.lang,
