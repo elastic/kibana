@@ -28,7 +28,8 @@ export function createInputControlVisTypeDefinition(
     description: i18n.translate('inputControl.register.controlsDescription', {
       defaultMessage: 'Input controls are deprecated and will be removed in a future version.',
     }),
-    stage: 'deprecated',
+    stage: 'experimental',
+    isDeprecated: true,
     visConfig: {
       defaults: {
         controls: [],

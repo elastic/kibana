@@ -9,6 +9,7 @@
 import expect from '@kbn/expect';
 
 import { VisualizeConstants } from '@kbn/visualizations-plugin/common/constants';
+import { VISUALIZE_ENABLE_LABS_SETTING } from '@kbn/visualizations-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -138,6 +139,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const exists = await dashboardAddPanel.panelAddLinkExists(LAB_VIS_NAME);
         await dashboardAddPanel.closeAddPanel();
         expect(exists).to.be(true);
+      });
+
+      describe('is false', () => {
+        before(async () => {
+          await PageObjects.header.clickStackManagement();
+          await PageObjects.settings.clickKibanaSettings();
+          await PageObjects.settings.toggleAdvancedSettingCheckbox(VISUALIZE_ENABLE_LABS_SETTING);
+        });
+
+        it('should not display lab visualizations in add panel', async () => {
+          await PageObjects.common.navigateToApp('dashboard');
+          await PageObjects.dashboard.clickNewDashboard();
+
+          const exists = await dashboardAddPanel.panelAddLinkExists(LAB_VIS_NAME);
+          await dashboardAddPanel.closeAddPanel();
+          expect(exists).to.be(false);
+        });
+
+        after(async () => {
+          await PageObjects.header.clickStackManagement();
+          await PageObjects.settings.clickKibanaSettings();
+          await PageObjects.settings.clearAdvancedSettings(VISUALIZE_ENABLE_LABS_SETTING);
+          await PageObjects.header.clickDashboard();
+        });
       });
     });
   });

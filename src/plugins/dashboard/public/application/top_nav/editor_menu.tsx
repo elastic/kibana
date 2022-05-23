@@ -127,23 +127,30 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
   });
 
   const getVisTypeMenuItem = (visType: BaseVisType): EuiContextMenuPanelItemDescriptor => {
-    const { name, title, titleInWizard, description, icon = 'empty', group, stage } = visType;
+    const {
+      name,
+      title,
+      titleInWizard,
+      description,
+      icon = 'empty',
+      group,
+      isDeprecated,
+    } = visType;
     return {
-      name:
-        stage !== 'deprecated' ? (
-          titleInWizard || title
-        ) : (
-          <EuiFlexGroup wrap responsive={false} gutterSize="s">
-            <EuiFlexItem grow={false}>{titleInWizard || title}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="warning">
-                {i18n.translate('dashboard.editorMenu.deprecatedTag', {
-                  defaultMessage: 'Deprecated',
-                })}
-              </EuiBadge>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
+      name: !isDeprecated ? (
+        titleInWizard || title
+      ) : (
+        <EuiFlexGroup wrap responsive={false} gutterSize="s">
+          <EuiFlexItem grow={false}>{titleInWizard || title}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="warning">
+              {i18n.translate('dashboard.editorMenu.deprecatedTag', {
+                defaultMessage: 'Deprecated',
+              })}
+            </EuiBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
       icon: icon as string,
       onClick:
         // not all the agg-based visualizations need to be created via the wizard

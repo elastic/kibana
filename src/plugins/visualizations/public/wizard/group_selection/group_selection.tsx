@@ -233,7 +233,7 @@ const ToolsGroup = ({ visType, onVisTypeSelected, showExperimental }: VisCardPro
                 : visType.title}
             </EuiLink>
           </EuiFlexItem>
-          {visType.stage === 'experimental' ? (
+          {visType.stage === 'experimental' && !visType.isDeprecated ? (
             <EuiFlexItem grow={false}>
               <EuiBetaBadge
                 iconType="beaker"
@@ -247,7 +247,7 @@ const ToolsGroup = ({ visType, onVisTypeSelected, showExperimental }: VisCardPro
               />
             </EuiFlexItem>
           ) : (
-            visType.stage === 'deprecated' && (
+            visType.isDeprecated && (
               <EuiFlexItem grow={false}>
                 <EuiBadge color="warning">
                   <FormattedMessage id="visualizations.deprecatedTag" defaultMessage="Deprecated" />

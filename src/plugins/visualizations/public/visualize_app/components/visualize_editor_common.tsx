@@ -150,7 +150,8 @@ export const VisualizeEditorCommon = ({
           onAppLeave={onAppLeave}
         />
       )}
-      {visInstance?.vis?.type?.stage === 'experimental' && <ExperimentalVisInfo />}
+      {visInstance?.vis?.type?.stage === 'experimental' &&
+        !visInstance?.vis?.type?.isDeprecated && <ExperimentalVisInfo />}
       {!hasLegacyChartsEnabled && isSplitChart && chartNeedsWarning && chartToken && chartName && (
         <VizChartWarning
           chartType={chartName as CHARTS_WITHOUT_SMALL_MULTIPLES}
@@ -158,7 +159,7 @@ export const VisualizeEditorCommon = ({
         />
       )}
       {((hasLegacyChartsEnabled && deprecatedChartsNeedWarning && chartToken && chartName) ||
-        visInstance?.vis?.type?.stage === 'deprecated') && (
+        visInstance?.vis?.type?.isDeprecated) && (
         <VizChartWarning
           chartType={chartName as CHARTS_TO_BE_DEPRECATED}
           chartConfigToken={chartToken ?? undefined}
