@@ -20,6 +20,7 @@ describe(__filename, () => {
       });
 
       await fetchMonitoredClusters({
+        timeout: 10,
         monitoringIndex: 'foo',
         entSearchIndex: 'foo',
         timeRange: { min: 1652979091217, max: 11652979091217 },
@@ -27,6 +28,58 @@ describe(__filename, () => {
       });
 
       assert.equal(searchFn.mock.calls.length, 3);
+    });
+
+    test('it should report request timeouts', async () => {
+      const searchFn = jest
+        .fn()
+        .mockResolvedValueOnce({
+          timed_out: false,
+          aggregations: {},
+        })
+        .mockResolvedValueOnce({
+          timed_out: true,
+          aggregations: {},
+        })
+        .mockResolvedValueOnce({
+          timed_out: false,
+          aggregations: {},
+        });
+
+      const result = await fetchMonitoredClusters({
+        timeout: 10,
+        monitoringIndex: 'foo',
+        entSearchIndex: 'foo',
+        timeRange: { min: 1652979091217, max: 11652979091217 },
+        search: searchFn,
+      });
+
+      assert.equal(result.execution.timedOut, true);
+    });
+
+    test('it should report request errors', async () => {
+      const searchFn = jest
+        .fn()
+        .mockResolvedValueOnce({
+          timed_out: false,
+          aggregations: {},
+        })
+        .mockRejectedValueOnce(new Error('massive failure'))
+        .mockResolvedValueOnce({
+          timed_out: false,
+          aggregations: {},
+        });
+
+      const result = await fetchMonitoredClusters({
+        timeout: 10,
+        monitoringIndex: 'foo',
+        entSearchIndex: 'foo',
+        timeRange: { min: 1652979091217, max: 11652979091217 },
+        search: searchFn,
+      });
+
+      assert.equal(result.execution.timedOut, false);
+      assert.deepEqual(result.execution.errors, ['massive failure']);
     });
 
     test('it should merge the query results', async () => {
@@ -202,6 +255,7 @@ describe(__filename, () => {
         .mockResolvedValueOnce(entsearchMetricsetsResponse);
 
       const monitoredClusters = await fetchMonitoredClusters({
+        timeout: 10,
         monitoringIndex: 'foo',
         entSearchIndex: 'foo',
         timeRange: { min: 1652979091217, max: 11652979091217 },
@@ -209,41 +263,48 @@ describe(__filename, () => {
       });
 
       assert.deepEqual(monitoredClusters, {
-        'cluster-id.1': {
-          elasticsearch: {
-            'es-node-id.1': {
-              enrich: {
-                'Metricbeat 8': {
-                  index: '.ds-.monitoring-es-8-mb-2022.05.19-000001',
-                  lastSeen: '2022-05-19T15:51:51.716Z',
+        execution: {
+          timedOut: false,
+          errors: [],
+        },
+
+        clusters: {
+          'cluster-id.1': {
+            elasticsearch: {
+              'es-node-id.1': {
+                enrich: {
+                  'Metricbeat 8': {
+                    index: '.ds-.monitoring-es-8-mb-2022.05.19-000001',
+                    lastSeen: '2022-05-19T15:51:51.716Z',
+                  },
                 },
-              },
-              shard: {
-                'Metricbeat 8': {
-                  index: '.ds-.monitoring-es-8-mb-2022.05.19-000001',
-                  lastSeen: '2022-05-19T15:51:51.716Z',
+                shard: {
+                  'Metricbeat 8': {
+                    index: '.ds-.monitoring-es-8-mb-2022.05.19-000001',
+                    lastSeen: '2022-05-19T15:51:51.716Z',
+                  },
                 },
               },
             },
-          },
 
-          kibana: {
-            'kibana-node-id.1': {
-              stats: {
-                'Metricbeat 8': {
-                  index: '.ds-.monitoring-kibana-8-mb-2022.05.19-000001',
-                  lastSeen: '2022-05-19T15:51:53.680Z',
+            kibana: {
+              'kibana-node-id.1': {
+                stats: {
+                  'Metricbeat 8': {
+                    index: '.ds-.monitoring-kibana-8-mb-2022.05.19-000001',
+                    lastSeen: '2022-05-19T15:51:53.680Z',
+                  },
                 },
               },
             },
-          },
 
-          enterpriseSearch: {
-            'ent-search-node-id.1': {
-              health: {
-                'Metricbeat 8': {
-                  index: '.ds-.monitoring-ent-search-8-mb-2022.05.19-000001',
-                  lastSeen: '2022-05-19T15:51:51.716Z',
+            enterpriseSearch: {
+              'ent-search-node-id.1': {
+                health: {
+                  'Metricbeat 8': {
+                    index: '.ds-.monitoring-ent-search-8-mb-2022.05.19-000001',
+                    lastSeen: '2022-05-19T15:51:51.716Z',
+                  },
                 },
               },
             },

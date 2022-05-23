@@ -7,6 +7,11 @@
 
 import { TimeRange } from '../../../../../../common/http_api/shared';
 
+type QueryOptions = {
+  timeRange?: TimeRange;
+  timeout: number; // in seconds
+};
+
 /**
  * returns a nested aggregation of the monitored products per cluster, standalone
  * included. each product aggregation retrieves the related metricsets and the
@@ -14,16 +19,19 @@ import { TimeRange } from '../../../../../../common/http_api/shared';
  * if a product requires multiple aggregations the key is suffixed with an identifer
  * separated by an underscore. eg beats_state
  */
-export const monitoredClustersQuery = ({ min, max }: TimeRange) => {
+export const monitoredClustersQuery = ({ timeRange, timeout }: QueryOptions) => {
+  if (!timeRange) throw new Error('monitoredClustersQuery: missing timeRange parameter');
+
   return {
+    timeout: `${timeout}s`,
     query: {
       bool: {
         filter: [
           {
             range: {
               timestamp: {
-                gte: min,
-                lte: max,
+                gte: timeRange.min,
+                lte: timeRange.max,
               },
             },
           },
@@ -50,7 +58,7 @@ export const monitoredClustersQuery = ({ min, max }: TimeRange) => {
  * the documents in the index. we query those metricsets separately without
  * a time range filter
  */
-export const persistentMetricsetsQuery = () => {
+export const persistentMetricsetsQuery = ({ timeout }: QueryOptions) => {
   const metricsetsAggregations = {
     elasticsearch: {
       terms: {
@@ -108,6 +116,7 @@ export const persistentMetricsetsQuery = () => {
   };
 
   return {
+    timeout: `${timeout}s`,
     aggs: {
       clusters: {
         terms: clusterUuidTerm,
@@ -117,18 +126,20 @@ export const persistentMetricsetsQuery = () => {
   };
 };
 
-export const enterpriseSearchQuery = ({ min, max }: TimeRange) => {
-  const timestampField = '@timestamp';
+export const enterpriseSearchQuery = ({ timeRange, timeout }: QueryOptions) => {
+  if (!timeRange) throw new Error('enterpriseSearchQuery: missing timeRange parameter');
 
+  const timestampField = '@timestamp';
   return {
+    timeout: `${timeout}s`,
     query: {
       bool: {
         filter: [
           {
             range: {
               [timestampField]: {
-                gte: min,
-                lte: max,
+                gte: timeRange.min,
+                lte: timeRange.max,
               },
             },
           },
