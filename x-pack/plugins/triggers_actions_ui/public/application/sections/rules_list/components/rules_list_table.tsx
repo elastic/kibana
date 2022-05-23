@@ -226,13 +226,8 @@ export const RulesListTable = (props: RulesListTableProps) => {
   const renderRuleStatusDropdown = (ruleEnabled: boolean | undefined, rule: RuleTableItem) => {
     return (
       <RuleStatusDropdown
-        hideSnoozeOption
         disableRule={async () => await onDisableRule(rule)}
         enableRule={async () => await onEnableRule(rule)}
-        snoozeRule={async (snoozeEndTime: string | -1, interval: string | null) => {
-          await onSnoozeRule(rule, snoozeEndTime);
-        }}
-        unsnoozeRule={async () => await onUnsnoozeRule(rule)}
         rule={rule}
         onRuleChanged={onRuleChanged}
         isEditable={rule.isEditable && isRuleTypeEditableInContext(rule.ruleTypeId)}

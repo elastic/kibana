@@ -13,10 +13,11 @@ import { isRuleSnoozed } from './rule_status_dropdown';
 import { RuleTableItem } from '../../../../types';
 import {
   SnoozePanel,
+  SnoozeUnit,
   futureTimeToInterval,
   usePreviousSnoozeInterval,
-  SnoozeUnit,
-} from './rule_status_dropdown';
+} from './rule_snooze_panel';
+import { RuleSnoozeScheduler } from './rule_snooze_scheduler';
 
 export interface RulesListNotifyBadgeProps {
   rule: RuleTableItem;
@@ -45,6 +46,8 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     snoozeRule,
     unsnoozeRule,
   } = props;
+
+  const [isSchedulerOpen, setIsSchedulerOpen] = useState(false);
 
   const { isSnoozedUntil, muteAll } = rule;
 
@@ -210,15 +213,31 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     [onRuleChanged, onClose, snoozeRuleAndStoreInterval, unsnoozeRule, setIsLoading]
   );
 
+  const onOpenScheduler = useCallback(() => setIsSchedulerOpen(true), [setIsSchedulerOpen]);
+  const onCloseScheduler = useCallback(() => setIsSchedulerOpen(false), [setIsSchedulerOpen]);
+
   return (
     <EuiPopover isOpen={isOpen} closePopover={onClose} button={buttonWithToolTip}>
-      <SnoozePanel
-        isLoading={isLoading}
-        applySnooze={onChangeSnooze}
-        interval={futureTimeToInterval(isSnoozedUntil)}
-        showCancel={isSnoozed}
-        previousSnoozeInterval={previousSnoozeInterval}
-      />
+      {!isSchedulerOpen ? (
+        <SnoozePanel
+          isLoading={isLoading}
+          applySnooze={onChangeSnooze}
+          interval={futureTimeToInterval(isSnoozedUntil)}
+          showCancel={isSnoozed}
+          previousSnoozeInterval={previousSnoozeInterval}
+          scheduledSnoozes={[]}
+          navigateToScheduler={onOpenScheduler}
+        />
+      ) : (
+        <RuleSnoozeScheduler
+          onClose={onCloseScheduler}
+          onSaveSchedule={(sched) => {
+            console.log('******');
+            console.log('SCHEDULE', JSON.stringify(sched, null, 4));
+            console.log('******');
+          }}
+        />
+      )}
     </EuiPopover>
   );
 };
