@@ -5,11 +5,27 @@
  * 2.0.
  */
 
-import { get } from 'lodash/fp';
+import { has, get } from 'lodash/fp';
 import { ColumnHeaderOptions } from '../../../../../../common/types';
 
 import { BrowserFields } from '../../../../../common/containers/source';
 import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../constants';
+
+/**
+ * Returns the root category for fields that are only one level, e.g. `_id` or `test_field_1`
+ *
+ * The `base` category will be returned for fields that are members of `base`,
+ * e.g. the `@timestamp`, `_id`, and `message` fields.
+ *
+ * The field name will be echoed-back for all other fields, e.g. `test_field_1`
+ */
+export const getRootCategory = ({
+  browserFields,
+  field,
+}: {
+  browserFields: BrowserFields;
+  field: string;
+}): string => (has(`base.fields.${field}`, browserFields) ? 'base' : field);
 
 /** Enriches the column headers with field details from the specified browserFields */
 export const getColumnHeaders = (
@@ -19,13 +35,14 @@ export const getColumnHeaders = (
   return headers
     ? headers.map((header) => {
         const splitHeader = header.id.split('.'); // source.geo.city_name -> [source, geo, city_name]
+        const category =
+          splitHeader.length > 1
+            ? splitHeader[0]
+            : getRootCategory({ field: header.id, browserFields });
 
         return {
           ...header,
-          ...get(
-            [splitHeader.length > 1 ? splitHeader[0] : 'base', 'fields', header.id],
-            browserFields
-          ),
+          ...get([category, 'fields', header.id], browserFields),
         };
       })
     : [];

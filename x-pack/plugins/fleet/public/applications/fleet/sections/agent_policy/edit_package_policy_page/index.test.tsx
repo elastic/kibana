@@ -89,7 +89,6 @@ jest.mock('../../../hooks', () => {
               },
             ],
             latestVersion: version,
-            removable: true,
             keepPoliciesUpToDate: false,
             status: 'not_installed',
           },

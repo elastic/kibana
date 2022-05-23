@@ -50,6 +50,10 @@ const defaultProps: TableProps = {
   canGoInApp: () => true,
   pageIndex: 1,
   pageSize: 2,
+  sort: {
+    field: 'updated_at',
+    direction: 'desc',
+  },
   items: [
     {
       id: '1',

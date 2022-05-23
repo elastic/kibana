@@ -57,6 +57,7 @@ export type {
   HasDataViewsResponse,
   IndicesResponse,
   IndicesResponseModified,
+  IndicesViaSearchResponse,
 } from './types';
 
 // Export plugin after all other imports

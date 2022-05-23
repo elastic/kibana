@@ -53,6 +53,7 @@ describe('formatMonitorConfig', () => {
       expect(yamlConfig).toEqual({
         'check.request.method': 'GET',
         enabled: true,
+        locations: [],
         max_redirects: '0',
         name: 'Test',
         password: '3z9SBOQWW5F0UrdqLVFqlF6z',
@@ -110,6 +111,7 @@ describe('formatMonitorConfig', () => {
         'filter_journeys.tags': ['dev'],
         ignore_https_errors: false,
         name: 'Test',
+        locations: [],
         schedule: '@every 3m',
         screenshots: 'on',
         'source.inline.script':
