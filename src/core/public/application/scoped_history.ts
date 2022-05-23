@@ -6,17 +6,9 @@
  * Side Public License, v 1.
  */
 
-import {
-  History,
-  Path,
-  LocationDescriptorObject,
-  TransitionPromptHook,
-  UnregisterCallback,
-  LocationListener,
-  Location,
-  Href,
-  Action,
-} from 'history';
+import { History, State, To, Listener, Location, Blocker } from 'history';
+
+export type UnregisterCallback = () => void;
 
 /**
  * A wrapper around a `History` instance that is scoped to a particular base path of the history stack. Behaves
@@ -31,7 +23,7 @@ import {
  *
  * @public
  */
-export class ScopedHistory<HistoryLocationState = unknown>
+export class ScopedHistory<HistoryLocationState extends State = State>
   implements History<HistoryLocationState>
 {
   /**
@@ -42,7 +34,7 @@ export class ScopedHistory<HistoryLocationState = unknown>
   /**
    * All active listeners on this history instance.
    */
-  private listeners = new Set<LocationListener<HistoryLocationState>>();
+  private listeners = new Set<Listener<HistoryLocationState>>();
   /**
    * Array of the local history stack. Only stores {@link Location.key} to use tracking an index of the current
    * position of the window in the history stack.
@@ -112,10 +104,7 @@ export class ScopedHistory<HistoryLocationState = unknown>
    * @param pathOrLocation a string or location descriptor
    * @param state
    */
-  public push = (
-    pathOrLocation: Path | LocationDescriptorObject<HistoryLocationState>,
-    state?: HistoryLocationState
-  ): void => {
+  public push = (pathOrLocation: To, state?: HistoryLocationState): void => {
     this.verifyActive();
     if (typeof pathOrLocation === 'string') {
       this.parentHistory.push(this.prependBasePath(pathOrLocation), state);
@@ -130,10 +119,7 @@ export class ScopedHistory<HistoryLocationState = unknown>
    * @param pathOrLocation a string or location descriptor
    * @param state
    */
-  public replace = (
-    pathOrLocation: Path | LocationDescriptorObject<HistoryLocationState>,
-    state?: HistoryLocationState
-  ): void => {
+  public replace = (pathOrLocation: To, state?: HistoryLocationState): void => {
     this.verifyActive();
     if (typeof pathOrLocation === 'string') {
       this.parentHistory.replace(this.prependBasePath(pathOrLocation), state);
@@ -167,7 +153,7 @@ export class ScopedHistory<HistoryLocationState = unknown>
    * Send the user one location back in the history stack. Equivalent to calling
    * {@link ScopedHistory.go | ScopedHistory.go(-1)}. If no more entries are available backwards, this is a no-op.
    */
-  public goBack = () => {
+  public back = () => {
     this.verifyActive();
     this.go(-1);
   };
@@ -176,7 +162,7 @@ export class ScopedHistory<HistoryLocationState = unknown>
    * Send the user one location forward in the history stack. Equivalent to calling
    * {@link ScopedHistory.go | ScopedHistory.go(1)}. If no more entries are available forwards, this is a no-op.
    */
-  public goForward = () => {
+  public forward = () => {
     this.verifyActive();
     this.go(1);
   };
@@ -184,12 +170,10 @@ export class ScopedHistory<HistoryLocationState = unknown>
   /**
    * Add a block prompt requesting user confirmation when navigating away from the current page.
    */
-  public block = (
-    prompt?: boolean | string | TransitionPromptHook<HistoryLocationState>
-  ): UnregisterCallback => {
+  public block = (blocker: Blocker<HistoryLocationState>): UnregisterCallback => {
     this.verifyActive();
 
-    const unregisterCallback = this.parentHistory.block(prompt);
+    const unregisterCallback = this.parentHistory.block(blocker);
     this.blockUnregisterCallbacks.add(unregisterCallback);
 
     return () => {
@@ -204,9 +188,7 @@ export class ScopedHistory<HistoryLocationState = unknown>
    * @param listener a function that receives location updates.
    * @returns an function to unsubscribe the listener.
    */
-  public listen = (
-    listener: (location: Location<HistoryLocationState>, action: Action) => void
-  ): UnregisterCallback => {
+  public listen = (listener: Listener<HistoryLocationState>): UnregisterCallback => {
     this.verifyActive();
     this.listeners.add(listener);
     return () => {
@@ -222,13 +204,13 @@ export class ScopedHistory<HistoryLocationState = unknown>
    * @param prependBasePath
    */
   public createHref = (
-    location: LocationDescriptorObject<HistoryLocationState>,
+    location: To,
     { prependBasePath = true }: { prependBasePath?: boolean } = {}
-  ): Href => {
+  ): string => {
     this.verifyActive();
     if (prependBasePath) {
       location = this.prependBasePath(location);
-      if (location.pathname === undefined) {
+      if (typeof location != 'string' && location.pathname === undefined) {
         // we always want to create an url relative to the basePath
         // so if pathname is not present, we use the history's basePath as default
         // we are doing that here because `prependBasePath` should not
@@ -239,16 +221,10 @@ export class ScopedHistory<HistoryLocationState = unknown>
     return this.parentHistory.createHref(location);
   };
 
-  private prependBasePath(path: Path): Path;
-  private prependBasePath(
-    location: LocationDescriptorObject<HistoryLocationState>
-  ): LocationDescriptorObject<HistoryLocationState>;
   /**
    * Prepends the scoped base path to the Path or Location
    */
-  private prependBasePath(
-    pathOrLocation: Path | LocationDescriptorObject<HistoryLocationState>
-  ): Path | LocationDescriptorObject<HistoryLocationState> {
+  private prependBasePath(pathOrLocation: To): To {
     if (typeof pathOrLocation === 'string') {
       return this.prependBasePathToString(pathOrLocation);
     } else {
@@ -293,7 +269,7 @@ export class ScopedHistory<HistoryLocationState = unknown>
    * state. Also forwards events to child listeners with the base path stripped from the location.
    */
   private setupHistoryListener() {
-    const unlisten = this.parentHistory.listen((location, action) => {
+    const unlisten = this.parentHistory.listen(({ location, action }) => {
       // If the user navigates outside the scope of this basePath, tear it down.
       if (!location.pathname.startsWith(this.basePath)) {
         unlisten();
@@ -328,7 +304,7 @@ export class ScopedHistory<HistoryLocationState = unknown>
       }
 
       [...this.listeners].forEach((listener) => {
-        listener(this.stripBasePath(location), action);
+        listener({ location: this.stripBasePath(location), action });
       });
     });
   }

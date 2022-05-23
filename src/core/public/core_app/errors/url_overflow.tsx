@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { History, Location } from 'history';
+import { History } from 'history';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -36,7 +36,7 @@ interface Deps {
 }
 
 export const setupUrlOverflowDetection = ({ basePath, history, toasts, uiSettings }: Deps) =>
-  history.listen((location: Location) => {
+  history.listen(({ location }) => {
     // Bail if storeInSessionStorage is set or we're already on the error page
     if (
       uiSettings.get('state:storeInSessionStorage') ||
