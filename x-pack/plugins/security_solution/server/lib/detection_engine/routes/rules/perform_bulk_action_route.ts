@@ -116,11 +116,12 @@ const buildBulkResponse = (
     deleted?: RuleAlertType[];
   }
 ) => {
-  const succeeded = updated.length + created.length + deleted.length;
+  const numSucceeded = updated.length + created.length + deleted.length;
+  const numFailed = errors.length;
   const summary = {
-    failed: errors.length,
-    succeeded,
-    total: succeeded + errors.length,
+    failed: numFailed,
+    succeeded: numSucceeded,
+    total: numSucceeded + numFailed,
   };
 
   const results = {
@@ -129,7 +130,7 @@ const buildBulkResponse = (
     deleted: deleted.map((rule) => internalRuleToAPIResponse(rule)),
   };
 
-  if (errors.length > 0) {
+  if (numFailed > 0) {
     return response.custom({
       headers: { 'content-type': 'application/json' },
       body: Buffer.from(
