@@ -27,7 +27,7 @@ describe('SimpleMonitorForm', () => {
     expect(screen.getByText(WEBSITE_URL_HELP_TEXT)).toBeInTheDocument();
   });
 
-  it('show validation error on touch', async () => {
+  it('do not show validation error on touch', async () => {
     render(<SimpleMonitorForm />);
     await act(async () => {
       fireEvent.click(screen.getByTestId(syntheticsTestSubjects.urlsInput));
@@ -37,7 +37,7 @@ describe('SimpleMonitorForm', () => {
       fireEvent.click(screen.getByTestId('comboBoxInput'));
     });
 
-    expect(screen.getByText(URL_REQUIRED_LABEL)).toBeInTheDocument();
+    expect(await screen.queryByText(URL_REQUIRED_LABEL)).not.toBeInTheDocument();
   });
 
   it('shows the validation errors on submit', async () => {
