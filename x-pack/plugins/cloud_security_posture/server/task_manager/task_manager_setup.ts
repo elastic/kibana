@@ -82,17 +82,23 @@ const aggregateLatestFindings = async (
 ) => {
   try {
     const evaluationsQueryResult = await esClient.search<unknown, ScoreBucket>(getScoreQuery());
-    if (evaluationsQueryResult.hits && evaluationsQueryResult.aggregations) {
-      const clustersStats = evaluationsQueryResult.aggregations.score_by_cluster_id.buckets.map(
-        (clusterStats: AggregatedFindingsByCluster) => {
-          return {
-            [clusterStats.key]: {
-              total_findings: clusterStats.total_findings.value,
-              passed_findings: clusterStats.passed_findings.doc_count,
-              failed_findings: clusterStats.failed_findings.doc_count,
-            },
-          };
-        }
+    if (
+      evaluationsQueryResult.aggregations &&
+      evaluationsQueryResult.aggregations.total_findings.value
+    ) {
+      const clustersStats = Object.fromEntries(
+        evaluationsQueryResult.aggregations.score_by_cluster_id.buckets.map(
+          (clusterStats: AggregatedFindingsByCluster) => {
+            return [
+              clusterStats.key,
+              {
+                total_findings: clusterStats.total_findings.value,
+                passed_findings: clusterStats.passed_findings.doc_count,
+                failed_findings: clusterStats.failed_findings.doc_count,
+              },
+            ];
+          }
+        )
       );
 
       await esClient.index({
