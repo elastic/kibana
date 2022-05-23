@@ -23,6 +23,9 @@ const extractSettings = (config: MonitoringConfig) => {
   };
 };
 
+const DEFAULT_QUERY_TIMERANGE = { min: 'now-15m', max: 'now' };
+const DEFAULT_QUERY_TIMEOUT_SECONDS = 15;
+
 export function health(server: MonitoringCore) {
   const validateQuery = createValidationFunction(getHealthRequestQueryRT);
   const settings = extractSettings(server.config);
@@ -43,10 +46,10 @@ export function health(server: MonitoringCore) {
     async handler(req: LegacyRequest) {
       const logger = req.getLogger();
       const timeRange = {
-        min: req.query.min || 'now-30m',
-        max: req.query.max || 'now',
+        min: req.query.min || DEFAULT_QUERY_TIMERANGE.min,
+        max: req.query.max || DEFAULT_QUERY_TIMERANGE.max,
       } as TimeRange;
-      const timeout = req.query.timeout || 15;
+      const timeout = req.query.timeout || DEFAULT_QUERY_TIMEOUT_SECONDS;
       const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
 
       const monitoredClusters = await fetchMonitoredClusters({
