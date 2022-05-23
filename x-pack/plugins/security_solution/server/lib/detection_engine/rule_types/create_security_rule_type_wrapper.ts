@@ -290,6 +290,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               mergeStrategy,
               completeRule,
               spaceId,
+              indicesToQuery: inputIndex,
             });
 
             const wrapSequences = wrapSequencesFactory({
