@@ -5,23 +5,17 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 
 import type { RouteDefinitionParams } from '../..';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
+import { validateKibanaPrivileges } from '../../../lib';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
-import {
-  getPutPayloadSchema,
-  transformPutPayloadToElasticsearchRole,
-  validateKibanaPrivileges,
-} from './model';
+import type { RolePayloadSchemaType } from './model';
+import { getPutPayloadSchema, transformPutPayloadToElasticsearchRole } from './model';
 
-const roleGrantsSubFeaturePrivileges = (
-  features: KibanaFeature[],
-  role: TypeOf<ReturnType<typeof getPutPayloadSchema>>
-) => {
+const roleGrantsSubFeaturePrivileges = (features: KibanaFeature[], role: RolePayloadSchemaType) => {
   if (!role.kibana) {
     return false;
   }
