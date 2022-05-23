@@ -434,10 +434,10 @@ export class SyntheticsService {
     };
 
     const monitorsByType: Record<string, number> = {
-      browserMonitors: 0,
-      httpMonitors: 0,
-      tcpMonitors: 0,
-      icmpMonitors: 0,
+      browser: 0,
+      http: 0,
+      tcp: 0,
+      icmp: 0,
     };
 
     monitors.forEach((monitor) => {
@@ -461,22 +461,22 @@ export class SyntheticsService {
           break;
       }
 
-      monitorsByType[monitor.type + 'Monitors'] = (monitorsByType[monitor.type] ?? 0) + 1;
+      monitorsByType[monitor.type] = (monitorsByType[monitor.type] ?? 0) + 1;
 
       monitor.locations.forEach(({ id }) => {
-        locationRuns[id + 'TestRuns'] =
-          (locationRuns[id + 'TestRuns'] ?? 0) + testRunsInDay(monitor.schedule.number);
+        locationRuns[id + 'Tests'] =
+          (locationRuns[id + 'Tests'] ?? 0) + testRunsInDay(monitor.schedule.number);
         locationMonitors[id + 'Monitors'] = (locationMonitors[id + 'Monitors'] ?? 0) + 1;
       });
     });
 
     return {
-      totalMonitors: monitors.length,
-      totalTestRuns: totalRuns,
-      browserTestRunsPer24h: browserTestRuns,
-      httpTestRunsPer24h: httpTestRuns,
-      icmpTestRunsPer24h: icmpTestRuns,
-      tcpTestRunsPer24h: tcpTestRuns,
+      total: monitors.length,
+      totalTests: totalRuns,
+      browserTests24h: browserTestRuns,
+      httpTests24h: httpTestRuns,
+      icmpTests24h: icmpTestRuns,
+      tcpTests24h: tcpTestRuns,
       ...locationRuns,
       ...locationMonitors,
       ...monitorsByType,
