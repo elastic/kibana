@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import moment from 'moment';
 
 import { NewAgentActionSchema } from '../models';
 
@@ -80,8 +81,11 @@ export const PostBulkAgentUpgradeRequestSchema = {
     rollout_duration_seconds: schema.maybe(schema.number({ min: 600 })),
     start_time: schema.maybe(
       schema.string({
-        // TODO validate date
-        // validate: schema.
+        validate: (v: string) => {
+          if (!moment(v).isValid()) {
+            return 'not a valid date';
+          }
+        },
       })
     ),
   }),
