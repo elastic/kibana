@@ -106,7 +106,7 @@ const getTableColumns: GetTableColumns = () => [
   },
   {
     field: 'totalAlerts',
-    name: i18n.CASES_TABLE_COLUMN_ALERTS,
+    name: i18n.ALERTS_TEXT,
     truncateText: true,
     textOnly: true,
     'data-test-subj': 'recentlyCreatedCaseAlert',

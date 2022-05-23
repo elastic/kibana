@@ -209,13 +209,6 @@ export const CASES_TABLE_COLUMN_NAME = i18n.translate(
   }
 );
 
-export const CASES_TABLE_COLUMN_ALERTS = i18n.translate(
-  'xpack.securitySolution.detectionResponse.alerts',
-  {
-    defaultMessage: 'Alerts',
-  }
-);
-
 export const CASES_TABLE_COLUMN_TIME = i18n.translate(
   'xpack.securitySolution.detectionResponse.caseColumnTime',
   {
