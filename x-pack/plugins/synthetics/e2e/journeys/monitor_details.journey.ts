@@ -40,12 +40,12 @@ journey('MonitorDetails', async ({ page, params }: { page: Page; params: any }) 
   step('create basic monitor', async () => {
     await uptime.enableMonitorManagement();
     await uptime.clickAddMonitor();
-    await uptime.createBasicMonitorDetails({
+    await uptime.createBasicHTTPMonitorDetails({
       name,
       locations: ['US Central'],
       apmServiceName: 'synthetics',
+      url: 'https://www.google.com',
     });
-    await uptime.fillByTestSubj('syntheticsUrlField', 'https://www.google.com');
     await uptime.confirmAndSave();
   });
 
