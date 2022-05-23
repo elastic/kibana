@@ -368,13 +368,12 @@ export class APIKeys {
   }
 
   private parseRoleDescriptorsWithKibanaPrivileges(createParams: CreateAPIKeyParams) {
-    let roleDescriptors = createParams.role_descriptors;
-
-    if (roleDescriptors) {
-      return roleDescriptors;
+    if (createParams.role_descriptors) {
+      return createParams.role_descriptors;
     }
 
-    roleDescriptors = Object.create(null);
+    const roleDescriptors = Object.create(null);
+
     const { kibana_role_descriptors: kibanaRoleDescriptors } = createParams;
 
     const allValidationErrors: string[] = [];
