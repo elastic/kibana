@@ -443,6 +443,13 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.ONEDRIVE,
     serviceType: 'one_drive',
+    categories: [
+      SOURCE_CATEGORIES.FILE_SHARING,
+      SOURCE_CATEGORIES.CLOUD,
+      SOURCE_CATEGORIES.STORAGE,
+      SOURCE_CATEGORIES.MICROSOFT,
+      SOURCE_CATEGORIES.OFFICE_365,
+    ],
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: true,
