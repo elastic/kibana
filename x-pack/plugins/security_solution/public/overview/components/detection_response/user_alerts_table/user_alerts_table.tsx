@@ -119,7 +119,10 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.STATUS_CRITICAL_LABEL,
     render: (count: number, { userName }) => (
       <EuiHealth data-test-subj="userSeverityAlertsTable-critical" color={SEVERITY_COLOR.critical}>
-        <EuiLink onClick={() => handleClick({ userName, severity: 'critical' })}>
+        <EuiLink
+          disabled={count === 0}
+          onClick={() => handleClick({ userName, severity: 'critical' })}
+        >
           <FormattedCount count={count} />
         </EuiLink>
       </EuiHealth>
@@ -130,7 +133,7 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.STATUS_HIGH_LABEL,
     render: (count: number, { userName }) => (
       <EuiHealth data-test-subj="userSeverityAlertsTable-high" color={SEVERITY_COLOR.high}>
-        <EuiLink onClick={() => handleClick({ userName, severity: 'high' })}>
+        <EuiLink disabled={count === 0} onClick={() => handleClick({ userName, severity: 'high' })}>
           <FormattedCount count={count} />
         </EuiLink>
       </EuiHealth>
@@ -141,7 +144,10 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.STATUS_MEDIUM_LABEL,
     render: (count: number, { userName }) => (
       <EuiHealth data-test-subj="userSeverityAlertsTable-medium" color={SEVERITY_COLOR.medium}>
-        <EuiLink onClick={() => handleClick({ userName, severity: 'medium' })}>
+        <EuiLink
+          disabled={count === 0}
+          onClick={() => handleClick({ userName, severity: 'medium' })}
+        >
           <FormattedCount count={count} />
         </EuiLink>
       </EuiHealth>
@@ -152,7 +158,7 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.STATUS_LOW_LABEL,
     render: (count: number, { userName }) => (
       <EuiHealth data-test-subj="userSeverityAlertsTable-low" color={SEVERITY_COLOR.low}>
-        <EuiLink onClick={() => handleClick({ userName, severity: 'low' })}>
+        <EuiLink disabled={count === 0} onClick={() => handleClick({ userName, severity: 'low' })}>
           <FormattedCount count={count} />
         </EuiLink>
       </EuiHealth>

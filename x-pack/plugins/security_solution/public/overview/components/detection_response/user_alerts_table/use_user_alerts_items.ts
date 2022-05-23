@@ -11,10 +11,9 @@ import { useQueryInspector } from '../../../../common/components/page/manage_que
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { GenericBuckets } from '../../../../../common/search_strategy';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
+import { getPageCount, ITEMS_PER_PAGE } from '../utils';
 
 const USERS_BY_SEVERITY_AGG = 'usersBySeverity';
-const ITEMS_PER_PAGE = 4;
-const MAX_ALLOWED_RESULTS = 100;
 const defaultPagination = {
   pageCount: 0,
   currentPage: 0,
@@ -90,11 +89,7 @@ export const useUserAlertsItems: UseUserAlertsItems = ({ skip, queryId, signalIn
 
       setPaginationData((p) => ({
         ...p,
-        pageCount: Math.ceil(
-          // While there could be more than 100 users we only want to show 25 pages of results,
-          // and the user count cardinality result will always be the total count
-          Math.min(data.aggregations?.user_count.value || 0, MAX_ALLOWED_RESULTS) / ITEMS_PER_PAGE
-        ),
+        pageCount: getPageCount(data.aggregations?.user_count.value),
       }));
     }
     setUpdatedAt(Date.now());

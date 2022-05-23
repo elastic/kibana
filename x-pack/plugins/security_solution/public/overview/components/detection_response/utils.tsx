@@ -19,6 +19,9 @@ export const SEVERITY_COLOR = {
   low: '#54B399',
 } as const;
 
+export const ITEMS_PER_PAGE = 4;
+const MAX_ALLOWED_RESULTS = 100;
+
 export interface LastUpdatedAtProps {
   updatedAt: number;
   isUpdating: boolean;
@@ -40,3 +43,10 @@ export const LastUpdatedAt: React.FC<LastUpdatedAtProps> = ({ isUpdating, update
     )}
   </EuiFlexGroup>
 );
+
+/**
+ * While there could be more than 100 hosts or users we only want to show 25 pages of results,
+ * and the host count cardinality result will always be the total count
+ * */
+export const getPageCount = (count: number = 0) =>
+  Math.ceil(Math.min(count || 0, MAX_ALLOWED_RESULTS) / ITEMS_PER_PAGE);
