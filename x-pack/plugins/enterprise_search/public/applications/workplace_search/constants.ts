@@ -414,6 +414,12 @@ export const SOURCE_CATEGORIES = {
       defaultMessage: 'Customer relationship management',
     }
   ),
+  CUSTOMER_SERVICE: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.customerService',
+    {
+      defaultMessage: 'Customer service',
+    }
+  ),
   EMAIL: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.email', {
     defaultMessage: 'Email',
   }),
@@ -428,6 +434,12 @@ export const SOURCE_CATEGORIES = {
   }),
   GSUITE: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.gsuite', {
     defaultMessage: 'GSuite',
+  }),
+  HELP: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.help', {
+    defaultMessage: 'Help',
+  }),
+  HELPDESK: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.helpdesk', {
+    defaultMessage: 'Helpdesk',
   }),
   INSTANT_MESSAGING: i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.sources.categories.instantMessaging',
@@ -461,6 +473,9 @@ export const SOURCE_CATEGORIES = {
   }),
   STORAGE: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.storage', {
     defaultMessage: 'Storage',
+  }),
+  TICKETING: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.ticketing', {
+    defaultMessage: 'Ticketing',
   }),
   VERSION_CONTROL: i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.sources.categories.versionControl',

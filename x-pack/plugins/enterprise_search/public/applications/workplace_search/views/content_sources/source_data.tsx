@@ -743,6 +743,13 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.ZENDESK,
     serviceType: 'zendesk',
+    categories: [
+      SOURCE_CATEGORIES.HELP,
+      SOURCE_CATEGORIES.CUSTOMER_SERVICE,
+      SOURCE_CATEGORIES.CUSTOMER_RELATIONSHIP_MANAGEMENT,
+      SOURCE_CATEGORIES.TICKETING,
+      SOURCE_CATEGORIES.HELPDESK,
+    ],
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: true,
