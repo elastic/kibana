@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-export * from './step_configure_package.test';
 export * from './step_configure_package';
-export * from './step_define_package_policy.test';
 export * from './step_define_package_policy';
-export * from './step_select_agent_policy.test';
 export * from './step_select_agent_policy';
-export * from './step_select_hosts.test';
 export * from './step_select_hosts';

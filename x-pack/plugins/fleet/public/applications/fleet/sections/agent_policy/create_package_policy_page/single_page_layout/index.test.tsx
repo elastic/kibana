@@ -23,8 +23,6 @@ import {
   useGetPackageInfoByKey,
 } from '../../../../hooks';
 
-import { CreatePackagePolicyPage } from '.';
-
 jest.mock('../../../../hooks', () => {
   return {
     ...jest.requireActual('../../../../hooks'),
