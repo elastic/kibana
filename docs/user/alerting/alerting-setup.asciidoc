@@ -91,7 +91,7 @@ triggered actions. The following rule actions will re-generate the API key:
 
 When you disable a rule, it retains the associated API key which is re-used when 
 the rule is enabled. If the API key is missing when you enable the rule (for 
-example, in case of imported rules), it generates a new key that has your 
+example, in the case of imported rules), it generates a new key that has your 
 security privileges.
 
 You can update an API key manually in 
