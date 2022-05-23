@@ -275,11 +275,11 @@ export const ModelsList: FC<Props> = ({
       return acc;
     }, new Set<string>());
     return [...result]
+      .sort((a, b) => a.localeCompare(b))
       .map((v) => ({
         value: v,
         name: v,
-      }))
-      .sort((a, b) => a.name.localeCompare(b.name));
+      }));
   }, [items]);
 
   /**
