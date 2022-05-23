@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { FormattedNumber } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
 import { BarChart } from '../../../../common/components/charts/barchart';
-import { LastUpdatedAt } from '../util';
+import { LastUpdatedAt } from '../utils';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { HeaderSection } from '../../../../common/components/header_section';
 import {
@@ -112,10 +112,6 @@ const Wrapper = styled.div`
   width: 100%;
 `;
 
-const StyledEuiPanel = styled(EuiPanel)`
-  height: 258px;
-`;
-
 const CasesByStatusComponent: React.FC = () => {
   const { toggleStatus, setToggleStatus } = useQueryToggle(CASES_BY_STATUS_ID);
   const { getAppUrl, navigateTo } = useNavigation();
@@ -155,7 +151,7 @@ const CasesByStatusComponent: React.FC = () => {
   );
 
   return (
-    <StyledEuiPanel hasBorder>
+    <EuiPanel hasBorder>
       <HeaderSection
         id={CASES_BY_STATUS_ID}
         title={CASES_BY_STATUS_SECTION_TITLE}
@@ -194,7 +190,7 @@ const CasesByStatusComponent: React.FC = () => {
           </StyledEuiFlexItem>
         </EuiFlexGroup>
       )}
-    </StyledEuiPanel>
+    </EuiPanel>
   );
 };
 
