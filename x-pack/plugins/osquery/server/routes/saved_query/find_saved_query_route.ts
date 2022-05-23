@@ -7,12 +7,12 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
-import { filter } from 'lodash/fp';
-import { mapKeys } from 'lodash';
+
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { OSQUERY_INTEGRATION_NAME, PLUGIN_ID } from '../../../common';
 import { savedQuerySavedObjectType } from '../../../common/types';
 import { convertECSMappingToObject } from '../utils';
+import { getPrebuiltList } from './utils';
 
 export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.get(
@@ -37,7 +37,7 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
 
       const savedQueries = await savedObjectsClient.find<{
         ecs_mapping: Array<{ field: string; value: string }>;
-        prebuilt?: boolean;
+        prebuilt: boolean;
       }>({
         type: savedQuerySavedObjectType,
         page: parseInt(request.query.pageIndex ?? '0', 10) + 1,
@@ -50,22 +50,11 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
         .getPackageService()
         ?.asInternalUser?.getInstallation(OSQUERY_INTEGRATION_NAME);
 
-      let installedWithIntegrationMap: Record<string, unknown>;
-      if (installation) {
-        const installationSavedQueries = filter(
-          ['type', savedQuerySavedObjectType],
-          installation.installed_kibana
-        );
-        installedWithIntegrationMap = mapKeys(installationSavedQueries, (value) => value.id);
-      }
-
       const savedObjects = savedQueries.saved_objects.map((savedObject) => {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const ecs_mapping = savedObject.attributes.ecs_mapping;
 
-        if (installedWithIntegrationMap[savedObject.id]) {
-          savedObject.attributes.prebuilt = true;
-        }
+        savedObject.attributes.prebuilt = getPrebuiltList(installation, savedObject.id);
 
         if (ecs_mapping) {
           // @ts-expect-error update types

@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
-import { find } from 'lodash';
+import { getPrebuiltDetail } from './utils';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { OSQUERY_INTEGRATION_NAME, PLUGIN_ID } from '../../../common';
 import { savedQuerySavedObjectType } from '../../../common/types';
@@ -30,20 +30,12 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
 
       const savedQuery = await savedObjectsClient.get<{
         ecs_mapping: Array<{ key: string; value: Record<string, object> }>;
-        prebuilt?: boolean;
+        prebuilt: boolean;
       }>(savedQuerySavedObjectType, request.params.id);
 
       const installation = await osqueryContext.service
         .getPackageService()
         ?.asInternalUser?.getInstallation(OSQUERY_INTEGRATION_NAME);
-
-      let installationSavedQueries;
-      if (installation) {
-        installationSavedQueries = find(
-          installation.installed_kibana,
-          (item) => item.type === savedQuerySavedObjectType && item.id === savedQuery.id
-        );
-      }
 
       if (savedQuery.attributes.ecs_mapping) {
         // @ts-expect-error update types
@@ -52,9 +44,7 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
         );
       }
 
-      if (installationSavedQueries) {
-        savedQuery.attributes.prebuilt = true;
-      }
+      savedQuery.attributes.prebuilt = getPrebuiltDetail(installation, savedQuery.id);
 
       return response.ok({
         body: savedQuery,
