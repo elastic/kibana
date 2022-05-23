@@ -25,11 +25,11 @@ export const debugTelemetryRoute = createApmServerRoute({
 
     await taskManagerStart?.runNow?.(APM_TELEMETRY_TASK_NAME);
 
-  const apmTelemetryObject = await savedObjectsClient.get(
-    APM_TELEMETRY_SAVED_OBJECT_TYPE,
-    APM_TELEMETRY_SAVED_OBJECT_ID
-  );
+    const apmTelemetryObject = await savedObjectsClient.get(
+      APM_TELEMETRY_SAVED_OBJECT_TYPE,
+      APM_TELEMETRY_SAVED_OBJECT_ID
+    );
 
-  return apmTelemetryObject.attributes;
+    return apmTelemetryObject.attributes;
   },
 });
