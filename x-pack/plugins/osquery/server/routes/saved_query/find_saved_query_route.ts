@@ -9,10 +9,10 @@ import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { OSQUERY_INTEGRATION_NAME, PLUGIN_ID } from '../../../common';
+import { PLUGIN_ID } from '../../../common';
 import { savedQuerySavedObjectType } from '../../../common/types';
 import { convertECSMappingToObject } from '../utils';
-import { getPrebuiltList } from './utils';
+import { getInstalledSavedQueriesMap } from './utils';
 
 export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.get(
@@ -46,15 +46,13 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
         // @ts-expect-error update types
         sortOrder: request.query.sortDirection ?? 'desc',
       });
-      const installation = await osqueryContext.service
-        .getPackageService()
-        ?.asInternalUser?.getInstallation(OSQUERY_INTEGRATION_NAME);
 
+      const prebuiltSavedQueriesMap = await getInstalledSavedQueriesMap(osqueryContext);
       const savedObjects = savedQueries.saved_objects.map((savedObject) => {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const ecs_mapping = savedObject.attributes.ecs_mapping;
 
-        savedObject.attributes.prebuilt = getPrebuiltList(installation, savedObject.id);
+        savedObject.attributes.prebuilt = !!prebuiltSavedQueriesMap[savedObject.id];
 
         if (ecs_mapping) {
           // @ts-expect-error update types

@@ -5,26 +5,35 @@
  * 2.0.
  */
 
-import { filter } from 'lodash/fp';
 import { find, mapKeys } from 'lodash';
-import { Installation } from '@kbn/fleet-plugin/common';
+import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { savedQuerySavedObjectType } from '../../../common/types';
+import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
-export const getPrebuiltList = (installation: Installation | undefined, savedQueryId: string) => {
+const getInstallation = async (osqueryContext: OsqueryAppContext) =>
+  await osqueryContext.service
+    .getPackageService()
+    ?.asInternalUser?.getInstallation(OSQUERY_INTEGRATION_NAME);
+
+export const getInstalledSavedQueriesMap = async (osqueryContext: OsqueryAppContext) => {
+  const installation = await getInstallation(osqueryContext);
   if (installation) {
-    const installationSavedQueries = filter(
-      ['type', savedQuerySavedObjectType],
-      installation.installed_kibana
-    );
-    const installedWithIntegrationMap = mapKeys(installationSavedQueries, (value) => value.id);
-
-    return !!(installedWithIntegrationMap && installedWithIntegrationMap[savedQueryId]);
+    return mapKeys(installation.installed_kibana, (value) => {
+      if (value.type === savedQuerySavedObjectType) {
+        return value.id;
+      }
+    });
   }
 
-  return false;
+  return {};
 };
 
-export const getPrebuiltDetail = (installation: Installation | undefined, savedQueryId: string) => {
+export const isSavedQueryPrebuilt = async (
+  osqueryContext: OsqueryAppContext,
+  savedQueryId: string
+) => {
+  const installation = await getInstallation(osqueryContext);
+
   if (installation) {
     const installationSavedQueries = find(
       installation.installed_kibana,

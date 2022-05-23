@@ -7,9 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
-import { getPrebuiltDetail } from './utils';
+import { isSavedQueryPrebuilt } from './utils';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { OSQUERY_INTEGRATION_NAME, PLUGIN_ID } from '../../../common';
+import { PLUGIN_ID } from '../../../common';
 import { savedQuerySavedObjectType } from '../../../common/types';
 import { convertECSMappingToObject } from '../utils';
 
@@ -33,9 +33,7 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
         prebuilt: boolean;
       }>(savedQuerySavedObjectType, request.params.id);
 
-      const installation = await osqueryContext.service
-        .getPackageService()
-        ?.asInternalUser?.getInstallation(OSQUERY_INTEGRATION_NAME);
+      const isPrebuilt: boolean = await isSavedQueryPrebuilt(osqueryContext, savedQuery.id);
 
       if (savedQuery.attributes.ecs_mapping) {
         // @ts-expect-error update types
@@ -44,7 +42,7 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
         );
       }
 
-      savedQuery.attributes.prebuilt = getPrebuiltDetail(installation, savedQuery.id);
+      savedQuery.attributes.prebuilt = isPrebuilt;
 
       return response.ok({
         body: savedQuery,

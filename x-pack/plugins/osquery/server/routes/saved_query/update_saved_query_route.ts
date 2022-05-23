@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { filter, find } from 'lodash';
+import { filter } from 'lodash';
 import { schema } from '@kbn/config-schema';
 
 import { IRouter } from '@kbn/core/server';
-import { OSQUERY_INTEGRATION_NAME, PLUGIN_ID } from '../../../common';
+import { isSavedQueryPrebuilt } from './utils';
+import { PLUGIN_ID } from '../../../common';
 import { savedQuerySavedObjectType } from '../../../common/types';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
@@ -63,18 +64,10 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
         ecs_mapping,
       } = request.body;
 
-      const installation = await osqueryContext.service
-        .getPackageService()
-        ?.asInternalUser?.getInstallation(OSQUERY_INTEGRATION_NAME);
+      const isPrebuilt = await isSavedQueryPrebuilt(osqueryContext, request.params.id);
 
-      if (installation) {
-        const installationSavedQueries = find(
-          installation.installed_kibana,
-          (item) => item.type === savedQuerySavedObjectType && item.id === request.params.id
-        );
-        if (installationSavedQueries) {
-          return response.conflict({ body: `Elastic prebuilt Saved query cannot be updated.` });
-        }
+      if (isPrebuilt) {
+        return response.conflict({ body: `Elastic prebuilt Saved query cannot be updated.` });
       }
 
       const conflictingEntries = await savedObjectsClient.find<{ id: string }>({
