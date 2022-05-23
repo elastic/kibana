@@ -8,6 +8,7 @@
 import React, { memo, useCallback, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
+import { ConsoleHeader } from './components/console_header';
 import { HistoryOutput } from './components/history_output';
 import { CommandInput, CommandInputProps } from './components/command_input';
 import { ConsoleProps } from './types';
@@ -103,7 +104,7 @@ export const Console = memo<ConsoleProps>(
               data-test-subj={getTestId('mainPanel')}
             >
               <EuiFlexItem grow={false} className="layout-container">
-                {'header here'}
+                <ConsoleHeader />
               </EuiFlexItem>
               <EuiFlexItem grow={true} className="layout-historyOutput">
                 <div

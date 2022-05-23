@@ -97,12 +97,20 @@ export interface ConsoleProps extends CommonProps {
    * The list of Commands that will be available in the console for the user to execute
    */
   commands: CommandDefinition[];
+
   /**
    * If defined, then the `help` builtin command will display this output instead of the default one
    * which is generated out of the Command list.
    */
   HelpComponent?: CommandExecutionComponent;
+
+  /**
+   * A component to be used in the Console's header title area (left side)
+   */
+  TitleComponent?: ComponentType;
+
   prompt?: string;
+
   /**
    * For internal use only!
    * Provided by the ConsoleManager to indicate that the console is being managed by it
