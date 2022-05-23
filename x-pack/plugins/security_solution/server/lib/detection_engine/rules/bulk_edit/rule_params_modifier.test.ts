@@ -40,6 +40,16 @@ describe('deleteItemsFromArray', () => {
 describe('ruleParamsModifier', () => {
   const ruleParamsMock = { index: ['initial-index-*'], version: 1 } as RuleAlertType['params'];
 
+  test('should increment version', () => {
+    const editedRuleParams = ruleParamsModifier(ruleParamsMock, [
+      {
+        type: BulkActionEditType.add_index_patterns,
+        value: ['my-index-*'],
+      },
+    ]);
+    expect(editedRuleParams).toHaveProperty('version', ruleParamsMock.version + 1);
+  });
+
   describe('index_patterns', () => {
     test('should add new index pattern to rule', () => {
       const editedRuleParams = ruleParamsModifier(ruleParamsMock, [
