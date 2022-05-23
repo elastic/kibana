@@ -158,13 +158,18 @@ export function getComparisonOptions({
   });
 
   if (canGetJobs) {
+    const disabled =
+      anomalyDetectionJobsStatus === 'success' && !hasMLJobsMatchingEnv;
     comparisonOptions.push({
       value: TimeRangeComparisonEnum.ExpectedBounds,
-      text: i18n.translate('xpack.apm.comparison.mlExpectedBounds', {
-        defaultMessage: 'Expected bounds',
-      }),
-      disabled:
-        anomalyDetectionJobsStatus === 'success' && !hasMLJobsMatchingEnv,
+      text: disabled
+        ? i18n.translate('xpack.apm.comparison.mlExpectedBoundsDisabledText', {
+            defaultMessage: 'Expected bounds (select other environment)',
+          })
+        : i18n.translate('xpack.apm.comparison.mlExpectedBoundsText', {
+            defaultMessage: 'Expected bounds',
+          }),
+      disabled,
     });
   }
 

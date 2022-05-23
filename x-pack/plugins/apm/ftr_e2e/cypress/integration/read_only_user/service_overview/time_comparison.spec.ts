@@ -203,7 +203,7 @@ describe.skip('Service overview: Time Comparison', () => {
     cy.get('[data-test-subj="throughput"]')
       .get('#echHighlighterClipPath__throughput')
       .realHover({ position: 'center' });
-    cy.contains('Comparison: Week before');
+    cy.contains('Week before');
     cy.contains('0 tpm');
 
     cy.contains('Throughput');

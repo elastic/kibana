@@ -21,7 +21,7 @@ import { APMChartSpec } from '../../../../../typings/timeseries';
 export const expectedBoundsTitle = i18n.translate(
   'xpack.apm.comparison.expectedBoundsTitle',
   {
-    defaultMessage: 'Comparison: Expected bounds',
+    defaultMessage: 'Expected bounds',
   }
 );
 export function getChartAnomalyTimeseries({

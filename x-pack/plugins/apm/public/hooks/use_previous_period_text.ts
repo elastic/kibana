@@ -29,10 +29,7 @@ export const usePreviousPeriodLabel = () => {
       timeComparisonOptions.find(
         (d) => d.value === offset || d.value.endsWith('ms')
       )?.text ?? fallbackPreviousPeriodText;
-    return i18n.translate('xpack.apm.chart.comparisonPreviousPeriodLabel', {
-      defaultMessage: 'Comparison: {comparisonPeriodText}',
-      values: { comparisonPeriodText },
-    });
+    return comparisonPeriodText;
   }, [start, end, offset]);
   return previousPeriodText;
 };
