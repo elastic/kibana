@@ -203,10 +203,11 @@ export const getDatatableVisualization = ({
             )
             .map((accessor) => ({
               columnId: accessor,
-              triggerIcon:
-                columnMap[accessor].hidden || columnMap[accessor].collapseFn
-                  ? 'invisible'
-                  : undefined,
+              triggerIcon: columnMap[accessor].hidden
+                ? 'invisible'
+                : columnMap[accessor].collapseFn
+                ? 'aggregate'
+                : undefined,
             })),
           supportsMoreColumns: true,
           filterOperations: (op) => op.isBucketed,

@@ -560,7 +560,7 @@ export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfig
 
 export interface AccessorConfig {
   columnId: string;
-  triggerIcon?: 'color' | 'disabled' | 'colorBy' | 'none' | 'invisible';
+  triggerIcon?: 'color' | 'disabled' | 'colorBy' | 'none' | 'invisible' | 'aggregate';
   color?: string;
   palette?: string[] | Array<{ color: string; stop: number }>;
 }
