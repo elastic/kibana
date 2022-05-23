@@ -374,7 +374,7 @@ export class APIKeys {
       return roleDescriptors;
     }
 
-    roleDescriptors = {};
+    roleDescriptors = Object.create(null);
     const { kibana_role_descriptors: kibanaRoleDescriptors } = createParams;
 
     const allValidationErrors: string[] = [];
