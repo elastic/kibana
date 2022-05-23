@@ -301,15 +301,15 @@ export function RuleDetailsPage() {
           : [],
       }}
     >
-      <EuiFlexGroup wrap={true}>
+      <EuiFlexGroup wrap={true} gutterSize="m">
         {/* Left side of Rule Summary */}
         <EuiFlexItem grow={1}>
           <EuiPanel
             color={getHealthColor(rule.executionStatus.status)}
             hasBorder={false}
-            paddingSize={'l'}
+            paddingSize={'m'}
           >
-            <EuiFlexGroup direction="column">
+            <EuiFlexGroup direction="column" gutterSize="xs">
               <EuiFlexItem>
                 <EuiTitle size="s">
                   <EuiHealth textSize="inherit" color={getHealthColor(rule.executionStatus.status)}>
@@ -318,7 +318,7 @@ export function RuleDetailsPage() {
                   </EuiHealth>
                 </EuiTitle>
               </EuiFlexItem>
-              <EuiSpacer size="l" />
+              <EuiSpacer size="m" />
               <EuiFlexGroup>
                 <ItemTitleRuleSummary>
                   {i18n.translate('xpack.observability.ruleDetails.lastRun', {
@@ -330,11 +330,7 @@ export function RuleDetailsPage() {
                   itemValue={moment(rule.executionStatus.lastExecutionDate).fromNow()}
                 />
               </EuiFlexGroup>
-              <EuiSpacer size="xl" />
-
-              <EuiHorizontalRule margin="none" />
-              <EuiSpacer size="s" />
-
+              <EuiHorizontalRule margin="s" />
               <EuiFlexGroup>
                 <ItemTitleRuleSummary>
                   {i18n.translate('xpack.observability.ruleDetails.alerts', {
@@ -376,8 +372,6 @@ export function RuleDetailsPage() {
                   />
                 </EuiFlexGroup>
               )}
-              <EuiSpacer size="l" />
-              <EuiSpacer size="l" />
             </EuiFlexGroup>
           </EuiPanel>
         </EuiFlexItem>
@@ -385,7 +379,7 @@ export function RuleDetailsPage() {
         {/* Right side of Rule Summary */}
 
         <EuiFlexItem grow={3}>
-          <EuiPanel color="subdued" hasBorder={false} paddingSize={'l'}>
+          <EuiPanel color="subdued" hasBorder={false} paddingSize={'m'}>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiTitle size="s">
                 <EuiFlexItem grow={false}>
@@ -401,7 +395,7 @@ export function RuleDetailsPage() {
               )}
             </EuiFlexGroup>
 
-            <EuiSpacer size="l" />
+            <EuiSpacer size="m" />
 
             <EuiFlexGroup alignItems="baseline">
               <EuiFlexItem>
@@ -416,9 +410,9 @@ export function RuleDetailsPage() {
                   />
                 </EuiFlexGroup>
 
-                <EuiSpacer size="l" />
+                <EuiSpacer size="m" />
 
-                <EuiFlexGroup alignItems="flexStart">
+                <EuiFlexGroup alignItems="flexStart" responsive={false}>
                   <ItemTitleRuleSummary>
                     {i18n.translate('xpack.observability.ruleDetails.description', {
                       defaultMessage: 'Description',
@@ -429,7 +423,7 @@ export function RuleDetailsPage() {
                   />
                 </EuiFlexGroup>
 
-                <EuiSpacer size="l" />
+                <EuiSpacer size="m" />
 
                 <EuiFlexGroup>
                   <ItemTitleRuleSummary>
@@ -449,8 +443,6 @@ export function RuleDetailsPage() {
                     </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-
-                <EuiSpacer size="l" />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFlexGroup>
@@ -463,7 +455,7 @@ export function RuleDetailsPage() {
                   <ItemValueRuleSummary itemValue={formatInterval(rule.schedule.interval)} />
                 </EuiFlexGroup>
 
-                <EuiSpacer size="l" />
+                <EuiSpacer size="m" />
 
                 <EuiFlexGroup>
                   <ItemTitleRuleSummary>
@@ -474,7 +466,7 @@ export function RuleDetailsPage() {
                   <ItemValueRuleSummary itemValue={String(getNotifyText())} />
                 </EuiFlexGroup>
 
-                <EuiSpacer size="l" />
+                <EuiSpacer size="m" />
                 <EuiFlexGroup alignItems="baseline">
                   <ItemTitleRuleSummary>
                     {i18n.translate('xpack.observability.ruleDetails.actions', {
