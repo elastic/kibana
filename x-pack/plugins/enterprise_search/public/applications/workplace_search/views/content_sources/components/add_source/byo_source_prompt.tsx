@@ -55,7 +55,7 @@ export const BYOSourcePrompt: React.FC = () => {
             {i18n.translate(
               'xpack.enterpriseSearch.workplaceSearch.contentSource.addSource.byoSourcePrompt.description',
               {
-                defaultMessage: 'Build, modify and deploy a connector package for your use case.?',
+                defaultMessage: 'Build, modify and deploy a connector package for your use case.',
               }
             )}
           </p>
