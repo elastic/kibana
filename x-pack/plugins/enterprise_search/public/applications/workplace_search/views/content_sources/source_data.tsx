@@ -245,6 +245,11 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.GITHUB_ENTERPRISE,
     serviceType: 'github_enterprise_server',
+    categories: [
+      SOURCE_CATEGORIES.SOFTWARE,
+      SOURCE_CATEGORIES.VERSION_CONTROL,
+      SOURCE_CATEGORIES.CODE_REPOSITORY,
+    ],
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: true,
