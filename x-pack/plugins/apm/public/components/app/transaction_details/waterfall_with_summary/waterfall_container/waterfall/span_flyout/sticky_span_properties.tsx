@@ -18,11 +18,12 @@ import { getNextEnvironmentUrlParam } from '../../../../../../../../common/envir
 import { NOT_AVAILABLE_LABEL } from '../../../../../../../../common/i18n';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
-import { useApmParams } from '../../../../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../../../../hooks/use_apm_params';
 import { BackendLink } from '../../../../../../shared/backend_link';
 import { TransactionDetailLink } from '../../../../../../shared/links/apm/transaction_detail_link';
 import { ServiceLink } from '../../../../../../shared/service_link';
 import { StickyProperties } from '../../../../../../shared/sticky_properties';
+import { LatencyAggregationType } from '../../../../../../../../common/latency_aggregation_types';
 
 interface Props {
   span: Span;
@@ -30,9 +31,17 @@ interface Props {
 }
 
 export function StickySpanProperties({ span, transaction }: Props) {
-  const { query } = useApmParams('/services/{serviceName}/transactions/view');
-  const { environment, latencyAggregationType, comparisonEnabled, offset } =
-    query;
+  const { query } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/traces/explorer'
+  );
+  const { environment, comparisonEnabled, offset } = query;
+
+  const latencyAggregationType =
+    ('latencyAggregationType' in query && query.latencyAggregationType) ||
+    LatencyAggregationType.avg;
+
+  const serviceGroup = ('serviceGroup' in query && query.serviceGroup) || '';
 
   const trackEvent = useUiTracker();
 
@@ -56,6 +65,7 @@ export function StickySpanProperties({ span, transaction }: Props) {
               agentName={transaction.agent.name}
               query={{
                 ...query,
+                serviceGroup,
                 environment: nextEnvironment,
               }}
               serviceName={transaction.service.name}

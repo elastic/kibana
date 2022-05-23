@@ -17,6 +17,7 @@ export {
   defaultApmServiceEnvironment,
   apmServiceInventoryOptimizedSorting,
   apmProgressiveLoading,
+  apmTraceExplorerTab,
 } from './ui_settings_keys';
 
 export {

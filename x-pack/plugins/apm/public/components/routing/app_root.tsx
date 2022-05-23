@@ -20,6 +20,7 @@ import {
   HeaderMenuPortal,
   InspectorContextProvider,
 } from '@kbn/observability-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ScrollToTopOnPathChange } from '../app/main/scroll_to_top_on_path_change';
 import { AnomalyDetectionJobsContextProvider } from '../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import {
@@ -38,6 +39,8 @@ import { apmRouter } from './apm_route_config';
 import { TrackPageview } from './track_pageview';
 import { RedirectWithDefaultEnvironment } from '../shared/redirect_with_default_environment';
 import { RedirectWithOffset } from '../shared/redirect_with_offset';
+
+const storage = new Storage(localStorage);
 
 export function ApmAppRoot({
   apmPluginContextValue,
@@ -58,7 +61,7 @@ export function ApmAppRoot({
       role="main"
     >
       <ApmPluginContext.Provider value={apmPluginContextValue}>
-        <KibanaContextProvider services={{ ...core, ...pluginsStart }}>
+        <KibanaContextProvider services={{ ...core, ...pluginsStart, storage }}>
           <i18nCore.Context>
             <TimeRangeIdContextProvider>
               <RouterProvider history={history} router={apmRouter as any}>

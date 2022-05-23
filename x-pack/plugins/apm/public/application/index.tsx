@@ -52,6 +52,8 @@ export const renderApp = ({
     inspector: pluginsStart.inspector,
     observability: pluginsStart.observability,
     observabilityRuleTypeRegistry,
+    dataViews: pluginsStart.dataViews,
+    unifiedSearch: pluginsStart.unifiedSearch,
   };
 
   // render APM feedback link in global help menu
