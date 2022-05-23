@@ -8,7 +8,7 @@
 import React from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { MemoryRouterProps } from 'react-router';
-import { prettyDOM, render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { TestProviders } from '../../common/mock';
 import { CasesRoutes } from './routes';
@@ -46,11 +46,9 @@ const renderWithRouter = (
 
 describe('Cases routes', () => {
   describe('All cases', () => {
-    it('navigates to the all cases page', async () => {
+    it('navigates to the all cases page', () => {
       renderWithRouter();
-      await waitFor(() => {
-        expect(screen.getByText('All cases')).toBeInTheDocument();
-      });
+      expect(screen.getByText('All cases')).toBeInTheDocument();
     });
 
     // User has read only privileges
@@ -61,13 +59,6 @@ describe('Cases routes', () => {
   });
 
   describe.skip('Case view', () => {
-    it.only('renders', async () => {
-      const result = renderWithRouter(['cases/test-id']);
-      await waitFor(() => {
-        expect(screen.getByText('Case view')).toBeInTheDocument();
-      });
-      console.log(prettyDOM(result.container));
-    });
     it.each(getCaseViewPaths())('navigates to the cases view page for path: %s', (path: string) => {
       renderWithRouter([path]);
       expect(screen.getByText('Case view')).toBeInTheDocument();
