@@ -299,6 +299,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               mergeStrategy,
               completeRule,
               spaceId,
+              indicesToQuery: inputIndex,
             });
 
             for (const tuple of tuples) {

@@ -131,6 +131,7 @@ export const buildAncestors = (doc: SimpleHit): AncestorLatest[] => {
  * @param rule The rule that is generating the new alert.
  * @param spaceId The space ID in which the rule was executed.
  * @param reason Human readable string summarizing alert.
+ * @param indicesToQuery Array of index patterns searched by the rule.
  */
 export const buildAlert = (
   docs: SimpleHit[],

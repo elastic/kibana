@@ -107,6 +107,7 @@ describe('searchAfterAndBulkCreate', () => {
       mergeStrategy: 'missingFields',
       ignoreFields: [],
       spaceId: 'default',
+      indicesToQuery: inputIndexPattern,
     });
   });
 
