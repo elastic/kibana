@@ -404,7 +404,7 @@
     "remark-parse": "^8.0.3",
     "remark-stringify": "^8.0.3",
     "require-in-the-middle": "^5.1.0",
-    "reselect": "^4.0.0",
+    "reselect": "^4.1.5",
     "resize-observer-polyfill": "^1.5.1",
     "rison-node": "1.0.2",
     "rrule": "2.6.4",

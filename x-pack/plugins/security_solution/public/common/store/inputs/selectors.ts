@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
+import { createSelector } from '@reduxjs/toolkit';
 
 import type { Filter, Query } from '@kbn/es-query';
 import { State } from '../types';

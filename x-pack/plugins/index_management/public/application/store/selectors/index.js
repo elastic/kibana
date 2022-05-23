@@ -7,7 +7,7 @@
 
 import { Pager, EuiSearchBar } from '@elastic/eui';
 
-import { createSelector } from 'reselect';
+import { createSelector } from '@reduxjs/toolkit';
 import * as qs from 'query-string';
 import { indexStatusLabels } from '../../lib/index_status_labels';
 import { isHiddenIndex, isSystemIndex } from '../../lib/indices';

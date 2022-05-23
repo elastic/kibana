@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { getOr } from 'lodash/fp';
-import { createSelector } from 'reselect';
+import { createSelector } from '@reduxjs/toolkit';
 import { TGridModel } from '.';
 import { tGridDefaults, getTGridManageDefaults } from './defaults';
 

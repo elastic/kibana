@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
+import { createSelector } from '@reduxjs/toolkit';
 import type { RooState } from '../root_reducer';
 
 const getState = (appState: RooState) => appState.indexStatus;

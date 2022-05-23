@@ -7,7 +7,7 @@
  */
 
 import React, { Component } from 'react';
-import { createSelector } from 'reselect';
+import { createSelector } from '@reduxjs/toolkit';
 
 import { EuiSpacer } from '@elastic/eui';
 import { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
+import { createSelector } from '@reduxjs/toolkit';
 import { selectTimeline } from '../../../../store/timeline/selectors';
 
 export const getEqlOptions = () =>

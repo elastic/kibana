@@ -7,7 +7,7 @@
  */
 
 import React, { Component } from 'react';
-import { createSelector } from 'reselect';
+import { createSelector } from '@reduxjs/toolkit';
 import { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import { Table } from './components/table';

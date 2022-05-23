@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import { createSelector } from 'reselect';
+import { createSelector } from '@reduxjs/toolkit';
 import { State } from '../../store';
 import { InputsModelId } from '../../store/inputs/constants';
 import { Policy, InputsRange, TimeRange, GlobalQuery } from '../../store/inputs/model';
