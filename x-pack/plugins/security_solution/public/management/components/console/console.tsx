@@ -8,13 +8,14 @@
 import React, { memo, useCallback, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
+import { RightPanelContentManager } from './components/right_panel_content_manager';
 import { ConsoleHeader } from './components/console_header';
-import { HistoryOutput } from './components/history_output';
 import { CommandInput, CommandInputProps } from './components/command_input';
 import { ConsoleProps } from './types';
 import { ConsoleStateProvider } from './components/console_state';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 import { useWithManagedConsole } from './components/console_manager/console_manager';
+import { HistoryOutput } from './components/history_output';
 
 const ConsoleWindow = styled.div`
   height: 100%;
@@ -24,20 +25,40 @@ const ConsoleWindow = styled.div`
     height: 100%;
     min-height: 300px;
 
+    &-hideOverflow {
+      overflow: hidden;
+    }
+
     &-container {
       padding: ${({ theme: { eui } }) => eui.paddingSizes.l}
         ${({ theme: { eui } }) => eui.paddingSizes.l} ${({ theme: { eui } }) => eui.paddingSizes.s}
         ${({ theme: { eui } }) => eui.paddingSizes.l};
     }
 
+    &-header {
+      border-bottom: 1px solid ${({ theme: { eui } }) => eui.euiColorLightShade};
+    }
+
+    &-rightPanel {
+      width: 35%;
+      background-color: ${({ theme: { eui } }) => eui.euiColorGhost};
+      border-right: ${({ theme: { eui } }) => eui.paddingSizes.s} solid
+        ${({ theme: { eui } }) => eui.euiPageBackgroundColor};
+      border-bottom: ${({ theme: { eui } }) => eui.paddingSizes.s} solid
+        ${({ theme: { eui } }) => eui.euiPageBackgroundColor};
+    }
+
     &-historyOutput {
-      border-top: 1px solid ${({ theme: { eui } }) => eui.euiColorLightShade};
       overflow: auto;
     }
 
     &-historyViewport {
       height: 100%;
       overflow-x: hidden;
+    }
+
+    &-commandInput {
+      padding-top: ${({ theme: { eui } }) => eui.paddingSizes.xs};
     }
   }
 
@@ -103,19 +124,43 @@ export const Console = memo<ConsoleProps>(
               wrap={false}
               data-test-subj={getTestId('mainPanel')}
             >
-              <EuiFlexItem grow={false} className="layout-container">
+              <EuiFlexItem grow={false} className="layout-container layout-header">
                 <ConsoleHeader />
               </EuiFlexItem>
-              <EuiFlexItem grow={true} className="layout-historyOutput">
-                <div
-                  className="layout-container layout-historyViewport eui-scrollBar eui-yScroll"
-                  ref={scrollingViewport}
+
+              <EuiFlexItem grow className="layout-hideOverflow">
+                <EuiFlexGroup
+                  wrap={false}
+                  gutterSize="none"
+                  responsive={false}
+                  className="layout-hideOverflow"
                 >
-                  <HistoryOutput />
-                </div>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} className="layout-container">
-                <CommandInput prompt={prompt} focusRef={inputFocusRef} />
+                  <EuiFlexItem className="eui-fullHeight layout-hideOverflow">
+                    <EuiFlexGroup
+                      direction="column"
+                      gutterSize="none"
+                      responsive={false}
+                      wrap={false}
+                      className="layout-hideOverflow"
+                    >
+                      <EuiFlexItem grow className="layout-historyOutput">
+                        <div
+                          className="layout-container layout-historyViewport eui-scrollBar eui-yScroll"
+                          ref={scrollingViewport}
+                        >
+                          <HistoryOutput />
+                        </div>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false} className="layout-container layout-commandInput">
+                        <CommandInput prompt={prompt} focusRef={inputFocusRef} />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+
+                  <EuiFlexItem grow={false} className="layout-rightPanel eui-scrollBar eui-yScroll">
+                    <RightPanelContentManager />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
           </ConsoleWindow>

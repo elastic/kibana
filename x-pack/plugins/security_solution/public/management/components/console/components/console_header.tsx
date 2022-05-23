@@ -5,18 +5,23 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { memo, useCallback } from 'react';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ConsoleProps } from '..';
 
 export type ConsoleHeaderProps = Pick<ConsoleProps, 'TitleComponent'>;
 
 export const ConsoleHeader = memo<ConsoleHeaderProps>(({ TitleComponent }) => {
+  const helpOnCLickHandler = useCallback(() => {
+    //
+  }, []);
+
   return (
     <EuiFlexGroup gutterSize="none">
       <EuiFlexItem grow>{TitleComponent ? <TitleComponent /> : ''}</EuiFlexItem>
-      {/* TODO: Implement actions (probably via OLM issue #3829) */}
-      <EuiFlexItem grow={false}>{''}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon onClick={helpOnCLickHandler} iconType={'help'} />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 });
