@@ -76,6 +76,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteAnnotation).toBe(true);
       expect(capabilities.canUseMlAlerts).toBe(true);
       expect(capabilities.canGetTrainedModels).toBe(true);
+      expect(capabilities.canTestTrainedModels).toBe(true);
 
       expect(capabilities.canCreateJob).toBe(false);
       expect(capabilities.canDeleteJob).toBe(false);
@@ -102,7 +103,6 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateTrainedModels).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
-      expect(capabilities.canTestTrainedModels).toBe(false);
     });
 
     test('full capabilities', async () => {
@@ -129,6 +129,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteAnnotation).toBe(true);
       expect(capabilities.canUseMlAlerts).toBe(true);
       expect(capabilities.canGetTrainedModels).toBe(true);
+      expect(capabilities.canTestTrainedModels).toBe(true);
 
       expect(capabilities.canCreateJob).toBe(true);
       expect(capabilities.canDeleteJob).toBe(true);
@@ -155,7 +156,6 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateTrainedModels).toBe(true);
       expect(capabilities.canDeleteTrainedModels).toBe(true);
       expect(capabilities.canStartStopTrainedModels).toBe(true);
-      expect(capabilities.canTestTrainedModels).toBe(true);
     });
 
     test('upgrade in progress with full capabilities', async () => {
@@ -182,6 +182,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteAnnotation).toBe(false);
       expect(capabilities.canUseMlAlerts).toBe(false);
       expect(capabilities.canGetTrainedModels).toBe(true);
+      expect(capabilities.canTestTrainedModels).toBe(true);
 
       expect(capabilities.canCreateJob).toBe(false);
       expect(capabilities.canDeleteJob).toBe(false);
@@ -208,7 +209,6 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateTrainedModels).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
-      expect(capabilities.canTestTrainedModels).toBe(false);
     });
 
     test('upgrade in progress with partial capabilities', async () => {
@@ -235,6 +235,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteAnnotation).toBe(false);
       expect(capabilities.canUseMlAlerts).toBe(false);
       expect(capabilities.canGetTrainedModels).toBe(true);
+      expect(capabilities.canTestTrainedModels).toBe(true);
 
       expect(capabilities.canCreateJob).toBe(false);
       expect(capabilities.canDeleteJob).toBe(false);
@@ -261,7 +262,6 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateTrainedModels).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
-      expect(capabilities.canTestTrainedModels).toBe(false);
     });
 
     test('full capabilities, ml disabled in space', async () => {
@@ -288,6 +288,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteAnnotation).toBe(false);
       expect(capabilities.canUseMlAlerts).toBe(false);
       expect(capabilities.canGetTrainedModels).toBe(false);
+      expect(capabilities.canTestTrainedModels).toBe(false);
 
       expect(capabilities.canCreateJob).toBe(false);
       expect(capabilities.canDeleteJob).toBe(false);
@@ -314,7 +315,6 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateTrainedModels).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
-      expect(capabilities.canTestTrainedModels).toBe(false);
     });
   });
 
@@ -343,6 +343,7 @@ describe('check_capabilities', () => {
     expect(capabilities.canDeleteAnnotation).toBe(false);
     expect(capabilities.canUseMlAlerts).toBe(false);
     expect(capabilities.canGetTrainedModels).toBe(false);
+    expect(capabilities.canTestTrainedModels).toBe(false);
 
     expect(capabilities.canCreateJob).toBe(false);
     expect(capabilities.canDeleteJob).toBe(false);
@@ -369,6 +370,5 @@ describe('check_capabilities', () => {
     expect(capabilities.canCreateTrainedModels).toBe(false);
     expect(capabilities.canDeleteTrainedModels).toBe(false);
     expect(capabilities.canStartStopTrainedModels).toBe(false);
-    expect(capabilities.canTestTrainedModels).toBe(false);
   });
 });

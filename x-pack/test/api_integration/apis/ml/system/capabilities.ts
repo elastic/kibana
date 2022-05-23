@@ -87,10 +87,10 @@ export default ({ getService }: FtrProviderContext) => {
           canDeleteAnnotation: true,
           canViewMlNodes: false,
           canGetTrainedModels: true,
+          canTestTrainedModels: true,
           canCreateTrainedModels: false,
           canDeleteTrainedModels: false,
           canStartStopTrainedModels: false,
-          canTestTrainedModels: false,
         });
       });
 
@@ -131,10 +131,10 @@ export default ({ getService }: FtrProviderContext) => {
           canDeleteAnnotation: true,
           canViewMlNodes: true,
           canGetTrainedModels: true,
+          canTestTrainedModels: true,
           canCreateTrainedModels: true,
           canDeleteTrainedModels: true,
           canStartStopTrainedModels: true,
-          canTestTrainedModels: true,
         });
       });
     });
