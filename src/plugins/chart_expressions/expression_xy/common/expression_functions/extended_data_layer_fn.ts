@@ -31,7 +31,7 @@ export const extendedDataLayerFn: ExtendedDataLayerFn['fn'] = async (data, args,
   validateShowPointsForChartType(args.showPoints, args.seriesType);
   validatePointsRadiusForChartType(args.pointsRadius, args.seriesType);
   validateLinesVisibilityForChartType(args.showLines, args.seriesType);
-  
+
   const normalizedTable = normalizeTable(table, accessors.xAccessor);
 
   const showLines = getShowLines(args);
