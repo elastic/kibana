@@ -45,6 +45,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'UPGRADE',
             action_id: 'action1',
             agents: ['agent1', 'agent2', 'agent3'],
+            start_time: moment().toISOString(),
             expiration: moment().add(1, 'day').toISOString(),
           },
         });
@@ -57,6 +58,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'UPGRADE',
             action_id: 'action2',
             agents: ['agent1', 'agent2', 'agent3'],
+            start_time: moment().toISOString(),
             expiration: moment().add(1, 'day').toISOString(),
           },
         });
@@ -68,6 +70,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'UPGRADE',
             action_id: 'action2',
             agents: ['agent4', 'agent5'],
+            start_time: moment().toISOString(),
             expiration: moment().add(1, 'day').toISOString(),
           },
         });
@@ -79,6 +82,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'UPGRADE',
             action_id: 'action3',
             agents: ['agent1', 'agent2'],
+            start_time: moment().toISOString(),
             expiration: moment().add(1, 'day').toISOString(),
           },
         });
@@ -129,6 +133,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'UPGRADE',
             action_id: 'action5',
             agents: ['agent1', 'agent2', 'agent3'],
+            start_time: moment().toISOString(),
             expiration: moment().add(1, 'day').toISOString(),
           },
         });

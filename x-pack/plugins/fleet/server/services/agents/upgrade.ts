@@ -84,6 +84,7 @@ export async function sendUpgradeAgentsActions(
     sourceUri?: string | undefined;
     force?: boolean;
     upgradeDurationSeconds?: number;
+    startTime?: string;
   }
 ) {
   // Full set of agents
@@ -166,9 +167,11 @@ export async function sendUpgradeAgentsActions(
 
   const rollingUpgradeOptions = options?.upgradeDurationSeconds
     ? {
-        start_time: now,
+        start_time: options.startTime ?? now,
         minimum_execution_duration: MINIMUM_EXECUTION_DURATION_SECONDS,
-        expiration: moment().add(options?.upgradeDurationSeconds, 'seconds').toISOString(),
+        expiration: moment(options.startTime ?? now)
+          .add(options?.upgradeDurationSeconds, 'seconds')
+          .toISOString(),
       }
     : {};
 
@@ -312,6 +315,11 @@ async function _getUpgradeActions(esClient: ElasticsearchClient, now = new Date(
             },
           },
           {
+            exists: {
+              field: 'start_time',
+            },
+          },
+          {
             range: {
               expiration: { gte: now },
             },
@@ -334,6 +342,7 @@ async function _getUpgradeActions(esClient: ElasticsearchClient, now = new Date(
           complete: false,
           nbAgentsAck: 0,
           version: hit._source.data?.version as string,
+          startTime: hit._source.start_time as string,
         };
       }
 

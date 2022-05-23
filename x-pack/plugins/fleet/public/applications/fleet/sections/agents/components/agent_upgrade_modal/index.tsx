@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 import {
   EuiConfirmModal,
   EuiComboBox,
@@ -17,6 +18,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiCallOut,
+  EuiDatePicker,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -36,6 +38,7 @@ interface Props {
   onClose: () => void;
   agents: Agent[] | string;
   agentCount: number;
+  isScheduled?: boolean;
 }
 
 const getVersion = (version: Array<EuiComboBoxOptionOption<string>>) => version[0].value as string;
@@ -44,6 +47,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
   onClose,
   agents,
   agentCount,
+  isScheduled = false,
 }) => {
   const { notifications } = useStartServices();
   const kibanaVersion = useKibanaVersion();
@@ -61,7 +65,8 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
       value: option,
     })
   );
-  const maintainanceWindows = isSmallBatch ? [0].concat(MAINTAINANCE_VALUES) : MAINTAINANCE_VALUES;
+  const maintainanceWindows =
+    isSmallBatch && !isScheduled ? [0].concat(MAINTAINANCE_VALUES) : MAINTAINANCE_VALUES;
   const maintainanceOptions: Array<EuiComboBoxOptionOption<number>> = maintainanceWindows.map(
     (option) => ({
       label:
@@ -81,14 +86,18 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
     maintainanceOptions[0],
   ]);
 
+  const initialDatetime = useMemo(() => moment(), []);
+  const [startDatetime, setStartDatetime] = useState<moment.Moment>(initialDatetime);
+
   async function onSubmit() {
     const version = getVersion(selectedVersion);
-    const rolloutOptions =
-      selectedMantainanceWindow.length > 0 && (selectedMantainanceWindow[0]?.value as number) > 0
-        ? {
-            rollout_duration_seconds: selectedMantainanceWindow[0].value,
-          }
-        : {};
+    const rolloutOptions = {
+      rollout_duration_seconds:
+        selectedMantainanceWindow.length > 0 && (selectedMantainanceWindow[0]?.value as number) > 0
+          ? selectedMantainanceWindow[0].value
+          : undefined,
+      start_time: startDatetime.toISOString(),
+    };
 
     try {
       setIsSubmitting(true);
@@ -177,12 +186,18 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
           {isSingleAgent ? (
             <FormattedMessage
               id="xpack.fleet.upgradeAgents.upgradeSingleTitle"
-              defaultMessage="Upgrade agent to latest version"
+              defaultMessage="Upgrade agent"
+            />
+          ) : isScheduled ? (
+            <FormattedMessage
+              id="xpack.fleet.upgradeAgents.scheduleUpgradeMultipleTitle"
+              defaultMessage="Schedule upgrade for {count, plural, one {agent} other {{count} agents} =true {all selected agents}}"
+              values={{ count: isAllAgents || agentCount }}
             />
           ) : (
             <FormattedMessage
               id="xpack.fleet.upgradeAgents.upgradeMultipleTitle"
-              defaultMessage="Upgrade {count, plural, one {agent} other {{count} agents} =true {all selected agents}} to latest version"
+              defaultMessage="Upgrade {count, plural, one {agent} other {{count} agents} =true {all selected agents}}"
               values={{ count: isAllAgents || agentCount }}
             />
           )}
@@ -202,6 +217,11 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
           <FormattedMessage
             id="xpack.fleet.upgradeAgents.confirmSingleButtonLabel"
             defaultMessage="Upgrade agent"
+          />
+        ) : isScheduled ? (
+          <FormattedMessage
+            id="xpack.fleet.upgradeAgents.confirmScheduleMultipleButtonLabel"
+            defaultMessage="Schedule"
           />
         ) : (
           <FormattedMessage
@@ -248,6 +268,27 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
           }}
         />
       </EuiFormRow>
+      {isScheduled && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFormRow
+            label={i18n.translate('xpack.fleet.upgradeAgents.startTimeLabel', {
+              defaultMessage: 'Scheduled date and time',
+            })}
+            fullWidth
+          >
+            <EuiDatePicker
+              data-test-subj="agentUpgradeModal.startTimeDatePicker"
+              fullWidth
+              required
+              showTimeSelect
+              selected={startDatetime}
+              minDate={initialDatetime}
+              onChange={(date) => setStartDatetime(date as moment.Moment)}
+            />
+          </EuiFormRow>
+        </>
+      )}
       <EuiSpacer size="m" />
       {!isSingleAgent ? (
         <EuiFormRow
