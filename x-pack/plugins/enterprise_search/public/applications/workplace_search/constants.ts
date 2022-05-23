@@ -366,6 +366,12 @@ export const SOURCE_OBJ_TYPES = {
 };
 
 export const SOURCE_CATEGORIES = {
+  ACCOUNT_MANAGEMENT: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.accountManagement',
+    {
+      defaultMessage: 'Account management',
+    }
+  ),
   ATLASSIAN: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.atlassian', {
     defaultMessage: 'Atlassian',
   }),
@@ -388,6 +394,15 @@ export const SOURCE_CATEGORIES = {
     'xpack.enterpriseSearch.workplaceSearch.sources.categories.communication',
     {
       defaultMessage: 'Communication',
+    }
+  ),
+  CRM: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.crm', {
+    defaultMessage: 'CRM',
+  }),
+  CUSTOMER_RELATIONSHIP_MANAGEMENT: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.customerRelationshipManagement',
+    {
+      defaultMessage: 'Customer relationship management',
     }
   ),
   EMAIL: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.email', {
