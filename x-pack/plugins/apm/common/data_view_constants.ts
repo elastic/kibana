@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export const APM_STATIC_INDEX_PATTERN_ID = 'apm_static_index_pattern_id';
+// value of const needs to be backwards compatible
+export const APM_STATIC_DATA_VIEW_ID = 'apm_static_index_pattern_id';

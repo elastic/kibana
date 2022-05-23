@@ -13,7 +13,7 @@ import {
 } from '@kbn/home-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { APMConfig } from '..';
-import { APM_STATIC_INDEX_PATTERN_ID } from '../../common/index_pattern_constants';
+import { APM_STATIC_DATA_VIEW_ID } from '../../common/data_view_constants';
 import { getApmDataViewAttributes } from '../routes/data_view/get_apm_data_view_attributes';
 import { getApmDataViewTitle } from '../routes/data_view/get_apm_data_view_title';
 import { ApmIndicesConfig } from '../routes/settings/apm_indices/get_apm_indices';
@@ -42,7 +42,7 @@ export const tutorialProvider =
     const dataViewTitle = getApmDataViewTitle(apmIndices);
     const savedObjects = [
       {
-        id: APM_STATIC_INDEX_PATTERN_ID,
+        id: APM_STATIC_DATA_VIEW_ID,
         attributes: getApmDataViewAttributes(dataViewTitle),
         type: 'index-pattern',
       },

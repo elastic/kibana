@@ -12,7 +12,6 @@ import {
   EuiSelect,
   EuiSelectOption,
 } from '@elastic/eui';
-import { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import React from 'react';
@@ -24,7 +23,6 @@ import { useStaticDataView } from '../../../../hooks/use_static_data_view';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { EQLCodeEditorSuggestionType } from '../../../shared/eql_code_editor/constants';
 import { LazilyLoadedEQLCodeEditor } from '../../../shared/eql_code_editor/lazily_loaded_code_editor';
-import { maybe } from '../../../../../common/utils/maybe';
 
 interface Props {
   query: TraceSearchQuery;
@@ -61,12 +59,6 @@ export function TraceSearchBox({
   const { unifiedSearch } = useApmPluginContext();
   const { value: dataView } = useStaticDataView();
 
-  const indexPatterns: DataView[] = [];
-
-  if (dataView) {
-    indexPatterns.push(dataView);
-  }
-
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
@@ -97,13 +89,9 @@ export function TraceSearchBox({
                           );
 
                         case EQLCodeEditorSuggestionType.Value:
-                          const indexPattern = maybe(indexPatterns[0]);
+                          const field = dataView?.getFieldByName(request.field);
 
-                          const field = indexPattern?.getFieldByName(
-                            request.field
-                          );
-
-                          if (!indexPattern || !field) {
+                          if (!dataView || !field) {
                             return [];
                           }
 
@@ -111,7 +99,7 @@ export function TraceSearchBox({
                             await unifiedSearch.autocomplete.getValueSuggestions(
                               {
                                 field,
-                                indexPattern,
+                                indexPattern: dataView,
                                 query: request.value,
                                 useTimeRange: true,
                                 method: 'terms_agg',
@@ -128,7 +116,7 @@ export function TraceSearchBox({
                   <form>
                     <QueryStringInput
                       disableLanguageSwitcher
-                      indexPatterns={indexPatterns}
+                      indexPatterns={dataView ? [dataView] : []}
                       query={{
                         query: query.query,
                         language: 'kuery',

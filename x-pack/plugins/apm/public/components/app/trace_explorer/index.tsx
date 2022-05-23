@@ -15,7 +15,7 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { ApmDatePicker } from '../../shared/date_picker/apm_date_picker';
-import { fromQuery, toQuery } from '../../shared/links/url_helpers';
+import { fromQuery, toQuery, push } from '../../shared/links/url_helpers';
 import { useWaterfallFetcher } from '../transaction_details/use_waterfall_fetcher';
 import { WaterfallWithSummary } from '../transaction_details/waterfall_with_summary';
 import { TraceSearchBox } from './trace_search_box';
@@ -130,23 +130,19 @@ export function TraceExplorer() {
           environment={environment}
           isLoading={isLoading}
           onSampleClick={(sample) => {
-            history.push({
-              ...history.location,
-              search: fromQuery({
-                ...toQuery(history.location.search),
+            push(history, {
+              query: {
                 traceId: sample.traceId,
                 transactionId: sample.transactionId,
                 waterfallItemId: '',
-              }),
+              },
             });
           }}
           onTabClick={(nextDetailTab) => {
-            history.push({
-              ...history.location,
-              search: fromQuery({
-                ...toQuery(history.location.search),
+            push(history, {
+              query: {
                 detailTab: nextDetailTab,
-              }),
+              },
             });
           }}
           traceSamples={traceSamplesData?.samples ?? []}

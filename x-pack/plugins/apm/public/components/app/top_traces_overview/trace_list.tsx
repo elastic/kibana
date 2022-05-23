@@ -16,6 +16,7 @@ import {
   asTransactionRate,
 } from '../../../../common/utils/formatters';
 import { useApmParams } from '../../../hooks/use_apm_params';
+import { FetcherResult, FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { truncate } from '../../../utils/style';
 import { EmptyMessage } from '../../shared/empty_message';
@@ -26,18 +27,16 @@ import { ServiceLink } from '../../shared/service_link';
 import { TruncateWithTooltip } from '../../shared/truncate_with_tooltip';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 
-type TraceGroup = APIReturnType<'GET /internal/apm/traces'>['items'][0];
-
 const StyledTransactionLink = euiStyled(TransactionDetailLink)`
   font-size: ${({ theme }) => theme.eui.euiFontSizeS};
   ${truncate('100%')};
 `;
 
 interface Props {
-  items: TraceGroup[];
-  isLoading: boolean;
-  isFailure: boolean;
+  response: FetcherResult<APIReturnType<'GET /internal/apm/traces'>>;
 }
+
+type TraceGroup = Required<Props['response']>['data']['items'][number];
 
 export function getTraceListColumns({
   query,
@@ -153,7 +152,9 @@ const noItemsMessage = (
   />
 );
 
-export function TraceList({ items = [], isLoading, isFailure }: Props) {
+export function TraceList({ response }: Props) {
+  const { data: { items } = { items: [] }, status } = response;
+
   const { query } = useApmParams('/traces');
 
   const traceListColumns = useMemo(
@@ -162,8 +163,8 @@ export function TraceList({ items = [], isLoading, isFailure }: Props) {
   );
   return (
     <ManagedTable
-      isLoading={isLoading}
-      error={isFailure}
+      isLoading={status === FETCH_STATUS.LOADING}
+      error={status === FETCH_STATUS.FAILURE}
       columns={traceListColumns}
       items={items}
       initialSortField="impact"
