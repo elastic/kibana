@@ -128,7 +128,7 @@ export const buildEqlOptionsDescription = (eqlOptions: EqlOptionsSelected): List
       ...items,
       {
         title: <>{i18n.EQL_EVENT_CATEGORY_FIELD_LABEL}</>,
-        description: <Query>{eqlOptions.eventCategoryField}</Query>,
+        description: <>{eqlOptions.eventCategoryField}</>,
       },
     ];
   }
