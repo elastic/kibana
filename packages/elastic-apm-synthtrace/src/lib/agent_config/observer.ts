@@ -6,15 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { Serializable } from '../serializable';
-import { Fields } from '../entity';
+import { AgentConfigFields } from './agent_config_fields';
+import { AgentConfig } from './agent_config';
+import { Entity } from '../entity';
 
-export class Metricset<TFields extends Fields> extends Serializable<TFields> {
-  constructor(fields: TFields) {
-    super({
-      'processor.event': 'metric',
-      'processor.name': 'metric',
-      ...fields,
-    });
+export class Observer extends Entity<AgentConfigFields> {
+  agentConfig() {
+    return new AgentConfig();
   }
+}
+
+export function observer() {
+  return new Observer({});
 }

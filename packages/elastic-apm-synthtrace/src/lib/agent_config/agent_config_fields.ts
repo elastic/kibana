@@ -6,15 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { Serializable } from '../serializable';
-import { Fields } from '../entity';
+import { ApmFields } from '../apm/apm_fields';
 
-export class Metricset<TFields extends Fields> extends Serializable<TFields> {
-  constructor(fields: TFields) {
-    super({
-      'processor.event': 'metric',
-      'processor.name': 'metric',
-      ...fields,
-    });
-  }
-}
+export type AgentConfigFields = Pick<
+  ApmFields,
+  | '@timestamp'
+  | 'processor.event'
+  | 'processor.name'
+  | 'metricset.name'
+  | 'observer'
+  | 'ecs.version'
+  | 'event.ingested'
+> &
+  Partial<{
+    'labels.etag': string;
+    agent_config_applied: number;
+    'event.agent_id_status': string;
+  }>;
