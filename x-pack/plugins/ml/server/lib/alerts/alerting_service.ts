@@ -6,10 +6,10 @@
  */
 
 import Boom from '@hapi/boom';
+import { i18n } from '@kbn/i18n';
 import rison from 'rison-node';
 import { Duration } from 'moment/moment';
 import { memoize } from 'lodash';
-import type { MlDatafeed } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   FIELD_FORMAT_IDS,
   IFieldFormat,
@@ -50,6 +50,20 @@ type AggResultsResponse = { key?: number } & {
     };
   };
 };
+
+interface AnomalyESQueryParams {
+  resultType: AnomalyResultType;
+  /** Appropriate score field for requested result type. */
+  anomalyScoreField: string;
+  anomalyScoreThreshold: number;
+  jobIds: string[];
+  topNBuckets: number;
+  maxBucketInSeconds: number;
+  lookBackTimeInterval: string;
+  includeInterimResults: boolean;
+  /** Source index from the datafeed. Required for retrieving field types for formatting results. */
+  indexPattern: string;
+}
 
 const TIME_RANGE_PADDING = 10;
 
@@ -158,11 +172,11 @@ export function alertingServiceProvider(
    * Provides formatters based on the data view of the datafeed index pattern
    * and set of default formatters for fallback.
    */
-  const getFormatters = memoize(async (datafeed: MlDatafeed) => {
+  const getFormatters = memoize(async (indexPattern: string) => {
     const fieldFormatsRegistry = await getFieldsFormatRegistry();
     const numberFormatter = fieldFormatsRegistry.deserialize({ id: FIELD_FORMAT_IDS.NUMBER });
 
-    const fieldFormatMap = await getFieldsFormatMap(datafeed.indices[0]);
+    const fieldFormatMap = await getFieldsFormatMap(indexPattern);
 
     const fieldFormatters = fieldFormatMap
       ? Object.entries(fieldFormatMap).reduce((acc, [fieldName, config]) => {
@@ -392,8 +406,10 @@ export function alertingServiceProvider(
       return {
         count: aggTypeResults.doc_count,
         key: v.key,
-        message:
-          'Alerts are raised based on real-time scores. Remember that scores may be adjusted over time as data continues to be analyzed.',
+        message: i18n.translate('xpack.ml.alertTypes.anomalyDetectionAlertingRule.alertMessage', {
+          defaultMessage:
+            'Alerts are raised based on real-time scores. Remember that scores may be adjusted over time as data continues to be analyzed.',
+        }),
         alertInstanceKey,
         jobIds: [...new Set(requestedAnomalies.map((h) => h._source.job_id))],
         isInterim: requestedAnomalies.some((h) => h._source.is_interim),
@@ -542,7 +558,7 @@ export function alertingServiceProvider(
 
     const resultsLabel = getAggResultsLabel(params.resultType);
 
-    const fieldsFormatters = await getFormatters(datafeeds![0]!);
+    const fieldsFormatters = await getFormatters(datafeeds![0]!.indices[0]);
 
     const formatter = getResultsFormatter(
       params.resultType,
@@ -574,14 +590,14 @@ export function alertingServiceProvider(
   };
 
   /**
-   * Fetches the most recent anomaly according the top N buckets within the lookback interval
-   * that satisfies a rule criteria.
+   * Gets ES query params for fetching anomalies.
    *
-   * @param params - Alert params
+   * @param params {MlAnomalyDetectionAlertParams}
+   * @return Params required for performing ES query for anomalies.
    */
-  const fetchResult = async (
+  const getQueryParams = async (
     params: MlAnomalyDetectionAlertParams
-  ): Promise<AlertExecutionResult | undefined> => {
+  ): Promise<AnomalyESQueryParams | void> => {
     const jobAndGroupIds = [
       ...(params.jobSelection.jobIds ?? []),
       ...(params.jobSelection.groupIds ?? []),
@@ -613,6 +629,40 @@ export function alertingServiceProvider(
 
     const topNBuckets: number = params.topNBuckets ?? getTopNBuckets(jobsResponse[0]);
 
+    return {
+      jobIds,
+      topNBuckets,
+      maxBucketInSeconds,
+      lookBackTimeInterval,
+      anomalyScoreField: resultTypeScoreMapping[params.resultType],
+      includeInterimResults: params.includeInterim,
+      resultType: params.resultType,
+      indexPattern: datafeeds![0]!.indices[0],
+      anomalyScoreThreshold: params.severity,
+    };
+  };
+
+  /**
+   * Fetches the most recent anomaly according the top N buckets within the lookback interval
+   * that satisfies a rule criteria.
+   *
+   * @param params - Alert params
+   */
+  const fetchResult = async (
+    params: AnomalyESQueryParams
+  ): Promise<AlertExecutionResult | undefined> => {
+    const {
+      resultType,
+      jobIds,
+      maxBucketInSeconds,
+      topNBuckets,
+      lookBackTimeInterval,
+      anomalyScoreField,
+      includeInterimResults,
+      anomalyScoreThreshold,
+      indexPattern,
+    } = params;
+
     const requestBody = {
       size: 0,
       query: {
@@ -633,7 +683,7 @@ export function alertingServiceProvider(
                 },
               },
             },
-            ...(params.includeInterim
+            ...(includeInterimResults
               ? []
               : [
                   {
@@ -655,10 +705,10 @@ export function alertingServiceProvider(
           aggs: {
             max_score: {
               max: {
-                field: resultTypeScoreMapping[params.resultType],
+                field: anomalyScoreField,
               },
             },
-            ...getResultTypeAggRequest(params.resultType, params.severity),
+            ...getResultTypeAggRequest(resultType, anomalyScoreThreshold),
             truncate: {
               bucket_sort: {
                 size: topNBuckets,
@@ -701,7 +751,7 @@ export function alertingServiceProvider(
       prev.max_score.value > current.max_score.value ? prev : current
     );
 
-    const formatters = await getFormatters(datafeeds![0]);
+    const formatters = await getFormatters(indexPattern);
 
     return getResultsFormatter(params.resultType, false, formatters)(topResult);
   };
@@ -714,24 +764,56 @@ export function alertingServiceProvider(
      */
     execute: async (
       params: MlAnomalyDetectionAlertParams
-    ): Promise<{ context: AnomalyDetectionAlertContext; name: string } | undefined> => {
-      const result = await fetchResult(params);
+    ): Promise<
+      { context: AnomalyDetectionAlertContext; name: string; isHealthy: boolean } | undefined
+    > => {
+      const queryParams = await getQueryParams(params);
 
-      if (!result) return;
+      if (!queryParams) {
+        return;
+      }
 
-      const anomalyExplorerUrl = buildExplorerUrl(
-        result.jobIds,
-        { from: result.bucketRange.start, to: result.bucketRange.end },
-        params.resultType,
-        result
-      );
+      const result = await fetchResult(queryParams);
 
-      const executionResult = {
-        ...result,
-        anomalyExplorerUrl,
+      if (result) {
+        const anomalyExplorerUrl = buildExplorerUrl(
+          result.jobIds,
+          { from: result.bucketRange.start, to: result.bucketRange.end },
+          params.resultType,
+          result
+        );
+
+        const executionResult = {
+          ...result,
+          anomalyExplorerUrl,
+        };
+
+        return { context: executionResult, name: result.alertInstanceKey, isHealthy: false };
+      }
+
+      return {
+        name: '',
+        isHealthy: true,
+        context: {
+          anomalyExplorerUrl: buildExplorerUrl(
+            queryParams.jobIds,
+            {
+              from: queryParams.lookBackTimeInterval,
+              to: 'now',
+            },
+            queryParams.resultType
+          ),
+          jobIds: queryParams.jobIds,
+          message: i18n.translate(
+            'xpack.ml.alertTypes.anomalyDetectionAlertingRule.recoveredMessage',
+            {
+              defaultMessage:
+                'No anomalies have been found that exceeded the [{severity}] threshold.',
+              values: { severity: queryParams.anomalyScoreThreshold },
+            }
+          ),
+        } as AnomalyDetectionAlertContext,
       };
-
-      return { context: executionResult, name: result.alertInstanceKey };
     },
     /**
      * Checks how often the alert condition will fire an alert instance

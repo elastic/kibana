@@ -13,7 +13,6 @@ import {
   AlertInstanceState,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
-import { buildExplorerUrl } from './alerting_service';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
@@ -146,7 +145,7 @@ export function registerAnomalyDetectionAlertType({
       );
       const executionResult = await execute(params);
 
-      if (executionResult) {
+      if (executionResult && !executionResult.isHealthy) {
         const alertInstanceName = executionResult.name;
         const alertInstance = services.alertFactory.create(alertInstanceName);
         alertInstance.scheduleActions(ANOMALY_SCORE_MATCH_GROUP_ID, executionResult.context);
@@ -155,29 +154,9 @@ export function registerAnomalyDetectionAlertType({
       // Set context for recovered alerts
       const { getRecoveredAlerts } = services.alertFactory.done();
       for (const recoveredAlert of getRecoveredAlerts()) {
-        const recoveredAlertId = recoveredAlert.getId();
-
-        const jobIds = [recoveredAlertId];
-
-        recoveredAlert.setContext({
-          jobIds,
-          anomalyExplorerUrl: buildExplorerUrl(
-            jobIds,
-            {
-              from: previousStartedAt!.toISOString(),
-              to: 'now',
-            },
-            params.resultType
-          ),
-          message: i18n.translate(
-            'xpack.ml.alertTypes.anomalyDetectionAlertingRule.recoveredMessage',
-            {
-              defaultMessage:
-                'No anomalies have been found that exceeded the [{severity}] threshold.',
-              values: { severity: params.severity },
-            }
-          ),
-        } as AnomalyDetectionAlertContext);
+        if (!!executionResult?.isHealthy) {
+          recoveredAlert.setContext(executionResult.context);
+        }
       }
     },
   });
