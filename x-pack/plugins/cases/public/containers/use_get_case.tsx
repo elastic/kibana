@@ -35,8 +35,4 @@ export const useFetchCase = (caseId: string) => {
   );
 };
 
-// dummy types to pass typescript check
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const useGetCase = (_params: any): any => {};
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type UseGetCase = any;
+export type UseFetchCase = ReturnType<typeof useFetchCase>;
