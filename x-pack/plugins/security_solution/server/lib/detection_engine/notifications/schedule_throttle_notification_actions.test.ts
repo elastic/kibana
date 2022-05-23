@@ -59,6 +59,9 @@ describe('schedule_throttle_notification_actions', () => {
       note: '# sample markdown',
       version: 1,
       exceptionsList: [],
+      relatedIntegrations: [],
+      requiredFields: [],
+      setup: '',
     };
   });
 
