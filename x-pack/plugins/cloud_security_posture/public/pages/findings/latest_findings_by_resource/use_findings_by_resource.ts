@@ -186,9 +186,9 @@ const createFindingsByResource = (resource: FindingsAggBucket): FindingsByResour
 
   return {
     resource_id: resource.key,
-    resource_name: resource.name.buckets[0].key,
-    resource_subtype: resource.subtype.buckets[0].key,
-    cluster_id: resource.cluster_id.buckets[0].key,
+    resource_name: resource.name.buckets[0]?.key,
+    resource_subtype: resource.subtype.buckets[0]?.key,
+    cluster_id: resource.cluster_id.buckets[0]?.key,
     cis_sections: resource.cis_sections.buckets.map((v) => v.key),
     failed_findings: {
       count: resource.failed_findings.doc_count,
