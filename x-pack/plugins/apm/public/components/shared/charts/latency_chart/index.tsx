@@ -69,7 +69,7 @@ export function LatencyChart({ height, kuery }: Props) {
   const preferredAnomalyTimeseries = usePreferredServiceAnomalyTimeseries(
     ApmMlDetectorType.txLatency
   );
-  const previousPeriodColor = previousPeriod?.color as string;
+  const anomalyTimeseriesColor = currentPeriod?.color as string;
 
   const timeseries = [
     currentPeriod,
@@ -137,7 +137,7 @@ export function LatencyChart({ height, kuery }: Props) {
             preferredAnomalyTimeseries
               ? {
                   ...preferredAnomalyTimeseries,
-                  color: previousPeriodColor,
+                  color: anomalyTimeseriesColor,
                 }
               : undefined
           }

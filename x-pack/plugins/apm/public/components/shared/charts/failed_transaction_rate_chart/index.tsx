@@ -177,7 +177,7 @@ export function FailedTransactionRateChart({
           preferredAnomalyTimeseries
             ? {
                 ...preferredAnomalyTimeseries,
-                color: previousPeriodColor,
+                color: currentPeriodColor,
               }
             : undefined
         }

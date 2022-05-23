@@ -164,7 +164,7 @@ export function ServiceOverviewThroughputChart({
           preferredAnomalyTimeseries
             ? {
                 ...preferredAnomalyTimeseries,
-                color: previousPeriodColor,
+                color: currentPeriodColor,
               }
             : undefined
         }
