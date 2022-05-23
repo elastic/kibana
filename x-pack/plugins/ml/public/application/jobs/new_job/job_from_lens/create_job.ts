@@ -39,7 +39,7 @@ import {
   hasIncompatibleProperties,
   hasSourceField,
   isTermsField,
-  isSupportedSplitFieldType,
+  isCompatibleSplitFieldType,
   getMlFunction,
   getJobsItemsFromEmbeddable,
 } from './utils';
@@ -288,7 +288,7 @@ async function extractFields(
     );
   }
 
-  if (splitField !== null && isSupportedSplitFieldType(splitField) === false) {
+  if (splitField !== null && isCompatibleSplitFieldType(splitField) === false) {
     throw Error(
       i18n.translate('xpack.ml.newJob.fromLens.createJob.error.splitFieldMustBeString', {
         defaultMessage: 'Selected split field type must be string.',
