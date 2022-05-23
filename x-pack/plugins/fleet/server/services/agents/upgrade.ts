@@ -267,6 +267,7 @@ async function _getCancelledActionId(
 ) {
   const res = await esClient.search<FleetServerAgentAction>({
     index: AGENT_ACTIONS_INDEX,
+    ignore_unavailable: true,
     query: {
       bool: {
         must: [
@@ -296,6 +297,7 @@ async function _getCancelledActionId(
 async function _getUpgradeActions(esClient: ElasticsearchClient, now = new Date().toISOString()) {
   const res = await esClient.search<FleetServerAgentAction>({
     index: AGENT_ACTIONS_INDEX,
+    ignore_unavailable: true,
     query: {
       bool: {
         must: [
@@ -331,6 +333,7 @@ async function _getUpgradeActions(esClient: ElasticsearchClient, now = new Date(
           nbAgents: 0,
           complete: false,
           nbAgentsAck: 0,
+          version: hit._source.data?.version as string,
         };
       }
 
