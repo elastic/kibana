@@ -456,6 +456,9 @@ export const SOURCE_CATEGORIES = {
   WIKI: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.wiki', {
     defaultMessage: 'Wiki',
   }),
+  WORKFLOW: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.workflow', {
+    defaultMessage: 'Workflow',
+  }),
 };
 
 export const API_KEYS_TITLE = i18n.translate(

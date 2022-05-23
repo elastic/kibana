@@ -574,6 +574,7 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.SERVICENOW,
     serviceType: 'service_now',
+    categories: [SOURCE_CATEGORIES.WORKFLOW],
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: false,
