@@ -51,17 +51,14 @@ export function createGenerateIndexRecordsStream({
         ).body;
 
         for (const [index, { settings, mappings }] of Object.entries(resp)) {
-          const {
-            body: {
-              [index]: { aliases },
-            },
-          } = await client.indices.getAlias(
+          const { body: aliasBody } = await client.indices.getAlias(
             { index },
             {
               headers: ES_CLIENT_HEADERS,
               meta: true,
             }
           );
+          const aliases = aliasBody[index]?.aliases || {};
 
           stats.archivedIndex(index, { settings, mappings });
           this.push({
