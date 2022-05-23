@@ -5,37 +5,34 @@
  * 2.0.
  */
 
-import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
-import { mergeProjection } from '../../projections/util/merge_projection';
-import { SetupUX } from './route';
 import {
-  CLS_FIELD,
+  TBT_FIELD,
   FCP_FIELD,
+  CLS_FIELD,
   FID_FIELD,
   LCP_FIELD,
-  TBT_FIELD,
 } from '../../../common/elasticsearch_fieldnames';
+import { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
+import { mergeProjection } from '../../../common/utils/merge_projection';
+import { getRumPageLoadTransactionsProjection } from './projections';
 
-export async function getWebCoreVitals({
-  setup,
-  urlQuery,
-  percentile = 50,
-  start,
-  end,
-}: {
-  setup: SetupUX;
-  urlQuery?: string;
-  percentile?: number;
-  start: number;
-  end: number;
-}) {
+export const PERCENTILE_DEFAULT = 50;
+
+export function coreWebVitalsQuery(
+  start: number,
+  end: number,
+  urlQuery?: string,
+  uiFilters?: UxUIFilters,
+  percentile = PERCENTILE_DEFAULT
+) {
+  const setup: SetupUX = { uiFilters: uiFilters ? uiFilters : {} };
+
   const projection = getRumPageLoadTransactionsProjection({
     setup,
     urlQuery,
     start,
     end,
   });
-
   const params = mergeProjection(projection, {
     body: {
       size: 0,
@@ -106,55 +103,6 @@ export async function getWebCoreVitals({
       },
     },
   });
-
-  const { apmEventClient } = setup;
-
-  const response = await apmEventClient.search('get_web_core_vitals', params);
-  const {
-    lcp,
-    cls,
-    fid,
-    tbt,
-    fcp,
-    lcpRanks,
-    fidRanks,
-    clsRanks,
-    coreVitalPages,
-  } = response.aggregations ?? {};
-
-  const getRanksPercentages = (
-    ranks?: Array<{ key: number; value: number | null }>
-  ) => {
-    const ranksVal = ranks?.map(({ value }) => value?.toFixed(0) ?? 0) ?? [];
-    return [
-      Number(ranksVal?.[0]),
-      Number(ranksVal?.[1]) - Number(ranksVal?.[0]),
-      100 - Number(ranksVal?.[1]),
-    ];
-  };
-
-  const defaultRanks = [100, 0, 0];
-
-  const pkey = percentile.toFixed(1);
-
-  return {
-    coreVitalPages: coreVitalPages?.doc_count ?? 0,
-    /* Because cls is required in the type UXMetrics, and defined as number | null,
-     * we need to default to null in the case where cls is undefined in order to satisfy the UXMetrics type */
-    cls: cls?.values[pkey] ?? null,
-    fid: fid?.values[pkey],
-    lcp: lcp?.values[pkey],
-    tbt: tbt?.values[pkey] ?? 0,
-    fcp: fcp?.values[pkey],
-
-    lcpRanks: lcp?.values[pkey]
-      ? getRanksPercentages(lcpRanks?.values)
-      : defaultRanks,
-    fidRanks: fid?.values[pkey]
-      ? getRanksPercentages(fidRanks?.values)
-      : defaultRanks,
-    clsRanks: cls?.values[pkey]
-      ? getRanksPercentages(clsRanks?.values)
-      : defaultRanks,
-  };
+  const { apm, ...rest } = params;
+  return rest;
 }
