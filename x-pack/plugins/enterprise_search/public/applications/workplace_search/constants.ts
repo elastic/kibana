@@ -366,6 +366,9 @@ export const SOURCE_OBJ_TYPES = {
 };
 
 export const SOURCE_CATEGORIES = {
+  ATLASSIAN: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.atlassian', {
+    defaultMessage: 'Atlassian',
+  }),
   CLOUD: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.cloud', {
     defaultMessage: 'Cloud',
   }),
@@ -381,6 +384,9 @@ export const SOURCE_CATEGORIES = {
       defaultMessage: 'File Sharing',
     }
   ),
+  INTRANET: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.intranet', {
+    defaultMessage: 'Intranet',
+  }),
   MICROSOFT: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.microsoft', {
     defaultMessage: 'Microsoft',
   }),
@@ -395,6 +401,9 @@ export const SOURCE_CATEGORIES = {
   ),
   STORAGE: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.storage', {
     defaultMessage: 'Storage',
+  }),
+  WIKI: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.wiki', {
+    defaultMessage: 'Wiki',
   }),
 };
 
