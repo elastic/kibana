@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { AggregationsMultiBucketAggregateBase } from '@elastic/elasticsearch/lib/api/types';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
+import { flatten } from 'lodash';
 import type { DeprecationsDetails } from '../../deprecations';
 import { IScopedClusterClient } from '../../elasticsearch';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
@@ -49,7 +51,34 @@ const getTargetIndices = ({
   ];
 };
 
-const getUnknownTypesQuery = (knownTypes: string[]): estypes.QueryDslQueryContainer => {
+const getNoTypeDocumentsQuery = (): estypes.QueryDslQueryContainer => {
+  return {
+    bool: {
+      must_not: {
+        exists: {
+          field: 'type',
+        },
+      },
+    },
+  };
+};
+
+const getNoTypeDocuments = async (esClient: IScopedClusterClient, targetIndices: string[]) => {
+  const query = getNoTypeDocumentsQuery();
+  const body = await esClient.asInternalUser.search<SavedObjectsRawDocSource>({
+    index: targetIndices,
+    body: {
+      size: 1000,
+      query,
+    },
+  });
+
+  const { hits: unknownDocs } = body.hits;
+
+  return unknownDocs.map((doc) => ({ id: doc._id, type: 'unknown' }));
+};
+
+const getNonRegisteredTypesQuery = (knownTypes: string[]): estypes.QueryDslQueryContainer => {
   return {
     bool: {
       must_not: knownTypes.map((type) => ({
@@ -57,6 +86,58 @@ const getUnknownTypesQuery = (knownTypes: string[]): estypes.QueryDslQueryContai
       })),
     },
   };
+};
+
+const getNonRegisteredTypesDocuments = async (
+  esClient: IScopedClusterClient,
+  targetIndices: string[],
+  knownTypes: string[]
+) => {
+  const query = getNonRegisteredTypesQuery(knownTypes);
+  const body = await esClient.asInternalUser.search<SavedObjectsRawDocSource>({
+    index: targetIndices,
+    body: {
+      size: 0,
+      // filter the known types
+      query,
+      // aggregate them by type, so that we have a sneak peak of all types
+      aggs: {
+        unknownTypesAggregation: {
+          terms: {
+            field: 'type',
+            size: 1000,
+          },
+          aggs: {
+            docs: {
+              top_hits: {
+                size: 100,
+                _source: {
+                  excludes: ['*'],
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!body.aggregations) return [];
+
+  const { unknownTypesAggregation } = body.aggregations;
+  const buckets = (unknownTypesAggregation as AggregationsMultiBucketAggregateBase).buckets;
+
+  const bucketsArray = Array.isArray(buckets) ? buckets : Object.values(buckets);
+
+  return flatten(
+    bucketsArray.map(
+      (bucket: any) =>
+        bucket.docs?.hits?.hits?.map((doc: any) => ({
+          id: doc._id,
+          type: bucket.key,
+        })) || []
+    )
+  );
 };
 
 const getUnknownSavedObjects = async ({
@@ -72,18 +153,14 @@ const getUnknownSavedObjects = async ({
     kibanaIndex,
     kibanaVersion,
   });
-  const query = getUnknownTypesQuery(knownTypes);
+  const noTypeDocumentsP = getNoTypeDocuments(esClient, targetIndices);
+  const nonRegisteredTypesDocumentsP = getNonRegisteredTypesDocuments(
+    esClient,
+    targetIndices,
+    knownTypes
+  );
 
-  const body = await esClient.asInternalUser.search<SavedObjectsRawDocSource>({
-    index: targetIndices,
-    body: {
-      size: 10000,
-      query,
-    },
-  });
-  const { hits: unknownDocs } = body.hits;
-
-  return unknownDocs.map((doc) => ({ id: doc._id, type: doc._source?.type ?? 'unknown' }));
+  return flatten(await Promise.all([noTypeDocumentsP, nonRegisteredTypesDocumentsP]));
 };
 
 export const getUnknownTypesDeprecations = async (
@@ -149,13 +226,25 @@ export const deleteUnknownTypeObjects = async ({
     kibanaIndex,
     kibanaVersion,
   });
-  const query = getUnknownTypesQuery(knownTypes);
+  const noTypeQuery = getNoTypeDocumentsQuery();
 
-  await esClient.asInternalUser.deleteByQuery({
+  const deleteNoTypeDocuments = esClient.asInternalUser.deleteByQuery({
     index: targetIndices,
     wait_for_completion: false,
     body: {
-      query,
+      query: noTypeQuery,
     },
   });
+
+  const nonRegisteredTypesQuery = getNonRegisteredTypesQuery(knownTypes);
+
+  const deleteNonRegisteredTypesDocuments = esClient.asInternalUser.deleteByQuery({
+    index: targetIndices,
+    wait_for_completion: false,
+    body: {
+      query: nonRegisteredTypesQuery,
+    },
+  });
+
+  await Promise.all([deleteNoTypeDocuments, deleteNonRegisteredTypesDocuments]);
 };

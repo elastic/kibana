@@ -59,11 +59,42 @@ describe('unknown saved object types deprecation', () => {
         kibanaVersion,
       });
 
-      expect(esClient.asInternalUser.search).toHaveBeenCalledTimes(1);
-      expect(esClient.asInternalUser.search).toHaveBeenCalledWith({
+      expect(esClient.asInternalUser.search).toHaveBeenCalledTimes(2);
+
+      expect(esClient.asInternalUser.search).toHaveBeenNthCalledWith(1, {
         index: ['foo-index', 'bar-index'],
         body: {
-          size: 10000,
+          size: 1000,
+          query: {
+            bool: {
+              must_not: { exists: { field: 'type' } },
+            },
+          },
+        },
+      });
+
+      expect(esClient.asInternalUser.search).toHaveBeenNthCalledWith(2, {
+        index: ['foo-index', 'bar-index'],
+        body: {
+          size: 0,
+          aggs: {
+            unknownTypesAggregation: {
+              terms: {
+                field: 'type',
+                size: 1000,
+              },
+              aggs: {
+                docs: {
+                  top_hits: {
+                    size: 100,
+                    _source: {
+                      excludes: ['*'],
+                    },
+                  },
+                },
+              },
+            },
+          },
           query: {
             bool: {
               must_not: [{ term: { type: 'foo' } }, { term: { type: 'bar' } }],
@@ -124,8 +155,24 @@ describe('unknown saved object types deprecation', () => {
         kibanaVersion,
       });
 
-      expect(esClient.asInternalUser.deleteByQuery).toHaveBeenCalledTimes(1);
-      expect(esClient.asInternalUser.deleteByQuery).toHaveBeenCalledWith({
+      expect(esClient.asInternalUser.deleteByQuery).toHaveBeenCalledTimes(2);
+      expect(esClient.asInternalUser.deleteByQuery).toHaveBeenNthCalledWith(1, {
+        index: ['foo-index', 'bar-index'],
+        wait_for_completion: false,
+        body: {
+          query: {
+            bool: {
+              must_not: {
+                exists: {
+                  field: 'type',
+                },
+              },
+            },
+          },
+        },
+      });
+
+      expect(esClient.asInternalUser.deleteByQuery).toHaveBeenNthCalledWith(2, {
         index: ['foo-index', 'bar-index'],
         wait_for_completion: false,
         body: {

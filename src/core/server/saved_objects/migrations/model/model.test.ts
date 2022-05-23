@@ -886,6 +886,7 @@ describe('migrations v2 model', () => {
                 { term: { type: 'dashboard' } },
                 { term: { type: 'foo' } },
               ],
+              must: [{ exists: { field: 'type' } }],
             },
           });
 

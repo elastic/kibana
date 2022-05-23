@@ -14,6 +14,7 @@ import { REPO_ROOT } from '@kbn/utils';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import type { Root } from '../../../root';
 import { getEnvOptions } from '../../../config/mocks';
+import type { ElasticsearchClient } from '../../../elasticsearch';
 
 const logFilePath = Path.join(__dirname, '7_13_unknown_types.log');
 
@@ -110,13 +111,19 @@ describe('migration v2', () => {
   describe('when `discardUnknownObjects` matches current kibana version', () => {
     const currentVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 
-    it('continues with the migration even when unknown types are found in the source index', async () => {
+    it('discards the documents with unknown types and finishes the migration successfully', async () => {
       // Start kibana with foo and space types disabled
       root = createRoot(currentVersion);
       esServer = await startES();
       await root.preboot();
       await root.setup();
+
+      // the migration process should finish successfully
       await expect(root.start()).resolves.not.toThrowError();
+
+      const esClient: ElasticsearchClient = esServer.es.getClient();
+      const body = await esClient.count({ q: 'type:foo|space' });
+      expect(body.count).toEqual(0);
     });
   });
 });

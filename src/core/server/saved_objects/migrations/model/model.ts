@@ -29,6 +29,7 @@ import {
 import type { ExcludeRetryableEsError } from './types';
 import {
   addExcludedTypesToBoolQuery,
+  addMustClausesToBoolQuery,
   addMustNotClausesToBoolQuery,
   getAliases,
   indexBelongsToLaterVersion,
@@ -387,7 +388,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       }
 
       // at this point, users have configured kibana to discard unknown objects
-      // thus, we have to proceed with the migration
+      // thus, we can ignore unknown documents and proceed with the migration
       logs = [
         ...stateP.logs,
         { level: 'warning', message: extractIgnoredUnknownDocs(res.right.unknownDocs) },
@@ -399,6 +400,14 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         stateP.excludeOnUpgradeQuery?.bool,
         unknownTypes
       );
+
+      excludeOnUpgradeQuery = addMustClausesToBoolQuery(excludeOnUpgradeQuery.bool, [
+        {
+          exists: {
+            field: 'type',
+          },
+        },
+      ]);
     }
 
     const source = stateP.sourceIndex;
