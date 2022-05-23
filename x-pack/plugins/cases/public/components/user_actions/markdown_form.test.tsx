@@ -98,7 +98,7 @@ describe('UserActionMarkdown ', () => {
       appMockRenderer = createAppMockRenderer();
     });
 
-    it('creates a state state if a key is not passed to the component', async () => {
+    it('creates a stale state if a key is not passed to the component', async () => {
       const TestComponent = () => {
         const [isEditable, setIsEditable] = React.useState(true);
         const [saveContent, setSaveContent] = React.useState(defaultProps.content);
