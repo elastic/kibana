@@ -17,15 +17,14 @@ import { useCancelAddPackagePolicy, useEnsureDefaultAgentPolicy } from '../hooks
 import {
   AddFirstIntegrationSplashScreen,
   MultiPageStepsLayout,
-  InstallElasticAgentManagedPageStep,
-  InstallElasticAgentStandalonePageStep,
+  InstallElasticAgentPageStep,
   AddIntegrationPageStep,
 } from './components';
 
 const fleetManagedSteps = [
   {
-    title: 'Install Elastic Agent',
-    component: InstallElasticAgentManagedPageStep,
+    title: 'Install Elastic Agent', // TODO: i18n
+    component: InstallElasticAgentPageStep,
   },
   {
     title: 'Add the integration',
@@ -44,7 +43,7 @@ const standaloneSteps = [
   },
   {
     title: 'Install Elastic Agent',
-    component: InstallElasticAgentStandalonePageStep,
+    component: InstallElasticAgentPageStep,
   },
   {
     title: 'Confirm incoming data',

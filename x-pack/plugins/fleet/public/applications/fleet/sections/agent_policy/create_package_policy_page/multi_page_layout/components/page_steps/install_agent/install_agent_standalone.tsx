@@ -10,29 +10,32 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSteps, EuiSpacer } from '@elastic/eui';
 import { safeDump } from 'js-yaml';
 
-import type { FullAgentPolicy } from '../../../../../../../../../common/types/models/agent_policy';
+import type { FullAgentPolicy } from '../../../../../../../../../../common/types/models/agent_policy';
 
-import type { MultiPageStepLayoutProps } from '../../types';
+import type { MultiPageStepLayoutProps } from '../../../types';
 import {
   CreatePackagePolicyBottomBar,
   StandaloneModeWarningCallout,
   NotObscuredByBottomBar,
-} from '..';
-import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../../../../../../services';
+} from '../..';
+import {
+  fullAgentPolicyToYaml,
+  agentPolicyRouteService,
+} from '../../../../../../../../../services';
 
-import { Error as FleetError } from '../../../../../../components';
+import { Error as FleetError } from '../../../../../../../components';
 import {
   useKibanaVersion,
   useStartServices,
   sendGetOneAgentPolicyFull,
-} from '../../../../../../../../hooks';
+} from '../../../../../../../../../hooks';
 import {
   InstallStandaloneAgentStep,
   AgentEnrollmentConfirmationStep,
   ConfigureStandaloneAgentStep,
-} from '../../../../../../../../components/agent_enrollment_flyout/steps';
-import { usePollingAgentCount } from '../../../../../../../../components/agent_enrollment_flyout/confirm_agent_enrollment';
-import { StandaloneInstructions } from '../../../../../../../../components/enrollment_instructions';
+} from '../../../../../../../../../components/agent_enrollment_flyout/steps';
+import { usePollingAgentCount } from '../../../../../../../../../components/agent_enrollment_flyout/confirm_agent_enrollment';
+import { StandaloneInstructions } from '../../../../../../../../../components/enrollment_instructions';
 
 export const InstallElasticAgentStandalonePageStep: React.FC<MultiPageStepLayoutProps> = (
   props
@@ -110,7 +113,7 @@ export const InstallElasticAgentStandalonePageStep: React.FC<MultiPageStepLayout
     }),
     InstallStandaloneAgentStep({
       installCommand: installManagedCommands,
-      isComplete: !!enrolledAgentIds.length,
+      isComplete: yaml && !!enrolledAgentIds.length,
     }),
     AgentEnrollmentConfirmationStep({
       selectedPolicyId: agentPolicy?.id,
