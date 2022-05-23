@@ -11,6 +11,7 @@ import {
   BulkActionEditForRuleAttributes,
   BulkActionEditType,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { assertUnreachable } from '../../../../../common/utility_types';
 
 /**
  * converts bulk edit action to format of rulesClient.bulkEdit operation
@@ -42,5 +43,8 @@ export const bulkEditActionToRulesClientOperation = (
         operation: 'set',
         value: action.value,
       };
+
+    default:
+      return assertUnreachable(action.type);
   }
 };

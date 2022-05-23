@@ -35,7 +35,7 @@ export const createThresholdAlertType = (
           return validated;
         },
         /**
-         * validate rule params when rule is updated or created
+         * validate rule params when rule is updated (for created in future as well)
          * returned params can be modified (useful in case of version increment)
          * @param mutatedRuleParams
          * @returns mutatedRuleParams

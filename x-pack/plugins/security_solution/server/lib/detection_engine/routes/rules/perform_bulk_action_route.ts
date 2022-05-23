@@ -48,24 +48,26 @@ const MAX_RULES_TO_PROCESS_TOTAL = 10000;
 const MAX_ERROR_MESSAGE_LENGTH = 1000;
 const MAX_ROUTE_CONCURRENCY = 5;
 
+interface RuleDetailsInError {
+  id: string;
+  name?: string;
+}
 interface NormalizedRuleError {
   message: string;
   status_code: number;
-  rules: Array<{
-    id: string;
-    name: string;
-  }>;
+  rules: RuleDetailsInError[];
 }
 
 type BulkActionError = PromisePoolError<string> | PromisePoolError<RuleAlertType> | BulkEditError;
 
 const normalizeErrorResponse = (errors: BulkActionError[]): NormalizedRuleError[] => {
-  const errorsMap = new Map();
+  const errorsMap = new Map<string, NormalizedRuleError>();
 
   errors.forEach((errorObj) => {
-    let message;
-    let statusCode;
-    let rule;
+    let message: string;
+    let statusCode: number = 500;
+    let rule: RuleDetailsInError;
+
     // transform different error types (PromisePoolError<string> | PromisePoolError<RuleAlertType> | BulkEditError)
     // to one common used in NormalizedRuleError
     if ('rule' in errorObj) {
@@ -87,7 +89,7 @@ const normalizeErrorResponse = (errors: BulkActionError[]): NormalizedRuleError[
     }
 
     if (errorsMap.has(message)) {
-      errorsMap.get(message).rules.push(rule);
+      errorsMap.get(message)?.rules.push(rule);
     } else {
       errorsMap.set(message, {
         message: truncate(message, { length: MAX_ERROR_MESSAGE_LENGTH }),
