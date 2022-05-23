@@ -87,7 +87,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
   ]);
 
   const startDate = useMemo(() => moment(), []);
-  const [startTime, setStartTime] = useState<string | undefined>();
+  const [startTime, setStartTime] = useState<moment.Moment>(startDate);
 
   async function onSubmit() {
     const version = getVersion(selectedVersion);
@@ -96,7 +96,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
         selectedMantainanceWindow.length > 0 && (selectedMantainanceWindow[0]?.value as number) > 0
           ? selectedMantainanceWindow[0].value
           : undefined,
-      start_time: startTime,
+      start_time: startTime.toISOString(),
     };
 
     try {
@@ -281,12 +281,14 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
               data-test-subj="agentUpgradeModal.startTimeDatePicker"
               fullWidth
               required
-              value={startTime}
+              selected={startTime}
               minDate={startDate}
               showTimeSelect
+              dateFormat="MM/DD/YY HH:MM:SSA"
+              timeFormat="MM/DD/YY HH:MM:SSA"
               onChange={(date) => {
                 if (date?.isAfter(startDate)) {
-                  setStartTime(date?.toISOString());
+                  setStartTime(date);
                 }
               }}
             />
