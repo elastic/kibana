@@ -43,10 +43,6 @@ const baseTitle = i18n.translate('xpack.synthetics.routes.baseTitle', {
   defaultMessage: 'Synthetics - Kibana',
 });
 
-const MONITORS_LABEL = i18n.translate('xpack.synthetics.monitorManagement.heading', {
-  defaultMessage: 'Monitor Management',
-});
-
 const getRoutes = (): RouteProps[] => {
   return [
     {
