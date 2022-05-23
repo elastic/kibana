@@ -7,10 +7,12 @@
 
 import React, { Fragment, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
+import { firstValueFrom } from 'rxjs';
+import { Filter } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Filter, DataView, Query, ISearchSource } from '@kbn/data-plugin/common';
+import { DataView, Query, ISearchSource, getTime } from '@kbn/data-plugin/common';
 import {
   ForLastExpression,
   IErrorObject,
@@ -24,6 +26,8 @@ import { EsQueryAlertParams, SearchType } from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { DataViewSelectPopover } from '../../components/data_view_select_popover';
 import { useTriggersAndActionsUiDeps } from '../util';
+import { totalHitsToNumber } from './use_test_query';
+import { TestQueryRow } from './test_query_row';
 
 interface LocalState {
   index: DataView;
@@ -161,6 +165,17 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
     (updatedValue: number) => dispatch({ type: 'size', payload: updatedValue }),
     []
   );
+  const onTestFetch = useCallback(async () => {
+    const timeWindow = `${timeWindowSize}${timeWindowUnit}`;
+    const testSearchSource = searchSource.createCopy();
+    const timeFilter = getTime(searchSource.getField('index')!, {
+      from: `now-${timeWindow}`,
+      to: 'now',
+    });
+    testSearchSource.setField('filter', timeFilter);
+    const { rawResponse } = await firstValueFrom(testSearchSource.fetch$());
+    return { nrOfDocs: totalHitsToNumber(rawResponse.hits.total), timeWindow };
+  }, [searchSource, timeWindowSize, timeWindowUnit]);
 
   return (
     <Fragment>
@@ -264,6 +279,8 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         onChangeSelectedValue={onChangeSizeValue}
       />
       <EuiSpacer size="s" />
+      <TestQueryRow fetch={onTestFetch} hasValidationErrors={false} />
+      <EuiSpacer />
     </Fragment>
   );
 };
