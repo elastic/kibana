@@ -455,7 +455,7 @@ export function jobsHealthServiceProvider(
               ? i18n.translate(
                   'xpack.ml.alertTypes.jobsHealthAlertingRule.delayedDataRecoveryMessage',
                   {
-                    defaultMessage: 'No jobs are suffering from delayed data.',
+                    defaultMessage: 'No data delay has occurred.',
                   }
                 )
               : i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.delayedDataMessage', {
