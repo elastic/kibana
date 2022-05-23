@@ -12,9 +12,9 @@ import { sendGetCurrentUpgrades, sendPostCancelAction, useStartServices } from '
 
 import type { CurrentUpgrade } from '../../../../types';
 
-const POLL_INTERVAL = 30 * 1000;
+const POLL_INTERVAL = 2 * 60 * 1000; // 2 minutes
 
-export function useCurrentUpgrades() {
+export function useCurrentUpgrades(onAbortSuccess: () => void) {
   const [currentUpgrades, setCurrentUpgrades] = useState<CurrentUpgrade[]>([]);
   const currentTimeoutRef = useRef<NodeJS.Timeout>();
   const isCancelledRef = useRef<boolean>(false);
@@ -65,7 +65,7 @@ export function useCurrentUpgrades() {
           return;
         }
         await sendPostCancelAction(currentUpgrade.actionId);
-        await refreshUpgrades();
+        await Promise.all([refreshUpgrades(), onAbortSuccess()]);
       } catch (err) {
         notifications.toasts.addError(err, {
           title: i18n.translate('xpack.fleet.currentUpgrade.abortRequestError', {
@@ -74,7 +74,7 @@ export function useCurrentUpgrades() {
         });
       }
     },
-    [refreshUpgrades, notifications.toasts, overlays]
+    [refreshUpgrades, notifications.toasts, overlays, onAbortSuccess]
   );
 
   // Poll for upgrades

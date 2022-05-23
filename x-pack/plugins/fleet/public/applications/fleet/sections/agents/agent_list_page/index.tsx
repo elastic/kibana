@@ -244,13 +244,15 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           inactive: agentsRequest.data.totalInactive,
         });
 
-        // Only set tags on the first request - we don't want the list of tags to update based
-        // on the returned set of agents from the API
-        if (allTags === undefined) {
-          const newAllTags = Array.from(
-            new Set(agentsRequest.data.items.flatMap((agent) => agent.tags ?? []))
-          );
+        const newAllTags = Array.from(
+          new Set(agentsRequest.data.items.flatMap((agent) => agent.tags ?? []))
+        );
 
+        // We only want to update the list of available tags if we've either received
+        // more tags than we currently have from the API (e.g. new agents have been enrolled)
+        // or we haven't set our list of tags yet. TODO: Would it be possible to remove a tag
+        // from the filterable list if an agent is unenrolled and no agents remain with that tag?
+        if (!allTags || newAllTags.length > allTags.length) {
           setAllTags(newAllTags);
         }
 
@@ -338,7 +340,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   }, [flyoutContext]);
 
   // Current upgrades
-  const { abortUpgrade, currentUpgrades, refreshUpgrades } = useCurrentUpgrades();
+  const { abortUpgrade, currentUpgrades, refreshUpgrades } = useCurrentUpgrades(fetchData);
 
   const columns = [
     {
@@ -545,7 +547,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         selectionMode={selectionMode}
         currentQuery={kuery}
         selectedAgents={selectedAgents}
-        refreshAgents={() => fetchData()}
+        refreshAgents={() => Promise.all([fetchData(), refreshUpgrades()])}
       />
       <EuiSpacer size="m" />
       {/* Agent total, bulk actions and status bar */}
