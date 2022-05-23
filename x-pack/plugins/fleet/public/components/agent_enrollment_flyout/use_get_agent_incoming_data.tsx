@@ -79,9 +79,10 @@ export const useGetAgentIncomingData = (
  */
 const POLLING_INTERVAL_MS = 5 * 1000; // 5 sec
 
-export const usePollingIncomingData = (agentsIds: string[]) => {
+export const usePollingIncomingData = (agentsIds: string[], previewData?: boolean) => {
   const timeout = useRef<number | undefined>(undefined);
   const [incomingData, setIncomingData] = useState<IncomingDataList[]>([]);
+  const [dataPreview, setDataPreview] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -89,7 +90,7 @@ export const usePollingIncomingData = (agentsIds: string[]) => {
 
     const poll = () => {
       timeout.current = window.setTimeout(async () => {
-        const { data } = await sendGetAgentIncomingData({ agentsIds });
+        const { data } = await sendGetAgentIncomingData({ agentsIds, previewData });
 
         if (data?.items) {
           // filter out agents that have `data = false` and keep polling
@@ -103,6 +104,10 @@ export const usePollingIncomingData = (agentsIds: string[]) => {
             setIsLoading(false);
           }
         }
+
+        if (data?.data) {
+          setDataPreview(data?.data);
+        }
         if (!isAborted) {
           poll();
         }
@@ -115,7 +120,7 @@ export const usePollingIncomingData = (agentsIds: string[]) => {
     return () => {
       isAborted = true;
     };
-  }, [agentsIds, incomingData]);
+  }, [agentsIds, previewData, incomingData]);
 
-  return { incomingData, isLoading };
+  return { incomingData, dataPreview, isLoading };
 };

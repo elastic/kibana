@@ -167,6 +167,7 @@ export interface GetAgentStatusResponse {
 export interface GetAgentIncomingDataRequest {
   query: {
     agentsIds: string[];
+    previewData?: boolean;
   };
 }
 
@@ -175,6 +176,7 @@ export interface IncomingDataList {
 }
 export interface GetAgentIncomingDataResponse {
   items: IncomingDataList[];
+  data: any[];
 }
 
 export interface GetCurrentUpgradesResponse {
