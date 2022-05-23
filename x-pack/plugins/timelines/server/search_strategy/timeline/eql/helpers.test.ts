@@ -208,6 +208,9 @@ describe('Search Strategy EQL helper', () => {
                 "_id": "qhymg3cBX5UUcOOYP3Ec",
                 "_index": ".ds-logs-endpoint.events.security-default-2021.02.05-000005",
                 "agent": Object {
+                  "id": Array [
+                    "1d15cf9e-3dc7-5b97-f586-743f7c2518b2",
+                  ],
                   "type": Array [
                     "endpoint",
                   ],
@@ -335,6 +338,9 @@ describe('Search Strategy EQL helper', () => {
                 "_id": "qxymg3cBX5UUcOOYP3Ec",
                 "_index": ".ds-logs-endpoint.events.security-default-2021.02.05-000005",
                 "agent": Object {
+                  "id": Array [
+                    "1d15cf9e-3dc7-5b97-f586-743f7c2518b2",
+                  ],
                   "type": Array [
                     "endpoint",
                   ],
@@ -476,6 +482,9 @@ describe('Search Strategy EQL helper', () => {
                 "_id": "rBymg3cBX5UUcOOYP3Ec",
                 "_index": ".ds-logs-endpoint.events.security-default-2021.02.05-000005",
                 "agent": Object {
+                  "id": Array [
+                    "1d15cf9e-3dc7-5b97-f586-743f7c2518b2",
+                  ],
                   "type": Array [
                     "endpoint",
                   ],
@@ -592,6 +601,9 @@ describe('Search Strategy EQL helper', () => {
                 "_id": "pxymg3cBX5UUcOOYP3Ec",
                 "_index": ".ds-logs-endpoint.events.process-default-2021.02.02-000005",
                 "agent": Object {
+                  "id": Array [
+                    "1d15cf9e-3dc7-5b97-f586-743f7c2518b2",
+                  ],
                   "type": Array [
                     "endpoint",
                   ],
