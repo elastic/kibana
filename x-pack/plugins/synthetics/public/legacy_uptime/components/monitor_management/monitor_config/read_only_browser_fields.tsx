@@ -116,6 +116,7 @@ export const ProjectBrowserReadonlyFields = ({ minColumnWidth }: { minColumnWidt
             onChange={noop}
             onBlur={noop}
             data-test-subj="syntheticsAPMServiceName"
+            readOnly={true}
           />
         </EuiFormRow>
         <EuiFormRow
@@ -188,6 +189,7 @@ export const ProjectBrowserReadonlyFields = ({ minColumnWidth }: { minColumnWidt
                 />
               }
               onChange={noop}
+              disabled={true}
             />
           </EuiFormRow>
 
