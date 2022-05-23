@@ -95,7 +95,7 @@ export function UXSection({ bucketSize }: Props) {
       }}
       hasError={status === FETCH_STATUS.FAILURE}
     >
-      <div style={{ height: 500 }}>
+      <div style={{ height: 320 }}>
         <ExploratoryViewEmbeddable
           attributes={seriesList}
           reportType="data-distribution"
