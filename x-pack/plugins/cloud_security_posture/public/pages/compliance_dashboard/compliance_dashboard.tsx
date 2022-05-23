@@ -35,30 +35,18 @@ const getNoDataConfig = (onClick: () => void): KibanaPageTemplateProps['noDataCo
 
 export const ComplianceDashboard = () => {
   const getInfo = useInfoApi();
+  const isFindingsIndexApplicable = getInfo.data?.latestFindingsIndexStatus === 'applicable';
   const getDashboardData = useComplianceDashboardDataApi({
-    enabled: getInfo.data?.latestFindingsIndexStatus === 'applicable',
+    enabled: isFindingsIndexApplicable,
   });
   useCspBreadcrumbs([allNavigationItems.dashboard]);
-
-  // if (!getInfo.isSuccess)
-  if (false)
-    return (
-      <CspPageTemplate
-        pageHeader={{ pageTitle: CLOUD_POSTURE }}
-        query={getInfo}
-        noDataConfig={
-          getInfo.data?.latestFindingsIndexStatus !== 'applicable'
-            ? getNoDataConfig(getInfo.refetch)
-            : undefined
-        }
-      />
-    );
 
   return (
     <CspPageTemplate
       pageHeader={{ pageTitle: CLOUD_POSTURE }}
       restrictWidth={1600}
-      query={getDashboardData}
+      query={isFindingsIndexApplicable ? getDashboardData : getInfo}
+      noDataConfig={!isFindingsIndexApplicable ? getNoDataConfig(getInfo.refetch) : undefined}
     >
       {getDashboardData.data && (
         <>

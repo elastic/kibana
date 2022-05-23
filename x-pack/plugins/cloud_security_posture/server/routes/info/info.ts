@@ -31,7 +31,7 @@ const getLatestFindingsStatus = async (
   }
 };
 
-export const defineGetInfo = (router: CspRouter, cspContext: CspAppContext): void =>
+export const defineGetInfoRoute = (router: CspRouter, cspContext: CspAppContext): void =>
   router.get(
     {
       path: INFO_ROUTE_PATH,
