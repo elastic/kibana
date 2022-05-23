@@ -11,7 +11,7 @@
 import _, { each, reject } from 'lodash';
 import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { calculateObjectHash, CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
+import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 import {
   FieldFormatsStartCommon,
   FieldFormat,
@@ -53,7 +53,7 @@ export interface TimeBasedDataView extends DataView {
 }
 
 export class DataView implements IIndexPattern {
-  private _id?: string;
+  public id?: string;
   public title: string = '';
   public fieldFormatMap: Record<string, any>;
   /**
@@ -100,7 +100,7 @@ export class DataView implements IIndexPattern {
     this.flattenHit = flattenHitWrapper(this, metaFields);
 
     // set values
-    this._id = spec.id;
+    this.id = spec.id;
     this.fieldFormatMap = spec.fieldFormats || {};
 
     this.version = spec.version;
@@ -112,21 +112,13 @@ export class DataView implements IIndexPattern {
     this.type = spec.type;
     this.typeMeta = spec.typeMeta;
     this.fieldAttrs = spec.fieldAttrs || {};
-    this.allowNoIndex = spec.allowNoIndex;
+    this.allowNoIndex = spec.allowNoIndex || false;
     this.runtimeFieldMap = spec.runtimeFieldMap || {};
     this.namespaces = spec.namespaces || [];
   }
 
-  public get id() {
-    return this._id || calculateObjectHash(this.toSpec());
-  }
-
-  public set id(id: string) {
-    this._id = id;
-  }
-
   isPersisted() {
-    return !!this._id;
+    return !this.id?.startsWith('local');
   }
 
   /**
@@ -213,9 +205,10 @@ export class DataView implements IIndexPattern {
    * Create static representation of index pattern
    */
   public toSpec(): DataViewSpec {
-    const spec: DataViewSpec = {};
+    const spec: DataViewSpec = {
+      id: this.id,
+    };
 
-    if (this._id) spec.id = this._id;
     if (this.version) spec.version = this.version;
     if (this.title) spec.title = this.title;
     if (this.timeFieldName) spec.timeFieldName = this.timeFieldName;
