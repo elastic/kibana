@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { entSearchOverviewRoute } from './overview';
+export * from './post_enterprise_search_overview';
