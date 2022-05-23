@@ -118,7 +118,7 @@ export const EQL_TIMESTAMP_FIELD_LABEL = i18n.translate(
     defaultMessage: 'Timestamp field',
   }
 );
-        
+
 export const RELATED_INTEGRATIONS_INSTALLED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrationsInstalledDescription',
   {
