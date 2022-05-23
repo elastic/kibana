@@ -9,6 +9,10 @@ import { FileSavedObjectAttributes, UpdatableFileAttributes } from '../../common
 
 export type Action =
   | {
+      action: 'delete';
+      payload?: undefined;
+    }
+  | {
       action: 'uploading';
       payload?: undefined;
     }
@@ -33,6 +37,8 @@ export function fileAttributesReducer(
   { action, payload }: Action
 ): FileSavedObjectAttributes {
   switch (action) {
+    case 'delete':
+      return { ...state, status: 'DELETED' };
     case 'uploading':
       return { ...state, content_ref: undefined, status: 'UPLOADING' };
     case 'uploaded':

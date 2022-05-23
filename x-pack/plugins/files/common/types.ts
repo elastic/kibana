@@ -9,7 +9,7 @@
 import type { SavedObject } from '@kbn/core/server';
 import { Readable } from 'stream';
 
-export type FileStatus = 'AWAITING_UPLOAD' | 'UPLOADING' | 'READY' | 'UPLOAD_ERROR';
+export type FileStatus = 'AWAITING_UPLOAD' | 'UPLOADING' | 'READY' | 'UPLOAD_ERROR' | 'DELETED';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type FileSavedObjectAttributes<Meta = unknown> = {
