@@ -16,11 +16,7 @@ export const HistoryItem = memo<HistoryItemProps>(({ children }) => {
   const getTestId = useTestIdGenerator(useDataTestSubj());
 
   return (
-    <EuiFlexItem
-      grow={true}
-      style={{ flexBasis: '100%' }}
-      data-test-subj={getTestId('historyItem')}
-    >
+    <EuiFlexItem grow={true} style={{ flexBasis: '99%' }} data-test-subj={getTestId('historyItem')}>
       {children}
     </EuiFlexItem>
   );

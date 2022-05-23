@@ -14,15 +14,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import {
-  EuiButton,
-  EuiCode,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButton, EuiCode, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { useIsMounted } from '../../../components/hooks/use_is_mounted';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useUrlParams } from '../../../components/hooks/use_url_params';
@@ -230,7 +222,7 @@ export const ShowDevConsole = memo(() => {
   }, [commands, consoleManager]);
 
   return (
-    <EuiPanel>
+    <>
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiButton onClick={handleRegisterOnClick}>{'Open a managed console'}</EuiButton>
@@ -249,10 +241,10 @@ export const ShowDevConsole = memo(() => {
       <EuiText>
         <h3>{'Un-managed console'}</h3>
       </EuiText>
-      <EuiPanel style={{ height: '600px' }}>
+      <div style={{ height: '600px', marginBottom: '150px' }}>
         <Console prompt="$$>" commands={getCommandList()} data-test-subj="dev" />
-      </EuiPanel>
-    </EuiPanel>
+      </div>
+    </>
   );
 });
 ShowDevConsole.displayName = 'ShowDevConsole';

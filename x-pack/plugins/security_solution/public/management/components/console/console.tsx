@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useRef } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { HistoryOutput } from './components/history_output';
 import { CommandInput, CommandInputProps } from './components/command_input';
@@ -17,15 +17,27 @@ import { useWithManagedConsole } from './components/console_manager/console_mana
 
 const ConsoleWindow = styled.div`
   height: 100%;
-
   background-color: ${({ theme: { eui } }) => eui.euiPageBackgroundColor};
 
-  .ui-panel {
-    min-width: ${({ theme }) => theme.eui.euiBreakpoints.s};
+  .layout {
     height: 100%;
     min-height: 300px;
-    overflow-y: auto;
-    background-color: inherit;
+
+    &-container {
+      padding: ${({ theme: { eui } }) => eui.paddingSizes.l}
+        ${({ theme: { eui } }) => eui.paddingSizes.l} ${({ theme: { eui } }) => eui.paddingSizes.s}
+        ${({ theme: { eui } }) => eui.paddingSizes.l};
+    }
+
+    &-historyOutput {
+      border-top: 1px solid ${({ theme: { eui } }) => eui.euiColorLightShade};
+      overflow: auto;
+    }
+
+    &-historyViewport {
+      height: 100%;
+      overflow-x: hidden;
+    }
   }
 
   .descriptionList-20_80 {
@@ -43,7 +55,7 @@ const ConsoleWindow = styled.div`
 
 export const Console = memo<ConsoleProps>(
   ({ prompt, commands, HelpComponent, managedKey, ...commonProps }) => {
-    const consoleWindowRef = useRef<HTMLDivElement | null>(null);
+    const scrollingViewport = useRef<HTMLDivElement | null>(null);
     const inputFocusRef: CommandInputProps['focusRef'] = useRef(null);
     const getTestId = useTestIdGenerator(commonProps['data-test-subj']);
     const managedConsole = useWithManagedConsole(managedKey);
@@ -52,8 +64,8 @@ export const Console = memo<ConsoleProps>(
       // We need the `setTimeout` here because in some cases, the command output
       // will take a bit of time to populate its content due to the use of Promises
       setTimeout(() => {
-        if (consoleWindowRef.current) {
-          consoleWindowRef.current.scrollTop = consoleWindowRef.current.scrollHeight;
+        if (scrollingViewport.current) {
+          scrollingViewport.current.scrollTop = scrollingViewport.current.scrollHeight;
         }
       }, 1);
 
@@ -82,22 +94,29 @@ export const Console = memo<ConsoleProps>(
         */}
         {!managedConsole || managedConsole.isOpen ? (
           <ConsoleWindow onClick={handleConsoleClick} {...commonProps}>
-            <EuiPanel
-              className="ui-panel"
-              panelRef={consoleWindowRef}
+            <EuiFlexGroup
+              direction="column"
+              className="layout"
+              gutterSize="none"
+              responsive={false}
+              wrap={false}
               data-test-subj={getTestId('mainPanel')}
-              hasShadow={false}
             >
-              <EuiFlexGroup direction="column">
-                <EuiFlexItem grow={false}>{'header here'}</EuiFlexItem>
-                <EuiFlexItem grow={true}>
+              <EuiFlexItem grow={false} className="layout-container">
+                {'header here'}
+              </EuiFlexItem>
+              <EuiFlexItem grow={true} className="layout-historyOutput">
+                <div
+                  className="layout-container layout-historyViewport eui-scrollBar eui-yScroll"
+                  ref={scrollingViewport}
+                >
                   <HistoryOutput />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <CommandInput prompt={prompt} focusRef={inputFocusRef} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
+                </div>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false} className="layout-container">
+                <CommandInput prompt={prompt} focusRef={inputFocusRef} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </ConsoleWindow>
         ) : null}
       </ConsoleStateProvider>
