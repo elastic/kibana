@@ -667,7 +667,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: `${this.alertsIndex}*`,
       ignore_unavailable: true,
-      size: 1,
+      size: 100,
       body: {
         query: {
           bool: {
