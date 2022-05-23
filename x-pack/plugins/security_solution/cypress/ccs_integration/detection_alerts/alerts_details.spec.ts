@@ -30,13 +30,13 @@ describe('Alert details with unmapped fields', () => {
   });
 
   it('Displays the unmapped field on the JSON view', () => {
-    const expectedUnmappedValue = ['This is the unmapped field'];
+    const expectedUnmappedValue = 'This is the unmapped field';
 
     openJsonView();
 
     cy.get(JSON_TEXT).then((x) => {
       const parsed = JSON.parse(x.text());
-      expect(parsed.fields.unmapped).to.equal(expectedUnmappedValue);
+      expect(parsed.fields.unmapped[0]).to.equal(expectedUnmappedValue);
     });
   });
 });
