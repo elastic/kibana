@@ -31,7 +31,7 @@ Once uploaded to the telemetry cluster, the data telemetry is stored in
 
 In order to collect a new telemetry field you need to add a task which performs the query that collects the data from the cluster.
 
-All the available tasks are [here](../server/lib/apm_telemetry/collect_data_telemetry/tasks.ts)
+All the available tasks are [here](https://github.com/elastic/kibana/blob/ba84602455671f0f6175bbc0fd2e8f302c60bbe6/x-pack/plugins/apm/server/lib/apm_telemetry/collect_data_telemetry/tasks.ts)
 
 ### Debug telemetry
 
