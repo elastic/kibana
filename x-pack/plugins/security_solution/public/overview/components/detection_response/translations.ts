@@ -209,10 +209,10 @@ export const CASES_TABLE_COLUMN_NAME = i18n.translate(
   }
 );
 
-export const CASES_TABLE_COLUMN_NOTE = i18n.translate(
-  'xpack.securitySolution.detectionResponse.caseColumnNote',
+export const CASES_TABLE_COLUMN_ALERTS = i18n.translate(
+  'xpack.securitySolution.detectionResponse.alerts',
   {
-    defaultMessage: 'Note',
+    defaultMessage: 'Alerts',
   }
 );
 

@@ -20,6 +20,7 @@ import { CaseStatuses } from '@kbn/cases-plugin/common';
 
 import { SecurityPageName } from '../../../../app/types';
 import { FormattedDate } from '../../../../common/components/formatted_date';
+import { FormattedCount } from '../../../../common/components/formatted_number';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
 import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
@@ -104,15 +105,12 @@ const getTableColumns: GetTableColumns = () => [
     render: (id: string, { name }) => <CaseDetailsLink detailName={id}>{name}</CaseDetailsLink>,
   },
   {
-    field: 'note',
-    name: i18n.CASES_TABLE_COLUMN_NOTE,
+    field: 'totalAlerts',
+    name: i18n.CASES_TABLE_COLUMN_ALERTS,
     truncateText: true,
     textOnly: true,
-    render: (note: string) => (
-      <EuiText data-test-subj="recentlyCreatedCaseNote" size="s">
-        {note}
-      </EuiText>
-    ),
+    'data-test-subj': 'recentlyCreatedCaseAlert',
+    render: (totalAlerts: number) => <FormattedCount count={totalAlerts} />,
   },
   {
     field: 'createdAt',
