@@ -36,13 +36,24 @@ export const commonDataLayerArgs: Omit<
   xScaleType: {
     options: [...Object.values(XScaleTypes)],
     help: strings.getXScaleTypeHelp(),
-    default: XScaleTypes.ORDINAL,
     strict: true,
   },
   isHistogram: {
     types: ['boolean'],
     default: false,
     help: strings.getIsHistogramHelp(),
+  },
+  lineWidth: {
+    types: ['number'],
+    help: strings.getLineWidthHelp(),
+  },
+  showPoints: {
+    types: ['boolean'],
+    help: strings.getShowPointsHelp(),
+  },
+  pointsRadius: {
+    types: ['number'],
+    help: strings.getPointsRadiusHelp(),
   },
   yConfig: {
     types: [Y_CONFIG],
