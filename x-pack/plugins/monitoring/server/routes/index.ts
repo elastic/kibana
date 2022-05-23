@@ -17,6 +17,7 @@ import {
   registerV1ClusterRoutes,
   registerV1ElasticsearchRoutes,
   registerV1ElasticsearchSettingsRoutes,
+  registerV1EnterpriseSearchRoutes,
   registerV1LogstashRoutes,
   registerV1SetupRoutes,
   registerV1KibanaRoutes,
@@ -46,6 +47,7 @@ export function requireUIRoutes(
   registerV1ClusterRoutes(server);
   registerV1ElasticsearchRoutes(server);
   registerV1ElasticsearchSettingsRoutes(server, npRoute);
+  registerV1EnterpriseSearchRoutes(server);
   registerV1LogstashRoutes(server);
   registerV1SetupRoutes(server);
   registerV1KibanaRoutes(server);
