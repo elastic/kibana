@@ -6,21 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { Datatable } from '@kbn/expressions-plugin';
 import { i18n } from '@kbn/i18n';
-import { validateAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { isValidInterval } from '@kbn/data-plugin/common';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { AxisExtentModes, ValueLabelModes } from '../constants';
 import {
-  DataLayerArgs,
-  ExtendedDataLayerArgs,
   SeriesType,
   AxisExtentConfigResult,
   DataLayerConfigResult,
+  CommonXYDataLayerConfigResult,
   ValueLabelMode,
   CommonXYDataLayerConfig,
+  ExtendedDataLayerConfigResult,
 } from '../types';
+import { isTimeChart } from '../helpers';
 
-const errors = {
+export const errors = {
   markSizeAccessorForNonLineOrAreaChartsError: () =>
     i18n.translate(
       'expressionXY.reusable.function.dataLayer.errors.markSizeAccessorForNonLineOrAreaChartsError',
@@ -61,6 +62,10 @@ const errors = {
         defaultMessage: 'Lines visibility can be controlled only at line charts',
       }
     ),
+  markSizeRatioWithoutAccessor: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.markSizeRatioWithoutAccessor', {
+      defaultMessage: 'Mark size ratio can be applied only with `markSizeAccessor`',
+    }),
   extendBoundsAreInvalidError: () =>
     i18n.translate('expressionXY.reusable.function.xyVis.errors.extendBoundsAreInvalidError', {
       defaultMessage:
@@ -82,6 +87,22 @@ const errors = {
     i18n.translate('expressionXY.reusable.function.xyVis.errors.dataBoundsForNotLineChartError', {
       defaultMessage: 'Only line charts can be fit to the data bounds',
     }),
+  timeMarkerForNotTimeChartsError: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.timeMarkerForNotTimeChartsError', {
+      defaultMessage: 'Only time charts can have current time marker',
+    }),
+  isInvalidIntervalError: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.isInvalidIntervalError', {
+      defaultMessage:
+        'Provided x-axis interval is invalid. The interval should include quantity and unit names. Examples: 1d, 24h, 1w.',
+    }),
+  minTimeBarIntervalNotForTimeBarChartError: () =>
+    i18n.translate(
+      'expressionXY.reusable.function.xyVis.errors.minTimeBarIntervalNotForTimeBarChartError',
+      {
+        defaultMessage: '`minTimeBarInterval` argument is applicable only for time bar charts.',
+      }
+    ),
 };
 
 export const hasBarLayer = (layers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>) =>
@@ -150,8 +171,17 @@ export const validateValueLabels = (
 const isAreaOrLineChart = (seriesType: SeriesType) =>
   seriesType.includes('line') || seriesType.includes('area');
 
+export const validateAddTimeMarker = (
+  dataLayers: Array<DataLayerConfigResult | ExtendedDataLayerConfigResult>,
+  addTimeMarker?: boolean
+) => {
+  if (addTimeMarker && !isTimeChart(dataLayers)) {
+    throw new Error(errors.timeMarkerForNotTimeChartsError());
+  }
+};
+
 export const validateMarkSizeForChartType = (
-  markSizeAccessor: string | undefined,
+  markSizeAccessor: ExpressionValueVisDimension | string | undefined,
   seriesType: SeriesType
 ) => {
   if (markSizeAccessor && !seriesType.includes('line') && !seriesType.includes('area')) {
@@ -159,8 +189,8 @@ export const validateMarkSizeForChartType = (
   }
 };
 
-export const validateMarkSizeRatioLimits = (markSizeRatio: number) => {
-  if (markSizeRatio < 1 || markSizeRatio > 100) {
+export const validateMarkSizeRatioLimits = (markSizeRatio?: number) => {
+  if (markSizeRatio !== undefined && (markSizeRatio < 1 || markSizeRatio > 100)) {
     throw new Error(errors.markSizeRatioLimitsError());
   }
 };
@@ -201,14 +231,27 @@ export const validateLinesVisibilityForChartType = (
   }
 };
 
-export const validateDataLayer = (
-  args: DataLayerArgs | ExtendedDataLayerArgs,
-  table: Datatable
+export const validateMarkSizeRatioWithAccessor = (
+  markSizeRatio: number | undefined,
+  markSizeAccessor: ExpressionValueVisDimension | string | undefined
 ) => {
-  validateMarkSizeForChartType(args.markSizeAccessor, args.seriesType);
-  validateAccessor(args.markSizeAccessor, table.columns);
-  validateLinesVisibilityForChartType(args.showLines, args.seriesType);
-  validateLineWidthForChartType(args.lineWidth, args.seriesType);
-  validateShowPointsForChartType(args.showPoints, args.seriesType);
-  validatePointsRadiusForChartType(args.pointsRadius, args.seriesType);
+  if (markSizeRatio !== undefined && !markSizeAccessor) {
+    throw new Error(errors.markSizeRatioWithoutAccessor());
+  }
+};
+
+export const validateMinTimeBarInterval = (
+  dataLayers: CommonXYDataLayerConfigResult[],
+  hasBar: boolean,
+  minTimeBarInterval?: string
+) => {
+  if (minTimeBarInterval) {
+    if (!isValidInterval(minTimeBarInterval)) {
+      throw new Error(errors.isInvalidIntervalError());
+    }
+
+    if (!hasBar || !isTimeChart(dataLayers)) {
+      throw new Error(errors.minTimeBarIntervalNotForTimeBarChartError());
+    }
+  }
 };

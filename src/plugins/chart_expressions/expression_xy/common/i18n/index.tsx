@@ -49,6 +49,14 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.yRightExtent.help', {
       defaultMessage: 'Y right axis extents',
     }),
+  getYLeftScaleTypeHelp: () =>
+    i18n.translate('expressionXY.xyVis.yLeftScaleType.help', {
+      defaultMessage: 'The scale type of the left y axis',
+    }),
+  getYRightScaleTypeHelp: () =>
+    i18n.translate('expressionXY.xyVis.yRightScaleType.help', {
+      defaultMessage: 'The scale type of the right y axis',
+    }),
   getLegendHelp: () =>
     i18n.translate('expressionXY.xyVis.legend.help', {
       defaultMessage: 'Configure the chart legend.',
@@ -85,9 +93,9 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.dataLayer.help', {
       defaultMessage: 'Data layer of visual series',
     }),
-  getReferenceLineLayerHelp: () =>
-    i18n.translate('expressionXY.xyVis.referenceLineLayer.help', {
-      defaultMessage: 'Reference line layer',
+  getReferenceLinesHelp: () =>
+    i18n.translate('expressionXY.xyVis.referenceLines.help', {
+      defaultMessage: 'Reference line',
     }),
   getAnnotationLayerHelp: () =>
     i18n.translate('expressionXY.xyVis.annotationLayer.help', {
@@ -113,9 +121,29 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.ariaLabel.help', {
       defaultMessage: 'Specifies the aria label of the xy chart',
     }),
+  getAddTimeMakerHelp: () =>
+    i18n.translate('expressionXY.xyVis.addTimeMaker.help', {
+      defaultMessage: 'Show time marker',
+    }),
   getMarkSizeRatioHelp: () =>
     i18n.translate('expressionXY.xyVis.markSizeRatio.help', {
       defaultMessage: 'Specifies the ratio of the dots at the line and area charts',
+    }),
+  getMinTimeBarIntervalHelp: () =>
+    i18n.translate('expressionXY.xyVis.xAxisInterval.help', {
+      defaultMessage: 'Specifies the min interval for time bar chart',
+    }),
+  getSplitColumnAccessorHelp: () =>
+    i18n.translate('expressionXY.xyVis.splitColumnAccessor.help', {
+      defaultMessage: 'Specifies split column of the xy chart',
+    }),
+  getSplitRowAccessorHelp: () =>
+    i18n.translate('expressionXY.xyVis.splitRowAccessor.help', {
+      defaultMessage: 'Specifies split row of the xy chart',
+    }),
+  getLayersHelp: () =>
+    i18n.translate('expressionXY.layeredXyVis.layers.help', {
+      defaultMessage: 'Layers of visual series',
     }),
   getDataLayerFnHelp: () =>
     i18n.translate('expressionXY.dataLayer.help', {
@@ -140,10 +168,6 @@ export const strings = {
   getIsHistogramHelp: () =>
     i18n.translate('expressionXY.dataLayer.isHistogram.help', {
       defaultMessage: 'Whether to layout the chart as a histogram',
-    }),
-  getYScaleTypeHelp: () =>
-    i18n.translate('expressionXY.dataLayer.yScaleType.help', {
-      defaultMessage: 'The scale type of the y axes',
     }),
   getSplitAccessorHelp: () =>
     i18n.translate('expressionXY.dataLayer.splitAccessor.help', {
@@ -232,5 +256,13 @@ export const strings = {
   getAnnotationLayerAnnotationsHelp: () =>
     i18n.translate('expressionXY.annotationLayer.annotations.help', {
       defaultMessage: 'Annotations',
+    }),
+  getReferenceLineNameHelp: () =>
+    i18n.translate('expressionXY.referenceLine.name.help', {
+      defaultMessage: 'Reference line name',
+    }),
+  getReferenceLineValueHelp: () =>
+    i18n.translate('expressionXY.referenceLine.Value.help', {
+      defaultMessage: 'Reference line value',
     }),
 };

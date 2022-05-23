@@ -25,9 +25,11 @@ export const mapFiltersToKql = ({
   actionTypesFilter,
   ruleExecutionStatusesFilter,
   ruleStatusesFilter,
+  tagsFilter,
 }: {
   typesFilter?: string[];
   actionTypesFilter?: string[];
+  tagsFilter?: string[];
   ruleExecutionStatusesFilter?: string[];
   ruleStatusesFilter?: RuleStatus[];
 }): string[] => {
@@ -55,7 +57,7 @@ export const mapFiltersToKql = ({
 
   if (ruleStatusesFilter && ruleStatusesFilter.length) {
     const enablementFilter = getEnablementFilter(ruleStatusesFilter);
-    const snoozedFilter = `(alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)`;
+    const snoozedFilter = `(alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)`;
     const hasEnablement =
       ruleStatusesFilter.includes('enabled') || ruleStatusesFilter.includes('disabled');
     const hasSnoozed = ruleStatusesFilter.includes('snoozed');
@@ -67,6 +69,9 @@ export const mapFiltersToKql = ({
     } else {
       filters.push(`${enablementFilter} or ${snoozedFilter}`);
     }
+  }
+  if (tagsFilter && tagsFilter.length) {
+    filters.push(`alert.attributes.tags:(${tagsFilter.join(' or ')})`);
   }
 
   return filters;

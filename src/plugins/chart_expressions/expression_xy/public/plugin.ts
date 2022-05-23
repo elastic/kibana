@@ -17,7 +17,6 @@ import { ExpressionXyPluginSetup, ExpressionXyPluginStart, SetupDeps } from './t
 import {
   xyVisFunction,
   layeredXyVisFunction,
-  dataLayerFunction,
   extendedDataLayerFunction,
   yAxisConfigFunction,
   extendedYAxisConfigFunction,
@@ -25,8 +24,8 @@ import {
   gridlinesConfigFunction,
   axisExtentConfigFunction,
   tickLabelsConfigFunction,
+  referenceLineFunction,
   referenceLineLayerFunction,
-  extendedReferenceLineLayerFunction,
   annotationLayerFunction,
   labelsOrientationConfigFunction,
   axisTitlesVisibilityConfigFunction,
@@ -59,15 +58,14 @@ export class ExpressionXyPlugin {
     expressions.registerFunction(extendedYAxisConfigFunction);
     expressions.registerFunction(legendConfigFunction);
     expressions.registerFunction(gridlinesConfigFunction);
-    expressions.registerFunction(dataLayerFunction);
     expressions.registerFunction(extendedDataLayerFunction);
     expressions.registerFunction(axisExtentConfigFunction);
     expressions.registerFunction(tickLabelsConfigFunction);
     expressions.registerFunction(annotationLayerFunction);
     expressions.registerFunction(extendedAnnotationLayerFunction);
     expressions.registerFunction(labelsOrientationConfigFunction);
+    expressions.registerFunction(referenceLineFunction);
     expressions.registerFunction(referenceLineLayerFunction);
-    expressions.registerFunction(extendedReferenceLineLayerFunction);
     expressions.registerFunction(axisTitlesVisibilityConfigFunction);
     expressions.registerFunction(xyVisFunction);
     expressions.registerFunction(layeredXyVisFunction);

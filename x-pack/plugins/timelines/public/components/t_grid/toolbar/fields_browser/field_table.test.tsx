@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, RenderResult } from '@testing-library/react';
 import { mockBrowserFields, TestProviders } from '../../../../mock';
 import { tGridActions } from '../../../../store/t_grid';
 import { defaultColumnHeaderType } from '../../body/column_headers/default_headers';
@@ -155,50 +155,117 @@ describe('FieldTable', () => {
     expect(checkbox).toHaveAttribute('checked');
   });
 
-  it('should dispatch remove column action on field unchecked', () => {
-    const result = render(
-      <TestProviders>
-        <FieldTable
-          {...defaultProps}
-          selectedCategoryIds={['base']}
-          columnHeaders={columnHeaders}
-          filteredBrowserFields={{ base: { fields: { [timestampFieldId]: timestampField } } }}
-        />
-      </TestProviders>
-    );
+  describe('selection', () => {
+    it('should dispatch remove column action on field unchecked', () => {
+      const result = render(
+        <TestProviders>
+          <FieldTable
+            {...defaultProps}
+            selectedCategoryIds={['base']}
+            columnHeaders={columnHeaders}
+            filteredBrowserFields={{ base: { fields: { [timestampFieldId]: timestampField } } }}
+          />
+        </TestProviders>
+      );
 
-    result.getByTestId(`field-${timestampFieldId}-checkbox`).click();
+      result.getByTestId(`field-${timestampFieldId}-checkbox`).click();
 
-    expect(mockDispatch).toHaveBeenCalledTimes(1);
-    expect(mockDispatch).toHaveBeenCalledWith(
-      tGridActions.removeColumn({ id: timelineId, columnId: timestampFieldId })
-    );
+      expect(mockDispatch).toHaveBeenCalledTimes(1);
+      expect(mockDispatch).toHaveBeenCalledWith(
+        tGridActions.removeColumn({ id: timelineId, columnId: timestampFieldId })
+      );
+    });
+
+    it('should dispatch upsert column action on field checked', () => {
+      const result = render(
+        <TestProviders>
+          <FieldTable
+            {...defaultProps}
+            selectedCategoryIds={['base']}
+            filteredBrowserFields={{ base: { fields: { [timestampFieldId]: timestampField } } }}
+          />
+        </TestProviders>
+      );
+
+      result.getByTestId(`field-${timestampFieldId}-checkbox`).click();
+
+      expect(mockDispatch).toHaveBeenCalledTimes(1);
+      expect(mockDispatch).toHaveBeenCalledWith(
+        tGridActions.upsertColumn({
+          id: timelineId,
+          column: {
+            columnHeaderType: defaultColumnHeaderType,
+            id: timestampFieldId,
+            initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+          },
+          index: 1,
+        })
+      );
+    });
   });
 
-  it('should dispatch upsert column action on field checked', () => {
-    const result = render(
-      <TestProviders>
+  describe('pagination', () => {
+    const isAtFirstPage = (result: RenderResult) =>
+      result.getByTestId('pagination-button-0').classList.contains('euiPaginationButton-isActive');
+
+    const changePage = (result: RenderResult) => {
+      result.getByTestId('pagination-button-1').click();
+    };
+
+    const defaultPaginationProps: FieldTableProps = {
+      ...defaultProps,
+      filteredBrowserFields: mockBrowserFields,
+    };
+
+    it('should paginate on page clicked', () => {
+      const result = render(
+        <TestProviders>
+          <FieldTable {...defaultPaginationProps} />
+        </TestProviders>
+      );
+
+      expect(isAtFirstPage(result)).toBeTruthy();
+
+      changePage(result);
+
+      expect(isAtFirstPage(result)).toBeFalsy();
+    });
+
+    it('should not reset on field checked', () => {
+      const result = render(
+        <TestProviders>
+          <FieldTable {...defaultPaginationProps} />
+        </TestProviders>
+      );
+
+      changePage(result);
+
+      result.getAllByRole('checkbox').at(0)?.click();
+      expect(mockDispatch).toHaveBeenCalled(); // assert some field has been selected
+
+      expect(isAtFirstPage(result)).toBeFalsy();
+    });
+
+    it('should reset on filter change', () => {
+      const result = render(
         <FieldTable
-          {...defaultProps}
-          selectedCategoryIds={['base']}
-          filteredBrowserFields={{ base: { fields: { [timestampFieldId]: timestampField } } }}
+          {...defaultPaginationProps}
+          selectedCategoryIds={['destination', 'event', 'client', 'agent', 'host']}
+        />,
+        { wrapper: TestProviders }
+      );
+
+      changePage(result);
+      expect(isAtFirstPage(result)).toBeFalsy();
+
+      result.rerender(
+        <FieldTable
+          {...defaultPaginationProps}
+          selectedCategoryIds={['destination', 'event', 'client', 'agent']}
         />
-      </TestProviders>
-    );
+      );
 
-    result.getByTestId(`field-${timestampFieldId}-checkbox`).click();
-
-    expect(mockDispatch).toHaveBeenCalledTimes(1);
-    expect(mockDispatch).toHaveBeenCalledWith(
-      tGridActions.upsertColumn({
-        id: timelineId,
-        column: {
-          columnHeaderType: defaultColumnHeaderType,
-          id: timestampFieldId,
-          initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-        },
-        index: 1,
-      })
-    );
+      expect(isAtFirstPage(result)).toBeTruthy();
+    });
   });
 });

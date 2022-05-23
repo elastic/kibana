@@ -6,13 +6,15 @@
  */
 import React from 'react';
 import {
-  EuiTableFieldDataColumnType,
   EuiEmptyPrompt,
   EuiBasicTable,
   EuiTextColor,
-  EuiFlexGroup,
-  EuiFlexItem,
+  type EuiTableFieldDataColumnType,
+  type CriteriaWithPagination,
+  type Pagination,
+  EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
 import { Link, generatePath } from 'react-router-dom';
@@ -25,17 +27,25 @@ import { findingsNavigation } from '../../../common/navigation/constants';
 export const formatNumber = (value: number) =>
   value < 1000 ? value : numeral(value).format('0.0a');
 
-type FindingsGroupByResourceProps = CspFindingsByResourceResult;
-type CspFindingsByResource = NonNullable<CspFindingsByResourceResult['data']>['page'][number];
+export type CspFindingsByResource = NonNullable<
+  CspFindingsByResourceResult['data']
+>['page'][number];
+
+interface Props extends CspFindingsByResourceResult {
+  pagination: Pagination;
+  setTableOptions(options: CriteriaWithPagination<CspFindingsByResource>): void;
+}
 
 export const getResourceId = (resource: CspFindingsByResource) =>
-  [resource.resource_id, resource.cluster_id, resource.cis_section].join('/');
+  [resource.resource_id, ...resource.cis_sections].join('/');
 
 const FindingsByResourceTableComponent = ({
   error,
   data,
   loading,
-}: FindingsGroupByResourceProps) => {
+  pagination,
+  setTableOptions,
+}: Props) => {
   const getRowProps = (row: CspFindingsByResource) => ({
     'data-test-subj': TEST_SUBJECTS.getFindingsByResourceTableRowTestId(getResourceId(row)),
   });
@@ -50,6 +60,8 @@ const FindingsByResourceTableComponent = ({
       items={data?.page || []}
       columns={columns}
       rowProps={getRowProps}
+      pagination={pagination}
+      onChange={setTableOptions}
     />
   );
 };
@@ -70,7 +82,27 @@ const columns: Array<EuiTableFieldDataColumnType<CspFindingsByResource>> = [
     ),
   },
   {
-    field: 'cis_section',
+    field: 'resource_subtype',
+    truncateText: true,
+    name: (
+      <FormattedMessage
+        id="xpack.csp.findings.groupByResourceTable.resourceTypeColumnLabel"
+        defaultMessage="Resource Type"
+      />
+    ),
+  },
+  {
+    field: 'resource_name',
+    truncateText: true,
+    name: (
+      <FormattedMessage
+        id="xpack.csp.findings.groupByResourceTable.resourceNameColumnLabel"
+        defaultMessage="Resource Name"
+      />
+    ),
+  },
+  {
+    field: 'cis_sections',
     truncateText: true,
     name: (
       <FormattedMessage
@@ -78,16 +110,7 @@ const columns: Array<EuiTableFieldDataColumnType<CspFindingsByResource>> = [
         defaultMessage="CIS Section"
       />
     ),
-  },
-  {
-    field: 'cluster_id',
-    truncateText: true,
-    name: (
-      <FormattedMessage
-        id="xpack.csp.findings.groupByResourceTable.clusterIdColumnLabel"
-        defaultMessage="Cluster ID"
-      />
-    ),
+    render: (sections: string[]) => sections.join(', '),
   },
   {
     field: 'failed_findings',
@@ -99,14 +122,22 @@ const columns: Array<EuiTableFieldDataColumnType<CspFindingsByResource>> = [
       />
     ),
     render: (failedFindings: CspFindingsByResource['failed_findings']) => (
-      <EuiFlexGroup gutterSize="xs">
-        <EuiFlexItem grow={false}>
-          <EuiTextColor color="danger">{formatNumber(failedFindings.total)}</EuiTextColor>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <span>({numeral(failedFindings.normalized).format('0%')})</span>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiToolTip
+        content={i18n.translate('xpack.csp.findings.groupByResourceTable.failedFindingsToolTip', {
+          defaultMessage: '{failed} out of {total}',
+          values: {
+            failed: failedFindings.count,
+            total: failedFindings.total_findings,
+          },
+        })}
+      >
+        <>
+          <EuiTextColor color={failedFindings.count === 0 ? '' : 'danger'}>
+            {formatNumber(failedFindings.count)}
+          </EuiTextColor>
+          <span> ({numeral(failedFindings.normalized).format('0%')})</span>
+        </>
+      </EuiToolTip>
     ),
   },
 ];

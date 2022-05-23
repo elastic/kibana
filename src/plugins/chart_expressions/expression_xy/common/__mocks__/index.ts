@@ -73,7 +73,21 @@ export const sampleExtendedLayer: ExtendedDataLayerConfig = {
   splitAccessor: 'd',
   columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
   xScaleType: 'ordinal',
-  yScaleType: 'linear',
+  isHistogram: false,
+  palette: mockPaletteOutput,
+  table: createSampleDatatableWithRows([]),
+};
+
+export const sampleExtendedLayer: ExtendedDataLayerConfig = {
+  layerId: 'first',
+  type: 'extendedDataLayer',
+  layerType: LayerTypes.DATA,
+  seriesType: 'line',
+  xAccessor: 'c',
+  accessors: ['a', 'b'],
+  splitAccessor: 'd',
+  columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+  xScaleType: 'ordinal',
   isHistogram: false,
   palette: mockPaletteOutput,
   table: createSampleDatatableWithRows([]),
@@ -126,12 +140,14 @@ export const createArgsWithLayers = (
   },
   markSizeRatio: 5,
   layers: Array.isArray(layers) ? layers : [layers],
+  yLeftScale: 'linear',
+  yRightScale: 'linear',
 });
 
 export function sampleArgs() {
   const data = createSampleDatatableWithRows([
-    { a: 1, b: 2, c: 'I', d: 'Foo' },
-    { a: 1, b: 5, c: 'J', d: 'Bar' },
+    { a: 1, b: 2, c: 1652034840000, d: 'Foo' },
+    { a: 1, b: 5, c: 1652122440000, d: 'Bar' },
   ]);
 
   return {
