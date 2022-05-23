@@ -20,7 +20,6 @@ import { useKibana, useGetUserCasesPermissions, useHttp } from '../../../common/
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { cloneDeep } from 'lodash';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import {
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,
@@ -33,6 +32,7 @@ import {
   isAlertFromEndpointAlert,
 } from '../../../common/utils/endpoint_alert_check';
 import { HostStatus } from '../../../../common/endpoint/types';
+import { getUserPrivilegesMockDefaultValue } from '../../../common/components/user_privileges/__mocks__';
 
 jest.mock('../../../common/components/user_privileges');
 
@@ -123,6 +123,10 @@ describe('take action dropdown', () => {
     });
 
     (useHttp as jest.Mock).mockReturnValue(mockStartServicesMock.http);
+  });
+
+  afterEach(() => {
+    (useUserPrivileges as jest.Mock).mockReturnValue(getUserPrivilegesMockDefaultValue());
   });
 
   test('should render takeActionButton', () => {
@@ -417,19 +421,27 @@ describe('take action dropdown', () => {
         });
       });
 
+      it('should not display the button if user is not allowed to manage endpoints', async () => {
+        (useUserPrivileges as jest.Mock).mockReturnValue({
+          ...mockInitialUserPrivilegesState(),
+          endpointPrivileges: { loading: false, canAccessEndpointManagement: false },
+        });
+        render();
+
+        expect(findLaunchResponderButton()).toHaveLength(0);
+      });
+
       it('should disable the button if alert NOT from a host running endpoint', async () => {
         setTypeOnEcsDataWithAgentType('filebeat');
         if (defaultProps.detailsData) {
-          defaultProps.detailsData = cloneDeep(
-            generateAlertDetailsDataMock()
-          ) as TimelineEventsDetailsItem[];
+          defaultProps.detailsData = generateAlertDetailsDataMock() as TimelineEventsDetailsItem[];
         }
         render();
 
-        expect(findLaunchResponderButton().first().prop('disabled')).toBe(true);
-        expect(findLaunchResponderButton().first().prop('toolTipContent')).toEqual(
-          NOT_FROM_ENDPOINT_HOST_TOOLTIP
-        );
+        const consoleButton = findLaunchResponderButton().first();
+
+        expect(consoleButton.prop('disabled')).toBe(true);
+        expect(consoleButton.prop('toolTipContent')).toEqual(NOT_FROM_ENDPOINT_HOST_TOOLTIP);
       });
 
       it('should disable the button if host status is unenrolled', async () => {
