@@ -7,12 +7,12 @@
 import { ServiceLocationErrors } from '../../../../common/runtime_types/monitor_management';
 
 export interface MonitorSyncEvent {
-  totalMonitors: number;
-  totalTestRuns: number;
-  browserTestRunsPer24h: number;
-  httpTestRunsPer24h: number;
-  icmpTestRunsPer24h: number;
-  tcpTestRunsPer24h: number;
+  total: number;
+  totalTests: number;
+  browserTests24h: number;
+  httpTests24h: number;
+  icmpTests24h: number;
+  tcpTests24h: number;
   [key: string]: number;
 }
 

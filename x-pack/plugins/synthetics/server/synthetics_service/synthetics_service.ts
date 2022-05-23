@@ -15,6 +15,7 @@ import {
   TaskManagerStartContract,
   TaskInstance,
 } from '@kbn/task-manager-plugin/server';
+import { MonitorSyncEvent } from '../legacy_uptime/lib/telemetry/types';
 import { sendSyncTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import { installSyntheticsIndexTemplates } from '../routes/synthetics_service/install_index_templates';
@@ -260,7 +261,7 @@ export class SyntheticsService {
       return null;
     }
 
-    if (!configs) {
+    if (!configs && monitorConfigs.length > 0) {
       const telemetry = this.getSyncTelemetry(monitorConfigs);
       sendSyncTelemetryEvents(this.logger, this.server.telemetry, telemetry);
     }
@@ -419,7 +420,7 @@ export class SyntheticsService {
     );
   }
 
-  getSyncTelemetry(monitors: SyntheticsMonitorWithId[]) {
+  getSyncTelemetry(monitors: SyntheticsMonitorWithId[]): MonitorSyncEvent {
     let totalRuns = 0;
     let browserTestRuns = 0;
     let httpTestRuns = 0;
