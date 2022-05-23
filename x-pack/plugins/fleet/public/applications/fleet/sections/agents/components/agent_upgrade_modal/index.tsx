@@ -269,7 +269,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
           <EuiCallOut
             color="warning"
             title={i18n.translate('xpack.fleet.upgradeAgents.warningCallout', {
-              defaultMessage: 'Only available for Elastic Agent versions 8.3+',
+              defaultMessage: 'Rolling upgrade only available for Elastic Agent versions 8.3+',
             })}
           />
         </>
