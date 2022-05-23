@@ -497,6 +497,10 @@ export class AggConfigs {
     );
   }
 
+  /**
+   * Generates an expression abstract syntax tree using the `esaggs` expression function.
+   * @returns The expression AST.
+   */
   toExpressionAst() {
     return buildExpression([
       buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {

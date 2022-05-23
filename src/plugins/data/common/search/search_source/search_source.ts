@@ -936,6 +936,13 @@ export class SearchSource {
     return [filterField];
   }
 
+  /**
+   * Generates an expression abstract syntax tree using the fields set in the current search source and its ancestors.
+   * The produced expression from the returned AST will return the `datatable` structure.
+   * The generator will use the `esdsl` function to perform the search.
+   * When the `aggs` field is present, it will use the `esaggs` function instead.
+   * @returns The expression AST.
+   */
   toExpressionAst(): ExpressionAstExpression {
     const searchRequest = this.mergeProps();
     const { body, index, query } = searchRequest;
