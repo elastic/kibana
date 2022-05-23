@@ -169,7 +169,6 @@ const testADJobs: Array<{ job: Job; datafeed: Datafeed }> = [
 ];
 
 const testDFAJobs: DataFrameAnalyticsConfig[] = [
-  // @ts-expect-error not full interface
   {
     id: `bm_1_1`,
     description:
@@ -198,7 +197,6 @@ const testDFAJobs: DataFrameAnalyticsConfig[] = [
     model_memory_limit: '60mb',
     allow_lazy_start: false,
   },
-  // @ts-expect-error not full interface
   {
     id: `ihp_1_2`,
     description: 'This is the job description',
@@ -221,7 +219,6 @@ const testDFAJobs: DataFrameAnalyticsConfig[] = [
     },
     model_memory_limit: '5mb',
   },
-  // @ts-expect-error not full interface
   {
     id: `egs_1_3`,
     description: 'This is the job description',
