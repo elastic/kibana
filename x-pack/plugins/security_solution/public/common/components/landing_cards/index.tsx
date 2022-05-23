@@ -69,7 +69,6 @@ export const LandingCards = memo(() => {
 
   const { resetTour, incrementStep } = useTourContext();
 
-
   return (
     <EuiFlexGroup data-test-subj="siem-landing-page" direction="column" gutterSize="l">
       <EuiFlexItem grow={false}>
