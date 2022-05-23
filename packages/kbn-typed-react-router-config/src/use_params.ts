@@ -25,7 +25,7 @@ export function useParams(...args: any[]) {
 
   const paths = args as string[];
 
-  const getParamsArgs = [...paths, location, optional] as [never, Location<any>, boolean];
+  const getParamsArgs = [...paths, location, optional] as [never, Location, boolean];
 
   return router.getParams(...getParamsArgs);
 }

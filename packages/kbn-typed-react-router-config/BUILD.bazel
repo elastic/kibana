@@ -46,12 +46,12 @@ TYPES_DEPS = [
   "@npm//query-string",
   "@npm//utility-types",
   "@npm//history",
+  "@npm//react-router-dom",
   "@npm//@types/jest",
   "@npm//@types/lodash",
   "@npm//@types/node",
   "@npm//@types/react",
   "@npm//@types/react-router-config",
-  "@npm//@types/react-router-dom",
 ]
 
 jsts_transpiler(

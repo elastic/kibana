@@ -91,6 +91,7 @@ TYPES_DEPS = [
   "@npm//jest",
   "@npm//jest-cli",
   "@npm//jest-snapshot",
+  "@npm//react-router-dom",
   "@npm//redux",
   "@npm//rxjs",
   "@npm//xmlbuilder",
@@ -109,7 +110,6 @@ TYPES_DEPS = [
   "@npm//@types/react",
   "@npm//@types/react-dom",
   "@npm//@types/react-redux",
-  "@npm//@types/react-router-dom",
   "@npm//@types/semver",
   "@npm//@types/xml2js",
 ]

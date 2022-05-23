@@ -7,7 +7,7 @@
  */
 
 import React, { Component, ComponentType } from 'react';
-import { MemoryRouter, Route, withRouter } from 'react-router-dom';
+import { MemoryRouter, Route } from 'react-router-dom';
 import { History, Location, To, InitialEntry } from 'history';
 
 const stringifyPath = (path: To): string => {
@@ -18,13 +18,7 @@ const stringifyPath = (path: To): string => {
   return path.pathname || '/';
 };
 
-const locationDescriptorToRoutePath = (paths: To | To[]): string | string[] => {
-  if (Array.isArray(paths)) {
-    return paths.map((path: To) => {
-      return stringifyPath(path);
-    });
-  }
-
+const locationDescriptorToRoutePath = (paths: To): string => {
   return stringifyPath(paths);
 };
 
@@ -39,10 +33,12 @@ export const WithMemoryRouter =
     );
 
 export const WithRoute =
-  (componentRoutePath: InitialEntry | InitialEntry[] = ['/'], onRouter = (router: any) => {}) =>
+  (componentRoutePath: InitialEntry = '/', onRouter = (router: any) => {}) =>
   (WrappedComponent: ComponentType) => {
     // Create a class component that will catch the router
     // and forward it to our "onRouter()" handler.
+    // TODO: withRouter is no longer a thing, need to use FC/hooks instead AND stop accessing history or router
+    //       as those are no longer exported by react-router-dom
     const CatchRouter = withRouter(
       class extends Component<any> {
         componentDidMount() {
@@ -58,10 +54,9 @@ export const WithRoute =
     );
 
     return (props: any) => (
-      <Route
-        path={locationDescriptorToRoutePath(componentRoutePath)}
-        render={(routerProps) => <CatchRouter {...routerProps} {...props} />}
-      />
+      <Route path={locationDescriptorToRoutePath(componentRoutePath)}>
+        <CatchRouter {...props} />
+      </Route>
     );
   };
 
