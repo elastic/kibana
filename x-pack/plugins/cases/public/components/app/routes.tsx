@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { lazy, Suspense, useCallback } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { QueryClientProvider } from 'react-query';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { AllCases } from '../all_cases';
-import { CaseView } from '../case_view';
 import { CreateCase } from '../create';
 import { ConfigureCases } from '../configure_cases';
 import { CasesRoutesProps } from './types';
@@ -26,6 +26,9 @@ import { NoPrivilegesPage } from '../no_privileges';
 import * as i18n from './translations';
 import { useReadonlyHeader } from './use_readonly_header';
 import { casesQueryClient } from '../cases_context/query_client';
+import type { CaseViewProps } from '../case_view/types';
+
+const CaseViewLazy: React.FC<CaseViewProps> = lazy(() => import('../case_view'));
 
 const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   onComponentInitialized,
@@ -74,15 +77,17 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
         </Route>
 
         <Route exact path={[getCaseViewWithCommentPath(basePath), getCaseViewPath(basePath)]}>
-          <CaseView
-            onComponentInitialized={onComponentInitialized}
-            actionsNavigation={actionsNavigation}
-            ruleDetailsNavigation={ruleDetailsNavigation}
-            showAlertDetails={showAlertDetails}
-            useFetchAlertData={useFetchAlertData}
-            refreshRef={refreshRef}
-            timelineIntegration={timelineIntegration}
-          />
+          <Suspense fallback={<EuiLoadingSpinner />}>
+            <CaseViewLazy
+              onComponentInitialized={onComponentInitialized}
+              actionsNavigation={actionsNavigation}
+              ruleDetailsNavigation={ruleDetailsNavigation}
+              showAlertDetails={showAlertDetails}
+              useFetchAlertData={useFetchAlertData}
+              refreshRef={refreshRef}
+              timelineIntegration={timelineIntegration}
+            />
+          </Suspense>
         </Route>
 
         <Route path={basePath}>
