@@ -20,6 +20,7 @@ export interface FieldIconProps extends Omit<EuiTokenProps, 'iconType'> {
     | 'geo_shape'
     | 'ip'
     | 'ip_range'
+    | 'match_only_text'
     | 'murmur3'
     | 'number'
     | 'number_range'
@@ -45,6 +46,7 @@ export const typeToEuiIconMap: Partial<Record<string, EuiTokenProps>> = {
   geo_shape: { iconType: 'tokenGeo' },
   ip: { iconType: 'tokenIP' },
   ip_range: { iconType: 'tokenIP' },
+  match_only_text: { iconType: 'tokenString' },
   // is a plugin's data type https://www.elastic.co/guide/en/elasticsearch/plugins/current/mapper-murmur3-usage.html
   murmur3: { iconType: 'tokenSearchType' },
   number: { iconType: 'tokenNumber' },
