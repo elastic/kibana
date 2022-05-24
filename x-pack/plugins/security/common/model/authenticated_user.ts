@@ -42,6 +42,11 @@ export interface AuthenticatedUser extends User {
    * @example "realm" | "api_key" | "token" | "anonymous" | "internal"
    */
   authentication_type: string;
+
+  /**
+   * Indicates whether user is authenticated via Elastic Cloud built-in SAML realm.
+   */
+  elastic_cloud_user: boolean;
 }
 
 export function isUserAnonymous(user: Pick<AuthenticatedUser, 'authentication_provider'>) {

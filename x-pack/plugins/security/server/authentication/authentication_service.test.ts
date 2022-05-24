@@ -74,6 +74,7 @@ describe('AuthenticationService', () => {
     session: jest.Mocked<PublicMethodsOf<Session>>;
     applicationName: 'kibana-.kibana';
     kibanaFeatures: [];
+    isElasticCloudDeployment: jest.Mock;
   };
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
@@ -115,6 +116,7 @@ describe('AuthenticationService', () => {
       userProfileService: userProfileServiceMock.createStart(),
       applicationName: 'kibana-.kibana',
       kibanaFeatures: [],
+      isElasticCloudDeployment: jest.fn().mockReturnValue(false),
     };
     (mockStartAuthenticationParams.http.basePath.get as jest.Mock).mockImplementation(
       () => mockStartAuthenticationParams.http.basePath.serverBasePath

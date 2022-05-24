@@ -16,6 +16,7 @@ export function defineUpdateUserProfileDataRoute({
   getSession,
   getUserProfileService,
   logger,
+  getAuthenticationService,
 }: RouteDefinitionParams) {
   router.post(
     {
@@ -34,6 +35,16 @@ export function defineUpdateUserProfileDataRoute({
       if (!session.userProfileId) {
         logger.warn(`User profile missing from current session. (sid: ${session.sid.slice(-10)})`);
         return response.notFound();
+      }
+
+      const currentUser = getAuthenticationService().getCurrentUser(request);
+      if (currentUser?.elastic_cloud_user) {
+        logger.warn(
+          `Elastic Cloud SSO users aren't allowed to update profiles in Kibana. (sid: ${session.sid.slice(
+            -10
+          )})`
+        );
+        return response.forbidden();
       }
 
       const userProfileService = getUserProfileService();

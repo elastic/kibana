@@ -83,6 +83,7 @@ describe('SecurityNavControl', () => {
                 "type": "native",
               },
               "authentication_type": "realm",
+              "elastic_cloud_user": false,
               "email": "email",
               "enabled": true,
               "full_name": "full name",
