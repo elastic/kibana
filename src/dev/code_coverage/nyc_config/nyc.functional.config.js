@@ -25,7 +25,9 @@ module.exports = {
   // 'temp-dir': process.env.COVERAGE_TEMP_DIR
   //   ? path.resolve(process.env.COVERAGE_TEMP_DIR, 'functional')
   //   : 'target/kibana-coverage/functional',
-  'temp-dir': process.env.COVERAGE_TEMP_DIR ? process.env.COVERAGE_TEMP_DIR : 'target/kibana-coverage/functional',
+  'temp-dir': process.env.COVERAGE_TEMP_DIR
+    ? process.env.COVERAGE_TEMP_DIR
+    : 'target/kibana-coverage/functional',
   'report-dir': 'target/kibana-coverage/functional-combined',
   reporter: ['html', 'json-summary'],
   include: [
