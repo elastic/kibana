@@ -254,6 +254,21 @@
             ],
             "path": "packages/kbn-config/src/deprecation/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/config",
+            "id": "def-server.ConfigDeprecationContext.docLinks",
+            "type": "Object",
+            "tags": [],
+            "label": "docLinks",
+            "description": [
+              "Allow direct access to the doc links from the deprecation handler"
+            ],
+            "signature": [
+              "DocLinks"
+            ],
+            "path": "packages/kbn-config/src/deprecation/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false

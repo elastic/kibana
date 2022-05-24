@@ -15,6 +15,7 @@ import { alertsChartPreviewRouteRepository } from '../alerts/route';
 import { backendsRouteRepository } from '../backends/route';
 import { environmentsRouteRepository } from '../environments/route';
 import { errorsRouteRepository } from '../errors/route';
+import { infrastructureRouteRepository } from '../infrastructure/route';
 import { apmFleetRouteRepository } from '../fleet/route';
 import { dataViewRouteRepository } from '../data_view/route';
 import { latencyDistributionRouteRepository } from '../latency_distribution/route';
@@ -69,6 +70,7 @@ function getTypedGlobalApmServerRouteRepository() {
     ...eventMetadataRouteRepository,
     ...agentKeysRouteRepository,
     ...spanLinksRouteRepository,
+    ...infrastructureRouteRepository,
     ...debugTelemetryRoute,
   };
 
