@@ -9,12 +9,12 @@ import { TypeOf } from '@kbn/config-schema';
 import type { Writable } from '@kbn/utility-types';
 import { Comparator } from '../../../common/comparator_types';
 import {
-  EsQueryAlertParamsSchema,
-  EsQueryAlertParams,
+  EsQueryRuleParamsSchema,
+  EsQueryRuleParams,
   ES_QUERY_MAX_HITS_PER_EXECUTION,
-} from './alert_type_params';
+} from './rule_type_params';
 
-const DefaultParams: Writable<Partial<EsQueryAlertParams>> = {
+const DefaultParams: Writable<Partial<EsQueryRuleParams>> = {
   index: ['index-name'],
   timeField: 'time-field',
   esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
@@ -220,7 +220,7 @@ describe('alertType Params validate()', () => {
     return () => validate();
   }
 
-  function validate(): TypeOf<typeof EsQueryAlertParamsSchema> {
-    return EsQueryAlertParamsSchema.validate(params);
+  function validate(): TypeOf<typeof EsQueryRuleParamsSchema> {
+    return EsQueryRuleParamsSchema.validate(params);
   }
 });

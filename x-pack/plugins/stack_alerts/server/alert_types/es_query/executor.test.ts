@@ -6,7 +6,7 @@
  */
 
 import { getSearchParams, getValidTimefieldSort, tryToParseAsDate } from './executor';
-import { OnlyEsQueryAlertParams } from './types';
+import { OnlyEsQueryRuleParams } from './types';
 
 describe('es_query executor', () => {
   const defaultProps = {
@@ -49,13 +49,13 @@ describe('es_query executor', () => {
 
   describe('getSearchParams', () => {
     it('should return search params correctly', () => {
-      const result = getSearchParams(defaultProps as OnlyEsQueryAlertParams);
+      const result = getSearchParams(defaultProps as OnlyEsQueryRuleParams);
       expect(result.parsedQuery.query).toBe('test-query');
     });
 
     it('should throw invalid query error', () => {
       expect(() =>
-        getSearchParams({ ...defaultProps, esQuery: '' } as OnlyEsQueryAlertParams)
+        getSearchParams({ ...defaultProps, esQuery: '' } as OnlyEsQueryRuleParams)
       ).toThrow('invalid query specified: "" - query must be JSON');
     });
 
@@ -64,7 +64,7 @@ describe('es_query executor', () => {
         getSearchParams({
           ...defaultProps,
           esQuery: '{ "someProperty": "test-query" }',
-        } as OnlyEsQueryAlertParams)
+        } as OnlyEsQueryRuleParams)
       ).toThrow('invalid query specified: "{ "someProperty": "test-query" }" - query must be JSON');
     });
 
@@ -74,7 +74,7 @@ describe('es_query executor', () => {
           ...defaultProps,
           timeWindowSize: 5,
           timeWindowUnit: 'r',
-        } as OnlyEsQueryAlertParams)
+        } as OnlyEsQueryRuleParams)
       ).toThrow('invalid format for windowSize: "5r"');
     });
   });
