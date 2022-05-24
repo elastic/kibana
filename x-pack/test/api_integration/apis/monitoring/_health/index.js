@@ -8,8 +8,8 @@
 import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../data_stream';
 
-import esBeatsResponse from './fixtures/response_es-beats.json';
-import emptyResponse from './fixtures/response-empty.json';
+import emptyResponse from './fixtures/response_empty.json';
+import { esBeatsResponse } from './fixtures/response_es_beats';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -34,8 +34,8 @@ export default function ({ getService }) {
 
     describe('with data', () => {
       const archives = [
-        'x-pack/test/api_integration/apis/monitoring/es_archives/_health/monitoring-es-8',
-        'x-pack/test/api_integration/apis/monitoring/es_archives/_health/monitoring-beats-8',
+        'x-pack/test/api_integration/apis/monitoring/es_archives/_health/monitoring_es_8',
+        'x-pack/test/api_integration/apis/monitoring/es_archives/_health/monitoring_beats_8',
       ];
       const { setup, tearDown } = getLifecycleMethods(getService);
 
@@ -54,7 +54,7 @@ export default function ({ getService }) {
           .expect(200);
 
         delete body.settings;
-        expect(body).to.eql(esBeatsResponse);
+        expect(body).to.eql(esBeatsResponse());
       });
     });
   });
