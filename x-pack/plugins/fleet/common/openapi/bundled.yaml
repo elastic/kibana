@@ -782,7 +782,6 @@ paths:
         '200':
           description: OK
           content:
-            content: null
             application/json:
               schema:
                 type: object

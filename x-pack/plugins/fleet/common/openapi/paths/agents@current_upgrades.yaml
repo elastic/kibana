@@ -5,7 +5,6 @@ get:
     '200':
       description: OK
       content:
-        content:
         application/json:
           schema:
             type: object
