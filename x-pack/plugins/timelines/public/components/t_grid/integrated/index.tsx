@@ -353,8 +353,8 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                   )}
               </UpdatedFlexGroup>
               <>
-              {!hasAlerts && !loading && !graphOverlay && <TGridEmpty height="short" />}
-              {hasAlerts && (
+                {!hasAlerts && !loading && !graphOverlay && <TGridEmpty height="short" />}
+                {hasAlerts && (
                   <FullWidthFlexGroup
                     $visible={!graphEventId && graphOverlay == null}
                     gutterSize="none"
