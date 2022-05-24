@@ -4,22 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { getNewRule } from '../../objects/rule';
+
 import {
   HOST_TABLE_ROW_TOTAL_ALERTS,
   RULE_TABLE_ROW_TOTAL_ALERTS,
   USER_TABLE_ROW_TOTAL_ALERTS,
 } from '../../screens/detection_response';
 import { QUERY_TAB_BUTTON } from '../../screens/timeline';
-
 import { waitForAlertsToBeIndexed } from '../../tasks/api_calls/alerts';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
-
 import { login, visit } from '../../tasks/login';
 import { closeTimeline } from '../../tasks/timeline';
-
 import { DETECTIONS_RESPONSE_URL } from '../../urls/navigation';
 
 const ALERT_COUNT = 1;
