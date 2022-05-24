@@ -25,7 +25,6 @@ interface SplittedData<TMeta extends BaseMeta = BaseMeta> {
   id: string;
   splitByLabel: string;
   label: string;
-  labelFormatted?: string;
   termsSplitKey?: string | string[];
   color: string;
   meta: TMeta;
@@ -72,7 +71,6 @@ export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta =
         bucket.id = `${series.id}${SERIES_SEPARATOR}${bucket.key}`;
         bucket.splitByLabel = splitByLabel;
         bucket.label = formatKey(bucket.key, series);
-        bucket.labelFormatted = bucket.key_as_string ? formatKey(bucket.key_as_string, series) : '';
         bucket.color = color.string();
         bucket.meta = meta;
         bucket.termsSplitKey = bucket.key;
