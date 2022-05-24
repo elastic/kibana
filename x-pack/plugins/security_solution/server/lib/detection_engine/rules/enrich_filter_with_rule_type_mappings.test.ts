@@ -14,7 +14,7 @@ import {
   THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
 
-import { getFilter } from './find_rules';
+import { enrichFilterWithRuleTypeMapping } from './enrich_filter_with_rule_type_mappings';
 
 const allAlertTypeIds = `(alert.attributes.alertTypeId: ${EQL_RULE_TYPE_ID}
  OR alert.attributes.alertTypeId: ${ML_RULE_TYPE_ID}
@@ -23,14 +23,14 @@ const allAlertTypeIds = `(alert.attributes.alertTypeId: ${EQL_RULE_TYPE_ID}
  OR alert.attributes.alertTypeId: ${INDICATOR_RULE_TYPE_ID}
  OR alert.attributes.alertTypeId: ${THRESHOLD_RULE_TYPE_ID})`.replace(/[\n\r]/g, '');
 
-describe('find_rules', () => {
+describe('enrichFilterWithRuleTypeMapping', () => {
   test('it returns a full filter with an AND if sent down', () => {
-    expect(getFilter('alert.attributes.enabled: true')).toEqual(
+    expect(enrichFilterWithRuleTypeMapping('alert.attributes.enabled: true')).toEqual(
       `${allAlertTypeIds} AND alert.attributes.enabled: true`
     );
   });
 
   test('it returns existing filter with no AND when not set [rule registry enabled: %p]', () => {
-    expect(getFilter(null)).toEqual(allAlertTypeIds);
+    expect(enrichFilterWithRuleTypeMapping(null)).toEqual(allAlertTypeIds);
   });
 });
