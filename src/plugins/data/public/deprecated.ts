@@ -49,6 +49,7 @@ import {
   COMPARE_ALL_OPTIONS,
   onlyDisabledFiltersChanged,
   getEsQueryConfig,
+  TimeRange,
 } from '../common';
 
 import {
@@ -112,6 +113,7 @@ export type {
   PhraseFilter,
   MatchAllFilter,
   EsQueryConfig,
+  TimeRange,
 };
 export { isFilters };
 

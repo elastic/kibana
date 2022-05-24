@@ -34,6 +34,7 @@ export type {
   RangeFilterParams,
   ScriptedPhraseFilter,
   ScriptedRangeFilter,
+  TimeRange,
 } from './filters';
 
 export type {

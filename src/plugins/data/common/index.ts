@@ -64,6 +64,7 @@ export type {
   RangeFilterParams,
   KueryNode,
   EsQueryConfig,
+  TimeRange,
 } from './es_query';
 export { KbnFieldType } from './kbn_field_types';
 export {
@@ -77,7 +78,6 @@ export {
 export * from './search';
 export type {
   RefreshInterval,
-  TimeRange,
   TimeRangeBounds,
   GetConfigFn,
   SavedQuery,
