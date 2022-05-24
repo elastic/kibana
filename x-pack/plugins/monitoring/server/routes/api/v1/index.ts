@@ -15,3 +15,4 @@ export { registerV1ElasticsearchSettingsRoutes } from './elasticsearch_settings'
 export { registerV1EnterpriseSearchRoutes } from './enterprise_search';
 export { registerV1LogstashRoutes } from './logstash';
 export { registerV1SetupRoutes } from './setup';
+export { registerV1KibanaRoutes } from './kibana';

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const metricSet = [
+import { MetricDescriptor } from '../../../../lib/details/get_metrics';
+
+export const metricSet: MetricDescriptor[] = [
   'kibana_cluster_requests',
   {
     keys: ['kibana_cluster_max_response_times', 'kibana_cluster_average_response_times'],

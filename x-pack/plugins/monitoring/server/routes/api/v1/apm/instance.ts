@@ -10,6 +10,7 @@ import { INDEX_PATTERN_BEATS } from '../../../../../common/constants';
 import {
   postApmInstanceRequestParamsRT,
   postApmInstanceRequestPayloadRT,
+  postApmInstanceResponsePayloadRT,
 } from '../../../../../common/http_api/apm';
 import { getApmInfo } from '../../../../lib/apm';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
@@ -50,10 +51,10 @@ export function apmInstanceRoute(server: MonitoringCore) {
           getApmInfo(req, apmIndexPattern, { clusterUuid, apmUuid }),
         ]);
 
-        return {
+        return postApmInstanceResponsePayloadRT.encode({
           metrics,
           apmSummary,
-        };
+        });
       } catch (err) {
         return handleError(err, req);
       }

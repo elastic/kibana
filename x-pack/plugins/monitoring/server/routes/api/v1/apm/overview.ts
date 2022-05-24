@@ -8,6 +8,7 @@
 import {
   postApmOverviewRequestParamsRT,
   postApmOverviewRequestPayloadRT,
+  postApmOverviewResponsePayloadRT,
 } from '../../../../../common/http_api/apm';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getMetrics } from '../../../../lib/details/get_metrics';
@@ -45,10 +46,10 @@ export function apmOverviewRoute(server: MonitoringCore) {
           getMetrics(req, 'beats', metricSet),
         ]);
 
-        return {
+        return postApmOverviewResponsePayloadRT.encode({
           stats,
           metrics,
-        };
+        });
       } catch (err) {
         return handleError(err, req);
       }
