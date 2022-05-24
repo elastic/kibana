@@ -21,7 +21,10 @@ import {
   AutonomousSystemItem,
 } from '../../../../../../common/search_strategy';
 import { getOppositeField } from '../helpers';
-import { formatResponseObjectValues } from '../../../../helpers/format_response_object_values';
+import {
+  formatResponseObjectValues,
+  unflattenObject,
+} from '../../../../helpers/format_response_object_values';
 
 export const getTopNFlowEdges = (
   response: IEsSearchResponse<unknown>,
@@ -71,14 +74,12 @@ const getGeoItem = (result: NetworkTopNFlowBuckets): GeoItem | null =>
         geo: formatResponseObjectValues(
           getOr(
             '',
-            `location.top_geo.hits.hits[0].fields.${
-              Object.keys(result.location.top_geo.hits.hits[0].fields)[0]
-            }.geo`,
-            result
+            `${Object.keys(result.location.top_geo.hits.hits[0].fields)[0].split('.geo')[0]}.geo`,
+            unflattenObject(getOr({}, `location.top_geo.hits.hits[0].fields`, result))
           )
         ),
         flowTarget: getFlowTargetFromString(
-          Object.keys(result.location.top_geo.hits.hits[0].fields)[0]
+          Object.keys(result.location.top_geo.hits.hits[0].fields)[0].split('.geo')[0]
         ),
       }
     : null;
@@ -89,16 +90,16 @@ const getAsItem = (result: NetworkTopNFlowBuckets): AutonomousSystemItem | null 
     ? {
         number: getOr(
           null,
-          `autonomous_system.top_as.hits.hits[0].fields.${
-            Object.keys(result.autonomous_system.top_as.hits.hits[0].fields)[0]
-          }.as.number`,
+          `autonomous_system.top_as.hits.hits[0].fields['${
+            Object.keys(result.autonomous_system.top_as.hits.hits[0].fields)[0].split('.as.')[0]
+          }.as.number'][0]`,
           result
         ),
         name: getOr(
           '',
-          `autonomous_system.top_as.hits.hits[0].fields.${
-            Object.keys(result.autonomous_system.top_as.hits.hits[0].fields)[0]
-          }.as.organization.name`,
+          `autonomous_system.top_as.hits.hits[0].fields['${
+            Object.keys(result.autonomous_system.top_as.hits.hits[0].fields)[0].split('.as')[0]
+          }.as.organization.name'][0]`,
           result
         ),
       }
