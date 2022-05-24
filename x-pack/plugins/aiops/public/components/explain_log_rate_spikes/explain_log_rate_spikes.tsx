@@ -7,7 +7,7 @@
 
 import React, { useEffect, FC } from 'react';
 
-import { EuiBadge, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useFetchStream } from '@kbn/aiops-utils';
@@ -42,11 +42,11 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({ dataView }
   return (
     <EuiText>
       <h2>{dataView.title}</h2>
-      <p>{isRunning ? 'Loading fields ...' : 'Loaded all fields.'}</p>
+      <p>{isRunning ? 'Loading ...' : 'Done.'}</p>
       <EuiSpacer size="xs" />
-      {data.fields.map((field) => (
-        <EuiBadge>{field}</EuiBadge>
-      ))}
+      <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
+        {JSON.stringify(data, null, 2)}
+      </EuiCodeBlock>
     </EuiText>
   );
 };

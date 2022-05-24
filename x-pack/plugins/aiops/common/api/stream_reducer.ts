@@ -8,11 +8,15 @@
 import { API_ACTION_NAME, AiopsExplainLogRateSpikesApiAction } from './explain_log_rate_spikes';
 
 interface StreamState {
-  fields: string[];
+  ccsWarning: boolean;
+  loaded: number;
+  loadingState: string;
 }
 
 export const initialState: StreamState = {
-  fields: [],
+  ccsWarning: false,
+  loaded: 0,
+  loadingState: '',
 };
 
 export function streamReducer(
@@ -24,10 +28,8 @@ export function streamReducer(
   }
 
   switch (action.type) {
-    case API_ACTION_NAME.ADD_FIELDS:
-      return {
-        fields: [...state.fields, ...action.payload],
-      };
+    case API_ACTION_NAME.INITIALIZE:
+      return action.payload;
     default:
       return state;
   }

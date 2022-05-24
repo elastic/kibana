@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { firstValueFrom } from 'rxjs';
+// import { firstValueFrom } from 'rxjs';
 
 import type { IRouter, Logger } from '@kbn/core/server';
 import type { DataRequestHandlerContext, IEsSearchRequest } from '@kbn/data-plugin/server';
@@ -13,7 +13,7 @@ import { streamFactory } from '@kbn/aiops-utils';
 
 import {
   aiopsExplainLogRateSpikesSchema,
-  addFieldsAction,
+  initializeAction,
   AiopsExplainLogRateSpikesApiAction,
 } from '../../common/api/explain_log_rate_spikes';
 import { API_ENDPOINT } from '../../common/api';
@@ -44,47 +44,38 @@ export const defineExplainLogRateSpikesRoute = (
         controller.abort();
       });
 
-      const search = await context.search;
-      const res = await firstValueFrom(
-        search.search(
-          {
-            params: {
-              index,
-              body: { size: 1 },
-            },
-          } as IEsSearchRequest,
-          { abortSignal: controller.signal }
-        )
-      );
-
-      const doc = res.rawResponse.hits.hits.pop();
-      const fields = Object.keys(doc?._source ?? {});
+      // const search = await context.search;
+      // const res = await firstValueFrom(
+      //   search.search(
+      //     {
+      //       params: {
+      //         index,
+      //         body: { size: 1 },
+      //       },
+      //     } as IEsSearchRequest,
+      //     { abortSignal: controller.signal }
+      //   )
+      // );
 
       const { end, push, responseWithHeaders } = streamFactory<AiopsExplainLogRateSpikesApiAction>(
         request.headers
       );
 
-      async function pushField() {
-        setTimeout(() => {
-          if (shouldStop) {
-            end();
-            return;
-          }
+      // Async IIFE to run the analysis while not blocking returning `responseWithHeaders`.
+      (async () => {
+        push(
+          initializeAction({
+            ccsWarning: false,
+            loaded: 0,
+            loadingState: 'Loading field candidates.',
+          })
+        );
 
-          const field = fields.pop();
+        // This iteration just takes in an index name and based on a date histogram we identify the window params.
+        // Eventually it should be possible to pass these attributes from the client based on the brush selection.
 
-          if (field !== undefined) {
-            push(addFieldsAction([field]));
-            pushField();
-          } else {
-            end();
-          }
-          // This is just exemplary demo code so we're adding a random timout of 0-250ms to each
-          // stream push to simulate string chunks appearing on the client with some randomness.
-        }, Math.random() * 250);
-      }
-
-      pushField();
+        end();
+      })();
 
       return response.ok(responseWithHeaders);
     }

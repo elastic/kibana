@@ -15,20 +15,24 @@ export const aiopsExplainLogRateSpikesSchema = schema.object({
 export type AiopsExplainLogRateSpikesSchema = TypeOf<typeof aiopsExplainLogRateSpikesSchema>;
 
 export const API_ACTION_NAME = {
-  ADD_FIELDS: 'add_fields',
+  INITIALIZE: 'initialize',
 } as const;
 export type ApiActionName = typeof API_ACTION_NAME[keyof typeof API_ACTION_NAME];
 
-interface ApiActionAddFields {
-  type: typeof API_ACTION_NAME.ADD_FIELDS;
-  payload: string[];
+interface ApiActionInitialize {
+  type: typeof API_ACTION_NAME.INITIALIZE;
+  payload: {
+    ccsWarning: boolean;
+    loaded: number;
+    loadingState: string;
+  };
 }
 
-export function addFieldsAction(payload: string[]): ApiActionAddFields {
+export function initializeAction(payload: ApiActionInitialize['payload']): ApiActionInitialize {
   return {
-    type: API_ACTION_NAME.ADD_FIELDS,
+    type: API_ACTION_NAME.INITIALIZE,
     payload,
   };
 }
 
-export type AiopsExplainLogRateSpikesApiAction = ApiActionAddFields;
+export type AiopsExplainLogRateSpikesApiAction = ApiActionInitialize;
