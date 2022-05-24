@@ -32,13 +32,7 @@ export interface SearchSessionSavedObjectAttributes {
    * Expiration time of the session. Expiration itself is managed by Elasticsearch.
    */
   expires: string;
-  /**
-   * Time of transition into completed state,
-   *
-   * Can be "null" in case already completed session
-   * transitioned into in-progress session
-   */
-  completed?: string | null;
+
   /**
    * status
    */
@@ -62,10 +56,6 @@ export interface SearchSessionSavedObjectAttributes {
    */
   idMapping: Record<string, SearchSessionRequestInfo>;
 
-  /**
-   * This value is true if the session was actively stored by the user. If it is false, the session may be purged by the system.
-   */
-  persisted: boolean;
   /**
    * The realm type/name & username uniquely identifies the user who created this search session
    */

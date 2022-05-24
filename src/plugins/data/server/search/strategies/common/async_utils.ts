@@ -25,9 +25,10 @@ export function getCommonDefaultAsyncSubmitParams(
 > {
   const useSearchSessions = searchSessionsConfig?.enabled && !!options.sessionId;
 
-  const keepAlive = useSearchSessions
-    ? `${searchSessionsConfig!.defaultExpiration.asMilliseconds()}ms`
-    : '1m';
+  const keepAlive =
+    useSearchSessions && options.isStored
+      ? `${searchSessionsConfig!.defaultExpiration.asMilliseconds()}ms`
+      : '1m';
 
   return {
     // Wait up to 100ms for the response to return
@@ -51,9 +52,11 @@ export function getCommonDefaultAsyncGetParams(
   return {
     // Wait up to 100ms for the response to return
     wait_for_completion_timeout: '100ms',
-    ...(useSearchSessions
-      ? // Don't change the expiration of search requests that are tracked in a search session
-        undefined
+    ...(useSearchSessions && options.isStored
+      ? // Use session's keep_alive if search belongs to a stored session
+        {
+          keep_alive: `${searchSessionsConfig!.defaultExpiration.asMilliseconds()}ms`,
+        }
       : {
           // We still need to do polling for searches not within the context of a search session or when search session disabled
           keep_alive: '1m',

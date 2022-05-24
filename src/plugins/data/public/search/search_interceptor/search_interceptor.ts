@@ -8,18 +8,7 @@
 
 import { memoize, once } from 'lodash';
 import { BehaviorSubject, EMPTY, from, fromEvent, of, Subscription, throwError } from 'rxjs';
-import {
-  catchError,
-  filter,
-  finalize,
-  map,
-  shareReplay,
-  skip,
-  switchMap,
-  take,
-  takeUntil,
-  tap,
-} from 'rxjs/operators';
+import { catchError, finalize, map, shareReplay, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import {
   ApplicationStart,
@@ -41,6 +30,7 @@ import {
   IAsyncSearchOptions,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
+  isCompleteResponse,
   ISearchOptions,
   ISearchOptionsSerializable,
   pollSearch,
@@ -57,7 +47,7 @@ import {
   TimeoutErrorMode,
   SearchSessionIncompleteWarning,
 } from '../errors';
-import { ISessionService, SearchSessionState } from '../session';
+import { ISessionService } from '../session';
 import { SearchResponseCache } from './search_response_cache';
 import { createRequestHash } from './utils';
 import { SearchAbortController } from './search_abort_controller';
@@ -221,50 +211,53 @@ export class SearchInterceptor {
     options: IAsyncSearchOptions,
     searchAbortController: SearchAbortController
   ) {
-    const search = () =>
-      this.runSearch(
-        { id, ...request },
-        { ...options, abortSignal: searchAbortController.getSignal() }
-      );
     const { sessionId, strategy } = options;
 
-    // track if this search's session will be send to background
-    // if yes, then we don't need to cancel this search when it is aborted
-    let isSavedToBackground = false;
-    const savedToBackgroundSub =
-      this.deps.session.isCurrentSession(sessionId) &&
-      this.deps.session.state$
-        .pipe(
-          skip(1), // ignore any state, we are only interested in transition x -> BackgroundLoading
-          filter(
-            (state) =>
-              this.deps.session.isCurrentSession(sessionId) &&
-              state === SearchSessionState.BackgroundLoading
-          ),
-          take(1)
-        )
-        .subscribe(() => {
-          isSavedToBackground = true;
-        });
+    const search = () => {
+      searchTracker.polled();
+      return this.runSearch(
+        { id, ...request },
+        {
+          ...options,
+          ...this.deps.session.getSearchOptions(sessionId),
+          abortSignal: searchAbortController.getSignal(),
+        }
+      );
+    };
+
+    const searchTracker = this.deps.session.trackSearch({
+      abort: () => searchAbortController.abort(),
+      poll: async () => {
+        if (id) {
+          await search();
+        }
+      },
+    });
 
     const cancel = once(() => {
-      if (id && !isSavedToBackground) this.deps.http.delete(`/internal/search/${strategy}/${id}`);
+      if (this.deps.session.isCurrentSession(sessionId) && !this.deps.session.isStored()) {
+        this.deps.http.delete(`/internal/search/${strategy}/${id}`);
+      }
     });
 
     return pollSearch(search, cancel, {
       ...options,
       abortSignal: searchAbortController.getSignal(),
     }).pipe(
-      tap((response) => (id = response.id)),
+      tap((response) => {
+        id = response.id;
+
+        if (isCompleteResponse(response)) {
+          searchTracker.complete();
+        }
+      }),
       catchError((e: Error) => {
+        searchTracker.error();
         cancel();
         return throwError(e);
       }),
       finalize(() => {
         searchAbortController.cleanup();
-        if (savedToBackgroundSub) {
-          savedToBackgroundSub.unsubscribe();
-        }
       }),
       // This observable is cached in the responseCache.
       // Using shareReplay makes sure that future subscribers will get the final response
@@ -377,9 +370,6 @@ export class SearchInterceptor {
         );
 
         this.pendingCount$.next(this.pendingCount$.getValue() + 1);
-        const untrackSearch = this.deps.session.isCurrentSession(sessionId)
-          ? this.deps.session.trackSearch({ abort: () => searchAbortController.abort() })
-          : undefined;
 
         // Abort the replay if the abortSignal is aborted.
         // The underlaying search will not abort unless searchAbortController fires.
@@ -409,10 +399,6 @@ export class SearchInterceptor {
           }),
           finalize(() => {
             this.pendingCount$.next(this.pendingCount$.getValue() - 1);
-            if (untrackSearch && this.deps.session.isCurrentSession(sessionId)) {
-              // untrack if this search still belongs to current session
-              untrackSearch();
-            }
           })
         );
       })

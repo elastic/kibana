@@ -7,8 +7,8 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { debounce, distinctUntilChanged, mapTo, switchMap, tap } from 'rxjs/operators';
-import { merge, of, timer } from 'rxjs';
+import { debounce } from 'rxjs/operators';
+import { timer } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
@@ -25,11 +25,6 @@ export interface SearchSessionIndicatorDeps {
   application: ApplicationStart;
   basePath: IBasePath;
   storage: IStorageWrapper;
-  /**
-   * Controls for how long we allow to save a session,
-   * after the last search in the session has completed
-   */
-  disableSaveAfterSessionCompletesTimeout: number;
   tourDisabled: boolean;
   usageCollector?: SearchUsageCollector;
 }
@@ -38,7 +33,6 @@ export const createConnectedSearchSessionIndicator = ({
   sessionService,
   application,
   storage,
-  disableSaveAfterSessionCompletesTimeout,
   usageCollector,
   basePath,
   tourDisabled,
@@ -49,23 +43,11 @@ export const createConnectedSearchSessionIndicator = ({
     debounce((_state) => timer(_state === SearchSessionState.None ? 50 : 300)) // switch to None faster to quickly remove indicator when navigating away
   );
 
-  const disableSaveAfterSessionCompleteTimedOut$ = sessionService.state$.pipe(
-    switchMap((_state) =>
-      _state === SearchSessionState.Completed
-        ? merge(of(false), timer(disableSaveAfterSessionCompletesTimeout).pipe(mapTo(true)))
-        : of(false)
-    ),
-    distinctUntilChanged(),
-    tap((value) => {
-      if (value) usageCollector?.trackSessionIndicatorSaveDisabled();
-    })
-  );
-
   return () => {
     const state = useObservable(debouncedSessionServiceState$, SearchSessionState.None);
     const isSaveDisabledByApp = sessionService.getSearchSessionIndicatorUiConfig().isDisabled();
     const disableSaveAfterSessionCompleteTimedOut = useObservable(
-      disableSaveAfterSessionCompleteTimedOut$,
+      sessionService.disableSaveAfterSessionCompleteTimedOut$,
       false
     );
     const [searchSessionIndicator, setSearchSessionIndicator] =

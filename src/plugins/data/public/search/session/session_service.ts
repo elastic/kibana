@@ -7,21 +7,38 @@
  */
 
 import { PublicContract, SerializableRecord } from '@kbn/utility-types';
-import { distinctUntilChanged, map, startWith } from 'rxjs/operators';
-import { Observable, Subscription } from 'rxjs';
+import {
+  distinctUntilChanged,
+  first,
+  map,
+  mapTo,
+  mergeMap,
+  repeat,
+  shareReplay,
+  startWith,
+  switchMap,
+  takeUntil,
+  tap,
+} from 'rxjs/operators';
+import { EMPTY, from, merge, Observable, of, Subscription, timer } from 'rxjs';
 import {
   PluginInitializerContext,
   StartServicesAccessor,
   ToastsStart as ToastService,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
+import { SearchUsageCollector } from '../..';
 import { ConfigSchema } from '../../../config';
-import { createSessionStateContainer } from './search_session_state';
 import type {
-  SearchSessionState,
   SessionMeta,
   SessionStateContainer,
   SessionStateInternal,
+} from './search_session_state';
+import {
+  createSessionStateContainer,
+  TrackedSearchState,
+  SearchSessionState,
 } from './search_session_state';
 import { ISessionsClient } from './sessions_client';
 import { ISearchOptions } from '../../../common';
@@ -29,10 +46,56 @@ import { NowProviderInternalContract } from '../../now_provider';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import { formatSessionName } from './lib/session_name_formatter';
 
+/**
+ * Polling interval for keeping completed searches alive
+ * until the user saves the session
+ */
+const KEEP_ALIVE_COMPLETED_SEARCHES_INTERVAL = 30000;
+
 export type ISessionService = PublicContract<SessionService>;
 
 interface TrackSearchDescriptor {
+  /**
+   * Cancel the search
+   */
   abort: () => void;
+
+  /**
+   * Keep polling the search to keep it alive
+   */
+  poll: () => Promise<void>;
+}
+
+interface TrackSearchMeta {
+  /**
+   * Time that indicates when last time this search was polled
+   */
+  lastPollingTime: Date;
+
+  /**
+   * If the keep_alive of this search was extended up to saved session keep_alive
+   */
+  isStored: boolean;
+}
+
+/**
+ * Api to manage tracked search
+ */
+interface TrackSearchHandler {
+  /**
+   * Transition search into "complete" status
+   */
+  complete(): void;
+
+  /**
+   * Transition search into "error" status
+   */
+  error(): void;
+
+  /**
+   * Call to notify when search was polled
+   */
+  polled(): void;
 }
 
 /**
@@ -82,9 +145,16 @@ interface SearchSessionIndicatorUiConfig {
  */
 export class SessionService {
   public readonly state$: Observable<SearchSessionState>;
-  private readonly state: SessionStateContainer<TrackSearchDescriptor>;
+  private readonly state: SessionStateContainer<TrackSearchDescriptor, TrackSearchMeta>;
 
   public readonly sessionMeta$: Observable<SessionMeta>;
+
+  /**
+   * Emits `true` when session completes and `config.search.sessions.notTouchedTimeout` duration has passed
+   * Used to stop keeping searches alive after some times and disabled "save session" button
+   */
+  public readonly disableSaveAfterSessionCompleteTimedOut$: Observable<boolean>;
+
   private searchSessionInfoProvider?: SearchSessionInfoProvider;
   private searchSessionIndicatorUiConfig?: Partial<SearchSessionIndicatorUiConfig>;
   private subscription = new Subscription();
@@ -105,15 +175,35 @@ export class SessionService {
     getStartServices: StartServicesAccessor,
     private readonly sessionsClient: ISessionsClient,
     private readonly nowProvider: NowProviderInternalContract,
+    private readonly usageCollector?: SearchUsageCollector,
     { freezeState = true }: { freezeState: boolean } = { freezeState: true }
   ) {
-    const { stateContainer, sessionState$, sessionMeta$ } =
-      createSessionStateContainer<TrackSearchDescriptor>({
-        freeze: freezeState,
-      });
+    const { stateContainer, sessionState$, sessionMeta$ } = createSessionStateContainer<
+      TrackSearchDescriptor,
+      TrackSearchMeta
+    >({
+      freeze: freezeState,
+    });
     this.state$ = sessionState$;
     this.state = stateContainer;
     this.sessionMeta$ = sessionMeta$;
+
+    const notTouchedTimeout = moment
+      .duration(initializerContext.config.get().search.sessions.notTouchedTimeout)
+      .asMilliseconds();
+
+    this.disableSaveAfterSessionCompleteTimedOut$ = this.state$.pipe(
+      switchMap((_state) =>
+        _state === SearchSessionState.Completed
+          ? merge(of(false), timer(notTouchedTimeout).pipe(mapTo(true)))
+          : of(false)
+      ),
+      distinctUntilChanged(),
+      tap((value) => {
+        if (value) this.usageCollector?.trackSessionIndicatorSaveDisabled();
+      }),
+      shareReplay()
+    );
 
     this.subscription.add(
       sessionMeta$
@@ -155,6 +245,50 @@ export class SessionService {
         })
       );
     });
+
+    // keep completed searches alive until user explicitly saves the session
+    this.subscription.add(
+      this.getSession$()
+        .pipe(
+          switchMap((sessionId) => {
+            if (!sessionId) return EMPTY;
+            if (this.isStored()) return EMPTY; // no need to keep searches alive because session and searches are already stored
+
+            const schedulePollSearches = () => {
+              return timer(KEEP_ALIVE_COMPLETED_SEARCHES_INTERVAL).pipe(
+                mergeMap(() => {
+                  const searchesToKeepAlive = this.state.get().trackedSearches.filter(
+                    (s) =>
+                      !s.searchMeta.isStored &&
+                      s.state === TrackedSearchState.Completed &&
+                      s.searchMeta.lastPollingTime.getTime() < Date.now() - 5000 // don't poll if was very recently polled
+                  );
+
+                  return from(
+                    Promise.all(
+                      searchesToKeepAlive.map((s) =>
+                        s.searchDescriptor.poll().catch((e) => {
+                          // eslint-disable-next-line no-console
+                          console.warn(`Error while polling search to keep it alive`, e);
+                        })
+                      )
+                    )
+                  );
+                }),
+                repeat()
+              );
+            };
+
+            return schedulePollSearches().pipe(
+              takeUntil(
+                // stop polling this session when no longer possible to save the session
+                this.disableSaveAfterSessionCompleteTimedOut$.pipe(first((timeout) => timeout))
+              )
+            );
+          })
+        )
+        .subscribe(() => {})
+    );
   }
 
   /**
@@ -167,15 +301,42 @@ export class SessionService {
   }
 
   /**
-   * Used to track pending searches within current session
+   * Used to track searches within current session
    *
-   * @param searchDescriptor - uniq object that will be used to untrack the search
-   * @returns untrack function
+   * @param searchDescriptor - uniq object that will be used to as search identifier
+   * @returns {@link TrackSearchHandler}
    */
-  public trackSearch(searchDescriptor: TrackSearchDescriptor): () => void {
-    this.state.transitions.trackSearch(searchDescriptor);
-    return () => {
-      this.state.transitions.unTrackSearch(searchDescriptor);
+  public trackSearch(searchDescriptor: TrackSearchDescriptor): TrackSearchHandler {
+    this.state.transitions.trackSearch(searchDescriptor, {
+      lastPollingTime: new Date(),
+      isStored: this.isStored(),
+    });
+
+    return {
+      complete: () => {
+        this.state.transitions.completeSearch(searchDescriptor);
+
+        // when search completes and session has just been saved,
+        // trigger polling once again to save search into a session and extend its keep_alive
+        if (this.isStored()) {
+          const search = this.state.selectors.getSearch(searchDescriptor);
+          if (search && !search.searchMeta.isStored) {
+            search.searchDescriptor.poll().catch((e) => {
+              // eslint-disable-next-line no-console
+              console.warn(`Failed to extend search after it was completed`, e);
+            });
+          }
+        }
+      },
+      error: () => {
+        this.state.transitions.errorSearch(searchDescriptor);
+      },
+      polled: () => {
+        this.state.transitions.updateSearchMeta(searchDescriptor, {
+          lastPollingTime: new Date(),
+          isStored: this.isStored(),
+        });
+      },
     };
   }
 
@@ -254,7 +415,7 @@ export class SessionService {
         // also have to drop all pending searches which are used to derive client side state of search session indicator,
         // if we weren't dropping this searches, then we would get into "infinite loading" state when continuing a session that was cleared with pending searches
         // possible solution to this problem is to refactor session service to support multiple sessions
-        pendingSearches: [],
+        trackedSearches: [],
       });
       this.lastSessionSnapshot = undefined;
     } else {
@@ -293,9 +454,9 @@ export class SessionService {
    * Request a cancellation of on-going search requests within current session
    */
   public async cancel(): Promise<void> {
-    const isStoredSession = this.state.get().isStored;
-    this.state.get().pendingSearches.forEach((s) => {
-      s.abort();
+    const isStoredSession = this.isStored();
+    this.state.get().trackedSearches.forEach((s) => {
+      s.searchDescriptor.abort();
     });
     this.state.transitions.cancel();
     if (isStoredSession) {
@@ -337,6 +498,16 @@ export class SessionService {
     // if we are still interested in this result
     if (this.getSessionId() === sessionId) {
       this.state.transitions.store(searchSessionSavedObject);
+      const completedSearches = this.state
+        .get()
+        .trackedSearches.filter(
+          (s) => s.state === TrackedSearchState.Completed && !s.searchMeta.isStored
+        );
+
+      await Promise.all(completedSearches.map((s) => s.searchDescriptor.poll())).catch((e) => {
+        // eslint-disable-next-line no-console
+        console.warn('Failed to extend search after session was saved', e);
+      });
     }
   }
 

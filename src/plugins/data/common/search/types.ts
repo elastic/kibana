@@ -71,6 +71,11 @@ export interface IKibanaSearchResponse<RawResponse = any> {
   isRestored?: boolean;
 
   /**
+   * Indicates whether the search has been saved to a search-session object and long keepAlive was set
+   */
+  isStored?: boolean;
+
+  /**
    * Optional warnings returned from Elasticsearch (for example, deprecation warnings)
    */
   warning?: string;

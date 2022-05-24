@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { firstValueFrom, from, Observable, throwError } from 'rxjs';
+import { firstValueFrom, from, mergeMap, Observable, of, throwError } from 'rxjs';
 import { pick } from 'lodash';
 import moment from 'moment';
 import {
@@ -19,7 +19,7 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from '@kbn/core/server';
-import { map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
@@ -156,13 +156,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     registerSearchRoute(router);
     registerSessionRoutes(router, this.logger);
 
-    if (taskManager) {
-      this.sessionService.setup(core, { taskManager, security });
-    } else {
-      // this should never happen in real world, but
-      // taskManager and security are optional deps because they are in x-pack
-      this.logger.debug('Skipping sessionService setup because taskManager is not available');
-    }
+    this.sessionService.setup(core, { security });
 
     core.http.registerRouteHandlerContext<DataRequestHandlerContext, 'search'>(
       'search',
@@ -270,9 +264,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   ): ISearchStart {
     const { elasticsearch, savedObjects, uiSettings } = core;
 
-    if (taskManager) {
-      this.sessionService.start(core, { taskManager });
-    }
+    this.sessionService.start(core, {});
 
     this.asScoped = this.asScopedProvider(core);
     return {
@@ -378,21 +370,33 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
       const searchRequest$ = from(getSearchRequest());
       const search$ = searchRequest$.pipe(
-        switchMap((searchRequest) => strategy.search(searchRequest, options, deps)),
-        withLatestFrom(searchRequest$),
-        tap(([response, requestWithId]) => {
-          if (!options.sessionId || !response.id || (options.isRestore && requestWithId.id)) return;
-          // intentionally swallow tracking error, as it shouldn't fail the search
-          deps.searchSessionsClient.trackId(request, response.id, options).catch((trackErr) => {
-            this.logger.error(trackErr);
-          });
-        }),
-        map(([response, requestWithId]) => {
-          return {
-            ...response,
-            isRestored: !!requestWithId.id,
-          };
-        })
+        switchMap((searchRequest) =>
+          strategy.search(searchRequest, options, deps).pipe(
+            mergeMap((response) => {
+              response = {
+                ...response,
+                isRestored: !!searchRequest.id,
+              };
+
+              if (
+                options.sessionId && // if within search session
+                options.isStored && // and search session was saved (saved object exists)
+                response.id && // and async search has started
+                !(options.isRestore && searchRequest.id) // and not restoring already tracked search
+              ) {
+                // then track this search inside the search-session saved object
+                return from(deps.searchSessionsClient.trackId(request, response.id, options)).pipe(
+                  map(() => ({
+                    ...response,
+                    isStored: true,
+                  }))
+                );
+              } else {
+                return of(response);
+              }
+            })
+          )
+        )
       );
 
       return search$;

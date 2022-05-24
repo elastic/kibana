@@ -15,7 +15,6 @@ import {
 } from '@kbn/core/public';
 import { BehaviorSubject } from 'rxjs';
 import React from 'react';
-import moment from 'moment';
 import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
@@ -117,7 +116,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       this.initializerContext,
       getStartServices,
       this.sessionsClient,
-      nowProvider
+      nowProvider,
+      this.usageCollector
     );
     /**
      * A global object that intercepts all searches and provides convenience methods for cancelling
@@ -242,9 +242,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
               application,
               basePath: http.basePath,
               storage: new Storage(window.localStorage),
-              disableSaveAfterSessionCompletesTimeout: moment
-                .duration(config.search.sessions.notTouchedTimeout)
-                .asMilliseconds(),
               usageCollector: this.usageCollector,
               tourDisabled: screenshotMode.isScreenshotMode(),
             })
