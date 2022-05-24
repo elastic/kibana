@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
+import { toBooleanRt } from '@kbn/io-ts-utils';
 import { Breadcrumb } from '../app/breadcrumb';
 import { TraceLink } from '../app/trace_link';
 import { TransactionLink } from '../app/transaction_link';
@@ -18,7 +19,7 @@ import { settings } from './settings';
 import { ApmMainTemplate } from './templates/apm_main_template';
 import { ServiceGroupsList } from '../app/service_groups';
 import { ServiceGroupsRedirect } from './service_groups_redirect';
-import { comparisonEnabledRt, offsetRt } from '../../../common/comparison_rt';
+import { offsetRt } from '../../../common/comparison_rt';
 
 const ServiceGroupsTitle = i18n.translate(
   'xpack.apm.views.serviceGroups.title',
@@ -90,7 +91,7 @@ const apmRoutes = {
             t.type({
               rangeFrom: t.string,
               rangeTo: t.string,
-              comparisonEnabled: comparisonEnabledRt,
+              comparisonEnabled: toBooleanRt,
             }),
             t.partial({
               serviceGroup: t.string,

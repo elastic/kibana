@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { Outlet, Route } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React, { ComponentProps } from 'react';
+import { toBooleanRt } from '@kbn/io-ts-utils';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
 import { TraceSearchType } from '../../../../common/trace_explorer';
@@ -24,10 +25,7 @@ import { RedirectToBackendOverviewRouteView } from './redirect_to_backend_overvi
 import { ServiceGroupTemplate } from '../templates/service_group_template';
 import { ServiceGroupsRedirect } from '../service_groups_redirect';
 import { RedirectTo } from '../redirect_to';
-import {
-  offsetRt,
-  comparisonEnabledRt,
-} from '../../../../common/comparison_rt';
+import { offsetRt } from '../../../../common/comparison_rt';
 import { TransactionTab } from '../../app/transaction_details/waterfall_with_summary/transaction_tabs';
 
 function page<
@@ -145,7 +143,7 @@ export const home = {
           rangeFrom: t.string,
           rangeTo: t.string,
           kuery: t.string,
-          comparisonEnabled: comparisonEnabledRt,
+          comparisonEnabled: toBooleanRt,
         }),
         t.partial({
           refreshPaused: t.union([t.literal('true'), t.literal('false')]),
@@ -224,7 +222,7 @@ export const home = {
         params: t.partial({
           query: t.intersection([
             t.type({
-              comparisonEnabled: comparisonEnabledRt,
+              comparisonEnabled: toBooleanRt,
             }),
             offsetRt,
           ]),

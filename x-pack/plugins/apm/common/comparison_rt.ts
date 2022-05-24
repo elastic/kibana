@@ -6,9 +6,6 @@
  */
 
 import * as t from 'io-ts';
-import { toBooleanRt } from '@kbn/io-ts-utils';
-
-export const comparisonEnabledRt = toBooleanRt;
 
 export const offsetRt = t.partial({
   offset: t.string,
