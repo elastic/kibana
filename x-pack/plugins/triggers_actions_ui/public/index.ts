@@ -71,7 +71,6 @@ export {
   builtInAggregationTypes,
   getFields,
   firstFieldOption,
-  getIndexOptions,
   getTimeFieldOptions,
   GroupByExpression,
   COMPARATORS,
