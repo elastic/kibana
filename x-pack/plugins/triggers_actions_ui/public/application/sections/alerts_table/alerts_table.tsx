@@ -15,7 +15,6 @@ import {
   EuiToolTip,
   EuiButtonIcon,
   EuiDataGridStyle,
-  EuiDataGridColumn,
 } from '@elastic/eui';
 import { useSorting, usePagination } from './hooks';
 import { AlertsTableProps } from '../../../types';
@@ -59,13 +58,14 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     alertsCount,
   });
 
-  const [visibleColumns, setVisibleColumns] = useState(props.columns.map(({ id }) => id));
+  const [visibleColumns, setVisibleColumns] = useState(props.visibleColumns);
 
   const onChangeVisibleColumns = useCallback(
     (newColumns: string[]) => {
       setVisibleColumns(newColumns);
       onColumnsChange(
-        newColumns.map((cid) => props.columns.find((oc) => oc.id === cid)) as EuiDataGridColumn[]
+        props.columns.sort((a, b) => newColumns.indexOf(a.id) - newColumns.indexOf(b.id)),
+        newColumns
       );
     },
     [onColumnsChange, props.columns]

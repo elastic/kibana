@@ -38,6 +38,7 @@ export interface AlertsTableStateProps {
 
 interface AlertsTableStorage {
   columns: EuiDataGridColumn[];
+  visibleColumns?: string[];
   sort: SortCombinations[];
 }
 
@@ -77,19 +78,27 @@ const AlertsTableState = ({
   const storage = useRef(new Storage(window.localStorage));
   const localAlertsTableConfig = storage.current.get(id) as Partial<AlertsTableStorage>;
 
+  const columnsLocal =
+    localAlertsTableConfig &&
+    localAlertsTableConfig.columns &&
+    !isEmpty(localAlertsTableConfig?.columns)
+      ? localAlertsTableConfig?.columns ?? []
+      : alertsTableConfiguration?.columns ?? [];
+
   const storageAlertsTable = useRef<AlertsTableStorage>({
-    columns:
-      localAlertsTableConfig &&
-      localAlertsTableConfig.columns &&
-      !isEmpty(localAlertsTableConfig?.columns)
-        ? localAlertsTableConfig?.columns ?? []
-        : alertsTableConfiguration?.columns ?? [],
+    columns: columnsLocal,
     sort:
       localAlertsTableConfig &&
       localAlertsTableConfig.sort &&
       !isEmpty(localAlertsTableConfig?.sort)
         ? localAlertsTableConfig?.sort ?? []
         : alertsTableConfiguration?.sort ?? [],
+    visibleColumns:
+      localAlertsTableConfig &&
+      localAlertsTableConfig.visibleColumns &&
+      !isEmpty(localAlertsTableConfig?.visibleColumns)
+        ? localAlertsTableConfig?.visibleColumns ?? []
+        : columnsLocal.map((c) => c.id),
   });
 
   const [showCheckboxes] = useState(false);
@@ -135,11 +144,12 @@ const AlertsTableState = ({
     [id]
   );
   const onColumnsChange = useCallback(
-    (newColumns: EuiDataGridColumn[]) => {
+    (newColumns: EuiDataGridColumn[], visibleColumns: string[]) => {
       setColumns(newColumns);
       storageAlertsTable.current = {
         ...storageAlertsTable.current,
         columns: newColumns,
+        visibleColumns,
       };
       storage.current.set(id, storageAlertsTable.current);
     },
@@ -189,6 +199,7 @@ const AlertsTableState = ({
       showExpandToDetails,
       trailingControlColumns: [],
       useFetchAlertsData,
+      visibleColumns: storageAlertsTable.current.visibleColumns ?? [],
       'data-test-subj': 'internalAlertsState',
     }),
     [

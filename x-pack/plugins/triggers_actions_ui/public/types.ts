@@ -393,7 +393,7 @@ export interface FetchAlertData {
   isInitializing: boolean;
   isLoading: boolean;
   getInspectQuery: () => { request: {}; response: {} };
-  onColumnsChange: (columns: EuiDataGridColumn[]) => void;
+  onColumnsChange: (columns: EuiDataGridColumn[], visibleColumns: string[]) => void;
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
   onSortChange: (sort: EuiDataGridSorting['columns']) => void;
   refresh: () => void;
@@ -413,6 +413,7 @@ export interface AlertsTableProps {
   // defaultCellActions: TGridCellAction[];
   deletedEventIds: string[];
   disabledCellActions: string[];
+  flyoutState: AlertsTableFlyoutState;
   pageSize: number;
   pageSizeOptions: number[];
   leadingControlColumns: EuiDataGridControlColumn[];
@@ -420,8 +421,8 @@ export interface AlertsTableProps {
   showExpandToDetails: boolean;
   trailingControlColumns: EuiDataGridControlColumn[];
   useFetchAlertsData: () => FetchAlertData;
+  visibleColumns: string[];
   'data-test-subj': string;
-  flyoutState: AlertsTableFlyoutState;
 }
 
 // TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table

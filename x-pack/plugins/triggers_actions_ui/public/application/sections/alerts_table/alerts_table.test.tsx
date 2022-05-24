@@ -91,6 +91,7 @@ describe('AlertsTable', () => {
     alerts,
     flyoutState: AlertsTableFlyoutState.internal,
     useFetchAlertsData,
+    visibleColumns: columns.map((c) => c.id),
     'data-test-subj': 'testTable',
   };
 
