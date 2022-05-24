@@ -15,12 +15,12 @@ export const aiopsExplainLogRateSpikesSchema = schema.object({
 export type AiopsExplainLogRateSpikesSchema = TypeOf<typeof aiopsExplainLogRateSpikesSchema>;
 
 export const API_ACTION_NAME = {
-  INITIALIZE: 'initialize',
+  UPDATE_LOADING_STATE: 'update_loading_state',
 } as const;
 export type ApiActionName = typeof API_ACTION_NAME[keyof typeof API_ACTION_NAME];
 
-interface ApiActionInitialize {
-  type: typeof API_ACTION_NAME.INITIALIZE;
+interface ApiActionUpdateLoadingState {
+  type: typeof API_ACTION_NAME.UPDATE_LOADING_STATE;
   payload: {
     ccsWarning: boolean;
     loaded: number;
@@ -28,11 +28,13 @@ interface ApiActionInitialize {
   };
 }
 
-export function initializeAction(payload: ApiActionInitialize['payload']): ApiActionInitialize {
+export function updateLoadingStateAction(
+  payload: ApiActionUpdateLoadingState['payload']
+): ApiActionUpdateLoadingState {
   return {
-    type: API_ACTION_NAME.INITIALIZE,
+    type: API_ACTION_NAME.UPDATE_LOADING_STATE,
     payload,
   };
 }
 
-export type AiopsExplainLogRateSpikesApiAction = ApiActionInitialize;
+export type AiopsExplainLogRateSpikesApiAction = ApiActionUpdateLoadingState;

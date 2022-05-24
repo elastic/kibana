@@ -28,7 +28,7 @@ export function streamReducer(
   }
 
   switch (action.type) {
-    case API_ACTION_NAME.INITIALIZE:
+    case API_ACTION_NAME.UPDATE_LOADING_STATE:
       return action.payload;
     default:
       return state;

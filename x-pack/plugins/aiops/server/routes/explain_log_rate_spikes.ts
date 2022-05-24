@@ -8,12 +8,13 @@
 // import { firstValueFrom } from 'rxjs';
 
 import type { IRouter, Logger } from '@kbn/core/server';
-import type { DataRequestHandlerContext, IEsSearchRequest } from '@kbn/data-plugin/server';
+// import type { DataRequestHandlerContext, IEsSearchRequest } from '@kbn/data-plugin/server';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { streamFactory } from '@kbn/aiops-utils';
 
 import {
   aiopsExplainLogRateSpikesSchema,
-  initializeAction,
+  updateLoadingStateAction,
   AiopsExplainLogRateSpikesApiAction,
 } from '../../common/api/explain_log_rate_spikes';
 import { API_ENDPOINT } from '../../common/api';
@@ -30,7 +31,7 @@ export const defineExplainLogRateSpikesRoute = (
       },
     },
     async (context, request, response) => {
-      const index = request.body.index;
+      // const index = request.body.index;
 
       const controller = new AbortController();
 
@@ -64,7 +65,7 @@ export const defineExplainLogRateSpikesRoute = (
       // Async IIFE to run the analysis while not blocking returning `responseWithHeaders`.
       (async () => {
         push(
-          initializeAction({
+          updateLoadingStateAction({
             ccsWarning: false,
             loaded: 0,
             loadingState: 'Loading field candidates.',
@@ -73,6 +74,15 @@ export const defineExplainLogRateSpikesRoute = (
 
         // This iteration just takes in an index name and based on a date histogram we identify the window params.
         // Eventually it should be possible to pass these attributes from the client based on the brush selection.
+
+        // const resp = await getHistogramsForFields(
+        //   esClient,
+        //   dataViewTitle,
+        //   query,
+        //   fields,
+        //   samplerShardSize,
+        //   runtimeMappings
+        // );
 
         end();
       })();
