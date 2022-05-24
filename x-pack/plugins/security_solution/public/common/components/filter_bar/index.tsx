@@ -8,10 +8,9 @@
 import React, { memo, useMemo, useCallback } from 'react';
 
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
-import { FilterManager, TimeHistory } from '@kbn/data-plugin/public';
+import { FilterManager } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SearchBar, SearchBarProps } from '@kbn/unified-search-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 export interface FilterBarComponentProps {
   dataTestSubj?: string;
@@ -45,7 +44,6 @@ export const FilterBar = memo<FilterBarComponentProps>(
     );
 
     const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
-    const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
 
     return (
       <SearchBar
@@ -63,7 +61,6 @@ export const FilterBar = memo<FilterBarComponentProps>(
         showQueryBar={false}
         showQueryInput={false}
         showSaveQuery={false}
-        timeHistory={timeHistory}
         dataTestSubj={dataTestSubj}
         displayStyle={displayStyle}
       />
