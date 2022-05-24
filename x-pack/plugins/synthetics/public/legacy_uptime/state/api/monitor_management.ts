@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { CreateAPIKeyResult } from '@kbn/security-plugin/server';
 import { API_URLS } from '../../../../common/constants';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { CreateAPIKeyResult } from '@kbn/security-plugin/server';
 import {
   FetchMonitorManagementListQueryArgs,
   MonitorManagementListResultCodec,
