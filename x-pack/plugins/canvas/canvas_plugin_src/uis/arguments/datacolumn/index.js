@@ -9,6 +9,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { EuiSelect, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { sortBy } from 'lodash';
+import usePrevious from 'react-use/lib/usePrevious';
 import { getType } from '@kbn/interpreter';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../../i18n';
@@ -46,10 +47,8 @@ const DatacolumnArgInput = ({
   typeInstance,
 }) => {
   const [mathValue, setMathValue] = useState(getMathValue(argValue, columns));
-
-  useEffect(() => {
-    setMathValue(getMathValue(argValue, columns));
-  }, [argValue, columns]);
+  const prevColumns = usePrevious(columns);
+  const prevMathValue = usePrevious(mathValue);
 
   const allowedTypes = typeInstance.options.allowedTypes || false;
   const onlyShowMathFunctions = typeInstance.options.onlyMath || false;
@@ -64,9 +63,10 @@ const DatacolumnArgInput = ({
         }
       }
 
-      // if there is no column value, do nothing
+      // if there is no column value, paste empty expression
+      // it means, columns has been changed
       if (valueNotSet(column)) {
-        return setMathValue({ ...mathValue, fn });
+        return onValueChange('');
       }
 
       // if fn is not set, just use the value input
@@ -77,8 +77,22 @@ const DatacolumnArgInput = ({
       // fn has a value, so use it as a math.js expression
       onValueChange(`${fn}(${maybeQuoteValue(column)})`);
     },
-    [mathValue, onValueChange, columns]
+    [onValueChange, columns]
   );
+
+  useEffect(() => {
+    setMathValue(getMathValue(argValue, columns));
+  }, [argValue, columns]);
+
+  useEffect(() => {
+    if (
+      columns !== prevColumns &&
+      prevMathValue?.column !== mathValue.column &&
+      mathValue.column === ''
+    ) {
+      updateFunctionValue();
+    }
+  }, [prevColumns, columns, mathValue.column, prevMathValue?.column, updateFunctionValue]);
 
   const onChangeFn = useCallback(
     ({ target: { value } }) => updateFunctionValue(value, mathValue.column),
