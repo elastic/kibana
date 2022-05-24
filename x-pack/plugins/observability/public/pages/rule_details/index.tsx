@@ -86,7 +86,7 @@ export function RuleDetailsPage() {
   const [ruleType, setRuleType] = useState<RuleType<string, string>>();
   const [ruleToDelete, setRuleToDelete] = useState<string[]>([]);
   const [isPageLoading, setIsPageLoading] = useState(false);
-  const { last24hAlerts } = useFetchLast24hAlerts({
+  const { isLoadingLast24hAlerts, last24hAlerts } = useFetchLast24hAlerts({
     http,
     features,
     ruleId,
@@ -353,29 +353,37 @@ export function RuleDetailsPage() {
                     defaultMessage: 'Alerts',
                   })}
                 </ItemTitleRuleSummary>
-
-                <ItemValueRuleSummary
-                  extraSpace={false}
-                  itemValue={`
+                {isLoadingLast24hAlerts ? (
+                  <EuiFlexItem>
+                    <EuiLoadingSpinner size="s" />
+                  </EuiFlexItem>
+                ) : (
+                  <ItemValueRuleSummary
+                    extraSpace={false}
+                    itemValue={`
                     ${String(last24hAlerts)} ${i18n.translate(
-                    'xpack.observability.ruleDetails.last24h',
-                    {
-                      defaultMessage: '(last 24 h)',
-                    }
-                  )}`}
-                />
+                      'xpack.observability.ruleDetails.last24h',
+                      {
+                        defaultMessage: '(last 24 h)',
+                      }
+                    )}`}
+                  />
+                )}
               </EuiFlexGroup>
               <EuiSpacer size="s" />
-              {isLoadingExecutionLog ? (
-                <EuiLoadingSpinner size="s" />
-              ) : (
-                <EuiFlexGroup>
-                  <ItemTitleRuleSummary>
-                    {i18n.translate('xpack.observability.ruleDetails.execution', {
-                      defaultMessage: 'Executions',
-                    })}
-                  </ItemTitleRuleSummary>
 
+              <EuiFlexGroup>
+                <ItemTitleRuleSummary>
+                  {i18n.translate('xpack.observability.ruleDetails.execution', {
+                    defaultMessage: 'Executions',
+                  })}
+                </ItemTitleRuleSummary>
+
+                {isLoadingExecutionLog ? (
+                  <EuiFlexItem>
+                    <EuiLoadingSpinner size="s" />
+                  </EuiFlexItem>
+                ) : (
                   <ItemValueRuleSummary
                     extraSpace={false}
                     itemValue={`
@@ -386,8 +394,8 @@ export function RuleDetailsPage() {
                       }
                     )}`}
                   />
-                </EuiFlexGroup>
-              )}
+                )}
+              </EuiFlexGroup>
             </EuiFlexGroup>
           </EuiPanel>
         </EuiFlexItem>
