@@ -32,6 +32,7 @@ interface UseProcessTreeDeps {
   updatedAlertsStatus: AlertStatusEventEntityIdMap;
   verboseMode: boolean;
   jumpToEntityId?: string;
+  refreshClicked?: boolean;
 }
 
 export class ProcessImpl implements Process {
@@ -283,6 +284,7 @@ export const useProcessTree = ({
   updatedAlertsStatus,
   verboseMode,
   jumpToEntityId,
+  refreshClicked,
 }: UseProcessTreeDeps) => {
   const firstEvent = data[0]?.events?.[0];
   const sessionLeaderProcess = useMemo(() => {
@@ -306,7 +308,9 @@ export const useProcessTree = ({
     const newProcessedPages: ProcessEventsPage[] = [];
 
     data.forEach((page, i) => {
-      const processed = processedPages.find((p) => p.cursor === page.cursor);
+      const processed = processedPages.find(
+        (p) => p.cursor === page.cursor && p.events && p.events.length === page.events?.length
+      );
 
       if (!processed) {
         const backwards = i < processedPages.length;
@@ -332,7 +336,7 @@ export const useProcessTree = ({
       setOrphans(newOrphans);
       autoExpandProcessTree(updatedProcessMap, jumpToEntityId);
     }
-  }, [data, processMap, orphans, processedPages, sessionEntityId, jumpToEntityId]);
+  }, [data, processMap, orphans, processedPages, sessionEntityId, jumpToEntityId, refreshClicked]);
 
   useEffect(() => {
     setSearchResults(searchProcessTree(processMap, searchQuery, verboseMode));

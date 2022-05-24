@@ -62,6 +62,8 @@ export interface ProcessTreeDeps {
   onShowAlertDetails: (alertUuid: string) => void;
   showTimestamp?: boolean;
   verboseMode?: boolean;
+
+  refreshClicked?: boolean;
 }
 
 export const ProcessTree = ({
@@ -82,6 +84,7 @@ export const ProcessTree = ({
   onShowAlertDetails,
   showTimestamp = true,
   verboseMode = false,
+  refreshClicked = false,
 }: ProcessTreeDeps) => {
   const [isInvestigatedEventVisible, setIsInvestigatedEventVisible] = useState<boolean>(true);
   const [isInvestigatedEventAbove, setIsInvestigatedEventAbove] = useState<boolean>(false);
@@ -94,6 +97,7 @@ export const ProcessTree = ({
     updatedAlertsStatus,
     verboseMode,
     jumpToEntityId,
+    refreshClicked,
   });
 
   const eventsRemaining = useMemo(() => {

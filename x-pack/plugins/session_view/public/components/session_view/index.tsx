@@ -14,6 +14,7 @@ import {
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiBetaBadge,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -76,6 +77,8 @@ export const SessionView = ({
   const [currentJumpToCursor, setCurrentJumpToCursor] = useState(jumpToCursor);
   const [currentJumpToEntityId, setCurrentJumpToEntityId] = useState(jumpToEntityId);
 
+  const [refreshSession, setRefreshSession] = useState(false);
+
   const styles = useStyles({ height, isFullScreen });
 
   const detailPanelCollapseFn = useRef(() => {});
@@ -116,6 +119,7 @@ export const SessionView = ({
     isFetching,
     fetchPreviousPage,
     hasPreviousPage,
+    refetch,
   } = useFetchSessionViewProcessEvents(sessionEntityId, currentJumpToCursor);
 
   const {
@@ -124,7 +128,21 @@ export const SessionView = ({
     isFetching: isFetchingAlerts,
     hasNextPage: hasNextPageAlerts,
     error: alertsError,
+    refetch: refetchAlerts,
   } = useFetchSessionViewAlerts(sessionEntityId, investigatedAlertId);
+
+  useEffect(() => {
+    refetch().then((val) => {
+      setRefreshSession(val.isLoading);
+    });
+    refetchAlerts().then((val) => {
+      setRefreshSession(val.isLoading);
+    });
+  }, [refreshSession, refetch, refetchAlerts]);
+
+  const handleRefresh = useCallback(() => {
+    setRefreshSession(true);
+  }, []);
 
   const alerts = useMemo(() => {
     let events: ProcessEvent[] = [];
@@ -150,6 +168,7 @@ export const SessionView = ({
     updatedAlertsStatus,
     fetchAlertStatus[0] ?? ''
   );
+  // console.log(dataLoaded && data.pages[0].events.length);
 
   useEffect(() => {
     if (newUpdatedAlertsStatus) {
@@ -237,6 +256,18 @@ export const SessionView = ({
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType="refresh"
+                display="empty"
+                onClick={handleRefresh}
+                size="m"
+                aria-label="Session View Refresh Button"
+                data-test-subj="sessionView:sessionViewRefreshButton"
+                isLoading={refreshSession}
+              />
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
               <SessionViewDisplayOptions
                 displayOptions={displayOptions!}
                 onChange={handleOptionChange}
@@ -313,6 +344,7 @@ export const SessionView = ({
                         onShowAlertDetails={onShowAlertDetails}
                         showTimestamp={displayOptions?.timestamp}
                         verboseMode={displayOptions?.verboseMode}
+                        refreshClicked={refreshSession}
                       />
                     </div>
                   )}
