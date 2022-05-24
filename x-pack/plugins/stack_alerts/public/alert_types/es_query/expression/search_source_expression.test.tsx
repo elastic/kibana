@@ -14,12 +14,19 @@ import { EsQueryAlertParams, SearchType } from '../types';
 import { SearchSourceExpression } from './search_source_expression';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { act } from 'react-dom/test-utils';
+import { of } from 'rxjs';
+import { IKibanaSearchResponse, ISearchSource } from '@kbn/data-plugin/common';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { findTestSubject } from '@elastic/eui/lib/test';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 const dataViewPluginMock = dataViewPluginMocks.createStartContract();
 const chartsStartMock = chartPluginMock.createStartContract();
 const unifiedSearchMock = unifiedSearchPluginMock.createStartContract();
+export const uiSettingsMock = {
+  get: jest.fn(),
+} as unknown as IUiSettingsClient;
 
 const defaultSearchSourceExpressionParams: EsQueryAlertParams<SearchType.searchSource> = {
   size: 100,
@@ -52,7 +59,23 @@ const searchSourceMock = {
     }
     return '';
   },
-};
+  setField: jest.fn(),
+  createCopy: jest.fn(() => {
+    return searchSourceMock;
+  }),
+  setParent: jest.fn(() => {
+    return searchSourceMock;
+  }),
+  fetch$: jest.fn(() => {
+    return of<IKibanaSearchResponse>({
+      rawResponse: {
+        hits: {
+          total: 1234,
+        },
+      },
+    });
+  }),
+} as unknown as ISearchSource;
 
 const savedQueryMock = {
   id: 'test-id',
@@ -67,10 +90,6 @@ const savedQueryMock = {
   },
 };
 
-jest.mock('./search_source_expression_form', () => ({
-  SearchSourceExpressionForm: () => <div>search source expression form mock</div>,
-}));
-
 const dataMock = dataPluginMock.createStartContract();
 (dataMock.search.searchSource.create as jest.Mock).mockImplementation(() =>
   Promise.resolve(searchSourceMock)
@@ -78,6 +97,9 @@ const dataMock = dataPluginMock.createStartContract();
 (dataMock.dataViews.getIdsWithTitle as jest.Mock).mockImplementation(() => Promise.resolve([]));
 (dataMock.query.savedQueries.getSavedQuery as jest.Mock).mockImplementation(() =>
   Promise.resolve(savedQueryMock)
+);
+dataMock.query.savedQueries.findSavedQueries = jest.fn(() =>
+  Promise.resolve({ total: 0, queries: [] })
 );
 
 const setup = (alertParams: EsQueryAlertParams<SearchType.searchSource>) => {
@@ -88,8 +110,8 @@ const setup = (alertParams: EsQueryAlertParams<SearchType.searchSource>) => {
     searchConfiguration: [],
   };
 
-  const wrapper = mountWithIntl(
-    <KibanaContextProvider services={{ data: dataMock }}>
+  return mountWithIntl(
+    <KibanaContextProvider services={{ data: dataMock, uiSettings: uiSettingsMock }}>
       <SearchSourceExpression
         ruleInterval="1m"
         ruleThrottle="1m"
@@ -107,31 +129,49 @@ const setup = (alertParams: EsQueryAlertParams<SearchType.searchSource>) => {
       />
     </KibanaContextProvider>
   );
-
-  return wrapper;
 };
 
 describe('SearchSourceAlertTypeExpression', () => {
   test('should render correctly', async () => {
-    let wrapper = setup(defaultSearchSourceExpressionParams).children();
+    let wrapper = setup(defaultSearchSourceExpressionParams);
 
     expect(wrapper.find(EuiLoadingSpinner).exists()).toBeTruthy();
-    expect(wrapper.text().includes('Cant find searchSource')).toBeFalsy();
 
     await act(async () => {
       await nextTick();
     });
     wrapper = await wrapper.update();
+    expect(findTestSubject(wrapper, 'thresholdExpression')).toBeTruthy();
+  });
+  test('should show success message if Test Query is successful', async () => {
+    let wrapper = setup(defaultSearchSourceExpressionParams);
+    await act(async () => {
+      await nextTick();
+    });
+    wrapper = await wrapper.update();
+    await act(async () => {
+      findTestSubject(wrapper, 'testQuery').simulate('click');
+      wrapper.update();
+    });
+    wrapper = await wrapper.update();
 
-    expect(wrapper.text().includes('Cant find searchSource')).toBeFalsy();
-    expect(wrapper.text().includes('search source expression form mock')).toBeTruthy();
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('[data-test-subj="testQuerySuccess"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="testQueryError"]').exists()).toBeFalsy();
+    expect(wrapper.find('EuiText[data-test-subj="testQuerySuccess"]').text()).toEqual(
+      `Query matched 1234 documents in the last 15s.`
+    );
   });
 
   test('should render error prompt', async () => {
     (dataMock.search.searchSource.create as jest.Mock).mockImplementationOnce(() =>
       Promise.reject(new Error('Cant find searchSource'))
     );
-    let wrapper = setup(defaultSearchSourceExpressionParams).children();
+    let wrapper = setup(defaultSearchSourceExpressionParams);
 
     expect(wrapper.find(EuiLoadingSpinner).exists()).toBeTruthy();
     expect(wrapper.text().includes('Cant find searchSource')).toBeFalsy();

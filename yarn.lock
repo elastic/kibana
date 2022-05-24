@@ -3060,6 +3060,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/handlebars@link:bazel-bin/packages/kbn-handlebars":
+  version "0.0.0"
+  uid ""
+
 "@kbn/i18n-react@link:bazel-bin/packages/kbn-i18n-react":
   version "0.0.0"
   uid ""
@@ -6275,6 +6279,10 @@
   uid ""
 
 "@types/kbn__generate@link:bazel-bin/packages/kbn-generate/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__handlebars@link:bazel-bin/packages/kbn-handlebars/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -23701,6 +23709,11 @@ react-helmet-async@^1.0.7:
     prop-types "^15.7.2"
     react-fast-compare "^3.2.0"
     shallowequal "^1.1.0"
+
+react-hook-form@^7.30.0:
+  version "7.30.0"
+  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.30.0.tgz#c9e2fd54d3627e43bd94bf38ef549df2e80c1371"
+  integrity sha512-DzjiM6o2vtDGNMB9I4yCqW8J21P314SboNG1O0obROkbg7KVS0I7bMtwSdKyapnCPjHgnxc3L7E5PEdISeEUcQ==
 
 react-input-autosize@^2.2.1:
   version "2.2.2"
