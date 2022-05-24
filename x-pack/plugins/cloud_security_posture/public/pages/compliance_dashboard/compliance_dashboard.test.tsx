@@ -16,7 +16,7 @@ import { useCisKubernetesIntegration } from '../../common/api/use_cis_kubernetes
 import * as TEXT from './translations';
 import { useComplianceDashboardDataApi } from '../../common/api/use_compliance_dashboard_data_api';
 
-jest.mock('../../common/api/use_info_api');
+jest.mock('../../common/api/use_setup_status_api');
 jest.mock('../../common/api/use_cis_kubernetes_integration');
 jest.mock('../../common/api/use_compliance_dashboard_data_api');
 
