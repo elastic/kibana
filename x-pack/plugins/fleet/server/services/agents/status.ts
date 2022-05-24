@@ -19,7 +19,7 @@ import { FleetUnauthorizedError } from '../../errors';
 import { getAgentById, getAgentsByKuery, removeSOAttributes } from './crud';
 
 const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*,synthetics-*-*';
-const MAX_AGENT_DATA_PREVIEW_SIZE = 50;
+const MAX_AGENT_DATA_PREVIEW_SIZE = 20;
 export async function getAgentStatusById(
   esClient: ElasticsearchClient,
   agentId: string

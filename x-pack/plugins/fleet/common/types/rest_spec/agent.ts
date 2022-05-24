@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SearchHit } from '@kbn/core/types/elasticsearch';
+
 import type { Agent, AgentAction, CurrentUpgrade, NewAgentAction } from '../models';
 
 import type { ListResult, ListWithKuery } from './common';
@@ -176,7 +178,7 @@ export interface IncomingDataList {
 }
 export interface GetAgentIncomingDataResponse {
   items: IncomingDataList[];
-  dataPreview: any[];
+  dataPreview: SearchHit[];
 }
 
 export interface GetCurrentUpgradesResponse {

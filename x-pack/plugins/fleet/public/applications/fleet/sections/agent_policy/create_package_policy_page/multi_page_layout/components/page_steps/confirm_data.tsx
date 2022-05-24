@@ -5,26 +5,29 @@
  * 2.0.
  */
 
-import React from 'react';
-// import { FormattedMessage } from '@kbn/i18n-react';
-// import { EuiSpacer } from '@elastic/eui';
-// import { safeLoad } from 'js-yaml';
-
-// import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 
 import type { MultiPageStepLayoutProps } from '../../types';
-// import type { PackagePolicyFormState } from '../../../types';
-// import type { NewPackagePolicy } from '../../../../../../types';
-// import { sendCreatePackagePolicy, useStartServices } from '../../../../../../hooks';
-// import type { RequestError } from '../../../../../../hooks';
-// import { Error } from '../../../../../../components';
-// import { sendGeneratePackagePolicy } from '../../hooks';
-// import { CreatePackagePolicyBottomBar, StandaloneModeWarningCallout } from '..';
-// import type { PackagePolicyValidationResults } from '../../../services';
-// import { validatePackagePolicy, validationHasErrors } from '../../../services';
-// import { NotObscuredByBottomBar } from '..';
-// import { StepConfigurePackagePolicy } from '../../../components';
+import { useStartServices } from '../../../../../../hooks';
+
+import { ConfirmIncomingDataWithPreview } from '..';
 
 export const ConfirmDataPageStep: React.FC<MultiPageStepLayoutProps> = (props) => {
-  return <>Confirm data</>;
+  const { enrolledAgentIds, packageInfo } = props;
+  const core = useStartServices();
+
+  const [agentDataConfirmed, setAgentDataConfirmed] = useState(false);
+  const { docLinks } = core;
+  const troubleshootLink = docLinks.links.fleet.troubleshooting;
+  return (
+    <>
+      <ConfirmIncomingDataWithPreview
+        agentIds={enrolledAgentIds}
+        installedPolicy={packageInfo}
+        agentDataConfirmed={agentDataConfirmed}
+        setAgentDataConfirmed={setAgentDataConfirmed}
+        troubleshootLink={troubleshootLink}
+      />
+    </>
+  );
 };

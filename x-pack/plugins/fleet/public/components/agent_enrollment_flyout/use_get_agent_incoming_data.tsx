@@ -7,6 +7,8 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import type { SearchHit } from '@kbn/core/types/elasticsearch';
+
 import type { IncomingDataList } from '../../../common/types/rest_spec/agent';
 
 import { sendGetAgentIncomingData, useLink } from '../../hooks';
@@ -81,8 +83,13 @@ const POLLING_INTERVAL_MS = 5 * 1000; // 5 sec
 
 export const usePollingIncomingData = (agentsIds: string[], previewData?: boolean) => {
   const timeout = useRef<number | undefined>(undefined);
-  const [incomingData, setIncomingData] = useState<IncomingDataList[]>([]);
-  const [dataPreview, setDataPreview] = useState<any[]>([]);
+  const [result, setResult] = useState<{
+    incomingData: IncomingDataList[];
+    dataPreview: SearchHit[];
+  }>({
+    incomingData: [],
+    dataPreview: [],
+  });
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -90,23 +97,18 @@ export const usePollingIncomingData = (agentsIds: string[], previewData?: boolea
 
     const poll = () => {
       timeout.current = window.setTimeout(async () => {
-        const { data } = await sendGetAgentIncomingData({ agentsIds, previewData });
-
+        const { data } = await sendGetAgentIncomingData({ agentsIds, previewData }); // TODO: handle error
         if (data?.items) {
-          // filter out agents that have `data = false` and keep polling
+          // filter out  agents that have `data = false` and keep polling
           const filtered = data?.items.filter((item) => {
             const key = Object.keys(item)[0];
             return item[key].data === true;
           });
 
           if (filtered.length > 0) {
-            setIncomingData(filtered);
+            setResult({ incomingData: filtered, dataPreview: data.dataPreview || [] });
             setIsLoading(false);
           }
-        }
-
-        if (data?.data) {
-          setDataPreview(data?.data);
         }
         if (!isAborted) {
           poll();
@@ -115,12 +117,12 @@ export const usePollingIncomingData = (agentsIds: string[], previewData?: boolea
     };
 
     poll();
-    if (isAborted || incomingData.length > 0) clearTimeout(timeout.current);
+    if (isAborted || result.incomingData.length > 0) clearTimeout(timeout.current);
 
     return () => {
       isAborted = true;
     };
-  }, [agentsIds, previewData, incomingData]);
+  }, [agentsIds, result, previewData]);
 
-  return { incomingData, dataPreview, isLoading };
+  return { ...result, isLoading };
 };
