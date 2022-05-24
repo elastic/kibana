@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import moment from 'moment';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -23,6 +23,7 @@ import {
   EuiTabbedContent,
   EuiEmptyPrompt,
   EuiLoadingSpinner,
+  EuiSuperSelectOption,
 } from '@elastic/eui';
 
 import {
@@ -33,7 +34,7 @@ import {
   deleteRules,
   useLoadRuleTypes,
   RuleType,
-  NOTIFY_WHEN_OPTIONS,
+  getNotifyWhenOptions,
   RuleEventLogListProps,
   AlertsTableFlyoutState,
 } from '@kbn/triggers-actions-ui-plugin/public';
@@ -94,6 +95,14 @@ export function RuleDetailsPage() {
 
   const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
   const [isRuleEditPopoverOpen, setIsRuleEditPopoverOpen] = useState(false);
+
+  const NOTIFY_WHEN_OPTIONS = useRef<Array<EuiSuperSelectOption<unknown>>>([]);
+  useEffect(() => {
+    const loadNotifyWhenOption = async () => {
+      NOTIFY_WHEN_OPTIONS.current = await getNotifyWhenOptions();
+    };
+    loadNotifyWhenOption();
+  }, []);
 
   const handleClosePopover = useCallback(() => setIsRuleEditPopoverOpen(false), []);
 
@@ -253,7 +262,7 @@ export function RuleDetailsPage() {
     });
 
   const getNotifyText = () =>
-    NOTIFY_WHEN_OPTIONS.find((option) => option.value === rule?.notifyWhen)?.inputDisplay ||
+    NOTIFY_WHEN_OPTIONS.current.find((option) => option.value === rule?.notifyWhen)?.inputDisplay ||
     rule.notifyWhen;
   return (
     <ObservabilityPageTemplate
