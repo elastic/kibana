@@ -5,20 +5,25 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/logging/logging_system.mock';
-import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import { Chance } from 'chance';
-import { httpServiceMock } from '@kbn/core/server/http/http_service.mock';
 import { CspAppService } from '../../lib/csp_app_services';
 import { CspAppContext } from '../../plugin';
 import { defineGetInfoRoute } from './info';
-import { httpServerMock } from '@kbn/core/server/http/http_server.mocks';
+import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
 
 describe('Update rules configuration API', () => {
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  let mockEsClient: jest.Mocked<ElasticsearchClient>;
-  const chance = new Chance();
-
+  const logger: ReturnType<typeof loggingSystemMock.createLogger> =
+    loggingSystemMock.createLogger();
+  const mockResponse = httpServerMock.createResponseFactory();
+  const mockRequest = httpServerMock.createKibanaRequest();
+  const mockEsClient = elasticsearchClientMock.createElasticsearchClient();
+  const mockContext = {
+    core: {
+      elasticsearch: { client: { asCurrentUser: mockEsClient } },
+    },
+  };
   const router = httpServiceMock.createRouter();
   const cspAppContextService = new CspAppService();
 
@@ -28,7 +33,6 @@ describe('Update rules configuration API', () => {
   };
 
   beforeEach(() => {
-    logger = loggingSystemMock.createLogger();
     jest.clearAllMocks();
   });
 
@@ -39,20 +43,39 @@ describe('Update rules configuration API', () => {
     expect(config.path).toEqual('/internal/cloud_security_posture/info');
   });
 
-  it('should accept to a user with fleet.all privilege', async () => {
+  it('validate the API result when there are no findings in latest findings index', async () => {
     defineGetInfoRoute(router, cspContext);
+    mockEsClient.search.mockResponse({
+      hits: {
+        hits: [],
+      },
+    } as unknown as ESSearchResponse);
+
     const [_, handler] = router.get.mock.calls[0];
 
-    const mockContext = {
-      fleet: { authz: { fleet: { all: true } } },
-    } as unknown as KibanaRequest;
+    await handler(mockContext, mockRequest, mockResponse);
+    const [call] = mockResponse.ok.mock.calls;
+    const body = call[0]!.body;
 
-    const mockRequest = httpServerMock.createKibanaRequest();
-    const mockResponse = httpServerMock.createResponseFactory();
-    const [context, req, res] = [mockContext, mockRequest, mockResponse];
+    expect(mockResponse.ok).toHaveBeenCalledTimes(1);
+    await expect(body).toEqual({ latestFindingsIndexStatus: 'inapplicable' });
+  });
 
-    await handler(context, req, res);
+  it('validate the API result when there are findings in latest findings index', async () => {
+    defineGetInfoRoute(router, cspContext);
+    mockEsClient.search.mockResponse({
+      hits: {
+        hits: [{}],
+      },
+    } as unknown as ESSearchResponse);
 
-    expect(res.forbidden).toHaveBeenCalledTimes(0);
+    const [_, handler] = router.get.mock.calls[0];
+
+    await handler(mockContext, mockRequest, mockResponse);
+    const [call] = mockResponse.ok.mock.calls;
+    const body = call[0]!.body;
+
+    expect(mockResponse.ok).toHaveBeenCalledTimes(1);
+    await expect(body).toEqual({ latestFindingsIndexStatus: 'applicable' });
   });
 });

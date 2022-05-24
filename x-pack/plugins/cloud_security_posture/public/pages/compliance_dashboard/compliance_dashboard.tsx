@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiSpacer, EuiIcon } from '@elastic/eui';
 import { type KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
+import { UseQueryResult } from 'react-query';
 import { allNavigationItems } from '../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
 import { SummarySection } from './dashboard_sections/summary_section';
@@ -41,11 +42,16 @@ export const ComplianceDashboard = () => {
   });
   useCspBreadcrumbs([allNavigationItems.dashboard]);
 
+  const getPageQuery = useCallback(
+    (): UseQueryResult => (isFindingsIndexApplicable ? getDashboardData : getInfo),
+    [getDashboardData, getInfo, isFindingsIndexApplicable]
+  );
+
   return (
     <CspPageTemplate
       pageHeader={{ pageTitle: CLOUD_POSTURE }}
       restrictWidth={1600}
-      query={isFindingsIndexApplicable ? getDashboardData : getInfo}
+      query={getPageQuery()}
       noDataConfig={!isFindingsIndexApplicable ? getNoDataConfig(getInfo.refetch) : undefined}
     >
       {getDashboardData.data && (
