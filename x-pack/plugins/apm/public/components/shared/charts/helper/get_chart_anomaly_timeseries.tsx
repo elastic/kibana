@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { rgba } from 'polished';
 import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { getSeverity } from '@kbn/ml-plugin/public';
-import { Fit } from '@elastic/charts';
 import { getSeverityColor } from '../../../../../common/anomaly_detection';
 import {
   ANOMALY_SEVERITY,
@@ -46,7 +45,6 @@ export function getChartAnomalyTimeseries({
     {
       title: expectedBoundsTitle,
       type: 'area',
-      fit: Fit.Nearest,
       hideLegend: false,
       hideTooltipValue: true,
       areaSeriesStyle: {
