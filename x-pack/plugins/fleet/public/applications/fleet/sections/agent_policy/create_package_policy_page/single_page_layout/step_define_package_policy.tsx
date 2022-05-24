@@ -22,12 +22,17 @@ import {
 
 import styled from 'styled-components';
 
-import type { AgentPolicy, PackageInfo, NewPackagePolicy, RegistryVarsEntry } from '../../../types';
-import { packageToPackagePolicy, pkgKeyFromPackageInfo } from '../../../services';
-import { Loading } from '../../../components';
-import { useStartServices, useGetPackagePolicies } from '../../../hooks';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
-import { SO_SEARCH_LIMIT, getMaxPackageName } from '../../../../../../common';
+import type {
+  AgentPolicy,
+  PackageInfo,
+  NewPackagePolicy,
+  RegistryVarsEntry,
+} from '../../../../types';
+import { packageToPackagePolicy, pkgKeyFromPackageInfo } from '../../../../services';
+import { Loading } from '../../../../components';
+import { useStartServices, useGetPackagePolicies } from '../../../../hooks';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../constants';
+import { SO_SEARCH_LIMIT, getMaxPackageName } from '../../../../../../../common';
 
 import { isAdvancedVar } from './services';
 import type { PackagePolicyValidationResults } from './services';

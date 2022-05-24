@@ -19,10 +19,10 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { WithHeaderLayout } from '../../../../layouts';
-import type { AgentPolicy, PackageInfo, RegistryPolicyTemplate } from '../../../../types';
-import { PackageIcon } from '../../../../components';
-import type { EditPackagePolicyFrom } from '../types';
+import { WithHeaderLayout } from '../../../../../layouts';
+import type { AgentPolicy, PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
+import { PackageIcon } from '../../../../../components';
+import type { EditPackagePolicyFrom } from '../../types';
 
 const AgentPolicyName = styled(EuiDescriptionListDescription)`
   margin-left: auto;
@@ -32,7 +32,7 @@ const AgentPolicyName = styled(EuiDescriptionListDescription)`
   overflow: hidden;
 `;
 
-export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
+export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
   from: EditPackagePolicyFrom;
   cancelUrl: string;
   onCancel?: React.ReactEventHandler;
