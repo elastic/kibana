@@ -7,9 +7,9 @@
  */
 
 import { BehaviorSubject, firstValueFrom, ReplaySubject } from 'rxjs';
-import { take, toArray } from 'rxjs/operators';
+import { takeWhile, tap, toArray } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
-import type { Plugin, CoreSetup, CoreStart, TelemetryCounter } from '@kbn/core/server';
+import type { Plugin, CoreSetup, CoreStart, TelemetryCounter, Event } from '@kbn/core/server';
 import type { Action } from './custom_shipper';
 import { CustomShipper } from './custom_shipper';
 
@@ -79,17 +79,21 @@ export class AnalyticsPluginAPlugin implements Plugin {
     router.get(
       {
         path: '/internal/analytics_plugin_a/actions',
-        validate: {
-          query: schema.object({
-            takeNumberOfActions: schema.number({ min: 1 }),
-          }),
-        },
+        validate: false,
       },
       async (context, req, res) => {
-        const { takeNumberOfActions } = req.query;
-
-        const actions = await firstValueFrom(actions$.pipe(take(takeNumberOfActions), toArray()));
-
+        let found = false;
+        const actions = await firstValueFrom(
+          actions$.pipe(
+            takeWhile(() => !found),
+            tap(({ action, meta }) => {
+              found =
+                action === 'reportEvents' &&
+                meta.find((event: Event) => event.event_type === 'test-plugin-lifecycle');
+            }),
+            toArray()
+          )
+        );
         return res.ok({ body: actions });
       }
     );

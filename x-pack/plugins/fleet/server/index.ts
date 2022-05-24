@@ -54,6 +54,7 @@ export const config: PluginConfigDescriptor = {
     agents: {
       enabled: true,
     },
+    enableExperimental: true,
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
     // Unused settings before Fleet server exists
