@@ -19,6 +19,7 @@ import { FieldTextSelect } from './field_text_select';
 import { ComboBoxSelect } from './combo_box_select';
 
 import type { IndexPatternValue, FetchedIndexPattern } from '../../../../../common/types';
+import { getDataViewNotFoundError } from '../../../../../common/errors';
 import { USE_KIBANA_INDEXES_KEY } from '../../../../../common/constants';
 
 export interface IndexPatternSelectProps {
@@ -115,13 +116,7 @@ export const IndexPatternSelect = ({
       helpText={fetchedIndex.defaultIndex && getIndexPatternHelpText(useKibanaIndices)}
       isInvalid={!isFetchedIndexValid(fetchedIndex)}
       error={
-        <FormattedMessage
-          id="visTypeTimeseries.indexPatternSelect.invalidIndexPattern"
-          defaultMessage="{label} is required to visualize the data"
-          values={{
-            label: indexPatternLabel,
-          }}
-        />
+        fetchedIndex.missedIndex ? getDataViewNotFoundError(fetchedIndex.missedIndex) : undefined
       }
       labelAppend={
         !useKibanaIndices && fetchedIndex.indexPatternString && !fetchedIndex.indexPattern ? (
