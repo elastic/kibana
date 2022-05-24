@@ -136,7 +136,7 @@ describe('#sortPredicateByType', () => {
   it('should correct sort items for WAFFLE chart type', () => {
     const sortPredicate = getSortPredicate(ChartTypes.WAFFLE);
 
-    let items = [
+    const items = [
       ['Foo', { value: 2 }],
       ['Hi', { value: 4 }],
       ['Test', { value: 1 }],
