@@ -710,39 +710,6 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(400);
       });
-      it('should respond 200 if trying to bulk upgrade to a version higher than the latest fleet server version if the agents include fleet server agents', async () => {
-        const higherVersion = semver.inc(fleetServerVersion, 'patch');
-        await es.update({
-          id: 'agent1',
-          refresh: 'wait_for',
-          index: AGENTS_INDEX,
-          body: {
-            doc: {
-              policy_id: `agent-policy-1`,
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
-          },
-        });
-        await es.update({
-          id: 'agent2',
-          refresh: 'wait_for',
-          index: AGENTS_INDEX,
-          body: {
-            doc: {
-              policy_id: `agent-policy-2`,
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
-          },
-        });
-        await supertest
-          .post(`/api/fleet/agents/bulk_upgrade`)
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            agents: ['agent1', 'agent2', 'agentWithFS'],
-            version: higherVersion,
-          })
-          .expect(200);
-      });
 
       it('should throw an error if source_uri parameter is passed', async () => {
         const kibanaVersion = await kibanaServer.version.get();

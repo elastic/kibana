@@ -7,7 +7,6 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
-import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 
 import semverCoerce from 'semver/functions/coerce';
 import semverGt from 'semver/functions/gt';
@@ -21,14 +20,12 @@ import type { PostAgentUpgradeRequestSchema, PostBulkAgentUpgradeRequestSchema }
 import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services';
 import { defaultIngestErrorHandler } from '../../errors';
-import { SO_SEARCH_LIMIT } from '../../../common';
 import { isAgentUpgradeable } from '../../../common/services';
-import { getAgentById, getAgentsByKuery } from '../../services/agents';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, AGENTS_PREFIX } from '../../constants';
-
 import { getMaxVersion } from '../../../common/services/get_max_version';
+import { getAgentById } from '../../services/agents';
+import type { Agent } from '../../types';
 
-import { packagePolicyService } from '../../services/package_policy';
+import { getAllFleetServerAgents } from '../../collectors/get_all_fleet_server_agents';
 
 export const postAgentUpgradeHandler: RequestHandler<
   TypeOf<typeof PostAgentUpgradeRequestSchema.params>,
@@ -60,7 +57,6 @@ export const postAgentUpgradeHandler: RequestHandler<
       },
     });
   }
-
   if (!force && !isAgentUpgradeable(agent, kibanaVersion)) {
     return response.customError({
       statusCode: 400,
@@ -106,7 +102,8 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
   try {
     checkKibanaVersion(version, kibanaVersion);
     checkSourceUriAllowed(sourceUri);
-    await checkFleetServerVersion(version, agents, soClient, esClient);
+    const fleetServerAgents = await getAllFleetServerAgents(soClient, esClient);
+    checkFleetServerVersion(version, fleetServerAgents);
   } catch (err) {
     return response.customError({
       statusCode: 400,
@@ -176,57 +173,8 @@ const checkSourceUriAllowed = (sourceUri?: string) => {
   }
 };
 
-// Check the installed fleet server versions
-// Allow upgrading if the agents to upgrade include fleet server agents
-const checkFleetServerVersion = async (
-  versionToUpgradeNumber: string,
-  agentsIds: string | string[],
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient
-) => {
-  let packagePolicyData;
-  try {
-    packagePolicyData = await packagePolicyService.list(soClient, {
-      perPage: SO_SEARCH_LIMIT,
-      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: fleet_server`,
-    });
-  } catch (error) {
-    throw new Error(error.message);
-  }
-  const agentPoliciesIds = packagePolicyData?.items.map((item) => item.policy_id);
-
-  if (agentPoliciesIds.length === 0) {
-    return;
-  }
-
-  let agentsResponse;
-  try {
-    agentsResponse = await getAgentsByKuery(esClient, {
-      showInactive: false,
-      perPage: SO_SEARCH_LIMIT,
-      kuery: `${AGENTS_PREFIX}.policy_id:${agentPoliciesIds.map((id) => `"${id}"`).join(' or ')}`,
-    });
-  } catch (error) {
-    throw new Error(error.message);
-  }
-
-  const { agents: fleetServerAgents } = agentsResponse;
-
-  if (fleetServerAgents.length === 0) {
-    return;
-  }
-  const fleetServerIds = fleetServerAgents.map((agent) => agent.id);
-
-  let hasFleetServerAgents: boolean;
-  if (Array.isArray(agentsIds)) {
-    hasFleetServerAgents = agentsIds.some((id) => fleetServerIds.includes(id));
-  } else {
-    hasFleetServerAgents = fleetServerIds.includes(agentsIds);
-  }
-  if (hasFleetServerAgents) {
-    return;
-  }
-
+// Check the installed fleet server version
+const checkFleetServerVersion = (versionToUpgradeNumber: string, fleetServerAgents: Agent[]) => {
   const fleetServerVersions = fleetServerAgents.map(
     (agent) => agent.local_metadata.elastic.agent.version
   ) as string[];
