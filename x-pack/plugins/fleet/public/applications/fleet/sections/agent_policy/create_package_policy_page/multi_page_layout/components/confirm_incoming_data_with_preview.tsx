@@ -40,7 +40,7 @@ interface Props {
   setAgentDataConfirmed: (v: boolean) => void;
   troubleshootLink: string;
 }
-const MAX_AGENT_DATA_PREVIEW_COUNT = 20;
+const MAX_AGENT_DATA_PREVIEW_COUNT = 5;
 // make room for more interesting keys in the UI
 const DATA_PREVIEW_OMIT_KEYS = [
   'agent.ephemeral_id',
@@ -52,8 +52,7 @@ const DATA_PREVIEW_OMIT_KEYS = [
 
 const CleanOverflowDescriptionList = styled(EuiDescriptionList)`
   overflow: hidden;
-  column-idth: 350px;
-  max-height: 120px;
+  max-height: 125px;
   word-break: break-all;
   white-space: pre-wrap;
 `;
@@ -64,14 +63,6 @@ const CompressedPre = styled('pre')`
     background: none;
     padding: 0 0;
   }
-`;
-
-const ScrollingDataContainer = styled('div')`
-  max-height: 50vh;
-  overflow-y: scroll;
-  /* keep scroll bar at the bottom by default */
-  display: flex;
-  flex-direction: column-reverse;
 `;
 
 const HitPreview: React.FC<{ hit: SearchHit }> = ({ hit }) => {
@@ -108,7 +99,7 @@ const HitTimestamp: React.FC<{ hit: SearchHit }> = ({ hit }) => {
 const AgentDataPreview: React.FC<{ dataPreview: SearchHit[] }> = ({ dataPreview }) => {
   const previewData = dataPreview.slice(0, MAX_AGENT_DATA_PREVIEW_COUNT);
   return (
-    <ScrollingDataContainer>
+    <>
       {previewData.map((hit) => (
         <div id={hit._id}>
           <EuiFlexGroup gutterSize={'xs'}>
@@ -123,7 +114,7 @@ const AgentDataPreview: React.FC<{ dataPreview: SearchHit[] }> = ({ dataPreview 
           <EuiHorizontalRule margin="s" />
         </div>
       ))}
-    </ScrollingDataContainer>
+    </>
   );
 };
 
