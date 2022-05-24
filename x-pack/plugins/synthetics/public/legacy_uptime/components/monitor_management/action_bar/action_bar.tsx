@@ -31,7 +31,7 @@ import { TestRun } from '../test_now_mode/test_now_mode';
 import { monitorManagementListSelector } from '../../../state/selectors';
 
 import { kibanaService } from '../../../state/kibana_service';
-import { showSyncErrors } from '../show_sync_errors';
+import { showSyncErrors } from '../../../../apps/synthetics/components/monitor_management/show_sync_errors';
 
 export interface ActionBarProps {
   monitor: SyntheticsMonitor;
@@ -103,7 +103,7 @@ export const ActionBar = ({
       });
       setIsSuccessful(true);
     } else if (hasErrors && !loading) {
-      showSyncErrors(data.attributes.errors, locations);
+      showSyncErrors(data.attributes.errors, locations, kibanaService.toasts);
       setIsSuccessful(true);
     }
   }, [data, status, isSaving, isValid, monitorId, hasErrors, locations, loading]);

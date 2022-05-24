@@ -11,7 +11,7 @@ import React, { Component } from 'react';
 
 import { Required } from '@kbn/utility-types';
 import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
-import { IndexPatternsContract } from '@kbn/data-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 
 export type IndexPatternSelectProps = Required<
   Omit<
@@ -26,7 +26,7 @@ export type IndexPatternSelectProps = Required<
 };
 
 export type IndexPatternSelectInternalProps = IndexPatternSelectProps & {
-  indexPatternService: IndexPatternsContract;
+  indexPatternService: DataViewsContract;
 };
 
 interface IndexPatternSelectState {

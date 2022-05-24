@@ -8,6 +8,7 @@
 import { Setup } from '../../../lib/helpers/setup_request';
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 import { convertConfigSettingsToString } from './convert_settings_to_string';
+import { getConfigsAppliedToAgentsThroughFleet } from './get_config_applied_to_agent_through_fleet';
 
 export async function listConfigurations({ setup }: { setup: Setup }) {
   const { internalClient, indices } = setup;
@@ -17,12 +18,22 @@ export async function listConfigurations({ setup }: { setup: Setup }) {
     size: 200,
   };
 
-  const resp = await internalClient.search<AgentConfiguration>(
-    'list_agent_configuration',
-    params
-  );
+  const [agentConfigs, configsAppliedToAgentsThroughFleet] = await Promise.all([
+    internalClient.search<AgentConfiguration>(
+      'list_agent_configuration',
+      params
+    ),
+    getConfigsAppliedToAgentsThroughFleet({ setup }),
+  ]);
 
-  return resp.hits.hits
+  return agentConfigs.hits.hits
     .map(convertConfigSettingsToString)
-    .map((hit) => hit._source);
+    .map((hit) => {
+      return {
+        ...hit._source,
+        applied_by_agent:
+          hit._source.applied_by_agent ||
+          configsAppliedToAgentsThroughFleet.hasOwnProperty(hit._source.etag),
+      };
+    });
 }
