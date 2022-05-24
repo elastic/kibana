@@ -70,11 +70,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
 }) => {
   const { addError } = useAppToasts();
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
-  const {
-    isValidating,
-    value: fieldValue,
-    setValue: setFieldValue,
-  } = field as FieldHook<FieldValueQueryBar>;
+  const { isValidating, value: fieldValue, setValue: setFieldValue } = field;
   const { isValid, message, messages, error } = getValidationResults(field);
 
   const { uiSettings } = useKibana().services;
