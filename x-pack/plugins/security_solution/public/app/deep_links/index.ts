@@ -35,7 +35,6 @@ import {
   POLICIES,
   ENDPOINTS,
   GETTING_STARTED,
-  THREAT_HUNTING,
   DASHBOARDS,
   CREATE_NEW_RULE,
 } from '../translations';
@@ -60,7 +59,7 @@ import {
   SERVER_APP_ID,
   USERS_PATH,
   KUBERNETES_PATH,
-  THREAT_HUNTING_PATH,
+  EXPLORE_PATH,
   DASHBOARDS_PATH,
   MANAGE_PATH,
   RULES_CREATE_PATH,
@@ -114,18 +113,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
     keywords: [
       i18n.translate('xpack.securitySolution.search.getStarted', {
         defaultMessage: 'Getting started',
-      }),
-    ],
-  },
-  {
-    id: SecurityPageName.threatHuntingLanding,
-    title: THREAT_HUNTING,
-    path: THREAT_HUNTING_PATH,
-    navLinkStatus: AppNavLinkStatus.hidden,
-    features: [FEATURE.general],
-    keywords: [
-      i18n.translate('xpack.securitySolution.search.threatHunting', {
-        defaultMessage: 'Threat Hunting',
       }),
     ],
   },
@@ -215,8 +202,9 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
     ],
   },
   {
-    id: SecurityPageName.explore,
+    id: SecurityPageName.exploreLanding,
     title: EXPLORE,
+    path: EXPLORE_PATH,
     navLinkStatus: AppNavLinkStatus.hidden,
     features: [FEATURE.general],
     keywords: [

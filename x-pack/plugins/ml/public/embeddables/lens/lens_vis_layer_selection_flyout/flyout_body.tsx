@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect, useMemo } from 'react';
+import React, { FC } from 'react';
 import type { Embeddable } from '@kbn/lens-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import './style.scss';
@@ -24,43 +22,26 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-import {
-  getLayers,
-  getJobsItemsFromEmbeddable,
-  convertLensToADJob,
-} from '../../../application/jobs/new_job/job_from_lens';
+import { convertLensToADJob } from '../../../application/jobs/new_job/job_from_lens';
 import type { LayerResult } from '../../../application/jobs/new_job/job_from_lens';
 import { CREATED_BY_LABEL } from '../../../../common/constants/new_job';
 import { extractErrorMessage } from '../../../../common/util/errors';
 
 interface Props {
+  layerResults: LayerResult[];
   embeddable: Embeddable;
-  data: DataPublicPluginStart;
   share: SharePluginStart;
-  lens: LensPublicStart;
   onClose: () => void;
 }
 
-export const FlyoutBody: FC<Props> = ({ onClose, embeddable, data, share, lens }) => {
-  const embeddableItems = useMemo(() => getJobsItemsFromEmbeddable(embeddable), [embeddable]);
-
-  const [layerResult, setLayerResults] = useState<LayerResult[]>([]);
-
-  useEffect(() => {
-    const { vis } = embeddableItems;
-
-    getLayers(vis, data.dataViews, lens).then((layers) => {
-      setLayerResults(layers);
-    });
-  }, []);
-
+export const FlyoutBody: FC<Props> = ({ onClose, layerResults, embeddable, share }) => {
   function createADJob(layerIndex: number) {
     convertLensToADJob(embeddable, share, layerIndex);
   }
 
   return (
     <>
-      {layerResult.map((layer, i) => (
+      {layerResults.map((layer, i) => (
         <>
           <EuiSplitPanel.Outer grow>
             <EuiSplitPanel.Inner>
@@ -103,12 +84,17 @@ export const FlyoutBody: FC<Props> = ({ onClose, embeddable, data, share, lens }
                     </EuiFlexItem>
                   </EuiFlexGroup>
                   <EuiSpacer size="m" />
-                  <EuiButton onClick={createADJob.bind(null, i)} size="s" color="success">
+                  <EuiButton
+                    onClick={createADJob.bind(null, i)}
+                    size="s"
+                    color="success"
+                    iconType="popout"
+                    iconSide="right"
+                  >
                     <FormattedMessage
                       id="xpack.ml.embeddables.lensLayerFlyout.createJobButton"
                       defaultMessage="Create job from this layer"
-                    />{' '}
-                    <EuiIcon type="popout" />
+                    />
                   </EuiButton>
                 </>
               ) : (

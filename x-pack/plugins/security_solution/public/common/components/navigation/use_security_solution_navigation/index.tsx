@@ -46,22 +46,15 @@ export const useSecuritySolutionNavigation = () => {
       setBreadcrumbs(
         {
           detailName,
-          filters: urlState.filters,
           flowTarget,
           navTabs: enabledNavTabs,
           pageName,
           pathName,
-          query: urlState.query,
-          savedQuery: urlState.savedQuery,
           search,
-          sourcerer: urlState.sourcerer,
           state,
           tabName,
-          timeline: urlState.timeline,
-          timerange: urlState.timerange,
         },
         chrome,
-        getUrlForApp,
         navigateToUrl
       );
     }
@@ -70,7 +63,6 @@ export const useSecuritySolutionNavigation = () => {
     pageName,
     pathName,
     search,
-    urlState,
     state,
     detailName,
     flowTarget,

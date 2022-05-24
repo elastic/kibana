@@ -8,11 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import {
   DASHBOARDS_PATH,
+  EXPLORE_PATH,
   SecurityPageName,
   SERVER_APP_ID,
-  THREAT_HUNTING_PATH,
 } from '../../common/constants';
-import { DASHBOARDS, THREAT_HUNTING } from '../app/translations';
+import { DASHBOARDS, EXPLORE } from '../app/translations';
 import { LinkItem } from '../common/links/types';
 import { overviewLinks, detectionResponseLinks } from '../overview/links';
 import { links as hostsLinks } from '../hosts/links';
@@ -37,14 +37,14 @@ export const dashboardsLandingLinks: LinkItem = {
 };
 
 export const threatHuntingLandingLinks: LinkItem = {
-  id: SecurityPageName.threatHuntingLanding,
-  title: THREAT_HUNTING,
-  path: THREAT_HUNTING_PATH,
+  id: SecurityPageName.exploreLanding,
+  title: EXPLORE,
+  path: EXPLORE_PATH,
   globalNavEnabled: false,
   capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
-    i18n.translate('xpack.securitySolution.appLinks.threatHunting', {
-      defaultMessage: 'Threat hunting',
+    i18n.translate('xpack.securitySolution.appLinks.explore', {
+      defaultMessage: 'Explore',
     }),
   ],
   links: [hostsLinks, networkLinks, usersLinks, kubernetesLinks],

@@ -6,7 +6,7 @@
  */
 
 import { createSelector } from 'reselect';
-import type { RooState } from '../root_reducer';
+import type { SyntheticsAppState } from '../root_reducer';
 
-const getState = (appState: RooState) => appState.indexStatus;
+const getState = (appState: SyntheticsAppState) => appState.indexStatus;
 export const selectIndexState = createSelector(getState, (state) => state);
