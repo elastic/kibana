@@ -37,7 +37,7 @@ export interface Props {
   isSizeOptionDisabled?: boolean;
   optionsData?: EqlOptionsData;
   optionsSelected?: EqlOptionsSelected;
-  onOptionsChange?: (field: FieldsEqlOptions, newValue: string | null) => void;
+  onOptionsChange?: (field: FieldsEqlOptions, newValue: string | undefined) => void;
 }
 
 type SizeVoidFunc = (newSize: string) => void;
@@ -91,7 +91,7 @@ export const EqlQueryBarFooter: FC<Props> = ({
         if (opt.length > 0) {
           onOptionsChange('eventCategoryField', opt[0].label);
         } else {
-          onOptionsChange('eventCategoryField', null);
+          onOptionsChange('eventCategoryField', undefined);
         }
       }
     },
@@ -103,7 +103,7 @@ export const EqlQueryBarFooter: FC<Props> = ({
         if (opt.length > 0) {
           onOptionsChange('tiebreakerField', opt[0].label);
         } else {
-          onOptionsChange('tiebreakerField', null);
+          onOptionsChange('tiebreakerField', undefined);
         }
       }
     },
@@ -115,7 +115,7 @@ export const EqlQueryBarFooter: FC<Props> = ({
         if (opt.length > 0) {
           onOptionsChange('timestampField', opt[0].label);
         } else {
-          onOptionsChange('timestampField', null);
+          onOptionsChange('timestampField', undefined);
         }
       }
     },

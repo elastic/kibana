@@ -36,7 +36,7 @@ export interface EqlQueryBarProps {
   optionsData?: EqlOptionsData;
   optionsSelected?: EqlOptionsSelected;
   isSizeOptionDisabled?: boolean;
-  onOptionsChange?: (field: FieldsEqlOptions, newValue: string | null) => void;
+  onOptionsChange?: (field: FieldsEqlOptions, newValue: string | undefined) => void;
   onValidityChange?: (arg: boolean) => void;
   onValiditingChange?: (arg: boolean) => void;
 }
