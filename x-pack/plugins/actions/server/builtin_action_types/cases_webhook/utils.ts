@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { AxiosResponse } from 'axios';
+import { AxiosResponse, AxiosError } from 'axios';
 import { isEmpty, isObjectLike } from 'lodash';
 import { addTimeZoneToDate, getErrorMessage } from '../lib/axios_utils';
 import * as i18n from './translations';
 
-export const createServiceError = (error: any, message: string) =>
+export const createServiceError = (error: AxiosError, message: string) =>
   new Error(
     getErrorMessage(
       i18n.NAME,
-      `${message}. Error: ${error.message} Reason: ${error.response?.data}`
+      `${message}. Error: ${error.message} Reason: ${error.response?.statusText}`
     )
   );
+
 export const getPushedDate = (timestamp?: string) => {
   if (timestamp != null) {
     try {
@@ -107,14 +108,28 @@ export const throwIfResponseIsNotValidSpecial = ({
 
 export const removeSlash = (url: string) => (url.endsWith('/') ? url.slice(0, -1) : url);
 
-export const replaceSumDesc = (stringifiedJson: string, sum?: string, desc?: string | null) => {
+export const replaceSumDesc = (
+  stringifiedJson: string,
+  sum?: string,
+  desc?: string | null,
+  labels?: string[] | null
+) => {
   let str = stringifiedJson;
-  if (sum != null) {
-    str = str.replace('$SUM', sum);
-  }
-  if (desc != null) {
-    str = str.replace('$DESC', desc);
-  }
+
+  const prs = JSON.parse(str);
+  str = JSON.stringify(prs, function replacer(key, value) {
+    if (value === '$SUM') {
+      return sum;
+    }
+    if (value === '$DESC') {
+      return desc;
+    }
+    if (value === '$TAGS') {
+      return labels != null ? labels : [];
+    }
+    return value;
+  });
+
   return JSON.parse(str);
 };
 

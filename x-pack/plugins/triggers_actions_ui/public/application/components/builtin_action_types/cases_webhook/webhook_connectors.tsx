@@ -336,7 +336,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
               'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.createIncidentJsonTextFieldLabel',
               {
                 defaultMessage:
-                  'JSON object to create incident. Sub $SUM where the summary/title should go and $DESC where the description should go',
+                  'JSON object to create incident. Sub $SUM where the summary/title should go, $DESC where the description should go, and $TAGS where tags should go (optional).',
               }
             )}
           >
@@ -681,7 +681,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
               'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.updateIncidentJsonTextFieldLabel',
               {
                 defaultMessage:
-                  'JSON object to update incident. Sub $SUM where the summary/title should go and $DESC where the description should go',
+                  'JSON object to update incident. Sub $SUM where the summary/title should go, $DESC where the description should go, and $TAGS where tags should go (optional).',
               }
             )}
           >

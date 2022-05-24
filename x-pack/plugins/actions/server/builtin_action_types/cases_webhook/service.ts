@@ -76,12 +76,7 @@ export const createExternalService = (
         logger,
         configurationUtilities,
       });
-      console.log({
-        getIncidentResponseCreatedDateKey,
-        getIncidentResponseExternalTitleKey,
-        getIncidentResponseUpdatedDateKey,
-      });
-      // console.log(res);
+
       throwIfResponseIsNotValidSpecial({
         res,
         requiredAttributesToBeInTheResponse: [
@@ -94,7 +89,6 @@ export const createExternalService = (
       const title = getObjectValueByKey(res.data, getIncidentResponseExternalTitleKey);
       const created = getObjectValueByKey(res.data, getIncidentResponseCreatedDateKey);
       const updated = getObjectValueByKey(res.data, getIncidentResponseUpdatedDateKey);
-      console.log('GET RESPONSE', { id, title, created, updated });
       return { id, title, created, updated };
     } catch (error) {
       throw createServiceError(error, 'Unable to get incident');
@@ -104,14 +98,14 @@ export const createExternalService = (
   const createIncident = async ({
     incident,
   }: CreateIncidentParams): Promise<ExternalServiceIncidentResponse> => {
-    const { summary, description } = incident;
+    const { labels, summary, description } = incident;
     try {
       const res: AxiosResponse = await request({
         axios: axiosInstance,
         url: `${createIncidentUrl}`,
         logger,
         method: createIncidentMethod,
-        data: replaceSumDesc(createIncidentJson, summary, description ?? ''),
+        data: replaceSumDesc(createIncidentJson, summary, description ?? '', labels ?? []),
         configurationUtilities,
       });
 
@@ -147,7 +141,12 @@ export const createExternalService = (
         method: updateIncidentMethod,
         url: makeIncidentUrl(updateIncidentUrl, incidentId),
         logger,
-        data: replaceSumDesc(updateIncidentJson, incident.summary, incident.description),
+        data: replaceSumDesc(
+          updateIncidentJson,
+          incident.summary,
+          incident.description,
+          incident.labels
+        ),
         configurationUtilities,
       });
 
