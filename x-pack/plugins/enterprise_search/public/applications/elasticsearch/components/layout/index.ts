@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export const ROOT_PATH = '/';
-export const SETUP_GUIDE_PATH = '/setup_guide';
+export { useEnterpriseSearchElasticsearchNav } from './nav';
+export { EnterpriseSearchElasticsearchPageTemplate } from './page_template';
