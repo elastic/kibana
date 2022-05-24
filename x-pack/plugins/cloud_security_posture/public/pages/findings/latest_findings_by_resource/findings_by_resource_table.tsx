@@ -112,8 +112,8 @@ const columns: Array<EuiTableFieldDataColumnType<CspFindingsByResource>> = [
     truncateText: true,
     name: (
       <FormattedMessage
-        id="xpack.csp.findings.groupByResourceTable.cisSectionColumnLabel"
-        defaultMessage="CIS Section"
+        id="xpack.csp.findings.groupByResourceTable.cisSectionsColumnLabel"
+        defaultMessage="CIS Sections"
       />
     ),
     render: (sections: string[]) => sections.join(', '),
@@ -132,7 +132,6 @@ const columns: Array<EuiTableFieldDataColumnType<CspFindingsByResource>> = [
       />
     ),
     truncateText: true,
-    sortable: true,
   },
   {
     field: 'failed_findings',
