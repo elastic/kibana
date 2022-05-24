@@ -16,7 +16,7 @@ export const ColumnNameWithTooltip = ({
   columnName: ReactNode;
 }) => (
   <EuiToolTip content={tooltipContent}>
-    <EuiFlexGroup gutterSize={'xs'} alignItems="center">
+    <EuiFlexGroup gutterSize="xs" alignItems="center">
       <EuiFlexItem>
         <span>{columnName}</span>
       </EuiFlexItem>
