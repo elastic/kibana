@@ -10,6 +10,12 @@ export const mockAlertDetailsData = [
   { category: 'process', field: 'process.pid', values: [0], originalValue: 0 },
   { category: 'process', field: 'process.executable', values: ['-'], originalValue: '-' },
   {
+    category: 'process',
+    field: 'process.entry_leader.entity_id',
+    values: ['2938b3f873b4f3n84f938'],
+    originalValue: '2938b3f873b4f3n84f938',
+  },
+  {
     category: 'agent',
     field: 'agent.hostname',
     values: ['windows-native'],
