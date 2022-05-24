@@ -109,7 +109,7 @@ export class StringFormat extends FieldFormat {
     });
   }
 
-  textConvert: TextContextTypeConvert = (val: string | number) => {
+  textConvert: TextContextTypeConvert = (val: string | number, options) => {
     if (val === '') {
       return emptyLabel;
     }
@@ -127,7 +127,7 @@ export class StringFormat extends FieldFormat {
       case 'urlparam':
         return decodeURIComponent(String(val));
       default:
-        return asPrettyString(val);
+        return asPrettyString(val, options?.flat ?? false);
     }
   };
 

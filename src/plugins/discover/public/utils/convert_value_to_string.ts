@@ -34,19 +34,28 @@ export const convertValueToString = ({
   const rowFlattened = rowsFlattened[rowIndex];
   const field = dataView.fields.getByName(columnId);
   const value = rowFlattened[columnId];
+  const valArr = Array.isArray(value) ? value : [value];
+
+  const stringify = (val: object) => {
+    return (
+      (options?.allowMultiline === false ? JSON.stringify(val) : JSON.stringify(val, null, 2)) || ''
+    );
+  };
 
   const formattedValue =
     field?.type === '_source'
       ? rowFlattened
-      : formatFieldValue(value, rows[rowIndex], fieldFormats, dataView, field, 'text');
+      : valArr
+          .map((v) =>
+            field?.type === 'unknown' || !field?.type
+              ? stringify(v)
+              : formatFieldValue(v, rows[rowIndex], fieldFormats, dataView, field, 'text')
+          )
+          .join(', ');
 
   if (typeof formattedValue === 'string') {
     return formattedValue;
   }
 
-  return (
-    (options?.allowMultiline === false
-      ? JSON.stringify(formattedValue)
-      : JSON.stringify(formattedValue, null, 2)) || ''
-  );
+  return stringify(formatFieldValue);
 };

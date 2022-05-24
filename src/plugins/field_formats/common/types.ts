@@ -29,9 +29,10 @@ export type HtmlContextTypeConvert = (value: any, options?: HtmlContextTypeOptio
 /**
  * Plain text converter options
  * @remark
- * no options for now
  */
-export type TextContextTypeOptions = object;
+interface TextContextTypeOptions {
+  flat?: boolean;
+}
 
 /**
  * To plain text converter function

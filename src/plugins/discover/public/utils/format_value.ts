@@ -31,14 +31,15 @@ export function formatFieldValue(
   contentType?: FieldFormatsContentType | undefined
 ): string {
   const usedContentType = contentType ?? 'html';
+  const flat = contentType === 'text';
   if (!dataView || !field) {
     // If either no field is available or no data view, we'll use the default
     // string formatter to format that field.
     return fieldFormats
       .getDefaultInstance(KBN_FIELD_TYPES.STRING)
-      .convert(value, usedContentType, { hit, field });
+      .convert(value, usedContentType, { hit, field, flat });
   }
 
   // If we have a data view and field we use that fields field formatter
-  return dataView.getFormatterForField(field).convert(value, usedContentType, { hit, field });
+  return dataView.getFormatterForField(field).convert(value, usedContentType, { hit, field, flat });
 }
