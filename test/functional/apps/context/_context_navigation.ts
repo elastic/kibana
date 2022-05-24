@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({});
     });
 
-    it('should go back after loading', async function () {
+    it('should go back after loading using data grid', async function () {
       await retry.waitFor('user navigating to context and returning to discover', async () => {
         // navigate to the context view
         const initialHitCount = await PageObjects.discover.getHitCount();
@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('should go back via breadcrumbs with preserved state', async function () {
+    it('should go back via breadcrumbs with preserved state using data grid', async function () {
       await retry.waitFor(
         'user navigating to context and returning to discover via breadcrumbs',
         async () => {
@@ -74,8 +74,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
           await PageObjects.discover.waitUntilSearchingHasFinished();
 
-          for await (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
-            expect(filterBar.hasFilter(columnName, value)).to.eql(true);
+          for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
+            expect(await filterBar.hasFilter(columnName, value)).to.eql(true);
           }
           expect(await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes()).to.eql({
             start: 'Sep 18, 2015 @ 06:31:44.000',
@@ -86,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    it('should go back after loading for doc table', async function () {
+    it('should go back after loading using doc table', async function () {
       await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
       await retry.waitFor('user navigating to context and returning to discover', async () => {
         await browser.refresh();
@@ -107,7 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('should go back via breadcrumbs with preserved state for doc table', async function () {
+    it('should go back via breadcrumbs with preserved state using doc table', async function () {
       await retry.waitFor(
         'user navigating to context and returning to discover via breadcrumbs',
         async () => {
