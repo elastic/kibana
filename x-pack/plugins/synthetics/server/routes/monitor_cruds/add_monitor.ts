@@ -82,7 +82,11 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
 
     if (errors && errors.length > 0) {
       return response.ok({
-        body: { message: 'error pushing monitor to the service', attributes: { errors } },
+        body: {
+          message: 'error pushing monitor to the service',
+          attributes: { errors },
+          id: newMonitor.id,
+        },
       });
     }
 
