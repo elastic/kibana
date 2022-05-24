@@ -6,9 +6,8 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { get, merge } from 'lodash';
-import { Logger } from 'elastic-apm-node';
 import { AlertingUsage } from './types';
 import { NUM_ALERTING_RULE_TYPES } from './alerting_usage_collector';
 
