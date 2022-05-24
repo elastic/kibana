@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const metricSet = [
+import { MetricDescriptor } from '../../../../lib/details/get_metrics';
+
+export const metricSet: MetricDescriptor[] = [
   {
     keys: ['kibana_os_load_1m', 'kibana_os_load_5m', 'kibana_os_load_15m'],
     name: 'kibana_os_load',

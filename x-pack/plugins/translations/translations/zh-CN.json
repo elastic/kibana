@@ -7591,7 +7591,6 @@
     "xpack.apm.home.infraTabLabel": "基础设施",
     "xpack.apm.home.serviceLogsTabLabel": "日志",
     "xpack.apm.home.serviceMapTabLabel": "服务地图",
-    "xpack.apm.infra.announcement": "即将提供基础架构数据",
     "xpack.apm.inspectButtonText": "检查",
     "xpack.apm.instancesLatencyDistributionChartLegend": "实例",
     "xpack.apm.instancesLatencyDistributionChartLegend.previousPeriod": "上一时段",
