@@ -15,7 +15,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  Class | Description |
 |  --- | --- |
 |  [ScopedHistory](./kibana-plugin-core-public.scopedhistory.md) | A wrapper around a <code>History</code> instance that is scoped to a particular base path of the history stack. Behaves similarly to the <code>basename</code> option except that this wrapper hides any history stack entries from outside the scope of this base path.<!-- -->This wrapper also allows Core and Plugins to share a single underlying global <code>History</code> instance without exposing the history of other applications.<!-- -->The [createSubHistory](./kibana-plugin-core-public.scopedhistory.createsubhistory.md) method is particularly useful for applications that contain any number of "sub-apps" which should not have access to the main application's history or basePath. |
-|  [SimpleSavedObject](./kibana-plugin-core-public.simplesavedobject.md) | This class is a very simple wrapper for SavedObjects loaded from the server with the .<!-- -->It provides basic functionality for creating/saving/deleting saved objects, but doesn't include any type-specific implementations. |
+|  [SimpleSavedObject](./kibana-plugin-core-public.simplesavedobject.md) | This class is a very simple wrapper for SavedObjects loaded from the server with the [SavedObjectsClientContract](./kibana-plugin-core-public.savedobjectsclientcontract.md)<!-- -->.<!-- -->It provides basic functionality for creating/saving/deleting saved objects, but doesn't include any type-specific implementations. |
 |  [ToastsApi](./kibana-plugin-core-public.toastsapi.md) | Methods for adding and removing global toast messages. |
 
 ## Enumerations
@@ -97,7 +97,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [OverlayStart](./kibana-plugin-core-public.overlaystart.md) |  |
 |  [Plugin\_2](./kibana-plugin-core-public.plugin_2.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
 |  [PluginInitializerContext](./kibana-plugin-core-public.plugininitializercontext.md) | The available core services passed to a <code>PluginInitializer</code> |
-|  [ResolvedSimpleSavedObject](./kibana-plugin-core-public.resolvedsimplesavedobject.md) | This interface is a very simple wrapper for SavedObjects resolved from the server with the . |
+|  [ResolvedSimpleSavedObject](./kibana-plugin-core-public.resolvedsimplesavedobject.md) | This interface is a very simple wrapper for SavedObjects resolved from the server with the [SavedObjectsClientContract](./kibana-plugin-core-public.savedobjectsclientcontract.md)<!-- -->. |
 |  [ResponseErrorBody](./kibana-plugin-core-public.responseerrorbody.md) |  |
 |  [SavedObject](./kibana-plugin-core-public.savedobject.md) |  |
 |  [SavedObjectAttributes](./kibana-plugin-core-public.savedobjectattributes.md) | The data for a Saved Object is stored as an object in the <code>attributes</code> property. |

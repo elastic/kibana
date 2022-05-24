@@ -4,7 +4,7 @@
 
 ## ResolvedSimpleSavedObject interface
 
-This interface is a very simple wrapper for SavedObjects resolved from the server with the .
+This interface is a very simple wrapper for SavedObjects resolved from the server with the [SavedObjectsClientContract](./kibana-plugin-core-public.savedobjectsclientcontract.md)<!-- -->.
 
 <b>Signature:</b>
 
