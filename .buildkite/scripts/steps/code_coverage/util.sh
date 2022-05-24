@@ -49,7 +49,7 @@ fileHeads() {
   printf "\n### %s Uploaded\n" "$fileName"
 }
 
-collect () {
+collectAndUpload() {
   local fileName=$1
   local dir=$2
 
