@@ -69,6 +69,8 @@ while read -r config; do
   if [[ -d "$KIBANA_DIR/target/kibana-coverage/functional" ]]; then
     echo "--- Server and / or Client side code coverage collected"
     if [[ -f "target/kibana-coverage/functional/coverage-final.json" ]]; then
+      # We potentially have more than one file with the same name being created,
+      # so we make them unique here.
       mv target/kibana-coverage/functional/coverage-final.json "target/kibana-coverage/functional/${dasherized}-server-coverage.json"
     fi
   fi
