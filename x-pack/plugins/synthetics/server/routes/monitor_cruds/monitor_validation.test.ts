@@ -21,6 +21,7 @@ import {
   MonitorFields,
   ResponseBodyIndexPolicy,
   ScheduleUnit,
+  SourceType,
   TCPAdvancedFields,
   TCPFields,
   TCPSimpleFields,
@@ -29,7 +30,7 @@ import {
   VerificationMode,
   ZipUrlTLSFields,
 } from '../../../common/runtime_types';
-import { validateMonitor } from '../monitor_cruds/monitor_validation';
+import { validateMonitor } from './monitor_validation';
 
 describe('validateMonitor', () => {
   let testSchedule;
@@ -160,8 +161,12 @@ describe('validateMonitor', () => {
     testBrowserSimpleFields = {
       ...testZipUrlTLSFields,
       ...testCommonFields,
+      [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
+      [ConfigKey.JOURNEY_ID]: '',
+      [ConfigKey.PROJECT_ID]: '',
       [ConfigKey.METADATA]: testMetaData,
       [ConfigKey.SOURCE_INLINE]: '',
+      [ConfigKey.SOURCE_PROJECT_CONTENT]: '',
       [ConfigKey.SOURCE_ZIP_URL]: '',
       [ConfigKey.SOURCE_ZIP_FOLDER]: '',
       [ConfigKey.SOURCE_ZIP_USERNAME]: 'test-username',
