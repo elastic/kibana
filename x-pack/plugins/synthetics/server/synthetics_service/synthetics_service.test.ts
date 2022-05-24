@@ -12,6 +12,8 @@ import { SyntheticsService, SyntheticsConfig } from './synthetics_service';
 import { loggerMock } from '@kbn/core/server/logging/logger.mock';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import axios, { AxiosResponse } from 'axios';
+import times from 'lodash/times';
+import { LocationStatus } from '../../common/runtime_types';
 
 describe('SyntheticsService', () => {
   const mockEsClient = {
@@ -26,6 +28,61 @@ describe('SyntheticsService', () => {
   } as unknown as UptimeServerSetup;
 
   const logger = loggerMock.create();
+
+  const getMockedService = (locationsNum: number = 1) => {
+    serverMock.config = { service: { devUrl: 'http://localhost' } };
+    const service = new SyntheticsService(logger, serverMock, {
+      username: 'dev',
+      password: '12345',
+    });
+
+    const locations = times(locationsNum).map((n) => {
+      return {
+        id: `loc-${n}`,
+        label: `Location ${n}`,
+        url: `example.com/${n}`,
+        geo: {
+          lat: 0,
+          lon: 0,
+        },
+        isServiceManaged: true,
+        status: LocationStatus.GA,
+      };
+    });
+
+    service.apiClient.locations = locations;
+
+    jest.spyOn(service, 'getApiKey').mockResolvedValue({ name: 'example', id: 'i', apiKey: 'k' });
+    jest.spyOn(service, 'getOutput').mockResolvedValue({ hosts: ['es'], api_key: 'i:k' });
+
+    return { service, locations };
+  };
+
+  const getFakePayload = (locations: SyntheticsConfig['locations']) => {
+    return {
+      type: 'http',
+      enabled: true,
+      schedule: {
+        number: '3',
+        unit: 'm',
+      },
+      name: 'my mon',
+      locations,
+      urls: 'http://google.com',
+      max_redirects: '0',
+      password: '',
+      proxy_url: '',
+      id: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
+      fields: { config_id: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d' },
+      fields_under_root: true,
+    };
+  };
+
+  beforeEach(() => {
+    (axios as jest.MockedFunction<typeof axios>).mockReset();
+  });
+
+  afterEach(() => jest.restoreAllMocks());
 
   it('inits properly', async () => {
     const service = new SyntheticsService(logger, serverMock, {});
@@ -67,63 +124,16 @@ describe('SyntheticsService', () => {
         label: 'Local Synthetics Service',
         url: 'http://localhost',
         isServiceManaged: true,
+        status: LocationStatus.EXPERIMENTAL,
       },
     ]);
   });
 
   describe('addConfig', () => {
-    afterEach(() => jest.restoreAllMocks());
-
     it('saves configs only to the selected locations', async () => {
-      serverMock.config = { service: { devUrl: 'http://localhost' } };
-      const service = new SyntheticsService(logger, serverMock, {
-        username: 'dev',
-        password: '12345',
-      });
+      const { service, locations } = getMockedService(3);
 
-      service.apiClient.locations = [
-        {
-          id: 'selected',
-          label: 'Selected Location',
-          url: 'example.com/1',
-          geo: {
-            lat: 0,
-            lon: 0,
-          },
-          isServiceManaged: true,
-        },
-        {
-          id: 'not selected',
-          label: 'Not Selected Location',
-          url: 'example.com/2',
-          geo: {
-            lat: 0,
-            lon: 0,
-          },
-          isServiceManaged: true,
-        },
-      ];
-
-      jest.spyOn(service, 'getApiKey').mockResolvedValue({ name: 'example', id: 'i', apiKey: 'k' });
-      jest.spyOn(service, 'getOutput').mockResolvedValue({ hosts: ['es'], api_key: 'i:k' });
-
-      const payload = {
-        type: 'http',
-        enabled: true,
-        schedule: {
-          number: '3',
-          unit: 'm',
-        },
-        name: 'my mon',
-        locations: [{ id: 'selected', isServiceManaged: true }],
-        urls: 'http://google.com',
-        max_redirects: '0',
-        password: '',
-        proxy_url: '',
-        id: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
-        fields: { config_id: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d' },
-        fields_under_root: true,
-      };
+      const payload = getFakePayload([locations[0]]);
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
@@ -132,7 +142,43 @@ describe('SyntheticsService', () => {
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
         expect.objectContaining({
-          url: 'example.com/1/monitors',
+          url: locations[0].url + '/monitors',
+        })
+      );
+    });
+  });
+
+  describe('pushConfigs', () => {
+    it('does not include the isEdit flag on normal push requests', async () => {
+      const { service, locations } = getMockedService();
+
+      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+
+      const payload = getFakePayload([locations[0]]);
+
+      await service.pushConfigs([payload] as SyntheticsConfig[]);
+
+      expect(axios).toHaveBeenCalledTimes(1);
+      expect(axios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ is_edit: false }),
+        })
+      );
+    });
+
+    it('includes the isEdit flag on edit requests', async () => {
+      const { service, locations } = getMockedService();
+
+      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+
+      const payload = getFakePayload([locations[0]]);
+
+      await service.pushConfigs([payload] as SyntheticsConfig[], true);
+
+      expect(axios).toHaveBeenCalledTimes(1);
+      expect(axios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ is_edit: true }),
         })
       );
     });

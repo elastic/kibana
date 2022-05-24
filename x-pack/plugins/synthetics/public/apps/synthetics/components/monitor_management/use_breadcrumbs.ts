@@ -22,9 +22,6 @@ export const useMonitorManagementBreadcrumbs = () => {
   ]);
 };
 
-const MONITOR_MANAGEMENT_CRUMB = i18n.translate(
-  'xpack.synthetics.monitorManagementPage.monitorManagementCrumb',
-  {
-    defaultMessage: 'Monitor Management',
-  }
-);
+const MONITOR_MANAGEMENT_CRUMB = i18n.translate('xpack.synthetics.monitorsPage.monitorCrumb', {
+  defaultMessage: 'Monitors',
+});

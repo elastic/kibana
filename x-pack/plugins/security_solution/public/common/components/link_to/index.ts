@@ -90,7 +90,7 @@ function formatPath(path: string, search: string, skipSearch?: boolean) {
 function needsUrlState(pageId: SecurityPageName) {
   return (
     pageId !== SecurityPageName.dashboardsLanding &&
-    pageId !== SecurityPageName.threatHuntingLanding &&
+    pageId !== SecurityPageName.exploreLanding &&
     pageId !== SecurityPageName.administration &&
     pageId !== SecurityPageName.rules &&
     pageId !== SecurityPageName.exceptions &&
