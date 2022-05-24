@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { kibanaInstanceRoute } from './instance';
-export { kibanaInstancesRoute } from './instances';
-export { kibanaOverviewRoute } from './overview';
+export * from './post_kibana_instance';
+export * from './post_kibana_instances';
+export * from './post_kibana_overview';

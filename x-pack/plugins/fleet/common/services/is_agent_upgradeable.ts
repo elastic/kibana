@@ -24,12 +24,15 @@ export function isAgentUpgradeable(agent: Agent, kibanaVersion: string) {
     return false;
   }
 
+  return isAgentVersionLessThanKibana(agentVersion, kibanaVersion);
+}
+
+export const isAgentVersionLessThanKibana = (agentVersion: string, kibanaVersion: string) => {
   // make sure versions are only the number before comparison
   const agentVersionNumber = semverCoerce(agentVersion);
-  if (!agentVersionNumber) throw new Error('agent version is invalid');
+  if (!agentVersionNumber) throw new Error('agent version is not valid');
   const kibanaVersionNumber = semverCoerce(kibanaVersion);
-  if (!kibanaVersionNumber) throw new Error('kibana version is invalid');
-  const isAgentLessThanKibana = semverLt(agentVersionNumber, kibanaVersionNumber);
+  if (!kibanaVersionNumber) throw new Error('kibana version is not valid');
 
-  return isAgentLessThanKibana;
-}
+  return semverLt(agentVersionNumber, kibanaVersionNumber);
+};
