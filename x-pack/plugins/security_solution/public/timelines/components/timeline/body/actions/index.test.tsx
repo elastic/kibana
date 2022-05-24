@@ -9,7 +9,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import { TestProviders, mockTimelineModel, mockTimelineData } from '../../../../../common/mock';
-import { Actions } from '.';
+import { Actions, isAlert } from '.';
 import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
@@ -219,6 +219,16 @@ describe('Actions', () => {
       );
 
       expect(wrapper.find('[data-test-subj="view-in-analyzer"]').exists()).toBe(false);
+    });
+  });
+
+  describe('isAlert', () => {
+    test('it returns true when the eventType is an alert', () => {
+      expect(isAlert('signal')).toBe(true);
+    });
+
+    test('it returns false when the eventType is NOT an alert', () => {
+      expect(isAlert('raw')).toBe(false);
     });
   });
 });
