@@ -267,8 +267,7 @@ const TopNav = ({
 
   const shouldShowDataViewPicker = Boolean(
     vis.type.editorConfig?.enableDataViewChange &&
-      !vis.data.savedSearchId &&
-      vis.data.indexPattern &&
+      (vis.data.indexPattern || isFallbackDataView(vis.data.indexPattern)) &&
       indexPatterns.length
   );
 
