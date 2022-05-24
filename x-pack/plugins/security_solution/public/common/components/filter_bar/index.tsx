@@ -45,6 +45,7 @@ export const FilterBar = memo<FilterBarComponentProps>(
     );
 
     const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
+    const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
 
     return (
       <SearchBar
@@ -62,7 +63,7 @@ export const FilterBar = memo<FilterBarComponentProps>(
         showQueryBar={false}
         showQueryInput={false}
         showSaveQuery={false}
-        timeHistory={new TimeHistory(new Storage(localStorage))}
+        timeHistory={timeHistory}
         dataTestSubj={dataTestSubj}
         displayStyle={displayStyle}
       />

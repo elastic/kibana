@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, ChangeEvent, useEffect, useState } from 'react';
+import React, { FC, useCallback, ChangeEvent, useEffect, useState, useRef } from 'react';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
@@ -78,7 +78,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
   const { isValid, message, messages, error } = getValidationResults(field);
 
   const { uiSettings } = useKibana().services;
-  const [filterManager] = useState<FilterManager>(new FilterManager(uiSettings));
+  const filterManager = useRef<FilterManager>(new FilterManager(uiSettings));
 
   // Bubbles up field validity to parent.
   // Using something like form `getErrors` does
@@ -108,13 +108,13 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
   useEffect(() => {
     let isSubscribed = true;
     const subscriptions = new Subscription();
-    filterManager.setFilters([]);
+    filterManager.current.setFilters([]);
 
     subscriptions.add(
-      filterManager.getUpdates$().subscribe({
+      filterManager.current.getUpdates$().subscribe({
         next: () => {
           if (isSubscribed) {
-            const newFilters = filterManager.getFilters();
+            const newFilters = filterManager.current.getFilters();
             const { filters } = fieldValue;
 
             if (!deepEqual(filters, newFilters)) {
@@ -133,8 +133,8 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
 
   useEffect(() => {
     const { filters } = fieldValue;
-    if (!deepEqual(filters, filterManager.getFilters())) {
-      filterManager.setFilters(filters);
+    if (!deepEqual(filters, filterManager.current.getFilters())) {
+      filterManager.current.setFilters(filters);
     }
   }, [fieldValue, filterManager]);
 
@@ -186,12 +186,13 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
           <>
             <EuiSpacer size="s" />
             <FilterBar
+              data-test-subj="eqlFilterBar"
               indexPattern={indexPattern}
               isLoading={isLoading}
               isRefreshPaused={false}
               filterQuery={fieldValue.query}
-              filterManager={filterManager}
-              filters={filterManager.getFilters() || []}
+              filterManager={filterManager.current}
+              filters={filterManager.current.getFilters() || []}
               displayStyle="inPage"
             />
           </>
