@@ -6,6 +6,7 @@
  */
 
 import { KueryNode } from '@kbn/es-query';
+import { flatten } from 'lodash';
 
 export function getKueryFields(nodes: KueryNode[]) {
   const allFields = nodes.map((node) => {
@@ -25,5 +26,5 @@ export function getKueryFields(nodes: KueryNode[]) {
     return fieldNameArg.value;
   });
 
-  return allFields;
+  return flatten(allFields);
 }

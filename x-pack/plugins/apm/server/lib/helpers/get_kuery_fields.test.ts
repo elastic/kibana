@@ -25,7 +25,8 @@ describe('get kuery fields', () => {
       'service.name: my-service AND service.environment: production';
     const kueryNode = fromKueryExpression(kuery);
     expect(getKueryFields([kueryNode])).toEqual([
-      ['service.name', 'service.environment'],
+      'service.name',
+      'service.environment',
     ]);
   });
 
@@ -33,7 +34,8 @@ describe('get kuery fields', () => {
     const kuery = 'network.carrier.mcc: test or child.id: 33';
     const kueryNode = fromKueryExpression(kuery);
     expect(getKueryFields([kueryNode])).toEqual([
-      ['network.carrier.mcc', 'child.id'],
+      'network.carrier.mcc',
+      'child.id',
     ]);
   });
 
@@ -41,7 +43,8 @@ describe('get kuery fields', () => {
     const kuery = 'network.carrier.mcc:* or child.id: *';
     const kueryNode = fromKueryExpression(kuery);
     expect(getKueryFields([kueryNode])).toEqual([
-      ['network.carrier.mcc', 'child.id'],
+      'network.carrier.mcc',
+      'child.id',
     ]);
   });
 
@@ -50,6 +53,20 @@ describe('get kuery fields', () => {
     const kueryNode = fromKueryExpression(kuery);
     expect(getKueryFields([kueryNode])).toEqual([
       'transaction.duration.aggregate',
+    ]);
+  });
+
+  it('returns dublicate fields', () => {
+    const kueries = [
+      'service.name: my-service',
+      'service.name: my-service and trace.id: trace',
+    ];
+
+    const kueryNodes = kueries.map((kuery) => fromKueryExpression(kuery));
+    expect(getKueryFields(kueryNodes)).toEqual([
+      'service.name',
+      'service.name',
+      'trace.id',
     ]);
   });
 });
