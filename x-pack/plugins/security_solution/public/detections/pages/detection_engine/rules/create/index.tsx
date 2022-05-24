@@ -286,6 +286,9 @@ const CreateRulePageComponent: React.FC = () => {
     });
     return null;
   }
+
+  const isShouldRerenderStep = (step: RuleStep) => (activeStep !== step ? '0' : '1');
+
   return (
     <>
       <SecuritySolutionPageWrapper>
@@ -330,6 +333,7 @@ const CreateRulePageComponent: React.FC = () => {
                   setForm={setFormHook}
                   onSubmit={submitStepDefineRule}
                   descriptionColumns="singleSplit"
+                  key={isShouldRerenderStep(RuleStep.defineRule)}
                 />
               </EuiAccordion>
             </MyEuiPanel>
@@ -365,6 +369,7 @@ const CreateRulePageComponent: React.FC = () => {
                   isLoading={isLoading || loading}
                   setForm={setFormHook}
                   onSubmit={() => submitStep(RuleStep.aboutRule)}
+                  key={isShouldRerenderStep(RuleStep.aboutRule)}
                 />
               </EuiAccordion>
             </MyEuiPanel>
@@ -399,6 +404,7 @@ const CreateRulePageComponent: React.FC = () => {
                   isLoading={isLoading || loading}
                   setForm={setFormHook}
                   onSubmit={() => submitStep(RuleStep.scheduleRule)}
+                  key={isShouldRerenderStep(RuleStep.scheduleRule)}
                 />
               </EuiAccordion>
             </MyEuiPanel>
@@ -432,6 +438,7 @@ const CreateRulePageComponent: React.FC = () => {
                   setForm={setFormHook}
                   onSubmit={() => submitStep(RuleStep.ruleActions)}
                   actionMessageParams={actionMessageParams}
+                  key={isShouldRerenderStep(RuleStep.ruleActions)}
                 />
               </EuiAccordion>
             </MyEuiPanel>
