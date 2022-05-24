@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactNode, useState, useCallback } from 'react';
+import React, { ReactNode, useState, useCallback, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -36,6 +36,8 @@ const offset: EuiTourStepProps['offset'] = 30;
 const repositionOnScroll: EuiTourStepProps['repositionOnScroll'] = false;
 
 const overviewPath = '/overview';
+
+const observabilityTourStorageKey = 'xpack.observability.tourState';
 
 const tourStepsConfig: TourStep[] = [
   {
@@ -183,6 +185,28 @@ const getSteps = ({
   });
 };
 
+interface TourState {
+  activeStep: number;
+  isTourActive: boolean;
+}
+
+const getInitialTourState = (prevTourState: string | null): TourState => {
+  if (prevTourState) {
+    try {
+      const parsedPrevTourState = JSON.parse(prevTourState);
+      return parsedPrevTourState as TourState;
+    } catch (e) {
+      // Fall back to default state
+    }
+  }
+
+  return {
+    activeStep: 1,
+    // TODO this will default to false once we added the workflow landing page and localStorage is set there
+    isTourActive: true,
+  };
+};
+
 export function ObservabilityOverviewTour({
   children,
   navigateToApp,
@@ -190,8 +214,12 @@ export function ObservabilityOverviewTour({
   children: ReactNode;
   navigateToApp: ApplicationStart['navigateToApp'];
 }) {
-  const [isTourActive, setIsTourActive] = useState(true);
-  const [activeStep, setActiveStep] = useState(1);
+  const prevTourState = localStorage.getItem(observabilityTourStorageKey);
+  const { activeStep: initialActiveStep, isTourActive: initialIsTourActive } =
+    getInitialTourState(prevTourState);
+
+  const [isTourActive, setIsTourActive] = useState(initialIsTourActive);
+  const [activeStep, setActiveStep] = useState(initialActiveStep);
 
   const { hasAnyData, isAllRequestsComplete } = useHasData();
   const { pathname: currentPath } = useLocation();
@@ -199,16 +227,8 @@ export function ObservabilityOverviewTour({
   const isOverviewPage = currentPath === overviewPath;
 
   const incrementStep = useCallback(() => {
-    // The user must be on the overview page to view the last step in the tour
-    // TODO this logic feels brittle if we ever change the steps/step order
-    if (isOverviewPage === false && activeStep === tourStepsConfig.length - 1) {
-      return navigateToApp(observabilityAppId, {
-        path: overviewPath,
-      });
-    }
-
     setActiveStep((prevState) => prevState + 1);
-  }, [activeStep, isOverviewPage, navigateToApp]);
+  }, []);
 
   const endTour = useCallback(() => setIsTourActive(false), []);
 
@@ -219,6 +239,20 @@ export function ObservabilityOverviewTour({
     }
     return isTourActive;
   }, [hasAnyData, isAllRequestsComplete, isOverviewPage, isTourActive]);
+
+  useEffect(() => {
+    localStorage.setItem(observabilityTourStorageKey, JSON.stringify({ isTourActive, activeStep }));
+  }, [isTourActive, activeStep]);
+
+  useEffect(() => {
+    // The user must be on the overview page to view the last step in the tour
+    // TODO this logic feels brittle if we ever change the steps/step order
+    if (isOverviewPage === false && activeStep === tourStepsConfig.length) {
+      navigateToApp(observabilityAppId, {
+        path: overviewPath,
+      });
+    }
+  }, [activeStep, isOverviewPage, navigateToApp]);
 
   return (
     <>

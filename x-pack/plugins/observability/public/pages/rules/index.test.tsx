@@ -13,7 +13,7 @@ import { RulesPage } from '.';
 import { RulesTable } from './components/rules_table';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import * as pluginContext from '../../hooks/use_plugin_context';
-import { KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-components';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { AppMountParameters } from '@kbn/core/public';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
