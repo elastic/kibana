@@ -53,7 +53,7 @@ const FlyoutBody = ({ alert }: AlertsTableFlyoutBaseProps) => (
   <ul>
     {columns.map((column) => (
       <li data-test-subj={`alertsFlyout${column.displayAsText}`} key={column.id}>
-        {get(alert, column.id, [])[0]}
+        {get(alert as any, column.id, [])[0]}
       </li>
     ))}
   </ul>

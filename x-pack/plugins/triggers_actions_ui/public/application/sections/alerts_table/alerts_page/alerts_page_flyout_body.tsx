@@ -44,7 +44,7 @@ const AlertsFlyoutBody = ({ alert, isLoading }: Props) => {
           <EuiLoadingContent lines={1} />
         ) : (
           <EuiText size="s" data-test-subj="alertsFlyoutName">
-            {get(alert, AlertsField.name, [])[0]}
+            {get(alert as any, AlertsField.name, [])[0]}
           </EuiText>
         )}
       </EuiFlexItem>
@@ -57,7 +57,7 @@ const AlertsFlyoutBody = ({ alert, isLoading }: Props) => {
           <EuiLoadingContent lines={3} />
         ) : (
           <EuiText size="s" data-test-subj="alertsFlyoutReason">
-            {get(alert, AlertsField.reason, [])[0]}
+            {get(alert as any, AlertsField.reason, [])[0]}
           </EuiText>
         )}
       </EuiFlexItem>

@@ -53,7 +53,7 @@ export function registerAlertsTableConfiguration({
     getRenderCellValue: () => (props) => {
       const myProps = props as any;
       // any is required here to improve typescript performance
-      const value = get(myProps.data, myProps.field, [])[0] as string;
+      const value = get(myProps.data as any, myProps.field, [])[0] as string;
       return value ?? 'N/A';
     },
   });

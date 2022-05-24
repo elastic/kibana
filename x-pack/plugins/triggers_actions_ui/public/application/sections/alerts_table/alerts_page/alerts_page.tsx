@@ -6,7 +6,7 @@
  */
 import React, { useState, useCallback, useEffect } from 'react';
 import {
-  EuiDataGridControlColumn,
+  EuiDataGridColumn,
   EuiDataGridSorting,
   EuiFlexItem,
   EuiFlexGroup,
@@ -149,7 +149,7 @@ const AlertsPage: React.FunctionComponent = () => {
       isInitializing,
       isLoading,
       getInspectQuery: () => ({ request: {}, response: {} }),
-      onColumnsChange: (columns: EuiDataGridControlColumn[]) => {},
+      onColumnsChange: (columns: EuiDataGridColumn[]) => {},
       onPageChange,
       onSortChange,
       refresh: () => {
