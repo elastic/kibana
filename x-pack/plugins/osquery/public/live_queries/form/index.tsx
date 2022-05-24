@@ -120,7 +120,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         {
           ...formData,
           saved_query_id: savedQueryId,
-          ecs_mapping: convertECSMappingToObject(ecs_mapping) || {},
+          ecs_mapping: convertECSMappingToObject(ecs_mapping),
         },
         (value) => !isEmpty(value)
       ),
