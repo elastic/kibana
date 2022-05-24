@@ -25,13 +25,13 @@ import { SpacesApi } from '@kbn/spaces-plugin/public';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { UseGetCase, useGetCase } from '../../containers/use_get_case';
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
-import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { ConnectorTypes } from '../../../common/api';
 import { Case } from '../../../common/ui';
 import { useKibana } from '../../common/lib/kibana';
+import { useFetchCaseUserActions } from '../../containers/use_get_case_user_actions';
 
 jest.mock('../../containers/use_update_case');
 jest.mock('../../containers/use_get_case_user_actions');
@@ -46,7 +46,7 @@ jest.mock('../../common/navigation/hooks');
 const useFetchCaseMock = useGetCase as jest.Mock;
 const useGetCaseMetricsMock = useGetCaseMetrics as jest.Mock;
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
-const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
+const useFetchCaseUserActionsMock = useFetchCaseUserActions as jest.Mock;
 const useConnectorsMock = useConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
@@ -148,15 +148,16 @@ describe('CaseView', () => {
   };
 
   const defaultUseGetCaseUserActions = {
-    caseUserActions: [...caseUserActions, getAlertUserAction()],
-    caseServices: {},
-    fetchCaseUserActions,
-    firstIndexPushToService: -1,
-    hasDataToPush: false,
+    data: {
+      caseUserActions: [...caseUserActions, getAlertUserAction()],
+      caseServices: {},
+      hasDataToPush: false,
+      participants: [caseData.createdBy],
+    },
+    refetch: fetchCaseUserActions,
     isLoading: false,
+    isFetching: false,
     isError: false,
-    lastIndexPushToService: -1,
-    participants: [caseData.createdBy],
   };
 
   const mockGetCase = (props: Partial<UseGetCase> = {}) => {
@@ -175,7 +176,7 @@ describe('CaseView', () => {
     mockGetCase();
     useGetCaseMetricsMock.mockReturnValue(defaultGetCaseMetrics);
     useUpdateCaseMock.mockReturnValue(defaultUpdateCaseState);
-    useGetCaseUserActionsMock.mockReturnValue(defaultUseGetCaseUserActions);
+    useFetchCaseUserActionsMock.mockReturnValue(defaultUseGetCaseUserActions);
     usePostPushToServiceMock.mockReturnValue({ isLoading: false, pushCaseToExternalService });
     useConnectorsMock.mockReturnValue({ connectors: connectorsMock, loading: false });
     useKibanaMock().services.spaces = { ui: spacesUiApiMock } as unknown as SpacesApi;
@@ -281,9 +282,9 @@ describe('CaseView', () => {
     );
     wrapper.find('[data-test-subj="case-refresh"]').first().simulate('click');
     await waitFor(() => {
-      expect(fetchCaseUserActions).toBeCalledWith(caseData.id, 'resilient-2');
-      expect(fetchCaseMetrics).toBeCalled();
-      expect(refetchCase).toBeCalled();
+      expect(fetchCaseUserActions).toHaveBeenCalled();
+      expect(fetchCaseMetrics).toHaveBeenCalled();
+      expect(refetchCase).toHaveBeenCalled();
     });
   });
 
@@ -320,7 +321,7 @@ describe('CaseView', () => {
     it('should refresh actions and comments', async () => {
       refreshRef!.current!.refreshCase();
       await waitFor(() => {
-        expect(fetchCaseUserActions).toBeCalledWith('basic-case-id', 'resilient-2');
+        expect(fetchCaseUserActions).toHaveBeenCalled();
         expect(fetchCaseMetrics).toBeCalledWith(true);
         expect(refetchCase).toHaveBeenCalled();
       });
