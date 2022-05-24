@@ -5,38 +5,48 @@
  * 2.0.
  */
 
-import React, { memo, useEffect } from 'react';
-import { EuiCallOut, EuiText } from '@elastic/eui';
+import React, { memo, useEffect, useMemo } from 'react';
+import { EuiCode, EuiIcon, EuiText, EuiTextColor } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CommandExecutionComponentProps } from '../types';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
-export const UnknownCommand = memo<CommandExecutionComponentProps>(({ setStatus }) => {
+export const UnknownCommand = memo<CommandExecutionComponentProps>(({ command, setStatus }) => {
   const getTestId = useTestIdGenerator(useDataTestSubj());
+
+  const message = useMemo(() => {
+    return (
+      <FormattedMessage
+        id="xpack.securitySolution.console.unknownCommand.helpMessage"
+        defaultMessage="The text you entered {userInput} is unsupported! Click {helpIcon} or type {helpCmd} for assistance."
+        values={{
+          userInput: <EuiCode>{command.input}</EuiCode>,
+          helpIcon: <EuiIcon type="help" />,
+          helpCmd: <EuiCode>{'help'}</EuiCode>,
+        }}
+      />
+    );
+  }, [command.input]);
 
   useEffect(() => {
     setStatus('success');
   }, [setStatus]);
 
   return (
-    <EuiCallOut color="danger" data-test-subj={getTestId('unknownCommandError')}>
-      <EuiText>
-        <FormattedMessage
-          id="xpack.securitySolution.console.unknownCommand.title"
-          defaultMessage="Unknown command"
-        />
+    <div data-test-subj={getTestId('unknownCommandError')}>
+      <EuiText size="s">
+        <EuiTextColor color="danger">
+          <FormattedMessage
+            id="xpack.securitySolution.console.unknownCommand.title"
+            defaultMessage="Unsupported text/command!"
+          />
+        </EuiTextColor>
       </EuiText>
-      <EuiText size="xs">
-        <FormattedMessage
-          id="xpack.securitySolution.console.unknownCommand.helpMessage"
-          defaultMessage="For a list of available command, enter: {helpCmd}"
-          values={{
-            helpCmd: <code>{'help'}</code>,
-          }}
-        />
+      <EuiText size="s">
+        <EuiTextColor color="subdued">{message}</EuiTextColor>
       </EuiText>
-    </EuiCallOut>
+    </div>
   );
 });
 UnknownCommand.displayName = 'UnknownCommand';
