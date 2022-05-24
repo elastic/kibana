@@ -407,7 +407,7 @@ const durationToTextString = (value: number, unit: SnoozeUnit) => {
 };
 
 const scheduleSummary = (schedule: SnoozeSchedule) => {
-  if (!schedule.rRule.freq) return moment(schedule.rRule.dtstart).format('LLLL');
+  if (schedule.rRule.freq == null) return moment(schedule.rRule.dtstart).format('LLLL');
   const summary = recurrenceSummary(schedule.rRule as RecurrenceSchedule);
   // Capitalize first letter of summary
   return summary[0].toLocaleUpperCase() + summary.slice(1);

@@ -98,7 +98,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
       };
     }
 
-    const isRecurring = Boolean(initialSchedule?.rRule?.freq);
+    const isRecurring = initialSchedule?.rRule?.freq != null;
 
     const recurrenceSchedule = !isRecurring
       ? null
