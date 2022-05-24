@@ -22,7 +22,7 @@ import {
   getAlertUserAction,
 } from '../../containers/mock';
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
-import { useFetchCaseUserActions } from '../../containers/use_get_case_user_actions';
+import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { CaseViewPage } from './case_view_page';
@@ -43,7 +43,7 @@ const useUrlParamsMock = useUrlParams as jest.Mock;
 const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useGetCaseMetricsMock = useGetCaseMetrics as jest.Mock;
-const useFetchCaseUserActionsMock = useFetchCaseUserActions as jest.Mock;
+const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
 const useConnectorsMock = useConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 
@@ -97,7 +97,7 @@ describe('CaseViewPage', () => {
     jest.clearAllMocks();
     useUpdateCaseMock.mockReturnValue(defaultUpdateCaseState);
     useGetCaseMetricsMock.mockReturnValue(defaultGetCaseMetrics);
-    useFetchCaseUserActionsMock.mockReturnValue(defaultUseGetCaseUserActions);
+    useGetCaseUserActionsMock.mockReturnValue(defaultUseGetCaseUserActions);
     usePostPushToServiceMock.mockReturnValue({ isLoading: false, pushCaseToExternalService });
     useConnectorsMock.mockReturnValue({ connectors: connectorsMock, loading: false });
   });
@@ -297,7 +297,7 @@ describe('CaseViewPage', () => {
   });
 
   it('should push updates on button click', async () => {
-    useFetchCaseUserActionsMock.mockImplementation(() => ({
+    useGetCaseUserActionsMock.mockImplementation(() => ({
       ...defaultUseGetCaseUserActions,
       data: {
         ...defaultUseGetCaseUserActions.data,
@@ -324,7 +324,7 @@ describe('CaseViewPage', () => {
   });
 
   it('should disable the push button when connector is invalid', async () => {
-    useFetchCaseUserActionsMock.mockImplementation(() => ({
+    useGetCaseUserActionsMock.mockImplementation(() => ({
       ...defaultUseGetCaseUserActions,
       data: {
         ...defaultUseGetCaseUserActions.data,
@@ -455,7 +455,7 @@ describe('CaseViewPage', () => {
 
   it('should show loading content when loading user actions', async () => {
     const useFetchAlertData = jest.fn().mockReturnValue([true]);
-    useFetchCaseUserActionsMock.mockReturnValue({
+    useGetCaseUserActionsMock.mockReturnValue({
       data: undefined,
       isError: false,
       isLoading: true,
@@ -530,7 +530,7 @@ describe('CaseViewPage', () => {
 
   it('should show the correct connector name on the push button', async () => {
     useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
-    useFetchCaseUserActionsMock.mockImplementation(() => ({
+    useGetCaseUserActionsMock.mockImplementation(() => ({
       ...defaultUseGetCaseUserActions,
       data: {
         ...defaultUseGetCaseUserActions.data,

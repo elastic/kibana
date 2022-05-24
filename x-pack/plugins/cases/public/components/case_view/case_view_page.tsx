@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import { Case, UpdateKey } from '../../../common/ui';
 import { useCaseViewNavigation, useUrlParams } from '../../common/navigation';
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
-import { useFetchCaseUserActions } from '../../containers/use_get_case_user_actions';
+import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { CaseActionBar } from '../case_action_bar';
@@ -64,7 +64,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
       data,
       refetch: fetchCaseUserActions,
       isFetching: isLoadingUserActions,
-    } = useFetchCaseUserActions(caseData.id, caseData.connector.id);
+    } = useGetCaseUserActions(caseData.id, caseData.connector.id);
 
     const {
       metrics,
@@ -79,7 +79,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     }, [fetchCase, fetchCaseMetrics, fetchCaseUserActions]);
 
     const handleUpdateField = useCallback(
-      (newCase: Case, _updateKey: UpdateKey) => {
+      (_newCase: Case, _updateKey: UpdateKey) => {
         fetchCase();
         fetchCaseUserActions();
         fetchCaseMetrics();

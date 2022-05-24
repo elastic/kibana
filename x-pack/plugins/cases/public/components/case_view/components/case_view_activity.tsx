@@ -24,7 +24,7 @@ import * as i18n from '../translations';
 import { getNoneConnector, normalizeActionConnector } from '../../configure_cases/utils';
 import { getConnectorById } from '../../utils';
 import { SeveritySidebarSelector } from '../../severity/sidebar_selector';
-import { useFetchCaseUserActions } from '../../../containers/use_get_case_user_actions';
+import { useGetCaseUserActions } from '../../../containers/use_get_case_user_actions';
 
 export const CaseViewActivity = ({
   ruleDetailsNavigation,
@@ -50,7 +50,7 @@ export const CaseViewActivity = ({
     data,
     refetch: fetchCaseUserActions,
     isFetching: isLoadingUserActions,
-  } = useFetchCaseUserActions(caseData.id, caseData.connector.id);
+  } = useGetCaseUserActions(caseData.id, caseData.connector.id);
 
   const onShowAlertDetails = useCallback(
     (alertId: string, index: string) => {

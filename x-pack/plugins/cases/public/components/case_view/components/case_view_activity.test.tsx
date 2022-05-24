@@ -18,7 +18,7 @@ import { CaseViewActivity } from './case_view_activity';
 import { ConnectorTypes } from '../../../../common/api/connectors';
 import { Case } from '../../../../common';
 import { CaseViewProps } from '../types';
-import { useFetchCaseUserActions } from '../../../containers/use_get_case_user_actions';
+import { useGetCaseUserActions } from '../../../containers/use_get_case_user_actions';
 import { useConnectors } from '../../../containers/configure/use_connectors';
 import { usePostPushToService } from '../../../containers/use_post_push_to_service';
 import { useGetActionLicense } from '../../../containers/use_get_action_license';
@@ -90,13 +90,13 @@ export const caseProps = {
   fetchCaseMetrics: jest.fn(),
 };
 
-const useFetchCaseUserActionsMock = useFetchCaseUserActions as jest.Mock;
+const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
 const useConnectorsMock = useConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 
 describe('Case View Page activity tab', () => {
   beforeAll(() => {
-    useFetchCaseUserActionsMock.mockReturnValue(defaultUseGetCaseUserActions);
+    useGetCaseUserActionsMock.mockReturnValue(defaultUseGetCaseUserActions);
     useConnectorsMock.mockReturnValue({ connectors: connectorsMock, loading: false });
     usePostPushToServiceMock.mockReturnValue({ isLoading: false, pushCaseToExternalService });
   });
@@ -113,11 +113,11 @@ describe('Case View Page activity tab', () => {
     expect(result.getByTestId('case-tags')).toBeTruthy();
     expect(result.getByTestId('connector-edit-header')).toBeTruthy();
     expect(result.getByTestId('case-view-status-action-button')).toBeTruthy();
-    expect(useFetchCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, caseData.connector.id);
+    expect(useGetCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, caseData.connector.id);
   });
 
   it('should show a loading when is fetching data is true and hide the user actions activity', () => {
-    useFetchCaseUserActionsMock.mockReturnValue({
+    useGetCaseUserActionsMock.mockReturnValue({
       ...defaultUseGetCaseUserActions,
       isFetching: true,
       isLoading: true,
@@ -125,6 +125,6 @@ describe('Case View Page activity tab', () => {
     const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
     expect(result.getByTestId('case-view-loading-content')).toBeTruthy();
     expect(result.queryByTestId('case-view-activity')).toBeFalsy();
-    expect(useFetchCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, caseData.connector.id);
+    expect(useGetCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, caseData.connector.id);
   });
 });

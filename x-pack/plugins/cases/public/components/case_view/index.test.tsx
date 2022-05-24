@@ -31,7 +31,7 @@ import { usePostPushToService } from '../../containers/use_post_push_to_service'
 import { ConnectorTypes } from '../../../common/api';
 import { Case } from '../../../common/ui';
 import { useKibana } from '../../common/lib/kibana';
-import { useFetchCaseUserActions } from '../../containers/use_get_case_user_actions';
+import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 
 jest.mock('../../containers/use_update_case');
 jest.mock('../../containers/use_get_case_user_actions');
@@ -46,7 +46,7 @@ jest.mock('../../common/navigation/hooks');
 const useFetchCaseMock = useGetCase as jest.Mock;
 const useGetCaseMetricsMock = useGetCaseMetrics as jest.Mock;
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
-const useFetchCaseUserActionsMock = useFetchCaseUserActions as jest.Mock;
+const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
 const useConnectorsMock = useConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
@@ -176,7 +176,7 @@ describe('CaseView', () => {
     mockGetCase();
     useGetCaseMetricsMock.mockReturnValue(defaultGetCaseMetrics);
     useUpdateCaseMock.mockReturnValue(defaultUpdateCaseState);
-    useFetchCaseUserActionsMock.mockReturnValue(defaultUseGetCaseUserActions);
+    useGetCaseUserActionsMock.mockReturnValue(defaultUseGetCaseUserActions);
     usePostPushToServiceMock.mockReturnValue({ isLoading: false, pushCaseToExternalService });
     useConnectorsMock.mockReturnValue({ connectors: connectorsMock, loading: false });
     useKibanaMock().services.spaces = { ui: spacesUiApiMock } as unknown as SpacesApi;
