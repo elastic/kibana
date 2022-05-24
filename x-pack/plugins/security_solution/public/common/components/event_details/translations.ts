@@ -156,3 +156,7 @@ export const VIEW_RULE_DETAIL_PAGE = i18n.translate(
 export const VIEW_ALL_FIELDS = i18n.translate('xpack.securitySolution.eventDetails.viewAllFields', {
   defaultMessage: 'View all fields in table',
 });
+
+export const SESSION_ID = i18n.translate('xpack.securitySolution.eventDetails.sessionId', {
+  defaultMessage: 'Session ID',
+});
