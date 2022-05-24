@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-// these are the remaining routes not yet converted to TypeScript
-// all others are registered through index.ts
-
-// @ts-expect-error
-export { kibanaInstanceRoute, kibanaInstancesRoute, kibanaOverviewRoute } from './kibana';
+export * from './post_kibana_instance';
+export * from './post_kibana_instances';
+export * from './post_kibana_overview';
