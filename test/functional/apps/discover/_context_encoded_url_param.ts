@@ -31,7 +31,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.settings.createIndexPattern('context-encoded-param');
 
-      await kibanaServer.uiSettings.update({ 'doc_table:legacy': false });
+      await kibanaServer.uiSettings.update({
+        'doc_table:legacy': false,
+        'discover:searchOnPageLoad': true,
+      });
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });
