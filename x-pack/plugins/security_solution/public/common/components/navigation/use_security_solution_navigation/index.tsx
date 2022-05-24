@@ -32,10 +32,7 @@ export const useSecuritySolutionNavigation = () => {
 
   const { detailName, flowTarget, pageName, pathName, search, state, tabName } = routeProps;
 
-  const disabledNavTabs = [
-    ...(!useIsExperimentalFeatureEnabled('usersEnabled') ? ['users'] : []),
-    ...(!useIsExperimentalFeatureEnabled('detectionResponseEnabled') ? ['detection_response'] : []),
-  ];
+  const disabledNavTabs = [...(!useIsExperimentalFeatureEnabled('usersEnabled') ? ['users'] : [])];
   const enabledNavTabs: GenericNavRecord = omit(disabledNavTabs, navTabs);
 
   const setBreadcrumbs = useSetBreadcrumbs();

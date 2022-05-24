@@ -36,6 +36,7 @@ export interface SeverityRuleAlertsAggsResponse {
               _source: {
                 '@timestamp': string;
                 'kibana.alert.rule.name': string;
+                'kibana.alert.rule.uuid': string;
                 'kibana.alert.severity': Severity;
               };
             }
@@ -60,7 +61,7 @@ const getSeverityRuleAlertsQuery = ({ from, to }: { from: string; to: string }) 
     alertsByRule: {
       terms: {
         // top 4 rules sorted by severity counters
-        field: 'kibana.alert.rule.uuid',
+        field: 'kibana.alert.rule.name',
         size: 4,
         order: [{ critical: 'desc' }, { high: 'desc' }, { medium: 'desc' }, { low: 'desc' }],
       },
@@ -90,8 +91,9 @@ const getRuleAlertsItemsFromAggs = (
   const buckets = aggregations?.alertsByRule.buckets ?? [];
   return buckets.map<RuleAlertsItem>((bucket) => {
     const lastAlert = bucket.lastRuleAlert.hits.hits[0]._source;
+
     return {
-      id: bucket.key,
+      id: lastAlert['kibana.alert.rule.uuid'],
       alert_count: bucket.lastRuleAlert.hits.total.value,
       name: lastAlert['kibana.alert.rule.name'],
       last_alert_at: lastAlert['@timestamp'],

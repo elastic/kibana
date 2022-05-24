@@ -14,7 +14,7 @@ export const mockCasesResult = {
       version: 'Wzg2MDIsMV0=',
       comments: [],
       totalComment: 0,
-      totalAlerts: 0,
+      totalAlerts: 1,
       title: 'sdcsd',
       tags: [],
       description: 'klklk',
@@ -54,7 +54,7 @@ export const mockCasesResult = {
       version: 'Wzg5NjksMV0=',
       comments: [],
       totalComment: 0,
-      totalAlerts: 0,
+      totalAlerts: 2,
       title: 'zzzz',
       tags: [],
       description: 'sssss',
@@ -94,7 +94,7 @@ export const mockCasesResult = {
       version: 'Wzg5ODQsMV0=',
       comments: [],
       totalComment: 0,
-      totalAlerts: 0,
+      totalAlerts: 3,
       title: 'asxa',
       tags: [],
       description: 'dsdd',
@@ -135,7 +135,7 @@ export const mockCasesResult = {
 export const parsedCasesItems = [
   {
     name: 'sdcsd',
-    note: 'klklk',
+    totalAlerts: 1,
     createdBy: 'elastic',
     status: CaseStatuses.open,
     createdAt: '2022-04-25T01:50:14.499Z',
@@ -143,7 +143,7 @@ export const parsedCasesItems = [
   },
   {
     name: 'zzzz',
-    note: 'sssss',
+    totalAlerts: 2,
     status: CaseStatuses['in-progress'],
     createdAt: '2022-04-21T13:42:17.414Z',
     createdBy: 'elastic',
@@ -151,7 +151,7 @@ export const parsedCasesItems = [
   },
   {
     name: 'asxa',
-    note: 'dsdd',
+    totalAlerts: 3,
     createdBy: 'elastic',
     status: CaseStatuses.closed,
     createdAt: '2022-04-21T13:41:59.025Z',
