@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import {
   ExpressionFunctionKibana,
   ExpressionFunctionKibanaContext,
