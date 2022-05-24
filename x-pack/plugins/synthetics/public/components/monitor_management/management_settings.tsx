@@ -5,9 +5,9 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
+import { EuiPopover, EuiPopoverTitle, EuiText, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useUptimeSettingsContext } from '../../contexts/uptime_settings_context';
+import { useUptimeSettingsContext } from '../../legacy_uptime/contexts/uptime_settings_context';
 import { GetApiKeyBtn } from './get_api_key_btn';
 
 export const ManagementSettings = () => {
@@ -23,7 +23,9 @@ export const ManagementSettings = () => {
     <EuiPopover
       isOpen={isPopoverOpen}
       id="managementSettingsPopover"
-      button={<EuiButtonIcon iconType="gear" onClick={() => setIsPopoverOpen(true)} />}
+      button={
+        <EuiButtonEmpty onClick={() => setIsPopoverOpen(true)}>{API_KEYS_LABEL}</EuiButtonEmpty>
+      }
       closePopover={() => setIsPopoverOpen(false)}
       style={{ margin: 'auto' }}
     >
@@ -34,15 +36,19 @@ export const ManagementSettings = () => {
   );
 };
 
+const API_KEYS_LABEL = i18n.translate('xpack.synthetics.monitorManagement.getAPIKeyLabel.label', {
+  defaultMessage: 'API Keys',
+});
+
 const GET_API_KEY_GENERATE = i18n.translate(
-  'xpack.uptime.monitorManagement.getAPIKeyLabel.generate',
+  'xpack.synthetics.monitorManagement.getAPIKeyLabel.generate',
   {
     defaultMessage: 'Generate API Key',
   }
 );
 
 const GET_API_KEY_LABEL_DESCRIPTION = i18n.translate(
-  'xpack.uptime.monitorManagement.getAPIKeyLabel.description',
+  'xpack.synthetics.monitorManagement.getAPIKeyLabel.description',
   {
     defaultMessage:
       'You can generate an API key which can be used with push command from Synthetics agent.',

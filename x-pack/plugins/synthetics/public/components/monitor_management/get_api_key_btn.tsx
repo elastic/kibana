@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 import { EuiButton, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import { useFetcher } from '@kbn/observability-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { fetchServiceAPIKey } from '../../state/api';
+import { fetchServiceAPIKey } from '../../legacy_uptime/state/api';
 
 export const GetApiKeyBtn = () => {
   const [loadAPIKey, setLoadAPIKey] = useState(false);

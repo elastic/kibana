@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
-import { ManagementSettings } from './components/monitor_management/management_settings';
+import { ManagementSettings } from '../components/monitor_management/management_settings';
 import {
   CERTIFICATES_ROUTE,
   MAPPING_ERROR_ROUTE,
