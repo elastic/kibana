@@ -17,13 +17,10 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiLink,
   EuiSpacer,
   EuiSteps,
-  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { LicensingLogic } from '../../../../../shared/licensing';
 import { ApiKey } from '../../../../components/shared/api_key';
@@ -32,6 +29,7 @@ import { PUBLIC_KEY_LABEL, CONSUMER_KEY_LABEL, REMOVE_BUTTON } from '../../../..
 import { Configuration } from '../../../../types';
 
 import { ExternalConnectorFormFields } from './add_external_connector';
+import { ExternalConnectorDocumentation } from './add_external_connector';
 import { AddSourceLogic, SourceConfigFormElement } from './add_source_logic';
 import { ConfigDocsLinks } from './config_docs_links';
 import { OAUTH_SAVE_CONFIG_BUTTON, OAUTH_BACK_BUTTON } from './constants';
@@ -101,7 +99,7 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
 
   const { sourceConfigData, buttonLoading, configuredFields } = useValues(AddSourceLogic);
 
-  const { accountContextOnly, serviceType, configured, configurableFields = [] } = sourceConfigData;
+  const { accountContextOnly, serviceType, configurableFields = [] } = sourceConfigData;
 
   const formFields: SourceConfigFormElement[] =
     serviceType === 'external'
@@ -213,43 +211,7 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
       <EuiSpacer size="l" />
       {serviceType === 'external' && (
         <>
-          <EuiText size="s">
-            <p>
-              {configured ? (
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.workplaceSearch.contentSource.saveConfig.externalConnectorDocumenation.configuredHeading"
-                  defaultMessage="Your self managed {name} connector package is registered with Enterprise Search. Review our {documentationLink} to learn more about configuring a connector package."
-                  values={{
-                    name,
-                    documentationLink: (
-                      <EuiLink external target="_blank" href={documentationUrl}>
-                        {i18n.translate(
-                          'xpack.enterpriseSearch.workplaceSearch.contentSource.saveConfig.externalConnectorDocumenation.documentationLinkLabel',
-                          { defaultMessage: 'documentation' }
-                        )}
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.workplaceSearch.contentSource.saveConfig.externalConnectorDocumenation.unconfiguredHeading"
-                  defaultMessage="Your self managed {name} connector package is now registered with Enterprise Search, and the configuration can now be finalized. Review our {documentationLink}, and collect the credentials from your content source provider in preparation for the next step"
-                  values={{
-                    name,
-                    documentationLink: (
-                      <EuiLink external target="_blank" href={documentationUrl}>
-                        {i18n.translate(
-                          'xpack.enterpriseSearch.workplaceSearch.contentSource.saveConfig.externalConnectorDocumenation.documentationLinkLabel',
-                          { defaultMessage: 'documentation' }
-                        )}
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              )}
-            </p>
-          </EuiText>
+          <ExternalConnectorDocumentation name={name} documentationUrl={documentationUrl} />
           <EuiSpacer size="l" />
         </>
       )}
