@@ -195,6 +195,7 @@ export interface LensPublicStart {
       openInNewTab?: boolean;
       originatingApp?: string;
       originatingPath?: string;
+      skipAppLeave?: boolean;
     }
   ) => void;
   /**
@@ -458,7 +459,7 @@ export class LensPlugin {
       SaveModalComponent: getSaveModalComponent(core, startDependencies),
       navigateToPrefilledEditor: (
         input,
-        { openInNewTab = false, originatingApp = '', originatingPath } = {}
+        { openInNewTab = false, originatingApp = '', originatingPath, skipAppLeave = false } = {}
       ) => {
         // for openInNewTab, we set the time range in url via getEditPath below
         if (input?.timeRange && !openInNewTab) {
@@ -476,7 +477,7 @@ export class LensPlugin {
             originatingPath,
             valueInput: input,
           },
-          skipAppLeave: openInNewTab,
+          skipAppLeave,
         });
       },
       canUseEditor: () => {
