@@ -44,7 +44,6 @@ import { OptInConfig } from '@kbn/analytics-client';
 import { PackageInfo } from '@kbn/config';
 import { Path } from 'history';
 import { PeerCertificate } from 'tls';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import { default as React_2 } from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { Request as Request_2 } from '@hapi/hapi';
@@ -1131,7 +1130,7 @@ export interface SavedObjectsBulkResolveObject {
 // @public (undocumented)
 export interface SavedObjectsBulkResolveResponse<T = unknown> {
     // (undocumented)
-    resolved_objects: Array<SavedObjectsResolveResponse<T>>;
+    resolved_objects: Array<ResolvedSimpleSavedObject<T>>;
 }
 
 // @public (undocumented)
@@ -1154,35 +1153,62 @@ export interface SavedObjectsBulkUpdateOptions {
     namespace?: string;
 }
 
-// @public
-export class SavedObjectsClient {
-    // @internal
+// @internal
+export class SavedObjectsClient implements SavedObjectsClientContract {
     constructor(http: HttpSetup);
     bulkCreate: (objects?: SavedObjectsBulkCreateObject[], options?: SavedObjectsBulkCreateOptions) => Promise<SavedObjectsBatchResponse<unknown>>;
+    // (undocumented)
     bulkGet: (objects?: Array<{
         id: string;
         type: string;
     }>) => Promise<SavedObjectsBatchResponse<unknown>>;
+    // (undocumented)
     bulkResolve: <T = unknown>(objects?: Array<{
         id: string;
         type: string;
     }>) => Promise<{
         resolved_objects: ResolvedSimpleSavedObject<T>[];
     }>;
+    // (undocumented)
     bulkUpdate<T = unknown>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<T>>;
+    // (undocumented)
     create: <T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsDeleteOptions" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsClientContract" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
     delete: (type: string, id: string, options?: SavedObjectsDeleteOptions | undefined) => ReturnType<SavedObjectsClientContract_2['delete']>;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsFindOptions" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
     find: <T = unknown, A = unknown>(options: SavedObjectsFindOptions_2) => Promise<SavedObjectsFindResponsePublic<T, unknown>>;
+    // (undocumented)
     get: <T = unknown>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
+    // (undocumented)
     resolve: <T = unknown>(type: string, id: string) => Promise<ResolvedSimpleSavedObject<T>>;
+    // (undocumented)
     update<T = unknown>(type: string, id: string, attributes: T, { version, references, upsert }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
 }
 
 // @public
-export type SavedObjectsClientContract = PublicMethodsOf<SavedObjectsClient>;
+export interface SavedObjectsClientContract {
+    bulkCreate(objects: SavedObjectsBulkCreateObject[], options?: SavedObjectsBulkCreateOptions): Promise<SavedObjectsBatchResponse<unknown>>;
+    bulkGet(objects: Array<{
+        id: string;
+        type: string;
+    }>): Promise<SavedObjectsBatchResponse<unknown>>;
+    bulkResolve<T = unknown>(objects: Array<{
+        id: string;
+        type: string;
+    }>): Promise<SavedObjectsBulkResolveResponse<T>>;
+    bulkUpdate<T = unknown>(objects: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<T>>;
+    create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SimpleSavedObject<T>>;
+    delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
+    find<T = unknown, A = unknown>(options: SavedObjectsFindOptions_2): Promise<SavedObjectsFindResponsePublic<T>>;
+    get<T = unknown>(type: string, id: string): Promise<SimpleSavedObject<T>>;
+    resolve<T = unknown>(type: string, id: string): Promise<ResolvedSimpleSavedObject<T>>;
+    update<T = unknown>(type: string, id: string, attributes: T, options?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
+}
 
 // @public
 export interface SavedObjectsCollectMultiNamespaceReferencesResponse {

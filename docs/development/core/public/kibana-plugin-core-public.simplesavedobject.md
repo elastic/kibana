@@ -4,7 +4,7 @@
 
 ## SimpleSavedObject class
 
-This class is a very simple wrapper for SavedObjects loaded from the server with the [SavedObjectsClient](./kibana-plugin-core-public.savedobjectsclient.md)<!-- -->.
+This class is a very simple wrapper for SavedObjects loaded from the server with the .
 
 It provides basic functionality for creating/saving/deleting saved objects, but doesn't include any type-specific implementations.
 
