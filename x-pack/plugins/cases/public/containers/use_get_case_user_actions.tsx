@@ -9,7 +9,7 @@ import { isEmpty, uniqBy } from 'lodash/fp';
 import deepEqual from 'fast-deep-equal';
 
 import { useQuery } from 'react-query';
-import { ElasticUser, CaseUserActions, CaseExternalService } from '../../common/ui/types';
+import { CaseUserActions, CaseExternalService } from '../../common/ui/types';
 import { ActionTypes, CaseConnector, NONE_CONNECTOR_ID } from '../../common/api';
 import { getCaseUserActions } from './api';
 import {
@@ -28,24 +28,6 @@ export interface CaseService extends CaseExternalService {
 export interface CaseServices {
   [key: string]: CaseService;
 }
-
-interface CaseUserActionsState {
-  caseServices: CaseServices;
-  caseUserActions: CaseUserActions[];
-  hasDataToPush: boolean;
-  isError: boolean;
-  isLoading: boolean;
-  participants: ElasticUser[];
-}
-
-export const initialData: CaseUserActionsState = {
-  caseServices: {},
-  caseUserActions: [],
-  hasDataToPush: false,
-  isError: false,
-  isLoading: true,
-  participants: [],
-};
 
 const groupConnectorFields = (
   userActions: CaseUserActions[]
