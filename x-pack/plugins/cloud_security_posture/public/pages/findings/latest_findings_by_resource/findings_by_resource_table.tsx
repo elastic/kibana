@@ -114,6 +114,7 @@ const columns: Array<EuiTableFieldDataColumnType<CspFindingsByResource>> = [
   },
   {
     field: 'failed_findings',
+    width: '150px',
     truncateText: true,
     name: (
       <FormattedMessage
@@ -139,6 +140,7 @@ const columns: Array<EuiTableFieldDataColumnType<CspFindingsByResource>> = [
         </>
       </EuiToolTip>
     ),
+    dataType: 'number',
   },
 ];
 

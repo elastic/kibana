@@ -15,6 +15,9 @@ import {
   TaskManagerStartContract,
   TaskInstance,
 } from '@kbn/task-manager-plugin/server';
+import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
+import { MonitorSyncEvent } from '../legacy_uptime/lib/telemetry/types';
+import { sendSyncTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import { installSyntheticsIndexTemplates } from '../routes/synthetics_service/install_index_templates';
 import { SyntheticsServiceApiKey } from '../../common/runtime_types/synthetics_service_api_key';
@@ -48,7 +51,7 @@ const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID = 'UPTIME:SyntheticsService:sync-task';
 const SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT = '5m';
 
-type SyntheticsConfig = SyntheticsMonitorWithId & {
+export type SyntheticsConfig = SyntheticsMonitorWithId & {
   fields_under_root?: boolean;
   fields?: { config_id: string; run_once?: boolean; test_run_id?: string };
 };
@@ -56,7 +59,7 @@ type SyntheticsConfig = SyntheticsMonitorWithId & {
 export class SyntheticsService {
   private logger: Logger;
   private readonly server: UptimeServerSetup;
-  private apiClient: ServiceAPIClient;
+  public apiClient: ServiceAPIClient;
 
   private readonly config: ServiceConfig;
   private readonly esHosts: string[];
@@ -81,7 +84,7 @@ export class SyntheticsService {
     this.isAllowed = false;
     this.signupUrl = null;
 
-    this.apiClient = new ServiceAPIClient(logger, this.config, this.server.kibanaVersion);
+    this.apiClient = new ServiceAPIClient(logger, this.config, this.server);
 
     this.esHosts = getEsHosts({ config: this.config, cloud: server.cloud });
 
@@ -152,16 +155,26 @@ export class SyntheticsService {
             // Perform the work of the task. The return value should fit the TaskResult interface.
             async run() {
               const { state } = taskInstance;
+              try {
+                await service.registerServiceLocations();
 
-              await service.registerServiceLocations();
+                const { allowed, signupUrl } = await service.apiClient.checkAccountAccessStatus();
+                service.isAllowed = allowed;
+                service.signupUrl = signupUrl;
 
-              const { allowed, signupUrl } = await service.apiClient.checkAccountAccessStatus();
-              service.isAllowed = allowed;
-              service.signupUrl = signupUrl;
-
-              if (service.isAllowed) {
-                service.setupIndexTemplates();
-                service.syncErrors = await service.pushConfigs();
+                if (service.isAllowed) {
+                  service.setupIndexTemplates();
+                  service.syncErrors = await service.pushConfigs();
+                }
+              } catch (e) {
+                sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
+                  reason: 'Failed to run scheduled sync task',
+                  message: e?.message,
+                  type: 'runTaskError',
+                  code: e?.code,
+                  status: e.status,
+                });
+                throw e;
               }
 
               return { state };
@@ -199,9 +212,17 @@ export class SyntheticsService {
 
       return taskInstance;
     } catch (e) {
+      sendErrorTelemetryEvents(this.logger, this.server.telemetry, {
+        reason: 'Failed to schedule sync task',
+        message: e?.message ?? e,
+        type: 'scheduleTaskError',
+        code: e?.code,
+        status: e.status,
+      });
+
       this.logger?.error(
         `Error running task: ${SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID}, `,
-        e?.message() ?? e
+        e?.message ?? e
       );
 
       return null;
@@ -251,11 +272,18 @@ export class SyntheticsService {
     }
   }
 
-  async pushConfigs(configs?: SyntheticsConfig[]) {
-    const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
+  async pushConfigs(configs?: SyntheticsConfig[], isEdit?: boolean) {
+    const monitorConfigs = configs ?? (await this.getMonitorConfigs());
+    const monitors = this.formatConfigs(monitorConfigs);
+
     if (monitors.length === 0) {
       this.logger.debug('No monitor found which can be pushed to service.');
       return null;
+    }
+
+    if (!configs && monitorConfigs.length > 0) {
+      const telemetry = this.getSyncTelemetry(monitorConfigs);
+      sendSyncTelemetryEvents(this.logger, this.server.telemetry, telemetry);
     }
 
     this.apiKey = await this.getApiKey();
@@ -267,6 +295,7 @@ export class SyntheticsService {
     const data = {
       monitors,
       output: await this.getOutput(this.apiKey),
+      isEdit: !!isEdit,
     };
 
     this.logger.debug(`${monitors.length} monitors will be pushed to synthetics service.`);
@@ -398,18 +427,86 @@ export class SyntheticsService {
       });
     }
 
-    return (monitors ?? []).map((monitor) => ({
-      ...normalizeSecrets(monitor).attributes,
-      id: monitor.id,
-      fields_under_root: true,
-      fields: { config_id: monitor.id },
-    }));
+    return (monitors ?? []).map((monitor) => {
+      const attributes = monitor.attributes as unknown as MonitorFields;
+      const id = attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] || monitor.id;
+      return {
+        ...normalizeSecrets(monitor).attributes,
+        id, // heartbeat id
+        fields_under_root: true,
+        fields: { config_id: monitor.id }, // monitor saved object id
+      };
+    });
   }
 
   formatConfigs(configs: SyntheticsMonitorWithId[]) {
     return configs.map((config: Partial<MonitorFields>) =>
       formatMonitorConfig(Object.keys(config) as ConfigKey[], config)
     );
+  }
+
+  getSyncTelemetry(monitors: SyntheticsMonitorWithId[]): MonitorSyncEvent {
+    let totalRuns = 0;
+    let browserTestRuns = 0;
+    let httpTestRuns = 0;
+    let icmpTestRuns = 0;
+    let tcpTestRuns = 0;
+
+    const locationRuns: Record<string, number> = {};
+    const locationMonitors: Record<string, number> = {};
+
+    const testRunsInDay = (schedule: string) => {
+      return (24 * 60) / Number(schedule);
+    };
+
+    const monitorsByType: Record<string, number> = {
+      browser: 0,
+      http: 0,
+      tcp: 0,
+      icmp: 0,
+    };
+
+    monitors.forEach((monitor) => {
+      if (monitor.schedule.number) {
+        totalRuns += testRunsInDay(monitor.schedule.number);
+      }
+      switch (monitor.type) {
+        case 'browser':
+          browserTestRuns += testRunsInDay(monitor.schedule.number);
+          break;
+        case 'http':
+          httpTestRuns += testRunsInDay(monitor.schedule.number);
+          break;
+        case 'icmp':
+          icmpTestRuns += testRunsInDay(monitor.schedule.number);
+          break;
+        case 'tcp':
+          tcpTestRuns += testRunsInDay(monitor.schedule.number);
+          break;
+        default:
+          break;
+      }
+
+      monitorsByType[monitor.type] = (monitorsByType[monitor.type] ?? 0) + 1;
+
+      monitor.locations.forEach(({ id }) => {
+        locationRuns[id + 'Tests'] =
+          (locationRuns[id + 'Tests'] ?? 0) + testRunsInDay(monitor.schedule.number);
+        locationMonitors[id + 'Monitors'] = (locationMonitors[id + 'Monitors'] ?? 0) + 1;
+      });
+    });
+
+    return {
+      total: monitors.length,
+      totalTests: totalRuns,
+      browserTests24h: browserTestRuns,
+      httpTests24h: httpTestRuns,
+      icmpTests24h: icmpTestRuns,
+      tcpTests24h: tcpTestRuns,
+      ...locationRuns,
+      ...locationMonitors,
+      ...monitorsByType,
+    };
   }
 }
 
