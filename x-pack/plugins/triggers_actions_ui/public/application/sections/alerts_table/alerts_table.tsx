@@ -144,7 +144,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     data: Array<{ field: string; value: string[] }>;
     columnId: string;
   }) => {
-    // any is required here to improve typescript performance
     const value = data.find((d) => d.field === columnId)?.value ?? [];
     return <>{value.length ? value.join() : '--'}</>;
   };
@@ -152,7 +151,12 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   const handleRenderCellValue = useCallback(
     (improper: EuiDataGridCellValueElementProps) => {
       const rcvProps = improper as EuiDataGridCellValueElementProps & EuiDataGridCellValueProps;
-      const alert = alerts[rcvProps.rowIndex];
+      const alert =
+        alerts[
+          rcvProps.visibleRowIndex != null
+            ? rcvProps.visibleRowIndex
+            : rcvProps.rowIndex - props.pageSize
+        ];
       const renderCellValue = props.alertsTableConfiguration?.getRenderCellValue
         ? props.alertsTableConfiguration?.getRenderCellValue({
             setFlyoutAlert: handleFlyoutAlert,
@@ -167,7 +171,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         data,
       });
     },
-    [alerts, handleFlyoutAlert, props.alertsTableConfiguration]
+    [alerts, handleFlyoutAlert, props.alertsTableConfiguration, props.pageSize]
   );
 
   return (

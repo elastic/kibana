@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { lazy } from 'react';
-import { get } from 'lodash';
+import React, { lazy } from 'react';
 import { PLUGIN_ID } from '../../../../common/constants';
 import { AlertsTableConfigurationRegistry } from '../../../../types';
 import { TypeRegistry } from '../../../type_registry';
@@ -52,9 +51,8 @@ export function registerAlertsTableConfiguration({
     },
     getRenderCellValue: () => (props) => {
       const myProps = props as any;
-      // any is required here to improve typescript performance
-      const value = get(myProps.data as any, myProps.field, [])[0] as string;
-      return value ?? 'N/A';
+      const value = myProps.data.find((d: any) => d.field === myProps.columnId)?.value ?? [];
+      return <>{value.length ? value.join() : '--'}</>;
     },
   });
 }
