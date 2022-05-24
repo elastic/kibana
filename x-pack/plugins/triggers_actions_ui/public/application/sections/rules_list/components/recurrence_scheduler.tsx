@@ -464,6 +464,7 @@ export const recurrenceSummary = ({
   bymonth,
 }: RecurrenceSchedule) => {
   const frequencySummary = i18nFreqSummary(interval)[freq];
+  console.log('freq', freq);
 
   // For weekday summaries
   const firstWeekday = byweekday ? byweekday[0] : '';
@@ -526,7 +527,7 @@ export const recurrenceSummary = ({
   const untilSummary = until
     ? i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.untilDateSummary', {
         defaultMessage: 'until {date}',
-        values: { date: until.format('LL') },
+        values: { date: moment(until).format('LL') },
       })
     : count
     ? i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.occurrencesSummary', {

@@ -107,9 +107,10 @@ import {
   getExecutionLogAggregation,
 } from '../lib/get_execution_log_aggregation';
 import { IExecutionLogWithErrorsResult } from '../../common';
-import { validateSnoozeDate } from '../lib/validate_snooze_date';
+import { validateSnoozeStartDate } from '../lib/validate_snooze_date';
 import { RuleMutedError } from '../lib/errors/rule_muted';
 import { formatExecutionErrorsResult } from '../lib/format_execution_log_errors';
+import { getActiveSnoozes } from '../lib/is_rule_snoozed';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -2071,7 +2072,7 @@ export class RulesClient {
     id: string;
     snoozeSchedule: RuleSnoozeSchedule;
   }): Promise<void> {
-    const snoozeDateValidationMsg = validateSnoozeDate(snoozeSchedule.rRule.dtstart);
+    const snoozeDateValidationMsg = validateSnoozeStartDate(snoozeSchedule.rRule.dtstart);
     if (snoozeDateValidationMsg) {
       throw new RuleMutedError(snoozeDateValidationMsg);
     }
@@ -2137,7 +2138,7 @@ export class RulesClient {
           }
         : {
             snoozeSchedule: (snoozeId
-              ? clearScheduledSnoozeById(attributes, snoozeId)
+              ? clearScheduledSnoozesById(attributes, [snoozeId])
               : clearUnscheduledSnooze(attributes)
             ).concat(snoozeSchedule),
             muteAll: false,
@@ -2158,15 +2159,21 @@ export class RulesClient {
     ).then(() => this.updateSnoozedUntilTime({ id }));
   }
 
-  public async unsnooze({ id }: { id: string }): Promise<void> {
+  public async unsnooze({
+    id,
+    scheduleIds,
+  }: {
+    id: string;
+    scheduleIds?: string[];
+  }): Promise<void> {
     return await retryIfConflicts(
       this.logger,
       `rulesClient.unsnooze('${id}')`,
-      async () => await this.unsnoozeWithOCC({ id })
+      async () => await this.unsnoozeWithOCC({ id, scheduleIds })
     );
   }
 
-  private async unsnoozeWithOCC({ id }: { id: string }) {
+  private async unsnoozeWithOCC({ id, scheduleIds }: { id: string; scheduleIds?: string[] }) {
     const { attributes, version } = await this.unsecuredSavedObjectsClient.get<RawRule>(
       'alert',
       id
@@ -2205,10 +2212,12 @@ export class RulesClient {
     this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
     const updateAttributes = this.updateMeta({
-      snoozeSchedule: clearUnscheduledSnooze(attributes),
-      muteAll: false,
+      snoozeSchedule: scheduleIds
+        ? clearScheduledSnoozesById(attributes, scheduleIds)
+        : clearCurrentActiveSnooze(attributes),
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
+      ...(!scheduleIds ? { muteAll: false } : {}),
     });
     const updateOptions = { version };
 
@@ -2850,11 +2859,28 @@ function parseDate(dateString: string | undefined, propertyName: string, default
 }
 
 function clearUnscheduledSnooze(attributes: { snoozeSchedule?: RuleSnooze }) {
+  // Clear any snoozes that have no ID property. These are "simple" snoozes created with the quick UI, e.g. snooze for 3 days starting now
   return attributes.snoozeSchedule
     ? attributes.snoozeSchedule.filter((s) => typeof s.id !== 'undefined')
     : [];
 }
 
-function clearScheduledSnoozeById(attributes: { snoozeSchedule?: RuleSnooze }, id: string) {
-  return attributes.snoozeSchedule ? attributes.snoozeSchedule.filter((s) => s.id !== id) : [];
+function clearScheduledSnoozesById(attributes: { snoozeSchedule?: RuleSnooze }, ids: string[]) {
+  return attributes.snoozeSchedule
+    ? attributes.snoozeSchedule.filter((s) => s.id && !ids.includes(s.id))
+    : [];
+}
+
+function clearCurrentActiveSnooze(attributes: { snoozeSchedule?: RuleSnooze; muteAll: boolean }) {
+  // First attempt to cancel a simple (unscheduled) snooze
+  const clearedUnscheduledSnoozes = clearUnscheduledSnooze(attributes);
+  // Now clear any scheduled snoozes that are currently active and never recur
+  const activeSnoozes = getActiveSnoozes(attributes);
+  const activeSnoozeIds = activeSnoozes?.map((s) => s.id) ?? [];
+  const clearedNonRecurringActiveSnoozes = clearedUnscheduledSnoozes.filter((s) => {
+    if (!activeSnoozeIds.includes(s.id!)) return true;
+    // Check if this is a recurring snooze, and return true if so
+    if (s.rRule.freq && s.rRule.count !== 1) return true;
+  });
+  return clearedNonRecurringActiveSnoozes;
 }

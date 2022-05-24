@@ -408,8 +408,8 @@ export const RulesList: React.FunctionComponent = () => {
     return snoozeRule({ http, id: rule.id, snoozeSchedule });
   };
 
-  const onUnsnoozeRule = (rule: RuleTableItem) => {
-    return unsnoozeRule({ http, id: rule.id });
+  const onUnsnoozeRule = (rule: RuleTableItem, scheduleIds?: string[]) => {
+    return unsnoozeRule({ http, id: rule.id, scheduleIds });
   };
 
   const toolsRight = [

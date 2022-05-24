@@ -9,7 +9,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import moment from 'moment';
 import { EuiButton, EuiButtonIcon, EuiPopover, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isRuleSnoozed } from './rule_status_dropdown';
 import { RuleTableItem, SnoozeSchedule } from '../../../../types';
 import {
   SnoozePanel,
@@ -27,13 +26,18 @@ export interface RulesListNotifyBadgeProps {
   onClose: () => void;
   onRuleChanged: () => void;
   snoozeRule: (schedule: SnoozeSchedule, muteAll?: boolean) => Promise<void>;
-  unsnoozeRule: () => Promise<void>;
+  unsnoozeRule: (scheduleIds?: string[]) => Promise<void>;
 }
 
 const openSnoozePanelAriaLabel = i18n.translate(
   'xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.openSnoozePanel',
   { defaultMessage: 'Open snooze panel' }
 );
+
+const isRuleSnoozed = (rule: { isSnoozedUntil?: Date | null; muteAll: boolean }) =>
+  Boolean(
+    (rule.isSnoozedUntil && new Date(rule.isSnoozedUntil).getTime() > Date.now()) || rule.muteAll
+  );
 
 export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeProps> = (props) => {
   const {
@@ -48,6 +52,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   } = props;
 
   const [isSchedulerOpen, setIsSchedulerOpen] = useState(false);
+  const [initialSchedule, setInitialSchedule] = useState<SnoozeSchedule | null>(null);
 
   const { isSnoozedUntil, muteAll } = rule;
 
@@ -199,15 +204,43 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     [setPreviousSnoozeInterval, snoozeRule]
   );
 
-  const addSnoozeSchedule = useCallback(
-    (schedule: SnoozeSchedule) => {
-      onClosePopover();
-      return snoozeRule(schedule);
+  const saveSnoozeSchedule = useCallback(
+    async (schedule: SnoozeSchedule) => {
+      setIsLoading(true);
+      try {
+        await snoozeRule(schedule);
+        onRuleChanged();
+      } finally {
+        onClosePopover();
+        setIsLoading(false);
+      }
     },
     [snoozeRule]
   );
 
-  const onOpenScheduler = useCallback(() => setIsSchedulerOpen(true), [setIsSchedulerOpen]);
+  const cancelSnoozeSchedules = useCallback(
+    async (scheduleIds: string[]) => {
+      setIsLoading(true);
+      try {
+        console.log('UNSNOOZE', scheduleIds);
+        await unsnoozeRule(scheduleIds);
+        onRuleChanged();
+      } finally {
+        onClosePopover();
+        setIsLoading(false);
+      }
+    },
+    [unsnoozeRule]
+  );
+
+  const onOpenScheduler = useCallback(
+    (schedule?: SnoozeSchedule) => {
+      setInitialSchedule(schedule ?? null);
+      setIsSchedulerOpen(true);
+    },
+    [setInitialSchedule, setIsSchedulerOpen]
+  );
+
   const onCloseScheduler = useCallback(() => setIsSchedulerOpen(false), [setIsSchedulerOpen]);
   const onClosePopover = useCallback(() => {
     onClose();
@@ -243,11 +276,18 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
           interval={futureTimeToInterval(isSnoozedUntil)}
           showCancel={isSnoozed}
           previousSnoozeInterval={previousSnoozeInterval}
-          scheduledSnoozes={[]}
+          scheduledSnoozes={rule.snoozeSchedule}
           navigateToScheduler={onOpenScheduler}
+          onRemoveAllSchedules={cancelSnoozeSchedules}
         />
       ) : (
-        <RuleSnoozeScheduler onClose={onCloseScheduler} onSaveSchedule={addSnoozeSchedule} />
+        <RuleSnoozeScheduler
+          isLoading={isLoading}
+          initialSchedule={initialSchedule}
+          onClose={onCloseScheduler}
+          onSaveSchedule={saveSnoozeSchedule}
+          onCancelSchedules={cancelSnoozeSchedules}
+        />
       )}
     </EuiPopover>
   );

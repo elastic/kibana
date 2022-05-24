@@ -11,7 +11,7 @@ import { ILicenseState, RuleMutedError } from '../lib';
 import { verifyAccessAndContext, RewriteRequestCase } from './lib';
 import { SnoozeOptions } from '../rules_client';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
-import { validateSnoozeDate } from '../lib/validate_snooze_date';
+import { validateSnoozeStartDate, validateSnoozeEndDate } from '../lib/validate_snooze_date';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -22,13 +22,13 @@ const bodySchema = schema.object({
     id: schema.maybe(schema.string()),
     duration: schema.number(),
     rRule: schema.object({
-      dtstart: schema.string({ validate: validateSnoozeDate }),
+      dtstart: schema.string({ validate: validateSnoozeStartDate }),
       tzid: schema.string(),
       freq: schema.maybe(
         schema.oneOf([schema.literal(0), schema.literal(1), schema.literal(2), schema.literal(3)])
       ),
       interval: schema.maybe(schema.number()),
-      until: schema.maybe(schema.string({ validate: validateSnoozeDate })),
+      until: schema.maybe(schema.string({ validate: validateSnoozeEndDate })),
       count: schema.maybe(schema.number()),
       byweekday: schema.maybe(schema.arrayOf(schema.string())),
       bymonthday: schema.maybe(schema.arrayOf(schema.number())),

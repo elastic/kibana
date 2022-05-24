@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo, useRef } from 'react';
 import moment, { Moment } from 'moment';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid';
@@ -28,30 +28,47 @@ import { RecurrenceScheduler } from './recurrence_scheduler';
 
 import './rule_snooze_scheduler.scss';
 
-export interface ComponentOpts {
-  onClose: () => void;
+interface PanelOpts {
   onSaveSchedule: (sched: SnoozeSchedule) => void;
+  onCancelSchedules: (ids: string[]) => void;
+  initialSchedule: SnoozeSchedule | null;
+  isLoading: boolean;
+}
+
+export interface ComponentOpts extends PanelOpts {
+  onClose: () => void;
 }
 
 const TIMEZONE_OPTIONS = moment.tz.names().map((n) => ({ label: n }));
 
 export const RuleSnoozeScheduler: React.FunctionComponent<ComponentOpts> = ({
   onClose,
-  onSaveSchedule,
+  initialSchedule,
+  ...rest
 }: ComponentOpts) => {
   // We have to use refs for these things because setting state in an onFocus call re-renders and then blurs an EuiDatePicker input field
 
+  const title = initialSchedule
+    ? i18n.translate('xpack.triggersActionsUi.ruleSnoozeScheduler.editSchedule', {
+        defaultMessage: 'Edit schedule',
+      })
+    : i18n.translate('xpack.triggersActionsUi.ruleSnoozeScheduler.addSchedule', {
+        defaultMessage: 'Add schedule',
+      });
+
   return (
-    <EuiContextMenuPanel title="Add schedule" onClose={onClose}>
-      <RuleSnoozeSchedulerPanel onSaveSchedule={onSaveSchedule} />
+    <EuiContextMenuPanel title={title} onClose={onClose}>
+      <RuleSnoozeSchedulerPanel initialSchedule={initialSchedule} {...rest} />
     </EuiContextMenuPanel>
   );
 };
 
-interface PanelOpts {
-  onSaveSchedule: (sched: SnoozeSchedule) => void;
-}
-const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({ onSaveSchedule }) => {
+const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
+  onSaveSchedule,
+  initialSchedule,
+  isLoading,
+  onCancelSchedules,
+}) => {
   // These two states form a state machine for whether or not the user's clicks on the datepicker apply to the start/end date or start/end time
   // - State A: After the user clicks a start date:
   //    - Next date click will change the end date and move to state B
@@ -68,16 +85,46 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({ onSaveSc
   // Component initializes in State C
   const [selectingEndDate, setSelectingEndDate] = useState(false);
   const [selectingEndTime, setSelectingEndTime] = useState(false);
+  const minDate = useMemo(() => moment(), []);
 
-  const [startDT, setStartDT] = useState<Moment | null>(null);
-  const [endDT, setEndDT] = useState<Moment | null>(null);
+  const initialState = useMemo(() => {
+    if (!initialSchedule) {
+      return {
+        startDT: null,
+        endDT: null,
+        isRecurring: false,
+        recurrenceSchedule: null,
+        selectedTimezone: [{ label: moment.tz.guess() }],
+      };
+    }
 
-  const [isRecurring, setIsRecurring] = useState(false);
-  const [recurrenceSchedule, setRecurrenceSchedule] = useState<RecurrenceSchedule | null>(null);
+    const isRecurring = Boolean(initialSchedule?.rRule?.freq);
 
-  const [selectedTimezone, setSelectedTimezone] = useState([{ label: moment.tz.guess() }]);
+    const recurrenceSchedule = !isRecurring
+      ? null
+      : ({
+          ...initialSchedule.rRule,
+          ...(initialSchedule.rRule.until ? { until: moment(initialSchedule.rRule.until) } : {}),
+        } as RecurrenceSchedule);
 
-  const minDate = moment();
+    return {
+      startDT: moment(initialSchedule.rRule.dtstart),
+      endDT: moment(initialSchedule.rRule.dtstart).add(initialSchedule.duration, 'ms'),
+      isRecurring,
+      recurrenceSchedule,
+      selectedTimezone: [{ label: initialSchedule.rRule.tzid }],
+    };
+  }, [initialSchedule]);
+
+  const [startDT, setStartDT] = useState<Moment | null>(initialState.startDT);
+  const [endDT, setEndDT] = useState<Moment | null>(initialState.endDT);
+
+  const [isRecurring, setIsRecurring] = useState(initialState.isRecurring);
+  const [recurrenceSchedule, setRecurrenceSchedule] = useState<RecurrenceSchedule | null>(
+    initialState.recurrenceSchedule
+  );
+
+  const [selectedTimezone, setSelectedTimezone] = useState(initialState.selectedTimezone);
 
   const onFocusStart = useCallback(() => {
     setSelectingEndDate(false);
@@ -112,11 +159,14 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({ onSaveSc
   const onSelectFromInline = useCallback(
     (date) => {
       const dateAsMoment = moment(date);
-      const newDateAfterStart = !startDT || dateAsMoment.isAfter(startDT);
+      const newDateAfterStart =
+        !startDT || dateAsMoment.isAfter(startDT) || dateAsMoment.isSame(startDT);
       const isEndDateTimeChange =
         dateAsMoment.isSame(endDT, 'day') && !dateAsMoment.isSame(endDT, 'minute');
       const isStartDateTimeChange =
-        dateAsMoment.isSame(startDT, 'day') && !dateAsMoment.isSame(startDT, 'minute');
+        dateAsMoment.isSame(startDT, 'day') &&
+        !dateAsMoment.isSame(startDT, 'minute') &&
+        (!isEndDateTimeChange || !selectingEndTime);
 
       const applyToEndDate =
         !isStartDateTimeChange && (selectingEndDate || (isEndDateTimeChange && selectingEndTime));
@@ -136,7 +186,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({ onSaveSc
             count: 1,
           };
     onSaveSchedule({
-      id: uuid.v4(),
+      id: initialSchedule?.id ?? uuid.v4(),
       rRule: {
         dtstart: startDT.toISOString(),
         tzid: selectedTimezone[0].label ?? moment.tz.guess(),
@@ -145,6 +195,11 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({ onSaveSc
       duration: endDT.valueOf() - startDT.valueOf(),
     });
   }, [onSaveSchedule, endDT, startDT, selectedTimezone, isRecurring, recurrenceSchedule]);
+
+  const onCancelSchedule = useCallback(() => {
+    if (!initialSchedule?.id) return;
+    onCancelSchedules([initialSchedule.id]);
+  }, [initialSchedule, onCancelSchedules]);
 
   return (
     <EuiPanel paddingSize="s" hasShadow={false}>
@@ -160,6 +215,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({ onSaveSc
                 selected={startDT}
                 onChange={setStartDT}
                 minDate={minDate}
+                isInvalid={startDT?.isBefore(minDate)}
               />
             }
             endDateControl={
@@ -172,6 +228,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({ onSaveSc
                 selected={endDT}
                 onChange={setEndDT}
                 minDate={startDT ?? minDate}
+                isInvalid={startDT?.isAfter(endDT)}
               />
             }
           />
@@ -239,11 +296,36 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({ onSaveSc
         </>
       )}
       <EuiHorizontalRule margin="m" />
-      <EuiButton fill fullWidth disabled={!startDT || !endDT} onClick={onClickSaveSchedule}>
+      <EuiButton
+        fill
+        fullWidth
+        disabled={!startDT || !endDT || startDT.isAfter(endDT) || startDT.isBefore(minDate)}
+        onClick={onClickSaveSchedule}
+        isLoading={isLoading}
+      >
         {i18n.translate('xpack.triggersActionsUi.ruleSnoozeScheduler.saveSchedule', {
           defaultMessage: 'Save schedule',
         })}
       </EuiButton>
+      {initialSchedule && (
+        <>
+          <EuiHorizontalRule margin="s" />
+          <EuiFlexGroup>
+            <EuiFlexItem grow>
+              <EuiButton
+                isLoading={isLoading}
+                color="danger"
+                onClick={onCancelSchedule}
+                data-test-subj="ruleSnoozeCancel"
+              >
+                {i18n.translate('xpack.triggersActionsUI.sections.rulesList.cancelSnooze', {
+                  defaultMessage: 'Cancel snooze',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
     </EuiPanel>
   );
 };

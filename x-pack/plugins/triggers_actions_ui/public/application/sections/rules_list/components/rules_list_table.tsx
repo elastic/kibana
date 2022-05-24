@@ -117,7 +117,7 @@ export interface RulesListTableProps {
   onEnableRule: (rule: RuleTableItem) => Promise<void>;
   onDisableRule: (rule: RuleTableItem) => Promise<void>;
   onSnoozeRule: (rule: RuleTableItem, snoozeEndTime: SnoozeSchedule) => Promise<void>;
-  onUnsnoozeRule: (rule: RuleTableItem) => Promise<void>;
+  onUnsnoozeRule: (rule: RuleTableItem, scheduleIds?: string[]) => Promise<void>;
   renderCollapsedItemActions?: (rule: RuleTableItem) => React.ReactNode;
   renderRuleError?: (rule: RuleTableItem) => React.ReactNode;
 }
@@ -227,8 +227,11 @@ export const RulesListTable = (props: RulesListTableProps) => {
   const renderRuleStatusDropdown = (ruleEnabled: boolean | undefined, rule: RuleTableItem) => {
     return (
       <RuleStatusDropdown
+        hideSnoozeOption
         disableRule={async () => await onDisableRule(rule)}
         enableRule={async () => await onEnableRule(rule)}
+        snoozeRule={async () => {}}
+        unsnoozeRule={async () => {}}
         rule={rule}
         onRuleChanged={onRuleChanged}
         isEditable={rule.isEditable && isRuleTypeEditableInContext(rule.ruleTypeId)}
@@ -409,7 +412,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
               snoozeRule={async (snoozeSchedule) => {
                 await onSnoozeRule(rule, snoozeSchedule);
               }}
-              unsnoozeRule={async () => await onUnsnoozeRule(rule)}
+              unsnoozeRule={async (scheduleIds) => await onUnsnoozeRule(rule, scheduleIds)}
             />
           );
         },

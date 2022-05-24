@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import moment from 'moment';
+import { RuleSnooze } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import {
   useGeneratedHtmlId,
@@ -15,8 +16,12 @@ import {
   EuiLink,
   EuiText,
   EuiButtonEmpty,
+  EuiIcon,
+  EuiConfirmModal,
 } from '@elastic/eui';
 import { parseInterval } from '../../../../../common';
+import type { RecurrenceSchedule, SnoozeSchedule } from '../../../../types';
+import { recurrenceSummary } from './recurrence_scheduler';
 
 export type SnoozeUnit = 'm' | 'h' | 'd' | 'w' | 'M';
 const COMMON_SNOOZE_TIMES: Array<[number, SnoozeUnit]> = [
@@ -32,8 +37,9 @@ interface SnoozePanelProps {
   applySnooze: (value: number | -1, unit?: SnoozeUnit) => void;
   showCancel: boolean;
   previousSnoozeInterval: string | null;
-  scheduledSnoozes: string[];
-  navigateToScheduler: () => void;
+  scheduledSnoozes?: RuleSnooze;
+  navigateToScheduler: (sched?: SnoozeSchedule) => void;
+  onRemoveAllSchedules: (ids: string[]) => void;
 }
 
 const PREV_SNOOZE_INTERVAL_KEY = 'triggersActionsUi_previousSnoozeInterval';
@@ -61,9 +67,12 @@ export const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
   previousSnoozeInterval,
   scheduledSnoozes,
   navigateToScheduler,
+  onRemoveAllSchedules,
 }) => {
   const [intervalValue, setIntervalValue] = useState(parseInterval(interval).value);
   const [intervalUnit, setIntervalUnit] = useState(parseInterval(interval).unit);
+
+  const [isRemoveAllModalVisible, setIsRemoveAllModalVisible] = useState(false);
 
   const onChangeValue = useCallback(
     ({ target }) => setIntervalValue(target.value),
@@ -81,7 +90,21 @@ export const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
   );
   const onCancelSnooze = useCallback(() => applySnooze(0, 'm'), [applySnooze]);
 
-  const hasSchedules = useMemo(() => scheduledSnoozes.length > 0, [scheduledSnoozes]);
+  const onClickAddSchedule = useCallback(() => navigateToScheduler(), [navigateToScheduler]);
+  const onClickEditScheduleFactory = useCallback(
+    (schedule: SnoozeSchedule) => () => navigateToScheduler(schedule),
+    [navigateToScheduler]
+  );
+
+  const onClickRemoveAllSchedules = useCallback(() => {
+    setIsRemoveAllModalVisible(false);
+    onRemoveAllSchedules(scheduledSnoozes!.filter((s) => s.id).map((s) => s.id as string));
+  }, [onRemoveAllSchedules, scheduledSnoozes]);
+
+  const hasSchedules = useMemo(
+    () => scheduledSnoozes && scheduledSnoozes.filter((s) => Boolean(s.id)).length > 0,
+    [scheduledSnoozes]
+  );
 
   const parsedPrevSnooze = previousSnoozeInterval ? parseInterval(previousSnoozeInterval) : null;
   const prevSnoozeEqualsCurrentSnooze =
@@ -160,7 +183,7 @@ export const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
       {previousButton}
       <EuiFlexGrid columns={2} gutterSize="s">
         <EuiFlexItem>
-          <EuiTitle size="xxs">
+          <EuiTitle size="xxxs">
             <h5>
               {i18n.translate('xpack.triggersActionsUI.sections.rulesList.snoozeCommonlyUsed', {
                 defaultMessage: 'Commonly used',
@@ -194,7 +217,7 @@ export const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
             <EuiFlexItem grow>
               <EuiButton
                 color="primary"
-                onClick={navigateToScheduler}
+                onClick={onClickAddSchedule}
                 data-test-subj="ruleAddSchedule"
                 iconType="calendar"
               >
@@ -219,6 +242,67 @@ export const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
           </EuiFlexGroup>
         </>
       )}
+      {hasSchedules && (
+        <>
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem>
+              <EuiTitle size="xxxs">
+                <h5>
+                  {i18n.translate(
+                    'xpack.triggersActionsUi.sections.rulesList.snoozeSchedulesTitle',
+                    {
+                      defaultMessage: 'Schedules',
+                    }
+                  )}
+                </h5>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                color="danger"
+                size="xs"
+                onClick={() => setIsRemoveAllModalVisible(true)}
+              >
+                {i18n.translate('xpack.triggersActionsUi.sections.rulesList.removeAllButton', {
+                  defaultMessage: 'Remove all',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            {scheduledSnoozes!.map((schedule) => (
+              <EuiFlexItem key={`snooze-${schedule.id}`}>
+                <button
+                  style={{ paddingLeft: '9px', paddingRight: '9px' }}
+                  className="euiButton euiPanel euiPanel--borderRadiusMedium euiPanel--subdued euiPanel--noShadow euiPanel--noBorder"
+                  onClick={onClickEditScheduleFactory(schedule as SnoozeSchedule)}
+                >
+                  <EuiFlexGroup alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="calendar" />
+                    </EuiFlexItem>
+                    <EuiFlexItem style={{ textAlign: 'left' }}>
+                      {scheduleSummary(schedule as SnoozeSchedule)}
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="arrowRight" />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </button>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiButtonEmpty iconType="plusInCircleFilled" onClick={onClickAddSchedule}>
+                {i18n.translate('xpack.triggersActionsUi.sections.rulesList.addButton', {
+                  defaultMessage: 'Add',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
       {showCancel && (
         <>
           <EuiHorizontalRule margin="s" />
@@ -239,6 +323,42 @@ export const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
         </>
       )}
       <EuiSpacer size="s" />
+      {isRemoveAllModalVisible && (
+        <EuiConfirmModal
+          title={i18n.translate(
+            'xpack.triggersActionsUi.sections.rulesList.removeAllSnoozeSchedules',
+            {
+              defaultMessage: 'Remove all schedules',
+            }
+          )}
+          onCancel={() => setIsRemoveAllModalVisible(false)}
+          onConfirm={onClickRemoveAllSchedules}
+          buttonColor="danger"
+          cancelButtonText={i18n.translate(
+            'xpack.triggersActionsUi.sections.rulesList.removeCancelButton',
+            {
+              defaultMessage: 'Cancel',
+            }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.triggersActionsUi.sections.rulesList.removeConfirmButton',
+            {
+              defaultMessage: 'Remove all',
+            }
+          )}
+        >
+          <EuiText>
+            {i18n.translate(
+              'xpack.triggersActionsUi.sections.rulesList.removeAllSnoozeSchedulesConfirmText',
+              {
+                defaultMessage:
+                  'This will remove {count, plural, one {# scheduled snooze} other {# scheduled snoozes}} from this rule. Are you sure?',
+                values: { count: scheduledSnoozes?.length ?? 0 },
+              }
+            )}
+          </EuiText>
+        </EuiConfirmModal>
+      )}
     </>
   );
 };
@@ -284,6 +404,13 @@ const durationToTextString = (value: number, unit: SnoozeUnit) => {
     return ONE[unit];
   }
   return moment.duration(value, unit).humanize();
+};
+
+const scheduleSummary = (schedule: SnoozeSchedule) => {
+  if (!schedule.rRule.freq) return moment(schedule.rRule.dtstart).format('LLLL');
+  const summary = recurrenceSummary(schedule.rRule as RecurrenceSchedule);
+  // Capitalize first letter of summary
+  return summary[0].toLocaleUpperCase() + summary.slice(1);
 };
 
 const MINUTES = i18n.translate('xpack.triggersActionsUI.sections.rulesList.minutesLabel', {
