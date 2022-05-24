@@ -10,3 +10,4 @@ export * from './timefilter';
 export * from './types';
 export * from './is_query';
 export * from './query_state';
+export { queryStateToExpressionAst } from './to_expression_ast';
