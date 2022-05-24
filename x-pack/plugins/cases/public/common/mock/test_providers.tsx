@@ -12,6 +12,7 @@ import { ThemeProvider } from 'styled-components';
 
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { QueryClient } from 'react-query';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { CasesFeatures } from '../../../common/ui/types';
 import { CasesProvider } from '../../components/cases_context';
@@ -61,6 +62,14 @@ export interface AppMockRenderer {
   render: UiRender;
   coreStart: StartServices;
 }
+
+export const testQueryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
 
 export const createAppMockRenderer = ({
   features,
