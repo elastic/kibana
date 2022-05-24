@@ -4,7 +4,7 @@
 
 ## SavedObjectsExportByObjectOptions interface
 
-Options for the [export by objects API](./kibana-plugin-core-server.savedobjectsexporter.exportbyobjects.md)
+Options for the 
 
 <b>Signature:</b>
 
