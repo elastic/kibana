@@ -116,7 +116,11 @@ describe('formatMonitorConfig', () => {
         screenshots: 'on',
         'source.inline.script':
           "step('Go to https://www.google.com/', async () => {\n  await page.goto('https://www.google.com/');\n});",
-        throttling: '5d/3u/20l',
+        throttling: {
+          download: 5,
+          latency: 20,
+          upload: 3,
+        },
         timeout: '16s',
         type: 'browser',
         synthetics_args: ['--hasTouch true'],

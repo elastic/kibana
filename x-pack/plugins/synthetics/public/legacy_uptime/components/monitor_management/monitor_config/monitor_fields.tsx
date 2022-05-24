@@ -7,18 +7,19 @@
 
 import React, { useMemo, useState } from 'react';
 import { EuiForm } from '@elastic/eui';
-import { ConfigKey, DataStream } from '../../../../../common/runtime_types';
+import { ConfigKey, DataStream, SourceType } from '../../../../../common/runtime_types';
 import { usePolicyConfigContext } from '../../fleet_package/contexts';
 
 import { CustomFields } from '../../fleet_package/custom_fields';
 import { validate } from '../validation';
 import { MonitorNameAndLocation } from './monitor_name_location';
 import { MonitorManagementAdvancedFields } from './monitor_advanced_fields';
+import { ProjectBrowserReadonlyFields } from './read_only_browser_fields';
 
 const MIN_COLUMN_WRAP_WIDTH = '360px';
 
 export const MonitorFields = ({ isFormSubmitted = false }: { isFormSubmitted?: boolean }) => {
-  const { monitorType } = usePolicyConfigContext();
+  const { monitorType, sourceType } = usePolicyConfigContext();
 
   const [touchedFieldsHash, setTouchedFieldsHash] = useState<Record<string, boolean>>({});
 
@@ -41,21 +42,25 @@ export const MonitorFields = ({ isFormSubmitted = false }: { isFormSubmitted?: b
 
   return (
     <EuiForm id="syntheticsServiceCreateMonitorForm" component="form">
-      <CustomFields
-        minColumnWidth={MIN_COLUMN_WRAP_WIDTH}
-        validate={fieldValidation}
-        dataStreams={[DataStream.HTTP, DataStream.TCP, DataStream.ICMP, DataStream.BROWSER]}
-        appendAdvancedFields={
-          <MonitorManagementAdvancedFields
-            validate={fieldValidation}
-            minColumnWidth={MIN_COLUMN_WRAP_WIDTH}
-            onFieldBlur={handleFieldBlur}
-          />
-        }
-        onFieldBlur={handleFieldBlur}
-      >
-        <MonitorNameAndLocation validate={fieldValidation} onFieldBlur={handleFieldBlur} />
-      </CustomFields>
+      {sourceType === SourceType.PROJECT ? (
+        <ProjectBrowserReadonlyFields minColumnWidth={MIN_COLUMN_WRAP_WIDTH} />
+      ) : (
+        <CustomFields
+          minColumnWidth={MIN_COLUMN_WRAP_WIDTH}
+          validate={fieldValidation}
+          dataStreams={[DataStream.HTTP, DataStream.TCP, DataStream.ICMP, DataStream.BROWSER]}
+          appendAdvancedFields={
+            <MonitorManagementAdvancedFields
+              validate={fieldValidation}
+              minColumnWidth={MIN_COLUMN_WRAP_WIDTH}
+              onFieldBlur={handleFieldBlur}
+            />
+          }
+          onFieldBlur={handleFieldBlur}
+        >
+          <MonitorNameAndLocation validate={fieldValidation} onFieldBlur={handleFieldBlur} />
+        </CustomFields>
+      )}
     </EuiForm>
   );
 };

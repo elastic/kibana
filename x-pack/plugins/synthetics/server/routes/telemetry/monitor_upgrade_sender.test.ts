@@ -13,7 +13,9 @@ import {
   ConfigKey,
   DataStream,
   ScheduleUnit,
+  SourceType,
 } from '../../../common/runtime_types/monitor_management';
+import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 
 import type { TelemetryEventsSender } from '../../legacy_uptime/lib/telemetry/sender';
 import { createMockTelemetryEventsSender } from '../../legacy_uptime/lib/telemetry/__mocks__';
@@ -45,6 +47,7 @@ const testConfig: SavedObject<SyntheticsMonitor> = {
   updated_at: '2011-10-05T14:48:00.000Z',
   id,
   attributes: {
+    ...DEFAULT_FIELDS[DataStream.BROWSER],
     [ConfigKey.MONITOR_TYPE]: DataStream.HTTP,
     [ConfigKey.LOCATIONS]: [
       {
@@ -111,15 +114,16 @@ describe('monitor upgrade telemetry helpers', () => {
   });
 
   it.each([
-    [ConfigKey.SOURCE_INLINE, 'recorder', true, true],
-    [ConfigKey.SOURCE_INLINE, 'inline', false, true],
-    [ConfigKey.SOURCE_ZIP_URL, 'zip', false, false],
+    [ConfigKey.MONITOR_SOURCE_TYPE, SourceType.PROJECT, 'project', false, false],
+    [ConfigKey.SOURCE_INLINE, 'test', 'recorder', true, true],
+    [ConfigKey.SOURCE_INLINE, 'test', 'inline', false, true],
+    [ConfigKey.SOURCE_ZIP_URL, 'test', 'zip', false, false],
   ])(
     'handles formatting scriptType for browser monitors',
-    (config, scriptType, isRecorder, isInlineScript) => {
+    (config, value, scriptType, isRecorder, isInlineScript) => {
       const actual = formatTelemetryEvent({
         monitor: createTestConfig({
-          [config]: 'test',
+          [config]: value,
           [ConfigKey.METADATA]: {
             script_source: {
               is_generated_script: isRecorder,

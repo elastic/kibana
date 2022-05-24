@@ -8,6 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { v4 as uuidv4 } from 'uuid';
 import {
   ConfigKey,
+  MonitorFields,
   SyntheticsMonitor,
   SyntheticsMonitorWithSecrets,
 } from '../../../common/runtime_types';
@@ -41,6 +42,7 @@ export const testNowMonitorRoute: UMRestApiRouteFactory = () => ({
         syntheticsMonitor.name,
         monitorId
       );
+    const normalizedMonitor = normalizeSecrets(monitorWithSecrets);
 
     const { [ConfigKey.SCHEDULE]: schedule, [ConfigKey.LOCATIONS]: locations } = monitor.attributes;
 
@@ -50,8 +52,10 @@ export const testNowMonitorRoute: UMRestApiRouteFactory = () => ({
 
     const errors = await syntheticsService.triggerConfigs(request, [
       {
-        ...normalizeSecrets(monitorWithSecrets).attributes,
-        id: monitorId,
+        ...normalizedMonitor.attributes,
+        id:
+          (normalizedMonitor.attributes as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID] ||
+          monitorId,
         fields_under_root: true,
         fields: { config_id: monitorId, test_run_id: testRunId },
       },

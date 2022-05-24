@@ -13,6 +13,7 @@ import {
   EncryptedSyntheticsMonitor,
   ConfigKey,
   ServiceLocationErrors,
+  SourceType,
 } from '../../../common/runtime_types';
 import type { MonitorUpdateEvent } from '../../legacy_uptime/lib/telemetry/types';
 
@@ -184,14 +185,19 @@ export function formatTelemetrySyncEvent() {}
 function getScriptType(
   attributes: Partial<MonitorFields>,
   isInlineScript: boolean
-): 'inline' | 'recorder' | 'zip' | undefined {
-  if (attributes[ConfigKey.SOURCE_ZIP_URL]) {
-    return 'zip';
-  } else if (isInlineScript && attributes[ConfigKey.METADATA]?.script_source?.is_generated_script) {
-    return 'recorder';
-  } else if (isInlineScript) {
-    return 'inline';
+): MonitorUpdateEvent['scriptType'] | undefined {
+  switch (true) {
+    case Boolean(attributes[ConfigKey.SOURCE_ZIP_URL]):
+      return 'zip';
+    case Boolean(
+      isInlineScript && attributes[ConfigKey.METADATA]?.script_source?.is_generated_script
+    ):
+      return 'recorder';
+    case Boolean(isInlineScript):
+      return 'inline';
+    case attributes[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT:
+      return 'project';
+    default:
+      return undefined;
   }
-
-  return undefined;
 }
