@@ -35,7 +35,7 @@ export const ManagementSettings = () => {
       <div style={{ width: 550 }}>
         <EuiPopoverTitle>{GET_API_KEY_GENERATE}</EuiPopoverTitle>
         <EuiText>{GET_API_KEY_LABEL_DESCRIPTION}</EuiText>
-        <EuiLink>Learn more.</EuiLink>
+        <EuiLink>{LEARN_MORE_LABEL}</EuiLink>
         <GetApiKeyBtn
           loading={loading}
           setLoadAPIKey={setLoadAPIKey}
@@ -48,6 +48,10 @@ export const ManagementSettings = () => {
 
 const API_KEYS_LABEL = i18n.translate('xpack.synthetics.monitorManagement.getAPIKeyLabel.label', {
   defaultMessage: 'API Keys',
+});
+
+const LEARN_MORE_LABEL = i18n.translate('xpack.synthetics.monitorManagement.learnMore.label', {
+  defaultMessage: 'Learn more.',
 });
 
 const GET_API_KEY_GENERATE = i18n.translate(
