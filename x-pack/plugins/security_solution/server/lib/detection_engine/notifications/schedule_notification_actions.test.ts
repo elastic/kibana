@@ -52,6 +52,9 @@ describe('schedule_notification_actions', () => {
     note: '# sample markdown',
     version: 1,
     exceptionsList: [],
+    relatedIntegrations: [],
+    requiredFields: [],
+    setup: '',
   };
 
   it('Should schedule actions with unflatted and legacy context', () => {

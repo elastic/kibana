@@ -13,6 +13,11 @@ import styled from 'styled-components';
 import { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { DataViewBase, Filter, FilterStateStore } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
+import { buildRelatedIntegrationsDescription } from './required_integrations_description';
+import type {
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+} from '../../../../../common/detection_engine/schemas/common';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { AboutStepRiskScore, AboutStepSeverity } from '../../../pages/detection_engine/rules/types';
@@ -31,6 +36,7 @@ import {
   buildRuleTypeDescription,
   buildThresholdDescription,
   buildThreatMappingDescription,
+  buildRequiredFieldsDescription,
 } from './helpers';
 import { buildMlJobsDescription } from './ml_job_description';
 import { buildActionsDescription } from './actions_description';
@@ -151,8 +157,7 @@ export const addFilterStateIfNotThere = (filters: Filter[]): Filter[] => {
   });
 };
 
-/* eslint complexity: ["error", 21]*/
-// eslint-disable-next-line complexity
+/* eslint complexity: ["error", 25]*/
 export const getDescriptionItem = (
   field: string,
   label: string,
@@ -184,15 +189,18 @@ export const getDescriptionItem = (
   } else if (field === 'falsePositives') {
     const values: string[] = get(field, data);
     return buildUnorderedListArrayDescription(label, field, values);
-  } else if (Array.isArray(get(field, data)) && field !== 'threatMapping') {
-    const values: string[] = get(field, data);
-    return buildStringArrayDescription(label, field, values);
   } else if (field === 'riskScore') {
     const values: AboutStepRiskScore = get(field, data);
     return buildRiskScoreDescription(values);
   } else if (field === 'severity') {
     const values: AboutStepSeverity = get(field, data);
     return buildSeverityDescription(values);
+  } else if (field === 'requiredFields') {
+    const requiredFields: RequiredFieldArray = get(field, data);
+    return buildRequiredFieldsDescription(label, requiredFields);
+  } else if (field === 'relatedIntegrations') {
+    const relatedIntegrations: RelatedIntegrationArray = get(field, data);
+    return buildRelatedIntegrationsDescription(label, relatedIntegrations);
   } else if (field === 'timeline') {
     const timeline = get(field, data) as FieldValueTimeline;
     return [
@@ -227,6 +235,9 @@ export const getDescriptionItem = (
     return buildThreatMappingDescription(label, threatMap);
   } else if (field === 'dataViewId') {
     return [];
+  } else if (Array.isArray(get(field, data)) && field !== 'threatMapping') {
+    const values: string[] = get(field, data);
+    return buildStringArrayDescription(label, field, values);
   }
 
   const description: string = get(field, data);

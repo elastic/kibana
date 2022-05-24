@@ -133,6 +133,9 @@ describe('buildAlert', () => {
         ],
         to: 'now',
         references: ['http://example.com', 'https://example.com'],
+        related_integrations: [],
+        required_fields: [],
+        setup: '',
         version: 1,
         exceptions_list: [
           {
@@ -318,6 +321,9 @@ describe('buildAlert', () => {
         ],
         to: 'now',
         references: ['http://example.com', 'https://example.com'],
+        related_integrations: [],
+        required_fields: [],
+        setup: '',
         version: 1,
         exceptions_list: [
           {

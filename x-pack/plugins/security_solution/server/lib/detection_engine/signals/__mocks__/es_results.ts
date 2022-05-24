@@ -158,6 +158,9 @@ export const expectedRule = (): RulesSchema => {
     timeline_id: 'some-timeline-id',
     timeline_title: 'some-timeline-title',
     exceptions_list: getListArrayMock(),
+    related_integrations: [],
+    required_fields: [],
+    setup: '',
   };
 };
 
@@ -626,6 +629,9 @@ export const sampleSignalHit = (): SignalHit => ({
       rule_id: 'query-rule-id',
       interval: '5m',
       exceptions_list: getListArrayMock(),
+      related_integrations: [],
+      required_fields: [],
+      setup: '',
     },
     depth: 1,
   },
@@ -687,6 +693,9 @@ export const sampleThresholdSignalHit = (): SignalHit => ({
       rule_id: 'query-rule-id',
       interval: '5m',
       exceptions_list: getListArrayMock(),
+      related_integrations: [],
+      required_fields: [],
+      setup: '',
     },
     depth: 1,
   },

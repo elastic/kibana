@@ -165,6 +165,9 @@ export const convertCreateAPIToInternalSchema = (
       note: input.note,
       version: input.version ?? 1,
       exceptionsList: input.exceptions_list ?? [],
+      relatedIntegrations: [],
+      requiredFields: [],
+      setup: '',
       ...typeSpecificParams,
     },
     schedule: { interval: input.interval ?? '5m' },
@@ -284,6 +287,9 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
     version: params.version,
     exceptions_list: params.exceptionsList,
     immutable: params.immutable,
+    related_integrations: params.relatedIntegrations ?? [],
+    required_fields: params.requiredFields ?? [],
+    setup: params.setup ?? '',
   };
 };
 

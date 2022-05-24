@@ -96,6 +96,8 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
     filters: (rule.filters ?? []) as Filter[],
     saved_id: rule.saved_id,
   },
+  relatedIntegrations: rule.related_integrations ?? [],
+  requiredFields: rule.required_fields ?? [],
   timeline: {
     id: rule.timeline_id ?? null,
     title: rule.timeline_title ?? null,
@@ -228,6 +230,7 @@ export const determineDetailsValue = (
 export const getModifiedAboutDetailsData = (rule: Rule): AboutStepRuleDetails => ({
   note: rule.note ?? '',
   description: rule.description,
+  setup: rule.setup ?? '',
 });
 
 export const useQuery = () => new URLSearchParams(useLocation().search);

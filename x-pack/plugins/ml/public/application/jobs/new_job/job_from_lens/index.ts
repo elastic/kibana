@@ -7,6 +7,6 @@
 
 export type { LayerResult } from './create_job';
 export { resolver } from './route_resolver';
-export { getLayers } from './create_job';
+export { getResultLayersFromEmbeddable } from './create_job';
 export { convertLensToADJob } from './convert_lens_to_job_action';
 export { getJobsItemsFromEmbeddable, isCompatibleVisualizationType } from './utils';
