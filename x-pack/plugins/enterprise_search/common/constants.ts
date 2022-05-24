@@ -39,6 +39,22 @@ export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
 };
 
+export const ELASTICSEARCH_PLUGIN = {
+  ID: 'elasticsearch',
+  NAME: i18n.translate('xpack.enterpriseSearch.elasticsearch.productName', {
+    defaultMessage: 'Elasticsearch',
+  }),
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.elasticsearch.productDescription', {
+    defaultMessage: 'Low-level tools for creating performant and relevant search experiences.',
+  }),
+  CARD_DESCRIPTION: i18n.translate('xpack.enterpriseSearch.elasticsearch.productCardDescription', {
+    defaultMessage:
+      'Design and build performant, relevant search-powered applications or large-scale search implementations directly in Elasticsearch.',
+  }),
+  URL: '/app/enterprise_search/elasticsearch',
+  SUPPORT_URL: 'https://discuss.elastic.co/c/elastic-stack/elasticsearch/',
+};
+
 export const APP_SEARCH_PLUGIN = {
   ID: 'appSearch',
   NAME: i18n.translate('xpack.enterpriseSearch.appSearch.productName', {
