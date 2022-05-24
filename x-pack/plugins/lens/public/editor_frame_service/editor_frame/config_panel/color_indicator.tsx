@@ -59,6 +59,17 @@ export function ColorIndicator({
             })}
           />
         )}
+        {accessorConfig.triggerIcon === 'aggregate' && (
+          <EuiIcon
+            {...baseIconProps}
+            type="fold"
+            color="subdued"
+            aria-label={i18n.translate('xpack.lens.editorFrame.aggregateIndicatorLabel', {
+              defaultMessage:
+                'This dimension is not visible in the chart because all individual values are aggregated into a single value',
+            })}
+          />
+        )}
         {accessorConfig.triggerIcon === 'colorBy' && (
           <EuiIcon
             {...baseIconProps}
