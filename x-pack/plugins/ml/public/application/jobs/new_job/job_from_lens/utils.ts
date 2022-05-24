@@ -19,6 +19,9 @@ import type {
   DataType,
 } from '@kbn/lens-plugin/public';
 import { layerTypes } from '@kbn/lens-plugin/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+
+import { ML_JOB_AGGREGATION } from '../../../../../common/constants/aggregation_types';
 
 export const COMPATIBLE_SERIES_TYPES: SeriesType[] = [
   'line',
@@ -36,7 +39,10 @@ export const COMPATIBLE_LAYER_TYPE: XYDataLayerConfig['layerType'] = layerTypes.
 
 export const COMPATIBLE_VISUALIZATION = 'lnsXY';
 
-export const COMPATIBLE_SPLIT_FIELD_TYPES: DataType[] = ['string', 'ip'];
+export const COMPATIBLE_SPLIT_FIELD_TYPES: DataType[] = [
+  KBN_FIELD_TYPES.STRING,
+  KBN_FIELD_TYPES.IP,
+];
 
 export function getJobsItemsFromEmbeddable(embeddable: Embeddable) {
   const { query, filters, timeRange } = embeddable.getInput();
@@ -71,19 +77,19 @@ export function getJobsItemsFromEmbeddable(embeddable: Embeddable) {
 export function lensOperationToMlFunction(operationType: string) {
   switch (operationType) {
     case 'average':
-      return 'mean';
+      return ML_JOB_AGGREGATION.MEAN;
     case 'count':
-      return 'count';
+      return ML_JOB_AGGREGATION.COUNT;
     case 'max':
-      return 'max';
+      return ML_JOB_AGGREGATION.MAX;
     case 'median':
-      return 'median';
+      return ML_JOB_AGGREGATION.MEDIAN;
     case 'min':
-      return 'min';
+      return ML_JOB_AGGREGATION.MIN;
     case 'sum':
-      return 'sum';
+      return ML_JOB_AGGREGATION.SUM;
     case 'unique_count':
-      return 'distinct_count';
+      return ML_JOB_AGGREGATION.DISTINCT_COUNT;
 
     default:
       return null;
