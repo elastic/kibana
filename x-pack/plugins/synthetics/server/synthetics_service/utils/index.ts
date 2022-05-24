@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-export * from './state';
-export * from './config_key';
-export * from './monitor_configs';
-export * from './monitor_meta_data';
-export * from './monitor_types';
-export * from './monitor_types_project';
-export * from './locations';
+export * from './secrets';
