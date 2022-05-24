@@ -7,14 +7,15 @@
  */
 
 import React, { useMemo, FunctionComponent } from 'react';
-import { i18n } from '@kbn/i18n';
+import classNames from 'classnames';
 
 import { EuiLink, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import classNames from 'classnames';
+import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
+
 import { ElasticAgentCard } from './no_data_card';
 import { NoDataPageProps } from './types';
-import { KibanaSolutionAvatar } from '../../solution_avatar';
 
 export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
   solution,
@@ -57,7 +58,7 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
               values={{
                 solution,
                 link: (
-                  <EuiLink href={docsLink}>
+                  <EuiLink href={docsLink} target="_blank">
                     <FormattedMessage
                       id="sharedUXComponents.noDataPage.intro.link"
                       defaultMessage="learn more"

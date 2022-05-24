@@ -10,6 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 import { pick } from 'lodash';
 import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
 import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
@@ -140,6 +141,7 @@ export interface AlertingPluginsSetup {
   eventLog: IEventLogService;
   statusService: StatusServiceSetup;
   monitoringCollection: MonitoringCollectionSetup;
+  data: DataPluginSetup;
 }
 
 export interface AlertingPluginsStart {
@@ -247,12 +249,16 @@ export class AlertingPlugin {
     // Usage counter for telemetry
     this.usageCounter = plugins.usageCollection?.createUsageCounter(ALERTS_FEATURE_ID);
 
+    const getSearchSourceMigrations = plugins.data.search.searchSource.getAllMigrations.bind(
+      plugins.data.search.searchSource
+    );
     setupSavedObjects(
       core.savedObjects,
       plugins.encryptedSavedObjects,
       this.ruleTypeRegistry,
       this.logger,
-      plugins.actions.isPreconfiguredConnector
+      plugins.actions.isPreconfiguredConnector,
+      getSearchSourceMigrations
     );
 
     initializeApiKeyInvalidator(
@@ -340,7 +346,10 @@ export class AlertingPlugin {
         );
       },
       getConfig: () => {
-        return pick(this.config.rules, 'minimumScheduleInterval');
+        return {
+          ...pick(this.config.rules, 'minimumScheduleInterval'),
+          isUsingSecurity: this.licenseState ? !!this.licenseState.getIsSecurityEnabled() : false,
+        };
       },
     };
   }

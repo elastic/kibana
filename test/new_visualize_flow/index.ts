@@ -11,7 +11,6 @@ import { FtrProviderContext } from '../functional/ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
   describe('New Visualize Flow', function () {
-    this.tags('ciGroup11');
     const esArchiver = getService('esArchiver');
     before(async () => {
       await esArchiver.loadIfNeeded(

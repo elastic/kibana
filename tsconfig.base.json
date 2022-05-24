@@ -277,6 +277,8 @@
       "@kbn/ui-actions-enhanced-examples-plugin/*": ["x-pack/examples/ui_actions_enhanced_examples/*"],
       "@kbn/actions-plugin": ["x-pack/plugins/actions"],
       "@kbn/actions-plugin/*": ["x-pack/plugins/actions/*"],
+      "@kbn/aiops-plugin": ["x-pack/plugins/aiops"],
+      "@kbn/aiops-plugin/*": ["x-pack/plugins/aiops/*"],
       "@kbn/alerting-plugin": ["x-pack/plugins/alerting"],
       "@kbn/alerting-plugin/*": ["x-pack/plugins/alerting/*"],
       "@kbn/apm-plugin": ["x-pack/plugins/apm"],

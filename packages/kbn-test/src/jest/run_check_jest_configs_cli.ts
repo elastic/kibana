@@ -10,7 +10,8 @@ import { writeFileSync } from 'fs';
 import path from 'path';
 import Mustache from 'mustache';
 
-import { run, createFailError } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-cli-runner';
+import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/utils';
 import { getAllRepoRelativeBazelPackageDirs } from '@kbn/bazel-packages';
 

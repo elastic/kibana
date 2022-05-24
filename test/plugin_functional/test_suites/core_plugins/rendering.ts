@@ -139,7 +139,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'newsfeed.fetchInterval (duration)',
         'newsfeed.mainInterval (duration)',
         'newsfeed.service.pathTemplate (string)',
-        'newsfeed.service.urlRoot (any)',
+        'newsfeed.service.urlRoot (string)',
         'telemetry.allowChangingOptInStatus (boolean)',
         'telemetry.banner (boolean)',
         'telemetry.enabled (boolean)',
@@ -165,6 +165,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.deployment_url (string)',
         'xpack.cloud.full_story.enabled (boolean)',
         'xpack.cloud.full_story.org_id (any)',
+        // No PII. Just the list of event types we want to forward to FullStory.
+        'xpack.cloud.full_story.eventTypesAllowlist (array)',
         'xpack.cloud.id (string)',
         'xpack.cloud.organization_url (string)',
         'xpack.cloud.profile_url (string)',
@@ -188,7 +190,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.osquery.savedQueries (boolean)',
         'xpack.remote_clusters.ui.enabled (boolean)',
         /**
-         * NOTE: The Reporting plugin is currently disabled in functional tests (see test/functional/config.js).
+         * NOTE: The Reporting plugin is currently disabled in functional tests (see test/functional/config.base.js).
          * It will be re-enabled once #102552 is completed.
          */
         // 'xpack.reporting.roles.allow (array)',

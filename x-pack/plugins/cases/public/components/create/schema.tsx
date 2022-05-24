@@ -17,6 +17,7 @@ import {
 import * as i18n from './translations';
 
 import { OptionalFieldLabel } from './optional_field_label';
+import { SEVERITY_TITLE } from '../severity/translations';
 const { emptyField, maxLengthField } = fieldValidators;
 
 export const schemaTags = {
@@ -83,6 +84,9 @@ export const schema: FormSchema<FormProps> = {
     ],
   },
   tags: schemaTags,
+  severity: {
+    label: SEVERITY_TITLE,
+  },
   connectorId: {
     type: FIELD_TYPES.SUPER_SELECT,
     label: i18n.CONNECTORS,

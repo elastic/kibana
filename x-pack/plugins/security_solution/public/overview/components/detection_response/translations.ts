@@ -92,14 +92,21 @@ export const RULE_ALERTS_SECTION_TITLE = i18n.translate(
 export const HOST_ALERTS_SECTION_TITLE = i18n.translate(
   'xpack.securitySolution.detectionResponse.hostAlertsSectionTitle',
   {
-    defaultMessage: 'Vulnerable hosts by severity',
+    defaultMessage: 'Hosts by alert severity',
   }
 );
 
 export const USER_ALERTS_SECTION_TITLE = i18n.translate(
   'xpack.securitySolution.detectionResponse.userAlertsSectionTitle',
   {
-    defaultMessage: 'Vulnerable users by severity',
+    defaultMessage: 'Users by alert severity',
+  }
+);
+
+export const CASES_TABLE_SECTION_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionResponse.caseSectionTitle',
+  {
+    defaultMessage: 'Recently created cases',
   }
 );
 
@@ -107,6 +114,13 @@ export const NO_ALERTS_FOUND = i18n.translate(
   'xpack.securitySolution.detectionResponse.noRuleAlerts',
   {
     defaultMessage: 'No alerts to display',
+  }
+);
+
+export const NO_CASES_FOUND = i18n.translate(
+  'xpack.securitySolution.detectionResponse.noRecentCases',
+  {
+    defaultMessage: 'No cases to display',
   }
 );
 export const RULE_ALERTS_COLUMN_RULE_NAME = i18n.translate(
@@ -156,14 +170,21 @@ export const OPEN_ALL_ALERTS_BUTTON = i18n.translate(
 export const VIEW_ALL_USER_ALERTS = i18n.translate(
   'xpack.securitySolution.detectionResponse.viewAllUserAlerts',
   {
-    defaultMessage: 'View all other user alerts',
+    defaultMessage: 'View all users',
+  }
+);
+
+export const VIEW_RECENT_CASES = i18n.translate(
+  'xpack.securitySolution.detectionResponse.viewRecentCases',
+  {
+    defaultMessage: 'View recent cases',
   }
 );
 
 export const VIEW_ALL_HOST_ALERTS = i18n.translate(
   'xpack.securitySolution.detectionResponse.viewAllHostAlerts',
   {
-    defaultMessage: 'View all other host alerts',
+    defaultMessage: 'View all hosts',
   }
 );
 
@@ -178,5 +199,61 @@ export const USER_ALERTS_USERNAME_COLUMN = i18n.translate(
   'xpack.securitySolution.detectionResponse.userAlertsUserName',
   {
     defaultMessage: 'User name',
+  }
+);
+
+export const CASES_TABLE_COLUMN_NAME = i18n.translate(
+  'xpack.securitySolution.detectionResponse.caseColumnName',
+  {
+    defaultMessage: 'Name',
+  }
+);
+
+export const CASES_TABLE_COLUMN_NOTE = i18n.translate(
+  'xpack.securitySolution.detectionResponse.caseColumnNote',
+  {
+    defaultMessage: 'Note',
+  }
+);
+
+export const CASES_TABLE_COLUMN_TIME = i18n.translate(
+  'xpack.securitySolution.detectionResponse.caseColumnTime',
+  {
+    defaultMessage: 'Time',
+  }
+);
+
+export const CASES_TABLE_COLUMN_CREATED_BY = i18n.translate(
+  'xpack.securitySolution.detectionResponse.caseColumnCreatedBy',
+  {
+    defaultMessage: 'Created by',
+  }
+);
+
+export const CASES_TABLE_COLUMN_STATUS = i18n.translate(
+  'xpack.securitySolution.detectionResponse.caseColumnStatus',
+  {
+    defaultMessage: 'Status',
+  }
+);
+
+export const ERROR_MESSAGE_CASES = i18n.translate(
+  'xpack.securitySolution.detectionResponse.errorMessage',
+  {
+    defaultMessage: 'Error fetching case data',
+  }
+);
+
+export const HOST_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionResponse.hostSectionTooltip',
+  {
+    defaultMessage: 'Maximum of 100 hosts. Please consult Alerts page for further information.',
+  }
+);
+
+export const USER_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionResponse.userSectionTooltip',
+  {
+    defaultMessage: 'Maximum of 100 users. Please consult Alerts page for further information.',
   }
 );

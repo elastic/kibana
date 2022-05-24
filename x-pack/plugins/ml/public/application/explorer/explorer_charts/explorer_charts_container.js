@@ -16,7 +16,6 @@ import {
   EuiFlexItem,
   EuiIconTip,
   EuiToolTip,
-  htmlIdGenerator,
 } from '@elastic/eui';
 
 import {
@@ -36,15 +35,13 @@ import { MlTooltipComponent } from '../../components/chart_tooltip';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { useMlKibana } from '../../contexts/kibana';
 import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
-import { AnomalySource } from '../../../maps/anomaly_source';
-import { CUSTOM_COLOR_RAMP } from '../../../maps/anomaly_layer_wizard_factory';
-import { LAYER_TYPE, APP_ID as MAPS_APP_ID } from '@kbn/maps-plugin/common';
+import { getInitialAnomaliesLayers } from '../../../maps/util';
+import { APP_ID as MAPS_APP_ID } from '@kbn/maps-plugin/common';
 import { MAPS_APP_LOCATOR } from '@kbn/maps-plugin/public';
 import { ExplorerChartsErrorCallOuts } from './explorer_charts_error_callouts';
 import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
 import { EmbeddedMapComponentWrapper } from './explorer_chart_embedded_map';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
-import { ML_ANOMALY_LAYERS } from '../../../maps/util';
 import { Chart, Settings } from '@elastic/charts';
 import useObservable from 'react-use/lib/useObservable';
 
@@ -114,59 +111,7 @@ function ExplorerChartContainer({
 
   const getMapsLink = useCallback(async () => {
     const { queryString, query } = getEntitiesQuery(series);
-    const initialLayers = [];
-    const typicalStyle = {
-      type: 'VECTOR',
-      properties: {
-        fillColor: {
-          type: 'STATIC',
-          options: {
-            color: '#98A2B2',
-          },
-        },
-        lineColor: {
-          type: 'STATIC',
-          options: {
-            color: '#fff',
-          },
-        },
-        lineWidth: {
-          type: 'STATIC',
-          options: {
-            size: 2,
-          },
-        },
-        iconSize: {
-          type: 'STATIC',
-          options: {
-            size: 6,
-          },
-        },
-      },
-    };
-
-    const style = {
-      type: 'VECTOR',
-      properties: {
-        fillColor: CUSTOM_COLOR_RAMP,
-        lineColor: CUSTOM_COLOR_RAMP,
-      },
-      isTimeAware: false,
-    };
-
-    for (const layer in ML_ANOMALY_LAYERS) {
-      if (ML_ANOMALY_LAYERS.hasOwnProperty(layer)) {
-        initialLayers.push({
-          id: htmlIdGenerator()(),
-          type: LAYER_TYPE.GEOJSON_VECTOR,
-          sourceDescriptor: AnomalySource.createDescriptor({
-            jobId: series.jobId,
-            typicalActual: ML_ANOMALY_LAYERS[layer],
-          }),
-          style: ML_ANOMALY_LAYERS[layer] === ML_ANOMALY_LAYERS.TYPICAL ? typicalStyle : style,
-        });
-      }
-    }
+    const initialLayers = getInitialAnomaliesLayers(series.jobId);
 
     const locator = share.url.locators.get(MAPS_APP_LOCATOR);
     const location = await locator.getLocation({

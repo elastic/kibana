@@ -12,6 +12,16 @@ type PaginationProps = RuleRegistrySearchRequestPagination & {
   alertsCount: number;
 };
 
+export type UsePagination = (props: PaginationProps) => {
+  pagination: RuleRegistrySearchRequestPagination;
+  onChangePageSize: (pageSize: number) => void;
+  onChangePageIndex: (pageIndex: number) => void;
+  onPaginateFlyoutNext: () => void;
+  onPaginateFlyoutPrevious: () => void;
+  flyoutAlertIndex: number;
+  setFlyoutAlertIndex: (alertIndex: number) => void;
+};
+
 export function usePagination({ onPageChange, pageIndex, pageSize, alertsCount }: PaginationProps) {
   const [pagination, setPagination] = useState<RuleRegistrySearchRequestPagination>({
     pageIndex,
@@ -58,19 +68,20 @@ export function usePagination({ onPageChange, pageIndex, pageSize, alertsCount }
     },
     [pagination, alertsCount, onChangePageIndex]
   );
-  const onPaginateFlyoutNext = useCallback(() => {
-    paginateFlyout(flyoutAlertIndex + 1);
-  }, [paginateFlyout, flyoutAlertIndex]);
-  const onPaginateFlyoutPrevious = useCallback(() => {
-    paginateFlyout(flyoutAlertIndex - 1);
-  }, [paginateFlyout, flyoutAlertIndex]);
+
+  const onPaginateFlyout = useCallback(
+    (nextPageIndex: number) => {
+      nextPageIndex -= pagination.pageSize * pagination.pageIndex;
+      paginateFlyout(nextPageIndex);
+    },
+    [paginateFlyout, pagination.pageSize, pagination.pageIndex]
+  );
 
   return {
     pagination,
     onChangePageSize,
     onChangePageIndex,
-    onPaginateFlyoutNext,
-    onPaginateFlyoutPrevious,
+    onPaginateFlyout,
     flyoutAlertIndex,
     setFlyoutAlertIndex,
   };

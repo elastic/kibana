@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance, AxiosRequestHeaders } from 'axios';
 import type { Capabilities as UICapabilities } from '@kbn/core/types';
 import { format as formatUrl } from 'url';
 import util from 'util';
@@ -61,7 +61,7 @@ export class UICapabilitiesService {
     this.log.debug(
       `requesting ${spaceUrlPrefix}/api/core/capabilities to parse the uiCapabilities`
     );
-    const requestHeaders = credentials
+    const requestHeaders: AxiosRequestHeaders = credentials
       ? {
           Authorization: `Basic ${Buffer.from(
             `${credentials.username}:${credentials.password}`

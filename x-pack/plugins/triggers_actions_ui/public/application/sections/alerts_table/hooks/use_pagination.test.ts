@@ -58,31 +58,31 @@ describe('usePagination', () => {
     expect(result.current.flyoutAlertIndex).toBe(-1);
 
     act(() => {
-      result.current.onPaginateFlyoutNext();
+      result.current.onPaginateFlyout(0);
     });
 
     expect(result.current.flyoutAlertIndex).toBe(0);
 
     act(() => {
-      result.current.onPaginateFlyoutNext();
+      result.current.onPaginateFlyout(1);
     });
 
     expect(result.current.flyoutAlertIndex).toBe(1);
 
     act(() => {
-      result.current.onPaginateFlyoutPrevious();
+      result.current.onPaginateFlyout(0);
     });
 
     expect(result.current.flyoutAlertIndex).toBe(0);
   });
 
-  it('should paginate the flyout when we need to change the page index', () => {
+  it('should paginate the flyout when we need to change the page index going back', () => {
     const { result } = renderHook(() =>
       usePagination({ onPageChange, pageIndex: 0, pageSize: 1, alertsCount })
     );
 
     act(() => {
-      result.current.onPaginateFlyoutPrevious();
+      result.current.onPaginateFlyout(-2);
     });
 
     // It should reset to the first alert in the table
@@ -90,25 +90,21 @@ describe('usePagination', () => {
 
     // It should go to the last page
     expect(result.current.pagination).toStrictEqual({ pageIndex: 4, pageSize: 1 });
+  });
+
+  it('should paginate the flyout when we need to change the page index going forward', () => {
+    const { result } = renderHook(() =>
+      usePagination({ onPageChange, pageIndex: 0, pageSize: 1, alertsCount })
+    );
 
     act(() => {
-      result.current.onPaginateFlyoutNext();
+      result.current.onPaginateFlyout(1);
     });
 
     // It should reset to the first alert in the table
     expect(result.current.flyoutAlertIndex).toBe(0);
 
     // It should go to the first page
-    expect(result.current.pagination).toStrictEqual({ pageIndex: 0, pageSize: 1 });
-
-    act(() => {
-      result.current.onPaginateFlyoutNext();
-    });
-
-    // It should reset to the first alert in the table
-    expect(result.current.flyoutAlertIndex).toBe(0);
-
-    // It should go to the second page
     expect(result.current.pagination).toStrictEqual({ pageIndex: 1, pageSize: 1 });
   });
 });

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';

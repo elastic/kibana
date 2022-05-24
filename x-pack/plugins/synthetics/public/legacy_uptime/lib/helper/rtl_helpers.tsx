@@ -30,7 +30,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { mockState } from '../__mocks__/uptime_store.mock';
 import { MountWithReduxProvider } from './helper_with_redux';
 import { AppState } from '../../state';
-import { stringifyUrlParams } from './stringify_url_params';
+import { stringifyUrlParams } from '../../../apps/synthetics/utils/url_params/stringify_url_params';
 import { ClientPluginsStart } from '../../../plugin';
 import { UptimeRefreshContextProvider, UptimeStartupPluginsContextProvider } from '../../contexts';
 import { kibanaService } from '../../state/kibana_service';

@@ -34,6 +34,17 @@ export default ({ getService }: FtrProviderContext): void => {
   const kibanaServer = getService('kibanaServer');
 
   describe('all cases metrics', () => {
+    it('accepts the features as string', async () => {
+      const metrics = await getCasesMetrics({
+        supertest,
+        features: 'mttr',
+      });
+
+      expect(metrics).to.eql({ mttr: 0 });
+
+      await deleteAllCaseItems(es);
+    });
+
     describe('MTTR', () => {
       it('responses with zero if there are no cases', async () => {
         const metrics = await getCasesMetrics({

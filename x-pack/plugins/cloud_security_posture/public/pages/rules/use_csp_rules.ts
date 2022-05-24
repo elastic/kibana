@@ -7,8 +7,11 @@
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { FunctionKeys } from 'utility-types';
 import type { SavedObjectsFindOptions, SimpleSavedObject } from '@kbn/core/public';
-import { UPDATE_RULES_CONFIG_ROUTE_PATH } from '../../../common/constants';
-import { cspRuleAssetSavedObjectType, type CspRuleSchema } from '../../../common/schemas/csp_rule';
+import {
+  UPDATE_RULES_CONFIG_ROUTE_PATH,
+  cspRuleAssetSavedObjectType,
+} from '../../../common/constants';
+import type { CspRuleSchema } from '../../../common/schemas/csp_rule';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { UPDATE_FAILED } from './translations';
 

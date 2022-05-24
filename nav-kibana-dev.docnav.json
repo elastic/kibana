@@ -100,7 +100,6 @@
         { "id": "kibCoreSavedObjectsPluginApi" },
         { "id": "kibFieldFormatsPluginApi" },
         { "id": "kibDataPluginApi" },
-        { "id": "kibDataAutocompletePluginApi" },
         { "id": "kibDataEnhancedPluginApi" },
         { "id": "kibDataViewsPluginApi" },
         { "id": "kibDataQueryPluginApi" },
@@ -165,6 +164,47 @@
         { "id": "kibUsageCollectionPluginApi" },
         { "id": "kibVisTypeTimeseriesPluginApi" },
         { "id": "kibVisualizationsPluginApi" }
+      ]
+    },
+    {
+      "label": "Operations",
+      "items": [
+        { "id": "kibDevDocsOpsOverview", "label": "Overview" },
+        {
+          "label": "CI",
+          "items": [
+            { "id": "kibDevDocsOpsCiStats" }
+          ]
+        },
+        {
+          "label": "Build tooling",
+          "items": [
+            { "id": "kibDevDocsOpsOptimizer" },
+            { "id": "kibDevDocsOpsBabelPreset" },
+            { "id": "kibDevDocsOpsTypeSummarizer" },
+            { "id": "kibDevDocsOpsBabelPluginSyntheticPackages"}
+          ]
+        },
+        {
+          "label": "Linting & Validation",
+          "items": [
+            { "id": "kibDevDocsOpsEslintConfig" },
+            { "id": "kibDevDocsOpsEslintPluginEslint" },
+            { "id": "kibDevDocsOpsEslintWithTypes" },
+            { "id": "kibDevDocsOpsEslintPluginImports" }
+          ]
+        },
+        {
+          "label": "Utilities",
+          "items": [
+            { "id": "kibDevDocsToolingLog" },
+            { "id": "kibDevDocsOpsJestSerializers" },
+            { "id": "kibDevDocsOpsExpect" },
+            { "id": "kibDevDocsOpsAmbientStorybookTypes" },
+            { "id": "kibDevDocsOpsAmbientUiTypes" },
+            { "id": "kibDevDocsOpsTestSubjSelector"}
+          ]
+        }
       ]
     }
   ]

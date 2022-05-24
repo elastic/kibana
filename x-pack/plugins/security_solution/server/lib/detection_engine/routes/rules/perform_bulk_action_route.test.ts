@@ -14,6 +14,7 @@ import {
   getBulkActionEditRequest,
   getFindResultWithSingleHit,
   getFindResultWithMultiHits,
+  getRuleMock,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { performBulkActionRoute } from './perform_bulk_action_route';
@@ -23,9 +24,19 @@ import {
 } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { readRules } from '../../rules/read_rules';
+import { legacyMigrate } from '../../rules/utils';
+import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 jest.mock('../../rules/read_rules', () => ({ readRules: jest.fn() }));
+
+jest.mock('../../rules/utils', () => {
+  const actual = jest.requireActual('../../rules/utils');
+  return {
+    ...actual,
+    legacyMigrate: jest.fn(),
+  };
+});
 
 describe('perform_bulk_action', () => {
   const readRulesMock = readRules as jest.Mock;
@@ -40,6 +51,8 @@ describe('perform_bulk_action', () => {
     logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
+    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
+
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
     performBulkActionRoute(server.router, ml, logger);
   });
@@ -220,7 +233,10 @@ describe('perform_bulk_action', () => {
       readRulesMock.mockImplementationOnce(() =>
         Promise.resolve({ ...mockRule, params: { ...mockRule.params, type: 'machine_learning' } })
       );
-
+      (legacyMigrate as jest.Mock).mockResolvedValue({
+        ...mockRule,
+        params: { ...mockRule.params, type: 'machine_learning' },
+      });
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_BULK_ACTION,
@@ -271,7 +287,10 @@ describe('perform_bulk_action', () => {
       readRulesMock.mockImplementationOnce(() =>
         Promise.resolve({ ...mockRule, params: { ...mockRule.params, index: ['index-*'] } })
       );
-
+      (legacyMigrate as jest.Mock).mockResolvedValue({
+        ...mockRule,
+        params: { ...mockRule.params, index: ['index-*'] },
+      });
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_BULK_ACTION,

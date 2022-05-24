@@ -7,8 +7,8 @@
 import React, { useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import type { DataView } from '@kbn/data-plugin/common';
-import { SortDirection } from '@kbn/data-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { number } from 'io-ts';
 import { FindingsTable } from './latest_findings_table';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
 import * as TEST_SUBJECTS from '../test_subjects';
@@ -18,7 +18,7 @@ import type { FindingsGroupByNoneQuery } from './use_latest_findings';
 import type { FindingsBaseURLQuery } from '../types';
 import { useFindingsCounter } from '../use_findings_count';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
-import { getBaseQuery } from '../utils';
+import { getBaseQuery, getPaginationQuery, getPaginationTableParams } from '../utils';
 import { PageWrapper, PageTitle, PageTitleText } from '../layout/findings_layout';
 import { FindingsGroupBySelector } from '../layout/findings_group_by_selector';
 import { useCspBreadcrumbs } from '../../../common/navigation/use_csp_breadcrumbs';
@@ -27,14 +27,15 @@ import { findingsNavigation } from '../../../common/navigation/constants';
 export const getDefaultQuery = (): FindingsBaseURLQuery & FindingsGroupByNoneQuery => ({
   query: { language: 'kuery', query: '' },
   filters: [],
-  sort: [{ ['@timestamp']: SortDirection.desc }],
-  from: 0,
-  size: 10,
+  sort: { field: '@timestamp', direction: 'desc' },
+  pageIndex: 0,
+  pageSize: 10,
 });
 
 export const LatestFindingsContainer = ({ dataView }: { dataView: DataView }) => {
   useCspBreadcrumbs([findingsNavigation.findings_default]);
   const { urlQuery, setUrlQuery } = useUrlQuery(getDefaultQuery);
+
   const baseEsQuery = useMemo(
     () => getBaseQuery({ dataView, filters: urlQuery.filters, query: urlQuery.query }),
     [dataView, urlQuery.filters, urlQuery.query]
@@ -43,9 +44,17 @@ export const LatestFindingsContainer = ({ dataView }: { dataView: DataView }) =>
   const findingsCount = useFindingsCounter(baseEsQuery);
   const findingsGroupByNone = useLatestFindings({
     ...baseEsQuery,
-    size: urlQuery.size,
-    from: urlQuery.from,
+    ...getPaginationQuery({ pageIndex: urlQuery.pageIndex, pageSize: urlQuery.pageSize }),
     sort: urlQuery.sort,
+  });
+
+  const findingsDistribution = getFindingsDistribution({
+    total: findingsGroupByNone.data?.total,
+    passed: findingsCount.data?.passed,
+    failed: findingsCount.data?.failed,
+    pageIndex: urlQuery.pageIndex,
+    pageSize: urlQuery.pageSize,
+    currentPageSize: findingsGroupByNone.data?.page.length,
   });
 
   return (
@@ -55,33 +64,59 @@ export const LatestFindingsContainer = ({ dataView }: { dataView: DataView }) =>
         setQuery={setUrlQuery}
         query={urlQuery.query}
         filters={urlQuery.filters}
-        loading={findingsGroupByNone.isLoading}
+        loading={findingsCount.isFetching}
       />
       <PageWrapper>
-        <PageTitle>
-          <PageTitleText
-            title={
-              <FormattedMessage id="xpack.csp.findings.findingsTitle" defaultMessage="Findings" />
-            }
-          />
-        </PageTitle>
+        <LatestFindingsPageTitle />
         <FindingsGroupBySelector type="default" />
-        <FindingsDistributionBar
-          total={findingsGroupByNone.data?.total || 0}
-          passed={findingsCount.data?.passed || 0}
-          failed={findingsCount.data?.failed || 0}
-          pageStart={urlQuery.from + 1} // API index is 0, but UI is 1
-          pageEnd={urlQuery.from + urlQuery.size}
-        />
+        {findingsDistribution && <FindingsDistributionBar {...findingsDistribution} />}
         <EuiSpacer />
         <FindingsTable
-          {...urlQuery}
-          setQuery={setUrlQuery}
           data={findingsGroupByNone.data}
           error={findingsGroupByNone.error}
-          loading={findingsGroupByNone.isLoading}
+          loading={findingsGroupByNone.isFetching}
+          pagination={getPaginationTableParams({
+            pageSize: urlQuery.pageSize,
+            pageIndex: urlQuery.pageIndex,
+            totalItemCount: findingsGroupByNone.data?.total || 0,
+          })}
+          sorting={{
+            sort: { field: urlQuery.sort.field, direction: urlQuery.sort.direction },
+          }}
+          setTableOptions={({ page, sort }) =>
+            setUrlQuery({ pageIndex: page.index, pageSize: page.size, sort })
+          }
         />
       </PageWrapper>
     </div>
   );
+};
+
+const LatestFindingsPageTitle = () => (
+  <PageTitle>
+    <PageTitleText
+      title={<FormattedMessage id="xpack.csp.findings.findingsTitle" defaultMessage="Findings" />}
+    />
+  </PageTitle>
+);
+
+const getFindingsDistribution = ({
+  total,
+  passed,
+  failed,
+  currentPageSize,
+  pageIndex,
+  pageSize,
+}: Record<'currentPageSize' | 'total' | 'passed' | 'failed', number | undefined> &
+  Record<'pageIndex' | 'pageSize', number>) => {
+  if (!number.is(total) || !number.is(passed) || !number.is(failed) || !number.is(currentPageSize))
+    return;
+
+  return {
+    total,
+    passed,
+    failed,
+    pageStart: pageIndex * pageSize + 1,
+    pageEnd: pageIndex * pageSize + currentPageSize,
+  };
 };

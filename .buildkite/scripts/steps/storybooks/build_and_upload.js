@@ -38,6 +38,7 @@ const STORYBOOKS = [
   'security_solution',
   'shared_ux',
   'ui_actions_enhanced',
+  'unified_search',
 ];
 
 const GITHUB_CONTEXT = 'Build and Publish Storybooks';

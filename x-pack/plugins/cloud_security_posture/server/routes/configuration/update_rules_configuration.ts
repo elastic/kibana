@@ -20,9 +20,12 @@ import { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/comm
 import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
 import { CspAppContext } from '../../plugin';
 import { CspRulesConfigSchema } from '../../../common/schemas/csp_configuration';
-import { CspRuleSchema, cspRuleAssetSavedObjectType } from '../../../common/schemas/csp_rule';
-import { UPDATE_RULES_CONFIG_ROUTE_PATH } from '../../../common/constants';
-import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../../common/constants';
+import { CspRuleSchema } from '../../../common/schemas/csp_rule';
+import {
+  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+  UPDATE_RULES_CONFIG_ROUTE_PATH,
+  cspRuleAssetSavedObjectType,
+} from '../../../common/constants';
 import { CspRouter } from '../../types';
 
 export const getPackagePolicy = async (
@@ -45,18 +48,17 @@ export const getPackagePolicy = async (
   return packagePolicies![0];
 };
 
-export const getCspRules = async (
+export const getCspRules = (
   soClient: SavedObjectsClientContract,
   packagePolicy: PackagePolicy
-) => {
-  const cspRules = await soClient.find<CspRuleSchema>({
+): Promise<SavedObjectsFindResponse<CspRuleSchema, unknown>> => {
+  return soClient.find<CspRuleSchema>({
     type: cspRuleAssetSavedObjectType,
     filter: `${cspRuleAssetSavedObjectType}.attributes.package_policy_id: ${packagePolicy.id} AND ${cspRuleAssetSavedObjectType}.attributes.policy_id: ${packagePolicy.policy_id}`,
     searchFields: ['name'],
     // TODO: research how to get all rules
     perPage: 10000,
   });
-  return cspRules;
 };
 
 export const createRulesConfig = (
@@ -64,8 +66,10 @@ export const createRulesConfig = (
 ): CspRulesConfigSchema => {
   const activatedRules = cspRules.saved_objects.filter((cspRule) => cspRule.attributes.enabled);
   const config = {
-    activated_rules: {
-      cis_k8s: activatedRules.map((activatedRule) => activatedRule.attributes.rego_rule_id),
+    data_yaml: {
+      activated_rules: {
+        cis_k8s: activatedRules.map((activatedRule) => activatedRule.attributes.rego_rule_id),
+      },
     },
   };
   return config;

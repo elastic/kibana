@@ -98,6 +98,7 @@ describe('migrations v2 model', () => {
       resolveMigrationFailures: 'resolveMigrationFailures',
       repeatedTimeoutRequests: 'repeatedTimeoutRequests',
       routingAllocationDisabled: 'routingAllocationDisabled',
+      clusterShardLimitExceeded: 'clusterShardLimitExceeded',
     },
   };
 
@@ -282,17 +283,21 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
-      test('INIT -> FATAL when cluster routing allocation is not enabled', () => {
+      test('INIT -> INIT when cluster routing allocation is incompatible', () => {
         const res: ResponseType<'INIT'> = Either.left({
-          type: 'unsupported_cluster_routing_allocation',
-          message: '[unsupported_cluster_routing_allocation]',
+          type: 'incompatible_cluster_routing_allocation',
         });
         const newState = model(initState, res) as FatalState;
 
-        expect(newState.controlState).toEqual('FATAL');
-        expect(newState.reason).toMatchInlineSnapshot(
-          `"[unsupported_cluster_routing_allocation] To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {\\"transient\\": {\\"cluster.routing.allocation.enable\\": null}, \\"persistent\\": {\\"cluster.routing.allocation.enable\\": null}}. Refer to routingAllocationDisabled for more information on how to resolve the issue."`
-        );
+        expect(newState.controlState).toEqual('INIT');
+        expect(newState.retryCount).toEqual(1);
+        expect(newState.retryDelay).toEqual(2000);
+        expect(newState.logs[0]).toMatchInlineSnapshot(`
+          Object {
+            "level": "error",
+            "message": "Action failed with '[incompatible_cluster_routing_allocation] Incompatible Elasticsearch cluster settings detected. Remove the persistent and transient Elasticsearch cluster setting 'cluster.routing.allocation.enable' or set it to a value of 'all' to allow migrations to proceed. Refer to routingAllocationDisabled for more information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
+          }
+        `);
       });
       test("INIT -> FATAL when .kibana points to newer version's index", () => {
         const res: ResponseType<'INIT'> = Either.right({
@@ -575,6 +580,12 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('LEGACY_CREATE_REINDEX_TARGET');
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
+        expect(newState.logs[0]).toMatchInlineSnapshot(`
+          Object {
+            "level": "error",
+            "message": "Action failed with '[index_not_yellow_timeout] Timeout waiting for ... Refer to repeatedTimeoutRequests for information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
+          }
+        `);
       });
       test('LEGACY_CREATE_REINDEX_TARGET -> LEGACY_REINDEX resets retry count and retry delay if action succeeds', () => {
         const res: ResponseType<'LEGACY_CREATE_REINDEX_TARGET'> =
@@ -588,6 +599,16 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('LEGACY_REINDEX');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
+      });
+      test('LEGACY_CREATE_REINDEX_TARGET -> FATAL if action fails with cluster_shard_limit_exceeded', () => {
+        const res: ResponseType<'LEGACY_CREATE_REINDEX_TARGET'> = Either.left({
+          type: 'cluster_shard_limit_exceeded',
+        });
+        const newState = model(legacyCreateReindexTargetState, res);
+        expect(newState.controlState).toEqual('FATAL');
+        expect((newState as FatalState).reason).toMatchInlineSnapshot(
+          `"[cluster_shard_limit_exceeded] Upgrading Kibana requires adding a small number of new shards. Ensure that Kibana is able to add 10 more shards by increasing the cluster.max_shards_per_node setting, or removing indices to clear up resources. See clusterShardLimitExceeded"`
+        );
       });
     });
 
@@ -743,6 +764,12 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('WAIT_FOR_YELLOW_SOURCE');
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
+        expect(newState.logs[0]).toMatchInlineSnapshot(`
+          Object {
+            "level": "error",
+            "message": "Action failed with '[index_not_yellow_timeout] Timeout waiting for ... Refer to repeatedTimeoutRequests for information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
+          }
+        `);
       });
 
       test('WAIT_FOR_YELLOW_SOURCE -> CHECK_UNKNOWN_DOCUMENTS resets retry count and delay if action succeeds', () => {
@@ -962,6 +989,12 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('CREATE_REINDEX_TEMP');
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
+        expect(newState.logs[0]).toMatchInlineSnapshot(`
+          Object {
+            "level": "error",
+            "message": "Action failed with '[index_not_yellow_timeout] Timeout waiting for ... Refer to repeatedTimeoutRequests for information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
+          }
+        `);
       });
       it('CREATE_REINDEX_TEMP -> REINDEX_SOURCE_TO_TEMP_OPEN_PIT resets retry count if action succeeds', () => {
         const res: ResponseType<'CREATE_REINDEX_TEMP'> = Either.right('create_index_succeeded');
@@ -974,6 +1007,16 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_OPEN_PIT');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
+      });
+      test('CREATE_REINDEX_TEMP -> FATAL if action fails with cluster_shard_limit_exceeded', () => {
+        const res: ResponseType<'CREATE_REINDEX_TEMP'> = Either.left({
+          type: 'cluster_shard_limit_exceeded',
+        });
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('FATAL');
+        expect((newState as FatalState).reason).toMatchInlineSnapshot(
+          `"[cluster_shard_limit_exceeded] Upgrading Kibana requires adding a small number of new shards. Ensure that Kibana is able to add 10 more shards by increasing the cluster.max_shards_per_node setting, or removing indices to clear up resources. See clusterShardLimitExceeded"`
+        );
       });
     });
 
@@ -1296,8 +1339,14 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('CLONE_TEMP_TO_TARGET');
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
+        expect(newState.logs[0]).toMatchInlineSnapshot(`
+          Object {
+            "level": "error",
+            "message": "Action failed with '[index_not_yellow_timeout] Timeout waiting for ... Refer to repeatedTimeoutRequests for information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
+          }
+        `);
       });
-      it('CREATE_NEW_TARGET -> MARK_VERSION_INDEX_READY resets the retry count and delay', () => {
+      it('CLONE_TEMP_TO_TARGET -> MARK_VERSION_INDEX_READY resets the retry count and delay', () => {
         const res: ResponseType<'CLONE_TEMP_TO_TARGET'> = Either.right({
           acknowledged: true,
           shardsAcknowledged: true,
@@ -1311,6 +1360,16 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toBe('REFRESH_TARGET');
         expect(newState.retryCount).toBe(0);
         expect(newState.retryDelay).toBe(0);
+      });
+      test('CLONE_TEMP_TO_TARGET -> FATAL if action fails with cluster_shard_limit_exceeded', () => {
+        const res: ResponseType<'CLONE_TEMP_TO_TARGET'> = Either.left({
+          type: 'cluster_shard_limit_exceeded',
+        });
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('FATAL');
+        expect((newState as FatalState).reason).toMatchInlineSnapshot(
+          `"[cluster_shard_limit_exceeded] Upgrading Kibana requires adding a small number of new shards. Ensure that Kibana is able to add 10 more shards by increasing the cluster.max_shards_per_node setting, or removing indices to clear up resources. See clusterShardLimitExceeded"`
+        );
       });
     });
 
@@ -1820,6 +1879,16 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('MARK_VERSION_INDEX_READY');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
+      });
+      test('CREATE_NEW_TARGET -> FATAL if action fails with cluster_shard_limit_exceeded', () => {
+        const res: ResponseType<'CREATE_NEW_TARGET'> = Either.left({
+          type: 'cluster_shard_limit_exceeded',
+        });
+        const newState = model(createNewTargetState, res);
+        expect(newState.controlState).toEqual('FATAL');
+        expect((newState as FatalState).reason).toMatchInlineSnapshot(
+          `"[cluster_shard_limit_exceeded] Upgrading Kibana requires adding a small number of new shards. Ensure that Kibana is able to add 10 more shards by increasing the cluster.max_shards_per_node setting, or removing indices to clear up resources. See clusterShardLimitExceeded"`
+        );
       });
     });
 

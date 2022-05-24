@@ -2228,8 +2228,6 @@ components:
           type: string
         path:
           type: string
-        removable:
-          type: boolean
       required:
         - name
         - title
@@ -2391,6 +2389,8 @@ components:
           type: string
         source_uri:
           type: string
+        rollout_duration_seconds:
+          type: number
         agents:
           oneOf:
             - type: array

@@ -166,6 +166,7 @@ describe('CasesService', () => {
             "settings": Object {
               "syncAlerts": true,
             },
+            "severity": "low",
             "status": "open",
             "tags": Array [
               "defacement",
@@ -519,6 +520,7 @@ describe('CasesService', () => {
             "settings": Object {
               "syncAlerts": true,
             },
+            "severity": "low",
             "status": "open",
             "tags": Array [
               "defacement",

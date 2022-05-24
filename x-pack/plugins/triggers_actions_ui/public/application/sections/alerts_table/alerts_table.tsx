@@ -8,7 +8,6 @@
 import React, { useState, Suspense, lazy, useCallback, useMemo, useEffect } from 'react';
 import {
   EuiDataGrid,
-  EuiEmptyPrompt,
   EuiDataGridCellValueElementProps,
   EuiDataGridCellValueProps,
   EuiFlexGroup,
@@ -18,11 +17,8 @@ import {
   EuiDataGridStyle,
 } from '@elastic/eui';
 import { useSorting, usePagination } from './hooks';
-import { AlertsTableProps, AlertsField } from '../../../types';
-import { useKibana } from '../../../common/lib/kibana';
+import { AlertsTableProps } from '../../../types';
 import {
-  ALERTS_TABLE_CONF_ERROR_MESSAGE,
-  ALERTS_TABLE_CONF_ERROR_TITLE,
   ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL,
   ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL,
 } from './translations';
@@ -30,23 +26,30 @@ import './alerts_table.scss';
 
 export const ACTIVE_ROW_CLASS = 'alertsTableActiveRow';
 
-const AlertsFlyout = lazy(() => import('./alerts_flyout'));
-
-const emptyConfiguration = {
-  id: '',
-  columns: [],
+const GridStyles: EuiDataGridStyle = {
+  border: 'horizontal',
+  header: 'underline',
 };
+
+const AlertsFlyout = lazy(() => import('./alerts_flyout'));
 
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
   const [rowClasses, setRowClasses] = useState<EuiDataGridStyle['rowClasses']>({});
-  const { activePage, alertsCount, onPageChange, onSortChange } = props.useFetchAlertsData();
-  const { sortingColumns, onSort } = useSorting(onSortChange);
+  const {
+    activePage,
+    alerts,
+    alertsCount,
+    isLoading,
+    onPageChange,
+    onSortChange,
+    sort: sortingFields,
+  } = props.useFetchAlertsData();
+  const { sortingColumns, onSort } = useSorting(onSortChange, sortingFields);
   const {
     pagination,
     onChangePageSize,
     onChangePageIndex,
-    onPaginateFlyoutNext,
-    onPaginateFlyoutPrevious,
+    onPaginateFlyout,
     flyoutAlertIndex,
     setFlyoutAlertIndex,
   } = usePagination({
@@ -56,15 +59,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     alertsCount,
   });
 
-  const alertsTableConfigurationRegistry = useKibana().services.alertsTableConfigurationRegistry;
-  const hasAlertsTableConfiguration = alertsTableConfigurationRegistry.has(props.configurationId);
-  const alertsTableConfiguration = hasAlertsTableConfiguration
-    ? alertsTableConfigurationRegistry.get(props.configurationId)
-    : emptyConfiguration;
-
-  const [visibleColumns, setVisibleColumns] = useState(
-    alertsTableConfiguration.columns.map(({ id }) => id)
-  );
+  const [visibleColumns, setVisibleColumns] = useState(props.columns.map(({ id }) => id));
 
   const leadingControlColumns = useMemo(() => {
     return [
@@ -116,36 +111,43 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
   const handleFlyoutClose = useCallback(() => setFlyoutAlertIndex(-1), [setFlyoutAlertIndex]);
 
-  return hasAlertsTableConfiguration ? (
-    <section data-test-subj={props['data-test-subj']}>
+  const handleRenderCellValue = useCallback(
+    (improper: EuiDataGridCellValueElementProps) => {
+      const rcvProps = improper as EuiDataGridCellValueElementProps & EuiDataGridCellValueProps;
+      const alert = alerts[rcvProps.visibleRowIndex];
+      return props.renderCellValue({
+        ...rcvProps,
+        alert,
+        field: rcvProps.columnId,
+      });
+    },
+    [alerts, props]
+  );
+
+  return (
+    <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
       {flyoutAlertIndex > -1 && (
         <Suspense fallback={null}>
           <AlertsFlyout
-            alert={props.alerts[flyoutAlertIndex]}
+            alert={alerts[flyoutAlertIndex]}
+            alertsCount={alertsCount}
             onClose={handleFlyoutClose}
-            onPaginateNext={onPaginateFlyoutNext}
-            onPaginatePrevious={onPaginateFlyoutPrevious}
+            flyoutIndex={flyoutAlertIndex + pagination.pageIndex * pagination.pageSize}
+            onPaginate={onPaginateFlyout}
+            isLoading={isLoading}
           />
         </Suspense>
       )}
       <EuiDataGrid
         aria-label="Alerts table"
         data-test-subj="alertsTable"
-        columns={alertsTableConfiguration.columns}
+        columns={props.columns}
         columnVisibility={{ visibleColumns, setVisibleColumns }}
         trailingControlColumns={props.trailingControlColumns}
         leadingControlColumns={leadingControlColumns}
         rowCount={alertsCount}
-        renderCellValue={(improper: EuiDataGridCellValueElementProps) => {
-          const rcvProps = improper as EuiDataGridCellValueElementProps & EuiDataGridCellValueProps;
-          const alert = props.alerts[rcvProps.visibleRowIndex];
-          return props.renderCellValue({
-            ...rcvProps,
-            alert,
-            field: rcvProps.columnId as AlertsField,
-          });
-        }}
-        gridStyle={{ rowClasses }}
+        renderCellValue={handleRenderCellValue}
+        gridStyle={{ ...GridStyles, rowClasses }}
         sorting={{ columns: sortingColumns, onSort }}
         pagination={{
           ...pagination,
@@ -155,13 +157,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         }}
       />
     </section>
-  ) : (
-    <EuiEmptyPrompt
-      data-test-subj="alertsTableNoConfiguration"
-      iconType="watchesApp"
-      title={<h2>{ALERTS_TABLE_CONF_ERROR_TITLE}</h2>}
-      body={<p>{ALERTS_TABLE_CONF_ERROR_MESSAGE}</p>}
-    />
   );
 };
 
