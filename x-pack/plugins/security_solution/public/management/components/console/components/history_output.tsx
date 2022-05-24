@@ -45,6 +45,7 @@ export const HistoryOutput = memo<OutputHistoryProps>((commonProps) => {
       direction="row"
       alignItems="flexEnd"
       responsive={false}
+      gutterSize="none"
     >
       {historyBody}
     </EuiFlexGroup>
