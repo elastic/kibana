@@ -6,7 +6,6 @@
  */
 
 // TODO: https://github.com/elastic/kibana/issues/110895
-/* eslint-disable @kbn/eslint/no_export_all */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { PluginInitializerContext } from '@kbn/core/server';
@@ -76,8 +75,11 @@ export {
   COMPARATORS,
 } from './common';
 
-export { Plugin };
-export * from './plugin';
+export type {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+} from './plugin';
+export { Plugin } from './plugin';
 // TODO remove this import when we expose the Rules tables as a component
 export { loadRules } from './application/lib/rule_api/rules';
 export { loadExecutionLogAggregations } from './application/lib/rule_api/load_execution_log_aggregations';
