@@ -81,7 +81,11 @@ export const useGetAgentIncomingData = (
  */
 const POLLING_INTERVAL_MS = 5 * 1000; // 5 sec
 
-export const usePollingIncomingData = (agentsIds: string[], previewData?: boolean) => {
+export const usePollingIncomingData = (
+  agentsIds: string[],
+  previewData?: boolean,
+  stopPollingAfterPreviewLength: number = 0
+) => {
   const timeout = useRef<number | undefined>(undefined);
   const [result, setResult] = useState<{
     incomingData: IncomingDataList[];
@@ -91,13 +95,11 @@ export const usePollingIncomingData = (agentsIds: string[], previewData?: boolea
     dataPreview: [],
   });
   const [isLoading, setIsLoading] = useState<boolean>(true);
-
   useEffect(() => {
     let isAborted = false;
-
     const poll = () => {
       timeout.current = window.setTimeout(async () => {
-        const { data } = await sendGetAgentIncomingData({ agentsIds, previewData }); // TODO: handle error
+        const { data } = await sendGetAgentIncomingData({ agentsIds, previewData });
         if (data?.items) {
           // filter out  agents that have `data = false` and keep polling
           const filtered = data?.items.filter((item) => {
@@ -106,7 +108,10 @@ export const usePollingIncomingData = (agentsIds: string[], previewData?: boolea
           });
 
           if (filtered.length > 0) {
-            setResult({ incomingData: filtered, dataPreview: data.dataPreview || [] });
+            setResult({
+              incomingData: filtered,
+              dataPreview: data.dataPreview || [],
+            });
             setIsLoading(false);
           }
         }
@@ -117,12 +122,15 @@ export const usePollingIncomingData = (agentsIds: string[], previewData?: boolea
     };
 
     poll();
-    if (isAborted || result.incomingData.length > 0) clearTimeout(timeout.current);
+    const previewLengthReached = result.dataPreview.length >= stopPollingAfterPreviewLength;
+    const incomingDataReceived = result.incomingData.length > 0;
+    const dataReceived = previewData ? previewLengthReached : incomingDataReceived;
+    if (isAborted || dataReceived) clearTimeout(timeout.current);
 
     return () => {
       isAborted = true;
     };
-  }, [agentsIds, result, previewData]);
+  }, [agentsIds, result, previewData, stopPollingAfterPreviewLength]);
 
   return { ...result, isLoading };
 };

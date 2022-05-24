@@ -40,14 +40,14 @@ interface Props {
   setAgentDataConfirmed: (v: boolean) => void;
   troubleshootLink: string;
 }
-const MAX_AGENT_DATA_PREVIEW_COUNT = 10;
+const MAX_AGENT_DATA_PREVIEW_COUNT = 20;
 // make room for more interesting keys in the UI
-const OMIT_KEYS = [
+const DATA_PREVIEW_OMIT_KEYS = [
   'agent.ephemeral_id',
   'agent.id',
   'elastic_agent.id',
   'data_stream.namespace',
-  '@timestamp', // this is already
+  '@timestamp',
 ];
 
 const CleanOverflowDescriptionList = styled(EuiDescriptionList)`
@@ -69,10 +69,16 @@ const CompressedPre = styled('pre')`
 const ScrollingDataContainer = styled('div')`
   max-height: 50vh;
   overflow-y: scroll;
+  /* keep scroll bar at the bottom by default */
+  display: flex;
+  flex-direction: column-reverse;
 `;
 
 const HitPreview: React.FC<{ hit: SearchHit }> = ({ hit }) => {
-  const hitForDisplay = omit(getFlattenedObject(hit._source as Record<string, unknown>), OMIT_KEYS);
+  const hitForDisplay = omit(
+    getFlattenedObject(hit._source as Record<string, unknown>),
+    DATA_PREVIEW_OMIT_KEYS
+  );
   const listItems = Object.entries(hitForDisplay).map(([key, value]) => ({
     title: `${key}:`,
     description: value,
@@ -103,7 +109,7 @@ const AgentDataPreview: React.FC<{ dataPreview: SearchHit[] }> = ({ dataPreview 
   const previewData = dataPreview.slice(0, MAX_AGENT_DATA_PREVIEW_COUNT);
   return (
     <ScrollingDataContainer>
-      {previewData.map((hit, idx) => (
+      {previewData.map((hit) => (
         <div id={hit._id}>
           <EuiFlexGroup gutterSize={'xs'}>
             <EuiFlexItem style={{ minWidth: '220px' }}>
@@ -114,7 +120,7 @@ const AgentDataPreview: React.FC<{ dataPreview: SearchHit[] }> = ({ dataPreview 
               <HitPreview hit={hit} />
             </EuiFlexItem>
           </EuiFlexGroup>
-          {idx !== previewData.length - 1 && <EuiHorizontalRule margin="s" />}
+          <EuiHorizontalRule margin="s" />
         </div>
       ))}
     </ScrollingDataContainer>
@@ -128,7 +134,11 @@ export const ConfirmIncomingDataWithPreview: React.FunctionComponent<Props> = ({
   setAgentDataConfirmed,
   troubleshootLink,
 }) => {
-  const { incomingData, dataPreview, isLoading } = usePollingIncomingData(agentIds, true);
+  const { incomingData, dataPreview, isLoading } = usePollingIncomingData(
+    agentIds,
+    true,
+    MAX_AGENT_DATA_PREVIEW_COUNT
+  );
   const { enrolledAgents, numAgentsWithData } = useGetAgentIncomingData(
     incomingData,
     installedPolicy
