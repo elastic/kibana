@@ -21,11 +21,10 @@ import {
   MONITOR_UPDATE_CHANNEL,
   MONITOR_CURRENT_CHANNEL,
   MONITOR_ERROR_EVENT_CHANNEL,
-} from '../../legacy_uptime/lib/telemetry/constants';
-import { MonitorErrorEvent } from '../../legacy_uptime/lib/telemetry/types';
   MONITOR_SYNC_STATE_CHANNEL,
   MONITOR_SYNC_EVENTS_CHANNEL,
 } from '../../legacy_uptime/lib/telemetry/constants';
+import { MonitorErrorEvent } from '../../legacy_uptime/lib/telemetry/types';
 import { MonitorSyncEvent } from '../../legacy_uptime/lib/telemetry/types';
 
 export interface UpgradeError {
