@@ -152,6 +152,12 @@ export const useDashboardAppState = ({
         return;
       }
 
+      const defaultDataView = await dataViews.getDefaultDataView();
+
+      if (!defaultDataView) {
+        return;
+      }
+
       /**
        * Load and unpack state from dashboard saved object.
        */
