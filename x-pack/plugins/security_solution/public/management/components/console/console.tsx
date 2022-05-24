@@ -8,7 +8,6 @@
 import React, { memo, useCallback, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
-import { SidePanelContentManager } from './components/side_panel/side_panel_content_manager';
 import { ConsoleHeader } from './components/console_header';
 import { CommandInput, CommandInputProps } from './components/command_input';
 import { ConsoleProps } from './types';
@@ -16,6 +15,7 @@ import { ConsoleStateProvider } from './components/console_state';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 import { useWithManagedConsole } from './components/console_manager/console_manager';
 import { HistoryOutput } from './components/history_output';
+import { SidePanelFlexItem } from './components/side_panel/side_panel_flex_item';
 
 const ConsoleWindow = styled.div`
   height: 100%;
@@ -160,9 +160,7 @@ export const Console = memo<ConsoleProps>(
                     </EuiFlexGroup>
                   </EuiFlexItem>
 
-                  <EuiFlexItem grow={false} className="layout-rightPanel">
-                    <SidePanelContentManager />
-                  </EuiFlexItem>
+                  {<SidePanelFlexItem />}
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -172,5 +170,4 @@ export const Console = memo<ConsoleProps>(
     );
   }
 );
-
 Console.displayName = 'Console';
