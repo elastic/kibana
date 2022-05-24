@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import { createListStream } from '@kbn/utils';
 import type { Logger } from '@kbn/logging';
 import { SavedObject, SavedObjectsClientContract } from '../types';
