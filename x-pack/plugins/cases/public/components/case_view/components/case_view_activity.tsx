@@ -23,47 +23,34 @@ import { useCasesContext } from '../../cases_context/use_cases_context';
 import * as i18n from '../translations';
 import { getNoneConnector, normalizeActionConnector } from '../../configure_cases/utils';
 import { getConnectorById } from '../../utils';
-import { UseGetCaseUserActions } from '../../../containers/use_get_case_user_actions';
 import { SeveritySidebarSelector } from '../../severity/sidebar_selector';
+import { useFetchCaseUserActions } from '../../../containers/use_get_case_user_actions';
 
 export const CaseViewActivity = ({
-  initLoadingData,
   ruleDetailsNavigation,
-  caseId,
   caseData,
   actionsNavigation,
   showAlertDetails,
   updateCase,
   fetchCaseMetrics,
   useFetchAlertData,
-  getCaseUserActions,
 }: {
-  initLoadingData: boolean;
   ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;
-  caseId: string;
   caseData: Case;
   actionsNavigation?: CasesNavigation<string, 'configurable'>;
   showAlertDetails?: (alertId: string, index: string) => void;
-  updateCase: (newCase: Case) => void;
+  updateCase: () => void;
   fetchCaseMetrics: (silent?: boolean) => Promise<void>;
   useFetchAlertData: UseFetchAlertData;
-  getCaseUserActions: UseGetCaseUserActions;
 }) => {
   const { userCanCrud } = useCasesContext();
   const { getCaseViewUrl } = useCaseViewNavigation();
 
   const {
-    caseUserActions,
-    fetchCaseUserActions,
-    caseServices,
-    hasDataToPush,
+    data,
+    refetch: fetchCaseUserActions,
     isLoading: isLoadingUserActions,
-    participants,
-  } = getCaseUserActions;
-
-  const refetchCaseUserActions = useCallback(() => {
-    fetchCaseUserActions(caseId, caseData.connector.id);
-  }, [caseId, fetchCaseUserActions, caseData]);
+  } = useFetchCaseUserActions(caseData.id, caseData.connector.id);
 
   const onShowAlertDetails = useCallback(
     (alertId: string, index: string) => {
@@ -75,16 +62,16 @@ export const CaseViewActivity = ({
   );
 
   const handleUpdateField = useCallback(
-    (newCase: Case, _updateKey: UpdateKey) => {
-      updateCase({ ...newCase, comments: caseData.comments });
-      fetchCaseUserActions(caseId, newCase.connector.id);
+    (_newCase: Case, _updateKey: UpdateKey) => {
+      updateCase();
+      fetchCaseUserActions();
       fetchCaseMetrics();
     },
-    [updateCase, caseData, fetchCaseUserActions, caseId, fetchCaseMetrics]
+    [updateCase, fetchCaseUserActions, fetchCaseMetrics]
   );
 
   const { onUpdateField, isLoading, loadingKey } = useOnUpdateField({
-    caseId,
+    caseId: caseData.id,
     caseData,
     handleUpdateField,
   });
@@ -101,9 +88,9 @@ export const CaseViewActivity = ({
   const emailContent = useMemo(
     () => ({
       subject: i18n.EMAIL_SUBJECT(caseData.title),
-      body: i18n.EMAIL_BODY(getCaseViewUrl({ detailName: caseId })),
+      body: i18n.EMAIL_BODY(getCaseViewUrl({ detailName: caseData.id })),
     }),
-    [caseData.title, getCaseViewUrl, caseId]
+    [caseData.title, getCaseViewUrl, caseData.id]
   );
 
   const onSubmitTags = useCallback(
@@ -124,12 +111,12 @@ export const CaseViewActivity = ({
   }, [connectors, caseData.connector]);
 
   const handleUpdateCase = useCallback(
-    (newCase: Case) => {
-      updateCase(newCase);
-      fetchCaseUserActions(caseId, newCase.connector.id);
+    (_newCase: Case) => {
+      updateCase();
+      fetchCaseUserActions();
       fetchCaseMetrics();
     },
-    [updateCase, fetchCaseUserActions, caseId, fetchCaseMetrics]
+    [updateCase, fetchCaseUserActions, fetchCaseMetrics]
   );
 
   const onSubmitConnector = useCallback(
@@ -152,20 +139,20 @@ export const CaseViewActivity = ({
   return (
     <>
       <EuiFlexItem grow={6}>
-        {initLoadingData && (
+        {isLoadingUserActions && (
           <EuiLoadingContent lines={8} data-test-subj="case-view-loading-content" />
         )}
-        {!initLoadingData && (
+        {!isLoadingUserActions && data && (
           <EuiFlexGroup direction="column" responsive={false} data-test-subj="case-view-activity">
             <EuiFlexItem>
               <UserActions
                 getRuleDetailsHref={ruleDetailsNavigation?.href}
                 onRuleDetailsClick={ruleDetailsNavigation?.onClick}
-                caseServices={caseServices}
-                caseUserActions={caseUserActions}
+                caseServices={data.caseServices}
+                caseUserActions={data.caseUserActions}
                 data={caseData}
                 actionsNavigation={actionsNavigation}
-                fetchUserActions={refetchCaseUserActions}
+                fetchUserActions={fetchCaseUserActions}
                 isLoadingDescription={isLoading && loadingKey === 'description'}
                 isLoadingUserActions={isLoadingUserActions}
                 onShowAlertDetails={onShowAlertDetails}
@@ -200,13 +187,15 @@ export const CaseViewActivity = ({
           headline={i18n.REPORTER}
           users={[caseData.createdBy]}
         />
-        <UserList
-          data-test-subj="case-view-user-list-participants"
-          email={emailContent}
-          headline={i18n.PARTICIPANTS}
-          loading={isLoadingUserActions}
-          users={participants}
-        />
+        {data?.participants ? (
+          <UserList
+            data-test-subj="case-view-user-list-participants"
+            email={emailContent}
+            headline={i18n.PARTICIPANTS}
+            loading={isLoadingUserActions}
+            users={data.participants}
+          />
+        ) : null}
         <TagList
           data-test-subj="case-view-tag-list"
           userCanCrud={userCanCrud}
@@ -214,19 +203,21 @@ export const CaseViewActivity = ({
           onSubmit={onSubmitTags}
           isLoading={isLoading && loadingKey === 'tags'}
         />
-        <EditConnector
-          caseData={caseData}
-          caseServices={caseServices}
-          connectorName={connectorName}
-          connectors={connectors}
-          hasDataToPush={hasDataToPush && userCanCrud}
-          isLoading={isLoadingConnectors || (isLoading && loadingKey === 'connector')}
-          isValidConnector={isLoadingConnectors ? true : isValidConnector}
-          onSubmit={onSubmitConnector}
-          updateCase={handleUpdateCase}
-          userActions={caseUserActions}
-          userCanCrud={userCanCrud}
-        />
+        {data ? (
+          <EditConnector
+            caseData={caseData}
+            caseServices={data.caseServices}
+            connectorName={connectorName}
+            connectors={connectors}
+            hasDataToPush={data.hasDataToPush && userCanCrud}
+            isLoading={isLoadingConnectors || (isLoading && loadingKey === 'connector')}
+            isValidConnector={isLoadingConnectors ? true : isValidConnector}
+            onSubmit={onSubmitConnector}
+            updateCase={handleUpdateCase}
+            userActions={data.caseUserActions}
+            userCanCrud={userCanCrud}
+          />
+        ) : null}
       </EuiFlexItem>
     </>
   );

@@ -6,12 +6,12 @@
  */
 
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 import { Case, UpdateKey } from '../../../common/ui';
 import { useCaseViewNavigation, useUrlParams } from '../../common/navigation';
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
-import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
+import { useFetchCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { CaseActionBar } from '../case_action_bar';
@@ -38,7 +38,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     caseId,
     fetchCase,
     onComponentInitialized,
-    updateCase,
     refreshRef,
     ruleDetailsNavigation,
     actionsNavigation,
@@ -58,21 +57,14 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
       return CASE_VIEW_PAGE_TABS.ACTIVITY;
     }, [urlParams.tabId]);
 
-    const [initLoadingData, setInitLoadingData] = useState(true);
     const init = useRef(true);
     const timelineUi = useTimelineContext()?.ui;
 
-    const getCaseUserActions = useGetCaseUserActions(caseId, caseData.connector.id);
-
     const {
-      fetchCaseUserActions,
-      caseServices,
+      data,
+      refetch: fetchCaseUserActions,
       isLoading: isLoadingUserActions,
-    } = getCaseUserActions;
-
-    const refetchCaseUserActions = useCallback(() => {
-      fetchCaseUserActions(caseId, caseData.connector.id);
-    }, [caseId, fetchCaseUserActions, caseData]);
+    } = useFetchCaseUserActions(caseData.id, caseData.connector.id);
 
     const {
       metrics,
@@ -83,16 +75,16 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     const handleRefresh = useCallback(() => {
       fetchCase();
       fetchCaseMetrics();
-      refetchCaseUserActions();
-    }, [fetchCase, refetchCaseUserActions, fetchCaseMetrics]);
+      fetchCaseUserActions();
+    }, [fetchCase, fetchCaseMetrics, fetchCaseUserActions]);
 
     const handleUpdateField = useCallback(
       (newCase: Case, _updateKey: UpdateKey) => {
-        updateCase({ ...newCase, comments: caseData.comments });
-        fetchCaseUserActions(caseId, newCase.connector.id);
+        fetchCase();
+        fetchCaseUserActions();
         fetchCaseMetrics();
       },
-      [updateCase, caseData, fetchCaseUserActions, caseId, fetchCaseMetrics]
+      [fetchCase, fetchCaseUserActions, fetchCaseMetrics]
     );
 
     const { onUpdateField, isLoading, loadingKey } = useOnUpdateField({
@@ -111,7 +103,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
             if (isStale || isLoading || isLoadingMetrics || isLoadingUserActions) {
               return;
             }
-            await Promise.all([fetchCase(), fetchCaseMetrics(true), refetchCaseUserActions()]);
+            await Promise.all([fetchCase(), fetchCaseMetrics(true), fetchCaseUserActions()]);
           },
         };
         return () => {
@@ -122,20 +114,19 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     }, [
       fetchCase,
       fetchCaseMetrics,
-      refetchCaseUserActions,
       isLoadingUserActions,
       isLoadingMetrics,
       isLoading,
       refreshRef,
-      updateCase,
+      fetchCaseUserActions,
     ]);
 
     const currentExternalIncident = useMemo(
       () =>
-        caseServices != null && caseServices[caseData.connector.id] != null
-          ? caseServices[caseData.connector.id]
+        data?.caseServices != null && data.caseServices[caseData.connector.id] != null
+          ? data.caseServices[caseData.connector.id]
           : null,
-      [caseServices, caseData.connector]
+      [data?.caseServices, caseData.connector]
     );
 
     const onSubmitTitle = useCallback(
@@ -146,12 +137,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
         }),
       [onUpdateField]
     );
-
-    useEffect(() => {
-      if (initLoadingData && !isLoadingUserActions) {
-        setInitLoadingData(false);
-      }
-    }, [initLoadingData, isLoadingUserActions]);
 
     // useEffect used for component's initialization
     useEffect(() => {
@@ -170,14 +155,11 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
           name: ACTIVITY_TAB,
           content: (
             <CaseViewActivity
-              getCaseUserActions={getCaseUserActions}
-              initLoadingData={initLoadingData}
               ruleDetailsNavigation={ruleDetailsNavigation}
-              caseId={caseId}
               caseData={caseData}
               actionsNavigation={actionsNavigation}
               showAlertDetails={showAlertDetails}
-              updateCase={updateCase}
+              updateCase={fetchCase}
               fetchCaseMetrics={fetchCaseMetrics}
               useFetchAlertData={useFetchAlertData}
             />
@@ -209,12 +191,10 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
         caseData,
         caseId,
         features.alerts.enabled,
+        fetchCase,
         fetchCaseMetrics,
-        getCaseUserActions,
-        initLoadingData,
         ruleDetailsNavigation,
         showAlertDetails,
-        updateCase,
         useFetchAlertData,
       ]
     );
@@ -262,7 +242,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
         </HeaderPage>
 
         <WhitePageWrapperNoBorder>
-          {!initLoadingData && metricsFeatures.length > 0 ? (
+          {!isLoadingUserActions && metricsFeatures.length > 0 ? (
             <>
               <EuiFlexGroup>
                 <EuiFlexItem>

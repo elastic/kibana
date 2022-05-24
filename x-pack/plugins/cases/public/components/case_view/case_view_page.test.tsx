@@ -52,7 +52,6 @@ export const caseProps: CaseViewPageProps = {
   caseId: caseData.id,
   caseData,
   fetchCase: jest.fn(),
-  updateCase: jest.fn(),
 };
 
 export const caseClosedProps: CaseViewPageProps = {

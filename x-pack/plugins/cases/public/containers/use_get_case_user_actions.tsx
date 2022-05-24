@@ -6,14 +6,12 @@
  */
 
 import { isEmpty, uniqBy } from 'lodash/fp';
-import { useCallback, useEffect, useState, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
+import { useQuery } from 'react-query';
 import { ElasticUser, CaseUserActions, CaseExternalService } from '../../common/ui/types';
 import { ActionTypes, CaseConnector, NONE_CONNECTOR_ID } from '../../common/api';
 import { getCaseUserActions } from './api';
-import * as i18n from './translations';
-import { useToasts } from '../common/lib/kibana';
 import {
   isPushedUserAction,
   isConnectorUserAction,
@@ -48,10 +46,6 @@ export const initialData: CaseUserActionsState = {
   isLoading: true,
   participants: [],
 };
-
-export interface UseGetCaseUserActions extends CaseUserActionsState {
-  fetchCaseUserActions: (caseId: string, caseConnectorId: string) => Promise<void>;
-}
 
 const groupConnectorFields = (
   userActions: CaseUserActions[]
@@ -228,78 +222,22 @@ export const getPushedInfo = (
   };
 };
 
-export const useGetCaseUserActions = (
-  caseId: string,
-  caseConnectorId: string
-): UseGetCaseUserActions => {
-  const [caseUserActionsState, setCaseUserActionsState] =
-    useState<CaseUserActionsState>(initialData);
-  const abortCtrlRef = useRef(new AbortController());
-  const isCancelledRef = useRef(false);
-  const toasts = useToasts();
+export const useFetchCaseUserActions = (caseId: string, caseConnectorId: string) => {
+  const abortCtrlRef = new AbortController();
+  return useQuery(['case-user-actions', caseId, caseConnectorId], async () => {
+    const response = await getCaseUserActions(caseId, abortCtrlRef.signal);
+    const participants = !isEmpty(response)
+      ? uniqBy('createdBy.username', response).map((cau) => cau.createdBy)
+      : [];
 
-  const fetchCaseUserActions = useCallback(
-    async (thisCaseId: string, thisCaseConnectorId: string) => {
-      try {
-        isCancelledRef.current = false;
-        abortCtrlRef.current.abort();
-        abortCtrlRef.current = new AbortController();
-        setCaseUserActionsState({
-          ...caseUserActionsState,
-          isLoading: true,
-        });
-
-        const response = await getCaseUserActions(thisCaseId, abortCtrlRef.current.signal);
-
-        if (!isCancelledRef.current) {
-          const participants = !isEmpty(response)
-            ? uniqBy('createdBy.username', response).map((cau) => cau.createdBy)
-            : [];
-
-          const caseUserActions = !isEmpty(response) ? response : [];
-
-          setCaseUserActionsState({
-            caseUserActions,
-            ...getPushedInfo(caseUserActions, thisCaseConnectorId),
-            isLoading: false,
-            isError: false,
-            participants,
-          });
-        }
-      } catch (error) {
-        if (!isCancelledRef.current) {
-          if (error.name !== 'AbortError') {
-            toasts.addError(
-              error.body && error.body.message ? new Error(error.body.message) : error,
-              { title: i18n.ERROR_TITLE }
-            );
-          }
-
-          setCaseUserActionsState({
-            caseServices: {},
-            caseUserActions: [],
-            hasDataToPush: false,
-            isError: true,
-            isLoading: false,
-            participants: [],
-          });
-        }
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [caseUserActionsState]
-  );
-
-  useEffect(() => {
-    if (!isEmpty(caseId)) {
-      fetchCaseUserActions(caseId, caseConnectorId);
-    }
-
-    return () => {
-      isCancelledRef.current = true;
-      abortCtrlRef.current.abort();
+    const caseUserActions = !isEmpty(response) ? response : [];
+    const pushedInfo = getPushedInfo(caseUserActions, caseConnectorId);
+    return {
+      caseUserActions,
+      participants,
+      ...pushedInfo,
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [caseId]);
-  return { ...caseUserActionsState, fetchCaseUserActions };
+  });
 };
+
+export type UseFetchCaseUserActions = ReturnType<typeof useFetchCaseUserActions>;
