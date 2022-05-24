@@ -10,9 +10,7 @@ export default ({ getService, getPageObjects }) => {
   describe('monitoring app - stack functional integration - suite', () => {
     const browser = getService('browser');
     const PageObjects = getPageObjects(['security', 'monitoring', 'common']);
-    //const log = getService('log');
     const testSubjects = getService('testSubjects');
-    //const esClusterSummaryStatus = getService('monitoringElasticsearchSummaryStatus');
     const clusterOverview = getService('monitoringClusterOverview');
     const find = getService('find');
 
@@ -27,7 +25,7 @@ export default ({ getService, getPageObjects }) => {
       await find.clickByLinkText('elasticsearch');
       // this is a workaround for https://github.com/elastic/kibana/issues/130029
     });
-    it('Elasticsearch should have >0 documents', async () => {
+    it('Elasticsearch should have at least 1 document', async () => {
       // Looking at various ES metrics in the ES overview page
       await testSubjects.click('esOverview');
       const docCountText = await testSubjects.getVisibleText('documentCount');
@@ -35,7 +33,7 @@ export default ({ getService, getPageObjects }) => {
       const docCount = parseInt(docCountText.slice(10), 10);
       expect(docCount).to.be.greaterThan(0);
     });
-    it('Elasticsearch should have >0 indices', async () => {
+    it('Elasticsearch should have at least 1 index', async () => {
       await testSubjects.click('esOverview');
       const indCountText = await testSubjects.getVisibleText('indicesCount');
       const indCount = parseInt(indCountText.slice(8), 10);
@@ -47,7 +45,7 @@ export default ({ getService, getPageObjects }) => {
       const instances = await testSubjects.getVisibleText('instances');
       expect(instances).to.eql('Instances\n1');
     });
-    it('Kibana should have >0 requests', async () => {
+    it('Kibana should have at least 1 request', async () => {
       await testSubjects.click('kbnOverview');
       const conCountText = await testSubjects.getVisibleText('requests');
       const conCount = parseInt(conCountText.slice(9), 10);
@@ -59,7 +57,7 @@ export default ({ getService, getPageObjects }) => {
       const nodes = await testSubjects.getVisibleText('node_count');
       expect(nodes).to.eql('Nodes\n1');
     });
-    it('Logstash should have >0 events received', async () => {
+    it('Logstash should have at least 1 event received', async () => {
       await testSubjects.click('lsOverview');
       const eventsCountText = await testSubjects.getVisibleText('events_in_total');
       const eventsCount = parseInt(eventsCountText.slice(16, -1), 10);
