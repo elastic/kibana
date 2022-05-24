@@ -12,12 +12,12 @@ import {
   USER_TABLE_ROW_TOTAL_ALERTS,
 } from '../../screens/detection_response';
 import { QUERY_TAB_BUTTON } from '../../screens/timeline';
-import { waitForAlertsToBeIndexed } from '../../tasks/api_calls/alerts';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
+import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { login, visit } from '../../tasks/login';
 import { closeTimeline } from '../../tasks/timeline';
-import { DETECTIONS_RESPONSE_URL } from '../../urls/navigation';
+import { ALERTS_URL, DETECTIONS_RESPONSE_URL } from '../../urls/navigation';
 
 const ALERT_COUNT = 1;
 
@@ -27,7 +27,8 @@ describe('Detection response view', () => {
       cleanKibana();
       login();
       createCustomRuleEnabled(getNewRule());
-      waitForAlertsToBeIndexed(ALERT_COUNT);
+      visit(ALERTS_URL);
+      waitForAlertsToPopulate();
       visit(DETECTIONS_RESPONSE_URL);
     });
 
