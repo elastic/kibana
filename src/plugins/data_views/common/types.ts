@@ -21,6 +21,10 @@ export type { QueryDslQueryContainer };
 
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
+/**
+ * Runtime field - type of value returned
+ */
+
 export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
 
 export type RuntimeTypeExceptComposite = Exclude<RuntimeType, 'composite'>;
