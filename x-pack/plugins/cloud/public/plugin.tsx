@@ -268,20 +268,30 @@ export class CloudPlugin implements Plugin<CloudSetup> {
               user.authentication_realm?.name === 'cloud-saml-kibana'
             ) {
               // If authenticated via Cloud SAML, use the SAML username as the user ID
-              return user.username;
+              return { userId: user.username, isElasticCloudUser: true };
             }
 
-            return cloudId ? `${cloudId}:${user.username}` : user.username;
+            return {
+              // Join the cloud org id and the user to create a truly unique user id.
+              userId: cloudId ? `${cloudId}:${user.username}` : user.username,
+              isElasticCloudUser: false,
+            };
           }),
-          // Join the cloud org id and the user to create a truly unique user id.
           // The hashing here is to keep it at clear as possible in our source code that we do not send literal user IDs
-          map((userId) => ({ userId: sha256(userId) })),
-          catchError(() => of({ userId: undefined }))
+          map(({ userId, isElasticCloudUser }) => ({ userId: sha256(userId), isElasticCloudUser })),
+          catchError(() => of({ userId: undefined, isElasticCloudUser: false }))
         ),
         schema: {
           userId: {
             type: 'keyword',
             _meta: { description: 'The user id scoped as seen by Cloud (hashed)' },
+          },
+          isElasticCloudUser: {
+            type: 'boolean',
+            _meta: {
+              description:
+                '`true` if the user is logged in via the Elastic Cloud authentication provider.',
+            },
           },
         },
       });
