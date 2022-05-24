@@ -182,7 +182,8 @@
             { "id": "kibDevDocsOpsOptimizer" },
             { "id": "kibDevDocsOpsBabelPreset" },
             { "id": "kibDevDocsOpsTypeSummarizer" },
-            { "id": "kibDevDocsOpsBabelPluginSyntheticPackages"}
+            { "id": "kibDevDocsOpsBabelPluginSyntheticPackages" },
+            { "id": "kibDevDocsOpsUiSharedDepsNpm" }
           ]
         },
         {
@@ -202,7 +203,7 @@
             { "id": "kibDevDocsOpsExpect" },
             { "id": "kibDevDocsOpsAmbientStorybookTypes" },
             { "id": "kibDevDocsOpsAmbientUiTypes" },
-            { "id": "kibDevDocsOpsTestSubjSelector"}
+            { "id": "kibDevDocsOpsTestSubjSelector" }
           ]
         }
       ]
