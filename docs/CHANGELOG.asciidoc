@@ -35,7 +35,7 @@ coming::[8.2.2]
 Review the following information about the {kib} 8.2.2 release.
 
 [float]
-[[breaking-changes-8.2.1]]
+[[breaking-changes-8.2.2]]
 === Breaking changes
 
 Breaking changes can prevent your application from optimal operation and performance.
