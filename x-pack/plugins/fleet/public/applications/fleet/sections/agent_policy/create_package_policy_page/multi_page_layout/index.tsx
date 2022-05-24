@@ -13,7 +13,9 @@ import { splitPkgKey } from '../../../../../../../common';
 import { useGetPackageInfoByKey, useGetSettings } from '../../../../hooks';
 
 import type { AddToPolicyParams, CreatePackagePolicyParams } from '../types';
-import { useCancelAddPackagePolicy, useGetAgentPolicyOrDefault } from '../hooks';
+import { useCancelAddPackagePolicy } from '../hooks';
+
+import { useGetAgentPolicyOrDefault } from './hooks';
 
 import {
   AddFirstIntegrationSplashScreen,

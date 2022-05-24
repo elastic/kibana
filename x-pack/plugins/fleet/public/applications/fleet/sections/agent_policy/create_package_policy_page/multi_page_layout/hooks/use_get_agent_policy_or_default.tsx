@@ -11,9 +11,9 @@ import {
   sendCreateAgentPolicy,
   sendGetOneAgentPolicy,
   sendGetEnrollmentAPIKeys,
-} from '../../../../../../hooks';
+} from '../../../../../../../hooks';
 
-import type { AgentPolicy, NewAgentPolicy, EnrollmentAPIKey } from '../../../../../../types';
+import type { AgentPolicy, NewAgentPolicy, EnrollmentAPIKey } from '../../../../../../../types';
 
 interface UseGetAgentPolicyOrDefaultResponse {
   isLoading: boolean;

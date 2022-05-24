@@ -6,4 +6,3 @@
  */
 
 export * from './navigation';
-export { useGetAgentPolicyOrDefault } from './use_ensure_default_agent_policy';
