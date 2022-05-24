@@ -499,10 +499,13 @@ export function jobsProvider(
   async function blockingJobTasks() {
     const jobs: Array<Record<string, JobAction>> = [];
     try {
-      const body = await asInternalUser.tasks.list({
-        actions: JOB_ACTION_TASKS,
-        detailed: true,
-      });
+      const body = await asInternalUser.tasks.list(
+        {
+          actions: JOB_ACTION_TASKS,
+          detailed: true,
+        },
+        { maxRetries: 0 }
+      );
 
       if (body.nodes !== undefined) {
         Object.values(body.nodes).forEach(({ tasks }) => {
