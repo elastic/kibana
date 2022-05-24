@@ -60,7 +60,7 @@ export const esBeatsResponse = (date = moment().format('YYYY.MM.DD')) => {
             },
           },
           beats: {
-            '726039e5-67fe-4e78-837f-072cf2ba0fe7': {
+            'metricbeat|726039e5-67fe-4e78-837f-072cf2ba0fe7': {
               stats: {
                 'Metricbeat 8': {
                   index: beatsIndex,
