@@ -25,10 +25,7 @@ export function OutputJsonHighlightRules() {
     },
     {
       token: 'comment',
-      /* Comments start with '#' character and end where characters start with http status and statusText
-       * This will allow us to tokenize the status badges for highlighting the multiple request results in editor output
-       */
-      regex: /#(.*?)(?=\d+\s(?:OK|Bad Request|Not Found|Continue|Created)|$)/,
+      regex: /#(.*?)(?=\d+\s(?:[\sA-Za-z]+)|$)/,
     },
     {
       token: function (value) {
@@ -47,8 +44,7 @@ export function OutputJsonHighlightRules() {
         }
         return 'badge.badge-danger';
       },
-      // Matches any digits ending with http statusText at the end of string
-      regex: /(\d+\s(OK|Bad Request|Not Found|Continue|Created))$/,
+      regex: /(\d+\s[\sA-Za-z]+$)/,
     }
   );
 

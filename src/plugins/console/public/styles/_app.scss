@@ -52,22 +52,27 @@
 
   .ace_badge-success {
     background-color: $euiColorSuccess;
+    color: chooseLightOrDarkText($euiColorSuccess);
   }
 
   .ace_badge-primary {
     background-color: $euiColorPrimary;
+    color: chooseLightOrDarkText($euiColorPrimary);
   }
 
   .ace_badge-default {
     background-color: $euiColorGhost;
+    color: chooseLightOrDarkText($euiColorGhost);
   }
 
   .ace_badge-warning {
     background-color: $euiColorWarning;
+    color: chooseLightOrDarkText($euiColorWarning);
   }
 
   .ace_badge-danger {
     background-color: $euiColorDanger;
+    color: chooseLightOrDarkText($euiColorDanger);
   }
 }
 
