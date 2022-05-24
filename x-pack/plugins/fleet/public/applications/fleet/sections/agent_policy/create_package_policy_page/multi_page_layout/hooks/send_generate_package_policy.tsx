@@ -12,7 +12,6 @@ import { SO_SEARCH_LIMIT, getMaxPackageName } from '../../../../../../../../comm
 import { packageToPackagePolicy } from '../../../../../services';
 import { sendGetPackagePolicies } from '../../../../../hooks';
 
-// TODO: rename file
 export const sendGeneratePackagePolicy = async (
   agentPolicyId: string,
   packageInfo: PackageInfo,
@@ -27,7 +26,6 @@ export const sendGeneratePackagePolicy = async (
   const incrementedName = getMaxPackageName(packageInfo.name, packagePolicyData?.items);
 
   const defaultPolicy: NewPackagePolicy = {
-    // TODO: neaten
     name: incrementedName,
     description: '',
     namespace: 'default',

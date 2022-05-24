@@ -22,7 +22,6 @@ interface UseEnsureDefaultAgentPolicyResponse {
   enrollmentAPIKey?: EnrollmentAPIKey;
   created?: boolean;
 }
-// TODO: decide sensible default
 export const DEFAULT_AGENT_POLICY_ID: string = 'fleet-first-agent-policy';
 export const DEFAULT_AGENT_POLICY: NewAgentPolicy = Object.freeze({
   id: DEFAULT_AGENT_POLICY_ID,

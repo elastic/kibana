@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { sendGeneratePackagePolicy } from './use_generate_package_policy';
+export { sendGeneratePackagePolicy } from './send_generate_package_policy';
