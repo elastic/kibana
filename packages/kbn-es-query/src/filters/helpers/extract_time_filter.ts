@@ -8,7 +8,7 @@
 
 import { Filter, isRangeFilter, RangeFilter } from '@kbn/es-query';
 import { keys, partition } from 'lodash';
-import { TimeRange } from '../../../../common';
+import { TimeRange } from './types';
 import { convertRangeFilterToTimeRangeString } from './change_time_filter';
 
 export function extractTimeFilter(timeFieldName: string, filters: Filter[]) {

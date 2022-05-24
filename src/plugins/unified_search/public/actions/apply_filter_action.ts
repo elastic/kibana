@@ -11,8 +11,9 @@ import { ThemeServiceSetup } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { Action, createAction, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 // for cleanup esFilters need to fix the issue https://github.com/elastic/kibana/issues/131292
-import { FilterManager, TimefilterContract, esFilters } from '@kbn/data-plugin/public';
+import { FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
+import { extractTimeFilter, changeTimeFilter } from '@kbn/es-query';
 import { getOverlays, getIndexPatterns } from '../services';
 import { applyFiltersPopover } from '../apply_filters';
 
@@ -103,13 +104,13 @@ export function createFilterAction(
       }
 
       if (timeFieldName) {
-        const { timeRangeFilter, restOfFilters } = esFilters.extractTimeFilter(
+        const { timeRangeFilter, restOfFilters } = extractTimeFilter(
           timeFieldName,
           selectedFilters
         );
         filterManager.addFilters(restOfFilters);
         if (timeRangeFilter) {
-          esFilters.changeTimeFilter(timeFilter, timeRangeFilter);
+          changeTimeFilter(timeFilter, timeRangeFilter);
         }
       } else {
         filterManager.addFilters(selectedFilters);

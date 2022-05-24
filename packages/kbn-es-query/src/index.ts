@@ -96,6 +96,11 @@ export {
   toggleFilterPinned,
   uniqFilters,
   unpinFilter,
+  extractTimeFilter,
+  extractTimeRange,
+  convertRangeFilterToTimeRange,
+  convertRangeFilterToTimeRangeString,
+  changeTimeFilter
 } from './filters';
 
 export {

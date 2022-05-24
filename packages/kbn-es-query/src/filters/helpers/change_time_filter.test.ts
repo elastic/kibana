@@ -8,7 +8,8 @@
 
 import { changeTimeFilter } from './change_time_filter';
 import { timefilterServiceMock } from '../timefilter_service.mock';
-import { TimeRange, RangeFilter } from '../../../../common';
+import { RangeFilter } from '../build_filters';
+import { TimeRange } from './types';
 
 const timefilterMock = timefilterServiceMock.createSetupContract();
 const timefilter = timefilterMock.timefilter;

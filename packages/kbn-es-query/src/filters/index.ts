@@ -25,6 +25,11 @@ export {
   toggleFilterDisabled,
   toggleFilterPinned,
   unpinFilter,
+  extractTimeFilter,
+  extractTimeRange,
+  convertRangeFilterToTimeRange,
+  convertRangeFilterToTimeRangeString,
+  changeTimeFilter
 } from './helpers';
 
 export {

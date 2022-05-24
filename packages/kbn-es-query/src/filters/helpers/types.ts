@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-export * from './compare_filters';
-export * from './dedup_filters';
-export * from './uniq_filters';
-export * from './meta_filter';
-export * from './only_disabled';
-export * from './extract_time_filter';
-export * from './change_time_filter';
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type TimeRange = {
+  from: string;
+  to: string;
+  mode?: 'absolute' | 'relative';
+};
