@@ -10,7 +10,6 @@ import React from 'react';
 
 import { TestProviders, mockTimelineModel, mockTimelineData } from '../../../../../common/mock';
 import { Actions, isAlert } from '.';
-import { Ecs } from '../../../../../../common/ecs';
 import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
@@ -224,28 +223,12 @@ describe('Actions', () => {
   });
 
   describe('isAlert', () => {
-    test('it returns true when the ecsData is an alert', () => {
-      const ecsData: Ecs = {
-        ...mockTimelineData[0].ecs,
-        kibana: {
-          alert: {
-            rule: {
-              parameters: {},
-              uuid: ['CBDCAB79-BEDC-4A08-8AC2-29D7500063B9'],
-            },
-          },
-        },
-      };
-
-      expect(isAlert(ecsData)).toBe(true);
+    test('it returns true when the eventType is an alert', () => {
+      expect(isAlert('signal')).toBe(true);
     });
 
-    test('it returns false when ecsData is NOT an alert', () => {
-      const ecsData: Ecs = {
-        ...mockTimelineData[0].ecs,
-      };
-
-      expect(isAlert(ecsData)).toBe(false);
+    test('it returns false when the eventType is NOT an alert', () => {
+      expect(isAlert('raw')).toBe(false);
     });
   });
 });

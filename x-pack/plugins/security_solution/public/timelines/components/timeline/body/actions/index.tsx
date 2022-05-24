@@ -30,18 +30,19 @@ import {
   useGlobalFullScreen,
   useTimelineFullScreen,
 } from '../../../../../common/containers/use_full_screen';
-import { Ecs } from '../../../../../../common/ecs';
 import {
   TimelineId,
   ActionProps,
   OnPinEvent,
   TimelineTabs,
+  TimelineEventsType,
 } from '../../../../../../common/types/timeline';
 import { timelineActions, timelineSelectors } from '../../../../store/timeline';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
 import { isInvestigateInResolverActionEnabled } from '../../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 
-export const isAlert = (ecsData: Ecs): boolean => getEventType(ecsData) === 'signal';
+export const isAlert = (eventType: TimelineEventsType | Omit<TimelineEventsType, 'all'>): boolean =>
+  eventType === 'signal';
 
 const ActionsContainer = styled.div`
   align-items: center;
@@ -224,7 +225,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
             />
             <PinEventAction
               ariaLabel={i18n.PIN_EVENT_FOR_ROW({ ariaRowindex, columnValues, isEventPinned })}
-              isAlert={isAlert(ecsData)}
+              isAlert={isAlert(eventType)}
               key="pin-event"
               onPinClicked={handlePinClicked}
               noteIds={eventIdToNoteIds ? eventIdToNoteIds[eventId] || emptyNotes : emptyNotes}
