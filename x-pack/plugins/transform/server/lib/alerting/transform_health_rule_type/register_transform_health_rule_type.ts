@@ -102,6 +102,7 @@ export function getTransformHealthRuleType(): RuleType<
     producer: 'stackAlerts',
     minimumLicenseRequired: PLUGIN.MINIMUM_LICENSE_REQUIRED,
     isExportable: true,
+    doesSetRecoveryContext: true,
     async executor(options) {
       const {
         services: { scopedClusterClient, alertFactory },
@@ -114,11 +115,23 @@ export function getTransformHealthRuleType(): RuleType<
 
       const executionResult = await transformHealthService.getHealthChecksResults(params);
 
-      if (executionResult.length > 0) {
-        executionResult.forEach(({ name: alertInstanceName, context }) => {
+      const unhealthyTests = executionResult.filter(({ isHealthy }) => !isHealthy);
+
+      if (unhealthyTests.length > 0) {
+        unhealthyTests.forEach(({ name: alertInstanceName, context }) => {
           const alertInstance = alertFactory.create(alertInstanceName);
           alertInstance.scheduleActions(TRANSFORM_ISSUE, context);
         });
+      }
+
+      // Set context for recovered alerts
+      const { getRecoveredAlerts } = alertFactory.done();
+      for (const recoveredAlert of getRecoveredAlerts()) {
+        const recoveredAlertId = recoveredAlert.getId();
+        const testResult = executionResult.find((v) => v.name === recoveredAlertId);
+        if (testResult) {
+          recoveredAlert.setContext(testResult.context);
+        }
       }
     },
   };
