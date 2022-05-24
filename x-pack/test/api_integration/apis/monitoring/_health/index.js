@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { mapValues } from 'lodash';
 import expect from '@kbn/expect';
+
 import { getLifecycleMethods } from '../data_stream';
 
 import emptyResponse from './fixtures/response_empty.json';
@@ -55,6 +57,26 @@ export default function ({ getService }) {
 
         delete body.settings;
         expect(body).to.eql(esBeatsResponse());
+      });
+
+      it('returns relevant settings', async () => {
+        const {
+          body: { settings },
+        } = await supertest
+          .get(`/api/monitoring/v1/_health?min=${timeRange.min}&max=${timeRange.max}`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        // we only test the structure of the settings and not the actual values
+        // to avoid coupling our tests with any underlying changes to default
+        // configuration
+        const settingsType = mapValues(settings, (value) => typeof value);
+        expect(settingsType).to.eql({
+          ccs: 'boolean',
+          logsIndex: 'string',
+          metricbeatIndex: 'string',
+          hasRemoteClusterConfigured: 'boolean',
+        });
       });
     });
   });
