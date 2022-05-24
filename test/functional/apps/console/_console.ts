@@ -125,8 +125,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('multiple requests output', () => {
       const sendRequests = async () => {
-        await PageObjects.console.enterRequest('\n PUT test-index');
-        await PageObjects.console.enterRequest('\n DELETE test-index');
+        await PageObjects.console.enterRequest('\n PUT test-index-1');
+        await PageObjects.console.enterRequest('\n PUT test-index-2');
         await PageObjects.console.selectAllRequests();
         await PageObjects.console.clickPlay();
       };
@@ -139,8 +139,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           const response = await PageObjects.console.getResponse();
           log.debug(response);
-          expect(response).to.contain('# PUT test-index 200 OK');
-          expect(response).to.contain('# DELETE test-index 200 OK');
+          expect(response).to.contain('# PUT test-index-1 200 OK');
+          expect(response).to.contain('# PUT test-index-2 200 OK');
         });
       });
       it('should display status badges', async () => {
