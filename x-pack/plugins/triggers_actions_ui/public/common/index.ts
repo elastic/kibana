@@ -22,6 +22,6 @@ export {
   builtInGroupByTypes,
 } from './constants';
 export type { IOption } from './index_controls';
-export { getFields, firstFieldOption } from './index_controls';
+export { getFields, getIndexOptions, firstFieldOption } from './index_controls';
 export { getTimeFieldOptions } from './lib';
 export type { Comparator, AggregationType, GroupByType, RuleStatus } from './types';

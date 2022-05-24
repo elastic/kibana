@@ -69,6 +69,7 @@ export {
   builtInGroupByTypes,
   builtInAggregationTypes,
   getFields,
+  getIndexOptions,
   firstFieldOption,
   getTimeFieldOptions,
   GroupByExpression,
