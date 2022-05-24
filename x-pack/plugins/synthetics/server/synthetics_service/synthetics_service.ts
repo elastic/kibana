@@ -15,6 +15,7 @@ import {
   TaskManagerStartContract,
   TaskInstance,
 } from '@kbn/task-manager-plugin/server';
+import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
 import { MonitorSyncEvent } from '../legacy_uptime/lib/telemetry/types';
 import { sendSyncTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
@@ -83,7 +84,7 @@ export class SyntheticsService {
     this.isAllowed = false;
     this.signupUrl = null;
 
-    this.apiClient = new ServiceAPIClient(logger, this.config, this.server.kibanaVersion);
+    this.apiClient = new ServiceAPIClient(logger, this.config, this.server);
 
     this.esHosts = getEsHosts({ config: this.config, cloud: server.cloud });
 
@@ -154,16 +155,26 @@ export class SyntheticsService {
             // Perform the work of the task. The return value should fit the TaskResult interface.
             async run() {
               const { state } = taskInstance;
+              try {
+                await service.registerServiceLocations();
 
-              await service.registerServiceLocations();
+                const { allowed, signupUrl } = await service.apiClient.checkAccountAccessStatus();
+                service.isAllowed = allowed;
+                service.signupUrl = signupUrl;
 
-              const { allowed, signupUrl } = await service.apiClient.checkAccountAccessStatus();
-              service.isAllowed = allowed;
-              service.signupUrl = signupUrl;
-
-              if (service.isAllowed) {
-                service.setupIndexTemplates();
-                service.syncErrors = await service.pushConfigs();
+                if (service.isAllowed) {
+                  service.setupIndexTemplates();
+                  service.syncErrors = await service.pushConfigs();
+                }
+              } catch (e) {
+                sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
+                  reason: 'Failed to run scheduled sync task',
+                  message: e?.message,
+                  type: 'runTaskError',
+                  code: e?.code,
+                  status: e.status,
+                });
+                throw e;
               }
 
               return { state };
@@ -201,9 +212,17 @@ export class SyntheticsService {
 
       return taskInstance;
     } catch (e) {
+      sendErrorTelemetryEvents(this.logger, this.server.telemetry, {
+        reason: 'Failed to schedule sync task',
+        message: e?.message ?? e,
+        type: 'scheduleTaskError',
+        code: e?.code,
+        status: e.status,
+      });
+
       this.logger?.error(
         `Error running task: ${SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID}, `,
-        e?.message() ?? e
+        e?.message ?? e
       );
 
       return null;

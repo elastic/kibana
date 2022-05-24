@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { forkJoin, from as rxjsFrom, Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import * as https from 'https';
 import { SslConfig } from '@kbn/server-http-tools';
 import { Logger } from '@kbn/core/server';
+import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
+import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
 import { MonitorFields, ServiceLocations, ServiceLocationErrors } from '../../common/runtime_types';
 import { convertToDataStreamFormat } from './formatters/convert_to_data_stream';
 import { ServiceConfig } from '../../common/config';
@@ -34,12 +36,13 @@ export class ServiceAPIClient {
   private logger: Logger;
   private readonly config: ServiceConfig;
   private readonly kibanaVersion: string;
+  private readonly server: UptimeServerSetup;
 
-  constructor(logger: Logger, config: ServiceConfig, kibanaVersion: string) {
+  constructor(logger: Logger, config: ServiceConfig, server: UptimeServerSetup) {
     this.config = config;
     const { username, password } = config;
     this.username = username;
-    this.kibanaVersion = kibanaVersion;
+    this.kibanaVersion = server.kibanaVersion;
 
     if (username && password) {
       this.authorization = 'Basic ' + Buffer.from(`${username}:${password}`).toString('base64');
@@ -49,6 +52,7 @@ export class ServiceAPIClient {
 
     this.logger = logger;
     this.locations = [];
+    this.server = server;
   }
 
   getHttpsAgent() {
@@ -169,9 +173,17 @@ export class ServiceAPIClient {
                 `Successfully called service with method ${method} with ${allMonitors.length} monitors `
               );
             }),
-            catchError((err) => {
-              pushErrors.push({ locationId: id, error: err.response?.data });
+            catchError((err: AxiosError<{ reason: string; status: number }>) => {
+              pushErrors.push({ locationId: id, error: err.response?.data! });
               this.logger.error(err);
+              sendErrorTelemetryEvents(this.logger, this.server.telemetry, {
+                reason: err.response?.data?.reason,
+                message: err.message,
+                type: 'syncError',
+                code: err.code,
+                status: err.response?.data?.status,
+                url,
+              });
               if (err.response?.data?.reason) {
                 this.logger.error(err.response?.data?.reason);
               }
