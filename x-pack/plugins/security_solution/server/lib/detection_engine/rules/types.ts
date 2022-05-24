@@ -42,7 +42,7 @@ import type { VersionOrUndefined, Version } from '@kbn/securitysolution-io-ts-ty
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
 import type { ListArrayOrUndefined, ListArray } from '@kbn/securitysolution-io-ts-list-types';
-import { RulesClient, PartialRule } from '@kbn/alerting-plugin/server';
+import { RulesClient, PartialRule, BulkEditOperation } from '@kbn/alerting-plugin/server';
 import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
@@ -284,6 +284,15 @@ export interface FindRuleOptions {
   filter: QueryFilterOrUndefined;
   fields: FieldsOrUndefined;
   sortOrder: SortOrderOrUndefined;
+}
+
+export interface BulkEditRulesOptions {
+  isRuleRegistryEnabled: boolean;
+  rulesClient: RulesClient;
+  operations: BulkEditOperation[];
+  filter?: QueryFilterOrUndefined;
+  ids?: string[];
+  paramsModifier?: (params: RuleParams) => Promise<RuleParams>;
 }
 
 export interface LegacyMigrateParams {

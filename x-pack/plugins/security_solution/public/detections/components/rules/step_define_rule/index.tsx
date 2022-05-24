@@ -80,6 +80,8 @@ export const stepDefineDefaultValue: DefineStepRule = {
     filters: [],
     saved_id: undefined,
   },
+  requiredFields: [],
+  relatedIntegrations: [],
   threatMapping: [],
   threshold: {
     field: [],
