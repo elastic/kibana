@@ -87,7 +87,7 @@ export class File<M = unknown> implements IFile {
       });
     } catch (e) {
       await this.updateFileState({ action: 'uploadError' });
-      this.blobStorageService.delete(this.id).catch(() => {}); // Best effort to remove any uploaded content
+      this.blobStorage.delete(this.id).catch(() => {}); // Best effort to remove any uploaded content
       throw e;
     }
   }
