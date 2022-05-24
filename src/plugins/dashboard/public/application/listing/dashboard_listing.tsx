@@ -19,6 +19,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ApplicationStart, SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import useMount from 'react-use/lib/useMount';
 import { attemptLoadDashboardByTitle } from '../lib';
 import { DashboardAppServices, DashboardRedirect } from '../../types';
 import {
@@ -36,6 +37,7 @@ import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { confirmCreateWithUnsaved, confirmDiscardUnsavedChanges } from './confirm_overlays';
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
+import { DashboardAppNoDataPage, isDashboardAppInNoDataState } from '../dashboard_app_no_data';
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
@@ -57,6 +59,7 @@ export const DashboardListing = ({
     services: {
       core,
       data,
+      dataViews,
       savedDashboards,
       savedObjectsClient,
       savedObjectsTagging,
@@ -65,6 +68,11 @@ export const DashboardListing = ({
       chrome: { setBreadcrumbs },
     },
   } = useKibana<DashboardAppServices>();
+
+  const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
+  useMount(() => {
+    (async () => setShowNoDataPage(await isDashboardAppInNoDataState(dataViews)))();
+  });
 
   const [unsavedDashboardIds, setUnsavedDashboardIds] = useState<string[]>(
     dashboardSessionStorage.getDashboardIdsWithUnsavedChanges()
@@ -286,37 +294,44 @@ export const DashboardListing = ({
   const { getEntityName, getTableCaption, getTableListTitle, getEntityNamePlural } =
     dashboardListingTable;
   return (
-    <TableListView
-      createItem={!showWriteControls ? undefined : createItem}
-      deleteItems={!showWriteControls ? undefined : deleteItems}
-      initialPageSize={initialPageSize}
-      editItem={!showWriteControls ? undefined : editItem}
-      initialFilter={initialFilter ?? defaultFilter}
-      toastNotifications={core.notifications.toasts}
-      headingId="dashboardListingHeading"
-      findItems={fetchItems}
-      rowHeader="title"
-      entityNamePlural={getEntityNamePlural()}
-      tableListTitle={getTableListTitle()}
-      tableCaption={getTableCaption()}
-      entityName={getEntityName()}
-      {...{
-        emptyPrompt,
-        searchFilters,
-        listingLimit,
-        tableColumns,
-      }}
-      theme={core.theme}
-      application={core.application}
-    >
-      <DashboardUnsavedListing
-        redirectTo={redirectTo}
-        unsavedDashboardIds={unsavedDashboardIds}
-        refreshUnsavedDashboards={() =>
-          setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges())
-        }
-      />
-    </TableListView>
+    <>
+      {showNoDataPage && (
+        <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
+      )}
+      {!showNoDataPage && (
+        <TableListView
+          createItem={!showWriteControls ? undefined : createItem}
+          deleteItems={!showWriteControls ? undefined : deleteItems}
+          initialPageSize={initialPageSize}
+          editItem={!showWriteControls ? undefined : editItem}
+          initialFilter={initialFilter ?? defaultFilter}
+          toastNotifications={core.notifications.toasts}
+          headingId="dashboardListingHeading"
+          findItems={fetchItems}
+          rowHeader="title"
+          entityNamePlural={getEntityNamePlural()}
+          tableListTitle={getTableListTitle()}
+          tableCaption={getTableCaption()}
+          entityName={getEntityName()}
+          {...{
+            emptyPrompt,
+            searchFilters,
+            listingLimit,
+            tableColumns,
+          }}
+          theme={core.theme}
+          application={core.application}
+        >
+          <DashboardUnsavedListing
+            redirectTo={redirectTo}
+            unsavedDashboardIds={unsavedDashboardIds}
+            refreshUnsavedDashboards={() =>
+              setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges())
+            }
+          />
+        </TableListView>
+      )}
+    </>
   );
 };
 
