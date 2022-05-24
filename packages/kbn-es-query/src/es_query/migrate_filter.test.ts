@@ -9,6 +9,7 @@
 import { isEqual, cloneDeep } from 'lodash';
 import { migrateFilter, DeprecatedMatchPhraseFilter } from './migrate_filter';
 import { PhraseFilter, MatchAllFilter } from '../filters';
+import { Filter } from '../filters';
 
 describe('migrateFilter', function () {
   const oldMatchPhraseFilter = {
@@ -66,7 +67,25 @@ describe('migrateFilter', function () {
     } as MatchAllFilter;
     const migratedFilter = migrateFilter(originalFilter, undefined);
 
-    expect(migratedFilter).toBe(originalFilter);
+    expect(migratedFilter).toEqual(originalFilter);
     expect(isEqual(migratedFilter, originalFilter)).toBe(true);
+  });
+
+  it('should handle the case where .query already exists and filter has other top level keys on there', function () {
+    const originalFilter = {
+      query: { match_all: {} },
+      meta: {},
+      size: 0,
+    } as Filter;
+
+    const filterAfterMigrate = {
+      query: { match_all: {} },
+      meta: {},
+    } as Filter;
+
+    const migratedFilter = migrateFilter(originalFilter, undefined);
+
+    expect(migratedFilter).toEqual(filterAfterMigrate);
+    expect(isEqual(migratedFilter, filterAfterMigrate)).toBe(true);
   });
 });
