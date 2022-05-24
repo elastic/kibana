@@ -25,6 +25,8 @@ import { getFlattenedObject } from '@kbn/std';
 import omit from 'lodash/omit';
 import type { SearchHit } from '@kbn/core/types/elasticsearch';
 
+import styled from 'styled-components';
+
 import type { InstalledIntegrationPolicy } from '../../../../../../../components/agent_enrollment_flyout/use_get_agent_incoming_data';
 import {
   useGetAgentIncomingData,
@@ -45,8 +47,30 @@ const OMIT_KEYS = [
   'agent.id',
   'elastic_agent.id',
   'data_stream.namespace',
-  '@timestamp',
+  '@timestamp', // this is already
 ];
+
+const CleanOverflowDescriptionList = styled(EuiDescriptionList)`
+  overflow: hidden;
+  column-idth: 350px;
+  max-height: 120px;
+  word-break: break-all;
+  white-space: pre-wrap;
+`;
+
+// &&& increases the style priority
+const CompressedPre = styled('pre')`
+  &&& {
+    background: none;
+    padding: 0 0;
+  }
+`;
+
+const ScrollingDataContainer = styled('div')`
+  max-height: 50vh;
+  overflow-y: scroll;
+`;
+
 const HitPreview: React.FC<{ hit: SearchHit }> = ({ hit }) => {
   const hitForDisplay = omit(getFlattenedObject(hit._source as Record<string, unknown>), OMIT_KEYS);
   const listItems = Object.entries(hitForDisplay).map(([key, value]) => ({
@@ -57,19 +81,7 @@ const HitPreview: React.FC<{ hit: SearchHit }> = ({ hit }) => {
   return (
     <pre>
       <code>
-        <EuiDescriptionList
-          style={{
-            overflow: 'hidden',
-            columnWidth: '350px',
-            maxHeight: '120px',
-            wordBreak: 'break-all',
-            whiteSpace: 'pre-wrap',
-          }}
-          listItems={listItems}
-          type="inline"
-          align="left"
-          compressed
-        />
+        <CleanOverflowDescriptionList listItems={listItems} type="inline" align="left" compressed />
       </code>
     </pre>
   );
@@ -80,9 +92,9 @@ const HitTimestamp: React.FC<{ hit: SearchHit }> = ({ hit }) => {
   const timestamp = source?.['@timestamp'] || '-';
   return (
     <EuiText size={'xs'}>
-      <pre style={{ background: 'none', padding: '0 0' }}>
+      <CompressedPre>
         {timestamp ? formatDate(timestamp, 'MMM D, YYYY @ HH:mm:ss.SSS') : '-'}
-      </pre>
+      </CompressedPre>
     </EuiText>
   );
 };
@@ -90,7 +102,7 @@ const HitTimestamp: React.FC<{ hit: SearchHit }> = ({ hit }) => {
 const AgentDataPreview: React.FC<{ dataPreview: SearchHit[] }> = ({ dataPreview }) => {
   const previewData = dataPreview.slice(0, MAX_AGENT_DATA_PREVIEW_COUNT);
   return (
-    <div style={{ maxHeight: '50vh', overflowY: 'scroll' }}>
+    <ScrollingDataContainer>
       {previewData.map((hit, idx) => (
         <div id={hit._id}>
           <EuiFlexGroup gutterSize={'xs'}>
@@ -105,7 +117,7 @@ const AgentDataPreview: React.FC<{ dataPreview: SearchHit[] }> = ({ dataPreview 
           {idx !== previewData.length - 1 && <EuiHorizontalRule margin="s" />}
         </div>
       ))}
-    </div>
+    </ScrollingDataContainer>
   );
 };
 
