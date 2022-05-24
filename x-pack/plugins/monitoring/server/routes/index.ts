@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint import/namespace: ['error', { allowComputed: true }]*/
 
 import { MonitoringConfig } from '../config';
 import { decorateDebugServer } from '../debug_logger';

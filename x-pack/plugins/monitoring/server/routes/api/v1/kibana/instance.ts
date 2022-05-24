@@ -14,6 +14,7 @@ import { MonitoringCore } from '../../../../types';
 import {
   postKibanaInstanceRequestParamsRT,
   postKibanaInstanceRequestPayloadRT,
+  postKibanaInstanceResponsePayloadRT,
 } from '../../../../../common/http_api/kibana';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 
@@ -38,10 +39,10 @@ export function kibanaInstanceRoute(server: MonitoringCore) {
           getKibanaInfo(req, { clusterUuid, kibanaUuid }),
         ]);
 
-        return {
+        return postKibanaInstanceResponsePayloadRT.encode({
           metrics,
           kibanaSummary,
-        };
+        });
       } catch (err) {
         throw handleError(err, req);
       }

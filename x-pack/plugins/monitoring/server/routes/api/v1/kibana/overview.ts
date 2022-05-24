@@ -12,6 +12,7 @@ import { handleError } from '../../../../lib/errors';
 import {
   postKibanaOverviewRequestParamsRT,
   postKibanaOverviewRequestPayloadRT,
+  postKibanaOverviewResponsePayloadRT,
 } from '../../../../../common/http_api/kibana';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { MonitoringCore } from '../../../../types';
@@ -48,10 +49,10 @@ export function kibanaOverviewRoute(server: MonitoringCore) {
           ]),
         ]);
 
-        return {
+        return postKibanaOverviewResponsePayloadRT.encode({
           clusterStatus,
           metrics,
-        };
+        });
       } catch (err) {
         throw handleError(err, req);
       }

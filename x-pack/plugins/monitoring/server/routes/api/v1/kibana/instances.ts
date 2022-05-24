@@ -12,6 +12,7 @@ import { MonitoringCore } from '../../../../types';
 import {
   postKibanaInstancesRequestParamsRT,
   postKibanaInstancesRequestPayloadRT,
+  postKibanaInstancesResponsePayloadRT,
 } from '../../../../../common/http_api/kibana';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 
@@ -35,10 +36,10 @@ export function kibanaInstancesRoute(server: MonitoringCore) {
           getKibanas(req, { clusterUuid }),
         ]);
 
-        return {
+        return postKibanaInstancesResponsePayloadRT.encode({
           clusterStatus,
           kibanas,
-        };
+        });
       } catch (err) {
         throw handleError(err, req);
       }

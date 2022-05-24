@@ -18,5 +18,5 @@ export const getKibanaClusterStatus = (
   }
 ) => {
   const clusters = [{ cluster_uuid: clusterUuid }];
-  return getKibanasForClusters(req, clusters).then((kibanas) => kibanas && kibanas[0]?.stats);
+  return getKibanasForClusters(req, clusters).then((kibanas) => kibanas?.[0]?.stats);
 };
