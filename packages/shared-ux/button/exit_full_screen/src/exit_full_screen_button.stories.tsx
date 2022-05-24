@@ -9,7 +9,6 @@
 import React from 'react';
 import { action } from '@storybook/addon-actions';
 
-import { Fallback } from './fallback';
 import { ExitFullScreenButtonProvider } from './services';
 import { ExitFullScreenButton as ExitFullScreenButtonComponent } from './exit_full_screen_button.component';
 import { ExitFullScreenButton } from './exit_full_screen_button';
@@ -44,5 +43,3 @@ ConnectedComponent.argTypes = {
 export const PureComponent = () => {
   return <ExitFullScreenButtonComponent onClick={action('onClick')} />;
 };
-
-export const AsyncFallback = () => <Fallback />;
