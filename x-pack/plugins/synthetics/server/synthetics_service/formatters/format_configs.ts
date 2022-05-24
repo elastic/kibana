@@ -17,7 +17,6 @@ const UI_KEYS_TO_SKIP = [
   ConfigKey.DOWNLOAD_SPEED,
   ConfigKey.LATENCY,
   ConfigKey.IS_THROTTLING_ENABLED,
-  ConfigKey.LOCATIONS,
   ConfigKey.REVISION,
   ConfigKey.CUSTOM_HEARTBEAT_ID,
   'secrets',

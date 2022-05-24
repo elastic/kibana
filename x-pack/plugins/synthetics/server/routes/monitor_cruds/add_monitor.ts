@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { SavedObject } from '@kbn/core/server';
+import { SavedObject, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   ConfigKey,
   MonitorFields,
@@ -36,20 +36,38 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       return response.badRequest({ body: { message, attributes: { details, ...payload } } });
     }
 
-    const newMonitor: SavedObject<EncryptedSyntheticsMonitor> =
-      await savedObjectsClient.create<EncryptedSyntheticsMonitor>(
+    let newMonitor: SavedObject<EncryptedSyntheticsMonitor> | null = null;
+
+    try {
+      newMonitor = await savedObjectsClient.create<EncryptedSyntheticsMonitor>(
         syntheticsMonitorType,
         formatSecrets({
           ...monitor,
           revision: 1,
         })
       );
+    } catch (getErr) {
+      if (SavedObjectsErrorHelpers.isForbiddenError(getErr)) {
+        return response.forbidden({ body: getErr });
+      }
+    }
+
+    if (!newMonitor) {
+      return response.customError({
+        body: { message: 'Unable to create monitor' },
+        statusCode: 500,
+      });
+    }
 
     const errors = await syncNewMonitor({ monitor, monitorSavedObject: newMonitor, server });
 
     if (errors && errors.length > 0) {
       return response.ok({
-        body: { message: 'error pushing monitor to the service', attributes: { errors } },
+        body: {
+          message: 'error pushing monitor to the service',
+          attributes: { errors },
+          id: newMonitor.id,
+        },
       });
     }
 
