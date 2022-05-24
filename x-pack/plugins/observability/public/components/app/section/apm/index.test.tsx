@@ -8,6 +8,8 @@
 import React from 'react';
 import * as fetcherHook from '../../../../hooks/use_fetcher';
 import { render, data as dataMock } from '../../../../utils/test_helper';
+import { CoreStart } from '@kbn/core/public';
+import { ObservabilityPublicPluginsStart } from '../../../../plugin';
 import { APMSection } from '.';
 import { response } from './mock_data/apm.mock';
 import * as hasDataHook from '../../../../hooks/use_has_data';
@@ -48,10 +50,11 @@ describe('APMSection', () => {
         unsafe: {
           alertingExperience: { enabled: true },
           cases: { enabled: true },
-          overviewNext: { enabled: false },
           rules: { enabled: true },
         },
       },
+      core: {} as CoreStart,
+      plugins: {} as ObservabilityPublicPluginsStart,
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
       ObservabilityPageTemplate: KibanaPageTemplate,
       kibanaFeatures: [],

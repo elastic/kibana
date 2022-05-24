@@ -63,7 +63,6 @@ describe('renderApp', () => {
       unsafe: {
         alertingExperience: { enabled: true },
         cases: { enabled: true },
-        overviewNext: { enabled: false },
         rules: { enabled: true },
       },
     };
@@ -84,6 +83,12 @@ describe('renderApp', () => {
         observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
         ObservabilityPageTemplate: KibanaPageTemplate,
         kibanaFeatures: [],
+        usageCollection: {
+          components: {
+            ApplicationUsageTrackingProvider: (props) => null,
+          },
+          reportUiCounter: jest.fn(),
+        },
       });
       unmount();
     }).not.toThrowError();

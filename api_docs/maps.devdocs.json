@@ -80,29 +80,8 @@
             "label": "getMeta",
             "description": [],
             "signature": [
-              "() => Partial<",
-              "DataFilters",
-              " & { applyGlobalQuery: boolean; applyGlobalTime: boolean; applyForceRefresh: boolean; fieldNames: string[]; geogridPrecision?: number | undefined; timesliceMaskField?: string | undefined; sourceQuery?: ",
-              "Query",
-              " | undefined; sourceMeta: object | null; isForceRefresh: boolean; } & ",
-              "VectorJoinSourceRequestMeta",
-              " & { dynamicStyleFields: string[]; isTimeAware: boolean; sourceQuery: ",
-              "Query",
-              "; timeFilters: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
-              "; } & ",
-              "ESSearchSourceResponseMeta",
-              " & ",
-              "ESGeoLineSourceResponseMeta",
-              " & ",
-              "VectorTileLayerMeta",
-              ">"
+              "() => ",
+              "DataRequestMeta"
             ],
             "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
             "deprecated": false,
@@ -1184,6 +1163,20 @@
             "description": [],
             "signature": [
               "Timeslice",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.BoundsRequestMeta.joinKeyFilter",
+            "type": "Object",
+            "tags": [],
+            "label": "joinKeyFilter",
+            "description": [],
+            "signature": [
+              "Filter",
               " | undefined"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
@@ -3051,7 +3044,7 @@
         "label": "SourceEditorArgs",
         "description": [],
         "signature": [
-          "{ clearJoins: () => void; currentLayerType: string; hasJoins: boolean; onChange: (...args: ",
+          "{ currentLayerType: string; numberOfJoins: number; onChange: (...args: ",
           "OnSourceChangeArgs",
           "[]) => Promise<void>; }"
         ],

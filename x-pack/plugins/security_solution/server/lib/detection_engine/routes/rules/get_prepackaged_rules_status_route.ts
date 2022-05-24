@@ -61,7 +61,7 @@ export const getPrepackagedRulesStatusRoute = (
           page: 1,
           sortField: 'enabled',
           sortOrder: 'desc',
-          filter: 'alert.attributes.tags:"__internal_immutable:false"',
+          filter: 'alert.attributes.params.immutable: false',
           fields: undefined,
         });
         const frameworkRequest = await buildFrameworkRequest(context, security, request);

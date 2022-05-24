@@ -1476,55 +1476,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-server.DataRequestHandlerContext",
-        "type": "Interface",
-        "tags": [],
-        "label": "DataRequestHandlerContext",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "server",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-server.DataRequestHandlerContext",
-            "text": "DataRequestHandlerContext"
-          },
-          " extends ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.RequestHandlerContext",
-            "text": "RequestHandlerContext"
-          }
-        ],
-        "path": "src/plugins/data/server/search/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-server.DataRequestHandlerContext.search",
-            "type": "Object",
-            "tags": [],
-            "label": "search",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "server",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-server.IScopedSearchClient",
-                "text": "IScopedSearchClient"
-              }
-            ],
-            "path": "src/plugins/data/server/search/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-server.IScopedSearchClient",
         "type": "Interface",
         "tags": [],
@@ -2636,6 +2587,35 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "data",
+        "id": "def-server.DataRequestHandlerContext",
+        "type": "Type",
+        "tags": [],
+        "label": "DataRequestHandlerContext",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.RequestHandlerContext",
+            "text": "RequestHandlerContext"
+          },
+          " & { search: Promise<",
+          {
+            "pluginId": "data",
+            "scope": "server",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-server.IScopedSearchClient",
+            "text": "IScopedSearchClient"
+          },
+          ">; }"
+        ],
+        "path": "src/plugins/data/server/search/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "data",
         "id": "def-server.SearchRequestHandlerContext",
@@ -7594,6 +7574,117 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.MultiFieldKey",
+        "type": "Class",
+        "tags": [],
+        "label": "MultiFieldKey",
+        "description": [],
+        "path": "src/plugins/data/common/search/aggs/buckets/multi_field_key.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.MultiFieldKey.id",
+            "type": "string",
+            "tags": [],
+            "label": "[id]",
+            "description": [],
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_field_key.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.MultiFieldKey.keys",
+            "type": "Array",
+            "tags": [],
+            "label": "keys",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_field_key.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.MultiFieldKey.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_field_key.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.MultiFieldKey.Unnamed.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "bucket",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/plugins/data/common/search/aggs/buckets/multi_field_key.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.MultiFieldKey.idBucket",
+            "type": "Function",
+            "tags": [],
+            "label": "idBucket",
+            "description": [],
+            "signature": [
+              "(bucket: unknown) => string"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_field_key.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.MultiFieldKey.idBucket.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "bucket",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/plugins/data/common/search/aggs/buckets/multi_field_key.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.MultiFieldKey.toString",
+            "type": "Function",
+            "tags": [],
+            "label": "toString",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_field_key.ts",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           }
         ],
@@ -17988,6 +18079,19 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.AggParamsMultiTerms.shardSize",
+            "type": "number",
+            "tags": [],
+            "label": "shardSize",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.AggParamsMultiTerms.otherBucket",
             "type": "CompoundType",
             "tags": [],
@@ -18771,6 +18875,19 @@
             "type": "number",
             "tags": [],
             "label": "size",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsTerms.shardSize",
+            "type": "number",
+            "tags": [],
+            "label": "shardSize",
             "description": [],
             "signature": [
               "number | undefined"
@@ -24348,7 +24465,7 @@
         "label": "AggConfigOptions",
         "description": [],
         "signature": [
-          "{ type: ",
+          "{ id?: string | undefined; type: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -24356,7 +24473,7 @@
             "section": "def-common.IAggType",
             "text": "IAggType"
           },
-          "; id?: string | undefined; enabled?: boolean | undefined; params?: {} | ",
+          "; enabled?: boolean | undefined; params?: {} | ",
           "SerializableRecord",
           " | undefined; schema?: string | undefined; }"
         ],
@@ -25058,7 +25175,7 @@
         "label": "CreateAggConfigParams",
         "description": [],
         "signature": [
-          "{ type: string | ",
+          "{ id?: string | undefined; type: string | ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -25066,7 +25183,7 @@
             "section": "def-common.IAggType",
             "text": "IAggType"
           },
-          "; id?: string | undefined; enabled?: boolean | undefined; params?: {} | ",
+          "; enabled?: boolean | undefined; params?: {} | ",
           "SerializableRecord",
           " | undefined; schema?: string | undefined; }"
         ],

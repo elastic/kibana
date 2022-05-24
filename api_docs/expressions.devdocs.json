@@ -6361,7 +6361,13 @@
         "description": [],
         "signature": [
           "(nodeRef: React.RefObject<HTMLElement>, {\n    debounce,\n    expression,\n    hasCustomErrorRenderer,\n    onData$,\n    onEvent,\n    onRender$,\n    reload$,\n    ...loaderParams\n  }: ",
-          "ExpressionRendererParams",
+          {
+            "pluginId": "expressions",
+            "scope": "public",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-public.ExpressionRendererParams",
+            "text": "ExpressionRendererParams"
+          },
           ") => ExpressionRendererState"
         ],
         "path": "src/plugins/expressions/public/react_expression_renderer/use_expression_renderer.ts",
@@ -6389,7 +6395,13 @@
             "label": "{\n    debounce,\n    expression,\n    hasCustomErrorRenderer,\n    onData$,\n    onEvent,\n    onRender$,\n    reload$,\n    ...loaderParams\n  }",
             "description": [],
             "signature": [
-              "ExpressionRendererParams"
+              {
+                "pluginId": "expressions",
+                "scope": "public",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-public.ExpressionRendererParams",
+                "text": "ExpressionRendererParams"
+              }
             ],
             "path": "src/plugins/expressions/public/react_expression_renderer/use_expression_renderer.ts",
             "deprecated": false,
@@ -7877,15 +7889,11 @@
             "references": [
               {
                 "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/demodata/index.ts"
+              },
+              {
+                "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/embeddable.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/common/functions/filters.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
               },
               {
                 "plugin": "canvas",
@@ -7897,15 +7905,19 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/neq.ts"
-              },
-              {
-                "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/demodata/index.ts"
+                "path": "x-pack/plugins/canvas/common/functions/filters.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/neq.ts"
               },
               {
                 "plugin": "visTypeXy",
@@ -8608,6 +8620,230 @@
               }
             ],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressions",
+        "id": "def-public.ExpressionRendererParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "ExpressionRendererParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "public",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-public.ExpressionRendererParams",
+            "text": "ExpressionRendererParams"
+          },
+          " extends ",
+          {
+            "pluginId": "expressions",
+            "scope": "public",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-public.IExpressionLoaderParams",
+            "text": "IExpressionLoaderParams"
+          }
+        ],
+        "path": "src/plugins/expressions/public/react_expression_renderer/use_expression_renderer.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionRendererParams.debounce",
+            "type": "number",
+            "tags": [],
+            "label": "debounce",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/expressions/public/react_expression_renderer/use_expression_renderer.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionRendererParams.expression",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "expression",
+            "description": [],
+            "signature": [
+              "string | ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              }
+            ],
+            "path": "src/plugins/expressions/public/react_expression_renderer/use_expression_renderer.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionRendererParams.hasCustomErrorRenderer",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasCustomErrorRenderer",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/expressions/public/react_expression_renderer/use_expression_renderer.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionRendererParams.onData$",
+            "type": "Function",
+            "tags": [],
+            "label": "onData$",
+            "description": [],
+            "signature": [
+              "(<TData, TInspectorAdapters>(data: TData, adapters?: TInspectorAdapters | undefined, partial?: boolean | undefined) => void) | undefined"
+            ],
+            "path": "src/plugins/expressions/public/react_expression_renderer/use_expression_renderer.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionRendererParams.onData$.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "TData"
+                ],
+                "path": "src/plugins/expressions/public/react_expression_renderer/use_expression_renderer.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionRendererParams.onData$.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "adapters",
+                "description": [],
+                "signature": [
+                  "TInspectorAdapters | undefined"
+                ],
+                "path": "src/plugins/expressions/public/react_expression_renderer/use_expression_renderer.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionRendererParams.onData$.$3",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "partial",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/plugins/expressions/public/react_expression_renderer/use_expression_renderer.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionRendererParams.onEvent",
+            "type": "Function",
+            "tags": [],
+            "label": "onEvent",
+            "description": [],
+            "signature": [
+              "((event: ",
+              {
+                "pluginId": "expressions",
+                "scope": "public",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-public.ExpressionRendererEvent",
+                "text": "ExpressionRendererEvent"
+              },
+              ") => void) | undefined"
+            ],
+            "path": "src/plugins/expressions/public/react_expression_renderer/use_expression_renderer.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionRendererParams.onEvent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "expressions",
+                    "scope": "public",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-public.ExpressionRendererEvent",
+                    "text": "ExpressionRendererEvent"
+                  }
+                ],
+                "path": "src/plugins/expressions/public/react_expression_renderer/use_expression_renderer.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionRendererParams.onRender$",
+            "type": "Function",
+            "tags": [],
+            "label": "onRender$",
+            "description": [],
+            "signature": [
+              "((item: number) => void) | undefined"
+            ],
+            "path": "src/plugins/expressions/public/react_expression_renderer/use_expression_renderer.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionRendererParams.onRender$.$1",
+                "type": "number",
+                "tags": [],
+                "label": "item",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/plugins/expressions/public/react_expression_renderer/use_expression_renderer.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionRendererParams.reload$",
+            "type": "Object",
+            "tags": [],
+            "label": "reload$",
+            "description": [
+              "\nAn observable which can be used to re-run the expression without destroying the component"
+            ],
+            "signature": [
+              "Observable",
+              "<unknown> | undefined"
+            ],
+            "path": "src/plugins/expressions/public/react_expression_renderer/use_expression_renderer.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -10366,7 +10602,13 @@
             "text": "ReactExpressionRendererProps"
           },
           " extends Omit<",
-          "ExpressionRendererParams",
+          {
+            "pluginId": "expressions",
+            "scope": "public",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-public.ExpressionRendererParams",
+            "text": "ExpressionRendererParams"
+          },
           ", \"hasCustomErrorRenderer\">"
         ],
         "path": "src/plugins/expressions/public/react_expression_renderer/react_expression_renderer.tsx",
@@ -11266,7 +11508,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"color\" | \"y\" | \"x\" | \"size\" | \"text\""
+          "\"color\" | \"size\" | \"text\" | \"y\" | \"x\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/pointseries.ts",
         "deprecated": false,
@@ -17996,15 +18238,11 @@
             "references": [
               {
                 "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/demodata/index.ts"
+              },
+              {
+                "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/embeddable.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/common/functions/filters.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
               },
               {
                 "plugin": "canvas",
@@ -18016,15 +18254,19 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/neq.ts"
-              },
-              {
-                "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/demodata/index.ts"
+                "path": "x-pack/plugins/canvas/common/functions/filters.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/neq.ts"
               },
               {
                 "plugin": "visTypeXy",
@@ -20218,7 +20460,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"color\" | \"y\" | \"x\" | \"size\" | \"text\""
+          "\"color\" | \"size\" | \"text\" | \"y\" | \"x\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/pointseries.ts",
         "deprecated": false,
@@ -29735,15 +29977,11 @@
             "references": [
               {
                 "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/demodata/index.ts"
+              },
+              {
+                "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/embeddable.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/common/functions/filters.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
               },
               {
                 "plugin": "canvas",
@@ -29755,15 +29993,19 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/neq.ts"
-              },
-              {
-                "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/demodata/index.ts"
+                "path": "x-pack/plugins/canvas/common/functions/filters.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/neq.ts"
               },
               {
                 "plugin": "visTypeXy",
@@ -34299,7 +34541,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"color\" | \"y\" | \"x\" | \"size\" | \"text\""
+          "\"color\" | \"size\" | \"text\" | \"y\" | \"x\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/pointseries.ts",
         "deprecated": false,
@@ -38006,7 +38248,15 @@
                 "section": "def-common.DatatableRow",
                 "text": "DatatableRow"
               },
-              "[]; type: \"datatable\"; meta?: ",
+              "[] | (",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableRow",
+                "text": "DatatableRow"
+              },
+              " | { [x: string]: any; })[]; type: \"datatable\"; meta?: ",
               "DatatableMeta",
               " | undefined; }>"
             ],

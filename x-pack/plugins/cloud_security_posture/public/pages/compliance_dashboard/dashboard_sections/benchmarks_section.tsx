@@ -42,19 +42,19 @@ export const BenchmarksSection = ({
     const [layerValue] = element;
     const evaluation = layerValue[0].groupByRollup as Evaluation;
 
-    navToFindings({ cluster_id: clusterId, 'result.evaluation': evaluation });
+    navToFindings({ 'cluster_id.keyword': clusterId, 'result.evaluation.keyword': evaluation });
   };
 
-  const handleCellClick = (clusterId: string, resourceTypeName: string) => {
+  const handleCellClick = (clusterId: string, ruleSection: string) => {
     navToFindings({
-      cluster_id: clusterId,
-      'resource.type': resourceTypeName,
-      'result.evaluation': RULE_FAILED,
+      'cluster_id.keyword': clusterId,
+      'rule.section.keyword': ruleSection,
+      'result.evaluation.keyword': RULE_FAILED,
     });
   };
 
   const handleViewAllClick = (clusterId: string) => {
-    navToFindings({ cluster_id: clusterId, 'result.evaluation': RULE_FAILED });
+    navToFindings({ 'cluster_id.keyword': clusterId, 'result.evaluation.keyword': RULE_FAILED });
   };
 
   return (
@@ -110,7 +110,7 @@ export const BenchmarksSection = ({
                 <EuiFlexItem grow={4}>
                   <ChartPanel title={TEXT.RISKS} hasBorder={false}>
                     <RisksTable
-                      data={cluster.resourcesTypes}
+                      data={cluster.groupedFindingsEvaluation}
                       maxItems={3}
                       onCellClick={(resourceTypeName) =>
                         handleCellClick(cluster.meta.clusterId, resourceTypeName)

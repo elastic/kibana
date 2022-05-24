@@ -77,12 +77,12 @@ export { AnalyticsClient }
 // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
 //
 // @public
-export type AnalyticsServicePreboot = AnalyticsClient;
+export type AnalyticsServicePreboot = Omit<AnalyticsClient, 'shutdown'>;
 
 // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
 //
 // @public
-export type AnalyticsServiceSetup = AnalyticsClient;
+export type AnalyticsServiceSetup = Omit<AnalyticsClient, 'shutdown'>;
 
 // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
 //
@@ -2541,7 +2541,7 @@ export class SavedObjectsImporter {
         typeRegistry: ISavedObjectTypeRegistry;
         importSizeLimit: number;
     });
-    import({ readStream, createNewCopies, namespace, overwrite, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
+    import({ readStream, createNewCopies, namespace, overwrite, refresh, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
     resolveImportErrors({ readStream, createNewCopies, namespace, retries, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
 }
 
@@ -2604,6 +2604,7 @@ export interface SavedObjectsImportOptions {
     namespace?: string;
     overwrite: boolean;
     readStream: Readable;
+    refresh?: boolean | 'wait_for';
 }
 
 // @public
@@ -2938,6 +2939,7 @@ export interface SavedObjectsUpdateObjectsSpacesResponseObject {
 export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedObjectsBaseOptions {
     references?: SavedObjectReference[];
     refresh?: MutatingOperationRefreshSetting;
+    retryOnConflict?: number;
     upsert?: Attributes;
     version?: string;
 }

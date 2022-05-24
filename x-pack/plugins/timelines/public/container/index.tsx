@@ -110,9 +110,10 @@ const getInspectResponse = <T extends TimelineFactoryQueryTypes>(
 const ID = 'timelineEventsQuery';
 export const initSortDefault = [
   {
+    direction: Direction.desc,
+    esTypes: ['date'],
     field: '@timestamp',
-    direction: Direction.asc,
-    type: 'number',
+    type: 'date',
   },
 ];
 

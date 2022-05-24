@@ -32,6 +32,8 @@ import {
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { KibanaFeature } from '@kbn/features-plugin/common';
+
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ConfigSchema } from '.';
 import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
 import { createLazyObservabilityPageTemplate } from './components/shared';
@@ -51,9 +53,11 @@ export interface ObservabilityPublicPluginsSetup {
   data: DataPublicPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   home?: HomePublicPluginSetup;
+  usageCollection: UsageCollectionSetup;
 }
 
 export interface ObservabilityPublicPluginsStart {
+  usageCollection: UsageCollectionSetup;
   cases: CasesUiStart;
   embeddable: EmbeddableStart;
   home?: HomePublicPluginStart;
@@ -144,6 +148,12 @@ export class Plugin
       const { renderApp } = await import('./application');
       // Get start services
       const [coreStart, pluginsStart, { navigation }] = await coreSetup.getStartServices();
+      // Register alerts metadata
+      const { registerAlertsTableConfiguration } = await import(
+        './config/register_alerts_table_configuration'
+      );
+      const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;
+      registerAlertsTableConfiguration(alertsTableConfigurationRegistry);
       // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
       // subset of this privilege are not authorized to access this endpoint and will receive a 404
       // error that causes the Alerting view to fail to load.
@@ -162,6 +172,7 @@ export class Plugin
         observabilityRuleTypeRegistry,
         ObservabilityPageTemplate: navigation.PageTemplate,
         kibanaFeatures,
+        usageCollection: pluginsSetup.usageCollection,
       });
     };
 
@@ -268,7 +279,6 @@ export class Plugin
 
   public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
     const { application } = coreStart;
-
     const config = this.initializerContext.config.get();
 
     updateGlobalNavigation({

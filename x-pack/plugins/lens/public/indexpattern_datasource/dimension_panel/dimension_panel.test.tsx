@@ -635,7 +635,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     act(() => {
       wrapper
-        .find('input[data-test-subj="indexPattern-label-edit"]')
+        .find('input[data-test-subj="column-label-edit"]')
         .simulate('change', { target: { value: 'New Label' } });
     });
 
@@ -739,7 +739,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     act(() => {
       wrapper
-        .find('input[data-test-subj="indexPattern-label-edit"]')
+        .find('input[data-test-subj="column-label-edit"]')
         .simulate('change', { target: { value: 'Sum of bytes' } });
     });
 

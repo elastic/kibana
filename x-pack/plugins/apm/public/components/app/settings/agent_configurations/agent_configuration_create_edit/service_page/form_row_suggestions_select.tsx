@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import moment from 'moment';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -13,7 +13,7 @@ import { ENVIRONMENT_ALL } from '../../../../../../../common/environment_filter_
 
 interface Props {
   title: string;
-  field: string;
+  fieldName: string;
   description: string;
   fieldLabel: string;
   value?: string;
@@ -24,7 +24,7 @@ interface Props {
 
 export function FormRowSuggestionsSelect({
   title,
-  field,
+  fieldName,
   description,
   fieldLabel,
   value,
@@ -40,9 +40,9 @@ export function FormRowSuggestionsSelect({
     >
       <EuiFormRow label={fieldLabel}>
         <SuggestionsSelect
-          allOption={allowAll ? ENVIRONMENT_ALL : undefined}
+          customOptions={allowAll ? [ENVIRONMENT_ALL] : undefined}
           defaultValue={value}
-          field={field}
+          fieldName={fieldName}
           onChange={onChange}
           isClearable={false}
           placeholder={i18n.translate(
@@ -50,6 +50,8 @@ export function FormRowSuggestionsSelect({
             { defaultMessage: 'Select Option' }
           )}
           dataTestSubj={dataTestSubj}
+          start={moment().subtract(24, 'h').toISOString()}
+          end={moment().toISOString()}
         />
       </EuiFormRow>
     </EuiDescribedFormGroup>

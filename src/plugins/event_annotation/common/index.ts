@@ -6,8 +6,19 @@
  * Side Public License, v 1.
  */
 
-export type { EventAnnotationArgs, EventAnnotationOutput } from './manual_event_annotation/types';
-export { manualEventAnnotation } from './manual_event_annotation';
+export type {
+  EventAnnotationArgs,
+  EventAnnotationOutput,
+  ManualPointEventAnnotationArgs,
+  ManualPointEventAnnotationOutput,
+  ManualRangeEventAnnotationArgs,
+  ManualRangeEventAnnotationOutput,
+} from './manual_event_annotation/types';
+export { manualPointEventAnnotation, manualRangeEventAnnotation } from './manual_event_annotation';
 export { eventAnnotationGroup } from './event_annotation_group';
 export type { EventAnnotationGroupArgs } from './event_annotation_group';
-export type { EventAnnotationConfig } from './types';
+export type {
+  EventAnnotationConfig,
+  RangeEventAnnotationConfig,
+  AvailableAnnotationIcon,
+} from './types';

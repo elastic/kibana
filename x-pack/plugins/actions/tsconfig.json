@@ -10,10 +10,12 @@
     "server/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
-    "common/*"
+    "public/**/*",
+    "common/**/*"
   ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
+    { "path": "../../../src/plugins/data/tsconfig.json" },
     { "path": "../spaces/tsconfig.json" },
     { "path": "../security/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },

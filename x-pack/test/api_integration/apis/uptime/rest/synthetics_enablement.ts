@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { serviceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/lib/synthetics_service/get_api_key';
+import { serviceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -39,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
               ],
               elasticsearch: {
                 cluster: [privilege, ...serviceApiKeyPrivileges.cluster],
-                indices: serviceApiKeyPrivileges.index,
+                indices: serviceApiKeyPrivileges.indices,
               },
             });
 
@@ -125,7 +125,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             elasticsearch: {
               cluster: ['manage_security', ...serviceApiKeyPrivileges.cluster],
-              indices: serviceApiKeyPrivileges.index,
+              indices: serviceApiKeyPrivileges.indices,
             },
           });
 
@@ -224,7 +224,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             elasticsearch: {
               cluster: ['manage_security', ...serviceApiKeyPrivileges.cluster],
-              indices: serviceApiKeyPrivileges.index,
+              indices: serviceApiKeyPrivileges.indices,
             },
           });
 
@@ -332,7 +332,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             elasticsearch: {
               cluster: ['manage_security', ...serviceApiKeyPrivileges.cluster],
-              indices: serviceApiKeyPrivileges.index,
+              indices: serviceApiKeyPrivileges.indices,
             },
           });
 

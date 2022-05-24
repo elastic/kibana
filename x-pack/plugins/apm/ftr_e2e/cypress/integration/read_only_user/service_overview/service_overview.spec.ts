@@ -216,7 +216,22 @@ describe('Service Overview', () => {
     it('with the correct environment when changing the environment', () => {
       cy.wait(aliasNames, { requestTimeout: 10000 });
 
-      cy.get('[data-test-subj="environmentFilter"]').select('production');
+      cy.intercept('GET', 'internal/apm/suggestions?*').as(
+        'suggestionsRequest'
+      );
+
+      cy.get('[data-test-subj="environmentFilter"]').type('production');
+
+      cy.expectAPIsToHaveBeenCalledWith({
+        apisIntercepted: ['@suggestionsRequest'],
+        value: 'fieldValue=production',
+      });
+
+      cy.get(
+        '[data-test-subj="comboBoxOptionsList environmentFilter-optionsList"]'
+      )
+        .contains('production')
+        .click({ force: true });
 
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: aliasNames,

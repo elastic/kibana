@@ -14,7 +14,7 @@ import { usePostPushToService } from '../../containers/use_post_push_to_service'
 
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { Case } from '../../containers/types';
-import { NONE_CONNECTOR_ID } from '../../../common/api';
+import { CaseSeverity, NONE_CONNECTOR_ID } from '../../../common/api';
 import {
   UseCreateAttachments,
   useCreateAttachments,
@@ -28,6 +28,7 @@ const initialCaseValue: FormProps = {
   description: '',
   tags: [],
   title: '',
+  severity: CaseSeverity.LOW,
   connectorId: NONE_CONNECTOR_ID,
   fields: null,
   syncAlerts: true,

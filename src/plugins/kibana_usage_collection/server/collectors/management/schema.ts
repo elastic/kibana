@@ -418,6 +418,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:enableNewSyntheticsView': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:maxSuggestions': {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },

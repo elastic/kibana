@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -79,6 +78,7 @@ export interface InheritedChildInput extends IndexSignature {
   id: string;
   searchSessionId?: string;
   syncColors?: boolean;
+  syncTooltips?: boolean;
   executionContext?: KibanaExecutionContext;
 }
 
@@ -314,6 +314,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       filters,
       searchSessionId,
       syncColors,
+      syncTooltips,
       executionContext,
     } = this.input;
     let combinedFilters = filters;
@@ -330,6 +331,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       id,
       searchSessionId,
       syncColors,
+      syncTooltips,
       executionContext,
     };
   }

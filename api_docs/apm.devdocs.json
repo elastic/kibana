@@ -345,12 +345,43 @@
           {
             "parentPluginId": "apm",
             "id": "def-server.APMRouteHandlerResources.context",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "context",
             "description": [],
             "signature": [
-              "ApmPluginRequestHandlerContext"
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.RequestHandlerContext",
+                "text": "RequestHandlerContext"
+              },
+              " & { licensing: Promise<",
+              {
+                "pluginId": "licensing",
+                "scope": "server",
+                "docId": "kibLicensingPluginApi",
+                "section": "def-server.LicensingApiRequestHandlerContext",
+                "text": "LicensingApiRequestHandlerContext"
+              },
+              ">; alerting: Promise<",
+              {
+                "pluginId": "alerting",
+                "scope": "server",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-server.AlertingApiRequestHandlerContext",
+                "text": "AlertingApiRequestHandlerContext"
+              },
+              ">; rac: Promise<",
+              {
+                "pluginId": "ruleRegistry",
+                "scope": "server",
+                "docId": "kibRuleRegistryPluginApi",
+                "section": "def-server.RacApiRequestHandlerContext",
+                "text": "RacApiRequestHandlerContext"
+              },
+              ">; }"
             ],
             "path": "x-pack/plugins/apm/server/routes/typings.ts",
             "deprecated": false
@@ -491,7 +522,7 @@
                 "section": "def-server.RequestHandlerContext",
                 "text": "RequestHandlerContext"
               },
-              " & { licensing: ",
+              " & { licensing: Promise<",
               {
                 "pluginId": "licensing",
                 "scope": "server",
@@ -499,7 +530,7 @@
                 "section": "def-server.LicensingApiRequestHandlerContext",
                 "text": "LicensingApiRequestHandlerContext"
               },
-              "; }, request: ",
+              ">; }, request: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -2979,7 +3010,11 @@
           "Type",
           "<number, string, unknown>; end: ",
           "Type",
-          "<number, string, unknown>; }>]>; }>, ",
+          "<number, string, unknown>; }>, ",
+          "TypeC",
+          "<{ probability: ",
+          "Type",
+          "<number, unknown, unknown>; }>]>; }>, ",
           {
             "pluginId": "apm",
             "scope": "server",
@@ -4010,6 +4045,8 @@
           "<{ query: ",
           "IntersectionC",
           "<[",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ environment: ",
           "UnionC",
@@ -4038,6 +4075,10 @@
           "<{ offset: ",
           "StringC",
           "; }>, ",
+          "TypeC",
+          "<{ probability: ",
+          "Type",
+          "<number, unknown, unknown>; }>]>, ",
           "TypeC",
           "<{ serviceNames: ",
           "Type",
@@ -4085,7 +4126,11 @@
           "PartialC",
           "<{ serviceGroup: ",
           "StringC",
-          "; }>]>; }>, ",
+          "; }>, ",
+          "TypeC",
+          "<{ probability: ",
+          "Type",
+          "<number, unknown, unknown>; }>]>; }>, ",
           {
             "pluginId": "apm",
             "scope": "server",
@@ -5219,12 +5264,43 @@
                 {
                   "parentPluginId": "apm",
                   "id": "def-server.APMPluginSetup.createApmEventClient.$1.context",
-                  "type": "Object",
+                  "type": "CompoundType",
                   "tags": [],
                   "label": "context",
                   "description": [],
                   "signature": [
-                    "ApmPluginRequestHandlerContext"
+                    {
+                      "pluginId": "core",
+                      "scope": "server",
+                      "docId": "kibCorePluginApi",
+                      "section": "def-server.RequestHandlerContext",
+                      "text": "RequestHandlerContext"
+                    },
+                    " & { licensing: Promise<",
+                    {
+                      "pluginId": "licensing",
+                      "scope": "server",
+                      "docId": "kibLicensingPluginApi",
+                      "section": "def-server.LicensingApiRequestHandlerContext",
+                      "text": "LicensingApiRequestHandlerContext"
+                    },
+                    ">; alerting: Promise<",
+                    {
+                      "pluginId": "alerting",
+                      "scope": "server",
+                      "docId": "kibAlertingPluginApi",
+                      "section": "def-server.AlertingApiRequestHandlerContext",
+                      "text": "AlertingApiRequestHandlerContext"
+                    },
+                    ">; rac: Promise<",
+                    {
+                      "pluginId": "ruleRegistry",
+                      "scope": "server",
+                      "docId": "kibRuleRegistryPluginApi",
+                      "section": "def-server.RacApiRequestHandlerContext",
+                      "text": "RacApiRequestHandlerContext"
+                    },
+                    ">; }"
                   ],
                   "path": "x-pack/plugins/apm/server/types.ts",
                   "deprecated": false

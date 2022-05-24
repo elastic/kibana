@@ -21,7 +21,11 @@ import {
   setProgressTotal,
 } from './progress';
 import { delayRetryState, resetRetryState } from './retry_state';
-import { extractTransformFailuresReason, extractUnknownDocFailureReason } from './extract_errors';
+import {
+  extractTransformFailuresReason,
+  extractUnknownDocFailureReason,
+  fatalReasonDocumentExceedsMaxBatchSizeBytes,
+} from './extract_errors';
 import type { ExcludeRetryableEsError } from './types';
 import {
   getAliases,
@@ -33,17 +37,8 @@ import {
 } from './helpers';
 import { createBatches } from './create_batches';
 
-const FATAL_REASON_REQUEST_ENTITY_TOO_LARGE = `While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.maxBatchSizeBytes' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option.`;
-const fatalReasonDocumentExceedsMaxBatchSizeBytes = ({
-  _id,
-  docSizeBytes,
-  maxBatchSizeBytes,
-}: {
-  _id: string;
-  docSizeBytes: number;
-  maxBatchSizeBytes: number;
-}) =>
-  `The document with _id "${_id}" is ${docSizeBytes} bytes which exceeds the configured maximum batch size of ${maxBatchSizeBytes} bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value.`;
+export const FATAL_REASON_REQUEST_ENTITY_TOO_LARGE = `While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.maxBatchSizeBytes' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option.`;
+const CLUSTER_SHARD_LIMIT_EXCEEDED_REASON = `[cluster_shard_limit_exceeded] Upgrading Kibana requires adding a small number of new shards. Ensure that Kibana is able to add 10 more shards by increasing the cluster.max_shards_per_node setting, or removing indices to clear up resources.`;
 
 export const model = (currentState: State, resW: ResponseType<AllActionStates>): State => {
   // The action response `resW` is weakly typed, the type includes all action
@@ -72,19 +67,9 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
     if (Either.isLeft(res)) {
       const left = res.left;
-      if (isLeftTypeof(left, 'unsupported_cluster_routing_allocation')) {
-        return {
-          ...stateP,
-          controlState: 'FATAL',
-          reason: `The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {"transient": {"cluster.routing.allocation.enable": null}, "persistent": {"cluster.routing.allocation.enable": null}}`,
-          logs: [
-            ...stateP.logs,
-            {
-              level: 'error',
-              message: `The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. Ensure that the persistent and transient Elasticsearch configuration option 'cluster.routing.allocation.enable' is not set or set it to a value of 'all'.`,
-            },
-          ],
-        };
+      if (isLeftTypeof(left, 'incompatible_cluster_routing_allocation')) {
+        const retryErrorMessage = `[${left.type}] Incompatible Elasticsearch cluster settings detected. Remove the persistent and transient Elasticsearch cluster setting 'cluster.routing.allocation.enable' or set it to a value of 'all' to allow migrations to proceed. Refer to ${stateP.migrationDocLinks.routingAllocationDisabled} for more information on how to resolve the issue.`;
+        return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
       } else {
         return throwBadResponse(stateP, left);
       }
@@ -244,8 +229,14 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // we get a response.
         // If the cluster hit the low watermark for disk usage the LEGACY_CREATE_REINDEX_TARGET action will
         // continue to timeout and eventually lead to a failed migration.
-        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for information on how to resolve the issue.`;
+        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
         return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
+      } else if (isLeftTypeof(left, 'cluster_shard_limit_exceeded')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `${CLUSTER_SHARD_LIMIT_EXCEEDED_REASON} See ${stateP.migrationDocLinks.clusterShardLimitExceeded}`,
+        };
       } else {
         return throwBadResponse(stateP, left);
       }
@@ -366,7 +357,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // we get a response.
         // In the event of retries running out, we link to the docs to help with diagnosing
         // the problem.
-        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for information on how to resolve the issue.`;
+        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
         return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
       } else {
         return throwBadResponse(stateP, left);
@@ -461,8 +452,14 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         //
         // If there is a problem CREATE_REINDEX_TEMP action will
         // continue to timeout and eventually lead to a failed migration.
-        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for information on how to resolve the issue.`;
+        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
         return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
+      } else if (isLeftTypeof(left, 'cluster_shard_limit_exceeded')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `${CLUSTER_SHARD_LIMIT_EXCEEDED_REASON} See ${stateP.migrationDocLinks.clusterShardLimitExceeded}`,
+        };
       } else {
         return throwBadResponse(stateP, left);
       }
@@ -696,8 +693,14 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // `_cluster/allocation/explain?index=${targetIndex}` API.
         // Unless the root cause is identified and addressed, the request will
         // continue to timeout and eventually lead to a failed migration.
-        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for information on how to resolve the issue.`;
+        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
         return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
+      } else if (isLeftTypeof(left, 'cluster_shard_limit_exceeded')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `${CLUSTER_SHARD_LIMIT_EXCEEDED_REASON} See ${stateP.migrationDocLinks.clusterShardLimitExceeded}`,
+        };
       } else {
         throwBadResponse(stateP, left);
       }
@@ -951,8 +954,14 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // If the cluster hit the low watermark for disk usage the action will continue to timeout.
         // Unless the disk space is addressed, the LEGACY_CREATE_REINDEX_TARGET action will
         // continue to timeout and eventually lead to a failed migration.
-        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for information on how to resolve the issue.`;
+        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
         return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
+      } else if (isLeftTypeof(left, 'cluster_shard_limit_exceeded')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `${CLUSTER_SHARD_LIMIT_EXCEEDED_REASON} See ${stateP.migrationDocLinks.clusterShardLimitExceeded}`,
+        };
       } else {
         return throwBadResponse(stateP, left);
       }

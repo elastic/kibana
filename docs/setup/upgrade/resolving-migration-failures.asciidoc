@@ -171,7 +171,7 @@ Upgrade migrations fail because routing allocation is disabled or restricted (`c
 
 [source,sh]
 --------------------------------------------
-Unable to complete saved object migrations for the [.kibana] index: The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {"transient": {"cluster.routing.allocation.enable": null}, "persistent": {"cluster.routing.allocation.enable": null}}
+Unable to complete saved object migrations for the [.kibana] index: [incompatible_cluster_routing_allocation] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {"transient": {"cluster.routing.allocation.enable": null}, "persistent": {"cluster.routing.allocation.enable": null}}
 --------------------------------------------
 
 To get around the issue, remove the transient and persisted routing allocation settings:
@@ -187,3 +187,10 @@ PUT /_cluster/settings
   }
 }
 --------------------------------------------
+
+[float]
+[[cluster-shard-limit-exceeded]]
+==== {es} cluster shard limit exceeded
+When upgrading, {kib} creates new indices requiring a small number of new shards. If the amount of open {es} shards approaches or exceeds the {es} `cluster.max_shards_per_node` setting, {kib} is unable to complete the upgrade. Ensure that {kib} is able to add at least 10 more shards by removing indices to clear up resources, or by increasing the `cluster.max_shards_per_node` setting.
+
+For more information, refer to the documentation on {ref}/allocation-total-shards.html[total shards per node].

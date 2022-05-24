@@ -93,6 +93,14 @@ import { ACTIONS_FEATURE_ID, AlertHistoryEsIndexConnectorId } from '../common';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
 import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
 import { InMemoryMetrics, registerClusterCollector, registerNodeCollector } from './monitoring';
+import {
+  isConnectorDeprecated,
+  ConnectorWithOptionalDeprecation,
+} from './lib/is_conector_deprecated';
+import { createSubActionConnectorFramework } from './sub_action_framework';
+import { IServiceAbstract, SubActionConnectorType } from './sub_action_framework/types';
+import { SubActionConnector } from './sub_action_framework/sub_action_connector';
+import { CaseConnector } from './sub_action_framework/case';
 
 export interface PluginSetupContract {
   registerType<
@@ -103,8 +111,15 @@ export interface PluginSetupContract {
   >(
     actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
   ): void;
-
+  registerSubActionConnectorType<
+    Config extends ActionTypeConfig = ActionTypeConfig,
+    Secrets extends ActionTypeSecrets = ActionTypeSecrets
+  >(
+    connector: SubActionConnectorType<Config, Secrets>
+  ): void;
   isPreconfiguredConnector(connectorId: string): boolean;
+  getSubActionConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
+  getCaseConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
 }
 
 export interface PluginStartContract {
@@ -221,10 +236,14 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 
     for (const preconfiguredId of Object.keys(this.actionsConfig.preconfigured)) {
       if (preconfiguredId !== AlertHistoryEsIndexConnectorId) {
-        this.preconfiguredActions.push({
+        const rawPreconfiguredConnector: ConnectorWithOptionalDeprecation = {
           ...this.actionsConfig.preconfigured[preconfiguredId],
           id: preconfiguredId,
           isPreconfigured: true,
+        };
+        this.preconfiguredActions.push({
+          ...rawPreconfiguredConnector,
+          isDeprecated: isConnectorDeprecated(rawPreconfiguredConnector),
         });
       } else {
         this.logger.warn(
@@ -302,12 +321,19 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       });
     }
 
+    const subActionFramework = createSubActionConnectorFramework({
+      actionTypeRegistry,
+      logger: this.logger,
+      actionsConfigUtils,
+    });
+
     // Routes
-    defineRoutes(
-      core.http.createRouter<ActionsRequestHandlerContext>(),
-      this.licenseState,
-      this.usageCounter
-    );
+    defineRoutes({
+      router: core.http.createRouter<ActionsRequestHandlerContext>(),
+      licenseState: this.licenseState,
+      actionsConfigUtils,
+      usageCounter: this.usageCounter,
+    });
 
     // Cleanup failed execution task definition
     if (this.actionsConfig.cleanupFailedExecutionsTask.enabled) {
@@ -333,11 +359,21 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         ensureSufficientLicense(actionType);
         actionTypeRegistry.register(actionType);
       },
+      registerSubActionConnectorType: <
+        Config extends ActionTypeConfig = ActionTypeConfig,
+        Secrets extends ActionTypeSecrets = ActionTypeSecrets
+      >(
+        connector: SubActionConnectorType<Config, Secrets>
+      ) => {
+        subActionFramework.registerConnector(connector);
+      },
       isPreconfiguredConnector: (connectorId: string): boolean => {
         return !!this.preconfiguredActions.find(
           (preconfigured) => preconfigured.id === connectorId
         );
       },
+      getSubActionConnectorClass: () => SubActionConnector,
+      getCaseConnectorClass: () => CaseConnector,
     };
   }
 
@@ -377,6 +413,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       );
 
       return new ActionsClient({
+        logger,
         unsecuredSavedObjectsClient,
         actionTypeRegistry: actionTypeRegistry!,
         defaultKibanaIndex: kibanaIndex!,
@@ -568,6 +605,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             includedHiddenTypes,
           });
           return new ActionsClient({
+            logger,
             unsecuredSavedObjectsClient,
             actionTypeRegistry: actionTypeRegistry!,
             defaultKibanaIndex,

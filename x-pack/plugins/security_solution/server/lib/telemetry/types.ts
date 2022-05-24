@@ -6,6 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { AlertEvent, ResolverNode, SafeResolverEvent } from '../../../common/endpoint/types';
 
 type BaseSearchTypes = string | number | boolean | object;
 export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;
@@ -233,6 +234,10 @@ export interface EndpointMetrics {
     library_load_events?: SystemImpactEventsMetrics;
   }>;
   threads: Array<{ name: string; cpu: { mean: number } }>;
+  event_filter: {
+    active_global_count: number;
+    active_user_count: number;
+  };
 }
 
 interface EndpointMetricOS {
@@ -352,4 +357,21 @@ export interface RuleSearchResult {
     updatedAt: string;
     params: DetectionRuleParms;
   };
+}
+
+// EP Timeline telemetry
+
+export type EnhancedAlertEvent = AlertEvent & { 'event.id': string; 'kibana.alert.uuid': string };
+
+export type TimelineTelemetryEvent = ResolverNode & { event: SafeResolverEvent | undefined };
+
+export interface TimelineTelemetryTemplate {
+  '@timestamp': string;
+  cluster_uuid: string;
+  cluster_name: string;
+  version: string | undefined;
+  license_uuid: string | undefined;
+  alert_id: string | undefined;
+  event_id: string;
+  timeline: TimelineTelemetryEvent[];
 }

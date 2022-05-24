@@ -1033,6 +1033,29 @@
           },
           {
             "parentPluginId": "@kbn/config-schema",
+            "id": "def-server.Type.getSchemaStructure",
+            "type": "Function",
+            "tags": [],
+            "label": "getSchemaStructure",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.SchemaStructureEntry",
+                "text": "SchemaStructureEntry"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-config-schema/src/types/type.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/config-schema",
             "id": "def-server.Type.handleError",
             "type": "Function",
             "tags": [],
@@ -1207,7 +1230,44 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/config-schema",
+        "id": "def-server.SchemaStructureEntry",
+        "type": "Interface",
+        "tags": [],
+        "label": "SchemaStructureEntry",
+        "description": [],
+        "path": "packages/kbn-config-schema/src/types/type.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/config-schema",
+            "id": "def-server.SchemaStructureEntry.path",
+            "type": "Array",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-config-schema/src/types/type.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/config-schema",
+            "id": "def-server.SchemaStructureEntry.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "packages/kbn-config-schema/src/types/type.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {

@@ -20,7 +20,7 @@ export {
 export type { RetryableEsClientError };
 
 // actions/* imports
-export type { InitActionParams, UnsupportedClusterRoutingAllocation } from './initialize_action';
+export type { InitActionParams, IncompatibleClusterRoutingAllocation } from './initialize_action';
 export { initAction } from './initialize_action';
 
 export type { FetchIndexResponse, FetchIndicesParams } from './fetch_indices';
@@ -87,7 +87,8 @@ export type {
 export { updateAndPickupMappings } from './update_and_pickup_mappings';
 
 import type { UnknownDocsFound } from './check_for_unknown_docs';
-import type { UnsupportedClusterRoutingAllocation } from './initialize_action';
+import type { IncompatibleClusterRoutingAllocation } from './initialize_action';
+import { ClusterShardLimitExceeded } from './create_index';
 
 export type {
   CheckForUnknownDocsParams,
@@ -151,8 +152,9 @@ export interface ActionErrorTypeMap {
   documents_transform_failed: DocumentsTransformFailed;
   request_entity_too_large_exception: RequestEntityTooLargeException;
   unknown_docs_found: UnknownDocsFound;
-  unsupported_cluster_routing_allocation: UnsupportedClusterRoutingAllocation;
+  incompatible_cluster_routing_allocation: IncompatibleClusterRoutingAllocation;
   index_not_yellow_timeout: IndexNotYellowTimeout;
+  cluster_shard_limit_exceeded: ClusterShardLimitExceeded;
 }
 
 /**

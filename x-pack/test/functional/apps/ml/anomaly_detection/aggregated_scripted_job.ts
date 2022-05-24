@@ -360,7 +360,7 @@ export default function ({ getService }: FtrProviderContext) {
   ];
 
   describe('aggregated or scripted job', function () {
-    this.tags(['mlqa']);
+    this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');

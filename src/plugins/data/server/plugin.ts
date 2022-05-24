@@ -12,19 +12,20 @@ import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { ConfigSchema } from '../config';
+import type { ISearchSetup, ISearchStart } from './search';
 import { DatatableUtilitiesService } from './datatable_utilities';
-import type { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
 import { SearchService } from './search/search_service';
 import { QueryService } from './query/query_service';
 import { ScriptsService } from './scripts';
 import { KqlTelemetryService } from './kql_telemetry';
 import { getUiSettings } from './ui_settings';
 import { QuerySetup } from './query';
-
-interface DataEnhancements {
-  search: SearchEnhancements;
-}
 
 export interface DataPluginSetup {
   search: ISearchSetup;
@@ -33,10 +34,6 @@ export interface DataPluginSetup {
    * @deprecated - use "fieldFormats" plugin directly instead
    */
   fieldFormats: FieldFormatsSetup;
-  /**
-   * @internal
-   */
-  __enhance: (enhancements: DataEnhancements) => void;
 }
 
 export interface DataPluginStart {
@@ -58,12 +55,15 @@ export interface DataPluginSetupDependencies {
   expressions: ExpressionsServerSetup;
   usageCollection?: UsageCollectionSetup;
   fieldFormats: FieldFormatsSetup;
+  taskManager?: TaskManagerSetupContract;
+  security?: SecurityPluginSetup;
 }
 
 export interface DataPluginStartDependencies {
   fieldFormats: FieldFormatsStart;
   logger: Logger;
   dataViews: DataViewsServerPluginStart;
+  taskManager?: TaskManagerStartContract;
 }
 
 export class DataServerPlugin
@@ -90,7 +90,14 @@ export class DataServerPlugin
 
   public setup(
     core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
-    { bfetch, expressions, usageCollection, fieldFormats }: DataPluginSetupDependencies
+    {
+      bfetch,
+      expressions,
+      usageCollection,
+      fieldFormats,
+      taskManager,
+      security,
+    }: DataPluginSetupDependencies
   ) {
     this.scriptsService.setup(core);
     const querySetup = this.queryService.setup(core);
@@ -102,20 +109,26 @@ export class DataServerPlugin
       bfetch,
       expressions,
       usageCollection,
+      security,
+      taskManager,
     });
 
     return {
-      __enhance: (enhancements: DataEnhancements) => {
-        searchSetup.__enhance(enhancements.search);
-      },
       search: searchSetup,
       query: querySetup,
       fieldFormats,
     };
   }
 
-  public start(core: CoreStart, { fieldFormats, dataViews }: DataPluginStartDependencies) {
-    const search = this.searchService.start(core, { fieldFormats, indexPatterns: dataViews });
+  public start(
+    core: CoreStart,
+    { fieldFormats, dataViews, taskManager }: DataPluginStartDependencies
+  ) {
+    const search = this.searchService.start(core, {
+      fieldFormats,
+      indexPatterns: dataViews,
+      taskManager,
+    });
     const datatableUtilities = new DatatableUtilitiesService(
       search.aggs,
       dataViews,

@@ -9,8 +9,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('ObservabilityApp', function () {
-    this.tags('ciGroup6');
-
     loadTestFile(require.resolve('./alerts'));
     loadTestFile(require.resolve('./alerts/add_to_case'));
     loadTestFile(require.resolve('./alerts/alert_disclaimer'));
@@ -21,5 +19,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./alerts/table_storage'));
     loadTestFile(require.resolve('./exploratory_view'));
     loadTestFile(require.resolve('./feature_controls'));
+    loadTestFile(require.resolve('./alerts/rules_page'));
   });
 }

@@ -20,6 +20,7 @@ export interface VisTypeOptions {
   showQueryBar: boolean;
   showFilterBar: boolean;
   showIndexSelection: boolean;
+  showQueryInput: boolean;
   hierarchicalData: boolean;
 }
 
@@ -55,6 +56,7 @@ interface DefaultEditorConfig<TVisParams> {
     [key: string]: Array<{ text: string; value: string }> | Array<{ id: string; label: string }>;
   };
   enableAutoApply?: boolean;
+  enableDataViewChange?: boolean;
   defaultSize?: string;
   optionsTemplate?: DefaultEditorOptionsComponent<TVisParams>;
   optionTabs?: Array<{
