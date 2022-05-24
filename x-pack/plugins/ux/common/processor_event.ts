@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export * from './installed_integrations';
-export * from './rule_monitoring';
-export * from './rule_params';
-export * from './schemas';
+export enum ProcessorEvent {
+  transaction = 'transaction',
+  error = 'error',
+  metric = 'metric',
+  span = 'span',
+  profile = 'profile',
+}

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export * from './installed_integrations';
-export * from './rule_monitoring';
-export * from './rule_params';
-export * from './schemas';
+import { serviceNameQuery } from './service_name_query';
+
+describe('serviceNameQuery', () => {
+  it('fetches rum services', () => {
+    expect(serviceNameQuery(0, 50000, {})).toMatchSnapshot();
+  });
+});
