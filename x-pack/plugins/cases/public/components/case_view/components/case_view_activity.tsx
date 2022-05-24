@@ -7,6 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
+import { useQueryClient } from 'react-query';
 import { CaseSeverity } from '../../../../common/api';
 import { useConnectors } from '../../../containers/configure/use_connectors';
 import { useCaseViewNavigation } from '../../../common/navigation';
@@ -32,7 +33,6 @@ export const CaseViewActivity = ({
   actionsNavigation,
   showAlertDetails,
   updateCase,
-  fetchCaseMetrics,
   useFetchAlertData,
 }: {
   ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;
@@ -40,16 +40,16 @@ export const CaseViewActivity = ({
   actionsNavigation?: CasesNavigation<string, 'configurable'>;
   showAlertDetails?: (alertId: string, index: string) => void;
   updateCase: () => void;
-  fetchCaseMetrics: (silent?: boolean) => Promise<void>;
   useFetchAlertData: UseFetchAlertData;
 }) => {
   const { userCanCrud } = useCasesContext();
   const { getCaseViewUrl } = useCaseViewNavigation();
+  const queryClient = useQueryClient();
 
   const {
-    data,
+    data: userActionsData,
     refetch: fetchCaseUserActions,
-    isFetching: isLoadingUserActions,
+    isLoading: isLoadingUserActions,
   } = useGetCaseUserActions(caseData.id, caseData.connector.id);
 
   const onShowAlertDetails = useCallback(
@@ -63,11 +63,9 @@ export const CaseViewActivity = ({
 
   const handleUpdateField = useCallback(
     (_newCase: Case, _updateKey: UpdateKey) => {
-      updateCase();
-      fetchCaseUserActions();
-      fetchCaseMetrics();
+      queryClient.invalidateQueries('case');
     },
-    [updateCase, fetchCaseUserActions, fetchCaseMetrics]
+    [queryClient]
   );
 
   const { onUpdateField, isLoading, loadingKey } = useOnUpdateField({
@@ -114,9 +112,8 @@ export const CaseViewActivity = ({
     (_newCase: Case) => {
       updateCase();
       fetchCaseUserActions();
-      fetchCaseMetrics();
     },
-    [updateCase, fetchCaseUserActions, fetchCaseMetrics]
+    [updateCase, fetchCaseUserActions]
   );
 
   const onSubmitConnector = useCallback(
@@ -142,14 +139,14 @@ export const CaseViewActivity = ({
         {isLoadingUserActions && (
           <EuiLoadingContent lines={8} data-test-subj="case-view-loading-content" />
         )}
-        {!isLoadingUserActions && data && (
+        {!isLoadingUserActions && userActionsData && (
           <EuiFlexGroup direction="column" responsive={false} data-test-subj="case-view-activity">
             <EuiFlexItem>
               <UserActions
                 getRuleDetailsHref={ruleDetailsNavigation?.href}
                 onRuleDetailsClick={ruleDetailsNavigation?.onClick}
-                caseServices={data.caseServices}
-                caseUserActions={data.caseUserActions}
+                caseServices={userActionsData.caseServices}
+                caseUserActions={userActionsData.caseUserActions}
                 data={caseData}
                 actionsNavigation={actionsNavigation}
                 fetchUserActions={fetchCaseUserActions}
@@ -187,13 +184,13 @@ export const CaseViewActivity = ({
           headline={i18n.REPORTER}
           users={[caseData.createdBy]}
         />
-        {data?.participants ? (
+        {userActionsData?.participants ? (
           <UserList
             data-test-subj="case-view-user-list-participants"
             email={emailContent}
             headline={i18n.PARTICIPANTS}
             loading={isLoadingUserActions}
-            users={data.participants}
+            users={userActionsData.participants}
           />
         ) : null}
         <TagList
@@ -203,18 +200,18 @@ export const CaseViewActivity = ({
           onSubmit={onSubmitTags}
           isLoading={isLoading && loadingKey === 'tags'}
         />
-        {data ? (
+        {userActionsData ? (
           <EditConnector
             caseData={caseData}
-            caseServices={data.caseServices}
+            caseServices={userActionsData.caseServices}
             connectorName={connectorName}
             connectors={connectors}
-            hasDataToPush={data.hasDataToPush && userCanCrud}
+            hasDataToPush={userActionsData.hasDataToPush && userCanCrud}
             isLoading={isLoadingConnectors || (isLoading && loadingKey === 'connector')}
             isValidConnector={isLoadingConnectors ? true : isValidConnector}
             onSubmit={onSubmitConnector}
             updateCase={handleUpdateCase}
-            userActions={data.caseUserActions}
+            userActions={userActionsData.caseUserActions}
             userCanCrud={userCanCrud}
           />
         ) : null}
