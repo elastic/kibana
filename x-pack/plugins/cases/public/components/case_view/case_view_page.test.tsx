@@ -21,7 +21,7 @@ import {
   connectorsMock,
   getAlertUserAction,
 } from '../../containers/mock';
-import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
+import { useFetchCaseMetrics } from '../../containers/use_get_case_metrics';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { useUpdateCase } from '../../containers/use_update_case';
@@ -42,10 +42,10 @@ jest.mock('../../common/hooks');
 const useUrlParamsMock = useUrlParams as jest.Mock;
 const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
-const useGetCaseMetricsMock = useGetCaseMetrics as jest.Mock;
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
 const useConnectorsMock = useConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
+const useGetCaseMetricsMock = useFetchCaseMetrics as jest.Mock;
 
 export const caseProps: CaseViewPageProps = {
   ...caseViewProps,
@@ -89,8 +89,10 @@ describe('CaseViewPage', () => {
   const defaultGetCaseMetrics = {
     isLoading: false,
     isError: false,
-    metrics: basicCaseMetrics,
-    fetchCaseMetrics,
+    data: {
+      metrics: basicCaseMetrics,
+    },
+    refetch: fetchCaseMetrics,
   };
 
   beforeEach(() => {
@@ -119,7 +121,7 @@ describe('CaseViewPage', () => {
       'Open'
     );
 
-    expect(wrapper.find(`[data-test-subj="case-view-metrics"]`).exists()).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="case-view-metrics"]`).exists()).toBeTruthy();
 
     expect(
       wrapper
