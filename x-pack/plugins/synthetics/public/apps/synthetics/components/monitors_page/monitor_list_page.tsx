@@ -11,18 +11,18 @@ import { useTrackPageview } from '@kbn/observability-plugin/public';
 
 import { useLocations } from '../../hooks/use_locations';
 
-import { Loader } from './loader/loader';
+import { Loader } from './management/loader/loader';
 import { useEnablement } from '../../hooks/use_enablement';
 
-import { EnablementEmptyState } from './synthetics_enablement/synthetics_enablement';
-import { MonitorListContainer } from './monitor_list_container';
-import { useMonitorListBreadcrumbs } from './use_breadcrumbs';
+import { EnablementEmptyState } from './management/synthetics_enablement/synthetics_enablement';
+import { MonitorListContainer } from './management/monitor_list_container';
+import { useMonitorListBreadcrumbs } from './hooks/use_breadcrumbs';
 import { useMonitorList } from './hooks/use_monitor_list';
-import * as labels from './labels';
+import * as labels from './management/labels';
 
 export const MonitorListPage: React.FC = () => {
-  useTrackPageview({ app: 'synthetics', path: 'manage-monitors' });
-  useTrackPageview({ app: 'synthetics', path: 'manage-monitors', delay: 15000 });
+  useTrackPageview({ app: 'synthetics', path: 'monitors' });
+  useTrackPageview({ app: 'synthetics', path: 'monitors', delay: 15000 });
 
   useMonitorListBreadcrumbs();
 

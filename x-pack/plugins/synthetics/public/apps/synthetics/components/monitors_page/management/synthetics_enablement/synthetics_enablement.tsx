@@ -7,8 +7,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { EuiEmptyPrompt, EuiButton, EuiTitle, EuiLink } from '@elastic/eui';
-import { useEnablement } from '../../../hooks/use_enablement';
-import { kibanaService } from '../../../../../utils/kibana_service';
+import { useEnablement } from '../../../../hooks/use_enablement';
+import { kibanaService } from '../../../../../../utils/kibana_service';
 import * as labels from './labels';
 
 export const EnablementEmptyState = () => {

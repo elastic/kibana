@@ -7,8 +7,8 @@
 
 import { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getIndexStatus, selectIndexState } from '../../../state';
-import { SyntheticsRefreshContext } from '../../../contexts';
+import { getIndexStatus, selectIndexState } from '../../../../state';
+import { SyntheticsRefreshContext } from '../../../../contexts';
 // import { getDynamicSettings } from '../../../state/actions/dynamic_settings';
 
 export const useHasData = () => {

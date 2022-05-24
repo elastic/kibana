@@ -24,15 +24,15 @@ export function useMonitorList() {
   const { type: viewType } = useParams<{ type: 'all' | 'invalid' }>();
 
   const loadPage = useCallback(
-    (state: MonitorListPageState) => dispatch(fetchMonitorListAction(state)),
+    (state: MonitorListPageState) => dispatch(fetchMonitorListAction.get(state)),
     [dispatch]
   );
 
   const reloadPage = useCallback(() => loadPage(pageState), [pageState, loadPage]);
 
-  // Initial loading, if list is empty
+  // Initial loading
   useEffect(() => {
-    if (!loading && syntheticsMonitors.length === 0) {
+    if (!loading) {
       reloadPage();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

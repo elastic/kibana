@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React, { Fragment } from 'react';
 import { EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Fragment } from 'react';
 
 export const EmptyStateLoading = () => (
   <EuiEmptyPrompt

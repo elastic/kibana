@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { screen } from '@testing-library/react';
-import { render } from '../../../utils/testing/rtl_helpers';
+import { render } from '../../../../utils/testing/rtl_helpers';
 import { Loader } from './loader';
 
 describe('<Loader />', () => {

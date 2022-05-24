@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { selectMonitorListState, selectServiceLocationsState } from '../../../state';
+import { selectMonitorListState, selectServiceLocationsState } from '../../../../state';
 
 export const MonitorAsyncError = () => {
   const [isDismissed, setIsDismissed] = useState(false);
@@ -18,7 +18,7 @@ export const MonitorAsyncError = () => {
   } = useSelector(selectMonitorListState);
   const { locations } = useSelector(selectServiceLocationsState);
 
-  return syncErrors.length > 0 && !isDismissed ? (
+  return syncErrors && syncErrors.length > 0 && !isDismissed ? (
     <>
       <EuiCallOut
         title={

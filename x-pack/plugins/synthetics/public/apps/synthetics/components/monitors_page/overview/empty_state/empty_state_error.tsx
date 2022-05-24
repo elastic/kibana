@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React, { Fragment } from 'react';
 import { EuiEmptyPrompt, EuiPanel, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Fragment } from 'react';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 
 interface EmptyStateErrorProps {

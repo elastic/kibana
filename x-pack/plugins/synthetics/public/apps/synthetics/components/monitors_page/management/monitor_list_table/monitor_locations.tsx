@@ -7,8 +7,8 @@
 
 import React, { useState } from 'react';
 import { EuiBadge, EuiBadgeGroup } from '@elastic/eui';
-import { ServiceLocations, ServiceLocation } from '../../../../../../common/runtime_types';
-import { useLocations } from '../../../hooks/use_locations';
+import { ServiceLocations, ServiceLocation } from '../../../../../../../common/runtime_types';
+import { useLocations } from '../../../../hooks/use_locations';
 import { EXPAND_LOCATIONS_LABEL } from './labels';
 
 interface Props {

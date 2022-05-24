@@ -6,12 +6,11 @@
  */
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
 
-import { useMonitorList } from './hooks/use_monitor_list';
+import { useMonitorList } from '../hooks/use_monitor_list';
 import { MonitorList } from './monitor_list_table/monitor_list';
 import { MonitorAsyncError } from './monitor_errors/monitor_async_error';
-import { useInlineErrors } from './hooks/use_inline_errors';
+import { useInlineErrors } from '../hooks/use_inline_errors';
 
 export const MonitorListContainer = ({ isEnabled }: { isEnabled?: boolean }) => {
   const {
@@ -23,9 +22,8 @@ export const MonitorListContainer = ({ isEnabled }: { isEnabled?: boolean }) => 
     reloadPage,
   } = useMonitorList();
 
-  const { type: viewType } = useParams<{ type: 'all' | 'invalid' }>();
   const { errorSummaries, loading: errorsLoading } = useInlineErrors({
-    onlyInvalidMonitors: viewType === 'invalid',
+    onlyInvalidMonitors: false,
     sortField: pageState.sortField,
     sortOrder: pageState.sortOrder,
   });

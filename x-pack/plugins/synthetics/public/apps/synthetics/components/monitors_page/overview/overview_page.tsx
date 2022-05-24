@@ -40,7 +40,7 @@ export const OverviewPage: React.FC = () => {
         <p>This page should show empty state or overview</p>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiLink href={`${basePath}/app/synthetics/manage-monitors`}>Monitor Management</EuiLink>
+        <EuiLink href={`${basePath}/app/synthetics/monitors`}>Monitors</EuiLink>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiLink href={`${basePath}/app/synthetics/add-monitor`}>Add Monitor</EuiLink>

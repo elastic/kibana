@@ -79,7 +79,7 @@ export function useInlineErrors({
 
   const doFetch = configIds.length > 0 || onlyInvalidMonitors;
 
-  const { data, loading } = useEsSearch(
+  const { data } = useEsSearch(
     {
       index: doFetch ? SYNTHETICS_INDEX_PATTERN : '',
       body: {
@@ -105,6 +105,6 @@ export function useInlineErrors({
       timestamp: (source as any)['@timestamp'],
     }));
 
-    return { loading: (loading ?? false) || countLoading, errorSummaries, count };
-  }, [count, countLoading, data, loading]);
+    return { loading: countLoading, errorSummaries, count };
+  }, [count, countLoading, data]);
 }

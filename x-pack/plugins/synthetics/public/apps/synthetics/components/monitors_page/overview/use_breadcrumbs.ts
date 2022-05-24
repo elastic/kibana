@@ -6,22 +6,21 @@
  */
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import { MONITOR_MANAGEMENT_ROUTE } from '../../../../../common/constants';
-import { PLUGIN } from '../../../../../common/constants/plugin';
+import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
+import { PLUGIN } from '../../../../../../common/constants/plugin';
 
-export const useMonitorListBreadcrumbs = () => {
+export const useOverviewBreadcrumbs = () => {
   const kibana = useKibana();
   const appPath = kibana.services.application?.getUrlForApp(PLUGIN.SYNTHETICS_PLUGIN_ID) ?? '';
 
   useBreadcrumbs([
     {
-      text: MONITOR_MANAGEMENT_CRUMB,
-      href: `${appPath}/${MONITOR_MANAGEMENT_ROUTE}`,
+      text: OVERVIEW_PAGE_CRUMB,
+      href: `${appPath}`,
     },
   ]);
 };
 
-const MONITOR_MANAGEMENT_CRUMB = i18n.translate('xpack.synthetics.monitorsPage.monitorCrumb', {
-  defaultMessage: 'Monitors',
+export const OVERVIEW_PAGE_CRUMB = i18n.translate('xpack.synthetics.overviewPage.overviewCrumb', {
+  defaultMessage: 'Overview',
 });
