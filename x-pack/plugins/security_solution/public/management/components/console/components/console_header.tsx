@@ -21,25 +21,28 @@ export type ConsoleHeaderProps = Pick<ConsoleProps, 'TitleComponent'>;
 export const ConsoleHeader = memo<ConsoleHeaderProps>(({ TitleComponent }) => {
   const dispatch = useConsoleStateDispatch();
   const panelCurrentlyShowing = useWithSidePanel().show;
+  const isHelpOpen = panelCurrentlyShowing === 'help';
 
   const handleHelpButtonOnClick = useCallback(() => {
     dispatch({
       type: 'showSidePanel',
-      payload: { show: panelCurrentlyShowing === 'help' ? null : 'help' },
+      payload: { show: isHelpOpen ? null : 'help' },
     });
-  }, [dispatch, panelCurrentlyShowing]);
+  }, [dispatch, isHelpOpen]);
 
   return (
     <EuiFlexGroup gutterSize="none" alignItems="center">
-      <EuiFlexItem grow>{TitleComponent ? <TitleComponent /> : ''}</EuiFlexItem>
+      <EuiFlexItem grow className="eui-textTruncate">
+        {TitleComponent ? <TitleComponent /> : ''}
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           onClick={handleHelpButtonOnClick}
           iconType={'help'}
           title={HELP_LABEL}
           aria-label={HELP_LABEL}
-          isSelected={Boolean(panelCurrentlyShowing)}
-          display={panelCurrentlyShowing === 'help' ? 'fill' : 'empty'}
+          isSelected={isHelpOpen}
+          display={isHelpOpen ? 'fill' : 'empty'}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
