@@ -6526,7 +6526,7 @@
               "\nImport saved objects from given stream. See the {@link SavedObjectsImportOptions | options} for more\ndetailed information.\n"
             ],
             "signature": [
-              "({ readStream, createNewCopies, namespace, overwrite, }: ",
+              "({ readStream, createNewCopies, namespace, overwrite, refresh, }: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -6552,7 +6552,7 @@
                 "id": "def-server.SavedObjectsImporter.import.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    readStream,\n    createNewCopies,\n    namespace,\n    overwrite,\n  }",
+                "label": "{\n    readStream,\n    createNewCopies,\n    namespace,\n    overwrite,\n    refresh,\n  }",
                 "description": [],
                 "signature": [
                   {
@@ -12832,6 +12832,21 @@
             ],
             "path": "src/core/server/saved_objects/import/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsImportOptions.refresh",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "refresh",
+            "description": [
+              "Refresh setting, defaults to `wait_for`"
+            ],
+            "signature": [
+              "boolean | \"wait_for\" | undefined"
+            ],
+            "path": "src/core/server/saved_objects/import/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -13512,14 +13527,6 @@
             "deprecated": true,
             "removeBy": "8.8.0",
             "references": [
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/server/migrations/saved_object_migrations.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/server/migrations/saved_object_migrations.ts"
-              },
               {
                 "plugin": "dashboard",
                 "path": "src/plugins/dashboard/server/saved_objects/migrations_730.ts"
@@ -15605,7 +15612,7 @@
             "tags": [],
             "label": "version",
             "description": [
-              "An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control."
+              "\nAn opaque version number which changes on each successful write operation.\nCan be used for implementing optimistic concurrency control."
             ],
             "signature": [
               "string | undefined"
@@ -15665,6 +15672,21 @@
             ],
             "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsUpdateOptions.retryOnConflict",
+            "type": "number",
+            "tags": [],
+            "label": "retryOnConflict",
+            "description": [
+              "\nThe Elasticsearch `retry_on_conflict` setting for this operation.\nDefaults to `0` when `version` is provided, `3` otherwise."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -15688,7 +15710,7 @@
           },
           "<T> extends Omit<",
           "SavedObject",
-          "<T>, \"references\" | \"attributes\">"
+          "<T>, \"attributes\" | \"references\">"
         ],
         "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
         "deprecated": false,
@@ -15803,7 +15825,7 @@
         "label": "ISavedObjectsImporter",
         "description": [],
         "signature": [
-          "{ import: ({ readStream, createNewCopies, namespace, overwrite, }: ",
+          "{ import: ({ readStream, createNewCopies, namespace, overwrite, refresh, }: ",
           {
             "pluginId": "core",
             "scope": "server",

@@ -282,7 +282,7 @@
                 "section": "def-server.CiStatsReportTestsOptions",
                 "text": "CiStatsReportTestsOptions"
               },
-              ") => Promise<ReportTestsResponse | undefined>"
+              ") => Promise<void>"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
@@ -573,6 +573,21 @@
             "label": "name",
             "description": [
               "\nThe name of this specific group (within the \"type\")"
+            ],
+            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/ci-stats-reporter",
+            "id": "def-server.CiStatsTestGroupInfo.result",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "result",
+            "description": [
+              "\nOverall result of this test group"
+            ],
+            "signature": [
+              "\"fail\" | \"pass\" | \"skip\""
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false

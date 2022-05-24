@@ -1,0 +1,172 @@
+{
+  "id": "@kbn/shared-ux-page-analytics-no-data",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+        "id": "def-common.AnalyticsNoDataPage",
+        "type": "Function",
+        "tags": [],
+        "label": "AnalyticsNoDataPage",
+        "description": [
+          "\nAn entire page that can be displayed when Kibana \"has no data\", specifically for Analytics.\nRequires a Provider for relevant services."
+        ],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          "AnalyticsNoDataPageProps",
+          " & React.RefAttributes<{}>>"
+        ],
+        "path": "packages/shared-ux/page/analytics_no_data/src/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+            "id": "def-common.AnalyticsNoDataPage.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+        "id": "def-common.AnalyticsNoDataPageKibanaProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "AnalyticsNoDataPageKibanaProvider",
+        "description": [
+          "\nKibana-specific Provider that maps dependencies to services."
+        ],
+        "signature": [
+          "({ children, ...dependencies }: React.PropsWithChildren<",
+          "AnalyticsNoDataPageKibanaDependencies",
+          ">) => JSX.Element"
+        ],
+        "path": "packages/shared-ux/page/analytics_no_data/src/services.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+            "id": "def-common.AnalyticsNoDataPageKibanaProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  ...dependencies\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "AnalyticsNoDataPageKibanaDependencies",
+              ">"
+            ],
+            "path": "packages/shared-ux/page/analytics_no_data/src/services.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+        "id": "def-common.AnalyticsNoDataPageProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "AnalyticsNoDataPageProvider",
+        "description": [
+          "\nA Context Provider that provides services to the component."
+        ],
+        "signature": [
+          "({ children, ...services }: React.PropsWithChildren<",
+          "Services",
+          ">) => JSX.Element"
+        ],
+        "path": "packages/shared-ux/page/analytics_no_data/src/services.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+            "id": "def-common.AnalyticsNoDataPageProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ children, ...services }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "Services",
+              ">"
+            ],
+            "path": "packages/shared-ux/page/analytics_no_data/src/services.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+        "id": "def-common.LazyAnalyticsNoDataPage",
+        "type": "Function",
+        "tags": [],
+        "label": "LazyAnalyticsNoDataPage",
+        "description": [
+          "\nLazy-loaded connected component.  Must be wrapped in `React.Suspense`."
+        ],
+        "signature": [
+          "React.ExoticComponent<",
+          "AnalyticsNoDataPageProps",
+          "> & { readonly _result: ({ onDataViewCreated }: ",
+          "AnalyticsNoDataPageProps",
+          ") => JSX.Element; }"
+        ],
+        "path": "packages/shared-ux/page/analytics_no_data/src/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+            "id": "def-common.LazyAnalyticsNoDataPage.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

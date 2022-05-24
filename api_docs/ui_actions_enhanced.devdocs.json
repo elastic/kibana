@@ -2663,6 +2663,38 @@
           },
           {
             "parentPluginId": "uiActionsEnhanced",
+            "id": "def-public.DrilldownDefinition.isConfigurable",
+            "type": "Function",
+            "tags": [],
+            "label": "isConfigurable",
+            "description": [
+              "\nCompatibility check during drilldown creation.\nCould be used to filter out a drilldown if it's not compatible with the current context."
+            ],
+            "signature": [
+              "((context: FactoryContext) => boolean) | undefined"
+            ],
+            "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "uiActionsEnhanced",
+                "id": "def-public.DrilldownDefinition.isConfigurable.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "FactoryContext"
+                ],
+                "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "uiActionsEnhanced",
             "id": "def-public.DrilldownDefinition.euiIcon",
             "type": "string",
             "tags": [],

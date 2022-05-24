@@ -679,7 +679,7 @@
             "section": "def-public.UnifiedSearchPublicPluginStart",
             "text": "UnifiedSearchPublicPluginStart"
           },
-          " | undefined; className?: string | undefined; setMenuMountPoint?: ((menuMount: ",
+          " | undefined; className?: string | undefined; visible?: boolean | undefined; setMenuMountPoint?: ((menuMount: ",
           {
             "pluginId": "core",
             "scope": "public",

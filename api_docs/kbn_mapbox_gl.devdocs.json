@@ -9,10 +9,18 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/mapbox-gl",
-        "id": "def-server.GeoJSONSource",
+        "id": "def-common.GeoJSONSource",
         "type": "Class",
         "tags": [],
         "label": "GeoJSONSource",
@@ -25,7 +33,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource.type",
+            "id": "def-common.GeoJSONSource.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -38,7 +46,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource.id",
+            "id": "def-common.GeoJSONSource.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -48,7 +56,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource.minzoom",
+            "id": "def-common.GeoJSONSource.minzoom",
             "type": "number",
             "tags": [],
             "label": "minzoom",
@@ -58,7 +66,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource.maxzoom",
+            "id": "def-common.GeoJSONSource.maxzoom",
             "type": "number",
             "tags": [],
             "label": "maxzoom",
@@ -68,7 +76,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource.tileSize",
+            "id": "def-common.GeoJSONSource.tileSize",
             "type": "number",
             "tags": [],
             "label": "tileSize",
@@ -78,7 +86,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource.attribution",
+            "id": "def-common.GeoJSONSource.attribution",
             "type": "string",
             "tags": [],
             "label": "attribution",
@@ -88,7 +96,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource.promoteId",
+            "id": "def-common.GeoJSONSource.promoteId",
             "type": "CompoundType",
             "tags": [],
             "label": "promoteId",
@@ -101,7 +109,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource.isTileClipped",
+            "id": "def-common.GeoJSONSource.isTileClipped",
             "type": "boolean",
             "tags": [],
             "label": "isTileClipped",
@@ -111,7 +119,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource.reparseOverscaled",
+            "id": "def-common.GeoJSONSource.reparseOverscaled",
             "type": "boolean",
             "tags": [],
             "label": "reparseOverscaled",
@@ -121,7 +129,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource._data",
+            "id": "def-common.GeoJSONSource._data",
             "type": "CompoundType",
             "tags": [],
             "label": "_data",
@@ -134,7 +142,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource._options",
+            "id": "def-common.GeoJSONSource._options",
             "type": "Any",
             "tags": [],
             "label": "_options",
@@ -147,7 +155,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource.workerOptions",
+            "id": "def-common.GeoJSONSource.workerOptions",
             "type": "Any",
             "tags": [],
             "label": "workerOptions",
@@ -160,7 +168,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource.map",
+            "id": "def-common.GeoJSONSource.map",
             "type": "Object",
             "tags": [],
             "label": "map",
@@ -173,7 +181,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource.actor",
+            "id": "def-common.GeoJSONSource.actor",
             "type": "Object",
             "tags": [],
             "label": "actor",
@@ -186,7 +194,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource._pendingLoads",
+            "id": "def-common.GeoJSONSource._pendingLoads",
             "type": "number",
             "tags": [],
             "label": "_pendingLoads",
@@ -196,7 +204,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource._collectResourceTiming",
+            "id": "def-common.GeoJSONSource._collectResourceTiming",
             "type": "boolean",
             "tags": [],
             "label": "_collectResourceTiming",
@@ -206,7 +214,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource._removed",
+            "id": "def-common.GeoJSONSource._removed",
             "type": "boolean",
             "tags": [],
             "label": "_removed",
@@ -216,7 +224,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource.Unnamed",
+            "id": "def-common.GeoJSONSource.Unnamed",
             "type": "Function",
             "tags": [
               "private"
@@ -231,7 +239,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.GeoJSONSource.Unnamed.$1",
+                "id": "def-common.GeoJSONSource.Unnamed.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -245,7 +253,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.GeoJSONSource.Unnamed.$2",
+                "id": "def-common.GeoJSONSource.Unnamed.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "options",
@@ -259,7 +267,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.GeoJSONSource.Unnamed.$3",
+                "id": "def-common.GeoJSONSource.Unnamed.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "dispatcher",
@@ -273,7 +281,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.GeoJSONSource.Unnamed.$4",
+                "id": "def-common.GeoJSONSource.Unnamed.$4",
                 "type": "Object",
                 "tags": [],
                 "label": "eventedParent",
@@ -290,7 +298,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource.load",
+            "id": "def-common.GeoJSONSource.load",
             "type": "Function",
             "tags": [],
             "label": "load",
@@ -305,7 +313,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource.onAdd",
+            "id": "def-common.GeoJSONSource.onAdd",
             "type": "Function",
             "tags": [],
             "label": "onAdd",
@@ -318,7 +326,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.GeoJSONSource.onAdd.$1",
+                "id": "def-common.GeoJSONSource.onAdd.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "map",
@@ -335,7 +343,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource.setData",
+            "id": "def-common.GeoJSONSource.setData",
             "type": "Function",
             "tags": [],
             "label": "setData",
@@ -350,7 +358,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.GeoJSONSource.setData.$1",
+                "id": "def-common.GeoJSONSource.setData.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "data",
@@ -371,7 +379,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource.getClusterExpansionZoom",
+            "id": "def-common.GeoJSONSource.getClusterExpansionZoom",
             "type": "Function",
             "tags": [],
             "label": "getClusterExpansionZoom",
@@ -386,7 +394,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.GeoJSONSource.getClusterExpansionZoom.$1",
+                "id": "def-common.GeoJSONSource.getClusterExpansionZoom.$1",
                 "type": "number",
                 "tags": [],
                 "label": "clusterId",
@@ -402,7 +410,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.GeoJSONSource.getClusterExpansionZoom.$2",
+                "id": "def-common.GeoJSONSource.getClusterExpansionZoom.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "callback",
@@ -423,7 +431,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource.getClusterChildren",
+            "id": "def-common.GeoJSONSource.getClusterChildren",
             "type": "Function",
             "tags": [],
             "label": "getClusterChildren",
@@ -438,7 +446,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.GeoJSONSource.getClusterChildren.$1",
+                "id": "def-common.GeoJSONSource.getClusterChildren.$1",
                 "type": "number",
                 "tags": [],
                 "label": "clusterId",
@@ -454,7 +462,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.GeoJSONSource.getClusterChildren.$2",
+                "id": "def-common.GeoJSONSource.getClusterChildren.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "callback",
@@ -475,7 +483,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource.getClusterLeaves",
+            "id": "def-common.GeoJSONSource.getClusterLeaves",
             "type": "Function",
             "tags": [],
             "label": "getClusterLeaves",
@@ -490,7 +498,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.GeoJSONSource.getClusterLeaves.$1",
+                "id": "def-common.GeoJSONSource.getClusterLeaves.$1",
                 "type": "number",
                 "tags": [],
                 "label": "clusterId",
@@ -506,7 +514,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.GeoJSONSource.getClusterLeaves.$2",
+                "id": "def-common.GeoJSONSource.getClusterLeaves.$2",
                 "type": "number",
                 "tags": [],
                 "label": "limit",
@@ -522,7 +530,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.GeoJSONSource.getClusterLeaves.$3",
+                "id": "def-common.GeoJSONSource.getClusterLeaves.$3",
                 "type": "number",
                 "tags": [],
                 "label": "offset",
@@ -538,7 +546,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.GeoJSONSource.getClusterLeaves.$4",
+                "id": "def-common.GeoJSONSource.getClusterLeaves.$4",
                 "type": "Function",
                 "tags": [],
                 "label": "callback",
@@ -559,7 +567,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource._updateWorkerData",
+            "id": "def-common.GeoJSONSource._updateWorkerData",
             "type": "Function",
             "tags": [],
             "label": "_updateWorkerData",
@@ -572,7 +580,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.GeoJSONSource._updateWorkerData.$1",
+                "id": "def-common.GeoJSONSource._updateWorkerData.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "sourceDataType",
@@ -589,7 +597,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource.loaded",
+            "id": "def-common.GeoJSONSource.loaded",
             "type": "Function",
             "tags": [],
             "label": "loaded",
@@ -604,7 +612,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource.loadTile",
+            "id": "def-common.GeoJSONSource.loadTile",
             "type": "Function",
             "tags": [],
             "label": "loadTile",
@@ -617,7 +625,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.GeoJSONSource.loadTile.$1",
+                "id": "def-common.GeoJSONSource.loadTile.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "tile",
@@ -631,7 +639,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.GeoJSONSource.loadTile.$2",
+                "id": "def-common.GeoJSONSource.loadTile.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "callback",
@@ -648,7 +656,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource.abortTile",
+            "id": "def-common.GeoJSONSource.abortTile",
             "type": "Function",
             "tags": [],
             "label": "abortTile",
@@ -661,7 +669,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.GeoJSONSource.abortTile.$1",
+                "id": "def-common.GeoJSONSource.abortTile.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "tile",
@@ -678,7 +686,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource.unloadTile",
+            "id": "def-common.GeoJSONSource.unloadTile",
             "type": "Function",
             "tags": [],
             "label": "unloadTile",
@@ -691,7 +699,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.GeoJSONSource.unloadTile.$1",
+                "id": "def-common.GeoJSONSource.unloadTile.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "tile",
@@ -708,7 +716,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource.onRemove",
+            "id": "def-common.GeoJSONSource.onRemove",
             "type": "Function",
             "tags": [],
             "label": "onRemove",
@@ -723,7 +731,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource.serialize",
+            "id": "def-common.GeoJSONSource.serialize",
             "type": "Function",
             "tags": [],
             "label": "serialize",
@@ -738,7 +746,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.GeoJSONSource.hasTransition",
+            "id": "def-common.GeoJSONSource.hasTransition",
             "type": "Function",
             "tags": [],
             "label": "hasTransition",
@@ -756,7 +764,7 @@
       },
       {
         "parentPluginId": "@kbn/mapbox-gl",
-        "id": "def-server.LngLat",
+        "id": "def-common.LngLat",
         "type": "Class",
         "tags": [],
         "label": "LngLat",
@@ -769,7 +777,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.LngLat.lng",
+            "id": "def-common.LngLat.lng",
             "type": "number",
             "tags": [],
             "label": "lng",
@@ -779,7 +787,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.LngLat.lat",
+            "id": "def-common.LngLat.lat",
             "type": "number",
             "tags": [],
             "label": "lat",
@@ -789,7 +797,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.LngLat.Unnamed",
+            "id": "def-common.LngLat.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -802,7 +810,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.LngLat.Unnamed.$1",
+                "id": "def-common.LngLat.Unnamed.$1",
                 "type": "number",
                 "tags": [],
                 "label": "lng",
@@ -816,7 +824,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.LngLat.Unnamed.$2",
+                "id": "def-common.LngLat.Unnamed.$2",
                 "type": "number",
                 "tags": [],
                 "label": "lat",
@@ -833,7 +841,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.LngLat.wrap",
+            "id": "def-common.LngLat.wrap",
             "type": "Function",
             "tags": [],
             "label": "wrap",
@@ -852,7 +860,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.LngLat.toArray",
+            "id": "def-common.LngLat.toArray",
             "type": "Function",
             "tags": [],
             "label": "toArray",
@@ -871,7 +879,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.LngLat.toString",
+            "id": "def-common.LngLat.toString",
             "type": "Function",
             "tags": [],
             "label": "toString",
@@ -890,7 +898,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.LngLat.distanceTo",
+            "id": "def-common.LngLat.distanceTo",
             "type": "Function",
             "tags": [],
             "label": "distanceTo",
@@ -905,7 +913,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.LngLat.distanceTo.$1",
+                "id": "def-common.LngLat.distanceTo.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "lngLat",
@@ -926,7 +934,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.LngLat.toBounds",
+            "id": "def-common.LngLat.toBounds",
             "type": "Function",
             "tags": [],
             "label": "toBounds",
@@ -941,7 +949,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.LngLat.toBounds.$1",
+                "id": "def-common.LngLat.toBounds.$1",
                 "type": "number",
                 "tags": [],
                 "label": "radius",
@@ -962,7 +970,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.LngLat.convert",
+            "id": "def-common.LngLat.convert",
             "type": "Function",
             "tags": [],
             "label": "convert",
@@ -977,7 +985,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.LngLat.convert.$1",
+                "id": "def-common.LngLat.convert.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "input",
@@ -1001,7 +1009,7 @@
       },
       {
         "parentPluginId": "@kbn/mapbox-gl",
-        "id": "def-server.LngLatBounds",
+        "id": "def-common.LngLatBounds",
         "type": "Class",
         "tags": [],
         "label": "LngLatBounds",
@@ -1014,7 +1022,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.LngLatBounds._ne",
+            "id": "def-common.LngLatBounds._ne",
             "type": "Object",
             "tags": [],
             "label": "_ne",
@@ -1027,7 +1035,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.LngLatBounds._sw",
+            "id": "def-common.LngLatBounds._sw",
             "type": "Object",
             "tags": [],
             "label": "_sw",
@@ -1040,7 +1048,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.LngLatBounds.Unnamed",
+            "id": "def-common.LngLatBounds.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -1053,7 +1061,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.LngLatBounds.Unnamed.$1",
+                "id": "def-common.LngLatBounds.Unnamed.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "sw",
@@ -1067,7 +1075,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.LngLatBounds.Unnamed.$2",
+                "id": "def-common.LngLatBounds.Unnamed.$2",
                 "type": "Any",
                 "tags": [],
                 "label": "ne",
@@ -1084,7 +1092,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.LngLatBounds.setNorthEast",
+            "id": "def-common.LngLatBounds.setNorthEast",
             "type": "Function",
             "tags": [],
             "label": "setNorthEast",
@@ -1099,7 +1107,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.LngLatBounds.setNorthEast.$1",
+                "id": "def-common.LngLatBounds.setNorthEast.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "ne",
@@ -1120,7 +1128,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.LngLatBounds.setSouthWest",
+            "id": "def-common.LngLatBounds.setSouthWest",
             "type": "Function",
             "tags": [],
             "label": "setSouthWest",
@@ -1135,7 +1143,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.LngLatBounds.setSouthWest.$1",
+                "id": "def-common.LngLatBounds.setSouthWest.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "sw",
@@ -1156,7 +1164,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.LngLatBounds.extend",
+            "id": "def-common.LngLatBounds.extend",
             "type": "Function",
             "tags": [],
             "label": "extend",
@@ -1171,7 +1179,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.LngLatBounds.extend.$1",
+                "id": "def-common.LngLatBounds.extend.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "obj",
@@ -1192,7 +1200,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.LngLatBounds.getCenter",
+            "id": "def-common.LngLatBounds.getCenter",
             "type": "Function",
             "tags": [],
             "label": "getCenter",
@@ -1211,7 +1219,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.LngLatBounds.getSouthWest",
+            "id": "def-common.LngLatBounds.getSouthWest",
             "type": "Function",
             "tags": [],
             "label": "getSouthWest",
@@ -1230,7 +1238,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.LngLatBounds.getNorthEast",
+            "id": "def-common.LngLatBounds.getNorthEast",
             "type": "Function",
             "tags": [],
             "label": "getNorthEast",
@@ -1249,7 +1257,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.LngLatBounds.getNorthWest",
+            "id": "def-common.LngLatBounds.getNorthWest",
             "type": "Function",
             "tags": [],
             "label": "getNorthWest",
@@ -1268,7 +1276,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.LngLatBounds.getSouthEast",
+            "id": "def-common.LngLatBounds.getSouthEast",
             "type": "Function",
             "tags": [],
             "label": "getSouthEast",
@@ -1287,7 +1295,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.LngLatBounds.getWest",
+            "id": "def-common.LngLatBounds.getWest",
             "type": "Function",
             "tags": [],
             "label": "getWest",
@@ -1306,7 +1314,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.LngLatBounds.getSouth",
+            "id": "def-common.LngLatBounds.getSouth",
             "type": "Function",
             "tags": [],
             "label": "getSouth",
@@ -1325,7 +1333,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.LngLatBounds.getEast",
+            "id": "def-common.LngLatBounds.getEast",
             "type": "Function",
             "tags": [],
             "label": "getEast",
@@ -1344,7 +1352,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.LngLatBounds.getNorth",
+            "id": "def-common.LngLatBounds.getNorth",
             "type": "Function",
             "tags": [],
             "label": "getNorth",
@@ -1363,7 +1371,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.LngLatBounds.toArray",
+            "id": "def-common.LngLatBounds.toArray",
             "type": "Function",
             "tags": [],
             "label": "toArray",
@@ -1382,7 +1390,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.LngLatBounds.toString",
+            "id": "def-common.LngLatBounds.toString",
             "type": "Function",
             "tags": [],
             "label": "toString",
@@ -1401,7 +1409,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.LngLatBounds.isEmpty",
+            "id": "def-common.LngLatBounds.isEmpty",
             "type": "Function",
             "tags": [],
             "label": "isEmpty",
@@ -1420,7 +1428,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.LngLatBounds.contains",
+            "id": "def-common.LngLatBounds.contains",
             "type": "Function",
             "tags": [],
             "label": "contains",
@@ -1435,7 +1443,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.LngLatBounds.contains.$1",
+                "id": "def-common.LngLatBounds.contains.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "lnglat",
@@ -1456,7 +1464,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.LngLatBounds.convert",
+            "id": "def-common.LngLatBounds.convert",
             "type": "Function",
             "tags": [],
             "label": "convert",
@@ -1471,7 +1479,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.LngLatBounds.convert.$1",
+                "id": "def-common.LngLatBounds.convert.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "input",
@@ -1495,7 +1503,7 @@
       },
       {
         "parentPluginId": "@kbn/mapbox-gl",
-        "id": "def-server.Map",
+        "id": "def-common.Map",
         "type": "Class",
         "tags": [],
         "label": "Map",
@@ -1508,7 +1516,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.style",
+            "id": "def-common.Map.style",
             "type": "Object",
             "tags": [],
             "label": "style",
@@ -1521,7 +1529,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.painter",
+            "id": "def-common.Map.painter",
             "type": "Object",
             "tags": [],
             "label": "painter",
@@ -1534,7 +1542,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.handlers",
+            "id": "def-common.Map.handlers",
             "type": "Object",
             "tags": [],
             "label": "handlers",
@@ -1547,7 +1555,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._container",
+            "id": "def-common.Map._container",
             "type": "Object",
             "tags": [],
             "label": "_container",
@@ -1560,7 +1568,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._canvasContainer",
+            "id": "def-common.Map._canvasContainer",
             "type": "Object",
             "tags": [],
             "label": "_canvasContainer",
@@ -1573,7 +1581,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._controlContainer",
+            "id": "def-common.Map._controlContainer",
             "type": "Object",
             "tags": [],
             "label": "_controlContainer",
@@ -1586,7 +1594,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._controlPositions",
+            "id": "def-common.Map._controlPositions",
             "type": "Object",
             "tags": [],
             "label": "_controlPositions",
@@ -1599,7 +1607,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._interactive",
+            "id": "def-common.Map._interactive",
             "type": "boolean",
             "tags": [],
             "label": "_interactive",
@@ -1609,7 +1617,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._showTileBoundaries",
+            "id": "def-common.Map._showTileBoundaries",
             "type": "boolean",
             "tags": [],
             "label": "_showTileBoundaries",
@@ -1619,7 +1627,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._showCollisionBoxes",
+            "id": "def-common.Map._showCollisionBoxes",
             "type": "boolean",
             "tags": [],
             "label": "_showCollisionBoxes",
@@ -1629,7 +1637,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._showPadding",
+            "id": "def-common.Map._showPadding",
             "type": "boolean",
             "tags": [],
             "label": "_showPadding",
@@ -1639,7 +1647,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._showOverdrawInspector",
+            "id": "def-common.Map._showOverdrawInspector",
             "type": "boolean",
             "tags": [],
             "label": "_showOverdrawInspector",
@@ -1649,7 +1657,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._repaint",
+            "id": "def-common.Map._repaint",
             "type": "boolean",
             "tags": [],
             "label": "_repaint",
@@ -1659,7 +1667,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._vertices",
+            "id": "def-common.Map._vertices",
             "type": "boolean",
             "tags": [],
             "label": "_vertices",
@@ -1669,7 +1677,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._canvas",
+            "id": "def-common.Map._canvas",
             "type": "Object",
             "tags": [],
             "label": "_canvas",
@@ -1682,7 +1690,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._maxTileCacheSize",
+            "id": "def-common.Map._maxTileCacheSize",
             "type": "number",
             "tags": [],
             "label": "_maxTileCacheSize",
@@ -1692,7 +1700,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._frame",
+            "id": "def-common.Map._frame",
             "type": "Object",
             "tags": [],
             "label": "_frame",
@@ -1705,7 +1713,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._styleDirty",
+            "id": "def-common.Map._styleDirty",
             "type": "boolean",
             "tags": [],
             "label": "_styleDirty",
@@ -1715,7 +1723,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._sourcesDirty",
+            "id": "def-common.Map._sourcesDirty",
             "type": "boolean",
             "tags": [],
             "label": "_sourcesDirty",
@@ -1725,7 +1733,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._placementDirty",
+            "id": "def-common.Map._placementDirty",
             "type": "boolean",
             "tags": [],
             "label": "_placementDirty",
@@ -1735,7 +1743,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._loaded",
+            "id": "def-common.Map._loaded",
             "type": "boolean",
             "tags": [],
             "label": "_loaded",
@@ -1745,7 +1753,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._fullyLoaded",
+            "id": "def-common.Map._fullyLoaded",
             "type": "boolean",
             "tags": [],
             "label": "_fullyLoaded",
@@ -1755,7 +1763,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._trackResize",
+            "id": "def-common.Map._trackResize",
             "type": "boolean",
             "tags": [],
             "label": "_trackResize",
@@ -1765,7 +1773,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._preserveDrawingBuffer",
+            "id": "def-common.Map._preserveDrawingBuffer",
             "type": "boolean",
             "tags": [],
             "label": "_preserveDrawingBuffer",
@@ -1775,7 +1783,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._failIfMajorPerformanceCaveat",
+            "id": "def-common.Map._failIfMajorPerformanceCaveat",
             "type": "boolean",
             "tags": [],
             "label": "_failIfMajorPerformanceCaveat",
@@ -1785,7 +1793,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._antialias",
+            "id": "def-common.Map._antialias",
             "type": "boolean",
             "tags": [],
             "label": "_antialias",
@@ -1795,7 +1803,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._refreshExpiredTiles",
+            "id": "def-common.Map._refreshExpiredTiles",
             "type": "boolean",
             "tags": [],
             "label": "_refreshExpiredTiles",
@@ -1805,7 +1813,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._hash",
+            "id": "def-common.Map._hash",
             "type": "Object",
             "tags": [],
             "label": "_hash",
@@ -1818,7 +1826,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._delegatedListeners",
+            "id": "def-common.Map._delegatedListeners",
             "type": "Any",
             "tags": [],
             "label": "_delegatedListeners",
@@ -1831,7 +1839,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._fadeDuration",
+            "id": "def-common.Map._fadeDuration",
             "type": "number",
             "tags": [],
             "label": "_fadeDuration",
@@ -1841,7 +1849,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._crossSourceCollisions",
+            "id": "def-common.Map._crossSourceCollisions",
             "type": "boolean",
             "tags": [],
             "label": "_crossSourceCollisions",
@@ -1851,7 +1859,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._crossFadingFactor",
+            "id": "def-common.Map._crossFadingFactor",
             "type": "number",
             "tags": [],
             "label": "_crossFadingFactor",
@@ -1861,7 +1869,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._collectResourceTiming",
+            "id": "def-common.Map._collectResourceTiming",
             "type": "boolean",
             "tags": [],
             "label": "_collectResourceTiming",
@@ -1871,7 +1879,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._renderTaskQueue",
+            "id": "def-common.Map._renderTaskQueue",
             "type": "Object",
             "tags": [],
             "label": "_renderTaskQueue",
@@ -1884,7 +1892,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._controls",
+            "id": "def-common.Map._controls",
             "type": "Array",
             "tags": [],
             "label": "_controls",
@@ -1897,7 +1905,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._mapId",
+            "id": "def-common.Map._mapId",
             "type": "number",
             "tags": [],
             "label": "_mapId",
@@ -1907,7 +1915,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._localIdeographFontFamily",
+            "id": "def-common.Map._localIdeographFontFamily",
             "type": "string",
             "tags": [],
             "label": "_localIdeographFontFamily",
@@ -1917,7 +1925,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._requestManager",
+            "id": "def-common.Map._requestManager",
             "type": "Object",
             "tags": [],
             "label": "_requestManager",
@@ -1930,7 +1938,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._locale",
+            "id": "def-common.Map._locale",
             "type": "Any",
             "tags": [],
             "label": "_locale",
@@ -1943,7 +1951,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._removed",
+            "id": "def-common.Map._removed",
             "type": "boolean",
             "tags": [],
             "label": "_removed",
@@ -1953,7 +1961,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._clickTolerance",
+            "id": "def-common.Map._clickTolerance",
             "type": "number",
             "tags": [],
             "label": "_clickTolerance",
@@ -1963,7 +1971,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._pixelRatio",
+            "id": "def-common.Map._pixelRatio",
             "type": "number",
             "tags": [],
             "label": "_pixelRatio",
@@ -1973,7 +1981,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.scrollZoom",
+            "id": "def-common.Map.scrollZoom",
             "type": "Object",
             "tags": [],
             "label": "scrollZoom",
@@ -1988,7 +1996,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.boxZoom",
+            "id": "def-common.Map.boxZoom",
             "type": "Object",
             "tags": [],
             "label": "boxZoom",
@@ -2003,7 +2011,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.dragRotate",
+            "id": "def-common.Map.dragRotate",
             "type": "Object",
             "tags": [],
             "label": "dragRotate",
@@ -2018,7 +2026,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.dragPan",
+            "id": "def-common.Map.dragPan",
             "type": "Object",
             "tags": [],
             "label": "dragPan",
@@ -2033,7 +2041,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.keyboard",
+            "id": "def-common.Map.keyboard",
             "type": "Object",
             "tags": [],
             "label": "keyboard",
@@ -2048,7 +2056,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.doubleClickZoom",
+            "id": "def-common.Map.doubleClickZoom",
             "type": "Object",
             "tags": [],
             "label": "doubleClickZoom",
@@ -2063,7 +2071,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.touchZoomRotate",
+            "id": "def-common.Map.touchZoomRotate",
             "type": "Object",
             "tags": [],
             "label": "touchZoomRotate",
@@ -2078,7 +2086,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.touchPitch",
+            "id": "def-common.Map.touchPitch",
             "type": "Object",
             "tags": [],
             "label": "touchPitch",
@@ -2093,7 +2101,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.Unnamed",
+            "id": "def-common.Map.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -2106,7 +2114,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.Unnamed.$1",
+                "id": "def-common.Map.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -2123,7 +2131,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._getMapId",
+            "id": "def-common.Map._getMapId",
             "type": "Function",
             "tags": [],
             "label": "_getMapId",
@@ -2138,7 +2146,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.addControl",
+            "id": "def-common.Map.addControl",
             "type": "Function",
             "tags": [
               "see"
@@ -2155,7 +2163,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.addControl.$1",
+                "id": "def-common.Map.addControl.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "control",
@@ -2171,7 +2179,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.addControl.$2",
+                "id": "def-common.Map.addControl.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "position",
@@ -2192,7 +2200,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.removeControl",
+            "id": "def-common.Map.removeControl",
             "type": "Function",
             "tags": [],
             "label": "removeControl",
@@ -2207,7 +2215,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.removeControl.$1",
+                "id": "def-common.Map.removeControl.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "control",
@@ -2228,7 +2236,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.hasControl",
+            "id": "def-common.Map.hasControl",
             "type": "Function",
             "tags": [],
             "label": "hasControl",
@@ -2243,7 +2251,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.hasControl.$1",
+                "id": "def-common.Map.hasControl.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "control",
@@ -2264,7 +2272,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.resize",
+            "id": "def-common.Map.resize",
             "type": "Function",
             "tags": [],
             "label": "resize",
@@ -2279,7 +2287,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.resize.$1",
+                "id": "def-common.Map.resize.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "eventData",
@@ -2300,7 +2308,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.getPixelRatio",
+            "id": "def-common.Map.getPixelRatio",
             "type": "Function",
             "tags": [],
             "label": "getPixelRatio",
@@ -2319,7 +2327,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.setPixelRatio",
+            "id": "def-common.Map.setPixelRatio",
             "type": "Function",
             "tags": [],
             "label": "setPixelRatio",
@@ -2334,7 +2342,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.setPixelRatio.$1",
+                "id": "def-common.Map.setPixelRatio.$1",
                 "type": "number",
                 "tags": [],
                 "label": "pixelRatio",
@@ -2353,7 +2361,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.getBounds",
+            "id": "def-common.Map.getBounds",
             "type": "Function",
             "tags": [],
             "label": "getBounds",
@@ -2372,7 +2380,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.getMaxBounds",
+            "id": "def-common.Map.getMaxBounds",
             "type": "Function",
             "tags": [],
             "label": "getMaxBounds",
@@ -2391,7 +2399,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.setMaxBounds",
+            "id": "def-common.Map.setMaxBounds",
             "type": "Function",
             "tags": [],
             "label": "setMaxBounds",
@@ -2406,7 +2414,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.setMaxBounds.$1",
+                "id": "def-common.Map.setMaxBounds.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "bounds",
@@ -2427,7 +2435,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.setMinZoom",
+            "id": "def-common.Map.setMinZoom",
             "type": "Function",
             "tags": [],
             "label": "setMinZoom",
@@ -2442,7 +2450,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.setMinZoom.$1",
+                "id": "def-common.Map.setMinZoom.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "minZoom",
@@ -2463,7 +2471,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.getMinZoom",
+            "id": "def-common.Map.getMinZoom",
             "type": "Function",
             "tags": [],
             "label": "getMinZoom",
@@ -2482,7 +2490,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.setMaxZoom",
+            "id": "def-common.Map.setMaxZoom",
             "type": "Function",
             "tags": [],
             "label": "setMaxZoom",
@@ -2497,7 +2505,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.setMaxZoom.$1",
+                "id": "def-common.Map.setMaxZoom.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "maxZoom",
@@ -2518,7 +2526,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.getMaxZoom",
+            "id": "def-common.Map.getMaxZoom",
             "type": "Function",
             "tags": [],
             "label": "getMaxZoom",
@@ -2537,7 +2545,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.setMinPitch",
+            "id": "def-common.Map.setMinPitch",
             "type": "Function",
             "tags": [],
             "label": "setMinPitch",
@@ -2552,7 +2560,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.setMinPitch.$1",
+                "id": "def-common.Map.setMinPitch.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "minPitch",
@@ -2573,7 +2581,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.getMinPitch",
+            "id": "def-common.Map.getMinPitch",
             "type": "Function",
             "tags": [],
             "label": "getMinPitch",
@@ -2592,7 +2600,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.setMaxPitch",
+            "id": "def-common.Map.setMaxPitch",
             "type": "Function",
             "tags": [],
             "label": "setMaxPitch",
@@ -2607,7 +2615,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.setMaxPitch.$1",
+                "id": "def-common.Map.setMaxPitch.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "maxPitch",
@@ -2628,7 +2636,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.getMaxPitch",
+            "id": "def-common.Map.getMaxPitch",
             "type": "Function",
             "tags": [],
             "label": "getMaxPitch",
@@ -2647,7 +2655,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.getRenderWorldCopies",
+            "id": "def-common.Map.getRenderWorldCopies",
             "type": "Function",
             "tags": [
               "see"
@@ -2668,7 +2676,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.setRenderWorldCopies",
+            "id": "def-common.Map.setRenderWorldCopies",
             "type": "Function",
             "tags": [
               "see"
@@ -2685,7 +2693,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.setRenderWorldCopies.$1",
+                "id": "def-common.Map.setRenderWorldCopies.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "renderWorldCopies",
@@ -2706,7 +2714,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.project",
+            "id": "def-common.Map.project",
             "type": "Function",
             "tags": [],
             "label": "project",
@@ -2722,7 +2730,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.project.$1",
+                "id": "def-common.Map.project.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "lnglat",
@@ -2743,7 +2751,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.unproject",
+            "id": "def-common.Map.unproject",
             "type": "Function",
             "tags": [],
             "label": "unproject",
@@ -2758,7 +2766,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.unproject.$1",
+                "id": "def-common.Map.unproject.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "point",
@@ -2779,7 +2787,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.isMoving",
+            "id": "def-common.Map.isMoving",
             "type": "Function",
             "tags": [],
             "label": "isMoving",
@@ -2798,7 +2806,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.isZooming",
+            "id": "def-common.Map.isZooming",
             "type": "Function",
             "tags": [],
             "label": "isZooming",
@@ -2817,7 +2825,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.isRotating",
+            "id": "def-common.Map.isRotating",
             "type": "Function",
             "tags": [],
             "label": "isRotating",
@@ -2836,7 +2844,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._createDelegatedListener",
+            "id": "def-common.Map._createDelegatedListener",
             "type": "Function",
             "tags": [],
             "label": "_createDelegatedListener",
@@ -2849,7 +2857,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map._createDelegatedListener.$1",
+                "id": "def-common.Map._createDelegatedListener.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -2863,7 +2871,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map._createDelegatedListener.$2",
+                "id": "def-common.Map._createDelegatedListener.$2",
                 "type": "string",
                 "tags": [],
                 "label": "layerId",
@@ -2877,7 +2885,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map._createDelegatedListener.$3",
+                "id": "def-common.Map._createDelegatedListener.$3",
                 "type": "Function",
                 "tags": [],
                 "label": "listener",
@@ -2894,7 +2902,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.on",
+            "id": "def-common.Map.on",
             "type": "Function",
             "tags": [
               "see",
@@ -2914,7 +2922,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.on.$1",
+                "id": "def-common.Map.on.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "type",
@@ -2930,7 +2938,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.on.$2",
+                "id": "def-common.Map.on.$2",
                 "type": "string",
                 "tags": [],
                 "label": "layer",
@@ -2944,7 +2952,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.on.$3",
+                "id": "def-common.Map.on.$3",
                 "type": "Function",
                 "tags": [],
                 "label": "listener",
@@ -2965,7 +2973,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.on",
+            "id": "def-common.Map.on",
             "type": "Function",
             "tags": [],
             "label": "on",
@@ -2978,7 +2986,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.on.$1",
+                "id": "def-common.Map.on.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "type",
@@ -2992,7 +3000,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.on.$2",
+                "id": "def-common.Map.on.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "listener",
@@ -3009,7 +3017,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.on",
+            "id": "def-common.Map.on",
             "type": "Function",
             "tags": [],
             "label": "on",
@@ -3022,7 +3030,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.on.$1",
+                "id": "def-common.Map.on.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -3036,7 +3044,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.on.$2",
+                "id": "def-common.Map.on.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "listener",
@@ -3053,7 +3061,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.once",
+            "id": "def-common.Map.once",
             "type": "Function",
             "tags": [
               "method",
@@ -3073,7 +3081,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.once.$1",
+                "id": "def-common.Map.once.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "type",
@@ -3089,7 +3097,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.once.$2",
+                "id": "def-common.Map.once.$2",
                 "type": "string",
                 "tags": [],
                 "label": "layer",
@@ -3103,7 +3111,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.once.$3",
+                "id": "def-common.Map.once.$3",
                 "type": "Function",
                 "tags": [],
                 "label": "listener",
@@ -3124,7 +3132,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.once",
+            "id": "def-common.Map.once",
             "type": "Function",
             "tags": [],
             "label": "once",
@@ -3137,7 +3145,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.once.$1",
+                "id": "def-common.Map.once.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "type",
@@ -3151,7 +3159,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.once.$2",
+                "id": "def-common.Map.once.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "listener",
@@ -3168,7 +3176,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.once",
+            "id": "def-common.Map.once",
             "type": "Function",
             "tags": [],
             "label": "once",
@@ -3181,7 +3189,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.once.$1",
+                "id": "def-common.Map.once.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -3195,7 +3203,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.once.$2",
+                "id": "def-common.Map.once.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "listener",
@@ -3212,7 +3220,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.off",
+            "id": "def-common.Map.off",
             "type": "Function",
             "tags": [
               "method",
@@ -3232,7 +3240,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.off.$1",
+                "id": "def-common.Map.off.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "type",
@@ -3248,7 +3256,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.off.$2",
+                "id": "def-common.Map.off.$2",
                 "type": "string",
                 "tags": [],
                 "label": "layer",
@@ -3262,7 +3270,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.off.$3",
+                "id": "def-common.Map.off.$3",
                 "type": "Function",
                 "tags": [],
                 "label": "listener",
@@ -3283,7 +3291,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.off",
+            "id": "def-common.Map.off",
             "type": "Function",
             "tags": [],
             "label": "off",
@@ -3296,7 +3304,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.off.$1",
+                "id": "def-common.Map.off.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "type",
@@ -3310,7 +3318,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.off.$2",
+                "id": "def-common.Map.off.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "listener",
@@ -3327,7 +3335,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.off",
+            "id": "def-common.Map.off",
             "type": "Function",
             "tags": [],
             "label": "off",
@@ -3340,7 +3348,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.off.$1",
+                "id": "def-common.Map.off.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -3354,7 +3362,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.off.$2",
+                "id": "def-common.Map.off.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "listener",
@@ -3371,7 +3379,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.queryRenderedFeatures",
+            "id": "def-common.Map.queryRenderedFeatures",
             "type": "Function",
             "tags": [
               "see"
@@ -3388,7 +3396,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.queryRenderedFeatures.$1",
+                "id": "def-common.Map.queryRenderedFeatures.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "geometry",
@@ -3404,7 +3412,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.queryRenderedFeatures.$2",
+                "id": "def-common.Map.queryRenderedFeatures.$2",
                 "type": "Any",
                 "tags": [],
                 "label": "options",
@@ -3425,7 +3433,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.querySourceFeatures",
+            "id": "def-common.Map.querySourceFeatures",
             "type": "Function",
             "tags": [],
             "label": "querySourceFeatures",
@@ -3440,7 +3448,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.querySourceFeatures.$1",
+                "id": "def-common.Map.querySourceFeatures.$1",
                 "type": "string",
                 "tags": [],
                 "label": "sourceId",
@@ -3456,7 +3464,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.querySourceFeatures.$2",
+                "id": "def-common.Map.querySourceFeatures.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "parameters",
@@ -3477,7 +3485,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.setStyle",
+            "id": "def-common.Map.setStyle",
             "type": "Function",
             "tags": [],
             "label": "setStyle",
@@ -3492,7 +3500,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.setStyle.$1",
+                "id": "def-common.Map.setStyle.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "style",
@@ -3508,7 +3516,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.setStyle.$2",
+                "id": "def-common.Map.setStyle.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "options",
@@ -3529,7 +3537,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.setTransformRequest",
+            "id": "def-common.Map.setTransformRequest",
             "type": "Function",
             "tags": [],
             "label": "setTransformRequest",
@@ -3544,7 +3552,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.setTransformRequest.$1",
+                "id": "def-common.Map.setTransformRequest.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "transformRequest",
@@ -3565,7 +3573,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._getUIString",
+            "id": "def-common.Map._getUIString",
             "type": "Function",
             "tags": [],
             "label": "_getUIString",
@@ -3578,7 +3586,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map._getUIString.$1",
+                "id": "def-common.Map._getUIString.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
@@ -3595,7 +3603,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._updateStyle",
+            "id": "def-common.Map._updateStyle",
             "type": "Function",
             "tags": [],
             "label": "_updateStyle",
@@ -3608,7 +3616,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map._updateStyle.$1",
+                "id": "def-common.Map._updateStyle.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "style",
@@ -3622,7 +3630,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map._updateStyle.$2",
+                "id": "def-common.Map._updateStyle.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "options",
@@ -3639,7 +3647,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._lazyInitEmptyStyle",
+            "id": "def-common.Map._lazyInitEmptyStyle",
             "type": "Function",
             "tags": [],
             "label": "_lazyInitEmptyStyle",
@@ -3654,7 +3662,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._diffStyle",
+            "id": "def-common.Map._diffStyle",
             "type": "Function",
             "tags": [],
             "label": "_diffStyle",
@@ -3667,7 +3675,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map._diffStyle.$1",
+                "id": "def-common.Map._diffStyle.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "style",
@@ -3681,7 +3689,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map._diffStyle.$2",
+                "id": "def-common.Map._diffStyle.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "options",
@@ -3698,7 +3706,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._updateDiff",
+            "id": "def-common.Map._updateDiff",
             "type": "Function",
             "tags": [],
             "label": "_updateDiff",
@@ -3711,7 +3719,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map._updateDiff.$1",
+                "id": "def-common.Map._updateDiff.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "style",
@@ -3725,7 +3733,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map._updateDiff.$2",
+                "id": "def-common.Map._updateDiff.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "options",
@@ -3742,7 +3750,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.getStyle",
+            "id": "def-common.Map.getStyle",
             "type": "Function",
             "tags": [],
             "label": "getStyle",
@@ -3761,7 +3769,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.isStyleLoaded",
+            "id": "def-common.Map.isStyleLoaded",
             "type": "Function",
             "tags": [],
             "label": "isStyleLoaded",
@@ -3780,7 +3788,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.addSource",
+            "id": "def-common.Map.addSource",
             "type": "Function",
             "tags": [
               "fires",
@@ -3798,7 +3806,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.addSource.$1",
+                "id": "def-common.Map.addSource.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -3814,7 +3822,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.addSource.$2",
+                "id": "def-common.Map.addSource.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "source",
@@ -3835,7 +3843,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.isSourceLoaded",
+            "id": "def-common.Map.isSourceLoaded",
             "type": "Function",
             "tags": [],
             "label": "isSourceLoaded",
@@ -3850,7 +3858,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.isSourceLoaded.$1",
+                "id": "def-common.Map.isSourceLoaded.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -3871,7 +3879,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.areTilesLoaded",
+            "id": "def-common.Map.areTilesLoaded",
             "type": "Function",
             "tags": [],
             "label": "areTilesLoaded",
@@ -3890,7 +3898,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.addSourceType",
+            "id": "def-common.Map.addSourceType",
             "type": "Function",
             "tags": [
               "private"
@@ -3907,7 +3915,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.addSourceType.$1",
+                "id": "def-common.Map.addSourceType.$1",
                 "type": "string",
                 "tags": [],
                 "label": "name",
@@ -3923,7 +3931,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.addSourceType.$2",
+                "id": "def-common.Map.addSourceType.$2",
                 "type": "Any",
                 "tags": [],
                 "label": "SourceType",
@@ -3939,7 +3947,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.addSourceType.$3",
+                "id": "def-common.Map.addSourceType.$3",
                 "type": "Function",
                 "tags": [],
                 "label": "callback",
@@ -3958,7 +3966,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.removeSource",
+            "id": "def-common.Map.removeSource",
             "type": "Function",
             "tags": [],
             "label": "removeSource",
@@ -3973,7 +3981,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.removeSource.$1",
+                "id": "def-common.Map.removeSource.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -3994,7 +4002,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.getSource",
+            "id": "def-common.Map.getSource",
             "type": "Function",
             "tags": [
               "see",
@@ -4013,7 +4021,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.getSource.$1",
+                "id": "def-common.Map.getSource.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -4034,7 +4042,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.addImage",
+            "id": "def-common.Map.addImage",
             "type": "Function",
             "tags": [
               "see",
@@ -4052,7 +4060,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.addImage.$1",
+                "id": "def-common.Map.addImage.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -4068,7 +4076,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.addImage.$2",
+                "id": "def-common.Map.addImage.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "image",
@@ -4084,7 +4092,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.addImage.$3",
+                "id": "def-common.Map.addImage.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "{ pixelRatio, sdf, stretchX, stretchY, content }",
@@ -4101,7 +4109,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.updateImage",
+            "id": "def-common.Map.updateImage",
             "type": "Function",
             "tags": [],
             "label": "updateImage",
@@ -4116,7 +4124,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.updateImage.$1",
+                "id": "def-common.Map.updateImage.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -4132,7 +4140,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.updateImage.$2",
+                "id": "def-common.Map.updateImage.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "image",
@@ -4151,7 +4159,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.hasImage",
+            "id": "def-common.Map.hasImage",
             "type": "Function",
             "tags": [],
             "label": "hasImage",
@@ -4166,7 +4174,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.hasImage.$1",
+                "id": "def-common.Map.hasImage.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -4187,7 +4195,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.removeImage",
+            "id": "def-common.Map.removeImage",
             "type": "Function",
             "tags": [],
             "label": "removeImage",
@@ -4202,7 +4210,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.removeImage.$1",
+                "id": "def-common.Map.removeImage.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -4221,7 +4229,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.loadImage",
+            "id": "def-common.Map.loadImage",
             "type": "Function",
             "tags": [
               "see"
@@ -4238,7 +4246,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.loadImage.$1",
+                "id": "def-common.Map.loadImage.$1",
                 "type": "string",
                 "tags": [],
                 "label": "url",
@@ -4254,7 +4262,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.loadImage.$2",
+                "id": "def-common.Map.loadImage.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "callback",
@@ -4273,7 +4281,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.listImages",
+            "id": "def-common.Map.listImages",
             "type": "Function",
             "tags": [],
             "label": "listImages",
@@ -4292,7 +4300,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.addLayer",
+            "id": "def-common.Map.addLayer",
             "type": "Function",
             "tags": [
               "see",
@@ -4311,7 +4319,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.addLayer.$1",
+                "id": "def-common.Map.addLayer.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "layer",
@@ -4327,7 +4335,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.addLayer.$2",
+                "id": "def-common.Map.addLayer.$2",
                 "type": "string",
                 "tags": [],
                 "label": "beforeId",
@@ -4348,7 +4356,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.moveLayer",
+            "id": "def-common.Map.moveLayer",
             "type": "Function",
             "tags": [],
             "label": "moveLayer",
@@ -4363,7 +4371,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.moveLayer.$1",
+                "id": "def-common.Map.moveLayer.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -4379,7 +4387,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.moveLayer.$2",
+                "id": "def-common.Map.moveLayer.$2",
                 "type": "string",
                 "tags": [],
                 "label": "beforeId",
@@ -4400,7 +4408,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.removeLayer",
+            "id": "def-common.Map.removeLayer",
             "type": "Function",
             "tags": [
               "fires"
@@ -4417,7 +4425,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.removeLayer.$1",
+                "id": "def-common.Map.removeLayer.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -4436,7 +4444,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.getLayer",
+            "id": "def-common.Map.getLayer",
             "type": "Function",
             "tags": [
               "see",
@@ -4454,7 +4462,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.getLayer.$1",
+                "id": "def-common.Map.getLayer.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -4475,7 +4483,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.setLayerZoomRange",
+            "id": "def-common.Map.setLayerZoomRange",
             "type": "Function",
             "tags": [],
             "label": "setLayerZoomRange",
@@ -4490,7 +4498,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.setLayerZoomRange.$1",
+                "id": "def-common.Map.setLayerZoomRange.$1",
                 "type": "string",
                 "tags": [],
                 "label": "layerId",
@@ -4506,7 +4514,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.setLayerZoomRange.$2",
+                "id": "def-common.Map.setLayerZoomRange.$2",
                 "type": "number",
                 "tags": [],
                 "label": "minzoom",
@@ -4522,7 +4530,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.setLayerZoomRange.$3",
+                "id": "def-common.Map.setLayerZoomRange.$3",
                 "type": "number",
                 "tags": [],
                 "label": "maxzoom",
@@ -4543,7 +4551,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.setFilter",
+            "id": "def-common.Map.setFilter",
             "type": "Function",
             "tags": [
               "see"
@@ -4560,7 +4568,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.setFilter.$1",
+                "id": "def-common.Map.setFilter.$1",
                 "type": "string",
                 "tags": [],
                 "label": "layerId",
@@ -4576,7 +4584,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.setFilter.$2",
+                "id": "def-common.Map.setFilter.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "filter",
@@ -4592,7 +4600,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.setFilter.$3",
+                "id": "def-common.Map.setFilter.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -4613,7 +4621,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.getFilter",
+            "id": "def-common.Map.getFilter",
             "type": "Function",
             "tags": [],
             "label": "getFilter",
@@ -4628,7 +4636,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.getFilter.$1",
+                "id": "def-common.Map.getFilter.$1",
                 "type": "string",
                 "tags": [],
                 "label": "layerId",
@@ -4649,7 +4657,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.setPaintProperty",
+            "id": "def-common.Map.setPaintProperty",
             "type": "Function",
             "tags": [
               "see",
@@ -4667,7 +4675,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.setPaintProperty.$1",
+                "id": "def-common.Map.setPaintProperty.$1",
                 "type": "string",
                 "tags": [],
                 "label": "layerId",
@@ -4683,7 +4691,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.setPaintProperty.$2",
+                "id": "def-common.Map.setPaintProperty.$2",
                 "type": "string",
                 "tags": [],
                 "label": "name",
@@ -4699,7 +4707,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.setPaintProperty.$3",
+                "id": "def-common.Map.setPaintProperty.$3",
                 "type": "Any",
                 "tags": [],
                 "label": "value",
@@ -4715,7 +4723,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.setPaintProperty.$4",
+                "id": "def-common.Map.setPaintProperty.$4",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -4736,7 +4744,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.getPaintProperty",
+            "id": "def-common.Map.getPaintProperty",
             "type": "Function",
             "tags": [],
             "label": "getPaintProperty",
@@ -4751,7 +4759,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.getPaintProperty.$1",
+                "id": "def-common.Map.getPaintProperty.$1",
                 "type": "string",
                 "tags": [],
                 "label": "layerId",
@@ -4767,7 +4775,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.getPaintProperty.$2",
+                "id": "def-common.Map.getPaintProperty.$2",
                 "type": "string",
                 "tags": [],
                 "label": "name",
@@ -4788,7 +4796,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.setLayoutProperty",
+            "id": "def-common.Map.setLayoutProperty",
             "type": "Function",
             "tags": [],
             "label": "setLayoutProperty",
@@ -4803,7 +4811,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.setLayoutProperty.$1",
+                "id": "def-common.Map.setLayoutProperty.$1",
                 "type": "string",
                 "tags": [],
                 "label": "layerId",
@@ -4819,7 +4827,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.setLayoutProperty.$2",
+                "id": "def-common.Map.setLayoutProperty.$2",
                 "type": "string",
                 "tags": [],
                 "label": "name",
@@ -4835,7 +4843,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.setLayoutProperty.$3",
+                "id": "def-common.Map.setLayoutProperty.$3",
                 "type": "Any",
                 "tags": [],
                 "label": "value",
@@ -4851,7 +4859,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.setLayoutProperty.$4",
+                "id": "def-common.Map.setLayoutProperty.$4",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -4872,7 +4880,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.getLayoutProperty",
+            "id": "def-common.Map.getLayoutProperty",
             "type": "Function",
             "tags": [],
             "label": "getLayoutProperty",
@@ -4887,7 +4895,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.getLayoutProperty.$1",
+                "id": "def-common.Map.getLayoutProperty.$1",
                 "type": "string",
                 "tags": [],
                 "label": "layerId",
@@ -4903,7 +4911,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.getLayoutProperty.$2",
+                "id": "def-common.Map.getLayoutProperty.$2",
                 "type": "string",
                 "tags": [],
                 "label": "name",
@@ -4924,7 +4932,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.setLight",
+            "id": "def-common.Map.setLight",
             "type": "Function",
             "tags": [],
             "label": "setLight",
@@ -4939,7 +4947,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.setLight.$1",
+                "id": "def-common.Map.setLight.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "light",
@@ -4955,7 +4963,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.setLight.$2",
+                "id": "def-common.Map.setLight.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -4976,7 +4984,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.getLight",
+            "id": "def-common.Map.getLight",
             "type": "Function",
             "tags": [],
             "label": "getLight",
@@ -4995,7 +5003,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.setFeatureState",
+            "id": "def-common.Map.setFeatureState",
             "type": "Function",
             "tags": [
               "see"
@@ -5012,7 +5020,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.setFeatureState.$1",
+                "id": "def-common.Map.setFeatureState.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "feature",
@@ -5028,7 +5036,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.setFeatureState.$2",
+                "id": "def-common.Map.setFeatureState.$2",
                 "type": "Any",
                 "tags": [],
                 "label": "state",
@@ -5047,7 +5055,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.removeFeatureState",
+            "id": "def-common.Map.removeFeatureState",
             "type": "Function",
             "tags": [],
             "label": "removeFeatureState",
@@ -5062,7 +5070,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.removeFeatureState.$1",
+                "id": "def-common.Map.removeFeatureState.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "target",
@@ -5078,7 +5086,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.removeFeatureState.$2",
+                "id": "def-common.Map.removeFeatureState.$2",
                 "type": "string",
                 "tags": [],
                 "label": "key",
@@ -5097,7 +5105,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.getFeatureState",
+            "id": "def-common.Map.getFeatureState",
             "type": "Function",
             "tags": [],
             "label": "getFeatureState",
@@ -5112,7 +5120,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map.getFeatureState.$1",
+                "id": "def-common.Map.getFeatureState.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "feature",
@@ -5133,7 +5141,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.getContainer",
+            "id": "def-common.Map.getContainer",
             "type": "Function",
             "tags": [],
             "label": "getContainer",
@@ -5152,7 +5160,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.getCanvasContainer",
+            "id": "def-common.Map.getCanvasContainer",
             "type": "Function",
             "tags": [
               "see"
@@ -5173,7 +5181,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.getCanvas",
+            "id": "def-common.Map.getCanvas",
             "type": "Function",
             "tags": [
               "see",
@@ -5196,7 +5204,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._containerDimensions",
+            "id": "def-common.Map._containerDimensions",
             "type": "Function",
             "tags": [],
             "label": "_containerDimensions",
@@ -5211,7 +5219,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._setupContainer",
+            "id": "def-common.Map._setupContainer",
             "type": "Function",
             "tags": [],
             "label": "_setupContainer",
@@ -5226,7 +5234,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._resizeCanvas",
+            "id": "def-common.Map._resizeCanvas",
             "type": "Function",
             "tags": [],
             "label": "_resizeCanvas",
@@ -5239,7 +5247,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map._resizeCanvas.$1",
+                "id": "def-common.Map._resizeCanvas.$1",
                 "type": "number",
                 "tags": [],
                 "label": "width",
@@ -5253,7 +5261,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map._resizeCanvas.$2",
+                "id": "def-common.Map._resizeCanvas.$2",
                 "type": "number",
                 "tags": [],
                 "label": "height",
@@ -5267,7 +5275,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map._resizeCanvas.$3",
+                "id": "def-common.Map._resizeCanvas.$3",
                 "type": "number",
                 "tags": [],
                 "label": "pixelRatio",
@@ -5284,7 +5292,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._setupPainter",
+            "id": "def-common.Map._setupPainter",
             "type": "Function",
             "tags": [],
             "label": "_setupPainter",
@@ -5299,7 +5307,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._contextLost",
+            "id": "def-common.Map._contextLost",
             "type": "Function",
             "tags": [],
             "label": "_contextLost",
@@ -5312,7 +5320,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map._contextLost.$1",
+                "id": "def-common.Map._contextLost.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "event",
@@ -5329,7 +5337,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._contextRestored",
+            "id": "def-common.Map._contextRestored",
             "type": "Function",
             "tags": [],
             "label": "_contextRestored",
@@ -5342,7 +5350,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map._contextRestored.$1",
+                "id": "def-common.Map._contextRestored.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "event",
@@ -5359,7 +5367,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._onMapScroll",
+            "id": "def-common.Map._onMapScroll",
             "type": "Function",
             "tags": [],
             "label": "_onMapScroll",
@@ -5372,7 +5380,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map._onMapScroll.$1",
+                "id": "def-common.Map._onMapScroll.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "event",
@@ -5389,7 +5397,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.loaded",
+            "id": "def-common.Map.loaded",
             "type": "Function",
             "tags": [],
             "label": "loaded",
@@ -5408,7 +5416,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._update",
+            "id": "def-common.Map._update",
             "type": "Function",
             "tags": [
               "private"
@@ -5425,7 +5433,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map._update.$1",
+                "id": "def-common.Map._update.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "updateStyle",
@@ -5446,7 +5454,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._requestRenderFrame",
+            "id": "def-common.Map._requestRenderFrame",
             "type": "Function",
             "tags": [
               "private"
@@ -5463,7 +5471,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map._requestRenderFrame.$1",
+                "id": "def-common.Map._requestRenderFrame.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "callback",
@@ -5482,7 +5490,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._cancelRenderFrame",
+            "id": "def-common.Map._cancelRenderFrame",
             "type": "Function",
             "tags": [],
             "label": "_cancelRenderFrame",
@@ -5495,7 +5503,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map._cancelRenderFrame.$1",
+                "id": "def-common.Map._cancelRenderFrame.$1",
                 "type": "number",
                 "tags": [],
                 "label": "id",
@@ -5512,7 +5520,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._render",
+            "id": "def-common.Map._render",
             "type": "Function",
             "tags": [
               "private"
@@ -5529,7 +5537,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map._render.$1",
+                "id": "def-common.Map._render.$1",
                 "type": "number",
                 "tags": [],
                 "label": "paintStartTimeStamp",
@@ -5550,7 +5558,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.redraw",
+            "id": "def-common.Map.redraw",
             "type": "Function",
             "tags": [],
             "label": "redraw",
@@ -5569,7 +5577,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.remove",
+            "id": "def-common.Map.remove",
             "type": "Function",
             "tags": [],
             "label": "remove",
@@ -5586,7 +5594,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.triggerRepaint",
+            "id": "def-common.Map.triggerRepaint",
             "type": "Function",
             "tags": [
               "see",
@@ -5606,7 +5614,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._onWindowOnline",
+            "id": "def-common.Map._onWindowOnline",
             "type": "Function",
             "tags": [],
             "label": "_onWindowOnline",
@@ -5621,7 +5629,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._onWindowResize",
+            "id": "def-common.Map._onWindowResize",
             "type": "Function",
             "tags": [],
             "label": "_onWindowResize",
@@ -5634,7 +5642,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map._onWindowResize.$1",
+                "id": "def-common.Map._onWindowResize.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "event",
@@ -5651,7 +5659,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.showTileBoundaries",
+            "id": "def-common.Map.showTileBoundaries",
             "type": "boolean",
             "tags": [
               "name",
@@ -5668,7 +5676,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.showTileBoundaries",
+            "id": "def-common.Map.showTileBoundaries",
             "type": "boolean",
             "tags": [],
             "label": "showTileBoundaries",
@@ -5678,7 +5686,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.showPadding",
+            "id": "def-common.Map.showPadding",
             "type": "boolean",
             "tags": [
               "name",
@@ -5695,7 +5703,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.showPadding",
+            "id": "def-common.Map.showPadding",
             "type": "boolean",
             "tags": [],
             "label": "showPadding",
@@ -5705,7 +5713,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.showCollisionBoxes",
+            "id": "def-common.Map.showCollisionBoxes",
             "type": "boolean",
             "tags": [
               "name",
@@ -5722,7 +5730,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.showCollisionBoxes",
+            "id": "def-common.Map.showCollisionBoxes",
             "type": "boolean",
             "tags": [],
             "label": "showCollisionBoxes",
@@ -5732,7 +5740,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.showOverdrawInspector",
+            "id": "def-common.Map.showOverdrawInspector",
             "type": "boolean",
             "tags": [],
             "label": "showOverdrawInspector",
@@ -5742,7 +5750,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.showOverdrawInspector",
+            "id": "def-common.Map.showOverdrawInspector",
             "type": "boolean",
             "tags": [],
             "label": "showOverdrawInspector",
@@ -5752,7 +5760,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.repaint",
+            "id": "def-common.Map.repaint",
             "type": "boolean",
             "tags": [
               "name",
@@ -5769,7 +5777,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.repaint",
+            "id": "def-common.Map.repaint",
             "type": "boolean",
             "tags": [],
             "label": "repaint",
@@ -5779,7 +5787,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.vertices",
+            "id": "def-common.Map.vertices",
             "type": "boolean",
             "tags": [],
             "label": "vertices",
@@ -5789,7 +5797,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map.vertices",
+            "id": "def-common.Map.vertices",
             "type": "boolean",
             "tags": [],
             "label": "vertices",
@@ -5799,7 +5807,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Map._setCacheLimits",
+            "id": "def-common.Map._setCacheLimits",
             "type": "Function",
             "tags": [],
             "label": "_setCacheLimits",
@@ -5812,7 +5820,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map._setCacheLimits.$1",
+                "id": "def-common.Map._setCacheLimits.$1",
                 "type": "number",
                 "tags": [],
                 "label": "limit",
@@ -5826,7 +5834,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Map._setCacheLimits.$2",
+                "id": "def-common.Map._setCacheLimits.$2",
                 "type": "number",
                 "tags": [],
                 "label": "checkThreshold",
@@ -5846,7 +5854,7 @@
       },
       {
         "parentPluginId": "@kbn/mapbox-gl",
-        "id": "def-server.MapMouseEvent",
+        "id": "def-common.MapMouseEvent",
         "type": "Class",
         "tags": [],
         "label": "MapMouseEvent",
@@ -5859,7 +5867,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.MapMouseEvent.type",
+            "id": "def-common.MapMouseEvent.type",
             "type": "CompoundType",
             "tags": [],
             "label": "type",
@@ -5874,7 +5882,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.MapMouseEvent.target",
+            "id": "def-common.MapMouseEvent.target",
             "type": "Object",
             "tags": [],
             "label": "target",
@@ -5889,7 +5897,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.MapMouseEvent.originalEvent",
+            "id": "def-common.MapMouseEvent.originalEvent",
             "type": "Object",
             "tags": [],
             "label": "originalEvent",
@@ -5904,7 +5912,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.MapMouseEvent.point",
+            "id": "def-common.MapMouseEvent.point",
             "type": "Object",
             "tags": [],
             "label": "point",
@@ -5919,7 +5927,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.MapMouseEvent.lngLat",
+            "id": "def-common.MapMouseEvent.lngLat",
             "type": "Object",
             "tags": [],
             "label": "lngLat",
@@ -5934,7 +5942,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.MapMouseEvent.preventDefault",
+            "id": "def-common.MapMouseEvent.preventDefault",
             "type": "Function",
             "tags": [],
             "label": "preventDefault",
@@ -5951,7 +5959,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.MapMouseEvent.defaultPrevented",
+            "id": "def-common.MapMouseEvent.defaultPrevented",
             "type": "boolean",
             "tags": [
               "private"
@@ -5965,7 +5973,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.MapMouseEvent._defaultPrevented",
+            "id": "def-common.MapMouseEvent._defaultPrevented",
             "type": "boolean",
             "tags": [],
             "label": "_defaultPrevented",
@@ -5975,7 +5983,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.MapMouseEvent.Unnamed",
+            "id": "def-common.MapMouseEvent.Unnamed",
             "type": "Function",
             "tags": [
               "private"
@@ -5990,7 +5998,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.MapMouseEvent.Unnamed.$1",
+                "id": "def-common.MapMouseEvent.Unnamed.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -6004,7 +6012,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.MapMouseEvent.Unnamed.$2",
+                "id": "def-common.MapMouseEvent.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "map",
@@ -6018,7 +6026,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.MapMouseEvent.Unnamed.$3",
+                "id": "def-common.MapMouseEvent.Unnamed.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "originalEvent",
@@ -6032,7 +6040,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.MapMouseEvent.Unnamed.$4",
+                "id": "def-common.MapMouseEvent.Unnamed.$4",
                 "type": "Any",
                 "tags": [],
                 "label": "data",
@@ -6052,7 +6060,7 @@
       },
       {
         "parentPluginId": "@kbn/mapbox-gl",
-        "id": "def-server.VectorTileSource",
+        "id": "def-common.VectorTileSource",
         "type": "Class",
         "tags": [],
         "label": "VectorTileSource",
@@ -6065,7 +6073,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource.type",
+            "id": "def-common.VectorTileSource.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -6078,7 +6086,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource.id",
+            "id": "def-common.VectorTileSource.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -6088,7 +6096,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource.minzoom",
+            "id": "def-common.VectorTileSource.minzoom",
             "type": "number",
             "tags": [],
             "label": "minzoom",
@@ -6098,7 +6106,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource.maxzoom",
+            "id": "def-common.VectorTileSource.maxzoom",
             "type": "number",
             "tags": [],
             "label": "maxzoom",
@@ -6108,7 +6116,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource.url",
+            "id": "def-common.VectorTileSource.url",
             "type": "string",
             "tags": [],
             "label": "url",
@@ -6118,7 +6126,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource.scheme",
+            "id": "def-common.VectorTileSource.scheme",
             "type": "string",
             "tags": [],
             "label": "scheme",
@@ -6128,7 +6136,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource.tileSize",
+            "id": "def-common.VectorTileSource.tileSize",
             "type": "number",
             "tags": [],
             "label": "tileSize",
@@ -6138,7 +6146,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource.promoteId",
+            "id": "def-common.VectorTileSource.promoteId",
             "type": "CompoundType",
             "tags": [],
             "label": "promoteId",
@@ -6151,7 +6159,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource._options",
+            "id": "def-common.VectorTileSource._options",
             "type": "Object",
             "tags": [],
             "label": "_options",
@@ -6164,7 +6172,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource._collectResourceTiming",
+            "id": "def-common.VectorTileSource._collectResourceTiming",
             "type": "boolean",
             "tags": [],
             "label": "_collectResourceTiming",
@@ -6174,7 +6182,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource.dispatcher",
+            "id": "def-common.VectorTileSource.dispatcher",
             "type": "Object",
             "tags": [],
             "label": "dispatcher",
@@ -6187,7 +6195,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource.map",
+            "id": "def-common.VectorTileSource.map",
             "type": "Object",
             "tags": [],
             "label": "map",
@@ -6200,7 +6208,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource.bounds",
+            "id": "def-common.VectorTileSource.bounds",
             "type": "Object",
             "tags": [],
             "label": "bounds",
@@ -6213,7 +6221,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource.tiles",
+            "id": "def-common.VectorTileSource.tiles",
             "type": "Array",
             "tags": [],
             "label": "tiles",
@@ -6226,7 +6234,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource.tileBounds",
+            "id": "def-common.VectorTileSource.tileBounds",
             "type": "Object",
             "tags": [],
             "label": "tileBounds",
@@ -6239,7 +6247,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource.reparseOverscaled",
+            "id": "def-common.VectorTileSource.reparseOverscaled",
             "type": "boolean",
             "tags": [],
             "label": "reparseOverscaled",
@@ -6249,7 +6257,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource.isTileClipped",
+            "id": "def-common.VectorTileSource.isTileClipped",
             "type": "boolean",
             "tags": [],
             "label": "isTileClipped",
@@ -6259,7 +6267,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource._tileJSONRequest",
+            "id": "def-common.VectorTileSource._tileJSONRequest",
             "type": "Object",
             "tags": [],
             "label": "_tileJSONRequest",
@@ -6272,7 +6280,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource._loaded",
+            "id": "def-common.VectorTileSource._loaded",
             "type": "boolean",
             "tags": [],
             "label": "_loaded",
@@ -6282,7 +6290,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource.Unnamed",
+            "id": "def-common.VectorTileSource.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -6295,7 +6303,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.VectorTileSource.Unnamed.$1",
+                "id": "def-common.VectorTileSource.Unnamed.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -6309,7 +6317,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.VectorTileSource.Unnamed.$2",
+                "id": "def-common.VectorTileSource.Unnamed.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "options",
@@ -6323,7 +6331,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.VectorTileSource.Unnamed.$3",
+                "id": "def-common.VectorTileSource.Unnamed.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "dispatcher",
@@ -6337,7 +6345,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.VectorTileSource.Unnamed.$4",
+                "id": "def-common.VectorTileSource.Unnamed.$4",
                 "type": "Object",
                 "tags": [],
                 "label": "eventedParent",
@@ -6354,7 +6362,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource.load",
+            "id": "def-common.VectorTileSource.load",
             "type": "Function",
             "tags": [],
             "label": "load",
@@ -6369,7 +6377,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource.loaded",
+            "id": "def-common.VectorTileSource.loaded",
             "type": "Function",
             "tags": [],
             "label": "loaded",
@@ -6384,7 +6392,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource.hasTile",
+            "id": "def-common.VectorTileSource.hasTile",
             "type": "Function",
             "tags": [],
             "label": "hasTile",
@@ -6397,7 +6405,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.VectorTileSource.hasTile.$1",
+                "id": "def-common.VectorTileSource.hasTile.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "tileID",
@@ -6414,7 +6422,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource.onAdd",
+            "id": "def-common.VectorTileSource.onAdd",
             "type": "Function",
             "tags": [],
             "label": "onAdd",
@@ -6427,7 +6435,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.VectorTileSource.onAdd.$1",
+                "id": "def-common.VectorTileSource.onAdd.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "map",
@@ -6444,7 +6452,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource.setSourceProperty",
+            "id": "def-common.VectorTileSource.setSourceProperty",
             "type": "Function",
             "tags": [],
             "label": "setSourceProperty",
@@ -6457,7 +6465,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.VectorTileSource.setSourceProperty.$1",
+                "id": "def-common.VectorTileSource.setSourceProperty.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "callback",
@@ -6474,7 +6482,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource.setTiles",
+            "id": "def-common.VectorTileSource.setTiles",
             "type": "Function",
             "tags": [],
             "label": "setTiles",
@@ -6489,7 +6497,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.VectorTileSource.setTiles.$1",
+                "id": "def-common.VectorTileSource.setTiles.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "tiles",
@@ -6510,7 +6518,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource.setUrl",
+            "id": "def-common.VectorTileSource.setUrl",
             "type": "Function",
             "tags": [],
             "label": "setUrl",
@@ -6525,7 +6533,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.VectorTileSource.setUrl.$1",
+                "id": "def-common.VectorTileSource.setUrl.$1",
                 "type": "string",
                 "tags": [],
                 "label": "url",
@@ -6546,7 +6554,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource.onRemove",
+            "id": "def-common.VectorTileSource.onRemove",
             "type": "Function",
             "tags": [],
             "label": "onRemove",
@@ -6561,7 +6569,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource.serialize",
+            "id": "def-common.VectorTileSource.serialize",
             "type": "Function",
             "tags": [],
             "label": "serialize",
@@ -6576,7 +6584,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource.loadTile",
+            "id": "def-common.VectorTileSource.loadTile",
             "type": "Function",
             "tags": [],
             "label": "loadTile",
@@ -6589,7 +6597,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.VectorTileSource.loadTile.$1",
+                "id": "def-common.VectorTileSource.loadTile.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "tile",
@@ -6603,7 +6611,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.VectorTileSource.loadTile.$2",
+                "id": "def-common.VectorTileSource.loadTile.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "callback",
@@ -6620,7 +6628,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource.abortTile",
+            "id": "def-common.VectorTileSource.abortTile",
             "type": "Function",
             "tags": [],
             "label": "abortTile",
@@ -6633,7 +6641,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.VectorTileSource.abortTile.$1",
+                "id": "def-common.VectorTileSource.abortTile.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "tile",
@@ -6650,7 +6658,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource.unloadTile",
+            "id": "def-common.VectorTileSource.unloadTile",
             "type": "Function",
             "tags": [],
             "label": "unloadTile",
@@ -6663,7 +6671,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.VectorTileSource.unloadTile.$1",
+                "id": "def-common.VectorTileSource.unloadTile.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "tile",
@@ -6680,7 +6688,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.VectorTileSource.hasTransition",
+            "id": "def-common.VectorTileSource.hasTransition",
             "type": "Function",
             "tags": [],
             "label": "hasTransition",
@@ -6701,7 +6709,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/mapbox-gl",
-        "id": "def-server.CustomLayerInterface",
+        "id": "def-common.CustomLayerInterface",
         "type": "Interface",
         "tags": [
           "interface"
@@ -6718,7 +6726,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.CustomLayerInterface.id",
+            "id": "def-common.CustomLayerInterface.id",
             "type": "string",
             "tags": [
               "property"
@@ -6730,7 +6738,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.CustomLayerInterface.type",
+            "id": "def-common.CustomLayerInterface.type",
             "type": "string",
             "tags": [
               "property"
@@ -6745,7 +6753,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.CustomLayerInterface.renderingMode",
+            "id": "def-common.CustomLayerInterface.renderingMode",
             "type": "CompoundType",
             "tags": [
               "property"
@@ -6760,7 +6768,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.CustomLayerInterface.render",
+            "id": "def-common.CustomLayerInterface.render",
             "type": "Function",
             "tags": [
               "function",
@@ -6783,7 +6791,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.CustomLayerInterface.render.$1",
+                "id": "def-common.CustomLayerInterface.render.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "gl",
@@ -6798,7 +6806,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.CustomLayerInterface.render.$2",
+                "id": "def-common.CustomLayerInterface.render.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "matrix",
@@ -6815,7 +6823,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.CustomLayerInterface.prerender",
+            "id": "def-common.CustomLayerInterface.prerender",
             "type": "Function",
             "tags": [
               "function",
@@ -6835,7 +6843,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.CustomLayerInterface.onAdd",
+            "id": "def-common.CustomLayerInterface.onAdd",
             "type": "Function",
             "tags": [
               "function",
@@ -6855,7 +6863,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.CustomLayerInterface.onAdd.$1",
+                "id": "def-common.CustomLayerInterface.onAdd.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "map",
@@ -6871,7 +6879,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.CustomLayerInterface.onAdd.$2",
+                "id": "def-common.CustomLayerInterface.onAdd.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "gl",
@@ -6890,7 +6898,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.CustomLayerInterface.onRemove",
+            "id": "def-common.CustomLayerInterface.onRemove",
             "type": "Function",
             "tags": [
               "function",
@@ -6910,7 +6918,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.CustomLayerInterface.onRemove.$1",
+                "id": "def-common.CustomLayerInterface.onRemove.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "map",
@@ -6926,7 +6934,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.CustomLayerInterface.onRemove.$2",
+                "id": "def-common.CustomLayerInterface.onRemove.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "gl",
@@ -6948,7 +6956,7 @@
       },
       {
         "parentPluginId": "@kbn/mapbox-gl",
-        "id": "def-server.MapSourceDataEvent",
+        "id": "def-common.MapSourceDataEvent",
         "type": "Interface",
         "tags": [],
         "label": "MapSourceDataEvent",
@@ -6961,7 +6969,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.MapSourceDataEvent.dataType",
+            "id": "def-common.MapSourceDataEvent.dataType",
             "type": "string",
             "tags": [],
             "label": "dataType",
@@ -6974,7 +6982,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.MapSourceDataEvent.isSourceLoaded",
+            "id": "def-common.MapSourceDataEvent.isSourceLoaded",
             "type": "boolean",
             "tags": [],
             "label": "isSourceLoaded",
@@ -6984,7 +6992,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.MapSourceDataEvent.source",
+            "id": "def-common.MapSourceDataEvent.source",
             "type": "CompoundType",
             "tags": [],
             "label": "source",
@@ -6997,7 +7005,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.MapSourceDataEvent.sourceId",
+            "id": "def-common.MapSourceDataEvent.sourceId",
             "type": "string",
             "tags": [],
             "label": "sourceId",
@@ -7007,7 +7015,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.MapSourceDataEvent.sourceDataType",
+            "id": "def-common.MapSourceDataEvent.sourceDataType",
             "type": "CompoundType",
             "tags": [],
             "label": "sourceDataType",
@@ -7020,7 +7028,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.MapSourceDataEvent.tile",
+            "id": "def-common.MapSourceDataEvent.tile",
             "type": "Any",
             "tags": [],
             "label": "tile",
@@ -7036,7 +7044,7 @@
       },
       {
         "parentPluginId": "@kbn/mapbox-gl",
-        "id": "def-server.Source",
+        "id": "def-common.Source",
         "type": "Interface",
         "tags": [
           "private",
@@ -7060,7 +7068,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Source.type",
+            "id": "def-common.Source.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -7070,7 +7078,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Source.id",
+            "id": "def-common.Source.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -7080,7 +7088,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Source.minzoom",
+            "id": "def-common.Source.minzoom",
             "type": "number",
             "tags": [],
             "label": "minzoom",
@@ -7090,7 +7098,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Source.maxzoom",
+            "id": "def-common.Source.maxzoom",
             "type": "number",
             "tags": [],
             "label": "maxzoom",
@@ -7100,7 +7108,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Source.tileSize",
+            "id": "def-common.Source.tileSize",
             "type": "number",
             "tags": [],
             "label": "tileSize",
@@ -7110,7 +7118,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Source.attribution",
+            "id": "def-common.Source.attribution",
             "type": "string",
             "tags": [],
             "label": "attribution",
@@ -7123,7 +7131,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Source.roundZoom",
+            "id": "def-common.Source.roundZoom",
             "type": "CompoundType",
             "tags": [],
             "label": "roundZoom",
@@ -7136,7 +7144,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Source.isTileClipped",
+            "id": "def-common.Source.isTileClipped",
             "type": "CompoundType",
             "tags": [],
             "label": "isTileClipped",
@@ -7149,7 +7157,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Source.tileID",
+            "id": "def-common.Source.tileID",
             "type": "Object",
             "tags": [],
             "label": "tileID",
@@ -7162,7 +7170,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Source.reparseOverscaled",
+            "id": "def-common.Source.reparseOverscaled",
             "type": "CompoundType",
             "tags": [],
             "label": "reparseOverscaled",
@@ -7175,7 +7183,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Source.vectorLayerIds",
+            "id": "def-common.Source.vectorLayerIds",
             "type": "Array",
             "tags": [],
             "label": "vectorLayerIds",
@@ -7188,7 +7196,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Source.hasTransition",
+            "id": "def-common.Source.hasTransition",
             "type": "Function",
             "tags": [],
             "label": "hasTransition",
@@ -7203,7 +7211,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Source.loaded",
+            "id": "def-common.Source.loaded",
             "type": "Function",
             "tags": [],
             "label": "loaded",
@@ -7218,7 +7226,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Source.fire",
+            "id": "def-common.Source.fire",
             "type": "Function",
             "tags": [],
             "label": "fire",
@@ -7231,7 +7239,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Source.fire.$1",
+                "id": "def-common.Source.fire.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "event",
@@ -7248,7 +7256,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Source.onAdd",
+            "id": "def-common.Source.onAdd",
             "type": "Function",
             "tags": [],
             "label": "onAdd",
@@ -7261,7 +7269,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Source.onAdd.$1",
+                "id": "def-common.Source.onAdd.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "map",
@@ -7278,7 +7286,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Source.onRemove",
+            "id": "def-common.Source.onRemove",
             "type": "Function",
             "tags": [],
             "label": "onRemove",
@@ -7291,7 +7299,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Source.onRemove.$1",
+                "id": "def-common.Source.onRemove.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "map",
@@ -7308,7 +7316,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Source.loadTile",
+            "id": "def-common.Source.loadTile",
             "type": "Function",
             "tags": [],
             "label": "loadTile",
@@ -7321,7 +7329,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Source.loadTile.$1",
+                "id": "def-common.Source.loadTile.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "tile",
@@ -7335,7 +7343,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Source.loadTile.$2",
+                "id": "def-common.Source.loadTile.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "callback",
@@ -7352,7 +7360,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Source.hasTile",
+            "id": "def-common.Source.hasTile",
             "type": "Function",
             "tags": [],
             "label": "hasTile",
@@ -7365,7 +7373,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Source.hasTile.$1",
+                "id": "def-common.Source.hasTile.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "tileID",
@@ -7382,7 +7390,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Source.abortTile",
+            "id": "def-common.Source.abortTile",
             "type": "Function",
             "tags": [],
             "label": "abortTile",
@@ -7395,7 +7403,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Source.abortTile.$1",
+                "id": "def-common.Source.abortTile.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "tile",
@@ -7409,7 +7417,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Source.abortTile.$2",
+                "id": "def-common.Source.abortTile.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "callback",
@@ -7426,7 +7434,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Source.unloadTile",
+            "id": "def-common.Source.unloadTile",
             "type": "Function",
             "tags": [],
             "label": "unloadTile",
@@ -7439,7 +7447,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Source.unloadTile.$1",
+                "id": "def-common.Source.unloadTile.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "tile",
@@ -7453,7 +7461,7 @@
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-server.Source.unloadTile.$2",
+                "id": "def-common.Source.unloadTile.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "callback",
@@ -7470,7 +7478,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Source.serialize",
+            "id": "def-common.Source.serialize",
             "type": "Function",
             "tags": [
               "private"
@@ -7489,7 +7497,7 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-server.Source.prepare",
+            "id": "def-common.Source.prepare",
             "type": "Function",
             "tags": [],
             "label": "prepare",
@@ -7510,7 +7518,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/mapbox-gl",
-        "id": "def-server.FeatureIdentifier",
+        "id": "def-common.FeatureIdentifier",
         "type": "Type",
         "tags": [],
         "label": "FeatureIdentifier",
@@ -7524,7 +7532,7 @@
       },
       {
         "parentPluginId": "@kbn/mapbox-gl",
-        "id": "def-server.FilterSpecification",
+        "id": "def-common.FilterSpecification",
         "type": "Type",
         "tags": [],
         "label": "FilterSpecification",
@@ -7538,7 +7546,7 @@
       },
       {
         "parentPluginId": "@kbn/mapbox-gl",
-        "id": "def-server.LayerSpecification",
+        "id": "def-common.LayerSpecification",
         "type": "Type",
         "tags": [],
         "label": "LayerSpecification",
@@ -7552,13 +7560,13 @@
       },
       {
         "parentPluginId": "@kbn/mapbox-gl",
-        "id": "def-server.MapEvent",
+        "id": "def-common.MapEvent",
         "type": "Type",
         "tags": [],
         "label": "MapEvent",
         "description": [],
         "signature": [
-          "\"remove\" | \"error\" | \"data\" | \"render\" | \"move\" | \"rotate\" | \"idle\" | \"resize\" | \"zoom\" | \"mousedown\" | \"mouseup\" | \"mouseover\" | \"mousemove\" | \"click\" | \"dblclick\" | \"mouseenter\" | \"mouseleave\" | \"mouseout\" | \"contextmenu\" | \"wheel\" | \"touchstart\" | \"touchend\" | \"touchmove\" | \"touchcancel\" | \"movestart\" | \"moveend\" | \"dragstart\" | \"drag\" | \"dragend\" | \"zoomstart\" | \"zoomend\" | \"rotatestart\" | \"rotateend\" | \"pitchstart\" | \"pitch\" | \"pitchend\" | \"boxzoomstart\" | \"boxzoomend\" | \"boxzoomcancel\" | \"webglcontextlost\" | \"webglcontextrestored\" | \"load\" | \"styledata\" | \"sourcedata\" | \"dataloading\" | \"styledataloading\" | \"sourcedataloading\" | \"styleimagemissing\" | \"style.load\" | \"dataabort\" | \"sourcedataabort\""
+          "\"error\" | \"data\" | \"render\" | \"remove\" | \"move\" | \"rotate\" | \"idle\" | \"resize\" | \"zoom\" | \"mousedown\" | \"mouseup\" | \"mouseover\" | \"mousemove\" | \"click\" | \"dblclick\" | \"mouseenter\" | \"mouseleave\" | \"mouseout\" | \"contextmenu\" | \"wheel\" | \"touchstart\" | \"touchend\" | \"touchmove\" | \"touchcancel\" | \"movestart\" | \"moveend\" | \"dragstart\" | \"drag\" | \"dragend\" | \"zoomstart\" | \"zoomend\" | \"rotatestart\" | \"rotateend\" | \"pitchstart\" | \"pitch\" | \"pitchend\" | \"boxzoomstart\" | \"boxzoomend\" | \"boxzoomcancel\" | \"webglcontextlost\" | \"webglcontextrestored\" | \"load\" | \"styledata\" | \"sourcedata\" | \"dataloading\" | \"styledataloading\" | \"sourcedataloading\" | \"styleimagemissing\" | \"style.load\" | \"dataabort\" | \"sourcedataabort\""
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "deprecated": false,
@@ -7566,7 +7574,7 @@
       },
       {
         "parentPluginId": "@kbn/mapbox-gl",
-        "id": "def-server.MapGeoJSONFeature",
+        "id": "def-common.MapGeoJSONFeature",
         "type": "Type",
         "tags": [],
         "label": "MapGeoJSONFeature",
@@ -7580,7 +7588,7 @@
       },
       {
         "parentPluginId": "@kbn/mapbox-gl",
-        "id": "def-server.maplibregl",
+        "id": "def-common.maplibregl",
         "type": "Any",
         "tags": [],
         "label": "maplibregl",
@@ -7594,7 +7602,7 @@
       },
       {
         "parentPluginId": "@kbn/mapbox-gl",
-        "id": "def-server.MapOptions",
+        "id": "def-common.MapOptions",
         "type": "Type",
         "tags": [],
         "label": "MapOptions",
@@ -7608,7 +7616,7 @@
       },
       {
         "parentPluginId": "@kbn/mapbox-gl",
-        "id": "def-server.Point2D",
+        "id": "def-common.Point2D",
         "type": "Type",
         "tags": [],
         "label": "Point2D",
@@ -7622,7 +7630,7 @@
       },
       {
         "parentPluginId": "@kbn/mapbox-gl",
-        "id": "def-server.PointLike",
+        "id": "def-common.PointLike",
         "type": "Type",
         "tags": [
           "typedef"
@@ -7641,7 +7649,7 @@
       },
       {
         "parentPluginId": "@kbn/mapbox-gl",
-        "id": "def-server.StyleSpecification",
+        "id": "def-common.StyleSpecification",
         "type": "Type",
         "tags": [],
         "label": "StyleSpecification",
@@ -7654,14 +7662,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

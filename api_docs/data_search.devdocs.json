@@ -1422,6 +1422,1201 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-server.SearchSessionService",
+        "type": "Class",
+        "tags": [],
+        "label": "SearchSessionService",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "server",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-server.SearchSessionService",
+            "text": "SearchSessionService"
+          },
+          " implements ",
+          {
+            "pluginId": "data",
+            "scope": "server",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-server.ISearchSessionService",
+            "text": "ISearchSessionService"
+          },
+          "<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SearchSessionSavedObjectAttributes",
+            "text": "SearchSessionSavedObjectAttributes"
+          },
+          ">"
+        ],
+        "path": "src/plugins/data/server/search/session/session_service.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-server.SearchSessionService.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/data/server/search/session/session_service.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  "Logger"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  "Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; sessions: Readonly<{} & { enabled: boolean; pageSize: number; trackingInterval: moment.Duration; cleanupInterval: moment.Duration; expireInterval: moment.Duration; monitoringTaskTimeout: moment.Duration; notTouchedTimeout: moment.Duration; notTouchedInProgressTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; }>; }>; }>"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.Unnamed.$3",
+                "type": "string",
+                "tags": [],
+                "label": "version",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.SearchSessionService.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "(core: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.CoreSetup",
+                "text": "CoreSetup"
+              },
+              "<object, unknown>, deps: SetupDependencies) => void"
+            ],
+            "path": "src/plugins/data/server/search/session/session_service.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-server.CoreSetup",
+                    "text": "CoreSetup"
+                  },
+                  "<object, unknown>"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.setup.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "signature": [
+                  "SetupDependencies"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.SearchSessionService.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "(core: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.CoreStart",
+                "text": "CoreStart"
+              },
+              ", deps: StartDependencies) => Promise<void>"
+            ],
+            "path": "src/plugins/data/server/search/session/session_service.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.start.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-server.CoreStart",
+                    "text": "CoreStart"
+                  }
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.start.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "signature": [
+                  "StartDependencies"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.SearchSessionService.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/data/server/search/session/session_service.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.SearchSessionService.save",
+            "type": "Function",
+            "tags": [],
+            "label": "save",
+            "description": [],
+            "signature": [
+              "(deps: ",
+              "SearchSessionDependencies",
+              ", user: ",
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.AuthenticatedUser",
+                "text": "AuthenticatedUser"
+              },
+              " | null, sessionId: string, { name, appId, locatorId, initialState, restoreState, }: Partial<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
+              },
+              ">) => Promise<",
+              "SavedObject",
+              "<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
+              },
+              "> | undefined>"
+            ],
+            "path": "src/plugins/data/server/search/session/session_service.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.save.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "signature": [
+                  "SearchSessionDependencies"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.save.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "user",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "security",
+                    "scope": "common",
+                    "docId": "kibSecurityPluginApi",
+                    "section": "def-common.AuthenticatedUser",
+                    "text": "AuthenticatedUser"
+                  },
+                  " | null"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.save.$3",
+                "type": "string",
+                "tags": [],
+                "label": "sessionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.save.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n      name,\n      appId,\n      locatorId,\n      initialState = {},\n      restoreState = {},\n    }",
+                "description": [],
+                "signature": [
+                  "Partial<",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.SearchSessionSavedObjectAttributes",
+                    "text": "SearchSessionSavedObjectAttributes"
+                  },
+                  ">"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.SearchSessionService.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "({ savedObjectsClient }: ",
+              "SearchSessionDependencies",
+              ", user: ",
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.AuthenticatedUser",
+                "text": "AuthenticatedUser"
+              },
+              " | null, sessionId: string) => Promise<",
+              "SavedObject",
+              "<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
+              },
+              ">>"
+            ],
+            "path": "src/plugins/data/server/search/session/session_service.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.get.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ savedObjectsClient }",
+                "description": [],
+                "signature": [
+                  "SearchSessionDependencies"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.get.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "user",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "security",
+                    "scope": "common",
+                    "docId": "kibSecurityPluginApi",
+                    "section": "def-common.AuthenticatedUser",
+                    "text": "AuthenticatedUser"
+                  },
+                  " | null"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.get.$3",
+                "type": "string",
+                "tags": [],
+                "label": "sessionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.SearchSessionService.find",
+            "type": "Function",
+            "tags": [],
+            "label": "find",
+            "description": [],
+            "signature": [
+              "({ savedObjectsClient }: ",
+              "SearchSessionDependencies",
+              ", user: ",
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.AuthenticatedUser",
+                "text": "AuthenticatedUser"
+              },
+              " | null, options: Omit<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsFindOptions",
+                "text": "SavedObjectsFindOptions"
+              },
+              ", \"type\">) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsFindResponse",
+                "text": "SavedObjectsFindResponse"
+              },
+              "<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
+              },
+              ", unknown>>"
+            ],
+            "path": "src/plugins/data/server/search/session/session_service.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.find.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ savedObjectsClient }",
+                "description": [],
+                "signature": [
+                  "SearchSessionDependencies"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.find.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "user",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "security",
+                    "scope": "common",
+                    "docId": "kibSecurityPluginApi",
+                    "section": "def-common.AuthenticatedUser",
+                    "text": "AuthenticatedUser"
+                  },
+                  " | null"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.find.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "Omit<",
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-server.SavedObjectsFindOptions",
+                    "text": "SavedObjectsFindOptions"
+                  },
+                  ", \"type\">"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.SearchSessionService.update",
+            "type": "Function",
+            "tags": [],
+            "label": "update",
+            "description": [],
+            "signature": [
+              "(deps: ",
+              "SearchSessionDependencies",
+              ", user: ",
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.AuthenticatedUser",
+                "text": "AuthenticatedUser"
+              },
+              " | null, sessionId: string, attributes: Partial<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
+              },
+              ">) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsUpdateResponse",
+                "text": "SavedObjectsUpdateResponse"
+              },
+              "<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
+              },
+              ">>"
+            ],
+            "path": "src/plugins/data/server/search/session/session_service.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.update.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "signature": [
+                  "SearchSessionDependencies"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.update.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "user",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "security",
+                    "scope": "common",
+                    "docId": "kibSecurityPluginApi",
+                    "section": "def-common.AuthenticatedUser",
+                    "text": "AuthenticatedUser"
+                  },
+                  " | null"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.update.$3",
+                "type": "string",
+                "tags": [],
+                "label": "sessionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.update.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "attributes",
+                "description": [],
+                "signature": [
+                  "Partial<",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.SearchSessionSavedObjectAttributes",
+                    "text": "SearchSessionSavedObjectAttributes"
+                  },
+                  ">"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.SearchSessionService.extend",
+            "type": "Function",
+            "tags": [],
+            "label": "extend",
+            "description": [],
+            "signature": [
+              "(deps: ",
+              "SearchSessionDependencies",
+              ", user: ",
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.AuthenticatedUser",
+                "text": "AuthenticatedUser"
+              },
+              " | null, sessionId: string, expires: Date) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsUpdateResponse",
+                "text": "SavedObjectsUpdateResponse"
+              },
+              "<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
+              },
+              ">>"
+            ],
+            "path": "src/plugins/data/server/search/session/session_service.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.extend.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "signature": [
+                  "SearchSessionDependencies"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.extend.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "user",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "security",
+                    "scope": "common",
+                    "docId": "kibSecurityPluginApi",
+                    "section": "def-common.AuthenticatedUser",
+                    "text": "AuthenticatedUser"
+                  },
+                  " | null"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.extend.$3",
+                "type": "string",
+                "tags": [],
+                "label": "sessionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.extend.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "expires",
+                "description": [],
+                "signature": [
+                  "Date"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.SearchSessionService.cancel",
+            "type": "Function",
+            "tags": [],
+            "label": "cancel",
+            "description": [],
+            "signature": [
+              "(deps: ",
+              "SearchSessionDependencies",
+              ", user: ",
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.AuthenticatedUser",
+                "text": "AuthenticatedUser"
+              },
+              " | null, sessionId: string) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsUpdateResponse",
+                "text": "SavedObjectsUpdateResponse"
+              },
+              "<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
+              },
+              ">>"
+            ],
+            "path": "src/plugins/data/server/search/session/session_service.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.cancel.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "signature": [
+                  "SearchSessionDependencies"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.cancel.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "user",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "security",
+                    "scope": "common",
+                    "docId": "kibSecurityPluginApi",
+                    "section": "def-common.AuthenticatedUser",
+                    "text": "AuthenticatedUser"
+                  },
+                  " | null"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.cancel.$3",
+                "type": "string",
+                "tags": [],
+                "label": "sessionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.SearchSessionService.delete",
+            "type": "Function",
+            "tags": [],
+            "label": "delete",
+            "description": [],
+            "signature": [
+              "(deps: ",
+              "SearchSessionDependencies",
+              ", user: ",
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.AuthenticatedUser",
+                "text": "AuthenticatedUser"
+              },
+              " | null, sessionId: string) => Promise<{}>"
+            ],
+            "path": "src/plugins/data/server/search/session/session_service.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.delete.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "signature": [
+                  "SearchSessionDependencies"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.delete.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "user",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "security",
+                    "scope": "common",
+                    "docId": "kibSecurityPluginApi",
+                    "section": "def-common.AuthenticatedUser",
+                    "text": "AuthenticatedUser"
+                  },
+                  " | null"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.delete.$3",
+                "type": "string",
+                "tags": [],
+                "label": "sessionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.SearchSessionService.getSearchIdMapping",
+            "type": "Function",
+            "tags": [],
+            "label": "getSearchIdMapping",
+            "description": [],
+            "signature": [
+              "(deps: ",
+              "SearchSessionDependencies",
+              ", user: ",
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.AuthenticatedUser",
+                "text": "AuthenticatedUser"
+              },
+              " | null, sessionId: string) => Promise<Map<string, string>>"
+            ],
+            "path": "src/plugins/data/server/search/session/session_service.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.getSearchIdMapping.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "signature": [
+                  "SearchSessionDependencies"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.getSearchIdMapping.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "user",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "security",
+                    "scope": "common",
+                    "docId": "kibSecurityPluginApi",
+                    "section": "def-common.AuthenticatedUser",
+                    "text": "AuthenticatedUser"
+                  },
+                  " | null"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.getSearchIdMapping.$3",
+                "type": "string",
+                "tags": [],
+                "label": "sessionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.SearchSessionService.asScopedProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "asScopedProvider",
+            "description": [],
+            "signature": [
+              "({ savedObjects }: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.CoreStart",
+                "text": "CoreStart"
+              },
+              ") => (request: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>) => { getId: (args_0: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.IKibanaSearchRequest",
+                "text": "IKibanaSearchRequest"
+              },
+              "<any>, args_1: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.ISearchOptions",
+                "text": "ISearchOptions"
+              },
+              ") => Promise<string>; trackId: (args_0: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.IKibanaSearchRequest",
+                "text": "IKibanaSearchRequest"
+              },
+              "<any>, args_1: string, args_2: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.ISearchOptions",
+                "text": "ISearchOptions"
+              },
+              ") => Promise<void>; getSearchIdMapping: (sessionId: string) => Promise<Map<string, string>>; save: (args_0: string, args_1: Partial<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
+              },
+              ">) => Promise<",
+              "SavedObject",
+              "<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
+              },
+              "> | undefined>; get: (sessionId: string) => Promise<",
+              "SavedObject",
+              "<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
+              },
+              ">>; find: (options: Omit<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsFindOptions",
+                "text": "SavedObjectsFindOptions"
+              },
+              ", \"type\">) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsFindResponse",
+                "text": "SavedObjectsFindResponse"
+              },
+              "<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
+              },
+              ", unknown>>; update: (sessionId: string, attributes: Partial<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
+              },
+              ">) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsUpdateResponse",
+                "text": "SavedObjectsUpdateResponse"
+              },
+              "<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
+              },
+              ">>; extend: (sessionId: string, expires: Date) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsUpdateResponse",
+                "text": "SavedObjectsUpdateResponse"
+              },
+              "<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
+              },
+              ">>; cancel: (sessionId: string) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsUpdateResponse",
+                "text": "SavedObjectsUpdateResponse"
+              },
+              "<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
+              },
+              ">>; delete: (sessionId: string) => Promise<{}>; getConfig: () => Readonly<{} & { enabled: boolean; pageSize: number; trackingInterval: moment.Duration; cleanupInterval: moment.Duration; expireInterval: moment.Duration; monitoringTaskTimeout: moment.Duration; notTouchedTimeout: moment.Duration; notTouchedInProgressTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; }>; }"
+            ],
+            "path": "src/plugins/data/server/search/session/session_service.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.asScopedProvider.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ savedObjects }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-server.CoreStart",
+                    "text": "CoreStart"
+                  }
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "functions": [],
@@ -8342,12 +9537,20 @@
             "deprecated": true,
             "references": [
               {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.ts"
+              },
+              {
                 "plugin": "discover",
                 "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
               },
               {
                 "plugin": "discover",
                 "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/utils/wrap_search_source_client.ts"
               }
             ],
             "children": [],
@@ -8617,24 +9820,60 @@
             "removeBy": "8.1",
             "references": [
               {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/context/services/anchor.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/context/utils/fetch_hits_in_interval.ts"
-              },
-              {
                 "plugin": "stackAlerts",
                 "path": "x-pack/plugins/stack_alerts/server/alert_types/es_query/lib/fetch_search_source_query.ts"
               },
               {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.test.ts"
+              },
+              {
                 "plugin": "stackAlerts",
                 "path": "x-pack/plugins/stack_alerts/server/alert_types/es_query/alert_type.test.ts"
               },
               {
                 "plugin": "stackAlerts",
                 "path": "x-pack/plugins/stack_alerts/server/alert_types/es_query/alert_type.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/utils/wrap_search_source_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/utils/wrap_search_source_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/utils/wrap_search_source_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/utils/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "inputControlVis",
@@ -11447,7 +12686,15 @@
         "label": "getFilteredMetricAgg",
         "description": [],
         "signature": [
-          "() => ",
+          "({ getConfig }: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.FiltersMetricAggDependencies",
+            "text": "FiltersMetricAggDependencies"
+          },
+          ") => ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -11467,7 +12714,28 @@
         ],
         "path": "src/plugins/data/common/search/aggs/metrics/filtered_metric.ts",
         "deprecated": false,
-        "children": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.getFilteredMetricAgg.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ getConfig }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.FiltersMetricAggDependencies",
+                "text": "FiltersMetricAggDependencies"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/filtered_metric.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -13339,6 +14607,37 @@
         "returnComment": [
           "true if request is still running an/d response contains partial results"
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.isSerializedSearchSource",
+        "type": "Function",
+        "tags": [],
+        "label": "isSerializedSearchSource",
+        "description": [],
+        "signature": [
+          "(maybeSerializedSearchSource: unknown) => boolean"
+        ],
+        "path": "src/plugins/data/common/search/search_source/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.isSerializedSearchSource.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "maybeSerializedSearchSource",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/plugins/data/common/search/search_source/types.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -21299,6 +22598,49 @@
                   "string"
                 ],
                 "path": "src/plugins/data/common/search/aggs/buckets/filters.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.FiltersMetricAggDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "FiltersMetricAggDependencies",
+        "description": [],
+        "path": "src/plugins/data/common/search/aggs/metrics/filtered_metric.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.FiltersMetricAggDependencies.getConfig",
+            "type": "Function",
+            "tags": [],
+            "label": "getConfig",
+            "description": [],
+            "signature": [
+              "<T = unknown>(key: string) => T"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/filtered_metric.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.FiltersMetricAggDependencies.getConfig.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data/common/search/aggs/metrics/filtered_metric.ts",
                 "deprecated": false,
                 "isRequired": true
               }
