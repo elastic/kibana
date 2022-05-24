@@ -68,7 +68,6 @@ describe('migrateFilter', function () {
     const migratedFilter = migrateFilter(originalFilter, undefined);
 
     expect(migratedFilter).toEqual(originalFilter);
-    expect(isEqual(migratedFilter, originalFilter)).toBe(true);
   });
 
   it('should handle the case where .query already exists and filter has other top level keys on there', function () {
@@ -86,6 +85,5 @@ describe('migrateFilter', function () {
     const migratedFilter = migrateFilter(originalFilter, undefined);
 
     expect(migratedFilter).toEqual(filterAfterMigrate);
-    expect(isEqual(migratedFilter, filterAfterMigrate)).toBe(true);
   });
 });
