@@ -9,21 +9,21 @@ import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import {
-  HostFirstLastSeenStrategyResponse,
+  FirstLastSeenStrategyResponse,
   HostsQueries,
-  HostFirstLastSeenRequestOptions,
+  FirstLastSeenRequestOptions,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../types';
-import { buildFirstOrLastSeenHostQuery } from './query.first_or_last_seen_host.dsl';
+import { buildFirstOrLastSeenQuery } from './query.first_or_last_seen_host.dsl';
 
-export const firstOrLastSeenHost: SecuritySolutionFactory<HostsQueries.firstOrLastSeen> = {
-  buildDsl: (options: HostFirstLastSeenRequestOptions) => buildFirstOrLastSeenHostQuery(options),
+export const firstOrLastSeen: SecuritySolutionFactory<HostsQueries.firstOrLastSeen> = {
+  buildDsl: (options: FirstLastSeenRequestOptions) => buildFirstOrLastSeenQuery(options),
   parse: async (
-    options: HostFirstLastSeenRequestOptions,
+    options: FirstLastSeenRequestOptions,
     response: IEsSearchResponse<unknown>
-  ): Promise<HostFirstLastSeenStrategyResponse> => {
+  ): Promise<FirstLastSeenStrategyResponse> => {
     // First try to get the formatted field if it exists or not.
     const formattedField: string | null = getOr(
       null,
@@ -35,7 +35,7 @@ export const firstOrLastSeenHost: SecuritySolutionFactory<HostsQueries.firstOrLa
       formattedField || getOr(null, 'hits.hits[0]._source.@timestamp', response.rawResponse);
 
     const inspect = {
-      dsl: [inspectStringifyObject(buildFirstOrLastSeenHostQuery(options))],
+      dsl: [inspectStringifyObject(buildFirstOrLastSeenQuery(options))],
     };
 
     if (options.order === 'asc') {

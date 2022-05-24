@@ -9,18 +9,18 @@ import React from 'react';
 
 import { render as _render, waitFor } from '@testing-library/react';
 
-import { useFirstLastSeenHost } from '../../containers/hosts/first_last_seen';
-import { TestProviders } from '../../../common/mock';
-import { FirstLastSeenHost, FirstLastSeenHostType } from '.';
+import { useFirstLastSeen } from '../../containers/first_last_seen';
+import { TestProviders } from '../../mock';
+import { FirstLastSeen, FirstLastSeenType } from '.';
 
 const MOCKED_RESPONSE = {
   firstSeen: '2019-04-08T16:09:40.692Z',
   lastSeen: '2019-04-08T18:35:45.064Z',
 };
 
-jest.mock('../../containers/hosts/first_last_seen');
-const useFirstLastSeenHostMock = useFirstLastSeenHost as jest.Mock;
-useFirstLastSeenHostMock.mockReturnValue([false, MOCKED_RESPONSE]);
+jest.mock('../../containers/first_last_seen');
+const useFirstLastSeenMock = useFirstLastSeen as jest.Mock;
+useFirstLastSeenMock.mockReturnValue([false, MOCKED_RESPONSE]);
 
 describe('FirstLastSeen Component', () => {
   const firstSeen = 'Apr 8, 2019 @ 16:09:40.692';
@@ -39,14 +39,11 @@ describe('FirstLastSeen Component', () => {
   });
 
   test('Loading', async () => {
-    useFirstLastSeenHostMock.mockReturnValue([true, MOCKED_RESPONSE]);
+    useFirstLastSeenMock.mockReturnValue([true, MOCKED_RESPONSE]);
     const { getByTestId } = render(
-      <FirstLastSeenHost
-        docValueFields={[]}
-        indexNames={[]}
-        hostName="kibana-siem"
-        type={FirstLastSeenHostType.FIRST_SEEN}
-      />
+      <TestProviders>
+        <FirstLastSeen field="hostName" value="kibana-siem" type={FirstLastSeenType.FIRST_SEEN} />
+      </TestProviders>
     );
     expect(getByTestId('test-render-output').innerHTML).toBe(
       '<span class="euiLoadingSpinner euiLoadingSpinner--medium"></span>'
@@ -54,14 +51,11 @@ describe('FirstLastSeen Component', () => {
   });
 
   test('First Seen', async () => {
-    useFirstLastSeenHostMock.mockReturnValue([false, MOCKED_RESPONSE]);
+    useFirstLastSeenMock.mockReturnValue([false, MOCKED_RESPONSE]);
     const { getByTestId } = render(
-      <FirstLastSeenHost
-        docValueFields={[]}
-        indexNames={[]}
-        hostName="kibana-siem"
-        type={FirstLastSeenHostType.FIRST_SEEN}
-      />
+      <TestProviders>
+        <FirstLastSeen field="hostName" value="kibana-siem" type={FirstLastSeenType.FIRST_SEEN} />
+      </TestProviders>
     );
 
     await waitFor(() => {
@@ -72,14 +66,11 @@ describe('FirstLastSeen Component', () => {
   });
 
   test('Last Seen', async () => {
-    useFirstLastSeenHostMock.mockReturnValue([false, MOCKED_RESPONSE]);
+    useFirstLastSeenMock.mockReturnValue([false, MOCKED_RESPONSE]);
     const { getByTestId } = render(
-      <FirstLastSeenHost
-        docValueFields={[]}
-        indexNames={[]}
-        hostName="kibana-siem"
-        type={FirstLastSeenHostType.LAST_SEEN}
-      />
+      <TestProviders>
+        <FirstLastSeen field="hostName" value="kibana-siem" type={FirstLastSeenType.LAST_SEEN} />
+      </TestProviders>
     );
     await waitFor(() => {
       expect(getByTestId('test-render-output').innerHTML).toBe(
@@ -89,7 +80,7 @@ describe('FirstLastSeen Component', () => {
   });
 
   test('First Seen is empty but not Last Seen', async () => {
-    useFirstLastSeenHostMock.mockReturnValue([
+    useFirstLastSeenMock.mockReturnValue([
       false,
       {
         ...MOCKED_RESPONSE,
@@ -97,12 +88,9 @@ describe('FirstLastSeen Component', () => {
       },
     ]);
     const { getByTestId } = render(
-      <FirstLastSeenHost
-        docValueFields={[]}
-        indexNames={[]}
-        hostName="kibana-siem"
-        type={FirstLastSeenHostType.LAST_SEEN}
-      />
+      <TestProviders>
+        <FirstLastSeen field="hostName" value="kibana-siem" type={FirstLastSeenType.LAST_SEEN} />
+      </TestProviders>
     );
 
     await waitFor(() => {
@@ -113,7 +101,7 @@ describe('FirstLastSeen Component', () => {
   });
 
   test('Last Seen is empty but not First Seen', async () => {
-    useFirstLastSeenHostMock.mockReturnValue([
+    useFirstLastSeenMock.mockReturnValue([
       false,
       {
         ...MOCKED_RESPONSE,
@@ -121,12 +109,9 @@ describe('FirstLastSeen Component', () => {
       },
     ]);
     const { getByTestId } = render(
-      <FirstLastSeenHost
-        docValueFields={[]}
-        indexNames={[]}
-        hostName="kibana-siem"
-        type={FirstLastSeenHostType.FIRST_SEEN}
-      />
+      <TestProviders>
+        <FirstLastSeen field="hostName" value="kibana-siem" type={FirstLastSeenType.FIRST_SEEN} />
+      </TestProviders>
     );
 
     await waitFor(() => {
@@ -137,7 +122,7 @@ describe('FirstLastSeen Component', () => {
   });
 
   test('First Seen With a bad date time string', async () => {
-    useFirstLastSeenHostMock.mockReturnValue([
+    useFirstLastSeenMock.mockReturnValue([
       false,
       {
         ...MOCKED_RESPONSE,
@@ -146,12 +131,7 @@ describe('FirstLastSeen Component', () => {
     ]);
     const { container } = render(
       <TestProviders>
-        <FirstLastSeenHost
-          docValueFields={[]}
-          indexNames={[]}
-          hostName="kibana-siem"
-          type={FirstLastSeenHostType.FIRST_SEEN}
-        />
+        <FirstLastSeen field="hostName" value="kibana-siem" type={FirstLastSeenType.FIRST_SEEN} />
       </TestProviders>
     );
     await waitFor(() => {
@@ -160,7 +140,7 @@ describe('FirstLastSeen Component', () => {
   });
 
   test('Last Seen With a bad date time string', async () => {
-    useFirstLastSeenHostMock.mockReturnValue([
+    useFirstLastSeenMock.mockReturnValue([
       false,
       {
         ...MOCKED_RESPONSE,
@@ -169,12 +149,7 @@ describe('FirstLastSeen Component', () => {
     ]);
     const { container } = render(
       <TestProviders>
-        <FirstLastSeenHost
-          docValueFields={[]}
-          indexNames={[]}
-          hostName="kibana-siem"
-          type={FirstLastSeenHostType.LAST_SEEN}
-        />
+        <FirstLastSeen field="hostName" value="kibana-siem" type={FirstLastSeenType.LAST_SEEN} />
       </TestProviders>
     );
     await waitFor(() => {

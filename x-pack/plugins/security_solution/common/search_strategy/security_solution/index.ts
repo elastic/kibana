@@ -12,7 +12,7 @@ import {
   HostDetailsRequestOptions,
   HostsOverviewStrategyResponse,
   HostOverviewRequestOptions,
-  HostFirstLastSeenStrategyResponse,
+  FirstLastSeenStrategyResponse,
   HostsQueries,
   HostsRequestOptions,
   HostsStrategyResponse,
@@ -25,7 +25,7 @@ import {
   HostsKpiHostsRequestOptions,
   HostsKpiUniqueIpsStrategyResponse,
   HostsKpiUniqueIpsRequestOptions,
-  HostFirstLastSeenRequestOptions,
+  FirstLastSeenRequestOptions,
 } from './hosts';
 import {
   NetworkQueries,
@@ -134,7 +134,7 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   : T extends HostsQueries.overview
   ? HostsOverviewStrategyResponse
   : T extends HostsQueries.firstOrLastSeen
-  ? HostFirstLastSeenStrategyResponse
+  ? FirstLastSeenStrategyResponse
   : T extends HostsQueries.uncommonProcesses
   ? HostsUncommonProcessesStrategyResponse
   : T extends HostsKpiQueries.kpiAuthentications
@@ -196,7 +196,7 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   : T extends HostsQueries.overview
   ? HostOverviewRequestOptions
   : T extends HostsQueries.firstOrLastSeen
-  ? HostFirstLastSeenRequestOptions
+  ? FirstLastSeenRequestOptions
   : T extends HostsQueries.uncommonProcesses
   ? HostsUncommonProcessesRequestOptions
   : T extends HostsKpiQueries.kpiAuthentications

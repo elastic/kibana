@@ -7,11 +7,11 @@
 
 import {
   Direction,
-  HostFirstLastSeenRequestOptions,
+  FirstLastSeenRequestOptions,
   HostsQueries,
 } from '../../../../../../../common/search_strategy';
 
-export const mockOptions: HostFirstLastSeenRequestOptions = {
+export const mockOptions: FirstLastSeenRequestOptions = {
   defaultIndex: [
     'apm-*-transaction*',
     'traces-apm*',
@@ -24,7 +24,8 @@ export const mockOptions: HostFirstLastSeenRequestOptions = {
   ],
   docValueFields: [],
   factoryQueryType: HostsQueries.firstOrLastSeen,
-  hostName: 'siem-kibana',
+  field: 'hostName',
+  value: 'siem-kibana',
   order: Direction.asc,
 };
 

@@ -10,12 +10,7 @@ import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-th
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import {
-  buildHostNamesFilter,
-  DocValueFields,
-  HostItem,
-  RiskSeverity,
-} from '../../../../common/search_strategy';
+import { buildHostNamesFilter, HostItem, RiskSeverity } from '../../../../common/search_strategy';
 import { DEFAULT_DARK_MODE } from '../../../../common/constants';
 import { DescriptionList } from '../../../../common/utility_types';
 import { useUiSetting$ } from '../../../common/lib/kibana';
@@ -33,7 +28,7 @@ import { AnomalyScores } from '../../../common/components/ml/score/anomaly_score
 import { Anomalies, NarrowDateRange } from '../../../common/components/ml/types';
 import { DescriptionListStyled, OverviewWrapper } from '../../../common/components/page';
 import {
-  FirstLastSeenHost,
+  FirstLastSeen,
   FirstLastSeenHostType,
 } from '../../../hosts/components/first_last_seen_host';
 
@@ -46,13 +41,11 @@ import { RiskScore } from '../../../common/components/severity/common';
 interface HostSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
   data: HostItem;
-  docValueFields: DocValueFields[];
   id: string;
   isDraggable?: boolean;
   isInDetailsSidePanel: boolean;
   loading: boolean;
   isLoadingAnomaliesData: boolean;
-  indexNames: string[];
   anomaliesData: Anomalies | null;
   startDate: string;
   endDate: string;
@@ -70,13 +63,11 @@ export const HostOverview = React.memo<HostSummaryProps>(
     anomaliesData,
     contextID,
     data,
-    docValueFields,
     endDate,
     id,
     isDraggable = false,
     isInDetailsSidePanel = false, // Rather than duplicate the component, alter the structure based on it's location
     isLoadingAnomaliesData,
-    indexNames,
     loading,
     narrowDateRange,
     startDate,
@@ -144,10 +135,9 @@ export const HostOverview = React.memo<HostSummaryProps>(
           title: i18n.FIRST_SEEN,
           description:
             data && data.host != null && data.host.name && data.host.name.length ? (
-              <FirstLastSeenHost
-                docValueFields={docValueFields}
-                hostName={data.host.name[0]}
-                indexNames={indexNames}
+              <FirstLastSeen
+                field={'hostName'}
+                value={data.host.name[0]}
                 type={FirstLastSeenHostType.FIRST_SEEN}
               />
             ) : (
@@ -158,18 +148,13 @@ export const HostOverview = React.memo<HostSummaryProps>(
           title: i18n.LAST_SEEN,
           description:
             data && data.host != null && data.host.name && data.host.name.length ? (
-              <FirstLastSeenHost
-                docValueFields={docValueFields}
-                hostName={data.host.name[0]}
-                indexNames={indexNames}
-                type={FirstLastSeenHostType.LAST_SEEN}
-              />
+              <FirstLastSeen hostName={data.host.name[0]} type={FirstLastSeenHostType.LAST_SEEN} />
             ) : (
               getEmptyTagValue()
             ),
         },
       ],
-      [data, docValueFields, indexNames, isDraggable]
+      [data, isDraggable]
     );
     const firstColumn = useMemo(
       () =>

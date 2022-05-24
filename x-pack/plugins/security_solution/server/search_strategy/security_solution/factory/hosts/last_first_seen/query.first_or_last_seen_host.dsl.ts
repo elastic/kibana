@@ -6,15 +6,16 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { HostFirstLastSeenRequestOptions } from '../../../../../../common/search_strategy/security_solution/hosts';
+import { FirstLastSeenRequestOptions } from '../../../../../../common/search_strategy/security_solution/hosts';
 
-export const buildFirstOrLastSeenHostQuery = ({
-  hostName,
+export const buildFirstOrLastSeenQuery = ({
+  field,
+  value,
   defaultIndex,
   docValueFields,
   order,
-}: HostFirstLastSeenRequestOptions) => {
-  const filter = [{ term: { 'host.name': hostName } }];
+}: FirstLastSeenRequestOptions) => {
+  const filter = [{ term: { [field]: value } }];
 
   const dslQuery = {
     allow_no_indices: true,

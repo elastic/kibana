@@ -10,70 +10,72 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useAppToasts } from '../../hooks/use_app_toasts';
+import { useKibana } from '../../lib/kibana';
 import {
-  HostsQueries,
-  HostFirstLastSeenStrategyResponse,
-  HostFirstLastSeenRequestOptions,
-} from '../../../../../common/search_strategy/security_solution';
+  HostsQueries as Queries,
+  FirstLastSeenStrategyResponse,
+  FirstLastSeenRequestOptions,
+} from '../../../../common/search_strategy/security_solution';
 
 import * as i18n from './translations';
-import { Direction, DocValueFields } from '../../../../../common/search_strategy';
+import { Direction, DocValueFields } from '../../../../common/search_strategy';
+import { hostname } from 'os';
 
 const ID = 'firstLastSeenHostQuery';
 
-export interface FirstLastSeenHostArgs {
+export interface FirstLastSeenArgs {
   id: string;
   errorMessage: string | null;
   firstSeen?: string | null;
   lastSeen?: string | null;
   order: Direction.asc | Direction.desc | null;
 }
-interface UseHostFirstLastSeen {
+interface UseFirstLastSeen {
   docValueFields: DocValueFields[];
-  hostName: string;
+  field: 'hostName' | 'userName' | 'hostIp';
+  value: string;
   indexNames: string[];
   order: Direction.asc | Direction.desc;
 }
 
-export const useFirstLastSeenHost = ({
+export const useFirstLastSeen = ({
   docValueFields,
-  hostName,
+  field,
+  value,
   indexNames,
   order,
-}: UseHostFirstLastSeen): [boolean, FirstLastSeenHostArgs] => {
-  const { data } = useKibana().services;
+}: UseFirstLastSeen): [boolean, FirstLastSeenArgs] => {
+  const { search } = useKibana().services.data;
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [firstLastSeenHostRequest, setFirstLastSeenHostRequest] =
-    useState<HostFirstLastSeenRequestOptions>({
-      defaultIndex: indexNames,
-      docValueFields: docValueFields ?? [],
-      factoryQueryType: HostsQueries.firstOrLastSeen,
-      hostName,
-      order,
-    });
 
-  const [firstLastSeenHostResponse, setFirstLastSeenHostResponse] = useState<FirstLastSeenHostArgs>(
-    {
-      order: null,
-      firstSeen: null,
-      lastSeen: null,
-      errorMessage: null,
-      id: ID,
-    }
-  );
+  const [firstLastSeenRequest, setFirstLastSeenRequest] = useState<FirstLastSeenRequestOptions>({
+    defaultIndex: indexNames,
+    docValueFields: docValueFields ?? [],
+    factoryQueryType: Queries.firstOrLastSeen,
+    field: getField(field),
+    value,
+    order,
+  });
+
+  const [firstLastSeenResponse, setFirstLastSeenResponse] = useState<FirstLastSeenArgs>({
+    order: null, // I dont think this is use anywhere
+    firstSeen: null,
+    lastSeen: null,
+    errorMessage: null,
+    id: ID,
+  });
   const { addError, addWarning } = useAppToasts();
 
-  const firstLastSeenHostSearch = useCallback(
-    (request: HostFirstLastSeenRequestOptions) => {
+  const firstLastSeenSearch = useCallback(
+    (request: FirstLastSeenRequestOptions) => {
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
-        searchSubscription$.current = data.search
-          .search<HostFirstLastSeenRequestOptions, HostFirstLastSeenStrategyResponse>(request, {
+        searchSubscription$.current = search
+          .search<FirstLastSeenRequestOptions, FirstLastSeenStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
             abortSignal: abortCtrl.current.signal,
           })
@@ -81,7 +83,7 @@ export const useFirstLastSeenHost = ({
             next: (response) => {
               if (isCompleteResponse(response)) {
                 setLoading(false);
-                setFirstLastSeenHostResponse((prevResponse) => ({
+                setFirstLastSeenResponse((prevResponse) => ({
                   ...prevResponse,
                   errorMessage: null,
                   firstSeen: response.firstSeen,
@@ -96,7 +98,7 @@ export const useFirstLastSeenHost = ({
             },
             error: (msg) => {
               setLoading(false);
-              setFirstLastSeenHostResponse((prevResponse) => ({
+              setFirstLastSeenResponse((prevResponse) => ({
                 ...prevResponse,
                 errorMessage: msg,
               }));
@@ -111,31 +113,51 @@ export const useFirstLastSeenHost = ({
       abortCtrl.current.abort();
       asyncSearch();
     },
-    [data.search, addError, addWarning]
+    [search, addError, addWarning]
   );
 
   useEffect(() => {
-    setFirstLastSeenHostRequest((prevRequest) => {
+    setFirstLastSeenRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
         defaultIndex: indexNames,
         docValueFields: docValueFields ?? [],
-        hostName,
+        field,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, docValueFields, hostName]);
+  }, [indexNames, docValueFields, field]);
 
   useEffect(() => {
-    firstLastSeenHostSearch(firstLastSeenHostRequest);
+    firstLastSeenSearch(firstLastSeenRequest);
     return () => {
       searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
     };
-  }, [firstLastSeenHostRequest, firstLastSeenHostSearch]);
+  }, [firstLastSeenRequest, firstLastSeenSearch]);
 
-  return [loading, firstLastSeenHostResponse];
+  return [loading, firstLastSeenResponse];
+};
+
+enum fieldMap {
+  hostName = 'host.name',
+}
+
+const x = fieldMap.hostName;
+console.log(x === 'host.name');
+
+const getField = (fieldMap: UseFirstLastSeen['field']) => {
+  switch (fieldMap) {
+    case 'hostName':
+      return 'host.name';
+    case 'userName':
+      return 'user.name';
+    case 'hostIp':
+      return 'host.ip';
+    default:
+      return 'host.name';
+  }
 };

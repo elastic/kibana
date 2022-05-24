@@ -10,13 +10,13 @@ import { Inspect, Maybe, Direction } from '../../../common';
 import { RequestOptionsPaginated } from '../..';
 import { HostsFields } from '../common';
 
-export interface HostFirstLastSeenRequestOptions
-  extends Partial<RequestOptionsPaginated<HostsFields>> {
-  hostName: string;
+export interface FirstLastSeenRequestOptions extends Partial<RequestOptionsPaginated<HostsFields>> {
   order: Direction.asc | Direction.desc;
+  field: string;
+  value: string;
 }
 
-export interface HostFirstLastSeenStrategyResponse extends IEsSearchResponse {
+export interface FirstLastSeenStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
   firstSeen?: Maybe<string>;
   lastSeen?: Maybe<string>;
