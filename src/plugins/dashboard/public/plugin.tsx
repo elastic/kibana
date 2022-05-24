@@ -28,6 +28,7 @@ import {
 import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { createKbnUrlTracker } from './services/kibana_utils';
 import { UsageCollectionSetup } from './services/usage_collection';
 import { UiActionsSetup, UiActionsStart } from './services/ui_actions';
@@ -109,6 +110,7 @@ export interface DashboardStartDependencies {
   spaces?: SpacesPluginStart;
   visualizations: VisualizationsStart;
   screenshotMode: ScreenshotModePluginStart;
+  dataViewEditor: DataViewEditorStart;
 }
 
 export interface DashboardSetup {
