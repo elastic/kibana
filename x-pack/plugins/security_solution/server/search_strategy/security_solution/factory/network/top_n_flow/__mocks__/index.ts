@@ -96,7 +96,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _id: 'dd4fa2d4bd-1526378075029582',
                       _score: 0,
                       fields: {
-                        'source.as.number': [15169], 
+                        'source.as.number': [15169],
                         'source.as.organization.name': ['Google LLC'],
                       },
                     },
@@ -153,7 +153,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _id: 'dd4fa2d4bd-1527252060367158',
                       _score: 0,
                       fields: {
-                        'source.as.number': [54113], 
+                        'source.as.number': [54113],
                         'source.as.organization.name': ['Fastly'],
                       },
                     },
@@ -211,7 +211,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _id: 'dd4fa2d4bd-1526971840437636',
                       _score: 0,
                       fields: {
-                        'source.as.number': [41231], 
+                        'source.as.number': [41231],
                         'source.as.organization.name': ['Canonical Group Limited'],
                       },
                     },
@@ -296,7 +296,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _id: 'dd4fa2d4bd-1527003062069535',
                       _score: 0,
                       fields: {
-                        'source.as.number': [54113], 
+                        'source.as.number': [54113],
                         'source.as.organization.name': ['Fastly'],
                       },
                     },
@@ -354,7 +354,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _id: 'dd4fa2d4bd-1526557113311472',
                       _score: 0,
                       fields: {
-                        'source.as.number': [15169], 
+                        'source.as.number': [15169],
                         'source.as.organization.name': ['Google LLC'],
                       },
                     },
@@ -411,7 +411,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _id: 'dd4fa2d4bd-1526379128390241',
                       _score: 0,
                       fields: {
-                        'source.as.number': [54113], 
+                        'source.as.number': [54113],
                         'source.as.organization.name': ['Fastly'],
                       },
                     },
@@ -466,7 +466,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _id: 'dd4fa2d4bd-1526555996515551',
                       _score: 0,
                       fields: {
-                        'source.as.number': [41231], 
+                        'source.as.number': [41231],
                         'source.as.organization.name': ['Canonical Group Limited'],
                       },
                     },
@@ -524,7 +524,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _id: 'dd4fa2d4bd-1526584379144248',
                       _score: 0,
                       fields: {
-                        'source.as.number': [133766], 
+                        'source.as.number': [133766],
                         'source.as.organization.name': ['YHSRV.LLC'],
                       },
                     },
