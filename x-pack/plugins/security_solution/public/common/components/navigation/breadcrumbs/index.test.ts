@@ -132,6 +132,36 @@ jest.mock('../../../lib/kibana/kibana_react', () => {
   };
 });
 
+const securityBreadCrumb = {
+  href: 'securitySolutionUI/get_started',
+  text: 'Security',
+};
+
+const hostsBreadcrumbs = {
+  href: 'securitySolutionUI/hosts',
+  text: 'Hosts',
+};
+
+const networkBreadcrumb = {
+  text: 'Network',
+  href: 'securitySolutionUI/network',
+};
+
+const exploreBreadcrumbs = {
+  href: 'securitySolutionUI/explore',
+  text: 'Explore',
+};
+
+const rulesBReadcrumb = {
+  text: 'Rules',
+  href: 'securitySolutionUI/rules',
+};
+
+const manageBreadcrumbs = {
+  text: 'Manage',
+  href: 'securitySolutionUI/administration',
+};
+
 describe('Navigation Breadcrumbs', () => {
   beforeAll(async () => {
     const appLinks = await getAppLinks(coreMock.createStart(), {} as StartPlugins);
@@ -169,10 +199,7 @@ describe('Navigation Breadcrumbs', () => {
           false
         );
         expect(breadcrumbs).toEqual([
-          {
-            href: 'securitySolutionUI/get_started',
-            text: 'Security',
-          },
+          securityBreadCrumb,
           {
             href: '',
             text: 'Overview',
@@ -187,14 +214,8 @@ describe('Navigation Breadcrumbs', () => {
           false
         );
         expect(breadcrumbs).toEqual([
-          {
-            href: 'securitySolutionUI/get_started',
-            text: 'Security',
-          },
-          {
-            href: 'securitySolutionUI/hosts',
-            text: 'Hosts',
-          },
+          securityBreadCrumb,
+          hostsBreadcrumbs,
           {
             href: '',
             text: 'Authentications',
@@ -209,11 +230,8 @@ describe('Navigation Breadcrumbs', () => {
           false
         );
         expect(breadcrumbs).toEqual([
-          { text: 'Security', href: 'securitySolutionUI/get_started' },
-          {
-            text: 'Network',
-            href: 'securitySolutionUI/network',
-          },
+          securityBreadCrumb,
+          networkBreadcrumb,
           {
             text: 'Flows',
             href: '',
@@ -228,7 +246,7 @@ describe('Navigation Breadcrumbs', () => {
           false
         );
         expect(breadcrumbs).toEqual([
-          { text: 'Security', href: 'securitySolutionUI/get_started' },
+          securityBreadCrumb,
           {
             text: 'Timelines',
             href: '',
@@ -243,11 +261,8 @@ describe('Navigation Breadcrumbs', () => {
           false
         );
         expect(breadcrumbs).toEqual([
-          { text: 'Security', href: 'securitySolutionUI/get_started' },
-          {
-            text: 'Hosts',
-            href: 'securitySolutionUI/hosts',
-          },
+          securityBreadCrumb,
+          hostsBreadcrumbs,
           {
             text: 'siem-kibana',
             href: 'securitySolutionUI/hosts/siem-kibana',
@@ -263,11 +278,8 @@ describe('Navigation Breadcrumbs', () => {
           false
         );
         expect(breadcrumbs).toEqual([
-          { text: 'Security', href: 'securitySolutionUI/get_started' },
-          {
-            text: 'Network',
-            href: 'securitySolutionUI/network',
-          },
+          securityBreadCrumb,
+          networkBreadcrumb,
           {
             text: ipv4,
             href: `securitySolutionUI/network/ip/${ipv4}/source`,
@@ -283,11 +295,8 @@ describe('Navigation Breadcrumbs', () => {
           false
         );
         expect(breadcrumbs).toEqual([
-          { text: 'Security', href: 'securitySolutionUI/get_started' },
-          {
-            text: 'Network',
-            href: 'securitySolutionUI/network',
-          },
+          securityBreadCrumb,
+          networkBreadcrumb,
           {
             text: ipv6,
             href: `securitySolutionUI/network/ip/${ipv6Encoded}/source`,
@@ -303,7 +312,7 @@ describe('Navigation Breadcrumbs', () => {
           false
         );
         expect(breadcrumbs).toEqual([
-          { text: 'Security', href: 'securitySolutionUI/get_started' },
+          securityBreadCrumb,
           {
             text: 'Alerts',
             href: '',
@@ -318,7 +327,7 @@ describe('Navigation Breadcrumbs', () => {
           false
         );
         expect(breadcrumbs).toEqual([
-          { text: 'Security', href: 'securitySolutionUI/get_started' },
+          securityBreadCrumb,
           {
             text: 'Exception lists',
             href: '',
@@ -333,7 +342,7 @@ describe('Navigation Breadcrumbs', () => {
           false
         );
         expect(breadcrumbs).toEqual([
-          { text: 'Security', href: 'securitySolutionUI/get_started' },
+          securityBreadCrumb,
           {
             text: 'Rules',
             href: '',
@@ -348,11 +357,8 @@ describe('Navigation Breadcrumbs', () => {
           false
         );
         expect(breadcrumbs).toEqual([
-          { text: 'Security', href: 'securitySolutionUI/get_started' },
-          {
-            text: 'Rules',
-            href: 'securitySolutionUI/rules',
-          },
+          securityBreadCrumb,
+          rulesBReadcrumb,
           {
             text: 'Create',
             href: '',
@@ -375,11 +381,8 @@ describe('Navigation Breadcrumbs', () => {
           false
         );
         expect(breadcrumbs).toEqual([
-          { text: 'Security', href: 'securitySolutionUI/get_started' },
-          {
-            text: 'Rules',
-            href: 'securitySolutionUI/rules',
-          },
+          securityBreadCrumb,
+          rulesBReadcrumb,
           {
             text: mockRuleName,
             href: ``,
@@ -402,11 +405,8 @@ describe('Navigation Breadcrumbs', () => {
           false
         );
         expect(breadcrumbs).toEqual([
-          { text: 'Security', href: 'securitySolutionUI/get_started' },
-          {
-            text: 'Rules',
-            href: 'securitySolutionUI/rules',
-          },
+          securityBreadCrumb,
+          rulesBReadcrumb,
           {
             text: 'ALERT_RULE_NAME',
             href: `securitySolutionUI/rules/id/${mockDetailName}`,
@@ -451,7 +451,7 @@ describe('Navigation Breadcrumbs', () => {
         );
 
         expect(breadcrumbs).toEqual([
-          { text: 'Security', href: 'securitySolutionUI/get_started' },
+          securityBreadCrumb,
           {
             text: 'Endpoints',
             href: '',
@@ -504,10 +504,7 @@ describe('Navigation Breadcrumbs', () => {
           true
         );
         expect(breadcrumbs).toEqual([
-          {
-            href: 'securitySolutionUI/get_started',
-            text: 'Security',
-          },
+          securityBreadCrumb,
           {
             href: 'securitySolutionUI/dashboards',
             text: 'Dashboards',
@@ -526,18 +523,9 @@ describe('Navigation Breadcrumbs', () => {
           true
         );
         expect(breadcrumbs).toEqual([
-          {
-            href: 'securitySolutionUI/get_started',
-            text: 'Security',
-          },
-          {
-            href: 'securitySolutionUI/threat_hunting',
-            text: 'Threat Hunting',
-          },
-          {
-            href: 'securitySolutionUI/hosts',
-            text: 'Hosts',
-          },
+          securityBreadCrumb,
+          exploreBreadcrumbs,
+          hostsBreadcrumbs,
           {
             href: '',
             text: 'Authentications',
@@ -552,15 +540,9 @@ describe('Navigation Breadcrumbs', () => {
           true
         );
         expect(breadcrumbs).toEqual([
-          { text: 'Security', href: 'securitySolutionUI/get_started' },
-          {
-            href: 'securitySolutionUI/threat_hunting',
-            text: 'Threat Hunting',
-          },
-          {
-            text: 'Network',
-            href: 'securitySolutionUI/network',
-          },
+          securityBreadCrumb,
+          exploreBreadcrumbs,
+          networkBreadcrumb,
           {
             text: 'Flows',
             href: '',
@@ -575,7 +557,7 @@ describe('Navigation Breadcrumbs', () => {
           true
         );
         expect(breadcrumbs).toEqual([
-          { text: 'Security', href: 'securitySolutionUI/get_started' },
+          securityBreadCrumb,
           {
             text: 'Timelines',
             href: '',
@@ -590,15 +572,9 @@ describe('Navigation Breadcrumbs', () => {
           true
         );
         expect(breadcrumbs).toEqual([
-          { text: 'Security', href: 'securitySolutionUI/get_started' },
-          {
-            href: 'securitySolutionUI/threat_hunting',
-            text: 'Threat Hunting',
-          },
-          {
-            text: 'Hosts',
-            href: 'securitySolutionUI/hosts',
-          },
+          securityBreadCrumb,
+          exploreBreadcrumbs,
+          hostsBreadcrumbs,
           {
             text: 'siem-kibana',
             href: 'securitySolutionUI/hosts/siem-kibana',
@@ -614,15 +590,9 @@ describe('Navigation Breadcrumbs', () => {
           true
         );
         expect(breadcrumbs).toEqual([
-          { text: 'Security', href: 'securitySolutionUI/get_started' },
-          {
-            href: 'securitySolutionUI/threat_hunting',
-            text: 'Threat Hunting',
-          },
-          {
-            text: 'Network',
-            href: 'securitySolutionUI/network',
-          },
+          securityBreadCrumb,
+          exploreBreadcrumbs,
+          networkBreadcrumb,
           {
             text: ipv4,
             href: `securitySolutionUI/network/ip/${ipv4}/source`,
@@ -638,15 +608,9 @@ describe('Navigation Breadcrumbs', () => {
           true
         );
         expect(breadcrumbs).toEqual([
-          { text: 'Security', href: 'securitySolutionUI/get_started' },
-          {
-            href: 'securitySolutionUI/threat_hunting',
-            text: 'Threat Hunting',
-          },
-          {
-            text: 'Network',
-            href: 'securitySolutionUI/network',
-          },
+          securityBreadCrumb,
+          exploreBreadcrumbs,
+          networkBreadcrumb,
           {
             text: ipv6,
             href: `securitySolutionUI/network/ip/${ipv6Encoded}/source`,
@@ -662,7 +626,7 @@ describe('Navigation Breadcrumbs', () => {
           true
         );
         expect(breadcrumbs).toEqual([
-          { text: 'Security', href: 'securitySolutionUI/get_started' },
+          securityBreadCrumb,
           {
             text: 'Alerts',
             href: '',
@@ -677,11 +641,8 @@ describe('Navigation Breadcrumbs', () => {
           true
         );
         expect(breadcrumbs).toEqual([
-          { text: 'Security', href: 'securitySolutionUI/get_started' },
-          {
-            text: 'Manage',
-            href: 'securitySolutionUI/administration',
-          },
+          securityBreadCrumb,
+          manageBreadcrumbs,
           {
             text: 'Exception lists',
             href: '',
@@ -696,11 +657,8 @@ describe('Navigation Breadcrumbs', () => {
           true
         );
         expect(breadcrumbs).toEqual([
-          { text: 'Security', href: 'securitySolutionUI/get_started' },
-          {
-            text: 'Manage',
-            href: 'securitySolutionUI/administration',
-          },
+          securityBreadCrumb,
+          manageBreadcrumbs,
           {
             text: 'Rules',
             href: '',
@@ -715,15 +673,9 @@ describe('Navigation Breadcrumbs', () => {
           true
         );
         expect(breadcrumbs).toEqual([
-          { text: 'Security', href: 'securitySolutionUI/get_started' },
-          {
-            text: 'Manage',
-            href: 'securitySolutionUI/administration',
-          },
-          {
-            text: 'Rules',
-            href: 'securitySolutionUI/rules',
-          },
+          securityBreadCrumb,
+          manageBreadcrumbs,
+          rulesBReadcrumb,
           {
             text: 'Create',
             href: '',
@@ -746,15 +698,9 @@ describe('Navigation Breadcrumbs', () => {
           true
         );
         expect(breadcrumbs).toEqual([
-          { text: 'Security', href: 'securitySolutionUI/get_started' },
-          {
-            text: 'Manage',
-            href: 'securitySolutionUI/administration',
-          },
-          {
-            text: 'Rules',
-            href: 'securitySolutionUI/rules',
-          },
+          securityBreadCrumb,
+          manageBreadcrumbs,
+          rulesBReadcrumb,
           {
             text: mockRuleName,
             href: ``,
@@ -777,15 +723,9 @@ describe('Navigation Breadcrumbs', () => {
           true
         );
         expect(breadcrumbs).toEqual([
-          { text: 'Security', href: 'securitySolutionUI/get_started' },
-          {
-            text: 'Manage',
-            href: 'securitySolutionUI/administration',
-          },
-          {
-            text: 'Rules',
-            href: 'securitySolutionUI/rules',
-          },
+          securityBreadCrumb,
+          manageBreadcrumbs,
+          rulesBReadcrumb,
           {
             text: 'ALERT_RULE_NAME',
             href: `securitySolutionUI/rules/id/${mockDetailName}`,
@@ -830,11 +770,8 @@ describe('Navigation Breadcrumbs', () => {
         );
 
         expect(breadcrumbs).toEqual([
-          { text: 'Security', href: 'securitySolutionUI/get_started' },
-          {
-            text: 'Manage',
-            href: 'securitySolutionUI/administration',
-          },
+          securityBreadCrumb,
+          manageBreadcrumbs,
           {
             text: 'Endpoints',
             href: '',
@@ -858,8 +795,8 @@ describe('Navigation Breadcrumbs', () => {
             onClick: expect.any(Function),
           }),
           expect.objectContaining({
-            text: 'Threat Hunting',
-            href: `securitySolutionUI/threat_hunting`,
+            text: 'Explore',
+            href: `securitySolutionUI/explore`,
             onClick: expect.any(Function),
           }),
           expect.objectContaining({

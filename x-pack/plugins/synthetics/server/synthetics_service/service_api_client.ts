@@ -26,6 +26,7 @@ export interface ServiceData {
     api_key: string;
   };
   runOnce?: boolean;
+  isEdit?: boolean;
 }
 
 export class ServiceAPIClient {
@@ -122,7 +123,7 @@ export class ServiceAPIClient {
 
   async callAPI(
     method: 'POST' | 'PUT' | 'DELETE',
-    { monitors: allMonitors, output, runOnce }: ServiceData
+    { monitors: allMonitors, output, runOnce, isEdit }: ServiceData
   ) {
     if (this.username === TEST_SERVICE_USERNAME) {
       // we don't want to call service while local integration tests are running
@@ -138,7 +139,12 @@ export class ServiceAPIClient {
       return axios({
         method,
         url: url + (runOnce ? '/run' : '/monitors'),
-        data: { monitors: monitorsStreams, output, stack_version: this.kibanaVersion },
+        data: {
+          monitors: monitorsStreams,
+          output,
+          stack_version: this.kibanaVersion,
+          is_edit: isEdit,
+        },
         headers:
           process.env.NODE_ENV !== 'production' && this.authorization
             ? {

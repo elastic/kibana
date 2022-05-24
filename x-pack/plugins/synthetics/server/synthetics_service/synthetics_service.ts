@@ -16,6 +16,8 @@ import {
   TaskInstance,
 } from '@kbn/task-manager-plugin/server';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
+import { MonitorSyncEvent } from '../legacy_uptime/lib/telemetry/types';
+import { sendSyncTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import { installSyntheticsIndexTemplates } from '../routes/synthetics_service/install_index_templates';
 import { SyntheticsServiceApiKey } from '../../common/runtime_types/synthetics_service_api_key';
@@ -270,11 +272,18 @@ export class SyntheticsService {
     }
   }
 
-  async pushConfigs(configs?: SyntheticsConfig[]) {
-    const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
+  async pushConfigs(configs?: SyntheticsConfig[], isEdit?: boolean) {
+    const monitorConfigs = configs ?? (await this.getMonitorConfigs());
+    const monitors = this.formatConfigs(monitorConfigs);
+
     if (monitors.length === 0) {
       this.logger.debug('No monitor found which can be pushed to service.');
       return null;
+    }
+
+    if (!configs && monitorConfigs.length > 0) {
+      const telemetry = this.getSyncTelemetry(monitorConfigs);
+      sendSyncTelemetryEvents(this.logger, this.server.telemetry, telemetry);
     }
 
     this.apiKey = await this.getApiKey();
@@ -286,6 +295,7 @@ export class SyntheticsService {
     const data = {
       monitors,
       output: await this.getOutput(this.apiKey),
+      isEdit: !!isEdit,
     };
 
     this.logger.debug(`${monitors.length} monitors will be pushed to synthetics service.`);
@@ -429,6 +439,70 @@ export class SyntheticsService {
     return configs.map((config: Partial<MonitorFields>) =>
       formatMonitorConfig(Object.keys(config) as ConfigKey[], config)
     );
+  }
+
+  getSyncTelemetry(monitors: SyntheticsMonitorWithId[]): MonitorSyncEvent {
+    let totalRuns = 0;
+    let browserTestRuns = 0;
+    let httpTestRuns = 0;
+    let icmpTestRuns = 0;
+    let tcpTestRuns = 0;
+
+    const locationRuns: Record<string, number> = {};
+    const locationMonitors: Record<string, number> = {};
+
+    const testRunsInDay = (schedule: string) => {
+      return (24 * 60) / Number(schedule);
+    };
+
+    const monitorsByType: Record<string, number> = {
+      browser: 0,
+      http: 0,
+      tcp: 0,
+      icmp: 0,
+    };
+
+    monitors.forEach((monitor) => {
+      if (monitor.schedule.number) {
+        totalRuns += testRunsInDay(monitor.schedule.number);
+      }
+      switch (monitor.type) {
+        case 'browser':
+          browserTestRuns += testRunsInDay(monitor.schedule.number);
+          break;
+        case 'http':
+          httpTestRuns += testRunsInDay(monitor.schedule.number);
+          break;
+        case 'icmp':
+          icmpTestRuns += testRunsInDay(monitor.schedule.number);
+          break;
+        case 'tcp':
+          tcpTestRuns += testRunsInDay(monitor.schedule.number);
+          break;
+        default:
+          break;
+      }
+
+      monitorsByType[monitor.type] = (monitorsByType[monitor.type] ?? 0) + 1;
+
+      monitor.locations.forEach(({ id }) => {
+        locationRuns[id + 'Tests'] =
+          (locationRuns[id + 'Tests'] ?? 0) + testRunsInDay(monitor.schedule.number);
+        locationMonitors[id + 'Monitors'] = (locationMonitors[id + 'Monitors'] ?? 0) + 1;
+      });
+    });
+
+    return {
+      total: monitors.length,
+      totalTests: totalRuns,
+      browserTests24h: browserTestRuns,
+      httpTests24h: httpTestRuns,
+      icmpTests24h: icmpTestRuns,
+      tcpTests24h: tcpTestRuns,
+      ...locationRuns,
+      ...locationMonitors,
+      ...monitorsByType,
+    };
   }
 }
 
