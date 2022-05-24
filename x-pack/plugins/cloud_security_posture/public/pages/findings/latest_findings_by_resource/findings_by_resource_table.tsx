@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
 import { Link, generatePath } from 'react-router-dom';
+import { ColumnNameWithTooltip } from '../../../components/column_name_with_tooltip';
 import { extractErrorMessage } from '../../../../common/utils/helpers';
 import * as TEST_SUBJECTS from '../test_subjects';
 import * as TEXT from '../translations';
@@ -70,9 +71,14 @@ const columns: Array<EuiTableFieldDataColumnType<CspFindingsByResource>> = [
   {
     field: 'resource_id',
     name: (
-      <FormattedMessage
-        id="xpack.csp.findings.groupByResourceTable.resourceIdColumnLabel"
-        defaultMessage="Resource ID"
+      <ColumnNameWithTooltip
+        columnName={TEXT.RESOURCE_ID}
+        tooltipContent={i18n.translate(
+          'xpack.csp.findings.resourceTable.resourceTableColumn.resourceIdColumnTooltipLabel',
+          {
+            defaultMessage: 'Custom Elastic Resource ID',
+          }
+        )}
       />
     ),
     render: (resourceId: CspFindingsByResource['resource_id']) => (
