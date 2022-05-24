@@ -7,14 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiAccordion,
-  EuiCheckbox,
-  EuiCallOut,
-  EuiFormRow,
-  EuiFieldText,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiAccordion, EuiCallOut, EuiFormRow, EuiFieldText, EuiSpacer } from '@elastic/eui';
 import { ConfigKey } from '../../../../../common/runtime_types';
 import {
   useBrowserSimpleFieldsContext,
