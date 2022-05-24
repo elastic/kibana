@@ -57,7 +57,7 @@ export function useFetchLast24hAlerts({ http, features, ruleId }: UseFetchLast24
         setLast24hAlerts((oldState: FetchLast24hAlerts) => ({
           ...oldState,
           last24hAlerts: alertsCount,
-          isLoading: false,
+          isLoadingLast24hAlerts: false,
         }));
       }
     } catch (error) {
@@ -65,7 +65,7 @@ export function useFetchLast24hAlerts({ http, features, ruleId }: UseFetchLast24
         if (error.name !== 'AbortError') {
           setLast24hAlerts((oldState: FetchLast24hAlerts) => ({
             ...oldState,
-            isLoading: false,
+            isLoadingLast24hAlerts: false,
             errorLast24hAlerts: RULE_LOAD_ERROR(
               error instanceof Error ? error.message : typeof error === 'string' ? error : ''
             ),
