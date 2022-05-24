@@ -25,6 +25,12 @@ const NumberlessHorizontalSteps = styled(EuiStepsHorizontal)`
     width: calc(50% - 8px);
     top: 32px;
   }
+  .euiStepHorizontal {
+    padding: 25px 16px 16px;
+  }
+  .euiStepHorizontal-isIncomplete .euiStepHorizontal__title {
+    color: #69707d;
+  }
 `;
 const getStepStatus = (currentStep: number, stepIndex: number, currentStepComplete: boolean) => {
   if (currentStep === stepIndex) {
@@ -36,7 +42,7 @@ const getStepStatus = (currentStep: number, stepIndex: number, currentStepComple
     return 'complete';
   }
 
-  return 'disabled';
+  return 'incomplete';
 };
 
 export const PageSteps: React.FC<{
