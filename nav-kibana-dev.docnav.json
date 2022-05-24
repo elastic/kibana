@@ -182,7 +182,8 @@
             { "id": "kibDevDocsOpsOptimizer" },
             { "id": "kibDevDocsOpsBabelPreset" },
             { "id": "kibDevDocsOpsTypeSummarizer" },
-            { "id": "kibDevDocsOpsBabelPluginSyntheticPackages"}
+            { "id": "kibDevDocsOpsBabelPluginSyntheticPackages"},
+            { "id": "kibDevDocsOpsUiSharedDepsSrc"}
           ]
         },
         {
