@@ -28,7 +28,6 @@ export {
   extractTimeFilter,
   extractTimeRange,
   convertRangeFilterToTimeRange,
-  convertRangeFilterToTimeRangeString,
 } from './helpers';
 
 export {

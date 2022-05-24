@@ -99,7 +99,6 @@ export {
   extractTimeFilter,
   extractTimeRange,
   convertRangeFilterToTimeRange,
-  convertRangeFilterToTimeRangeString,
 } from './filters';
 
 export {
