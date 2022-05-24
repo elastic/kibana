@@ -7,13 +7,13 @@
 
 import { CspAppService } from '../../lib/csp_app_services';
 import { CspAppContext } from '../../plugin';
-import { defineGetInfoRoute } from './info';
+import { defineGetCspSetupStatusRoute } from './setup_status';
 import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
 import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
 
-describe('Update rules configuration API', () => {
+describe('CspSetupStatus route', () => {
   const logger: ReturnType<typeof loggingSystemMock.createLogger> =
     loggingSystemMock.createLogger();
   const mockResponse = httpServerMock.createResponseFactory();
@@ -37,14 +37,14 @@ describe('Update rules configuration API', () => {
   });
 
   it('validate the API route path', async () => {
-    defineGetInfoRoute(router, cspContext);
+    defineGetCspSetupStatusRoute(router, cspContext);
     const [config] = router.get.mock.calls[0];
 
-    expect(config.path).toEqual('/internal/cloud_security_posture/info');
+    expect(config.path).toEqual('/internal/cloud_security_posture/setup_status');
   });
 
   it('validate the API result when there are no findings in latest findings index', async () => {
-    defineGetInfoRoute(router, cspContext);
+    defineGetCspSetupStatusRoute(router, cspContext);
     mockEsClient.search.mockResponse({
       hits: {
         hits: [],
@@ -62,7 +62,7 @@ describe('Update rules configuration API', () => {
   });
 
   it('validate the API result when there are findings in latest findings index', async () => {
-    defineGetInfoRoute(router, cspContext);
+    defineGetCspSetupStatusRoute(router, cspContext);
     mockEsClient.search.mockResponse({
       hits: {
         hits: [{}],

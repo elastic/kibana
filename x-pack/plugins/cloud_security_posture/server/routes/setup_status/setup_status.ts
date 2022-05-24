@@ -10,11 +10,11 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { INFO_ROUTE_PATH, LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../common/constants';
 import { CspAppContext } from '../../plugin';
 import { CspRouter } from '../../types';
-import { Info } from '../../../common/types';
+import { CspSetupStatus } from '../../../common/types';
 
 const getLatestFindingsStatus = async (
   esClient: ElasticsearchClient
-): Promise<Info['latestFindingsIndexStatus']> => {
+): Promise<CspSetupStatus['latestFindingsIndexStatus']> => {
   try {
     const queryResult = await esClient.search({
       index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
@@ -31,7 +31,7 @@ const getLatestFindingsStatus = async (
   }
 };
 
-export const defineGetInfoRoute = (router: CspRouter, cspContext: CspAppContext): void =>
+export const defineGetCspSetupStatusRoute = (router: CspRouter, cspContext: CspAppContext): void =>
   router.get(
     {
       path: INFO_ROUTE_PATH,
@@ -42,7 +42,7 @@ export const defineGetInfoRoute = (router: CspRouter, cspContext: CspAppContext)
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
         const latestFindingsIndexStatus = await getLatestFindingsStatus(esClient);
 
-        const body: Info = {
+        const body: CspSetupStatus = {
           latestFindingsIndexStatus,
         };
 

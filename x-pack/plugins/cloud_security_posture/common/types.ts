@@ -47,7 +47,7 @@ export interface ComplianceDashboardData {
   trend: PostureTrend[];
 }
 
-export interface Info {
+export interface CspSetupStatus {
   latestFindingsIndexStatus: 'applicable' | 'inapplicable';
 }
 

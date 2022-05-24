@@ -10,7 +10,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { render, screen } from '@testing-library/react';
 import { TestProvider } from '../../test/test_provider';
 import { ComplianceDashboard } from '..';
-import { useInfoApi } from '../../common/api/use_info_api';
+import { useInfoApi } from '../../common/api/use_setup_status_api';
 import { NO_DATA_CONFIG_TEXT } from './translations';
 import { useCisKubernetesIntegration } from '../../common/api/use_cis_kubernetes_integration';
 import * as TEXT from './translations';

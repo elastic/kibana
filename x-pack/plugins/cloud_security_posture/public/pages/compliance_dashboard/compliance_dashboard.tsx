@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { EuiSpacer, EuiIcon } from '@elastic/eui';
 import { type KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
 import { UseQueryResult } from 'react-query';
@@ -16,7 +16,7 @@ import { BenchmarksSection } from './dashboard_sections/benchmarks_section';
 import { useComplianceDashboardDataApi } from '../../common/api';
 import { CspPageTemplate } from '../../components/csp_page_template';
 import { CLOUD_POSTURE, NO_DATA_CONFIG_TEXT } from './translations';
-import { useInfoApi } from '../../common/api/use_info_api';
+import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 
 const getNoDataConfig = (onClick: () => void): KibanaPageTemplateProps['noDataConfig'] => ({
   pageTitle: NO_DATA_CONFIG_TEXT.PAGE_TITLE,
@@ -35,23 +35,20 @@ const getNoDataConfig = (onClick: () => void): KibanaPageTemplateProps['noDataCo
 });
 
 export const ComplianceDashboard = () => {
-  const getInfo = useInfoApi();
+  const getInfo = useCspSetupStatusApi();
   const isFindingsIndexApplicable = getInfo.data?.latestFindingsIndexStatus === 'applicable';
   const getDashboardData = useComplianceDashboardDataApi({
     enabled: isFindingsIndexApplicable,
   });
   useCspBreadcrumbs([allNavigationItems.dashboard]);
 
-  const getPageQuery = useCallback(
-    (): UseQueryResult => (isFindingsIndexApplicable ? getDashboardData : getInfo),
-    [getDashboardData, getInfo, isFindingsIndexApplicable]
-  );
+  const pageQuery: UseQueryResult = isFindingsIndexApplicable ? getDashboardData : getInfo;
 
   return (
     <CspPageTemplate
       pageHeader={{ pageTitle: CLOUD_POSTURE }}
       restrictWidth={1600}
-      query={getPageQuery()}
+      query={pageQuery}
       noDataConfig={!isFindingsIndexApplicable ? getNoDataConfig(getInfo.refetch) : undefined}
     >
       {getDashboardData.data && (
