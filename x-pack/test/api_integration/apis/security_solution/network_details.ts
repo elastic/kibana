@@ -40,12 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         expect(body.networkDetails.source?.geo.continent_name).to.eql(['North America']);
-        expect(body.networkDetails.source?.geo.location).to.eql([
-          {
-            coordinates: [-97.822, 37.751],
-            type: 'Point',
-          },
-        ]);
+        expect(body.networkDetails.source?.geo.location?.lat!).to.eql([37.751]);
         expect(body.networkDetails.host?.os?.platform).to.eql(['raspbian']);
       });
     });

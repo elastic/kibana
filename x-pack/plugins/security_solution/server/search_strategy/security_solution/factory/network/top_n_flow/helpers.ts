@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getOr } from 'lodash/fp';
+import { getOr, isEmpty } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { assertUnreachable } from '../../../../../../common/utility_types';
@@ -23,6 +23,7 @@ import {
 import { getOppositeField } from '../helpers';
 import {
   formatResponseObjectValues,
+  transformLocationFields,
   unflattenObject,
 } from '../../../../helpers/format_response_object_values';
 
@@ -75,7 +76,7 @@ const getGeoItem = (result: NetworkTopNFlowBuckets): GeoItem | null =>
           getOr(
             '',
             `${Object.keys(result.location.top_geo.hits.hits[0].fields)[0].split('.geo')[0]}.geo`,
-            unflattenObject(getOr({}, `location.top_geo.hits.hits[0].fields`, result))
+            unflattenObject(transformLocationFields(getOr({}, `location.top_geo.hits.hits[0].fields`, result)))
           )
         ),
         flowTarget: getFlowTargetFromString(

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { mapValues, isObject, isArray } from 'lodash/fp';
+import { mapValues, isObject, isArray, isEmpty } from 'lodash/fp';
 import { set } from '@elastic/safer-lodash-set';
 
 import { toArray } from '../../../common/utils/to_array';
+import { isGeoField } from '../../../common/utils/field_formatters';
 
 export const mapObjectValuesToStringArray = (object: object): object =>
   mapValues((o) => {
@@ -36,3 +37,28 @@ export const unflattenObject = <T extends object = GenericObject>(object: object
     set(acc, key, value);
     return acc;
   }, {} as T);
+
+export const formatGeoLocation = (item: unknown[]) => {
+  const itemGeo = item.length > 0 ? (item[0] as { coordinates: number[] }) : null;
+  if (itemGeo != null && !isEmpty(itemGeo.coordinates)) {
+    try {
+      return {
+        lon: [itemGeo.coordinates[0]],
+        lat: [itemGeo.coordinates[1]],
+      };
+    } catch {
+      return item;
+    }
+  }
+  return item;
+};
+
+export const transformLocationFields = (locationFields: Record<string, unknown>) => {
+  const transformed = { ...locationFields };
+  Object.entries(transformed).forEach(([key, item]) => {
+    if (isGeoField(key)) {
+      transformed[key] = formatGeoLocation(item as unknown[]);
+    }
+  });
+  return transformed;
+};

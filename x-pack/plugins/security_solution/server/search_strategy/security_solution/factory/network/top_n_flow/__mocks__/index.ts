@@ -120,8 +120,12 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                         'source.geo.region_iso_code': ['US-VA'],
                         'source.geo.country_iso_code': ['US'],
                         'source.geo.region_name': ['Virginia'],
-                        'source.geo.location.lon': [-77.2481],
-                        'source.geo.location.lat': [38.6583],
+                        'source.geo.location': [
+                          {
+                            coordinates: [-77.2481, 38.6583],
+                            type: 'Point',
+                          },
+                        ],
                       },
                     },
                   ],
@@ -174,8 +178,12 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                         'source.geo.city_name': ['Ashburn'],
                         'source.geo.country_iso_code': ['US'],
                         'source.geo.region_name': ['Virginia'],
-                        'source.geo.location.lon': [-77.4728],
-                        'source.geo.location.lat': [39.0481],
+                        'source.geo.location': [
+                          {
+                            coordinates: [-77.4728, 39.0481],
+                            type: 'Point',
+                          },
+                        ],
                       },
                     },
                   ],
@@ -228,8 +236,12 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                         'source.geo.city_name': ['London'],
                         'source.geo.country_iso_code': ['GB'],
                         'source.geo.region_name': ['England'],
-                        'source.geo.location.lon': [-0.0961],
-                        'source.geo.location.lat': [51.5132],
+                        'source.geo.location': [
+                          {
+                            coordinates: [-0.0961, 51.5132],
+                            type: 'Point',
+                          },
+                        ],
                       },
                     },
                   ],
@@ -309,8 +321,12 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                         'source.geo.city_name': ['Ashburn'],
                         'source.geo.country_iso_code': ['US'],
                         'source.geo.region_name': ['Virginia'],
-                        'source.geo.location.lon': [-77.539],
-                        'source.geo.location.lat': [39.018],
+                        'source.geo.location': [
+                          {
+                            coordinates: [-77.539, 39.018],
+                            type: 'Point',
+                          },
+                        ],
                       },
                     },
                   ],
@@ -362,8 +378,12 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                         'source.geo.region_iso_code': ['US-VA'],
                         'source.geo.country_iso_code': ['US'],
                         'source.geo.region_name': ['Virginia'],
-                        'source.geo.location.lon': [-77.2481],
-                        'source.geo.location.lat': [38.6583],
+                        'source.geo.location': [
+                          {
+                            coordinates: [-77.2481, 38.6583],
+                            type: 'Point',
+                          },
+                        ],
                       },
                     },
                   ],
@@ -413,8 +433,12 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       fields: {
                         'source.geo.continent_name': ['North America'],
                         'source.geo.country_iso_code': ['US'],
-                        'source.geo.location.lon': [-97.822],
-                        'source.geo.location.lat': [37.751],
+                        'source.geo.location': [
+                          {
+                            coordinates: [-97.822, 37.751],
+                            type: 'Point',
+                          },
+                        ],
                       },
                     },
                   ],
@@ -467,8 +491,12 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                         'source.geo.city_name': ['Boston'],
                         'source.geo.country_iso_code': ['US'],
                         'source.geo.region_name': ['Massachusetts'],
-                        'source.geo.location.lon': [-71.0631],
-                        'source.geo.location.lat': [42.3562],
+                        'source.geo.location': [
+                          {
+                            coordinates: [-71.0631, 42.3562],
+                            type: 'Point',
+                          },
+                        ],
                       },
                     },
                   ],
@@ -518,8 +546,12 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       fields: {
                         'source.geo.continent_name': ['North America'],
                         'source.geo.country_iso_code': ['US'],
-                        'source.geo.location.lon': [-97.822],
-                        'source.geo.location.lat': [37.751],
+                        'source.geo.location': [
+                          {
+                            coordinates: [-97.822, 37.751],
+                            type: 'Point',
+                          },
+                        ],
                       },
                     },
                   ],

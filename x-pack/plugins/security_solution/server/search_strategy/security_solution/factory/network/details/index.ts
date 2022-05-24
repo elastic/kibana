@@ -33,18 +33,21 @@ export const networkDetails: SecuritySolutionFactory<NetworkQueries.details> = {
     };
 
     const hostDetailsHit = getOr({}, 'aggregations.host', response.rawResponse);
-    const hostFields = unflattenObject(getOr(null, `results.hits.hits[0].fields`, hostDetailsHit));
+    const hostFields = unflattenObject(
+      getOr(null, `results.hits.hits[0].fields`, { ...hostDetailsHit })
+    );
 
     return {
       ...response,
       inspect,
       networkDetails: {
-        ...getNetworkDetailsAgg('source', getOr({}, 'aggregations.source', response.rawResponse)),
-        ...getNetworkDetailsAgg(
-          'destination',
-          getOr({}, 'aggregations.destination', response.rawResponse)
-        ),
         ...hostFields,
+        ...getNetworkDetailsAgg('source', {
+          ...getOr({}, 'aggregations.source', response.rawResponse),
+        }),
+        ...getNetworkDetailsAgg('destination', {
+          ...getOr({}, 'aggregations.destination', response.rawResponse),
+        }),
       },
     };
   },

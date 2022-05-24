@@ -6,7 +6,7 @@
  */
 
 import { getOr } from 'lodash/fp';
-import { unflattenObject } from '../../../../helpers/format_response_object_values';
+import { unflattenObject, transformLocationFields } from '../../../../helpers/format_response_object_values';
 import { GeoEcs } from '../../../../../../common/ecs/geo';
 import {
   AutonomousSystem,
@@ -26,7 +26,7 @@ export const getNetworkDetailsAgg = (type: string, networkHit: NetworkHit | {}) 
   const geoFields: GeoEcs | null = getOr(
     null,
     `${type}.geo`,
-    unflattenObject(getOr({}, 'geo.results.hits.hits[0].fields', networkHit))
+    unflattenObject(transformLocationFields(getOr({}, 'geo.results.hits.hits[0].fields', networkHit)))
   );
 
   return {

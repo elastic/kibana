@@ -96,7 +96,12 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                     'destination.geo.region_iso_code': ['US-VA'],
                     'destination.geo.country_iso_code': ['US'],
                     'destination.geo.region_name': ['Virginia'],
-                    'destination.geo.location': ['{ lon: -77.2481, lat: 38.6583 }'],
+                    'destination.geo.location': [
+                      {
+                        coordinates: [-77.2481, 38.6583],
+                        type: 'Point',
+                      },
+                    ],
                   },
                   sort: [1599703212208],
                 },
@@ -149,7 +154,12 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                     'source.geo.region_iso_code': ['US-VA'],
                     'source.geo.country_iso_code': ['US'],
                     'source.geo.region_name': ['Virginia'],
-                    'source.geo.location': ['{ lon: -77.2481, lat: 38.6583 }'],
+                    'source.geo.location': [
+                      {
+                        coordinates: [-77.2481, 38.6583],
+                        type: 'Point',
+                      },
+                    ],
                   },
                   sort: [1599703214494],
                 },
@@ -311,7 +321,7 @@ export const formattedSearchStrategyResponse = {
         region_iso_code: ['US-VA'],
         country_iso_code: ['US'],
         region_name: ['Virginia'],
-        location: ['{ lon: -77.2481, lat: 38.6583 }'],
+        location: { lon: [-77.2481], lat: [38.6583] },
       },
     },
     destination: {
@@ -323,7 +333,7 @@ export const formattedSearchStrategyResponse = {
         region_iso_code: ['US-VA'],
         country_iso_code: ['US'],
         region_name: ['Virginia'],
-        location: ['{ lon: -77.2481, lat: 38.6583 }'],
+        location: { lon: [-77.2481], lat: [38.6583] },
       },
     },
     host: {
