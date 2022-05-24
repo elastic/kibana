@@ -18,7 +18,7 @@ import {
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../types';
 
-import { getNetworkDetailsAgg, getNetworkDetailsHostAgg } from './helpers';
+import { getNetworkDetailsAgg, unflattenObject } from './helpers';
 import { buildNetworkDetailsQuery } from './query.details_network.dsl';
 
 export const networkDetails: SecuritySolutionFactory<NetworkQueries.details> = {
@@ -31,6 +31,9 @@ export const networkDetails: SecuritySolutionFactory<NetworkQueries.details> = {
       dsl: [inspectStringifyObject(buildNetworkDetailsQuery(options))],
     };
 
+    const hostDetailsHit = getOr({}, 'aggregations.host', response.rawResponse);
+    const hostFields = unflattenObject(getOr(null, `results.hits.hits[0].fields`, hostDetailsHit));
+
     return {
       ...response,
       inspect,
@@ -40,7 +43,7 @@ export const networkDetails: SecuritySolutionFactory<NetworkQueries.details> = {
           'destination',
           getOr({}, 'aggregations.destination', response.rawResponse)
         ),
-        ...getNetworkDetailsHostAgg(getOr({}, 'aggregations.host', response.rawResponse)),
+        ...hostFields,
       },
     };
   },
