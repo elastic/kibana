@@ -9,12 +9,11 @@ import { WatcherPutWatchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { benchmarkScoreWatcher } from './benchmark_score_watcher';
 
-// TODO: Move transforms to integration package
 export const initializeCspWatcher = async (
   esClient: ElasticsearchClient,
   logger: Logger
 ): Promise<void> => {
-  await Promise.all([initializeWatcher(esClient, benchmarkScoreWatcher, logger)]);
+  await initializeWatcher(esClient, benchmarkScoreWatcher, logger);
 };
 
 export const initializeWatcher = async (
@@ -30,11 +29,11 @@ export const initializeWatcher = async (
 };
 
 /**
- * Checks if a transform exists, And if not creates it
+ * Checks if a watcher exists, And if not creates it
  *
- * @param transform - the transform to create. If a transform with the same transform_id already exists, nothing is created or updated.
+ * @param watcher - the watcher to create. If a watcher with the same watcher already exists, nothing is created or updated.
  *
- * @return true if the transform exits or created, false otherwise.
+ * @return true if the watcher exits or created, false otherwise.
  */
 export const createWatcherIfNotExists = async (
   esClient: ElasticsearchClient,
@@ -51,6 +50,7 @@ export const createWatcherIfNotExists = async (
     if (existError.statusCode === 404) {
       try {
         await esClient.watcher.putWatch(watcher);
+        logger.info(`Watcher ${watcher.id} were created`);
         return true;
       } catch (createErr) {
         const createError = transformError(createErr);
@@ -101,7 +101,7 @@ export const stopWatcher = async (esClient: ElasticsearchClient, logger: Logger)
       logger.debug(`Watcher: ${benchmarkScoreWatcher.id} deactivated successfully`);
     } catch (startErr) {
       const startError = transformError(startErr);
-      logger.error(`Failed starting transform ${benchmarkScoreWatcher.id}: ${startError.message}`);
+      logger.error(`Failed deactivate watcher ${benchmarkScoreWatcher.id}: ${startError.message}`);
     }
   } catch (statsErr) {
     const statsError = transformError(statsErr);

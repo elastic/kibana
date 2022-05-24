@@ -27,9 +27,9 @@ import type {
 import { defineRoutes } from './routes';
 import { cspRuleTemplateAssetType } from './saved_objects/csp_rule_template';
 import { cspRuleAssetType } from './saved_objects/csp_rule_type';
-import { initializeCspTransformsIndices } from './create_indices/create_transforms_indices';
+import { initializeCspTransformsIndices } from './create_indices/create_indices';
 import { initializeCspTransforms } from './create_transforms/create_transforms';
-import { initializeCspWatcher, stopWatcher } from './create_transforms/create_watcher';
+import { initializeCspWatcher, stopWatcher } from './create_watcher/create_watcher';
 import {
   onPackagePolicyPostCreateCallback,
   onPackagePolicyDeleteCallback,

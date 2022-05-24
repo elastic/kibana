@@ -73,8 +73,6 @@ const createBenchmarkScoreIndex = async (
       createScoreIndexSettings,
       logger
     );
-  } else {
-    logger.error(`Index ${indexPattern} not created`);
   }
 };
 
@@ -106,7 +104,7 @@ export const createIndexIfNotExists = async (
     }
   } catch (err) {
     const error = transformError(err);
-    logger.error(`Failed to create the index template: ${indexTemplateName}`);
+    logger.error(`Failed to create the index: ${indexTemplateName}`);
     logger.error(error.message);
   }
 };

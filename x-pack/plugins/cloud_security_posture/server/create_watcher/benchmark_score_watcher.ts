@@ -6,13 +6,17 @@
  */
 
 import type { WatcherPutWatchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { BENCHMARK_SCORE_INDEX_DEFAULT_NS } from '../../common/constants';
+import {
+  BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+  LATEST_FINDINGS_INDEX_DEFAULT_NS,
+} from '../../common/constants';
 
 export const benchmarkScoreWatcher: WatcherPutWatchRequest = {
-  id: 'cloud_security_posture.score-default',
+  id: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  transform: { search: { request: {}, timeout: {} } },
   trigger: {
     schedule: {
-      interval: '1m',
+      interval: '5m',
     },
   },
   input: {

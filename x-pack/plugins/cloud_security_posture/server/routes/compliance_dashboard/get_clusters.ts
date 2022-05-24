@@ -55,7 +55,7 @@ export const getClustersQuery = (query: QueryDslQueryContainer, pitId: string): 
         },
         timestamps: {
           terms: {
-            field: 'event.ingested',
+            field: '@timestamp',
             size: 1,
             order: {
               _key: 'desc',

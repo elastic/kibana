@@ -7,7 +7,7 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 /**
- * Checks if a transform exists, And if not creates it
+ * Checks if a pipeline exists, And if not creates it
  *
  * @param pipelineId - the pipeline id to create. If a pipeline with the same pipelineId already exists, nothing is created or updated.
  *
@@ -24,11 +24,11 @@ export const createPipelineIfNotExists = async (
       try {
         await esClient.ingest.putPipeline({
           id: pipelineId,
-          description: 'Pipeline for adding event timestamp to score transform',
+          description: 'Pipeline for adding event timestamp to score index',
           processors: [
             {
               set: {
-                field: 'event.ingested',
+                field: '@timestamp',
                 value: '{{_ingest.timestamp}}',
               },
             },
@@ -42,7 +42,6 @@ export const createPipelineIfNotExists = async (
             },
           ],
         });
-        esClient.index;
         return true;
       } catch (existError) {
         logger.error(`Failed to create CSP pipeline ${pipelineId}. error: ${existError.message}`);
