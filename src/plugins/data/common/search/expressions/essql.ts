@@ -16,10 +16,11 @@ import {
   DatatableColumnType,
   ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 
 import { zipObject } from 'lodash';
 import { Observable, defer, throwError } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { NowProviderPublicContract } from '../../../public';
 import { getEsQueryConfig } from '../../es_query';
@@ -130,7 +131,11 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
         }),
       },
     },
-    fn(input, { count, parameter, query, timeField, timezone }, { abortSignal, getKibanaRequest }) {
+    fn(
+      input,
+      { count, parameter, query, timeField, timezone },
+      { abortSignal, inspectorAdapters, getKibanaRequest }
+    ) {
       return defer(() =>
         getStartDependencies(() => {
           const request = getKibanaRequest?.();
@@ -172,9 +177,82 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
             );
           }
 
+          let startTime = Date.now();
+          const logInspectorRequest = () => {
+            if (!inspectorAdapters.requests) {
+              inspectorAdapters.requests = new RequestAdapter();
+            }
+
+            const request = inspectorAdapters.requests.start(
+              i18n.translate('data.search.dataRequest.title', {
+                defaultMessage: 'Data',
+              }),
+              {
+                description: i18n.translate('data.search.es_search.dataRequest.description', {
+                  defaultMessage:
+                    'This request queries Elasticsearch to fetch the data for the visualization.',
+                }),
+              },
+              startTime
+            );
+            startTime = Date.now();
+
+            return request;
+          };
+
           return search<SqlSearchStrategyRequest, SqlSearchStrategyResponse>(
             { params },
             { abortSignal, strategy: SQL_SEARCH_STRATEGY }
+          ).pipe(
+            catchError((error) => {
+              if (!error.err) {
+                error.message = `Unexpected error from Elasticsearch: ${error.message}`;
+              } else {
+                const { type, reason } = error.err.attributes;
+                if (type === 'parsing_exception') {
+                  error.message = `Couldn't parse Elasticsearch SQL query. You may need to add double quotes to names containing special characters. Check your query and try again. Error: ${reason}`;
+                } else {
+                  error.message = `Unexpected error from Elasticsearch: ${type} - ${reason}`;
+                }
+              }
+
+              return throwError(() => error);
+            }),
+            tap({
+              next({ rawResponse, took }) {
+                logInspectorRequest()
+                  .stats({
+                    hits: {
+                      label: i18n.translate('data.search.es_search.hitsLabel', {
+                        defaultMessage: 'Hits',
+                      }),
+                      value: `${rawResponse.rows.length}`,
+                      description: i18n.translate('data.search.es_search.hitsDescription', {
+                        defaultMessage: 'The number of documents returned by the query.',
+                      }),
+                    },
+                    queryTime: {
+                      label: i18n.translate('data.search.es_search.queryTimeLabel', {
+                        defaultMessage: 'Query time',
+                      }),
+                      value: i18n.translate('data.search.es_search.queryTimeValue', {
+                        defaultMessage: '{queryTime}ms',
+                        values: { queryTime: took },
+                      }),
+                      description: i18n.translate('data.search.es_search.queryTimeDescription', {
+                        defaultMessage:
+                          'The time it took to process the query. ' +
+                          'Does not include the time to send the request or parse it in the browser.',
+                      }),
+                    },
+                  })
+                  .json(params)
+                  .ok({ json: rawResponse });
+              },
+              error(error) {
+                logInspectorRequest().error({ json: error });
+              },
+            })
           );
         }),
         map(({ rawResponse: body }) => {
@@ -195,20 +273,6 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
             columns,
             rows,
           } as Datatable;
-        }),
-        catchError((error) => {
-          if (!error.err) {
-            error.message = `Unexpected error from Elasticsearch: ${error.message}`;
-          } else {
-            const { type, reason } = error.err.attributes;
-            if (type === 'parsing_exception') {
-              error.message = `Couldn't parse Elasticsearch SQL query. You may need to add double quotes to names containing special characters. Check your query and try again. Error: ${reason}`;
-            } else {
-              error.message = `Unexpected error from Elasticsearch: ${type} - ${reason}`;
-            }
-          }
-
-          return throwError(() => error);
         })
       );
     },
