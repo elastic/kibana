@@ -154,7 +154,7 @@ export class ConsolePageObject extends FtrService {
 
   public async selectAllRequests() {
     const textArea = await this.getEditorTextArea();
-    await textArea.pressKeys([Key.COMMAND, 'A']);
+    await textArea.pressKeys([Key.CONTROL, Key.COMMAND, 'A']);
   }
 
   public async hasSuccessBadge(): Promise<boolean> {
