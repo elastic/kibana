@@ -54,7 +54,9 @@ const LatestFindingsByResource = ({ dataView }: { dataView: DataView }) => {
     <div data-test-subj={TEST_SUBJECTS.FINDINGS_CONTAINER}>
       <FindingsSearchBar
         dataView={dataView}
-        setQuery={setUrlQuery}
+        setQuery={(query) => {
+          setUrlQuery({ ...query, pageIndex: 0 });
+        }}
         query={urlQuery.query}
         filters={urlQuery.filters}
         loading={findingsGroupByResource.isLoading}
