@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+source .buildkite/scripts/steps/code_coverage/util.sh
+
 export JOB=$BUILDKITE_PARALLEL_JOB
 
 # a jest failure will result in the script returning an exit code of 10
