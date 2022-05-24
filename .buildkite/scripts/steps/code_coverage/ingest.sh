@@ -43,7 +43,8 @@ echo "--- collect VCS Info"
 echo "--- Jest: merging coverage files and generating the final combined report"
 #dirListing "target/dir-listing-jest-just-before-final-replace.txt" target/kibana-coverage/jest
 echo "--- Final replace for jest"
-replacePaths target/kibana-coverage/jest
+sed -ie "s|CC_REPLACEMENT_ANCHOR|${KIBANA_DIR}|g" target/kibana-coverage/jest/*.json
+
 #dirListing "target/dir-listing-jest-after-final-replace.txt" target/kibana-coverage/jest
 yarn nyc report --nycrc-path src/dev/code_coverage/nyc_config/nyc.jest.config.js
 
