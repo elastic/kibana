@@ -248,11 +248,7 @@ describe('When using ConsoleManager', () => {
       const mockedContext = createAppRootMockRenderer();
 
       render = async () => {
-        renderResult = mockedContext.render(
-          <ConsoleManager>
-            <ConsoleManagerTestComponent />
-          </ConsoleManager>
-        );
+        renderResult = mockedContext.render(<ConsoleManagerTestComponent />);
 
         clickOnRegisterNewConsole();
 

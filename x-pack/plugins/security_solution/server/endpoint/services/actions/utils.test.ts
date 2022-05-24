@@ -87,11 +87,13 @@ describe('When using Actions service utilities', () => {
     });
   });
 
-  describe('#getAction CompletionInfo()', () => {
+  describe('#getActionCompletionInfo()', () => {
     const COMPLETED_AT = '2022-05-05T18:53:18.836Z';
     const NOT_COMPLETED_OUTPUT = Object.freeze({
       isCompleted: false,
-      completed: undefined,
+      completedAt: undefined,
+      wasSuccessful: false,
+      errors: undefined,
     });
 
     it('should show complete `false` if no action ids', () => {
@@ -131,7 +133,70 @@ describe('When using Actions service utilities', () => {
             }),
           ]
         )
-      ).toEqual({ isCompleted: true, completedAt: COMPLETED_AT });
+      ).toEqual({
+        isCompleted: true,
+        completedAt: COMPLETED_AT,
+        errors: undefined,
+        wasSuccessful: true,
+      });
+    });
+
+    describe('and action failed', () => {
+      let fleetResponseAtError: ActivityLogActionResponse;
+      let endpointResponseAtError: EndpointActivityLogActionResponse;
+
+      beforeEach(() => {
+        fleetResponseAtError = fleetActionGenerator.generateActivityLogActionResponse({
+          item: { data: { agent_id: '123', error: 'agent failed to deliver' } },
+        });
+
+        endpointResponseAtError = endpointActionGenerator.generateActivityLogActionResponse({
+          item: {
+            data: {
+              '@timestamp': '2022-05-18T13:03:54.756Z',
+              agent: { id: '123' },
+              error: {
+                message: 'endpoint failed to apply',
+              },
+              EndpointActions: {
+                completed_at: '2022-05-18T13:03:54.756Z',
+              },
+            },
+          },
+        });
+      });
+
+      it('should show `wasSuccessful` as `false` if endpoint action response has error', () => {
+        expect(getActionCompletionInfo(['123'], [endpointResponseAtError])).toEqual({
+          completedAt: endpointResponseAtError.item.data['@timestamp'],
+          errors: ['Endpoint action response error: endpoint failed to apply'],
+          isCompleted: true,
+          wasSuccessful: false,
+        });
+      });
+
+      it('should show `wasSuccessful` as `false` if fleet action response has error (no endpoint response)', () => {
+        expect(getActionCompletionInfo(['123'], [fleetResponseAtError])).toEqual({
+          completedAt: fleetResponseAtError.item.data.completed_at,
+          errors: ['Fleet action response error: agent failed to deliver'],
+          isCompleted: true,
+          wasSuccessful: false,
+        });
+      });
+
+      it('should include both fleet and endpoint errors if both responses returned failure', () => {
+        expect(
+          getActionCompletionInfo(['123'], [fleetResponseAtError, endpointResponseAtError])
+        ).toEqual({
+          completedAt: endpointResponseAtError.item.data['@timestamp'],
+          errors: [
+            'Endpoint action response error: endpoint failed to apply',
+            'Fleet action response error: agent failed to deliver',
+          ],
+          isCompleted: true,
+          wasSuccessful: false,
+        });
+      });
     });
 
     describe('with multiple agent ids', () => {
@@ -212,7 +277,12 @@ describe('When using Actions service utilities', () => {
             ...action456Responses,
             ...action789Responses,
           ])
-        ).toEqual({ isCompleted: true, completedAt: COMPLETED_AT });
+        ).toEqual({
+          isCompleted: true,
+          completedAt: COMPLETED_AT,
+          wasSuccessful: true,
+          errors: undefined,
+        });
       });
 
       it('should complete as `true` if one agent only received a fleet response with error on it', () => {
@@ -228,7 +298,12 @@ describe('When using Actions service utilities', () => {
 
             ...action789Responses,
           ])
-        ).toEqual({ isCompleted: true, completedAt: '2022-05-06T12:50:19.747Z' });
+        ).toEqual({
+          completedAt: '2022-05-06T12:50:19.747Z',
+          errors: ['Fleet action response error: something is no good'],
+          isCompleted: true,
+          wasSuccessful: false,
+        });
       });
     });
   });

@@ -9,7 +9,6 @@ import React from 'react';
 import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../../../../common/mock';
-import { mockHistory } from '../../../../../../common/utils/route/index.test';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 import { useUserData } from '../../../../../components/user_info';
 
@@ -17,6 +16,7 @@ import { ExceptionListsTable } from './exceptions_table';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import { useAllExceptionLists } from './use_all_exception_lists';
 import { useHistory } from 'react-router-dom';
+import { generateHistoryMock } from '../../../../../../common/utils/route/mocks';
 
 jest.mock('../../../../../components/user_info');
 jest.mock('../../../../../../common/lib/kibana');
@@ -44,6 +44,7 @@ jest.mock('../../../../../containers/detection_engine/lists/use_lists_config', (
 }));
 
 describe('ExceptionListsTable', () => {
+  const mockHistory = generateHistoryMock();
   const exceptionList1 = getExceptionListSchemaMock();
   const exceptionList2 = { ...getExceptionListSchemaMock(), list_id: 'not_endpoint_list', id: '2' };
 

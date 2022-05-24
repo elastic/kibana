@@ -44,6 +44,8 @@ describe('When using `getActionDetailsById()', () => {
       agents: ['agent-a'],
       command: 'isolate',
       completedAt: '2022-04-30T16:08:47.449Z',
+      wasSuccessful: true,
+      error: undefined,
       id: '123',
       isCompleted: true,
       isExpired: false,
