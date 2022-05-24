@@ -8,7 +8,7 @@
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { DiscoverAppLocatorParams, SearchInput } from '@kbn/discover-plugin/public';
 import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
-import { extractTimeRange } from '@kbn/data-plugin/public';
+import { extractTimeRange } from '@kbn/es-query';
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { KibanaLocation } from '@kbn/share-plugin/public';
 import * as shared from './shared';

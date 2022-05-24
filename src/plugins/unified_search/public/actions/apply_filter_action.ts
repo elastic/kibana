@@ -12,8 +12,8 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { Action, createAction, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 // for cleanup esFilters need to fix the issue https://github.com/elastic/kibana/issues/131292
 import { FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
-import type { Filter } from '@kbn/es-query';
-import { extractTimeFilter, changeTimeFilter } from '@kbn/es-query';
+import type { Filter, RangeFilter } from '@kbn/es-query';
+import { extractTimeFilter, convertRangeFilterToTimeRange } from '@kbn/es-query';
 import { getOverlays, getIndexPatterns } from '../services';
 import { applyFiltersPopover } from '../apply_filters';
 
@@ -117,4 +117,8 @@ export function createFilterAction(
       }
     },
   });
+}
+
+function changeTimeFilter(timeFilter: TimefilterContract, filter: RangeFilter) {
+  timeFilter.setTime(convertRangeFilterToTimeRange(filter));
 }

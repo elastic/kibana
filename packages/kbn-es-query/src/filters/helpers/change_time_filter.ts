@@ -9,7 +9,6 @@
 import moment from 'moment';
 import { keys } from 'lodash';
 import type { RangeFilter } from '../build_filters';
-import type { TimefilterContract } from '..';
 import type { TimeRange } from './types';
 
 export function convertRangeFilterToTimeRange(filter: RangeFilter) {
@@ -28,8 +27,4 @@ export function convertRangeFilterToTimeRangeString(filter: RangeFilter): TimeRa
     from: from?.toISOString(),
     to: to?.toISOString(),
   };
-}
-
-export function changeTimeFilter(timeFilter: TimefilterContract, filter: RangeFilter) {
-  timeFilter.setTime(convertRangeFilterToTimeRange(filter));
 }
