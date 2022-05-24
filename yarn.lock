@@ -2892,6 +2892,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/aiops-utils@link:bazel-bin/packages/kbn-aiops-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/alerts@link:bazel-bin/packages/kbn-alerts":
   version "0.0.0"
   uid ""
@@ -6143,6 +6147,10 @@
     "@types/node" "*"
 
 "@types/kbn__ace@link:bazel-bin/packages/kbn-ace/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__aiops-utils@link:bazel-bin/packages/kbn-aiops-utils/npm_module_types":
   version "0.0.0"
   uid ""
 

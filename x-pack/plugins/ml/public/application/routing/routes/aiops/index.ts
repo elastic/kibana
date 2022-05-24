@@ -6,4 +6,3 @@
  */
 
 export * from './explain_log_rate_spikes';
-export * from './single_endpoint_streaming_demo';

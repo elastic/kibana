@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { defineExampleStreamRoute } from './example_stream';
 export { defineExplainLogRateSpikesRoute } from './explain_log_rate_spikes';

@@ -16,7 +16,7 @@ import {
   AiopsPluginSetupDeps,
   AiopsPluginStartDeps,
 } from './types';
-import { defineExampleStreamRoute, defineExplainLogRateSpikesRoute } from './routes';
+import { defineExplainLogRateSpikesRoute } from './routes';
 
 export class AiopsPlugin
   implements Plugin<AiopsPluginSetup, AiopsPluginStart, AiopsPluginSetupDeps, AiopsPluginStartDeps>
@@ -34,7 +34,6 @@ export class AiopsPlugin
     // Register server side APIs
     if (AIOPS_ENABLED) {
       core.getStartServices().then(([_, depsStart]) => {
-        defineExampleStreamRoute(router, this.logger);
         defineExplainLogRateSpikesRoute(router, this.logger);
       });
     }
