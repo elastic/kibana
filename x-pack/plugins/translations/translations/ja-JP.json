@@ -7574,7 +7574,6 @@
     "xpack.apm.home.infraTabLabel": "インフラストラクチャー",
     "xpack.apm.home.serviceLogsTabLabel": "ログ",
     "xpack.apm.home.serviceMapTabLabel": "サービスマップ",
-    "xpack.apm.infra.announcement": "インフラストラクチャデータは近日公開予定です",
     "xpack.apm.inspectButtonText": "検査",
     "xpack.apm.instancesLatencyDistributionChartLegend": "インスタンス",
     "xpack.apm.instancesLatencyDistributionChartLegend.previousPeriod": "前の期間",
