@@ -72,7 +72,7 @@ export const getFindingsColumns = (): Array<EuiBasicTableColumn<CspFinding>> => 
       <ColumnNameWithTooltip
         columnName={TEXT.RESOURCE_ID}
         tooltipContent={i18n.translate(
-          'xpack.csp.findings.findingsTable.findingsTableColumn.findingsIdColumnTooltipLabel',
+          'xpack.csp.findings.findingsTable.findingsTableColumn.resourceIdColumnTooltipLabel',
           {
             defaultMessage: 'Custom Elastic Resource ID',
           }
