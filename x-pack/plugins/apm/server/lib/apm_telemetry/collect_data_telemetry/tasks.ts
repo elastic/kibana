@@ -4,12 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { fromKueryExpression } from '@kbn/es-query';
 import { flatten, merge, sortBy, sum, pickBy } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { TelemetryTask } from '.';
 import { AGENT_NAMES, RUM_AGENT_NAMES } from '../../../../common/agent_name';
+import {
+  SavedServiceGroup,
+  APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
+} from '../../../../common/service_groups';
+import { getKueryFields } from '../../helpers/get_kuery_fields';
 import {
   AGENT_NAME,
   AGENT_VERSION,
@@ -44,7 +50,6 @@ import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { Span } from '../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { APMTelemetry } from '../types';
-
 const TIME_RANGES = ['1d', 'all'] as const;
 type TimeRange = typeof TIME_RANGES[number];
 
@@ -1117,6 +1122,30 @@ export const tasks: TelemetryTask[] = [
               },
             },
           },
+        },
+      };
+    },
+  },
+  {
+    name: 'service_groups',
+    executor: async ({ savedObjectsClient }) => {
+      const response = await savedObjectsClient.find<SavedServiceGroup>({
+        type: APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
+        page: 1,
+        perPage: 50,
+        sortField: 'updated_at',
+        sortOrder: 'desc',
+      });
+
+      const kueryNodes = response.saved_objects.map(
+        ({ attributes: { kuery } }) => fromKueryExpression(kuery)
+      );
+
+      const kueryFields = getKueryFields(kueryNodes);
+
+      return {
+        service_groups: {
+          kuery_fields: kueryFields,
         },
       };
     },

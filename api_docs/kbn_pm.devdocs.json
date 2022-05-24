@@ -271,50 +271,6 @@
           },
           {
             "parentPluginId": "@kbn/pm",
-            "id": "def-server.Project.ensureValidProjectDependency",
-            "type": "Function",
-            "tags": [],
-            "label": "ensureValidProjectDependency",
-            "description": [],
-            "signature": [
-              "(project: ",
-              {
-                "pluginId": "@kbn/pm",
-                "scope": "server",
-                "docId": "kibKbnPmPluginApi",
-                "section": "def-server.Project",
-                "text": "Project"
-              },
-              ") => void"
-            ],
-            "path": "packages/kbn-pm/src/utils/project.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/pm",
-                "id": "def-server.Project.ensureValidProjectDependency.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "project",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/pm",
-                    "scope": "server",
-                    "docId": "kibKbnPmPluginApi",
-                    "section": "def-server.Project",
-                    "text": "Project"
-                  }
-                ],
-                "path": "packages/kbn-pm/src/utils/project.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/pm",
             "id": "def-server.Project.getBuildConfig",
             "type": "Function",
             "tags": [],

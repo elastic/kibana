@@ -39,17 +39,22 @@ import {
   areTimeRangesEqual,
   areRefreshIntervalsEqual,
 } from '../lib';
+import { isDashboardAppInNoDataState } from '../dashboard_app_no_data';
 
 export interface UseDashboardStateProps {
   history: History;
+  showNoDataPage: boolean;
   savedDashboardId?: string;
   isEmbeddedExternally: boolean;
+  setShowNoDataPage: (showNoData: boolean) => void;
   kbnUrlStateStorage: IKbnUrlStateStorage;
 }
 
 export const useDashboardAppState = ({
   history,
   savedDashboardId,
+  showNoDataPage,
+  setShowNoDataPage,
   kbnUrlStateStorage,
   isEmbeddedExternally,
 }: UseDashboardStateProps) => {
@@ -138,6 +143,21 @@ export const useDashboardAppState = ({
     };
 
     (async () => {
+      /**
+       * Ensure default data view exists and there is data in elasticsearch
+       */
+      const isEmpty = await isDashboardAppInNoDataState(dataViews);
+      if (showNoDataPage || isEmpty) {
+        setShowNoDataPage(true);
+        return;
+      }
+
+      const defaultDataView = await dataViews.getDefaultDataView();
+
+      if (!defaultDataView) {
+        return;
+      }
+
       /**
        * Load and unpack state from dashboard saved object.
        */
@@ -375,6 +395,8 @@ export const useDashboardAppState = ({
     search,
     query,
     data,
+    showNoDataPage,
+    setShowNoDataPage,
     spacesService?.ui,
     screenshotModeService,
   ]);
