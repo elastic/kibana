@@ -45,7 +45,7 @@ while read -r config; do
   if [[ -f "target/kibana-coverage/jest/coverage-final.json" ]]; then
     echo "--- Rename Jest coverage-final.json to avoid overwrite && Clean Jest Coverage Paths"
     penulitimate=target/kibana-coverage/jest/coverage-final.json
-    node .buildkite/scripts/steps/code_coverage/clean_coverage_paths.js $penulitimate
+#    node .buildkite/scripts/steps/code_coverage/clean_coverage_paths.js $penulitimate
     mv $penulitimate "./target/kibana-coverage/jest/coverage-$(date +%s%3N).json"
   else
     echo "Cannot find coverage-final.json"
@@ -70,6 +70,16 @@ while read -r config; do
   fi
 done <<<"$configs"
 
+echo "--- Replace paths after all configs:"
+fileHeads "target/file-heads-jest-post-thread-and-before-replacement.txt" target/kibana-coverage/jest
+replacePaths "$KIBANA_DIR/target/kibana-coverage/jest"
+fileHeads "target/file-heads-jest-post-thread-and-after-replacement.txt" target/kibana-coverage/jest
+collectAndUpload target/jest-after-replace.tar.gz target/kibana-coverage/jest
+
+
 echo "--- Jest configs complete"
 printf "%s\n" "${results[@]}"
 echo ""
+
+# Force exit 0 to ensure the next build step starts.
+exit 0

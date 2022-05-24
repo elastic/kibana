@@ -27,12 +27,7 @@ echo "--- Upload new git sha"
 
 echo "--- Download coverage arctifacts"
 buildkite-agent artifact download target/kibana-coverage/jest/* .
-
-#dirListing "target/dir-listing-jest.txt" target/kibana-coverage/jest
-
 buildkite-agent artifact download target/kibana-coverage/functional/* .
-#dirListing "target/dir-listing-functional-after-download.txt" target/kibana-coverage/functional
-#fileHeads "target/file-heads-functional-after-download.txt" target/kibana-coverage/functional
 
 echo "--- process HTML Links"
 .buildkite/scripts/steps/code_coverage/reporting/prokLinks.sh
@@ -41,19 +36,16 @@ echo "--- collect VCS Info"
 .buildkite/scripts/steps/code_coverage/reporting/collectVcsInfo.sh
 
 echo "--- Jest: merging coverage files and generating the final combined report"
-#dirListing "target/dir-listing-jest-just-before-final-replace.txt" target/kibana-coverage/jest
-echo "--- Final replace for jest"
+echo "### Final replace for jest"
 sed -ie "s|CC_REPLACEMENT_ANCHOR|${KIBANA_DIR}|g" target/kibana-coverage/jest/*.json
-
-#dirListing "target/dir-listing-jest-after-final-replace.txt" target/kibana-coverage/jest
 yarn nyc report --nycrc-path src/dev/code_coverage/nyc_config/nyc.jest.config.js
+collectAndUpload target/jest-combined-after-final-replace.tar.gz target/kibana-coverage/jest-combined
+
 
 echo "--- Functional: merging json files and generating the final combined report"
-
 set +e
-echo "--- Final replace for functional"
 sed -ie "s|CC_REPLACEMENT_ANCHOR|${KIBANA_DIR}|g" target/kibana-coverage/functional/*.json
-echo "--- Begin Split and Merge"
+echo "--- Begin Split and Merge for Functional"
 splitCoverage target/kibana-coverage/functional
 splitMerge
 set -e
