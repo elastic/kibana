@@ -347,7 +347,7 @@ must contain `from` and `to` values (see
 [horizontal]
 [[notifications-banner]]`notifications:banner`::
 A custom banner intended for temporary notices to all users. Supports
-https://help.github.com/en/articles/basic-writing-and-formatting-syntax[Markdown].
+https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax[Markdown].
 
 [[notifications-lifetime-banner]]`notifications:lifetime:banner`::
 The duration, in milliseconds, for banner notification displays. The default
