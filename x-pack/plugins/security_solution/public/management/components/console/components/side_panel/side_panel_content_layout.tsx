@@ -29,7 +29,7 @@ export const SidePanelContentLayout = memo<SidePanelContentLayoutProps>(
         {headerContent && (
           <>
             <EuiFlexItem grow={false} className="layout-container">
-              {headerContent}
+              `{headerContent}
             </EuiFlexItem>
             <EuiHorizontalRule margin="none" />
           </>

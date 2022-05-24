@@ -54,7 +54,10 @@ export type ConsoleDataAction =
     }
   | {
       type: 'updateCommandStoreState';
-      payload: { id: string; value: CommandExecutionState['store'] };
+      payload: {
+        id: string;
+        value: (prevState: CommandExecutionState['store']) => CommandExecutionState['store'];
+      };
     }
   | {
       type: 'updateCommandStatusState';
