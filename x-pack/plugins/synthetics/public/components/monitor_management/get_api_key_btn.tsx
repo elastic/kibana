@@ -4,45 +4,59 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
-import { EuiButton, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
-import { useFetcher } from '@kbn/observability-plugin/public';
+import React from 'react';
+import { EuiButton, EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { fetchServiceAPIKey } from '../../legacy_uptime/state/api';
 
-export const GetApiKeyBtn = () => {
-  const [loadAPIKey, setLoadAPIKey] = useState(false);
-
-  const { data, loading } = useFetcher(async () => {
-    if (loadAPIKey) {
-      return fetchServiceAPIKey();
-    }
-    return null;
-  }, [loadAPIKey]);
-
+export const GetApiKeyBtn = ({
+  apiKey,
+  loading,
+  setLoadAPIKey,
+}: {
+  loading?: boolean;
+  apiKey?: string;
+  setLoadAPIKey: (val: boolean) => void;
+}) => {
   return (
     <>
       <EuiSpacer />
       <EuiButton
         fill
+        fullWidth={true}
         isLoading={loading}
         color="primary"
         onClick={() => {
           setLoadAPIKey(true);
         }}
       >
-        {GET_API_KEY_LABEL}
+        {loading ? GET_API_KEY_LOADING_LABEL : GET_API_KEY_LABEL}
       </EuiButton>
       <EuiSpacer />
-      {data && (
+      {apiKey && (
+        <EuiText size="xs">
+          <h3>{API_KEY_LABEL}</h3>
+        </EuiText>
+      )}
+      {apiKey && (
         <EuiCodeBlock language="javascript" isCopyable>
-          {data?.apiKey.encoded}
+          {apiKey}
         </EuiCodeBlock>
       )}
     </>
   );
 };
 
-const GET_API_KEY_LABEL = i18n.translate('xpack.uptime.monitorManagement.getAPIKeyLabel', {
-  defaultMessage: 'Get API key',
+const API_KEY_LABEL = i18n.translate('xpack.uptime.monitorManagement.apiKey.label', {
+  defaultMessage: 'API key',
 });
+
+const GET_API_KEY_LABEL = i18n.translate('xpack.uptime.monitorManagement.getAPIKeyLabel', {
+  defaultMessage: 'Generate API key',
+});
+
+const GET_API_KEY_LOADING_LABEL = i18n.translate(
+  'xpack.uptime.monitorManagement.getAPIKeyLabel.loading',
+  {
+    defaultMessage: 'Generating API key',
+  }
+);

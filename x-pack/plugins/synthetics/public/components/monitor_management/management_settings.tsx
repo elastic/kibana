@@ -5,19 +5,22 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { EuiPopover, EuiPopoverTitle, EuiText, EuiButtonEmpty } from '@elastic/eui';
+import { EuiPopover, EuiPopoverTitle, EuiText, EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useUptimeSettingsContext } from '../../legacy_uptime/contexts/uptime_settings_context';
+import { useFetcher } from '@kbn/observability-plugin/public';
 import { GetApiKeyBtn } from './get_api_key_btn';
+import { fetchServiceAPIKey } from '../../legacy_uptime/state/api';
 
 export const ManagementSettings = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [loadAPIKey, setLoadAPIKey] = useState(false);
 
-  const { isDev } = useUptimeSettingsContext();
-
-  if (!isDev) {
+  const { data, loading } = useFetcher(async () => {
+    if (loadAPIKey) {
+      return fetchServiceAPIKey();
+    }
     return null;
-  }
+  }, [loadAPIKey]);
 
   return (
     <EuiPopover
@@ -29,9 +32,16 @@ export const ManagementSettings = () => {
       closePopover={() => setIsPopoverOpen(false)}
       style={{ margin: 'auto' }}
     >
-      <EuiPopoverTitle>{GET_API_KEY_GENERATE}</EuiPopoverTitle>
-      <EuiText>{GET_API_KEY_LABEL_DESCRIPTION}</EuiText>
-      <GetApiKeyBtn />
+      <div style={{ width: 550 }}>
+        <EuiPopoverTitle>{GET_API_KEY_GENERATE}</EuiPopoverTitle>
+        <EuiText>{GET_API_KEY_LABEL_DESCRIPTION}</EuiText>
+        <EuiLink>Learn more.</EuiLink>
+        <GetApiKeyBtn
+          loading={loading}
+          setLoadAPIKey={setLoadAPIKey}
+          apiKey={data?.apiKey.encoded}
+        />
+      </div>
     </EuiPopover>
   );
 };
@@ -50,7 +60,6 @@ const GET_API_KEY_GENERATE = i18n.translate(
 const GET_API_KEY_LABEL_DESCRIPTION = i18n.translate(
   'xpack.synthetics.monitorManagement.getAPIKeyLabel.description',
   {
-    defaultMessage:
-      'You can generate an API key which can be used with push command from Synthetics agent.',
+    defaultMessage: 'Use an API key to push monitors remotely from a CLI/CD pipeline.',
   }
 );
