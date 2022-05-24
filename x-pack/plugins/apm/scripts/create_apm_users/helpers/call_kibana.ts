@@ -6,7 +6,7 @@
  */
 import axios, { AxiosRequestConfig, AxiosError } from 'axios';
 import { once } from 'lodash';
-import { Elasticsearch, Kibana } from '../create_apm_users_and_roles';
+import { Elasticsearch, Kibana } from '../create_apm_users';
 
 export async function callKibana<T>({
   elasticsearch,

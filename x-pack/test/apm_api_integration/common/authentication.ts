@@ -21,19 +21,9 @@ export enum ApmUser {
   apmManageOwnAndCreateAgentKeys = 'apm_manage_own_and_create_agent_keys',
 }
 
-// TODO: Going forward we want to use the built-in roles `viewer` and `editor`. However ML privileges are not included in the built-in roles
-// Until https://github.com/elastic/kibana/issues/71422 is closed we have to use the custom roles below
 const roles = {
   [ApmUser.noAccessUser]: {},
-  [ApmUser.apmReadUser]: {
-    kibana: [
-      {
-        base: [],
-        feature: { ml: ['read'] },
-        spaces: ['*'],
-      },
-    ],
-  },
+  [ApmUser.apmReadUser]: {},
   [ApmUser.apmReadUserWithoutMlAccess]: {
     elasticsearch: {
       cluster: [],
@@ -52,15 +42,7 @@ const roles = {
       },
     ],
   },
-  [ApmUser.apmWriteUser]: {
-    kibana: [
-      {
-        base: [],
-        feature: { ml: ['all'] },
-        spaces: ['*'],
-      },
-    ],
-  },
+  [ApmUser.apmWriteUser]: {},
   [ApmUser.apmAnnotationsWriteUser]: {
     elasticsearch: {
       cluster: [],
