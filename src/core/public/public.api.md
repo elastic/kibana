@@ -1384,8 +1384,6 @@ export interface SavedObjectsResolveResponse<T = unknown> {
 
 // @public (undocumented)
 export interface SavedObjectsStart {
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "SavedObjectsClient"
-    //
     // (undocumented)
     client: SavedObjectsClientContract;
 }
