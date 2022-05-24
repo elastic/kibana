@@ -56,6 +56,7 @@ filegroup(
     "//packages/kbn-find-used-node-modules:build",
     "//packages/kbn-flot-charts:build",
     "//packages/kbn-generate:build",
+    "//packages/kbn-handlebars:build",
     "//packages/kbn-i18n-react:build",
     "//packages/kbn-i18n:build",
     "//packages/kbn-import-resolver:build",
@@ -119,6 +120,7 @@ filegroup(
     "//packages/shared-ux/button/exit_full_screen:build",
     "//packages/shared-ux/link/redirect_app:build",
     "//packages/shared-ux/page/analytics_no_data:build",
+    "//packages/shared-ux/prompt/no_data_views:build",
   ],
 )
 
@@ -164,6 +166,7 @@ filegroup(
     "//packages/kbn-field-types:build_types",
     "//packages/kbn-find-used-node-modules:build_types",
     "//packages/kbn-generate:build_types",
+    "//packages/kbn-handlebars:build_types",
     "//packages/kbn-i18n-react:build_types",
     "//packages/kbn-i18n:build_types",
     "//packages/kbn-import-resolver:build_types",
@@ -221,6 +224,7 @@ filegroup(
     "//packages/shared-ux/button/exit_full_screen:build_types",
     "//packages/shared-ux/link/redirect_app:build_types",
     "//packages/shared-ux/page/analytics_no_data:build_types",
+    "//packages/shared-ux/prompt/no_data_views:build_types",
   ],
 )
 
