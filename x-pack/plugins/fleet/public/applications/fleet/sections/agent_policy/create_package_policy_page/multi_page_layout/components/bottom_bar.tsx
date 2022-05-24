@@ -92,7 +92,7 @@ export const CreatePackagePolicyFinalBottomBar: React.FC<{
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty color="ghost" size="s" href={getHref('integrations_all')}>
               <FormattedMessage
-                id="xpack.fleet.createPackagePolicyBottomBar.backButton"
+                id="xpack.fleet.createPackagePolicyBottomBar.addAnotherIntegration"
                 defaultMessage="Add another integration"
               />
             </EuiButtonEmpty>

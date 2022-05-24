@@ -47,7 +47,7 @@ export const MultiPageStepsLayout = (props: MultiPageStepLayoutProps) => {
       <EuiTitle size="l">
         <CentralH1>
           <FormattedMessage
-            id="xpack.fleet.createPackagePolicy.pageTitle"
+            id="xpack.fleet.createPackagePolicy.multiPageTitle"
             defaultMessage="Set up {title} integration"
             values={{
               title: packageInfo.title,

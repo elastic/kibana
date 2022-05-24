@@ -35,8 +35,8 @@ const AddIntegrationError: React.FC<{ error: Error | string; title?: JSX.Element
         title
       ) : (
         <FormattedMessage
-          id={'xpack.fleet.addIntegration.errorTitle'}
-          defaultMessage={'Error adding integration'}
+          id="xpack.fleet.addIntegration.errorTitle"
+          defaultMessage="Error adding integration"
         />
       )
     }

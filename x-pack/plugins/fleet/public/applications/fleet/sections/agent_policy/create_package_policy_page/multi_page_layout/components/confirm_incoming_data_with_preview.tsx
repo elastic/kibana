@@ -164,7 +164,7 @@ export const ConfirmIncomingDataWithPreview: React.FunctionComponent<Props> = ({
           />
           <EuiSpacer size="m" />
           <FormattedMessage
-            id="xpack.fleet.confirmIncomingData.loading"
+            id="xpack.fleet.confirmIncomingDataWithPreview.loading"
             defaultMessage="It might take a few minutes for the data to get to Elasticsearch. If you're not seeing any, try generating some to verify. If you're having trouble connecting, check out the {link}."
             values={{
               link: (

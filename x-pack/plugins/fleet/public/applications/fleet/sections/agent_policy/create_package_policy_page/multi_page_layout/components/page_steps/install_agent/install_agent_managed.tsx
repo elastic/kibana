@@ -97,7 +97,7 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
             onNext={onNext}
             actionMessage={
               <FormattedMessage
-                id="xpack.fleet.addFirstIntegrationSplash.installAgentButton"
+                id="xpack.fleet.addFirstIntegrationSplash.addIntegrationButton"
                 defaultMessage="Add the integration"
               />
             }
