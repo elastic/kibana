@@ -135,9 +135,7 @@ export const SessionView = ({
     refetch().then((val) => {
       setRefreshSession(val.isLoading);
     });
-    refetchAlerts().then((val) => {
-      setRefreshSession(val.isLoading);
-    });
+    refetchAlerts();
   }, [refreshSession, refetch, refetchAlerts]);
 
   const handleRefresh = useCallback(() => {
