@@ -189,7 +189,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
       [
         actionsNavigation,
         caseData,
-        caseId,
         features.alerts.enabled,
         fetchCase,
         fetchCaseMetrics,
