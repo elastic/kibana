@@ -110,7 +110,7 @@ const DEFAULT_BROWSER_FIELDS = {};
 const DEFAULT_INDEX_PATTERNS = { fields: [], title: '' };
 const DEFAULT_DOC_VALUE_FIELDS: DocValueFields[] = [];
 
-export interface FetchIndexReturn {
+interface FetchIndexReturn {
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
   indexes: string[];

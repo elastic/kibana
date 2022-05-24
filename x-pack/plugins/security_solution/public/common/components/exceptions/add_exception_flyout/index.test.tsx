@@ -115,7 +115,7 @@ describe('When the add exception modal is opened', () => {
     jest.restoreAllMocks();
   });
 
-  describe('when the modal is loading', () => {
+  describe.skip('when the modal is loading', () => {
     let wrapper: ReactWrapper;
     beforeEach(() => {
       // Mocks one of the hooks as loading
@@ -143,7 +143,7 @@ describe('When the add exception modal is opened', () => {
     });
   });
 
-  describe('when there is no alert data passed to an endpoint list exception', () => {
+  describe.skip('when there is no alert data passed to an endpoint list exception', () => {
     let wrapper: ReactWrapper;
     beforeEach(async () => {
       wrapper = mount(
@@ -182,7 +182,7 @@ describe('When the add exception modal is opened', () => {
     });
   });
 
-  describe('when there is alert data passed to an endpoint list exception', () => {
+  describe.skip('when there is alert data passed to an endpoint list exception', () => {
     let wrapper: ReactWrapper;
     beforeEach(async () => {
       const alertDataMock: AlertData = {
@@ -242,7 +242,7 @@ describe('When the add exception modal is opened', () => {
     });
   });
 
-  describe('when there is alert data passed to a detection list exception', () => {
+  describe.skip('when there is alert data passed to a detection list exception', () => {
     let wrapper: ReactWrapper;
     beforeEach(async () => {
       const alertDataMock: AlertData = {
@@ -296,7 +296,7 @@ describe('When the add exception modal is opened', () => {
     });
   });
 
-  describe('when there is an exception being created on a sequence eql rule type', () => {
+  describe.skip('when there is an exception being created on a sequence eql rule type', () => {
     let wrapper: ReactWrapper;
     beforeEach(async () => {
       mockUseRuleAsync.mockImplementation(() => ({
@@ -357,7 +357,7 @@ describe('When the add exception modal is opened', () => {
     });
   });
 
-  describe('when there is bulk-closeable alert data passed to an endpoint list exception', () => {
+  describe.skip('when there is bulk-closeable alert data passed to an endpoint list exception', () => {
     let wrapper: ReactWrapper;
     let callProps: {
       onChange: (props: { exceptionItems: ExceptionListItemSchema[] }) => void;
@@ -454,7 +454,7 @@ describe('When the add exception modal is opened', () => {
     });
   });
 
-  test('when there are exception builder errors submit button is disabled', async () => {
+  test.skip('when there are exception builder errors submit button is disabled', async () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <AddExceptionFlyout
