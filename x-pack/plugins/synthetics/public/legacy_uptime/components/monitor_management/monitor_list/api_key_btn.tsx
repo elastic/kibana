@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiButton, EuiCodeBlock, EuiSpacer, EuiText, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export const GetApiKeyBtn = ({
+export const ApiKeyBtn = ({
   apiKey,
   loading,
   setLoadAPIKey,
@@ -30,6 +30,7 @@ export const GetApiKeyBtn = ({
             onClick={() => {
               setLoadAPIKey(true);
             }}
+            data-test-subj="uptimeMonitorManagementApiKeyGenerate"
           >
             {loading ? GET_API_KEY_LOADING_LABEL : GET_API_KEY_LABEL}
           </EuiButton>

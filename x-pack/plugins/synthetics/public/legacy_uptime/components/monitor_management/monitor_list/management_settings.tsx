@@ -9,7 +9,7 @@ import { EuiPopover, EuiPopoverTitle, EuiText, EuiButtonEmpty, EuiLink } from '@
 import { i18n } from '@kbn/i18n';
 import { useFetcher } from '@kbn/observability-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { GetApiKeyBtn } from './get_api_key_btn';
+import { ApiKeyBtn } from './api_key_btn';
 import { fetchServiceAPIKey } from '../../../state/api';
 import { useEnablement } from '../hooks/use_enablement';
 
@@ -45,6 +45,7 @@ export const ManagementSettings = () => {
               setIsPopoverOpen(true);
             }
           }}
+          data-test-subj="uptimeMonitorManagementApiKeyPopoverTrigger"
         >
           {API_KEYS_LABEL}
         </EuiButtonEmpty>
@@ -61,8 +62,8 @@ export const ManagementSettings = () => {
           <>
             <EuiPopoverTitle>{GET_API_KEY_GENERATE}</EuiPopoverTitle>
             <EuiText>{GET_API_KEY_LABEL_DESCRIPTION}</EuiText>
-            <EuiLink href="#">Learn more.</EuiLink>
-            <GetApiKeyBtn loading={loading} setLoadAPIKey={setLoadAPIKey} apiKey={apiKey} />
+            <EuiLink href="#">{LEARN_MORE_LABEL}</EuiLink>
+            <ApiKeyBtn loading={loading} setLoadAPIKey={setLoadAPIKey} apiKey={apiKey} />
           </>
         ) : (
           <>
@@ -77,6 +78,10 @@ export const ManagementSettings = () => {
 
 const API_KEYS_LABEL = i18n.translate('xpack.synthetics.monitorManagement.getAPIKeyLabel.label', {
   defaultMessage: 'API Keys',
+});
+
+const LEARN_MORE_LABEL = i18n.translate('xpack.synthetics.monitorManagement.learnMore.label', {
+  defaultMessage: 'Learn more.',
 });
 
 const GET_API_KEY_GENERATE = i18n.translate(
