@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Route, useLocation, useHistory } from 'react-router-dom';
+import { Route, useHistory } from 'react-router-dom';
 import React from 'react';
 import { fireEvent, act, waitFor } from '@testing-library/react';
 
-import type { MockedFleetStartServices, TestRenderer } from '../../../../../mock';
-import { createFleetTestRendererMock } from '../../../../../mock';
-import { FLEET_ROUTING_PATHS, pagePathGetters, PLUGIN_ID } from '../../../constants';
-import type { CreatePackagePolicyRouteState } from '../../../types';
+import type { MockedFleetStartServices, TestRenderer } from '../../../../../../mock';
+import { createFleetTestRendererMock } from '../../../../../../mock';
+import { FLEET_ROUTING_PATHS, pagePathGetters, PLUGIN_ID } from '../../../../constants';
+import type { CreatePackagePolicyRouteState } from '../../../../types';
 
 import {
   sendCreatePackagePolicy,
@@ -21,13 +21,11 @@ import {
   useIntraAppState,
   useStartServices,
   useGetPackageInfoByKey,
-} from '../../../hooks';
+} from '../../../../hooks';
 
-import { CreatePackagePolicyPage } from '.';
-
-jest.mock('../../../hooks', () => {
+jest.mock('../../../../hooks', () => {
   return {
-    ...jest.requireActual('../../../hooks'),
+    ...jest.requireActual('../../../../hooks'),
     useFleetStatus: jest.fn().mockReturnValue({ isReady: true } as any),
     sendGetStatus: jest
       .fn()
@@ -89,15 +87,26 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
+import { CreatePackagePolicySinglePage } from '.';
+
+// mock console.debug to prevent noisy logs from console.debugs in ./index.tsx
+let consoleDebugMock: any;
+beforeAll(() => {
+  consoleDebugMock = jest.spyOn(console, 'debug').mockImplementation(() => {});
+});
+afterAll(() => {
+  consoleDebugMock.mockRestore();
+});
+
 describe('when on the package policy create page', () => {
   const createPageUrlPath = pagePathGetters.add_integration_to_policy({ pkgkey: 'nginx-1.3.0' })[1];
 
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
-  const render = () =>
+  const render = (queryParamsPolicyId?: string) =>
     (renderResult = testRenderer.render(
       <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>
-        <CreatePackagePolicyPage />
+        <CreatePackagePolicySinglePage from="package" queryParamsPolicyId={queryParamsPolicyId} />
       </Route>
     ));
   let mockPackageInfo: any;
@@ -106,8 +115,6 @@ describe('when on the package policy create page', () => {
     testRenderer = createFleetTestRendererMock();
     mockApiCalls(testRenderer.startServices.http);
     testRenderer.mountHistory.push(createPageUrlPath);
-
-    // (useGetPackageInfoByKey as jest.Mock).mockClear();
 
     mockPackageInfo = {
       data: {
@@ -195,10 +202,9 @@ describe('when on the package policy create page', () => {
       let cancelLink: HTMLAnchorElement;
       let cancelButton: HTMLAnchorElement;
 
-      beforeEach(() => {
-        render();
-
-        act(() => {
+      beforeEach(async () => {
+        await act(async () => {
+          render();
           cancelLink = renderResult.getByTestId(
             'createPackagePolicy_cancelBackLink'
           ) as HTMLAnchorElement;
@@ -255,11 +261,9 @@ describe('when on the package policy create page', () => {
     };
 
     test('should create package policy on submit when query param agent policy id is set', async () => {
-      (useLocation as jest.MockedFunction<any>).mockImplementationOnce(() => ({
-        search: 'policyId=agent-policy-1',
-      }));
-
-      render();
+      await act(async () => {
+        render('agent-policy-1');
+      });
 
       let saveBtn: HTMLElement;
 
@@ -284,9 +288,9 @@ describe('when on the package policy create page', () => {
     });
 
     describe('on save navigate', () => {
-      async function setupSaveNavigate(routeState: any) {
+      async function setupSaveNavigate(routeState: any, queryParamsPolicyId?: string) {
         (useIntraAppState as jest.MockedFunction<any>).mockReturnValue(routeState);
-        render();
+        render(queryParamsPolicyId);
 
         await act(async () => {
           fireEvent.click(renderResult.getByText('Existing hosts')!);
@@ -316,23 +320,14 @@ describe('when on the package policy create page', () => {
       });
 
       test('should navigate to save navigate path with query param if set', async () => {
-        const mockUseLocation = useLocation as jest.MockedFunction<any>;
-        mockUseLocation.mockReturnValue({
-          search: 'policyId=agent-policy-1',
-        });
-
         const routeState = {
           onSaveNavigateTo: [PLUGIN_ID, { path: '/save/url/here' }],
         };
-
-        await setupSaveNavigate(routeState);
+        const queryParamsPolicyId = 'agent-policy-1';
+        await setupSaveNavigate(routeState, queryParamsPolicyId);
 
         expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID, {
           path: '/policies/agent-policy-1',
-        });
-
-        mockUseLocation.mockReturnValue({
-          search: '',
         });
       });
 
@@ -363,7 +358,9 @@ describe('when on the package policy create page', () => {
         },
       });
 
-      render();
+      await act(async () => {
+        render();
+      });
 
       await waitFor(() => {
         renderResult.getByDisplayValue('Agent policy 2');
@@ -385,8 +382,10 @@ describe('when on the package policy create page', () => {
     });
 
     describe('without query param', () => {
-      beforeEach(() => {
-        render();
+      beforeEach(async () => {
+        await act(async () => {
+          render();
+        });
 
         (sendCreateAgentPolicy as jest.MockedFunction<any>).mockClear();
         (sendCreatePackagePolicy as jest.MockedFunction<any>).mockClear();
@@ -558,6 +557,9 @@ const mockApiCalls = (http: MockedFleetStartServices['http']) => {
       return Promise.resolve({ data: { results: { total: 0 } } });
     }
     if (path === '/api/fleet/package_policies') {
+      return Promise.resolve({ data: { items: [] } });
+    }
+    if (path === '/api/fleet/outputs') {
       return Promise.resolve({ data: { items: [] } });
     }
     const err = new Error(`API [GET ${path}] is not MOCKED!`);

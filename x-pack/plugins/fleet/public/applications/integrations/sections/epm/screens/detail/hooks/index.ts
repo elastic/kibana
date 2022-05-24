@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { IntegrationBreadcrumb } from './integration_breadcrumb';
+export { useIsFirstTimeAgentUser } from './use_is_first_time_agent_user';

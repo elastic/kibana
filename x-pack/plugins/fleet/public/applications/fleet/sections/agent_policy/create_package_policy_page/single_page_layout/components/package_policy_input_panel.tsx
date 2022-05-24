@@ -24,7 +24,7 @@ import type {
   PackagePolicyInputStream,
   RegistryInput,
   RegistryStream,
-} from '../../../../types';
+} from '../../../../../types';
 import type { PackagePolicyInputValidationResults } from '../services';
 import { hasInvalidButRequiredVar, countValidationErrors } from '../services';
 

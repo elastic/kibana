@@ -7,7 +7,7 @@
 
 import { safeLoad } from 'js-yaml';
 
-import type { PackagePolicyConfigRecord, RegistryVarsEntry } from '../../../../types';
+import type { PackagePolicyConfigRecord, RegistryVarsEntry } from '../../../../../types';
 
 import { validatePackagePolicyConfig } from '.';
 

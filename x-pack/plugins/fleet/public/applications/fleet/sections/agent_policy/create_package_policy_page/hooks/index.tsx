@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-import type { RegistryVarsEntry } from '../../../../types';
-
-export const isAdvancedVar = (varDef: RegistryVarsEntry): boolean => {
-  if (varDef.show_user || (varDef.required && varDef.default === undefined)) {
-    return false;
-  }
-  return true;
-};
+export * from './navigation';

@@ -41,7 +41,7 @@ export type DynamicPage =
 export type Page = StaticPage | DynamicPage;
 
 export interface DynamicPagePathValues {
-  [key: string]: string;
+  [key: string]: string | boolean;
 }
 
 export const FLEET_BASE_PATH = '/app/fleet';
@@ -129,7 +129,7 @@ export const pagePathGetters: {
     `/edit-integration/${packagePolicyId}`,
   ],
   // Upgrades happen on the same edit form, just with a flag set. Separate page record here
-  // allows us to set different breadcrumbds for upgrades when needed.
+  // allows us to set different breadcrumbs for upgrades when needed.
   integration_policy_upgrade: ({ packagePolicyId }) => [
     INTEGRATIONS_BASE_PATH,
     `/edit-integration/${packagePolicyId}`,
@@ -140,11 +140,17 @@ export const pagePathGetters: {
     FLEET_BASE_PATH,
     `/policies/${policyId}${tabId ? `/${tabId}` : ''}`,
   ],
-  add_integration_to_policy: ({ pkgkey, integration, agentPolicyId }) => [
-    FLEET_BASE_PATH,
-    // prettier-ignore
-    `/integrations/${pkgkey}/add-integration${integration ? `/${integration}` : ''}${agentPolicyId ? `?policyId=${agentPolicyId}` : ''}`,
-  ],
+  add_integration_to_policy: ({ pkgkey, integration, agentPolicyId, useMultiPageLayout }) => {
+    const qs = stringify({
+      ...(agentPolicyId ? { policyId: agentPolicyId } : {}),
+      ...(useMultiPageLayout ? { useMultiPageLayout: null } : {}),
+    });
+    return [
+      FLEET_BASE_PATH,
+      // prettier-ignore
+      `/integrations/${pkgkey}/add-integration${integration ? `/${integration}` : ''}${qs ? `?${qs}` : ''}`,
+    ];
+  },
   edit_integration: ({ policyId, packagePolicyId }) => [
     FLEET_BASE_PATH,
     `/policies/${policyId}/edit-integration/${packagePolicyId}`,
@@ -168,7 +174,7 @@ export const pagePathGetters: {
   ],
   settings_edit_outputs: ({ outputId }) => [
     FLEET_BASE_PATH,
-    FLEET_ROUTING_PATHS.settings_edit_outputs.replace(':outputId', outputId),
+    FLEET_ROUTING_PATHS.settings_edit_outputs.replace(':outputId', outputId as string),
   ],
   settings_create_outputs: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.settings_create_outputs],
 };

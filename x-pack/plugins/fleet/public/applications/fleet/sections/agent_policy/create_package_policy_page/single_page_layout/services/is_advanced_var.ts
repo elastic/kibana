@@ -5,4 +5,11 @@
  * 2.0.
  */
 
-export { IntegrationBreadcrumb } from './integration_breadcrumb';
+import type { RegistryVarsEntry } from '../../../../../types';
+
+export const isAdvancedVar = (varDef: RegistryVarsEntry): boolean => {
+  if (varDef.show_user || (varDef.required && varDef.default === undefined)) {
+    return false;
+  }
+  return true;
+};

@@ -11,10 +11,10 @@ export type {
   PackagePolicyValidationResults,
   PackagePolicyConfigValidationResults,
   PackagePolicyInputValidationResults,
-} from '../../../../services';
+} from '../../../../../services';
 export {
   validatePackagePolicy,
   validatePackagePolicyConfig,
   validationHasErrors,
   countValidationErrors,
-} from '../../../../services';
+} from '../../../../../services';
