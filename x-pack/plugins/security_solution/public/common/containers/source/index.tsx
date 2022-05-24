@@ -125,7 +125,7 @@ export interface FetchIndexReturn {
 export const useFetchIndex = (
   indexNames: string[],
   onlyCheckIfIndicesExist: boolean = false
-): [boolean, FetchIndexReturn, (indices: string[]) => void] => {
+): [boolean, FetchIndexReturn] => {
   const { data } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
@@ -193,11 +193,9 @@ export const useFetchIndex = (
             },
           });
       };
-      if (!isEqual(previousIndexesName.current, iNames)) {
-        searchSubscription$.current.unsubscribe();
-        abortCtrl.current.abort();
-        asyncSearch();
-      }
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+      asyncSearch();
     },
     [data.search, addError, addWarning, onlyCheckIfIndicesExist, setLoading, setState]
   );
@@ -210,7 +208,7 @@ export const useFetchIndex = (
       searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
     };
-  }, [indexNames, indexFieldsSearch]);
+  }, [indexNames, indexFieldsSearch, previousIndexesName]);
 
-  return [isLoading, state, indexFieldsSearch];
+  return [isLoading, state];
 };
