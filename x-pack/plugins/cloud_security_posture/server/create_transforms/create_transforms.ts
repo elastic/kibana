@@ -14,7 +14,7 @@ export const initializeCspTransforms = async (
   esClient: ElasticsearchClient,
   logger: Logger
 ): Promise<void> => {
-  await Promise.all([initializeTransform(esClient, latestFindingsTransform, logger)]);
+  await initializeTransform(esClient, latestFindingsTransform, logger);
 };
 
 export const initializeTransform = async (
