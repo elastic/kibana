@@ -58,63 +58,50 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
               </EuiTitle>
             </EuiFlexItem>
 
-            <EuiFlexItem className="homDataManage__actions" grow={false}>
-              <EuiFlexGroup alignItems="center" responsive={false} wrap>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    data-test-subj="homeElasticsearch"
-                    className="kbnOverviewPageHeader__actionButton"
-                    flush="both"
-                    iconType="logoElasticsearch"
-                    href={addBasePath('/app/enterprise_search/overview/elasticsearch_guide')}
-                  >
-                    <FormattedMessage
-                      id="home.manageData.elasticsearchButtonLabel"
-                      defaultMessage="Get started with Elasticsearch"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
+            {isDevToolsEnabled || isManagementEnabled ? (
+              <EuiFlexItem className="homDataManage__actions" grow={false}>
+                <EuiFlexGroup alignItems="center" responsive={false} wrap>
+                  {/* Check if both the Dev Tools UI and the Console UI are enabled. */}
+                  {isDevToolsEnabled && consoleHref !== undefined ? (
+                    <EuiFlexItem grow={false}>
+                      <RedirectAppLinks application={application}>
+                        <EuiButtonEmpty
+                          data-test-subj="homeDevTools"
+                          className="kbnOverviewPageHeader__actionButton"
+                          flush="both"
+                          iconType="wrench"
+                          href={consoleHref}
+                        >
+                          <FormattedMessage
+                            id="home.manageData.devToolsButtonLabel"
+                            defaultMessage="Dev Tools"
+                          />
+                        </EuiButtonEmpty>
+                      </RedirectAppLinks>
+                    </EuiFlexItem>
+                  ) : null}
 
-                {/* Check if both the Dev Tools UI and the Console UI are enabled. */}
-                {isDevToolsEnabled && consoleHref !== undefined ? (
-                  <EuiFlexItem grow={false}>
-                    <RedirectAppLinks application={application}>
-                      <EuiButtonEmpty
-                        data-test-subj="homeDevTools"
-                        className="kbnOverviewPageHeader__actionButton"
-                        flush="both"
-                        iconType="wrench"
-                        href={consoleHref}
-                      >
-                        <FormattedMessage
-                          id="home.manageData.devToolsButtonLabel"
-                          defaultMessage="Dev Tools"
-                        />
-                      </EuiButtonEmpty>
-                    </RedirectAppLinks>
-                  </EuiFlexItem>
-                ) : null}
-
-                {isManagementEnabled ? (
-                  <EuiFlexItem grow={false}>
-                    <RedirectAppLinks application={application}>
-                      <EuiButtonEmpty
-                        data-test-subj="homeManage"
-                        className="kbnOverviewPageHeader__actionButton"
-                        flush="both"
-                        iconType="gear"
-                        href={managementHref}
-                      >
-                        <FormattedMessage
-                          id="home.manageData.stackManagementButtonLabel"
-                          defaultMessage="Stack Management"
-                        />
-                      </EuiButtonEmpty>
-                    </RedirectAppLinks>
-                  </EuiFlexItem>
-                ) : null}
-              </EuiFlexGroup>
-            </EuiFlexItem>
+                  {isManagementEnabled ? (
+                    <EuiFlexItem grow={false}>
+                      <RedirectAppLinks application={application}>
+                        <EuiButtonEmpty
+                          data-test-subj="homeManage"
+                          className="kbnOverviewPageHeader__actionButton"
+                          flush="both"
+                          iconType="gear"
+                          href={managementHref}
+                        >
+                          <FormattedMessage
+                            id="home.manageData.stackManagementButtonLabel"
+                            defaultMessage="Stack Management"
+                          />
+                        </EuiButtonEmpty>
+                      </RedirectAppLinks>
+                    </EuiFlexItem>
+                  ) : null}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
 
           <EuiSpacer />
