@@ -33,8 +33,10 @@ export const CreatePackagePolicyBottomBar: React.FC<{
   actionMessage: React.ReactElement;
   onNext: () => void;
   noAnimation?: boolean;
+  loadingMessage?: React.ReactElement;
 }> = ({
   isLoading,
+  loadingMessage,
   onNext,
   cancelClickHandler,
   cancelUrl,
@@ -66,14 +68,14 @@ export const CreatePackagePolicyBottomBar: React.FC<{
             isLoading={!isDisabled && isLoading}
             onClick={onNext}
           >
-            {isLoading ? (
-              <FormattedMessage
-                id="xpack.fleet.createPackagePolicyBottomBar.loading"
-                defaultMessage="Loading..."
-              />
-            ) : (
-              actionMessage
-            )}
+            {isLoading
+              ? loadingMessage || (
+                  <FormattedMessage
+                    id="xpack.fleet.createPackagePolicyBottomBar.loading"
+                    defaultMessage="Loading..."
+                  />
+                )
+              : actionMessage}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

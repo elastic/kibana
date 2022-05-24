@@ -226,6 +226,12 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
         onNext={onSubmit}
         isLoading={formState === 'LOADING'}
         isDisabled={formState === 'INVALID'}
+        loadingMessage={
+          <FormattedMessage
+            id="xpack.fleet.createFirstPackagePolicy.savingPackagePolicy"
+            defaultMessage="Saving package policy..."
+          />
+        }
         actionMessage={
           isManaged ? (
             <FormattedMessage
