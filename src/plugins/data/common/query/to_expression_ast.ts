@@ -16,6 +16,12 @@ import {
   timerangeToAst,
 } from '..';
 
+/**
+ * Converts QueryState to expression AST
+ * @param filters array of kibana filters
+ * @param query kibana query
+ * @param time kibana time range
+ */
 export function queryStateToExpressionAst({ filters, query, time }: QueryState) {
   const kibana = buildExpressionFunction<ExpressionFunctionKibana>('kibana', {});
   const kibanaContext = buildExpressionFunction<ExpressionFunctionKibanaContext>('kibana_context', {
