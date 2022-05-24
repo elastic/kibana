@@ -21,6 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const browser = getService('browser');
   const docTable = getService('docTable');
+  const dataGrid = getService('dataGrid');
   const PageObjects = getPageObjects(['common', 'context', 'discover', 'timePicker']);
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
@@ -29,8 +30,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover - context - back navigation', function contextSize() {
     before(async function () {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
       await PageObjects.common.navigateToApp('discover');
+      await kibanaServer.uiSettings.update({ 'doc_table:legacy': false });
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
         await PageObjects.discover.clickFieldListItem(columnName);
         await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
@@ -43,6 +44,52 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should go back after loading', async function () {
       await retry.waitFor('user navigating to context and returning to discover', async () => {
+        // navigate to the context view
+        const initialHitCount = await PageObjects.discover.getHitCount();
+        await dataGrid.clickRowToggle({ rowIndex: 0 });
+
+        const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+        await rowActions[1].click();
+        await PageObjects.context.waitUntilContextLoadingHasFinished();
+        await PageObjects.context.clickSuccessorLoadMoreButton();
+        await PageObjects.context.clickSuccessorLoadMoreButton();
+        await PageObjects.context.clickSuccessorLoadMoreButton();
+        await PageObjects.context.waitUntilContextLoadingHasFinished();
+        await browser.goBack();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        const hitCount = await PageObjects.discover.getHitCount();
+        return initialHitCount === hitCount;
+      });
+    });
+
+    it('should go back via breadcrumbs with preserved state', async function () {
+      await retry.waitFor(
+        'user navigating to context and returning to discover via breadcrumbs',
+        async () => {
+          await dataGrid.clickRowToggle({ rowIndex: 0 });
+          const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+          await rowActions[1].click();
+          await PageObjects.context.waitUntilContextLoadingHasFinished();
+
+          await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
+          await PageObjects.discover.waitUntilSearchingHasFinished();
+
+          for await (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
+            expect(filterBar.hasFilter(columnName, value)).to.eql(true);
+          }
+          expect(await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes()).to.eql({
+            start: 'Sep 18, 2015 @ 06:31:44.000',
+            end: 'Sep 23, 2015 @ 18:31:44.000',
+          });
+          return true;
+        }
+      );
+    });
+
+    it('should go back after loading for doc table', async function () {
+      await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
+      await retry.waitFor('user navigating to context and returning to discover', async () => {
+        await browser.refresh();
         // navigate to the context view
         const initialHitCount = await PageObjects.discover.getHitCount();
         await docTable.clickRowToggle({ rowIndex: 0 });
@@ -60,7 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('should go back via breadcrumbs with preserved state', async function () {
+    it('should go back via breadcrumbs with preserved state for doc table', async function () {
       await retry.waitFor(
         'user navigating to context and returning to discover via breadcrumbs',
         async () => {
