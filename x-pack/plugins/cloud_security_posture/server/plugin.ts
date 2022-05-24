@@ -99,10 +99,10 @@ export class CspPlugin
         async (
           packagePolicy: PackagePolicy,
           context: RequestHandlerContext,
-          _: KibanaRequest
+          request: KibanaRequest
         ): Promise<PackagePolicy> => {
           if (packagePolicy.package?.name === CLOUD_SECURITY_POSTURE_PACKAGE_NAME) {
-            await this.initialize(core);
+            await this.initialize(core, request);
             const soClient = (await context.core).savedObjects.client;
             await onPackagePolicyPostCreateCallback(this.logger, packagePolicy, soClient);
           }
@@ -133,10 +133,13 @@ export class CspPlugin
 
   public stop() {}
 
-  async initialize(core: CoreStart): Promise<void> {
+  async initialize(core: CoreStart, request: KibanaRequest): Promise<void> {
     this.logger.debug('initialize');
     await initializeCspTransformsIndices(core.elasticsearch.client.asInternalUser, this.logger);
     await initializeCspTransforms(core.elasticsearch.client.asInternalUser, this.logger);
-    await initializeCspWatcher(core.elasticsearch.client.asInternalUser, this.logger);
+    await initializeCspWatcher(
+      core.elasticsearch.client.asScoped(request).asCurrentUser,
+      this.logger
+    );
   }
 }
