@@ -1118,8 +1118,10 @@ const serviceProfilingStatisticsRoute = createApmServerRoute({
   },
 });
 
+// TODO: remove this endpoint in favour of
 const serviceInfrastructureRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/infrastructure',
+  endpoint:
+    'GET /internal/apm/services/{serviceName}/infrastructure_attributes_for_logs',
   params: t.type({
     path: t.type({
       serviceName: t.string,
