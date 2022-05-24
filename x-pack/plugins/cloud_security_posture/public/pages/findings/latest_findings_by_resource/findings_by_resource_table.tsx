@@ -119,6 +119,22 @@ const columns: Array<EuiTableFieldDataColumnType<CspFindingsByResource>> = [
     render: (sections: string[]) => sections.join(', '),
   },
   {
+    field: 'cluster_id',
+    name: (
+      <ColumnNameWithTooltip
+        columnName={TEXT.CLUSTER_ID}
+        tooltipContent={i18n.translate(
+          'xpack.csp.findings.resourceTable.resourceTableColumn.clusterIdColumnTooltipLabel',
+          {
+            defaultMessage: 'Kube-System Namespace ID',
+          }
+        )}
+      />
+    ),
+    truncateText: true,
+    sortable: true,
+  },
+  {
     field: 'failed_findings',
     width: '150px',
     truncateText: true,

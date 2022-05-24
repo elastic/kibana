@@ -45,6 +45,7 @@ interface FindingsAggBucket extends estypes.AggregationsStringRareTermsBucketKey
   failed_findings: estypes.AggregationsMultiBucketBase;
   name: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringTermsBucketKeys>;
   subtype: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringTermsBucketKeys>;
+  cluster_id: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringTermsBucketKeys>;
   cis_sections: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
 }
 
@@ -74,6 +75,9 @@ export const getFindingsByResourceAggQuery = ({
           },
           failed_findings: {
             filter: { term: { 'result.evaluation.keyword': 'failed' } },
+          },
+          cluster_id: {
+            terms: { field: 'cluster_id.keyword', size: 1 },
           },
           sort_failed_findings: {
             bucket_sort: {
@@ -129,7 +133,8 @@ const createFindingsByResource = (resource: FindingsAggBucket) => {
   if (
     !Array.isArray(resource.cis_sections.buckets) ||
     !Array.isArray(resource.name.buckets) ||
-    !Array.isArray(resource.subtype.buckets)
+    !Array.isArray(resource.subtype.buckets) ||
+    !Array.isArray(resource.cluster_id.buckets)
   )
     throw new Error('expected buckets to be an array');
 
@@ -137,6 +142,7 @@ const createFindingsByResource = (resource: FindingsAggBucket) => {
     resource_id: resource.key,
     resource_name: resource.name.buckets.map((v) => v.key).at(0),
     resource_subtype: resource.subtype.buckets.map((v) => v.key).at(0),
+    cluster_id: resource.cluster_id.buckets.map((v) => v.key).at(0),
     cis_sections: resource.cis_sections.buckets.map((v) => v.key),
     failed_findings: {
       count: resource.failed_findings.doc_count,

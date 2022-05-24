@@ -103,6 +103,12 @@ export const getFindingsColumns = (): Array<EuiBasicTableColumn<CspFinding>> => 
     sortable: true,
   },
   {
+    field: 'rule.section',
+    name: TEXT.CIS_SECTION,
+    sortable: true,
+    truncateText: true,
+  },
+  {
     field: 'cluster_id',
     name: (
       <ColumnNameWithTooltip
@@ -117,12 +123,6 @@ export const getFindingsColumns = (): Array<EuiBasicTableColumn<CspFinding>> => 
     ),
     truncateText: true,
     sortable: true,
-  },
-  {
-    field: 'rule.section',
-    name: TEXT.CIS_SECTION,
-    sortable: true,
-    truncateText: true,
   },
   {
     field: '@timestamp',
