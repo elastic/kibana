@@ -6,6 +6,7 @@
  */
 
 import { SyntheticsAppState } from '../../../state/root_reducer';
+import { LocationStatus } from '../../../../../../common/runtime_types';
 
 /**
  * NOTE: This variable name MUST start with 'mock*' in order for
@@ -36,6 +37,18 @@ export const mockState: SyntheticsAppState = {
         },
         url: 'https://test.elastic.dev',
         isServiceManaged: true,
+        status: LocationStatus.EXPERIMENTAL,
+      },
+      {
+        id: 'us_central',
+        label: 'US Central',
+        geo: {
+          lat: 41.25,
+          lon: -95.86,
+        },
+        url: 'https://test.elastic.dev',
+        isServiceManaged: true,
+        status: LocationStatus.GA,
       },
     ],
     loading: false,
