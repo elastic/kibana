@@ -66,7 +66,8 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllEventLogExecutionEvents(es, log);
     });
 
-    describe('"kql" rule type', () => {
+    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/132856
+    describe.skip('"kql" rule type', () => {
       let stats: DetectionMetrics | undefined;
       before(async () => {
         const rule = getRuleForSignalTesting(['telemetry']);
