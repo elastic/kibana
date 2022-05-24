@@ -13,7 +13,6 @@ import { Action, createAction, IncompatibleActionError } from '@kbn/ui-actions-p
 // for cleanup esFilters need to fix the issue https://github.com/elastic/kibana/issues/131292
 import { FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
 import type { Filter, RangeFilter } from '@kbn/es-query';
-import { extractTimeFilter, convertRangeFilterToTimeRange } from '@kbn/es-query';
 import { getOverlays, getIndexPatterns } from '../services';
 import { applyFiltersPopover } from '../apply_filters';
 
@@ -104,6 +103,7 @@ export function createFilterAction(
       }
 
       if (timeFieldName) {
+        const { extractTimeFilter } = await import('@kbn/es-query');
         const { timeRangeFilter, restOfFilters } = extractTimeFilter(
           timeFieldName,
           selectedFilters
@@ -119,6 +119,7 @@ export function createFilterAction(
   });
 }
 
-function changeTimeFilter(timeFilter: TimefilterContract, filter: RangeFilter) {
+async function changeTimeFilter(timeFilter: TimefilterContract, filter: RangeFilter) {
+  const { convertRangeFilterToTimeRange } = await import('@kbn/es-query');
   timeFilter.setTime(convertRangeFilterToTimeRange(filter));
 }
