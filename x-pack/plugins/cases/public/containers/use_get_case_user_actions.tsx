@@ -211,7 +211,7 @@ export const useGetCaseUserActions = (caseId: string, caseConnectorId: string) =
   const toasts = useToasts();
   const abortCtrlRef = new AbortController();
   return useQuery(
-    ['case-user-actions', caseId, caseConnectorId],
+    ['case', 'user-actions', caseId, caseConnectorId],
     async () => {
       const response = await getCaseUserActions(caseId, abortCtrlRef.signal);
       const participants = !isEmpty(response)

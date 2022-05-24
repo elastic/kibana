@@ -7,10 +7,13 @@
 
 import { useEffect, useReducer, useCallback, useRef } from 'react';
 
+import { useQuery } from 'react-query';
 import { SingleCaseMetrics, SingleCaseMetricsFeature } from './types';
 import * as i18n from './translations';
 import { useToasts } from '../common/lib/kibana';
 import { getSingleCaseMetrics } from './api';
+import { ServerError } from '../types';
+import { ERROR_TITLE } from './translations';
 
 interface CaseMeticsState {
   metrics: SingleCaseMetrics | null;
@@ -56,6 +59,36 @@ export interface UseGetCaseMetrics extends CaseMeticsState {
    */
   fetchCaseMetrics: (silent?: boolean) => Promise<void>;
 }
+
+export const useFetchCaseMetrics = (caseId: string, features: SingleCaseMetricsFeature[]) => {
+  const toasts = useToasts();
+  const abortCtrlRef = new AbortController();
+  return useQuery(
+    ['case', 'metrics', caseId, features],
+    async () => {
+      const response: SingleCaseMetrics = await getSingleCaseMetrics(
+        caseId,
+        features,
+        abortCtrlRef.signal
+      );
+      return {
+        metrics: response,
+      };
+    },
+    {
+      onError: (error: ServerError) => {
+        if (error.name !== 'AbortError') {
+          toasts.addError(
+            error.body && error.body.message ? new Error(error.body.message) : error,
+            { title: ERROR_TITLE }
+          );
+        }
+      },
+    }
+  );
+};
+
+export type UseFetchCasesMetrics = ReturnType<typeof useFetchCaseMetrics>;
 
 export const useGetCaseMetrics = (
   caseId: string,
