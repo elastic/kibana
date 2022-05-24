@@ -125,13 +125,27 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     [alerts, setFlyoutAlertIndex]
   );
 
+  const basicRenderCellValue = ({
+    data,
+    columnId,
+  }: {
+    data: Array<{ field: string; value: string[] }>;
+    columnId: string;
+  }) => {
+    // any is required here to improve typescript performance
+    const value = data.find((d) => d.field === columnId)?.value ?? [];
+    return <>{value.length ? value.join() : '--'}</>;
+  };
+
   const handleRenderCellValue = useCallback(
     (improper: EuiDataGridCellValueElementProps) => {
       const rcvProps = improper as EuiDataGridCellValueElementProps & EuiDataGridCellValueProps;
       const alert = alerts[rcvProps.visibleRowIndex];
-      const renderCellValue = props.alertsTableConfiguration.getRenderCellValue({
-        setFlyoutAlert: handleFlyoutAlert,
-      });
+      const renderCellValue = props.alertsTableConfiguration?.getRenderCellValue
+        ? props.alertsTableConfiguration?.getRenderCellValue({
+            setFlyoutAlert: handleFlyoutAlert,
+          })
+        : basicRenderCellValue;
       const data: Array<{ field: string; value: string[] }> = [];
       Object.entries(alert ?? {}).forEach(([key, value]) => {
         data.push({ field: key, value });

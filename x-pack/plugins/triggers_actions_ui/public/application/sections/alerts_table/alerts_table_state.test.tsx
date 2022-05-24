@@ -131,15 +131,11 @@ describe('AlertsTableState', () => {
   });
 
   describe('flyout', () => {
+    beforeEach(() => {
+      hookUseFetchAlerts.mockClear();
+    });
     it('should show a flyout when selecting an alert', async () => {
-      const wrapper = render(
-        <AlertsTableState
-          {...{
-            ...tableProps,
-            pageSize: 10,
-          }}
-        />
-      );
+      const wrapper = render(<AlertsTableState {...tableProps} />);
       userEvent.click(wrapper.queryByTestId('expandColumnCellOpenFlyoutButton-0')!);
 
       const result = await wrapper.findAllByTestId('alertsFlyout');
@@ -159,17 +155,40 @@ describe('AlertsTableState', () => {
     });
 
     it('should refetch data if flyout pagination exceeds the current page', async () => {
-      const wrapper = render(<AlertsTableState {...tableProps} />);
+      const wrapper = render(
+        <AlertsTableState
+          {...{
+            ...tableProps,
+            pageSize: 1,
+          }}
+        />
+      );
 
       userEvent.click(wrapper.queryByTestId('expandColumnCellOpenFlyoutButton-0')!);
       const result = await wrapper.findAllByTestId('alertsFlyout');
       expect(result.length).toBe(1);
 
+      hookUseFetchAlerts.mockClear();
       userEvent.click(wrapper.queryAllByTestId('pagination-button-next')[0]);
-      expect(hookUseFetchAlerts).toHaveBeenCalledWith({ pageIndex: 1, pageSize: 1 });
+      expect(hookUseFetchAlerts).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pagination: {
+            pageIndex: 1,
+            pageSize: 1,
+          },
+        })
+      );
 
+      hookUseFetchAlerts.mockClear();
       userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
-      expect(hookUseFetchAlerts).toHaveBeenCalledWith({ pageIndex: 0, pageSize: 1 });
+      expect(hookUseFetchAlerts).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pagination: {
+            pageIndex: 0,
+            pageSize: 1,
+          },
+        })
+      );
     });
   });
 });

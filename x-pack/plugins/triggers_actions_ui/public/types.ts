@@ -449,7 +449,7 @@ export interface AlertsTableConfigurationRegistry {
     footer?: AlertTableFlyoutComponent;
   };
   sort?: SortCombinations[];
-  getRenderCellValue: GetRenderCellValue;
+  getRenderCellValue?: GetRenderCellValue;
 }
 
 export interface AlertsTableFlyoutBaseProps {

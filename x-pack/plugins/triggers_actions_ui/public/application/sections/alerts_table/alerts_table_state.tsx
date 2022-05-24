@@ -38,6 +38,7 @@ export interface AlertsTableStateProps {
   featureIds: ValidFeatureId[];
   flyoutState: AlertsTableFlyoutState;
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
+  pageSize?: number;
   showExpandToDetails: boolean;
 }
 
@@ -70,6 +71,7 @@ const AlertsTableState = ({
   featureIds,
   flyoutState,
   query,
+  pageSize,
   showExpandToDetails,
 }: AlertsTableStateProps) => {
   const hasAlertsTableConfiguration =
@@ -98,7 +100,10 @@ const AlertsTableState = ({
 
   const [showCheckboxes] = useState(false);
   const [sort, setSort] = useState<SortCombinations[]>(storageAlertsTable.current.sort);
-  const [pagination, setPagination] = useState(DefaultPagination);
+  const [pagination, setPagination] = useState({
+    ...DefaultPagination,
+    pageSize: pageSize ?? DefaultPagination.pageSize,
+  });
   const [columns, setColumns] = useState<EuiDataGridColumn[]>(storageAlertsTable.current.columns);
 
   const [
