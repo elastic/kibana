@@ -476,6 +476,7 @@ export class LensPlugin {
             originatingPath,
             valueInput: input,
           },
+          skipAppLeave: openInNewTab,
         });
       },
       canUseEditor: () => {
