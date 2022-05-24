@@ -79,6 +79,8 @@ export const defineExplainLogRateSpikesRoute = (
           } else {
             end();
           }
+          // This is just exemplary demo code so we're adding a random timout of 0-250ms to each
+          // stream push to simulate string chunks appearing on the client with some randomness.
         }, Math.random() * 250);
       }
 
