@@ -7,27 +7,38 @@
 
 import { schema } from '@kbn/config-schema';
 
-import type { RouteDefinitionParams } from '../';
+import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 export function defineUpdateUserProfileDataRoute({
   router,
+  getSession,
   getUserProfileService,
+  logger,
 }: RouteDefinitionParams) {
   router.post(
     {
-      path: '/internal/security/user_profile/_data/{uid}',
-      options: { tags: ['access:updateUserProfile'] },
+      path: '/internal/security/user_profile/_data',
       validate: {
-        params: schema.object({ uid: schema.string() }),
         body: schema.recordOf(schema.string(), schema.any()),
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
+      const session = await getSession().get(request);
+      if (!session) {
+        logger.warn('User profile requested without valid session.');
+        return response.notFound();
+      }
+
+      if (!session.userProfileId) {
+        logger.warn(`User profile missing from current session. (sid: ${session.sid.slice(-10)})`);
+        return response.notFound();
+      }
+
       const userProfileService = getUserProfileService();
       try {
-        await userProfileService.update(request.params.uid, request.body);
+        await userProfileService.update(session.userProfileId, request.body);
         return response.ok();
       } catch (error) {
         return response.customError(wrapIntoCustomErrorResponse(error));

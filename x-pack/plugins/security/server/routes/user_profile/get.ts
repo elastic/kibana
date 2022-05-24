@@ -7,27 +7,43 @@
 
 import { schema } from '@kbn/config-schema';
 
-import type { RouteDefinitionParams } from '../';
+import type { RouteDefinitionParams } from '..';
+import type { AuthenticatedUserProfile } from '../../../common';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 export function defineGetUserProfileRoute({
   router,
+  getSession,
   getUserProfileService,
+  logger,
 }: RouteDefinitionParams) {
   router.get(
     {
-      path: '/internal/security/user_profile/{uid}',
-      options: { tags: ['access:accessUserProfile'] },
+      path: '/internal/security/user_profile',
       validate: {
-        params: schema.object({ uid: schema.string() }),
+        query: schema.object({ data: schema.maybe(schema.string()) }),
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
+      const session = await getSession().get(request);
+      if (!session) {
+        return response.notFound();
+      }
+
+      if (!session.userProfileId) {
+        logger.warn(`User profile missing from current session. (sid: ${session.sid.slice(-10)})`);
+        return response.notFound();
+      }
+
       const userProfileService = getUserProfileService();
       try {
-        const profile = await userProfileService.get(request.params.uid, '*');
-        return response.ok({ body: profile });
+        const profile = await userProfileService.get(session.userProfileId, request.query.data);
+        const body: AuthenticatedUserProfile = {
+          ...profile,
+          user: { ...profile.user, authentication_provider: session.provider },
+        };
+        return response.ok({ body });
       } catch (error) {
         return response.customError(wrapIntoCustomErrorResponse(error));
       }

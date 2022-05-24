@@ -10,5 +10,4 @@ export type {
   UserProfileServiceStart,
   UserProfileServiceStartParams,
 } from './user_profile_service';
-export type { UserProfile, UserData } from './user_profile';
 export type { UserProfileGrant } from './user_profile_grant';

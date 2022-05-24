@@ -27,6 +27,7 @@ import {
 } from '../../common/constants';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
+import { userProfileMock } from '../../common/model/user_profile.mock';
 import type { AuditLogger } from '../audit';
 import { auditLoggerMock, auditServiceMock } from '../audit/mocks';
 import { ConfigSchema, createConfig } from '../config';
@@ -35,7 +36,6 @@ import { securityMock } from '../mocks';
 import type { SessionValue } from '../session_management';
 import { sessionMock } from '../session_management/index.mock';
 import type { UserProfileGrant } from '../user_profile';
-import { userProfileMock } from '../user_profile/user_profile.mock';
 import { userProfileServiceMock } from '../user_profile/user_profile_service.mock';
 import { AuthenticationResult } from './authentication_result';
 import type { AuthenticatorOptions } from './authenticator';

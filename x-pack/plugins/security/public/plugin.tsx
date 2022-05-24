@@ -23,12 +23,12 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 import { SecurityLicenseService } from '../common/licensing';
 import type { SecurityLicense } from '../common/licensing';
-import { accountManagementApp } from './account_management';
+import { accountManagementApp, UserProfileAPIClient } from './account_management';
 import { AnonymousAccessService } from './anonymous_access';
 import type { AuthenticationServiceSetup, AuthenticationServiceStart } from './authentication';
 import { AuthenticationService } from './authentication';
 import type { ConfigType } from './config';
-import { ManagementService } from './management';
+import { ManagementService, UserAPIClient } from './management';
 import type { SecurityNavControlServiceStart } from './nav_control';
 import { SecurityNavControlService } from './nav_control';
 import { SecurityCheckupService } from './security_checkup';
@@ -91,16 +91,22 @@ export class SecurityPlugin
       http: core.http,
     });
 
+    const apiClients = {
+      userProfiles: new UserProfileAPIClient(core.http),
+      users: new UserAPIClient(core.http),
+    };
+
     this.navControlService.setup({
       securityLicense: license,
-      authc: this.authc,
       logoutUrl: getLogoutUrl(core.http),
+      apiClients,
     });
 
     accountManagementApp.create({
       authc: this.authc,
       application: core.application,
       getStartServices: core.getStartServices,
+      apiClients,
     });
 
     if (management) {
@@ -167,7 +173,7 @@ export class SecurityPlugin
 
     return {
       uiApi: getUiApi({ core }),
-      navControlService: this.navControlService.start({ core }),
+      navControlService: this.navControlService.start({ core, authc: this.authc }),
       authc: this.authc as AuthenticationServiceStart,
     };
   }
@@ -206,6 +212,7 @@ export interface SecurityPluginStart {
   authc: AuthenticationServiceStart;
   /**
    * Exposes UI components that will be loaded asynchronously.
+   * @deprecated
    */
   uiApi: UiApi;
 }

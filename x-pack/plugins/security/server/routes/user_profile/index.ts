@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RouteDefinitionParams } from '../index';
+import type { RouteDefinitionParams } from '..';
 import { defineGetUserProfileRoute } from './get';
 import { defineUpdateUserProfileDataRoute } from './update';
 
