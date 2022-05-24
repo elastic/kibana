@@ -48,7 +48,7 @@ const Counters = (props: Props) => (
         align-items: flex-end;
       `}
     >
-      {<PassedFailedCounters {...props} />}
+      <PassedFailedCounters {...props} />
     </EuiFlexItem>
   </EuiFlexGroup>
 );
