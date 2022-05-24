@@ -3918,6 +3918,16 @@
             }
           }
         },
+        "service_groups": {
+          "properties": {
+            "kuery_fields": {
+              "type": "array",
+              "items": {
+                "type": "keyword"
+              }
+            }
+          }
+        },
         "tasks": {
           "properties": {
             "aggregated_transactions": {
@@ -4053,6 +4063,17 @@
               }
             },
             "environments": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "service_groups": {
               "properties": {
                 "took": {
                   "properties": {
