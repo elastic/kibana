@@ -7,8 +7,8 @@
  */
 
 import { BehaviorSubject, firstValueFrom, ReplaySubject } from 'rxjs';
-import { take, toArray } from 'rxjs/operators';
-import type { Plugin, CoreSetup, TelemetryCounter, CoreStart } from '@kbn/core/public';
+import { takeWhile, tap, toArray } from 'rxjs/operators';
+import type { Plugin, CoreSetup, CoreStart, TelemetryCounter, Event } from '@kbn/core/server';
 import type { Action } from './custom_shipper';
 import { CustomShipper } from './custom_shipper';
 import './types';
@@ -52,10 +52,20 @@ export class AnalyticsPluginA implements Plugin {
       plugin: 'analyticsPluginA',
       step: 'setup',
     });
-
+    let found = false;
     window.__analyticsPluginA__ = {
-      getLastActions: async (takeNumberOfActions: number) =>
-        firstValueFrom(this.actions$.pipe(take(takeNumberOfActions), toArray())),
+      getActionsUntilReportTestPluginLifecycleEvent: async () =>
+        firstValueFrom(
+          this.actions$.pipe(
+            takeWhile(() => !found),
+            tap(({ action, meta }) => {
+              found =
+                action === 'reportEvents' &&
+                meta.find((event: Event) => event.event_type === 'test-plugin-lifecycle');
+            }),
+            toArray()
+          )
+        ),
       stats,
       setOptIn(optIn: boolean) {
         analytics.optIn({ global: { enabled: optIn } });
