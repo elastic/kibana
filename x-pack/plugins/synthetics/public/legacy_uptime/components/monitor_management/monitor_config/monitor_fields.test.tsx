@@ -119,7 +119,7 @@ describe('<MonitorFields />', () => {
       ...defaultBrowserConfig,
       [ConfigKey.NAME]: name,
     };
-    const { getByText, getByTestId } = render(
+    const { getByText } = render(
       <WrappedComponent
         isFormSubmitted={false}
         defaultBrowserFields={browserFields}
