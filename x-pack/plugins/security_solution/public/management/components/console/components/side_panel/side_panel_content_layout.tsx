@@ -6,7 +6,7 @@
  */
 
 import React, { memo, ReactNode } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 
 export interface SidePanelContentLayoutProps {
   children: ReactNode;
@@ -27,9 +27,12 @@ export const SidePanelContentLayout = memo<SidePanelContentLayoutProps>(
         gutterSize="none"
       >
         {headerContent && (
-          <EuiFlexItem grow={false} className="layout-container">
-            {headerContent}
-          </EuiFlexItem>
+          <>
+            <EuiFlexItem grow={false} className="layout-container">
+              {headerContent}
+            </EuiFlexItem>
+            <EuiHorizontalRule margin="none" />
+          </>
         )}
         <EuiFlexItem grow className="eui-scrollBar eui-yScroll layout-container">
           <div>{children}</div>

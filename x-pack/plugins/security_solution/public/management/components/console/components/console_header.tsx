@@ -7,9 +7,14 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useConsoleStateDispatch } from '../hooks/state_selectors/use_console_state_dispatch';
 import { useWithSidePanel } from '../hooks/state_selectors/use_with_side_panel';
 import { ConsoleProps } from '..';
+
+const HELP_LABEL = i18n.translate('xpack.securitySolution.console.layoutHeader.helpButtonLabel', {
+  defaultMessage: 'Show help',
+});
 
 export type ConsoleHeaderProps = Pick<ConsoleProps, 'TitleComponent'>;
 
@@ -31,7 +36,8 @@ export const ConsoleHeader = memo<ConsoleHeaderProps>(({ TitleComponent }) => {
         <EuiButtonIcon
           onClick={handleHelpButtonOnClick}
           iconType={'help'}
-          aria-label="show help"
+          title={HELP_LABEL}
+          aria-label={HELP_LABEL}
           isSelected={Boolean(panelCurrentlyShowing)}
           display={panelCurrentlyShowing === 'help' ? 'fill' : 'empty'}
         />
