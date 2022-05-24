@@ -22096,7 +22096,7 @@
     "xpack.osquery.pack.queryFlyoutForm.idFieldLabel": "ID",
     "xpack.osquery.pack.queryFlyoutForm.intervalFieldLabel": "时间间隔 (s)",
     "xpack.osquery.pack.queryFlyoutForm.invalidIdError": "字符必须是数字字母、_ 或 -",
-    "xpack.osquery.pack.queryFlyoutForm.invalidIntervalField": "时间间隔值必须为正数",
+    "xpack.osquery.pack.queryFlyoutForm.intervalFieldMinNumberError": "时间间隔值必须为正数",
     "xpack.osquery.pack.queryFlyoutForm.mappingEcsFieldLabel": "ECS 字段",
     "xpack.osquery.pack.queryFlyoutForm.mappingValueFieldLabel": "值",
     "xpack.osquery.pack.queryFlyoutForm.osqueryResultFieldRequiredErrorMessage": "“值”必填。",
