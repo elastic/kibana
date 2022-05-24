@@ -6,6 +6,7 @@
  */
 import React, { useMemo, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 
 import { splitPkgKey } from '../../../../../../../common';
 
@@ -22,35 +23,30 @@ import {
   ConfirmDataPageStep,
 } from './components';
 
-const fleetManagedSteps = [
-  {
-    title: 'Install Elastic Agent', // TODO: i18n
-    component: InstallElasticAgentPageStep,
-  },
-  {
-    title: 'Add the integration',
-    component: AddIntegrationPageStep,
-  },
-  {
-    title: 'Confirm incoming data',
-    component: ConfirmDataPageStep,
-  },
-];
+const installAgentStep = {
+  title: i18n.translate('xpack.fleet.createFirstPackagePolicy.installAgentStepTitle', {
+    defaultMessage: 'Install Elastic Agent',
+  }),
+  component: InstallElasticAgentPageStep,
+};
 
-const standaloneSteps = [
-  {
-    title: 'Add the integration',
-    component: AddIntegrationPageStep,
-  },
-  {
-    title: 'Install Elastic Agent',
-    component: InstallElasticAgentPageStep,
-  },
-  {
-    title: 'Confirm incoming data',
-    component: ConfirmDataPageStep,
-  },
-];
+const addIntegrationStep = {
+  title: i18n.translate('xpack.fleet.createFirstPackagePolicy.addIntegrationStepTitle', {
+    defaultMessage: 'Add the integration',
+  }),
+  component: AddIntegrationPageStep,
+};
+
+const confirmDataStep = {
+  title: i18n.translate('xpack.fleet.createFirstPackagePolicy.confirmDataStepTitle', {
+    defaultMessage: 'Confirm incoming data',
+  }),
+  component: ConfirmDataPageStep,
+};
+
+const fleetManagedSteps = [installAgentStep, addIntegrationStep, confirmDataStep];
+
+const standaloneSteps = [addIntegrationStep, installAgentStep, confirmDataStep];
 
 export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({ from }) => {
   const { params } = useRouteMatch<AddToPolicyParams>();
