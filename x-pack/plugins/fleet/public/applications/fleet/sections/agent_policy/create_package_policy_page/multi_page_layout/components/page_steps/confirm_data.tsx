@@ -10,7 +10,11 @@ import React, { useState } from 'react';
 import type { MultiPageStepLayoutProps } from '../../types';
 import { useStartServices } from '../../../../../../hooks';
 
-import { ConfirmIncomingDataWithPreview } from '..';
+import {
+  ConfirmIncomingDataWithPreview,
+  CreatePackagePolicyFinalBottomBar,
+  NotObscuredByBottomBar,
+} from '..';
 
 export const ConfirmDataPageStep: React.FC<MultiPageStepLayoutProps> = (props) => {
   const { enrolledAgentIds, packageInfo } = props;
@@ -28,6 +32,15 @@ export const ConfirmDataPageStep: React.FC<MultiPageStepLayoutProps> = (props) =
         setAgentDataConfirmed={setAgentDataConfirmed}
         troubleshootLink={troubleshootLink}
       />
+
+      {!!agentDataConfirmed && (
+        <>
+          <NotObscuredByBottomBar />
+          <CreatePackagePolicyFinalBottomBar
+            pkgkey={`${packageInfo.name}-${packageInfo.version}`}
+          />
+        </>
+      )}
     </>
   );
 };

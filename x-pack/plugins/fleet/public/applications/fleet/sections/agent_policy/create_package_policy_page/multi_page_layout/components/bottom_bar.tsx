@@ -10,6 +10,8 @@ import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBottomBar, EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 
+import { useLink } from '../../../../../../../hooks';
+
 const CenteredRoundedBottomBar = styled(EuiBottomBar)`
   max-width: 820px;
   margin: 0 auto;
@@ -76,5 +78,42 @@ export const CreatePackagePolicyBottomBar: React.FC<{
         </EuiFlexItem>
       </EuiFlexGroup>
     </Bar>
+  );
+};
+
+export const CreatePackagePolicyFinalBottomBar: React.FC<{
+  pkgkey: string;
+}> = ({ pkgkey }) => {
+  const { getHref } = useLink();
+  return (
+    <CenteredRoundedBottomBar>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty color="ghost" size="s" href={getHref('integrations_all')}>
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicyBottomBar.backButton"
+                defaultMessage="Add another integration"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            color="success"
+            fill
+            size="m"
+            href={getHref('integration_details_assets', {
+              pkgkey,
+            })}
+          >
+            <FormattedMessage
+              id="xpack.fleet.confirmIncomingData.viewDataAssetsButtonText'"
+              defaultMessage="View assets"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </CenteredRoundedBottomBar>
   );
 };

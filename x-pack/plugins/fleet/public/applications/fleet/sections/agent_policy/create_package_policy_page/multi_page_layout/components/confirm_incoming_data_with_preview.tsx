@@ -10,7 +10,6 @@ import {
   EuiCallOut,
   EuiText,
   EuiSpacer,
-  EuiButton,
   EuiLink,
   EuiLoadingContent,
   EuiLoadingSpinner,
@@ -41,7 +40,13 @@ interface Props {
 }
 const MAX_AGENT_DATA_PREVIEW_COUNT = 10;
 // make room for more interesting keys in the UI
-const OMIT_KEYS = ['agent.ephemeral_id', 'agent.id', 'elastic_agent.id', 'data_stream.namespace'];
+const OMIT_KEYS = [
+  'agent.ephemeral_id',
+  'agent.id',
+  'elastic_agent.id',
+  'data_stream.namespace',
+  '@timestamp',
+];
 const HitPreview: React.FC<{ hit: SearchHit }> = ({ hit }) => {
   const hitForDisplay = omit(getFlattenedObject(hit._source as Record<string, unknown>), OMIT_KEYS);
   const listItems = Object.entries(hitForDisplay).map(([key, value]) => ({
@@ -56,7 +61,7 @@ const HitPreview: React.FC<{ hit: SearchHit }> = ({ hit }) => {
           style={{
             overflow: 'hidden',
             columnWidth: '350px',
-            maxHeight: '100px',
+            maxHeight: '120px',
             wordBreak: 'break-all',
             whiteSpace: 'pre-wrap',
           }}
@@ -75,7 +80,7 @@ const HitTimestamp: React.FC<{ hit: SearchHit }> = ({ hit }) => {
   const timestamp = source?.['@timestamp'] || '-';
   return (
     <EuiText size={'xs'}>
-      <pre style={{ background: 'none' }}>
+      <pre style={{ background: 'none', padding: '0 0' }}>
         {timestamp ? formatDate(timestamp, 'MMM D, YYYY @ HH:mm:ss.SSS') : '-'}
       </pre>
     </EuiText>
@@ -83,11 +88,11 @@ const HitTimestamp: React.FC<{ hit: SearchHit }> = ({ hit }) => {
 };
 
 const AgentDataPreview: React.FC<{ dataPreview: SearchHit[] }> = ({ dataPreview }) => {
+  const previewData = dataPreview.slice(0, MAX_AGENT_DATA_PREVIEW_COUNT);
   return (
-    <div style={{}}>
-      {dataPreview.slice(0, MAX_AGENT_DATA_PREVIEW_COUNT).map((hit) => (
-        <>
-          <EuiHorizontalRule margin="s" />
+    <div style={{ maxHeight: '50vh', overflowY: 'scroll' }}>
+      {previewData.map((hit, idx) => (
+        <div id={hit._id}>
           <EuiFlexGroup gutterSize={'xs'}>
             <EuiFlexItem style={{ minWidth: '220px' }}>
               <HitTimestamp hit={hit} />
@@ -97,9 +102,9 @@ const AgentDataPreview: React.FC<{ dataPreview: SearchHit[] }> = ({ dataPreview 
               <HitPreview hit={hit} />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </>
+          {idx !== previewData.length - 1 && <EuiHorizontalRule margin="s" />}
+        </div>
       ))}
-      <EuiHorizontalRule />
     </div>
   );
 };
@@ -112,7 +117,7 @@ export const ConfirmIncomingDataWithPreview: React.FunctionComponent<Props> = ({
   troubleshootLink,
 }) => {
   const { incomingData, dataPreview, isLoading } = usePollingIncomingData(agentIds, true);
-  const { enrolledAgents, numAgentsWithData, linkButton, message } = useGetAgentIncomingData(
+  const { enrolledAgents, numAgentsWithData } = useGetAgentIncomingData(
     incomingData,
     installedPolicy
   );
@@ -152,7 +157,7 @@ export const ConfirmIncomingDataWithPreview: React.FunctionComponent<Props> = ({
           />
         </EuiText>
         <EuiSpacer size="m" />
-        <EuiLoadingContent lines={10} />;
+        <EuiLoadingContent lines={10} />
       </>
     );
   }
@@ -171,23 +176,17 @@ export const ConfirmIncomingDataWithPreview: React.FunctionComponent<Props> = ({
         color="success"
         iconType="check"
       />
+      <EuiSpacer size="m" />
+      <EuiText>
+        <h3>
+          <FormattedMessage
+            id="xpack.fleet.confirmIncomingDataWithPreview.previewTitle"
+            defaultMessage="Preview of incoming data:"
+          />
+        </h3>
+      </EuiText>
+      <EuiSpacer size="m" />
       <AgentDataPreview dataPreview={dataPreview} />
-      {installedPolicy && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiText size="s">{message}</EuiText>
-          <EuiSpacer size="m" />
-          <EuiButton
-            href={linkButton.href}
-            isDisabled={isLoading}
-            color="primary"
-            fill
-            data-test-subj="IncomingDataConfirmedButton"
-          >
-            {linkButton.text}
-          </EuiButton>
-        </>
-      )}
     </>
   );
 };
