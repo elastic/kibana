@@ -122,5 +122,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
     });
+
+    describe('multiple requests output', () => {
+      const sendRequests = async () => {
+        await PageObjects.console.enterRequest('\n PUT test-index');
+        await PageObjects.console.enterRequest('\n DELETE test-index');
+        await PageObjects.console.selectAllRequests();
+        await PageObjects.console.clickPlay();
+      };
+      beforeEach(async () => {
+        await PageObjects.console.clearTextArea();
+      });
+      it('should contain comments starting with # symbol', async () => {
+        await sendRequests();
+
+        await retry.try(async () => {
+          const response = await PageObjects.console.getResponse();
+          log.debug(response);
+          expect(response).to.contain('# PUT test-index 200 OK');
+          expect(response).to.contain('# DELETE test-index 200 OK');
+        });
+      });
+      it('should display status badges', async () => {
+        // This request should fail
+        await PageObjects.console.enterRequest('\n GET test-index');
+        await sendRequests();
+
+        await retry.waitFor('success badge', () => PageObjects.console.hasSuccessBadge());
+        await retry.waitFor('warning badge', () => PageObjects.console.hasWarningBadge());
+      });
+    });
   });
 }
