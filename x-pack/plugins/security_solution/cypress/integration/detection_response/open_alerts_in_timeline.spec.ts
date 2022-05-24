@@ -20,7 +20,7 @@ import { DETECTIONS_RESPONSE_URL } from '../../urls/navigation';
 
 const ALERT_COUNT = 1;
 
-describe('Detection response view', () => {
+describe.skip('Detection response view', () => {
   context('Open in timeline', () => {
     before(() => {
       cleanKibana();
