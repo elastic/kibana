@@ -29,7 +29,7 @@ describe('No data screen', () => {
         headers: {
           'kbn-xsrf': true,
         },
-        auth: { user: 'apm_power_user', pass: 'changeme' },
+        auth: { user: 'editor_user', pass: 'changeme' },
       });
     });
 
@@ -57,7 +57,7 @@ describe('No data screen', () => {
           metric: '',
         },
         headers: { 'kbn-xsrf': true },
-        auth: { user: 'apm_power_user', pass: 'changeme' },
+        auth: { user: 'editor_user', pass: 'changeme' },
       });
     });
   });

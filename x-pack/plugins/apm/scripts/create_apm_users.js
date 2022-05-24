@@ -6,14 +6,11 @@
  */
 
 /*
- * This script will create two roles
- * - a read_only kibana role
- * - a read/write kibana role
+ * This script will create two users
+ * - editor_user
+ * - viewer_user
  *
- * The two roles will be assigned to the already existing users: `apm_read_user`, `apm_write_user`, `kibana_write_user`
- *
- * This makes it possible to use the existing cloud users locally
- * Usage: node create-apm-users-and-roles.js --role-suffix <YOUR-GITHUB-USERNAME-OR-SOMETHING-UNIQUE>
+ * Usage: node create-apm-users.js
  ******************************/
 
 // compile typescript on the fly
