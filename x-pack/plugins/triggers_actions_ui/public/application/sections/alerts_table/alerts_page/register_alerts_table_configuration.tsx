@@ -54,5 +54,12 @@ export function registerAlertsTableConfiguration({
       const value = myProps.data.find((d: any) => d.field === myProps.columnId)?.value ?? [];
       return <>{value.length ? value.join() : '--'}</>;
     },
+    sort: [
+      {
+        'event.action': {
+          order: 'asc',
+        },
+      },
+    ],
   });
 }

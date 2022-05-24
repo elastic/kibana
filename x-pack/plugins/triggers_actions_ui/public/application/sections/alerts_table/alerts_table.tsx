@@ -15,7 +15,6 @@ import {
   EuiToolTip,
   EuiButtonIcon,
   EuiDataGridStyle,
-  EuiDataGridCellValueProps,
   EuiDataGridColumn,
 } from '@elastic/eui';
 import { useSorting, usePagination } from './hooks';
@@ -78,7 +77,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         ? [
             {
               id: 'expandColumn',
-              width: 50,
+              width: 75,
               headerCellRender: () => {
                 return (
                   <span data-test-subj="expandColumnHeaderLabel">
@@ -145,18 +144,14 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     columnId: string;
   }) => {
     const value = data.find((d) => d.field === columnId)?.value ?? [];
+    // console.log({ data, columnId })
     return <>{value.length ? value.join() : '--'}</>;
   };
 
   const handleRenderCellValue = useCallback(
-    (improper: EuiDataGridCellValueElementProps) => {
-      const rcvProps = improper as EuiDataGridCellValueElementProps & EuiDataGridCellValueProps;
-      const alert =
-        alerts[
-          rcvProps.visibleRowIndex != null
-            ? rcvProps.visibleRowIndex
-            : rcvProps.rowIndex - props.pageSize
-        ];
+    (_props: EuiDataGridCellValueElementProps) => {
+      // https://github.com/elastic/eui/issues/5811
+      const alert = alerts[_props.rowIndex - pagination.pageSize * pagination.pageIndex];
       const renderCellValue = props.alertsTableConfiguration?.getRenderCellValue
         ? props.alertsTableConfiguration?.getRenderCellValue({
             setFlyoutAlert: handleFlyoutAlert,
@@ -167,11 +162,17 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         data.push({ field: key, value });
       });
       return renderCellValue({
-        ...rcvProps,
+        ..._props,
         data,
       });
     },
-    [alerts, handleFlyoutAlert, props.alertsTableConfiguration, props.pageSize]
+    [
+      alerts,
+      handleFlyoutAlert,
+      pagination.pageIndex,
+      pagination.pageSize,
+      props.alertsTableConfiguration,
+    ]
   );
 
   return (
