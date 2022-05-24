@@ -21,7 +21,7 @@ export const ColumnNameWithTooltip = ({
         <span>{columnName}</span>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiIcon size="s" color="subdued" type="questionInCircle" />
+        <EuiIcon size="m" color="subdued" type="questionInCircle" />
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiToolTip>
