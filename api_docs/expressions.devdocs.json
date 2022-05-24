@@ -2142,6 +2142,18 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-public.ExpressionFunction.deprecated",
+            "type": "boolean",
+            "tags": [],
+            "label": "deprecated",
+            "description": [
+              "\nDeprecation flag."
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/expression_function.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-public.ExpressionFunction.telemetry",
             "type": "Function",
             "tags": [],
@@ -2544,6 +2556,16 @@
             "signature": [
               "string[]"
             ],
+            "path": "src/plugins/expressions/common/expression_functions/expression_function_parameter.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionFunctionParameter.deprecated",
+            "type": "boolean",
+            "tags": [],
+            "label": "deprecated",
+            "description": [],
             "path": "src/plugins/expressions/common/expression_functions/expression_function_parameter.ts",
             "deprecated": false
           },
@@ -3506,7 +3528,7 @@
                 "id": "def-public.ExpressionRenderHandler.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n      onRenderError,\n      renderMode,\n      syncColors,\n      interactive,\n      hasCompatibleActions = async () => false,\n    }",
+                "label": "{\n      onRenderError,\n      renderMode,\n      syncColors,\n      syncTooltips,\n      interactive,\n      hasCompatibleActions = async () => false,\n    }",
                 "description": [],
                 "signature": [
                   "ExpressionRenderHandlerParams"
@@ -6717,6 +6739,23 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-public.ExecutionContext.isSyncTooltipsEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isSyncTooltipsEnabled",
+            "description": [
+              "\nReturns the state (true|false) of the sync tooltips across panels switch."
+            ],
+            "signature": [
+              "(() => boolean) | undefined"
+            ],
+            "path": "src/plugins/expressions/common/execution/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-public.ExecutionContext.getExecutionContext",
             "type": "Function",
             "tags": [],
@@ -7668,6 +7707,21 @@
             ],
             "signature": [
               "Name"
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionFunctionDefinition.deprecated",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "deprecated",
+            "description": [
+              "\nThe flag to mark the function as deprecated."
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
             "deprecated": false
@@ -10048,6 +10102,19 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-public.IExpressionLoaderParams.syncTooltips",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "syncTooltips",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/expressions/public/types/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-public.IExpressionLoaderParams.hasCompatibleActions",
             "type": "Function",
             "tags": [],
@@ -10366,6 +10433,21 @@
             "type": "Function",
             "tags": [],
             "label": "isSyncColorsEnabled",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.IInterpreterRenderHandlers.isSyncTooltipsEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isSyncTooltipsEnabled",
             "description": [],
             "signature": [
               "() => boolean"
@@ -14288,6 +14370,18 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-server.ExpressionFunction.deprecated",
+            "type": "boolean",
+            "tags": [],
+            "label": "deprecated",
+            "description": [
+              "\nDeprecation flag."
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/expression_function.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-server.ExpressionFunction.telemetry",
             "type": "Function",
             "tags": [],
@@ -14690,6 +14784,16 @@
             "signature": [
               "string[]"
             ],
+            "path": "src/plugins/expressions/common/expression_functions/expression_function_parameter.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.ExpressionFunctionParameter.deprecated",
+            "type": "boolean",
+            "tags": [],
+            "label": "deprecated",
+            "description": [],
             "path": "src/plugins/expressions/common/expression_functions/expression_function_parameter.ts",
             "deprecated": false
           },
@@ -17095,6 +17199,23 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-server.ExecutionContext.isSyncTooltipsEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isSyncTooltipsEnabled",
+            "description": [
+              "\nReturns the state (true|false) of the sync tooltips across panels switch."
+            ],
+            "signature": [
+              "(() => boolean) | undefined"
+            ],
+            "path": "src/plugins/expressions/common/execution/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-server.ExecutionContext.getExecutionContext",
             "type": "Function",
             "tags": [],
@@ -18017,6 +18138,21 @@
             ],
             "signature": [
               "Name"
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.ExpressionFunctionDefinition.deprecated",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "deprecated",
+            "description": [
+              "\nThe flag to mark the function as deprecated."
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
             "deprecated": false
@@ -19519,6 +19655,21 @@
             "type": "Function",
             "tags": [],
             "label": "isSyncColorsEnabled",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.IInterpreterRenderHandlers.isSyncTooltipsEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isSyncTooltipsEnabled",
             "description": [],
             "signature": [
               "() => boolean"
@@ -22806,6 +22957,18 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-common.ExpressionFunction.deprecated",
+            "type": "boolean",
+            "tags": [],
+            "label": "deprecated",
+            "description": [
+              "\nDeprecation flag."
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/expression_function.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-common.ExpressionFunction.telemetry",
             "type": "Function",
             "tags": [],
@@ -23208,6 +23371,16 @@
             "signature": [
               "string[]"
             ],
+            "path": "src/plugins/expressions/common/expression_functions/expression_function_parameter.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionFunctionParameter.deprecated",
+            "type": "boolean",
+            "tags": [],
+            "label": "deprecated",
+            "description": [],
             "path": "src/plugins/expressions/common/expression_functions/expression_function_parameter.ts",
             "deprecated": false
           },
@@ -28123,6 +28296,23 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-common.ExecutionContext.isSyncTooltipsEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isSyncTooltipsEnabled",
+            "description": [
+              "\nReturns the state (true|false) of the sync tooltips across panels switch."
+            ],
+            "signature": [
+              "(() => boolean) | undefined"
+            ],
+            "path": "src/plugins/expressions/common/execution/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-common.ExecutionContext.getExecutionContext",
             "type": "Function",
             "tags": [],
@@ -29659,6 +29849,19 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-common.ExpressionExecutionParams.syncTooltips",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "syncTooltips",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-common.ExpressionExecutionParams.inspectorAdapters",
             "type": "Object",
             "tags": [],
@@ -29756,6 +29959,21 @@
             ],
             "signature": [
               "Name"
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionFunctionDefinition.deprecated",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "deprecated",
+            "description": [
+              "\nThe flag to mark the function as deprecated."
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
             "deprecated": false
@@ -32566,6 +32784,21 @@
             "type": "Function",
             "tags": [],
             "label": "isSyncColorsEnabled",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.IInterpreterRenderHandlers.isSyncTooltipsEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isSyncTooltipsEnabled",
             "description": [],
             "signature": [
               "() => boolean"
@@ -40460,6 +40693,20 @@
             ]
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressions",
+        "id": "def-common.PointSeriesColumnNames",
+        "type": "Object",
+        "tags": [],
+        "label": "PointSeriesColumnNames",
+        "description": [],
+        "signature": [
+          "{ readonly X: \"x\"; readonly Y: \"y\"; readonly COLOR: \"color\"; readonly SIZE: \"size\"; readonly TEXT: \"text\"; }"
+        ],
+        "path": "src/plugins/expressions/common/expression_types/specs/pointseries.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {

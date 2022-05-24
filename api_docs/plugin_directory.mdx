@@ -3,7 +3,7 @@ id: kibDevDocsPluginDirectory
 slug: /kibana-dev-docs/api-meta/plugin-api-directory
 title: Directory
 summary: Directory of public APIs available through plugins or packages.
-date: 2022-05-23
+date: 2022-05-24
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
 warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
 ---
@@ -12,13 +12,13 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 
 | Count | Plugins or Packages with a <br /> public API | Number of teams | 
 |--------------|----------|------------------------|
-| 258 | 209 | 35 |
+| 280 | 209 | 43 |
 
 ### Public API health stats
 
 | API Count | Any Count | Missing comments | Missing exports | 
 |--------------|----------|-----------------|--------|
-| 26222 | 171 | 19770 | 870 |
+| 26262 | 171 | 19807 | 1220 |
 
 ## Plugin Directory
 
@@ -26,8 +26,9 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 |--------------|----------------|-----------|--------------|----------|---------------|--------|
 | <DocLink id="kibActionsPluginApi" text="actions"/> | [Response Ops](https://github.com/orgs/elastic/teams/response-ops) | - | 240 | 0 | 235 | 19 |
 | <DocLink id="kibAdvancedSettingsPluginApi" text="advancedSettings"/> | [Kibana Core](https://github.com/orgs/elastic/teams/kibana-core) | - | 23 | 0 | 19 | 1 |
+| <DocLink id="kibAiopsPluginApi" text="aiops"/> | [Machine Learning UI](https://github.com/orgs/elastic/teams/ml-ui) | AIOps plugin maintained by ML team. | 12 | 0 | 0 | 0 |
 | <DocLink id="kibAlertingPluginApi" text="alerting"/> | [Response Ops](https://github.com/orgs/elastic/teams/response-ops) | - | 359 | 0 | 350 | 19 |
-| <DocLink id="kibApmPluginApi" text="apm"/> | [APM UI](https://github.com/orgs/elastic/teams/apm-ui) | The user interface for Elastic APM | 40 | 0 | 40 | 51 |
+| <DocLink id="kibApmPluginApi" text="apm"/> | [APM UI](https://github.com/orgs/elastic/teams/apm-ui) | The user interface for Elastic APM | 40 | 0 | 40 | 52 |
 | <DocLink id="kibBannersPluginApi" text="banners"/> | [Kibana Core](https://github.com/orgs/elastic/teams/kibana-core) | - | 9 | 0 | 9 | 0 |
 | <DocLink id="kibBfetchPluginApi" text="bfetch"/> | [App Services](https://github.com/orgs/elastic/teams/kibana-app-services) | Considering using bfetch capabilities when fetching large amounts of data. This services supports batching HTTP requests and streaming responses back. | 78 | 1 | 69 | 2 |
 | <DocLink id="kibCanvasPluginApi" text="canvas"/> | [Kibana Presentation](https://github.com/orgs/elastic/teams/kibana-presentation) | Adds Canvas application to Kibana | 9 | 0 | 8 | 3 |
@@ -42,7 +43,7 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | <DocLink id="kibCustomIntegrationsPluginApi" text="customIntegrations"/> | [Fleet](https://github.com/orgs/elastic/teams/fleet) | Add custom data integrations so they can be displayed in the Fleet integrations app | 101 | 0 | 82 | 1 |
 | <DocLink id="kibDashboardPluginApi" text="dashboard"/> | [Kibana Presentation](https://github.com/orgs/elastic/teams/kibana-presentation) | Adds the Dashboard app to Kibana | 143 | 0 | 141 | 12 |
 | <DocLink id="kibDashboardEnhancedPluginApi" text="dashboardEnhanced"/> | [App Services](https://github.com/orgs/elastic/teams/kibana-app-services) | - | 52 | 0 | 51 | 0 |
-| <DocLink id="kibDataPluginApi" text="data"/> | [App Services](https://github.com/orgs/elastic/teams/kibana-app-services) | Data services are useful for searching and querying data from Elasticsearch. Helpful utilities include: a re-usable react query bar, KQL autocomplete, async search, Data Views (Index Patterns) and field formatters. | 3482 | 38 | 2869 | 19 |
+| <DocLink id="kibDataPluginApi" text="data"/> | [App Services](https://github.com/orgs/elastic/teams/kibana-app-services) | Data services are useful for searching and querying data from Elasticsearch. Helpful utilities include: a re-usable react query bar, KQL autocomplete, async search, Data Views (Index Patterns) and field formatters. | 3487 | 38 | 2873 | 20 |
 | <DocLink id="kibDataViewEditorPluginApi" text="dataViewEditor"/> | [App Services](https://github.com/orgs/elastic/teams/kibana-app-services) | This plugin provides the ability to create data views via a modal flyout from any kibana app | 14 | 0 | 7 | 0 |
 | <DocLink id="kibDataViewFieldEditorPluginApi" text="dataViewFieldEditor"/> | [App Services](https://github.com/orgs/elastic/teams/kibana-app-services) | Reusable data view field editor across Kibana | 42 | 0 | 37 | 3 |
 | <DocLink id="kibDataViewManagementPluginApi" text="dataViewManagement"/> | [App Services](https://github.com/orgs/elastic/teams/kibana-app-services) | Data view management app | 2 | 0 | 2 | 0 |
@@ -51,11 +52,11 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | <DocLink id="kibDevToolsPluginApi" text="devTools"/> | [Stack Management](https://github.com/orgs/elastic/teams/kibana-stack-management) | - | 10 | 0 | 8 | 2 |
 | <DocLink id="kibDiscoverPluginApi" text="discover"/> | [Data Discovery](https://github.com/orgs/elastic/teams/kibana-data-discovery) | This plugin contains the Discover application and the saved search embeddable. | 78 | 0 | 62 | 7 |
 | <DocLink id="kibDiscoverEnhancedPluginApi" text="discoverEnhanced"/> | [Data Discovery](https://github.com/orgs/elastic/teams/kibana-data-discovery) | - | 37 | 0 | 35 | 2 |
-| <DocLink id="kibEmbeddablePluginApi" text="embeddable"/> | [App Services](https://github.com/orgs/elastic/teams/kibana-app-services) | Adds embeddables service to Kibana | 486 | 0 | 396 | 4 |
+| <DocLink id="kibEmbeddablePluginApi" text="embeddable"/> | [App Services](https://github.com/orgs/elastic/teams/kibana-app-services) | Adds embeddables service to Kibana | 486 | 0 | 396 | 3 |
 | <DocLink id="kibEmbeddableEnhancedPluginApi" text="embeddableEnhanced"/> | [App Services](https://github.com/orgs/elastic/teams/kibana-app-services) | Extends embeddable plugin with more functionality | 14 | 0 | 14 | 0 |
 | <DocLink id="kibEncryptedSavedObjectsPluginApi" text="encryptedSavedObjects"/> | [Platform Security](https://github.com/orgs/elastic/teams/kibana-security) | This plugin provides encryption and decryption utilities for saved objects containing sensitive information. | 51 | 0 | 44 | 0 |
 | <DocLink id="kibEnterpriseSearchPluginApi" text="enterpriseSearch"/> | [Enterprise Search](https://github.com/orgs/elastic/teams/enterprise-search-frontend) | Adds dashboards for discovering and managing Enterprise Search products. | 2 | 0 | 2 | 0 |
-| <DocLink id="kibEsUiSharedPluginApi" text="esUiShared"/> | [Stack Management](https://github.com/orgs/elastic/teams/kibana-stack-management) | - | 112 | 3 | 108 | 3 |
+| <DocLink id="kibEsUiSharedPluginApi" text="esUiShared"/> | [Stack Management](https://github.com/orgs/elastic/teams/kibana-stack-management) | - | 114 | 3 | 110 | 3 |
 | <DocLink id="kibEventAnnotationPluginApi" text="eventAnnotation"/> | [Vis Editors](https://github.com/orgs/elastic/teams/kibana-vis-editors) | The Event Annotation service contains expressions for event annotations | 90 | 0 | 90 | 5 |
 | <DocLink id="kibEventLogPluginApi" text="eventLog"/> | [Response Ops](https://github.com/orgs/elastic/teams/response-ops) | - | 100 | 0 | 100 | 9 |
 | <DocLink id="kibExpressionErrorPluginApi" text="expressionError"/> | [Kibana Presentation](https://github.com/orgs/elastic/teams/kibana-presentation) | Adds 'error' renderer to expressions | 17 | 0 | 15 | 2 |
@@ -72,9 +73,9 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | <DocLink id="kibExpressionXYPluginApi" text="expressionXY"/> | [Vis Editors](https://github.com/orgs/elastic/teams/kibana-vis-editors) | Expression XY plugin adds a `xy` renderer and function to the expression plugin. The renderer will display the `xy` chart. | 143 | 0 | 133 | 14 |
 | <DocLink id="kibExpressionsPluginApi" text="expressions"/> | [App Services](https://github.com/orgs/elastic/teams/kibana-app-services) | Adds expression runtime to Kibana | 2176 | 17 | 1722 | 5 |
 | <DocLink id="kibFeaturesPluginApi" text="features"/> | [Kibana Core](https://github.com/orgs/elastic/teams/kibana-core) | - | 222 | 0 | 95 | 2 |
-| <DocLink id="kibFieldFormatsPluginApi" text="fieldFormats"/> | [App Services](https://github.com/orgs/elastic/teams/kibana-app-services) | Index pattern fields and ambiguous values formatters | 286 | 6 | 247 | 3 |
+| <DocLink id="kibFieldFormatsPluginApi" text="fieldFormats"/> | [App Services](https://github.com/orgs/elastic/teams/kibana-app-services) | Index pattern fields and ambiguous values formatters | 290 | 6 | 251 | 3 |
 | <DocLink id="kibFileUploadPluginApi" text="fileUpload"/> | [Machine Learning UI](https://github.com/orgs/elastic/teams/ml-ui) | The file upload plugin contains components and services for uploading a file, analyzing its data, and then importing the data into an Elasticsearch index. Supported file types include CSV, TSV, newline-delimited JSON and GeoJSON. | 62 | 0 | 62 | 2 |
-| <DocLink id="kibFleetPluginApi" text="fleet"/> | [Fleet](https://github.com/orgs/elastic/teams/fleet) | - | 1403 | 8 | 1281 | 10 |
+| <DocLink id="kibFleetPluginApi" text="fleet"/> | [Fleet](https://github.com/orgs/elastic/teams/fleet) | - | 1404 | 8 | 1282 | 10 |
 | <DocLink id="kibGlobalSearchPluginApi" text="globalSearch"/> | [Kibana Core](https://github.com/orgs/elastic/teams/kibana-core) | - | 68 | 0 | 14 | 5 |
 | globalSearchBar | [Kibana Core](https://github.com/orgs/elastic/teams/kibana-core) | - | 0 | 0 | 0 | 0 |
 | globalSearchProviders | [Kibana Core](https://github.com/orgs/elastic/teams/kibana-core) | - | 0 | 0 | 0 | 0 |
@@ -83,13 +84,13 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | <DocLink id="kibHomePluginApi" text="home"/> | [Kibana Core](https://github.com/orgs/elastic/teams/kibana-core) | - | 141 | 0 | 102 | 0 |
 | <DocLink id="kibIndexLifecycleManagementPluginApi" text="indexLifecycleManagement"/> | [Stack Management](https://github.com/orgs/elastic/teams/kibana-stack-management) | - | 4 | 0 | 4 | 0 |
 | <DocLink id="kibIndexManagementPluginApi" text="indexManagement"/> | [Stack Management](https://github.com/orgs/elastic/teams/kibana-stack-management) | - | 175 | 0 | 170 | 3 |
-| <DocLink id="kibInfraPluginApi" text="infra"/> | [Logs and Metrics UI](https://github.com/orgs/elastic/teams/logs-metrics-ui) | This plugin visualizes data from Filebeat and Metricbeat, and integrates with other Observability solutions | 34 | 0 | 31 | 5 |
+| <DocLink id="kibInfraPluginApi" text="infra"/> | [Logs and Metrics UI](https://github.com/orgs/elastic/teams/logs-metrics-ui) | This plugin visualizes data from Filebeat and Metricbeat, and integrates with other Observability solutions | 42 | 0 | 39 | 8 |
 | ingestPipelines | [Stack Management](https://github.com/orgs/elastic/teams/kibana-stack-management) | - | 0 | 0 | 0 | 0 |
 | inputControlVis | [Kibana Presentation](https://github.com/orgs/elastic/teams/kibana-presentation) | Adds Input Control visualization to Kibana | 0 | 0 | 0 | 0 |
 | <DocLink id="kibInspectorPluginApi" text="inspector"/> | [App Services](https://github.com/orgs/elastic/teams/kibana-app-services) | - | 123 | 2 | 96 | 4 |
 | <DocLink id="kibInteractiveSetupPluginApi" text="interactiveSetup"/> | [Platform Security](https://github.com/orgs/elastic/teams/kibana-security) | This plugin provides UI and APIs for the interactive setup mode. | 28 | 0 | 18 | 0 |
 | <DocLink id="kibKibanaOverviewPluginApi" text="kibanaOverview"/> | [Kibana Core](https://github.com/orgs/elastic/teams/kibana-core) | - | 6 | 0 | 6 | 0 |
-| <DocLink id="kibKibanaReactPluginApi" text="kibanaReact"/> | [App Services](https://github.com/orgs/elastic/teams/kibana-app-services) | - | 248 | 0 | 212 | 5 |
+| <DocLink id="kibKibanaReactPluginApi" text="kibanaReact"/> | [App Services](https://github.com/orgs/elastic/teams/kibana-app-services) | - | 250 | 0 | 213 | 5 |
 | kibanaUsageCollection | [Kibana Telemetry](https://github.com/orgs/elastic/teams/kibana-telemetry) | - | 0 | 0 | 0 | 0 |
 | <DocLink id="kibKibanaUtilsPluginApi" text="kibanaUtils"/> | [App Services](https://github.com/orgs/elastic/teams/kibana-app-services) | - | 615 | 3 | 420 | 9 |
 | <DocLink id="kibLensPluginApi" text="lens"/> | [Vis Editors](https://github.com/orgs/elastic/teams/kibana-vis-editors) | Visualization editor allowing to quickly and easily configure compelling visualizations to use on dashboards and canvas workpads. Exposes components to embed visualizations and link into the Lens editor from within other apps in Kibana. | 574 | 0 | 497 | 35 |
@@ -106,7 +107,7 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | <DocLink id="kibMonitoringCollectionPluginApi" text="monitoringCollection"/> | [Stack Monitoring](https://github.com/orgs/elastic/teams/stack-monitoring-ui) | - | 9 | 0 | 9 | 0 |
 | <DocLink id="kibNavigationPluginApi" text="navigation"/> | [App Services](https://github.com/orgs/elastic/teams/kibana-app-services) | - | 34 | 0 | 34 | 2 |
 | <DocLink id="kibNewsfeedPluginApi" text="newsfeed"/> | [Kibana Core](https://github.com/orgs/elastic/teams/kibana-core) | - | 17 | 0 | 17 | 0 |
-| <DocLink id="kibObservabilityPluginApi" text="observability"/> | [Observability UI](https://github.com/orgs/elastic/teams/observability-ui) | - | 376 | 2 | 373 | 30 |
+| <DocLink id="kibObservabilityPluginApi" text="observability"/> | [Observability UI](https://github.com/orgs/elastic/teams/observability-ui) | - | 377 | 2 | 374 | 30 |
 | <DocLink id="kibOsqueryPluginApi" text="osquery"/> | [Security asset management](https://github.com/orgs/elastic/teams/security-asset-management) | - | 13 | 0 | 13 | 0 |
 | painlessLab | [Stack Management](https://github.com/orgs/elastic/teams/kibana-stack-management) | - | 0 | 0 | 0 | 0 |
 | <DocLink id="kibPresentationUtilPluginApi" text="presentationUtil"/> | [Kibana Presentation](https://github.com/orgs/elastic/teams/kibana-presentation) | The Presentation Utility Plugin is a set of common, shared components and toolkits for solutions within the Presentation space, (e.g. Dashboards, Canvas). | 228 | 2 | 177 | 11 |
@@ -116,14 +117,14 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | <DocLink id="kibRuleRegistryPluginApi" text="ruleRegistry"/> | [RAC](https://github.com/orgs/elastic/teams/rac) | - | 202 | 0 | 174 | 9 |
 | <DocLink id="kibRuntimeFieldsPluginApi" text="runtimeFields"/> | [App Services](https://github.com/orgs/elastic/teams/kibana-app-services) | - | 24 | 0 | 19 | 2 |
 | <DocLink id="kibSavedObjectsPluginApi" text="savedObjects"/> | [Kibana Core](https://github.com/orgs/elastic/teams/kibana-core) | - | 192 | 2 | 151 | 5 |
-| <DocLink id="kibSavedObjectsManagementPluginApi" text="savedObjectsManagement"/> | [Kibana Core](https://github.com/orgs/elastic/teams/kibana-core) | - | 110 | 0 | 97 | 0 |
+| <DocLink id="kibSavedObjectsManagementPluginApi" text="savedObjectsManagement"/> | [Kibana Core](https://github.com/orgs/elastic/teams/kibana-core) | - | 125 | 0 | 112 | 0 |
 | <DocLink id="kibSavedObjectsTaggingPluginApi" text="savedObjectsTagging"/> | [Kibana Core](https://github.com/orgs/elastic/teams/kibana-core) | - | 76 | 0 | 70 | 3 |
 | <DocLink id="kibSavedObjectsTaggingOssPluginApi" text="savedObjectsTaggingOss"/> | [Kibana Core](https://github.com/orgs/elastic/teams/kibana-core) | - | 90 | 0 | 45 | 0 |
 | <DocLink id="kibScreenshotModePluginApi" text="screenshotMode"/> | [App Services](https://github.com/orgs/elastic/teams/kibana-app-services) | - | 32 | 0 | 13 | 0 |
 | <DocLink id="kibScreenshottingPluginApi" text="screenshotting"/> | [Kibana Reporting Services](https://github.com/orgs/elastic/teams/kibana-reporting-services) | Kibana Screenshotting Plugin | 28 | 0 | 8 | 4 |
 | searchprofiler | [Stack Management](https://github.com/orgs/elastic/teams/kibana-stack-management) | - | 0 | 0 | 0 | 0 |
-| <DocLink id="kibSecurityPluginApi" text="security"/> | [Platform Security](https://github.com/orgs/elastic/teams/kibana-security) | This plugin provides authentication and authorization features, and exposes functionality to understand the capabilities of the currently authenticated user. | 183 | 0 | 103 | 0 |
-| <DocLink id="kibSecuritySolutionPluginApi" text="securitySolution"/> | [Security solution](https://github.com/orgs/elastic/teams/security-solution) | - | 46 | 0 | 46 | 19 |
+| <DocLink id="kibSecurityPluginApi" text="security"/> | [Platform Security](https://github.com/orgs/elastic/teams/kibana-security) | This plugin provides authentication and authorization features, and exposes functionality to understand the capabilities of the currently authenticated user. | 179 | 0 | 99 | 0 |
+| <DocLink id="kibSecuritySolutionPluginApi" text="securitySolution"/> | [Security solution](https://github.com/orgs/elastic/teams/security-solution) | - | 49 | 0 | 49 | 21 |
 | <DocLink id="kibSessionViewPluginApi" text="sessionView"/> | [Security Team](https://github.com/orgs/elastic/teams/security-team) | - | 3 | 0 | 3 | 1 |
 | <DocLink id="kibSharePluginApi" text="share"/> | [App Services](https://github.com/orgs/elastic/teams/kibana-app-services) | Adds URL Service and sharing capabilities to Kibana | 113 | 0 | 54 | 10 |
 | <DocLink id="kibSharedUXPluginApi" text="sharedUX"/> | [Shared UX](https://github.com/orgs/elastic/teams/shared-ux) | A plugin providing components and services for shared user experiences in Kibana. | 4 | 0 | 0 | 0 |
@@ -136,7 +137,7 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | <DocLink id="kibTelemetryCollectionManagerPluginApi" text="telemetryCollectionManager"/> | [Kibana Telemetry](https://github.com/orgs/elastic/teams/kibana-telemetry) | - | 32 | 0 | 32 | 6 |
 | <DocLink id="kibTelemetryCollectionXpackPluginApi" text="telemetryCollectionXpack"/> | [Kibana Telemetry](https://github.com/orgs/elastic/teams/kibana-telemetry) | - | 1 | 0 | 1 | 0 |
 | <DocLink id="kibTelemetryManagementSectionPluginApi" text="telemetryManagementSection"/> | [Kibana Telemetry](https://github.com/orgs/elastic/teams/kibana-telemetry) | - | 11 | 0 | 10 | 0 |
-| <DocLink id="kibTimelinesPluginApi" text="timelines"/> | [Security solution](https://github.com/orgs/elastic/teams/security-solution) | - | 435 | 1 | 331 | 35 |
+| <DocLink id="kibTimelinesPluginApi" text="timelines"/> | [Security solution](https://github.com/orgs/elastic/teams/security-solution) | - | 436 | 1 | 332 | 35 |
 | <DocLink id="kibTransformPluginApi" text="transform"/> | [Machine Learning UI](https://github.com/orgs/elastic/teams/ml-ui) | This plugin provides access to the transforms features provided by Elastic. Transforms enable you to convert existing Elasticsearch indices into summarized indices, which provide opportunities for new insights and analytics. | 4 | 0 | 4 | 1 |
 | translations | [Kibana Localization](https://github.com/orgs/elastic/teams/kibana-localization) | - | 0 | 0 | 0 | 0 |
 | <DocLink id="kibTriggersActionsUiPluginApi" text="triggersActionsUi"/> | [Response Ops](https://github.com/orgs/elastic/teams/response-ops) | - | 374 | 0 | 360 | 34 |
@@ -223,7 +224,7 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | <DocLink id="kibKbnRuleDataUtilsPluginApi" text="@kbn/rule-data-utils"/> | [Owner missing] | - | 74 | 0 | 71 | 0 |
 | <DocLink id="kibKbnSecuritysolutionAutocompletePluginApi" text="@kbn/securitysolution-autocomplete"/> | [Owner missing] | Security Solution auto complete | 50 | 1 | 35 | 0 |
 | <DocLink id="kibKbnSecuritysolutionEsUtilsPluginApi" text="@kbn/securitysolution-es-utils"/> | [Owner missing] | security solution elastic search utilities to use across plugins such lists, security_solution, cases, etc... | 57 | 0 | 51 | 1 |
-| <DocLink id="kibKbnSecuritysolutionHookUtilsPluginApi" text="@kbn/securitysolution-hook-utils"/> | [Owner missing] | Security Solution utilities for React hooks | 14 | 0 | 6 | 0 |
+| <DocLink id="kibKbnSecuritysolutionHookUtilsPluginApi" text="@kbn/securitysolution-hook-utils"/> | [Owner missing] | Security Solution utilities for React hooks | 15 | 0 | 7 | 0 |
 | <DocLink id="kibKbnSecuritysolutionIoTsAlertingTypesPluginApi" text="@kbn/securitysolution-io-ts-alerting-types"/> | [Owner missing] | io ts utilities and types to be shared with plugins from the security solution project | 148 | 0 | 129 | 0 |
 | <DocLink id="kibKbnSecuritysolutionIoTsListTypesPluginApi" text="@kbn/securitysolution-io-ts-list-types"/> | [Owner missing] | io ts utilities and types to be shared with plugins from the security solution project | 458 | 1 | 446 | 0 |
 | <DocLink id="kibKbnSecuritysolutionIoTsTypesPluginApi" text="@kbn/securitysolution-io-ts-types"/> | [Owner missing] | io ts utilities and types to be shared with plugins from the security solution project | 48 | 0 | 26 | 0 |
@@ -254,6 +255,6 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | <DocLink id="kibKbnTypeSummarizerPluginApi" text="@kbn/type-summarizer"/> | [Owner missing] | - | 29 | 0 | 2 | 0 |
 | <DocLink id="kibKbnTypedReactRouterConfigPluginApi" text="@kbn/typed-react-router-config"/> | [Owner missing] | - | 83 | 0 | 83 | 1 |
 | <DocLink id="kibKbnUiThemePluginApi" text="@kbn/ui-theme"/> | [Owner missing] | - | 7 | 0 | 6 | 0 |
-| <DocLink id="kibKbnUtilityTypesPluginApi" text="@kbn/utility-types"/> | [Owner missing] | - | 28 | 0 | 10 | 1 |
+| <DocLink id="kibKbnUtilityTypesPluginApi" text="@kbn/utility-types"/> | [Owner missing] | - | 29 | 0 | 10 | 1 |
 | <DocLink id="kibKbnUtilsPluginApi" text="@kbn/utils"/> | [Owner missing] | - | 31 | 1 | 21 | 0 |
 
