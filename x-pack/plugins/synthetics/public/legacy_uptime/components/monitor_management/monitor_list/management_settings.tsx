@@ -89,7 +89,7 @@ const GET_API_KEY_GENERATE = i18n.translate(
 const GET_API_KEY_LABEL_DESCRIPTION = i18n.translate(
   'xpack.synthetics.monitorManagement.getAPIKeyLabel.description',
   {
-    defaultMessage: 'Use an API key to push monitors remotely from a CLI/CD pipeline.',
+    defaultMessage: 'Use an API key to push monitors remotely from a CLI or CD pipeline.',
   }
 );
 
