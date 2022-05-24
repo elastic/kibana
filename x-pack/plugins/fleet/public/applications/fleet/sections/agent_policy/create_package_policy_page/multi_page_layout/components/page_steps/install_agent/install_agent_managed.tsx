@@ -74,6 +74,7 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
       troubleshootLink: link,
       agentCount: enrolledAgentIds.length,
       showLoading: true,
+      poll: commandCopied,
     }),
   ];
 
