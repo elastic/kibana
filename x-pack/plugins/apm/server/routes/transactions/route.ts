@@ -22,7 +22,7 @@ import { getFailedTransactionRatePeriods } from './get_failed_transaction_rate_p
 import { getColdstartRatePeriods } from '../../lib/transaction_groups/get_coldstart_rate';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
-import { offsetRt } from '../../../common/offset_rt';
+import { offsetRt } from '../../../common/comparison_rt';
 
 const transactionGroupsMainStatisticsRoute = createApmServerRoute({
   endpoint:

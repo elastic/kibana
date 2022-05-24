@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import React, { useState } from 'react';
 import uuid from 'uuid';
+import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
@@ -149,7 +150,10 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
                 groupIds: JSON.stringify(
                   items.map(({ groupId: groupId }) => groupId).sort()
                 ),
-                offset: comparisonEnabled ? offset : undefined,
+                offset:
+                  comparisonEnabled && isTimeComparison(offset)
+                    ? offset
+                    : undefined,
               },
             },
           }

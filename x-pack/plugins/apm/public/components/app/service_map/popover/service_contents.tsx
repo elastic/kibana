@@ -16,6 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { NodeDataDefinition } from 'cytoscape';
+import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import type { ContentsProps } from '.';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
@@ -71,7 +72,10 @@ export function ServiceContents({
                 environment,
                 start,
                 end,
-                offset: comparisonEnabled ? offset : undefined,
+                offset:
+                  comparisonEnabled && isTimeComparison(offset)
+                    ? offset
+                    : undefined,
               },
             },
           }

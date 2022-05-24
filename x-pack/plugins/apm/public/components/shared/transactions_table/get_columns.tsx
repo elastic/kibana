@@ -16,6 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ValuesType } from 'utility-types';
+import { isTimeComparison } from '../time_comparison/get_comparison_options';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import {
   asMillisecondDuration,
@@ -110,7 +111,9 @@ export function getColumns({
             isLoading={transactionGroupDetailedStatisticsLoading}
             series={currentTimeseries}
             comparisonSeries={
-              comparisonEnabled ? previousTimeseries : undefined
+              comparisonEnabled && isTimeComparison(offset)
+                ? previousTimeseries
+                : undefined
             }
             valueLabel={asMillisecondDuration(latency)}
             comparisonSeriesColor={previousPeriodColor}
@@ -145,7 +148,9 @@ export function getColumns({
             isLoading={transactionGroupDetailedStatisticsLoading}
             series={currentTimeseries}
             comparisonSeries={
-              comparisonEnabled ? previousTimeseries : undefined
+              comparisonEnabled && isTimeComparison(offset)
+                ? previousTimeseries
+                : undefined
             }
             valueLabel={asTransactionRate(throughput)}
             comparisonSeriesColor={previousPeriodColor}
@@ -202,7 +207,9 @@ export function getColumns({
             isLoading={transactionGroupDetailedStatisticsLoading}
             series={currentTimeseries}
             comparisonSeries={
-              comparisonEnabled ? previousTimeseries : undefined
+              comparisonEnabled && isTimeComparison(offset)
+                ? previousTimeseries
+                : undefined
             }
             valueLabel={asPercent(errorRate, 1)}
             comparisonSeriesColor={previousPeriodColor}

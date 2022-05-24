@@ -28,7 +28,7 @@ import { ServiceDependencies } from '../../app/service_dependencies';
 import { ServiceLogs } from '../../app/service_logs';
 import { InfraOverview } from '../../app/infra_overview';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import { offsetRt } from '../../../../common/offset_rt';
+import { offsetRt } from '../../../../common/comparison_rt';
 
 function page({
   title,

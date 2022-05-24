@@ -7,4 +7,6 @@
 
 import * as t from 'io-ts';
 
-export const offsetRt = t.partial({ offset: t.string });
+export const offsetRt = t.partial({
+  offset: t.string,
+});

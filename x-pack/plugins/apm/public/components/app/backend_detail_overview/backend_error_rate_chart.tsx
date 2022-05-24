@@ -6,6 +6,8 @@
  */
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { usePreviousPeriodLabel } from '../../../hooks/use_previous_period_text';
+import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { asPercent } from '../../../../common/utils/formatters';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -55,7 +57,10 @@ export function BackendFailedTransactionRateChart({
             backendName,
             start,
             end,
-            offset: comparisonEnabled ? offset : undefined,
+            offset:
+              comparisonEnabled && isTimeComparison(offset)
+                ? offset
+                : undefined,
             kuery,
             environment,
           },
@@ -68,6 +73,8 @@ export function BackendFailedTransactionRateChart({
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
     ChartType.FAILED_TRANSACTION_RATE
   );
+
+  const previousPeriodLabel = usePreviousPeriodLabel();
   const timeseries = useMemo(() => {
     const specs: Array<TimeSeries<Coordinate>> = [];
 
@@ -87,15 +94,12 @@ export function BackendFailedTransactionRateChart({
         data: data.comparisonTimeseries,
         type: 'area',
         color: previousPeriodColor,
-        title: i18n.translate(
-          'xpack.apm.backendErrorRateChart.previousPeriodLabel',
-          { defaultMessage: 'Previous period' }
-        ),
+        title: previousPeriodLabel,
       });
     }
 
     return specs;
-  }, [data, currentPeriodColor, previousPeriodColor]);
+  }, [data, currentPeriodColor, previousPeriodColor, previousPeriodLabel]);
 
   return (
     <TimeseriesChart
