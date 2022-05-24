@@ -13,6 +13,7 @@ import { Actions, isAlert } from '.';
 import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 
 jest.mock('../../../../../detections/components/user_info', () => ({
   useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
@@ -20,9 +21,7 @@ jest.mock('../../../../../detections/components/user_info', () => ({
 jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
 }));
-jest.mock('../../../../../common/hooks/use_selector', () => ({
-  useShallowEqualSelector: jest.fn().mockReturnValue(mockTimelineModel),
-}));
+jest.mock('../../../../../common/hooks/use_selector');
 jest.mock(
   '../../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline',
   () => ({
@@ -87,6 +86,10 @@ const defaultProps = {
 };
 
 describe('Actions', () => {
+  beforeAll(() => {
+    (useShallowEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
+  });
+
   test('it renders a checkbox for selecting the event when `showCheckboxes` is `true`', () => {
     const wrapper = mount(
       <TestProviders>

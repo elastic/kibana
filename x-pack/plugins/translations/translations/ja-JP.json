@@ -23860,7 +23860,6 @@
     "xpack.securitySolution.console.commandValidation.unsupportedArg": "サポートされていない引数：{argName}",
     "xpack.securitySolution.console.unknownCommand.helpMessage": "使用可能なコマンドのリストについては、{helpCmd}を入力します",
     "xpack.securitySolution.console.unknownCommand.title": "不明なコマンド",
-    "xpack.securitySolution.consolesPopoverHeaderItem.buttonLabel": "エンドポイントコンソール",
     "xpack.securitySolution.containers.anomalies.errorFetchingAnomaliesData": "異常データをクエリできませんでした",
     "xpack.securitySolution.containers.anomalies.stackByJobId": "ジョブ",
     "xpack.securitySolution.containers.anomalies.title": "異常",

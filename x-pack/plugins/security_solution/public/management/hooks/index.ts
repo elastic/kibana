@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { ConsolesPopoverHeaderSectionItem } from './consoles_popover_header_section_item';
+export { useGetEndpointDetails } from './endpoint/use_get_endpoint_details';
+export { useShowEndpointResponseActionsConsole } from './endpoint/use_show_endpoint_response_actions_console';
