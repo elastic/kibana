@@ -47,7 +47,7 @@ export const buildMonitoredClusters = (clustersBuckets: any[]) => {
   return clustersBuckets.reduce((clusters, { key, doc_count: _, ...products }) => {
     clusters[key] = buildMonitoredProducts(products);
     return clusters;
-  }, {} as any);
+  }, {});
 };
 
 /**
@@ -75,10 +75,13 @@ const buildMonitoredProducts = (rawProducts: any) => {
 };
 
 const buildMonitoredEntities = (entitiesBuckets: any[]) => {
-  return entitiesBuckets.reduce((entities, { key, key_as_string, doc_count: _, ...metricsets }) => {
-    entities[key_as_string || key] = buildMonitoredMetricsets(metricsets);
-    return entities;
-  }, {} as any);
+  return entitiesBuckets.reduce(
+    (entities, { key, key_as_string: keyAsString, doc_count: _, ...metricsets }) => {
+      entities[keyAsString || key] = buildMonitoredMetricsets(metricsets);
+      return entities;
+    },
+    {}
+  );
 };
 
 const buildMonitoredMetricsets = (rawMetricsets: any) => {
@@ -91,7 +94,7 @@ const buildMonitoredMetricsets = (rawMetricsets: any) => {
           lastSeen: lastSeen.value_as_string,
         };
         return metricsets;
-      }, {} as any);
+      }, {});
     }
   );
 
