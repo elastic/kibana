@@ -7478,7 +7478,6 @@
     "xpack.apm.home.infraTabLabel": "Infrastructure",
     "xpack.apm.home.serviceLogsTabLabel": "Logs",
     "xpack.apm.home.serviceMapTabLabel": "Carte des services",
-    "xpack.apm.infra.announcement": "Données sur les infrastructures bientôt disponibles",
     "xpack.apm.inspectButtonText": "Inspecter",
     "xpack.apm.instancesLatencyDistributionChartLegend": "Instances",
     "xpack.apm.instancesLatencyDistributionChartLegend.previousPeriod": "Période précédente",

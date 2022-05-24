@@ -269,14 +269,16 @@ export const serviceDetail = {
         }),
         element: <ServiceProfiling />,
       }),
-      '/services/{serviceName}/infra': page({
-        tab: 'infra',
+      '/services/{serviceName}/infrastructure': page({
+        tab: 'infrastructure',
         title: i18n.translate('xpack.apm.views.infra.title', {
           defaultMessage: 'Infrastructure',
         }),
         element: <InfraOverview />,
         searchBarOptions: {
-          hidden: true,
+          showKueryBar: false,
+          showTimeComparison: false,
+          showTransactionTypeSelector: false,
         },
       }),
       '/services/{serviceName}/': {
