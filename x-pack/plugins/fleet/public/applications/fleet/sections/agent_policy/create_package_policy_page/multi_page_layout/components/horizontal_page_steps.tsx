@@ -48,6 +48,7 @@ export const PageSteps: React.FC<{
     return {
       title,
       status: getStepStatus(currentStep, index, currentStepComplete),
+      onClick: () => {},
     };
   }) as EuiStepsHorizontalProps['steps'];
 

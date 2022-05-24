@@ -139,7 +139,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     namespace: 'default',
     policy_id: '',
     enabled: true,
-    output_id: '', // TODO: Blank for now as we only support default output
+    output_id: '',
     inputs: [],
   });
 
