@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiLink, EuiSteps, EuiSpacer } from '@elastic/eui';
 
@@ -38,6 +38,7 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
   const fleetServerHosts = useMemo(() => {
     return settings?.fleet_server_hosts || [];
   }, [settings]);
+  const [commandCopied, setCommandCopied] = useState(false);
 
   if (!enrollmentAPIKey) {
     return (
@@ -64,7 +65,9 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
       installCommand: installManagedCommands,
       apiKeyData: { item: enrollmentAPIKey },
       selectedApiKeyId: enrollmentAPIKey.id,
-      isComplete: !!enrolledAgentIds.length,
+      isComplete: commandCopied || !!enrolledAgentIds.length,
+      fullCopyButton: true,
+      onCopy: () => setCommandCopied(true),
     }),
     AgentEnrollmentConfirmationStep({
       selectedPolicyId: agentPolicy?.id,

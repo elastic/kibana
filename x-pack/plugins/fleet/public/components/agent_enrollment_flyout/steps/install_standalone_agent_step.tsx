@@ -20,16 +20,27 @@ export const InstallStandaloneAgentStep = ({
   installCommand,
   isK8s,
   isComplete,
+  fullCopyButton,
+  onCopy,
 }: {
   installCommand: CommandsByPlatform;
   isK8s?: K8sMode;
   isComplete?: boolean;
+  fullCopyButton?: boolean;
+  onCopy?: () => void;
 }): EuiContainedStepProps => {
   return {
     title: i18n.translate('xpack.fleet.agentEnrollment.stepEnrollAndRunAgentTitle', {
       defaultMessage: 'Install Elastic Agent on your host',
     }),
-    children: <InstallSection installCommand={installCommand} isK8s={isK8s} />,
+    children: (
+      <InstallSection
+        installCommand={installCommand}
+        isK8s={isK8s}
+        onCopy={onCopy}
+        fullCopyButton={fullCopyButton}
+      />
+    ),
     status: isComplete ? 'complete' : undefined,
   };
 };
