@@ -10,13 +10,38 @@ import type { ReducerAction } from 'react';
 
 import type { UseFetchStreamParamsDefault } from './use_fetch_stream';
 
-type GeneratorError = string | undefined;
+type GeneratorError = string | null;
 
+/**
+ * Uses `fetch` and `getReader` to receive an API call as a stream with multiple chunks
+ * as soon as they are available. `fetchStream` is implemented as a generator that will
+ * yield/emit chunks and can be consumed for example like this:
+ *
+ * ```js
+ * for await (const [error, chunk] of fetchStream(...) {
+ *     ...
+ * }
+ * ```
+ *
+ * @param endpoint     — The API endpoint including the Kibana basepath.
+ * @param abortCtrl    — Abort controller for cancelling the request.
+ * @param body         — The request body. For now all requests are POST.
+ * @param ndjson       — Boolean flag to receive the stream as a raw string or NDJSON.
+ * @param bufferBounce — A buffer timeout which defaults to 100ms. This collects stream
+ *                       chunks for the time of the timeout and only then yields/emits them.
+ *                       This is useful so we are more in control of passing on data to
+ *                       consuming React components and we won't hammer the DOM with
+ *                       updates on every received chunk.
+ *
+ * @returns            - Yields/emits items in the format [error, value]
+ *                       inspired by node's recommended error convention for callbacks.
+ */
 export async function* fetchStream<I extends UseFetchStreamParamsDefault, BasePath extends string>(
   endpoint: `${BasePath}${I['endpoint']}`,
   abortCtrl: React.MutableRefObject<AbortController>,
   body: I['body'],
-  ndjson = true
+  ndjson = true,
+  bufferBounce = 100
 ): AsyncGenerator<
   [GeneratorError, ReducerAction<I['reducer']> | Array<ReducerAction<I['reducer']>> | undefined]
 > {
@@ -44,7 +69,6 @@ export async function* fetchStream<I extends UseFetchStreamParamsDefault, BasePa
     // const reader = stream.body.pipeThrough(new TextDecoderStream()).getReader();
     const reader = stream.body.getReader();
 
-    const bufferBounce = 100;
     let partial = '';
     let actionBuffer: Array<ReducerAction<I['reducer']>> = [];
     let lastCall = 0;
@@ -70,7 +94,7 @@ export async function* fetchStream<I extends UseFetchStreamParamsDefault, BasePa
         const now = Date.now();
 
         if (now - lastCall >= bufferBounce && actionBuffer.length > 0) {
-          yield [undefined, actionBuffer];
+          yield [null, actionBuffer];
           actionBuffer = [];
           lastCall = now;
 
@@ -86,11 +110,11 @@ export async function* fetchStream<I extends UseFetchStreamParamsDefault, BasePa
           >((resolve) => {
             setTimeout(() => {
               if (actionBuffer.length > 0) {
-                resolve([undefined, actionBuffer]);
+                resolve([null, actionBuffer]);
                 actionBuffer = [];
                 lastCall = now;
               } else {
-                resolve([undefined, []]);
+                resolve([null, []]);
               }
             }, bufferBounce + 10);
           });
@@ -103,10 +127,10 @@ export async function* fetchStream<I extends UseFetchStreamParamsDefault, BasePa
       }
     }
 
-    // The reader might finish with a partially filled actionBuffer so
+    // The stream reader might finish with a partially filled actionBuffer so
     // we need to clear it once more after the request is done.
     if (actionBuffer.length > 0) {
-      yield [undefined, actionBuffer];
+      yield [null, actionBuffer];
       actionBuffer.length = 0;
     }
   }

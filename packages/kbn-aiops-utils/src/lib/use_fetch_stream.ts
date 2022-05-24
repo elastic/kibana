@@ -104,7 +104,7 @@ export function useFetchStream<I extends UseFetchStreamParamsDefault, BasePath e
       UseFetchStreamCustomReducerParams,
       BasePath
     >(endpoint, abortCtrl, body, options !== undefined)) {
-      if (fetchStreamError) {
+      if (fetchStreamError !== null) {
         setError(fetchStreamError);
       } else if (actions.length > 0) {
         dispatch(actions as ReducerAction<I['reducer']>);
