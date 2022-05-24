@@ -120,9 +120,6 @@ and then use that field for analysis and visualizations,
 the same way you do with other fields.
 
 . Click *Add a field*.
-+
-[role="screenshot"]
-image:images/add-field-to-data-view.png[Dropdown menu located next to {data-source} field with item for adding a field to a {data-source}, width=50%]
 
 . In the *Create field* form, enter `hello` for the name.
 
