@@ -9,7 +9,6 @@
 /* eslint-disable @kbn/eslint/no_export_all */
 
 export * from './expression_items';
-export * from './constants';
 export * from './index_controls';
 export * from './lib';
 export * from './types';
