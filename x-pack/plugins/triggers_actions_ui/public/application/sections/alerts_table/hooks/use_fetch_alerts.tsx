@@ -227,7 +227,7 @@ const useFetchAlerts = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [skip, data, featureIds, fields, query]
+    [skip, data, featureIds, query]
   );
 
   useEffect(() => {

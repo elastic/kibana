@@ -42,8 +42,8 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-import type { CellValueElementProps } from '@kbn/timelines-plugin/common';
 import { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import React from 'react';
 import { TypeRegistry } from './application/type_registry';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
@@ -424,36 +424,29 @@ export interface AlertsTableProps {
   flyoutState: AlertsTableFlyoutState;
 }
 
+// TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
 export type GetRenderCellValue = ({
   setFlyoutAlert,
 }: {
-  setFlyoutAlert?: (data: any) => void;
-}) => (props: CellValueElementProps) => React.ReactNode;
+  setFlyoutAlert?: (data: unknown) => void;
+}) => (props: unknown) => React.ReactNode;
 
+export type AlertTableFlyoutComponent =
+  | React.FunctionComponent<AlertsTableFlyoutBaseProps>
+  | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>
+  | null;
 export interface AlertsTableConfigurationRegistry {
   id: string;
   columns: EuiDataGridColumn[];
   externalFlyout?: {
-    header?:
-      | React.FunctionComponent<AlertsTableFlyoutBaseProps>
-      | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>;
-    body:
-      | React.FunctionComponent<AlertsTableFlyoutBaseProps>
-      | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>;
-    footer?:
-      | React.FunctionComponent<AlertsTableFlyoutBaseProps>
-      | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>;
+    header?: AlertTableFlyoutComponent;
+    body?: AlertTableFlyoutComponent;
+    footer?: AlertTableFlyoutComponent;
   };
   internalFlyout?: {
-    header?:
-      | React.FunctionComponent<AlertsTableFlyoutBaseProps>
-      | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>;
-    body:
-      | React.FunctionComponent<AlertsTableFlyoutBaseProps>
-      | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>;
-    footer?:
-      | React.FunctionComponent<AlertsTableFlyoutBaseProps>
-      | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>;
+    header?: AlertTableFlyoutComponent;
+    body?: AlertTableFlyoutComponent;
+    footer?: AlertTableFlyoutComponent;
   };
   sort?: SortCombinations[];
   getRenderCellValue: GetRenderCellValue;

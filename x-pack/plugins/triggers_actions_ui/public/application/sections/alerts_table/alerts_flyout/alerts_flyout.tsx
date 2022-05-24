@@ -18,7 +18,11 @@ import {
   EuiFlyoutFooter,
 } from '@elastic/eui';
 import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-import { AlertsTableConfigurationRegistry, AlertsTableFlyoutState } from '../../../../types';
+import {
+  AlertsTableConfigurationRegistry,
+  AlertsTableFlyoutState,
+  AlertTableFlyoutComponent,
+} from '../../../../types';
 
 const AlertsFlyoutHeader = lazy(() => import('./alerts_flyout_header'));
 const PAGINATION_LABEL = i18n.translate(
@@ -48,15 +52,15 @@ export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
   onClose,
   onPaginate,
 }: AlertsFlyoutProps) => {
-  let Header: AlertsTableConfigurationRegistry['externalFlyout']['header'];
-  let Body: AlertsTableConfigurationRegistry['externalFlyout']['body'] | null;
-  let Footer: AlertsTableConfigurationRegistry['externalFlyout']['footer'] | null;
+  let Header: AlertTableFlyoutComponent;
+  let Body: AlertTableFlyoutComponent;
+  let Footer: AlertTableFlyoutComponent;
 
   switch (state) {
     case AlertsTableFlyoutState.external:
       Header = alertsTableConfiguration?.externalFlyout?.header ?? AlertsFlyoutHeader;
-      Body = alertsTableConfiguration?.externalFlyout?.body;
-      Footer = alertsTableConfiguration?.externalFlyout?.footer;
+      Body = alertsTableConfiguration?.externalFlyout?.body ?? null;
+      Footer = alertsTableConfiguration?.externalFlyout?.footer ?? null;
       break;
     case AlertsTableFlyoutState.internal:
       Header = alertsTableConfiguration?.internalFlyout?.header ?? AlertsFlyoutHeader;
@@ -92,9 +96,11 @@ export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <Suspense fallback={null}>
-          <Body {...passedProps} />
-        </Suspense>
+        {Body && (
+          <Suspense fallback={null}>
+            <Body {...passedProps} />
+          </Suspense>
+        )}
       </EuiFlyoutBody>
       {Footer ? (
         <EuiFlyoutFooter>

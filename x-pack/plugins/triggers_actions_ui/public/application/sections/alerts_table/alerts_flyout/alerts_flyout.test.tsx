@@ -37,6 +37,10 @@ const props = {
     internalFlyout: {
       body: () => <h3>Internal flyout body</h3>,
     },
+    getRenderCellValue: () =>
+      jest.fn().mockImplementation((rcvProps) => {
+        return `${rcvProps.colIndex}:${rcvProps.rowIndex}`;
+      }),
   },
   flyoutIndex: 0,
   alertsCount: 4,

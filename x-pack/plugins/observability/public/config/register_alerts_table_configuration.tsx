@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { AlertsTableConfigurationRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
+import type {
+  AlertsTableConfigurationRegistryContract,
+  AlertTableFlyoutComponent,
+  GetRenderCellValue,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { lazy } from 'react';
 
 import { observabilityFeatureId } from '../../common';
@@ -30,11 +34,11 @@ const registerAlertsTableConfiguration = (registry: AlertsTableConfigurationRegi
     id: observabilityFeatureId,
     columns: alertO11yColumns,
     externalFlyout: {
-      header: AlertsPageFlyoutHeaderLazy,
-      body: AlertsPageFlyoutBodyLazy,
-      footer: AlertsFlyoutFooterLazy,
+      header: AlertsPageFlyoutHeaderLazy as AlertTableFlyoutComponent,
+      body: AlertsPageFlyoutBodyLazy as AlertTableFlyoutComponent,
+      footer: AlertsFlyoutFooterLazy as AlertTableFlyoutComponent,
     },
-    getRenderCellValue,
+    getRenderCellValue: getRenderCellValue as GetRenderCellValue,
   });
 };
 

@@ -6,7 +6,6 @@
  */
 
 import { ALERT_UUID } from '@kbn/rule-data-utils';
-import type { CellValueElementProps, TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import React, { useState, Suspense, lazy, useCallback, useMemo, useEffect } from 'react';
 import {
   EuiDataGrid,
@@ -133,14 +132,14 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       const renderCellValue = props.alertsTableConfiguration.getRenderCellValue({
         setFlyoutAlert: handleFlyoutAlert,
       });
-      const data: TimelineNonEcsData[] = [];
+      const data: Array<{ field: string; value: string[] }> = [];
       Object.entries(alert ?? {}).forEach(([key, value]) => {
         data.push({ field: key, value });
       });
       return renderCellValue({
         ...rcvProps,
         data,
-      } as unknown as CellValueElementProps);
+      });
     },
     [alerts, handleFlyoutAlert, props.alertsTableConfiguration]
   );

@@ -56,7 +56,28 @@ describe('AlertsTable', () => {
     return fetchAlertsData;
   };
 
+  const alertsTableConfiguration = {
+    id: '',
+    columns,
+    sort: [],
+    externalFlyout: {
+      header: jest.fn(),
+      body: jest.fn(),
+      footer: jest.fn(),
+    },
+    internalFlyout: {
+      header: jest.fn(),
+      body: jest.fn(),
+      footer: jest.fn(),
+    },
+    getRenderCellValue: () =>
+      jest.fn().mockImplementation((props) => {
+        return `${props.colIndex}:${props.rowIndex}`;
+      }),
+  };
+
   const tableProps = {
+    alertsTableConfiguration,
     columns,
     bulkActions: [],
     deletedEventIds: [],
@@ -64,10 +85,8 @@ describe('AlertsTable', () => {
     pageSize: 1,
     pageSizeOptions: [1, 10, 20, 50, 100],
     leadingControlColumns: [],
-    renderCellValue: jest.fn().mockImplementation((props) => {
-      return `${props.colIndex}:${props.rowIndex}`;
-    }),
     showCheckboxes: false,
+    showExpandToDetails: true,
     trailingControlColumns: [],
     alerts,
     flyoutState: AlertsTableFlyoutState.internal,

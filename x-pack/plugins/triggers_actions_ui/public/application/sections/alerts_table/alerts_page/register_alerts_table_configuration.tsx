@@ -6,6 +6,7 @@
  */
 
 import { lazy } from 'react';
+import { get } from 'lodash';
 import { PLUGIN_ID } from '../../../../common/constants';
 import { AlertsTableConfigurationRegistry } from '../../../../types';
 import { TypeRegistry } from '../../../type_registry';
@@ -48,6 +49,12 @@ export function registerAlertsTableConfiguration({
     externalFlyout: {
       header: AlertsPageFlyoutHeader,
       body: AlertsPageFlyoutBody,
+    },
+    getRenderCellValue: () => (props) => {
+      const myProps = props as any;
+      // any is required here to improve typescript performance
+      const value = get(myProps.data, myProps.field, [])[0] as string;
+      return value ?? 'N/A';
     },
   });
 }

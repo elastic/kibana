@@ -43,6 +43,18 @@ const defaultPagination = {
 const emptyConfiguration = {
   id: '',
   columns: [],
+  sort: [],
+  externalFlyout: {
+    header: () => null,
+    body: () => null,
+    footer: () => null,
+  },
+  internalFlyout: {
+    header: () => null,
+    body: () => null,
+    footer: () => null,
+  },
+  getRenderCellValue: () => () => null,
 };
 
 const defaultSort: estypes.SortCombinations[] = [
@@ -149,6 +161,7 @@ const AlertsPage: React.FunctionComponent = () => {
   };
 
   const tableProps = {
+    alertsTableConfiguration,
     columns: alertsTableConfiguration.columns,
     consumers,
     bulkActions: [],
@@ -163,6 +176,7 @@ const AlertsPage: React.FunctionComponent = () => {
       return value ?? 'N/A';
     },
     showCheckboxes,
+    showExpandToDetails: true,
     trailingControlColumns: [],
     useFetchAlertsData,
     alerts,

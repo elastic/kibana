@@ -38,6 +38,8 @@ export type {
   AlertsTableConfigurationRegistryContract,
   AlertsTableFlyoutBaseProps,
   RuleEventLogListProps,
+  AlertTableFlyoutComponent,
+  GetRenderCellValue,
 } from './types';
 
 export { AlertsTableFlyoutState } from './types';
