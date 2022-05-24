@@ -69,4 +69,21 @@ describe('get kuery fields', () => {
       'trace.id',
     ]);
   });
+
+  it('returns multiple fields with multiple logical operators', () => {
+    const kuery =
+      '(service.name:opbeans-* OR service.name:kibana) and (service.environment:production)';
+    const kueryNode = fromKueryExpression(kuery);
+    expect(getKueryFields([kueryNode])).toEqual([
+      'service.name',
+      'service.name',
+      'service.environment',
+    ]);
+  });
+
+  it('do not return if kuery field is null', () => {
+    const kuery = 'opbean';
+    const kueryNode = fromKueryExpression(kuery);
+    expect(getKueryFields([kueryNode])).toEqual([]);
+  });
 });
