@@ -8,7 +8,7 @@
 
 import {
   extractUnknownDocFailureReason,
-  extractIgnoredUnknownDocs,
+  extractDiscardedUnknownDocs,
   fatalReasonDocumentExceedsMaxBatchSizeBytes,
 } from './extract_errors';
 
@@ -36,10 +36,10 @@ describe('extractUnknownDocFailureReason', () => {
   });
 });
 
-describe('extractIgnoredUnknownDocs', () => {
+describe('extractDiscardedUnknownDocs', () => {
   it('generates the correct error message', () => {
     expect(
-      extractIgnoredUnknownDocs([
+      extractDiscardedUnknownDocs([
         {
           id: 'unknownType:12',
           type: 'unknownType',

@@ -51,33 +51,6 @@ const getTargetIndices = ({
   ];
 };
 
-const getNoTypeDocumentsQuery = (): estypes.QueryDslQueryContainer => {
-  return {
-    bool: {
-      must_not: {
-        exists: {
-          field: 'type',
-        },
-      },
-    },
-  };
-};
-
-const getNoTypeDocuments = async (esClient: IScopedClusterClient, targetIndices: string[]) => {
-  const query = getNoTypeDocumentsQuery();
-  const body = await esClient.asInternalUser.search<SavedObjectsRawDocSource>({
-    index: targetIndices,
-    body: {
-      size: 1000,
-      query,
-    },
-  });
-
-  const { hits: unknownDocs } = body.hits;
-
-  return unknownDocs.map((doc) => ({ id: doc._id, type: 'unknown' }));
-};
-
 const getNonRegisteredTypesQuery = (knownTypes: string[]): estypes.QueryDslQueryContainer => {
   return {
     bool: {
@@ -104,13 +77,15 @@ const getNonRegisteredTypesDocuments = async (
       aggs: {
         unknownTypesAggregation: {
           terms: {
+            // assign type __UNKNOWN__ to those documents that don't define one
+            missing: '__UNKNOWN__',
             field: 'type',
-            size: 1000,
+            size: 1000, // collect up to 1000 non-registered types
           },
           aggs: {
             docs: {
               top_hits: {
-                size: 100,
+                size: 100, // collect up to 100 docs for each non-registered type
                 _source: {
                   excludes: ['*'],
                 },
@@ -153,14 +128,7 @@ const getUnknownSavedObjects = async ({
     kibanaIndex,
     kibanaVersion,
   });
-  const noTypeDocumentsP = getNoTypeDocuments(esClient, targetIndices);
-  const nonRegisteredTypesDocumentsP = getNonRegisteredTypesDocuments(
-    esClient,
-    targetIndices,
-    knownTypes
-  );
-
-  return flatten(await Promise.all([noTypeDocumentsP, nonRegisteredTypesDocumentsP]));
+  return await getNonRegisteredTypesDocuments(esClient, targetIndices, knownTypes);
 };
 
 export const getUnknownTypesDeprecations = async (
@@ -226,25 +194,13 @@ export const deleteUnknownTypeObjects = async ({
     kibanaIndex,
     kibanaVersion,
   });
-  const noTypeQuery = getNoTypeDocumentsQuery();
-
-  const deleteNoTypeDocuments = esClient.asInternalUser.deleteByQuery({
-    index: targetIndices,
-    wait_for_completion: false,
-    body: {
-      query: noTypeQuery,
-    },
-  });
-
   const nonRegisteredTypesQuery = getNonRegisteredTypesQuery(knownTypes);
 
-  const deleteNonRegisteredTypesDocuments = esClient.asInternalUser.deleteByQuery({
+  await esClient.asInternalUser.deleteByQuery({
     index: targetIndices,
     wait_for_completion: false,
     body: {
       query: nonRegisteredTypesQuery,
     },
   });
-
-  await Promise.all([deleteNoTypeDocuments, deleteNonRegisteredTypesDocuments]);
 };

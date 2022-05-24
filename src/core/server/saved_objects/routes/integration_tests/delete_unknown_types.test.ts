@@ -63,23 +63,8 @@ describe('POST /internal/saved_objects/deprecations/_delete_unknown_types', () =
       .post('/internal/saved_objects/deprecations/_delete_unknown_types')
       .expect(200);
 
-    expect(elasticsearchClient.asInternalUser.deleteByQuery).toHaveBeenCalledTimes(2);
-    expect(elasticsearchClient.asInternalUser.deleteByQuery).toHaveBeenNthCalledWith(1, {
-      index: ['known-type-index_8.0.0'],
-      wait_for_completion: false,
-      body: {
-        query: {
-          bool: {
-            must_not: {
-              exists: {
-                field: 'type',
-              },
-            },
-          },
-        },
-      },
-    });
-    expect(elasticsearchClient.asInternalUser.deleteByQuery).toHaveBeenNthCalledWith(2, {
+    expect(elasticsearchClient.asInternalUser.deleteByQuery).toHaveBeenCalledTimes(1);
+    expect(elasticsearchClient.asInternalUser.deleteByQuery).toHaveBeenCalledWith({
       index: ['known-type-index_8.0.0'],
       wait_for_completion: false,
       body: {

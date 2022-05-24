@@ -73,7 +73,7 @@ export function indexBelongsToLaterVersion(indexName: string, kibanaVersion: str
 }
 
 /**
- * Add new filter.must_not clauses to the given query
+ * Add new must_not clauses to the given query
  * in order to filter out the specified types
  * @param boolQuery the bool query to be enriched
  * @param types the types to be filtered out

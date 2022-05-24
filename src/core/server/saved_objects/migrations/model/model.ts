@@ -24,7 +24,7 @@ import {
   extractTransformFailuresReason,
   extractUnknownDocFailureReason,
   fatalReasonDocumentExceedsMaxBatchSizeBytes,
-  extractIgnoredUnknownDocs,
+  extractDiscardedUnknownDocs,
 } from './extract_errors';
 import type { ExcludeRetryableEsError } from './types';
 import {
@@ -391,7 +391,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       // thus, we can ignore unknown documents and proceed with the migration
       logs = [
         ...stateP.logs,
-        { level: 'warning', message: extractIgnoredUnknownDocs(res.right.unknownDocs) },
+        { level: 'warning', message: extractDiscardedUnknownDocs(res.right.unknownDocs) },
       ];
 
       const unknownTypes = [...new Set(res.right.unknownDocs.map(({ type }) => type))];

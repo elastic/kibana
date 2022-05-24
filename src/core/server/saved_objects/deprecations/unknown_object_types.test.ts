@@ -14,12 +14,31 @@ import { typeRegistryMock } from '../saved_objects_type_registry.mock';
 import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
 import { SavedObjectsType } from '../..';
 
-const createSearchResponse = (count: number): estypes.SearchResponse => {
+const createSearchResponse = (typeCount: number, docCount: number = 1): estypes.SearchResponse => {
   return {
+    took: 0,
+    timed_out: false,
+    _shards: {
+      total: 1,
+      successful: 1,
+      skipped: 0,
+      failed: 0,
+    },
     hits: {
-      total: count,
-      max_score: 0,
-      hits: new Array(count).fill({}),
+      total: {
+        value: typeCount,
+        relation: 'eq',
+      },
+      max_score: null,
+      hits: [],
+    },
+    aggregations: {
+      unknownTypesAggregation: {
+        buckets: new Array(typeCount).fill({
+          type: 'someType',
+          docs: { hits: { hits: new Array(docCount).fill({ _id: 'someId' }) } },
+        }),
+      },
     },
   } as estypes.SearchResponse;
 };
@@ -59,27 +78,15 @@ describe('unknown saved object types deprecation', () => {
         kibanaVersion,
       });
 
-      expect(esClient.asInternalUser.search).toHaveBeenCalledTimes(2);
-
-      expect(esClient.asInternalUser.search).toHaveBeenNthCalledWith(1, {
-        index: ['foo-index', 'bar-index'],
-        body: {
-          size: 1000,
-          query: {
-            bool: {
-              must_not: { exists: { field: 'type' } },
-            },
-          },
-        },
-      });
-
-      expect(esClient.asInternalUser.search).toHaveBeenNthCalledWith(2, {
+      expect(esClient.asInternalUser.search).toHaveBeenCalledTimes(1);
+      expect(esClient.asInternalUser.search).toHaveBeenCalledWith({
         index: ['foo-index', 'bar-index'],
         body: {
           size: 0,
           aggs: {
             unknownTypesAggregation: {
               terms: {
+                missing: '__UNKNOWN__',
                 field: 'type',
                 size: 1000,
               },
@@ -155,24 +162,9 @@ describe('unknown saved object types deprecation', () => {
         kibanaVersion,
       });
 
-      expect(esClient.asInternalUser.deleteByQuery).toHaveBeenCalledTimes(2);
-      expect(esClient.asInternalUser.deleteByQuery).toHaveBeenNthCalledWith(1, {
-        index: ['foo-index', 'bar-index'],
-        wait_for_completion: false,
-        body: {
-          query: {
-            bool: {
-              must_not: {
-                exists: {
-                  field: 'type',
-                },
-              },
-            },
-          },
-        },
-      });
+      expect(esClient.asInternalUser.deleteByQuery).toHaveBeenCalledTimes(1);
 
-      expect(esClient.asInternalUser.deleteByQuery).toHaveBeenNthCalledWith(2, {
+      expect(esClient.asInternalUser.deleteByQuery).toHaveBeenCalledWith({
         index: ['foo-index', 'bar-index'],
         wait_for_completion: false,
         body: {

@@ -36,7 +36,7 @@ export function extractTransformFailuresReason(
   );
 }
 
-export function extractIgnoredUnknownDocs(unknownDocs: CheckForUnknownDocsFoundDoc[]): string {
+export function extractDiscardedUnknownDocs(unknownDocs: CheckForUnknownDocsFoundDoc[]): string {
   return (
     `Kibana has been configured to discard unknown documents for this migration.\n` +
     `Therefore, the following documents with unknown types will not be taken into account and they will not be available after the migration:\n` +
