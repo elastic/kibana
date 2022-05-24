@@ -215,7 +215,6 @@ const CreateRulePageComponent: React.FC = () => {
             stepIsValid(scheduleStep) &&
             stepIsValid(actionsStep)
           ) {
-            // console.error('DEFINE STEP DATA', JSON.stringify(defineStep.data, null, 2));
             setRule(
               formatRule<CreateRulesSchema>(
                 defineStep.data,
@@ -244,7 +243,6 @@ const CreateRulePageComponent: React.FC = () => {
   );
 
   const submitStepDefineRule = useCallback(() => {
-    // console.error('SUBMITTING DEFINE RULE STEP', RuleStep.defineRule);
     submitStep(RuleStep.defineRule);
   }, [submitStep]);
 

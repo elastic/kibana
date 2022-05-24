@@ -69,39 +69,38 @@ export const getInputIndex = async ({
       index: indices,
       runtimeMappings,
     };
+  }
+  if (index != null) {
+    logger.debug(`[rule_id:${ruleId}] - Indices to search include: ${index}.`);
+
+    return {
+      index,
+      runtimeMappings: {},
+    };
   } else {
-    if (index != null) {
-      logger.debug(`[rule_id:${ruleId}] - Indices to search include: ${index}.`);
+    const configuration = await withSecuritySpan('getDefaultIndex', () =>
+      services.savedObjectsClient.get<{
+        'securitySolution:defaultIndex': string[];
+      }>('config', version)
+    );
+    if (configuration.attributes != null && configuration.attributes[DEFAULT_INDEX_KEY] != null) {
+      logger.debug(
+        `[rule_id:${ruleId}] - No index patterns defined, falling back to using configured default indices: ${configuration.attributes[DEFAULT_INDEX_KEY]}.`
+      );
 
       return {
-        index,
+        index: configuration.attributes[DEFAULT_INDEX_KEY],
         runtimeMappings: {},
       };
     } else {
-      const configuration = await withSecuritySpan('getDefaultIndex', () =>
-        services.savedObjectsClient.get<{
-          'securitySolution:defaultIndex': string[];
-        }>('config', version)
+      logger.debug(
+        `[rule_id:${ruleId}] - No index patterns defined, falling back to using default indices: ${DEFAULT_INDEX_PATTERN}.`
       );
-      if (configuration.attributes != null && configuration.attributes[DEFAULT_INDEX_KEY] != null) {
-        logger.debug(
-          `[rule_id:${ruleId}] - No index patterns defined, falling back to using configured default indices: ${configuration.attributes[DEFAULT_INDEX_KEY]}.`
-        );
 
-        return {
-          index: configuration.attributes[DEFAULT_INDEX_KEY],
-          runtimeMappings: {},
-        };
-      } else {
-        logger.debug(
-          `[rule_id:${ruleId}] - No index patterns defined, falling back to using default indices: ${DEFAULT_INDEX_PATTERN}.`
-        );
-
-        return {
-          index: DEFAULT_INDEX_PATTERN,
-          runtimeMappings: {},
-        };
-      }
+      return {
+        index: DEFAULT_INDEX_PATTERN,
+        runtimeMappings: {},
+      };
     }
   }
 };

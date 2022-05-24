@@ -189,7 +189,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     };
 
     fetchSingleDataView();
-  }, [data.dataViews, dataViewId, indexIndexPatterns, setIndexPattern]);
+  }, [data.dataViews, dataViewId, setIndexPattern]);
 
   const handleBuilderOnChange = useCallback(
     ({

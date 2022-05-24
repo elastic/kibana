@@ -91,10 +91,3 @@ export const THREAT_MATCH_EMPTIES = i18n.translate(
     defaultMessage: 'All matches require both a field and threat index field.',
   }
 );
-
-export const INDEX_PATTERNS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.indexPatternDropdown',
-  {
-    defaultMessage: 'Index Patterns',
-  }
-);
