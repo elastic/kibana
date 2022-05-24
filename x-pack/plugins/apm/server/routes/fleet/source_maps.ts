@@ -16,7 +16,7 @@ import { Artifact } from '@kbn/fleet-plugin/server';
 import { isEmpty } from 'lodash';
 import { SourceMap } from '../source_maps/route';
 import { APMPluginStartDependencies } from '../../types';
-import { getApmPackgePolicies } from './get_apm_package_policies';
+import { getApmPackagePolicies } from './get_apm_package_policies';
 import { APM_SERVER, PackagePolicy } from './register_fleet_policy_callbacks';
 
 export interface ApmArtifactBody {
@@ -161,7 +161,7 @@ export async function updateSourceMapsOnFleetPolicies({
 }) {
   const artifacts = await listArtifacts({ fleetPluginStart });
 
-  const apmFleetPolicies = await getApmPackgePolicies({
+  const apmFleetPolicies = await getApmPackagePolicies({
     core,
     fleetPluginStart,
   });
