@@ -268,6 +268,7 @@ export type { NowProviderInternalContract } from './now_provider';
 
 export type {
   QueryState,
+  QueryState$,
   SavedQuery,
   SavedQueryService,
   SavedQueryTimeFilter,

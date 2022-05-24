@@ -27,7 +27,7 @@ import { CaseDetailsLink } from '../../../../common/components/links';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { useNavigation, NavigateTo, GetAppUrl } from '../../../../common/lib/kibana';
 import * as i18n from '../translations';
-import { LastUpdatedAt } from '../util';
+import { LastUpdatedAt } from '../utils';
 import { StatusBadge } from './status_badge';
 import { CaseItem, useCaseItems } from './use_case_items';
 
