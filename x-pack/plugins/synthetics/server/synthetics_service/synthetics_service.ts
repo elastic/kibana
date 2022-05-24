@@ -168,9 +168,9 @@ export class SyntheticsService {
                 }
               } catch (e) {
                 sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
-                  reason: 'Failed to schedule sync task',
+                  reason: 'Failed to run scheduled sync task',
                   message: e?.message,
-                  type: 'scheduleTaskError',
+                  type: 'runTaskError',
                   code: e?.code,
                   status: e.status,
                 });
