@@ -6921,7 +6921,6 @@
     "visualizations.function.xyDimension.params.help": "パラメーター",
     "visualizations.function.xyDimension.visDimension.help": "ディメンションオブジェクト構成",
     "visualizations.helpMenu.appName": "Visualizeライブラリ",
-    "visualizations.initializeWithoutIndexPatternErrorMessage": "インデックスパターンなしで集約を初期化しようとしています",
     "visualizations.legacyCharts.conditionalMessage.noPermissions": "古いライブラリに切り替えるには、システム管理者に連絡してください。",
     "visualizations.legacyUrlConflict.objectNoun": "{visName}ビジュアライゼーション",
     "visualizations.linkedToSearch.unlinkSuccessNotificationText": "保存された検索「{searchTitle}」からリンクが解除されました",
