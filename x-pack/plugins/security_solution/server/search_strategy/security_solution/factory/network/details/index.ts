@@ -18,8 +18,9 @@ import {
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../types';
 
-import { getNetworkDetailsAgg, unflattenObject } from './helpers';
+import { getNetworkDetailsAgg } from './helpers';
 import { buildNetworkDetailsQuery } from './query.details_network.dsl';
+import { unflattenObject } from '../../../../helpers/format_response_object_values';
 
 export const networkDetails: SecuritySolutionFactory<NetworkQueries.details> = {
   buildDsl: (options: NetworkDetailsRequestOptions) => buildNetworkDetailsQuery(options),

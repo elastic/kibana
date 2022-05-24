@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { unflattenObject } from '../../../../helpers/format_response_object_values';
 import { getOr } from 'lodash/fp';
 import { GeoEcs } from '../../../../../../common/ecs/geo';
 import {
@@ -42,13 +42,3 @@ export const getNetworkDetailsAgg = (type: string, networkHit: NetworkHit | {}) 
     },
   };
 };
-
-interface GenericObject {
-  [key: string]: any;
-}
-
-export const unflattenObject = <T extends object = GenericObject>(object: object): T =>
-  Object.entries(object).reduce((acc, [key, value]) => {
-    set(acc, key, value);
-    return acc;
-  }, {} as T);

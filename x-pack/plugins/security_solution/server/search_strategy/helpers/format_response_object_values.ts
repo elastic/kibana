@@ -6,6 +6,7 @@
  */
 
 import { mapValues, isObject, isArray } from 'lodash/fp';
+import { set } from '@elastic/safer-lodash-set';
 
 import { toArray } from '../../../common/utils/to_array';
 
@@ -25,3 +26,13 @@ export const formatResponseObjectValues = <T>(object: T | T[] | null) => {
 
   return object;
 };
+
+interface GenericObject {
+  [key: string]: unknown;
+}
+
+export const unflattenObject = <T extends object = GenericObject>(object: object): T =>
+  Object.entries(object).reduce((acc, [key, value]) => {
+    set(acc, key, value);
+    return acc;
+  }, {} as T);
