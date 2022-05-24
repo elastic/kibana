@@ -17,6 +17,9 @@ import {
   isConnectorUserAction,
   isCreateCaseUserAction,
 } from '../../common/utils/user_actions';
+import { ServerError } from '../types';
+import { useToasts } from '../common/lib/kibana';
+import { ERROR_TITLE } from './translations';
 
 export interface CaseService extends CaseExternalService {
   firstPushIndex: number;
@@ -205,21 +208,35 @@ export const getPushedInfo = (
 };
 
 export const useGetCaseUserActions = (caseId: string, caseConnectorId: string) => {
+  const toasts = useToasts();
   const abortCtrlRef = new AbortController();
-  return useQuery(['case-user-actions', caseId, caseConnectorId], async () => {
-    const response = await getCaseUserActions(caseId, abortCtrlRef.signal);
-    const participants = !isEmpty(response)
-      ? uniqBy('createdBy.username', response).map((cau) => cau.createdBy)
-      : [];
+  return useQuery(
+    ['case-user-actions', caseId, caseConnectorId],
+    async () => {
+      const response = await getCaseUserActions(caseId, abortCtrlRef.signal);
+      const participants = !isEmpty(response)
+        ? uniqBy('createdBy.username', response).map((cau) => cau.createdBy)
+        : [];
 
-    const caseUserActions = !isEmpty(response) ? response : [];
-    const pushedInfo = getPushedInfo(caseUserActions, caseConnectorId);
-    return {
-      caseUserActions,
-      participants,
-      ...pushedInfo,
-    };
-  });
+      const caseUserActions = !isEmpty(response) ? response : [];
+      const pushedInfo = getPushedInfo(caseUserActions, caseConnectorId);
+      return {
+        caseUserActions,
+        participants,
+        ...pushedInfo,
+      };
+    },
+    {
+      onError: (error: ServerError) => {
+        if (error.name !== 'AbortError') {
+          toasts.addError(
+            error.body && error.body.message ? new Error(error.body.message) : error,
+            { title: ERROR_TITLE }
+          );
+        }
+      },
+    }
+  );
 };
 
 export type UseGetCaseUserActions = ReturnType<typeof useGetCaseUserActions>;
