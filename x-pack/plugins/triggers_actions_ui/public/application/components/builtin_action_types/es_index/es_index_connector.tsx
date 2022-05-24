@@ -84,7 +84,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
   const [areIndiciesLoading, setAreIndicesLoading] = useState<boolean>(false);
 
   const hasTimeFieldCheckbox = __internal__ != null ? __internal__.hasTimeFieldCheckbox : false;
-  const showTimeFieldCheckbox = index && timeFieldOptions.length > 0;
+  const showTimeFieldCheckbox = index != null && timeFieldOptions.length > 0;
 
   const setTimeFields = (fields: TimeFieldOptions[]) => {
     if (fields.length > 0) {
@@ -104,12 +104,13 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
     const indexPatternsFunction = async () => {
       if (index) {
         const currentEsFields = await getFields(http!, [index]);
-        setTimeFields(getTimeFieldOptions(currentEsFields as any));
+        if (Array.isArray(currentEsFields)) {
+          setTimeFields(getTimeFieldOptions(currentEsFields as any));
+        }
       }
     };
     indexPatternsFunction();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [http, index]);
 
   return (
     <>

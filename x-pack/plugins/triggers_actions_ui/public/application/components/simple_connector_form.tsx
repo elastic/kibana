@@ -83,6 +83,7 @@ const FormRow: React.FC<FormRowProps> = ({
   isUrlField,
   helpText,
 }) => {
+  const dataTestSub = `${id}-input`;
   return (
     <>
       <EuiFlexGroup>
@@ -93,11 +94,16 @@ const FormRow: React.FC<FormRowProps> = ({
               config={getFieldConfig({ label, isUrlField })}
               helpText={helpText}
               componentProps={{
-                euiFieldProps: { readOnly, fullWidth: true },
+                euiFieldProps: { readOnly, fullWidth: true, 'data-test-subj': dataTestSub },
               }}
             />
           ) : (
-            <PasswordField path={id} label={label} readOnly={readOnly} />
+            <PasswordField
+              path={id}
+              label={label}
+              readOnly={readOnly}
+              data-test-subj={dataTestSub}
+            />
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -114,10 +120,10 @@ const SimpleConnectorFormComponent: React.FC<SimpleConnectorFormProps> = ({
   return (
     <>
       {configFormSchema.map(({ id, ...restConfigSchema }, index) => (
-        <>
+        <React.Fragment key={`config.${id}`}>
           <FormRow id={`config.${id}`} {...restConfigSchema} readOnly={readOnly} />
           {index !== configFormSchema.length ? <EuiSpacer size="m" /> : null}
-        </>
+        </React.Fragment>
       ))}
       <EuiFlexGroup>
         <EuiFlexItem>
@@ -135,10 +141,15 @@ const SimpleConnectorFormComponent: React.FC<SimpleConnectorFormProps> = ({
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       {secretsFormSchema.map(({ id, ...restSecretsSchema }, index) => (
-        <>
-          <FormRow id={`secrets.${id}`} {...restSecretsSchema} readOnly={readOnly} />
+        <React.Fragment key={`secrets.${id}`}>
+          <FormRow
+            id={`secrets.${id}`}
+            key={`secrets.${id}`}
+            {...restSecretsSchema}
+            readOnly={readOnly}
+          />
           {index !== secretsFormSchema.length ? <EuiSpacer size="m" /> : null}
-        </>
+        </React.Fragment>
       ))}
     </>
   );

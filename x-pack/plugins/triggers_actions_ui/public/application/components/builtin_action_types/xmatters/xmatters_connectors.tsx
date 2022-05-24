@@ -55,6 +55,9 @@ const XmattersUrlField: React.FC<{ path: string }> = ({ path }) => {
           },
         ],
       }}
+      componentProps={{
+        euiFieldProps: { 'data-test-subj': path },
+      }}
     />
   );
 };
@@ -63,8 +66,8 @@ const XmattersActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
   readOnly,
 }) => {
   const { setFieldValue } = useFormContext();
-  const [{ __internal__ }] = useFormData({
-    watch: ['__internal__.auth'],
+  const [{ config, __internal__ }] = useFormData({
+    watch: ['config.usesBasic', '__internal__.auth'],
   });
 
   const authenticationButtons = [
@@ -78,7 +81,10 @@ const XmattersActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
     },
   ];
 
-  const selectedAuth = __internal__ != null ? __internal__.auth : XmattersAuthenticationType.Basic;
+  const selectedAuth =
+    config != null && !config.usesBasic
+      ? XmattersAuthenticationType.URL
+      : XmattersAuthenticationType.Basic;
 
   useEffect(() => {
     setFieldValue('config.usesBasic', isBasicAuth(__internal__));
@@ -158,6 +164,7 @@ const XmattersActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
                 path="secrets.password"
                 label={i18n.PASSWORD_LABEL}
                 readOnly={readOnly}
+                data-test-subj="xmattersPasswordInput"
               />
             </EuiFlexItem>
           </EuiFlexGroup>

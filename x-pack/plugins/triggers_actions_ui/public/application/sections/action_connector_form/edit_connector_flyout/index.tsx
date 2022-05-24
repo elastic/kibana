@@ -68,7 +68,6 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   tab = EditConnectorTabs.Configuration,
   onConnectorCreated,
 }) => {
-  console.log(connector);
   const {
     docLinks,
     application: { capabilities },
@@ -90,6 +89,16 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   });
 
   const [selectedTab, setTab] = useState<EditConnectorTabs>(tab);
+  /**
+   * Test connector
+   */
+
+  const [testExecutionActionParams, setTestExecutionActionParams] = useState<
+    Record<string, unknown>
+  >({});
+  const [testExecutionResult, setTestExecutionResult] =
+    useState<Option<ActionTypeExecutorResult<unknown> | undefined>>(none);
+
   const handleSetTab = useCallback(
     () =>
       setTab((prevTab) => {
@@ -103,7 +112,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
 
         return EditConnectorTabs.Configuration;
       }),
-    []
+    [testExecutionResult]
   );
 
   const [isFormModified, setIsFormModified] = useState<boolean>(false);
@@ -113,6 +122,34 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const isSaving = isUpdatingConnector || isSubmitting || isExecutingConnector;
   const actionTypeModel: ActionTypeModel | null = actionTypeRegistry.get(connector.actionTypeId);
   const showButtons = canSave && actionTypeModel && !connector.isPreconfigured;
+
+  const onExecutionAction = useCallback(async () => {
+    try {
+      const res = await executeConnector({
+        connectorId: connector.id,
+        params: testExecutionActionParams,
+      });
+
+      setTestExecutionResult(some(res));
+    } catch (error) {
+      const result: ActionTypeExecutorResult<unknown> = isActionTypeExecutorResult(error)
+        ? error
+        : {
+            actionId: connector.id,
+            status: 'error',
+            message: error.message,
+          };
+      setTestExecutionResult(some(result));
+    }
+  }, [connector.id, executeConnector, testExecutionActionParams]);
+
+  const onFormModifiedChange = useCallback(
+    (formModified: boolean) => {
+      setIsFormModified(formModified);
+      setTestExecutionResult(none);
+    },
+    [setIsFormModified]
+  );
 
   const closeFlyout = useCallback(() => {
     onClose();
@@ -167,49 +204,19 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
         return updatedConnector;
       }
     },
-    [submit, preSubmitValidator, closeFlyout, onConnectorCreated]
-  );
-
-  const onFormModifiedChange = useCallback(
-    (formModified: boolean) => {
-      setIsFormModified(formModified);
-      setTestExecutionResult(none);
-    },
-    [setIsFormModified]
+    [
+      submit,
+      preSubmitValidator,
+      connector.id,
+      updateConnector,
+      onFormModifiedChange,
+      onConnectorCreated,
+      closeFlyout,
+    ]
   );
 
   const onSubmit = useCallback(() => onClickSave(false), [onClickSave]);
   const onSubmitAndClose = useCallback(() => onClickSave(true), [onClickSave]);
-
-  /**
-   * Test connector
-   */
-
-  const [testExecutionActionParams, setTestExecutionActionParams] = useState<
-    Record<string, unknown>
-  >({});
-  const [testExecutionResult, setTestExecutionResult] =
-    useState<Option<ActionTypeExecutorResult<unknown> | undefined>>(none);
-
-  const onExecutionAction = async () => {
-    try {
-      const res = await executeConnector({
-        connectorId: connector.id,
-        params: testExecutionActionParams,
-      });
-
-      setTestExecutionResult(some(res));
-    } catch (error) {
-      const result: ActionTypeExecutorResult<unknown> = isActionTypeExecutorResult(error)
-        ? error
-        : {
-            actionId: connector.id,
-            status: 'error',
-            message: error.message,
-          };
-      setTestExecutionResult(some(result));
-    }
-  };
 
   useEffect(() => {
     isMounted.current = true;

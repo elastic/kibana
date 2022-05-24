@@ -7,20 +7,13 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { WebhookActionConnector } from '../types';
 import WebhookActionConnectorFields from './webhook_connectors';
+import { FormTestProvider, waitForComponentToUpdate } from '../test_utils';
 
 describe('WebhookActionConnectorFields renders', () => {
-  test('all connector fields is rendered', () => {
+  test('all connector fields is rendered', async () => {
     const actionConnector = {
-      secrets: {
-        user: 'user',
-        password: 'pass',
-      },
-      id: 'test',
       actionTypeId: '.webhook',
-      isPreconfigured: false,
-      isDeprecated: false,
       name: 'webhook',
       config: {
         method: 'PUT',
@@ -28,18 +21,24 @@ describe('WebhookActionConnectorFields renders', () => {
         headers: { 'content-type': 'text' },
         hasAuth: true,
       },
-    } as WebhookActionConnector;
+      secrets: {
+        user: 'user',
+        password: 'pass',
+      },
+    };
+
     const wrapper = mountWithIntl(
-      <WebhookActionConnectorFields
-        action={actionConnector}
-        errors={{ url: [], method: [], user: [], password: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
+      <FormTestProvider connector={actionConnector}>
+        <WebhookActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </FormTestProvider>
     );
+
+    await waitForComponentToUpdate();
+
     expect(wrapper.find('[data-test-subj="webhookViewHeadersSwitch"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="webhookHeaderText"]').length > 0).toBeTruthy();
     wrapper.find('[data-test-subj="webhookViewHeadersSwitch"]').first().simulate('click');
@@ -47,96 +46,5 @@ describe('WebhookActionConnectorFields renders', () => {
     expect(wrapper.find('[data-test-subj="webhookUrlText"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="webhookUserInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="webhookPasswordInput"]').length > 0).toBeTruthy();
-  });
-
-  test('should display a message on create to remember credentials', () => {
-    const actionConnector = {
-      secrets: {},
-      actionTypeId: '.webhook',
-      isPreconfigured: false,
-      isDeprecated: false,
-      config: {
-        hasAuth: true,
-      },
-    } as WebhookActionConnector;
-    const wrapper = mountWithIntl(
-      <WebhookActionConnectorFields
-        action={actionConnector}
-        errors={{ url: [], method: [], user: [], password: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toBeGreaterThan(0);
-    expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toEqual(0);
-  });
-
-  test('should display a message on edit to re-enter credentials', () => {
-    const actionConnector = {
-      secrets: {
-        user: 'user',
-        password: 'pass',
-      },
-      id: 'test',
-      actionTypeId: '.webhook',
-      isPreconfigured: false,
-      isDeprecated: false,
-      name: 'webhook',
-      config: {
-        method: 'PUT',
-        url: 'http:\\test',
-        headers: { 'content-type': 'text' },
-        hasAuth: true,
-      },
-    } as WebhookActionConnector;
-    const wrapper = mountWithIntl(
-      <WebhookActionConnectorFields
-        action={actionConnector}
-        errors={{ url: [], method: [], user: [], password: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);
-    expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toEqual(0);
-  });
-
-  test('should display a message for missing secrets after import', () => {
-    const actionConnector = {
-      secrets: {
-        user: 'user',
-        password: 'pass',
-      },
-      id: 'test',
-      actionTypeId: '.webhook',
-      isPreconfigured: false,
-      isDeprecated: false,
-      isMissingSecrets: true,
-      name: 'webhook',
-      config: {
-        method: 'PUT',
-        url: 'http:\\test',
-        headers: { 'content-type': 'text' },
-        hasAuth: true,
-      },
-    } as WebhookActionConnector;
-    const wrapper = mountWithIntl(
-      <WebhookActionConnectorFields
-        action={actionConnector}
-        errors={{ url: [], method: [], user: [], password: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="missingSecretsMessage"]').length).toBeGreaterThan(0);
   });
 });

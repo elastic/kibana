@@ -104,15 +104,16 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
       const createdConnector = await createConnector(validConnector);
       return createdConnector;
     }
-  }, [submit, preSubmitValidator]);
+  }, [submit, preSubmitValidator, createConnector]);
 
   const resetActionType = useCallback(() => setActionType(null), []);
 
   const testConnector = useCallback(async () => {
     const createdConnector = await validateAndCreateConnector();
-    onClose();
 
     if (createdConnector) {
+      onClose();
+
       if (onConnectorCreated) {
         onConnectorCreated(createdConnector);
       }
@@ -121,16 +122,18 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         onTestConnector(createdConnector);
       }
     }
-  }, [validateAndCreateConnector, onConnectorCreated]);
+  }, [validateAndCreateConnector, onClose, onConnectorCreated, onTestConnector]);
 
   const onSubmit = useCallback(async () => {
     const createdConnector = await validateAndCreateConnector();
-    onClose();
+    if (createdConnector) {
+      onClose();
 
-    if (onConnectorCreated && createdConnector) {
-      onConnectorCreated(createdConnector);
+      if (onConnectorCreated) {
+        onConnectorCreated(createdConnector);
+      }
     }
-  }, [validateAndCreateConnector, onConnectorCreated]);
+  }, [validateAndCreateConnector, onClose, onConnectorCreated]);
 
   useEffect(() => {
     isMounted.current = true;

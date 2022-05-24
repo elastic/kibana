@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { act } from '@testing-library/react';
 import SlackActionFields from './slack_connectors';
 import { FormTestProvider } from '../test_utils';
@@ -28,13 +27,7 @@ describe('SlackActionFields renders', () => {
 
     const wrapper = mountWithIntl(
       <FormTestProvider connector={actionConnector}>
-        {(registerPreSubmitValidator: ActionConnectorFieldsProps['registerPreSubmitValidator']) => (
-          <SlackActionFields
-            readOnly={false}
-            isEdit={false}
-            registerPreSubmitValidator={registerPreSubmitValidator}
-          />
-        )}
+        <SlackActionFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
       </FormTestProvider>
     );
 
@@ -42,6 +35,7 @@ describe('SlackActionFields renders', () => {
       await nextTick();
       wrapper.update();
     });
+
     expect(wrapper.find('[data-test-subj="slackWebhookUrlInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="slackWebhookUrlInput"]').first().prop('value')).toBe(
       'http:\\test'

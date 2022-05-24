@@ -8,8 +8,9 @@
 import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import { PagerDutyActionConnector } from '../types';
 import PagerDutyActionConnectorFields from './pagerduty_connectors';
+import { FormTestProvider } from '../test_utils';
+
 jest.mock('../../../../common/lib/kibana');
 
 describe('PagerDutyActionConnectorFields renders', () => {
@@ -24,18 +25,16 @@ describe('PagerDutyActionConnectorFields renders', () => {
       config: {
         apiUrl: 'http:\\test',
       },
-    } as PagerDutyActionConnector;
+    };
 
     const wrapper = mountWithIntl(
-      <PagerDutyActionConnectorFields
-        action={actionConnector}
-        errors={{ index: [], routingKey: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
+      <FormTestProvider connector={actionConnector}>
+        <PagerDutyActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </FormTestProvider>
     );
 
     await act(async () => {
@@ -48,80 +47,5 @@ describe('PagerDutyActionConnectorFields renders', () => {
       'http:\\test'
     );
     expect(wrapper.find('[data-test-subj="pagerdutyRoutingKeyInput"]').length > 0).toBeTruthy();
-  });
-
-  test('should display a message on create to remember credentials', () => {
-    const actionConnector = {
-      actionTypeId: '.pagerduty',
-      secrets: {},
-      config: {},
-    } as PagerDutyActionConnector;
-    const wrapper = mountWithIntl(
-      <PagerDutyActionConnectorFields
-        action={actionConnector}
-        errors={{ index: [], routingKey: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toBeGreaterThan(0);
-    expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toEqual(0);
-  });
-
-  test('should display a message on edit to re-enter credentials', () => {
-    const actionConnector = {
-      secrets: {
-        routingKey: 'test',
-      },
-      id: 'test',
-      actionTypeId: '.pagerduty',
-      name: 'pagerduty',
-      config: {
-        apiUrl: 'http:\\test',
-      },
-    } as PagerDutyActionConnector;
-    const wrapper = mountWithIntl(
-      <PagerDutyActionConnectorFields
-        action={actionConnector}
-        errors={{ index: [], routingKey: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);
-    expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toEqual(0);
-  });
-
-  test('should display a message for missing secrets after import', () => {
-    const actionConnector = {
-      secrets: {
-        routingKey: 'test',
-      },
-      id: 'test',
-      actionTypeId: '.pagerduty',
-      isMissingSecrets: true,
-      name: 'pagerduty',
-      config: {
-        apiUrl: 'http:\\test',
-      },
-    } as PagerDutyActionConnector;
-    const wrapper = mountWithIntl(
-      <PagerDutyActionConnectorFields
-        action={actionConnector}
-        errors={{ index: [], routingKey: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="missingSecretsMessage"]').length).toBeGreaterThan(0);
   });
 });

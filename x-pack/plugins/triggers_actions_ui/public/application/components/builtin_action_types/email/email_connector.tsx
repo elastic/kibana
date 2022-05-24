@@ -98,7 +98,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
               ],
             }}
             componentProps={{
-              euiFieldProps: { 'data-test-subj': 'emailUserInput' },
+              euiFieldProps: { 'data-test-subj': 'emailFromInput' },
             }}
           />
         </EuiFlexItem>
@@ -248,6 +248,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
                     path="secrets.password"
                     label={i18n.PASSWORD_LABEL}
                     readOnly={readOnly}
+                    data-test-subj="emailPasswordInput"
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
