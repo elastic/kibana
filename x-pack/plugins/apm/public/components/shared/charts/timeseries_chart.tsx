@@ -122,6 +122,9 @@ export function TimeseriesChart({
   const xDomain = isEmpty ? { min: 0, max: 1 } : { min, max };
 
   const legendSort = (a: SeriesIdentifier, b: SeriesIdentifier) => {
+    // Using custom legendSort here when comparing expected bounds
+    // because by default elastic-charts will show legends for expected bounds first
+    // but for consistency, we are making `Expected bounds` last
     if ((a as XYChartSeriesIdentifier)?.specId === expectedBoundsTitle)
       return -1;
     if ((b as XYChartSeriesIdentifier)?.specId === expectedBoundsTitle)
