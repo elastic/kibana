@@ -42,86 +42,161 @@ describe('createInitialState', () => {
         typeRegistry,
         docLinks,
       })
-    ).toEqual({
-      batchSize: 1000,
-      maxBatchSizeBytes: ByteSizeValue.parse('100mb').getValueInBytes(),
-      controlState: 'INIT',
-      currentAlias: '.kibana_task_manager',
-      excludeFromUpgradeFilterHooks: {},
-      indexPrefix: '.kibana_task_manager',
-      kibanaVersion: '8.1.0',
-      knownTypes: [],
-      legacyIndex: '.kibana_task_manager',
-      logs: [],
-      outdatedDocumentsQuery: {
-        bool: {
-          should: [],
+    ).toMatchInlineSnapshot(`
+      Object {
+        "batchSize": 1000,
+        "controlState": "INIT",
+        "currentAlias": ".kibana_task_manager",
+        "excludeFromUpgradeFilterHooks": Object {},
+        "indexPrefix": ".kibana_task_manager",
+        "kibanaVersion": "8.1.0",
+        "knownTypes": Array [],
+        "legacyIndex": ".kibana_task_manager",
+        "logs": Array [],
+        "maxBatchSizeBytes": 104857600,
+        "migrationDocLinks": Object {
+          "clusterShardLimitExceeded": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#cluster-shard-limit-exceeded",
+          "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
+          "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
+          "routingAllocationDisabled": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#routing-allocation-disabled",
         },
-      },
-      preMigrationScript: {
-        _tag: 'None',
-      },
-      retryAttempts: 15,
-      retryCount: 0,
-      retryDelay: 0,
-      targetIndexMappings: {
-        dynamic: 'strict',
-        properties: {
-          my_type: {
-            properties: {
-              title: {
-                type: 'text',
+        "outdatedDocumentsQuery": Object {
+          "bool": Object {
+            "should": Array [],
+          },
+        },
+        "preMigrationScript": Object {
+          "_tag": "None",
+        },
+        "retryAttempts": 15,
+        "retryCount": 0,
+        "retryDelay": 0,
+        "targetIndexMappings": Object {
+          "dynamic": "strict",
+          "properties": Object {
+            "my_type": Object {
+              "properties": Object {
+                "title": Object {
+                  "type": "text",
+                },
               },
             },
           },
         },
-      },
-      tempIndex: '.kibana_task_manager_8.1.0_reindex_temp',
-      tempIndexMappings: {
-        dynamic: false,
-        properties: {
-          migrationVersion: {
-            dynamic: 'true',
-            type: 'object',
-          },
-          type: {
-            type: 'keyword',
-          },
-        },
-      },
-      unusedTypesQuery: {
-        bool: {
-          must_not: expect.arrayContaining([
-            {
-              bool: {
-                must: [
-                  {
-                    match: {
-                      type: 'search-session',
-                    },
-                  },
-                  {
-                    match: {
-                      'search-session.persisted': false,
-                    },
-                  },
-                ],
-              },
+        "tempIndex": ".kibana_task_manager_8.1.0_reindex_temp",
+        "tempIndexMappings": Object {
+          "dynamic": false,
+          "properties": Object {
+            "migrationVersion": Object {
+              "dynamic": "true",
+              "type": "object",
             },
-          ]),
+            "type": Object {
+              "type": "keyword",
+            },
+          },
         },
-      },
-      versionAlias: '.kibana_task_manager_8.1.0',
-      versionIndex: '.kibana_task_manager_8.1.0_001',
-      migrationDocLinks: {
-        resolveMigrationFailures:
-          'https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html',
-        repeatedTimeoutRequests:
-          'https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail',
-        routingAllocationDisabled:
-          'https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#routing-allocation-disabled',
-      },
-    });
+        "unusedTypesQuery": Object {
+          "bool": Object {
+            "must_not": Array [
+              Object {
+                "term": Object {
+                  "type": "apm-services-telemetry",
+                },
+              },
+              Object {
+                "term": Object {
+                  "type": "background-session",
+                },
+              },
+              Object {
+                "term": Object {
+                  "type": "cases-sub-case",
+                },
+              },
+              Object {
+                "term": Object {
+                  "type": "file-upload-telemetry",
+                },
+              },
+              Object {
+                "term": Object {
+                  "type": "fleet-agent-actions",
+                },
+              },
+              Object {
+                "term": Object {
+                  "type": "fleet-agent-events",
+                },
+              },
+              Object {
+                "term": Object {
+                  "type": "fleet-agents",
+                },
+              },
+              Object {
+                "term": Object {
+                  "type": "fleet-enrollment-api-keys",
+                },
+              },
+              Object {
+                "term": Object {
+                  "type": "ml-telemetry",
+                },
+              },
+              Object {
+                "term": Object {
+                  "type": "osquery-usage-metric",
+                },
+              },
+              Object {
+                "term": Object {
+                  "type": "server",
+                },
+              },
+              Object {
+                "term": Object {
+                  "type": "siem-detection-engine-rule-status",
+                },
+              },
+              Object {
+                "term": Object {
+                  "type": "timelion-sheet",
+                },
+              },
+              Object {
+                "term": Object {
+                  "type": "tsvb-validation-telemetry",
+                },
+              },
+              Object {
+                "term": Object {
+                  "type": "ui-counter",
+                },
+              },
+              Object {
+                "bool": Object {
+                  "must": Array [
+                    Object {
+                      "match": Object {
+                        "type": "search-session",
+                      },
+                    },
+                    Object {
+                      "match": Object {
+                        "search-session.persisted": false,
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        "versionAlias": ".kibana_task_manager_8.1.0",
+        "versionIndex": ".kibana_task_manager_8.1.0_001",
+      }
+    `);
   });
 
   it('returns state with the correct `knownTypes`', () => {

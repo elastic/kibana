@@ -82,6 +82,7 @@ const tracesByIdRoute = createApmServerRoute({
     errorDocs: Array<
       import('./../../../typings/es_schemas/ui/apm_error').APMError
     >;
+    linkedChildrenOfSpanCountBySpanId: Record<string, number>;
   }> => {
     const setup = await setupRequest(resources);
     const { params } = resources;

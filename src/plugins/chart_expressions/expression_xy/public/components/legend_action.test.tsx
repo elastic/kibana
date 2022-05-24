@@ -162,7 +162,6 @@ const sampleLayer: DataLayerConfig = {
   splitAccessor: 'splitAccessorId',
   columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
   xScaleType: 'ordinal',
-  yScaleType: 'linear',
   isHistogram: false,
   palette: mockPaletteOutput,
   table,

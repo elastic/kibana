@@ -65,10 +65,9 @@ Rules and connectors are isolated to the {kib} space in which they were created.
 Rules are authorized using an <<api-keys,API key>> associated with the last user to edit the rule. This API key captures a snapshot of the user's privileges at the time of edit and is subsequently used to run all background tasks associated with the rule, including condition checks like {es} queries and triggered actions. The following rule actions will re-generate the API key:
 
 * Creating a rule
-* Enabling a disabled rule
 * Updating a rule
 
 [IMPORTANT]
 ==============================================
-If a rule requires certain privileges, such as index privileges, to run, and a user without those privileges updates, disables, or re-enables the rule, the rule will no longer function. Conversely, if a user with greater or administrator privileges modifies the rule, it will begin running with increased privileges.
+If a rule requires certain privileges, such as index privileges, to run, and a user without those privileges updates the rule, the rule will no longer function. Conversely, if a user with greater or administrator privileges modifies the rule, it will begin running with increased privileges.
 ==============================================

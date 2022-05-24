@@ -166,7 +166,8 @@ export const alertsPreviewDefaultModel: SubsetTimelineModel = {
   sort: [
     {
       columnId: 'kibana.alert.original_time',
-      columnType: 'number',
+      columnType: 'date',
+      esTypes: ['date'],
       sortDirection: 'desc',
     },
   ],

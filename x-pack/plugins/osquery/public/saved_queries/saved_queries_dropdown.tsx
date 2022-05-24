@@ -40,11 +40,22 @@ interface SavedQueriesDropdownProps {
   ) => void;
 }
 
+interface SelectedOption {
+  label: string;
+  value: {
+    savedQueryId: string;
+    id: string;
+    description: string;
+    query: string;
+    ecs_mapping: Record<string, unknown>;
+  };
+}
+
 const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
   disabled,
   onChange,
 }) => {
-  const [selectedOptions, setSelectedOptions] = useState([]);
+  const [selectedOptions, setSelectedOptions] = useState<SelectedOption[]>([]);
 
   const [{ savedQueryId }] = useFormData();
 
@@ -109,17 +120,13 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
       const savedQueryOption = find(['value.savedQueryId', savedQueryId], queryOptions);
 
       if (savedQueryOption) {
-        handleSavedQueryChange([savedQueryOption]);
+        setSelectedOptions([savedQueryOption]);
       }
     }
-  }, [savedQueryId, handleSavedQueryChange, queryOptions]);
+  }, [savedQueryId, queryOptions]);
 
   useEffect(() => {
-    if (
-      selectedOptions.length &&
-      // @ts-expect-error update types
-      selectedOptions[0].value.savedQueryId !== savedQueryId
-    ) {
+    if (selectedOptions.length && selectedOptions[0].value.savedQueryId !== savedQueryId) {
       setSelectedOptions([]);
     }
   }, [savedQueryId, selectedOptions]);
@@ -151,5 +158,7 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
     </EuiFormRow>
   );
 };
+
+SavedQueriesDropdownComponent.displayName = 'SavedQueriesDropdown';
 
 export const SavedQueriesDropdown = React.memo(SavedQueriesDropdownComponent);

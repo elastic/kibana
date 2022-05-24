@@ -300,7 +300,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
-      snoozeEndTime: null,
+      snoozeSchedule: [],
       mutedInstanceIds: [],
       actions: [
         {
@@ -376,6 +376,7 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "tags": Array [
           "foo",
         ],
@@ -412,6 +413,7 @@ describe('create()', () => {
           "status": "pending",
           "warning": null,
         },
+        "isSnoozedUntil": null,
         "legacyId": null,
         "meta": Object {
           "versionApiKeyLastmodified": "v8.0.0",
@@ -434,7 +436,7 @@ describe('create()', () => {
         "schedule": Object {
           "interval": "1m",
         },
-        "snoozeEndTime": null,
+        "snoozeSchedule": Array [],
         "tags": Array [
           "foo",
         ],
@@ -506,7 +508,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
-      snoozeEndTime: null,
+      snoozeSchedule: [],
       mutedInstanceIds: [],
       actions: [
         {
@@ -566,7 +568,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
-      snoozeEndTime: null,
+      snoozeSchedule: [],
       mutedInstanceIds: [],
       actions: [
         {
@@ -618,6 +620,7 @@ describe('create()', () => {
           "status": "pending",
           "warning": null,
         },
+        "isSnoozedUntil": null,
         "legacyId": "123",
         "meta": Object {
           "versionApiKeyLastmodified": "v7.10.0",
@@ -640,7 +643,7 @@ describe('create()', () => {
         "schedule": Object {
           "interval": "1m",
         },
-        "snoozeEndTime": null,
+        "snoozeSchedule": Array [],
         "tags": Array [
           "foo",
         ],
@@ -1044,6 +1047,7 @@ describe('create()', () => {
         createdAt: '2019-02-12T21:01:22.479Z',
         createdBy: 'elastic',
         enabled: true,
+        isSnoozedUntil: null,
         legacyId: null,
         executionStatus: {
           error: null,
@@ -1054,7 +1058,7 @@ describe('create()', () => {
         monitoring: getDefaultRuleMonitoring(),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
-        snoozeEndTime: null,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         name: 'abc',
         notifyWhen: 'onActiveAlert',
@@ -1243,6 +1247,7 @@ describe('create()', () => {
         createdAt: '2019-02-12T21:01:22.479Z',
         createdBy: 'elastic',
         enabled: true,
+        isSnoozedUntil: null,
         legacyId: null,
         executionStatus: {
           error: null,
@@ -1253,7 +1258,7 @@ describe('create()', () => {
         monitoring: getDefaultRuleMonitoring(),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
-        snoozeEndTime: null,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         name: 'abc',
         notifyWhen: 'onActiveAlert',
@@ -1407,6 +1412,7 @@ describe('create()', () => {
         alertTypeId: '123',
         apiKey: null,
         apiKeyOwner: null,
+        isSnoozedUntil: null,
         legacyId: null,
         consumer: 'bar',
         createdAt: '2019-02-12T21:01:22.479Z',
@@ -1421,7 +1427,7 @@ describe('create()', () => {
         monitoring: getDefaultRuleMonitoring(),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
-        snoozeEndTime: null,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         name: 'abc',
         notifyWhen: 'onActiveAlert',
@@ -1530,7 +1536,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
-      snoozeEndTime: null,
+      snoozeSchedule: [],
       mutedInstanceIds: [],
       notifyWhen: 'onActionGroupChange',
       actions: [
@@ -1571,6 +1577,7 @@ describe('create()', () => {
         alertTypeId: '123',
         consumer: 'bar',
         name: 'abc',
+        isSnoozedUntil: null,
         legacyId: null,
         params: { bar: true },
         apiKey: null,
@@ -1587,7 +1594,7 @@ describe('create()', () => {
         throttle: '10m',
         notifyWhen: 'onActionGroupChange',
         muteAll: false,
-        snoozeEndTime: null,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {
@@ -1638,6 +1645,7 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "tags": Array [
           "foo",
         ],
@@ -1662,7 +1670,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
-      snoozeEndTime: null,
+      snoozeSchedule: [],
       mutedInstanceIds: [],
       notifyWhen: 'onThrottleInterval',
       actions: [
@@ -1700,6 +1708,7 @@ describe('create()', () => {
             params: { foo: true },
           },
         ],
+        isSnoozedUntil: null,
         legacyId: null,
         alertTypeId: '123',
         consumer: 'bar',
@@ -1719,7 +1728,7 @@ describe('create()', () => {
         throttle: '10m',
         notifyWhen: 'onThrottleInterval',
         muteAll: false,
-        snoozeEndTime: null,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {
@@ -1770,6 +1779,7 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "tags": Array [
           "foo",
         ],
@@ -1794,7 +1804,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
-      snoozeEndTime: null,
+      snoozeSchedule: [],
       mutedInstanceIds: [],
       notifyWhen: 'onActiveAlert',
       actions: [
@@ -1832,6 +1842,7 @@ describe('create()', () => {
             params: { foo: true },
           },
         ],
+        isSnoozedUntil: null,
         legacyId: null,
         alertTypeId: '123',
         consumer: 'bar',
@@ -1851,7 +1862,7 @@ describe('create()', () => {
         throttle: null,
         notifyWhen: 'onActiveAlert',
         muteAll: false,
-        snoozeEndTime: null,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {
@@ -1902,6 +1913,7 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "tags": Array [
           "foo",
         ],
@@ -1935,7 +1947,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
-      snoozeEndTime: null,
+      snoozeSchedule: [],
       mutedInstanceIds: [],
       actions: [
         {
@@ -1993,13 +2005,14 @@ describe('create()', () => {
         ],
         apiKeyOwner: null,
         apiKey: null,
+        isSnoozedUntil: null,
         legacyId: null,
         createdBy: 'elastic',
         updatedBy: 'elastic',
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedAt: '2019-02-12T21:01:22.479Z',
         muteAll: false,
-        snoozeEndTime: null,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         executionStatus: {
           status: 'pending',
@@ -2066,6 +2079,7 @@ describe('create()', () => {
           "interval": "10s",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "tags": Array [
           "foo",
         ],
@@ -2345,6 +2359,7 @@ describe('create()', () => {
         alertTypeId: '123',
         consumer: 'bar',
         name: 'abc',
+        isSnoozedUntil: null,
         legacyId: null,
         params: { bar: true },
         apiKey: Buffer.from('123:abc').toString('base64'),
@@ -2361,7 +2376,7 @@ describe('create()', () => {
         throttle: null,
         notifyWhen: 'onActiveAlert',
         muteAll: false,
-        snoozeEndTime: null,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {
@@ -2444,6 +2459,7 @@ describe('create()', () => {
             params: { foo: true },
           },
         ],
+        isSnoozedUntil: null,
         legacyId: null,
         alertTypeId: '123',
         consumer: 'bar',
@@ -2463,7 +2479,7 @@ describe('create()', () => {
         throttle: null,
         notifyWhen: 'onActiveAlert',
         muteAll: false,
-        snoozeEndTime: null,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {

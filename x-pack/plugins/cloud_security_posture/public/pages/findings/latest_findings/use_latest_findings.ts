@@ -75,6 +75,7 @@ export const useLatestFindings = ({ index, query, sort, from, size }: UseFinding
         })
       ),
     {
+      keepPreviousData: true,
       select: ({ rawResponse: { hits } }) => ({
         page: hits.hits.map((hit) => hit._source!),
         total: number.is(hits.total) ? hits.total : 0,

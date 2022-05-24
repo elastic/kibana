@@ -130,6 +130,7 @@ export const histogramVisTypeDefinition = {
     },
   },
   editorConfig: {
+    enableDataViewChange: true,
     optionTabs,
     schemas: [
       {

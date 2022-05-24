@@ -68,7 +68,11 @@ export const HostMetricsTable = (props: HostMetricsTableProps) => {
   );
 
   if (isLoading) {
-    return <EuiLoadingSpinner size="xl" data-test-subj="hostMetricsTableLoader" />;
+    return (
+      <EuiFlexGroup alignItems="center" justifyContent="center" direction="column">
+        <EuiLoadingSpinner size="xl" data-test-subj="hostMetricsTableLoader" />
+      </EuiFlexGroup>
+    );
   }
 
   return (

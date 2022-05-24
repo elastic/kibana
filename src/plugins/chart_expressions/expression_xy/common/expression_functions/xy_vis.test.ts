@@ -18,7 +18,7 @@ describe('xyVis', () => {
     const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
     const result = await xyVisFunction.fn(
       data,
-      { ...rest, ...restLayerArgs, referenceLineLayers: [], annotationLayers: [] },
+      { ...rest, ...restLayerArgs, referenceLines: [], annotationLayers: [] },
       createMockExecutionContext()
     );
 
@@ -34,6 +34,95 @@ describe('xyVis', () => {
     });
   });
 
+  test('it should throw error if markSizeRatio is lower then 1 or greater then 100', async () => {
+    const { data, args } = sampleArgs();
+    const { layers, ...rest } = args;
+    expect(
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...{ ...sampleLayer, markSizeAccessor: 'b' },
+          markSizeRatio: 0,
+          referenceLines: [],
+          annotationLayers: [],
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+
+    expect(
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...{ ...sampleLayer, markSizeAccessor: 'b' },
+          markSizeRatio: 101,
+          referenceLines: [],
+          annotationLayers: [],
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  test('it should throw error if minTimeBarInterval is invalid', async () => {
+    const { data, args } = sampleArgs();
+    const { layers, ...rest } = args;
+    const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
+    expect(
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          minTimeBarInterval: '1q',
+          referenceLines: [],
+          annotationLayers: [],
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  test('it should throw error if minTimeBarInterval applied for not time bar chart', async () => {
+    const { data, args } = sampleArgs();
+    const { layers, ...rest } = args;
+    const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
+    expect(
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          minTimeBarInterval: '1h',
+          referenceLines: [],
+          annotationLayers: [],
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  test('it should throw error if addTimeMarker applied for not time chart', async () => {
+    const { data, args } = sampleArgs();
+    const { layers, ...rest } = args;
+    const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
+    expect(
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          addTimeMarker: true,
+          referenceLines: [],
+          annotationLayers: [],
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
   test('it should throw error if splitRowAccessor is pointing to the absent column', async () => {
     const { data, args } = sampleArgs();
     const { layers, ...rest } = args;
@@ -46,7 +135,7 @@ describe('xyVis', () => {
         {
           ...rest,
           ...restLayerArgs,
-          referenceLineLayers: [],
+          referenceLines: [],
           annotationLayers: [],
           splitRowAccessor,
         },
@@ -67,9 +156,29 @@ describe('xyVis', () => {
         {
           ...rest,
           ...restLayerArgs,
-          referenceLineLayers: [],
+          referenceLines: [],
           annotationLayers: [],
           splitColumnAccessor,
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  test('it should throw error if markSizeRatio is specified while markSizeAccessor is not', async () => {
+    const { data, args } = sampleArgs();
+    const { layers, ...rest } = args;
+    const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
+
+    expect(
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          referenceLines: [],
+          annotationLayers: [],
+          markSizeRatio: 5,
         },
         createMockExecutionContext()
       )
