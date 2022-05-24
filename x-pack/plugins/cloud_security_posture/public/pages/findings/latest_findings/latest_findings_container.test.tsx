@@ -37,7 +37,10 @@ beforeEach(() => {
 
 describe('<LatestFindingsContainer />', () => {
   it('data#search.search fn called with URL query', () => {
-    const query = getDefaultQuery();
+    const query = getDefaultQuery({
+      filters: [],
+      query: { language: 'kuery', query: '' },
+    });
     const dataMock = dataPluginMock.createStartContract();
     const dataView = createStubDataView({
       spec: {

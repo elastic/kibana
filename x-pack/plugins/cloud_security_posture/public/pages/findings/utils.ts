@@ -7,15 +7,10 @@
 
 import { buildEsQuery } from '@kbn/es-query';
 import { EuiBasicTableProps, Pagination } from '@elastic/eui';
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { FindingsBaseProps, FindingsBaseURLQuery } from './types';
 import { useKibana } from '../../common/hooks/use_kibana';
-
-export const getDefaultUrlQuery = (): FindingsBaseURLQuery => ({
-  query: { language: 'kuery', query: '' },
-  filters: [],
-});
 
 const getBaseQuery = ({ dataView, query, filters }: FindingsBaseURLQuery & FindingsBaseProps) => {
   try {
@@ -42,6 +37,23 @@ export const getPaginationTableParams = (
   showPerPageOptions,
 });
 
+export const usePersistedQuery = <T>(getter: ({ filters, query }: FindingsBaseURLQuery) => T) => {
+  const {
+    data: {
+      query: { filterManager, queryString },
+    },
+  } = useKibana().services;
+
+  return useCallback(
+    () =>
+      getter({
+        filters: filterManager.getAppFilters(),
+        query: queryString.getQuery(),
+      }),
+    [getter, filterManager, queryString]
+  );
+};
+
 export const getPaginationQuery = ({
   pageIndex,
   pageSize,
@@ -57,12 +69,23 @@ export const useBaseEsQuery = ({
 }: FindingsBaseURLQuery & FindingsBaseProps) => {
   const {
     notifications: { toasts },
+    data: {
+      query: { filterManager, queryString },
+    },
   } = useKibana().services;
 
   const baseEsQuery = useMemo(
     () => getBaseQuery({ dataView, filters, query }),
     [dataView, filters, query]
   );
+
+  /**
+   * Sync filters with the URL query
+   */
+  useEffect(() => {
+    filterManager.setAppFilters(filters);
+    queryString.setQuery(query);
+  }, [filters, filterManager, queryString, query]);
 
   const handleMalformedQueryError = () => {
     const error = baseEsQuery.error;

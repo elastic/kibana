@@ -17,14 +17,22 @@ import { findingsNavigation } from '../../../../common/navigation/constants';
 import { ResourceFindingsQuery, useResourceFindings } from './use_resource_findings';
 import { useUrlQuery } from '../../../../common/hooks/use_url_query';
 import type { FindingsBaseURLQuery, FindingsBaseProps } from '../../types';
-import { getPaginationQuery, getPaginationTableParams, useBaseEsQuery } from '../../utils';
+import {
+  getPaginationQuery,
+  getPaginationTableParams,
+  useBaseEsQuery,
+  usePersistedQuery,
+} from '../../utils';
 import { ResourceFindingsTable } from './resource_findings_table';
 import { FindingsSearchBar } from '../../layout/findings_search_bar';
 import { ErrorCallout } from '../../layout/error_callout';
 
-const getDefaultQuery = (): FindingsBaseURLQuery & ResourceFindingsQuery => ({
-  query: { language: 'kuery', query: '' },
-  filters: [],
+const getDefaultQuery = ({
+  query,
+  filters,
+}: FindingsBaseURLQuery): FindingsBaseURLQuery & ResourceFindingsQuery => ({
+  query,
+  filters,
   pageIndex: 0,
   pageSize: 10,
 });
@@ -44,7 +52,9 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
   useCspBreadcrumbs([findingsNavigation.findings_default]);
   const { euiTheme } = useEuiTheme();
   const params = useParams<{ resourceId: string }>();
-  const { urlQuery, setUrlQuery } = useUrlQuery(getDefaultQuery);
+
+  const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
+  const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
 
   /**
    * Page URL query to ES query
@@ -77,8 +87,6 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
         setQuery={(query) => {
           setUrlQuery({ ...query, pageIndex: 0 });
         }}
-        query={urlQuery.query}
-        filters={urlQuery.filters}
         loading={resourceFindings.isFetching}
       />
       <PageWrapper>

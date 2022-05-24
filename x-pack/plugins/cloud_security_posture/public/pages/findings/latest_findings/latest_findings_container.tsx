@@ -15,10 +15,10 @@ import type { FindingsGroupByNoneQuery } from './use_latest_findings';
 import type { FindingsBaseURLQuery } from '../types';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
 import {
-  getDefaultUrlQuery,
   getPaginationQuery,
   getPaginationTableParams,
   useBaseEsQuery,
+  usePersistedQuery,
 } from '../utils';
 import { PageWrapper, PageTitle, PageTitleText } from '../layout/findings_layout';
 import { FindingsGroupBySelector } from '../layout/findings_group_by_selector';
@@ -27,8 +27,12 @@ import { findingsNavigation } from '../../../common/navigation/constants';
 import { useUrlQuery } from '../../../common/hooks/use_url_query';
 import { ErrorCallout } from '../layout/error_callout';
 
-export const getDefaultQuery = (): FindingsBaseURLQuery & FindingsGroupByNoneQuery => ({
-  ...getDefaultUrlQuery(),
+export const getDefaultQuery = ({
+  query,
+  filters,
+}: FindingsBaseURLQuery): FindingsBaseURLQuery & FindingsGroupByNoneQuery => ({
+  query,
+  filters,
   sort: { field: '@timestamp', direction: 'desc' },
   pageIndex: 0,
   pageSize: 10,
@@ -37,7 +41,8 @@ export const getDefaultQuery = (): FindingsBaseURLQuery & FindingsGroupByNoneQue
 export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
   useCspBreadcrumbs([findingsNavigation.findings_default]);
 
-  const { urlQuery, setUrlQuery } = useUrlQuery(getDefaultQuery);
+  const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
+  const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
 
   /**
    * Page URL query to ES query
@@ -67,8 +72,6 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
         setQuery={(query) => {
           setUrlQuery({ ...query, pageIndex: 0 });
         }}
-        query={urlQuery.query}
-        filters={urlQuery.filters}
         loading={findingsGroupByNone.isFetching}
       />
       <PageWrapper>

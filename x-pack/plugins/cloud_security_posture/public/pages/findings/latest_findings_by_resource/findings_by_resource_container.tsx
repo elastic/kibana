@@ -13,7 +13,12 @@ import { useUrlQuery } from '../../../common/hooks/use_url_query';
 import type { FindingsBaseProps, FindingsBaseURLQuery } from '../types';
 import { FindingsByResourceQuery, useFindingsByResource } from './use_findings_by_resource';
 import { FindingsByResourceTable } from './findings_by_resource_table';
-import { getPaginationQuery, getPaginationTableParams, useBaseEsQuery } from '../utils';
+import {
+  getPaginationQuery,
+  getPaginationTableParams,
+  useBaseEsQuery,
+  usePersistedQuery,
+} from '../utils';
 import { PageTitle, PageTitleText, PageWrapper } from '../layout/findings_layout';
 import { FindingsGroupBySelector } from '../layout/findings_group_by_selector';
 import { findingsNavigation } from '../../../common/navigation/constants';
@@ -21,9 +26,12 @@ import { useCspBreadcrumbs } from '../../../common/navigation/use_csp_breadcrumb
 import { ResourceFindings } from './resource_findings/resource_findings_container';
 import { ErrorCallout } from '../layout/error_callout';
 
-const getDefaultQuery = (): FindingsBaseURLQuery & FindingsByResourceQuery => ({
-  query: { language: 'kuery', query: '' },
-  filters: [],
+const getDefaultQuery = ({
+  query,
+  filters,
+}: FindingsBaseURLQuery): FindingsBaseURLQuery & FindingsByResourceQuery => ({
+  query,
+  filters,
   pageIndex: 0,
   pageSize: 10,
 });
@@ -45,7 +53,8 @@ export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => 
 const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
   useCspBreadcrumbs([findingsNavigation.findings_by_resource]);
 
-  const { urlQuery, setUrlQuery } = useUrlQuery(getDefaultQuery);
+  const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
+  const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
 
   /**
    * Page URL query to ES query
@@ -74,8 +83,6 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
         setQuery={(query) => {
           setUrlQuery({ ...query, pageIndex: 0 });
         }}
-        query={urlQuery.query}
-        filters={urlQuery.filters}
         loading={findingsGroupByResource.isFetching}
       />
       <PageWrapper>
