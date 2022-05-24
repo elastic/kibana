@@ -20,7 +20,10 @@ import { TelemetryEventsSender } from '../../legacy_uptime/lib/telemetry/sender'
 import {
   MONITOR_UPDATE_CHANNEL,
   MONITOR_CURRENT_CHANNEL,
+  MONITOR_SYNC_STATE_CHANNEL,
+  MONITOR_SYNC_EVENTS_CHANNEL,
 } from '../../legacy_uptime/lib/telemetry/constants';
+import { MonitorSyncEvent } from '../../legacy_uptime/lib/telemetry/types';
 
 export interface UpgradeError {
   key?: string;
@@ -40,7 +43,24 @@ export function sendTelemetryEvents(
     eventsTelemetry.queueTelemetryEvents(MONITOR_UPDATE_CHANNEL, [updateEvent]);
     eventsTelemetry.queueTelemetryEvents(MONITOR_CURRENT_CHANNEL, [updateEvent]);
   } catch (exc) {
-    logger.error(`queing telemetry events failed ${exc}`);
+    logger.error(`queuing telemetry events failed ${exc}`);
+  }
+}
+
+export function sendSyncTelemetryEvents(
+  logger: Logger,
+  eventsTelemetry: TelemetryEventsSender | undefined,
+  updateEvent: MonitorSyncEvent
+) {
+  if (eventsTelemetry === undefined) {
+    return;
+  }
+
+  try {
+    eventsTelemetry.queueTelemetryEvents(MONITOR_SYNC_STATE_CHANNEL, [updateEvent]);
+    eventsTelemetry.queueTelemetryEvents(MONITOR_SYNC_EVENTS_CHANNEL, [updateEvent]);
+  } catch (exc) {
+    logger.error(`queuing telemetry events failed ${exc}`);
   }
 }
 
@@ -140,6 +160,8 @@ export function formatTelemetryDeleteEvent(
     errors,
   });
 }
+
+export function formatTelemetrySyncEvent() {}
 
 function getScriptType(
   attributes: Partial<MonitorFields>,

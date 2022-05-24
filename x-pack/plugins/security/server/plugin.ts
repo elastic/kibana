@@ -384,9 +384,15 @@ export class SecurityPlugin
       http: core.http,
       loggers: this.initializerContext.logger,
       session,
+      applicationName: this.authorizationSetup!.applicationName,
+      kibanaFeatures: features.getKibanaFeatures(),
     });
 
-    this.authorizationService.start({ features, clusterClient, online$: watchOnlineStatus$() });
+    this.authorizationService.start({
+      features,
+      clusterClient,
+      online$: watchOnlineStatus$(),
+    });
 
     this.anonymousAccessStart = this.anonymousAccessService.start({
       capabilities: core.capabilities,
