@@ -15,7 +15,7 @@ import {
 
 import type { AgentPolicy, NewAgentPolicy, EnrollmentAPIKey } from '../../../../../../types';
 
-interface UseEnsureDefaultAgentPolicyResponse {
+interface UseGetAgentPolicyOrDefaultResponse {
   isLoading: boolean;
   error?: Error;
   agentPolicy?: AgentPolicy;
@@ -29,11 +29,11 @@ export const DEFAULT_AGENT_POLICY: NewAgentPolicy = Object.freeze({
   namespace: 'default',
 });
 
-const sendGetDefaultAgentPolicy = async () => {
+const sendGetAgentPolicy = async (agentPolicyId: string) => {
   let result;
   let error;
   try {
-    result = await sendGetOneAgentPolicy(DEFAULT_AGENT_POLICY_ID);
+    result = await sendGetOneAgentPolicy(agentPolicyId);
     if (result.error) {
       error = result.error;
     }
@@ -50,14 +50,23 @@ const sendGetDefaultAgentPolicy = async () => {
 
 const sendCreateDefaultAgentPolicy = sendCreateAgentPolicy.bind(null, DEFAULT_AGENT_POLICY);
 
-export function useEnsureDefaultAgentPolicy() {
-  const [result, setResult] = useState<UseEnsureDefaultAgentPolicyResponse>({ isLoading: true });
+export function useGetAgentPolicyOrDefault(agentPolicyIdIn?: string) {
+  const [result, setResult] = useState<UseGetAgentPolicyOrDefaultResponse>({ isLoading: true });
 
   useEffect(() => {
-    const ensureDefaultAgentPolicy = async () => {
-      const { data: agentPolicyData, error: getError } = await sendGetDefaultAgentPolicy();
+    const getAgentPolicyOrDefault = async () => {
+      const agentPolicyId = agentPolicyIdIn || DEFAULT_AGENT_POLICY_ID;
+      const { data: agentPolicyData, error: getError } = await sendGetAgentPolicy(agentPolicyId);
 
       const existingAgentPolicy = agentPolicyData?.item;
+
+      if (agentPolicyIdIn && !existingAgentPolicy) {
+        setResult({
+          isLoading: false,
+          error: new Error(`Agent policy ${agentPolicyId} not found`),
+        });
+        return;
+      }
       let createdAgentPolicy;
       if (getError) {
         setResult({ isLoading: false, error: getError });
@@ -81,7 +90,7 @@ export function useEnsureDefaultAgentPolicy() {
       const { data: apiKeysData, error: apiKeysError } = await sendGetEnrollmentAPIKeys({
         page: 1,
         perPage: 1,
-        kuery: `policy_id:${DEFAULT_AGENT_POLICY_ID}`,
+        kuery: `policy_id:${agentPolicyId}`,
       });
 
       if (apiKeysError) {
@@ -92,7 +101,7 @@ export function useEnsureDefaultAgentPolicy() {
       if (!apiKeysData || !apiKeysData.items?.length) {
         setResult({
           isLoading: false,
-          error: new Error(`No enrollment API key found for policy ${DEFAULT_AGENT_POLICY_ID}`),
+          error: new Error(`No enrollment API key found for policy ${agentPolicyId}`),
         });
         return;
       }
@@ -102,8 +111,8 @@ export function useEnsureDefaultAgentPolicy() {
       setResult({ isLoading: false, created: !!createdAgentPolicy, agentPolicy, enrollmentAPIKey });
     };
 
-    ensureDefaultAgentPolicy();
-  }, []);
+    getAgentPolicyOrDefault();
+  }, [agentPolicyIdIn]);
 
   return result;
 }

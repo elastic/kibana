@@ -13,7 +13,7 @@ import { splitPkgKey } from '../../../../../../../common';
 import { useGetPackageInfoByKey, useGetSettings } from '../../../../hooks';
 
 import type { AddToPolicyParams, CreatePackagePolicyParams } from '../types';
-import { useCancelAddPackagePolicy, useEnsureDefaultAgentPolicy } from '../hooks';
+import { useCancelAddPackagePolicy, useGetAgentPolicyOrDefault } from '../hooks';
 
 import {
   AddFirstIntegrationSplashScreen,
@@ -48,7 +48,10 @@ const fleetManagedSteps = [installAgentStep, addIntegrationStep, confirmDataStep
 
 const standaloneSteps = [addIntegrationStep, installAgentStep, confirmDataStep];
 
-export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({ from }) => {
+export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
+  from,
+  queryParamsPolicyId,
+}) => {
   const { params } = useRouteMatch<AddToPolicyParams>();
 
   const { pkgName, pkgVersion } = splitPkgKey(params.pkgkey);
@@ -70,11 +73,11 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({ from }
   } = useGetPackageInfoByKey(pkgName, pkgVersion);
 
   const {
-    agentPolicy: defaultAgentPolicy,
+    agentPolicy,
     enrollmentAPIKey,
     error: agentPolicyError,
     isLoading: isAgentPolicyLoading,
-  } = useEnsureDefaultAgentPolicy();
+  } = useGetAgentPolicyOrDefault(queryParamsPolicyId);
 
   const packageInfo = useMemo(() => packageInfoData?.item, [packageInfoData]);
   const settings = useMemo(() => settingsData?.item, [settingsData]);
@@ -130,7 +133,7 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({ from }
   return (
     <MultiPageStepsLayout
       settings={settings}
-      agentPolicy={defaultAgentPolicy}
+      agentPolicy={agentPolicy}
       enrollmentAPIKey={enrollmentAPIKey}
       currentStep={currentStep}
       steps={steps}

@@ -38,7 +38,7 @@ export const getInstallPkgRouteOptions = ({
   const packageExemptFromStepsLayout = isPackageExemptFromStepsLayout(pkgkey);
   const useMultiPageLayout =
     isExperimentalAddIntegrationPageEnabled &&
-    isCloud &&
+    true &&
     isFirstTimeAgentUser &&
     !packageExemptFromStepsLayout;
   const path = pagePathGetters.add_integration_to_policy({
