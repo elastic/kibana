@@ -22,7 +22,7 @@ import {
   getAlertUserAction,
 } from '../../containers/mock';
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
-import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
+import { useFetchCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { CaseViewPage } from './case_view_page';
@@ -43,7 +43,7 @@ const useUrlParamsMock = useUrlParams as jest.Mock;
 const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useGetCaseMetricsMock = useGetCaseMetrics as jest.Mock;
-const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
+const useFetchCaseUserActionsMock = useFetchCaseUserActions as jest.Mock;
 const useConnectorsMock = useConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 
@@ -75,15 +75,15 @@ describe('CaseViewPage', () => {
   };
 
   const defaultUseGetCaseUserActions = {
-    caseUserActions: [...caseUserActions, getAlertUserAction()],
-    caseServices: {},
-    fetchCaseUserActions,
-    firstIndexPushToService: -1,
-    hasDataToPush: false,
+    data: {
+      caseUserActions: [...caseUserActions, getAlertUserAction()],
+      caseServices: {},
+      hasDataToPush: false,
+      participants: [data.createdBy],
+    },
+    refetch: fetchCaseUserActions,
     isLoading: false,
     isError: false,
-    lastIndexPushToService: -1,
-    participants: [data.createdBy],
   };
 
   const defaultGetCaseMetrics = {
@@ -97,7 +97,7 @@ describe('CaseViewPage', () => {
     jest.clearAllMocks();
     useUpdateCaseMock.mockReturnValue(defaultUpdateCaseState);
     useGetCaseMetricsMock.mockReturnValue(defaultGetCaseMetrics);
-    useGetCaseUserActionsMock.mockReturnValue(defaultUseGetCaseUserActions);
+    useFetchCaseUserActionsMock.mockReturnValue(defaultUseGetCaseUserActions);
     usePostPushToServiceMock.mockReturnValue({ isLoading: false, pushCaseToExternalService });
     useConnectorsMock.mockReturnValue({ connectors: connectorsMock, loading: false });
   });
@@ -297,9 +297,12 @@ describe('CaseViewPage', () => {
   });
 
   it('should push updates on button click', async () => {
-    useGetCaseUserActionsMock.mockImplementation(() => ({
+    useFetchCaseUserActionsMock.mockImplementation(() => ({
       ...defaultUseGetCaseUserActions,
-      hasDataToPush: true,
+      data: {
+        ...defaultUseGetCaseUserActions.data,
+        hasDataToPush: true,
+      },
     }));
 
     const wrapper = mount(
@@ -321,9 +324,12 @@ describe('CaseViewPage', () => {
   });
 
   it('should disable the push button when connector is invalid', async () => {
-    useGetCaseUserActionsMock.mockImplementation(() => ({
+    useFetchCaseUserActionsMock.mockImplementation(() => ({
       ...defaultUseGetCaseUserActions,
-      hasDataToPush: true,
+      data: {
+        ...defaultUseGetCaseUserActions.data,
+        hasDataToPush: true,
+      },
     }));
 
     const wrapper = mount(
@@ -447,15 +453,13 @@ describe('CaseViewPage', () => {
     });
   });
 
-  it('should show loading content when loading alerts', async () => {
+  it('should show loading content when loading user actions', async () => {
     const useFetchAlertData = jest.fn().mockReturnValue([true]);
-    useGetCaseUserActionsMock.mockReturnValue({
-      caseServices: {},
-      caseUserActions: [],
-      hasDataToPush: false,
+    useFetchCaseUserActionsMock.mockReturnValue({
+      data: undefined,
       isError: false,
       isLoading: true,
-      participants: [],
+      isFetching: true,
     });
 
     const wrapper = mount(
@@ -526,9 +530,12 @@ describe('CaseViewPage', () => {
 
   it('should show the correct connector name on the push button', async () => {
     useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
-    useGetCaseUserActionsMock.mockImplementation(() => ({
+    useFetchCaseUserActionsMock.mockImplementation(() => ({
       ...defaultUseGetCaseUserActions,
-      hasDataToPush: true,
+      data: {
+        ...defaultUseGetCaseUserActions.data,
+        hasDataToPush: true,
+      },
     }));
 
     const wrapper = mount(
