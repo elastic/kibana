@@ -45,6 +45,8 @@ while read -r config; do
   if [[ -f "target/kibana-coverage/jest/coverage-final.json" ]]; then
     echo "--- Rename Jest coverage-final.json to avoid overwrite && Clean Jest Coverage Paths"
     penulitimate=target/kibana-coverage/jest/coverage-final.json
+    dirListing "target/dir-listing-jest-in-loop.txt" target/kibana-coverage/jest
+
 #    node .buildkite/scripts/steps/code_coverage/clean_coverage_paths.js $penulitimate
     mv $penulitimate "./target/kibana-coverage/jest/coverage-$(date +%s%3N).json"
   else
