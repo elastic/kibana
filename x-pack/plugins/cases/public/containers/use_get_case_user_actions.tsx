@@ -204,7 +204,7 @@ export const getPushedInfo = (
   };
 };
 
-export const useFetchCaseUserActions = (caseId: string, caseConnectorId: string) => {
+export const useGetCaseUserActions = (caseId: string, caseConnectorId: string) => {
   const abortCtrlRef = new AbortController();
   return useQuery(['case-user-actions', caseId, caseConnectorId], async () => {
     const response = await getCaseUserActions(caseId, abortCtrlRef.signal);
@@ -222,4 +222,4 @@ export const useFetchCaseUserActions = (caseId: string, caseConnectorId: string)
   });
 };
 
-export type UseFetchCaseUserActions = ReturnType<typeof useFetchCaseUserActions>;
+export type UseGetCaseUserActions = ReturnType<typeof useGetCaseUserActions>;

@@ -8,8 +8,8 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import {
   getPushedInfo,
-  useFetchCaseUserActions,
-  UseFetchCaseUserActions,
+  useGetCaseUserActions,
+  UseGetCaseUserActions,
 } from './use_get_case_user_actions';
 import {
   basicCase,
@@ -47,8 +47,8 @@ describe('useGetCaseUserActions', () => {
 
   it('returns proper state on getCaseUserActions', async () => {
     await act(async () => {
-      const { result } = renderHook<string, UseFetchCaseUserActions>(
-        () => useFetchCaseUserActions(basicCase.id, basicCase.connector.id),
+      const { result } = renderHook<string, UseGetCaseUserActions>(
+        () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
         { wrapper }
       );
       await waitFor(() => {
