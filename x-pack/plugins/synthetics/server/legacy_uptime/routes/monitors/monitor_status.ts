@@ -24,7 +24,6 @@ export const createGetStatusBarRoute: UMRestApiRouteFactory = (libs: UMServerLib
   },
   handler: async ({ uptimeEsClient, request, server, savedObjectsClient }): Promise<any> => {
     const { monitorId, dateStart, dateEnd } = request.query;
-    const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
     const latestMonitor = await libs.requests.getLatestMonitor({
       uptimeEsClient,

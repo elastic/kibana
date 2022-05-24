@@ -128,7 +128,5 @@ describe('<MonitorFields />', () => {
     );
 
     expect(getByText('Read only')).toBeInTheDocument();
-    const input = getByTestId('monitorManagementMonitorName') as HTMLInputElement;
-    expect(input).toHaveValue(name);
   });
 });
