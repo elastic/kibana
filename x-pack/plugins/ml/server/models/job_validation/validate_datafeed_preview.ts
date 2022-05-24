@@ -37,7 +37,7 @@ export async function validateDatafeedPreview(
           datafeed_config: datafeed,
         },
       },
-      authHeader
+      { ...authHeader, maxRetries: 0 }
       // previewDatafeed response type is incorrect
     )) as unknown as { body: unknown[] };
 
