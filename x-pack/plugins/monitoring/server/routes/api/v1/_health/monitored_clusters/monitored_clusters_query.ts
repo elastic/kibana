@@ -407,9 +407,15 @@ const logstashAggregation = {
 
 const beatsAggregations = {
   beats_stats: {
-    terms: {
-      field: 'beats_stats.beat.uuid',
-      size: 10000,
+    multi_terms: {
+      terms: [
+        {
+          field: 'beats_stats.beat.type',
+        },
+        {
+          field: 'beats_stats.beat.uuid',
+        },
+      ],
     },
     aggs: {
       stats: lastSeenByIndex({
@@ -434,9 +440,15 @@ const beatsAggregations = {
   },
 
   beats_state: {
-    terms: {
-      field: 'beats_state.beat.uuid',
-      size: 10000,
+    multi_terms: {
+      terms: [
+        {
+          field: 'beats_state.beat.type',
+        },
+        {
+          field: 'beats_state.beat.uuid',
+        },
+      ],
     },
     aggs: {
       state: lastSeenByIndex({
