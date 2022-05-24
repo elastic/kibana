@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import {
@@ -17,6 +17,7 @@ import {
 
 export function useMonitorList() {
   const dispatch = useDispatch();
+  const [isDataQueried, setIsDataQueried] = useState(false);
 
   const { pageState, loading, error } = useSelector(selectMonitorListState);
   const syntheticsMonitors = useSelector(selectEncryptedSyntheticsSavedMonitors);
@@ -32,11 +33,14 @@ export function useMonitorList() {
 
   // Initial loading
   useEffect(() => {
-    if (!loading) {
+    if (!loading && !isDataQueried) {
       reloadPage();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reloadPage]);
+
+    if (loading) {
+      setIsDataQueried(true);
+    }
+  }, [reloadPage, isDataQueried, syntheticsMonitors, loading]);
 
   return {
     loading,
@@ -46,5 +50,6 @@ export function useMonitorList() {
     viewType,
     loadPage,
     reloadPage,
+    isDataQueried,
   };
 }

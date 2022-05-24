@@ -29,7 +29,7 @@ export const MonitorPage: React.FC = () => {
 
   useMonitorListBreadcrumbs();
 
-  const { syntheticsMonitors, loading: monitorsLoading } = useMonitorList();
+  const { syntheticsMonitors, loading: monitorsLoading, isDataQueried } = useMonitorList();
 
   const {
     error: enablementError,
@@ -41,7 +41,7 @@ export const MonitorPage: React.FC = () => {
   const { loading: locationsLoading } = useLocations();
   const showEmptyState = isEnabled !== undefined && syntheticsMonitors.length === 0;
 
-  if (isEnabled && !monitorsLoading && syntheticsMonitors.length === 0) {
+  if (isEnabled && !monitorsLoading && syntheticsMonitors.length === 0 && isDataQueried) {
     return <Redirect to={GETTING_STARTED_ROUTE} />;
   }
 
