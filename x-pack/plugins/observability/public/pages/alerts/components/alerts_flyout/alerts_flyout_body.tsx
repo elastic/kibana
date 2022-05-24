@@ -41,7 +41,7 @@ export default function AlertsFlyoutBody(props: FlyoutProps) {
   const { http } = services;
   const dateFormat = useUiSetting<string>('dateFormat');
   const prepend = http?.basePath.prepend;
-  const ruleId = get(alert, 'kibana.alert.rule.uuid') ?? null;
+  const ruleId = get(props.alert, 'kibana.alert.rule.uuid') ?? null;
   const linkToRule = ruleId && prepend ? prepend(paths.management.ruleDetails(ruleId)) : null;
   const overviewListItems = [
     {

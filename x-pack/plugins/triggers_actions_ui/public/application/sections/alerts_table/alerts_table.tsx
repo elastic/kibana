@@ -16,6 +16,7 @@ import {
   EuiButtonIcon,
   EuiDataGridStyle,
   EuiDataGridCellValueProps,
+  EuiDataGridColumn,
 } from '@elastic/eui';
 import { useSorting, usePagination } from './hooks';
 import { AlertsTableProps } from '../../../types';
@@ -39,6 +40,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     alerts,
     alertsCount,
     isLoading,
+    onColumnsChange,
     onPageChange,
     onSortChange,
     sort: sortingFields,
@@ -59,6 +61,16 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   });
 
   const [visibleColumns, setVisibleColumns] = useState(props.columns.map(({ id }) => id));
+
+  const onChangeVisibleColumns = useCallback(
+    (newColumns: string[]) => {
+      setVisibleColumns(newColumns);
+      onColumnsChange(
+        newColumns.map((cid) => props.columns.find((oc) => oc.id === cid)) as EuiDataGridColumn[]
+      );
+    },
+    [onColumnsChange, props.columns]
+  );
 
   const leadingControlColumns = useMemo(() => {
     return [
@@ -140,7 +152,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   const handleRenderCellValue = useCallback(
     (improper: EuiDataGridCellValueElementProps) => {
       const rcvProps = improper as EuiDataGridCellValueElementProps & EuiDataGridCellValueProps;
-      const alert = alerts[rcvProps.visibleRowIndex];
+      const alert = alerts[rcvProps.rowIndex];
       const renderCellValue = props.alertsTableConfiguration?.getRenderCellValue
         ? props.alertsTableConfiguration?.getRenderCellValue({
             setFlyoutAlert: handleFlyoutAlert,
@@ -178,7 +190,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         aria-label="Alerts table"
         data-test-subj="alertsTable"
         columns={props.columns}
-        columnVisibility={{ visibleColumns, setVisibleColumns }}
+        columnVisibility={{ visibleColumns, setVisibleColumns: onChangeVisibleColumns }}
         trailingControlColumns={props.trailingControlColumns}
         leadingControlColumns={leadingControlColumns}
         rowCount={alertsCount}

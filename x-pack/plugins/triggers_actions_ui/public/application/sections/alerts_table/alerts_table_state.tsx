@@ -6,13 +6,7 @@
  */
 import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { isEmpty } from 'lodash';
-import {
-  EuiDataGridColumn,
-  EuiDataGridControlColumn,
-  EuiProgress,
-  EuiDataGridSorting,
-  EuiEmptyPrompt,
-} from '@elastic/eui';
+import { EuiDataGridColumn, EuiProgress, EuiDataGridSorting, EuiEmptyPrompt } from '@elastic/eui';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -141,7 +135,7 @@ const AlertsTableState = ({
     [id]
   );
   const onColumnsChange = useCallback(
-    (newColumns: EuiDataGridControlColumn[]) => {
+    (newColumns: EuiDataGridColumn[]) => {
       setColumns(newColumns);
       storageAlertsTable.current = {
         ...storageAlertsTable.current,

@@ -393,7 +393,7 @@ export interface FetchAlertData {
   isInitializing: boolean;
   isLoading: boolean;
   getInspectQuery: () => { request: {}; response: {} };
-  onColumnsChange: (columns: EuiDataGridControlColumn[]) => void;
+  onColumnsChange: (columns: EuiDataGridColumn[]) => void;
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
   onSortChange: (sort: EuiDataGridSorting['columns']) => void;
   refresh: () => void;

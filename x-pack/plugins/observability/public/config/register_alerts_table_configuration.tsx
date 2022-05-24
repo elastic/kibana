@@ -14,6 +14,7 @@ import { lazy } from 'react';
 
 import { observabilityFeatureId } from '../../common';
 import { getRenderCellValue } from '../pages/alerts/components/render_cell_value';
+import { addDisplayNames } from '../pages/alerts/containers/alerts_table_t_grid/add_display_names';
 import { columns as alertO11yColumns } from '../pages/alerts/containers/alerts_table_t_grid/alerts_table_t_grid';
 
 const AlertsPageFlyoutHeaderLazy = lazy(
@@ -32,7 +33,7 @@ const registerAlertsTableConfiguration = (registry: AlertsTableConfigurationRegi
   }
   registry.register({
     id: observabilityFeatureId,
-    columns: alertO11yColumns,
+    columns: alertO11yColumns.map(addDisplayNames),
     externalFlyout: {
       header: AlertsPageFlyoutHeaderLazy as AlertTableFlyoutComponent,
       body: AlertsPageFlyoutBodyLazy as AlertTableFlyoutComponent,
