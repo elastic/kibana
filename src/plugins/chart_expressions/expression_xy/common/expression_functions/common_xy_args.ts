@@ -128,6 +128,15 @@ export const commonXYArgs: CommonXYFn['args'] = {
     types: ['string'],
     help: strings.getAriaLabelHelp(),
   },
+  addTimeMarker: {
+    types: ['boolean'],
+    default: false,
+    help: strings.getAddTimeMakerHelp(),
+  },
+  markSizeRatio: {
+    types: ['number'],
+    help: strings.getMarkSizeRatioHelp(),
+  },
   minTimeBarInterval: {
     types: ['string'],
     help: strings.getMinTimeBarIntervalHelp(),

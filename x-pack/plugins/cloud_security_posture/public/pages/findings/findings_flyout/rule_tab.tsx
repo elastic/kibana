@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { EuiDescriptionList } from '@elastic/eui';
 import React from 'react';
-import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
-import k8sLogoIcon from '../../../assets/icons/k8s_logo.svg';
 import * as TEXT from '../translations';
 import { CspFinding } from '../types';
-import { Markdown } from './findings_flyout';
+import { CisKubernetesIcons, Markdown } from './findings_flyout';
 
-const getRuleList = ({ rule }: CspFinding) => [
+export const getRuleList = (rule: CspFinding['rule']) => [
   {
     title: TEXT.NAME,
     description: rule.name,
@@ -24,16 +22,7 @@ const getRuleList = ({ rule }: CspFinding) => [
   },
   {
     title: TEXT.FRAMEWORK_SOURCES,
-    description: (
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type={cisLogoIcon} size="xxl" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type={k8sLogoIcon} size="xxl" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
+    description: <CisKubernetesIcons />,
   },
   {
     title: TEXT.CIS_SECTION,
@@ -59,5 +48,5 @@ const getRuleList = ({ rule }: CspFinding) => [
 ];
 
 export const RuleTab = ({ data }: { data: CspFinding }) => (
-  <EuiDescriptionList listItems={getRuleList(data)} />
+  <EuiDescriptionList listItems={getRuleList(data.rule)} />
 );

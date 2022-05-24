@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import {
   BLOCKLIST_PATH,
@@ -12,14 +13,17 @@ import {
   EVENT_FILTERS_PATH,
   EXCEPTIONS_PATH,
   HOST_ISOLATION_EXCEPTIONS_PATH,
-  MANAGEMENT_PATH,
+  MANAGE_PATH,
   POLICIES_PATH,
+  RULES_CREATE_PATH,
   RULES_PATH,
   SecurityPageName,
+  SERVER_APP_ID,
   TRUSTED_APPS_PATH,
 } from '../../common/constants';
 import {
   BLOCKLIST,
+  CREATE_NEW_RULE,
   ENDPOINTS,
   EVENT_FILTERS,
   EXCEPTIONS,
@@ -29,8 +33,8 @@ import {
   RULES,
   TRUSTED_APPLICATIONS,
 } from '../app/translations';
-import { NavigationCategories } from '../common/components/navigation/types';
-import { FEATURE, LinkItem } from '../common/links/types';
+import { LinkItem } from '../common/links/types';
+import { StartPlugins } from '../types';
 
 import { IconBlocklist } from './icons/blocklist';
 import { IconEndpoints } from './icons/endpoints';
@@ -41,18 +45,42 @@ import { IconHostIsolation } from './icons/host_isolation';
 import { IconSiemRules } from './icons/siem_rules';
 import { IconTrustedApplications } from './icons/trusted_applications';
 
-export const links: LinkItem = {
+const categories = [
+  {
+    label: i18n.translate('xpack.securitySolution.appLinks.category.siem', {
+      defaultMessage: 'SIEM',
+    }),
+    linkIds: [SecurityPageName.rules, SecurityPageName.exceptions],
+  },
+  {
+    label: i18n.translate('xpack.securitySolution.appLinks.category.endpoints', {
+      defaultMessage: 'ENDPOINTS',
+    }),
+    linkIds: [
+      SecurityPageName.endpoints,
+      SecurityPageName.policies,
+      SecurityPageName.trustedApps,
+      SecurityPageName.eventFilters,
+      SecurityPageName.hostIsolationExceptions,
+      SecurityPageName.blocklist,
+    ],
+  },
+];
+
+const links: LinkItem = {
   id: SecurityPageName.administration,
   title: MANAGE,
-  path: MANAGEMENT_PATH,
+  path: MANAGE_PATH,
   skipUrlState: true,
+  hideTimeline: true,
   globalNavEnabled: false,
-  features: [FEATURE.general],
+  capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.manage', {
       defaultMessage: 'Manage',
     }),
   ],
+  categories,
   links: [
     {
       id: SecurityPageName.rules,
@@ -70,7 +98,16 @@ export const links: LinkItem = {
           defaultMessage: 'Rules',
         }),
       ],
-      globalSearchEnabled: true,
+      links: [
+        {
+          id: SecurityPageName.rulesCreate,
+          title: CREATE_NEW_RULE,
+          path: RULES_CREATE_PATH,
+          globalNavEnabled: false,
+          skipUrlState: true,
+          hideTimeline: true,
+        },
+      ],
     },
     {
       id: SecurityPageName.exceptions,
@@ -86,7 +123,6 @@ export const links: LinkItem = {
           defaultMessage: 'Exception lists',
         }),
       ],
-      globalSearchEnabled: true,
     },
     {
       id: SecurityPageName.endpoints,
@@ -99,6 +135,7 @@ export const links: LinkItem = {
       globalNavOrder: 9006,
       path: ENDPOINTS_PATH,
       skipUrlState: true,
+      hideTimeline: true,
     },
     {
       id: SecurityPageName.policies,
@@ -110,6 +147,7 @@ export const links: LinkItem = {
       landingIcon: IconEndpointPolicies,
       path: POLICIES_PATH,
       skipUrlState: true,
+      hideTimeline: true,
       experimentalKey: 'policyListEnabled',
     },
     {
@@ -125,6 +163,7 @@ export const links: LinkItem = {
       landingIcon: IconTrustedApplications,
       path: TRUSTED_APPS_PATH,
       skipUrlState: true,
+      hideTimeline: true,
     },
     {
       id: SecurityPageName.eventFilters,
@@ -135,6 +174,7 @@ export const links: LinkItem = {
       landingIcon: IconEventFilters,
       path: EVENT_FILTERS_PATH,
       skipUrlState: true,
+      hideTimeline: true,
     },
     {
       id: SecurityPageName.hostIsolationExceptions,
@@ -145,6 +185,7 @@ export const links: LinkItem = {
       landingIcon: IconHostIsolation,
       path: HOST_ISOLATION_EXCEPTIONS_PATH,
       skipUrlState: true,
+      hideTimeline: true,
     },
     {
       id: SecurityPageName.blocklist,
@@ -155,28 +196,12 @@ export const links: LinkItem = {
       landingIcon: IconBlocklist,
       path: BLOCKLIST_PATH,
       skipUrlState: true,
+      hideTimeline: true,
     },
   ],
 };
 
-export const navigationCategories: NavigationCategories = [
-  {
-    label: i18n.translate('xpack.securitySolution.appLinks.category.siem', {
-      defaultMessage: 'SIEM',
-    }),
-    linkIds: [SecurityPageName.rules, SecurityPageName.exceptions],
-  },
-  {
-    label: i18n.translate('xpack.securitySolution.appLinks.category.endpoints', {
-      defaultMessage: 'ENDPOINTS',
-    }),
-    linkIds: [
-      SecurityPageName.endpoints,
-      SecurityPageName.policies,
-      SecurityPageName.trustedApps,
-      SecurityPageName.eventFilters,
-      SecurityPageName.blocklist,
-      SecurityPageName.hostIsolationExceptions,
-    ],
-  },
-] as const;
+export const getManagementLinkItems = async (core: CoreStart, plugins: StartPlugins) => {
+  // TODO: implement async logic to exclude links
+  return links;
+};
