@@ -10,8 +10,6 @@ import React, { useEffect, useState, FC } from 'react';
 
 import { Chart, Settings, Axis, BarSeries, Position, ScaleType } from '@elastic/charts';
 
-import { i18n } from '@kbn/i18n';
-
 import {
   EuiBadge,
   EuiButton,
@@ -73,13 +71,7 @@ export const PageReducerStream: FC = () => {
     }
   }, [error, notifications.toasts]);
 
-  const buttonLabel = isRunning
-    ? i18n.translate('xpack.response_stream.stopbuttonText', {
-        defaultMessage: 'Stop development',
-      })
-    : i18n.translate('xpack.response_stream.startbuttonText', {
-        defaultMessage: 'Start development',
-      });
+  const buttonLabel = isRunning ? 'Stop development' : 'Start development';
 
   return (
     <Page title={'Reducer stream'}>
@@ -113,21 +105,8 @@ export const PageReducerStream: FC = () => {
       <div style={{ height: '300px' }}>
         <Chart>
           <Settings rotation={90} />
-          <Axis
-            id="entities"
-            position={Position.Bottom}
-            title={i18n.translate('xpack.response_stream.barChart.commitsTitle', {
-              defaultMessage: 'Commits',
-            })}
-            showOverlappingTicks
-          />
-          <Axis
-            id="left2"
-            title={i18n.translate('xpack.response_stream.barChart.developersTitle', {
-              defaultMessage: 'Developers',
-            })}
-            position={Position.Left}
-          />
+          <Axis id="entities" position={Position.Bottom} title="Commits" showOverlappingTicks />
+          <Axis id="left2" title="Developers" position={Position.Left} />
 
           <BarSeries
             id="commits"
@@ -150,10 +129,7 @@ export const PageReducerStream: FC = () => {
         <p>{getStatusMessage(isRunning, isCancelled, data.progress)}</p>
         <EuiCheckbox
           id="responseStreamSimulateErrorsCheckbox"
-          label={i18n.translate('xpack.responseStream.simulateErrorsCheckboxLabel', {
-            defaultMessage:
-              'Simulate errors (gets applied to new streams only, not currently running ones).',
-          })}
+          label="Simulate errors (gets applied to new streams only, not currently running ones)."
           checked={simulateErrors}
           onChange={(e) => setSimulateErrors(!simulateErrors)}
           compressed

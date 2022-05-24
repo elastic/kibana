@@ -8,8 +8,6 @@
 
 import React, { FC } from 'react';
 
-import { i18n } from '@kbn/i18n';
-
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { useFetchStream } from '@kbn/aiops-utils';
@@ -38,16 +36,10 @@ export const PageSimpleStringStream: FC = () => {
     }
   };
 
-  const buttonLabel = isRunning
-    ? i18n.translate('xpack.response_stream.simpleString.StopbuttonText', {
-        defaultMessage: 'Stop',
-      })
-    : i18n.translate('xpack.response_stream.simpleString.startbuttonText', {
-        defaultMessage: 'Start',
-      });
+  const buttonLabel = isRunning ? 'Stop' : 'Start';
 
   return (
-    <Page title={'Simple string stream'}>
+    <Page title="Simple string stream">
       <EuiText>
         <p>
           This demonstrates a single endpoint with streaming support that sends just chunks of a
