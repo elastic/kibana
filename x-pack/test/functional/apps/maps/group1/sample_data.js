@@ -138,8 +138,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
           'web_logs_map',
           updateBaselines
         );
-        //expect(percentDifference).to.be.lessThan(0.02);
-        expect(percentDifference).to.be.lessThan(0);
+        expect(percentDifference).to.be.lessThan(0.02);
       });
     });
   });
