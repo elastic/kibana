@@ -14,9 +14,9 @@ import {
   EuiFlexItem,
   EuiSwitch,
   EuiText,
-  EuiButtonIcon,
   EuiHorizontalRule,
   EuiSpacer,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 
 import type {
@@ -151,10 +151,11 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                 </EuiFlexItem>
               ) : null}
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType={isShowingStreams ? 'arrowUp' : 'arrowDown'}
+                <EuiButtonEmpty
+                  color={hasErrors ? 'danger' : 'primary'}
                   onClick={() => setIsShowingStreams(!isShowingStreams)}
-                  color={hasErrors ? 'danger' : 'text'}
+                  iconType={isShowingStreams ? 'arrowUp' : 'arrowDown'}
+                  iconSide="right"
                   aria-label={
                     isShowingStreams
                       ? i18n.translate(
@@ -176,7 +177,14 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                           }
                         )
                   }
-                />
+                >
+                  {
+                    <FormattedMessage
+                      id="xpack.fleet.createPackagePolicy.stepConfigure.expandLabel"
+                      defaultMessage="Change defaults"
+                    />
+                  }
+                </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
