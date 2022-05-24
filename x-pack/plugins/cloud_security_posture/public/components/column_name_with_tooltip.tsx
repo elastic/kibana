@@ -5,22 +5,15 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiTableFieldDataColumnType,
-  EuiToolTip,
-  EuiToolTipProps,
-} from '@elastic/eui';
-import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip, EuiToolTipProps } from '@elastic/eui';
+import React, { ReactNode } from 'react';
 
 export const ColumnNameWithTooltip = ({
   tooltipContent,
   columnName,
 }: {
   tooltipContent: EuiToolTipProps['content'];
-  columnName: EuiTableFieldDataColumnType['name'];
+  columnName: ReactNode;
 }) => (
   <EuiToolTip content={tooltipContent}>
     <EuiFlexGroup gutterSize={'xs'} alignItems="center">
