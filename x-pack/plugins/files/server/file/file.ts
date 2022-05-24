@@ -62,7 +62,7 @@ export class File<M = unknown> implements IFile {
     );
   }
 
-  public async update(attrs: UpdatableFileAttributes): Promise<IFile> {
+  public async update(attrs: Partial<UpdatableFileAttributes>): Promise<IFile> {
     await this.updateFileState({
       action: 'updateFile',
       payload: attrs,
