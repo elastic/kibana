@@ -13,7 +13,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const esArchiver = getService('esArchiver');
 
-  describe('Rule status filter', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/132736
+  describe.skip('Rule status filter', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
       await PageObjects.common.navigateToUrlWithBrowserHistory(
