@@ -121,10 +121,10 @@ export function PolicyConfigContextProvider<ExtraFields = unknown>({
   const isAddMonitorRoute = useRouteMatch(MONITOR_ADD_ROUTE);
 
   useEffect(() => {
-    if (isAddMonitorRoute) {
+    if (isAddMonitorRoute?.isExact) {
       setMonitorType(DataStream.BROWSER);
     }
-  }, [isAddMonitorRoute]);
+  }, [isAddMonitorRoute?.isExact]);
 
   const value = useMemo(() => {
     return {

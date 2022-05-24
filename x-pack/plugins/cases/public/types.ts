@@ -36,6 +36,7 @@ import { GetAllCasesSelectorModalProps } from './client/ui/get_all_cases_selecto
 import { GetCreateCaseFlyoutProps } from './client/ui/get_create_case_flyout';
 import { GetRecentCasesProps } from './client/ui/get_recent_cases';
 import { Cases, CasesStatus, CasesMetrics } from '../common/ui';
+import { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
 
 export interface CasesPluginSetup {
   security: SecurityPluginSetup;
@@ -129,6 +130,7 @@ export interface CasesUiStart {
      */
     canUseCases: (owners?: CasesOwners[]) => { crud: boolean; read: boolean };
     getRuleIdFromEvent: typeof getRuleIdFromEvent;
+    groupAlertsByRule: typeof groupAlertsByRule;
   };
 }
 

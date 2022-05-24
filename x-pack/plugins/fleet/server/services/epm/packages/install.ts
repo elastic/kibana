@@ -598,7 +598,6 @@ export async function createInstallation(options: {
     ? true
     : undefined;
 
-  // TODO cleanup removable flag and isUnremovablePackage function
   const created = await savedObjectsClient.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
     {
@@ -609,7 +608,6 @@ export async function createInstallation(options: {
       es_index_patterns: toSaveESIndexPatterns,
       name: pkgName,
       version: pkgVersion,
-      removable: true,
       install_version: pkgVersion,
       install_status: 'installing',
       install_started_at: new Date().toISOString(),

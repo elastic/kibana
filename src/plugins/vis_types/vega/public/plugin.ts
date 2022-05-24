@@ -20,7 +20,6 @@ import {
   setDataViews,
   setInjectedVars,
   setUISettings,
-  setInjectedMetadata,
   setDocLinks,
   setMapsEms,
 } from './services';
@@ -73,7 +72,6 @@ export class VegaPlugin implements Plugin<void, void> {
   ) {
     setInjectedVars({
       enableExternalUrls: this.initializerContext.config.get().enableExternalUrls,
-      emsTileLayerId: core.injectedMetadata.getInjectedVar('emsTileLayerId', true),
     });
 
     setUISettings(core.uiSettings);
@@ -98,7 +96,6 @@ export class VegaPlugin implements Plugin<void, void> {
     setNotifications(core.notifications);
     setData(data);
     setDataViews(dataViews);
-    setInjectedMetadata(core.injectedMetadata);
     setDocLinks(core.docLinks);
     setMapsEms(mapsEms);
   }
