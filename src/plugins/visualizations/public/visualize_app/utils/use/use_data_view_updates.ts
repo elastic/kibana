@@ -20,6 +20,7 @@ import { VisualizeAppState } from '../../types';
 export const updateDataView = (visInstance: VisualizeEditorVisInstance, dataView: DataView) => {
   visInstance.vis.data.indexPattern = dataView;
   visInstance.vis.data.searchSource?.setField('index', dataView);
+  visInstance.vis.data.savedSearchId = undefined;
 };
 
 export const useDataViewUpdates = (
