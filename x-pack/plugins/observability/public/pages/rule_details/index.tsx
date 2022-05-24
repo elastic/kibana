@@ -35,10 +35,12 @@ import {
   RuleType,
   NOTIFY_WHEN_OPTIONS,
   RuleEventLogListProps,
+  AlertsTableFlyoutState,
 } from '@kbn/triggers-actions-ui-plugin/public';
 // TODO: use a Delete modal from triggersActionUI when it's sharable
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { DeleteModalConfirmation } from '../rules/components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from '../rules/components/center_justified_spinner';
 import { OBSERVABILITY_SOLUTIONS } from '../rules/config';
@@ -54,16 +56,19 @@ import { useFetchLast24hRuleExecutionLog } from '../../hooks/use_fetch_last24h_r
 import { formatInterval } from './utils';
 import { hasExecuteActionsCapability, hasAllPrivilege } from './config';
 import { paths } from '../../config/paths';
+import { observabilityFeatureId } from '../../../common';
 
 export function RuleDetailsPage() {
   const {
     http,
     triggersActionsUi: {
+      alertsTableConfigurationRegistry,
       ruleTypeRegistry,
       getRuleStatusDropdown,
       getEditAlertFlyout,
       actionTypeRegistry,
       getRuleEventLogList,
+      getAlertsStateTable,
     },
     application: { capabilities, navigateToUrl },
     notifications: { toasts },
@@ -159,6 +164,26 @@ export function RuleDetailsPage() {
     );
   };
 
+  const alertStateProps = {
+    alertsTableConfigurationRegistry,
+    configurationId: observabilityFeatureId,
+    id: `case-details-alerts-o11y`,
+    flyoutState: AlertsTableFlyoutState.external,
+    featureIds: [features] as AlertConsumers[],
+    query: {
+      bool: {
+        must: [
+          {
+            term: {
+              'kibana.alert.rule.uuid': ruleId,
+            },
+          },
+        ],
+      },
+    },
+    showExpandToDetails: false,
+  };
+
   const tabs = [
     {
       id: EVENT_LOG_LIST_TAB,
@@ -180,7 +205,7 @@ export function RuleDetailsPage() {
         defaultMessage: 'Alerts',
       }),
       'data-test-subj': 'ruleAlertListTab',
-      content: <EuiText>Alerts</EuiText>,
+      content: <>{getAlertsStateTable(alertStateProps)}</>,
     },
   ];
 
