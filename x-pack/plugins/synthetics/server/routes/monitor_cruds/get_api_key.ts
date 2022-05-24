@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { UMRestApiRouteFactory } from '../types';
+import { UMRestApiRouteFactory } from '../../legacy_uptime/routes';
+import { generateAPIKey } from '../../synthetics_service/get_api_key';
 import { API_URLS } from '../../../common/constants';
-import { generateAPIKey } from '../../lib/synthetics_service/get_api_key';
 
 export const getAPIKeySyntheticsRoute: UMRestApiRouteFactory = (libs) => ({
   method: 'GET',

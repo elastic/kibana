@@ -38,4 +38,5 @@ export const syntheticsAppRestApiRoutes: UMRestApiRouteFactory[] = [
   runOnceSyntheticsMonitorRoute,
   testNowMonitorRoute,
   getServiceAllowedRoute,
+  getAPIKeySyntheticsRoute,
 ];

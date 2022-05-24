@@ -86,21 +86,33 @@ export const generateAPIKey = async ({
   const apiKeyPrivileges: Record<string, any> = { ...serviceApiKeyPrivileges };
 
   if (uptimePrivileges) {
-    apiKeyPrivileges.index = [];
-    apiKeyPrivileges.cluster = [];
-    apiKeyPrivileges.applications = [
-      {
-        privileges: ['feature_uptime.all'],
-        application: 'kibana-.kibana',
-        resources: [ALL_SPACES_ID],
+    return security.authc.apiKeys?.create(request, {
+      name: 'synthetics-api-key',
+      role_descriptors: {
+        synthetics_writer: apiKeyPrivileges,
       },
-    ];
+      metadata: {
+        description:
+          'Created for synthetics service to be passed to the heartbeat to communicate with ES',
+      },
+    });
   }
 
   return security.authc.apiKeys?.create(request, {
     name: 'synthetics-api-key',
-    role_descriptors: {
-      synthetics_writer: apiKeyPrivileges,
+    kibana_role_descriptors: {
+      uptime_save: {
+        elasticsearch: serviceApiKeyPrivileges,
+        kibana: [
+          {
+            base: [],
+            spaces: [ALL_SPACES_ID],
+            feature: {
+              uptime: ['all'],
+            },
+          },
+        ],
+      },
     },
     metadata: {
       description:
