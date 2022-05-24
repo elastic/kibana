@@ -7,7 +7,7 @@
 
 import React, { useCallback, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { safeLoad } from 'js-yaml';
 
 import { i18n } from '@kbn/i18n';
@@ -23,8 +23,38 @@ import { CreatePackagePolicyBottomBar, StandaloneModeWarningCallout } from '..';
 import type { PackagePolicyValidationResults } from '../../../services';
 import { validatePackagePolicy, validationHasErrors } from '../../../services';
 import { NotObscuredByBottomBar } from '..';
-import { StepConfigurePackagePolicy } from '../../../components';
+import { StepConfigurePackagePolicy, StepDefinePackagePolicy } from '../../../components';
 
+const ExpandableAdvancedSettings: React.FC = ({ children }) => {
+  const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
+
+  return (
+    <EuiFlexItem>
+      <EuiFlexGroup justifyContent="spaceBetween" direction="column">
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent="spaceBetween" direction="row">
+            <EuiFlexItem>{/* intentionally empty */}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                iconType={isShowingAdvanced ? 'arrowDown' : 'arrowUp'}
+                iconSide="right"
+                onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
+                flush="left"
+              >
+                <FormattedMessage
+                  id="xpack.fleet.createPackagePolicy.stepConfigure.advancedOptionsToggleLinkText"
+                  defaultMessage="Advanced options"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        {isShowingAdvanced && <EuiFlexItem>{children}</EuiFlexItem>}
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  );
+};
 const AddIntegrationError: React.FC<{ error: Error | string; title?: JSX.Element }> = ({
   error,
   title,
@@ -178,6 +208,18 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
         submitAttempted={formState === 'INVALID'}
         noTopRule={true}
       />
+      {validationResults && (
+        <ExpandableAdvancedSettings>
+          <StepDefinePackagePolicy
+            packageInfo={packageInfo}
+            packagePolicy={packagePolicy}
+            updatePackagePolicy={updatePackagePolicy}
+            validationResults={validationResults!}
+            submitAttempted={formState === 'INVALID'}
+            noAdvancedToggle={true}
+          />
+        </ExpandableAdvancedSettings>
+      )}
       <NotObscuredByBottomBar />
       <CreatePackagePolicyBottomBar
         cancelClickHandler={onBack}

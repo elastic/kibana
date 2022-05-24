@@ -57,6 +57,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   validationResults: PackagePolicyValidationResults;
   submitAttempted: boolean;
   isUpdate?: boolean;
+  noAdvancedToggle?: boolean;
 }> = memo(
   ({
     agentPolicy,
@@ -67,6 +68,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     updatePackagePolicy,
     validationResults,
     submitAttempted,
+    noAdvancedToggle = false,
   }) => {
     const { docLinks } = useStartServices();
 
@@ -78,7 +80,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     });
 
     // Form show/hide states
-    const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
+    const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(noAdvancedToggle);
 
     // Package-level vars
     const requiredVars: RegistryVarsEntry[] = [];
@@ -261,34 +263,36 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
           })}
 
           {/* Advanced options toggle */}
-          <EuiFlexItem>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="xs"
-                  iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
-                  onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
-                  flush="left"
-                >
-                  <FormattedMessage
-                    id="xpack.fleet.createPackagePolicy.stepConfigure.advancedOptionsToggleLinkText"
-                    defaultMessage="Advanced options"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              {!isShowingAdvanced && !!validationResults.namespace ? (
+          {!noAdvancedToggle && (
+            <EuiFlexItem>
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <EuiText color="danger" size="s">
+                  <EuiButtonEmpty
+                    size="xs"
+                    iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
+                    onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
+                    flush="left"
+                  >
                     <FormattedMessage
-                      id="xpack.fleet.createPackagePolicy.stepConfigure.errorCountText"
-                      defaultMessage="{count, plural, one {# error} other {# errors}}"
-                      values={{ count: 1 }}
+                      id="xpack.fleet.createPackagePolicy.stepConfigure.advancedOptionsToggleLinkText"
+                      defaultMessage="Advanced options"
                     />
-                  </EuiText>
+                  </EuiButtonEmpty>
                 </EuiFlexItem>
-              ) : null}
-            </EuiFlexGroup>
-          </EuiFlexItem>
+                {!isShowingAdvanced && !!validationResults.namespace ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiText color="danger" size="s">
+                      <FormattedMessage
+                        id="xpack.fleet.createPackagePolicy.stepConfigure.errorCountText"
+                        defaultMessage="{count, plural, one {# error} other {# errors}}"
+                        values={{ count: 1 }}
+                      />
+                    </EuiText>
+                  </EuiFlexItem>
+                ) : null}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
 
           {/* Advanced options content */}
           {/* Todo: Populate list of existing namespaces */}
