@@ -105,6 +105,7 @@ export const getFindingsColumns = (): Array<EuiBasicTableColumn<CspFinding>> => 
   },
   {
     field: '@timestamp',
+    width: '150px',
     name: TEXT.LAST_CHECKED,
     truncateText: true,
     sortable: true,
