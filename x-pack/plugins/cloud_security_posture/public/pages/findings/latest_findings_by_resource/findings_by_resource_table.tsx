@@ -112,8 +112,8 @@ const columns: Array<EuiTableFieldDataColumnType<CspFindingsByResource>> = [
     truncateText: true,
     name: (
       <FormattedMessage
-        id="xpack.csp.findings.groupByResourceTable.cisSectionsColumnLabel"
-        defaultMessage="CIS Sections"
+        id="xpack.csp.findings.groupByResourceTable.cisSectionColumnLabel"
+        defaultMessage="CIS Section"
       />
     ),
     render: (sections: string[]) => sections.join(', '),
