@@ -9,6 +9,7 @@ import {
   DataStream,
   ScreenshotOption,
   Locations,
+  LocationStatus,
   ProjectBrowserMonitor,
 } from '../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
@@ -30,6 +31,7 @@ describe('browser normalizers', () => {
         geo: { lat: 33.333, lon: 73.333 },
         url: 'test-url',
         isServiceManaged: true,
+        status: LocationStatus.GA,
       },
       {
         id: 'us_east',
@@ -37,6 +39,7 @@ describe('browser normalizers', () => {
         geo: { lat: 33.333, lon: 73.333 },
         url: 'test-url',
         isServiceManaged: true,
+        status: LocationStatus.GA,
       },
     ];
     const monitors: ProjectBrowserMonitor[] = [
@@ -117,6 +120,7 @@ describe('browser normalizers', () => {
               isServiceManaged: true,
               label: 'Test Location',
               url: 'test-url',
+              status: 'ga',
             },
           ],
           name: 'test-name-1',
@@ -156,6 +160,7 @@ describe('browser normalizers', () => {
               isServiceManaged: true,
               label: 'Test Location',
               url: 'test-url',
+              status: 'ga',
             },
             {
               geo: {
@@ -166,6 +171,7 @@ describe('browser normalizers', () => {
               isServiceManaged: true,
               label: 'Test Location',
               url: 'test-url',
+              status: 'ga',
             },
           ],
           name: 'test-name-2',
@@ -206,6 +212,7 @@ describe('browser normalizers', () => {
               isServiceManaged: true,
               label: 'Test Location',
               url: 'test-url',
+              status: 'ga',
             },
             {
               geo: {
@@ -216,6 +223,7 @@ describe('browser normalizers', () => {
               isServiceManaged: true,
               label: 'Test Location',
               url: 'test-url',
+              status: 'ga',
             },
           ],
           name: 'test-name-3',
