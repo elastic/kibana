@@ -53,6 +53,9 @@ export const syntheticsMonitor: SavedObjectsType = {
       'monitor.origin': {
         type: 'keyword',
       },
+      custom_heartbeat_id: {
+        type: 'keyword',
+      },
     },
   },
   management: {

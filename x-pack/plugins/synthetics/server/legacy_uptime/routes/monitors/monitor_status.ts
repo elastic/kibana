@@ -10,6 +10,7 @@ import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../../common/constants';
 import { ConfigKey, MonitorFields } from '../../../../common/runtime_types';
+import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
 
 export const createGetStatusBarRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
@@ -41,10 +42,13 @@ export const createGetStatusBarRoute: UMRestApiRouteFactory = (libs: UMServerLib
     }
 
     try {
-      const monitorSavedObject = await libs.requests.getSyntheticsMonitor({
-        monitorId,
-        encryptedSavedObjectsClient,
-        savedObjectsClient,
+      const {
+        saved_objects: [monitorSavedObject],
+      } = await savedObjectsClient.find({
+        type: syntheticsMonitorType,
+        perPage: 1,
+        page: 1,
+        filter: `${syntheticsMonitorType}.id: "${syntheticsMonitorType}:${monitorId}" OR ${syntheticsMonitorType}.attributes.${ConfigKey.CUSTOM_HEARTBEAT_ID}: "${monitorId}"`,
       });
 
       if (!monitorSavedObject) {
