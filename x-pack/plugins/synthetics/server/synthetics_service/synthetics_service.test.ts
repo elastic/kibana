@@ -13,6 +13,7 @@ import { loggerMock } from '@kbn/core/server/logging/logger.mock';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import axios, { AxiosResponse } from 'axios';
 import times from 'lodash/times';
+import { LocationStatus } from '../../common/runtime_types';
 
 describe('SyntheticsService', () => {
   const mockEsClient = {
@@ -45,6 +46,7 @@ describe('SyntheticsService', () => {
           lon: 0,
         },
         isServiceManaged: true,
+        status: LocationStatus.GA,
       };
     });
 
@@ -122,6 +124,7 @@ describe('SyntheticsService', () => {
         label: 'Local Synthetics Service',
         url: 'http://localhost',
         isServiceManaged: true,
+        status: LocationStatus.EXPERIMENTAL,
       },
     ]);
   });

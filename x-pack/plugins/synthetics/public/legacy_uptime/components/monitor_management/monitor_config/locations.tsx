@@ -8,9 +8,9 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { EuiCheckboxGroup, EuiFormRow } from '@elastic/eui';
+import { EuiCheckboxGroup, EuiFormRow, EuiText, EuiBadge } from '@elastic/eui';
 import { monitorManagementListSelector } from '../../../state/selectors';
-import { MonitorServiceLocations } from '../../../../../common/runtime_types';
+import { MonitorServiceLocations, LocationStatus } from '../../../../../common/runtime_types';
 
 interface Props {
   selectedLocations: MonitorServiceLocations;
@@ -57,10 +57,22 @@ export const ServiceLocations = ({ selectedLocations, setLocations, isInvalid, o
   return (
     <EuiFormRow label={LOCATIONS_LABEL} error={errorMessage} isInvalid={errorMessage !== null}>
       <EuiCheckboxGroup
-        options={locations.map((location) => ({
-          ...location,
-          'data-test-subj': `syntheticsServiceLocation--${location.id}`,
-        }))}
+        options={locations.map((location) => {
+          const badge =
+            location.status !== LocationStatus.GA ? (
+              <EuiBadge color="warning">Tech Preview</EuiBadge>
+            ) : null;
+          const label = (
+            <EuiText size="s" data-test-subj={`syntheticsServiceLocationText--${location.id}`}>
+              {location.label} {badge}
+            </EuiText>
+          );
+          return {
+            ...location,
+            label,
+            'data-test-subj': `syntheticsServiceLocation--${location.id}`,
+          };
+        })}
         idToSelectedMap={checkboxIdToSelectedMap}
         onChange={(id) => onLocationChange(id)}
         onBlur={() => onBlur?.()}
