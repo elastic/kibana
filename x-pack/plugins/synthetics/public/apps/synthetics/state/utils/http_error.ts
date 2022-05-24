@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IHttpFetchError } from '@kbn/core/target/types/public';
+import { IHttpFetchError } from '@kbn/core/public';
 
 export interface IHttpSerializedFetchError {
   name: string;
