@@ -309,7 +309,7 @@ export const useProcessTree = ({
 
     data.forEach((page, i) => {
       const processed = processedPages.find(
-        (p) => p.cursor === page.cursor && p.events && p.events.length === page.events?.length
+        (p) => p.cursor === page.cursor && p.events?.length === page.events?.length
       );
 
       if (!processed) {
@@ -336,7 +336,7 @@ export const useProcessTree = ({
       setOrphans(newOrphans);
       autoExpandProcessTree(updatedProcessMap, jumpToEntityId);
     }
-  }, [data, processMap, orphans, processedPages, sessionEntityId, jumpToEntityId, refreshClicked]);
+  }, [data, processMap, orphans, processedPages, sessionEntityId, jumpToEntityId]);
 
   useEffect(() => {
     setSearchResults(searchProcessTree(processMap, searchQuery, verboseMode));
