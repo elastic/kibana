@@ -12,7 +12,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
-import { ManagementSettings } from '../components/monitor_management/management_settings';
 import {
   CERTIFICATES_ROUTE,
   MAPPING_ERROR_ROUTE,
@@ -35,6 +34,7 @@ import {
   NotFoundPage,
   SettingsPage,
   MonitorManagementBottomBar,
+  APIKeysButton,
 } from './pages';
 import { CertificatesPage } from './pages/certificates';
 import { UptimePage, useUptimeTelemetry } from './hooks';
@@ -273,7 +273,7 @@ const getRoutes = (): RouteProps[] => {
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
-        rightSideItems: [<AddMonitorBtn />, <ManagementSettings />],
+        rightSideItems: [<AddMonitorBtn />, <APIKeysButton />],
       },
     },
   ];

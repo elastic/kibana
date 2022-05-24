@@ -83,36 +83,34 @@ export const generateAPIKey = async ({
     throw new SyntheticsForbiddenError();
   }
 
-  const apiKeyPrivileges: Record<string, any> = { ...serviceApiKeyPrivileges };
-
   if (uptimePrivileges) {
     return security.authc.apiKeys?.create(request, {
-      name: 'synthetics-api-key',
-      role_descriptors: {
-        synthetics_writer: apiKeyPrivileges,
+      name: 'uptime-api-key',
+      kibana_role_descriptors: {
+        uptime_save: {
+          elasticsearch: {},
+          kibana: [
+            {
+              base: [],
+              spaces: [ALL_SPACES_ID],
+              feature: {
+                uptime: ['all'],
+              },
+            },
+          ],
+        },
       },
       metadata: {
         description:
-          'Created for synthetics service to be passed to the heartbeat to communicate with ES',
+          'Created for the Synthetics Agent to be able to communicate with Kibana for generating monitors for projects',
       },
     });
   }
 
   return security.authc.apiKeys?.create(request, {
     name: 'synthetics-api-key',
-    kibana_role_descriptors: {
-      uptime_save: {
-        elasticsearch: serviceApiKeyPrivileges,
-        kibana: [
-          {
-            base: [],
-            spaces: [ALL_SPACES_ID],
-            feature: {
-              uptime: ['all'],
-            },
-          },
-        ],
-      },
+    role_descriptors: {
+      synthetics_writer: serviceApiKeyPrivileges,
     },
     metadata: {
       description:
@@ -203,6 +201,7 @@ export const getSyntheticsEnablement = async ({
 
   return {
     canEnable: canManageApiKeys && hasClusterPermissions && hasIndexPermissions,
+    canManageApiKeys,
     isEnabled: Boolean(apiKey),
     areApiKeysEnabled,
   };
