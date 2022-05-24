@@ -40,6 +40,7 @@ export const sqlSearchStrategyProvider = (
     { esClient }: SearchStrategyDependencies
   ) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
+    const startTime = Date.now();
 
     // disable search sessions until session task manager supports SQL
     // https://github.com/elastic/kibana/issues/127880
@@ -87,7 +88,7 @@ export const sqlSearchStrategyProvider = (
         }
       }
 
-      return toAsyncKibanaSearchResponse(body, headers?.warning);
+      return toAsyncKibanaSearchResponse(body, startTime, headers?.warning);
     };
 
     const cancel = async () => {

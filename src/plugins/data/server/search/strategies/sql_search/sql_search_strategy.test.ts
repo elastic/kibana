@@ -271,6 +271,15 @@ describe('SQL search strategy', () => {
 
       expect(mockSqlClearCursor).toHaveBeenCalledWith({ cursor: 'cursor' });
     });
+
+    it('returns the time it took to run a search', async () => {
+      mockSqlGetAsync.mockResolvedValueOnce(mockSqlResponse);
+
+      const esSearch = await sqlSearchStrategyProvider(mockLogger);
+      await expect(
+        esSearch.search({ id: 'foo', params: { query: 'query' } }, {}, mockDeps).toPromise()
+      ).resolves.toHaveProperty('took', expect.any(Number));
+    });
   });
 
   describe('cancel', () => {

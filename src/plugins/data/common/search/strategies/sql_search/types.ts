@@ -26,4 +26,9 @@ export type SqlRequestParams = (
 };
 export type SqlSearchStrategyRequest = IKibanaSearchRequest<SqlRequestParams>;
 
-export type SqlSearchStrategyResponse = IKibanaSearchResponse<SqlQueryResponse>;
+export interface SqlSearchStrategyResponse extends IKibanaSearchResponse<SqlQueryResponse> {
+  /**
+   * A metric showing how long did the search take.
+   */
+  took: number;
+}
