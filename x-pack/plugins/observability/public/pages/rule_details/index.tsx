@@ -172,7 +172,7 @@ export function RuleDetailsPage() {
     featureIds: [features] as AlertConsumers[],
     query: {
       bool: {
-        must: [
+        filter: [
           {
             term: {
               'kibana.alert.rule.uuid': ruleId,
@@ -205,7 +205,12 @@ export function RuleDetailsPage() {
         defaultMessage: 'Alerts',
       }),
       'data-test-subj': 'ruleAlertListTab',
-      content: <>{getAlertsStateTable(alertStateProps)}</>,
+      content: (
+        <>
+          <EuiSpacer size="m" />
+          {getAlertsStateTable(alertStateProps)}
+        </>
+      ),
     },
   ];
 
