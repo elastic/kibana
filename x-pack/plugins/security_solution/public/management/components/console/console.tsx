@@ -8,7 +8,7 @@
 import React, { memo, useCallback, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
-import { RightPanelContentManager } from './components/right_panel_content_manager';
+import { SidePanelContentManager } from './components/side_panel/side_panel_content_manager';
 import { ConsoleHeader } from './components/console_header';
 import { CommandInput, CommandInputProps } from './components/command_input';
 import { ConsoleProps } from './types';
@@ -29,6 +29,11 @@ const ConsoleWindow = styled.div`
       overflow: hidden;
     }
 
+    &-bottomBorder {
+      border-bottom: ${({ theme: { eui } }) => eui.paddingSizes.s} solid
+        ${({ theme: { eui } }) => eui.euiPageBackgroundColor};
+    }
+
     &-container {
       padding: ${({ theme: { eui } }) => eui.paddingSizes.l}
         ${({ theme: { eui } }) => eui.paddingSizes.l} ${({ theme: { eui } }) => eui.paddingSizes.s}
@@ -42,8 +47,6 @@ const ConsoleWindow = styled.div`
     &-rightPanel {
       width: 35%;
       background-color: ${({ theme: { eui } }) => eui.euiColorGhost};
-      border-right: ${({ theme: { eui } }) => eui.paddingSizes.s} solid
-        ${({ theme: { eui } }) => eui.euiPageBackgroundColor};
       border-bottom: ${({ theme: { eui } }) => eui.paddingSizes.s} solid
         ${({ theme: { eui } }) => eui.euiPageBackgroundColor};
     }
@@ -76,7 +79,7 @@ const ConsoleWindow = styled.div`
 `;
 
 export const Console = memo<ConsoleProps>(
-  ({ prompt, commands, HelpComponent, managedKey, ...commonProps }) => {
+  ({ prompt, commands, HelpComponent, TitleComponent, managedKey, ...commonProps }) => {
     const scrollingViewport = useRef<HTMLDivElement | null>(null);
     const inputFocusRef: CommandInputProps['focusRef'] = useRef(null);
     const getTestId = useTestIdGenerator(commonProps['data-test-subj']);
@@ -125,7 +128,7 @@ export const Console = memo<ConsoleProps>(
               data-test-subj={getTestId('mainPanel')}
             >
               <EuiFlexItem grow={false} className="layout-container layout-header">
-                <ConsoleHeader />
+                <ConsoleHeader TitleComponent={TitleComponent} />
               </EuiFlexItem>
 
               <EuiFlexItem grow className="layout-hideOverflow">
@@ -157,8 +160,8 @@ export const Console = memo<ConsoleProps>(
                     </EuiFlexGroup>
                   </EuiFlexItem>
 
-                  <EuiFlexItem grow={false} className="layout-rightPanel eui-scrollBar eui-yScroll">
-                    <RightPanelContentManager />
+                  <EuiFlexItem grow={false} className="layout-rightPanel">
+                    <SidePanelContentManager />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>

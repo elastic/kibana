@@ -17,7 +17,7 @@ export const ConsoleHeader = memo<ConsoleHeaderProps>(({ TitleComponent }) => {
   }, []);
 
   return (
-    <EuiFlexGroup gutterSize="none">
+    <EuiFlexGroup gutterSize="none" alignItems="center">
       <EuiFlexItem grow>{TitleComponent ? <TitleComponent /> : ''}</EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonIcon onClick={helpOnCLickHandler} iconType={'help'} />

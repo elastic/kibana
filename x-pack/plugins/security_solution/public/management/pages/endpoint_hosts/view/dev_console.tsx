@@ -241,8 +241,21 @@ export const ShowDevConsole = memo(() => {
       <EuiText>
         <h3>{'Un-managed console'}</h3>
       </EuiText>
+      <EuiSpacer size="xxl" />
       <div style={{ height: '600px', marginBottom: '150px' }}>
-        <Console prompt="$$>" commands={getCommandList()} data-test-subj="dev" />
+        <Console
+          prompt="$$>"
+          commands={getCommandList()}
+          data-test-subj="dev"
+          TitleComponent={() => {
+            return (
+              <EuiText>
+                <h3>{'Console title'}</h3>
+                <p>{'sub title here'}</p>
+              </EuiText>
+            );
+          }}
+        />
       </div>
     </>
   );
