@@ -65,7 +65,7 @@ describe.skip('Service overview: Time Comparison', () => {
   });
 
   beforeEach(() => {
-    cy.loginAsReadOnlyUser();
+    cy.loginAsViewerUser();
   });
 
   it('enables by default the time comparison feature with Last 24 hours selected', () => {

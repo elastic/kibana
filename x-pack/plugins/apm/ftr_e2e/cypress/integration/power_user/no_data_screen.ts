@@ -10,7 +10,7 @@ const apmIndicesSaveURL = '/internal/apm/settings/apm-indices/save';
 describe('No data screen', () => {
   describe('bypass no data screen on settings pages', () => {
     beforeEach(() => {
-      cy.loginAsPowerUser();
+      cy.loginAsEditorUser();
     });
 
     before(() => {

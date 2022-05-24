@@ -10,11 +10,11 @@ import 'cypress-axe';
 import moment from 'moment';
 import { AXE_CONFIG, AXE_OPTIONS } from '@kbn/axe-config';
 
-Cypress.Commands.add('loginAsReadOnlyUser', () => {
+Cypress.Commands.add('loginAsViewerUser', () => {
   cy.loginAs({ username: 'viewer_user', password: 'changeme' });
 });
 
-Cypress.Commands.add('loginAsPowerUser', () => {
+Cypress.Commands.add('loginAsEditorUser', () => {
   cy.loginAs({ username: 'editor_user', password: 'changeme' });
 });
 

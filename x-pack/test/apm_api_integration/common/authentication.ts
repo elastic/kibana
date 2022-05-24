@@ -13,8 +13,8 @@ type SecurityService = Awaited<ReturnType<typeof SecurityServiceProvider>>;
 
 export enum ApmUser {
   noAccessUser = 'no_access_user',
-  apmReadUser = 'apm_read_user',
-  apmWriteUser = 'apm_write_user',
+  viewerUser = 'viewer_user',
+  editorUser = 'editor_user',
   apmAnnotationsWriteUser = 'apm_annotations_write_user',
   apmReadUserWithoutMlAccess = 'apm_read_user_without_ml_access',
   apmManageOwnAgentKeys = 'apm_manage_own_agent_keys',
@@ -23,7 +23,8 @@ export enum ApmUser {
 
 const roles = {
   [ApmUser.noAccessUser]: {},
-  [ApmUser.apmReadUser]: {},
+  [ApmUser.viewerUser]: {},
+  [ApmUser.editorUser]: {},
   [ApmUser.apmReadUserWithoutMlAccess]: {
     elasticsearch: {
       cluster: [],
@@ -42,7 +43,6 @@ const roles = {
       },
     ],
   },
-  [ApmUser.apmWriteUser]: {},
   [ApmUser.apmAnnotationsWriteUser]: {
     elasticsearch: {
       cluster: [],
@@ -81,17 +81,17 @@ const users = {
   [ApmUser.noAccessUser]: {
     roles: [],
   },
-  [ApmUser.apmReadUser]: {
-    roles: ['viewer', ApmUser.apmReadUser],
+  [ApmUser.viewerUser]: {
+    roles: ['viewer'],
+  },
+  [ApmUser.editorUser]: {
+    roles: ['editor'],
   },
   [ApmUser.apmReadUserWithoutMlAccess]: {
     roles: [ApmUser.apmReadUserWithoutMlAccess],
   },
-  [ApmUser.apmWriteUser]: {
-    roles: ['editor', ApmUser.apmWriteUser],
-  },
   [ApmUser.apmAnnotationsWriteUser]: {
-    roles: ['editor', ApmUser.apmWriteUser, ApmUser.apmAnnotationsWriteUser],
+    roles: ['editor', ApmUser.apmAnnotationsWriteUser],
   },
   [ApmUser.apmManageOwnAgentKeys]: {
     roles: ['editor', ApmUser.apmManageOwnAgentKeys],
