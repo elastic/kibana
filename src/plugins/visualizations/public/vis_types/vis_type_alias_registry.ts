@@ -44,6 +44,7 @@ export interface VisTypeAlias {
   note?: string;
   getSupportedTriggers?: () => string[];
   stage: VisualizationStage;
+  isDeprecated?: boolean;
 
   appExtensions?: {
     visualizations: VisualizationsAppExtension;
