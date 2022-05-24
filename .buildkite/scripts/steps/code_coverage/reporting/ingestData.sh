@@ -34,7 +34,7 @@ export BUFFER_SIZE
 echo "### debug BUFFER_SIZE: ${BUFFER_SIZE}"
 
 # Build team assignments file
-echo "--- Generate Team Assignments"
+echo "### Generate Team Assignments"
 CI_STATS_DISABLED=true node scripts/generate_team_assignments.js \
   --verbose --src '.github/CODEOWNERS' --dest $TEAM_ASSIGN_PATH
 
@@ -47,5 +47,5 @@ for x in functional jest; do
 done
 wait
 
-echo "###  Ingesting Code Coverage - Complete"
+echo "---  Ingesting Code Coverage - Complete"
 echo ""

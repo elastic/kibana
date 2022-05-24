@@ -24,6 +24,9 @@ echo "### KIBANA_DIR: $KIBANA_DIR"
 while read -r config; do
   echo "--- $ node scripts/jest --config $config --coverage --coverageReporters json --coverageDirectory target/kibana-coverage/jest"
 
+  echo "--- Print config name"
+  echo "### config: $config"
+
   start=$(date +%s)
 
   # prevent non-zero exit code from breaking the loop
