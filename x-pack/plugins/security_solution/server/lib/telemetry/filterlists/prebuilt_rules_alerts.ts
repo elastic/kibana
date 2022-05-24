@@ -54,6 +54,12 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
   'kibana.alert.workflow_status': true,
   'kibana.space_ids': true,
   'kibana.version': true,
+  job_id: true,
+  causes: true,
+  typical: true,
+  multi_bucket_impact: true,
+  partition_field_name: true,
+  partition_field_value: true,
   // Alert specific filter entries
   agent: {
     id: true,
