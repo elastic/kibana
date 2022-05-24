@@ -160,7 +160,7 @@ describe('streamFactory', () => {
     }).toThrow('Must not push non-string chunks to a string based stream.');
   });
 
-  it('should throw when a NDJSON based stream receives a string chunk', async () => {
+  it('should throw when an NDJSON based stream receives a string chunk', async () => {
     const { push } = streamFactory<MockItem>({});
 
     // First push initializes the stream as NDJSON based.
@@ -177,5 +177,13 @@ describe('streamFactory', () => {
     expect(() => {
       push('push3' as unknown as MockItem);
     }).toThrow('Must not push raw string chunks to an NDJSON based stream.');
+  });
+
+  it('should throw for undefined as push value', async () => {
+    const { push } = streamFactory({});
+
+    expect(() => {
+      push(undefined as unknown as string);
+    }).toThrow('Stream chunk must not be undefined.');
   });
 });

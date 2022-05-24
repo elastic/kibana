@@ -70,6 +70,10 @@ export function streamFactory<T = unknown>(headers: Headers): StreamFactoryRetur
   }
 
   function push(d: T) {
+    if (d === undefined) {
+      error('Stream chunk must not be undefined.');
+      return;
+    }
     // Initialize the stream type with the first push to the stream,
     // otherwise check the integrity of the data to be pushed.
     if (streamType === undefined) {
@@ -79,6 +83,7 @@ export function streamFactory<T = unknown>(headers: Headers): StreamFactoryRetur
       return;
     } else if (streamType === 'ndjson' && typeof d === 'string') {
       error('Must not push raw string chunks to an NDJSON based stream.');
+      return;
     }
 
     try {
