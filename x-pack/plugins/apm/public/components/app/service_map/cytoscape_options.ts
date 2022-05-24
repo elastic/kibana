@@ -104,7 +104,10 @@ function isService(el: cytoscape.NodeSingular) {
   return el.data(SERVICE_NAME) !== undefined;
 }
 
-const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
+const getStyle = (
+  theme: EuiTheme,
+  isTraceExplorerEnabled: boolean
+): cytoscape.Stylesheet[] => {
   const lineColor = theme.eui.euiColorMediumShade;
   return [
     {
@@ -211,6 +214,20 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
         'target-arrow-color': theme.eui.euiColorDarkShade,
       },
     },
+    ...(isTraceExplorerEnabled
+      ? [
+          {
+            selector: 'edge.hover',
+            style: {
+              width: 4,
+              'z-index': zIndexEdgeHover,
+              'line-color': theme.eui.euiColorDarkShade,
+              'source-arrow-color': theme.eui.euiColorDarkShade,
+              'target-arrow-color': theme.eui.euiColorDarkShade,
+            },
+          },
+        ]
+      : []),
     {
       selector: 'node.hover',
       style: {
@@ -256,10 +273,11 @@ ${theme.eui.euiColorLightShade}`,
 });
 
 export const getCytoscapeOptions = (
-  theme: EuiTheme
+  theme: EuiTheme,
+  isTraceExplorerEnabled: boolean
 ): cytoscape.CytoscapeOptions => ({
   boxSelectionEnabled: false,
   maxZoom: 3,
   minZoom: 0.2,
-  style: getStyle(theme),
+  style: getStyle(theme, isTraceExplorerEnabled),
 });
