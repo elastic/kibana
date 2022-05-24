@@ -12,7 +12,7 @@ import { ThemeProvider } from 'styled-components';
 
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { QueryClient } from 'react-query';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { CasesFeatures } from '../../../common/ui/types';
 import { CasesProvider } from '../../components/cases_context';
@@ -44,11 +44,21 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   userCanCrud = true,
   releasePhase = 'ga',
 }) => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+
   return (
     <I18nProvider>
       <MockKibanaContextProvider>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <CasesProvider value={{ features, owner, userCanCrud }}>{children}</CasesProvider>
+          <QueryClientProvider client={queryClient}>
+            <CasesProvider value={{ features, owner, userCanCrud }}>{children}</CasesProvider>
+          </QueryClientProvider>
         </ThemeProvider>
       </MockKibanaContextProvider>
     </I18nProvider>
@@ -62,7 +72,6 @@ export interface AppMockRenderer {
   render: UiRender;
   coreStart: StartServices;
 }
-
 export const testQueryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -78,14 +87,23 @@ export const createAppMockRenderer = ({
   releasePhase = 'ga',
 }: Omit<TestProviderProps, 'children'> = {}): AppMockRenderer => {
   const services = createStartServicesMock();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
 
   const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
     <I18nProvider>
       <KibanaContextProvider services={services}>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <CasesProvider value={{ features, owner, userCanCrud, releasePhase }}>
-            {children}
-          </CasesProvider>
+          <QueryClientProvider client={queryClient}>
+            <CasesProvider value={{ features, owner, userCanCrud, releasePhase }}>
+              {children}
+            </CasesProvider>
+          </QueryClientProvider>
         </ThemeProvider>
       </KibanaContextProvider>
     </I18nProvider>
