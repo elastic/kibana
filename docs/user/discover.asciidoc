@@ -61,8 +61,7 @@ from the {data-source} dropdown.
 image::images/discover-data-view.png[How to set the {data-source} in Discover, width=50%]
 +
 To create a data view for your own data,
-click
-image:images/actions-icon.png[three dots icon next to data view dropdown], and then click *Create new data view*.
+click *Create a data view*.
 For details, refer to <<data-views, Create a data view.>>
 
 . Adjust the <<set-time-filter,time range>> to view data for the *Last 7 days*.
@@ -120,8 +119,7 @@ You can add a runtime field to your {data-source} from inside of **Discover**,
 and then use that field for analysis and visualizations,
 the same way you do with other fields.
 
-. Click
-image:images/actions-icon.png[three dots icon next to data view dropdown], and then click *Add field*.
+. Click *Add a field*.
 +
 [role="screenshot"]
 image:images/add-field-to-data-view.png[Dropdown menu located next to {data-source} field with item for adding a field to a {data-source}, width=50%]
@@ -179,7 +177,8 @@ you can use to build a structured query.
 Search the ecommerce data for documents where the country matches US:
 
 . Enter `g`, and then select *geoip.country_iso_code*.
-. Select *:* for equals some value and *US*, and then click *Update*.
+. Select *:* for equals some value and *US*, and then click
+image:images/update-button.png[button at the end of the query bar for updating your search, width=24px].
 . For a more complex search, try:
 +
 ```ts
@@ -197,13 +196,13 @@ and more.
 
 Exclude documents where day of week is not Wednesday:
 
-. Click **Add filter**.
-. Set **Field** to *day_of_week*, **Operator** to *is not*, and **Value** to *Wednesday*.
+. Click image:images/add-icon.png[Add icon] to the left of the query bar.
+. In the *Add filer** popover, set **Field** to *day_of_week*, **Operator** to *is not*, and **Value** to *Wednesday*.
 +
 [role="screenshot"]
 image:images/discover-add-filter.png[Add filter dialog in Discover]
 
-. Save the filter.
+. Click **Add filter**.
 . Continue your exploration by adding more filters.
 . To remove a filter,
 click the close icon (x) next to its name in the filter bar.
@@ -226,10 +225,11 @@ image:images/document-table-expanded.png[Table view with document expanded]
 click
 image:images/actions-icon.png[three dots icon next to data view dropdown] in the *Actions* column for filters and other controls.
 
+. To create a view of the document that you can bookmark and share, click **Single document**.
+
 . To view documents that occurred before or after the event you are looking at, click
 **Surrounding documents**.
 
-. To create a view of the document that you can bookmark and share, click **Single document**.
 
 
 [float]
