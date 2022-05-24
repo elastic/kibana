@@ -7,7 +7,7 @@
  */
 
 import moment from 'moment';
-import { convertRangeFilterToTimeRange } from './change_time_filter';
+import { convertRangeFilterToTimeRange } from './convert_range_filter';
 
 describe('convertRangeFilterToTimeRange', () => {
   const gt = 1388559600000;
