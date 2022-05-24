@@ -17,7 +17,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useMutation } from 'react-query';
-import deepMerge from 'deepmerge';
 import styled from 'styled-components';
 
 import { pickBy, isEmpty, map } from 'lodash';
@@ -110,8 +109,13 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     options: {
       stripEmptyFields: false,
     },
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    serializer: ({ savedQueryId, ecs_mapping, ...formData }) =>
+    // @ts-expect-error update types
+    serializer: ({
+      savedQueryId,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      ecs_mapping,
+      ...formData
+    }) =>
       pickBy(
         {
           ...formData,
@@ -120,20 +124,17 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         },
         (value) => !isEmpty(value)
       ),
-    defaultValue: deepMerge(
-      {
-        agentSelection: {
-          agents: [],
-          allAgentsSelected: false,
-          platformsSelected: [],
-          policiesSelected: [],
-        },
-        query: '',
-        savedQueryId: null,
-        ecs_mapping: [],
+    defaultValue: {
+      agentSelection: {
+        agents: [],
+        allAgentsSelected: false,
+        platformsSelected: [],
+        policiesSelected: [],
       },
-      defaultValue ?? {}
-    ),
+      query: '',
+      savedQueryId: null,
+      ecs_mapping: [],
+    },
   });
 
   const { updateFieldValues, setFieldValue, submit, isSubmitting } = form;
@@ -182,6 +183,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         updateFieldValues({
           query: savedQuery.query,
           savedQueryId: savedQuery.savedQueryId,
+          // @ts-expect-error update types
           ecs_mapping: savedQuery.ecs_mapping
             ? map(savedQuery.ecs_mapping, (value, key) => ({
                 key,
@@ -359,6 +361,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         agentSelection: defaultValue.agentSelection,
         query: defaultValue.query,
         savedQueryId: defaultValue.savedQueryId,
+        // @ts-expect-error update types
         ecs_mapping: defaultValue.ecs_mapping
           ? map(defaultValue.ecs_mapping, (value, key) => ({
               key,
