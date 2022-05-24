@@ -6,8 +6,11 @@
  */
 
 import React from 'react';
+import { Redirect } from 'react-router-dom';
 import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
+
+import { GETTING_STARTED_ROUTE } from '../../../../../common/constants';
 
 import { useLocations } from '../../hooks/use_locations';
 
@@ -20,13 +23,13 @@ import { useMonitorListBreadcrumbs } from './hooks/use_breadcrumbs';
 import { useMonitorList } from './hooks/use_monitor_list';
 import * as labels from './management/labels';
 
-export const MonitorListPage: React.FC = () => {
+export const MonitorPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'monitors' });
   useTrackPageview({ app: 'synthetics', path: 'monitors', delay: 15000 });
 
   useMonitorListBreadcrumbs();
 
-  const { syntheticsMonitors } = useMonitorList();
+  const { syntheticsMonitors, loading: monitorsLoading } = useMonitorList();
 
   const {
     error: enablementError,
@@ -37,6 +40,10 @@ export const MonitorListPage: React.FC = () => {
 
   const { loading: locationsLoading } = useLocations();
   const showEmptyState = isEnabled !== undefined && syntheticsMonitors.length === 0;
+
+  if (isEnabled && !monitorsLoading && syntheticsMonitors.length === 0) {
+    return <Redirect to={GETTING_STARTED_ROUTE} />;
+  }
 
   return (
     <>

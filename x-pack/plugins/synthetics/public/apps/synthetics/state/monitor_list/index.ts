@@ -53,4 +53,4 @@ export * from './models';
 export * from './actions';
 export * from './effects';
 export * from './selectors';
-export { fetchDeleteMonitor, fetchUpsertMonitor } from './api';
+export { fetchDeleteMonitor, fetchUpsertMonitor, fetchCreateMonitor } from './api';

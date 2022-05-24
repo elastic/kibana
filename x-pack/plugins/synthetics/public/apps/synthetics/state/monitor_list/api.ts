@@ -60,3 +60,11 @@ export const fetchUpsertMonitor = async ({
     return await apiService.post(API_URLS.SYNTHETICS_MONITORS, monitor);
   }
 };
+
+export const fetchCreateMonitor = async ({
+  monitor,
+}: {
+  monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
+}): Promise<{ attributes: { errors: ServiceLocationErrors } } | SyntheticsMonitor> => {
+  return await apiService.post(API_URLS.SYNTHETICS_MONITORS, monitor);
+};

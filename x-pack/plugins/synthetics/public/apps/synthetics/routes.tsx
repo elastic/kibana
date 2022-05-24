@@ -21,8 +21,13 @@ import { OverviewPage } from './components/monitors_page/overview/overview_page'
 import { SyntheticsPageTemplateComponent } from './components/common/pages/synthetics_page_template';
 import { NotFoundPage } from './components/common/pages/not_found';
 import { ServiceAllowedWrapper } from './components/common/wrappers/service_allowed_wrapper';
-import { MONITOR_ADD_ROUTE, MONITORS_ROUTE, OVERVIEW_ROUTE, GETTING_STARTED_ROUTE } from '../../../common/constants';
-import { MonitorListPage } from './components/monitors_page/monitor_list_page';
+import {
+  MONITOR_ADD_ROUTE,
+  MONITORS_ROUTE,
+  OVERVIEW_ROUTE,
+  GETTING_STARTED_ROUTE,
+} from '../../../common/constants';
+import { MonitorPage } from './components/monitors_page/monitor_page';
 import { apiService } from '../../utils/api_service';
 
 type RouteProps = {
@@ -97,12 +102,11 @@ const getRoutes = (euiTheme: EuiThemeComputed): RouteProps[] => {
       component: () => (
         <>
           <ServiceAllowedWrapper>
-            <MonitorListPage />
+            <MonitorPage />
           </ServiceAllowedWrapper>
         </>
       ),
       dataTestSubj: 'syntheticsMonitorManagementPage',
-      telemetryId: SyntheticsPage.MonitorManagement,
       paddingSize: 'none',
       pageBodyProps: {
         style: { backgroundColor: tint(0.5, euiTheme.colors.body) },
