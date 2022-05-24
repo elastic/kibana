@@ -225,5 +225,5 @@ export const toggleModalSaveTimeline = actionCreator<{
 export const updateEqlOptions = actionCreator<{
   id: string;
   field: FieldsEqlOptions;
-  value: string | null;
+  value: string | undefined;
 }>('UPDATE_EQL_OPTIONS_TIMELINE');

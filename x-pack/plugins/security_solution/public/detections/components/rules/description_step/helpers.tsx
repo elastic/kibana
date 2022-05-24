@@ -29,6 +29,7 @@ import { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types'
 import { getDisplayValueFromFilter } from '@kbn/data-plugin/public';
 import { FilterLabel } from '@kbn/unified-search-plugin/public';
 import { MATCHES, AND, OR } from '../../../../common/components/threat_match/translations';
+import { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';
 import * as i18nRiskScore from '../risk_score_mapping/translations';
@@ -119,6 +120,38 @@ export const buildQueryBarDescription = ({
       {
         title: <>{i18n.SAVED_ID_LABEL} </>,
         description: <>{savedId} </>,
+      },
+    ];
+  }
+  return items;
+};
+
+export const buildEqlOptionsDescription = (eqlOptions: EqlOptionsSelected): ListItems[] => {
+  let items: ListItems[] = [];
+  if (!isEmpty(eqlOptions.eventCategoryField)) {
+    items = [
+      ...items,
+      {
+        title: <>{i18n.EQL_EVENT_CATEGORY_FIELD_LABEL}</>,
+        description: <>{eqlOptions.eventCategoryField}</>,
+      },
+    ];
+  }
+  if (!isEmpty(eqlOptions.tiebreakerField)) {
+    items = [
+      ...items,
+      {
+        title: <>{i18n.EQL_TIEBREAKER_FIELD_LABEL}</>,
+        description: <>{eqlOptions.tiebreakerField}</>,
+      },
+    ];
+  }
+  if (!isEmpty(eqlOptions.timestampField)) {
+    items = [
+      ...items,
+      {
+        title: <>{i18n.EQL_TIMESTAMP_FIELD_LABEL}</>,
+        description: <>{eqlOptions.timestampField}</>,
       },
     ];
   }

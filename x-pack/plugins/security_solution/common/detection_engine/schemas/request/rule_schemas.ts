@@ -33,7 +33,9 @@ import {
   id,
   index,
   filters,
+  timestamp_field,
   event_category_override,
+  tiebreaker_field,
   building_block_type,
   note,
   license,
@@ -213,7 +215,9 @@ const eqlRuleParams = {
   optional: {
     index,
     filters,
+    timestamp_field,
     event_category_override,
+    tiebreaker_field,
   },
   defaultable: {},
 };
